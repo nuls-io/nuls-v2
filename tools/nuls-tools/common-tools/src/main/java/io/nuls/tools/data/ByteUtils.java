@@ -254,10 +254,4 @@ public class ByteUtils {
             throw new RuntimeException(e);
         }
     }
-
-    public static void main(String[] args) {
-        System.out.println(Integer.toHexString(15));
-        System.out.println(Integer.toHexString(255));
-        System.out.println(Integer.toString((15 & 0xff) + 0x100, 16).substring(1));
-    }
 }
