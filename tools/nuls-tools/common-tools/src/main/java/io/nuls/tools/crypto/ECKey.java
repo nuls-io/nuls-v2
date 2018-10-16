@@ -88,7 +88,7 @@ public class ECKey {
      **/
     protected final BigInteger priv;
     /**
-     * 公匙
+     * 椭圆曲线点
      **/
     private final ECPoint pub;
 
@@ -117,7 +117,7 @@ public class ECKey {
     }
 
     /**
-     * 根据私匙和公匙创建
+     * 根据私匙和椭圆曲线点创建
      *
      * @param priv 私钥
      * @param pub  公钥
@@ -143,7 +143,7 @@ public class ECKey {
     }
 
     /**
-     * 根据私匙创建密码器，并选择是否压缩公匙
+     * 根据私匙创建密码器，并选择是否压缩椭圆曲线点
      *
      * @param privKey    private key
      * @param compressed compressed
@@ -165,8 +165,8 @@ public class ECKey {
     }
 
     /**
-     * 根据ECPoint(公钥)创建密码器
-     * @param pub    ECPoint公钥
+     * 根据ECPoint创建密码器
+     * @param pub    ECPoint
      * @return ECKey
      */
     public static ECKey fromPublicOnly(ECPoint pub) {
@@ -174,7 +174,7 @@ public class ECKey {
     }
 
     /**
-     * 根据私钥生成ECPoint公钥
+     * 根据私钥生成ECPoint椭圆曲线点
      * @param privKey    private key
      * @return ECPoint
      */
@@ -189,7 +189,7 @@ public class ECKey {
      * 根据EncryptedData和公钥生成ECKey
      * @param encryptedPrivateKey    私钥封装类
      * @param pubKey                 公钥
-     * @return ECPoint
+     * @return ECKey
      */
     public static ECKey fromEncrypted(EncryptedData encryptedPrivateKey, byte[] pubKey) {
         ECKey key = fromPublicOnly(pubKey);
@@ -268,7 +268,7 @@ public class ECKey {
     }
 
     /**
-     * 压缩公匙
+     * 用于压缩椭圆曲线点的实用程序，如果已经压缩，则返回相同的点
      * @param point      压缩前的公钥public key
      * @param compressed 是否压缩
      * @return   ECPoint 压缩后的公钥
