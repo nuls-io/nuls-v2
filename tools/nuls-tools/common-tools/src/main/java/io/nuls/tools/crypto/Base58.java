@@ -85,7 +85,7 @@ public class Base58 {
     }
 
     /**
-     * Decodes the given base58 string into the original data bytes.
+     * Decodes the given base58 string into the original data bytes./将给定的Base58字符串解码为原始数据字节
      *
      * @param input the base58-encoded string to decode
      * @return the decoded data bytes
