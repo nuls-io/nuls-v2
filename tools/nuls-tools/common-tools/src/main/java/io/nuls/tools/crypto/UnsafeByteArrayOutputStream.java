@@ -124,7 +124,7 @@ public class UnsafeByteArrayOutputStream extends ByteArrayOutputStream {
      * @see ByteArrayOutputStream#size()
      */
     @Override
-    public byte toByteArray()[] {
+    public byte[] toByteArray() {
         return count == buf.length ? buf : ByteUtils.copyOf(buf, count);
     }
 
