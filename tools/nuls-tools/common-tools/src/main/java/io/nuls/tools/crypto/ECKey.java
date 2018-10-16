@@ -100,6 +100,10 @@ public class ECKey {
         this(SECURE_RANDOM);
     }
 
+    /**
+     * 使用给定的{@link SecureRandom}对象生成一个全新的密钥对。点压缩是这样使用的
+     * 结果公钥将是33个字节（32个用于坐标，1个字节用于表示y位）。
+     **/
     public ECKey(SecureRandom secureRandom) {
         ECKeyPairGenerator generator = new ECKeyPairGenerator();
         ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(CURVE, secureRandom);
@@ -152,7 +156,7 @@ public class ECKey {
 
 
     /**
-     * 根据公匙创建密码器
+     * 创建一个不能用于签名的ECKey，仅从给定的编码点验证签名,pub的压缩状态将被保留。
      * @param pubKey    public key
      * @return ECKey
      */
