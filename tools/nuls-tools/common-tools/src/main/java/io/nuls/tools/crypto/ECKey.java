@@ -194,6 +194,11 @@ public class ECKey {
         return key;
     }
 
+    /**
+     * 获取公钥的byte[],指定是否压缩
+     * @param compressed  是否压缩
+     * @return  byte[]
+     * */
     protected byte[] getPubKey(boolean compressed) {
         return pub.getEncoded(compressed);
     }
@@ -249,12 +254,20 @@ public class ECKey {
         return getPublicKeyAsHex(false);
     }
 
+    /**
+     * 获取公匙转16进制后的字符串，指定是否压缩
+     * @param compressed  是否压缩
+     * @return String
+     * */
     public String getPublicKeyAsHex(boolean compressed) {
         return HexUtil.encode(getPubKey(compressed));
     }
 
     /**
      * 压缩公匙
+     * @param point      压缩前的公钥public key
+     * @param compressed 是否压缩
+     * @return   ECPoint 压缩后的公钥
      **/
     private static ECPoint getPointWithCompression(ECPoint point, boolean compressed) {
         if (point.isCompressed() == compressed) {
@@ -266,6 +279,13 @@ public class ECKey {
         return CURVE.getCurve().createPoint(x, y, compressed);
     }
 
+    /**
+     * 验证数据签名
+     * @param data        需验证的数据
+     * @param signature   签名
+     * @param pub         公钥
+     * @return boolean        验证是否通过
+     * */
     public static boolean verify(byte[] data, ECDSASignature signature, byte[] pub) {
         ECDSASigner signer = new ECDSASigner();
         ECPublicKeyParameters params = new ECPublicKeyParameters(CURVE.getCurve().decodePoint(pub), CURVE);
@@ -278,10 +298,24 @@ public class ECKey {
         }
     }
 
+
+    /**
+     * 验证数据签名
+     * @param data        需验证的数据
+     * @param signature   签名
+     * @param pub         公钥
+     * @return boolean        验证是否通过
+     * */
     public static boolean verify(byte[] data, byte[] signature, byte[] pub) {
         return verify(data, ECDSASignature.decodeFromDER(signature), pub);
     }
 
+    /**
+     * 用当前ECKey公钥验证签名
+     * @param hash        需验证的数据
+     * @param signature   签名
+     * @return boolean    验证是否通过
+     * */
     public boolean verify(byte[] hash, byte[] signature) {
         return ECKey.verify(hash, signature, getPubKey());
     }
@@ -290,6 +324,9 @@ public class ECKey {
         private static final long serialVersionUID = 2789844760773725676L;
     }
 
+    /**
+     * 静态内部类 签名封装类
+     * */
     public static class ECDSASignature {
         public final BigInteger r, s;
 
@@ -374,18 +411,41 @@ public class ECKey {
         }
     }
 
+    /**
+     * 用私钥对数据进行签名
+     * @param hash    需签名数据
+     * @return byte[] 签名
+     * */
     public byte[] sign(byte[] hash) {
         return sign(hash, null);
     }
 
+    /**
+     * 用私钥对数据进行签名
+     * @param hash    需签名数据
+     * @param aesKey  私钥
+     * @return byte[] 签名
+     * */
     public byte[] sign(Sha256Hash hash, BigInteger aesKey) {
         return doSign(hash.getBytes(), priv);
     }
 
+    /**
+     * 用私钥对数据进行签名
+     * @param hash    需签名数据
+     * @param aesKey  私钥
+     * @return byte[] 签名
+     * */
     public byte[] sign(byte[] hash, BigInteger aesKey) {
         return doSign(hash, priv);
     }
 
+    /**
+     * 用私钥对数据进行签名
+     * @param input    需签名数据
+     * @param privateKeyForSigning  私钥
+     * @return byte[] 签名
+     * */
     protected byte[] doSign(byte[] input, BigInteger privateKeyForSigning) {
         HexUtil.checkNotNull(privateKeyForSigning);
         ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
@@ -395,10 +455,18 @@ public class ECKey {
         return new ECDSASignature(components[0], components[1]).toCanonicalised().encodeToDER();
     }
 
+    /**
+     * 该ECKey对象是否有私钥
+     * @return  boolean 有私钥返回true，否则返回false
+     * */
     public boolean hasPrivKey() {
         return priv != null;
     }
 
+    /**
+     * 该ECKey对象是否已经压缩过
+     * @return  boolean 已压缩返回true，否则返回false
+     * */
     public boolean isCompressed() {
         return pub.isCompressed();
     }
@@ -419,6 +487,10 @@ public class ECKey {
         this.encryptedPrivateKey = encryptedPrivateKey;
     }
 
+    /**
+     * 验证16进制私钥字符串是否正确
+     * @return  boolean 正确返回true,否则返回false
+     * */
     public static boolean isValidPrivteHex(String privateHex) {
         int len = privateHex.length();
         if (len % 2 == 1) {
@@ -431,6 +503,9 @@ public class ECKey {
         return true;
     }
 
+    /**
+     * ECKey比较器（按公钥比较）
+     * */
     public static final Comparator<ECKey> PUBKEY_COMPARATOR = new Comparator<ECKey>() {
         private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
 
