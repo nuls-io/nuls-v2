@@ -21,13 +21,13 @@
     </properties>
 
     <dependencies>
-        <!--
+        <!-- common-tools -->
         <dependency>
             <groupId>io.nuls.nuls-tools</groupId>
             <artifactId>common-tools</artifactId>
-            <scope>compile</scope>
+            <version>1.0.0-SNAPSHOT</version>
         </dependency>
-        -->
+
         <!-- rocksdb -->
         <dependency>
             <groupId>org.rocksdb</groupId>
@@ -84,5 +84,4 @@
             <version>${logback.version}</version>
         </dependency>
     </dependencies>
-
 </project>

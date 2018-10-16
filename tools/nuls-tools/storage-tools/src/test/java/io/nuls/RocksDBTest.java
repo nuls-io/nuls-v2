@@ -24,9 +24,9 @@
  */
 package io.nuls;
 
-import io.nuls.db.manager.RocksDBManager;
 import io.nuls.db.model.Entry;
-import io.nuls.db.model.Result;
+import io.nuls.db.service.DBService;
+import io.nuls.tools.basic.Result;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,19 +37,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static io.nuls.db.manager.RocksDBManager.batchPut;
-import static io.nuls.db.manager.RocksDBManager.createTable;
-import static io.nuls.db.manager.RocksDBManager.delete;
-import static io.nuls.db.manager.RocksDBManager.deleteKeys;
-import static io.nuls.db.manager.RocksDBManager.destroyTable;
-import static io.nuls.db.manager.RocksDBManager.entryList;
-import static io.nuls.db.manager.RocksDBManager.get;
-import static io.nuls.db.manager.RocksDBManager.keyList;
-import static io.nuls.db.manager.RocksDBManager.listTable;
-import static io.nuls.db.manager.RocksDBManager.multiGet;
-import static io.nuls.db.manager.RocksDBManager.multiGetValueList;
-import static io.nuls.db.manager.RocksDBManager.put;
-import static io.nuls.db.manager.RocksDBManager.valueList;
+import static io.nuls.db.service.DBService.batchPut;
+import static io.nuls.db.service.DBService.createTable;
+import static io.nuls.db.service.DBService.delete;
+import static io.nuls.db.service.DBService.deleteKeys;
+import static io.nuls.db.service.DBService.destroyTable;
+import static io.nuls.db.service.DBService.entryList;
+import static io.nuls.db.service.DBService.get;
+import static io.nuls.db.service.DBService.keyList;
+import static io.nuls.db.service.DBService.listTable;
+import static io.nuls.db.service.DBService.multiGet;
+import static io.nuls.db.service.DBService.multiGetValueList;
+import static io.nuls.db.service.DBService.put;
+import static io.nuls.db.service.DBService.valueList;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -85,7 +85,7 @@ public class RocksDBTest {
     public void initTest() throws Exception {
         String dataPath = "../../data";
         long start = System.currentTimeMillis();
-        RocksDBManager.init(dataPath);
+        DBService.init(dataPath);
         long end = System.currentTimeMillis();
         System.out.println("数据库连接初始化测试耗时：" + (end - start) + "ms");
     }
@@ -95,7 +95,7 @@ public class RocksDBTest {
      */
     public void createTableTest() {
         String tableName = table;//account chain
-        Result result = RocksDBManager.createTable(tableName);
+        Result result = DBService.createTable(tableName);
         System.out.println(result.toString());
         Assert.assertEquals(true, result.isSuccess());
     }
@@ -105,7 +105,7 @@ public class RocksDBTest {
      */
     public void destroyTableTest() {
         String tableName = "user";
-        Result result = RocksDBManager.destroyTable(tableName);
+        Result result = DBService.destroyTable(tableName);
         System.out.println(result.toString());
         Assert.assertEquals(true, result.isSuccess());
     }
@@ -114,7 +114,7 @@ public class RocksDBTest {
      * 查询所有表名
      */
     public void listTableTest() {
-        String[] tables = RocksDBManager.listTable();
+        String[] tables = DBService.listTable();
         String testTable = "testListTable";
         createTable(testTable);
         tables = listTable();
@@ -189,9 +189,11 @@ public class RocksDBTest {
         long start = System.currentTimeMillis();
         List<byte[]> list = keyList(table);
         long end = System.currentTimeMillis();
-        System.out.println(list.size() + "查询测试耗时：" + (end - start) + "ms");
-        for (byte[] value : list) {
-            System.out.println(new String(value));
+        if(list!=null) {
+            System.out.println(list.size() + "查询测试耗时：" + (end - start) + "ms");
+            for (byte[] value : list) {
+                System.out.println(new String(value));
+            }
         }
     }
 

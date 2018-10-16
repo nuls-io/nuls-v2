@@ -22,10 +22,16 @@ package io.nuls.db.model;
 import java.util.Comparator;
 import java.util.Objects;
 
+/**
+ * 封装数据键值对
+ *
+ * @param <K>
+ * @param <V>
+ */
 public class Entry<K, V> implements Comparable<K> {
-    final K key;
-    V value;
-    Comparator<K> comparator;
+    private final K key;
+    private V value;
+    private Comparator<K> comparator;
 
     public Entry(K key, V value) {
         this.key = key;
@@ -63,8 +69,7 @@ public class Entry<K, V> implements Comparable<K> {
         }
         if (o instanceof Entry) {
             Entry<?, ?> e = (Entry<?, ?>) o;
-            if (Objects.equals(key, e.getKey()) &&
-                    Objects.equals(value, e.getValue())) {
+            if (Objects.equals(key, e.getKey()) && Objects.equals(value, e.getValue())) {
                 return true;
             }
         }
