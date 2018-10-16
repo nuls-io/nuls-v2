@@ -27,9 +27,9 @@
 
 package io.nuls.rpc.cmd;
 
-import com.alibaba.fastjson.JSON;
 import io.nuls.rpc.RpcInfo;
 import io.nuls.rpc.pojo.Rpc;
+import io.nuls.tools.parse.JSONUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +53,10 @@ public class RpcListCmd extends BaseCmd {
         Map<String, Rpc> rpcMap = new HashMap<>(16);
         rpcMap.putAll(RpcInfo.localInterfaceMap);
         rpcMap.putAll(RpcInfo.remoteInterfaceMap);
-        return JSON.toJSONString(rpcMap);
+        try {
+            return JSONUtils.obj2json(rpcMap);
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 }

@@ -25,8 +25,8 @@
 
 package io.nuls.rpc;
 
-import com.alibaba.fastjson.JSON;
 import io.nuls.rpc.pojo.RpcCmd;
+import io.nuls.tools.parse.JSONUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -75,8 +75,12 @@ public class RpcClient {
         rpcCmd.setParam(param);
 
         List<NameValuePair> urlParameters = new ArrayList<>();
-        System.out.println("Client build jason String: " + JSON.toJSONString(rpcCmd));
-        urlParameters.add(new BasicNameValuePair("jsonString", JSON.toJSONString(rpcCmd)));
+        try {
+            System.out.println("Client build jason String: " + JSONUtils.obj2json(rpcCmd));
+            urlParameters.add(new BasicNameValuePair("jsonString", JSONUtils.obj2json(rpcCmd)));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         HttpEntity postParams = null;
         try {

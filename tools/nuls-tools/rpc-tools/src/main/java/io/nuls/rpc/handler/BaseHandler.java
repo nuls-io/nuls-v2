@@ -25,11 +25,11 @@
 
 package io.nuls.rpc.handler;
 
-import com.alibaba.fastjson.JSON;
 import io.nuls.rpc.RpcInfo;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.pojo.Rpc;
 import io.nuls.rpc.pojo.RpcCmd;
+import io.nuls.tools.parse.JSONUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -63,7 +63,17 @@ public class BaseHandler {
     private String cmd(String jsonString, HttpServletRequest request) {
         System.out.println("BaseHandler-cmd start, jsonString->" + jsonString + "\n"
                 + "request->" + request);
-        RpcCmd rpcCmd = JSON.parseObject(jsonString, RpcCmd.class);
+
+        RpcCmd rpcCmd = null;
+        try {
+            rpcCmd = JSONUtils.json2pojo(jsonString, RpcCmd.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (rpcCmd == null) {
+            return "Bad cmd: " + jsonString;
+        }
+
         String key = rpcCmd.generateKey();
         Object param = rpcCmd.getParam();
         Rpc rpc;

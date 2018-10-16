@@ -27,9 +27,8 @@
 
 package io.nuls.rpc;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import io.nuls.rpc.pojo.Rpc;
+import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
 
 import java.util.Map;
@@ -42,7 +41,7 @@ import java.util.Map;
 public class TestRpcListCmd {
     @SuppressWarnings("unchecked")
     @Test
-    public void test() {
+    public void test() throws Exception {
 
         System.out.println("启动Client");
         RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
@@ -50,9 +49,9 @@ public class TestRpcListCmd {
         System.out.println(response);
 
         System.out.println("我获取的接口如下：");
-        Map<String, JSONObject> rpcMap = JSON.parseObject(response, Map.class);
+        Map<String, Rpc> rpcMap = JSONUtils.json2map(response, Rpc.class);
         for (String key : rpcMap.keySet()) {
-            Rpc rpc = JSON.parseObject(JSON.toJSONString(rpcMap.get(key)), Rpc.class);
+            Rpc rpc = JSONUtils.json2pojo(JSONUtils.obj2json(rpcMap.get(key)), Rpc.class);
             System.out.println(rpc);
         }
 

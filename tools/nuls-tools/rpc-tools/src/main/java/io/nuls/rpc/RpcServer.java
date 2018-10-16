@@ -25,7 +25,6 @@
 
 package io.nuls.rpc;
 
-import com.alibaba.fastjson.JSON;
 import io.nuls.rpc.pojo.Rpc;
 import io.nuls.rpc.thread.HeartbeatCheck;
 import org.glassfish.jersey.grizzly2.servlet.GrizzlyWebContainerFactory;
@@ -70,9 +69,7 @@ public class RpcServer {
     }
 
     public void register(String cmd, int version, String invokeClass, String monitorPath) {
-
         Rpc rpc = buildRpc(cmd, version, invokeClass, monitorPath);
-        System.out.println(JSON.toJSONString(rpc));
         RpcInfo.localInterfaceMap.put(rpc.generateKey(), rpc);
     }
 

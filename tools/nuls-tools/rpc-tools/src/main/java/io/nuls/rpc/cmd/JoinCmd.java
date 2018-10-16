@@ -25,9 +25,9 @@
 
 package io.nuls.rpc.cmd;
 
-import com.alibaba.fastjson.JSON;
 import io.nuls.rpc.RpcInfo;
 import io.nuls.rpc.pojo.Rpc;
+import io.nuls.tools.parse.JSONUtils;
 
 import java.util.Map;
 
@@ -47,20 +47,25 @@ public class JoinCmd extends BaseCmd {
      */
     @Override
     public String execRpc(Object param) {
-        @SuppressWarnings("unchecked") Map<String, Rpc> rpcMap = (Map<String, Rpc>) param;
-        for (String key : rpcMap.keySet()) {
-            if (RpcInfo.remoteInterfaceMap.containsKey(key)) {
-                // TODO
+        try {
+            @SuppressWarnings("unchecked") Map<String, Rpc> rpcMap = (Map<String, Rpc>) param;
+            for (String key : rpcMap.keySet()) {
+                if (RpcInfo.remoteInterfaceMap.containsKey(key)) {
+                    // TODO
 
-            } else {
-                Rpc rpc = JSON.parseObject(JSON.toJSONString(rpcMap.get(key)), Rpc.class);
-                RpcInfo.remoteInterfaceMap.put(key, rpc);
+                } else {
+                    Rpc rpc = JSONUtils.json2pojo(JSONUtils.obj2json(rpcMap.get(key)), Rpc.class);
+                    RpcInfo.remoteInterfaceMap.put(key, rpc);
 
-                // 维护心跳
-                RpcInfo.heartbeatMap.put(rpc.getUri(), System.currentTimeMillis());
+                    // 维护心跳
+                    RpcInfo.heartbeatMap.put(rpc.getUri(), System.currentTimeMillis());
+                }
             }
+            RpcInfo.print();
+            return SUCCESS;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.getMessage();
         }
-        RpcInfo.print();
-        return SUCCESS;
     }
 }
