@@ -25,30 +25,42 @@
  *
  */
 
-package io.nuls.rpc.cmd;
+package io.nuls.rpc;
 
-import io.nuls.rpc.RpcInfo;
+import org.junit.Test;
 
 /**
  * @author tangyi
  * @date 2018/10/15
  * @description
  */
-public class HeartbeatCmd extends BaseCmd {
+public class TestJoinCmd {
 
+    @Test
+    public void test() {
 
-    /**
-     * @param param param说明：
-     *              心跳测试，只是判断Server是否还在运行，因此只交换最基础的信息
-     *              param为String，值为hello nuls
-     * @return String
-     */
-    @Override
-    public String execRpc(Object param) {
-        if (RpcInfo.HEARTBEAT_REQUEST.equals(param)) {
-            return RpcInfo.HEARTBEAT_RESPONSE;
-        } else {
-            return "";
+        RpcServer rpcServer = RpcServer.getInstance(8092);
+
+        assert rpcServer != null;
+
+        rpcServer.register("cmd1", 1, "handler1");
+        rpcServer.register("cmd2", 2, "handler2");
+        rpcServer.register("cmd3", 3, "handler3");
+        rpcServer.register("cmd4", 4, "handler4");
+        rpcServer.register("cmd5", 5, "handler5");
+        rpcServer.start();
+
+        RpcInfo.print();
+
+        System.out.println("启动Client");
+        RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
+        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, RpcInfo.CMD_JOIN, 1, RpcInfo.localInterfaceMap);
+        System.out.println(response);
+
+        try {
+            Thread.sleep(Integer.MAX_VALUE);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }

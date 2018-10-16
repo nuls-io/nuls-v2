@@ -26,7 +26,6 @@
 package io.nuls.rpc;
 
 import com.alibaba.fastjson.JSON;
-import io.nuls.rpc.pojo.GetIp;
 import io.nuls.rpc.pojo.Rpc;
 import io.nuls.rpc.thread.HeartbeatCheck;
 import org.glassfish.jersey.grizzly2.servlet.GrizzlyWebContainerFactory;
@@ -45,9 +44,7 @@ public class RpcServer {
     public static synchronized RpcServer getInstance(int selfPort) {
         try {
             if (rpcServer == null) {
-                GetIp getIp = new GetIp();
-                System.out.println("Server IP: " + getIp.getIpAdd());
-                rpcServer = new RpcServer(getIp.getIpAdd(), selfPort);
+                rpcServer = new RpcServer(RpcInfo.getIpAdd(), selfPort);
             }
 
             return rpcServer;

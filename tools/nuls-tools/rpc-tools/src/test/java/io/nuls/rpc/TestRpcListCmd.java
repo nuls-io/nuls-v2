@@ -25,30 +25,36 @@
  *
  */
 
-package io.nuls.rpc.cmd;
+package io.nuls.rpc;
 
-import io.nuls.rpc.RpcInfo;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import io.nuls.rpc.pojo.Rpc;
+import org.junit.Test;
+
+import java.util.Map;
 
 /**
  * @author tangyi
- * @date 2018/10/15
+ * @date 2018/10/16
  * @description
  */
-public class HeartbeatCmd extends BaseCmd {
+public class TestRpcListCmd {
+    @SuppressWarnings("unchecked")
+    @Test
+    public void test() {
 
+        System.out.println("启动Client");
+        RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
+        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, RpcInfo.CMD_LIST, 1, null);
+        System.out.println(response);
 
-    /**
-     * @param param param说明：
-     *              心跳测试，只是判断Server是否还在运行，因此只交换最基础的信息
-     *              param为String，值为hello nuls
-     * @return String
-     */
-    @Override
-    public String execRpc(Object param) {
-        if (RpcInfo.HEARTBEAT_REQUEST.equals(param)) {
-            return RpcInfo.HEARTBEAT_RESPONSE;
-        } else {
-            return "";
+        System.out.println("我获取的接口如下：");
+        Map<String, JSONObject> rpcMap = JSON.parseObject(response, Map.class);
+        for (String key : rpcMap.keySet()) {
+            Rpc rpc = JSON.parseObject(JSON.toJSONString(rpcMap.get(key)), Rpc.class);
+            System.out.println(rpc);
         }
+
     }
 }

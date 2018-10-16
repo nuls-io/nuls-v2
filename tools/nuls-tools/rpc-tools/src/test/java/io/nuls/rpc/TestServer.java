@@ -25,36 +25,34 @@
  *
  */
 
-package io.nuls.rpc.test;
+package io.nuls.rpc;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import io.nuls.rpc.RpcClient;
-import io.nuls.rpc.RpcInfo;
-import io.nuls.rpc.pojo.Rpc;
-
-import java.util.Map;
+import org.junit.Test;
 
 /**
  * @author tangyi
- * @date 2018/10/16
+ * @date 2018/10/9
  * @description
  */
-public class TestRpcListCmd {
-    @SuppressWarnings("unchecked")
-    public static void main(String[] args) {
+public class TestServer {
 
-        System.out.println("启动Client");
-        RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
-        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, RpcInfo.CMD_LIST, 1, null);
-        System.out.println(response);
+    @Test
+    public  void test() {
 
-        System.out.println("我获取的接口如下：");
-        Map<String, JSONObject> rpcMap = JSON.parseObject(response, Map.class);
-        for (String key : rpcMap.keySet()) {
-            Rpc rpc = JSON.parseObject(JSON.toJSONString(rpcMap.get(key)), Rpc.class);
-            System.out.println(rpc);
+        RpcServer rpcServer = RpcServer.getInstance(8091);
+        assert rpcServer != null;
+
+        rpcServer.register("testCmd1", 2, "testHandler1");
+        rpcServer.start();
+
+        System.out.println("started.");
+
+        RpcInfo.print();
+
+        try {
+            Thread.sleep(Integer.MAX_VALUE);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-
     }
 }

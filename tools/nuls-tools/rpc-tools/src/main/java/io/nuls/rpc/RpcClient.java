@@ -89,7 +89,6 @@ public class RpcClient {
         try {
             return post(httpClient, httpPost);
         } catch (IOException e) {
-            e.printStackTrace();
             return e.getMessage();
         }
     }

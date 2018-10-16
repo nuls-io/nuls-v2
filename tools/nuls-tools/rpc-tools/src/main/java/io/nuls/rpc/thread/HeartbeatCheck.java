@@ -45,17 +45,24 @@ public class HeartbeatCheck implements Runnable {
         while (true) {
             System.out.println("start heartbeat :");
             List<String> removeKeyList = new ArrayList<>();
+
             for (String key : RpcInfo.remoteInterfaceMap.keySet()) {
                 Rpc rpc = RpcInfo.remoteInterfaceMap.get(key);
-                System.out.println("uri:" + rpc.getUri());
-                System.out.println("path:" + rpc.getMonitorPath());
                 RpcClient rpcClient = new RpcClient(rpc.getUri());
-                String response = rpcClient.callRpc(rpc.getMonitorPath(), RpcInfo.CMD_HEARTBEAT, 1, RpcInfo.HEARTBEATREQUEST);
-                if (RpcInfo.HEARTBEATRESPONSE.equals(response)) {
-                    RpcInfo.heartbeatMap.put(rpc.getUri(), System.currentTimeMillis());
-                    System.out.println("心跳成功：" + key + "," + rpc.getUri());
-                } else if (System.currentTimeMillis() - RpcInfo.heartbeatMap.get(rpc.getUri()) > RpcInfo.HEARTBEATTIMEMILLIS) {
-                    // 判定为不可连接
+                try {
+                    String response = rpcClient.callRpc(rpc.getMonitorPath(), RpcInfo.CMD_HEARTBEAT, 1, RpcInfo.HEARTBEAT_REQUEST);
+                    if (RpcInfo.HEARTBEAT_RESPONSE.equals(response)) {
+                        // 心跳成功，更新时间
+                        RpcInfo.heartbeatMap.put(rpc.getUri(), System.currentTimeMillis());
+                    }
+                } catch (Exception e) {
+                    // 心跳失败，不更新时间
+                    System.out.println("心跳失败：" + e.getMessage());
+                }
+
+                if (System.currentTimeMillis() - RpcInfo.heartbeatMap.get(rpc.getUri()) > RpcInfo.HEARTBEAT_OVERTIME_MILLIS) {
+                    // 心跳超时，判定为不可连接
+                    System.out.println("心跳超时：" + rpc.getUri() + "," + rpc.getMonitorPath() + "," + rpc.getInvokeClass());
                     removeKeyList.add(key);
                 }
             }
@@ -67,7 +74,7 @@ public class HeartbeatCheck implements Runnable {
             RpcInfo.print();
 
             try {
-                Thread.sleep(10 * 1000);
+                Thread.sleep(RpcInfo.HEARTBEAT_INTERVAL_MILLIS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

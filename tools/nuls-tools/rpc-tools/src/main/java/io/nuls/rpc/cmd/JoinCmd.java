@@ -50,7 +50,7 @@ public class JoinCmd extends BaseCmd {
         @SuppressWarnings("unchecked") Map<String, Rpc> rpcMap = (Map<String, Rpc>) param;
         for (String key : rpcMap.keySet()) {
             if (RpcInfo.remoteInterfaceMap.containsKey(key)) {
-                // cmd 冲突如何处理？
+                // TODO
 
             } else {
                 Rpc rpc = JSON.parseObject(JSON.toJSONString(rpcMap.get(key)), Rpc.class);

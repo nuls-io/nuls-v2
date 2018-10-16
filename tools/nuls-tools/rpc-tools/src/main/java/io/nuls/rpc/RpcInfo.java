@@ -27,6 +27,10 @@ package io.nuls.rpc;
 
 import io.nuls.rpc.pojo.Rpc;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -57,9 +61,10 @@ public class RpcInfo {
 
     public static final int VERSION = 1;
 
-    public static final long HEARTBEATTIMEMILLIS = 60 * 1000;
-    public static final String HEARTBEATREQUEST = "hello nuls?";
-    public static final String HEARTBEATRESPONSE = "i'm everything!";
+    public static final long HEARTBEAT_INTERVAL_MILLIS = 10 * 1000;
+    public static final long HEARTBEAT_OVERTIME_MILLIS = 60 * 1000;
+    public static final String HEARTBEAT_REQUEST = "hello nuls?";
+    public static final String HEARTBEAT_RESPONSE = "i'm everything!";
 
 
     public static void print() {
@@ -67,5 +72,32 @@ public class RpcInfo {
         System.out.println("系统默认的：" + defaultInterfaceMap.size());
         System.out.println("自己提供的：" + localInterfaceMap.size());
         System.out.println("远程获取的：" + remoteInterfaceMap.size());
+    }
+
+    /**
+     * 根据网卡获得IP地址
+     * @return ip
+     */
+    public static String getIpAdd() throws SocketException {
+        String ip = "";
+        for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
+            NetworkInterface intf = en.nextElement();
+            String name = intf.getName();
+            if (!name.contains("docker") && !name.contains("lo")) {
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
+                    //获得IP
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress()) {
+                        String ipAddress = inetAddress.getHostAddress();
+                        if (!ipAddress.contains("::") && !ipAddress.contains("0:0:") && !ipAddress.contains("fe80")) {
+                            if (!"127.0.0.1".equals(ip) && ipAddress.length() <= 16) {
+                                ip = ipAddress;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return ip;
     }
 }
