@@ -27,9 +27,8 @@ package io.nuls.tools.basic;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.parse.JSONUtils;
-
 import java.io.Serializable;
+import io.nuls.tools.parse.JSONUtils;
 
 /**
  * @author vivi
