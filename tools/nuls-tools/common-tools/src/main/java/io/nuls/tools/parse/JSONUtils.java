@@ -24,6 +24,7 @@
  */
 package io.nuls.tools.parse;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,11 +53,11 @@ public final class JSONUtils {
      * @param obj 需转换的对象
      * @return 转换得到的JSON字符串
      */
-    public static String obj2json(Object obj) throws Exception {
+    public static String obj2json(Object obj) throws JsonProcessingException{
         return OBJECT_MAPPER.writeValueAsString(obj);
     }
 
-    public static String obj2PrettyJson(Object obj) throws Exception {
+    public static String obj2PrettyJson(Object obj) throws JsonProcessingException {
         return OBJECT_MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
 
@@ -67,8 +68,7 @@ public final class JSONUtils {
      * @param clazz   目标对象类型
      * @return 转换得到的对象
      */
-    public static <T> T json2pojo(String jsonStr, Class<T> clazz)
-            throws Exception {
+    public static <T> T json2pojo(String jsonStr, Class<T> clazz) throws  IOException{
         return OBJECT_MAPPER.readValue(jsonStr, clazz);
     }
 
@@ -92,7 +92,7 @@ public final class JSONUtils {
      * @return 转换得到的MAP
      */
     public static <T> Map<String, Object> json2map(String jsonStr)
-            throws Exception {
+            throws IOException {
         return OBJECT_MAPPER.readValue(jsonStr, Map.class);
     }
 
@@ -103,8 +103,7 @@ public final class JSONUtils {
      * @param clazz   MAP中值的类型
      * @return 转换得到的MAP
      */
-    public static <T> Map<String, T> json2map(String jsonStr, Class<T> clazz)
-            throws Exception {
+    public static <T> Map<String, T> json2map(String jsonStr, Class<T> clazz) throws IOException{
         Map<String, Map<String, Object>> map = OBJECT_MAPPER.readValue(jsonStr,
                 new TypeReference<Map<String, T>>() {
                 });
@@ -123,7 +122,7 @@ public final class JSONUtils {
      * @return 转换后得到的List
      */
     public static <T> List<T> json2list(String jsonArrayStr, Class<T> clazz)
-            throws Exception {
+            throws IOException {
         List<Map<String, Object>> list = OBJECT_MAPPER.readValue(jsonArrayStr,
                 new TypeReference<List<T>>() {
                 });
