@@ -25,8 +25,8 @@
 package io.nuls.db.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.constant.ErrorCode;
-import io.nuls.db.constant.KernelErrorCode;
 import io.nuls.db.util.JSONUtils;
 import io.nuls.db.util.StringUtils;
 
@@ -47,12 +47,12 @@ public class Result<T> implements Serializable {
 
 
     public Result() {
-        this(true, KernelErrorCode.SUCCESS, null);
+        this(true, DBErrorCode.SUCCESS, null);
     }
 
     public Result(boolean success) {
         this.success = success;
-        this.errorCode = KernelErrorCode.SUCCESS;
+        this.errorCode = DBErrorCode.SUCCESS;
     }
     public Result(boolean success, ErrorCode errorCode, T data) {
         this.success = success;
@@ -122,7 +122,7 @@ public class Result<T> implements Serializable {
     }
 
     public static Result getFailed() {
-        return getFailed(KernelErrorCode.FAILED);
+        return getFailed(DBErrorCode.FAILED);
     }
 
  /*   public static Result getFailed(String msg) {

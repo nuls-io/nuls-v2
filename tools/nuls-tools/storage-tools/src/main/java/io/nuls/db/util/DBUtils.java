@@ -35,16 +35,7 @@ import java.net.URL;
 public class DBUtils {
 
     public static File loadDataPath(String path) throws Exception {
-//        Properties properties = ConfigLoader.loadProperties("db_config.properties");
-//        //String path = properties.getProperty("rocksdb.datapath", "./data");
-//        String max_str = properties.getProperty("rocksdb.area.max", "20");
-//        try {
-//            max = Integer.parseInt(max_str);
-//        } catch (Exception e) {
-//            //skip it
-//            max = 20;
-//        }
-        File dir = null;
+        File dir;
         String pathSeparator = System.getProperty("path.separator");
         String unixPathSeparator = ":";
         String rootPath;

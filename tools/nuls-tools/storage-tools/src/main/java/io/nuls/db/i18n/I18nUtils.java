@@ -25,8 +25,8 @@
 package io.nuls.db.i18n;
 
 import io.nuls.db.cfg.NulsConfig;
+import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.exception.NulsException;
-import io.nuls.db.constant.KernelErrorCode;
 import io.nuls.db.log.Log;
 import io.nuls.db.util.StringUtils;
 
@@ -95,15 +95,15 @@ public class I18nUtils {
         }
     }
 
-//    /**
-//     * 设置系统语言，切换语言包
-//     * Set up the system language and switch the language package.
-//     *
-//     * @param lang 语言标识/Language identification
-//     */
+    /**
+     * 设置系统语言，切换语言包
+     * Set up the system language and switch the language package.
+     *
+     * @param lang 语言标识/Language identification
+     */
     public static void setLanguage(String lang) throws NulsException {
         if (StringUtils.isBlank(lang)) {
-            throw new NulsException(KernelErrorCode.LANGUAGE_CANNOT_SET_NULL);
+            throw new NulsException(DBErrorCode.LANGUAGE_CANNOT_SET_NULL);
         }
         key = lang;
         nowMapping = ALL_MAPPING.get(lang);

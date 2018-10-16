@@ -20,7 +20,6 @@
 package io.nuls.db.manager;
 
 import io.nuls.db.constant.DBErrorCode;
-import io.nuls.db.constant.KernelErrorCode;
 import io.nuls.db.log.Log;
 import io.nuls.db.model.Entry;
 import io.nuls.db.model.Result;
@@ -50,6 +49,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import static io.nuls.db.constant.DBConstant.BASE_TABLE_NAME;
 
+/**
+ * rocksdb数据库连接管理、数据存储、查询、删除操作
+ * Rocksdb database connection management, data storage, query, delete operation
+ * @author qinyf
+ * @date 2018/10/10
+ */
 public class RocksDBManager {
 
     static {
@@ -150,7 +155,7 @@ public class RocksDBManager {
         lock.lock();
         try {
             if (StringUtils.isBlank(tableName)) {
-                return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+                return Result.getFailed(DBErrorCode.NULL_PARAMETER);
             }
             if (TABLES.containsKey(tableName)) {
                 return Result.getFailed(DBErrorCode.DB_TABLE_EXIST);
@@ -211,9 +216,6 @@ public class RocksDBManager {
             }
             String filePath = dataPath + File.separator + tableName + File.separator + BASE_DB_NAME;
             destroyDB(filePath);
-            //TABLES_COMPARATOR.remove(tableName);
-            //delete(BASE_TABLE_NAME, bytes(tableName + "-comparator"));
-            //delete(BASE_TABLE_NAME, bytes(tableName + "-cacheSize"));
             result = Result.getSuccess();
         } catch (Exception e) {
             Log.error("error destroy table: " + tableName, e);
@@ -236,7 +238,6 @@ public class RocksDBManager {
         for (Map.Entry<String, RocksDB> entry : entries) {
             try {
                 TABLES.remove(entry.getKey());
-                //TABLES_COMPARATOR.remove(entry.getKey());
                 entry.getValue().close();
             } catch (Exception e) {
                 Log.warn("close rocksdb error", e);
@@ -250,7 +251,6 @@ public class RocksDBManager {
      */
     public static void closeTable(String tableName) {
         try {
-            //TABLES_COMPARATOR.remove(table);
             RocksDB db = TABLES.remove(tableName);
             db.close();
         } catch (Exception e) {
@@ -278,7 +278,6 @@ public class RocksDBManager {
         int length = tables.length;
         while (keys.hasMoreElements()) {
             tables[i++] = keys.nextElement();
-            // thread safe, prevent java.lang.ArrayIndexOutOfBoundsException
             if (i == length) {
                 break;
             }
@@ -300,7 +299,7 @@ public class RocksDBManager {
             return Result.getFailed(DBErrorCode.DB_TABLE_NOT_EXIST);
         }
         if (key == null || value == null) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+            return Result.getFailed(DBErrorCode.NULL_PARAMETER);
         }
         try {
             RocksDB db = TABLES.get(table);
@@ -325,7 +324,7 @@ public class RocksDBManager {
             return Result.getFailed(DBErrorCode.DB_TABLE_NOT_EXIST);
         }
         if (key == null) {
-            return Result.getFailed(KernelErrorCode.NULL_PARAMETER);
+            return Result.getFailed(DBErrorCode.NULL_PARAMETER);
         }
         try {
             RocksDB db = TABLES.get(table);
@@ -337,6 +336,13 @@ public class RocksDBManager {
         }
     }
 
+    /**
+     * 批量保存数据
+     * batch save data
+     * @param table
+     * @param kvs
+     * @return
+     */
     public static Result batchPut(String table, Map<byte[], byte[]> kvs) {
         if (!baseCheckTable(table)) {
             return Result.getFailed(DBErrorCode.DB_TABLE_NOT_EXIST);
@@ -358,6 +364,13 @@ public class RocksDBManager {
         }
     }
 
+    /**
+     * 批量删除数据
+     * batch delete data
+     * @param table
+     * @param keys
+     * @return
+     */
     public static Result deleteKeys(String table, List<byte[]> keys) {
         if (!baseCheckTable(table)) {
             return Result.getFailed(DBErrorCode.DB_TABLE_NOT_EXIST);
