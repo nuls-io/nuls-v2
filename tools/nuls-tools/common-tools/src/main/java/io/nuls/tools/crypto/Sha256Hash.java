@@ -40,6 +40,7 @@ import java.util.Arrays;
 /**
  * A Sha256Hash just wraps a byte[] so that equals and hashcode work correctly, allowing it to be used as keys in a
  * map. It also checks that the length is correct and provides a bit more type safety.
+ * @author
  */
 public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
     private static final long serialVersionUID = 3986948258337764647L;

@@ -115,8 +115,8 @@ public class ECKey {
     /**
      * 根据私匙和公匙创建
      *
-     * @param priv
-     * @param pub
+     * @param priv 私钥
+     * @param pub  公钥
      */
     private ECKey(BigInteger priv, ECPoint pub) {
         if (priv != null) {
@@ -129,6 +129,11 @@ public class ECKey {
         creationTimeSeconds = System.currentTimeMillis();
     }
 
+    /**
+     * 根据私匙创建密码器
+     * @param privKey    private key
+     * @return ECKey
+     */
     public static ECKey fromPrivate(BigInteger privKey) {
         return fromPrivate(privKey, true);
     }
@@ -141,20 +146,34 @@ public class ECKey {
      * @return ECKey
      */
     public static ECKey fromPrivate(BigInteger privKey, boolean compressed) {
-
         ECPoint point = publicPointFromPrivate(privKey);
         return new ECKey(privKey, getPointWithCompression(point, compressed));
     }
 
 
+    /**
+     * 根据公匙创建密码器
+     * @param pubKey    public key
+     * @return ECKey
+     */
     public static ECKey fromPublicOnly(byte[] pubKey) {
         return new ECKey(null, CURVE.getCurve().decodePoint(pubKey));
     }
 
+    /**
+     * 根据ECPoint(公钥)创建密码器
+     * @param pub    ECPoint公钥
+     * @return ECKey
+     */
     public static ECKey fromPublicOnly(ECPoint pub) {
         return new ECKey(null, pub);
     }
 
+    /**
+     * 根据私钥生成ECPoint公钥
+     * @param privKey    private key
+     * @return ECPoint
+     */
     public static ECPoint publicPointFromPrivate(BigInteger privKey) {
         if (privKey.bitLength() > CURVE.getN().bitLength()) {
             privKey = privKey.mod(CURVE.getN());
@@ -162,6 +181,12 @@ public class ECKey {
         return new FixedPointCombMultiplier().multiply(CURVE.getG(), privKey);
     }
 
+    /**
+     * 根据EncryptedData和公钥生成ECKey
+     * @param encryptedPrivateKey    私钥封装类
+     * @param pubKey                 公钥
+     * @return ECPoint
+     */
     public static ECKey fromEncrypted(EncryptedData encryptedPrivateKey, byte[] pubKey) {
         ECKey key = fromPublicOnly(pubKey);
         ObjectUtils.canNotEmpty(encryptedPrivateKey, "encryptedPrivateKey can not null!");
