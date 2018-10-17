@@ -27,6 +27,7 @@
 
 package io.nuls.rpc;
 
+import io.nuls.rpc.cmd.VersionCmd1;
 import org.junit.Test;
 
 /**
@@ -43,11 +44,12 @@ public class TestJoinCmd {
 
         assert rpcServer != null;
 
-        rpcServer.register("cmd1", 1, "handler1");
-        rpcServer.register("cmd2", 2, "handler2");
-        rpcServer.register("cmd3", 3, "handler3");
-        rpcServer.register("cmd4", 4, "handler4");
-        rpcServer.register("cmd5", 5, "handler5");
+        rpcServer.register("cmd1", 1, null);
+        rpcServer.register("cmd2", 2, null);
+        rpcServer.register("cmd3", 3, null);
+        rpcServer.register("cmd4", 4, null);
+        rpcServer.register("cmd5", 5, null);
+        rpcServer.register("version", 1, VersionCmd1.class);
         rpcServer.start();
 
         RpcInfo.print();

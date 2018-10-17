@@ -59,6 +59,7 @@ public class RpcInfo {
     public static final String CMD_HEARTBEAT = "heartbeat";
 
     public static final String DEFAULT_PATH = "nulsrpc";
+    public static final String FORM_PARAM_NAME = "paramObjAsJson";
 
     public static final int VERSION = 1;
 
@@ -80,7 +81,7 @@ public class RpcInfo {
      *
      * @return ip
      */
-    public static String getIpAdd() throws SocketException {
+    static String getIpAdd() throws SocketException {
         String ip = "";
         for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
             NetworkInterface intf = en.nextElement();

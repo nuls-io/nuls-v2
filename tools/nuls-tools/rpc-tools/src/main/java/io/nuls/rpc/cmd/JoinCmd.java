@@ -29,6 +29,7 @@ import io.nuls.rpc.RpcInfo;
 import io.nuls.rpc.pojo.Rpc;
 import io.nuls.tools.parse.JSONUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -48,21 +49,26 @@ public class JoinCmd extends BaseCmd {
     @Override
     public String execRpc(Object param) {
         try {
+            Map<String, Rpc> failedMap = new HashMap<>(16);
             @SuppressWarnings("unchecked") Map<String, Rpc> rpcMap = (Map<String, Rpc>) param;
             for (String key : rpcMap.keySet()) {
+                Rpc rpc = JSONUtils.json2pojo(JSONUtils.obj2json(rpcMap.get(key)), Rpc.class);
                 if (RpcInfo.remoteInterfaceMap.containsKey(key)) {
-                    // TODO
-
+                    failedMap.put(key, rpc);
                 } else {
-                    Rpc rpc = JSONUtils.json2pojo(JSONUtils.obj2json(rpcMap.get(key)), Rpc.class);
                     RpcInfo.remoteInterfaceMap.put(key, rpc);
 
                     // 维护心跳
                     RpcInfo.heartbeatMap.put(rpc.getUri(), System.currentTimeMillis());
                 }
             }
+
             RpcInfo.print();
-            return SUCCESS;
+            if (failedMap.size() == 0) {
+                return SUCCESS;
+            } else {
+                return JSONUtils.obj2json(failedMap);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             return e.getMessage();

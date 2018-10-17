@@ -48,24 +48,23 @@ import java.util.List;
  * @description
  */
 public class RpcClient {
-    private String remoteIp;
-    private int remotePort;
+
     private String remoteUri;
     private CloseableHttpClient httpClient;
 
     public RpcClient(String remoteIp, int remotePort) {
-        this.remoteIp = remoteIp;
-        this.remotePort = remotePort;
         this.remoteUri = "http://" + remoteIp + ":" + remotePort + "/";
         httpClient = HttpClients.createDefault();
     }
 
     public RpcClient(String remoteUri) {
         this.remoteUri = remoteUri;
+        httpClient = HttpClients.createDefault();
     }
 
     /**
      * 默认获取最高版本的接口
+     *
      * @param monitorPath:
      * @param cmd:
      * @param param:
@@ -77,6 +76,7 @@ public class RpcClient {
 
     /**
      * 返回特定版本的接口
+     *
      * @param monitorPath:
      * @param cmd:
      * @param param:
@@ -89,6 +89,7 @@ public class RpcClient {
 
     /**
      * 调用接口
+     *
      * @param monitorPath:
      * @param cmd:
      * @param param:
@@ -107,7 +108,7 @@ public class RpcClient {
         HttpEntity postParams = null;
         List<NameValuePair> urlParameters = new ArrayList<>();
         try {
-            urlParameters.add(new BasicNameValuePair("jsonString", JSONUtils.obj2json(rpcCmd)));
+            urlParameters.add(new BasicNameValuePair(RpcInfo.FORM_PARAM_NAME, JSONUtils.obj2json(rpcCmd)));
             postParams = new UrlEncodedFormEntity(urlParameters);
         } catch (Exception e) {
             e.printStackTrace();
@@ -125,7 +126,6 @@ public class RpcClient {
     }
 
     private String post(HttpPost httpPost) throws IOException {
-
         CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
         System.out.println("POST Response Status:: " + httpResponse.getStatusLine().getStatusCode());
         BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));

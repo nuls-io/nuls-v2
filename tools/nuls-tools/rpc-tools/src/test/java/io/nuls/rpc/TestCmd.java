@@ -57,9 +57,9 @@ public class TestCmd {
     }
 
     @Test
-    public void testVersion() throws Exception {
+    public void testVersion() {
         RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
-        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, "version", null,1);
-        System.out.println(response);
+        System.out.println(rpcClient.callRpc(RpcInfo.DEFAULT_PATH, "version", null));
+        System.out.println(rpcClient.callRpc(RpcInfo.DEFAULT_PATH, "version", null,1));
     }
 }

@@ -49,29 +49,29 @@ public class BaseHandler {
     @POST
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.TEXT_HTML + ";charset=utf-8")
-    public String doPost(@FormParam("jsonString") String jsonString, @Context HttpServletRequest request) {
-        return cmd(jsonString, request);
+    public String doPost(@FormParam(RpcInfo.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) {
+        return cmd(formParamAsJson, request);
     }
 
     @GET
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.TEXT_HTML + ";charset=utf-8")
-    public String doGet(@QueryParam("jsonString") String jsonString, @Context HttpServletRequest request) {
-        return cmd(jsonString, request);
+    public String doGet(@QueryParam(RpcInfo.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) {
+        return cmd(formParamAsJson, request);
     }
 
-    private String cmd(String jsonString, HttpServletRequest request) {
-        System.out.println("BaseHandler-cmd start, jsonString->" + jsonString + "\n"
+    private String cmd(String formParamAsJson, HttpServletRequest request) {
+        System.out.println("BaseHandler-cmd start, formParamAsJson->" + formParamAsJson + "\n"
                 + "request->" + request);
 
         RpcCmd rpcCmd = null;
         try {
-            rpcCmd = JSONUtils.json2pojo(jsonString, RpcCmd.class);
+            rpcCmd = JSONUtils.json2pojo(formParamAsJson, RpcCmd.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
         if (rpcCmd == null) {
-            return "Bad cmd: " + jsonString;
+            return "Bad cmd: " + formParamAsJson;
         }
 
         Rpc rpc = RpcInfo.getInvokeRpcByCmd(rpcCmd);
@@ -80,7 +80,7 @@ public class BaseHandler {
         }
 
         try {
-            Class clz = Class.forName(rpc.getInvokeClass());
+            Class clz = rpc.getInvokeClass();
             @SuppressWarnings("unchecked") Method execRpc = clz.getMethod("execRpc", Object.class);
             @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
             BaseCmd cmd = (BaseCmd) constructor.newInstance();

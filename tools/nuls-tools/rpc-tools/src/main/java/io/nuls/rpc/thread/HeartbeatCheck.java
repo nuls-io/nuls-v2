@@ -43,40 +43,41 @@ public class HeartbeatCheck implements Runnable {
     @Override
     public void run() {
         while (true) {
-            System.out.println("start heartbeat :");
-            List<String> removeKeyList = new ArrayList<>();
-
-            for (String key : RpcInfo.remoteInterfaceMap.keySet()) {
-                Rpc rpc = RpcInfo.remoteInterfaceMap.get(key);
-                RpcClient rpcClient = new RpcClient(rpc.getUri());
-                try {
-                    String response = rpcClient.callRpc(rpc.getMonitorPath(), RpcInfo.CMD_HEARTBEAT, RpcInfo.HEARTBEAT_REQUEST);
-                    if (RpcInfo.HEARTBEAT_RESPONSE.equals(response)) {
-                        // 心跳成功，更新时间
-                        RpcInfo.heartbeatMap.put(rpc.getUri(), System.currentTimeMillis());
-                    }
-                } catch (Exception e) {
-                    // 心跳失败，不更新时间
-                    System.out.println("心跳失败：" + e.getMessage());
-                }
-
-                if (System.currentTimeMillis() - RpcInfo.heartbeatMap.get(rpc.getUri()) > RpcInfo.HEARTBEAT_OVERTIME_MILLIS) {
-                    // 心跳超时，判定为不可连接
-                    System.out.println("心跳超时：" + rpc.getUri() + "," + rpc.getMonitorPath() + "," + rpc.getInvokeClass());
-                    removeKeyList.add(key);
-                }
-            }
-
-            for (String key : removeKeyList) {
-                RpcInfo.remoteInterfaceMap.remove(key);
-            }
-
-            RpcInfo.print();
-
             try {
+                List<String> removeKeyList = new ArrayList<>();
+
+                for (String key : RpcInfo.remoteInterfaceMap.keySet()) {
+                    Rpc rpc = RpcInfo.remoteInterfaceMap.get(key);
+                    RpcClient rpcClient = new RpcClient(rpc.getUri());
+                    try {
+                        String response = rpcClient.callRpc(rpc.getMonitorPath(), RpcInfo.CMD_HEARTBEAT, RpcInfo.HEARTBEAT_REQUEST);
+                        if (RpcInfo.HEARTBEAT_RESPONSE.equals(response)) {
+                            // 心跳成功，更新时间
+                            System.out.println("心跳成功: " + rpc.getUri());
+                            RpcInfo.heartbeatMap.put(rpc.getUri(), System.currentTimeMillis());
+                        }
+                    } catch (Exception e) {
+                        // 心跳失败，不更新时间
+                        System.out.println("心跳失败：" + e.getMessage());
+                    }
+
+                    if (System.currentTimeMillis() - RpcInfo.heartbeatMap.get(rpc.getUri()) > RpcInfo.HEARTBEAT_OVERTIME_MILLIS) {
+                        // 心跳超时，判定为不可连接
+                        System.out.println("心跳超时：" + rpc.getUri() + "," + rpc.getMonitorPath() + "," + rpc.getInvokeClass());
+                        removeKeyList.add(key);
+                    }
+                }
+
+                for (String key : removeKeyList) {
+                    RpcInfo.remoteInterfaceMap.remove(key);
+                }
+
+                RpcInfo.print();
+
                 Thread.sleep(RpcInfo.HEARTBEAT_INTERVAL_MILLIS);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                break;
             }
         }
     }

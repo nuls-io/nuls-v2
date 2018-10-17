@@ -33,7 +33,7 @@ package io.nuls.rpc.pojo;
 public class Rpc extends RpcCmd {
 
     private String uri;
-    private String invokeClass;
+    private Class invokeClass;
     private String monitorPath;
 
     public String getUri() {
@@ -44,11 +44,11 @@ public class Rpc extends RpcCmd {
         this.uri = uri;
     }
 
-    public String getInvokeClass() {
+    public Class getInvokeClass() {
         return invokeClass;
     }
 
-    public void setInvokeClass(String invokeClass) {
+    public void setInvokeClass(Class invokeClass) {
         this.invokeClass = invokeClass;
     }
 

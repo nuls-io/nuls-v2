@@ -25,6 +25,9 @@
 
 package io.nuls.rpc;
 
+import io.nuls.rpc.cmd.HeartbeatCmd;
+import io.nuls.rpc.cmd.JoinCmd;
+import io.nuls.rpc.cmd.RpcListCmd;
 import io.nuls.rpc.pojo.Rpc;
 import io.nuls.rpc.thread.HeartbeatCheck;
 import org.glassfish.jersey.grizzly2.servlet.GrizzlyWebContainerFactory;
@@ -64,21 +67,21 @@ public class RpcServer {
         return "http://" + ip + ":" + port + "/";
     }
 
-    public void register(String cmd, int version, String invokeClass) {
+    public void register(String cmd, int version, Class invokeClass) {
         register(cmd, version, invokeClass, RpcInfo.DEFAULT_PATH);
     }
 
-    public void register(String cmd, int version, String invokeClass, String monitorPath) {
+    public void register(String cmd, int version, Class invokeClass, String monitorPath) {
         Rpc rpc = buildRpc(cmd, version, invokeClass, monitorPath);
         RpcInfo.localInterfaceMap.put(RpcInfo.generateKey(rpc.getCmd(), rpc.getVersion()), rpc);
     }
 
-    private void registerDefault(String cmd, String invokeClass) {
+    private void registerDefault(String cmd, Class invokeClass) {
         Rpc rpc = buildRpc(cmd, RpcInfo.VERSION, invokeClass, RpcInfo.DEFAULT_PATH);
         RpcInfo.defaultInterfaceMap.put(RpcInfo.generateKey(rpc.getCmd(), rpc.getVersion()), rpc);
     }
 
-    private Rpc buildRpc(String cmd, int version, String invokeClass, String monitorPath) {
+    private Rpc buildRpc(String cmd, int version, Class invokeClass, String monitorPath) {
         Rpc rpc = new Rpc();
         rpc.setCmd(cmd);
         rpc.setVersion(version);
@@ -89,9 +92,9 @@ public class RpcServer {
     }
 
     public void start() {
-        registerDefault(RpcInfo.CMD_JOIN, "io.nuls.rpc.cmd.JoinCmd");
-        registerDefault(RpcInfo.CMD_LIST, "io.nuls.rpc.cmd.RpcListCmd");
-        registerDefault(RpcInfo.CMD_HEARTBEAT, "io.nuls.rpc.cmd.HeartbeatCmd");
+        registerDefault(RpcInfo.CMD_JOIN, JoinCmd.class);
+        registerDefault(RpcInfo.CMD_LIST, RpcListCmd.class);
+        registerDefault(RpcInfo.CMD_HEARTBEAT, HeartbeatCmd.class);
 
         final HashMap<String, String> initParams = new HashMap<>(16);
         initParams.put("jersey.config.server.provider.packages", "io.nuls.rpc.handler");

@@ -45,6 +45,7 @@ public class HeartbeatCmd extends BaseCmd {
      */
     @Override
     public String execRpc(Object param) {
+        System.out.println("调用心跳检测:" + param);
         if (RpcInfo.HEARTBEAT_REQUEST.equals(param)) {
             return RpcInfo.HEARTBEAT_RESPONSE;
         } else {

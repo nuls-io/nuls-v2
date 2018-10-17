@@ -27,6 +27,8 @@
 
 package io.nuls.rpc;
 
+import io.nuls.rpc.cmd.VersionCmd1;
+import io.nuls.rpc.cmd.VersionCmd2;
 import org.junit.Test;
 
 /**
@@ -42,8 +44,8 @@ public class TestServer {
         RpcServer rpcServer = RpcServer.getInstance(8091);
         assert rpcServer != null;
 
-        rpcServer.register("version", 1, "io.nuls.rpc.cmd.VersionCmd1");
-        rpcServer.register("version", 2, "io.nuls.rpc.cmd.VersionCmd2");
+        rpcServer.register("version", 1, VersionCmd1.class);
+        rpcServer.register("version", 2, VersionCmd2.class);
         rpcServer.start();
 
         System.out.println("started.");
