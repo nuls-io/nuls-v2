@@ -66,6 +66,8 @@ public class HeartbeatCheck implements Runnable {
                         System.out.println("心跳超时：" + rpc.getUri() + "," + rpc.getMonitorPath() + "," + rpc.getInvokeClass());
                         removeKeyList.add(key);
                     }
+
+                    rpcClient.close();
                 }
 
                 for (String key : removeKeyList) {

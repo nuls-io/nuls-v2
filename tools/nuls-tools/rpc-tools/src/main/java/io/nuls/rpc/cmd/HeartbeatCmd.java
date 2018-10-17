@@ -35,8 +35,6 @@ import io.nuls.rpc.info.RpcInfo;
  * @description
  */
 public class HeartbeatCmd extends BaseCmd {
-
-
     /**
      * @param param param说明：
      *              心跳测试，只是判断Server是否还在运行，因此只交换最基础的信息
@@ -45,7 +43,6 @@ public class HeartbeatCmd extends BaseCmd {
      */
     @Override
     public String execRpc(Object param) {
-        System.out.println("调用心跳检测:" + param);
         if (RpcInfo.HEARTBEAT_REQUEST.equals(param)) {
             return RpcInfo.HEARTBEAT_RESPONSE;
         } else {

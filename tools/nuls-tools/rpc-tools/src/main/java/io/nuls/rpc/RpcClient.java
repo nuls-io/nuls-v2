@@ -141,4 +141,12 @@ public class RpcClient {
 
         return response.toString();
     }
+
+    public void close(){
+        try {
+            httpClient.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

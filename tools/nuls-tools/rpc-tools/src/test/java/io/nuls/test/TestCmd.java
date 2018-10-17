@@ -63,5 +63,6 @@ public class TestCmd {
         RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
         System.out.println(rpcClient.callRpc(RpcInfo.DEFAULT_PATH, "version", null));
         System.out.println(rpcClient.callRpc(RpcInfo.DEFAULT_PATH, "version", null,1));
+        //System.out.println(rpcClient.callRpc(RpcInfo.DEFAULT_PATH, "version", null,0,0));
     }
 }

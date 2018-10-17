@@ -90,7 +90,7 @@ public class RpcInfo {
         } else if (rpcCmd.getVersion() > 0) {
             return exactMatchRpc(rpcCmd.getCmd(), rpcCmd.getVersion());
         } else {
-            return fuzzyMatchRpc(rpcCmd.getCmd(), 0);
+            return fuzzyMatchRpc(rpcCmd.getCmd(), 1);
         }
     }
 
