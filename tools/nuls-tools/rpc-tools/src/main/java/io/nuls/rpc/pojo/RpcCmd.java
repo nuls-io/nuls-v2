@@ -34,6 +34,7 @@ package io.nuls.rpc.pojo;
 public class RpcCmd {
     private String cmd;
     private int version;
+    private int lowestVersion;
     private Object param;
 
     public String getCmd() {
@@ -52,6 +53,14 @@ public class RpcCmd {
         this.version = version;
     }
 
+    public int getLowestVersion() {
+        return lowestVersion;
+    }
+
+    public void setLowestVersion(int lowestVersion) {
+        this.lowestVersion = lowestVersion;
+    }
+
     public Object getParam() {
         return param;
     }
@@ -60,7 +69,10 @@ public class RpcCmd {
         this.param = param;
     }
 
-    public String generateKey() {
-        return getCmd() + "-" + getVersion();
+    @Override
+    public String toString() {
+        return "cmd->" + cmd + "\n"
+                + "version->" + version + "\n"
+                + "lowestVersion->" + lowestVersion + "\n";
     }
 }

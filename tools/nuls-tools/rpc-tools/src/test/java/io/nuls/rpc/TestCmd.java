@@ -27,33 +27,39 @@
 
 package io.nuls.rpc;
 
+import io.nuls.rpc.pojo.Rpc;
+import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
+
+import java.util.Map;
 
 /**
  * @author tangyi
- * @date 2018/10/9
+ * @date 2018/10/16
  * @description
  */
-public class TestServer {
+public class TestCmd {
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testList() throws Exception {
+
+        System.out.println("启动Client");
+        RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
+        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, RpcInfo.CMD_LIST,null);
+        System.out.println(response);
+
+        System.out.println("我获取的接口如下：");
+        Map<String, Rpc> rpcMap = JSONUtils.json2map(response, Rpc.class);
+        for (String key : rpcMap.keySet()) {
+            Rpc rpc = JSONUtils.json2pojo(JSONUtils.obj2json(rpcMap.get(key)), Rpc.class);
+            System.out.println(rpc);
+        }
+    }
 
     @Test
-    public  void test() {
-
-        RpcServer rpcServer = RpcServer.getInstance(8091);
-        assert rpcServer != null;
-
-        rpcServer.register("version", 1, "io.nuls.rpc.cmd.VersionCmd1");
-        rpcServer.register("version", 2, "io.nuls.rpc.cmd.VersionCmd2");
-        rpcServer.start();
-
-        System.out.println("started.");
-
-        RpcInfo.print();
-
-        try {
-            Thread.sleep(Integer.MAX_VALUE);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void testVersion() throws Exception {
+        RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
+        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, "version", null,1);
+        System.out.println(response);
     }
 }

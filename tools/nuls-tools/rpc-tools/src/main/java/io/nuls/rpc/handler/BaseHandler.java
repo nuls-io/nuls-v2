@@ -74,24 +74,17 @@ public class BaseHandler {
             return "Bad cmd: " + jsonString;
         }
 
-        String key = rpcCmd.generateKey();
-        Object param = rpcCmd.getParam();
-        Rpc rpc;
-        if (RpcInfo.defaultInterfaceMap.containsKey(key)) {
-            rpc = RpcInfo.defaultInterfaceMap.get(key);
-        } else if (RpcInfo.localInterfaceMap.containsKey(key)) {
-            rpc = RpcInfo.localInterfaceMap.get(key);
-        } else {
-            return "No cmd found: " + key;
+        Rpc rpc = RpcInfo.getInvokeRpcByCmd(rpcCmd);
+        if (rpc == null) {
+            return "No cmd found: " + rpcCmd.toString();
         }
-        assert rpc != null;
 
         try {
             Class clz = Class.forName(rpc.getInvokeClass());
             @SuppressWarnings("unchecked") Method execRpc = clz.getMethod("execRpc", Object.class);
             @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
             BaseCmd cmd = (BaseCmd) constructor.newInstance();
-            return (String) execRpc.invoke(cmd, param);
+            return (String) execRpc.invoke(cmd, rpcCmd.getParam());
         } catch (Exception e) {
             e.printStackTrace();
             return e.getMessage();

@@ -70,13 +70,12 @@ public class RpcServer {
 
     public void register(String cmd, int version, String invokeClass, String monitorPath) {
         Rpc rpc = buildRpc(cmd, version, invokeClass, monitorPath);
-        RpcInfo.localInterfaceMap.put(rpc.generateKey(), rpc);
+        RpcInfo.localInterfaceMap.put(RpcInfo.generateKey(rpc.getCmd(), rpc.getVersion()), rpc);
     }
 
     private void registerDefault(String cmd, String invokeClass) {
-
         Rpc rpc = buildRpc(cmd, RpcInfo.VERSION, invokeClass, RpcInfo.DEFAULT_PATH);
-        RpcInfo.defaultInterfaceMap.put(rpc.generateKey(), rpc);
+        RpcInfo.defaultInterfaceMap.put(RpcInfo.generateKey(rpc.getCmd(), rpc.getVersion()), rpc);
     }
 
     private Rpc buildRpc(String cmd, int version, String invokeClass, String monitorPath) {

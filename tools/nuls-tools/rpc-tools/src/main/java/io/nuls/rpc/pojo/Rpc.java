@@ -62,9 +62,8 @@ public class Rpc extends RpcCmd {
 
     @Override
     public String toString() {
-        return "uri->" + uri + "\n"
+        return super.toString() + "uri->" + uri + "\n"
                 + "monitorPath->" + monitorPath + "\n"
-                + "invokeClass->" + invokeClass + "\n"
-                + "print end\n";
+                + "invokeClass->" + invokeClass + "\n";
     }
 }

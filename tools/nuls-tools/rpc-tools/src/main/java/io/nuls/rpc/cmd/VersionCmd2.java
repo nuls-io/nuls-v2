@@ -25,35 +25,24 @@
  *
  */
 
-package io.nuls.rpc;
-
-import org.junit.Test;
+package io.nuls.rpc.cmd;
 
 /**
  * @author tangyi
- * @date 2018/10/9
+ * @date 2018/10/17
  * @description
  */
-public class TestServer {
-
-    @Test
-    public  void test() {
-
-        RpcServer rpcServer = RpcServer.getInstance(8091);
-        assert rpcServer != null;
-
-        rpcServer.register("version", 1, "io.nuls.rpc.cmd.VersionCmd1");
-        rpcServer.register("version", 2, "io.nuls.rpc.cmd.VersionCmd2");
-        rpcServer.start();
-
-        System.out.println("started.");
-
-        RpcInfo.print();
-
-        try {
-            Thread.sleep(Integer.MAX_VALUE);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+public class VersionCmd2 extends BaseCmd {
+    /**
+     * 内部测试version使用
+     *
+     * @param param param说明：
+     *              param为空
+     * @return String
+     */
+    @Override
+    public String execRpc(Object param) {
+        System.out.println("I'm version 2");
+        return "version 2";
     }
 }

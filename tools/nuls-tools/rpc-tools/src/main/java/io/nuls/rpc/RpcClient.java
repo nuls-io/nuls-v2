@@ -39,7 +39,6 @@ import org.apache.http.message.BasicNameValuePair;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,52 +51,80 @@ public class RpcClient {
     private String remoteIp;
     private int remotePort;
     private String remoteUri;
+    private CloseableHttpClient httpClient;
 
     public RpcClient(String remoteIp, int remotePort) {
         this.remoteIp = remoteIp;
         this.remotePort = remotePort;
         this.remoteUri = "http://" + remoteIp + ":" + remotePort + "/";
+        httpClient = HttpClients.createDefault();
     }
 
     public RpcClient(String remoteUri) {
         this.remoteUri = remoteUri;
     }
 
-    public String callRpc(String monitorPath, String cmd, int version, Object param) {
-        System.out.println(Thread.currentThread().getName() + " start.");
+    /**
+     * 默认获取最高版本的接口
+     * @param monitorPath:
+     * @param cmd:
+     * @param param:
+     * @return String
+     */
+    public String callRpc(String monitorPath, String cmd, Object param) {
+        return callRpc(monitorPath, cmd, param, 0, 1);
+    }
 
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        HttpPost httpPost = new HttpPost(remoteUri + monitorPath);
-        httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
+    /**
+     * 返回特定版本的接口
+     * @param monitorPath:
+     * @param cmd:
+     * @param param:
+     * @param version:
+     * @return String
+     */
+    public String callRpc(String monitorPath, String cmd, Object param, int version) {
+        return callRpc(monitorPath, cmd, param, version, 0);
+    }
+
+    /**
+     * 调用接口
+     * @param monitorPath:
+     * @param cmd:
+     * @param param:
+     * @param version:
+     * @param lowestVersion:
+     * @return String
+     */
+    private String callRpc(String monitorPath, String cmd, Object param, int version, int lowestVersion) {
+
         RpcCmd rpcCmd = new RpcCmd();
         rpcCmd.setCmd(cmd);
         rpcCmd.setVersion(version);
+        rpcCmd.setLowestVersion(lowestVersion);
         rpcCmd.setParam(param);
 
+        HttpEntity postParams = null;
         List<NameValuePair> urlParameters = new ArrayList<>();
         try {
-            System.out.println("Client build jason String: " + JSONUtils.obj2json(rpcCmd));
             urlParameters.add(new BasicNameValuePair("jsonString", JSONUtils.obj2json(rpcCmd)));
+            postParams = new UrlEncodedFormEntity(urlParameters);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        HttpEntity postParams = null;
-        try {
-            postParams = new UrlEncodedFormEntity(urlParameters);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        HttpPost httpPost = new HttpPost(remoteUri + monitorPath);
+        httpPost.addHeader("Content-Type", "application/x-www-form-urlencoded");
         httpPost.setEntity(postParams);
 
         try {
-            return post(httpClient, httpPost);
+            return post(httpPost);
         } catch (IOException e) {
             return e.getMessage();
         }
     }
 
-    private String post(CloseableHttpClient httpClient, HttpPost httpPost) throws IOException {
+    private String post(HttpPost httpPost) throws IOException {
 
         CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
         System.out.println("POST Response Status:: " + httpResponse.getStatusLine().getStatusCode());

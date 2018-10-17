@@ -54,7 +54,7 @@ public class TestJoinCmd {
 
         System.out.println("启动Client");
         RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
-        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, RpcInfo.CMD_JOIN, 1, RpcInfo.localInterfaceMap);
+        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, RpcInfo.CMD_JOIN, RpcInfo.localInterfaceMap);
         System.out.println(response);
 
         try {

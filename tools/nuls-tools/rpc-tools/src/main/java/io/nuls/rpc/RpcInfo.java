@@ -26,6 +26,7 @@
 package io.nuls.rpc;
 
 import io.nuls.rpc.pojo.Rpc;
+import io.nuls.rpc.pojo.RpcCmd;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -76,6 +77,7 @@ public class RpcInfo {
 
     /**
      * 根据网卡获得IP地址
+     *
      * @return ip
      */
     public static String getIpAdd() throws SocketException {
@@ -99,5 +101,57 @@ public class RpcInfo {
             }
         }
         return ip;
+    }
+
+    /**
+     * @param rpcCmd rpcCmd包含version和lowestVersion
+     *               如果lowestVersion>0, 则不考虑version，调用不低于lowestVersion的最新版
+     *               如果lowestVersion<=0，则使用version，精确匹配
+     *               如果lowestVersion和version同时<=0，则调用最新版
+     *               以上都找不到，则调用失败
+     * @return String
+     */
+    public static Rpc getInvokeRpcByCmd(RpcCmd rpcCmd) {
+        if (rpcCmd.getLowestVersion() > 0) {
+            return fuzzyMatchRpc(rpcCmd.getCmd(), rpcCmd.getLowestVersion());
+        } else if (rpcCmd.getVersion() > 0) {
+            return exactMatchRpc(rpcCmd.getCmd(), rpcCmd.getVersion());
+        } else {
+            return fuzzyMatchRpc(rpcCmd.getCmd(), 0);
+        }
+    }
+
+    private static Rpc exactMatchRpc(String cmd, int version) {
+        String key = generateKey(cmd, version);
+        if (RpcInfo.defaultInterfaceMap.containsKey(key)) {
+            return RpcInfo.defaultInterfaceMap.get(key);
+        } else {
+            return RpcInfo.localInterfaceMap.getOrDefault(key, null);
+        }
+    }
+
+    private static Rpc fuzzyMatchRpc(String cmd, int version) {
+        Rpc rpc = null;
+        while (true) {
+            String key = generateKey(cmd, version);
+            Rpc tempRpc = null;
+            if (RpcInfo.defaultInterfaceMap.containsKey(key)) {
+                tempRpc = RpcInfo.defaultInterfaceMap.get(key);
+            } else if (RpcInfo.localInterfaceMap.containsKey(key)) {
+                tempRpc = RpcInfo.localInterfaceMap.get(key);
+            }
+
+            if (tempRpc == null) {
+                return rpc;
+            } else {
+                rpc = tempRpc;
+            }
+
+            version++;
+        }
+    }
+
+    public static String generateKey(String cmd, int version) {
+        return cmd + "-" + version;
     }
 }

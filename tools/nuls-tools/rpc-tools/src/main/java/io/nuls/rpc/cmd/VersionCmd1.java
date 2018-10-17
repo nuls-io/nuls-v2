@@ -25,35 +25,24 @@
  *
  */
 
-package io.nuls.rpc;
-
-import io.nuls.rpc.pojo.Rpc;
-import io.nuls.tools.parse.JSONUtils;
-import org.junit.Test;
-
-import java.util.Map;
+package io.nuls.rpc.cmd;
 
 /**
  * @author tangyi
- * @date 2018/10/16
+ * @date 2018/10/17
  * @description
  */
-public class TestRpcListCmd {
-    @SuppressWarnings("unchecked")
-    @Test
-    public void test() throws Exception {
-
-        System.out.println("启动Client");
-        RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
-        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, RpcInfo.CMD_LIST, 1, null);
-        System.out.println(response);
-
-        System.out.println("我获取的接口如下：");
-        Map<String, Rpc> rpcMap = JSONUtils.json2map(response, Rpc.class);
-        for (String key : rpcMap.keySet()) {
-            Rpc rpc = JSONUtils.json2pojo(JSONUtils.obj2json(rpcMap.get(key)), Rpc.class);
-            System.out.println(rpc);
-        }
-
+public class VersionCmd1 extends BaseCmd {
+    /**
+     * 内部测试version使用
+     *
+     * @param param param说明：
+     *              param为空
+     * @return String
+     */
+    @Override
+    public String execRpc(Object param) {
+        System.out.println("I'm version 1");
+        return "version 1";
     }
 }

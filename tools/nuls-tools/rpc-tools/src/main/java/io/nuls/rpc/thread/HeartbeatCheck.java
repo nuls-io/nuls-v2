@@ -50,7 +50,7 @@ public class HeartbeatCheck implements Runnable {
                 Rpc rpc = RpcInfo.remoteInterfaceMap.get(key);
                 RpcClient rpcClient = new RpcClient(rpc.getUri());
                 try {
-                    String response = rpcClient.callRpc(rpc.getMonitorPath(), RpcInfo.CMD_HEARTBEAT, 1, RpcInfo.HEARTBEAT_REQUEST);
+                    String response = rpcClient.callRpc(rpc.getMonitorPath(), RpcInfo.CMD_HEARTBEAT, RpcInfo.HEARTBEAT_REQUEST);
                     if (RpcInfo.HEARTBEAT_RESPONSE.equals(response)) {
                         // 心跳成功，更新时间
                         RpcInfo.heartbeatMap.put(rpc.getUri(), System.currentTimeMillis());
