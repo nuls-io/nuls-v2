@@ -58,6 +58,11 @@ public class Result<T> implements Serializable {
         this.errorCode = errorCode;
     }
 
+    public Result(boolean success, String msg) {
+        this.success = success;
+        this.msg = msg;
+    }
+
     public boolean isSuccess() {
         return success;
     }
@@ -97,7 +102,7 @@ public class Result<T> implements Serializable {
         StringBuffer buffer = new StringBuffer();
         buffer.append("result:{");
         buffer.append("\"success\": " + success + ",");
-        buffer.append("\"validator\": \"" + msg + "\",");
+        buffer.append("\"msg\": \"" + msg + "\",");
         if (errorCode == null) {
             buffer.append("\"errorCode\": \"\",");
         } else {
