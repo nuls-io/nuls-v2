@@ -25,10 +25,12 @@
  *
  */
 
-package io.nuls.rpc;
+package io.nuls.test;
 
+import io.nuls.rpc.RpcServer;
 import io.nuls.rpc.cmd.VersionCmd1;
 import io.nuls.rpc.cmd.VersionCmd2;
+import io.nuls.rpc.info.RpcInfo;
 import org.junit.Test;
 
 /**

@@ -28,6 +28,8 @@ package io.nuls.rpc;
 import io.nuls.rpc.cmd.HeartbeatCmd;
 import io.nuls.rpc.cmd.JoinCmd;
 import io.nuls.rpc.cmd.RpcListCmd;
+import io.nuls.rpc.info.IpAddress;
+import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.pojo.Rpc;
 import io.nuls.rpc.thread.HeartbeatCheck;
 import org.glassfish.jersey.grizzly2.servlet.GrizzlyWebContainerFactory;
@@ -46,7 +48,7 @@ public class RpcServer {
     public static synchronized RpcServer getInstance(int selfPort) {
         try {
             if (rpcServer == null) {
-                rpcServer = new RpcServer(RpcInfo.getIpAdd(), selfPort);
+                rpcServer = new RpcServer(IpAddress.getIpAdd(), selfPort);
             }
 
             return rpcServer;

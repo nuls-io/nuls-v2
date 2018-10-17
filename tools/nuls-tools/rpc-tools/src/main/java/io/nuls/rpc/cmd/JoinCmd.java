@@ -25,7 +25,7 @@
 
 package io.nuls.rpc.cmd;
 
-import io.nuls.rpc.RpcInfo;
+import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.pojo.Rpc;
 import io.nuls.tools.parse.JSONUtils;
 

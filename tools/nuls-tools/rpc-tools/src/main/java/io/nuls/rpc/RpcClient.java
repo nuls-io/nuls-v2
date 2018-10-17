@@ -25,6 +25,7 @@
 
 package io.nuls.rpc;
 
+import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.pojo.RpcCmd;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.http.HttpEntity;

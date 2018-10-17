@@ -27,7 +27,7 @@ package io.nuls.rpc.thread;
 
 
 import io.nuls.rpc.RpcClient;
-import io.nuls.rpc.RpcInfo;
+import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.pojo.Rpc;
 
 import java.util.ArrayList;

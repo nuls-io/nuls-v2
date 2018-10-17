@@ -27,7 +27,7 @@
 
 package io.nuls.rpc.cmd;
 
-import io.nuls.rpc.RpcInfo;
+import io.nuls.rpc.info.RpcInfo;
 
 /**
  * @author tangyi

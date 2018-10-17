@@ -25,41 +25,47 @@
  *
  */
 
-package io.nuls.rpc;
+package io.nuls.test;
 
-import io.nuls.rpc.pojo.Rpc;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.rpc.RpcClient;
+import io.nuls.rpc.RpcServer;
+import io.nuls.rpc.cmd.VersionCmd1;
+import io.nuls.rpc.info.RpcInfo;
 import org.junit.Test;
-
-import java.util.Map;
 
 /**
  * @author tangyi
- * @date 2018/10/16
+ * @date 2018/10/15
  * @description
  */
-public class TestCmd {
-    @SuppressWarnings("unchecked")
+public class TestJoinCmd {
+
     @Test
-    public void testList() throws Exception {
+    public void test() {
+
+        RpcServer rpcServer = RpcServer.getInstance(8092);
+
+        assert rpcServer != null;
+
+        rpcServer.register("cmd1", 1, null);
+        rpcServer.register("cmd2", 2, null);
+        rpcServer.register("cmd3", 3, null);
+        rpcServer.register("cmd4", 4, null);
+        rpcServer.register("cmd5", 5, null);
+        rpcServer.register("version", 1, VersionCmd1.class);
+        rpcServer.start();
+
+        RpcInfo.print();
 
         System.out.println("启动Client");
         RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
-        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, RpcInfo.CMD_LIST,null);
+        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, RpcInfo.CMD_JOIN, RpcInfo.localInterfaceMap);
         System.out.println(response);
 
-        System.out.println("我获取的接口如下：");
-        Map<String, Rpc> rpcMap = JSONUtils.json2map(response, Rpc.class);
-        for (String key : rpcMap.keySet()) {
-            Rpc rpc = JSONUtils.json2pojo(JSONUtils.obj2json(rpcMap.get(key)), Rpc.class);
-            System.out.println(rpc);
+        try {
+            Thread.sleep(Integer.MAX_VALUE);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
-    }
-
-    @Test
-    public void testVersion() {
-        RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
-        System.out.println(rpcClient.callRpc(RpcInfo.DEFAULT_PATH, "version", null));
-        System.out.println(rpcClient.callRpc(RpcInfo.DEFAULT_PATH, "version", null,1));
     }
 }

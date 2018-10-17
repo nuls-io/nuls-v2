@@ -25,7 +25,7 @@
 
 package io.nuls.rpc.handler;
 
-import io.nuls.rpc.RpcInfo;
+import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.pojo.Rpc;
 import io.nuls.rpc.pojo.RpcCmd;
@@ -43,7 +43,7 @@ import java.lang.reflect.Method;
  * @date 2018/10/13
  * @description
  */
-@Path("nulsrpc")
+@Path(RpcInfo.DEFAULT_PATH)
 public class BaseHandler {
 
     @POST
