@@ -19,7 +19,6 @@
  */
 package io.nuls.db.manager;
 
-import com.sun.xml.internal.bind.v2.TODO;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.util.DBUtils;
@@ -131,6 +130,7 @@ public class RocksDBManager {
         if (!checkFile.exists()) {
             return null;
         }
+
         Options options = getCommonOptions(false);
         return RocksDB.open(options, dbPath);
     }
@@ -160,19 +160,14 @@ public class RocksDBManager {
         lock.lock();
         try {
             if (StringUtils.isBlank(tableName)) {
-                //TODO
-                //return new Result(false).setMsg(DBErrorCode.NULL_PARAMETER);
-                return new Result(false).setMsg(DBErrorCode.NULL_PARAMETER);
+                return new Result(false, DBErrorCode.NULL_PARAMETER);
             }
             if (TABLES.containsKey(tableName)) {
-                //return new Result(false).setMsg(DBErrorCode.DB_TABLE_EXIST);
-                return new Result(false).setMsg(DBErrorCode.DB_TABLE_EXIST);
+                return new Result(false, DBErrorCode.DB_TABLE_EXIST);
             }
             if (StringUtils.isBlank(dataPath) || !DBUtils.checkPathLegal(tableName)) {
-                //return new Result(false).setMsg(DBErrorCode.DB_TABLE_CREATE_PATH_ERROR);
-                return new Result(false).setMsg(DBErrorCode.DB_TABLE_CREATE_PATH_ERROR);
+                return new Result(false, DBErrorCode.DB_TABLE_CREATE_PATH_ERROR);
             }
-            //Result result;
             try {
                 File dir = new File(dataPath + File.separator + tableName);
                 if (!dir.exists()) {
@@ -181,10 +176,8 @@ public class RocksDBManager {
                 String filePath = dataPath + File.separator + tableName + File.separator + BASE_DB_NAME;
                 RocksDB db = openDB(filePath, true);
                 TABLES.put(tableName, db);
-                //result = Result.getSuccess();
             } catch (Exception e) {
                 Log.error("error create table: " + tableName, e);
-                //result = Result.getFailed(DBErrorCode.DB_TABLE_CREATE_ERROR);
                 return new Result(false).setMsg(DBErrorCode.DB_TABLE_CREATE_ERROR);
             }
             return new Result(true);
@@ -213,26 +206,23 @@ public class RocksDBManager {
      */
     public static Result destroyTable(final String tableName) {
         if (!baseCheckTable(tableName)) {
-            //TODO
-            return new Result(false).setMsg(DBErrorCode.DB_TABLE_NOT_EXIST);
+            return new Result(false, DBErrorCode.DB_TABLE_NOT_EXIST);
         }
         if (StringUtils.isBlank(dataPath) || !DBUtils.checkPathLegal(tableName)) {
-            return new Result(false).setMsg(DBErrorCode.DB_TABLE_CREATE_PATH_ERROR);
+            return new Result(false, DBErrorCode.DB_TABLE_CREATE_PATH_ERROR);
         }
-        Result result;
         try {
             RocksDB db = TABLES.remove(tableName);
             db.close();
             File dir = new File(dataPath + File.separator + tableName);
             if (!dir.exists()) {
-                return new Result(false).setMsg(DBErrorCode.DB_TABLE_NOT_EXIST);
+                return new Result(false, DBErrorCode.DB_TABLE_NOT_EXIST);
             }
             String filePath = dataPath + File.separator + tableName + File.separator + BASE_DB_NAME;
             destroyDB(filePath);
-            //result = Result.getSuccess();
         } catch (Exception e) {
             Log.error("error destroy table: " + tableName, e);
-            return new Result(false).setMsg(DBErrorCode.DB_TABLE_DESTROY_ERROR);
+            return new Result(false, DBErrorCode.DB_TABLE_DESTROY_ERROR);
         }
         return new Result(true);
     }
@@ -324,10 +314,10 @@ public class RocksDBManager {
      */
     public static Result put(final String table, final byte[] key, final byte[] value) {
         if (!baseCheckTable(table)) {
-            return new Result(false).setMsg(DBErrorCode.DB_TABLE_NOT_EXIST);
+            return new Result(false, DBErrorCode.DB_TABLE_NOT_EXIST);
         }
         if (key == null || value == null) {
-            return new Result(false).setMsg(DBErrorCode.NULL_PARAMETER);
+            return new Result(false, DBErrorCode.NULL_PARAMETER);
         }
         try {
             RocksDB db = TABLES.get(table);
@@ -335,7 +325,7 @@ public class RocksDBManager {
             return new Result(true);
         } catch (Exception e) {
             Log.error(e);
-            return new Result(false).setMsg(DBErrorCode.DB_UNKOWN_EXCEPTION);
+            return new Result(false, DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -349,10 +339,10 @@ public class RocksDBManager {
      */
     public static Result delete(final String table, final byte[] key) {
         if (!baseCheckTable(table)) {
-            return new Result(false).setMsg(DBErrorCode.DB_TABLE_NOT_EXIST);
+            return new Result(false, DBErrorCode.DB_TABLE_NOT_EXIST);
         }
         if (key == null) {
-            return new Result(false).setMsg(DBErrorCode.NULL_PARAMETER);
+            return new Result(false, DBErrorCode.NULL_PARAMETER);
         }
         try {
             RocksDB db = TABLES.get(table);
@@ -360,7 +350,7 @@ public class RocksDBManager {
             return new Result(true);
         } catch (Exception e) {
             Log.error(e);
-            return new Result(false).setMsg(DBErrorCode.DB_UNKOWN_EXCEPTION);
+            return new Result(false, DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -374,7 +364,7 @@ public class RocksDBManager {
      */
     public static Result batchPut(final String table, final Map<byte[], byte[]> kvs) {
         if (!baseCheckTable(table)) {
-            return new Result(false).setMsg(DBErrorCode.DB_TABLE_NOT_EXIST);
+            return new Result(false, DBErrorCode.DB_TABLE_NOT_EXIST);
         }
         if (kvs == null || kvs.size() == 0) {
             return null;
@@ -389,7 +379,7 @@ public class RocksDBManager {
             return new Result(true);
         } catch (Exception ex) {
             Log.error(ex);
-            return new Result(false).setMsg(DBErrorCode.DB_UNKOWN_EXCEPTION);
+            return new Result(false, DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -403,7 +393,7 @@ public class RocksDBManager {
      */
     public static Result deleteKeys(final String table, final List<byte[]> keys) {
         if (!baseCheckTable(table)) {
-            return new Result(false).setMsg(DBErrorCode.DB_TABLE_NOT_EXIST);
+            return new Result(false, DBErrorCode.DB_TABLE_NOT_EXIST);
         }
         if (keys == null || keys.size() == 0) {
             return null;
@@ -417,7 +407,7 @@ public class RocksDBManager {
             return new Result(true);
         } catch (Exception ex) {
             Log.error(ex);
-            return new Result(false).setMsg(DBErrorCode.DB_UNKOWN_EXCEPTION);
+            return new Result(false, DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 

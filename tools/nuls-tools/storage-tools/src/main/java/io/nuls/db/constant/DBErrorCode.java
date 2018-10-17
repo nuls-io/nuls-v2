@@ -24,7 +24,7 @@ package io.nuls.db.constant;
  */
 public interface DBErrorCode {
     String NULL_PARAMETER = "Parameter can not be null";
-    String DB_UNKOWN_EXCEPTION = "Parameter can not be null";
+    String DB_UNKOWN_EXCEPTION = "DB error";
     String DB_TABLE_EXIST = "DB table exists";
     String DB_TABLE_NOT_EXIST = "DB table not exists";
     String DB_TABLE_CREATE_ERROR = "Create DB table error";

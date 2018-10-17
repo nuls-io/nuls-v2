@@ -93,6 +93,8 @@ public class RocksDBTest {
     /**
      * 创建数据表
      */
+    @Ignore
+    @Test
     public void createTableTest() {
         String tableName = table;//account chain
         Result result = DBService.createTable(tableName);
@@ -103,6 +105,8 @@ public class RocksDBTest {
     /**
      * 删除数据表
      */
+    @Ignore
+    @Test
     public void destroyTableTest() {
         String tableName = "user";
         Result result = DBService.destroyTable(tableName);
@@ -113,6 +117,8 @@ public class RocksDBTest {
     /**
      * 查询所有表名
      */
+    @Ignore
+    @Test
     public void listTableTest() {
         String[] tables = DBService.listTable();
         String testTable = "testListTable";
@@ -133,6 +139,8 @@ public class RocksDBTest {
         destroyTable(testTable);
     }
 
+    @Ignore
+    @Test
     public void putTest() {
         String value = "testvalue";
         put(table, key.getBytes(UTF_8), value.getBytes(UTF_8));
@@ -140,17 +148,23 @@ public class RocksDBTest {
         Assert.assertEquals(value, getValue);
     }
 
+    @Ignore
+    @Test
     public void getTest() {
         String value = "testvalue";
         String getValue = new String(get(table, key.getBytes(UTF_8)), UTF_8);
         Assert.assertEquals(value, getValue);
     }
 
+    @Ignore
+    @Test
     public void deleteTest() {
         delete(table, key.getBytes(UTF_8));
         Assert.assertNull(get(table, key.getBytes(UTF_8)));
     }
 
+    @Ignore
+    @Test
     public void multiGetTest() {
         //String value = "testvalue";
         //String getValue = new String(get(table, key.getBytes(UTF_8)), UTF_8);
@@ -170,6 +184,8 @@ public class RocksDBTest {
         }
     }
 
+    @Ignore
+    @Test
     public void multiGetValueListTest() {
         put(table, "key1".getBytes(), "value1".getBytes());
         put(table, "key2".getBytes(), "value2".getBytes());
@@ -185,6 +201,8 @@ public class RocksDBTest {
         }
     }
 
+    @Ignore
+    @Test
     public void keyListTest() {
         long start = System.currentTimeMillis();
         List<byte[]> list = keyList(table);
@@ -197,6 +215,8 @@ public class RocksDBTest {
         }
     }
 
+    @Ignore
+    @Test
     public void valueListTest() {
         List<byte[]> list = valueList(table);
         for (byte[] value : list) {
@@ -204,6 +224,8 @@ public class RocksDBTest {
         }
     }
 
+    @Ignore
+    @Test
     public void entryListTest() {
         List<Entry<byte[], byte[]>> list = entryList(table);
         for (Entry<byte[], byte[]> entry : list) {
@@ -211,6 +233,8 @@ public class RocksDBTest {
         }
     }
 
+    @Ignore
+    @Test
     public void batchPutTest() {
         List<byte[]> list = new ArrayList<>();
         Map<byte[], byte[]> insertMap = new HashMap<>();
@@ -251,6 +275,8 @@ public class RocksDBTest {
         }
     }
 
+    @Ignore
+    @Test
     public void deleteKeysTest() {
         List<byte[]> list = keyList(table);
         if(list!=null) {
