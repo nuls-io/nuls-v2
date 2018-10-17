@@ -1,4 +1,4 @@
-package kernel
+package model
 
 type Plugin struct {
 	Name string

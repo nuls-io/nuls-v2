@@ -1,4 +1,4 @@
-package kernel
+package model
 
 import "encoding/json"
 

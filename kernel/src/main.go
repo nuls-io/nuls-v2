@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 	"nuls.io/kernel"
 )
@@ -11,6 +12,7 @@ func init() {
 }
 
 func main() {
+	flag.Parse()
 	log.Println("App Init")
 	app := new(kernel.AppDelegate)
 	app.Run()

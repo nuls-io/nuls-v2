@@ -1,22 +1,23 @@
-package kernel
+package service
 
 import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"nuls.io/kernel/model"
 	"strings"
 )
 
-type RPCServices struct {
+type RPCService struct {
 	http.Handler
 }
 
-func (self *RPCServices) StartRPC() {
+func (self *RPCService) StartRPC() {
 	go http.ListenAndServe("localhost:8080", self)
 }
 
-func (self *RPCServices) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
+func (self *RPCService) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	log.Printf("%s %s", request.Method, request.RequestURI)
 
 	switch strings.ToUpper(request.Method) {
@@ -28,7 +29,7 @@ func (self *RPCServices) ServeHTTP(writer http.ResponseWriter, request *http.Req
 			self.handleBadReq(writer, request)
 			return
 		}
-		cmd := &Command{}
+		cmd := &model.Command{}
 		err = json.Unmarshal(requestBody, cmd)
 		if err != nil {
 			self.handleBadReq(writer, request)
@@ -38,11 +39,11 @@ func (self *RPCServices) ServeHTTP(writer http.ResponseWriter, request *http.Req
 	}
 }
 
-func (self *RPCServices) handleCMD(cmd *Command, writer http.ResponseWriter, request *http.Request) {
+func (self *RPCService) handleCMD(cmd *model.Command, writer http.ResponseWriter, request *http.Request) {
 
 }
 
-func (self *RPCServices) handleBadReq(writer http.ResponseWriter, request *http.Request) {
+func (self *RPCService) handleBadReq(writer http.ResponseWriter, request *http.Request) {
 	resp := `{
   "jsonrpc": "1.0",
   "id": null,
