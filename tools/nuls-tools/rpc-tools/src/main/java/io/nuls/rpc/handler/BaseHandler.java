@@ -25,10 +25,10 @@
 
 package io.nuls.rpc.handler;
 
-import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.pojo.Rpc;
-import io.nuls.rpc.pojo.RpcCmd;
+import io.nuls.rpc.info.RpcConstant;
+import io.nuls.rpc.info.RpcInfo;
+import io.nuls.rpc.model.Rpc;
 import io.nuls.tools.parse.JSONUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,57 +37,51 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
  * @date 2018/10/13
  * @description
  */
-@Path(RpcInfo.DEFAULT_PATH)
+@Path(RpcConstant.DEFAULT_PATH)
 public class BaseHandler {
 
     @POST
+    @Path(RpcConstant.SINGLE)
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.TEXT_HTML + ";charset=utf-8")
-    public String doPost(@FormParam(RpcInfo.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) {
+    public String singlePost(@FormParam(RpcConstant.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) throws Exception {
         return cmd(formParamAsJson, request);
     }
 
     @GET
+    @Path(RpcConstant.SINGLE)
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.TEXT_HTML + ";charset=utf-8")
-    public String doGet(@QueryParam(RpcInfo.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) {
+    public String singleGet(@QueryParam(RpcConstant.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) throws Exception {
         return cmd(formParamAsJson, request);
     }
 
-    private String cmd(String formParamAsJson, HttpServletRequest request) {
+    private String cmd(String formParamAsJson, HttpServletRequest request) throws Exception {
         System.out.println("BaseHandler-cmd start, formParamAsJson->" + formParamAsJson + "\n"
-                + "request->" + request);
+                + "request->" + request.getRemoteAddr() + ":" + request.getRemotePort());
 
-        RpcCmd rpcCmd = null;
-        try {
-            rpcCmd = JSONUtils.json2pojo(formParamAsJson, RpcCmd.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (rpcCmd == null) {
-            return "Bad cmd: " + formParamAsJson;
-        }
+        Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
 
-        Rpc rpc = RpcInfo.getInvokeRpcByCmd(rpcCmd);
+        Rpc rpc = RpcInfo.getLocalInvokeRpc((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));
         if (rpc == null) {
-            return "No cmd found: " + rpcCmd.toString();
+            return "No cmd found: " + jsonMap.get("cmd");
         }
 
-        try {
-            Class clz = rpc.getInvokeClass();
-            @SuppressWarnings("unchecked") Method execRpc = clz.getMethod("execRpc", Object.class);
-            @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
-            BaseCmd cmd = (BaseCmd) constructor.newInstance();
-            return (String) execRpc.invoke(cmd, rpcCmd.getParam());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return e.getMessage();
-        }
+        Class clz = Class.forName(rpc.getInvokeClass());
+
+        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(rpc.getInvokeMethod(), List.class);
+        @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
+        BaseCmd cmd = (BaseCmd) constructor.newInstance();
+        Object obj = method.invoke(cmd, (List) jsonMap.get("param"));
+        System.out.println("Return String->" + JSONUtils.obj2json(obj));
+        return JSONUtils.obj2json(obj);
     }
 }

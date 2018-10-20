@@ -25,46 +25,38 @@
  *
  */
 
-package io.nuls.test;
+package io.nuls.rpc.server;
 
-import io.nuls.rpc.RpcClient;
-import io.nuls.rpc.RpcServer;
-import io.nuls.rpc.cmd.VersionCmd1;
-import io.nuls.rpc.info.RpcInfo;
-import org.junit.Test;
+import org.glassfish.jersey.grizzly2.servlet.GrizzlyWebContainerFactory;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * @author tangyi
- * @date 2018/10/15
+ * @date 2018/10/13
  * @description
  */
-public class TestJoinCmd {
+public class GrizzlyServer extends BaseRpcServer {
 
-    @Test
-    public void test() {
+    public GrizzlyServer() {
+        super();
+    }
 
-        RpcServer rpcServer = RpcServer.getInstance(8092);
+    public GrizzlyServer(int port) {
+        super(port);
+    }
 
-        assert rpcServer != null;
+    @Override
+    public void start() {
 
-        rpcServer.register("cmd1", 1, null);
-        rpcServer.register("cmd2", 2, null);
-        rpcServer.register("cmd3", 3, null);
-        rpcServer.register("cmd4", 4, null);
-        rpcServer.register("cmd5", 5, null);
-        rpcServer.register("version", 1, VersionCmd1.class);
-        rpcServer.start();
-
-        RpcInfo.print();
-
-        System.out.println("启动Client");
-        RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
-        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, RpcInfo.CMD_JOIN, RpcInfo.localInterfaceMap);
-        System.out.println(response);
+        final HashMap<String, String> initParams = new HashMap<>(16);
+        initParams.put("jersey.config.server.provider.packages", "io.nuls.rpc.handler");
 
         try {
-            Thread.sleep(Integer.MAX_VALUE);
-        } catch (InterruptedException e) {
+            GrizzlyWebContainerFactory.create(getBaseUri(), initParams);
+            System.out.println(getBaseUri() + " started");
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

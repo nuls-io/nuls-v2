@@ -25,35 +25,42 @@
  *
  */
 
-package io.nuls.test;
+package io.nuls.rpc.cmd_kernel;
 
-import io.nuls.rpc.info.RpcConstant;
+import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.info.CmdInfo;
 import io.nuls.rpc.info.RpcInfo;
-import io.nuls.rpc.server.BaseRpcServer;
-import io.nuls.rpc.server.GrizzlyServer;
-import org.junit.Test;
+import io.nuls.rpc.model.Module;
+import io.nuls.tools.parse.JSONUtils;
+
+import java.util.List;
 
 /**
  * @author tangyi
- * @date 2018/10/9
+ * @date 2018/10/17
  * @description
  */
-public class TestServer {
+public class KernelCmd extends BaseCmd {
 
-    @Test
-    public void test() throws Exception {
-
-        BaseRpcServer rpcServer = new GrizzlyServer(RpcConstant.KERNEL_PORT);
-        rpcServer.setModuleName("module 1");
-        rpcServer.scanPackage("io.nuls.rpc.cmd");
-        rpcServer.start();
-
-        RpcInfo.printLocalRpc();
-
+    @CmdInfo(cmd = "join", version = 1.0, preCompatible = true)
+    public Object join(List params) {
         try {
-            Thread.sleep(Integer.MAX_VALUE);
-        } catch (InterruptedException e) {
+            System.out.println("触发Kernel的Join操作");
+            System.out.println("join之前的remote接口数：" + RpcInfo.remoteModuleMap.size());
+            Module module = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Module.class);
+            System.out.println(module.getName() + " added");
+            RpcInfo.remoteModuleMap.put(module.getName(), module);
+            System.out.println("join之后的remote接口数：" + RpcInfo.remoteModuleMap.size());
+
+            return SUCCESS;
+        } catch (Exception e) {
             e.printStackTrace();
+            return e.getMessage();
         }
+    }
+
+    @CmdInfo(cmd = "fetch", version = 1.0, preCompatible = true)
+    public Object fetch(List params) {
+        return RpcInfo.remoteModuleMap;
     }
 }

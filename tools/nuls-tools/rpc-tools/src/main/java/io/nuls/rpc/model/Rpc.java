@@ -23,19 +23,32 @@
  *
  */
 
-package io.nuls.rpc.pojo;
-
+package io.nuls.rpc.model;
 
 /**
  * @author tangyi
  * @date 2018/10/15
  * @description
  */
-public class RpcCmd {
+
+public class Rpc {
+
     private String cmd;
-    private int version;
-    private int lowestVersion;
-    private Object param;
+    private double version;
+    private String invokeClass;
+    private String invokeMethod;
+    private boolean preCompatible;
+
+    public Rpc() {
+    }
+
+    public Rpc(String cmd, double version, String invokeClass, String invokeMethod, boolean preCompatible) {
+        this.cmd = cmd;
+        this.version = version;
+        this.invokeClass = invokeClass;
+        this.invokeMethod = invokeMethod;
+        this.preCompatible = preCompatible;
+    }
 
     public String getCmd() {
         return cmd;
@@ -45,34 +58,40 @@ public class RpcCmd {
         this.cmd = cmd;
     }
 
-    public int getVersion() {
+    public double getVersion() {
         return version;
     }
 
-    public void setVersion(int version) {
+    public void setVersion(double version) {
         this.version = version;
     }
 
-    public int getLowestVersion() {
-        return lowestVersion;
+    public String getInvokeClass() {
+        return invokeClass;
     }
 
-    public void setLowestVersion(int lowestVersion) {
-        this.lowestVersion = lowestVersion;
+    public void setInvokeClass(String invokeClass) {
+        this.invokeClass = invokeClass;
     }
 
-    public Object getParam() {
-        return param;
+    public String getInvokeMethod() {
+        return invokeMethod;
     }
 
-    public void setParam(Object param) {
-        this.param = param;
+    public void setInvokeMethod(String invokeMethod) {
+        this.invokeMethod = invokeMethod;
+    }
+
+    public boolean isPreCompatible() {
+        return preCompatible;
+    }
+
+    public void setPreCompatible(boolean preCompatible) {
+        this.preCompatible = preCompatible;
     }
 
     @Override
     public String toString() {
-        return "cmd->" + cmd + "\n"
-                + "version->" + version + "\n"
-                + "lowestVersion->" + lowestVersion + "\n";
+        return "[cmd=" + cmd + "][version=" + version + "][preCompatible=" + preCompatible + "][invokeClass=" + invokeClass + "][invokeMethod=" + invokeMethod + "]";
     }
 }

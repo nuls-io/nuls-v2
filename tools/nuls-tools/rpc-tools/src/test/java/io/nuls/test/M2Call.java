@@ -27,9 +27,10 @@
 
 package io.nuls.test;
 
-import io.nuls.rpc.RpcClient;
+import io.nuls.rpc.client.RpcClient;
+import io.nuls.rpc.info.RpcConstant;
 import io.nuls.rpc.info.RpcInfo;
-import io.nuls.rpc.pojo.Rpc;
+import io.nuls.rpc.model.Module;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
 
@@ -37,32 +38,27 @@ import java.util.Map;
 
 /**
  * @author tangyi
- * @date 2018/10/16
+ * @date 2018/10/20
  * @description
  */
-public class TestCmd {
-    @SuppressWarnings("unchecked")
+public class M2Call {
     @Test
-    public void testList() throws Exception {
-
-        System.out.println("启动Client");
-        RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
-        String response = rpcClient.callRpc(RpcInfo.DEFAULT_PATH, RpcInfo.CMD_LIST,null);
-        System.out.println(response);
-
-        System.out.println("我获取的接口如下：");
-        Map<String, Rpc> rpcMap = JSONUtils.json2map(response, Rpc.class);
-        for (String key : rpcMap.keySet()) {
-            Rpc rpc = JSONUtils.json2pojo(JSONUtils.obj2json(rpcMap.get(key)), Rpc.class);
-            System.out.println(rpc);
+    public void test() throws Exception {
+        System.out.println("我可以调用的模块：" + RpcInfo.remoteModuleMap.size());
+        String str = RpcClient.callFetchKernel("http://127.0.0.1:8091/" + RpcConstant.DEFAULT_PATH + "/" + RpcConstant.SINGLE);
+        System.out.println(str);
+        Map map = JSONUtils.json2map(str);
+        for (Object key : map.keySet()) {
+            System.out.println(key);
+            System.out.println(map.get(key));
+            Module module = JSONUtils.json2pojo(JSONUtils.obj2json(map.get(key)), Module.class);
+            RpcInfo.remoteModuleMap.put((String) key, module);
         }
-    }
+        System.out.println("我可以调用的模块：" + RpcInfo.remoteModuleMap.size());
 
-    @Test
-    public void testVersion() {
-        RpcClient rpcClient = new RpcClient("192.168.1.65", 8091);
-        System.out.println(rpcClient.callRpc(RpcInfo.DEFAULT_PATH, "version", null));
-        System.out.println(rpcClient.callRpc(RpcInfo.DEFAULT_PATH, "version", null,1));
-        //System.out.println(rpcClient.callRpc(RpcInfo.DEFAULT_PATH, "version", null,0,0));
+        System.out.println("我开始调用其他模块了");
+
+        System.out.println(RpcClient.callSingleRpc("cmd1", null, 3));
+
     }
 }

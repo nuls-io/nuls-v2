@@ -27,10 +27,15 @@
 
 package io.nuls.rpc.info;
 
-import io.nuls.rpc.pojo.Rpc;
-import io.nuls.rpc.pojo.RpcCmd;
+import io.nuls.rpc.model.Module;
+import io.nuls.rpc.model.Rpc;
+import io.nuls.rpc.model.RpcCmd;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author tangyi
@@ -39,92 +44,67 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RpcInfo {
 
-    /**
-     * key format: cmd-version
-     * value format: RpcInterface, include uri/handler
-     */
-    public static ConcurrentHashMap<String, Rpc> defaultInterfaceMap = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<String, Rpc> localInterfaceMap = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<String, Rpc> remoteInterfaceMap = new ConcurrentHashMap<>();
+    public static Module local;
+    public static ConcurrentMap<String, Module> remoteModuleMap = new ConcurrentHashMap<>();
 
-    public static ConcurrentHashMap<String, Long> heartbeatMap = new ConcurrentHashMap<>();
-
-    /**
-     * Default Value
-     */
-    public static final String CMD_JOIN = "join";
-    public static final String CMD_LIST = "list";
-    public static final String CMD_HEARTBEAT = "heartbeat";
-
-    public static final String DEFAULT_PATH = "nulsrpc";
-    public static final String FORM_PARAM_NAME = "paramObjAsJson";
-
-    public static final int VERSION = 1;
-
-    public static final long HEARTBEAT_INTERVAL_MILLIS = 10 * 1000;
-    public static final long HEARTBEAT_OVERTIME_MILLIS = 60 * 1000;
-    public static final String HEARTBEAT_REQUEST = "hello nuls?";
-    public static final String HEARTBEAT_RESPONSE = "i'm everything!";
-
-
-    public static void print() {
-        System.out.println("接口详细信息如下：");
-        System.out.println("系统默认的：" + defaultInterfaceMap.size());
-        System.out.println("自己提供的：" + localInterfaceMap.size());
-        System.out.println("远程获取的：" + remoteInterfaceMap.size());
-    }
-
-
-
-    /**
-     * @param rpcCmd rpcCmd包含version和lowestVersion
-     *               如果lowestVersion>0, 则不考虑version，调用不低于lowestVersion的最新版
-     *               如果lowestVersion<=0，则使用version，精确匹配
-     *               如果lowestVersion和version同时<=0，则调用最新版
-     *               以上都找不到，则调用失败
-     * @return String
-     */
-    public static Rpc getInvokeRpcByCmd(RpcCmd rpcCmd) {
-        if (rpcCmd.getLowestVersion() > 0) {
-            return fuzzyMatchRpc(rpcCmd.getCmd(), rpcCmd.getLowestVersion());
-        } else if (rpcCmd.getVersion() > 0) {
-            return exactMatchRpc(rpcCmd.getCmd(), rpcCmd.getVersion());
-        } else {
-            return fuzzyMatchRpc(rpcCmd.getCmd(), 1);
+    public static void printLocalRpc() {
+        System.out.println("打印localRpcList");
+        for (Rpc rpc : local.getRpcList()) {
+            System.out.println(rpc);
         }
     }
 
-    private static Rpc exactMatchRpc(String cmd, int version) {
-        String key = generateKey(cmd, version);
-        if (RpcInfo.defaultInterfaceMap.containsKey(key)) {
-            return RpcInfo.defaultInterfaceMap.get(key);
-        } else {
-            return RpcInfo.localInterfaceMap.getOrDefault(key, null);
-        }
-    }
-
-    private static Rpc fuzzyMatchRpc(String cmd, int version) {
-        Rpc rpc = null;
-        while (true) {
-            String key = generateKey(cmd, version);
-            Rpc tempRpc = null;
-            if (RpcInfo.defaultInterfaceMap.containsKey(key)) {
-                tempRpc = RpcInfo.defaultInterfaceMap.get(key);
-            } else if (RpcInfo.localInterfaceMap.containsKey(key)) {
-                tempRpc = RpcInfo.localInterfaceMap.get(key);
+    public static List<String> getRemoteUri(RpcCmd rpcCmd) {
+        List<String> remoteUriList = new ArrayList<>();
+        for (Module module : remoteModuleMap.values()) {
+            for (Rpc rpc : module.getRpcList()) {
+                if (rpc.getCmd().equals(rpcCmd.getCmd())) {
+                    remoteUriList.add(module.getUri());
+                    break;
+                }
             }
+        }
+        return remoteUriList;
+    }
 
-            if (tempRpc == null) {
-                return rpc;
-            } else {
-                rpc = tempRpc;
+    public static Rpc getLocalInvokeRpc(String cmd, double minVersion) {
+
+        local.getRpcList().sort(Comparator.comparingDouble(Rpc::getVersion));
+
+        Rpc findRpc = null;
+        for (Rpc rpc : local.getRpcList()) {
+            if (rpc.getCmd().equals(cmd) && rpc.getVersion() >= minVersion) {
+                if (findRpc == null) {
+                    findRpc = rpc;
+                } else if (rpc.getVersion() > findRpc.getVersion()) {
+                    if (rpc.isPreCompatible()) {
+                        findRpc = rpc;
+                    } else {
+                        break;
+                    }
+                }
             }
+        }
+        return findRpc;
+    }
 
-            version++;
+    public static void registerRpc(Rpc registerRpc) throws Exception {
+        if (isRegister(registerRpc)) {
+            throw new Exception("Duplicate cmd found: " + registerRpc.getCmd() + "-" + registerRpc.getVersion());
+        } else {
+            local.getRpcList().add(registerRpc);
         }
     }
 
-    public static String generateKey(String cmd, int version) {
-        return cmd + "-" + version;
+    private static boolean isRegister(Rpc sourceRpc) {
+        boolean exist = false;
+        for (Rpc rpc : local.getRpcList()) {
+            if (rpc.getCmd().equals(sourceRpc.getCmd()) && rpc.getVersion() == sourceRpc.getVersion()) {
+                exist = true;
+                break;
+            }
+        }
+
+        return exist;
     }
 }

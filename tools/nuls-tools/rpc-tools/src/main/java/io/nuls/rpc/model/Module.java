@@ -25,28 +25,60 @@
  *
  */
 
-package io.nuls.rpc.cmd;
+package io.nuls.rpc.model;
 
-import io.nuls.rpc.info.RpcInfo;
+import java.util.List;
 
 /**
  * @author tangyi
- * @date 2018/10/15
+ * @date 2018/10/19
  * @description
  */
-public class HeartbeatCmd extends BaseCmd {
-    /**
-     * @param param param说明：
-     *              心跳测试，只是判断Server是否还在运行，因此只交换最基础的信息
-     *              param为String，值为hello nuls
-     * @return String
-     */
-    @Override
-    public String execRpc(Object param) {
-        if (RpcInfo.HEARTBEAT_REQUEST.equals(param)) {
-            return RpcInfo.HEARTBEAT_RESPONSE;
-        } else {
-            return "";
-        }
+public class Module {
+    private String name;
+    private String uri;
+    private List<Rpc> rpcList;
+    private List<String> dependsModule;
+
+    public Module() {
+    }
+
+    public Module(String name, String uri, List<Rpc> rpcList, List<String> dependsModule) {
+        this.name = name;
+        this.uri = uri;
+        this.rpcList = rpcList;
+        this.dependsModule = dependsModule;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
+
+    public List<Rpc> getRpcList() {
+        return rpcList;
+    }
+
+    public void setRpcList(List<Rpc> rpcList) {
+        this.rpcList = rpcList;
+    }
+
+    public List<String> getDependsModule() {
+        return dependsModule;
+    }
+
+    public void setDependsModule(List<String> dependsModule) {
+        this.dependsModule = dependsModule;
     }
 }

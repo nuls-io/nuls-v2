@@ -25,24 +25,20 @@
  *
  */
 
-package io.nuls.rpc.cmd;
+package io.nuls.rpc.info;
 
 /**
  * @author tangyi
- * @date 2018/10/17
+ * @date 2018/10/19
  * @description
  */
-public class VersionCmd2 extends BaseCmd {
-    /**
-     * 内部测试version使用
-     *
-     * @param param param说明：
-     *              param为空
-     * @return String
-     */
-    @Override
-    public String execRpc(Object param) {
-        System.out.println("I'm version 2");
-        return "version 2";
-    }
+public class RpcConstant {
+    public static final int KERNEL_PORT = 8091;
+    public static final String KERNEL_URI = "http://" + IpPortInfo.getIpAddLocally() + ":" + KERNEL_PORT + "/";
+
+    public static final String DEFAULT_PATH = "nulsrpc";
+    public static final String SINGLE = "matchOne";
+    public static final String MULTIPLY = "matchMultiply";
+
+    public static final String FORM_PARAM_NAME = "paramObjAsJson";
 }

@@ -32,7 +32,7 @@ package io.nuls.rpc.cmd;
  */
 public abstract class BaseCmd {
 
-    final String SUCCESS = "Success";
+    public final String SUCCESS = "Success";
 
     /**
      * cmd命令的具体实现方法
@@ -41,5 +41,5 @@ public abstract class BaseCmd {
      *  param可以是任何形式的对象，由开发人员自己定义
      * @return String
      */
-    public abstract String execRpc(Object param);
+    //public abstract Object execRpc(Object param);
 }

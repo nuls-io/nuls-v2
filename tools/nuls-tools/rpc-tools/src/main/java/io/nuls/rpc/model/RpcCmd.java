@@ -23,47 +23,54 @@
  *
  */
 
-package io.nuls.rpc.pojo;
+package io.nuls.rpc.model;
+
 
 /**
  * @author tangyi
  * @date 2018/10/15
  * @description
  */
-public class Rpc extends RpcCmd {
+public class RpcCmd {
+    private String cmd;
+    private double minVersion;
+    private Object[] param;
 
-    private String uri;
-    private Class invokeClass;
-    private String monitorPath;
-
-    public String getUri() {
-        return uri;
+    public RpcCmd() {
     }
 
-    public void setUri(String uri) {
-        this.uri = uri;
+    public RpcCmd(String cmd, double minVersion, Object[] param) {
+        this.cmd = cmd;
+        this.minVersion = minVersion;
+        this.param = param;
     }
 
-    public Class getInvokeClass() {
-        return invokeClass;
+    public String getCmd() {
+        return cmd;
     }
 
-    public void setInvokeClass(Class invokeClass) {
-        this.invokeClass = invokeClass;
+    public void setCmd(String cmd) {
+        this.cmd = cmd;
     }
 
-    public String getMonitorPath() {
-        return monitorPath;
+    public double getMinVersion() {
+        return minVersion;
     }
 
-    public void setMonitorPath(String monitorPath) {
-        this.monitorPath = monitorPath;
+    public void setMinVersion(double minVersion) {
+        this.minVersion = minVersion;
+    }
+
+    public Object[] getParam() {
+        return param;
+    }
+
+    public void setParam(Object[] param) {
+        this.param = param;
     }
 
     @Override
     public String toString() {
-        return super.toString() + "uri->" + uri + "\n"
-                + "monitorPath->" + monitorPath + "\n"
-                + "invokeClass->" + invokeClass + "\n";
+        return "[cmd->" + cmd + "][" + minVersion + "][param->" + param + "]";
     }
 }

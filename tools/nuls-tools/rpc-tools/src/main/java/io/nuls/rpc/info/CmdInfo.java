@@ -25,38 +25,19 @@
  *
  */
 
-package io.nuls.rpc.cmd;
+package io.nuls.rpc.info;
 
-import io.nuls.rpc.info.RpcInfo;
-import io.nuls.rpc.pojo.Rpc;
-import io.nuls.tools.parse.JSONUtils;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import java.util.HashMap;
-import java.util.Map;
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface CmdInfo {
+    String cmd();
 
-/**
- * @author tangyi
- * @date 2018/10/16
- * @description
- */
-public class RpcListCmd extends BaseCmd {
+    double version();
 
-    /**
-     * cmd命令的具体实现方法
-     *
-     * @param param param说明：
-     *              不需要参数
-     * @return String
-     */
-    @Override
-    public String execRpc(Object param) {
-        Map<String, Rpc> rpcMap = new HashMap<>(16);
-        rpcMap.putAll(RpcInfo.localInterfaceMap);
-        rpcMap.putAll(RpcInfo.remoteInterfaceMap);
-        try {
-            return JSONUtils.obj2json(rpcMap);
-        } catch (Exception e) {
-            return e.getMessage();
-        }
-    }
+    boolean preCompatible();
 }

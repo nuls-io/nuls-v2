@@ -28,32 +28,22 @@
 package io.nuls.test;
 
 import io.nuls.rpc.info.RpcConstant;
-import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.server.BaseRpcServer;
 import io.nuls.rpc.server.GrizzlyServer;
 import org.junit.Test;
 
 /**
  * @author tangyi
- * @date 2018/10/9
+ * @date 2018/10/20
  * @description
  */
-public class TestServer {
-
+public class Kernel {
     @Test
-    public void test() throws Exception {
+    public void run() throws Exception {
+        BaseRpcServer server = new GrizzlyServer(RpcConstant.KERNEL_PORT);
+        server.scanPackage("io.nuls.rpc.cmd_kernel");
+        server.start();
 
-        BaseRpcServer rpcServer = new GrizzlyServer(RpcConstant.KERNEL_PORT);
-        rpcServer.setModuleName("module 1");
-        rpcServer.scanPackage("io.nuls.rpc.cmd");
-        rpcServer.start();
-
-        RpcInfo.printLocalRpc();
-
-        try {
-            Thread.sleep(Integer.MAX_VALUE);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Thread.sleep(Integer.MAX_VALUE);
     }
 }
