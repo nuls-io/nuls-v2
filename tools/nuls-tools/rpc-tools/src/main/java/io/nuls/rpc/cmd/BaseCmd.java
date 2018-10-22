@@ -25,6 +25,9 @@
 
 package io.nuls.rpc.cmd;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author tangyi
  * @date 2018/10/15
@@ -32,14 +35,12 @@ package io.nuls.rpc.cmd;
  */
 public abstract class BaseCmd {
 
-    public final String SUCCESS = "Success";
+    protected final String SUCCESS = "Success";
 
-    /**
-     * cmd命令的具体实现方法
-     * @param param
-     * param说明：
-     *  param可以是任何形式的对象，由开发人员自己定义
-     * @return String
-     */
-    //public abstract Object execRpc(Object param);
+    protected Object successObject() {
+        Map<String, Object> map = new HashMap<>(16);
+        map.put("code", 0);
+        map.put("msg", SUCCESS);
+        return map;
+    }
 }

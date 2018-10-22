@@ -25,25 +25,25 @@
  *
  */
 
-package io.nuls.rpc.cmd_kernel;
+package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.CmdInfo;
+import io.nuls.rpc.model.CmdInfo;
 import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.model.Module;
 import io.nuls.tools.parse.JSONUtils;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * @author tangyi
  * @date 2018/10/17
  * @description
  */
-public class KernelCmd extends BaseCmd {
+public class KernelCmd1 extends BaseCmd {
 
-    @CmdInfo(cmd = "join", version = 1.0, preCompatible = true)
-    public Object join(List params) {
+    @CmdInfo(cmd = "version", version = 1.0, preCompatible = true)
+    public Object version(List params) {
         try {
             System.out.println("触发Kernel的Join操作");
             System.out.println("join之前的remote接口数：" + RpcInfo.remoteModuleMap.size());
@@ -52,7 +52,7 @@ public class KernelCmd extends BaseCmd {
             RpcInfo.remoteModuleMap.put(module.getName(), module);
             System.out.println("join之后的remote接口数：" + RpcInfo.remoteModuleMap.size());
 
-            return SUCCESS;
+            return successObject();
         } catch (Exception e) {
             e.printStackTrace();
             return e.getMessage();
@@ -61,6 +61,20 @@ public class KernelCmd extends BaseCmd {
 
     @CmdInfo(cmd = "fetch", version = 1.0, preCompatible = true)
     public Object fetch(List params) {
-        return RpcInfo.remoteModuleMap;
+        Iterator<String> keyIterator = RpcInfo.remoteModuleMap.keySet().iterator();
+        List<String> available = new ArrayList<>();
+        while (keyIterator.hasNext()) {
+            available.add(keyIterator.next());
+        }
+
+        Map<String, Object> result = new HashMap<>(16);
+        result.put("available", available);
+        result.put("modules", RpcInfo.remoteModuleMap);
+
+        Map<String, Object> fetchMap = new HashMap<>();
+        fetchMap.put("code", 0);
+        fetchMap.put("msg", SUCCESS);
+        fetchMap.put("result", result);
+        return fetchMap;
     }
 }

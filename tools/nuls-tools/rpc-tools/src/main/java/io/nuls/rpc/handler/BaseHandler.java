@@ -72,7 +72,7 @@ public class BaseHandler {
 
         Rpc rpc = RpcInfo.getLocalInvokeRpc((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));
         if (rpc == null) {
-            return "No cmd found: " + jsonMap.get("cmd");
+            return "No cmd found: " + jsonMap.get("cmd") + "." + jsonMap.get("minVersion");
         }
 
         Class clz = Class.forName(rpc.getInvokeClass());

@@ -30,7 +30,6 @@ package io.nuls.test;
 import io.nuls.rpc.client.RpcClient;
 import io.nuls.rpc.info.RpcConstant;
 import io.nuls.rpc.info.RpcInfo;
-import io.nuls.rpc.model.Module;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
 
@@ -44,21 +43,17 @@ import java.util.Map;
 public class M2Call {
     @Test
     public void test() throws Exception {
+
+
         System.out.println("我可以调用的模块：" + RpcInfo.remoteModuleMap.size());
-        String str = RpcClient.callFetchKernel("http://127.0.0.1:8091/" + RpcConstant.DEFAULT_PATH + "/" + RpcConstant.SINGLE);
-        System.out.println(str);
-        Map map = JSONUtils.json2map(str);
-        for (Object key : map.keySet()) {
-            System.out.println(key);
-            System.out.println(map.get(key));
-            Module module = JSONUtils.json2pojo(JSONUtils.obj2json(map.get(key)), Module.class);
-            RpcInfo.remoteModuleMap.put((String) key, module);
-        }
+        Map<String,Object> fetchMap = RpcClient.callFetchKernel("http://127.0.0.1:8091/" + RpcConstant.DEFAULT_PATH + "/" + RpcConstant.SINGLE);
+        System.out.println(JSONUtils.obj2json(fetchMap));
+
         System.out.println("我可以调用的模块：" + RpcInfo.remoteModuleMap.size());
 
         System.out.println("我开始调用其他模块了");
 
-        System.out.println(RpcClient.callSingleRpc("cmd1", null, 3));
+        System.out.println(RpcClient.callSingleRpc("shutdown", null, 1));
 
     }
 }

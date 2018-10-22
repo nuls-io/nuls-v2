@@ -41,4 +41,10 @@ public class RpcConstant {
     public static final String MULTIPLY = "matchMultiply";
 
     public static final String FORM_PARAM_NAME = "paramObjAsJson";
+
+    public static final String SHUTDOWN="shutdown";
+    public static final String TERMINATE="terminate";
+    public static final String CONF_GET="conf_get";
+    public static final String CONF_SET="conf_set";
+    public static final String CONF_RESET="conf_reset";
 }

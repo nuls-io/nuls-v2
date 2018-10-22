@@ -44,7 +44,7 @@ public class TestServer {
     public void test() throws Exception {
 
         BaseRpcServer rpcServer = new GrizzlyServer(RpcConstant.KERNEL_PORT);
-        rpcServer.setModuleName("module 1");
+        rpcServer.init("", null);
         rpcServer.scanPackage("io.nuls.rpc.cmd");
         rpcServer.start();
 

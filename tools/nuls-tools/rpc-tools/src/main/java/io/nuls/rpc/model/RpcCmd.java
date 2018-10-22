@@ -34,15 +34,15 @@ package io.nuls.rpc.model;
 public class RpcCmd {
     private String cmd;
     private double minVersion;
-    private Object[] param;
+    private Object[] params;
 
     public RpcCmd() {
     }
 
-    public RpcCmd(String cmd, double minVersion, Object[] param) {
+    public RpcCmd(String cmd, double minVersion, Object[] params) {
         this.cmd = cmd;
         this.minVersion = minVersion;
-        this.param = param;
+        this.params = params;
     }
 
     public String getCmd() {
@@ -62,15 +62,15 @@ public class RpcCmd {
     }
 
     public Object[] getParam() {
-        return param;
+        return params;
     }
 
-    public void setParam(Object[] param) {
-        this.param = param;
+    public void setParam(Object[] params) {
+        this.params = params;
     }
 
     @Override
     public String toString() {
-        return "[cmd->" + cmd + "][" + minVersion + "][param->" + param + "]";
+        return "[cmd->" + cmd + "][" + minVersion + "][params->" + params + "]";
     }
 }

@@ -25,19 +25,51 @@
  *
  */
 
-package io.nuls.rpc.info;
+package io.nuls.rpc.cmd;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.List;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface CmdInfo {
-    String cmd();
+public interface KernelCmd {
 
-    double version();
+    /**
+     * 接收当前所有模块信息
+     * @param params：
+     * @return Object
+     */
+    public Object status(List params);
 
-    boolean preCompatible();
+    /**
+     * 关闭服务：在已有业务完成之后
+     * @param params：
+     * @return Object
+     */
+    public Object shutdown(List params);
+
+    /**
+     * 关闭服务：立即关闭，不管业务是否完成
+     * @param params：
+     * @return Object
+     */
+    public Object terminate(List params);
+
+    /**
+     * 提供本地配置信息
+     * @param params：
+     * @return Object
+     */
+    public Object confGet(List params);
+
+    /**
+     * 更新本地配置信息
+     * @param params：
+     * @return Object
+     */
+    public Object confSet(List params);
+
+    /**
+     * 重置本地配置信息
+     * @param params：
+     * @return Object
+     */
+    public Object confReset(List params);
 }

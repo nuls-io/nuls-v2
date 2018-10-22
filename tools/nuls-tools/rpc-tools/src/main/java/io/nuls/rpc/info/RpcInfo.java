@@ -59,7 +59,7 @@ public class RpcInfo {
         for (Module module : remoteModuleMap.values()) {
             for (Rpc rpc : module.getRpcList()) {
                 if (rpc.getCmd().equals(rpcCmd.getCmd())) {
-                    remoteUriList.add(module.getUri());
+                    remoteUriList.add("http://" + module.getAddr() + ":" + module.getPort());
                     break;
                 }
             }

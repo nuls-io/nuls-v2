@@ -25,25 +25,19 @@
  *
  */
 
-package io.nuls.test;
+package io.nuls.rpc.model;
 
-import io.nuls.rpc.info.RpcConstant;
-import io.nuls.rpc.server.BaseRpcServer;
-import io.nuls.rpc.server.GrizzlyServer;
-import org.junit.Test;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-/**
- * @author tangyi
- * @date 2018/10/20
- * @description
- */
-public class Kernel {
-    @Test
-    public void run() throws Exception {
-        BaseRpcServer server = new GrizzlyServer(RpcConstant.KERNEL_PORT);
-        server.scanPackage("io.nuls.rpc.cmd.kernel");
-        server.start();
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface CmdInfo {
+    String cmd();
 
-        Thread.sleep(Integer.MAX_VALUE);
-    }
+    double version();
+
+    boolean preCompatible();
 }

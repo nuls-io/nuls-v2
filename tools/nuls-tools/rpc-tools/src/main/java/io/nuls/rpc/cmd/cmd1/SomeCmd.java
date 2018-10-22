@@ -25,10 +25,12 @@
  *
  */
 
-package io.nuls.rpc.cmd_m1;
+package io.nuls.rpc.cmd.cmd1;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.CmdInfo;
+import io.nuls.rpc.cmd.KernelCmd;
+import io.nuls.rpc.model.CmdInfo;
+import io.nuls.rpc.info.RpcConstant;
 
 import java.util.List;
 
@@ -37,7 +39,7 @@ import java.util.List;
  * @date 2018/10/17
  * @description
  */
-public class SomeCmd extends BaseCmd {
+public class SomeCmd extends BaseCmd implements KernelCmd {
 
     @CmdInfo(cmd = "cmd1", version = 1.0, preCompatible = true)
     public Object methodName(List params) {
@@ -79,5 +81,77 @@ public class SomeCmd extends BaseCmd {
     public Object cmd2(List params) {
         System.out.println("I'm version 2");
         return "cmd2->2.0";
+    }
+
+
+    /**
+     * 接收当前所有模块信息
+     *
+     * @param params ：
+     * @return Object
+     */
+    @Override
+    public Object status(List params) {
+        return successObject();
+    }
+
+    /**
+     * 关闭服务：在已有业务完成之后
+     *
+     * @param params ：
+     * @return Object
+     */
+    @Override
+    @CmdInfo(cmd = RpcConstant.SHUTDOWN, version = 1.0, preCompatible = true)
+    public Object shutdown(List params) {
+        return successObject();
+    }
+
+    /**
+     * 关闭服务：立即关闭，不管业务是否完成
+     *
+     * @param params ：
+     * @return Object
+     */
+    @Override
+    @CmdInfo(cmd = RpcConstant.TERMINATE, version = 1.0, preCompatible = true)
+    public Object terminate(List params) {
+        return successObject();
+    }
+
+    /**
+     * 提供本地配置信息
+     *
+     * @param params ：
+     * @return Object
+     */
+    @Override
+    @CmdInfo(cmd = RpcConstant.CONF_GET, version = 1.0, preCompatible = true)
+    public Object confGet(List params) {
+        return successObject();
+    }
+
+    /**
+     * 更新本地配置信息
+     *
+     * @param params ：
+     * @return Object
+     */
+    @Override
+    @CmdInfo(cmd = RpcConstant.CONF_SET, version = 1.0, preCompatible = true)
+    public Object confSet(List params) {
+        return successObject();
+    }
+
+    /**
+     * 重置本地配置信息
+     *
+     * @param params ：
+     * @return Object
+     */
+    @Override
+    @CmdInfo(cmd = RpcConstant.CONF_RESET, version = 1.0, preCompatible = true)
+    public Object confReset(List params) {
+        return successObject();
     }
 }

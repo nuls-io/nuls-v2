@@ -29,6 +29,7 @@ package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.RpcConstant;
 import io.nuls.rpc.info.RpcInfo;
+import io.nuls.rpc.model.Module;
 import io.nuls.rpc.model.RpcCmd;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.http.HttpEntity;
@@ -44,7 +45,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -53,8 +56,8 @@ import java.util.List;
  */
 public class RpcClient {
 
-    public static String callJoinKernel(String kernelUri) throws Exception {
-        RpcCmd rpcCmd = new RpcCmd("join", 1.0, new Object[]{RpcInfo.local});
+    public static String versionToKernel(String kernelUri) throws Exception {
+        RpcCmd rpcCmd = new RpcCmd("version", 1.0, new Object[]{RpcInfo.local});
 
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair(RpcConstant.FORM_PARAM_NAME, JSONUtils.obj2json(rpcCmd)));
@@ -64,7 +67,48 @@ public class RpcClient {
         return post(kernelUri, postParams);
     }
 
-    public static String callFetchKernel(String kernelUri) throws Exception {
+    /**
+     * 从核心模块获取当前所有模块信息
+     * 核心模块的返回数据结构为：
+     * {
+     * "msg":"Success",
+     * "result":{
+     * "available":[
+     * "moduleABC"
+     * ],
+     * "modules":{
+     * "moduleABC":{
+     * "name":"moduleABC",
+     * "status":"",
+     * "addr":"127.0.0.1",
+     * "port":"17792",
+     * "rpcList":[
+     * {
+     * "cmd":"cmd1",
+     * "version":1,
+     * "invokeClass":"io.nuls.rpc.cmd.cmd1.SomeCmd",
+     * "invokeMethod":"methodName",
+     * "preCompatible":true
+     * },
+     * {
+     * "cmd":"cmd1",
+     * "version":2.2,
+     * "invokeClass":"io.nuls.rpc.cmd.cmd1.SomeCmd",
+     * "invokeMethod":"cmd11111",
+     * "preCompatible":true
+     * }
+     * ],
+     * "dependsModule":[
+     * "m2",
+     * "m3"
+     * ]
+     * }
+     * }
+     * },
+     * "code":0
+     * }
+     */
+    public static Map<String, Object> callFetchKernel(String kernelUri) throws Exception {
         RpcCmd rpcCmd = new RpcCmd("fetch", 1.0, new Object[]{RpcInfo.local});
 
         List<NameValuePair> urlParameters = new ArrayList<>();
@@ -72,16 +116,44 @@ public class RpcClient {
 
         HttpEntity postParams = new UrlEncodedFormEntity(urlParameters);
 
-        return post(kernelUri, postParams);
+        String fetchString = post(kernelUri, postParams);
+
+        return fetch2Map(fetchString);
     }
 
-    public static String callSingleRpc(String cmd, Object[] param, double minVersion) throws IOException {
+    private static Map<String, Object> fetch2Map(String fetchString) throws IOException {
+        System.out.println(fetchString);
 
-        RpcCmd rpcCmd = new RpcCmd(cmd, minVersion, param);
+        Map<String, Object> map1 = JSONUtils.json2map(fetchString);
+
+        Map<String, Object> result = JSONUtils.json2map(JSONUtils.obj2json(map1.get("result")));
+        System.out.println("available" + JSONUtils.obj2json(result.get("available")));
+
+        Map<String, Object> moduleMap = JSONUtils.json2map(JSONUtils.obj2json(result.get("modules")));
+        for (Object key : moduleMap.keySet()) {
+            System.out.println(key);
+            System.out.println(moduleMap.get(key));
+            Module module = JSONUtils.json2pojo(JSONUtils.obj2json(moduleMap.get(key)), Module.class);
+            RpcInfo.remoteModuleMap.put((String) key, module);
+        }
+        result.put("available", result.get("available"));
+        result.put("modules", RpcInfo.remoteModuleMap);
+
+        Map<String, Object> fetchMap = new HashMap<>(16);
+        fetchMap.put("code", map1.get("code"));
+        fetchMap.put("msg", map1.get("msg"));
+        fetchMap.put("result", result);
+
+        return fetchMap;
+    }
+
+    public static String callSingleRpc(String cmd, Object[] params, double minVersion) throws IOException {
+
+        RpcCmd rpcCmd = new RpcCmd(cmd, minVersion, params);
 
         List<String> remoteUriList = RpcInfo.getRemoteUri(rpcCmd);
         if (remoteUriList.size() == 0) {
-            return "No cmd found->" + cmd;
+            return "No cmd found->" + cmd + "." + minVersion;
         }
         if (remoteUriList.size() > 1) {
             return "Multiply cmd found->" + cmd;

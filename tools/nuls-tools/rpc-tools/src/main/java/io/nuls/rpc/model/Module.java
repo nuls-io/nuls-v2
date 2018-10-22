@@ -36,16 +36,20 @@ import java.util.List;
  */
 public class Module {
     private String name;
-    private String uri;
+    private String status;
+    private String addr;
+    private int port;
     private List<Rpc> rpcList;
     private List<String> dependsModule;
 
     public Module() {
     }
 
-    public Module(String name, String uri, List<Rpc> rpcList, List<String> dependsModule) {
+    public Module(String name, String status, String addr, int port, List<Rpc> rpcList, List<String> dependsModule) {
         this.name = name;
-        this.uri = uri;
+        this.status = status;
+        this.addr = addr;
+        this.port = port;
         this.rpcList = rpcList;
         this.dependsModule = dependsModule;
     }
@@ -58,12 +62,28 @@ public class Module {
         this.name = name;
     }
 
-    public String getUri() {
-        return uri;
+    public String getStatus() {
+        return status;
     }
 
-    public void setUri(String uri) {
-        this.uri = uri;
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getAddr() {
+        return addr;
+    }
+
+    public void setAddr(String addr) {
+        this.addr = addr;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 
     public List<Rpc> getRpcList() {

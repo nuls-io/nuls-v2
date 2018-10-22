@@ -27,7 +27,7 @@
 
 package io.nuls.rpc.server;
 
-import io.nuls.rpc.info.CmdInfo;
+import io.nuls.rpc.model.CmdInfo;
 import io.nuls.rpc.info.IpPortInfo;
 import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.model.Module;
@@ -45,37 +45,44 @@ import java.util.List;
  * @description
  */
 public abstract class BaseRpcServer {
-    private String ip;
+    private String addr;
     private int port;
 
     BaseRpcServer() {
-        this.ip = IpPortInfo.getIpAddLocally();
+        this.addr = IpPortInfo.getIpAddLocally();
         this.port = IpPortInfo.randomPort();
 
         init();
     }
 
     BaseRpcServer(int port) {
-        this.ip = IpPortInfo.getIpAddLocally();
+        this.addr = IpPortInfo.getIpAddLocally();
         this.port = port;
 
         init();
     }
 
     private void init() {
-        RpcInfo.local = new Module("", "", new ArrayList<>(), new ArrayList<>());
+        RpcInfo.local = new Module("", "", "", 0, new ArrayList<>(), new ArrayList<>());
     }
 
     String getBaseUri() {
-        return "http://" + ip + ":" + port + "/";
+        return "http://" + addr + ":" + port + "/";
     }
 
-    public void setModuleName(String moduleName){
+    public void init(String moduleName, List<String> depends) {
         RpcInfo.local.setName(moduleName);
+        RpcInfo.local.setDependsModule(depends);
+        RpcInfo.local.setAddr(getAddr());
+        RpcInfo.local.setPort(getPort());
     }
 
-    public String getIp() {
-        return ip;
+    public void setStatus(String status) {
+        RpcInfo.local.setStatus(status);
+    }
+
+    public String getAddr() {
+        return addr;
     }
 
     public int getPort() {
