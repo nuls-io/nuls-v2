@@ -53,7 +53,7 @@ public class BaseHandler {
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.TEXT_HTML + ";charset=utf-8")
     public String singlePost(@FormParam(RpcConstant.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) throws Exception {
-        return cmd(formParamAsJson, request);
+        return parse(formParamAsJson, request);
     }
 
     @GET
@@ -61,10 +61,10 @@ public class BaseHandler {
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.TEXT_HTML + ";charset=utf-8")
     public String singleGet(@QueryParam(RpcConstant.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) throws Exception {
-        return cmd(formParamAsJson, request);
+        return parse(formParamAsJson, request);
     }
 
-    private String cmd(String formParamAsJson, HttpServletRequest request) throws Exception {
+    private String parse(String formParamAsJson, HttpServletRequest request) throws Exception {
         System.out.println("BaseHandler-cmd start, formParamAsJson->" + formParamAsJson + "\n"
                 + "request->" + request.getRemoteAddr() + ":" + request.getRemotePort());
 
