@@ -42,6 +42,7 @@ public class RpcConstant {
 
     public static final String FORM_PARAM_NAME = "paramObjAsJson";
 
+    public static final String STATUS="status";
     public static final String SHUTDOWN="shutdown";
     public static final String TERMINATE="terminate";
     public static final String CONF_GET="conf_get";

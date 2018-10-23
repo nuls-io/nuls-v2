@@ -52,7 +52,9 @@ public class KernelCmd1 extends BaseCmd {
             RpcInfo.remoteModuleMap.put(module.getName(), module);
             System.out.println("join之后的remote接口数：" + RpcInfo.remoteModuleMap.size());
 
-            return successObject();
+            new Thread(new PushThread()).start();
+
+            return successObject(1.0);
         } catch (Exception e) {
             e.printStackTrace();
             return e.getMessage();
@@ -62,19 +64,15 @@ public class KernelCmd1 extends BaseCmd {
     @CmdInfo(cmd = "fetch", version = 1.0, preCompatible = true)
     public Object fetch(List params) {
         Iterator<String> keyIterator = RpcInfo.remoteModuleMap.keySet().iterator();
-        List<String> available = new ArrayList<>();
+        List<String> service = new ArrayList<>();
         while (keyIterator.hasNext()) {
-            available.add(keyIterator.next());
+            service.add(keyIterator.next());
         }
 
         Map<String, Object> result = new HashMap<>(16);
-        result.put("available", available);
+        result.put("service", service);
         result.put("modules", RpcInfo.remoteModuleMap);
 
-        Map<String, Object> fetchMap = new HashMap<>();
-        fetchMap.put("code", 0);
-        fetchMap.put("msg", SUCCESS);
-        fetchMap.put("result", result);
-        return fetchMap;
+        return successObject(1.0, result);
     }
 }

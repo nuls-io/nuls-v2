@@ -63,7 +63,7 @@ public abstract class BaseRpcServer {
     }
 
     private void init() {
-        RpcInfo.local = new Module("", "", "", 0, new ArrayList<>(), new ArrayList<>());
+        RpcInfo.local = new Module("", "", false, "", 0, new ArrayList<>(), new ArrayList<>());
     }
 
     String getBaseUri() {
@@ -99,6 +99,7 @@ public abstract class BaseRpcServer {
                     RpcInfo.registerRpc(rpc);
                 }
             }
+            System.out.println("====================");
         }
     }
 

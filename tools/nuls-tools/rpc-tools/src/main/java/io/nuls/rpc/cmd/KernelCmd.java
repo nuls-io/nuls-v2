@@ -32,7 +32,7 @@ import java.util.List;
 public interface KernelCmd {
 
     /**
-     * 接收当前所有模块信息
+     * 接收kernel推送的信息
      * @param params：
      * @return Object
      */

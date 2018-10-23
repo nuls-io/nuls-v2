@@ -25,7 +25,13 @@
 
 package io.nuls.rpc.cmd;
 
+import io.nuls.rpc.info.RpcInfo;
+import io.nuls.rpc.model.Module;
+import io.nuls.tools.parse.JSONUtils;
+
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -37,10 +43,62 @@ public abstract class BaseCmd {
 
     protected final String SUCCESS = "Success";
 
-    protected Object successObject() {
+    /**
+     * 从kernel接收所有模块信息
+     * 请求参数为：
+     * {
+     * "cmd": "status",
+     * "params": [{
+     * "service":["module_A","module_B"],
+     * "available": true,
+     * "modules": {
+     * "module_A": {
+     * "status" : "",
+     * "rpcList":[],
+     * "dependsModule":[],
+     * "addr":"ip",
+     * "port": 8080,
+     * }
+     * }
+     * }]
+     * }
+     */
+    protected Object status(List params) throws IOException {
+        System.out.println("我收到来自kernel的推送了");
+        Map<String, Object> map1 = JSONUtils.json2map(JSONUtils.obj2json(params.get(0)));
+
+        RpcInfo.local.setAvailable((Boolean) map1.get("available"));
+
+        Map<String, Object> moduleMap = JSONUtils.json2map(JSONUtils.obj2json(map1.get("modules")));
+        for (Object key : moduleMap.keySet()) {
+            Module module = JSONUtils.json2pojo(JSONUtils.obj2json(moduleMap.get(key)), Module.class);
+            RpcInfo.remoteModuleMap.put((String) key, module);
+        }
+
+        System.out.println(JSONUtils.obj2json(RpcInfo.remoteModuleMap));
+
+        return successObject(1.0);
+    }
+
+    protected Object successObject(double version) {
+        return successObject(version, null);
+    }
+
+    protected Object successObject(double version, Object result) {
         Map<String, Object> map = new HashMap<>(16);
         map.put("code", 0);
         map.put("msg", SUCCESS);
+        map.put("version", version);
+        map.put("result", result);
+        return map;
+    }
+
+    protected Object failObject(String code, String msg, double version, Object result) {
+        Map<String, Object> map = new HashMap<>(16);
+        map.put("code", code);
+        map.put("msg", msg);
+        map.put("version", version);
+        map.put("result", result);
         return map;
     }
 }
