@@ -44,16 +44,19 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class RpcInfo {
 
+    /**
+     * local information
+     */
     public static Module local;
+
+    /**
+     * remote module information
+     */
     public static ConcurrentMap<String, Module> remoteModuleMap = new ConcurrentHashMap<>();
 
-    public static void printLocalRpc() {
-        System.out.println("打印localRpcList");
-        for (Rpc rpc : local.getRpcList()) {
-            System.out.println(rpc);
-        }
-    }
-
+    /**
+     * get remote rpc uri based on cmd
+     */
     public static List<String> getRemoteUri(RpcCmd rpcCmd) {
         List<String> remoteUriList = new ArrayList<>();
         for (Module module : remoteModuleMap.values()) {
@@ -67,6 +70,9 @@ public class RpcInfo {
         return remoteUriList;
     }
 
+    /**
+     * get local Rpc based on cmd & minimum version
+     */
     public static Rpc getLocalInvokeRpc(String cmd, double minVersion) {
 
         local.getRpcList().sort(Comparator.comparingDouble(Rpc::getVersion));
@@ -88,23 +94,5 @@ public class RpcInfo {
         return findRpc;
     }
 
-    public static void registerRpc(Rpc registerRpc) throws Exception {
-        if (isRegister(registerRpc)) {
-            throw new Exception("Duplicate cmd found: " + registerRpc.getCmd() + "-" + registerRpc.getVersion());
-        } else {
-            local.getRpcList().add(registerRpc);
-        }
-    }
 
-    private static boolean isRegister(Rpc sourceRpc) {
-        boolean exist = false;
-        for (Rpc rpc : local.getRpcList()) {
-            if (rpc.getCmd().equals(sourceRpc.getCmd()) && rpc.getVersion() == sourceRpc.getVersion()) {
-                exist = true;
-                break;
-            }
-        }
-
-        return exist;
-    }
 }

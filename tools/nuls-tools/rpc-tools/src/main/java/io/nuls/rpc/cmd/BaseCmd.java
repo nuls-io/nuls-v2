@@ -48,6 +48,7 @@ public abstract class BaseCmd {
      * 请求参数为：
      * {
      * "cmd": "status",
+     * "version": 1.0,
      * "params": [{
      * "service":["module_A","module_B"],
      * "available": true,
@@ -77,14 +78,17 @@ public abstract class BaseCmd {
 
         System.out.println(JSONUtils.obj2json(RpcInfo.remoteModuleMap));
 
-        return successObject(1.0);
+        return success(1.0);
     }
 
-    protected Object successObject(double version) {
-        return successObject(version, null);
+    protected Object success(double version) {
+        return success(version, null);
     }
 
-    protected Object successObject(double version, Object result) {
+    /**
+     * return success object
+     */
+    protected Object success(double version, Object result) {
         Map<String, Object> map = new HashMap<>(16);
         map.put("code", 0);
         map.put("msg", SUCCESS);
@@ -93,7 +97,10 @@ public abstract class BaseCmd {
         return map;
     }
 
-    protected Object failObject(String code, String msg, double version, Object result) {
+    /**
+     * return fail object
+     */
+    protected Object fail(String code, String msg, double version, Object result) {
         Map<String, Object> map = new HashMap<>(16);
         map.put("code", code);
         map.put("msg", msg);

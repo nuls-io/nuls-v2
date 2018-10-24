@@ -64,6 +64,27 @@ public class BaseHandler {
         return parse(formParamAsJson, request);
     }
 
+    /**
+     *
+     * format of formParamAsJson:
+     * {
+     *     "cmd":"cmd1",
+     *     "minVersion":1,
+     *     "params":[
+     *         "wangkun",// note: it should be any types. include str, int, float, boolean, object etc.
+     *         "handsome",
+     *         true
+     *     ]
+     * }
+     *
+     * format of return string:
+     * {
+     *     "msg":"Success",
+     *     "result":{},
+     *     "code":0,
+     *     "version":1
+     * }
+     */
     private String parse(String formParamAsJson, HttpServletRequest request) throws Exception {
         System.out.println("BaseHandler-cmd start, formParamAsJson->" + formParamAsJson + "\n"
                 + "request->" + request.getRemoteAddr() + ":" + request.getRemotePort());
@@ -80,7 +101,7 @@ public class BaseHandler {
         @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(rpc.getInvokeMethod(), List.class);
         @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
         BaseCmd cmd = (BaseCmd) constructor.newInstance();
-        Object obj = method.invoke(cmd, (List) jsonMap.get("param"));
+        Object obj = method.invoke(cmd, (List) jsonMap.get("params"));
         System.out.println("Return String->" + JSONUtils.obj2json(obj));
         return JSONUtils.obj2json(obj);
     }

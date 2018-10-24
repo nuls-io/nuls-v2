@@ -36,7 +36,7 @@ import java.util.List;
  */
 public class Module {
     private String name;
-    private String status;
+    private ModuleStatus status;
     private boolean available;
     private String addr;
     private int port;
@@ -46,7 +46,7 @@ public class Module {
     public Module() {
     }
 
-    public Module(String name, String status, boolean available, String addr, int port, List<Rpc> rpcList, List<String> dependsModule) {
+    public Module(String name, ModuleStatus status, boolean available, String addr, int port, List<Rpc> rpcList, List<String> dependsModule) {
         this.name = name;
         this.status = status;
         this.available = available;
@@ -64,11 +64,11 @@ public class Module {
         this.name = name;
     }
 
-    public String getStatus() {
+    public ModuleStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(ModuleStatus status) {
         this.status = status;
     }
 

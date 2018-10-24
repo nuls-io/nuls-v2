@@ -46,14 +46,16 @@ public class M2Call {
 
 
         System.out.println("我可以调用的模块：" + RpcInfo.remoteModuleMap.size());
-        Map<String,Object> fetchMap = RpcClient.callFetchKernel("http://127.0.0.1:8091/" + RpcConstant.DEFAULT_PATH + "/" + RpcConstant.SINGLE);
+        Map<String, Object> fetchMap = RpcClient.callFetchKernel("http://127.0.0.1:8091/" + RpcConstant.DEFAULT_PATH + "/" + RpcConstant.SINGLE);
         System.out.println(JSONUtils.obj2json(fetchMap));
 
         System.out.println("我可以调用的模块：" + RpcInfo.remoteModuleMap.size());
 
         System.out.println("我开始调用其他模块了");
 
-        System.out.println(RpcClient.callSingleRpc("shutdown", null, 1));
+        System.out.println("SingleRpc->" + RpcClient.callSingleRpc("cmd2", new Object[]{"wangkun", "handsome", true}, 1));
+
+        System.out.println("MultiplyRpc->" + RpcClient.callMultiplyRpc("cmd1", new Object[]{"wangkun", "handsome", true}, 1));
 
     }
 }

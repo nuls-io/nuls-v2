@@ -33,15 +33,18 @@ package io.nuls.rpc.info;
  * @description
  */
 public class RpcConstant {
-    public static final int KERNEL_PORT = 8091;
-    public static final String KERNEL_URI = "http://" + IpPortInfo.getIpAddLocally() + ":" + KERNEL_PORT + "/";
 
+    public static final int KERNEL_PORT = 8091;
     public static final String DEFAULT_PATH = "nulsrpc";
     public static final String SINGLE = "matchOne";
-    public static final String MULTIPLY = "matchMultiply";
+//    public static final String MULTIPLY = "matchMultiply";
 
     public static final String FORM_PARAM_NAME = "paramObjAsJson";
 
+
+    /**
+     * predetermined cmd (used by kernel & module)
+     */
     public static final String STATUS="status";
     public static final String SHUTDOWN="shutdown";
     public static final String TERMINATE="terminate";

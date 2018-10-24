@@ -27,6 +27,7 @@
 
 package io.nuls.test;
 
+import io.nuls.rpc.client.RpcClient;
 import io.nuls.rpc.info.RpcConstant;
 import io.nuls.rpc.server.BaseRpcServer;
 import io.nuls.rpc.server.GrizzlyServer;
@@ -42,7 +43,10 @@ public class Kernel {
     public void run() throws Exception {
         BaseRpcServer server = new GrizzlyServer(RpcConstant.KERNEL_PORT);
         server.scanPackage("io.nuls.rpc.cmd.kernel");
+        server.init("kernel", null);
         server.start();
+
+        RpcClient.versionToKernel("http://127.0.0.1:8091/" + RpcConstant.DEFAULT_PATH + "/" + RpcConstant.SINGLE);
 
         Thread.sleep(Integer.MAX_VALUE);
     }

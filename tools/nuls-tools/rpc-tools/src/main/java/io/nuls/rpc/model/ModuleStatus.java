@@ -25,54 +25,8 @@
  *
  */
 
-package io.nuls.rpc.cmd;
+package io.nuls.rpc.model;
 
-import java.util.List;
-
-/**
- * @author tangyi
- */
-public interface KernelCmd {
-
-    /**
-     * receive msg from kernel
-     * @param params：
-     * @return Object
-     */
-    public Object status(List params);
-
-    /**
-     * shutdown module: after business completed
-     * @param params：
-     * @return Object
-     */
-    public Object shutdown(List params);
-
-    /**
-     * shutdown module: immediate
-     * @param params：
-     * @return Object
-     */
-    public Object terminate(List params);
-
-    /**
-     * provide local configuration
-     * @param params：
-     * @return Object
-     */
-    public Object confGet(List params);
-
-    /**
-     * update local configuration
-     * @param params：
-     * @return Object
-     */
-    public Object confSet(List params);
-
-    /**
-     * reset local configuration
-     * @param params：
-     * @return Object
-     */
-    public Object confReset(List params);
+public enum ModuleStatus {
+    UNKNOWN, READY, SERVICE, SHUTDOWN;
 }

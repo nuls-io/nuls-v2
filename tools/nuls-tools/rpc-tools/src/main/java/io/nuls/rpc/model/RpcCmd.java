@@ -61,11 +61,11 @@ public class RpcCmd {
         this.minVersion = minVersion;
     }
 
-    public Object[] getParam() {
+    public Object[] getParams() {
         return params;
     }
 
-    public void setParam(Object[] params) {
+    public void setParams(Object[] params) {
         this.params = params;
     }
 

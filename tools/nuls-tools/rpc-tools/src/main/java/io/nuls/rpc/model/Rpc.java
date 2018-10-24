@@ -25,6 +25,8 @@
 
 package io.nuls.rpc.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 /**
  * @author tangyi
  * @date 2018/10/15
@@ -35,8 +37,11 @@ public class Rpc {
 
     private String cmd;
     private double version;
+    @JsonIgnore
     private String invokeClass;
+    @JsonIgnore
     private String invokeMethod;
+    @JsonIgnore
     private boolean preCompatible;
 
     public Rpc() {

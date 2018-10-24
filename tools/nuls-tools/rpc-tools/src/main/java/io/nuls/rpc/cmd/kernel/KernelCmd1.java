@@ -54,7 +54,7 @@ public class KernelCmd1 extends BaseCmd {
 
             new Thread(new PushThread()).start();
 
-            return successObject(1.0);
+            return success(1.0);
         } catch (Exception e) {
             e.printStackTrace();
             return e.getMessage();
@@ -73,6 +73,11 @@ public class KernelCmd1 extends BaseCmd {
         result.put("service", service);
         result.put("modules", RpcInfo.remoteModuleMap);
 
-        return successObject(1.0, result);
+        return success(1.0, result);
+    }
+
+    @CmdInfo(cmd = "cmd1", version = 1.0, preCompatible = true)
+    public Object cmd1(List params) {
+        return success(1.0, "kernel cmd1");
     }
 }

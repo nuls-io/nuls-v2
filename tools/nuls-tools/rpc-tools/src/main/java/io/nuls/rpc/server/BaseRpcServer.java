@@ -31,6 +31,7 @@ import io.nuls.rpc.model.CmdInfo;
 import io.nuls.rpc.info.IpPortInfo;
 import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.model.Module;
+import io.nuls.rpc.model.ModuleStatus;
 import io.nuls.rpc.model.Rpc;
 import io.nuls.tools.core.ioc.ScanUtil;
 
@@ -63,7 +64,7 @@ public abstract class BaseRpcServer {
     }
 
     private void init() {
-        RpcInfo.local = new Module("", "", false, "", 0, new ArrayList<>(), new ArrayList<>());
+        RpcInfo.local = new Module("", ModuleStatus.READY, false, "", 0, new ArrayList<>(), new ArrayList<>());
     }
 
     String getBaseUri() {
@@ -75,10 +76,7 @@ public abstract class BaseRpcServer {
         RpcInfo.local.setDependsModule(depends);
         RpcInfo.local.setAddr(getAddr());
         RpcInfo.local.setPort(getPort());
-    }
-
-    public void setStatus(String status) {
-        RpcInfo.local.setStatus(status);
+        RpcInfo.local.setStatus(ModuleStatus.READY);
     }
 
     public String getAddr() {
@@ -89,6 +87,9 @@ public abstract class BaseRpcServer {
         return port;
     }
 
+    /**
+     * scan package, auto register cmd
+     */
     public void scanPackage(String packageName) throws Exception {
         List<Class> classList = ScanUtil.scan(packageName);
         for (Class clz : classList) {
@@ -96,13 +97,16 @@ public abstract class BaseRpcServer {
             for (Method method : methods) {
                 Rpc rpc = annotation2Rpc(method);
                 if (rpc != null) {
-                    RpcInfo.registerRpc(rpc);
+                    registerRpc(rpc);
                 }
             }
             System.out.println("====================");
         }
     }
 
+    /**
+     * get the annotation of method, if it was instance of CmdInfo, build CmdInfo
+     */
     private Rpc annotation2Rpc(Method method) {
         Annotation[] annotations = method.getDeclaredAnnotations();
         for (Annotation annotation : annotations) {
@@ -112,6 +116,29 @@ public abstract class BaseRpcServer {
             }
         }
         return null;
+    }
+
+    /**
+     * scan & register rpc
+     */
+    public static void registerRpc(Rpc registerRpc) throws Exception {
+        if (isRegister(registerRpc)) {
+            throw new Exception("Duplicate cmd found: " + registerRpc.getCmd() + "-" + registerRpc.getVersion());
+        } else {
+            RpcInfo.local.getRpcList().add(registerRpc);
+        }
+    }
+
+    private static boolean isRegister(Rpc sourceRpc) {
+        boolean exist = false;
+        for (Rpc rpc : RpcInfo.local.getRpcList()) {
+            if (rpc.getCmd().equals(sourceRpc.getCmd()) && rpc.getVersion() == sourceRpc.getVersion()) {
+                exist = true;
+                break;
+            }
+        }
+
+        return exist;
     }
 
     /**

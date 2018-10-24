@@ -56,6 +56,40 @@ import java.util.Map;
  */
 public class RpcClient {
 
+    /**
+     * the format of json string :
+     * {
+     * "cmd":"version",
+     * "minVersion":1,
+     * "params":[
+     * {
+     * "name":"moduleABC",
+     * "status":"READY",
+     * "available":false,
+     * "addr":"127.0.0.1",
+     * "port":18819,
+     * "rpcList":[
+     * {
+     * "cmd":"shutdown",
+     * "version":1
+     * },
+     * {
+     * "cmd":"cmd1",
+     * "version":1
+     * },
+     * {
+     * "cmd":"status",
+     * "version":1
+     * }
+     * ],
+     * "dependsModule":[
+     * "m2",
+     * "m3"
+     * ]
+     * }
+     * ]
+     * }
+     */
     public static String versionToKernel(String kernelUri) throws Exception {
         RpcCmd rpcCmd = new RpcCmd("version", 1.0, new Object[]{RpcInfo.local});
 
@@ -131,8 +165,6 @@ public class RpcClient {
 
         Map<String, Object> moduleMap = JSONUtils.json2map(JSONUtils.obj2json(result.get("modules")));
         for (Object key : moduleMap.keySet()) {
-            System.out.println(key);
-            System.out.println(moduleMap.get(key));
             Module module = JSONUtils.json2pojo(JSONUtils.obj2json(moduleMap.get(key)), Module.class);
             RpcInfo.remoteModuleMap.put((String) key, module);
         }
@@ -147,6 +179,9 @@ public class RpcClient {
         return fetchMap;
     }
 
+    /**
+     * call rpc : one cmd, one action
+     */
     public static String callSingleRpc(String cmd, Object[] params, double minVersion) throws IOException {
 
         RpcCmd rpcCmd = new RpcCmd(cmd, minVersion, params);
@@ -171,6 +206,36 @@ public class RpcClient {
         return post(uri, postParams);
     }
 
+    /**
+     * call rpc: one cmd, multiply action
+     */
+    public static String callMultiplyRpc(String cmd, Object[] params, double minVersion) throws IOException {
+
+        RpcCmd rpcCmd = new RpcCmd(cmd, minVersion, params);
+
+        List<String> remoteUriList = RpcInfo.getRemoteUri(rpcCmd);
+        if (remoteUriList.size() == 0) {
+            return "No cmd found->" + cmd + "." + minVersion;
+        }
+
+        Map<String, Object> resultMap = new HashMap<>(16);
+        for (String remoteUri : remoteUriList) {
+            List<NameValuePair> urlParameters = new ArrayList<>();
+            urlParameters.add(new BasicNameValuePair(RpcConstant.FORM_PARAM_NAME, JSONUtils.obj2json(rpcCmd)));
+
+            HttpEntity postParams = new UrlEncodedFormEntity(urlParameters);
+
+            String uri = remoteUri + "/" + RpcConstant.DEFAULT_PATH + "/" + RpcConstant.SINGLE;
+
+            resultMap.put(remoteUri, JSONUtils.json2map(post(uri, postParams)));
+        }
+
+        return JSONUtils.obj2json(resultMap);
+    }
+
+    /**
+     * call rpc with post
+     */
     private static String post(String uri, HttpEntity postParams) throws IOException {
         System.out.println("调用：" + uri);
         HttpPost httpPost = new HttpPost(uri);
