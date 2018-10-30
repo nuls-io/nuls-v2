@@ -12,6 +12,7 @@
         <module>rpc-tools</module>
         <module>storage-tools</module>
         <module>common-tools</module>
+        <module>base-tools</module>
     </modules>
 
 
