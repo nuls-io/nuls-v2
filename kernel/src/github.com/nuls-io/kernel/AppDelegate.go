@@ -2,15 +2,11 @@ package kernel
 
 import (
 	"log"
-	"nuls.io/kernel/service"
 	"time"
 )
 
 type AppDelegate struct {
 	quit chan struct{}
-	service.PluginsService
-	service.RPCService
-	service.UpdateService
 }
 
 func (self *AppDelegate) Run() {
@@ -34,6 +30,4 @@ func (self *AppDelegate) Quit() {
 }
 
 func (self *AppDelegate) init() {
-	self.StartRPC()
-	self.ScanPlugins()
 }

@@ -2,14 +2,11 @@ package main
 
 import (
 	"flag"
+	_ "github.com/gorilla/websocket"
+	_ "github.com/satori/go.uuid"
+	"github.com/nuls-io/kernel"
 	"log"
-	"nuls.io/kernel"
 )
-
-func init() {
-	log.SetPrefix("\rDEBUG:")
-	log.SetFlags(log.Ldate | log.Lmicroseconds | log.Llongfile)
-}
 
 func main() {
 	flag.Parse()
