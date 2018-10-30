@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * this class is only used by testing.
  * @author tangyi
  * @date 2018/10/17
  * @description

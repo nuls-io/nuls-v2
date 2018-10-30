@@ -29,14 +29,18 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.RpcConstant;
 import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.model.Rpc;
+import io.nuls.rpc.model.RpcCmd;
 import io.nuls.tools.parse.JSONUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -49,44 +53,43 @@ import java.util.Map;
 public class BaseHandler {
 
     @POST
-    @Path(RpcConstant.SINGLE)
+    @Path(RpcConstant.JSON)
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.TEXT_HTML + ";charset=utf-8")
-    public String singlePost(@FormParam(RpcConstant.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) throws Exception {
-        return parse(formParamAsJson, request);
+    public String jsonPost(@FormParam(RpcConstant.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) throws Exception {
+        return jsonGo(formParamAsJson, request);
     }
 
     @GET
-    @Path(RpcConstant.SINGLE)
+    @Path(RpcConstant.JSON)
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.TEXT_HTML + ";charset=utf-8")
-    public String singleGet(@QueryParam(RpcConstant.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) throws Exception {
-        return parse(formParamAsJson, request);
+    public String jsonGet(@QueryParam(RpcConstant.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) throws Exception {
+        return jsonGo(formParamAsJson, request);
     }
 
     /**
-     *
      * format of formParamAsJson:
      * {
-     *     "cmd":"cmd1",
-     *     "minVersion":1,
-     *     "params":[
-     *         "wangkun",// note: it should be any types. include str, int, float, boolean, object etc.
-     *         "handsome",
-     *         true
-     *     ]
+     * "cmd":"cmd1",
+     * "minVersion":1,
+     * "params":[
+     * "wangkun",// note: it should be any types. include str, int, float, boolean, object etc.
+     * "handsome",
+     * true
+     * ]
      * }
-     *
+     * <p>
      * format of return string:
      * {
-     *     "msg":"Success",
-     *     "result":{},
-     *     "code":0,
-     *     "version":1
+     * "msg":"Success",
+     * "result":{},
+     * "code":0,
+     * "version":1
      * }
      */
-    private String parse(String formParamAsJson, HttpServletRequest request) throws Exception {
-        System.out.println("BaseHandler-cmd start, formParamAsJson->" + formParamAsJson + "\n"
+    private String jsonGo(String formParamAsJson, HttpServletRequest request) throws Exception {
+        System.out.println("jsonGo: BaseHandler-cmd start, formParamAsJson->" + formParamAsJson + "\n"
                 + "request->" + request.getRemoteAddr() + ":" + request.getRemotePort());
 
         Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
@@ -102,7 +105,34 @@ public class BaseHandler {
         @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
         BaseCmd cmd = (BaseCmd) constructor.newInstance();
         Object obj = method.invoke(cmd, (List) jsonMap.get("params"));
-        System.out.println("Return String->" + JSONUtils.obj2json(obj));
+        System.out.println("jsonGo Return String->" + JSONUtils.obj2json(obj));
+        return JSONUtils.obj2json(obj);
+    }
+
+
+    @POST
+    @Path(RpcConstant.BYTE)
+    @Consumes("application/x-www-form-urlencoded")
+    @Produces(MediaType.TEXT_HTML + ";charset=utf-8")
+    public String bytePost(@Context HttpServletRequest request) throws Exception {
+        return byteGo(request);
+    }
+
+    private String byteGo(HttpServletRequest request) throws Exception {
+        System.out.println("postGo: BaseHandler-cmd start, request->" + request.getRemoteAddr() + ":" + request.getRemotePort());
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(request.getInputStream().readAllBytes());
+        ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
+        RpcCmd rpcCmd = (RpcCmd) objectInputStream.readObject();
+
+        Rpc rpc = RpcInfo.getLocalInvokeRpc(rpcCmd.getCmd(), rpcCmd.getMinVersion());
+
+        Class clz = Class.forName(rpc.getInvokeClass());
+
+        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(rpc.getInvokeMethod(), List.class);
+        @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
+        BaseCmd cmd = (BaseCmd) constructor.newInstance();
+        Object obj = method.invoke(cmd, Arrays.asList(rpcCmd.getParams()));
+        System.out.println("byteGo Return String->" + obj);
         return JSONUtils.obj2json(obj);
     }
 }

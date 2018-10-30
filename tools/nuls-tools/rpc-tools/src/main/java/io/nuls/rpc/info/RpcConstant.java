@@ -36,19 +36,27 @@ public class RpcConstant {
 
     public static final int KERNEL_PORT = 8091;
     public static final String DEFAULT_PATH = "nulsrpc";
-    public static final String SINGLE = "matchOne";
+    public static final String JSON = "jsonGo";
+    public static final String BYTE = "byteGo";
 //    public static final String MULTIPLY = "matchMultiply";
 
     public static final String FORM_PARAM_NAME = "paramObjAsJson";
 
 
     /**
+     * WebSocket constant
+     */
+    public static final String ONLINE = "nuls_websocket_online:";
+    public static final String OFFLINE = "nuls_websocket_offline:";
+
+
+    /**
      * predetermined cmd (used by kernel & module)
      */
-    public static final String STATUS="status";
-    public static final String SHUTDOWN="shutdown";
-    public static final String TERMINATE="terminate";
-    public static final String CONF_GET="conf_get";
-    public static final String CONF_SET="conf_set";
-    public static final String CONF_RESET="conf_reset";
+    public static final String STATUS = "status";
+    public static final String SHUTDOWN = "shutdown";
+    public static final String TERMINATE = "terminate";
+    public static final String CONF_GET = "conf_get";
+    public static final String CONF_SET = "conf_set";
+    public static final String CONF_RESET = "conf_reset";
 }

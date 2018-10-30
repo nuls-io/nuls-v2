@@ -26,6 +26,7 @@
 package io.nuls.rpc.cmd;
 
 import io.nuls.rpc.info.RpcInfo;
+import io.nuls.rpc.model.ConfigItem;
 import io.nuls.rpc.model.Module;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -79,6 +80,11 @@ public abstract class BaseCmd {
         System.out.println(JSONUtils.obj2json(RpcInfo.remoteModuleMap));
 
         return success(1.0);
+    }
+
+    protected void addConfigItem(String key, Object value, boolean readOnly) {
+        ConfigItem configItem = new ConfigItem(key, value, readOnly);
+        RpcInfo.configItemList.add(configItem);
     }
 
     protected Object success(double version) {

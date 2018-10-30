@@ -25,44 +25,48 @@
  *
  */
 
-package io.nuls.test;
-
-import io.nuls.rpc.model.RpcCmd;
-import org.junit.Test;
-
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+package io.nuls.rpc.model;
 
 /**
  * @author tangyi
- * @date 2018/10/9
+ * @date 2018/10/29
  * @description
  */
-public class TestServer {
+public class ConfigItem {
+    private String key;
+    private Object value;
+    private boolean readOnly;
 
-    @Test
-    public void test() throws Exception {
+    public ConfigItem() {
+    }
 
-        RpcCmd rpcCmd = new RpcCmd();
-        rpcCmd.setCmd("开火");
-        rpcCmd.setMinVersion(2.3);
-        rpcCmd.setParams(new Object[]{"a", 1, true});
+    public ConfigItem(String key, Object value, boolean readOnly) {
+        this.key = key;
+        this.value = value;
+        this.readOnly = readOnly;
+    }
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-        objectOutputStream.writeObject(rpcCmd);
-        byte[] bytes = byteArrayOutputStream.toByteArray();
+    public String getKey() {
+        return key;
+    }
 
-        for (byte b : bytes)
-            System.out.print(b);
-        System.out.println();
-        System.out.println(bytes.length);
+    public void setKey(String key) {
+        this.key = key;
+    }
 
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-        ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-        RpcCmd rpcCmd1 = (RpcCmd) objectInputStream.readObject();
-        System.out.println(rpcCmd1.getCmd());
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
     }
 }

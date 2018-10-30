@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * this class is only used by testing.
  * @author tangyi
  * @date 2018/10/23
  * @description
@@ -59,7 +60,7 @@ public class PushThread implements Runnable {
                 result.put("available", true);
                 result.put("modules", RpcInfo.remoteModuleMap);
 
-                System.out.println(RpcClient.callSingleRpc("status", new Object[]{result}, 1.0));
+                System.out.println(RpcClient.jsonSingleRpc("status", new Object[]{result}, 1.0));
                 System.out.println("调用子模块的status成功了，等待30秒");
                 Thread.sleep(30000);
             } catch (Exception e) {

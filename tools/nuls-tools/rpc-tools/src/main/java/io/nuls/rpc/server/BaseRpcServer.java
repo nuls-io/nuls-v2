@@ -27,16 +27,11 @@
 
 package io.nuls.rpc.server;
 
-import io.nuls.rpc.model.CmdInfo;
 import io.nuls.rpc.info.IpPortInfo;
 import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.model.Module;
 import io.nuls.rpc.model.ModuleStatus;
-import io.nuls.rpc.model.Rpc;
-import io.nuls.tools.core.ioc.ScanUtil;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,59 +82,7 @@ public abstract class BaseRpcServer {
         return port;
     }
 
-    /**
-     * scan package, auto register cmd
-     */
-    public void scanPackage(String packageName) throws Exception {
-        List<Class> classList = ScanUtil.scan(packageName);
-        for (Class clz : classList) {
-            Method[] methods = clz.getMethods();
-            for (Method method : methods) {
-                Rpc rpc = annotation2Rpc(method);
-                if (rpc != null) {
-                    registerRpc(rpc);
-                }
-            }
-            System.out.println("====================");
-        }
-    }
 
-    /**
-     * get the annotation of method, if it was instance of CmdInfo, build CmdInfo
-     */
-    private Rpc annotation2Rpc(Method method) {
-        Annotation[] annotations = method.getDeclaredAnnotations();
-        for (Annotation annotation : annotations) {
-            if (CmdInfo.class.getName().equals(annotation.annotationType().getName())) {
-                CmdInfo cmdInfo = (CmdInfo) annotation;
-                return new Rpc(cmdInfo.cmd(), cmdInfo.version(), method.getDeclaringClass().getName(), method.getName(), cmdInfo.preCompatible());
-            }
-        }
-        return null;
-    }
-
-    /**
-     * scan & register rpc
-     */
-    public static void registerRpc(Rpc registerRpc) throws Exception {
-        if (isRegister(registerRpc)) {
-            throw new Exception("Duplicate cmd found: " + registerRpc.getCmd() + "-" + registerRpc.getVersion());
-        } else {
-            RpcInfo.local.getRpcList().add(registerRpc);
-        }
-    }
-
-    private static boolean isRegister(Rpc sourceRpc) {
-        boolean exist = false;
-        for (Rpc rpc : RpcInfo.local.getRpcList()) {
-            if (rpc.getCmd().equals(sourceRpc.getCmd()) && rpc.getVersion() == sourceRpc.getVersion()) {
-                exist = true;
-                break;
-            }
-        }
-
-        return exist;
-    }
 
     /**
      * server 启动入口，不同server不同实现

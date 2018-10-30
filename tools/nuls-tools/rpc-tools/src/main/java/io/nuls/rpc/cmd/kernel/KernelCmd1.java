@@ -36,6 +36,7 @@ import io.nuls.tools.parse.JSONUtils;
 import java.util.*;
 
 /**
+ * this class is only used by testing.
  * @author tangyi
  * @date 2018/10/17
  * @description

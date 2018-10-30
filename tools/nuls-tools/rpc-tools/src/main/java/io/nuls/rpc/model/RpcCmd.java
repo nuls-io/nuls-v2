@@ -26,12 +26,14 @@
 package io.nuls.rpc.model;
 
 
+import java.io.Serializable;
+
 /**
  * @author tangyi
  * @date 2018/10/15
  * @description
  */
-public class RpcCmd {
+public class RpcCmd implements Serializable {
     private String cmd;
     private double minVersion;
     private Object[] params;
