@@ -26,8 +26,8 @@
 package io.nuls.rpc.handler;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.RpcConstant;
-import io.nuls.rpc.info.RpcInfo;
+import io.nuls.rpc.info.CallCmd;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.Rpc;
 import io.nuls.rpc.model.RpcCmd;
 import io.nuls.tools.parse.JSONUtils;
@@ -49,22 +49,22 @@ import java.util.Map;
  * @date 2018/10/13
  * @description
  */
-@Path(RpcConstant.DEFAULT_PATH)
+@Path(Constants.DEFAULT_PATH)
 public class BaseHandler {
 
     @POST
-    @Path(RpcConstant.JSON)
+    @Path(Constants.JSON)
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.TEXT_HTML + ";charset=utf-8")
-    public String jsonPost(@FormParam(RpcConstant.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) throws Exception {
+    public String jsonPost(@FormParam(Constants.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) throws Exception {
         return jsonGo(formParamAsJson, request);
     }
 
     @GET
-    @Path(RpcConstant.JSON)
+    @Path(Constants.JSON)
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.TEXT_HTML + ";charset=utf-8")
-    public String jsonGet(@QueryParam(RpcConstant.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) throws Exception {
+    public String jsonGet(@QueryParam(Constants.FORM_PARAM_NAME) String formParamAsJson, @Context HttpServletRequest request) throws Exception {
         return jsonGo(formParamAsJson, request);
     }
 
@@ -94,7 +94,7 @@ public class BaseHandler {
 
         Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
 
-        Rpc rpc = RpcInfo.getLocalInvokeRpc((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));
+        Rpc rpc = CallCmd.getLocalInvokeRpc((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));
         if (rpc == null) {
             return "No cmd found: " + jsonMap.get("cmd") + "." + jsonMap.get("minVersion");
         }
@@ -111,7 +111,7 @@ public class BaseHandler {
 
 
     @POST
-    @Path(RpcConstant.BYTE)
+    @Path(Constants.BYTE)
     @Consumes("application/x-www-form-urlencoded")
     @Produces(MediaType.TEXT_HTML + ";charset=utf-8")
     public String bytePost(@Context HttpServletRequest request) throws Exception {
@@ -124,7 +124,7 @@ public class BaseHandler {
         ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
         RpcCmd rpcCmd = (RpcCmd) objectInputStream.readObject();
 
-        Rpc rpc = RpcInfo.getLocalInvokeRpc(rpcCmd.getCmd(), rpcCmd.getMinVersion());
+        Rpc rpc = CallCmd.getLocalInvokeRpc(rpcCmd.getCmd(), rpcCmd.getMinVersion());
 
         Class clz = Class.forName(rpc.getInvokeClass());
 

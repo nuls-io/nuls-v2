@@ -25,13 +25,13 @@
 
 package io.nuls.rpc.cmd;
 
-import io.nuls.rpc.info.RpcInfo;
+import io.nuls.rpc.info.RuntimeParam;
 import io.nuls.rpc.model.ConfigItem;
 import io.nuls.rpc.model.Module;
+import io.nuls.rpc.model.RpcResult;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -43,6 +43,7 @@ import java.util.Map;
 public abstract class BaseCmd {
 
     protected final String SUCCESS = "Success";
+    protected final int SUCCESS_CODE = 0;
 
     /**
      * 从kernel接收所有模块信息
@@ -69,49 +70,35 @@ public abstract class BaseCmd {
         System.out.println("我收到来自kernel的推送了");
         Map<String, Object> map1 = JSONUtils.json2map(JSONUtils.obj2json(params.get(0)));
 
-        RpcInfo.local.setAvailable((Boolean) map1.get("available"));
+        RuntimeParam.local.setAvailable((Boolean) map1.get("available"));
 
         Map<String, Object> moduleMap = JSONUtils.json2map(JSONUtils.obj2json(map1.get("modules")));
-        for (Object key : moduleMap.keySet()) {
+        for (String key : moduleMap.keySet()) {
             Module module = JSONUtils.json2pojo(JSONUtils.obj2json(moduleMap.get(key)), Module.class);
-            RpcInfo.remoteModuleMap.put((String) key, module);
+            RuntimeParam.remoteModuleMap.put(key, module);
         }
 
-        System.out.println(JSONUtils.obj2json(RpcInfo.remoteModuleMap));
+        System.out.println(JSONUtils.obj2json(RuntimeParam.remoteModuleMap));
 
-        return success(1.0);
+        return result(1.0);
     }
 
     protected void addConfigItem(String key, Object value, boolean readOnly) {
         ConfigItem configItem = new ConfigItem(key, value, readOnly);
-        RpcInfo.configItemList.add(configItem);
+        RuntimeParam.configItemList.add(configItem);
     }
 
-    protected Object success(double version) {
-        return success(version, null);
+    protected RpcResult result(double version) {
+        return result(0, version, null, null);
     }
 
-    /**
-     * return success object
-     */
-    protected Object success(double version, Object result) {
-        Map<String, Object> map = new HashMap<>(16);
-        map.put("code", 0);
-        map.put("msg", SUCCESS);
-        map.put("version", version);
-        map.put("result", result);
-        return map;
+    protected RpcResult result(int code, double version, String msg, Object result) {
+        RpcResult rpcResult = new RpcResult();
+        rpcResult.setCode(code);
+        rpcResult.setVersion(version);
+        rpcResult.setMsg(msg);
+        rpcResult.setResult(result);
+        return rpcResult;
     }
 
-    /**
-     * return fail object
-     */
-    protected Object fail(String code, String msg, double version, Object result) {
-        Map<String, Object> map = new HashMap<>(16);
-        map.put("code", code);
-        map.put("msg", msg);
-        map.put("version", version);
-        map.put("result", result);
-        return map;
-    }
 }

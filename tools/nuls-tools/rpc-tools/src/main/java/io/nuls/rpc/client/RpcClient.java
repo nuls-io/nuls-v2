@@ -27,8 +27,9 @@
 
 package io.nuls.rpc.client;
 
-import io.nuls.rpc.info.RpcConstant;
-import io.nuls.rpc.info.RpcInfo;
+import io.nuls.rpc.info.CallCmd;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.info.RuntimeParam;
 import io.nuls.rpc.model.Module;
 import io.nuls.rpc.model.RpcCmd;
 import io.nuls.tools.parse.JSONUtils;
@@ -42,7 +43,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,10 +93,10 @@ public class RpcClient {
      * }
      */
     public static String versionToKernel(String kernelUri) throws Exception {
-        RpcCmd rpcCmd = new RpcCmd("version", 1.0, new Object[]{RpcInfo.local});
+        RpcCmd rpcCmd = new RpcCmd(RuntimeParam.sequence.incrementAndGet(), "version", 1.0, new Object[]{RuntimeParam.local});
 
         List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair(RpcConstant.FORM_PARAM_NAME, JSONUtils.obj2json(rpcCmd)));
+        urlParameters.add(new BasicNameValuePair(Constants.FORM_PARAM_NAME, JSONUtils.obj2json(rpcCmd)));
 
         HttpEntity postParams = new UrlEncodedFormEntity(urlParameters);
 
@@ -142,10 +145,10 @@ public class RpcClient {
      * }
      */
     public static Map<String, Object> callFetchKernel(String kernelUri) throws Exception {
-        RpcCmd rpcCmd = new RpcCmd("fetch", 1.0, new Object[]{RpcInfo.local});
+        RpcCmd rpcCmd = new RpcCmd(RuntimeParam.sequence.incrementAndGet(), "fetch", 1.0, new Object[]{RuntimeParam.local});
 
         List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair(RpcConstant.FORM_PARAM_NAME, JSONUtils.obj2json(rpcCmd)));
+        urlParameters.add(new BasicNameValuePair(Constants.FORM_PARAM_NAME, JSONUtils.obj2json(rpcCmd)));
 
         HttpEntity postParams = new UrlEncodedFormEntity(urlParameters);
 
@@ -163,12 +166,12 @@ public class RpcClient {
         System.out.println("available" + JSONUtils.obj2json(result.get("available")));
 
         Map<String, Object> moduleMap = JSONUtils.json2map(JSONUtils.obj2json(result.get("modules")));
-        for (Object key : moduleMap.keySet()) {
+        for (String key : moduleMap.keySet()) {
             Module module = JSONUtils.json2pojo(JSONUtils.obj2json(moduleMap.get(key)), Module.class);
-            RpcInfo.remoteModuleMap.put((String) key, module);
+            RuntimeParam.remoteModuleMap.put(key, module);
         }
         result.put("available", result.get("available"));
-        result.put("modules", RpcInfo.remoteModuleMap);
+        result.put("modules", RuntimeParam.remoteModuleMap);
 
         Map<String, Object> fetchMap = new HashMap<>(16);
         fetchMap.put("code", map1.get("code"));
@@ -183,9 +186,9 @@ public class RpcClient {
      */
     public static String jsonSingleRpc(String cmd, Object[] params, double minVersion) throws IOException {
 
-        RpcCmd rpcCmd = new RpcCmd(cmd, minVersion, params);
+        RpcCmd rpcCmd = new RpcCmd(RuntimeParam.sequence.incrementAndGet(), cmd, minVersion, params);
 
-        List<String> remoteUriList = RpcInfo.getRemoteUri(rpcCmd);
+        List<String> remoteUriList = CallCmd.getRemoteUri(rpcCmd);
         if (remoteUriList.size() == 0) {
             return "No cmd found->" + cmd + "." + minVersion;
         }
@@ -197,11 +200,11 @@ public class RpcClient {
         String remoteUri = remoteUriList.get(0);
 
         List<NameValuePair> urlParameters = new ArrayList<>();
-        urlParameters.add(new BasicNameValuePair(RpcConstant.FORM_PARAM_NAME, JSONUtils.obj2json(rpcCmd)));
+        urlParameters.add(new BasicNameValuePair(Constants.FORM_PARAM_NAME, JSONUtils.obj2json(rpcCmd)));
 
         HttpEntity postParams = new UrlEncodedFormEntity(urlParameters);
 
-        String uri = remoteUri + "/" + RpcConstant.DEFAULT_PATH + "/" + RpcConstant.JSON;
+        String uri = remoteUri + "/" + Constants.DEFAULT_PATH + "/" + Constants.JSON;
 
         return jsonPost(uri, postParams);
     }
@@ -211,9 +214,9 @@ public class RpcClient {
      */
     public static String jsonMultiplyRpc(String cmd, Object[] params, double minVersion) throws IOException {
 
-        RpcCmd rpcCmd = new RpcCmd(cmd, minVersion, params);
+        RpcCmd rpcCmd = new RpcCmd(RuntimeParam.sequence.incrementAndGet(), cmd, minVersion, params);
 
-        List<String> remoteUriList = RpcInfo.getRemoteUri(rpcCmd);
+        List<String> remoteUriList = CallCmd.getRemoteUri(rpcCmd);
         if (remoteUriList.size() == 0) {
             return "No cmd found->" + cmd + "." + minVersion;
         }
@@ -221,11 +224,11 @@ public class RpcClient {
         Map<String, Object> resultMap = new HashMap<>(16);
         for (String remoteUri : remoteUriList) {
             List<NameValuePair> urlParameters = new ArrayList<>();
-            urlParameters.add(new BasicNameValuePair(RpcConstant.FORM_PARAM_NAME, JSONUtils.obj2json(rpcCmd)));
+            urlParameters.add(new BasicNameValuePair(Constants.FORM_PARAM_NAME, JSONUtils.obj2json(rpcCmd)));
 
             HttpEntity postParams = new UrlEncodedFormEntity(urlParameters);
 
-            String uri = remoteUri + "/" + RpcConstant.DEFAULT_PATH + "/" + RpcConstant.JSON;
+            String uri = remoteUri + "/" + Constants.DEFAULT_PATH + "/" + Constants.JSON;
 
             resultMap.put(remoteUri, JSONUtils.json2map(jsonPost(uri, postParams)));
         }
@@ -265,9 +268,9 @@ public class RpcClient {
      */
     public static byte[] byteSingleRpc(String cmd, Object[] params, double minVersion) throws Exception {
 
-        RpcCmd rpcCmd = new RpcCmd(cmd, minVersion, params);
+        RpcCmd rpcCmd = new RpcCmd(RuntimeParam.sequence.incrementAndGet(), cmd, minVersion, params);
 
-        List<String> remoteUriList = RpcInfo.getRemoteUri(rpcCmd);
+        List<String> remoteUriList = CallCmd.getRemoteUri(rpcCmd);
         if (remoteUriList.size() == 0) {
             throw new Exception("No cmd found" + cmd);
         }
@@ -275,12 +278,11 @@ public class RpcClient {
             throw new Exception("Multiply cmd found->" + cmd);
         }
 
-        HttpPost httpPost = new HttpPost(remoteUriList.get(0) + "/" + RpcConstant.DEFAULT_PATH + "/" + RpcConstant.BYTE);
-        httpPost.setEntity(new ByteArrayEntity(RpcInfo.obj2Bytes(rpcCmd)));
+        HttpPost httpPost = new HttpPost(remoteUriList.get(0) + "/" + Constants.DEFAULT_PATH + "/" + Constants.BYTE);
+        httpPost.setEntity(new ByteArrayEntity(CallCmd.obj2Bytes(rpcCmd)));
 
         CloseableHttpClient httpClient = HttpClients.createDefault();
-        CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
-        try {
+        try (CloseableHttpResponse httpResponse = httpClient.execute(httpPost)) {
             HttpEntity entityResponse = httpResponse.getEntity();
             int contentLength = (int) entityResponse.getContentLength();
             if (contentLength <= 0) {
@@ -291,8 +293,6 @@ public class RpcClient {
                 throw new IOException("Read response buffer error");
             }
             return respBuffer;
-        } finally {
-            httpResponse.close();
         }
     }
 }

@@ -27,9 +27,13 @@
 
 package io.nuls.rpc.info;
 
-import io.nuls.rpc.model.*;
+import io.nuls.rpc.client.WsClient;
+import io.nuls.rpc.model.CmdInfo;
 import io.nuls.rpc.model.Module;
+import io.nuls.rpc.model.Rpc;
+import io.nuls.rpc.model.RpcCmd;
 import io.nuls.tools.core.ioc.ScanUtil;
+import io.nuls.tools.parse.JSONUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,33 +41,16 @@ import java.io.ObjectOutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.Map;
 
 /**
  * @author tangyi
- * @date 2018/10/13
+ * @date 2018/10/31
  * @description
  */
-public class RpcInfo {
-
-    /**
-     * local module(io.nuls.rpc.Module) information
-     */
-    public static Module local;
-
-    /**
-     * local Config item information
-     */
-    public static List<ConfigItem> configItemList = Collections.synchronizedList(new ArrayList<>());
-
-    /**
-     * remote module(io.nuls.rpc.Module) information
-     */
-    public static ConcurrentMap<String, Module> remoteModuleMap = new ConcurrentHashMap<>();
+public class CallCmd {
 
 
 
@@ -78,16 +65,15 @@ public class RpcInfo {
     }
 
 
-
     /**
      * get remote rpc uri based on cmd
      */
     public static List<String> getRemoteUri(RpcCmd rpcCmd) {
         List<String> remoteUriList = new ArrayList<>();
-        for (Module module : remoteModuleMap.values()) {
+        for (Module module : RuntimeParam.remoteModuleMap.values()) {
             for (Rpc rpc : module.getRpcList()) {
                 if (rpc.getCmd().equals(rpcCmd.getCmd())) {
-                    remoteUriList.add("http://" + module.getAddr() + ":" + module.getPort());
+                    remoteUriList.add("ws://" + module.getAddr() + ":" + module.getPort());
                     break;
                 }
             }
@@ -100,10 +86,10 @@ public class RpcInfo {
      */
     public static Rpc getLocalInvokeRpc(String cmd, double minVersion) {
 
-        local.getRpcList().sort(Comparator.comparingDouble(Rpc::getVersion));
+        RuntimeParam.local.getRpcList().sort(Comparator.comparingDouble(Rpc::getVersion));
 
         Rpc findRpc = null;
-        for (Rpc rpc : local.getRpcList()) {
+        for (Rpc rpc : RuntimeParam.local.getRpcList()) {
             if (rpc.getCmd().equals(cmd) && rpc.getVersion() >= minVersion) {
                 if (findRpc == null) {
                     findRpc = rpc;
@@ -123,6 +109,9 @@ public class RpcInfo {
      * scan package, auto register cmd
      */
     public static void scanPackage(String packageName) throws Exception {
+        if (packageName == null || packageName.length() == 0) {
+            return;
+        }
         List<Class> classList = ScanUtil.scan(packageName);
         for (Class clz : classList) {
             Method[] methods = clz.getMethods();
@@ -157,13 +146,13 @@ public class RpcInfo {
         if (isRegister(registerRpc)) {
             throw new Exception("Duplicate cmd found: " + registerRpc.getCmd() + "-" + registerRpc.getVersion());
         } else {
-            local.getRpcList().add(registerRpc);
+            RuntimeParam.local.getRpcList().add(registerRpc);
         }
     }
 
     private static boolean isRegister(Rpc sourceRpc) {
         boolean exist = false;
-        for (Rpc rpc : local.getRpcList()) {
+        for (Rpc rpc : RuntimeParam.local.getRpcList()) {
             if (rpc.getCmd().equals(sourceRpc.getCmd()) && rpc.getVersion() == sourceRpc.getVersion()) {
                 exist = true;
                 break;
@@ -173,4 +162,43 @@ public class RpcInfo {
         return exist;
     }
 
+    /**
+     * send local module information to kernel
+     */
+    public static void syncWebsocket(String kernelUri) throws Exception {
+        int id = RuntimeParam.nextSequence();
+        RpcCmd rpcCmd = new RpcCmd(id, "version", 1.0, new Object[]{RuntimeParam.local});
+        WsClient wsClient = RuntimeParam.getWsClient(kernelUri);
+
+        wsClient.send(JSONUtils.obj2json(rpcCmd));
+        Map remoteMap = wsClient.wsResponse(id);
+
+        Map resultMap = (Map) remoteMap.get("result");
+        RuntimeParam.local.setAvailable((Boolean) resultMap.get("available"));
+
+        Map<String, Object> moduleMap = JSONUtils.json2map(JSONUtils.obj2json(resultMap.get("modules")));
+        for (String key : moduleMap.keySet()) {
+            Module module = JSONUtils.json2pojo(JSONUtils.obj2json(moduleMap.get(key)), Module.class);
+            RuntimeParam.remoteModuleMap.put(key, module);
+        }
+    }
+
+    public static String singleCmdAsWs(String cmd, Object[] params, double minVersion) throws Exception {
+        int id = RuntimeParam.sequence.incrementAndGet();
+        RpcCmd rpcCmd = new RpcCmd(id, cmd, minVersion, params);
+
+        List<String> remoteUriList = CallCmd.getRemoteUri(rpcCmd);
+        if (remoteUriList.size() == 0) {
+            return "No cmd found->" + cmd + "." + minVersion;
+        }
+        if (remoteUriList.size() > 1) {
+            return "Multiply cmd found->" + cmd;
+        }
+
+        String remoteUri = remoteUriList.get(0);
+        WsClient wsClient = RuntimeParam.getWsClient(remoteUri);
+        wsClient.send(JSONUtils.obj2json(rpcCmd));
+        Map remoteMap = wsClient.wsResponse(id);
+        return JSONUtils.obj2json(remoteMap);
+    }
 }

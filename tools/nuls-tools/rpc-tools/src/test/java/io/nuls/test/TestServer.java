@@ -34,6 +34,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author tangyi
@@ -64,5 +67,19 @@ public class TestServer {
         ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
         RpcCmd rpcCmd1 = (RpcCmd) objectInputStream.readObject();
         System.out.println(rpcCmd1.getCmd());
+
+        System.out.println("===============================");
+
+        List<Integer> list= Collections.synchronizedList(new ArrayList<>());
+        for(int i=0;i<10;i++){
+            list.add(i);
+        }
+        System.out.println(list.get(5));
+        list.remove(5);
+        System.out.println(list.get(5));
+
+        for(int i=0;i<list.size();i++){
+            System.out.println(list.get(i));
+        }
     }
 }

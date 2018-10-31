@@ -27,39 +27,26 @@
 
 package io.nuls.test;
 
-import io.nuls.rpc.client.RpcClient;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.RuntimeParam;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.rpc.info.CallCmd;
+import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
-
-import java.util.Map;
 
 /**
  * @author tangyi
- * @date 2018/10/20
+ * @date 2018/10/30
  * @description
  */
-public class M2Call {
+public class WsKernel {
+
     @Test
-    public void test() throws Exception {
+    public  void test() throws Exception {
+        int port = 8887;
+        WsServer s = new WsServer(port);
+        s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
+        s.start();
 
+        CallCmd.syncWebsocket("ws://127.0.0.1:8887");
 
-        System.out.println("我可以调用的模块：" + RuntimeParam.remoteModuleMap.size());
-        Map<String, Object> fetchMap = RpcClient.callFetchKernel("http://127.0.0.1:8091/" + Constants.DEFAULT_PATH + "/" + Constants.JSON);
-        System.out.println(JSONUtils.obj2json(fetchMap));
-
-        System.out.println("我可以调用的模块：" + RuntimeParam.remoteModuleMap.size());
-
-        System.out.println("我开始调用其他模块了");
-
-        System.out.println("SingleRpc->" + RpcClient.jsonSingleRpc("cmd2", new Object[]{"wangkun", "handsome", true}, 1));
-
-        System.out.println("MultiplyRpc->" + RpcClient.jsonMultiplyRpc("cmd1", new Object[]{"wangkun", "handsome", true}, 1));
-
-        System.out.println("ByteRpc->");
-        byte[] bytes = RpcClient.byteSingleRpc("cmd2", new Object[]{"wangkun", "handsome", true}, 1);
-        String str = new String(bytes);
-        System.out.println(str);
+        Thread.sleep(Integer.MAX_VALUE);
     }
 }

@@ -27,66 +27,75 @@
 
 package io.nuls.rpc.server;
 
+import io.nuls.rpc.handler.WebSocketHandler;
+import io.nuls.rpc.info.CallCmd;
 import io.nuls.rpc.info.IpPortInfo;
 import io.nuls.rpc.info.RuntimeParam;
+import io.nuls.rpc.info.WsPool;
 import io.nuls.rpc.model.Module;
 import io.nuls.rpc.model.ModuleStatus;
+import org.java_websocket.WebSocket;
+import org.java_websocket.handshake.ClientHandshake;
+import org.java_websocket.server.WebSocketServer;
 
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author tangyi
- * @date 2018/10/18
+ * @date 2018/10/30
  * @description
  */
-public abstract class BaseRpcServer {
-    private String addr;
-    private int port;
-
-    BaseRpcServer() {
-        this.addr = IpPortInfo.getIpAddLocally();
-        this.port = IpPortInfo.randomPort();
-
-        init();
+public class WsServer extends WebSocketServer {
+    public WsServer(int port) {
+        super(new InetSocketAddress(port));
     }
 
-    BaseRpcServer(int port) {
-        this.addr = IpPortInfo.getIpAddLocally();
-        this.port = port;
-
-        init();
-    }
-
-    private void init() {
+    public void init(String moduleName, List<String> depends, String scanPackage) throws Exception {
         RuntimeParam.local = new Module("", ModuleStatus.READY, false, "", 0, new ArrayList<>(), new ArrayList<>());
-    }
-
-    String getBaseUri() {
-        return "http://" + addr + ":" + port + "/";
-    }
-
-    public void init(String moduleName, List<String> depends) {
         RuntimeParam.local.setName(moduleName);
         RuntimeParam.local.setDependsModule(depends);
-        RuntimeParam.local.setAddr(getAddr());
+        RuntimeParam.local.setAddr(IpPortInfo.getIpAdd());
         RuntimeParam.local.setPort(getPort());
         RuntimeParam.local.setStatus(ModuleStatus.READY);
+
+        CallCmd.scanPackage(scanPackage);
     }
 
-    public String getAddr() {
-        return addr;
+    @Override
+    public void onOpen(WebSocket webSocket, ClientHandshake handshake) {
+        System.out.println("ws server-> new connection join");
+        System.out.println(webSocket.getRemoteSocketAddress().getHostName() + ":" + webSocket.getRemoteSocketAddress().getPort());
     }
 
-    public int getPort() {
-        return port;
+    @Override
+    public void onClose(WebSocket webSocket, int code, String reason, boolean remote) {
+        //断开连接时候触发代码
+        WsPool.removeClient(webSocket);
+        System.out.println(reason);
     }
 
+    @Override
+    public void onMessage(WebSocket webSocket, String message) {
+        try {
+            System.out.println("ws server-> receive msg: " + message);
+            webSocket.send(WebSocketHandler.callCmd(message));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
+    @Override
+    public void onError(WebSocket webSocket, Exception ex) {
+        //错误时候触发的代码
+        System.out.println("ws server-> on error");
+        ex.printStackTrace();
+    }
 
-    /**
-     * server 启动入口，不同server不同实现
-     * 也允许自定义server
-     */
-    public abstract void start();
+    @Override
+    public void onStart() {
+        System.out.println("ws server-> started.");
+    }
+
 }

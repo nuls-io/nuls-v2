@@ -25,48 +25,43 @@
  *
  */
 
-package io.nuls.rpc.cmd.kernel;
+package io.nuls.rpc.handler;
 
-import io.nuls.rpc.client.RpcClient;
-import io.nuls.rpc.info.RuntimeParam;
+import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.info.CallCmd;
+import io.nuls.rpc.model.Rpc;
+import io.nuls.rpc.model.RpcResult;
+import io.nuls.tools.parse.JSONUtils;
 
-import java.util.HashMap;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 
 /**
- * this class is only used by testing.
  * @author tangyi
- * @date 2018/10/23
+ * @date 2018/10/30
  * @description
  */
-public class PushThread implements Runnable {
-    /**
-     * When an object implementing interface <code>Runnable</code> is used
-     * to create a thread, starting the thread causes the object's
-     * <code>run</code> method to be called in that separately executing
-     * thread.
-     * <p>
-     * The general contract of the method <code>run</code> is that it may
-     * take any action whatsoever.
-     *
-     * @see Thread#run()
-     */
-    @Override
-    public void run() {
-        while (true) {
-            try {
-                Map<String, Object> result = new HashMap<>(16);
-                result.put("service", new String[]{"a", "b", "c"});
-                result.put("available", true);
-                result.put("modules", RuntimeParam.remoteModuleMap);
+public class WebSocketHandler {
 
-                System.out.println(RpcClient.jsonSingleRpc("status", new Object[]{result}, 1.0));
-                System.out.println("调用子模块的status成功了，等待30秒");
-                Thread.sleep(30000);
-            } catch (Exception e) {
-                e.printStackTrace();
-                break;
-            }
+    public static String callCmd(String formParamAsJson) throws Exception {
+
+        Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
+
+        Rpc rpc = CallCmd.getLocalInvokeRpc((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));
+        if (rpc == null) {
+            return "No cmd found: " + jsonMap.get("cmd") + "." + jsonMap.get("minVersion");
         }
+
+        Class clz = Class.forName(rpc.getInvokeClass());
+
+        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(rpc.getInvokeMethod(), List.class);
+        @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
+        BaseCmd cmd = (BaseCmd) constructor.newInstance();
+        RpcResult rpcResult = (RpcResult) method.invoke(cmd, (List) jsonMap.get("params"));
+        rpcResult.setId((Integer) jsonMap.get("id"));
+
+        return JSONUtils.obj2json(rpcResult);
     }
 }

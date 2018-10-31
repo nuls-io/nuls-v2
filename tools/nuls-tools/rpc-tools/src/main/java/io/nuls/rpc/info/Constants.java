@@ -25,41 +25,39 @@
  *
  */
 
-package io.nuls.test;
-
-import io.nuls.rpc.client.RpcClient;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.RuntimeParam;
-import io.nuls.tools.parse.JSONUtils;
-import org.junit.Test;
-
-import java.util.Map;
+package io.nuls.rpc.info;
 
 /**
  * @author tangyi
- * @date 2018/10/20
+ * @date 2018/10/19
  * @description
  */
-public class M2Call {
-    @Test
-    public void test() throws Exception {
+public class Constants {
+
+    public static final int KERNEL_PORT = 8091;
+    public static final String DEFAULT_PATH = "nulsrpc";
+    public static final String JSON = "jsonGo";
+    public static final String BYTE = "byteGo";
+//    public static final String MULTIPLY = "matchMultiply";
+
+    public static final String FORM_PARAM_NAME = "paramObjAsJson";
 
 
-        System.out.println("我可以调用的模块：" + RuntimeParam.remoteModuleMap.size());
-        Map<String, Object> fetchMap = RpcClient.callFetchKernel("http://127.0.0.1:8091/" + Constants.DEFAULT_PATH + "/" + Constants.JSON);
-        System.out.println(JSONUtils.obj2json(fetchMap));
+    /**
+     * WebSocket constant
+     */
+    public static final String ONLINE = "nuls_websocket_online:";
+    public static final String OFFLINE = "nuls_websocket_offline:";
+    public static final String DELIMIT="-->>";
 
-        System.out.println("我可以调用的模块：" + RuntimeParam.remoteModuleMap.size());
 
-        System.out.println("我开始调用其他模块了");
-
-        System.out.println("SingleRpc->" + RpcClient.jsonSingleRpc("cmd2", new Object[]{"wangkun", "handsome", true}, 1));
-
-        System.out.println("MultiplyRpc->" + RpcClient.jsonMultiplyRpc("cmd1", new Object[]{"wangkun", "handsome", true}, 1));
-
-        System.out.println("ByteRpc->");
-        byte[] bytes = RpcClient.byteSingleRpc("cmd2", new Object[]{"wangkun", "handsome", true}, 1);
-        String str = new String(bytes);
-        System.out.println(str);
-    }
+    /**
+     * predetermined cmd (used by kernel & module)
+     */
+    public static final String STATUS = "status";
+    public static final String SHUTDOWN = "shutdown";
+    public static final String TERMINATE = "terminate";
+    public static final String CONF_GET = "conf_get";
+    public static final String CONF_SET = "conf_set";
+    public static final String CONF_RESET = "conf_reset";
 }

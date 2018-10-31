@@ -29,14 +29,15 @@ package io.nuls.rpc.cmd.cmd1;
 
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.cmd.KernelCmd;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdInfo;
-import io.nuls.rpc.info.RpcConstant;
 
 import java.io.IOException;
 import java.util.List;
 
 /**
  * this class is only used by testing.
+ *
  * @author tangyi
  * @date 2018/10/17
  * @description
@@ -52,7 +53,7 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
     @CmdInfo(cmd = "cmd1", version = 1.1, preCompatible = true)
     public Object methodName1(List params) {
         System.out.println("I'm version 1.1");
-        return success(1.1, "SomeCmd cmd1");
+        return result(1.1);
     }
 
     @CmdInfo(cmd = "cmd1", version = 2.0, preCompatible = false)
@@ -82,7 +83,7 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
     @CmdInfo(cmd = "cmd2", version = 2.0, preCompatible = true)
     public Object cmd2(List params) {
         System.out.println("I'm version 2");
-        return "cmd2->2.0";
+        return result(SUCCESS_CODE, 2.0, "2.0success", new String[]{"hello world cmd2", "inchain best"});
     }
 
     /**
@@ -92,7 +93,7 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
      * @return Object
      */
     @Override
-    @CmdInfo(cmd = RpcConstant.STATUS, version = 1.0, preCompatible = true)
+    @CmdInfo(cmd = Constants.STATUS, version = 1.0, preCompatible = true)
     public Object status(List params) {
         try {
             return super.status(params);
@@ -109,9 +110,9 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
      * @return Object
      */
     @Override
-    @CmdInfo(cmd = RpcConstant.SHUTDOWN, version = 1.0, preCompatible = true)
+    @CmdInfo(cmd = Constants.SHUTDOWN, version = 1.0, preCompatible = true)
     public Object shutdown(List params) {
-        return success(1.0);
+        return result(1.0);
     }
 
     /**
@@ -121,9 +122,9 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
      * @return Object
      */
     @Override
-    @CmdInfo(cmd = RpcConstant.TERMINATE, version = 1.0, preCompatible = true)
+    @CmdInfo(cmd = Constants.TERMINATE, version = 1.0, preCompatible = true)
     public Object terminate(List params) {
-        return success(1.0);
+        return result(1.0);
     }
 
     /**
@@ -133,9 +134,9 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
      * @return Object
      */
     @Override
-    @CmdInfo(cmd = RpcConstant.CONF_GET, version = 1.0, preCompatible = true)
+    @CmdInfo(cmd = Constants.CONF_GET, version = 1.0, preCompatible = true)
     public Object confGet(List params) {
-        return success(1.0);
+        return result(1.0);
     }
 
     /**
@@ -145,9 +146,9 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
      * @return Object
      */
     @Override
-    @CmdInfo(cmd = RpcConstant.CONF_SET, version = 1.0, preCompatible = true)
+    @CmdInfo(cmd = Constants.CONF_SET, version = 1.0, preCompatible = true)
     public Object confSet(List params) {
-        return success(1.0);
+        return result(1.0);
     }
 
     /**
@@ -157,8 +158,8 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
      * @return Object
      */
     @Override
-    @CmdInfo(cmd = RpcConstant.CONF_RESET, version = 1.0, preCompatible = true)
+    @CmdInfo(cmd = Constants.CONF_RESET, version = 1.0, preCompatible = true)
     public Object confReset(List params) {
-        return success(1.0);
+        return result(1.0);
     }
 }

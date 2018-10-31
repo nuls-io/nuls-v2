@@ -25,41 +25,57 @@
  *
  */
 
-package io.nuls.test;
-
-import io.nuls.rpc.client.RpcClient;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.RuntimeParam;
-import io.nuls.tools.parse.JSONUtils;
-import org.junit.Test;
-
-import java.util.Map;
+package io.nuls.rpc.model;
 
 /**
  * @author tangyi
- * @date 2018/10/20
+ * @date 2018/10/31
  * @description
  */
-public class M2Call {
-    @Test
-    public void test() throws Exception {
+public class RpcResult {
+    private int id;
+    private int code;
+    private String msg;
+    private double version;
+    private Object result;
 
+    public int getId() {
+        return id;
+    }
 
-        System.out.println("我可以调用的模块：" + RuntimeParam.remoteModuleMap.size());
-        Map<String, Object> fetchMap = RpcClient.callFetchKernel("http://127.0.0.1:8091/" + Constants.DEFAULT_PATH + "/" + Constants.JSON);
-        System.out.println(JSONUtils.obj2json(fetchMap));
+    public void setId(int id) {
+        this.id = id;
+    }
 
-        System.out.println("我可以调用的模块：" + RuntimeParam.remoteModuleMap.size());
+    public int getCode() {
+        return code;
+    }
 
-        System.out.println("我开始调用其他模块了");
+    public void setCode(int code) {
+        this.code = code;
+    }
 
-        System.out.println("SingleRpc->" + RpcClient.jsonSingleRpc("cmd2", new Object[]{"wangkun", "handsome", true}, 1));
+    public String getMsg() {
+        return msg;
+    }
 
-        System.out.println("MultiplyRpc->" + RpcClient.jsonMultiplyRpc("cmd1", new Object[]{"wangkun", "handsome", true}, 1));
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
 
-        System.out.println("ByteRpc->");
-        byte[] bytes = RpcClient.byteSingleRpc("cmd2", new Object[]{"wangkun", "handsome", true}, 1);
-        String str = new String(bytes);
-        System.out.println(str);
+    public double getVersion() {
+        return version;
+    }
+
+    public void setVersion(double version) {
+        this.version = version;
+    }
+
+    public Object getResult() {
+        return result;
+    }
+
+    public void setResult(Object result) {
+        this.result = result;
     }
 }

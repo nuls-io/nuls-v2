@@ -25,38 +25,41 @@
  *
  */
 
-package io.nuls.rpc.info;
+package io.nuls.test;
+
+import io.nuls.rpc.info.CallCmd;
+import io.nuls.rpc.info.IpPortInfo;
+import io.nuls.rpc.server.WsServer;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author tangyi
- * @date 2018/10/19
+ * @date 2018/10/30
  * @description
  */
-public class RpcConstant {
+public class WsM2 {
+    @Test
+    public void test() throws Exception {
 
-    public static final int KERNEL_PORT = 8091;
-    public static final String DEFAULT_PATH = "nulsrpc";
-    public static final String JSON = "jsonGo";
-    public static final String BYTE = "byteGo";
-//    public static final String MULTIPLY = "matchMultiply";
+        WsServer s = new WsServer(IpPortInfo.randomPort());
 
-    public static final String FORM_PARAM_NAME = "paramObjAsJson";
+        List<String> depends = new ArrayList<>();
+        depends.add("m1");
 
+        s.init("wangkun", depends, null);
+        s.start();
 
-    /**
-     * WebSocket constant
-     */
-    public static final String ONLINE = "nuls_websocket_online:";
-    public static final String OFFLINE = "nuls_websocket_offline:";
+        CallCmd.syncWebsocket("ws://127.0.0.1:8887");
 
+        System.out.println(CallCmd.singleCmdAsWs("cmd1", null, 1.0));
 
-    /**
-     * predetermined cmd (used by kernel & module)
-     */
-    public static final String STATUS = "status";
-    public static final String SHUTDOWN = "shutdown";
-    public static final String TERMINATE = "terminate";
-    public static final String CONF_GET = "conf_get";
-    public static final String CONF_SET = "conf_set";
-    public static final String CONF_RESET = "conf_reset";
+        System.out.println(CallCmd.singleCmdAsWs("cmd2", null, 1.0));
+
+        System.out.println(CallCmd.singleCmdAsWs("cmd1", null, 1.0));
+
+        Thread.sleep(Integer.MAX_VALUE);
+    }
 }

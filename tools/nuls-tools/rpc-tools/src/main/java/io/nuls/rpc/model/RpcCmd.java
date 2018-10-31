@@ -34,6 +34,7 @@ import java.io.Serializable;
  * @description
  */
 public class RpcCmd implements Serializable {
+    private int id;
     private String cmd;
     private double minVersion;
     private Object[] params;
@@ -41,10 +42,19 @@ public class RpcCmd implements Serializable {
     public RpcCmd() {
     }
 
-    public RpcCmd(String cmd, double minVersion, Object[] params) {
+    public RpcCmd(int id, String cmd, double minVersion, Object[] params) {
+        this.id = id;
         this.cmd = cmd;
         this.minVersion = minVersion;
         this.params = params;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getCmd() {

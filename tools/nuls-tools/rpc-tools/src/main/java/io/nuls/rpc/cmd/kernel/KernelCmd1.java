@@ -28,15 +28,17 @@
 package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.info.RuntimeParam;
 import io.nuls.rpc.model.CmdInfo;
-import io.nuls.rpc.info.RpcInfo;
 import io.nuls.rpc.model.Module;
+import io.nuls.rpc.model.RpcResult;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.*;
 
 /**
  * this class is only used by testing.
+ *
  * @author tangyi
  * @date 2018/10/17
  * @description
@@ -44,27 +46,29 @@ import java.util.*;
 public class KernelCmd1 extends BaseCmd {
 
     @CmdInfo(cmd = "version", version = 1.0, preCompatible = true)
-    public Object version(List params) {
+    public RpcResult version(List params) {
         try {
-            System.out.println("触发Kernel的Join操作");
-            System.out.println("join之前的remote接口数：" + RpcInfo.remoteModuleMap.size());
+            System.out.println("join之前的kernel remote接口数：" + RuntimeParam.remoteModuleMap.size());
             Module module = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Module.class);
             System.out.println(module.getName() + " added");
-            RpcInfo.remoteModuleMap.put(module.getName(), module);
-            System.out.println("join之后的remote接口数：" + RpcInfo.remoteModuleMap.size());
+            RuntimeParam.remoteModuleMap.put(module.getName(), module);
+            System.out.println("join之后的kernel remote接口数：" + RuntimeParam.remoteModuleMap.size());
 
-            new Thread(new PushThread()).start();
+            Map<String, Object> result = new HashMap<>(16);
+            result.put("service", new String[]{"a", "b", "c"});
+            result.put("available", true);
+            result.put("modules", RuntimeParam.remoteModuleMap);
 
-            return success(1.0);
+            return result(SUCCESS_CODE, 1.0, null, result);
         } catch (Exception e) {
             e.printStackTrace();
-            return e.getMessage();
+            return result(-1, 1.0, e.getMessage(), null);
         }
     }
 
     @CmdInfo(cmd = "fetch", version = 1.0, preCompatible = true)
     public Object fetch(List params) {
-        Iterator<String> keyIterator = RpcInfo.remoteModuleMap.keySet().iterator();
+        Iterator<String> keyIterator = RuntimeParam.remoteModuleMap.keySet().iterator();
         List<String> service = new ArrayList<>();
         while (keyIterator.hasNext()) {
             service.add(keyIterator.next());
@@ -72,13 +76,13 @@ public class KernelCmd1 extends BaseCmd {
 
         Map<String, Object> result = new HashMap<>(16);
         result.put("service", service);
-        result.put("modules", RpcInfo.remoteModuleMap);
+        result.put("modules", RuntimeParam.remoteModuleMap);
 
-        return success(1.0, result);
+        return result(SUCCESS_CODE, 1.0, null, result);
     }
 
     @CmdInfo(cmd = "cmd1", version = 1.0, preCompatible = true)
     public Object cmd1(List params) {
-        return success(1.0, "kernel cmd1");
+        return result(SUCCESS_CODE, 1.0, null, "kernel cmd1");
     }
 }
