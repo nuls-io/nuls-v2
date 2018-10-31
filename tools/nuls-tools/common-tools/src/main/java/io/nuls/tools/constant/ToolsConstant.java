@@ -23,7 +23,8 @@ public class ToolsConstant {
     public static byte[] PLACE_HOLDER = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
 
     /**
-     * hash length
+     * 脚本标识位
+     * Null placeholder.
      */
-    public static final int ADDRESS_LENGTH = 23;
+    public static byte[] SIGN_HOLDER = new byte[]{(byte) 0x00, (byte) 0x00};
 }

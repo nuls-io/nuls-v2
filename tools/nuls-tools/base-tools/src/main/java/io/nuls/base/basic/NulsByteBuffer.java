@@ -22,9 +22,13 @@
  * SOFTWARE.
  *
  */
-package io.nuls.tools.basic;
+package io.nuls.base.basic;
 
 
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
+import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -55,93 +59,93 @@ public class NulsByteBuffer {
         this.cursor = cursor;
     }
 
-    public long readUint32LE() throws Exception {
+    public long readUint32LE() throws NulsException {
         try {
             long u = SerializeUtils.readUint32LE(payload, cursor);
             cursor += 4;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new Exception();
+            throw new NulsException(e);
         }
     }
 
-    public int readUint16() throws Exception {
+    public int readUint16() throws NulsException {
         try {
             int val = SerializeUtils.readUint16LE(payload, cursor);
             cursor += 2;
             return val;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new Exception(e);
+            throw new NulsException(e);
         }
     }
 
-    public int readInt32() throws Exception {
+    public int readInt32() throws NulsException {
         try {
             int u = SerializeUtils.readInt32LE(payload, cursor);
             cursor += 4;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new Exception(e);
+            throw new NulsException(e);
         }
     }
 
-    public long readUint32() throws Exception {
+    public long readUint32() throws NulsException {
         try {
             long val = SerializeUtils.readUint32LE(payload, cursor);
             cursor += 4;
             return val;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new Exception(e);
+            throw new NulsException(e);
         }
     }
 
-    public long readInt64() throws Exception {
+    public long readInt64() throws NulsException {
         try {
             long u = SerializeUtils.readInt64LE(payload, cursor);
             cursor += 8;
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new Exception(e);
+            throw new NulsException(e);
         }
     }
 
 
-    public long readVarInt() throws Exception {
+    public long readVarInt() throws NulsException {
         return readVarInt(0);
     }
 
-    public long readVarInt(int offset) throws Exception {
+    public long readVarInt(int offset) throws NulsException {
         try {
             VarInt varint = new VarInt(payload, cursor + offset);
             cursor += offset + varint.getOriginalSizeInBytes();
             return varint.value;
         } catch (ArrayIndexOutOfBoundsException e) {
-            throw new Exception(e);
+            throw new NulsException(e);
         }
     }
 
-    public byte readByte() throws Exception {
+    public byte readByte() throws NulsException {
         try {
             byte b = payload[cursor];
             cursor += 1;
             return b;
         } catch (IndexOutOfBoundsException e) {
-            throw new Exception(e);
+            throw new NulsException(e);
         }
     }
 
-    public byte[] readBytes(int length) throws Exception {
+    public byte[] readBytes(int length) throws NulsException {
         try {
             byte[] b = new byte[length];
             System.arraycopy(payload, cursor, b, 0, length);
             cursor += length;
             return b;
         } catch (IndexOutOfBoundsException e) {
-            throw new Exception(e);
+            throw new NulsException(e);
         }
     }
 
-    public byte[] readByLengthByte() throws Exception {
+    public byte[] readByLengthByte() throws NulsException {
         long length = this.readVarInt();
         if (length == 0) {
             return null;
@@ -149,7 +153,7 @@ public class NulsByteBuffer {
         return readBytes((int) length);
     }
 
-    public boolean readBoolean() throws Exception {
+    public boolean readBoolean() throws NulsException {
         byte b = readByte();
         return 1 == b;
     }
@@ -159,7 +163,7 @@ public class NulsByteBuffer {
         this.cursor = 0;
     }
 
-    public short readShort() throws Exception {
+    public short readShort() throws NulsException {
         byte[] bytes = this.readBytes(2);
         if (null == bytes) {
             return 0;
@@ -167,7 +171,7 @@ public class NulsByteBuffer {
         return SerializeUtils.bytes2Short(bytes);
     }
 
-    public String readString() throws Exception {
+    public String readString() throws NulsException {
         try {
             byte[] bytes = this.readByLengthByte();
             if (null == bytes) {
@@ -181,7 +185,7 @@ public class NulsByteBuffer {
 
     }
 
-    public double readDouble() throws Exception {
+    public double readDouble() throws NulsException {
         byte[] bytes = this.readBytes(8);
         if (null == bytes) {
             return 0;
@@ -203,7 +207,7 @@ public class NulsByteBuffer {
         return payload;
     }
 
-    public <T extends BaseNulsData> T readNulsData(T nulsData) throws Exception {
+    public <T extends BaseNulsData> T readNulsData(T nulsData) throws NulsException{
         if (payload == null) {
             return null;
         }
@@ -236,6 +240,19 @@ public class NulsByteBuffer {
             return -1L;
         }
         return value;
+    }
+
+    public Transaction readTransaction() throws NulsException {
+        try {
+            return TransactionManager.getInstance(this);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsException(e);
+        }
+    }
+
+    public NulsDigestData readHash() throws NulsException {
+        return this.readNulsData(new NulsDigestData());
     }
 
     public int getCursor() {

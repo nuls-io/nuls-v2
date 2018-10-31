@@ -22,8 +22,11 @@
  * SOFTWARE.
  *
  */
-package io.nuls.tools.basic;
+package io.nuls.base.data;
 
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.tools.basic.NulsData;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.tools.exception.NulsException;

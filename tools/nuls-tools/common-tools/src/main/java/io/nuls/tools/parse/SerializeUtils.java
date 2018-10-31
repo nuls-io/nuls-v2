@@ -28,7 +28,6 @@ import io.nuls.tools.basic.NulsData;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.crypto.Sha256Hash;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
@@ -40,7 +39,6 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
-import java.util.List;
 
 /**
  * @author tag

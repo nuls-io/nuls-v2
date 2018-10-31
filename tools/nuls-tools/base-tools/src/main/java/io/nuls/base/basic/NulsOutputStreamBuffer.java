@@ -22,8 +22,10 @@
  * SOFTWARE.
  *
  */
-package io.nuls.tools.basic;
+package io.nuls.base.basic;
 
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
