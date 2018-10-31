@@ -12,7 +12,7 @@ import (
 func main() {
 	flag.Parse()
 	log.Println("App Init")
-	app := new(kernel.AppDelegate)
+	app := kernel.GetAppDelegate()
 	app.Run()
 	log.Println("App Exit")
 	os.Exit(0)
