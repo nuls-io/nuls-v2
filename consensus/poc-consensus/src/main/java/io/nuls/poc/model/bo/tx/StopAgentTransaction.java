@@ -29,7 +29,7 @@ package io.nuls.poc.model.bo.tx;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
-import io.nuls.poc.model.bo.data.StopAgent;
+import io.nuls.poc.model.bo.tx.txdata.StopAgent;
 import io.nuls.tools.exception.NulsException;
 
 /**

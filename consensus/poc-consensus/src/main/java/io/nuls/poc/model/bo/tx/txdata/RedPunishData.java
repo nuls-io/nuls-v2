@@ -22,53 +22,53 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.poc.model.bo.data;
+package io.nuls.poc.model.bo.tx.txdata;
 
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Address;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author: Niels Wang
+ * @author Niels
  */
-public class StopAgent extends TransactionLogicData {
-
+public class RedPunishData extends TransactionLogicData {
     private byte[] address;
+    private byte reasonCode;
+    private byte[] evidence;
 
-    private NulsDigestData createTxHash;
-    /**
-     * serialize important field
-     */
+    public RedPunishData() {
+    }
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += address.length;
+        size += 1;
+        size += SerializeUtils.sizeOfBytes(evidence);
+        return size;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(this.createTxHash);
+        stream.write(address);
+        stream.write(reasonCode);
+        stream.writeBytesWithLength(evidence);
 
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.createTxHash = byteBuffer.readHash();
-    }
-
-    @Override
-    public int size() {
-        return this.createTxHash.size();
-    }
-    @Override
-    public Set<byte[]> getAddresses() {
-        Set<byte[]> addressSet = new HashSet<>();
-        if(null!=address){
-            addressSet.add(this.address);
-        }
-        return addressSet;
+        this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+        this.reasonCode = byteBuffer.readByte();
+        this.evidence = byteBuffer.readByLengthByte();
     }
 
     public byte[] getAddress() {
@@ -79,11 +79,26 @@ public class StopAgent extends TransactionLogicData {
         this.address = address;
     }
 
-    public NulsDigestData getCreateTxHash() {
-        return createTxHash;
+    public byte getReasonCode() {
+        return reasonCode;
     }
 
-    public void setCreateTxHash(NulsDigestData createTxHash) {
-        this.createTxHash = createTxHash;
+    public void setReasonCode(byte reasonCode) {
+        this.reasonCode = reasonCode;
+    }
+
+    public byte[] getEvidence() {
+        return evidence;
+    }
+
+    public void setEvidence(byte[] evidence) {
+        this.evidence = evidence;
+    }
+
+    @Override
+    public Set<byte[]> getAddresses() {
+        Set<byte[]> set = new HashSet<>();
+        set.add(address);
+        return set;
     }
 }

@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.poc.model.bo.data;
+package io.nuls.poc.model.bo.tx.txdata;
 
 
 import io.nuls.base.basic.NulsByteBuffer;

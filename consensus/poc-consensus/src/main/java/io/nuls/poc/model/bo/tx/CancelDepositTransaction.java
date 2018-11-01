@@ -25,14 +25,11 @@
  */
 package io.nuls.poc.model.bo.tx;
 
-import io.nuls.consensus.constant.ConsensusConstant;
-import io.nuls.consensus.poc.protocol.entity.CancelDeposit;
-import io.nuls.kernel.context.NulsContext;
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.CoinData;
-import io.nuls.kernel.model.Transaction;
-import io.nuls.kernel.utils.NulsByteBuffer;
-import io.nuls.ledger.service.LedgerService;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.Transaction;
+import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
+import io.nuls.tools.exception.NulsException;
 
 /**
  * @author Niels
@@ -40,11 +37,11 @@ import io.nuls.ledger.service.LedgerService;
 public class CancelDepositTransaction extends Transaction<CancelDeposit> {
 
     public CancelDepositTransaction() {
-        super(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
+        super(5);
     }
 
     public CancelDepositTransaction(CoinData coinData) {
-        super(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
+        super(5);
     }
 
     @Override
@@ -54,13 +51,13 @@ public class CancelDepositTransaction extends Transaction<CancelDeposit> {
 
     @Override
     public String getInfo(byte[] address) {
-        if (null != this.txData) {
+        /*if (null != this.txData) {
             LedgerService ledgerService = NulsContext.getServiceBean(LedgerService.class);
             DepositTransaction tx = (DepositTransaction) ledgerService.getTx(this.txData.getJoinTxHash());
             if (null != tx) {
                 return "unlock " + tx.getTxData().getDeposit().toCoinString();
             }
-        }
+        }*/
         return "--";
     }
 

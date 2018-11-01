@@ -22,53 +22,36 @@
  * SOFTWARE.
  *
  */
-package io.nuls.poc.model.bo.data;
+
+package io.nuls.poc.model.bo.tx.txdata;
 
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
-import io.nuls.base.data.Address;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author Niels
+ * @author: Niels Wang
  */
-public class RedPunishData extends TransactionLogicData {
+public class CancelDeposit extends TransactionLogicData {
+
     private byte[] address;
-    private byte reasonCode;
-    private byte[] evidence;
 
-    public RedPunishData() {
-    }
+    private NulsDigestData joinTxHash;
 
     @Override
-    public int size() {
-        int size = 0;
-        size += address.length;
-        size += 1;
-        size += SerializeUtils.sizeOfBytes(evidence);
-        return size;
-    }
-
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(address);
-        stream.write(reasonCode);
-        stream.writeBytesWithLength(evidence);
-
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
-        this.reasonCode = byteBuffer.readByte();
-        this.evidence = byteBuffer.readByLengthByte();
+    public Set<byte[]> getAddresses() {
+        Set<byte[]> addressSet = new HashSet<>();
+        if (null != address) {
+            addressSet.add(this.address);
+        }
+        return addressSet;
     }
 
     public byte[] getAddress() {
@@ -79,26 +62,30 @@ public class RedPunishData extends TransactionLogicData {
         this.address = address;
     }
 
-    public byte getReasonCode() {
-        return reasonCode;
+    public NulsDigestData getJoinTxHash() {
+        return joinTxHash;
     }
 
-    public void setReasonCode(byte reasonCode) {
-        this.reasonCode = reasonCode;
+    public void setJoinTxHash(NulsDigestData joinTxHash) {
+        this.joinTxHash = joinTxHash;
     }
 
-    public byte[] getEvidence() {
-        return evidence;
-    }
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(this.joinTxHash);
 
-    public void setEvidence(byte[] evidence) {
-        this.evidence = evidence;
     }
 
     @Override
-    public Set<byte[]> getAddresses() {
-        Set<byte[]> set = new HashSet<>();
-        set.add(address);
-        return set;
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.joinTxHash = byteBuffer.readHash();
+    }
+
+    @Override
+    public int size() {
+        return this.joinTxHash.size();
     }
 }

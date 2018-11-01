@@ -23,13 +23,14 @@
  *
  */
 
-package io.nuls.poc.model.bo.data;
+package io.nuls.poc.model.bo.tx.txdata;
 
-import io.nuls.kernel.exception.NulsException;
-import io.nuls.kernel.model.NulsDigestData;
-import io.nuls.kernel.model.TransactionLogicData;
-import io.nuls.kernel.utils.NulsByteBuffer;
-import io.nuls.kernel.utils.NulsOutputStreamBuffer;
+
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -38,16 +39,33 @@ import java.util.Set;
 /**
  * @author: Niels Wang
  */
-public class CancelDeposit extends TransactionLogicData {
+public class StopAgent extends TransactionLogicData {
 
     private byte[] address;
 
-    private NulsDigestData joinTxHash;
+    private NulsDigestData createTxHash;
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(this.createTxHash);
 
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.createTxHash = byteBuffer.readHash();
+    }
+
+    @Override
+    public int size() {
+        return this.createTxHash.size();
+    }
     @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
-        if (null != address) {
+        if(null!=address){
             addressSet.add(this.address);
         }
         return addressSet;
@@ -61,30 +79,11 @@ public class CancelDeposit extends TransactionLogicData {
         this.address = address;
     }
 
-    public NulsDigestData getJoinTxHash() {
-        return joinTxHash;
+    public NulsDigestData getCreateTxHash() {
+        return createTxHash;
     }
 
-    public void setJoinTxHash(NulsDigestData joinTxHash) {
-        this.joinTxHash = joinTxHash;
-    }
-
-    /**
-     * serialize important field
-     */
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(this.joinTxHash);
-
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.joinTxHash = byteBuffer.readHash();
-    }
-
-    @Override
-    public int size() {
-        return this.joinTxHash.size();
+    public void setCreateTxHash(NulsDigestData createTxHash) {
+        this.createTxHash = createTxHash;
     }
 }
