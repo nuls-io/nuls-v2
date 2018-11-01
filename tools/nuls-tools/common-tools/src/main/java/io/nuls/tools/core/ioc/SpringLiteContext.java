@@ -172,7 +172,7 @@ public class SpringLiteContext {
         if (null == name || name.trim().length() == 0) {
             Set<String> nameSet = CLASS_NAME_SET_MAP.get(field.getType());
             if (nameSet == null || nameSet.isEmpty()) {
-                throw new Exception("Can't find the bean,field:" + field.getName());
+                throw new Exception("Can't find the model,field:" + field.getName());
             } else if (nameSet.size() == 1) {
                 name = nameSet.iterator().next();
             } else {
@@ -181,7 +181,7 @@ public class SpringLiteContext {
         }
         value = getBean(name);
         if (null == value) {
-            throw new Exception("Can't find the bean named:" + name);
+            throw new Exception("Can't find the model named:" + name);
         }
         field.setAccessible(true);
         field.set(obj, value);
@@ -191,7 +191,7 @@ public class SpringLiteContext {
 
     /**
      * 根据名称获取bean
-     * get bean by bean name
+     * get model by model name
      *
      * @param name 对象名称，Bean Name
      */
@@ -205,7 +205,7 @@ public class SpringLiteContext {
 
     /**
      * 检查一个类型，如果这个类型上被注释了我们关心的注解，如：Service/Component/Interceptor,就对这个对象进行加载，并放入bean管理器中
-     * Check a type, if this is commented on the type annotation, we care about, such as: (Service/Component/Interceptor), is to load the object, and in the bean manager
+     * Check a type, if this is commented on the type annotation, we care about, such as: (Service/Component/Interceptor), is to load the object, and in the model manager
      *
      * @param clazz class type
      */
@@ -292,11 +292,11 @@ public class SpringLiteContext {
      */
     private static Object loadBean(String beanName, Class clazz, boolean proxy) throws NulsException {
         if (BEAN_OK_MAP.containsKey(beanName)) {
-            Log.error("bean name repetition (" + beanName + "):" + clazz.getName());
+            Log.error("model name repetition (" + beanName + "):" + clazz.getName());
             return BEAN_OK_MAP.get(beanName);
         }
         if (BEAN_TEMP_MAP.containsKey(beanName)) {
-            Log.error("bean name repetition (" + beanName + "):" + clazz.getName());
+            Log.error("model name repetition (" + beanName + "):" + clazz.getName());
             return BEAN_TEMP_MAP.get(beanName);
         }
         Object bean = null;
