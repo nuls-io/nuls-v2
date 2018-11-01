@@ -29,6 +29,7 @@ package io.nuls.poc.model.bo.tx;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
+import io.nuls.poc.utils.ConsensusConstant;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 
@@ -38,7 +39,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 public class CreateAgentTransaction extends Transaction<Agent> {
 
     public CreateAgentTransaction() {
-        super(2);
+        super(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
     }
 
     @Override

@@ -29,6 +29,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
+import io.nuls.poc.utils.ConsensusConstant;
 import io.nuls.tools.exception.NulsException;
 
 /**
@@ -37,11 +38,11 @@ import io.nuls.tools.exception.NulsException;
 public class CancelDepositTransaction extends Transaction<CancelDeposit> {
 
     public CancelDepositTransaction() {
-        super(5);
+        super(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
     }
 
     public CancelDepositTransaction(CoinData coinData) {
-        super(5);
+        super(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
     }
 
     @Override
