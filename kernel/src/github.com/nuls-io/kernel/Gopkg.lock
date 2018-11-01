@@ -2,20 +2,23 @@
 
 
 [[projects]]
+  digest = "1:a66fce629a0e374ac46a776c32a536fdd01d05d56163bac4fab2e0f633d4d79b"
+  name = "github.com/gorilla/rpc"
+  packages = [
+    "v2",
+    "v2/json",
+  ]
+  pruneopts = "UT"
+  revision = "22c016f3df3febe0c1f6727598b6389507e03a18"
+  version = "v1.1.0"
+
+[[projects]]
   digest = "1:7b5c6e2eeaa9ae5907c391a91c132abfd5c9e8a784a341b5625e750c67e6825d"
   name = "github.com/gorilla/websocket"
   packages = ["."]
   pruneopts = "UT"
   revision = "66b9c49e59c6c48f0ffce28c2d8b8a5678502c6d"
   version = "v1.4.0"
-
-[[projects]]
-  digest = "1:a8a633510a8566261a472b01fb6e722d1e9307b3e620e7a2d3aeb8857dfeaff7"
-  name = "github.com/powerman/rpc-codec"
-  packages = ["jsonrpc2"]
-  pruneopts = "UT"
-  revision = "3e1ab3b635b7b0d5f771028cd45aa9a827fd9f31"
-  version = "v1.0.0"
 
 [[projects]]
   digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
@@ -29,8 +32,9 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/gorilla/rpc/v2",
+    "github.com/gorilla/rpc/v2/json",
     "github.com/gorilla/websocket",
-    "github.com/powerman/rpc-codec/jsonrpc2",
     "github.com/satori/go.uuid",
   ]
   solver-name = "gps-cdcl"

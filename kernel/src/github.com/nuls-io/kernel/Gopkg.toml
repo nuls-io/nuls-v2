@@ -26,13 +26,17 @@
 
 
 [[constraint]]
+  name = "github.com/gorilla/rpc"
+  version = "1.1.0"
+
+[[constraint]]
   name = "github.com/gorilla/websocket"
   version = "1.4.0"
+
+[[constraint]]
+  name = "github.com/satori/go.uuid"
+  version = "1.2.0"
 
 [prune]
   go-tests = true
   unused-packages = true
-
-[[constraint]]
-  name = "github.com/powerman/rpc-codec"
-  version = "1.0.0"
