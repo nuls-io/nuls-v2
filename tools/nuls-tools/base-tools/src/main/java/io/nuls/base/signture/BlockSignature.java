@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.base.script;
+package io.nuls.base.signture;
 import io.nuls.base.basic.*;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;

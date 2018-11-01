@@ -30,7 +30,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.constant.TxStatusEnum;
-import io.nuls.base.script.SignatureUtil;
+import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.crypto.UnsafeByteArrayOutputStream;
 import io.nuls.tools.exception.NulsException;
