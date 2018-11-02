@@ -23,44 +23,35 @@
  *
  */
 
-package io.nuls.account.model.po;
+package io.nuls.account.model.bo.tx.txdata;
 
-import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @author: qinyifeng
  */
-public class AliasPo extends BaseNulsData {
+public class Alias extends TransactionLogicData {
 
     private byte[] address;
 
+
     private String alias;
 
-    public AliasPo() {
+
+    public Alias() {
     }
 
-    public AliasPo(Alias alias) {
-        this.address = alias.getAddress();
-        this.alias = alias.getAlias().trim();
-
-    }
-
-    public Alias toAlias() {
-        return new Alias(this.address, this.getAlias().trim());
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias == null ? null : alias.trim();
+    public Alias(byte[] address, String alias) {
+        this.address = address;
+        this.alias = alias;
     }
 
     public byte[] getAddress() {
@@ -71,18 +62,40 @@ public class AliasPo extends BaseNulsData {
         this.address = address;
     }
 
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-
+    public String getAlias() {
+        return alias;
     }
 
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
 
+
+    @Override
+    public Set<byte[]> getAddresses() {
+        Set<byte[]> addressSet = new HashSet<>();
+        addressSet.add(this.address);
+        return addressSet;
     }
 
     @Override
     public int size() {
-        return 0;
+        int s = 0;
+        s += SerializeUtils.sizeOfBytes(address);
+        s += SerializeUtils.sizeOfString(alias);
+        return s;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeBytesWithLength(address);
+        stream.writeString(alias);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.address = byteBuffer.readByLengthByte();
+        this.alias = byteBuffer.readString();
+
     }
 }

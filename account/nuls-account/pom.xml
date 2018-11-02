@@ -14,6 +14,33 @@
     </properties>
 
 
+    <dependencies>
+        <!-- common-tools -->
+        <dependency>
+            <groupId>io.nuls.nuls-tools</groupId>
+            <artifactId>common-tools</artifactId>
+            <version>${tool.version}</version>
+        </dependency>
+        <!-- base-tools -->
+        <dependency>
+            <groupId>io.nuls.nuls-tools</groupId>
+            <artifactId>base-tools</artifactId>
+            <version>${tool.version}</version>
+        </dependency>
+        <!-- storage-tools -->
+        <dependency>
+            <groupId>io.nuls.nuls-tools</groupId>
+            <artifactId>storage-tools</artifactId>
+            <version>${tool.version}</version>
+        </dependency>
+        <!-- junit-test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>

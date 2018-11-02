@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls;
+package io.nuls.tools.storage;
 
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.BatchOperation;
@@ -78,7 +78,7 @@ public class RocksDBTest {
         //entryListTest();
         //batchPutTest();
         //deleteKeysTest();
-        executeBatchTest();
+        //executeBatchTest();
     }
 
     @Ignore

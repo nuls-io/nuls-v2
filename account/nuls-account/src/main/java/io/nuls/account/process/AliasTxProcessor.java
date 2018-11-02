@@ -23,66 +23,35 @@
  *
  */
 
-package io.nuls.account.model.po;
+package io.nuls.account.process;
 
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.account.model.bo.tx.AliasTransaction;
+import io.nuls.base.basic.TransactionProcessor;
+import io.nuls.base.data.Transaction;
+import io.nuls.tools.basic.Result;
 
-import java.io.IOException;
+import java.util.List;
 
 /**
+ * 设置别名处理器
+ *
  * @author: qinyifeng
  */
-public class AliasPo extends BaseNulsData {
+public class AliasTxProcessor implements TransactionProcessor<AliasTransaction> {
 
-    private byte[] address;
 
-    private String alias;
-
-    public AliasPo() {
-    }
-
-    public AliasPo(Alias alias) {
-        this.address = alias.getAddress();
-        this.alias = alias.getAlias().trim();
-
-    }
-
-    public Alias toAlias() {
-        return new Alias(this.address, this.getAlias().trim());
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public void setAlias(String alias) {
-        this.alias = alias == null ? null : alias.trim();
-    }
-
-    public byte[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(byte[] address) {
-        this.address = address;
+    @Override
+    public Result onRollback(AliasTransaction tx, Object secondaryData) {
+        return null;
     }
 
     @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-
+    public Result onCommit(AliasTransaction tx, Object secondaryData) {
+        return null;
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-
-    }
-
-    @Override
-    public int size() {
-        return 0;
+    public Result conflictDetect(List<Transaction> txList) {
+        return null;
     }
 }
