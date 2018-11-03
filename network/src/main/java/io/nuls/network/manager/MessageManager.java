@@ -91,12 +91,17 @@ public class MessageManager extends BaseManager{
         return null;
     }
 
+    /**
+     * 验证消息
+     * @param data
+     * @return
+     */
     public boolean validate(BaseMessage data){
         if (data.getHeader() == null) {
             Log.error("NET_MESSAGE_ERROR");
             return false;
         }
-        if(data.getHeader().getPayloadLength()==0 && data.getMsgBody() == null){
+        if(data.getHeader().getPayloadLength()== 4 && data.getMsgBody() == null){
             //ok
             return true;
         } else if (data.getHeader().getPayloadLength() != data.getMsgBody().size()) {

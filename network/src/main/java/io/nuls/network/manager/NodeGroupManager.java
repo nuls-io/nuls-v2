@@ -29,7 +29,6 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.NodeGroup;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -79,7 +78,10 @@ public class NodeGroupManager extends BaseManager{
     }
     //TODO:
     public boolean validMagicNumber(long magicNumber){
-        return true;
+        if(null != mgicNumChainIdMap.get(String.valueOf(magicNumber))) {
+            return true;
+        }
+        return false;
     }
 
     public static NodeGroupManager getInstance(){

@@ -31,19 +31,20 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
-
+/**
+ * message body
+ */
 public class MessageBody extends BaseNulsData {
-
+   byte [] empty =ToolsConstant.PLACE_HOLDER;
     public MessageBody() {
 
     }
 
     @Override
     public int size() {
-        return 0;
+        return 4;
     }
 
     /**
@@ -51,12 +52,13 @@ public class MessageBody extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write(ToolsConstant.PLACE_HOLDER);
 
     }
 
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
-
+        buffer.readBytes(4);
     }
 
 }

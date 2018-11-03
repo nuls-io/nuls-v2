@@ -25,12 +25,10 @@
 
 package io.nuls.network.model.message.body;
 
-import io.nuls.network.model.message.body.MessageBody;
-
 /**
  * vrack protocol message body
+ * @author  lan
  */
-public class VerackMessageBody extends MessageBody {
-
+public class VerackMessageBody  extends MessageBody {
 
 }

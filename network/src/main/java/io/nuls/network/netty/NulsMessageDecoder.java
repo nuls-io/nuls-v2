@@ -26,7 +26,6 @@ package io.nuls.network.netty;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.NodeGroupManager;
 
 import java.nio.ByteOrder;
