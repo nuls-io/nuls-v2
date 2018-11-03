@@ -30,4 +30,5 @@ public interface DBErrorCode {
     String DB_TABLE_CREATE_ERROR = "Create DB table error";
     String DB_TABLE_CREATE_PATH_ERROR = "Create DB table path error";
     String DB_TABLE_DESTROY_ERROR = "Destroy DB table error";
+    String DB_TABLE_FAILED_BATCH_CLOSE = "DB batch operation closed";
 }

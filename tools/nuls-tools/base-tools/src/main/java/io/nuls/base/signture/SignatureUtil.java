@@ -22,12 +22,13 @@
  * SOFTWARE.
  *
  */
-package io.nuls.base.script;
+package io.nuls.base.signture;
 
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.*;
+import io.nuls.base.script.*;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.exception.NulsException;

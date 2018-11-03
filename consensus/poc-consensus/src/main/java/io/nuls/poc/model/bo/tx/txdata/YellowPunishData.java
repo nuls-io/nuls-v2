@@ -22,70 +22,72 @@
  * SOFTWARE.
  *
  */
+package io.nuls.poc.model.bo.tx.txdata;
 
-package io.nuls.base.script;
-import io.nuls.base.basic.*;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.NulsSignData;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.crypto.ECKey;
+
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.base.data.Address;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-public class BlockSignature extends BaseNulsData {
-    private NulsSignData signData;
-    private byte[] publicKey;
+/**
+ * @author Niels
+ */
+public class YellowPunishData extends TransactionLogicData {
+    private List<byte[]> addressList = new ArrayList<>();
+
+    public YellowPunishData() {
+    }
+
+    public List<byte[]> getAddressList() {
+        return addressList;
+    }
+
+    public void setAddressList(List<byte[]> addressList) {
+        this.addressList = addressList;
+    }
+
+    @Override
+    public Set<byte[]> getAddresses() {
+        return new HashSet<>(addressList);
+    }
 
     /**
      * serialize important field
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(publicKey.length);
-        stream.write(publicKey);
-        stream.writeNulsData(signData);
+        stream.writeVarInt(addressList.size());
+        for (byte[] address : addressList) {
+            stream.write(address);
+        }
+
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        int length = byteBuffer.readByte();
-        this.publicKey = byteBuffer.readBytes(length);
-        this.signData = new NulsSignData();
-        this.signData.parse(byteBuffer);
+        int count = (int) byteBuffer.readVarInt();
+        addressList.clear();
+        for (int i = 0; i < count; i++) {
+            addressList.add(byteBuffer.readBytes(Address.ADDRESS_LENGTH));
+        }
+
     }
 
     @Override
     public int size() {
-        int size = 1 + publicKey.length;
-        size += SerializeUtils.sizeOfNulsData(signData);
-        return size;
-    }
-
-    public Result verifySignature(NulsDigestData digestData) {
-        boolean b = ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), publicKey);
-        if (b) {
-            return new Result(true);
-        } else {
-            return new Result(false);
+        int size = SerializeUtils.sizeOfVarInt(addressList.size());
+        for (byte[] address : addressList) {
+            size += Address.ADDRESS_LENGTH;
         }
-    }
-
-    public byte[] getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(byte[] publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public NulsSignData getSignData() {
-        return signData;
-    }
-
-    public void setSignData(NulsSignData signData) {
-        this.signData = signData;
+        return size;
     }
 }

@@ -22,7 +22,6 @@ package io.nuls.db.manager;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.model.Entry;
 import io.nuls.db.util.DBUtils;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import org.rocksdb.BlockBasedTableConfig;
@@ -86,36 +85,38 @@ public class RocksDBManager {
 
     /**
      * 根据传入的数据库路径将已存在的数据库连接打开，并缓存DB连接.
+     * 如果有数据表连接被关闭需要重新打开连接也可以，执行初始化连接
      *
      * @param path 数据库地址
      * @throws Exception 数据库打开连接异常
      */
     public static void init(final String path) throws Exception {
         synchronized (RocksDBManager.class) {
-            if (!isInit) {
-                isInit = true;
-                File dir = DBUtils.loadDataPath(path);
-                dataPath = dir.getPath();
-                Log.info("RocksDBManager dataPath is " + dataPath);
-                File[] tableFiles = dir.listFiles();
-                RocksDB db = null;
-                String dbPath = null;
-                for (File tableFile : tableFiles) {
-                    if (!tableFile.isDirectory()) {
-                        continue;
+            //if (isInit) {
+            isInit = true;
+            File dir = DBUtils.loadDataPath(path);
+            dataPath = dir.getPath();
+            Log.info("RocksDBManager dataPath is " + dataPath);
+            File[] tableFiles = dir.listFiles();
+            RocksDB db;
+            String dbPath = null;
+            for (File tableFile : tableFiles) {
+                //缓存中已存在的数据库连接不再重复打开
+                if (!tableFile.isDirectory() && TABLES.get(tableFile.getName()) != null) {
+                    continue;
+                }
+                try {
+                    dbPath = tableFile.getPath() + File.separator + BASE_DB_NAME;
+                    db = initOpenDB(dbPath);
+                    if (db != null) {
+                        TABLES.put(tableFile.getName(), db);
                     }
-                    try {
-                        dbPath = tableFile.getPath() + File.separator + BASE_DB_NAME;
-                        db = initOpenDB(dbPath);
-                        if (db != null) {
-                            TABLES.put(tableFile.getName(), db);
-                        }
-                    } catch (Exception e) {
-                        Log.warn("load table failed, tableName: " + tableFile.getName() + ", dbPath: " + dbPath, e);
-                    }
-
+                } catch (Exception e) {
+                    Log.warn("load table failed, tableName: " + tableFile.getName() + ", dbPath: " + dbPath, e);
+                    throw e;
                 }
             }
+            //}
         }
 
     }
@@ -156,17 +157,19 @@ public class RocksDBManager {
      * @param tableName 数据库表名称
      * @return Result 创建结果
      */
-    public static Result createTable(final String tableName) {
+    public static boolean createTable(final String tableName) throws Exception {
         lock.lock();
         try {
             if (StringUtils.isBlank(tableName)) {
-                return new Result(false, DBErrorCode.NULL_PARAMETER);
+                throw new Exception(DBErrorCode.NULL_PARAMETER);
             }
             if (TABLES.containsKey(tableName)) {
-                return new Result(false, DBErrorCode.DB_TABLE_EXIST);
+                //throw new Exception(DBErrorCode.DB_TABLE_EXIST);
+                Log.warn(DBErrorCode.DB_TABLE_EXIST);
+                return false;
             }
             if (StringUtils.isBlank(dataPath) || !DBUtils.checkPathLegal(tableName)) {
-                return new Result(false, DBErrorCode.DB_TABLE_CREATE_PATH_ERROR);
+                throw new Exception(DBErrorCode.DB_TABLE_CREATE_PATH_ERROR);
             }
             try {
                 File dir = new File(dataPath + File.separator + tableName);
@@ -178,9 +181,9 @@ public class RocksDBManager {
                 TABLES.put(tableName, db);
             } catch (Exception e) {
                 Log.error("error create table: " + tableName, e);
-                return new Result(false).setMsg(DBErrorCode.DB_TABLE_CREATE_ERROR);
+                throw new Exception(DBErrorCode.DB_TABLE_CREATE_ERROR);
             }
-            return new Result(true);
+            return true;
         } finally {
             lock.unlock();
         }
@@ -204,27 +207,27 @@ public class RocksDBManager {
      * @param tableName 数据库表名称
      * @return Result
      */
-    public static Result destroyTable(final String tableName) {
+    public static boolean destroyTable(final String tableName) throws Exception {
         if (!baseCheckTable(tableName)) {
-            return new Result(false, DBErrorCode.DB_TABLE_NOT_EXIST);
+            throw new Exception(DBErrorCode.DB_TABLE_NOT_EXIST);
         }
         if (StringUtils.isBlank(dataPath) || !DBUtils.checkPathLegal(tableName)) {
-            return new Result(false, DBErrorCode.DB_TABLE_CREATE_PATH_ERROR);
+            throw new Exception(DBErrorCode.DB_TABLE_CREATE_PATH_ERROR);
         }
         try {
             RocksDB db = TABLES.remove(tableName);
             db.close();
             File dir = new File(dataPath + File.separator + tableName);
             if (!dir.exists()) {
-                return new Result(false, DBErrorCode.DB_TABLE_NOT_EXIST);
+                throw new Exception(DBErrorCode.DB_TABLE_NOT_EXIST);
             }
             String filePath = dataPath + File.separator + tableName + File.separator + BASE_DB_NAME;
             destroyDB(filePath);
         } catch (Exception e) {
             Log.error("error destroy table: " + tableName, e);
-            return new Result(false, DBErrorCode.DB_TABLE_DESTROY_ERROR);
+            throw new Exception(DBErrorCode.DB_TABLE_DESTROY_ERROR);
         }
-        return new Result(true);
+        return true;
     }
 
     /**
@@ -312,20 +315,20 @@ public class RocksDBManager {
      * @param value 数据值
      * @return 保存是否成功
      */
-    public static Result put(final String table, final byte[] key, final byte[] value) {
+    public static boolean put(final String table, final byte[] key, final byte[] value) throws Exception {
         if (!baseCheckTable(table)) {
-            return new Result(false, DBErrorCode.DB_TABLE_NOT_EXIST);
+            throw new Exception(DBErrorCode.DB_TABLE_NOT_EXIST);
         }
         if (key == null || value == null) {
-            return new Result(false, DBErrorCode.NULL_PARAMETER);
+            throw new Exception(DBErrorCode.NULL_PARAMETER);
         }
         try {
             RocksDB db = TABLES.get(table);
             db.put(key, value);
-            return new Result(true);
+            return true;
         } catch (Exception e) {
             Log.error(e);
-            return new Result(false, DBErrorCode.DB_UNKOWN_EXCEPTION);
+            throw new Exception(DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -337,20 +340,20 @@ public class RocksDBManager {
      * @param key   删除标识
      * @return 删除是否成功
      */
-    public static Result delete(final String table, final byte[] key) {
+    public static boolean delete(final String table, final byte[] key) throws Exception {
         if (!baseCheckTable(table)) {
-            return new Result(false, DBErrorCode.DB_TABLE_NOT_EXIST);
+            throw new Exception(DBErrorCode.DB_TABLE_NOT_EXIST);
         }
         if (key == null) {
-            return new Result(false, DBErrorCode.NULL_PARAMETER);
+            throw new Exception(DBErrorCode.NULL_PARAMETER);
         }
         try {
             RocksDB db = TABLES.get(table);
             db.delete(key);
-            return new Result(true);
+            return true;
         } catch (Exception e) {
             Log.error(e);
-            return new Result(false, DBErrorCode.DB_UNKOWN_EXCEPTION);
+            throw new Exception(DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -362,12 +365,12 @@ public class RocksDBManager {
      * @param kvs   保存数据的键值对
      * @return 批量保存是否成功
      */
-    public static Result batchPut(final String table, final Map<byte[], byte[]> kvs) {
+    public static boolean batchPut(final String table, final Map<byte[], byte[]> kvs) throws Exception {
         if (!baseCheckTable(table)) {
-            return new Result(false, DBErrorCode.DB_TABLE_NOT_EXIST);
+            throw new Exception(DBErrorCode.DB_TABLE_NOT_EXIST);
         }
         if (kvs == null || kvs.size() == 0) {
-            return null;
+            throw new Exception(DBErrorCode.NULL_PARAMETER);
         }
 
         try (WriteBatch writeBatch = new WriteBatch()) {
@@ -376,10 +379,10 @@ public class RocksDBManager {
                 writeBatch.put(entry.getKey(), entry.getValue());
             }
             db.write(new WriteOptions(), writeBatch);
-            return new Result(true);
+            return true;
         } catch (Exception ex) {
             Log.error(ex);
-            return new Result(false, DBErrorCode.DB_UNKOWN_EXCEPTION);
+            throw new Exception(DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 
@@ -391,12 +394,12 @@ public class RocksDBManager {
      * @param keys  批量删除标识
      * @return 批量删除是否成功
      */
-    public static Result deleteKeys(final String table, final List<byte[]> keys) {
+    public static boolean deleteKeys(final String table, final List<byte[]> keys) throws Exception {
         if (!baseCheckTable(table)) {
-            return new Result(false, DBErrorCode.DB_TABLE_NOT_EXIST);
+            throw new Exception(DBErrorCode.DB_TABLE_NOT_EXIST);
         }
         if (keys == null || keys.size() == 0) {
-            return null;
+            throw new Exception(DBErrorCode.NULL_PARAMETER);
         }
         try (WriteBatch writeBatch = new WriteBatch()) {
             RocksDB db = TABLES.get(table);
@@ -404,10 +407,10 @@ public class RocksDBManager {
                 writeBatch.delete(key);
             }
             db.write(new WriteOptions(), writeBatch);
-            return new Result(true);
+            return true;
         } catch (Exception ex) {
             Log.error(ex);
-            return new Result(false, DBErrorCode.DB_UNKOWN_EXCEPTION);
+            throw new Exception(DBErrorCode.DB_UNKOWN_EXCEPTION);
         }
     }
 

@@ -22,11 +22,11 @@
  * SOFTWARE.
  *
  */
-package io.nuls;
+package io.nuls.tools.storage;
 
 import io.nuls.db.model.Entry;
-import io.nuls.db.service.DBService;
-import io.nuls.tools.basic.Result;
+import io.nuls.db.service.BatchOperation;
+import io.nuls.db.service.RocksDBService;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -37,19 +37,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import static io.nuls.db.service.DBService.batchPut;
-import static io.nuls.db.service.DBService.createTable;
-import static io.nuls.db.service.DBService.delete;
-import static io.nuls.db.service.DBService.deleteKeys;
-import static io.nuls.db.service.DBService.destroyTable;
-import static io.nuls.db.service.DBService.entryList;
-import static io.nuls.db.service.DBService.get;
-import static io.nuls.db.service.DBService.keyList;
-import static io.nuls.db.service.DBService.listTable;
-import static io.nuls.db.service.DBService.multiGet;
-import static io.nuls.db.service.DBService.multiGetValueList;
-import static io.nuls.db.service.DBService.put;
-import static io.nuls.db.service.DBService.valueList;
+import static io.nuls.db.service.RocksDBService.batchPut;
+import static io.nuls.db.service.RocksDBService.createTable;
+import static io.nuls.db.service.RocksDBService.delete;
+import static io.nuls.db.service.RocksDBService.deleteKeys;
+import static io.nuls.db.service.RocksDBService.destroyTable;
+import static io.nuls.db.service.RocksDBService.entryList;
+import static io.nuls.db.service.RocksDBService.get;
+import static io.nuls.db.service.RocksDBService.keyList;
+import static io.nuls.db.service.RocksDBService.listTable;
+import static io.nuls.db.service.RocksDBService.multiGet;
+import static io.nuls.db.service.RocksDBService.multiGetValueList;
+import static io.nuls.db.service.RocksDBService.put;
+import static io.nuls.db.service.RocksDBService.valueList;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
@@ -73,11 +73,12 @@ public class RocksDBTest {
         //deleteTest();
         //multiGetTest();
         //multiGetValueListTest();
-        keyListTest();
+        //keyListTest();
         //valueListTest();
         //entryListTest();
         //batchPutTest();
         //deleteKeysTest();
+        //executeBatchTest();
     }
 
     @Ignore
@@ -85,7 +86,7 @@ public class RocksDBTest {
     public void initTest() throws Exception {
         String dataPath = "../../data";
         long start = System.currentTimeMillis();
-        DBService.init(dataPath);
+        RocksDBService.init(dataPath);
         long end = System.currentTimeMillis();
         System.out.println("数据库连接初始化测试耗时：" + (end - start) + "ms");
     }
@@ -97,9 +98,14 @@ public class RocksDBTest {
     @Test
     public void createTableTest() {
         String tableName = table;//account chain
-        Result result = DBService.createTable(tableName);
-        System.out.println(result.toString());
-        Assert.assertEquals(true, result.isSuccess());
+        boolean result = false;
+        try {
+            result = RocksDBService.createTable(tableName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(result);
+        Assert.assertEquals(true, result);
     }
 
     /**
@@ -109,9 +115,13 @@ public class RocksDBTest {
     @Test
     public void destroyTableTest() {
         String tableName = "user";
-        Result result = DBService.destroyTable(tableName);
-        System.out.println(result.toString());
-        Assert.assertEquals(true, result.isSuccess());
+        boolean result = false;
+        try {
+            result = RocksDBService.destroyTable(tableName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Assert.assertEquals(true, result);
     }
 
     /**
@@ -120,30 +130,37 @@ public class RocksDBTest {
     @Ignore
     @Test
     public void listTableTest() {
-        String[] tables = DBService.listTable();
         String testTable = "testListTable";
-        createTable(testTable);
-        tables = listTable();
-        boolean exist = false;
-        for (String table : tables) {
-            if (table.equals(testTable)) {
-                exist = true;
-                //break;
+        try {
+            createTable(testTable);
+            String[] tables = listTable();
+            boolean exist = false;
+            for (String table : tables) {
+                if (table.equals(testTable)) {
+                    exist = true;
+                    //break;
+                }
+                System.out.println("table: " + table);
             }
-            System.out.println("table: " + table);
+            Assert.assertTrue("create - list tables failed.", exist);
+            put(testTable, key.getBytes(UTF_8), "testListTable".getBytes(UTF_8));
+            String getValue = new String(get(testTable, key.getBytes(UTF_8)), UTF_8);
+            Assert.assertEquals("testListTable", getValue);
+            destroyTable(testTable);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        Assert.assertTrue("create - list tables failed.", exist);
-        put(testTable, key.getBytes(UTF_8), "testListTable".getBytes(UTF_8));
-        String getValue = new String(get(testTable, key.getBytes(UTF_8)), UTF_8);
-        Assert.assertEquals("testListTable", getValue);
-        destroyTable(testTable);
     }
 
     @Ignore
     @Test
     public void putTest() {
         String value = "testvalue";
-        put(table, key.getBytes(UTF_8), value.getBytes(UTF_8));
+        try {
+            put(table, key.getBytes(UTF_8), value.getBytes(UTF_8));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         String getValue = new String(get(table, key.getBytes(UTF_8)), UTF_8);
         Assert.assertEquals(value, getValue);
     }
@@ -159,7 +176,11 @@ public class RocksDBTest {
     @Ignore
     @Test
     public void deleteTest() {
-        delete(table, key.getBytes(UTF_8));
+        try {
+            delete(table, key.getBytes(UTF_8));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         Assert.assertNull(get(table, key.getBytes(UTF_8)));
     }
 
@@ -168,9 +189,13 @@ public class RocksDBTest {
     public void multiGetTest() {
         //String value = "testvalue";
         //String getValue = new String(get(table, key.getBytes(UTF_8)), UTF_8);
-        put(table, "key1".getBytes(), "value1".getBytes());
-        put(table, "key2".getBytes(), "value2".getBytes());
-        put(table, "key3".getBytes(), "value3".getBytes());
+        try {
+            put(table, "key1".getBytes(), "value1".getBytes());
+            put(table, "key2".getBytes(), "value2".getBytes());
+            put(table, "key3".getBytes(), "value3".getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         List<byte[]> keyBytes = new ArrayList<>();
         Map<String, String> result = new HashMap<>();
         keyBytes.add("key1".getBytes());
@@ -187,9 +212,13 @@ public class RocksDBTest {
     @Ignore
     @Test
     public void multiGetValueListTest() {
-        put(table, "key1".getBytes(), "value1".getBytes());
-        put(table, "key2".getBytes(), "value2".getBytes());
-        put(table, "key3".getBytes(), "value3".getBytes());
+        try {
+            put(table, "key1".getBytes(), "value11".getBytes());
+            put(table, "key2".getBytes(), "value22".getBytes());
+            put(table, "key3".getBytes(), "value33".getBytes());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         List<byte[]> keyBytes = new ArrayList<>();
         Map<String, String> result = new HashMap<>();
         keyBytes.add("key1".getBytes());
@@ -207,7 +236,7 @@ public class RocksDBTest {
         long start = System.currentTimeMillis();
         List<byte[]> list = keyList(table);
         long end = System.currentTimeMillis();
-        if(list!=null) {
+        if (list != null) {
             System.out.println(list.size() + "查询测试耗时：" + (end - start) + "ms");
             for (byte[] value : list) {
                 System.out.println(new String(value));
@@ -247,7 +276,11 @@ public class RocksDBTest {
         //批量添加测试
         {
             long start = System.currentTimeMillis();
-            batchPut(table, insertMap);
+            try {
+                batchPut(table, insertMap);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             long end = System.currentTimeMillis();
             System.out.println(list.size() + "次批量添加测试耗时：" + (end - start) + "ms");
             //System.out.println("last insert data======" + new String(get(table,list.get(list.size() - 1))));
@@ -255,7 +288,11 @@ public class RocksDBTest {
         //批量修改测试
         {
             long start = System.currentTimeMillis();
-            batchPut(table, updateMap);
+            try {
+                batchPut(table, updateMap);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             long end = System.currentTimeMillis();
             System.out.println(list.size() + "次批量修改测试耗时：" + (end - start) + "ms");
         }
@@ -269,7 +306,11 @@ public class RocksDBTest {
         //批量删除测试
         {
             long start = System.currentTimeMillis();
-            deleteKeys(table, list);
+            try {
+                deleteKeys(table, list);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             long end = System.currentTimeMillis();
             System.out.println(list.size() + "次批量删除测试耗时：" + (end - start) + "ms");
         }
@@ -279,9 +320,13 @@ public class RocksDBTest {
     @Test
     public void deleteKeysTest() {
         List<byte[]> list = keyList(table);
-        if(list!=null) {
+        if (list != null) {
             long start = System.currentTimeMillis();
-            deleteKeys(table, list);
+            try {
+                deleteKeys(table, list);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             long end = System.currentTimeMillis();
             System.out.println(list.size() + "次批量删除测试耗时：" + (end - start) + "ms");
             list = keyList(table);
@@ -289,8 +334,37 @@ public class RocksDBTest {
         }
     }
 
+    @Ignore
+    @Test
+    public void executeBatchTest() {
+        //批量操作测试
+        {
+            try {
+                BatchOperation batch = RocksDBService.createWriteBatch(table);
+                batch.put("key111".getBytes(), "value111".getBytes());
+                batch.put("key222".getBytes(), "value222".getBytes());
+                batch.put("key333".getBytes(), "value333".getBytes());
+                batch.put("key444".getBytes(), "value444".getBytes());
+                batch.put("key222".getBytes(), "value22222".getBytes());
+                batch.delete("key444".getBytes());
+                batch.executeBatch();
+                System.out.println("query data======" + new String(get(table, "key222".getBytes())));
+                System.out.println("query deleted data======" + get(table, "key444".getBytes()));
+
+                RocksDBService.createTable("account");
+                BatchOperation batch2 = RocksDBService.createWriteBatch("account");
+                batch2.put("key111".getBytes(), "value111".getBytes());
+                batch2.executeBatch();
+                System.out.println("query data======" + new String(get("account", "key111".getBytes())));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * 随机生成不重复的key
+     *
      * @return
      */
     private static String randomstr() {

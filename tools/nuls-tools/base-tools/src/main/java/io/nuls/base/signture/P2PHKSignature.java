@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.base.script;
+package io.nuls.base.signture;
 
 import com.google.common.primitives.UnsignedBytes;
 import io.nuls.base.basic.*;

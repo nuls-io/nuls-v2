@@ -635,7 +635,7 @@ public class Script {
         return sigOps;
     }
 
-    static int decodeFromOpN(int opcode) {
+    public static int decodeFromOpN(int opcode) {
         checkArgument((opcode == OP_0 || opcode == OP_1NEGATE) || (opcode >= OP_1 && opcode <= OP_16), "decodeFromOpN called on non OP_N opcode");
         if (opcode == OP_0) {
             return 0;

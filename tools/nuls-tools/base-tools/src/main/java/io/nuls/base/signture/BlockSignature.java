@@ -22,67 +22,70 @@
  * SOFTWARE.
  *
  */
-package io.nuls.base.script;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
+package io.nuls.base.signture;
+import io.nuls.base.basic.*;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.tools.constant.ToolsConstant;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.NulsSignData;
+import io.nuls.tools.basic.Result;
+import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-public class ScriptSign extends BaseNulsData {
+public class BlockSignature extends BaseNulsData {
+    private NulsSignData signData;
+    private byte[] publicKey;
 
-    private List<Script> scripts;
-
+    /**
+     * serialize important field
+     */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        if (scripts != null && scripts.size() > 0) {
-            for (Script script : scripts) {
-                stream.writeBytesWithLength(script.getProgram());
-            }
-        } else {
-            stream.write(ToolsConstant.PLACE_HOLDER);
-        }
+        stream.write(publicKey.length);
+        stream.write(publicKey);
+        stream.writeNulsData(signData);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        List<Script> scripts = new ArrayList<>();
-        while (!byteBuffer.isFinished()) {
-            scripts.add(new Script(byteBuffer.readByLengthByte()));
-        }
-        this.scripts = scripts;
-    }
-
-    public static ScriptSign createFromBytes(byte[] bytes) throws NulsException {
-        ScriptSign sig = new ScriptSign();
-        sig.parse(bytes, 0);
-        return sig;
-    }
-
-    public List<Script> getScripts() {
-        return scripts;
-    }
-
-    public void setScripts(List<Script> scripts) {
-        this.scripts = scripts;
+        int length = byteBuffer.readByte();
+        this.publicKey = byteBuffer.readBytes(length);
+        this.signData = new NulsSignData();
+        this.signData.parse(byteBuffer);
     }
 
     @Override
     public int size() {
-        int size = 0;
-        if (scripts != null && scripts.size() > 0) {
-            for (Script script : scripts) {
-                size += SerializeUtils.sizeOfBytes(script.getProgram());
-            }
-        } else {
-            size = 4;
-        }
+        int size = 1 + publicKey.length;
+        size += SerializeUtils.sizeOfNulsData(signData);
         return size;
     }
 
+    public Result verifySignature(NulsDigestData digestData) {
+        boolean b = ECKey.verify(digestData.getDigestBytes(), signData.getSignBytes(), publicKey);
+        if (b) {
+            return new Result(true);
+        } else {
+            return new Result(false);
+        }
+    }
+
+    public byte[] getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(byte[] publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public NulsSignData getSignData() {
+        return signData;
+    }
+
+    public void setSignData(NulsSignData signData) {
+        this.signData = signData;
+    }
 }
