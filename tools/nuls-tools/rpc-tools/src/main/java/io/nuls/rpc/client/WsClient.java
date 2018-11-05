@@ -27,7 +27,7 @@
 
 package io.nuls.rpc.client;
 
-import io.nuls.rpc.info.RuntimeParam;
+import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -52,17 +52,15 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake shake) {
-
     }
 
     @Override
     public void onMessage(String paramString) {
-        System.out.println("ws client-> receive：" + paramString);
         try {
             Map map = JSONUtils.json2map(paramString);
 
-            RuntimeParam.resultQueue.add(map);
-            System.out.println("ws client-> add to map, id=" + map.get("id") + ",size=" + RuntimeParam.resultQueue.size());
+            RuntimeInfo.resultQueue.add(map);
+            System.out.println("ws client-> add to map, id=" + map.get("id") + ",size=" + RuntimeInfo.resultQueue.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -70,21 +68,20 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onClose(int paramInt, String paramString, boolean paramBoolean) {
-        System.out.println("关闭...");
     }
 
     @Override
     public void onError(Exception e) {
-        System.out.println("异常" + e);
+        e.printStackTrace();
     }
 
     public Map wsResponse(int id) throws InterruptedException {
         while (true) {
-            for (int i = 0; i < RuntimeParam.resultQueue.size(); i++) {
-                Map map = RuntimeParam.resultQueue.get(i);
+            for (int i = 0; i < RuntimeInfo.resultQueue.size(); i++) {
+                Map map = RuntimeInfo.resultQueue.get(i);
                 if ((Integer) map.get("id") == id) {
-                    RuntimeParam.resultQueue.remove(map);
-                    System.out.println("ws client-> get response,id=" + id + ", size=" + RuntimeParam.resultQueue.size());
+                    RuntimeInfo.resultQueue.remove(map);
+                    System.out.println("ws client-> get response,id=" + id + ", size=" + RuntimeInfo.resultQueue.size());
                     return map;
                 }
             }

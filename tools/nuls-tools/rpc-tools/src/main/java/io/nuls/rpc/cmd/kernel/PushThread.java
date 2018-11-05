@@ -28,7 +28,7 @@
 package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.client.RpcClient;
-import io.nuls.rpc.info.RuntimeParam;
+import io.nuls.rpc.info.RuntimeInfo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -58,7 +58,7 @@ public class PushThread implements Runnable {
                 Map<String, Object> result = new HashMap<>(16);
                 result.put("service", new String[]{"a", "b", "c"});
                 result.put("available", true);
-                result.put("modules", RuntimeParam.remoteModuleMap);
+                result.put("modules", RuntimeInfo.remoteModuleMap);
 
                 System.out.println(RpcClient.jsonSingleRpc("status", new Object[]{result}, 1.0));
                 System.out.println("调用子模块的status成功了，等待30秒");

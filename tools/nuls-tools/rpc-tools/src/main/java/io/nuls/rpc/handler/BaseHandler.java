@@ -26,10 +26,10 @@
 package io.nuls.rpc.handler;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.CallCmd;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.Rpc;
-import io.nuls.rpc.model.RpcCmd;
+import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.model.CmdDetail;
+import io.nuls.rpc.model.CmdRequest;
 import io.nuls.tools.parse.JSONUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -94,14 +94,14 @@ public class BaseHandler {
 
         Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
 
-        Rpc rpc = CallCmd.getLocalInvokeRpc((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));
-        if (rpc == null) {
+        CmdDetail cmdDetail = RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));
+        if (cmdDetail == null) {
             return "No cmd found: " + jsonMap.get("cmd") + "." + jsonMap.get("minVersion");
         }
 
-        Class clz = Class.forName(rpc.getInvokeClass());
+        Class clz = Class.forName(cmdDetail.getInvokeClass());
 
-        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(rpc.getInvokeMethod(), List.class);
+        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(cmdDetail.getInvokeMethod(), List.class);
         @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
         BaseCmd cmd = (BaseCmd) constructor.newInstance();
         Object obj = method.invoke(cmd, (List) jsonMap.get("params"));
@@ -122,16 +122,16 @@ public class BaseHandler {
         System.out.println("postGo: BaseHandler-cmd start, request->" + request.getRemoteAddr() + ":" + request.getRemotePort());
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(request.getInputStream().readAllBytes());
         ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-        RpcCmd rpcCmd = (RpcCmd) objectInputStream.readObject();
+        CmdRequest cmdRequest = (CmdRequest) objectInputStream.readObject();
 
-        Rpc rpc = CallCmd.getLocalInvokeRpc(rpcCmd.getCmd(), rpcCmd.getMinVersion());
+        CmdDetail cmdDetail = RuntimeInfo.getLocalInvokeCmd(cmdRequest.getCmd(), cmdRequest.getMinVersion());
 
-        Class clz = Class.forName(rpc.getInvokeClass());
+        Class clz = Class.forName(cmdDetail.getInvokeClass());
 
-        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(rpc.getInvokeMethod(), List.class);
+        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(cmdDetail.getInvokeMethod(), List.class);
         @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
         BaseCmd cmd = (BaseCmd) constructor.newInstance();
-        Object obj = method.invoke(cmd, Arrays.asList(rpcCmd.getParams()));
+        Object obj = method.invoke(cmd, Arrays.asList(cmdRequest.getParams()));
         System.out.println("byteGo Return String->" + obj);
         return JSONUtils.obj2json(obj);
     }

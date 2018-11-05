@@ -27,7 +27,7 @@
 
 package io.nuls.test;
 
-import io.nuls.rpc.info.CallCmd;
+import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
 
@@ -45,7 +45,7 @@ public class WsKernel {
         s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
         s.start();
 
-        CallCmd.syncWebsocket("ws://127.0.0.1:8887");
+        CmdDispatcher.syncLocalToKernel("ws://127.0.0.1:8887");
 
         Thread.sleep(Integer.MAX_VALUE);
     }

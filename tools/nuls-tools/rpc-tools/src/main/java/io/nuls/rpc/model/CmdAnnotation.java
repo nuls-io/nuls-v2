@@ -27,55 +27,17 @@
 
 package io.nuls.rpc.model;
 
-/**
- * @author tangyi
- * @date 2018/10/31
- * @description
- */
-public class RpcResult {
-    private int id;
-    private int code;
-    private String msg;
-    private double version;
-    private Object result;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-    public int getId() {
-        return id;
-    }
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface CmdAnnotation {
+    String cmd();
 
-    public void setId(int id) {
-        this.id = id;
-    }
+    double version();
 
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    public double getVersion() {
-        return version;
-    }
-
-    public void setVersion(double version) {
-        this.version = version;
-    }
-
-    public Object getResult() {
-        return result;
-    }
-
-    public void setResult(Object result) {
-        this.result = result;
-    }
+    boolean preCompatible();
 }

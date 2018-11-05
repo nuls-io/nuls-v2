@@ -37,7 +37,7 @@ import java.util.Random;
  * @date 2018/10/17
  * @description
  */
-public class IpPortInfo {
+public class HostInfo {
 
     /**
      * 根据网卡获得IP地址
