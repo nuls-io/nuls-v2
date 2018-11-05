@@ -27,6 +27,8 @@
 
 package io.nuls.rpc.model;
 
+import io.protostuff.Rpc;
+
 import java.util.List;
 
 /**
@@ -40,19 +42,19 @@ public class Module {
     private boolean available;
     private String addr;
     private int port;
-    private List<Rpc> rpcList;
+    private List<CmdDetail> cmdDetailList;
     private List<String> dependsModule;
 
     public Module() {
     }
 
-    public Module(String name, ModuleStatus status, boolean available, String addr, int port, List<Rpc> rpcList, List<String> dependsModule) {
+    public Module(String name, ModuleStatus status, boolean available, String addr, int port, List<CmdDetail> cmdDetailList, List<String> dependsModule) {
         this.name = name;
         this.status = status;
         this.available = available;
         this.addr = addr;
         this.port = port;
-        this.rpcList = rpcList;
+        this.cmdDetailList = cmdDetailList;
         this.dependsModule = dependsModule;
     }
 
@@ -72,7 +74,7 @@ public class Module {
         this.status = status;
     }
 
-    public boolean getAvailable() {
+    public boolean isAvailable() {
         return available;
     }
 
@@ -96,12 +98,12 @@ public class Module {
         this.port = port;
     }
 
-    public List<Rpc> getRpcList() {
-        return rpcList;
+    public List<CmdDetail> getCmdDetailList() {
+        return cmdDetailList;
     }
 
-    public void setRpcList(List<Rpc> rpcList) {
-        this.rpcList = rpcList;
+    public void setCmdDetailList(List<CmdDetail> cmdDetailList) {
+        this.cmdDetailList = cmdDetailList;
     }
 
     public List<String> getDependsModule() {

@@ -34,7 +34,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface CmdInfo {
+public @interface CmdAnnotation {
     String cmd();
 
     double version();
