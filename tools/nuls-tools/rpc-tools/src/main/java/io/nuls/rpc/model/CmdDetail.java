@@ -33,7 +33,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  * @description
  */
 
-public class Rpc {
+public class CmdDetail {
 
     private String cmd;
     private double version;
@@ -44,10 +44,9 @@ public class Rpc {
     @JsonIgnore
     private boolean preCompatible;
 
-    public Rpc() {
-    }
+    public CmdDetail(){}
 
-    public Rpc(String cmd, double version, String invokeClass, String invokeMethod, boolean preCompatible) {
+    public CmdDetail(String cmd, double version, String invokeClass, String invokeMethod, boolean preCompatible) {
         this.cmd = cmd;
         this.version = version;
         this.invokeClass = invokeClass;

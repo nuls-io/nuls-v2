@@ -29,7 +29,7 @@ package io.nuls.test;
 
 import io.nuls.rpc.client.RpcClient;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.RuntimeParam;
+import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
 
@@ -45,11 +45,11 @@ public class M2Call {
     public void test() throws Exception {
 
 
-        System.out.println("我可以调用的模块：" + RuntimeParam.remoteModuleMap.size());
+        System.out.println("我可以调用的模块：" + RuntimeInfo.remoteModuleMap.size());
         Map<String, Object> fetchMap = RpcClient.callFetchKernel("http://127.0.0.1:8091/" + Constants.DEFAULT_PATH + "/" + Constants.JSON);
         System.out.println(JSONUtils.obj2json(fetchMap));
 
-        System.out.println("我可以调用的模块：" + RuntimeParam.remoteModuleMap.size());
+        System.out.println("我可以调用的模块：" + RuntimeInfo.remoteModuleMap.size());
 
         System.out.println("我开始调用其他模块了");
 

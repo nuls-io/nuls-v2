@@ -32,12 +32,22 @@ package io.nuls.rpc.model;
  * @date 2018/10/31
  * @description
  */
-public class RpcResult {
+public class CmdResponse {
     private int id;
     private int code;
     private String msg;
     private double version;
     private Object result;
+
+    public CmdResponse(){}
+
+    public CmdResponse(int id, int code, String msg, double version, Object result) {
+        this.id = id;
+        this.code = code;
+        this.msg = msg;
+        this.version = version;
+        this.result = result;
+    }
 
     public int getId() {
         return id;

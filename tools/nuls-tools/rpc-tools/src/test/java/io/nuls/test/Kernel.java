@@ -28,8 +28,8 @@
 package io.nuls.test;
 
 import io.nuls.rpc.client.RpcClient;
-import io.nuls.rpc.info.CallCmd;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.server.BaseRpcServer;
 import io.nuls.rpc.server.GrizzlyServer;
 import org.junit.Test;
@@ -43,7 +43,7 @@ public class Kernel {
     @Test
     public void run() throws Exception {
         BaseRpcServer server = new GrizzlyServer(Constants.KERNEL_PORT);
-        CallCmd.scanPackage("io.nuls.rpc.cmd.kernel");
+        RuntimeInfo.scanPackage("io.nuls.rpc.cmd.kernel");
         server.init("kernel", null);
         server.start();
 

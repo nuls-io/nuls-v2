@@ -25,10 +25,10 @@
 
 package io.nuls.rpc.cmd;
 
-import io.nuls.rpc.info.RuntimeParam;
+import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.model.CmdResponse;
 import io.nuls.rpc.model.ConfigItem;
 import io.nuls.rpc.model.Module;
-import io.nuls.rpc.model.RpcResult;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
@@ -42,7 +42,6 @@ import java.util.Map;
  */
 public abstract class BaseCmd {
 
-    protected final String SUCCESS = "Success";
     protected final int SUCCESS_CODE = 0;
 
     /**
@@ -66,39 +65,39 @@ public abstract class BaseCmd {
      * }]
      * }
      */
-    protected Object status(List params) throws IOException {
+    protected CmdResponse status(List params) throws IOException {
         System.out.println("我收到来自kernel的推送了");
         Map<String, Object> map1 = JSONUtils.json2map(JSONUtils.obj2json(params.get(0)));
 
-        RuntimeParam.local.setAvailable((Boolean) map1.get("available"));
+        RuntimeInfo.local.setAvailable((Boolean) map1.get("available"));
 
         Map<String, Object> moduleMap = JSONUtils.json2map(JSONUtils.obj2json(map1.get("modules")));
         for (String key : moduleMap.keySet()) {
             Module module = JSONUtils.json2pojo(JSONUtils.obj2json(moduleMap.get(key)), Module.class);
-            RuntimeParam.remoteModuleMap.put(key, module);
+            RuntimeInfo.remoteModuleMap.put(key, module);
         }
 
-        System.out.println(JSONUtils.obj2json(RuntimeParam.remoteModuleMap));
+        System.out.println(JSONUtils.obj2json(RuntimeInfo.remoteModuleMap));
 
         return result(1.0);
     }
 
     protected void addConfigItem(String key, Object value, boolean readOnly) {
         ConfigItem configItem = new ConfigItem(key, value, readOnly);
-        RuntimeParam.configItemList.add(configItem);
+        RuntimeInfo.configItemList.add(configItem);
     }
 
-    protected RpcResult result(double version) {
+    protected CmdResponse result(double version) {
         return result(0, version, null, null);
     }
 
-    protected RpcResult result(int code, double version, String msg, Object result) {
-        RpcResult rpcResult = new RpcResult();
-        rpcResult.setCode(code);
-        rpcResult.setVersion(version);
-        rpcResult.setMsg(msg);
-        rpcResult.setResult(result);
-        return rpcResult;
+    protected CmdResponse result(int code, double version, String msg, Object result) {
+        CmdResponse cmdResponse = new CmdResponse();
+        cmdResponse.setCode(code);
+        cmdResponse.setVersion(version);
+        cmdResponse.setMsg(msg);
+        cmdResponse.setResult(result);
+        return cmdResponse;
     }
 
 }
