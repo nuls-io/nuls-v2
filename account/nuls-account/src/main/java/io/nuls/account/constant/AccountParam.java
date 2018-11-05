@@ -23,27 +23,34 @@
  *
  */
 
-package io.nuls.account.storage;
-
-import io.nuls.account.model.po.AccountPo;
+package io.nuls.account.constant;
 
 import java.util.List;
 
 /**
- * 账户数据存储服务接口
- * Account data storage service interface
+ * 账户相关参数
  *
- * @author: qinyifeng
+ * @author qinyifeng
  */
-public interface AccountStorageService {
+public class AccountParam {
 
-    /**
-     * 创建账户多个账户
-     * Create accounts
-     * @param accountPoList 待创建的账户集合
-     * @param accountPoList Account collection to be created
-     * @return the result of the opration
-     */
-    boolean saveAccountList(List<AccountPo> accountPoList);
+    private static AccountParam instance = new AccountParam();
+
+    public static AccountParam getInstance() {
+        return instance;
+    }
+
+    private AccountParam() {
+    }
+
+    private String dataPath;
+
+    public String getDataPath() {
+        return dataPath;
+    }
+
+    public void setDataPath(String dataPath) {
+        this.dataPath = dataPath;
+    }
 
 }

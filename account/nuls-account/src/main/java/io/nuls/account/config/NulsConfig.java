@@ -23,27 +23,36 @@
  *
  */
 
-package io.nuls.account.storage;
+package io.nuls.account.config;
 
-import io.nuls.account.model.po.AccountPo;
 
-import java.util.List;
+import io.nuls.tools.parse.config.IniEntity;
 
 /**
- * 账户数据存储服务接口
- * Account data storage service interface
+ * 用来管理配置项
+ * <p>
+ * Used to manage system configuration items.
  *
- * @author: qinyifeng
+ * @author: Niels Wang
  */
-public interface AccountStorageService {
+public class NulsConfig {
+    /**
+     * 模块配置文件名称
+     * Module configuration file name.
+     */
+    public static  String MODULES_CONFIG_FILE = "modules.ini";
 
     /**
-     * 创建账户多个账户
-     * Create accounts
-     * @param accountPoList 待创建的账户集合
-     * @param accountPoList Account collection to be created
-     * @return the result of the opration
+     * 系统使用的编码方式
+     * The encoding used by the nuls system.
      */
-    boolean saveAccountList(List<AccountPo> accountPoList);
+    public static String DEFAULT_ENCODING = "UTF-8";
+
+    /**
+     * 模块配置文件中加载的所有配置项
+     * All the configuration items that are loaded in the module configuration file.
+     */
+    public static IniEntity MODULES_CONFIG;
+
 
 }

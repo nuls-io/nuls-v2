@@ -25,12 +25,65 @@
 
 package io.nuls.account.service.impl;
 
+import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.service.AccountService;
+import io.nuls.account.storage.AccountStorageService;
+import io.nuls.account.util.AccountTool;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author: qinyifeng
  */
+@Service
 public class AccountServiceImpl implements AccountService {
 
+    private Lock locker = new ReentrantLock();
 
+    @Autowired
+    private AccountStorageService accountStorageService;
+
+    @Override
+    public List<Account> createAccount(int chainId, int count, String password) {
+        if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
+            throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
+        }
+        if (StringUtils.isNotBlank(password)) {
+            //&& !StringUtils.validPassword(password)
+            throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
+        }
+        locker.lock();
+        List<Account> accounts = new ArrayList<>();
+        try {
+
+            List<AccountPo> accountPos = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                Account account = AccountTool.createAccount();
+                if (StringUtils.isNotBlank(password)) {
+                    account.encrypt(password);
+                }
+                accounts.add(account);
+                AccountPo po = new AccountPo(account);
+                accountPos.add(po);
+            }
+            boolean result = accountStorageService.saveAccountList(accountPos);
+
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+        } finally {
+            locker.unlock();
+        }
+        return accounts;
+    }
 }

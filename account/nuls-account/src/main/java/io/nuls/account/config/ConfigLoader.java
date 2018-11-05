@@ -22,14 +22,29 @@
  * SOFTWARE.
  *
  */
+package io.nuls.account.config;
 
-package io.nuls.account.rpc;
+import io.nuls.tools.parse.config.IniEntity;
+import org.ini4j.Config;
+import org.ini4j.Ini;
+
+import java.io.IOException;
+import java.net.URL;
 
 /**
- * @author: qinyifeng
+ * @author Niels
  */
-public class AccountResource {
+public class ConfigLoader {
 
 
+    public static IniEntity loadIni(String fileName) throws IOException {
+        Config cfg = new Config();
+        URL url = ConfigLoader.class.getClassLoader().getResource(fileName);
+        cfg.setMultiSection(true);
+        Ini ini = new Ini();
+        ini.setConfig(cfg);
+        ini.load(url);
+        return new IniEntity(ini);
+    }
 
 }
