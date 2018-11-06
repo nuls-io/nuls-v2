@@ -28,9 +28,9 @@
 package io.nuls.rpc.handler;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.CallCmd;
-import io.nuls.rpc.model.Rpc;
-import io.nuls.rpc.model.RpcResult;
+import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.model.CmdDetail;
+import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.lang.reflect.Constructor;
@@ -49,19 +49,19 @@ public class WebSocketHandler {
 
         Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
 
-        Rpc rpc = CallCmd.getLocalInvokeRpc((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));
-        if (rpc == null) {
+        CmdDetail cmdDetail = RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));
+        if (cmdDetail == null) {
             return "No cmd found: " + jsonMap.get("cmd") + "." + jsonMap.get("minVersion");
         }
 
-        Class clz = Class.forName(rpc.getInvokeClass());
+        Class clz = Class.forName(cmdDetail.getInvokeClass());
 
-        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(rpc.getInvokeMethod(), List.class);
+        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(cmdDetail.getInvokeMethod(), List.class);
         @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
         BaseCmd cmd = (BaseCmd) constructor.newInstance();
-        RpcResult rpcResult = (RpcResult) method.invoke(cmd, (List) jsonMap.get("params"));
-        rpcResult.setId((Integer) jsonMap.get("id"));
+        CmdResponse cmdResponse = (CmdResponse) method.invoke(cmd, (List) jsonMap.get("params"));
+        cmdResponse.setId((Integer) jsonMap.get("id"));
 
-        return JSONUtils.obj2json(rpcResult);
+        return JSONUtils.obj2json(cmdResponse);
     }
 }

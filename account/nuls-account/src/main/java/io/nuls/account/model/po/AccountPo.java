@@ -26,12 +26,23 @@
 package io.nuls.account.model.po;
 
 
+import io.nuls.account.model.bo.Account;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.Address;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.Na;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
+
+import java.io.IOException;
+
 /**
  * @author: qinyifeng
  */
-public class AccountPo {
+public class AccountPo extends BaseNulsData {
 
-    //private transient Address addressObj;
+    private transient Address addressObj;
 
 
     private String address;
@@ -54,19 +65,19 @@ public class AccountPo {
 
     public AccountPo(){
     }
-//    public AccountPo(Account account){
-//        this.addressObj = account.getAddress();
-//        this.address = account.getAddress().toString();
-//        this.createTime = account.getCreateTime();
-//        this.alias = account.getAlias();
-//        this.pubKey = account.getPubKey();
-//        this.priKey = account.getPriKey();
-//        this.encryptedPriKey = account.getEncryptedPriKey();
-//        this.extend = account.getExtend();
-//        this.status = account.getStatus();
-//        this.remark = account.getRemark();
-//    }
-//
+    public AccountPo(Account account){
+        this.addressObj = account.getAddress();
+        this.address = account.getAddress().toString();
+        this.createTime = account.getCreateTime();
+        this.alias = account.getAlias();
+        this.pubKey = account.getPubKey();
+        this.priKey = account.getPriKey();
+        this.encryptedPriKey = account.getEncryptedPriKey();
+        this.extend = account.getExtend();
+        this.status = account.getStatus();
+        this.remark = account.getRemark();
+    }
+
 //    public Account toAccount(){
 //        Account account = new Account();
 //        account.setCreateTime(this.getCreateTime());
@@ -90,17 +101,46 @@ public class AccountPo {
 //        return account;
 //    }
 
+    @Override
+    public int size() {
+        int size = 0;
+//        size += SerializeUtils.sizeOfInt64();  // deposit.getValue()
+//        size += this.agentAddress.length;
+//        size += this.rewardAddress.length;
+//        size += this.packingAddress.length;
+//        size += SerializeUtils.sizeOfDouble(this.commissionRate);
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+//        stream.writeInt64(deposit.getValue());
+//        stream.write(agentAddress);
+//        stream.write(packingAddress);
+//        stream.write(rewardAddress);
+//        stream.writeDouble(this.commissionRate);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+//        this.deposit = Na.valueOf(byteBuffer.readInt64());
+//        this.agentAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+//        this.packingAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+//        this.rewardAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
+//        this.commissionRate = byteBuffer.readDouble();
+    }
+
     public String getAddress() {
         return address;
     }
 
-//    public Address getAddressObj() {
-//        return addressObj;
-//    }
-//
-//    public void setAddressObj(Address addressObj) {
-//        this.addressObj = addressObj;
-//    }
+    public Address getAddressObj() {
+        return addressObj;
+    }
+
+    public void setAddressObj(Address addressObj) {
+        this.addressObj = addressObj;
+    }
 
     public void setAddress(String address) {
         this.address = address;

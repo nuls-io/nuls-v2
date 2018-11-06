@@ -28,10 +28,10 @@
 package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.RuntimeParam;
-import io.nuls.rpc.model.CmdInfo;
+import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.CmdResponse;
 import io.nuls.rpc.model.Module;
-import io.nuls.rpc.model.RpcResult;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.*;
@@ -45,19 +45,19 @@ import java.util.*;
  */
 public class KernelCmd1 extends BaseCmd {
 
-    @CmdInfo(cmd = "version", version = 1.0, preCompatible = true)
-    public RpcResult version(List params) {
+    @CmdAnnotation(cmd = "version", version = 1.0, preCompatible = true)
+    public CmdResponse version(List params) {
         try {
-            System.out.println("join之前的kernel remote接口数：" + RuntimeParam.remoteModuleMap.size());
+            System.out.println("join之前的kernel remote接口数：" + RuntimeInfo.remoteModuleMap.size());
             Module module = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Module.class);
             System.out.println(module.getName() + " added");
-            RuntimeParam.remoteModuleMap.put(module.getName(), module);
-            System.out.println("join之后的kernel remote接口数：" + RuntimeParam.remoteModuleMap.size());
+            RuntimeInfo.remoteModuleMap.put(module.getName(), module);
+            System.out.println("join之后的kernel remote接口数：" + RuntimeInfo.remoteModuleMap.size());
 
             Map<String, Object> result = new HashMap<>(16);
             result.put("service", new String[]{"a", "b", "c"});
             result.put("available", true);
-            result.put("modules", RuntimeParam.remoteModuleMap);
+            result.put("modules", RuntimeInfo.remoteModuleMap);
 
             return result(SUCCESS_CODE, 1.0, null, result);
         } catch (Exception e) {
@@ -66,9 +66,9 @@ public class KernelCmd1 extends BaseCmd {
         }
     }
 
-    @CmdInfo(cmd = "fetch", version = 1.0, preCompatible = true)
+    @CmdAnnotation(cmd = "fetch", version = 1.0, preCompatible = true)
     public Object fetch(List params) {
-        Iterator<String> keyIterator = RuntimeParam.remoteModuleMap.keySet().iterator();
+        Iterator<String> keyIterator = RuntimeInfo.remoteModuleMap.keySet().iterator();
         List<String> service = new ArrayList<>();
         while (keyIterator.hasNext()) {
             service.add(keyIterator.next());
@@ -76,12 +76,12 @@ public class KernelCmd1 extends BaseCmd {
 
         Map<String, Object> result = new HashMap<>(16);
         result.put("service", service);
-        result.put("modules", RuntimeParam.remoteModuleMap);
+        result.put("modules", RuntimeInfo.remoteModuleMap);
 
         return result(SUCCESS_CODE, 1.0, null, result);
     }
 
-    @CmdInfo(cmd = "cmd1", version = 1.0, preCompatible = true)
+    @CmdAnnotation(cmd = "cmd1", version = 1.0, preCompatible = true)
     public Object cmd1(List params) {
         return result(SUCCESS_CODE, 1.0, null, "kernel cmd1");
     }

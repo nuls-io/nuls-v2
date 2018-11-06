@@ -28,8 +28,8 @@
 package io.nuls.test;
 
 import io.nuls.rpc.client.RpcClient;
-import io.nuls.rpc.info.CallCmd;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.server.BaseRpcServer;
 import io.nuls.rpc.server.GrizzlyServer;
 import org.junit.Test;
@@ -48,7 +48,7 @@ public class M1Join {
     public void test() throws Exception {
         BaseRpcServer server = new GrizzlyServer();
 
-        CallCmd.scanPackage("io.nuls.rpc.cmd.cmd1");
+        RuntimeInfo.scanPackage("io.nuls.rpc.cmd.cmd1");
 
         List<String> depends = new ArrayList<>();
         depends.add("m2");

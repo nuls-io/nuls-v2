@@ -27,7 +27,7 @@
 
 package io.nuls.test;
 
-import io.nuls.rpc.model.RpcCmd;
+import io.nuls.rpc.model.CmdRequest;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -48,14 +48,14 @@ public class TestServer {
     @Test
     public void test() throws Exception {
 
-        RpcCmd rpcCmd = new RpcCmd();
-        rpcCmd.setCmd("开火");
-        rpcCmd.setMinVersion(2.3);
-        rpcCmd.setParams(new Object[]{"a", 1, true});
+        CmdRequest cmdRequest = new CmdRequest();
+        cmdRequest.setCmd("开火");
+        cmdRequest.setMinVersion(2.3);
+        cmdRequest.setParams(new Object[]{"a", 1, true});
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-        objectOutputStream.writeObject(rpcCmd);
+        objectOutputStream.writeObject(cmdRequest);
         byte[] bytes = byteArrayOutputStream.toByteArray();
 
         for (byte b : bytes)
@@ -65,8 +65,8 @@ public class TestServer {
 
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
         ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
-        RpcCmd rpcCmd1 = (RpcCmd) objectInputStream.readObject();
-        System.out.println(rpcCmd1.getCmd());
+        CmdRequest cmdRequest1 = (CmdRequest) objectInputStream.readObject();
+        System.out.println(cmdRequest1.getCmd());
 
         System.out.println("===============================");
 

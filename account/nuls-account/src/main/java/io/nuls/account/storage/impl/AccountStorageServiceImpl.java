@@ -25,19 +25,58 @@
 
 package io.nuls.account.storage.impl;
 
+import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.constant.AccountParam;
+import io.nuls.account.constant.AccountStorageConstant;
+import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.storage.AccountStorageService;
+import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: qinyifeng
  */
-public class AccountStorageServiceImpl implements AccountStorageService {
+@Service
+public class AccountStorageServiceImpl implements AccountStorageService, InitializingBean {
 
-    /**
-     * 通用数据存储服务
-     * Universal data storage services.
-     */
-    private RocksDBService dbService;
+    @Override
+    public void afterPropertiesSet() {
+        //读取配置文件，数据存储根目录，初始化打开该目录下包含的表连接并放入缓存
+        RocksDBService.init(AccountParam.getInstance().getDataPath() + File.separator + AccountStorageConstant.DB_NAME_ACCOUNT);
+        try {
+            RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT);
+        } catch (Exception e) {
+            if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
+                Log.error(e.getMessage());
+                throw new NulsRuntimeException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
+            }
+        }
+    }
 
+    @Override
+    public boolean saveAccountList(List<AccountPo> accountPoList) {
+        Map<byte[], byte[]> accountPoMap = new HashMap<>();
+        try {
+            for (AccountPo po : accountPoList) {
+                //序列化对象为byte数组存储
+                accountPoMap.put(po.getAddressObj().getAddressBytes(), po.serialize());
+            }
+            return RocksDBService.batchPut(AccountStorageConstant.DB_NAME_ACCOUNT, accountPoMap);
+        } catch (Exception e) {
+            Log.error(e.getMessage());
+            throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_BATCH_ERROR);
+        }
+    }
 
 }

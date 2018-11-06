@@ -22,67 +22,28 @@
  * SOFTWARE.
  *
  */
+package io.nuls.network.storage;
 
-package io.nuls.rpc.model;
+import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeGroup;
 
-
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author tangyi
- * @date 2018/10/15
- * @description
+ * DbServiceImpl
+ * @author lan
+ * @date 2018/11/01
+ *
  */
-public class RpcCmd implements Serializable {
-    private int id;
-    private String cmd;
-    private double minVersion;
-    private Object[] params;
-
-    public RpcCmd() {
-    }
-
-    public RpcCmd(int id, String cmd, double minVersion, Object[] params) {
-        this.id = id;
-        this.cmd = cmd;
-        this.minVersion = minVersion;
-        this.params = params;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getCmd() {
-        return cmd;
-    }
-
-    public void setCmd(String cmd) {
-        this.cmd = cmd;
-    }
-
-    public double getMinVersion() {
-        return minVersion;
-    }
-
-    public void setMinVersion(double minVersion) {
-        this.minVersion = minVersion;
-    }
-
-    public Object[] getParams() {
-        return params;
-    }
-
-    public void setParams(Object[] params) {
-        this.params = params;
+public class DbServiceImpl implements DbService{
+    @Override
+    public List<NodeGroup> getAllNodeGroup() {
+        return new ArrayList<>();
     }
 
     @Override
-    public String toString() {
-        return "[cmd->" + cmd + "][" + minVersion + "][params->" + params + "]";
+    public List<Node> getNodeByChainId(int chainId) {
+        return new ArrayList<>();
     }
 }

@@ -30,7 +30,8 @@ package io.nuls.rpc.cmd.cmd1;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.cmd.KernelCmd;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.CmdInfo;
+import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.CmdResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -44,44 +45,44 @@ import java.util.List;
  */
 public class SomeCmd extends BaseCmd implements KernelCmd {
 
-    @CmdInfo(cmd = "cmd1", version = 1.0, preCompatible = true)
-    public Object methodName(List params) {
+    @CmdAnnotation(cmd = "cmd1", version = 1.0, preCompatible = true)
+    public CmdResponse methodName(List params) {
         System.out.println("I'm version 1");
-        return "cmd1->1.0";
+        return result(SUCCESS_CODE, 1.0, "cmd1->1.0", null);
     }
 
-    @CmdInfo(cmd = "cmd1", version = 1.1, preCompatible = true)
-    public Object methodName1(List params) {
+    @CmdAnnotation(cmd = "cmd1", version = 1.1, preCompatible = true)
+    public CmdResponse methodName1(List params) {
         System.out.println("I'm version 1.1");
         return result(1.1);
     }
 
-    @CmdInfo(cmd = "cmd1", version = 2.0, preCompatible = false)
-    public Object cmd111(List params) {
+    @CmdAnnotation(cmd = "cmd1", version = 2.0, preCompatible = false)
+    public CmdResponse cmd111(List params) {
         System.out.println("I'm version 2.0");
-        return "cmd1->2.0";
+        return result(SUCCESS_CODE, 2.0, "cmd1->2.0", null);
     }
 
-    @CmdInfo(cmd = "cmd1", version = 2.1, preCompatible = true)
-    public Object cmd1111(List params) {
+    @CmdAnnotation(cmd = "cmd1", version = 2.1, preCompatible = true)
+    public CmdResponse cmd1111(List params) {
         System.out.println("I'm version 2.1");
-        return "cmd1->2.1";
+        return result(SUCCESS_CODE, 2.1, "cmd1->2.1", null);
     }
 
-    @CmdInfo(cmd = "cmd1", version = 2.2, preCompatible = true)
-    public Object cmd11111(List params) {
+    @CmdAnnotation(cmd = "cmd1", version = 2.2, preCompatible = true)
+    public CmdResponse cmd11111(List params) {
         System.out.println("I'm version 2.2");
-        return "cmd1->2.2";
+        return result(SUCCESS_CODE, 2.2, "cmd1->2.2", null);
     }
 
-    @CmdInfo(cmd = "cmd1", version = 3.0, preCompatible = false)
-    public Object cmd111111(List params) {
+    @CmdAnnotation(cmd = "cmd1", version = 3.0, preCompatible = false)
+    public CmdResponse cmd111111(List params) {
         System.out.println("I'm version 3.0");
-        return "cmd1->3.0";
+        return result(SUCCESS_CODE, 3.0, "cmd1->3.0", null);
     }
 
-    @CmdInfo(cmd = "cmd2", version = 2.0, preCompatible = true)
-    public Object cmd2(List params) {
+    @CmdAnnotation(cmd = "cmd2", version = 2.0, preCompatible = true)
+    public CmdResponse cmd2(List params) {
         System.out.println("I'm version 2");
         return result(SUCCESS_CODE, 2.0, "2.0success", new String[]{"hello world cmd2", "inchain best"});
     }
@@ -93,13 +94,13 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
      * @return Object
      */
     @Override
-    @CmdInfo(cmd = Constants.STATUS, version = 1.0, preCompatible = true)
-    public Object status(List params) {
+    @CmdAnnotation(cmd = Constants.STATUS, version = 1.0, preCompatible = true)
+    public CmdResponse status(List params) {
         try {
             return super.status(params);
         } catch (IOException e) {
             e.printStackTrace();
-            return e.getMessage();
+            return result(-1, 1.0, e.getMessage(), null);
         }
     }
 
@@ -110,8 +111,8 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
      * @return Object
      */
     @Override
-    @CmdInfo(cmd = Constants.SHUTDOWN, version = 1.0, preCompatible = true)
-    public Object shutdown(List params) {
+    @CmdAnnotation(cmd = Constants.SHUTDOWN, version = 1.0, preCompatible = true)
+    public CmdResponse shutdown(List params) {
         return result(1.0);
     }
 
@@ -122,8 +123,8 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
      * @return Object
      */
     @Override
-    @CmdInfo(cmd = Constants.TERMINATE, version = 1.0, preCompatible = true)
-    public Object terminate(List params) {
+    @CmdAnnotation(cmd = Constants.TERMINATE, version = 1.0, preCompatible = true)
+    public CmdResponse terminate(List params) {
         return result(1.0);
     }
 
@@ -134,8 +135,8 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
      * @return Object
      */
     @Override
-    @CmdInfo(cmd = Constants.CONF_GET, version = 1.0, preCompatible = true)
-    public Object confGet(List params) {
+    @CmdAnnotation(cmd = Constants.CONF_GET, version = 1.0, preCompatible = true)
+    public CmdResponse confGet(List params) {
         return result(1.0);
     }
 
@@ -146,8 +147,8 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
      * @return Object
      */
     @Override
-    @CmdInfo(cmd = Constants.CONF_SET, version = 1.0, preCompatible = true)
-    public Object confSet(List params) {
+    @CmdAnnotation(cmd = Constants.CONF_SET, version = 1.0, preCompatible = true)
+    public CmdResponse confSet(List params) {
         return result(1.0);
     }
 
@@ -158,8 +159,8 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
      * @return Object
      */
     @Override
-    @CmdInfo(cmd = Constants.CONF_RESET, version = 1.0, preCompatible = true)
-    public Object confReset(List params) {
+    @CmdAnnotation(cmd = Constants.CONF_RESET, version = 1.0, preCompatible = true)
+    public CmdResponse confReset(List params) {
         return result(1.0);
     }
 }

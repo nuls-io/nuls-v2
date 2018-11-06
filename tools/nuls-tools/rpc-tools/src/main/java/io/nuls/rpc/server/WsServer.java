@@ -28,10 +28,8 @@
 package io.nuls.rpc.server;
 
 import io.nuls.rpc.handler.WebSocketHandler;
-import io.nuls.rpc.info.CallCmd;
-import io.nuls.rpc.info.IpPortInfo;
-import io.nuls.rpc.info.RuntimeParam;
-import io.nuls.rpc.info.WsPool;
+import io.nuls.rpc.info.HostInfo;
+import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.Module;
 import io.nuls.rpc.model.ModuleStatus;
 import org.java_websocket.WebSocket;
@@ -53,14 +51,9 @@ public class WsServer extends WebSocketServer {
     }
 
     public void init(String moduleName, List<String> depends, String scanPackage) throws Exception {
-        RuntimeParam.local = new Module("", ModuleStatus.READY, false, "", 0, new ArrayList<>(), new ArrayList<>());
-        RuntimeParam.local.setName(moduleName);
-        RuntimeParam.local.setDependsModule(depends);
-        RuntimeParam.local.setAddr(IpPortInfo.getIpAdd());
-        RuntimeParam.local.setPort(getPort());
-        RuntimeParam.local.setStatus(ModuleStatus.READY);
+        RuntimeInfo.local = new Module(moduleName, ModuleStatus.READY, false, HostInfo.getIpAdd(), getPort(), new ArrayList<>(), depends);
 
-        CallCmd.scanPackage(scanPackage);
+        RuntimeInfo.scanPackage(scanPackage);
     }
 
     @Override
@@ -71,9 +64,6 @@ public class WsServer extends WebSocketServer {
 
     @Override
     public void onClose(WebSocket webSocket, int code, String reason, boolean remote) {
-        //断开连接时候触发代码
-        WsPool.removeClient(webSocket);
-        System.out.println(reason);
     }
 
     @Override

@@ -27,8 +27,8 @@
 
 package io.nuls.rpc.server;
 
-import io.nuls.rpc.info.IpPortInfo;
-import io.nuls.rpc.info.RuntimeParam;
+import io.nuls.rpc.info.HostInfo;
+import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.Module;
 import io.nuls.rpc.model.ModuleStatus;
 
@@ -45,21 +45,21 @@ public abstract class BaseRpcServer {
     private int port;
 
     BaseRpcServer() {
-        this.addr = IpPortInfo.getIpAddLocally();
-        this.port = IpPortInfo.randomPort();
+        this.addr = HostInfo.getIpAddLocally();
+        this.port = HostInfo.randomPort();
 
         init();
     }
 
     BaseRpcServer(int port) {
-        this.addr = IpPortInfo.getIpAddLocally();
+        this.addr = HostInfo.getIpAddLocally();
         this.port = port;
 
         init();
     }
 
     private void init() {
-        RuntimeParam.local = new Module("", ModuleStatus.READY, false, "", 0, new ArrayList<>(), new ArrayList<>());
+        RuntimeInfo.local = new Module("", ModuleStatus.READY, false, "", 0, new ArrayList<>(), new ArrayList<>());
     }
 
     String getBaseUri() {
@@ -67,11 +67,11 @@ public abstract class BaseRpcServer {
     }
 
     public void init(String moduleName, List<String> depends) {
-        RuntimeParam.local.setName(moduleName);
-        RuntimeParam.local.setDependsModule(depends);
-        RuntimeParam.local.setAddr(getAddr());
-        RuntimeParam.local.setPort(getPort());
-        RuntimeParam.local.setStatus(ModuleStatus.READY);
+        RuntimeInfo.local.setName(moduleName);
+        RuntimeInfo.local.setDependsModule(depends);
+        RuntimeInfo.local.setAddr(getAddr());
+        RuntimeInfo.local.setPort(getPort());
+        RuntimeInfo.local.setStatus(ModuleStatus.READY);
     }
 
     public String getAddr() {

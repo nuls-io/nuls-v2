@@ -24,6 +24,11 @@
 
 package io.nuls.account.service;
 
+import io.nuls.account.model.bo.Account;
+import io.nuls.tools.basic.Result;
+
+import java.util.List;
+
 /**
  * 账户模块提供给外部的服务接口定义
  * account service definition
@@ -31,6 +36,20 @@ package io.nuls.account.service;
  * @author: qinyifeng
  */
 public interface AccountService {
+
+    /**
+     * 创建指定个数的账户（包含地址）
+     * Create a specified number of accounts,and encrypt the accounts,
+     * all the accounts are encrypted by the same password
+     * if the password is NULL or "", the accounts will be unencrypted.
+     *
+     * @param chainId    链ID
+     * @param count    想要创建的账户个数
+     * @param count    the number of account you want to create.
+     * @param password the password of the accounts.
+     * @return the account list created.
+     */
+    List<Account> createAccount(int chainId, int count, String password);
 
 
 }

@@ -28,9 +28,14 @@ package io.nuls.account.constant;
 
 /**
  * @author: qinyifeng
+ * @description: 配置常量
  */
 public interface AccountConstant {
 
-
+    /**
+     * --------[db configs] -------
+     */
+    String DB_SECTION = "db";
+    String DB_DATA_PATH = "rocksdb.datapath";
 
 }

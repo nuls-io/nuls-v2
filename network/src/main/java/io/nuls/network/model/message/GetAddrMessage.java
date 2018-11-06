@@ -22,14 +22,37 @@
  * SOFTWARE.
  *
  */
+package io.nuls.network.model.message;
 
-package io.nuls.account.rpc;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.model.message.base.BaseMessage;
+import io.nuls.network.model.message.body.MessageBody;
+import io.nuls.tools.exception.NulsException;
 
 /**
- * @author: qinyifeng
+ * 请求 peer地址协议消息
+ * get addr message
+ * @author lan
+ * @date 2018/11/01
+ *
  */
-public class AccountResource {
+public class GetAddrMessage extends BaseMessage<MessageBody> {
 
+    @Override
+    protected MessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        try {
+            return byteBuffer.readNulsData(new MessageBody());
+        } catch (Exception e) {
+           throw new NulsException(e);
+        }
+    }
+    public GetAddrMessage() {
+       super(NetworkConstant.CMD_MESSAGE_GET_ADDR,0);
+    }
 
-
+    public GetAddrMessage(long magicNumber, String cmd, MessageBody body) {
+        super(cmd,magicNumber);
+        this.setMsgBody(body);
+    }
 }

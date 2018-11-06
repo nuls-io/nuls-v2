@@ -27,17 +27,65 @@
 
 package io.nuls.rpc.model;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+/**
+ * @author tangyi
+ * @date 2018/10/31
+ * @description
+ */
+public class CmdResponse {
+    private int id;
+    private int code;
+    private String msg;
+    private double version;
+    private Object result;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface CmdInfo {
-    String cmd();
+    public CmdResponse(){}
 
-    double version();
+    public CmdResponse(int id, int code, String msg, double version, Object result) {
+        this.id = id;
+        this.code = code;
+        this.msg = msg;
+        this.version = version;
+        this.result = result;
+    }
 
-    boolean preCompatible();
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getMsg() {
+        return msg;
+    }
+
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public double getVersion() {
+        return version;
+    }
+
+    public void setVersion(double version) {
+        this.version = version;
+    }
+
+    public Object getResult() {
+        return result;
+    }
+
+    public void setResult(Object result) {
+        this.result = result;
+    }
 }

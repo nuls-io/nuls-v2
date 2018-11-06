@@ -25,6 +25,10 @@
 
 package io.nuls.account.storage;
 
+import io.nuls.account.model.po.AccountPo;
+
+import java.util.List;
+
 /**
  * 账户数据存储服务接口
  * Account data storage service interface
@@ -33,5 +37,13 @@ package io.nuls.account.storage;
  */
 public interface AccountStorageService {
 
+    /**
+     * 创建账户多个账户
+     * Create accounts
+     * @param accountPoList 待创建的账户集合
+     * @param accountPoList Account collection to be created
+     * @return the result of the opration
+     */
+    boolean saveAccountList(List<AccountPo> accountPoList);
 
 }
