@@ -28,11 +28,11 @@
 package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
 import io.nuls.rpc.model.Module;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.*;
@@ -65,7 +65,7 @@ public class KernelCmd4Test extends BaseCmd {
             return success(1.0, null, result);
         } catch (Exception e) {
             e.printStackTrace();
-            return failed(Constants.INTERNAL_ERROR, 1.0, null);
+            return failed(ErrorCode.init("-32603"), 1.0, null);
         }
     }
 

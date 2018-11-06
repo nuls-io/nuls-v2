@@ -27,8 +27,6 @@
 
 package io.nuls.rpc.info;
 
-import io.nuls.rpc.model.ErrorInfo;
-
 /**
  * @author tangyi
  * @date 2018/10/19
@@ -66,14 +64,14 @@ public class Constants {
     /**
      * SUCCESS_CODE
      */
-    public static final int SUCCESS_CODE = 0;
+    public static final String SUCCESS_CODE = "0";
 
     /**
      * ErrorInfo
      */
-    public static final ErrorInfo PARSE_ERROR = new ErrorInfo(-32700, "Parse error");
-    public static final ErrorInfo INVALID_REQUEST = new ErrorInfo(-32600, "Invalid Request");
-    public static final ErrorInfo METHOD_NOT_FOUND = new ErrorInfo(-32601, "Method not found");
-    public static final ErrorInfo INVALID_PARAMS = new ErrorInfo(-32602, "Invalid params");
-    public static final ErrorInfo INTERNAL_ERROR = new ErrorInfo(-32603, "Internal error");
+//    public static final ErrorInfo PARSE_ERROR = new ErrorInfo(-32700, "Parse error");
+//    public static final ErrorInfo INVALID_REQUEST = new ErrorInfo(-32600, "Invalid Request");
+//    public static final ErrorInfo METHOD_NOT_FOUND = new ErrorInfo(-32601, "Method not found");
+//    public static final ErrorInfo INVALID_PARAMS = new ErrorInfo(-32602, "Invalid params");
+//    public static final ErrorInfo INTERNAL_ERROR = new ErrorInfo(-32603, "Internal error");
 }
