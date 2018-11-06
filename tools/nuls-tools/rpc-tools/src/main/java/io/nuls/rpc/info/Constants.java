@@ -27,6 +27,8 @@
 
 package io.nuls.rpc.info;
 
+import io.nuls.rpc.model.ErrorInfo;
+
 /**
  * @author tangyi
  * @date 2018/10/19
@@ -48,7 +50,7 @@ public class Constants {
      */
     public static final String ONLINE = "nuls_websocket_online:";
     public static final String OFFLINE = "nuls_websocket_offline:";
-    public static final String DELIMIT="-->>";
+    public static final String DELIMIT = "-->>";
 
 
     /**
@@ -60,4 +62,18 @@ public class Constants {
     public static final String CONF_GET = "conf_get";
     public static final String CONF_SET = "conf_set";
     public static final String CONF_RESET = "conf_reset";
+
+    /**
+     * SUCCESS_CODE
+     */
+    public static final int SUCCESS_CODE = 0;
+
+    /**
+     * ErrorInfo
+     */
+    public static final ErrorInfo PARSE_ERROR = new ErrorInfo(-32700, "Parse error");
+    public static final ErrorInfo INVALID_REQUEST = new ErrorInfo(-32600, "Invalid Request");
+    public static final ErrorInfo METHOD_NOT_FOUND = new ErrorInfo(-32601, "Method not found");
+    public static final ErrorInfo INVALID_PARAMS = new ErrorInfo(-32602, "Invalid params");
+    public static final ErrorInfo INTERNAL_ERROR = new ErrorInfo(-32603, "Internal error");
 }

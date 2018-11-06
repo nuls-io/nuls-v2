@@ -28,6 +28,7 @@
 package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
@@ -43,15 +44,17 @@ import java.util.*;
  * @date 2018/10/17
  * @description
  */
-public class KernelCmd1 extends BaseCmd {
+public class KernelCmd4Test extends BaseCmd {
 
     @CmdAnnotation(cmd = "version", version = 1.0, preCompatible = true)
     public CmdResponse version(List params) {
         try {
             System.out.println("join之前的kernel remote接口数：" + RuntimeInfo.remoteModuleMap.size());
             Module module = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Module.class);
-            System.out.println(module.getName() + " added");
-            RuntimeInfo.remoteModuleMap.put(module.getName(), module);
+            if (module != null) {
+                System.out.println(module.getName() + " added");
+                RuntimeInfo.remoteModuleMap.put(module.getName(), module);
+            }
             System.out.println("join之后的kernel remote接口数：" + RuntimeInfo.remoteModuleMap.size());
 
             Map<String, Object> result = new HashMap<>(16);
@@ -59,10 +62,10 @@ public class KernelCmd1 extends BaseCmd {
             result.put("available", true);
             result.put("modules", RuntimeInfo.remoteModuleMap);
 
-            return result(SUCCESS_CODE, 1.0, null, result);
+            return success(1.0, null, result);
         } catch (Exception e) {
             e.printStackTrace();
-            return result(-1, 1.0, e.getMessage(), null);
+            return failed(Constants.INTERNAL_ERROR, 1.0, null);
         }
     }
 
@@ -78,11 +81,11 @@ public class KernelCmd1 extends BaseCmd {
         result.put("service", service);
         result.put("modules", RuntimeInfo.remoteModuleMap);
 
-        return result(SUCCESS_CODE, 1.0, null, result);
+        return success(1.0, null, result);
     }
 
     @CmdAnnotation(cmd = "cmd1", version = 1.0, preCompatible = true)
     public Object cmd1(List params) {
-        return result(SUCCESS_CODE, 1.0, null, "kernel cmd1");
+        return success(1.0, null, "kernel cmd1");
     }
 }

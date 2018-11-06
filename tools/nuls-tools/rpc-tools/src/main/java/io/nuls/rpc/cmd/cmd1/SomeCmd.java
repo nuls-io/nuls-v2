@@ -48,43 +48,43 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
     @CmdAnnotation(cmd = "cmd1", version = 1.0, preCompatible = true)
     public CmdResponse methodName(List params) {
         System.out.println("I'm version 1");
-        return result(SUCCESS_CODE, 1.0, "cmd1->1.0", null);
+        return success(1.0, "cmd1->1.0", null);
     }
 
     @CmdAnnotation(cmd = "cmd1", version = 1.1, preCompatible = true)
     public CmdResponse methodName1(List params) {
         System.out.println("I'm version 1.1");
-        return result(1.1);
+        return success(1.1);
     }
 
     @CmdAnnotation(cmd = "cmd1", version = 2.0, preCompatible = false)
     public CmdResponse cmd111(List params) {
         System.out.println("I'm version 2.0");
-        return result(SUCCESS_CODE, 2.0, "cmd1->2.0", null);
+        return success(2.0, "cmd1->2.0", null);
     }
 
     @CmdAnnotation(cmd = "cmd1", version = 2.1, preCompatible = true)
     public CmdResponse cmd1111(List params) {
         System.out.println("I'm version 2.1");
-        return result(SUCCESS_CODE, 2.1, "cmd1->2.1", null);
+        return success(2.1, "cmd1->2.1", null);
     }
 
     @CmdAnnotation(cmd = "cmd1", version = 2.2, preCompatible = true)
     public CmdResponse cmd11111(List params) {
         System.out.println("I'm version 2.2");
-        return result(SUCCESS_CODE, 2.2, "cmd1->2.2", null);
+        return success(2.2, "cmd1->2.2", null);
     }
 
     @CmdAnnotation(cmd = "cmd1", version = 3.0, preCompatible = false)
     public CmdResponse cmd111111(List params) {
         System.out.println("I'm version 3.0");
-        return result(SUCCESS_CODE, 3.0, "cmd1->3.0", null);
+        return success(3.0, "cmd1->3.0", null);
     }
 
     @CmdAnnotation(cmd = "cmd2", version = 2.0, preCompatible = true)
     public CmdResponse cmd2(List params) {
         System.out.println("I'm version 2");
-        return result(SUCCESS_CODE, 2.0, "2.0success", new String[]{"hello world cmd2", "inchain best"});
+        return success(2.0, "2.0success", new String[]{"hello world cmd2", "inchain best"});
     }
 
     /**
@@ -100,7 +100,7 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
             return super.status(params);
         } catch (IOException e) {
             e.printStackTrace();
-            return result(-1, 1.0, e.getMessage(), null);
+            return failed(Constants.PARSE_ERROR, 1.0, null);
         }
     }
 
@@ -113,7 +113,7 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
     @Override
     @CmdAnnotation(cmd = Constants.SHUTDOWN, version = 1.0, preCompatible = true)
     public CmdResponse shutdown(List params) {
-        return result(1.0);
+        return success(1.0);
     }
 
     /**
@@ -125,7 +125,7 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
     @Override
     @CmdAnnotation(cmd = Constants.TERMINATE, version = 1.0, preCompatible = true)
     public CmdResponse terminate(List params) {
-        return result(1.0);
+        return success(1.0);
     }
 
     /**
@@ -137,7 +137,7 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
     @Override
     @CmdAnnotation(cmd = Constants.CONF_GET, version = 1.0, preCompatible = true)
     public CmdResponse confGet(List params) {
-        return result(1.0);
+        return success(1.0);
     }
 
     /**
@@ -149,7 +149,7 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
     @Override
     @CmdAnnotation(cmd = Constants.CONF_SET, version = 1.0, preCompatible = true)
     public CmdResponse confSet(List params) {
-        return result(1.0);
+        return success(1.0);
     }
 
     /**
@@ -161,6 +161,6 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
     @Override
     @CmdAnnotation(cmd = Constants.CONF_RESET, version = 1.0, preCompatible = true)
     public CmdResponse confReset(List params) {
-        return result(1.0);
+        return success(1.0);
     }
 }
