@@ -46,7 +46,7 @@ public class WsM3 {
         s.init("wangkun", new String[]{"m1"}, null);
         s.start();
 
-        CmdDispatcher.syncLocalToKernel("ws://127.0.0.1:8887");
+        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
 
         System.out.println(CmdDispatcher.call("cmd1", null, 1.0));
 

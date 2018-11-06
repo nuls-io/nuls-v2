@@ -25,9 +25,11 @@
 
 package io.nuls.rpc.cmd;
 
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdResponse;
 import io.nuls.rpc.model.ConfigItem;
+import io.nuls.rpc.model.ErrorInfo;
 import io.nuls.rpc.model.Module;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -41,7 +43,6 @@ import java.util.Map;
  * @description
  */
 public abstract class BaseCmd {
-
 
 
     /**
@@ -79,7 +80,7 @@ public abstract class BaseCmd {
 
         System.out.println(JSONUtils.obj2json(RuntimeInfo.remoteModuleMap));
 
-        return result(1.0);
+        return success(1.0);
     }
 
     protected void addConfigItem(String key, Object value, boolean readOnly) {
@@ -87,17 +88,25 @@ public abstract class BaseCmd {
         RuntimeInfo.configItemList.add(configItem);
     }
 
-    protected CmdResponse result(double version) {
-        return result(0, version, null, null);
+    protected CmdResponse success(double version) {
+        return success(version, "", "");
     }
 
-    protected CmdResponse result(int code, double version, String msg, Object result) {
+    protected CmdResponse success(double version, String msg, Object result) {
         CmdResponse cmdResponse = new CmdResponse();
-        cmdResponse.setCode(code);
+        cmdResponse.setCode(Constants.SUCCESS_CODE);
         cmdResponse.setVersion(version);
         cmdResponse.setMsg(msg);
         cmdResponse.setResult(result);
         return cmdResponse;
     }
 
+    protected CmdResponse failed(ErrorInfo errorInfo, double version, Object result) {
+        CmdResponse cmdResponse = new CmdResponse();
+        cmdResponse.setCode(errorInfo.getCode());
+        cmdResponse.setVersion(version);
+        cmdResponse.setMsg(errorInfo.getMessage());
+        cmdResponse.setResult(result);
+        return cmdResponse;
+    }
 }
