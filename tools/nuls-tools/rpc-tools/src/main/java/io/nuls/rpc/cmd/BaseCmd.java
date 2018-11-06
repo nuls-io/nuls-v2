@@ -29,8 +29,8 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdResponse;
 import io.nuls.rpc.model.ConfigItem;
-import io.nuls.rpc.model.ErrorInfo;
 import io.nuls.rpc.model.Module;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
@@ -101,11 +101,11 @@ public abstract class BaseCmd {
         return cmdResponse;
     }
 
-    protected CmdResponse failed(ErrorInfo errorInfo, double version, Object result) {
+    protected CmdResponse failed(ErrorCode errorCode, double version, Object result) {
         CmdResponse cmdResponse = new CmdResponse();
-        cmdResponse.setCode(errorInfo.getCode());
+        cmdResponse.setCode(errorCode.getCode());
         cmdResponse.setVersion(version);
-        cmdResponse.setMsg(errorInfo.getMessage());
+        cmdResponse.setMsg(errorCode.getMsg());
         cmdResponse.setResult(result);
         return cmdResponse;
     }

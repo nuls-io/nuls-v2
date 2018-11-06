@@ -34,14 +34,14 @@ package io.nuls.rpc.model;
  */
 public class CmdResponse {
     private int id;
-    private int code;
+    private String code;
     private String msg;
     private double version;
     private Object result;
 
     public CmdResponse(){}
 
-    public CmdResponse(int id, int code, String msg, double version, Object result) {
+    public CmdResponse(int id, String code, String msg, double version, Object result) {
         this.id = id;
         this.code = code;
         this.msg = msg;
@@ -57,11 +57,11 @@ public class CmdResponse {
         this.id = id;
     }
 
-    public int getCode() {
+    public String getCode() {
         return code;
     }
 
-    public void setCode(int code) {
+    public void setCode(String code) {
         this.code = code;
     }
 

@@ -72,10 +72,16 @@ public class RuntimeInfo {
      */
     public static AtomicInteger sequence = new AtomicInteger(0);
 
+
     /**
-     * result queue
+     * all the call cmd from other module
      */
-    public static List<Map> resultQueue = Collections.synchronizedList(new ArrayList<>());
+    public static List<Map> requestQueue = Collections.synchronizedList(new ArrayList<>());
+
+    /**
+     * the response from other module
+     */
+    public static List<Map> responseQueue = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * WebSocket clients

@@ -32,6 +32,7 @@ import io.nuls.rpc.cmd.KernelCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
+import io.nuls.tools.constant.ErrorCode;
 
 import java.io.IOException;
 import java.util.List;
@@ -100,7 +101,7 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
             return super.status(params);
         } catch (IOException e) {
             e.printStackTrace();
-            return failed(Constants.PARSE_ERROR, 1.0, null);
+            return failed(ErrorCode.init("-32603"), 1.0, null);
         }
     }
 

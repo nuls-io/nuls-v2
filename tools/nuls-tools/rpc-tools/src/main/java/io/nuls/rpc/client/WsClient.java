@@ -42,7 +42,6 @@ import java.util.Map;
  * @date 2018/10/30
  * @description
  */
-
 public class WsClient extends WebSocketClient {
 
 
@@ -59,8 +58,8 @@ public class WsClient extends WebSocketClient {
         try {
             Map map = JSONUtils.json2map(paramString);
 
-            RuntimeInfo.resultQueue.add(map);
-            System.out.println("ws client-> add to map, id=" + map.get("id") + ",size=" + RuntimeInfo.resultQueue.size());
+            RuntimeInfo.responseQueue.add(map);
+            System.out.println("ws client-> add to map, id=" + map.get("id") + ",size=" + RuntimeInfo.responseQueue.size());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -75,13 +74,16 @@ public class WsClient extends WebSocketClient {
         e.printStackTrace();
     }
 
-    public Map wsResponse(int id) throws InterruptedException {
+    /**
+     * waiting for response
+     */
+    public Map waitingResponse(int id) throws InterruptedException {
         while (true) {
-            for (int i = 0; i < RuntimeInfo.resultQueue.size(); i++) {
-                Map map = RuntimeInfo.resultQueue.get(i);
+            for (int i = 0; i < RuntimeInfo.responseQueue.size(); i++) {
+                Map map = RuntimeInfo.responseQueue.get(i);
                 if ((Integer) map.get("id") == id) {
-                    RuntimeInfo.resultQueue.remove(map);
-                    System.out.println("ws client-> get response,id=" + id + ", size=" + RuntimeInfo.resultQueue.size());
+                    RuntimeInfo.responseQueue.remove(map);
+                    System.out.println("ws client-> get response,id=" + id + ", size=" + RuntimeInfo.responseQueue.size());
                     return map;
                 }
             }

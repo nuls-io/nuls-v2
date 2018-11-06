@@ -24,7 +24,7 @@ public class CmdDispatcher {
         WsClient wsClient = RuntimeInfo.getWsClient(kernelUri);
 
         wsClient.send(JSONUtils.obj2json(cmdRequest));
-        Map remoteMap = wsClient.wsResponse(id);
+        Map remoteMap = wsClient.waitingResponse(id);
 
         Map resultMap = (Map) remoteMap.get("result");
         if (RuntimeInfo.local != null && resultMap != null) {
@@ -53,7 +53,7 @@ public class CmdDispatcher {
         String remoteUri = remoteUriList.get(0);
         WsClient wsClient = RuntimeInfo.getWsClient(remoteUri);
         wsClient.send(JSONUtils.obj2json(cmdRequest));
-        Map remoteMap = wsClient.wsResponse(id);
+        Map remoteMap = wsClient.waitingResponse(id);
         return JSONUtils.obj2json(remoteMap);
     }
 }
