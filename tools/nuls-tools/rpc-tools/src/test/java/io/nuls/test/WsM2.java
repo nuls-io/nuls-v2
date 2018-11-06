@@ -28,8 +28,6 @@
 package io.nuls.test;
 
 import io.nuls.rpc.cmd.CmdDispatcher;
-import io.nuls.rpc.info.HostInfo;
-import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
 
 /**
@@ -41,17 +39,11 @@ public class WsM2 {
     @Test
     public void test() throws Exception {
 
-        WsServer s = new WsServer(HostInfo.randomPort());
-
-        s.init("wangkun", new String[]{"m1"}, null);
-        s.start();
-
-        CmdDispatcher.syncLocalToKernel("ws://127.0.0.1:8887");
+        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
 
         System.out.println(CmdDispatcher.call("cmd1", null, 1.0));
 
         System.out.println(CmdDispatcher.call("cmd2", null, 1.0));
 
-        Thread.sleep(Integer.MAX_VALUE);
     }
 }

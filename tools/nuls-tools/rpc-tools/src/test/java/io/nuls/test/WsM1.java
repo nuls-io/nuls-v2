@@ -46,7 +46,7 @@ public class WsM1 {
         s.init("m1", new String[]{"m2", "m3"}, "io.nuls.rpc.cmd.cmd1");
         s.start();
 
-        CmdDispatcher.syncLocalToKernel("ws://127.0.0.1:8887");
+        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
 
         Thread.sleep(Integer.MAX_VALUE);
     }
