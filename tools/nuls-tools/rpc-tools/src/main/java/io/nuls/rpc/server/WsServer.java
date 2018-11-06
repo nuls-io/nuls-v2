@@ -53,9 +53,11 @@ public class WsServer extends WebSocketServer {
 
     public void init(String moduleName, String[] depends, String scanPackage) throws Exception {
         List<String> dps = depends == null ? new ArrayList<>() : Arrays.asList(depends);
-        RuntimeInfo.local = new Module(moduleName, ModuleStatus.READY, false, HostInfo.getIpAdd(), getPort(), new ArrayList<>(), dps);
+        RuntimeInfo.local = new Module(moduleName, ModuleStatus.READY, true, HostInfo.getIpAdd(), getPort(), new ArrayList<>(), dps);
 
         RuntimeInfo.scanPackage(scanPackage);
+
+
     }
 
     @Override
