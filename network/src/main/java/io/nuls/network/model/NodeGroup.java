@@ -310,6 +310,38 @@ public class NodeGroup {
         return maxCrossOut;
     }
 
+    public int getHadConnectOut() {
+        return hadConnectOut;
+    }
+
+    public void setHadConnectOut(int hadConnectOut) {
+        this.hadConnectOut = hadConnectOut;
+    }
+
+    public int getHadConnectIn() {
+        return hadConnectIn;
+    }
+
+    public void setHadConnectIn(int hadConnectIn) {
+        this.hadConnectIn = hadConnectIn;
+    }
+
+    public int getHadCrossConnectOut() {
+        return hadCrossConnectOut;
+    }
+
+    public void setHadCrossConnectOut(int hadCrossConnectOut) {
+        this.hadCrossConnectOut = hadCrossConnectOut;
+    }
+
+    public int getHadCrossConnectIn() {
+        return hadCrossConnectIn;
+    }
+
+    public void setHadCrossConnectIn(int hadCrossConnectIn) {
+        this.hadCrossConnectIn = hadCrossConnectIn;
+    }
+
     public void setMaxCrossOut(int maxCrossOut) {
         this.maxCrossOut = maxCrossOut;
     }

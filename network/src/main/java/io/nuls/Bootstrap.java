@@ -72,6 +72,7 @@ public class Bootstrap {
             networkParam.setPacketMagic(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_MAGIC, 123456789));
             networkParam.setMaxInCount(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_NODE_MAX_IN, 10));
             networkParam.setMaxOutCount(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_NODE_MAX_OUT, 100));
+            networkParam.setMaxInSameIp((int)(networkParam.getMaxInCount()/networkParam.getMaxOutCount()));
             networkParam.setPort(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_SERVER_PORT, 8003));
             String seedIp = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_SEED_IP, "192.168.1.131:8003");
             List<String> ipList = new ArrayList<>();
@@ -81,8 +82,9 @@ public class Bootstrap {
             networkParam.setSeedIpList(ipList);
             //moon config
             networkParam.setMoonNode(Boolean.valueOf(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MOON_NODE, false)));
-            networkParam.setMoonMaxInCount(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MOON_NODE_MAX_IN, 0));
-            networkParam.setMoonMaxOutCount(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MOON_NODE_MAX_OUT, 0));
+            networkParam.setCrossMaxInCount(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_CROSS_NODE_MAX_IN, 1));
+            networkParam.setCrossMaxOutCount(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_CROSS_NODE_MAX_OUT, 1));
+            networkParam.setCorssMaxInSameIp((int)(networkParam.getCrossMaxInCount()/networkParam.getCrossMaxOutCount()));
             networkParam.setCrossPort(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_CROSS_SERVER_PORT, 0));
             String seedMoonIp = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MOON_SEED_IP, "0.0.0.0:8003");
             List<String> ipMoonList = new ArrayList<>();

@@ -50,16 +50,16 @@ public interface NetworkConstant {
     String NETWORK_SELF_NODE_MAX_IN = "network.self.max.in";
     String NETWORK_SELF_NODE_MAX_OUT = "network.self.max.out";
     String NETWORK_SELF_SEED_IP = "network.self.seed.ip";
-    String NETWORK_SELF_CHAIN_ID="network.self.chainId";
+    String NETWORK_SELF_CHAIN_ID = "network.self.chainId";
 
     String NETWORK_MOON_NODE = "network.moon.node";
     String NETWORK_CROSS_SERVER_PORT = "network.cross.server.port";
-    String NETWORK_MOON_NODE_MAX_IN = "network.moon.max.in";
-    String NETWORK_MOON_NODE_MAX_OUT = "network.moon.max.out";
+    String NETWORK_CROSS_NODE_MAX_IN = "network.cross.max.in";
+    String NETWORK_CROSS_NODE_MAX_OUT = "network.cross.max.out";
     String NETWORK_MOON_SEED_IP = "network.moon.seed.ip";
 
-    String CMD_MESSAGE_VERSION="version";
-    String CMD_MESSAGE_VERACK="verack";
-    String CMD_MESSAGE_ADDR="addr";
-    String CMD_MESSAGE_GET_ADDR="getaddr";
+    String CMD_MESSAGE_VERSION = "version";
+    String CMD_MESSAGE_VERACK = "verack";
+    String CMD_MESSAGE_ADDR = "addr";
+    String CMD_MESSAGE_GET_ADDR = "getaddr";
 }

@@ -60,15 +60,17 @@ public class VersionMessageHandler extends BaseMessageHandler {
         Node node =null;
         VersionMessageBody versionBody=(VersionMessageBody)message.getMsgBody();
         if(isServer){
-            localInfoManager.updateExternalAddress(versionBody.getAddrYou().getIp().getHostAddress(),versionBody.getAddrYou().getPort());
+
             node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
+            localInfoManager.updateExternalAddress(versionBody.getAddrYou().getIp().getHostAddress(),versionBody.getAddrYou().getPort());
+            //node加入到Group的未连接中
+            NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
             Log.debug("VersionMessageHandler Recieve:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
             //服务端首次知道channel的网络属性，进行channel归属
             node.addGroupConnector(message.getHeader().getMagicNumber());
             NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(message.getHeader().getMagicNumber());
-            nodeGroupConnector.setStatus(Node.CONNECTING);
             //node加入到Group的未连接中
-            NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
+            nodeGroupConnector.setStatus(Node.CONNECTING);
             nodeGroup.addDisConnetNode(node,true);
             //TODO:存储需要的信息
             node.setVersionProtocolInfos(message.getHeader().getMagicNumber(),versionBody.getProtocolVersion(),versionBody.getBlockHeight(),versionBody.getBlockHash());

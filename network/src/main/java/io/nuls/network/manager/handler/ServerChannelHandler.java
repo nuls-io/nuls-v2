@@ -71,6 +71,12 @@ public class ServerChannelHandler extends BaseChannelHandler {
         super.channelActive(ctx);
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         boolean isCrossConnect=isServerCrossConnect(ctx.channel());
+        //already exist peer ip （In or Out）
+        if( ConnectionManager.getInstance().isPeerConnectExist(socketChannel.remoteAddress().getHostString(),Node.IN,isCrossConnect)){
+            ctx.channel().close();
+            return;
+        }
+
         Node node = new Node(socketChannel.remoteAddress().getHostString(),socketChannel.remoteAddress().getPort(), Node.IN,isCrossConnect);
         node.setCanConnect(false);
         node.setChannel(ctx.channel());
@@ -79,7 +85,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
             ctx.channel().close();
             return;
         }
-        //此时无法知道client的魔法参数，不能发送version消息。
+        //此时无法知道client的魔法参数，不能发送version消息,此时业务法对MaxIn做判断
     }
 
 
@@ -90,7 +96,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
         Node node=ConnectionManager.getInstance().getNodeByCache(this.getNodeIdByChannel( ctx.channel()),Node.OUT);
         if(null != node) {
             node.setCanConnect(true);
-            ConnectionManager.getInstance().removeCacheConnectNodeInMap(node.getId());
+            ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),Node.IN);
             Log.info("Server Node is Inactive:" + node.getIp() + ":" + node.getRemotePort());
         }
     }

@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 定时建立连接
+ * 定时补充建立连接
  * ues add peer connect
  * @author lan
  * @date 2018/11/01
@@ -54,6 +54,8 @@ public class NodesConnectThread implements Runnable  {
             if (node.isEliminate()) {
                 eliminateNodes.add(node.getId());
             } else {
+                //TODO:判断peer是否在In里已经存在
+
                 if(node.isCanConnect()) {
                     node.addGroupConnector(magicNumber);
                     connectionManager.connectionNode(node);
@@ -63,7 +65,6 @@ public class NodesConnectThread implements Runnable  {
                     //去连接缓存中获取连接是否存在，如果存在，则直接进行业务握手
                     Node activeNode=ConnectionManager.getInstance().getNodeByCache(node.getId(),node.getType());
                     if(null != activeNode) {
-
                         NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(magicNumber);
                         if(null == nodeGroupConnector){
                             node.addGroupConnector(magicNumber);
@@ -97,7 +98,7 @@ public class NodesConnectThread implements Runnable  {
                     List <Node> nodesList=new ArrayList<>();
                     nodesList.addAll(nodes);
                     Collections.shuffle(nodesList);
-                    int leftCount= nodeGroup.getMaxOut()-nodeGroup.getConnectNodeMap().size();
+                    int leftCount= nodeGroup.getMaxOut()-nodeGroup.getHadConnectOut();
                     connectPeer(nodes,nodeGroup.getMagicNumber(),leftCount);
                 }
                 /**
@@ -108,17 +109,9 @@ public class NodesConnectThread implements Runnable  {
                     List <Node> nodesList=new ArrayList<>();
                     nodesList.addAll(nodes);
                     Collections.shuffle(nodesList);
-                    int leftCount= nodeGroup.getMaxCrossOut()-nodeGroup.getConnectCrossNodeMap().size();
+                    int leftCount= nodeGroup.getMaxCrossOut()-nodeGroup.getHadCrossConnectOut();
                     connectPeer(nodesList,nodeGroup.getMagicNumber(),leftCount);
                 }
-
-
-                //测试地址协议
-//                Collection<Node> connectNodes = nodeGroup.getConnectNodes();
-//                for (Node node : connectNodes) {
-//                    BaseMessage message=MessageFactory.getInstance().buildGetAddrMessage(node,nodeGroup.getMagicNumber());
-//                    MessageManager.getInstance().sendToNode(message,node,true);
-//                }
             }
 
         }catch(Exception e){

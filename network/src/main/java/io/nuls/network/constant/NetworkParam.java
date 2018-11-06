@@ -26,7 +26,6 @@
 package io.nuls.network.constant;
 
 import java.util.List;
-import java.util.Set;
 
 /**
  *
@@ -54,13 +53,17 @@ public class NetworkParam {
 
     private int maxOutCount;
 
+    private int maxInSameIp;
+
     private List<String> seedIpList;
 
     private int crossPort;
 
-    private int moonMaxInCount;
+    private int crossMaxInCount;
 
-    private int moonMaxOutCount;
+    private int crossMaxOutCount;
+
+    private int corssMaxInSameIp;
 
     private List<String> moonSeedIpList;
 
@@ -116,20 +119,36 @@ public class NetworkParam {
         this.crossPort = crossPort;
     }
 
-    public int getMoonMaxInCount() {
-        return moonMaxInCount;
+    public int getMaxInSameIp() {
+        return maxInSameIp;
     }
 
-    public void setMoonMaxInCount(int moonMaxInCount) {
-        this.moonMaxInCount = moonMaxInCount;
+    public void setMaxInSameIp(int maxInSameIp) {
+        this.maxInSameIp = maxInSameIp;
     }
 
-    public int getMoonMaxOutCount() {
-        return moonMaxOutCount;
+    public int getCrossMaxInCount() {
+        return crossMaxInCount;
     }
 
-    public void setMoonMaxOutCount(int moonMaxOutCount) {
-        this.moonMaxOutCount = moonMaxOutCount;
+    public void setCrossMaxInCount(int crossMaxInCount) {
+        this.crossMaxInCount = crossMaxInCount;
+    }
+
+    public int getCrossMaxOutCount() {
+        return crossMaxOutCount;
+    }
+
+    public void setCrossMaxOutCount(int crossMaxOutCount) {
+        this.crossMaxOutCount = crossMaxOutCount;
+    }
+
+    public int getCorssMaxInSameIp() {
+        return corssMaxInSameIp;
+    }
+
+    public void setCorssMaxInSameIp(int corssMaxInSameIp) {
+        this.corssMaxInSameIp = corssMaxInSameIp;
     }
 
     public List<String> getMoonSeedIpList() {
