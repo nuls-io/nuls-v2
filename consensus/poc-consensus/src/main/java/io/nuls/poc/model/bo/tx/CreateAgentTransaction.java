@@ -34,7 +34,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 /**
- * @author Niels
+ * @author tag
  */
 public class CreateAgentTransaction extends Transaction<Agent> {
 

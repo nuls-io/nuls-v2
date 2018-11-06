@@ -33,7 +33,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 /**
- * @author Niels
+ * @author tag
  */
 public class DepositTransaction extends Transaction<Deposit> {
 
