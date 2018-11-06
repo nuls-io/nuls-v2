@@ -1,4 +1,4 @@
-package io.nuls.account.rpc;
+package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.service.AccountService;
 import io.nuls.rpc.cmd.BaseCmd;
