@@ -28,6 +28,7 @@
 package io.nuls.rpc.cmd.cmd1;
 
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.cmd.BaseCode;
 import io.nuls.rpc.cmd.KernelCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -48,7 +49,7 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
     @CmdAnnotation(cmd = "cmd1", version = 1.0, preCompatible = true)
     public CmdResponse methodName(List params) {
         System.out.println("I'm version 1");
-        return result(SUCCESS_CODE, 1.0, "cmd1->1.0", null);
+        return result(BaseCode.SUCCESS_CODE, 1.0, "cmd1->1.0", null);
     }
 
     @CmdAnnotation(cmd = "cmd1", version = 1.1, preCompatible = true)
@@ -60,31 +61,31 @@ public class SomeCmd extends BaseCmd implements KernelCmd {
     @CmdAnnotation(cmd = "cmd1", version = 2.0, preCompatible = false)
     public CmdResponse cmd111(List params) {
         System.out.println("I'm version 2.0");
-        return result(SUCCESS_CODE, 2.0, "cmd1->2.0", null);
+        return result(BaseCode.SUCCESS_CODE, 2.0, "cmd1->2.0", null);
     }
 
     @CmdAnnotation(cmd = "cmd1", version = 2.1, preCompatible = true)
     public CmdResponse cmd1111(List params) {
         System.out.println("I'm version 2.1");
-        return result(SUCCESS_CODE, 2.1, "cmd1->2.1", null);
+        return result(BaseCode.SUCCESS_CODE, 2.1, "cmd1->2.1", null);
     }
 
     @CmdAnnotation(cmd = "cmd1", version = 2.2, preCompatible = true)
     public CmdResponse cmd11111(List params) {
         System.out.println("I'm version 2.2");
-        return result(SUCCESS_CODE, 2.2, "cmd1->2.2", null);
+        return result(BaseCode.SUCCESS_CODE, 2.2, "cmd1->2.2", null);
     }
 
     @CmdAnnotation(cmd = "cmd1", version = 3.0, preCompatible = false)
     public CmdResponse cmd111111(List params) {
         System.out.println("I'm version 3.0");
-        return result(SUCCESS_CODE, 3.0, "cmd1->3.0", null);
+        return result(BaseCode.SUCCESS_CODE, 3.0, "cmd1->3.0", null);
     }
 
     @CmdAnnotation(cmd = "cmd2", version = 2.0, preCompatible = true)
     public CmdResponse cmd2(List params) {
         System.out.println("I'm version 2");
-        return result(SUCCESS_CODE, 2.0, "2.0success", new String[]{"hello world cmd2", "inchain best"});
+        return result(BaseCode.SUCCESS_CODE, 2.0, "2.0success", new String[]{"hello world cmd2", "inchain best"});
     }
 
     /**

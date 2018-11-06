@@ -42,7 +42,7 @@ import java.util.Map;
  */
 public abstract class BaseCmd {
 
-    protected final int SUCCESS_CODE = 0;
+
 
     /**
      * 从kernel接收所有模块信息

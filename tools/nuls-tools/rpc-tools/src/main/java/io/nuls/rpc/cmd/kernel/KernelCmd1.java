@@ -28,6 +28,7 @@
 package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.cmd.BaseCode;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
@@ -59,7 +60,7 @@ public class KernelCmd1 extends BaseCmd {
             result.put("available", true);
             result.put("modules", RuntimeInfo.remoteModuleMap);
 
-            return result(SUCCESS_CODE, 1.0, null, result);
+            return result(BaseCode.SUCCESS_CODE, 1.0, null, result);
         } catch (Exception e) {
             e.printStackTrace();
             return result(-1, 1.0, e.getMessage(), null);
@@ -78,11 +79,11 @@ public class KernelCmd1 extends BaseCmd {
         result.put("service", service);
         result.put("modules", RuntimeInfo.remoteModuleMap);
 
-        return result(SUCCESS_CODE, 1.0, null, result);
+        return result(BaseCode.SUCCESS_CODE, 1.0, null, result);
     }
 
     @CmdAnnotation(cmd = "cmd1", version = 1.0, preCompatible = true)
     public Object cmd1(List params) {
-        return result(SUCCESS_CODE, 1.0, null, "kernel cmd1");
+        return result(BaseCode.SUCCESS_CODE, 1.0, null, "kernel cmd1");
     }
 }
