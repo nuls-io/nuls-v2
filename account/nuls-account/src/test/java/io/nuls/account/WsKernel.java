@@ -40,12 +40,13 @@ public class WsKernel {
 
     @Test
     public  void test() throws Exception {
+        //模拟启动内核模块
         int port = 8887;
         WsServer s = new WsServer(port);
-        s.init("kernel", new String[]{}, null);
+        s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
         s.start();
 
-        CmdDispatcher.syncLocalToKernel("ws://127.0.0.1:8887");
+        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
 
         Thread.sleep(Integer.MAX_VALUE);
     }

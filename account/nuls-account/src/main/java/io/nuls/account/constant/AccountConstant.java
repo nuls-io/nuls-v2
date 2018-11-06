@@ -33,6 +33,27 @@ package io.nuls.account.constant;
 public interface AccountConstant {
 
     /**
+     * ----[ System] ----
+     */
+    /**
+     * 系统配置项section名称
+     * The configuration item section name of the kernel module.
+     */
+    String CFG_SYSTEM_SECTION = "system";
+
+    /**
+     * 系统配置中语言设置的字段名
+     * The field name of the language set in the system configuration.
+     */
+    String CFG_SYSTEM_LANGUAGE = "language";
+
+    /**
+     * 系统配置中编码设置的字段名
+     * The field name of the code setting in the system configuration.
+     */
+    String CFG_SYSTEM_DEFAULT_ENCODING = "encoding";
+
+    /**
      * --------[db configs] -------
      */
     String DB_SECTION = "db";

@@ -1,12 +1,13 @@
 package io.nuls.account.rpc.cmd;
 
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.service.AccountService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 
 import java.util.List;
@@ -21,7 +22,6 @@ public class AccountCmd extends BaseCmd {
 
     @Autowired
     private AccountService accountService;
-
 
     /*
      * CmdAnnotation注解包含
@@ -45,20 +45,26 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_createAccount", version = 1.0, preCompatible = true)
     public CmdResponse createAccount(List params) {
         Log.debug("createAccount start:");
-        if (params.get(0) == null) {
-            return result(0, 1.0, "params chainId is null", null);
+        try {
+            // check parameters
+            if (params.get(0) == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+
+            Integer chainId = (Integer) params.get(0);
+            Integer count = null;
+            String password = null;
+            if (params.get(1) != null) {
+                count = (Integer) params.get(1);
+            }
+            if (params.get(2) != null) {
+                password = (String) params.get(2);
+            }
+            accountService.createAccount(chainId, count, password);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), 1.0, null);
         }
-        Integer chainId = (Integer) params.get(0);
-        Integer count = null;
-        String password = null;
-        if (params.get(1) != null) {
-            count = (Integer) params.get(1);
-        }
-        if (params.get(2) != null) {
-            password = (String) params.get(2);
-        }
-        accountService.createAccount(chainId, count, password);
-        return result(SUCCESS_CODE, 1.0, "hello nuls", null);
+        return success(1.0, "success", null);
     }
 
 }
