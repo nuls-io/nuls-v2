@@ -41,6 +41,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -76,12 +78,14 @@ public class RuntimeInfo {
     /**
      * all the call cmd from other module
      */
-    public static List<Map> requestQueue = Collections.synchronizedList(new ArrayList<>());
+    public static final List<Object[]> requestQueue = Collections.synchronizedList(new ArrayList<>());
+
+    public static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
 
     /**
      * the response from other module
      */
-    public static List<Map> responseQueue = Collections.synchronizedList(new ArrayList<>());
+    public static final List<Map> responseQueue = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * WebSocket clients

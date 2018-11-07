@@ -31,6 +31,7 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.CmdResponse;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.lang.reflect.Constructor;
@@ -52,20 +53,31 @@ public class WebSocketHandler {
         }
 
         Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
-
         CmdDetail cmdDetail = RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));
         if (cmdDetail == null) {
             return "No cmd found: " + jsonMap.get("cmd") + "." + jsonMap.get("minVersion");
         }
 
-        Class clz = Class.forName(cmdDetail.getInvokeClass());
-
-        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(cmdDetail.getInvokeMethod(), List.class);
-        @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
-        BaseCmd cmd = (BaseCmd) constructor.newInstance();
-        CmdResponse cmdResponse = (CmdResponse) method.invoke(cmd, (List) jsonMap.get("params"));
+        CmdResponse cmdResponse = buildResponse(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), (List) jsonMap.get("params"));
         cmdResponse.setId((Integer) jsonMap.get("id"));
 
         return JSONUtils.obj2json(cmdResponse);
     }
+
+    private static CmdResponse buildResponse(String invokeClass, String invokeMethod, List params) throws Exception {
+
+        Class clz = Class.forName(invokeClass);
+        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(invokeMethod, List.class);
+
+        BaseCmd cmd;
+        if (SpringLiteContext.getBeanByClass(invokeClass) == null) {
+            @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
+            cmd = (BaseCmd) constructor.newInstance();
+        } else {
+            cmd = (BaseCmd) SpringLiteContext.getBeanByClass(invokeClass);
+        }
+
+        return (CmdResponse) method.invoke(cmd, params);
+    }
+
 }
