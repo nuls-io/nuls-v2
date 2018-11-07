@@ -10,6 +10,10 @@ public class ConfigBean {
      * */
     private long packing_interval;
     /**
+     * 区块大小
+     * */
+    private int block_size;
+    /**
      * 出块最小金额
      * */
     private long packing_amount;
@@ -56,6 +60,14 @@ public class ConfigBean {
 
     public void setPacking_interval(long packing_interval) {
         this.packing_interval = packing_interval;
+    }
+
+    public int getBlock_size() {
+        return block_size;
+    }
+
+    public void setBlock_size(int block_size) {
+        this.block_size = block_size;
     }
 
     public long getPacking_amount() {
