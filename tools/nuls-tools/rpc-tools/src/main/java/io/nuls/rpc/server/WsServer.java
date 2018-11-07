@@ -27,7 +27,6 @@
 
 package io.nuls.rpc.server;
 
-import io.nuls.rpc.handler.WebSocketHandler;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.Module;
@@ -57,7 +56,6 @@ public class WsServer extends WebSocketServer {
 
         RuntimeInfo.scanPackage(scanPackage);
 
-
     }
 
     @Override
@@ -74,7 +72,8 @@ public class WsServer extends WebSocketServer {
     public void onMessage(WebSocket webSocket, String message) {
         try {
             System.out.println("ws server-> receive msg: " + message);
-            webSocket.send(WebSocketHandler.callCmd(message));
+            RuntimeInfo.requestQueue.add(new Object[]{webSocket, message});
+            RuntimeInfo.fixedThreadPool.execute(new WsProcessor());
         } catch (Exception e) {
             e.printStackTrace();
         }
