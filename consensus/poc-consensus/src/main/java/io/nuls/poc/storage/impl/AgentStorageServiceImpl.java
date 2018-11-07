@@ -27,7 +27,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
      * 保存节点
      * @param  agentPo   节点对象
      * */
-    public boolean save(AgentPo agentPo) {
+    public boolean save(AgentPo agentPo,int chainID) {
         if(agentPo == null || agentPo.getHash() == null){
             return false;
         }
@@ -46,7 +46,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
      * 根据节点HASH查询节点
      * @param  hash   节点hash
      * */
-    public AgentPo get(NulsDigestData hash) {
+    public AgentPo get(NulsDigestData hash,int chainID) {
         if(hash == null){
             return  null;
         }
@@ -71,7 +71,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
      * 根据节点hash删除节点
      * @param hash  节点hash
      * */
-    public boolean delete(NulsDigestData hash) {
+    public boolean delete(NulsDigestData hash,int chainID) {
         if(hash == null){
             return  false;
         }
@@ -88,7 +88,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
     /**
      * 获取所有节点信息
      * */
-    public List<AgentPo> getList() throws  Exception{
+    public List<AgentPo> getList(int chainID) throws  Exception{
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT);
             List<AgentPo> agentList = new ArrayList<>();
@@ -111,7 +111,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
     /**
      * 获取当前网络节点数量
      * */
-    public int size() {
+    public int size(int chainID) {
         List<byte[]> keyList = RocksDBService.keyList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT);
         if(keyList != null){
             return keyList.size();

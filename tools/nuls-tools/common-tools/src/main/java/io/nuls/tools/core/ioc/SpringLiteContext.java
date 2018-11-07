@@ -211,7 +211,7 @@ public class SpringLiteContext {
      * 根据对象类型字符串获取该类型实例的名称
      * Gets the name of the type instance according to the object type.
      */
-    private static Object getBeanByClass(String clazzStr) {
+    public static Object getBeanByClass(String clazzStr) {
         if(StringUtils.isBlank(clazzStr)){
             return null;
         }

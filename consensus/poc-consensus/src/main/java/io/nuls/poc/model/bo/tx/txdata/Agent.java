@@ -44,26 +44,69 @@ import java.util.Set;
  */
 public class Agent extends TransactionLogicData {
 
+    /**
+     * 节点地址
+     * */
     private byte[] agentAddress;
 
+    /**
+     * 打包地址
+     * */
     private byte[] packingAddress;
 
+    /**
+     * 奖励地址
+     * */
     private byte[] rewardAddress;
 
+    /**
+     * 保证金
+     * */
     private Na deposit;
 
+    /**
+     * 佣金比例
+     * */
     private double commissionRate;
 
+    /**
+     * 打包时间
+     * */
     private transient long time;
+
+    /**
+     * 所在区块高度
+     * */
     private transient long blockHeight = -1L;
+
+    /**
+     * 该节点注销所在区块高度
+     * */
     private transient long delHeight = -1L;
+
     /**
      * 0:待共识 unconsensus, 1:共识中 consensus
      */
     private transient int status;
+
+    /**
+     * 信誉值
+     * */
     private transient double creditVal;
+
+    /**
+     * 总委托金额
+     * */
     private transient long totalDeposit;
+
+    /**
+     * 交易HASH
+     * */
     private transient NulsDigestData txHash;
+
+    /**
+     * 参与共识人数
+     * */
     private transient int memberCount;
 
     @Override

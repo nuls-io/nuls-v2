@@ -20,7 +20,7 @@ import io.nuls.tools.log.Log;
 @Service
 public class TransactionStorageServiceImpl implements TransactionStorageService, InitializingBean {
     @Override
-    public boolean save(Transaction tx) {
+    public boolean save(Transaction tx,int chainID) {
         if(tx == null || tx.getHash() == null){
             return false;
         }
@@ -35,7 +35,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
     }
 
     @Override
-    public Transaction get(NulsDigestData hash) {
+    public Transaction get(NulsDigestData hash,int chainID) {
         if(hash == null){
             return  null;
         }
@@ -53,7 +53,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
     }
 
     @Override
-    public boolean delete(NulsDigestData hash) {
+    public boolean delete(NulsDigestData hash,int chainID) {
         if(hash == null){
             return  false;
         }

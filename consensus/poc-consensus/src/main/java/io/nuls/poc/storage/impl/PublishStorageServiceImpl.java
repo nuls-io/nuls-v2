@@ -21,7 +21,7 @@ import java.util.List;
 @Service
 public class PublishStorageServiceImpl implements PublishStorageService, InitializingBean {
     @Override
-    public boolean save(PunishLogPo po) {
+    public boolean save(PunishLogPo po,int chainID) {
         if (po == null || po.getKey() == null) {
             return false;
         }
@@ -34,7 +34,7 @@ public class PublishStorageServiceImpl implements PublishStorageService, Initial
     }
 
     @Override
-    public boolean delete(byte[] key) {
+    public boolean delete(byte[] key,int chainID) {
         if(key == null){
             return false;
         }
@@ -48,7 +48,7 @@ public class PublishStorageServiceImpl implements PublishStorageService, Initial
     }
 
     @Override
-    public List<PunishLogPo> getPunishList()throws Exception{
+    public List<PunishLogPo> getPunishList(int chainID)throws Exception{
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH);
             List<PunishLogPo> agentList = new ArrayList<>();
