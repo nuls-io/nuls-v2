@@ -105,4 +105,27 @@ public class AccountTool {
         //get prikey
         return new BigInteger(1, Sha256Hash.hash(pwPriBytes));
     }
+
+    /**
+     *  Check the difficulty of the password
+     *  length between 8 and 20, the combination of characters and numbers
+     *
+     * @return boolean
+     */
+    public static boolean validPassword(String password) {
+        if (StringUtils.isBlank(password)) {
+            return false;
+        }
+        if (password.length() < 8 || password.length() > 20) {
+            return false;
+        }
+        if (password.matches("(.*)[a-zA-z](.*)")
+                && password.matches("(.*)\\d+(.*)")
+                && !password.matches("(.*)\\s+(.*)")
+                && !password.matches("(.*)[\u4e00-\u9fa5\u3000]+(.*)")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

@@ -18,16 +18,18 @@ public class CmdDispatcher {
     /**
      * send local module information to kernel
      */
-    public static void syncLocalToKernel(String kernelUri) throws Exception {
+    public static void syncKernel(String kernelUri) throws Exception {
         int id = RuntimeInfo.nextSequence();
         CmdRequest cmdRequest = new CmdRequest(id, "version", 1.0, new Object[]{RuntimeInfo.local});
         WsClient wsClient = RuntimeInfo.getWsClient(kernelUri);
 
         wsClient.send(JSONUtils.obj2json(cmdRequest));
-        Map remoteMap = wsClient.wsResponse(id);
+        Map remoteMap = wsClient.waitingResponse(id);
 
         Map resultMap = (Map) remoteMap.get("result");
-        RuntimeInfo.local.setAvailable((Boolean) resultMap.get("available"));
+        if (RuntimeInfo.local != null && resultMap != null) {
+            RuntimeInfo.local.setAvailable((Boolean) resultMap.get("available"));
+        }
 
         Map<String, Object> moduleMap = JSONUtils.json2map(JSONUtils.obj2json(resultMap.get("modules")));
         for (String key : moduleMap.keySet()) {
@@ -51,7 +53,7 @@ public class CmdDispatcher {
         String remoteUri = remoteUriList.get(0);
         WsClient wsClient = RuntimeInfo.getWsClient(remoteUri);
         wsClient.send(JSONUtils.obj2json(cmdRequest));
-        Map remoteMap = wsClient.wsResponse(id);
+        Map remoteMap = wsClient.waitingResponse(id);
         return JSONUtils.obj2json(remoteMap);
     }
 }

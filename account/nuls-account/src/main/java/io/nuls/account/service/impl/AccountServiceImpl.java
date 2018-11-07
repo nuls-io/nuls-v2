@@ -58,8 +58,7 @@ public class AccountServiceImpl implements AccountService {
         if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (StringUtils.isNotBlank(password)) {
-            //&& !StringUtils.validPassword(password)
+        if (StringUtils.isNotBlank(password) && !AccountTool.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         locker.lock();
@@ -77,7 +76,7 @@ public class AccountServiceImpl implements AccountService {
                 accountPos.add(po);
             }
             boolean result = accountStorageService.saveAccountList(accountPos);
-
+            System.out.println(result);
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);

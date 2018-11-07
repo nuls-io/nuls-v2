@@ -25,9 +25,10 @@
  *
  */
 
-package io.nuls.test;
+package io.nuls.account;
 
 import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
 
 /**
@@ -35,15 +36,18 @@ import org.junit.Test;
  * @date 2018/10/30
  * @description
  */
-public class WsM2 {
+public class WsKernel {
+
     @Test
-    public void test() throws Exception {
+    public  void test() throws Exception {
+        //模拟启动内核模块
+        int port = 8887;
+        WsServer s = new WsServer(port);
+        s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
+        s.start();
 
         CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
 
-        System.out.println(CmdDispatcher.call("cmd1", null, 1.0));
-
-        System.out.println(CmdDispatcher.call("cmd2", null, 1.0));
-
+        Thread.sleep(Integer.MAX_VALUE);
     }
 }

@@ -34,7 +34,7 @@ import io.nuls.poc.utils.ConsensusConstant;
 import io.nuls.tools.exception.NulsException;
 
 /**
- * @author Niels
+ * @author tag
  */
 public class StopAgentTransaction extends Transaction<StopAgent> {
 

@@ -32,9 +32,6 @@ import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * @author tangyi
  * @date 2018/10/30
@@ -46,14 +43,10 @@ public class WsM1 {
 
         WsServer s = new WsServer(HostInfo.randomPort());
 
-        List<String> depends = new ArrayList<>();
-        depends.add("m2");
-        depends.add("m3");
-
-        s.init("m1", depends, "io.nuls.rpc.cmd.cmd1");
+        s.init("m1", new String[]{"m2", "m3"}, "io.nuls.rpc.cmd.cmd1");
         s.start();
 
-        CmdDispatcher.syncLocalToKernel("ws://127.0.0.1:8887");
+        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
 
         Thread.sleep(Integer.MAX_VALUE);
     }

@@ -27,6 +27,12 @@
       <artifactId>base-tools</artifactId>
       <version>${tool.version}</version>
     </dependency>
+
+    <dependency>
+      <groupId>io.nuls.nuls-tools</groupId>
+      <artifactId>storage-tools</artifactId>
+      <version>${tool.version}</version>
+    </dependency>
   </dependencies>
 
   <build>

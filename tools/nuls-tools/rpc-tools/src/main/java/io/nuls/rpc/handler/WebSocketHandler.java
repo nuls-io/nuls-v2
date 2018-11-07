@@ -47,6 +47,10 @@ public class WebSocketHandler {
 
     public static String callCmd(String formParamAsJson) throws Exception {
 
+        if (!RuntimeInfo.local.isAvailable()) {
+            return "Module not available: " + RuntimeInfo.local.getName();
+        }
+
         Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
 
         CmdDetail cmdDetail = RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));

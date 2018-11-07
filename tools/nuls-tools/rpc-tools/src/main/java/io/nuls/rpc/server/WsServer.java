@@ -38,6 +38,7 @@ import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -50,10 +51,13 @@ public class WsServer extends WebSocketServer {
         super(new InetSocketAddress(port));
     }
 
-    public void init(String moduleName, List<String> depends, String scanPackage) throws Exception {
-        RuntimeInfo.local = new Module(moduleName, ModuleStatus.READY, false, HostInfo.getIpAdd(), getPort(), new ArrayList<>(), depends);
+    public void init(String moduleName, String[] depends, String scanPackage) throws Exception {
+        List<String> dps = depends == null ? new ArrayList<>() : Arrays.asList(depends);
+        RuntimeInfo.local = new Module(moduleName, ModuleStatus.READY, true, HostInfo.getIpAdd(), getPort(), new ArrayList<>(), dps);
 
         RuntimeInfo.scanPackage(scanPackage);
+
+
     }
 
     @Override
