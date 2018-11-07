@@ -6,9 +6,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.utils.ConsensusConstant;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -20,7 +18,7 @@ import java.util.List;
  * 2018/11/06
  * */
 @Service
-public class AgentStorageServiceImpl implements AgentStorageService, InitializingBean {
+public class AgentStorageServiceImpl implements AgentStorageService{
 
     @Override
     /**
@@ -119,7 +117,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
         return 0;
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws NulsException {
         try {
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_AGENT);
@@ -127,5 +125,5 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
             Log.error(e);
             throw new NulsException(e);
         }
-    }
+    }*/
 }

@@ -27,6 +27,7 @@ public class ConsensusConstant {
      * config param
      * */
     public static String PACKING_INTERVAL = "packing_interval";
+    public static String BLOCK_SIZE = "block_size";
     public static String PACKING_AMOUNT = "packing_amount";
     public static String COINBASE_UNLOCK_HEIGHT = "coinbase_unlock_height";
     public static String RED_PUBLISH_LOCKTIME = "redPublish_lockTime";

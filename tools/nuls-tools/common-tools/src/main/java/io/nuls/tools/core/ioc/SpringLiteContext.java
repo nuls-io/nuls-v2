@@ -215,7 +215,11 @@ public class SpringLiteContext {
         if(StringUtils.isBlank(clazzStr)){
             return null;
         }
-        String beanName = clazzStr.split(".")[0];
+        String[] paths = clazzStr.split(".");
+        if(paths.length == 0){
+            return null;
+        }
+        String beanName = paths[paths.length - 1];
         String start = beanName.substring(0, 1).toLowerCase();
         String end = beanName.substring(1);
         String lowerBeanName = start + end;
