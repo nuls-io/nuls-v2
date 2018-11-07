@@ -215,7 +215,7 @@ public class SpringLiteContext {
         if(StringUtils.isBlank(clazzStr)){
             return null;
         }
-        String[] paths = clazzStr.split(".");
+        String[] paths = clazzStr.split("\\.");
         if(paths.length == 0){
             return null;
         }

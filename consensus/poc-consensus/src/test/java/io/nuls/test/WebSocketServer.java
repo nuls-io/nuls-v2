@@ -9,7 +9,7 @@ public class WebSocketServer {
     public void test() throws Exception{
         int port = 8887;
         WsServer s = new WsServer(port);
-        s.init("consensus", null, "io.nuls.poc.rpc");
+        s.init("consensus", null, "io.nuls.rpc.cmd.kernel");
         s.start();
         CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
         Thread.sleep(Integer.MAX_VALUE);
