@@ -60,18 +60,39 @@ public class ConnectionManager {
      */
     private  Map<String, Node> cacheConnectNodeOutMap=new ConcurrentHashMap<>();
 
-    public void removeCacheConnectNodeOutMap(String nodeKey){
-        Node node=cacheConnectNodeOutMap.get(nodeKey);
-        node.disConnectNodeChannel();
-        cacheConnectNodeOutMap.remove(nodeKey);
+    /**
+     * 所有in连接的IP,通过这个集合判断是否存在过载
+     * Key:ip  value: connectNumber
+     */
+    private  Map<String, Integer> cacheConnectIpInMap=new ConcurrentHashMap<>();
+    /**
+     * 所有out连接的IP,通过这个集合判断是否存在相互连接
+     * Key:ip  value: connectNumber
+     */
+    private  Map<String, Integer> cacheConnectIpOutMap=new ConcurrentHashMap<>();
 
+
+    public void removeCacheConnectNodeMap(String nodeKey,int nodeType){
+        //TODO:要加同步锁
+        Node node=null;
+        String ip=nodeKey.split(":")[0];
+        if(Node.OUT == nodeType) {
+              node = cacheConnectNodeOutMap.get(nodeKey);
+              cacheConnectNodeOutMap.remove(nodeKey);
+              cacheConnectIpOutMap.remove(ip);
+        }else{
+              node=cacheConnectNodeInMap.get(nodeKey);
+              cacheConnectNodeInMap.remove(nodeKey);
+              if(null != cacheConnectIpInMap.get(ip) && cacheConnectIpInMap.get(ip)>1){
+                  cacheConnectIpInMap.put(ip,cacheConnectIpInMap.get(ip)-1);
+              }else{
+                  cacheConnectIpInMap.remove(ip);
+              }
+        }
+        node.disConnectNodeChannel();
     }
 
-    public void removeCacheConnectNodeInMap(String nodeKey){
-        Node node=cacheConnectNodeOutMap.get(nodeKey);
-        node.disConnectNodeChannel();
-        cacheConnectNodeInMap.remove(nodeKey);
-    }
+
     public Node getNodeByCache(String nodeId,int nodeType)
     {
         if(Node.OUT == nodeType){
@@ -91,20 +112,63 @@ public class ConnectionManager {
      * 处理已经成功连接的节点
      */
     public boolean processConnectedServerNode(Node node) {
-        try {
-            cacheConnectNodeInMap.put(node.getId(),node);
-            return true;
-        } finally {
+        cacheConnectNodeInMap.put(node.getId(),node);
+        String ip=node.getId().split(":")[0];
+        if(null != cacheConnectIpInMap.get(ip)){
+            cacheConnectIpInMap.put(ip,cacheConnectIpInMap.get(ip)+1);
+        }else{
+            cacheConnectIpInMap.put(ip,1);
         }
+        return true;
     }
+    /**
+     * 处理已经成功连接的节点
+     */
     public boolean processConnectedClientNode(Node node) {
-        try {
-            cacheConnectNodeOutMap.put(node.getId(),node);
-            return true;
-        } finally {
+        cacheConnectNodeOutMap.put(node.getId(),node);
+        String ip=node.getId().split(":")[0];
+        cacheConnectIpOutMap.put(ip,1);
+        return true;
+    }
 
+    /**
+     * juge peer ip over max
+     */
+    public boolean isPeerConnectExist(String peerIp,int nodeType,boolean isCross){
+        if(null != cacheConnectIpOutMap.get(peerIp)){
+            //had connect
+            return true;
+        }
+        if(Node.OUT == nodeType){
+            //had connect
+            if(null != cacheConnectIpInMap.get(peerIp)) {
+                return true;
+            }else{
+                return false;
+            }
+        }else{
+            if(null != cacheConnectIpInMap.get(peerIp)) {
+                NetworkParam networkParam=NetworkParam.getInstance();
+                if(isCross){
+                    if(cacheConnectIpInMap.get(peerIp)>= networkParam.getCorssMaxInSameIp()){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }else{
+                    if(cacheConnectIpInMap.get(peerIp)>= networkParam.getMaxInSameIp()){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                }
+            }else{
+                return false;
+            }
         }
     }
+
+
     private ConnectionManager() {
     }
 

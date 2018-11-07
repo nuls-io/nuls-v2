@@ -28,12 +28,14 @@ package io.nuls.network.manager.handler;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.manager.*;
+import io.nuls.network.manager.ConnectionManager;
+import io.nuls.network.manager.LocalInfoManager;
+import io.nuls.network.manager.MessageFactory;
+import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.Node;
@@ -72,7 +74,12 @@ public class ClientChannelHandler extends BaseChannelHandler {
         Node node = nodeAttribute.get();
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         String remoteIP = socketChannel.remoteAddress().getHostString();
-
+        //already exist peer ip （In or Out）
+        boolean isCrossConnect=this.isServerCrossConnect(channel);
+        if( ConnectionManager.getInstance().isPeerConnectExist(remoteIP,Node.OUT,isCrossConnect)){
+            channel.close();
+            return;
+        }
         //如果是本机节点访问自己的服务器，则广播本机服务器到全网
         if (LocalInfoManager.getInstance().isSelfConnect(remoteIP)) {
           //广播自己的Ip
@@ -84,7 +91,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         node.setIp(remoteIP);
         node.setRemotePort(socketChannel.remoteAddress().getPort());
         node.setCanConnect(false);
-        boolean success = ConnectionManager.getInstance().processConnectedServerNode(node);
+        boolean success = ConnectionManager.getInstance().processConnectedClientNode(node);
         //非本机,发送version
         NodeGroupConnector nodeGroupConnector=node.getFirstNodeGroupConnector();
         nodeGroupConnector.setStatus(Node.CONNECTING);
@@ -105,7 +112,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
             node.setCanConnect(true);
             //移除连接
             Log.info("Client Node is Inactive:" + node.getIp() + ":" + node.getRemotePort());
-            ConnectionManager.getInstance().removeCacheConnectNodeOutMap(node.getId());
+            ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),Node.OUT);
         }
 //        Attribute<Node> nodeAttribute = ctx.channel().attr(key);
 //        Node node = nodeAttribute.get();
