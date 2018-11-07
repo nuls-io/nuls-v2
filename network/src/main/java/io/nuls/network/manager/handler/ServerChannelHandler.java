@@ -70,13 +70,12 @@ public class ServerChannelHandler extends BaseChannelHandler {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        boolean isCrossConnect=isServerCrossConnect(ctx.channel());
         //already exist peer ip （In or Out）
-        if( ConnectionManager.getInstance().isPeerConnectExist(socketChannel.remoteAddress().getHostString(),Node.IN,isCrossConnect)){
+        if( ConnectionManager.getInstance().isPeerConnectExist(socketChannel.remoteAddress().getHostString(),Node.IN)){
             ctx.channel().close();
             return;
         }
-
+        boolean isCrossConnect=isServerCrossConnect(ctx.channel());
         Node node = new Node(socketChannel.remoteAddress().getHostString(),socketChannel.remoteAddress().getPort(), Node.IN,isCrossConnect);
         node.setCanConnect(false);
         node.setChannel(ctx.channel());
