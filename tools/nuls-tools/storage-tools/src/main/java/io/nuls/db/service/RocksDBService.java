@@ -29,8 +29,13 @@ import java.util.Map;
 
 public class RocksDBService {
 
-    public static void init(String path) throws Exception {
-        RocksDBManager.init(path);
+    public static void init(String path) {
+        try {
+            RocksDBManager.init(path);
+        } catch (Exception e) {
+            Log.error(e.getMessage());
+            e.printStackTrace();
+        }
     }
 
     public static boolean createTable(String tableName) throws Exception {
@@ -86,7 +91,7 @@ public class RocksDBService {
     }
 
     public static BatchOperation createWriteBatch(String table) {
-        if(StringUtils.isBlank(table)) {
+        if (StringUtils.isBlank(table)) {
             return null;
         }
         RocksDBBatchOperation batchOperation = new RocksDBBatchOperation(table);
@@ -96,7 +101,7 @@ public class RocksDBService {
         } catch (Exception e) {
             Log.error("DB batch create error: " + e.getMessage());
         }
-        if(!result) {
+        if (!result) {
             return null;
         }
         return batchOperation;

@@ -41,20 +41,37 @@ import io.nuls.tools.parse.SerializeUtils;
  */
 public class AddressTool {
 
+    /**
+     * 生成地址字符串用于拼接hash160与chainId
+     */
+    public static String ADDRESS_SPLIT = "-";
+
+    /**
+     * 根据地址字符串查询地址字节数组
+     *
+     * @param addressString
+     * @return
+     */
     public static byte[] getAddress(String addressString) {
-        byte[] bytes;
+        byte[] result = new byte[Address.ADDRESS_LENGTH];
         try {
-            bytes = Base58.decode(addressString);
+            byte[] addressBytes = AddressTool.getAddressBytes(addressString);
+            System.arraycopy(addressBytes, 0, result, 0, 23);
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        byte[] result = new byte[Address.ADDRESS_LENGTH];
-        System.arraycopy(bytes, 0, result, 0, Address.ADDRESS_LENGTH);
         return result;
     }
 
-    public static byte[] getAddress(byte[] publicKey,short chain_id) {
+    /**
+     * 根据公钥查询地址字节数组
+     *
+     * @param publicKey
+     * @param chain_id
+     * @return
+     */
+    public static byte[] getAddress(byte[] publicKey, short chain_id) {
         if (publicKey == null) {
             return null;
         }
@@ -63,6 +80,12 @@ public class AddressTool {
         return address.getAddressBytes();
     }
 
+    /**
+     * 生成校验位，根据以下字段生成：addressType+hash160(pubKey)
+     *
+     * @param body
+     * @return
+     */
     private static byte getXor(byte[] body) {
         byte xor = 0x00;
         for (int i = 0; i < body.length; i++) {
@@ -71,27 +94,53 @@ public class AddressTool {
         return xor;
     }
 
-    public static boolean validAddress(String address,short chain_id) {
+    /**
+     * 检查校验位是否正确，XOR(addressType+hash160(pubKey))
+     *
+     * @param hashs
+     */
+    public static void checkXOR(byte[] hashs) {
+        byte[] body = new byte[Address.ADDRESS_ORIGIN_LENGTH];
+        System.arraycopy(hashs, 0, body, 0, Address.ADDRESS_ORIGIN_LENGTH);
+
+        byte xor = 0x00;
+        for (int i = 0; i < body.length; i++) {
+            xor ^= body[i];
+        }
+
+        if (xor != hashs[Address.ADDRESS_ORIGIN_LENGTH]) {
+            throw new NulsRuntimeException(new Exception());
+        }
+    }
+
+    /**
+     * 验证地址字符串是否是有效地址
+     *
+     * @param address
+     * @param chain_id
+     * @return
+     */
+    public static boolean validAddress(String address, short chain_id) {
         if (StringUtils.isBlank(address)) {
             return false;
         }
         byte[] bytes;
         try {
-            bytes = Base58.decode(address);
+            bytes = AddressTool.getAddressBytes(address);
             if (bytes.length != Address.ADDRESS_LENGTH + 1) {
                 return false;
             }
-        } catch (NulsException e) {
-            return false;
         } catch (Exception e) {
             return false;
         }
         NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
         short chainId;
         byte type;
+        byte[] hash160Bytes = new byte[Address.ADDRESS_ORIGIN_LENGTH + 1];
         try {
             chainId = byteBuffer.readShort();
             type = byteBuffer.readByte();
+            System.arraycopy(bytes, 2, hash160Bytes, 0, Address.ADDRESS_ORIGIN_LENGTH + 1);
         } catch (NulsException e) {
             Log.error(e);
             return false;
@@ -106,14 +155,21 @@ public class AddressTool {
             return false;
         }
         try {
-            checkXOR(bytes);
+            checkXOR(hash160Bytes);
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    public static boolean validNormalAddress(byte[] bytes,short chain_id) {
+    /**
+     * 校验是否是普通地址
+     *
+     * @param bytes
+     * @param chain_id
+     * @return
+     */
+    public static boolean validNormalAddress(byte[] bytes, short chain_id) {
         if (null == bytes || bytes.length != Address.ADDRESS_LENGTH) {
             return false;
         }
@@ -136,7 +192,14 @@ public class AddressTool {
         return true;
     }
 
-    public static boolean validContractAddress(byte[] addressBytes,short chain_id) {
+    /**
+     * 校验是否是智能合约地址
+     *
+     * @param addressBytes
+     * @param chain_id
+     * @return
+     */
+    public static boolean validContractAddress(byte[] addressBytes, short chain_id) {
         if (addressBytes == null) {
             return false;
         }
@@ -162,26 +225,27 @@ public class AddressTool {
         return true;
     }
 
-
-    public static void checkXOR(byte[] hashs) {
-        byte[] body = new byte[Address.ADDRESS_LENGTH];
-        System.arraycopy(hashs, 0, body, 0, Address.ADDRESS_LENGTH);
-
-        byte xor = 0x00;
-        for (int i = 0; i < body.length; i++) {
-            xor ^= body[i];
-        }
-        byte[] sign = new byte[1];
-        System.arraycopy(hashs, Address.ADDRESS_LENGTH, sign, 0, 1);
-
-        if (xor != hashs[Address.ADDRESS_LENGTH]) {
-            throw new NulsRuntimeException(new Exception());
-        }
-    }
-
+    /**
+     * 根据地址字节数组生成地址字符串
+     *
+     * @param addressBytes
+     * @return
+     */
     public static String getStringAddressByBytes(byte[] addressBytes) {
-        byte[] bytes = ByteUtils.concatenate(addressBytes, new byte[]{getXor(addressBytes)});
-        return Base58.encode(bytes);
+        if (addressBytes == null) {
+            return null;
+        }
+        if (addressBytes.length != Address.ADDRESS_LENGTH) {
+            return null;
+        }
+        byte[] chianIdByte = new byte[2];
+        System.arraycopy(addressBytes, 0, chianIdByte, 0, 2);
+        byte[] body = new byte[21];
+        System.arraycopy(addressBytes, 2, body, 0, 1);
+        System.arraycopy(addressBytes, 3, body, 1, 20);
+
+        byte[] bytes = ByteUtils.concatenate(body, new byte[]{getXor(body)});
+        return Base58.encode(bytes) + AddressTool.ADDRESS_SPLIT + Base58.encode(chianIdByte);
     }
 
 
@@ -210,27 +274,27 @@ public class AddressTool {
         return false;
     }
 
-    public static boolean isPackingAddress(String address,short chain_id) {
+    public static boolean isPackingAddress(String address, short chain_id) {
         if (StringUtils.isBlank(address)) {
             return false;
         }
         byte[] bytes;
         try {
-            bytes = Base58.decode(address);
+            bytes = AddressTool.getAddressBytes(address);
             if (bytes.length != Address.ADDRESS_LENGTH + 1) {
                 return false;
             }
-        } catch (NulsException e) {
-            return false;
         } catch (Exception e) {
             return false;
         }
         NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
         short chainId;
         byte type;
+        byte[] hash160Bytes = new byte[Address.ADDRESS_ORIGIN_LENGTH + 1];
         try {
             chainId = byteBuffer.readShort();
             type = byteBuffer.readByte();
+            System.arraycopy(bytes, 2, hash160Bytes, 0, Address.ADDRESS_ORIGIN_LENGTH + 1);
         } catch (NulsException e) {
             Log.error(e);
             return false;
@@ -242,10 +306,35 @@ public class AddressTool {
             return false;
         }
         try {
-            checkXOR(bytes);
+            checkXOR(hash160Bytes);
         } catch (Exception e) {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 根据地址字符串解码出地址原始字节数组
+     *
+     * @param addressString
+     * @return
+     */
+    private static byte[] getAddressBytes(String addressString) {
+        byte[] result = new byte[Address.ADDRESS_LENGTH + 1];
+        byte[] chainIdBytes;
+        byte[] hash160Bytes;
+        try {
+
+            String[] addressArr = addressString.split(AddressTool.ADDRESS_SPLIT);
+            chainIdBytes = Base58.decode(addressArr[1]);
+            hash160Bytes = Base58.decode(addressArr[0]);
+
+            System.arraycopy(chainIdBytes, 0, result, 0, 2);
+            System.arraycopy(hash160Bytes, 0, result, 2, 22);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+        return result;
     }
 }

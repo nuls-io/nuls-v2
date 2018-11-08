@@ -26,11 +26,81 @@
 package io.nuls.account.constant;
 
 
+import io.nuls.base.data.Na;
+
 /**
  * @author: qinyifeng
+ * @description: 配置常量
  */
 public interface AccountConstant {
 
+    /**
+     * ----[ System] ----
+     */
+    /**
+     * 系统配置项section名称
+     * The configuration item section name of the kernel module.
+     */
+    String CFG_SYSTEM_SECTION = "system";
 
+    /**
+     * 系统配置中语言设置的字段名
+     * The field name of the language set in the system configuration.
+     */
+    String CFG_SYSTEM_LANGUAGE = "language";
 
+    /**
+     * 系统配置中编码设置的字段名
+     * The field name of the code setting in the system configuration.
+     */
+    String CFG_SYSTEM_DEFAULT_ENCODING = "encoding";
+
+    /**
+     * --------[db configs] -------
+     */
+    String DB_SECTION = "db";
+    String DB_DATA_PATH = "rocksdb.datapath";
+
+    /**
+     * --------[account constant] -------
+     */
+    /**
+     * The name of accouts cache
+     */
+    String ACCOUNT_LIST_CACHE = "ACCOUNT_LIST";
+
+    /**
+     * 设置别名的费用(烧毁)
+     * The cost of setting an alias
+     */
+    Na ALIAS_NA = Na.parseNuls(1);
+
+    /**
+     * 设置账户别名的交易类型
+     * Set the transaction type of account alias.
+     */
+    int TX_TYPE_ACCOUNT_ALIAS = 3;
+
+    /**
+     * 导出accountkeystore文件的后缀名
+     * The suffix of the accountkeystore file
+     */
+    String ACCOUNTKEYSTORE_FILE_SUFFIX=".keystore";
+
+    /**
+     * 导出keystore备份文件目录
+     */
+    String ACCOUNTKEYSTORE_FOLDER_NAME ="backup";
+
+    /**
+     * --------[RPC constant] -------
+     */
+    /**
+     * SUCCESS_MSG
+     */
+    public static final String SUCCESS_MSG = "success";
+    /**
+     * RPC_VERSION
+     */
+    public static final double RPC_VERSION = 1.0;
 }

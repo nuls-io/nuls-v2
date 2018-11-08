@@ -43,6 +43,11 @@ public class Address {
     public static final int ADDRESS_LENGTH = 23;
 
     /**
+     * origin address hash length：addressType+hash160(pubKey)
+     */
+    public static final int ADDRESS_ORIGIN_LENGTH = 21;
+
+    /**
      * RIPEMD160 length
      */
     private static final int LENGTH = 20;
@@ -64,9 +69,6 @@ public class Address {
 
     protected byte[] addressBytes;
 
-    //    /**
-//     * @param address
-//     */
     public Address(String address) {
         try {
             byte[] bytes = AddressTool.getAddress(address);
@@ -97,7 +99,7 @@ public class Address {
         return chainId;
     }
 
-    public static Address fromHashs(String address) throws Exception {
+    public static Address fromHashs(String address) {
         byte[] bytes = AddressTool.getAddress(address);
         return fromHashs(bytes);
     }
