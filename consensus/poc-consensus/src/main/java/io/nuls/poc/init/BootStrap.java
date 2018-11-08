@@ -4,7 +4,7 @@ import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.config.ConfigItem;
-import io.nuls.poc.model.bo.config.ConfigManager;
+import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.poc.storage.ConfigeService;
 import io.nuls.poc.storage.LanguageService;
 import io.nuls.poc.utils.ConsensusConstant;

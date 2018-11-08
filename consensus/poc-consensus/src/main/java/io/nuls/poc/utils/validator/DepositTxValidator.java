@@ -1,4 +1,4 @@
-package io.nuls.poc.model.bo.tx.validator;
+package io.nuls.poc.utils.validator;
 
 public class DepositTxValidator {
 }

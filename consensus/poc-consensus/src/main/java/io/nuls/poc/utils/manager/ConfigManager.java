@@ -1,5 +1,7 @@
-package io.nuls.poc.model.bo.config;
+package io.nuls.poc.utils.manager;
 
+import io.nuls.poc.model.bo.config.ConfigBean;
+import io.nuls.poc.model.bo.config.ConfigItem;
 import io.nuls.poc.storage.ConfigeService;
 import io.nuls.poc.utils.ConsensusConstant;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -16,7 +18,7 @@ public class ConfigManager {
      * 先从数据库读出所有链的配置信息放入该MAP中，如果数据库中没有记录则读取配置文件
      * 加载主链的配置信息
      * */
-    public static Map<Integer,ConfigBean> config_map = new HashMap<>();
+    public static Map<Integer, ConfigBean> config_map = new HashMap<>();
 
     /**
      * 配置参数是否可修改
@@ -24,7 +26,7 @@ public class ConfigManager {
      * */
     public static  Map<String,Boolean> param_modify = new HashMap<>();
 
-    public static void initManager(List<ConfigItem> items,int chain_id) throws Exception{
+    public static void initManager(List<ConfigItem> items, int chain_id) throws Exception{
         ConfigBean bean = new ConfigBean();
         for (ConfigItem item : items) {
             param_modify.put(item.getKey(),item.isReadOnly());
