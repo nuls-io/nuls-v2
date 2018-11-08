@@ -29,7 +29,6 @@ package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
-import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
@@ -92,13 +91,8 @@ public class WsClient extends WebSocketClient {
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
 
-        return buildCmdResponseMap(Constants.RESPONSE_TIMEOUT);
+        return RuntimeInfo.buildCmdResponseMap(id, Constants.RESPONSE_TIMEOUT);
     }
 
-    private static Map buildCmdResponseMap(String msg) throws IOException {
-        CmdResponse cmdResponse = new CmdResponse();
-        cmdResponse.setCode(Constants.FAILED_CODE);
-        cmdResponse.setMsg(msg);
-        return JSONUtils.json2map(JSONUtils.obj2json(cmdResponse));
-    }
+
 }

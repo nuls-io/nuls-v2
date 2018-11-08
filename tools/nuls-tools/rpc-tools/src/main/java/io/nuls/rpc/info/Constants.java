@@ -34,6 +34,7 @@ package io.nuls.rpc.info;
  */
 public class Constants {
 
+    private Constants(){}
 
     /**
      * WebSocket constant

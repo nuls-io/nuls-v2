@@ -47,9 +47,11 @@ public class WsM2 {
 
         System.out.println(CmdDispatcher.call("aaaa", null, 1.0));
 
-        System.out.println(CmdDispatcher.call("chainInfo", null, 1.0));
+        System.out.println(CmdDispatcher.call("chainRegister", null, 1.0));
 
         System.out.println(CmdDispatcher.call("chainInfo", new Object[]{1}, 1.0));
+
+        System.out.println(CmdDispatcher.call("chainRegister", null, 1.0));
 
         //System.out.println(CmdDispatcher.call("cmd2", null, 1.0));
 
