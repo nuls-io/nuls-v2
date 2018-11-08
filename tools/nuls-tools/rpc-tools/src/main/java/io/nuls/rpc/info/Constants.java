@@ -34,22 +34,20 @@ package io.nuls.rpc.info;
  */
 public class Constants {
 
-    public static final int KERNEL_PORT = 8091;
-    public static final String DEFAULT_PATH = "nulsrpc";
-    public static final String JSON = "jsonGo";
-    public static final String BYTE = "byteGo";
-//    public static final String MULTIPLY = "matchMultiply";
-
-    public static final String FORM_PARAM_NAME = "paramObjAsJson";
-
 
     /**
      * WebSocket constant
      */
-    public static final String ONLINE = "nuls_websocket_online:";
-    public static final String OFFLINE = "nuls_websocket_offline:";
-    public static final String DELIMIT = "-->>";
+    public static final long INTERVAL_TIMEMILLIS = 100;
+    public static final long TIMEOUT_TIMEMILLIS = 60 * 1000;
 
+    /**
+     * RPC error message
+     */
+    public static final String RESPONSE_TIMEOUT = "Response timeout";
+    public static final String CMD_NOT_FOUND = "Cmd not found";
+    public static final String CMD_DUPLICATE = "Duplicate cmd found";
+    public static final String SERVICE_NOT_AVAILABLE = "Service not available";
 
     /**
      * predetermined cmd (used by kernel & module)
@@ -62,16 +60,9 @@ public class Constants {
     public static final String CONF_RESET = "conf_reset";
 
     /**
-     * SUCCESS_CODE
+     * RESPONSE_CODE
      */
     public static final String SUCCESS_CODE = "0";
+    public static final String FAILED_CODE = "-1";
 
-    /**
-     * ErrorInfo
-     */
-//    public static final ErrorInfo PARSE_ERROR = new ErrorInfo(-32700, "Parse error");
-//    public static final ErrorInfo INVALID_REQUEST = new ErrorInfo(-32600, "Invalid Request");
-//    public static final ErrorInfo METHOD_NOT_FOUND = new ErrorInfo(-32601, "Method not found");
-//    public static final ErrorInfo INVALID_PARAMS = new ErrorInfo(-32602, "Invalid params");
-//    public static final ErrorInfo INTERNAL_ERROR = new ErrorInfo(-32603, "Internal error");
 }
