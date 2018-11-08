@@ -1,4 +1,4 @@
-package io.nuls.poc.utils.validator;
+package io.nuls.poc.model.bo.tx.validator;
 
 public class AgentTxValidator {
 }

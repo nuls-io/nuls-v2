@@ -1,4 +1,4 @@
-package io.nuls.poc.utils.processor;
+package io.nuls.poc.model.bo.tx.processor;
 
 public class CancelDepositTxProcessor {
 }
