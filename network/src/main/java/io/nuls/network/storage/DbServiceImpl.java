@@ -24,11 +24,20 @@
  */
 package io.nuls.network.storage;
 
+import io.nuls.db.service.RocksDBService;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.po.NodeGroupPo;
+import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DbServiceImpl
@@ -36,14 +45,55 @@ import java.util.List;
  * @date 2018/11/01
  *
  */
-public class DbServiceImpl implements DbService{
+public class DbServiceImpl implements DbService,InitializingBean {
     @Override
-    public List<NodeGroup> getAllNodeGroup() {
+    public List<NodeGroup> getAllNodeGroups() {
         return new ArrayList<>();
     }
 
     @Override
-    public List<Node> getNodeByChainId(int chainId) {
+    public List<Node> getNodesByChainId(int chainId) {
         return new ArrayList<>();
+    }
+
+    @Override
+    public void saveNodeGroups(List<NodeGroup> nodeGroups) {
+        Map<byte[],byte[]> nodeGroupsMap=new HashMap<>();
+        try {
+        for(NodeGroup nodeGroup:nodeGroups){
+                nodeGroupsMap.put(ByteUtils.intToBytes(nodeGroup.getChainId()),nodeGroup.parseToPo().serialize());
+        }
+            RocksDBService.batchPut(NetworkConstant.DB_NAME_NETWORK_NODEGROUP,nodeGroupsMap);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public NodeGroupPo getNodeGroupByChainId(int chainId) throws NulsException {
+        byte [] bytes=RocksDBService.get(NetworkConstant.DB_NAME_NETWORK_NODEGROUP,ByteUtils.intToBytes(chainId));
+        NodeGroupPo nodeGroupPo=new NodeGroupPo();
+        nodeGroupPo.parse(bytes,0);
+        return nodeGroupPo;
+    }
+
+    @Override
+    public void saveNodesByChainId(List<Node> nodes, int chainId) {
+
+    }
+
+    @Override
+    public void saveAllNodesByNodeId(List<Node> nodes, int chainId) {
+
+    }
+
+    @Override
+    public void afterPropertiesSet() throws NulsException {
+        try {
+            RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_NODEGROUP);
+        }catch (Exception e){
+            Log.error(e);
+            throw new NulsException(e);
+        }
     }
 }

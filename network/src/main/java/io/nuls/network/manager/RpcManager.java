@@ -24,43 +24,49 @@
  */
 package io.nuls.network.manager;
 
-import io.nuls.db.service.RocksDBService;
-import io.nuls.network.storage.DbService;
-import io.nuls.network.storage.DbServiceImpl;
-import io.nuls.tools.basic.InitializingBean;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.info.HostInfo;
+import io.nuls.rpc.server.WsServer;
 
 /**
- * 存储管理
- * storage  manager
- * @author lan
- * @date 2018/11/01
- *
- */
-public class StorageManager extends BaseManager{
-    private static StorageManager storageManager=new StorageManager();
-    DbService dbService=new DbServiceImpl();
-    private StorageManager(){
-
+ * @program: nuls2.0
+ * @description: Rpc init
+ * @author: lan
+ * @create: 2018/11/07
+ **/
+public class RpcManager extends BaseManager{
+    private static RpcManager instance = new RpcManager();
+    public static RpcManager getInstance(){
+        return instance;
     }
-
-    public DbService getDbService(){
-        return dbService;
-    }
-    public static StorageManager getInstance(){
-        return storageManager;
-    }
-
     @Override
     public void init() {
+        /*
+         * 初始化websocket服务器，供其他模块调用本模块接口
+         * 端口随机，会自动分配未占用端口
+         */
+        WsServer s = new WsServer(HostInfo.randomPort());
+        /*
+         * 初始化，参数说明：
+         * 1. 本模块的code
+         * 2. 依赖的模块的code，类型为String[]
+         * 3. 本模块提供的对外接口所在的包路径
+         */
         try {
-            RocksDBService.init("./data");
-            ((InitializingBean)dbService).afterPropertiesSet();
-        } catch (NulsException e) {
-            e.printStackTrace();
+            s.init("nw", null, "io.nuls.network.rpc");
+            /*
+             * 启动服务
+             */
+            s.start();
+            /*
+             * 向核心模块汇报本模块信息
+             */
+            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+
     }
 
     @Override

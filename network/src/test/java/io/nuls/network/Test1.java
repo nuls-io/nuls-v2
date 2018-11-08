@@ -24,6 +24,8 @@
  */
 package io.nuls.network;
 
+import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.data.ByteUtils;
 import org.junit.Test;
 
@@ -63,6 +65,17 @@ public class Test1 {
     }
     @Test
     public void test3(){
-        System.out.println((int)100/10);
+        int port = 8887;
+        WsServer s = new WsServer(port);
+        try {
+            s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
+            s.start();
+            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+
+            Thread.sleep(Integer.MAX_VALUE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }

@@ -74,18 +74,18 @@ public class ClientChannelHandler extends BaseChannelHandler {
         Node node = nodeAttribute.get();
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         String remoteIP = socketChannel.remoteAddress().getHostString();
-        //already exist peer ip （In or Out）
-        boolean isCrossConnect=this.isServerCrossConnect(channel);
-        if( ConnectionManager.getInstance().isPeerConnectExist(remoteIP,Node.OUT,isCrossConnect)){
+        //如果是本机节点访问自己的服务器，则广播本机服务器到全网
+        if (LocalInfoManager.getInstance().isSelfConnect(remoteIP)) {
+            //广播自己的Ip
+            MessageManager.getInstance().broadcastSelfAddrToAllNode(true);
             channel.close();
             return;
         }
-        //如果是本机节点访问自己的服务器，则广播本机服务器到全网
-        if (LocalInfoManager.getInstance().isSelfConnect(remoteIP)) {
-          //广播自己的Ip
-             MessageManager.getInstance().broadcastSelfAddrToAllNode(true);
-             channel.close();
-             return;
+        //already exist peer ip （In or Out）
+        if( ConnectionManager.getInstance().isPeerConnectExist(remoteIP,Node.OUT)){
+            Log.info("dup connect,close channel");
+            channel.close();
+            return;
         }
         node.setChannel(channel);
         node.setIp(remoteIP);
@@ -114,16 +114,6 @@ public class ClientChannelHandler extends BaseChannelHandler {
             Log.info("Client Node is Inactive:" + node.getIp() + ":" + node.getRemotePort());
             ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),Node.OUT);
         }
-//        Attribute<Node> nodeAttribute = ctx.channel().attr(key);
-//        Node node = nodeAttribute.get();
-//        if (node != null) {
-//            nodeManager.removeNode(node);
-//        } else {
-//            SocketChannel socketChannel = (SocketChannel) ctx.channel();
-//            String remoteIP = socketChannel.remoteAddress().getHostString();
-//            int port = socketChannel.remoteAddress().getPort();
-//            Log.info("-----------------client channelInactive  node is null -----------------" + remoteIP + ":" + port);
-//        }
     }
 
     @Override

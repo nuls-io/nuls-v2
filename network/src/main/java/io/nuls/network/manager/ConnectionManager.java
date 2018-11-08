@@ -132,9 +132,9 @@ public class ConnectionManager {
     }
 
     /**
-     * juge peer ip over max
+     * juge peer ip Exist
      */
-    public boolean isPeerConnectExist(String peerIp,int nodeType,boolean isCross){
+    public boolean isPeerConnectExist(String peerIp,int nodeType){
         if(null != cacheConnectIpOutMap.get(peerIp)){
             //had connect
             return true;
@@ -147,27 +147,22 @@ public class ConnectionManager {
                 return false;
             }
         }else{
-            if(null != cacheConnectIpInMap.get(peerIp)) {
-                NetworkParam networkParam=NetworkParam.getInstance();
-                if(isCross){
-                    if(cacheConnectIpInMap.get(peerIp)>= networkParam.getCorssMaxInSameIp()){
-                        return true;
-                    }else{
-                        return false;
-                    }
-                }else{
-                    if(cacheConnectIpInMap.get(peerIp)>= networkParam.getMaxInSameIp()){
-                        return true;
-                    }else{
-                        return false;
-                    }
-                }
-            }else{
-                return false;
-            }
+            //nodeType == IN  juge maxIn on version protocol （isPeerConnectExceedMaxIn）
+            return true;
         }
     }
-
+    public boolean isPeerConnectExceedMaxIn(String peerIp,int maxInSameIp){
+        if(null != cacheConnectIpInMap.get(peerIp)) {
+            NetworkParam networkParam=NetworkParam.getInstance();
+           if(cacheConnectIpInMap.get(peerIp)>=maxInSameIp){
+                    return true;
+           }else{
+                    return false;
+            }
+        }else{
+            return false;
+        }
+    }
 
     private ConnectionManager() {
     }

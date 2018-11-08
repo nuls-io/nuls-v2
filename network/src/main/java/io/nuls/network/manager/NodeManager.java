@@ -24,13 +24,10 @@
  */
 package io.nuls.network.manager;
 
-import io.netty.channel.Channel;
 import io.nuls.network.constant.ManagerStatusEnum;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.NodeGroupConnector;
 
 import java.util.Collection;
 import java.util.List;
@@ -67,7 +64,7 @@ public class NodeManager extends  BaseManager{
                 loadSeedsNode(nodeGroup.getMagicNumber());
             }
             //数据库获取node
-            List<Node> nodes=storageManager.dbService.getNodeByChainId(nodeGroup.getChainId());
+            List<Node> nodes=storageManager.dbService.getNodesByChainId(nodeGroup.getChainId());
             for(Node node:nodes){
                 nodeGroup.addDisConnetNode(node,false);
             }

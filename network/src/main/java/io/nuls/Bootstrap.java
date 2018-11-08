@@ -52,7 +52,6 @@ public class Bootstrap {
 //            --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED
 //            System.setProperty("protostuff.runtime.allow_null_array_element", "true");
             cfgInit();
-            cfgInit();
             managerInit();
             managerStart();
             startNetty();
@@ -65,7 +64,6 @@ public class Bootstrap {
 
     public static void cfgInit() {
         try {
-
             NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
             NetworkParam networkParam = NetworkParam.getInstance();
             networkParam.setChainId(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_CHAIN_ID, 0));
@@ -103,6 +101,8 @@ public class Bootstrap {
         NodeManager.getInstance().init();
         MessageManager.getInstance().init();
         LocalInfoManager.getInstance().init();
+        RpcManager.getInstance().init();
+        StorageManager.getInstance().init();
     }
 
     public static void managerStart(){

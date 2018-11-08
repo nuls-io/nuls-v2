@@ -62,4 +62,6 @@ public interface NetworkConstant {
     String CMD_MESSAGE_VERACK = "verack";
     String CMD_MESSAGE_ADDR = "addr";
     String CMD_MESSAGE_GET_ADDR = "getaddr";
+
+    String DB_NAME_NETWORK_NODEGROUP="nwNodeGroup";
 }

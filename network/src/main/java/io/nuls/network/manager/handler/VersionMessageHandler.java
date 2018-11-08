@@ -60,11 +60,25 @@ public class VersionMessageHandler extends BaseMessageHandler {
         Node node =null;
         VersionMessageBody versionBody=(VersionMessageBody)message.getMsgBody();
         if(isServer){
-
             node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
-            localInfoManager.updateExternalAddress(versionBody.getAddrYou().getIp().getHostAddress(),versionBody.getAddrYou().getPort());
-            //node加入到Group的未连接中
             NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
+            localInfoManager.updateExternalAddress(versionBody.getAddrYou().getIp().getHostAddress(),versionBody.getAddrYou().getPort());
+            int maxIn=0;
+            if(node.isCrossConnect()){
+                maxIn=nodeGroup.getMaxCrossIn();
+            }else{
+                maxIn=nodeGroup.getMaxIn();
+            }
+            if(ConnectionManager.getInstance().isPeerConnectExceedMaxIn(node.getIp(),maxIn)){
+                if(node.getNodeGroupConnectors().size() == 0){
+                    node.getChannel().close();
+                }else{
+                    //client 要有version超时的处理逻辑
+                    return null;
+                }
+            }
+            //node加入到Group的未连接中
+
             Log.debug("VersionMessageHandler Recieve:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
             //服务端首次知道channel的网络属性，进行channel归属
             node.addGroupConnector(message.getHeader().getMagicNumber());
