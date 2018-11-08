@@ -23,13 +23,17 @@
  *
  */
 package io.nuls.network.model;
+
+import io.nuls.network.model.dto.Dto;
+import io.nuls.network.model.po.BasePo;
+
 /**
  * the bean for node peer and nodeGroup relation properties
  * @author lan
  * @date 2018/11/01
  *
  */
-public class NodeGroupConnector {
+public class NodeGroupConnector implements Dto{
     private long magicNumber;
     private boolean isSeed=false;
     private long version=0;
@@ -92,5 +96,10 @@ public class NodeGroupConnector {
 
     public void setBlockHash(String blockHash) {
         this.blockHash = blockHash;
+    }
+
+    @Override
+    public BasePo parseToPo() {
+        return null;
     }
 }

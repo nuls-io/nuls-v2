@@ -22,21 +22,10 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.model.po;
+package io.nuls.network.model.dto;
 
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.network.model.dto.Dto;
+import io.nuls.network.model.po.BasePo;
 
-/**
- * @program: nuls2
- * @description: base po
- * @author: lan
- * @create: 2018/11/07
- **/
-public abstract class BasePo extends BaseNulsData {
-    /**
-     * change to dto
-     * @return
-     */
-    public abstract Dto parseDto();
+public interface Dto {
+     BasePo parseToPo();
 }

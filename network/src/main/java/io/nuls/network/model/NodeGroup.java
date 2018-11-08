@@ -25,6 +25,8 @@
  */
 package io.nuls.network.model;
 
+import io.nuls.network.model.dto.Dto;
+import io.nuls.network.model.po.BasePo;
 import io.nuls.network.model.po.NodeGroupPo;
 
 import java.util.Collection;
@@ -37,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2018/11/01
  *
  */
-public class NodeGroup {
+public class NodeGroup  implements Dto {
     private long magicNumber = 0;
     private int chainId = 0;;
     private int maxOut = 0;;
@@ -109,6 +111,19 @@ public class NodeGroup {
         if(isMoonNet){
             isCrossActive=true;
         }
+    }
+
+    public boolean existSelfGroupList(String nodeId){
+        if(null == this.getConnectNodeMap().get(nodeId) && null == this.getDisConnectNodeMap().get(nodeId)){
+            return true;
+        }
+        return false;
+    }
+    public boolean existCrossGroupList(String nodeId){
+        if( null == this.getConnectCrossNodeMap().get(nodeId) && null == this.getDisConnectCrossNodeMap().get(nodeId)){
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -367,7 +382,8 @@ public class NodeGroup {
         isSelf = self;
     }
 
-    public NodeGroupPo parseToPo(){
+    @Override
+    public BasePo parseToPo(){
         NodeGroupPo po=new NodeGroupPo();
         po.setChainId(chainId);
         po.setCrossActive(isCrossActive);

@@ -103,7 +103,7 @@ public class NodeGroupManager extends BaseManager{
 
         //友链跨链部分等待跨链模块的初始化调用，卫星链的跨链group通过数据库进行初始化
         //获取数据库中已有的nodeGroup跨链网络组信息
-        List<NodeGroup> list=storageManager.dbService.getAllNodeGroups();
+        List<NodeGroup> list=storageManager.getAllNodeGroupFromDb();
         for(NodeGroup dbNodeGroup:list){
             dbNodeGroup.setMoonNet(true);
             dbNodeGroup.setSelf(false);

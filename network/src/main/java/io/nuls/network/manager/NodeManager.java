@@ -64,7 +64,7 @@ public class NodeManager extends  BaseManager{
                 loadSeedsNode(nodeGroup.getMagicNumber());
             }
             //数据库获取node
-            List<Node> nodes=storageManager.dbService.getNodesByChainId(nodeGroup.getChainId());
+            List<Node> nodes=storageManager.getNodesByChainId(nodeGroup.getChainId());
             for(Node node:nodes){
                 nodeGroup.addDisConnetNode(node,false);
             }

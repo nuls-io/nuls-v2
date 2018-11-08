@@ -205,7 +205,7 @@ public class ConnectionManager {
 
     public void clientStart() {
         ScheduledThreadPoolExecutor executor = TaskManager.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
-        executor.scheduleAtFixedRate(new NodesConnectThread(), 5, 10, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(new NodesConnectThread(), 5, 1000, TimeUnit.SECONDS);
     }
 
     public void connectionNode(Node node) {

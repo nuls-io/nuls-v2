@@ -95,9 +95,9 @@ public class MessageFactory {
 
     }
 
-    public VerackMessage buildVerackMessage(Node node,long magicNumber){
+    public VerackMessage buildVerackMessage(Node node,long magicNumber,int ackCode){
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByMagic(magicNumber);
-        VerackMessageBody verackMessageBody=new VerackMessageBody();
+        VerackMessageBody verackMessageBody=new VerackMessageBody(ackCode);
         return new VerackMessage(nodeGroup.getMagicNumber(),NetworkConstant.CMD_MESSAGE_VERACK,verackMessageBody);
     }
 

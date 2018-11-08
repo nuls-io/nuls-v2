@@ -29,6 +29,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.manager.handler.NetworkMessageHandlerFactory;
@@ -180,12 +181,19 @@ public class MessageManager extends BaseManager{
         }
         return new BroadcastResult(true, NetworkErrorCode.SUCCESS);
     }
-
+    private  boolean isHandShakeMessage(BaseMessage message){
+        if(message.getHeader().getCommandStr().equals(NetworkConstant.CMD_MESSAGE_VERSION) || message.getHeader().getCommandStr().equals(NetworkConstant.CMD_MESSAGE_VERACK)){
+            return true;
+        }
+        return false;
+    }
     public BroadcastResult broadcastToANode(BaseMessage message, Node node, boolean asyn) {
-//        NetworkParam
-        NodeGroupConnector nodeGroupConnector= node.getNodeGroupConnector(message.getHeader().getMagicNumber());
-        if (Node.HANDSHAKE !=nodeGroupConnector.getStatus()) {
-            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_DEAD);
+//        not handShakeMessage must be  validate peer status
+        if(!isHandShakeMessage(message)) {
+            NodeGroupConnector nodeGroupConnector = node.getNodeGroupConnector(message.getHeader().getMagicNumber());
+            if (Node.HANDSHAKE != nodeGroupConnector.getStatus()) {
+                return new BroadcastResult(false, NetworkErrorCode.NET_NODE_DEAD);
+            }
         }
         if (node.getChannel() == null || !node.getChannel().isActive()) {
             return new BroadcastResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);

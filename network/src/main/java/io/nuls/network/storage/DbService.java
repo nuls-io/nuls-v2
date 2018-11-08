@@ -24,12 +24,14 @@
  */
 package io.nuls.network.storage;
 
-import io.nuls.network.model.Node;
-import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.po.GroupNodeKeys;
 import io.nuls.network.model.po.NodeGroupPo;
+import io.nuls.network.model.po.NodePo;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
+import java.util.Map;
+
 /**
  * DbService
  * @author lan
@@ -41,25 +43,34 @@ public interface  DbService {
      * get nodeGroups
      * @return
      */
-    List<NodeGroup> getAllNodeGroups();
+    List<NodeGroupPo> getAllNodeGroups() throws NulsException;
 
     /**
-     * get Nodes
-     * @param chainId
+     * get nodes
      * @return
      */
-    List<Node> getNodesByChainId(int chainId);
-
+    public List<NodePo> getAllNodes() throws NulsException;
+    public Map<String,NodePo> getAllNodesMap() throws NulsException;
     /**
      * save node groups
      * @param nodeGroups
      */
-    public void saveNodeGroups(List<NodeGroup> nodeGroups);
+    public void saveNodeGroups(List<NodeGroupPo> nodeGroups);
+
+    public void saveNodes(List<NodePo> nodePos);
+    public void batchSaveGroupNodeKeys(List<GroupNodeKeys> groupNodeKeysList);
+    public void saveGroupNodeKeys(GroupNodeKeys groupNodeKeys);
+
+    public void deleteNode(String nodeId);
+
+    public void deleteGroup(int chainId);
+
+    public void deleteGroupNodeKeys(int chainId);
+
 
     public NodeGroupPo getNodeGroupByChainId(int chainId) throws NulsException;
+    public GroupNodeKeys getGroupNodeKeysByChainId(int chainId) throws NulsException;
 
-    public void saveNodesByChainId(List<Node> nodes,int chainId);
 
-    public void saveAllNodesByNodeId(List<Node> nodes,int chainId);
 
 }

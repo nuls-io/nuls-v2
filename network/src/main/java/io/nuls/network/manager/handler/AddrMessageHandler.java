@@ -28,13 +28,15 @@ package io.nuls.network.manager.handler;
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.manager.StorageManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.model.dto.IpAddress;
+import io.nuls.network.model.po.NodePo;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -67,8 +69,8 @@ public class AddrMessageHandler extends BaseMessageHandler {
         AddrMessage addrMessage=(AddrMessage)message;
         List<IpAddress> ipAddressList=addrMessage.getMsgBody().getIpAddressList();
 
-        //TODO:判断地址是否本地已经拥有，如果拥有不转发，PEER是跨链网络也不转发
-        List<Node> addNodes=new ArrayList<>();
+        //判断地址是否本地已经拥有，如果拥有不转发，PEER是跨链网络也不转发
+        List<NodePo> addNodes=new ArrayList<>();
         List<IpAddress> addAddressList=new ArrayList<>();
         if(node.isCrossConnect()){
             //跨链，只存储，不转发
@@ -77,10 +79,11 @@ public class AddrMessageHandler extends BaseMessageHandler {
                 int port=ipAddress.getPort();
                 Log.info("======ip:"+ip+":"+ipAddress.getPort());
                 String nodeId=ip+":"+port;
-                if( null != nodeGroup.getConnectCrossNodeMap().get(nodeId) && null != nodeGroup.getDisConnectCrossNodeMap().get(nodeId)){
+                if(!nodeGroup.existCrossGroupList(nodeId)){
                     //增加存储节点
                     Node crossNode=new Node(ip,port,Node.OUT,true);
                     nodeGroup.addDisConnetNode(crossNode,false);
+                    addNodes.add((NodePo)crossNode.parseToPo());
                 }
             }
         }else{
@@ -90,12 +93,13 @@ public class AddrMessageHandler extends BaseMessageHandler {
                 int port=ipAddress.getPort();
                 Log.info("======ip:"+ip+":"+ipAddress.getPort());
                 String nodeId=ip+":"+port;
-                if( null != nodeGroup.getConnectCrossNodeMap().get(nodeId) && null != nodeGroup.getDisConnectCrossNodeMap().get(nodeId)){
+                if(!nodeGroup.existSelfGroupList(nodeId)){
                     //增加存储节点
-                    Node crossNode=new Node(ip,port,Node.OUT,true);
-                    nodeGroup.addDisConnetNode(crossNode,false);
+                    Node selfNode=new Node(ip,port,Node.OUT,false);
+                    nodeGroup.addDisConnetNode(selfNode,false);
                     IpAddress addIpAddress=new IpAddress(ip,port);
                     addAddressList.add(addIpAddress);
+                    addNodes.add((NodePo)selfNode.parseToPo());
                 }
             }
 
@@ -103,6 +107,8 @@ public class AddrMessageHandler extends BaseMessageHandler {
                 //向自有网络广播
                 AddrMessage addrMessagebroadCast=MessageFactory.getInstance().buildAddrMessage(addAddressList,nodeGroup.getMagicNumber());
                 MessageManager.getInstance().broadcastAddrToAllNode(addrMessagebroadCast,node,true);
+                //存储节点信息
+                StorageManager.getInstance().saveNodes(addNodes,nodeGroup.getChainId());
             }
         }
         return new NetworkEventResult(true, null);
