@@ -27,12 +27,14 @@ package io.nuls.account.util;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
+import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.math.BigInteger;
@@ -53,7 +55,7 @@ public class AccountTool {
         //return new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(publicKey));
     }
 
-    public static Account createAccount(String prikey) throws NulsException {
+    public static Account createAccount(short chainId, String prikey) throws NulsException {
         ECKey key = null;
         if (StringUtils.isBlank(prikey)) {
             key = new ECKey();
@@ -64,21 +66,20 @@ public class AccountTool {
                 throw new NulsException(AccountErrorCode.PRIVATE_KEY_WRONG, e);
             }
         }
-        //TODO
-        //Address address = new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
-        Address address = new Address((short)0,(byte)1,null);
+        Address address = new Address(chainId, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
         Account account = new Account();
-        account.setEncryptedPriKey(new byte[0]);
+        account.setChainId(chainId);
         account.setAddress(address);
         account.setPubKey(key.getPubKey());
-        account.setEcKey(key);
         account.setPriKey(key.getPrivKeyBytes());
+        account.setEncryptedPriKey(new byte[0]);
         account.setCreateTime(TimeService.currentTimeMillis());
+        account.setEcKey(key);
         return account;
     }
 
-    public static Account createAccount() throws NulsException {
-        return createAccount(null);
+    public static Account createAccount(short chainId) throws NulsException {
+        return createAccount(chainId, null);
     }
 
     public static Address createContractAddress() throws NulsException {
@@ -107,8 +108,8 @@ public class AccountTool {
     }
 
     /**
-     *  Check the difficulty of the password
-     *  length between 8 and 20, the combination of characters and numbers
+     * Check the difficulty of the password
+     * length between 8 and 20, the combination of characters and numbers
      *
      * @return boolean
      */
