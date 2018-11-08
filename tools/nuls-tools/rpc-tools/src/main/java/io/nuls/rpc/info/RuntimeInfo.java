@@ -31,8 +31,10 @@ import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.Module;
 import io.nuls.tools.core.ioc.ScanUtil;
+import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 
+import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -220,6 +222,14 @@ public class RuntimeInfo {
         }
 
         return exist;
+    }
+
+    public static Map buildCmdResponseMap(int id, String msg) throws IOException {
+        CmdResponse cmdResponse = new CmdResponse();
+        cmdResponse.setId(id);
+        cmdResponse.setCode(Constants.FAILED_CODE);
+        cmdResponse.setMsg(msg);
+        return JSONUtils.json2map(JSONUtils.obj2json(cmdResponse));
     }
 
 }

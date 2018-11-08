@@ -62,7 +62,7 @@ public class CmdDispatcher {
         List<String> remoteUriList = RuntimeInfo.getRemoteUri(cmdRequest);
         switch (remoteUriList.size()) {
             case 0:
-                return Constants.CMD_NOT_FOUND;
+                return JSONUtils.obj2json(RuntimeInfo.buildCmdResponseMap(id, Constants.CMD_NOT_FOUND));
             case 1:
                 String remoteUri = remoteUriList.get(0);
                 WsClient wsClient = RuntimeInfo.getWsClient(remoteUri);
@@ -70,7 +70,7 @@ public class CmdDispatcher {
                 Map remoteMap = wsClient.getResponse(id);
                 return JSONUtils.obj2json(remoteMap);
             default:
-                return Constants.CMD_DUPLICATE;
+                return JSONUtils.obj2json(RuntimeInfo.buildCmdResponseMap(id, Constants.CMD_DUPLICATE));
         }
     }
 }
