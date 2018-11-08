@@ -26,15 +26,30 @@
 package io.nuls.account.model.po;
 
 
+import io.nuls.account.model.bo.Account;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.Address;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.tools.crypto.ECKey;
+import io.nuls.tools.crypto.EncryptedData;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.SerializeUtils;
+
+import java.io.IOException;
+import java.math.BigInteger;
+
 /**
  * @author: qinyifeng
  */
-public class AccountPo {
+public class AccountPo extends BaseNulsData {
 
-    //private transient Address addressObj;
-
+    private transient Address addressObj;
 
     private String address;
+
+    private short chainId;
 
     private Long createTime;
 
@@ -52,58 +67,110 @@ public class AccountPo {
 
     private String remark;
 
-    public AccountPo(){
+    public AccountPo() {
     }
-//    public AccountPo(Account account){
-//        this.addressObj = account.getAddress();
-//        this.address = account.getAddress().toString();
-//        this.createTime = account.getCreateTime();
-//        this.alias = account.getAlias();
-//        this.pubKey = account.getPubKey();
-//        this.priKey = account.getPriKey();
-//        this.encryptedPriKey = account.getEncryptedPriKey();
-//        this.extend = account.getExtend();
-//        this.status = account.getStatus();
-//        this.remark = account.getRemark();
-//    }
-//
-//    public Account toAccount(){
-//        Account account = new Account();
-//        account.setCreateTime(this.getCreateTime());
-//        try {
-//            account.setAddress(Address.fromHashs(this.getAddress()));
-//        } catch (Exception e) {
-//            Log.error(e);
-//        }
-//        account.setAlias(this.getAlias());
-//        account.setExtend(this.getExtend());
-//        account.setPriKey(this.getPriKey());
-//        account.setPubKey(this.getPubKey());
-//        account.setEncryptedPriKey(this.getEncryptedPriKey());
-//        if (this.getPriKey() != null && this.getPriKey().length > 1) {
-//            account.setEcKey(ECKey.fromPrivate(new BigInteger(1, account.getPriKey())));
-//        } else {
-//            account.setEcKey(ECKey.fromEncrypted(new EncryptedData(this.getEncryptedPriKey()), this.getPubKey()));
-//        }
-//        account.setStatus(this.getStatus());
-//        account.setRemark(this.remark);
-//        return account;
-//    }
+
+    public AccountPo(Account account) {
+        this.addressObj = account.getAddress();
+        this.chainId = account.getChainId();
+        this.address = account.getAddress().toString();
+        this.alias = account.getAlias();
+        this.pubKey = account.getPubKey();
+        this.priKey = account.getPriKey();
+        this.encryptedPriKey = account.getEncryptedPriKey();
+        this.extend = account.getExtend();
+        this.remark = account.getRemark();
+        this.createTime = account.getCreateTime();
+    }
+
+    public Account toAccount() {
+        Account account = new Account();
+        account.setChainId(this.getChainId());
+        try {
+            account.setAddress(Address.fromHashs(this.getAddress()));
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        account.setAlias(this.getAlias());
+        account.setExtend(this.getExtend());
+        account.setPriKey(this.getPriKey());
+        account.setPubKey(this.getPubKey());
+        account.setEncryptedPriKey(this.getEncryptedPriKey());
+        if (this.getPriKey() != null && this.getPriKey().length > 1) {
+            account.setEcKey(ECKey.fromPrivate(new BigInteger(1, account.getPriKey())));
+        } else {
+            account.setEcKey(ECKey.fromEncrypted(new EncryptedData(this.getEncryptedPriKey()), this.getPubKey()));
+        }
+        account.setRemark(this.remark);
+        account.setCreateTime(this.getCreateTime());
+        return account;
+    }
+
+    @Override
+    public int size() {
+        int size = 0;
+        //chainId
+        size += 2;
+        size += SerializeUtils.sizeOfString(address);
+        size += SerializeUtils.sizeOfString(alias);
+        //createTime
+        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfBytes(pubKey);
+        size += SerializeUtils.sizeOfBytes(priKey);
+        size += SerializeUtils.sizeOfBytes(encryptedPriKey);
+        size += SerializeUtils.sizeOfBytes(extend);
+        size += SerializeUtils.sizeOfString(remark);
+        return size;
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeShort(chainId);
+        stream.writeString(address);
+        stream.writeString(alias);
+        stream.writeUint48(createTime);
+        stream.writeBytesWithLength(pubKey);
+        stream.writeBytesWithLength(priKey);
+        stream.writeBytesWithLength(encryptedPriKey);
+        stream.writeBytesWithLength(extend);
+        stream.writeString(remark);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.chainId = byteBuffer.readShort();
+        this.address = byteBuffer.readString();
+        this.alias = byteBuffer.readString();
+        this.createTime = byteBuffer.readUint48();
+        this.pubKey = byteBuffer.readByLengthByte();
+        this.priKey = byteBuffer.readByLengthByte();
+        this.encryptedPriKey = byteBuffer.readByLengthByte();
+        this.extend = byteBuffer.readByLengthByte();
+        this.remark = byteBuffer.readString();
+    }
+
+    public Address getAddressObj() {
+        return addressObj;
+    }
+
+    public void setAddressObj(Address addressObj) {
+        this.addressObj = addressObj;
+    }
 
     public String getAddress() {
         return address;
     }
 
-//    public Address getAddressObj() {
-//        return addressObj;
-//    }
-//
-//    public void setAddressObj(Address addressObj) {
-//        this.addressObj = addressObj;
-//    }
-
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public short getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(short chainId) {
+        this.chainId = chainId;
     }
 
     public Long getCreateTime() {

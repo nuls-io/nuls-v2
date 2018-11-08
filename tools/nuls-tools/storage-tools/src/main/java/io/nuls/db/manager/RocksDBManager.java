@@ -164,9 +164,7 @@ public class RocksDBManager {
                 throw new Exception(DBErrorCode.NULL_PARAMETER);
             }
             if (TABLES.containsKey(tableName)) {
-                //throw new Exception(DBErrorCode.DB_TABLE_EXIST);
-                Log.warn(DBErrorCode.DB_TABLE_EXIST);
-                return false;
+                throw new Exception(DBErrorCode.DB_TABLE_EXIST);
             }
             if (StringUtils.isBlank(dataPath) || !DBUtils.checkPathLegal(tableName)) {
                 throw new Exception(DBErrorCode.DB_TABLE_CREATE_PATH_ERROR);

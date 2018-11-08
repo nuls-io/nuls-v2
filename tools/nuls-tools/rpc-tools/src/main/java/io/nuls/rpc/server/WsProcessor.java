@@ -1,6 +1,7 @@
 package io.nuls.rpc.server;
 
 import io.nuls.rpc.handler.WebSocketHandler;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import org.java_websocket.WebSocket;
 
@@ -24,33 +25,27 @@ public class WsProcessor implements Runnable {
     @Override
     public void run() {
 
-        while (RuntimeInfo.requestQueue.size() > 0) {
+        while (RuntimeInfo.REQUEST_QUEUE.size() > 0) {
 
             Object[] objects = null;
-            synchronized (RuntimeInfo.requestQueue) {
-                if (RuntimeInfo.requestQueue.size() > 0) {
-                    objects = RuntimeInfo.requestQueue.get(0);
-                    RuntimeInfo.requestQueue.remove(0);
+            synchronized (RuntimeInfo.REQUEST_QUEUE) {
+                if (RuntimeInfo.REQUEST_QUEUE.size() > 0) {
+                    objects = RuntimeInfo.REQUEST_QUEUE.get(0);
+                    RuntimeInfo.REQUEST_QUEUE.remove(0);
                 }
             }
 
-//            WebSocket webSocket = null;
-//            String message = null;
             try {
                 if (objects != null) {
                     WebSocket webSocket = (WebSocket) objects[0];
                     String message = (String) objects[1];
-//                    if (webSocket != null && message != null) {
                     webSocket.send(WebSocketHandler.callCmd(message));
-//                    }
                 }
 
-                Thread.sleep(100);
+                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
                 e.printStackTrace();
-                //RuntimeInfo.requestQueue.add(new Object[]{webSocket, message});
             }
         }
-
     }
 }

@@ -25,29 +25,28 @@
  *
  */
 
-package io.nuls.test;
+package io.nuls.account;
 
-import io.nuls.rpc.client.RpcClient;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.RuntimeInfo;
-import io.nuls.rpc.server.BaseRpcServer;
-import io.nuls.rpc.server.GrizzlyServer;
+import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
 
 /**
  * @author tangyi
- * @date 2018/10/20
+ * @date 2018/10/30
  * @description
  */
-public class Kernel {
-    @Test
-    public void run() throws Exception {
-        BaseRpcServer server = new GrizzlyServer(Constants.KERNEL_PORT);
-        RuntimeInfo.scanPackage("io.nuls.rpc.cmd.kernel");
-        server.init("kernel", null);
-        server.start();
+public class WsKernel {
 
-        RpcClient.versionToKernel("http://127.0.0.1:8091/" + Constants.DEFAULT_PATH + "/" + Constants.JSON);
+    @Test
+    public  void test() throws Exception {
+        //模拟启动内核模块
+        int port = 8887;
+        WsServer s = new WsServer(port);
+        s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
+        s.start();
+
+        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
 
         Thread.sleep(Integer.MAX_VALUE);
     }

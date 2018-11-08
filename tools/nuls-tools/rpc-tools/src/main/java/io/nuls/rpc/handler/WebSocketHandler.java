@@ -28,6 +28,7 @@
 package io.nuls.rpc.handler;
 
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.CmdResponse;
@@ -46,16 +47,21 @@ import java.util.Map;
  */
 public class WebSocketHandler {
 
+    /**
+     * Call local cmd.
+     * 1. Determine if service is available
+     * 2. Determine if the cmd exists
+     */
     public static String callCmd(String formParamAsJson) throws Exception {
 
         if (!RuntimeInfo.local.isAvailable()) {
-            return "Module not available: " + RuntimeInfo.local.getName();
+            return Constants.SERVICE_NOT_AVAILABLE;
         }
 
         Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
         CmdDetail cmdDetail = RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));
         if (cmdDetail == null) {
-            return "No cmd found: " + jsonMap.get("cmd") + "." + jsonMap.get("minVersion");
+            return Constants.CMD_NOT_FOUND;
         }
 
         CmdResponse cmdResponse = buildResponse(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), (List) jsonMap.get("params"));
@@ -64,6 +70,11 @@ public class WebSocketHandler {
         return JSONUtils.obj2json(cmdResponse);
     }
 
+    /**
+     * Call local cmd.
+     * 1. If the interface is injected via @Autowired, the injected object is used
+     * 2. If the interface has no special annotations, construct a new object by reflection
+     */
     private static CmdResponse buildResponse(String invokeClass, String invokeMethod, List params) throws Exception {
 
         Class clz = Class.forName(invokeClass);
