@@ -1,0 +1,14 @@
+[
+  {
+    "value":"item0",
+    "readOnly":true
+  },
+  {
+    "value":"item1",
+    "readOnly":true
+  },
+  {
+    "value":"item2",
+    "readOnly":true
+  }
+]

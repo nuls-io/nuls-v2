@@ -32,7 +32,7 @@ public class AgentStorageServiceImpl implements AgentStorageService{
         try {
             byte[] key = agentPo.getHash().serialize();
             byte[] value = agentPo.serialize();
-            return  RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_AGENT,key,value);
+            return  RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID,key,value);
         }catch (Exception e){
             Log.error(e);
             return  false;
@@ -50,7 +50,7 @@ public class AgentStorageServiceImpl implements AgentStorageService{
         }
         try {
             byte[] key = hash.serialize();
-            byte[] value = RocksDBService.get(ConsensusConstant.DB_NAME_CONSENSUS_AGENT,key);
+            byte[] value = RocksDBService.get(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID,key);
             if(value == null){
                 return  null;
             }
@@ -75,7 +75,7 @@ public class AgentStorageServiceImpl implements AgentStorageService{
         }
         try {
             byte[] key = hash.serialize();
-            return  RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_AGENT,key);
+            return  RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID,key);
         }catch (Exception e){
             Log.error(e);
             return  false;
@@ -88,7 +88,7 @@ public class AgentStorageServiceImpl implements AgentStorageService{
      * */
     public List<AgentPo> getList(int chainID) throws  Exception{
         try {
-            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT);
+            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID);
             List<AgentPo> agentList = new ArrayList<>();
             for (Entry<byte[], byte[]> entry:list) {
                 AgentPo po = new AgentPo();
@@ -110,7 +110,7 @@ public class AgentStorageServiceImpl implements AgentStorageService{
      * 获取当前网络节点数量
      * */
     public int size(int chainID) {
-        List<byte[]> keyList = RocksDBService.keyList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT);
+        List<byte[]> keyList = RocksDBService.keyList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID);
         if(keyList != null){
             return keyList.size();
         }
