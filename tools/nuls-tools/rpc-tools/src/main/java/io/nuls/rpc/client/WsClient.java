@@ -27,7 +27,10 @@
 
 package io.nuls.rpc.client;
 
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.model.CmdResponse;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -56,12 +59,12 @@ public class WsClient extends WebSocketClient {
     @Override
     public void onMessage(String paramString) {
         try {
-            Map map = JSONUtils.json2map(paramString);
-
-            RuntimeInfo.responseQueue.add(map);
-            System.out.println("ws client-> add to map, id=" + map.get("id") + ",size=" + RuntimeInfo.responseQueue.size());
+            /*
+             * add to response queue, Waiting for thread pool processing
+             */
+            RuntimeInfo.RESPONSE_QUEUE.add(JSONUtils.json2map(paramString));
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("WsClient.onMessage-> " + e.getMessage() + ":" + paramString);
         }
     }
 
@@ -75,19 +78,27 @@ public class WsClient extends WebSocketClient {
     }
 
     /**
-     * waiting for response
+     * get response by id
      */
-    public Map waitingResponse(int id) throws InterruptedException {
-        while (true) {
-            for (int i = 0; i < RuntimeInfo.responseQueue.size(); i++) {
-                Map map = RuntimeInfo.responseQueue.get(i);
+    public Map getResponse(int id) throws InterruptedException, IOException {
+        long timeMillis = System.currentTimeMillis();
+        do {
+            for (Map map : RuntimeInfo.RESPONSE_QUEUE) {
                 if ((Integer) map.get("id") == id) {
-                    RuntimeInfo.responseQueue.remove(map);
-                    System.out.println("ws client-> get response,id=" + id + ", size=" + RuntimeInfo.responseQueue.size());
+                    RuntimeInfo.RESPONSE_QUEUE.remove(map);
                     return map;
                 }
             }
-            Thread.sleep(100);
-        }
+            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+        } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
+
+        return buildCmdResponseMap(Constants.RESPONSE_TIMEOUT);
+    }
+
+    private static Map buildCmdResponseMap(String msg) throws IOException {
+        CmdResponse cmdResponse = new CmdResponse();
+        cmdResponse.setCode(Constants.FAILED_CODE);
+        cmdResponse.setMsg(msg);
+        return JSONUtils.json2map(JSONUtils.obj2json(cmdResponse));
     }
 }

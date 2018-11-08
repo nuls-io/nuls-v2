@@ -27,10 +27,12 @@
 
 package io.nuls.rpc.server;
 
+import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.Module;
 import io.nuls.rpc.model.ModuleStatus;
+import io.nuls.tools.log.Log;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -55,13 +57,17 @@ public class WsServer extends WebSocketServer {
         RuntimeInfo.local = new Module(moduleName, ModuleStatus.READY, true, HostInfo.getIpAdd(), getPort(), new ArrayList<>(), dps);
 
         RuntimeInfo.scanPackage(scanPackage);
+    }
 
+    public void startAndSyncKernel(String kernelUri) throws Exception {
+        this.start();
+        Thread.sleep(1000);
+        CmdDispatcher.syncKernel(kernelUri);
     }
 
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake handshake) {
-        System.out.println("ws server-> new connection join");
-        System.out.println(webSocket.getRemoteSocketAddress().getHostName() + ":" + webSocket.getRemoteSocketAddress().getPort());
+        Log.info("new connection join->" + webSocket.getRemoteSocketAddress().getHostName() + ":" + webSocket.getRemoteSocketAddress().getPort());
     }
 
     @Override
@@ -71,8 +77,8 @@ public class WsServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket webSocket, String message) {
         try {
-            System.out.println("ws server-> receive msg: " + message);
-            RuntimeInfo.requestQueue.add(new Object[]{webSocket, message});
+            Log.info("ws server-> receive msg: " + message);
+            RuntimeInfo.REQUEST_QUEUE.add(new Object[]{webSocket, message});
             RuntimeInfo.fixedThreadPool.execute(new WsProcessor());
         } catch (Exception e) {
             e.printStackTrace();
@@ -81,14 +87,13 @@ public class WsServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket webSocket, Exception ex) {
-        //错误时候触发的代码
-        System.out.println("ws server-> on error");
+        Log.error("ws server-> on error");
         ex.printStackTrace();
     }
 
     @Override
     public void onStart() {
-        System.out.println("ws server-> started.");
+        Log.info("ws server-> started.");
     }
 
 }
