@@ -29,18 +29,20 @@ import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
 
 /**
- * @author: qinyifeng
+ * @author: EdwardChan
  */
 public class AliasPo extends BaseNulsData {
 
-    private byte[] address;
-
     private String alias;
+
+    private byte[] address;
 
     public AliasPo() {
     }
@@ -73,16 +75,22 @@ public class AliasPo extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeString(this.alias);
+        stream.writeBytesWithLength(this.address);
 
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-
+        this.alias = byteBuffer.readString();
+        this.address = byteBuffer.readByLengthByte();;
     }
 
     @Override
     public int size() {
-        return 0;
+        int size = 0;
+        size += SerializeUtils.sizeOfString(alias);
+        size += SerializeUtils.sizeOfBytes(address);
+        return size;
     }
 }

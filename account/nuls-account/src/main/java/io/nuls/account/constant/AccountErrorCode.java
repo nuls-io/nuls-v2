@@ -76,6 +76,7 @@ public interface AccountErrorCode {
     ErrorCode DB_SAVE_ERROR = ErrorCode.init("20013");
     ErrorCode DB_UPDATE_ERROR = ErrorCode.init("20014");
     ErrorCode DB_QUERY_ERROR = ErrorCode.init("20015");
+    ErrorCode DB_DELETE_ERROR = ErrorCode.init("20016");
 
     ErrorCode PASSWORD_IS_WRONG = ErrorCode.init("50000");
     ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("50001");
