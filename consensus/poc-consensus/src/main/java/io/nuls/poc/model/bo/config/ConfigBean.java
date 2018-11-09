@@ -1,10 +1,13 @@
 package io.nuls.poc.model.bo.config;
+
+import java.io.Serializable;
+
 /**
  * 共识模块配置类
  * @author tag
  * 2018/11/7
  * */
-public class ConfigBean {
+public class ConfigBean implements Serializable {
     /**
      * 打包间隔时间
      * */

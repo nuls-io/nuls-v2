@@ -61,7 +61,7 @@ public class NulsThreadFactory implements ThreadFactory {
             threadName = "[" + poolName + "-" + threadNo.getAndIncrement() + "]";
         }
         Thread newThread = new Thread(r, threadName);
-        newThread.setDaemon(true);
+        //newThread.setDaemon(true);
         if (newThread.getPriority() != Thread.NORM_PRIORITY) {
             newThread.setPriority(Thread.NORM_PRIORITY);
         }

@@ -28,7 +28,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
         try {
             byte[] key = depositPo.getTxHash().serialize();
             byte[] value = depositPo.serialize();
-            return RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT,key,value);
+            return RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID,key,value);
         }catch (Exception e){
             Log.error(e);
             return false;
@@ -41,7 +41,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
             return  null;
         }
         try {
-            byte[] value = RocksDBService.get(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT,hash.serialize());
+            byte[] value = RocksDBService.get(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID,hash.serialize());
             if (value == null){
                 return null;
             }
@@ -62,7 +62,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
         }
         try {
             byte[] key = hash.serialize();
-            return  RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT,key);
+            return  RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID,key);
         }catch (Exception e){
             Log.error(e);
             return  false;
@@ -72,7 +72,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
     @Override
     public List<DepositPo> getList(int chainID) throws Exception{
         try {
-            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT);
+            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID);
             List<DepositPo> depositList = new ArrayList<>();
             for (Entry<byte[], byte[]> entry:list) {
                 DepositPo po = new DepositPo();
@@ -91,7 +91,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
 
     @Override
     public int size(int chainID) {
-        List<byte[]> keyList = RocksDBService.keyList(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT);
+        List<byte[]> keyList = RocksDBService.keyList(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID);
         if(keyList != null){
             return keyList.size();
         }

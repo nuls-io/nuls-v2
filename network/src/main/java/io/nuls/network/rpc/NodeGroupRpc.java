@@ -55,7 +55,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
      */
     @CmdAnnotation(cmd = "nw_createNodeGroup", version = 1.0, preCompatible = true)
     public CmdResponse createNodeGroup(List  params) {
-        List<NodeGroup> nodeGroups=new ArrayList<>();
+        List<NodeGroupPo> nodeGroupPos=new ArrayList<>();
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         long magicNumber = Long.valueOf(String.valueOf(params.get(1)));
         int maxOut = Integer.valueOf(String.valueOf(params.get(2)));
@@ -83,7 +83,8 @@ DbService dbService=StorageManager.getInstance().getDbService();
             }
             NetworkParam.getInstance().setMoonSeedIpList(ipList);
             nodeGroup.setCrossActive(true);
-            nodeGroups.add(nodeGroup);
+            NodeGroupPo po=(NodeGroupPo)nodeGroup.parseToPo();
+            nodeGroupPos.add(po);
             //更新存储
         }else{
           //卫星链的跨链协议调用
@@ -100,14 +101,15 @@ DbService dbService=StorageManager.getInstance().getDbService();
             nodeGroup = new NodeGroup(magicNumber,chainId,maxIn,maxOut,minAvailableCount,true);
             nodeGroup.setSelf(false);
             //存储nodegroup
-            nodeGroups.add(nodeGroup);
-            dbService.saveNodeGroups(nodeGroups);
+            nodeGroupPos.add((NodeGroupPo)nodeGroup.parseToPo());
+            dbService.saveNodeGroups(nodeGroupPos);
+            nodeGroupManager.addNodeGroup(nodeGroup.getChainId(),nodeGroup);
         }
         // 成功
         return success(1.0, "success", "");
     }
     /**
-     * nw_createNodeGroup
+     * nw_getGroupByChainId
      * 创建跨链网络
      */
     @CmdAnnotation(cmd = "nw_getGroupByChainId", version = 1.0, preCompatible = true)

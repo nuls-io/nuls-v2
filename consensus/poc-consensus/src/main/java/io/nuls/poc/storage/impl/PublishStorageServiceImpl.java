@@ -24,7 +24,7 @@ public class PublishStorageServiceImpl implements PublishStorageService{
             return false;
         }
         try {
-            return  RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH,po.getKey(),po.serialize());
+            return  RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH+chainID,po.getKey(),po.serialize());
         }catch (Exception  e){
             Log.error(e);
             return false;
@@ -37,7 +37,7 @@ public class PublishStorageServiceImpl implements PublishStorageService{
             return false;
         }
         try {
-            return RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH,key);
+            return RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH+chainID,key);
         }catch (Exception e){
             Log.error(e);
             return false;
@@ -48,7 +48,7 @@ public class PublishStorageServiceImpl implements PublishStorageService{
     @Override
     public List<PunishLogPo> getPunishList(int chainID)throws Exception{
         try {
-            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH);
+            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH+chainID);
             List<PunishLogPo> agentList = new ArrayList<>();
             for (Entry<byte[], byte[]> entry:list) {
                 PunishLogPo po = new PunishLogPo();

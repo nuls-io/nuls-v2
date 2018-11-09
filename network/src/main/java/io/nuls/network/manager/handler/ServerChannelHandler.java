@@ -70,11 +70,16 @@ public class ServerChannelHandler extends BaseChannelHandler {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
+        String remoteIp=socketChannel.remoteAddress().getHostString();
         //already exist peer ip （In or Out）
-        if( ConnectionManager.getInstance().isPeerConnectExist(socketChannel.remoteAddress().getHostString(),Node.IN)){
-            ctx.channel().close();
-            return;
+        if(!LocalInfoManager.getInstance().isSelfConnect(remoteIp)){
+            if( ConnectionManager.getInstance().isPeerConnectExist(remoteIp,Node.IN)){
+                Log.info("peer connect exist:"+socketChannel.remoteAddress().getHostString());
+                ctx.channel().close();
+                return;
+            }
         }
+
         boolean isCrossConnect=isServerCrossConnect(ctx.channel());
         Node node = new Node(socketChannel.remoteAddress().getHostString(),socketChannel.remoteAddress().getPort(), Node.IN,isCrossConnect);
         node.setCanConnect(false);
@@ -86,8 +91,6 @@ public class ServerChannelHandler extends BaseChannelHandler {
         }
         //此时无法知道client的魔法参数，不能发送version消息,此时业务法对MaxIn做判断
     }
-
-
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
@@ -117,7 +120,9 @@ public class ServerChannelHandler extends BaseChannelHandler {
         String nodeKey=remoteIP+":"+port;
         try {
             MessageManager.getInstance().receiveMessage(buf,nodeKey,true);
-        } finally {
+        } catch (Exception e){
+            e.printStackTrace();
+        }finally {
             buf.release();
         }
     }

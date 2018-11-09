@@ -26,17 +26,17 @@
 package io.nuls.network.model;
 
 import io.netty.channel.Channel;
-
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.network.manager.NodeGroupManager;
-
+import io.nuls.network.model.dto.Dto;
+import io.nuls.network.model.po.BasePo;
+import io.nuls.network.model.po.NodePo;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
-
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,7 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author lan
  */
-public class Node extends BaseNulsData {
+public class Node extends BaseNulsData  implements Dto {
 
     private String id;
 
@@ -59,7 +59,7 @@ public class Node extends BaseNulsData {
 
     private int remotePort = 0;
     /**
-     * 卫星链节点才有这个port，普通链无
+     * 跨链节点才有这个port，存跨链port 普通链无
      */
     private int remoteCrossPort = 0;
 
@@ -73,7 +73,9 @@ public class Node extends BaseNulsData {
      */
     private boolean canConnect=true;
     private final static int MAX_FAIL_COUNT=100;
-
+    /**
+     * 是否跨链连接
+     */
     private boolean isCrossConnect;
 
     /**
@@ -301,5 +303,11 @@ public class Node extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
 
+    }
+
+    @Override
+    public BasePo parseToPo() {
+        NodePo   nodePo = new NodePo(id, ip,remotePort,remoteCrossPort,isCrossConnect );
+        return nodePo;
     }
 }

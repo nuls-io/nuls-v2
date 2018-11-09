@@ -25,6 +25,7 @@
 package io.nuls.network.model.po;
 
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.network.model.dto.Dto;
 
 /**
  * @program: nuls2
@@ -33,5 +34,9 @@ import io.nuls.base.data.BaseNulsData;
  * @create: 2018/11/07
  **/
 public abstract class BasePo extends BaseNulsData {
-
+    /**
+     * change to dto
+     * @return
+     */
+    public abstract Dto parseDto();
 }
