@@ -27,7 +27,6 @@
 
 package io.nuls.test;
 
-import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
@@ -43,10 +42,9 @@ public class WsM1 {
 
         WsServer s = new WsServer(HostInfo.randomPort());
 
-        s.init("m1", new String[]{"m2", "m3"}, "io.nuls.rpc.cmd.cmd1");
-        s.start();
+        s.init("m1", new String[]{"m2", "m3"}, "io.nuls.rpc.cmd.test");
 
-        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+        s.startAndSyncKernel("ws://127.0.0.1:8887");
 
         Thread.sleep(Integer.MAX_VALUE);
     }

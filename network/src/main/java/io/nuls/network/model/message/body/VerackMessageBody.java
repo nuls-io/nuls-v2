@@ -25,10 +25,52 @@
 
 package io.nuls.network.model.message.body;
 
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.tools.exception.NulsException;
+
+import java.io.IOException;
+
 /**
  * vrack protocol message body
  * @author  lan
  */
 public class VerackMessageBody  extends MessageBody {
+    public static int VER_SUCCESS=1;
+    public static int VER_CONNECT_MAX=2;
+    public static int VER_FAIL=100;
 
+    int ackCode =VER_SUCCESS;
+    public VerackMessageBody(int ackCode ) {
+        this.ackCode=ackCode;
+    }
+    public VerackMessageBody() {
+
+    }
+    @Override
+    public int size() {
+        return 1;
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write((byte)ackCode);
+
+    }
+
+    @Override
+    public void parse(NulsByteBuffer buffer) throws NulsException {
+        ackCode= buffer.readByte() & 0xFF;   ;
+    }
+
+    public int getAckCode() {
+        return ackCode;
+    }
+
+    public void setAckCode(int ackCode) {
+        this.ackCode = ackCode;
+    }
 }

@@ -27,8 +27,6 @@ package io.nuls.account.storage;
 
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.base.data.Address;
-import io.nuls.tools.basic.Result;
-import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
 

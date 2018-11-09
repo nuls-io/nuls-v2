@@ -27,6 +27,10 @@
 
 package io.nuls.rpc.model;
 
+/**
+ * @author tangyi
+ */
+
 public enum ModuleStatus {
     UNKNOWN, READY, SERVICE, SHUTDOWN;
 }

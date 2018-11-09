@@ -28,7 +28,10 @@
 package io.nuls.rpc.info;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.Random;
 
@@ -40,8 +43,8 @@ import java.util.Random;
 public class HostInfo {
 
     /**
-     * 根据网卡获得IP地址
-     * 兼容Windows和Linux
+     * Get the IP address according to the network card
+     * Compatible with Windows and Linux
      *
      * @return ip
      */
@@ -53,7 +56,7 @@ public class HostInfo {
                 String name = networkInterface.getName();
                 if (!name.contains("docker") && !name.contains("lo")) {
                     for (Enumeration<InetAddress> enumIpAddress = networkInterface.getInetAddresses(); enumIpAddress.hasMoreElements(); ) {
-                        //获得IP
+                        //get IP
                         InetAddress inetAddress = enumIpAddress.nextElement();
                         if (!inetAddress.isLoopbackAddress()) {
                             String ipAddress = inetAddress.getHostAddress();
@@ -72,10 +75,11 @@ public class HostInfo {
         return ip;
     }
 
-    public static String getIpAddLocally() {
-        return "127.0.0.1";
-    }
-
+    /**
+     * Randomly get the port number
+     * Range from 10,000 to 20,000
+     * Re-random if the port already exists
+     */
     public static int randomPort() {
         int min = 10000;
         int max = 20000;
@@ -90,13 +94,10 @@ public class HostInfo {
     }
 
     /**
-     * 测试本机端口是否被使用
-     *
-     * @return boolean
+     * Test if the local port is being used
      */
     private static boolean isLocalPortUsing(int port) {
         try {
-            //建立一个Socket连接
             InetAddress address = InetAddress.getByName("127.0.0.1");
             new Socket(address, port);
             return true;
