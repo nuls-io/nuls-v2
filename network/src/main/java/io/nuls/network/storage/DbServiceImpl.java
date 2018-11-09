@@ -156,17 +156,32 @@ public class DbServiceImpl implements DbService,InitializingBean {
 
     @Override
     public void deleteNode(String nodeId) {
-
+        try {
+            RocksDBService.delete(NetworkConstant.DB_NAME_NETWORK_NODES,
+                    nodeId.getBytes(DEFAULT_ENCODING));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void deleteGroup(int chainId) {
-
+        try {
+            RocksDBService.delete(NetworkConstant.DB_NAME_NETWORK_NODEGROUPS,
+                    String.valueOf(chainId).getBytes(DEFAULT_ENCODING));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void deleteGroupNodeKeys(int chainId) {
-
+        try {
+            RocksDBService.delete(NetworkConstant.DB_NAME_NETWORK_GROUP_NODESKEYS,
+                    String.valueOf(chainId).getBytes(DEFAULT_ENCODING));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

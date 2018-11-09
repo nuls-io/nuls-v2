@@ -22,34 +22,43 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.model;
-
-import io.nuls.network.model.dto.Dto;
-import io.nuls.network.model.po.BasePo;
-import io.nuls.tools.thread.TimeService;
+package io.nuls.network.model.vo;
 
 /**
- * the bean for node peer and nodeGroup relation properties
- * @author lan
- * @date 2018/11/01
- *
- */
-public class NodeGroupConnector implements Dto{
+ * @program: nuls2
+ * @description: node vo
+ * @author: lan
+ * @create: 2018/11/09
+ **/
+public class NodeVo implements Ivo{
+    private int chainId;
+    private String nodeId;
     private long magicNumber;
-    private boolean isSeed=false;
-    private long version=0;
-    private long blockHeight=0;
-    private String blockHash="";
-    private volatile  int status=Node.WAIT;
-    private long createTime = TimeService.currentTimeMillis();
-    public NodeGroupConnector(long magicNumber){
-        this.magicNumber=magicNumber;
+    private int version;
+    private long blockHeight;
+    private String blockHash;
+    private String ip;
+    private int  port;
+    private int state;
+    private  int isOut;
+    private long time;
+
+    public int getChainId() {
+        return chainId;
     }
-    public NodeGroupConnector(long magicNumber,boolean isSeed,int status){
-        this.magicNumber=magicNumber;
-        this.isSeed=isSeed;
-        this.status=status;
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
     }
+
+    public String getNodeId() {
+        return nodeId;
+    }
+
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
+    }
+
     public long getMagicNumber() {
         return magicNumber;
     }
@@ -58,27 +67,11 @@ public class NodeGroupConnector implements Dto{
         this.magicNumber = magicNumber;
     }
 
-    public boolean isSeed() {
-        return isSeed;
-    }
-
-    public void setSeed(boolean seed) {
-        isSeed = seed;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(int status) {
-        this.status = status;
-    }
-
-    public long getVersion() {
+    public int getVersion() {
         return version;
     }
 
-    public void setVersion(long version) {
+    public void setVersion(int version) {
         this.version = version;
     }
 
@@ -98,16 +91,43 @@ public class NodeGroupConnector implements Dto{
         this.blockHash = blockHash;
     }
 
-    public long getCreateTime() {
-        return createTime;
+    public String getIp() {
+        return ip;
     }
 
-    public void setCreateTime(long createTime) {
-        this.createTime = createTime;
+    public void setIp(String ip) {
+        this.ip = ip;
     }
 
-    @Override
-    public BasePo parseToPo() {
-        return null;
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int state) {
+        this.state = state;
+    }
+
+    public int getIsOut() {
+        return isOut;
+    }
+
+    public void setIsOut(int isOut) {
+        this.isOut = isOut;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }

@@ -28,6 +28,7 @@ import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.NodeGroup;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +64,9 @@ public class NodeGroupManager extends BaseManager{
         }
         return nodeGroupMap.get(chainId);
     }
+    public  NodeGroup  getNodeGroupByChainId(int chainId){
+        return nodeGroupMap.get(chainId);
+    }
     public static Map<String,NodeGroup> getNodeGroupMap(){
         return nodeGroupMap;
     }
@@ -71,6 +75,12 @@ public class NodeGroupManager extends BaseManager{
         return nodeGroupMap.values();
     }
 
+    public List<NodeGroup> getNodeGroups(){
+        List<NodeGroup> nodeGroups=new ArrayList<>();
+        nodeGroups.addAll(nodeGroupMap.values());
+        return nodeGroups;
+
+    }
     public boolean addNodeGroup(int chainId,NodeGroup nodeGroup){
         nodeGroupMap.put(String.valueOf(chainId),nodeGroup);
         mgicNumChainIdMap.put(String.valueOf(nodeGroup.getMagicNumber()),String.valueOf(chainId));

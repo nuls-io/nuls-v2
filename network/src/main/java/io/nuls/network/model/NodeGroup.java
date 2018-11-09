@@ -50,7 +50,17 @@ public class NodeGroup  implements Dto {
     private int maxCrossOut = 0;;
     private int maxCrossIn = 0;;
 
-    private int minAvailableCount = 0;;
+    private int minAvailableCount = 0;
+    /**
+     * 最大高度peer id
+     */
+    private volatile String hightestBlockNodeId="";
+    /**
+     *   网络最大高度
+     */
+    private volatile long hightest=0;
+
+
     /**
      * 跨链网络是否激活,卫星链上的默认跨链true,
      * 友链默认false，在跨链模块请求时候这个属性才为true
@@ -63,6 +73,7 @@ public class NodeGroup  implements Dto {
     private boolean isSelf=true;
     /**
      * 是否卫星网络,只要卫星链上的节点就是true，如果是友链节点为false
+     * 节点是否是卫星节点
      */
     private boolean isMoonNet=false;
     /**
@@ -126,6 +137,45 @@ public class NodeGroup  implements Dto {
         return false;
     }
 
+    public long getHightest() {
+        return hightest;
+    }
+
+    public void setHightest(long hightest) {
+        this.hightest = hightest;
+    }
+
+    /**
+     * 删除节点
+     * @param node
+     * @param connectChange
+     */
+   public void delPeerNode(Node node,boolean connectChange){
+       if(!node.isCrossConnect()){
+           if(connectChange) {
+               if (Node.OUT == node.getType()) {
+                   hadConnectOut--;
+               } else {
+                   hadConnectIn--;
+               }
+           }
+           if(connectNodeMap.containsKey(node.getId())){
+               connectNodeMap.remove(node.getId());
+           }
+       }else{
+           if(connectChange) {
+               if (Node.OUT == node.getType()) {
+                   hadCrossConnectOut--;
+               } else {
+                   hadCrossConnectIn--;
+               }
+           }
+           if(connectCrossNodeMap.containsKey(node.getId())){
+               connectCrossNodeMap.remove(node.getId());
+           }
+       }
+
+   }
     /**
      * 如果是连接的节点变更 connectChange=true，如果不是connectChange=false
      * @param node
@@ -259,7 +309,68 @@ public class NodeGroup  implements Dto {
         isMoonNet = moonNet;
     }
 
+    public String getHightestBlockNodeId() {
+        return hightestBlockNodeId;
+    }
 
+    public void setHightestBlockNodeId(String hightestBlockNodeId) {
+        this.hightestBlockNodeId = hightestBlockNodeId;
+    }
+
+    /**
+     *
+     * 网络是否可使用 非自有网络满足跨链连接最小数
+     * @return
+     */
+    public boolean isActive(){
+        int activeConnectNum=0;
+        if(isSelf){
+            activeConnectNum=connectNodeMap.size();
+        }else{
+            activeConnectNum=connectCrossNodeMap.size();
+        }
+        if(isMoonNet){
+            if( activeConnectNum < minAvailableCount){
+                return false;
+            }
+        }
+        if(activeConnectNum > 0) {
+            return true;
+        }
+        return false;
+    }
+    /**
+     * 获取网络中最高区块连接器
+     * @return
+     */
+    public NodeGroupConnector getHightestNodeGroupInfo(){
+        Node node=connectNodeMap.get(hightestBlockNodeId);
+        if(null != node){
+            NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(magicNumber);
+            if(null != nodeGroupConnector){
+                return nodeGroupConnector;
+            }
+        }
+        //上面无法获取的最高网络信息，就只能遍历
+        long blockHeight=0;
+        NodeGroupConnector returnConnector=null;
+        String nodeId=null;
+        Collection<Node> nodes=connectNodeMap.values();
+        for(Node cNode:nodes){
+            NodeGroupConnector nodeGroupConnector=cNode.getNodeGroupConnector(magicNumber);
+            if(null != nodeGroupConnector){
+                if(nodeGroupConnector.getBlockHeight()> blockHeight){
+                    returnConnector=nodeGroupConnector;
+                    blockHeight = nodeGroupConnector.getBlockHeight();
+                    nodeId = cNode.getId();
+                }
+            }
+        }
+        if(null != nodeId){
+            hightestBlockNodeId =nodeId;
+        }
+        return returnConnector;
+    }
 
     public boolean isHadMaxOutFull() {
         return maxOut <= hadConnectOut;
