@@ -51,8 +51,6 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public void afterPropertiesSet() {
-        //读取配置文件，数据存储根目录，初始化打开该目录下包含的表连接并放入缓存
-        RocksDBService.init(AccountParam.getInstance().getDataPath());
         try {
             RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT);
         } catch (Exception e) {

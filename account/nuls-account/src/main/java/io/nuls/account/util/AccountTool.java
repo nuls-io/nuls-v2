@@ -46,13 +46,12 @@ public class AccountTool {
 
     public static final int CREATE_MAX_SIZE = 100;
 
-    public static Address newAddress(ECKey key) throws NulsException {
-        return newAddress(key.getPubKey());
+    public static Address newAddress(short chainId, ECKey key) {
+        return newAddress(chainId, key.getPubKey());
     }
 
-    public static Address newAddress(byte[] publicKey) throws NulsException {
-        return null;
-        //return new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(publicKey));
+    public static Address newAddress(short chainId, byte[] publicKey) {
+        return new Address(chainId, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(publicKey));
     }
 
     public static Account createAccount(short chainId, String prikey) throws NulsException {
@@ -82,11 +81,15 @@ public class AccountTool {
         return createAccount(chainId, null);
     }
 
-    public static Address createContractAddress() throws NulsException {
+    /**
+     * 创建智能合约地址
+     * Create smart contract address
+     * @param chainId
+     * @return
+     */
+    public static Address createContractAddress(short chainId) {
         ECKey key = new ECKey();
-        return null;
-        //TODO
-        //return new Address(NulsContext.DEFAULT_CHAIN_ID, NulsContext.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
+        return new Address(chainId, BaseConstant.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
     }
 
     //    /**
