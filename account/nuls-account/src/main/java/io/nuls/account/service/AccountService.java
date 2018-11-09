@@ -49,7 +49,23 @@ public interface AccountService {
      * @param password the password of the accounts.
      * @return the account list created.
      */
-    List<Account> createAccount(int chainId, int count, String password);
+    List<Account> createAccount(short chainId, int count, String password);
 
+    /**
+     * 根据账户地址字符串获取完整的账户信息
+     * Query account by address.
+     *
+     * @param chainId    链ID
+     * @param address the address of the account you want to query.
+     * @return the account.
+     */
+    Account getAccount(short chainId, String address);
 
+    /**
+     * 获取所有账户集合,并放入缓存
+     * Query all account collections and put them in cache.
+     *
+     * @return account list of all accounts.
+     */
+    List<Account> getAccountList();
 }

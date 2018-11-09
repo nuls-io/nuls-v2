@@ -6,9 +6,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.utils.ConsensusConstant;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -20,10 +18,10 @@ import java.util.List;
  * 2018/11/6
  * */
 @Service
-public class DepositStorageServiceImpl implements DepositStorageService, InitializingBean {
+public class DepositStorageServiceImpl implements DepositStorageService {
 
     @Override
-    public boolean save(DepositPo depositPo) {
+    public boolean save(DepositPo depositPo,int chainID) {
         if (depositPo == null || depositPo.getTxHash() == null) {
             return false;
         }
@@ -38,7 +36,7 @@ public class DepositStorageServiceImpl implements DepositStorageService, Initial
     }
 
     @Override
-    public DepositPo get(NulsDigestData hash) {
+    public DepositPo get(NulsDigestData hash,int chainID) {
         if(hash == null){
             return  null;
         }
@@ -58,7 +56,7 @@ public class DepositStorageServiceImpl implements DepositStorageService, Initial
     }
 
     @Override
-    public boolean delete(NulsDigestData hash) {
+    public boolean delete(NulsDigestData hash,int chainID) {
         if(hash == null){
             return  false;
         }
@@ -72,7 +70,7 @@ public class DepositStorageServiceImpl implements DepositStorageService, Initial
     }
 
     @Override
-    public List<DepositPo> getList() throws Exception{
+    public List<DepositPo> getList(int chainID) throws Exception{
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT);
             List<DepositPo> depositList = new ArrayList<>();
@@ -92,7 +90,7 @@ public class DepositStorageServiceImpl implements DepositStorageService, Initial
     }
 
     @Override
-    public int size() {
+    public int size(int chainID) {
         List<byte[]> keyList = RocksDBService.keyList(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT);
         if(keyList != null){
             return keyList.size();
@@ -100,7 +98,7 @@ public class DepositStorageServiceImpl implements DepositStorageService, Initial
         return 0;
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws NulsException {
         try {
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT);
@@ -108,5 +106,5 @@ public class DepositStorageServiceImpl implements DepositStorageService, Initial
             Log.error(e);
             throw new NulsException(e);
         }
-    }
+    }*/
 }

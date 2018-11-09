@@ -211,11 +211,15 @@ public class SpringLiteContext {
      * 根据对象类型字符串获取该类型实例的名称
      * Gets the name of the type instance according to the object type.
      */
-    private static Object getBeanByClass(String clazzStr) {
+    public static Object getBeanByClass(String clazzStr) {
         if(StringUtils.isBlank(clazzStr)){
             return null;
         }
-        String beanName = clazzStr.split(".")[0];
+        String[] paths = clazzStr.split("\\.");
+        if(paths.length == 0){
+            return null;
+        }
+        String beanName = paths[paths.length - 1];
         String start = beanName.substring(0, 1).toLowerCase();
         String end = beanName.substring(1);
         String lowerBeanName = start + end;

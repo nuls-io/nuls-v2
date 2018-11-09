@@ -24,6 +24,7 @@
 package io.nuls.account.model.bo;
 
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.util.AccountTool;
 import io.nuls.base.data.Address;
 import io.nuls.tools.crypto.AESEncrypt;
 import io.nuls.tools.crypto.ECKey;
@@ -42,6 +43,11 @@ import java.util.Arrays;
  */
 public class Account implements Serializable {
 
+
+    /**
+     * chain id
+     */
+    private short chainId;
 
     /**
      * 账户地址
@@ -156,10 +162,10 @@ public class Account implements Serializable {
      * Verify that the account password is correct
      */
     public boolean validatePassword(String password) {
-//        boolean result = StringUtils.validPassword(password);
-//        if (!result) {
-//            return result;
-//        }
+        boolean result = AccountTool.validPassword(password);
+        if (!result) {
+            return false;
+        }
         byte[] unencryptedPrivateKey;
         try {
             unencryptedPrivateKey = AESEncrypt.decrypt(this.getEncryptedPriKey(), password);
@@ -231,6 +237,7 @@ public class Account implements Serializable {
 
     public Object copy() {
         Account account = new Account();
+        account.setChainId(chainId);
         account.setAlias(alias);
         account.setAddress(address);
         account.setStatus(status);
@@ -244,6 +251,13 @@ public class Account implements Serializable {
         return account;
     }
 
+    public short getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(short chainId) {
+        this.chainId = chainId;
+    }
 
     public Address getAddress() {
         return address;
@@ -306,9 +320,9 @@ public class Account implements Serializable {
     }
 
     public byte[] getPriKey(String password) throws NulsException {
-//        if (!StringUtils.validPassword(password)) {
-//            throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
-//        }
+        if (!AccountTool.validPassword(password)) {
+            throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
         byte[] unencryptedPrivateKey;
         try {
             unencryptedPrivateKey = AESEncrypt.decrypt(this.getEncryptedPriKey(), password);

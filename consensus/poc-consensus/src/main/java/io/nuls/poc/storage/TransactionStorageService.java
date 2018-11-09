@@ -14,20 +14,20 @@ public interface TransactionStorageService {
      * 保存交易
      * @param tx 交易对象
      * */
-    boolean save(Transaction tx);
+    boolean save(Transaction tx,int chainID);
 
     /**
      * 查询交易
      * @param hash 交易hash
      * @return 交易对象
      * */
-    Transaction get(NulsDigestData hash);
+    Transaction get(NulsDigestData hash,int chainID);
 
     /**
      * 删除交易
      * @param hash 交易hash
      * */
-    boolean delete(NulsDigestData hash);
+    boolean delete(NulsDigestData hash,int chainID);
 
     /**
      * 获取轮询数据库时在下标

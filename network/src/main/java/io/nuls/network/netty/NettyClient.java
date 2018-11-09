@@ -34,8 +34,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
-import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.NodeManager;
 import io.nuls.network.manager.handler.ClientChannelHandler;
 import io.nuls.network.model.Node;
 import io.nuls.tools.log.Log;
@@ -94,7 +92,6 @@ public class NettyClient {
                         socketChannel = (SocketChannel) future.channel();
                     } else {
                         Log.error("Client connect to host error: " + future.cause() + ", remove node: " + node.getId());
-//                        System.out.println("Client connect fail: " + future.cause() + ", remove node: " + node.getId());
                         node.setLastFailTime(TimeService.currentTimeMillis());
                         node.setFailCount(node.getFailCount()+1);
                         if(node.getChannel()!=null && node.getChannel().isActive()){

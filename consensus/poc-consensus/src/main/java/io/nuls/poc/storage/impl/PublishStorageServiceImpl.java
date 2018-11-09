@@ -5,9 +5,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.PublishStorageService;
 import io.nuls.poc.utils.ConsensusConstant;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -19,9 +17,9 @@ import java.util.List;
  * 2018/11/6
  * */
 @Service
-public class PublishStorageServiceImpl implements PublishStorageService, InitializingBean {
+public class PublishStorageServiceImpl implements PublishStorageService{
     @Override
-    public boolean save(PunishLogPo po) {
+    public boolean save(PunishLogPo po,int chainID) {
         if (po == null || po.getKey() == null) {
             return false;
         }
@@ -34,7 +32,7 @@ public class PublishStorageServiceImpl implements PublishStorageService, Initial
     }
 
     @Override
-    public boolean delete(byte[] key) {
+    public boolean delete(byte[] key,int chainID) {
         if(key == null){
             return false;
         }
@@ -48,7 +46,7 @@ public class PublishStorageServiceImpl implements PublishStorageService, Initial
     }
 
     @Override
-    public List<PunishLogPo> getPunishList()throws Exception{
+    public List<PunishLogPo> getPunishList(int chainID)throws Exception{
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH);
             List<PunishLogPo> agentList = new ArrayList<>();
@@ -64,7 +62,7 @@ public class PublishStorageServiceImpl implements PublishStorageService, Initial
         }
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws NulsException {
         try {
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH);
@@ -72,5 +70,5 @@ public class PublishStorageServiceImpl implements PublishStorageService, Initial
             Log.error(e);
             throw new NulsException(e);
         }
-    }
+    }*/
 }

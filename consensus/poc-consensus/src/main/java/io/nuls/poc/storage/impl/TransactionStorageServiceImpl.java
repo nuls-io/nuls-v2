@@ -7,9 +7,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.storage.TransactionStorageService;
 import io.nuls.poc.utils.ConsensusConstant;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 /**
@@ -18,9 +16,9 @@ import io.nuls.tools.log.Log;
  * 2018/11/6
  * */
 @Service
-public class TransactionStorageServiceImpl implements TransactionStorageService, InitializingBean {
+public class TransactionStorageServiceImpl implements TransactionStorageService {
     @Override
-    public boolean save(Transaction tx) {
+    public boolean save(Transaction tx,int chainID) {
         if(tx == null || tx.getHash() == null){
             return false;
         }
@@ -35,7 +33,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
     }
 
     @Override
-    public Transaction get(NulsDigestData hash) {
+    public Transaction get(NulsDigestData hash,int chainID) {
         if(hash == null){
             return  null;
         }
@@ -53,7 +51,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
     }
 
     @Override
-    public boolean delete(NulsDigestData hash) {
+    public boolean delete(NulsDigestData hash,int chainID) {
         if(hash == null){
             return  false;
         }
@@ -66,7 +64,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
         }
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws NulsException {
         try {
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSUME_TX);
@@ -74,5 +72,5 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
             Log.error(e);
             throw new NulsException(e);
         }
-    }
+    }*/
 }

@@ -25,6 +25,8 @@
  */
 package io.nuls.network.model;
 
+import io.nuls.network.model.po.NodeGroupPo;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,17 +38,17 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class NodeGroup {
-    private long magicNumber;
-    private int chainId;
-    private int maxOut;
-    private int maxIn;
+    private long magicNumber = 0;
+    private int chainId = 0;;
+    private int maxOut = 0;;
+    private int maxIn = 0;;
     /**
      * 友链跨链最大连接数
      */
-    private int maxCrossOut;
-    private int maxCrossIn;
+    private int maxCrossOut = 0;;
+    private int maxCrossIn = 0;;
 
-    private int minAvailableCount;
+    private int minAvailableCount = 0;;
     /**
      * 跨链网络是否激活,卫星链上的默认跨链true,
      * 友链默认false，在跨链模块请求时候这个属性才为true
@@ -104,6 +106,9 @@ public class NodeGroup {
         this.minAvailableCount=minAvailableCount;
         this.isMoonNet=isMoonNet;
         this.status=WAIT;
+        if(isMoonNet){
+            isCrossActive=true;
+        }
     }
 
     /**
@@ -310,6 +315,38 @@ public class NodeGroup {
         return maxCrossOut;
     }
 
+    public int getHadConnectOut() {
+        return hadConnectOut;
+    }
+
+    public void setHadConnectOut(int hadConnectOut) {
+        this.hadConnectOut = hadConnectOut;
+    }
+
+    public int getHadConnectIn() {
+        return hadConnectIn;
+    }
+
+    public void setHadConnectIn(int hadConnectIn) {
+        this.hadConnectIn = hadConnectIn;
+    }
+
+    public int getHadCrossConnectOut() {
+        return hadCrossConnectOut;
+    }
+
+    public void setHadCrossConnectOut(int hadCrossConnectOut) {
+        this.hadCrossConnectOut = hadCrossConnectOut;
+    }
+
+    public int getHadCrossConnectIn() {
+        return hadCrossConnectIn;
+    }
+
+    public void setHadCrossConnectIn(int hadCrossConnectIn) {
+        this.hadCrossConnectIn = hadCrossConnectIn;
+    }
+
     public void setMaxCrossOut(int maxCrossOut) {
         this.maxCrossOut = maxCrossOut;
     }
@@ -328,5 +365,20 @@ public class NodeGroup {
 
     public void setSelf(boolean self) {
         isSelf = self;
+    }
+
+    public NodeGroupPo parseToPo(){
+        NodeGroupPo po=new NodeGroupPo();
+        po.setChainId(chainId);
+        po.setCrossActive(isCrossActive);
+        po.setMagicNumber(magicNumber);
+        po.setMaxCrossIn(maxCrossIn);
+        po.setMaxCrossOut(maxCrossOut);
+        po.setMaxIn(maxIn);
+        po.setMaxOut(maxOut);
+        po.setMinAvailableCount(minAvailableCount);
+        po.setMoonNet(isMoonNet);
+        po.setSelf(isSelf);
+        return po;
     }
 }

@@ -22,44 +22,16 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.storage;
+package io.nuls.network.model.po;
 
-import io.nuls.network.model.Node;
-import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.po.NodeGroupPo;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.base.data.BaseNulsData;
 
-import java.util.List;
 /**
- * DbService
- * @author lan
- * @date 2018/11/01
- *
- */
-public interface  DbService {
-    /**
-     * get nodeGroups
-     * @return
-     */
-    List<NodeGroup> getAllNodeGroups();
-
-    /**
-     * get Nodes
-     * @param chainId
-     * @return
-     */
-    List<Node> getNodesByChainId(int chainId);
-
-    /**
-     * save node groups
-     * @param nodeGroups
-     */
-    public void saveNodeGroups(List<NodeGroup> nodeGroups);
-
-    public NodeGroupPo getNodeGroupByChainId(int chainId) throws NulsException;
-
-    public void saveNodesByChainId(List<Node> nodes,int chainId);
-
-    public void saveAllNodesByNodeId(List<Node> nodes,int chainId);
+ * @program: nuls2
+ * @description: base po
+ * @author: lan
+ * @create: 2018/11/07
+ **/
+public abstract class BasePo extends BaseNulsData {
 
 }
