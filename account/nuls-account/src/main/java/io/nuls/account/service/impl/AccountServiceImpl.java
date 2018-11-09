@@ -96,6 +96,9 @@ public class AccountServiceImpl implements AccountService {
                 for (Account account : accounts) {
                     accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
                 }
+
+                //TODO
+                //发送创建账户成功事件
             }
         } catch (Exception e) {
             Log.error(e);
