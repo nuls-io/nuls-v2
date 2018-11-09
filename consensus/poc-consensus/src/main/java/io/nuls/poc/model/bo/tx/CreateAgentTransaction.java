@@ -29,7 +29,7 @@ package io.nuls.poc.model.bo.tx;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
-import io.nuls.poc.utils.ConsensusConstant;
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 

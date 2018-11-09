@@ -133,7 +133,7 @@ public class PocConsensusResource extends BaseCmd{
     /**
      * 退出共识交易提交
      * */
-    @CmdAnnotation(cmd = "cs_depositCommit", version = 1.0, preCompatible = true)
+    @CmdAnnotation(cmd = "cs_withdrawCommit", version = 1.0, preCompatible = true)
     public CmdResponse withdrawCommit(List<Object> params){
         return null;
     }
