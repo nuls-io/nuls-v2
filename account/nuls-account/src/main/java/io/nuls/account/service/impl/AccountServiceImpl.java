@@ -77,7 +77,6 @@ public class AccountServiceImpl implements AccountService {
         locker.lock();
         List<Account> accounts = new ArrayList<>();
         try {
-
             List<AccountPo> accountPos = new ArrayList<>();
             for (int i = 0; i < count; i++) {
                 //create account
@@ -96,7 +95,6 @@ public class AccountServiceImpl implements AccountService {
                 for (Account account : accounts) {
                     accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
                 }
-
                 //TODO
                 //发送创建账户成功事件
             }
