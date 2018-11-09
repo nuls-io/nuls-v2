@@ -4,14 +4,13 @@ import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.config.ConfigItem;
-import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.poc.storage.ConfigeService;
 import io.nuls.poc.storage.LanguageService;
 import io.nuls.poc.utils.ConsensusConstant;
+import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
@@ -55,7 +54,7 @@ public class BootStrap {
             /*Properties properties = ConfigLoader.loadProperties("db_config.properties");
             String path = properties.getProperty("rocksdb.datapath", "./data");
             System.out.println(path);*/
-            ConfigBean bean = new ConfigBean();
+            /*ConfigBean bean = new ConfigBean();
             bean.setStopAgent_lockTime(10000);
             bean.setRedPublish_lockTime(2000);
             bean.setPacking_interval(10000);
@@ -63,7 +62,17 @@ public class BootStrap {
             byte[] beanByte = ObjectUtils.objectToBytes(bean);
             ConfigBean bean1 = ObjectUtils.bytesToObject(beanByte);
             System.out.println(bean1.getCommission_max());
-            System.out.println(bean1.getStopAgent_lockTime());
+            System.out.println(bean1.getStopAgent_lockTime());*/
+
+            /*initDB();
+            SpringLiteContext.init("io.nuls.poc");
+            String str = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
+            List<ConfigItem> configItemList = JSONUtils.json2list(str,ConfigItem.class);
+            ConfigManager.initManager(configItemList,111);
+            ConfigBean bean = ConfigManager.config_map.get(111);
+            System.out.println(bean.getPacking_interval());
+            System.out.println(bean.getCommissionRate_min());*/
+            init(Integer.parseInt(args[0]));
         }catch (Exception e){
             Log.error("consensus startup error！");
             Log.error(e);
@@ -82,7 +91,7 @@ public class BootStrap {
             //初始化国际资源文件语言
             initLanguage();
             //加载本地配置参数,并本地服务
-
+            sysStart(chain_id);
             //启动WebSocket服务,向外提供RPC接口
             initServer();
         }catch (Exception e){

@@ -3,9 +3,9 @@ package io.nuls.poc.utils.manager;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.config.ConfigItem;
 import io.nuls.poc.storage.ConfigeService;
-import io.nuls.poc.utils.ConsensusConstant;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,56 +28,14 @@ public class ConfigManager {
 
     public static void initManager(List<ConfigItem> items, int chain_id) throws Exception{
         ConfigBean bean = new ConfigBean();
+        Class beanClass = bean.getClass();
+        Field field = null;
+        //通过反射设置bean属性值
         for (ConfigItem item : items) {
             param_modify.put(item.getKey(),item.isReadOnly());
-            if(item.getKey().equals(ConsensusConstant.PARAM_BLOCK_SIZE)){
-                bean.setBlock_size((Integer) item.getValue());
-                continue;
-            }
-            if(item.getKey().equals(ConsensusConstant.PARAM_COINBASE_UNLOCK_HEIGHT)){
-                bean.setCoinbase_unlock_height((Integer) item.getValue());
-                continue;
-            }
-            if(item.getKey().equals(ConsensusConstant.PARAM_COMMISSION_MAX)){
-                bean.setCommission_max((Long) item.getValue());
-                continue;
-            }
-            if(item.getKey().equals(ConsensusConstant.PARAM_COMMISSION_MIN)){
-                bean.setCommission_min((Long) item.getValue());
-                continue;
-            }
-            if(item.getKey().equals(ConsensusConstant.PARAM_COMMISSION_RATE_MAX)){
-                bean.setCommissionRate_max((Double) item.getValue());
-                continue;
-            }
-            if(item.getKey().equals(ConsensusConstant.PARAM_COMMISSION_RATE_MIN)){
-                bean.setCommissionRate_min((Double) item.getValue());
-                continue;
-            }
-            if(item.getKey().equals(ConsensusConstant.PARAM_DEPOSIT_MAX)){
-                bean.setDeposit_max((Long) item.getValue());
-                continue;
-            }
-            if(item.getKey().equals(ConsensusConstant.PARAM_DEPOSIT_MIN)){
-                bean.setDeposit_min((Long) item.getValue());
-                continue;
-            }
-            if(item.getKey().equals(ConsensusConstant.PARAM_PACKING_AMOUNT)){
-                bean.setPacking_amount((Long) item.getValue());
-                continue;
-            }
-            if(item.getKey().equals(ConsensusConstant.PARAM_PACKING_INTERVAL)){
-                bean.setPacking_interval((Long) item.getValue());
-                continue;
-            }
-            if(item.getKey().equals(ConsensusConstant.PARAM_RED_PUBLISH_LOCKTIME)){
-                bean.setRedPublish_lockTime((Long) item.getValue());
-                continue;
-            }
-            if(item.getKey().equals(ConsensusConstant.PARAM_STOP_AGENT_LOCKTIME)){
-                bean.setStopAgent_lockTime((Long) item.getValue());
-                continue;
-            }
+            field = beanClass.getDeclaredField(item.getKey());
+            field.setAccessible(true);
+            field.set(bean,item.getValue());
         }
         config_map.put(chain_id,bean);
         //保存配置信息到数据库

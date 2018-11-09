@@ -1,14 +1,17 @@
 [
   {
-    "value":"item0",
+    "key":"packing_interval",
+    "value":10000,
     "readOnly":true
   },
   {
-    "value":"item1",
+    "key":"block_size",
+    "value":10,
     "readOnly":true
   },
   {
-    "value":"item2",
+    "key":"packing_amount",
+    "value":10000,
     "readOnly":true
   }
 ]
