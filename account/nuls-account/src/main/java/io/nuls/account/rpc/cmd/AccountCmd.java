@@ -53,6 +53,7 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_createAccount", version = 1.0, preCompatible = true)
     public CmdResponse createAccount(List params) {
         Log.debug("createAccount start");
+        Map<String, List<String>> map = new HashMap<>();
         List<String> list = new ArrayList<>();
         try {
             // check parameters
@@ -69,15 +70,16 @@ public class AccountCmd extends BaseCmd {
             String password = params.get(2) != null ? (String) params.get(2) : null;
             //创建账户
             List<Account> accountList = accountService.createAccount(chainId, count, password);
-            for (Account account : accountList) {
-                list.add(account.getAddress().toString());
+            if (accountList != null) {
+                for (Account account : accountList) {
+                    list.add(account.getAddress().toString());
+                }
+                map.put("list", list);
             }
-            Map<String, List<String>> map = new HashMap<>();
-            map.put("list", list);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode(), AccountConstant.RPC_VERSION, null);
         }
-        return success(AccountConstant.RPC_VERSION, AccountConstant.SUCCESS_MSG, list);
+        return success(AccountConstant.RPC_VERSION, AccountConstant.SUCCESS_MSG, map);
     }
 
     /**
