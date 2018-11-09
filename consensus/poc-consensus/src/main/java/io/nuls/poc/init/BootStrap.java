@@ -2,13 +2,13 @@ package io.nuls.poc.init;
 
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.config.ConfigItem;
 import io.nuls.poc.storage.ConfigeService;
 import io.nuls.poc.storage.LanguageService;
-import io.nuls.poc.utils.ConsensusConstant;
 import io.nuls.poc.utils.manager.ConfigManager;
-import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.poc.utils.manager.SchedulerManager;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.io.IoUtils;
@@ -16,6 +16,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.thread.TimeService;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -24,7 +25,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-
 /**
  * 共识模块启动及初始化管理
  * @author tag
@@ -33,51 +33,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class BootStrap {
     public static void main(String[] args){
         try {
-            /*SpringLiteContext.init("io.nuls.poc");
-            initServer();
-            TimeService.getInstance().run();*/
-            /*String configJson = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
-            System.out.println(configJson);
-            Map<String,Object> map = JSONUtils.json2map(configJson);
-            System.out.println(map);*/
-            /*List<ConfigItem> configItemList = new ArrayList<>();
-            for(int i=0;i<10;i++){
-                ConfigItem item = new ConfigItem("item"+i,true);
-                configItemList.add(item);
-            }
-            String str = JSONUtils.obj2json(configItemList);
-            System.out.println(JSONUtils.obj2json(configItemList));*/
-            /*String str = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
-            List<ConfigItem> configItemList = JSONUtils.json2list(str,ConfigItem.class);
-            System.out.println(configItemList.get(0).getValue());
-            System.out.println(configItemList);*/
-            /*Properties properties = ConfigLoader.loadProperties("db_config.properties");
-            String path = properties.getProperty("rocksdb.datapath", "./data");
-            System.out.println(path);*/
-            /*ConfigBean bean = new ConfigBean();
-            bean.setStopAgent_lockTime(10000);
-            bean.setRedPublish_lockTime(2000);
-            bean.setPacking_interval(10000);
-            bean.setPacking_amount(5555);
-            byte[] beanByte = ObjectUtils.objectToBytes(bean);
-            ConfigBean bean1 = ObjectUtils.bytesToObject(beanByte);
-            System.out.println(bean1.getCommission_max());
-            System.out.println(bean1.getStopAgent_lockTime());*/
-
-            /*initDB();
-            SpringLiteContext.init("io.nuls.poc");
-            String str = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
-            List<ConfigItem> configItemList = JSONUtils.json2list(str,ConfigItem.class);
-            ConfigManager.initManager(configItemList,111);
-            ConfigBean bean = ConfigManager.config_map.get(111);
-            System.out.println(bean.getPacking_interval());
-            System.out.println(bean.getCommissionRate_min());*/
-            init(Integer.parseInt(args[0]));
+            init(1);
+            TimeService.getInstance().start();
         }catch (Exception e){
             Log.error("consensus startup error！");
             Log.error(e);
         }
-        System.out.println("end");
     }
 
     public static void init(int chain_id){
@@ -87,11 +48,11 @@ public class BootStrap {
             //初始化数据库配置文件
             initDB();
             //初始化上下文
-            SpringLiteContext.init("io.nuls.poc");
+            SpringLiteContext.init(ConsensusConstant.CONTEXT_PATH);
             //初始化国际资源文件语言
             initLanguage();
-            //加载本地配置参数,并本地服务
-            sysStart(chain_id);
+            //加载本地配置参数,并启动本地服务
+            //sysStart(chain_id);
             //启动WebSocket服务,向外提供RPC接口
             initServer();
         }catch (Exception e){
@@ -100,12 +61,12 @@ public class BootStrap {
     }
 
     /**
-     * 初始化系统参数
+     * 初始化系统编码
      * */
     public static void initSys(){
         try {
-            System.setProperty("protostuff.runtime.allow_null_array_element", "true");
-            System.setProperty("file.encoding", UTF_8.name());
+            System.setProperty(ConsensusConstant.SYS_ALLOW_NULL_ARRAY_ELEMENT, "true");
+            System.setProperty(ConsensusConstant.SYS_FILE_ENCODING, UTF_8.name());
             Field charset = Charset.class.getDeclaredField("defaultCharset");
             charset.setAccessible(true);
             charset.set(null, UTF_8);
@@ -150,7 +111,7 @@ public class BootStrap {
                 //初始化链相关表
                 initTabel(chain_id);
                 //启动内部服务
-
+                SchedulerManager.createChainScheduler(chain_id,ConfigManager.config_map.get(chain_id));
             }else{
                 //初始化配置管理类
                 ConfigManager.config_map.putAll(configMap);
@@ -159,7 +120,7 @@ public class BootStrap {
                     initTabel(id);
                 }
                 //启动内部服务,先启动主链，在启动子链
-
+                SchedulerManager.createChainSchefuler(ConfigManager.config_map);
             }
         }catch (Exception e){
             Log.error(e);
@@ -171,12 +132,12 @@ public class BootStrap {
      * */
     public static void initServer(){
         try {
-            WsServer s = new WsServer(8888);
-            s.init("consensus", null, "io.nuls.poc.rpc");
-            s.start();
-            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+            WsServer s = new WsServer(ConsensusConstant.CONSENSUS_RPC_PORT);
+            s.init(ConsensusConstant.CONSENSUS_MODULE_NAME, null, ConsensusConstant.CONSENSUS_RPC_PATH);
+            s.startAndSyncKernel(ConsensusConstant.KERNEL_URL);
         }catch (Exception e){
             Log.error("Consensus startup webSocket server error!");
+            e.printStackTrace();
         }
     }
 
@@ -185,8 +146,8 @@ public class BootStrap {
      * */
     public static void initDB(){
         try {
-            Properties properties = ConfigLoader.loadProperties("db_config.properties");
-            String path = properties.getProperty("rocksdb.datapath", "./data");
+            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.DB_CONFIG_NAME);
+            String path = properties.getProperty(ConsensusConstant.DB_DATA_PATH, ConsensusConstant.DB_DATA_DEFAULT_PATH);
             RocksDBService.init(path);
         }catch (Exception e){
             Log.error(e);

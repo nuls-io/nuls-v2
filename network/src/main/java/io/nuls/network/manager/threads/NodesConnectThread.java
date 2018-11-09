@@ -54,8 +54,10 @@ public class NodesConnectThread implements Runnable  {
             if (node.isEliminate()) {
                 eliminateNodes.add(node.getId());
             } else {
-                //TODO:判断peer是否在In里已经存在
-
+                //判断peer是否已经存在
+                if(ConnectionManager.getInstance().isPeerConnectExist(node.getIp(),Node.OUT)){
+                    continue;
+                }
                 if(node.isCanConnect()) {
                     node.addGroupConnector(magicNumber);
                     connectionManager.connectionNode(node);

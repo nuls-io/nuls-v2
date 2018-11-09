@@ -22,40 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.poc.model.bo.tx;
+package io.nuls.network.model.vo;
 
-
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Transaction;
-import io.nuls.poc.model.bo.tx.txdata.YellowPunishData;
-import io.nuls.poc.constant.ConsensusConstant;
-import io.nuls.tools.exception.NulsException;
-
-/**
- * @author tag
- */
-public class YellowPunishTransaction extends Transaction<YellowPunishData> {
-    public YellowPunishTransaction() {
-        super(ConsensusConstant.TX_TYPE_YELLOW_PUNISH);
-    }
-
-    @Override
-    protected YellowPunishData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new YellowPunishData());
-    }
-
-    @Override
-    public String getInfo(byte[] address) {
-        return "--";
-    }
-
-    @Override
-    public boolean isSystemTx() {
-        return true;
-    }
-
-    @Override
-    public boolean needVerifySignature() {
-        return false;
-    }
+public interface Ivo {
 }

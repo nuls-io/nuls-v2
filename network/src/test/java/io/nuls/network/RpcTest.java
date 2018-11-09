@@ -22,40 +22,19 @@
  * SOFTWARE.
  *
  */
-package io.nuls.poc.model.bo.tx;
+package io.nuls.network;
 
-
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Transaction;
-import io.nuls.poc.model.bo.tx.txdata.YellowPunishData;
-import io.nuls.poc.constant.ConsensusConstant;
-import io.nuls.tools.exception.NulsException;
+import org.junit.Test;
 
 /**
- * @author tag
- */
-public class YellowPunishTransaction extends Transaction<YellowPunishData> {
-    public YellowPunishTransaction() {
-        super(ConsensusConstant.TX_TYPE_YELLOW_PUNISH);
-    }
+ * @program: nuls2.0
+ * @description: rpc test
+ * @author: lan
+ * @create: 2018/11/09
+ **/
+public class RpcTest {
+    @Test
+    public void getCrossSeeds(){
 
-    @Override
-    protected YellowPunishData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new YellowPunishData());
-    }
-
-    @Override
-    public String getInfo(byte[] address) {
-        return "--";
-    }
-
-    @Override
-    public boolean isSystemTx() {
-        return true;
-    }
-
-    @Override
-    public boolean needVerifySignature() {
-        return false;
     }
 }
