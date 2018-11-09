@@ -30,6 +30,7 @@ import io.nuls.tools.crypto.AESEncrypt;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.EncryptedData;
 import io.nuls.tools.crypto.Sha256Hash;
+import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.CryptoException;
 import io.nuls.tools.exception.NulsException;
 import org.spongycastle.crypto.params.KeyParameter;
@@ -39,7 +40,7 @@ import java.math.BigInteger;
 import java.util.Arrays;
 
 /**
- * @author: Charlie
+ * @author: qinyifeng
  */
 public class Account implements Serializable {
 
@@ -74,7 +75,7 @@ public class Account implements Serializable {
     private byte[] pubKey;
 
     /**
-     *
+     * 扩展字段
      */
 
     private byte[] extend;
@@ -359,7 +360,7 @@ public class Account implements Serializable {
         //判断当前账户是否存在私钥，如果不存在私钥这为锁定账户
         BigInteger newPriv = null;
         if (this.isLocked()) {
-            //AssertUtil.canNotEmpty(password, "the password can not be empty");
+            ObjectUtils.canNotEmpty(password, "the password can not be empty");
             if (!validatePassword(password)) {
                 throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
             }
