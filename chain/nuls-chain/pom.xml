@@ -45,7 +45,7 @@
     </build>
 
     <groupId>io.nuls.chain</groupId>
-    <artifactId>chain</artifactId>
+    <artifactId>nuls-chain</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 
     <properties>

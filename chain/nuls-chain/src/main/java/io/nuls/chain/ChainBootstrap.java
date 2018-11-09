@@ -3,6 +3,7 @@ package io.nuls.chain;
 import io.nuls.chain.config.NulsConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
@@ -22,6 +23,9 @@ public class ChainBootstrap {
             Log.info("Account Bootstrap start...");
 
             initCfg();
+
+            //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
+            RocksDBService.init(CmConstants.DB_DATA_PATH);
 
             SpringLiteContext.init("io.nuls.chain", new ModularServiceMethodInterceptor());
 
