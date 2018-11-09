@@ -3,6 +3,8 @@ package io.nuls.account.init;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountParam;
+import io.nuls.account.constant.AccountStorageConstant;
+import io.nuls.account.service.AccountService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
@@ -25,14 +27,17 @@ public class AccountBootstrap {
         try {
             //初始化配置
             initCfg();
-            //启动账户模块服务
-            initServer();
             //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
             RocksDBService.init(AccountParam.getInstance().getDataPath());
             //springLite容器初始化
             SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
             //启动时间同步线程
             TimeService.getInstance().start();
+            //初始化本地账户到缓存
+            AccountService accountService = SpringLiteContext.getBean(AccountService.class);
+            accountService.getAccountList();
+            //启动账户模块服务
+            initServer();
         } catch (Exception e) {
             Log.error("Account Bootstrap failed", e);
             System.exit(-1);
