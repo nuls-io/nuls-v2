@@ -28,6 +28,7 @@ package io.nuls.base.basic;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
 import io.nuls.tools.crypto.Base58;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
@@ -40,11 +41,6 @@ import io.nuls.tools.parse.SerializeUtils;
  * @author: Niels Wang
  */
 public class AddressTool {
-
-    /**
-     * 生成地址字符串用于拼接hash160与chainId
-     */
-    public static String ADDRESS_SPLIT = "-";
 
     /**
      * 根据地址字符串查询地址字节数组
@@ -227,6 +223,7 @@ public class AddressTool {
 
     /**
      * 根据地址字节数组生成地址字符串
+     * base58(addressType+hash160(pubKey)+XOR(addressType+hash160(pubKey)))+Hex(chianId)
      *
      * @param addressBytes
      * @return
@@ -245,9 +242,34 @@ public class AddressTool {
         System.arraycopy(addressBytes, 3, body, 1, 20);
 
         byte[] bytes = ByteUtils.concatenate(body, new byte[]{getXor(body)});
-        return Base58.encode(bytes) + AddressTool.ADDRESS_SPLIT + Base58.encode(chianIdByte);
+        return Base58.encode(bytes) + HexUtil.encode(chianIdByte);
     }
 
+    /**
+     * 根据地址字符串解码出地址原始字节数组
+     * base58(addressType+hash160(pubKey)+XOR(addressType+hash160(pubKey)))+Hex(chianId)
+     * @param addressString
+     * @return
+     */
+    private static byte[] getAddressBytes(String addressString) {
+        byte[] result = new byte[Address.ADDRESS_LENGTH + 1];
+        byte[] chainIdBytes;
+        byte[] hash160Bytes;
+        try {
+            int length = addressString.length();
+            String hash160 = addressString.substring(0, length - 4);
+            String chainIdHex = addressString.substring(length - 4, length);
+            chainIdBytes = HexUtil.decode(chainIdHex);
+            hash160Bytes = Base58.decode(hash160);
+
+            System.arraycopy(chainIdBytes, 0, result, 0, 2);
+            System.arraycopy(hash160Bytes, 0, result, 2, 22);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+        return result;
+    }
 
     public static boolean checkPublicKeyHash(byte[] address, byte[] pubKeyHash) {
 
@@ -313,28 +335,4 @@ public class AddressTool {
         return true;
     }
 
-    /**
-     * 根据地址字符串解码出地址原始字节数组
-     *
-     * @param addressString
-     * @return
-     */
-    private static byte[] getAddressBytes(String addressString) {
-        byte[] result = new byte[Address.ADDRESS_LENGTH + 1];
-        byte[] chainIdBytes;
-        byte[] hash160Bytes;
-        try {
-
-            String[] addressArr = addressString.split(AddressTool.ADDRESS_SPLIT);
-            chainIdBytes = Base58.decode(addressArr[1]);
-            hash160Bytes = Base58.decode(addressArr[0]);
-
-            System.arraycopy(chainIdBytes, 0, result, 0, 2);
-            System.arraycopy(hash160Bytes, 0, result, 2, 22);
-        } catch (Exception e) {
-            Log.error(e);
-            throw new NulsRuntimeException(e);
-        }
-        return result;
-    }
 }
