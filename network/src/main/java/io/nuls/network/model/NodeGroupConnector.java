@@ -26,6 +26,7 @@ package io.nuls.network.model;
 
 import io.nuls.network.model.dto.Dto;
 import io.nuls.network.model.po.BasePo;
+import io.nuls.tools.thread.TimeService;
 
 /**
  * the bean for node peer and nodeGroup relation properties
@@ -40,8 +41,7 @@ public class NodeGroupConnector implements Dto{
     private long blockHeight=0;
     private String blockHash="";
     private volatile  int status=Node.WAIT;
-
-
+    private long createTime = TimeService.currentTimeMillis();
     public NodeGroupConnector(long magicNumber){
         this.magicNumber=magicNumber;
     }
@@ -96,6 +96,14 @@ public class NodeGroupConnector implements Dto{
 
     public void setBlockHash(String blockHash) {
         this.blockHash = blockHash;
+    }
+
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
     }
 
     @Override

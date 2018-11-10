@@ -234,11 +234,23 @@ public class Node extends BaseNulsData  implements Dto {
         isCrossConnect = crossConnect;
     }
 
+    /**
+     * 设置peer信息
+     * @param magicNumber
+     * @param version
+     * @param blockHeight
+     * @param blockHash
+     */
     public void setVersionProtocolInfos(long magicNumber,long version,long blockHeight,String blockHash){
         NodeGroupConnector nodeGroupConnector=nodeGroupConnectors.get(String.valueOf(magicNumber));
         nodeGroupConnector.setBlockHeight(blockHeight);
         nodeGroupConnector.setVersion(version);
         nodeGroupConnector.setBlockHash(blockHash);
+        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
+        if(blockHeight > nodeGroup.getHightest()){
+            nodeGroup.setHightestBlockNodeId(this.getId());
+            nodeGroup.setHightest(blockHeight);
+        }
     }
 
     /**

@@ -1,7 +1,6 @@
 package io.nuls.chain.cmd;
 
-import io.nuls.chain.model.AddressType;
-import io.nuls.chain.model.Chain;
+import io.nuls.base.data.chain.Chain;
 import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -43,10 +42,10 @@ public class ChainCmd extends BaseCmd {
         try {
 
             Chain chain = new Chain();
-            chain.setChainId((Integer) params.get(0));
+            chain.setChainId((Short) params.get(0));
             chain.setName((String) params.get(1));
             chain.setMagicNumber((Integer) params.get(2));
-            chain.setAddressType(Enum.valueOf(AddressType.class, (String) params.get(3)));
+            chain.setAddressType((String) params.get(3));
 
             System.out.println(chainService.chainRegister(chain));
 

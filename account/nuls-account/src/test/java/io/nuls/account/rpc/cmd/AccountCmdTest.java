@@ -1,21 +1,17 @@
 package io.nuls.account.rpc.cmd;
 
-import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.dto.AccountOfflineDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
-import io.nuls.account.model.po.AccountPo;
-import io.nuls.account.util.AccountTool;
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.model.CmdResponse;
-import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author: qinyifeng
@@ -28,8 +24,8 @@ public class AccountCmdTest {
     protected String password = "a12345678";
     protected double version = 1.0;
 
-    @Test
-    public void start() throws Exception {
+    @BeforeClass
+    public static void start() throws Exception {
         CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
     }
 
@@ -51,7 +47,20 @@ public class AccountCmdTest {
         }
     }
 
-    //@Ignore
+    @Ignore
+    @Test
+    public void createOfflineAccountTest() throws Exception {
+        int count = 10;
+        String response = CmdDispatcher.call("ac_createOfflineAccount", new Object[]{chainId, count, password}, version);
+        CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+        List<AccountOfflineDto> accoutList = JSONUtils.json2list(JSONUtils.obj2json(JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResult())).get("list")), AccountOfflineDto.class);
+        assertEquals(accoutList.size(), count);
+        for (AccountOfflineDto account : accoutList) {
+            System.out.println(account.getAddress());
+        }
+    }
+
+    @Ignore
     @Test
     public void getAccountByAddressTest() throws Exception {
         List<String> accoutList = createAccount(chainId, 1, password);

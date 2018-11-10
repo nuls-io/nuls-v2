@@ -73,7 +73,7 @@ public class ConnectionManager {
 
 
     public void removeCacheConnectNodeMap(String nodeKey,int nodeType){
-        //TODO:要加同步锁
+        //要加同步锁
         Node node=null;
         String ip=nodeKey.split(":")[0];
         if(Node.OUT == nodeType) {
@@ -154,10 +154,10 @@ public class ConnectionManager {
     public boolean isPeerConnectExceedMaxIn(String peerIp,int maxInSameIp){
         if(null != cacheConnectIpInMap.get(peerIp)) {
             NetworkParam networkParam=NetworkParam.getInstance();
-           if(cacheConnectIpInMap.get(peerIp)>=maxInSameIp){
-                    return true;
+           if(cacheConnectIpInMap.get(peerIp)>= maxInSameIp){
+               return true;
            }else{
-                    return false;
+               return false;
             }
         }else{
             return false;

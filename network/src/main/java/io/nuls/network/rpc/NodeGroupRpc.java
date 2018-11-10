@@ -29,12 +29,13 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.po.NodeGroupPo;
+import io.nuls.network.model.vo.NodeGroupVo;
 import io.nuls.network.storage.DbService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -110,20 +111,111 @@ DbService dbService=StorageManager.getInstance().getDbService();
     }
     /**
      * nw_getGroupByChainId
-     * 创建跨链网络
+     * 查看指定网络组信息
      */
     @CmdAnnotation(cmd = "nw_getGroupByChainId", version = 1.0, preCompatible = true)
     public CmdResponse getGroupByChainId(List  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-        try {
-           NodeGroupPo nodeGroupPo= dbService.getNodeGroupByChainId(chainId);
-            return success(1.0, "success",nodeGroupPo );
-        } catch (NulsException e) {
-            e.printStackTrace();
-            return failed(NetworkErrorCode.DATA_ERROR, 1.0, "");
-        }
+        NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
+        NodeGroupVo  nodeGroupVo=buildNodeGroupVo(nodeGroup);
+        return success(1.0, "success",nodeGroupVo );
+
 
     }
 
+    private NodeGroupVo buildNodeGroupVo(NodeGroup nodeGroup){
+        NodeGroupVo nodeGroupVo=new NodeGroupVo();
+        nodeGroupVo.setChainId(nodeGroup.getChainId());
+        nodeGroupVo.setMagicNumber(nodeGroup.getMagicNumber());
+        NodeGroupConnector nodeGroupConnector=nodeGroup.getHightestNodeGroupInfo();
+        if(null != nodeGroupConnector){
+            nodeGroupVo.setBlockHash(nodeGroupConnector.getBlockHash());
+            nodeGroupVo.setBlockHeight(nodeGroupConnector.getBlockHeight());
+        }
+        nodeGroupVo.setInCount(nodeGroup.getHadConnectIn());
+        nodeGroupVo.setOutCount(nodeGroup.getHadConnectOut());
+        nodeGroupVo.setInCrossCount(nodeGroup.getHadCrossConnectIn());
+        nodeGroupVo.setOutCrossCount(nodeGroup.getHadCrossConnectOut());
+        //网络连接，并能正常使用
+        nodeGroupVo.setIsActive(nodeGroup.isActive()? 1 : 0);
+        //跨链模块是否可用
+        nodeGroupVo.setIsCrossActive(nodeGroup.isCrossActive()? 1 : 0);
+        nodeGroupVo.setIsMoonNet(nodeGroup.isMoonNet()? 1 : 0);
+        nodeGroupVo.setTotalCount(nodeGroupVo.getInCount()+nodeGroupVo.getOutCount()+nodeGroupVo.getInCrossCount()+nodeGroupVo.getOutCrossCount());
+        return nodeGroupVo;
+    }
+    /**
+     * nw_delNodeGroup
+     * 注销指定网络组信息
+     */
+    @CmdAnnotation(cmd = "nw_delNodeGroup", version = 1.0, preCompatible = true)
+    public CmdResponse delGroupByChainId(List  params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
+        dbService.deleteGroup(chainId);
+        dbService.deleteGroupNodeKeys(chainId);
+        //TODO:删除网络连接
+        return success(1.0, "success",null );
+    }
+
+    /**
+     * nw_getSeeds
+     * 查询跨链种子节点
+     */
+    @CmdAnnotation(cmd = "nw_getSeeds", version = 1.0, preCompatible = true)
+    public CmdResponse getCrossSeeds(List  params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
+        Log.info("chainId:"+chainId);
+        List<String> seeds=NetworkParam.getInstance().getMoonSeedIpList();
+        if(null == seeds){
+            return success(1.0, "success", "");
+        }
+        StringBuffer seedsStr=new StringBuffer();
+        for(String seed:seeds){
+            seedsStr.append(seed);
+            seedsStr.append(",");
+        }
+        if(seedsStr.length()> 0) {
+            return success(1.0, "success", seedsStr.substring(0, seedsStr.length()));
+        }
+        return success(1.0, "success", "");
+    }
+
+
+
+
+    /**
+     * nw_reconnect
+     * 重连网络
+     */
+    @CmdAnnotation(cmd = "nw_reconnect", version = 1.0, preCompatible = true)
+    public CmdResponse reconnect(List  params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
+        Log.info("chainId:"+chainId);
+        //TODO：
+
+        return success(1.0, "success", "");
+    }
+
+    /**
+     * nw_getGroups
+     * 重连网络
+     */
+    @CmdAnnotation(cmd = "nw_getGroups", version = 1.0, preCompatible = true)
+    public CmdResponse getGroups(List  params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
+        Log.info("chainId:"+chainId);
+        int startPage=Integer.valueOf(String.valueOf(params.get(0)));
+        int pageSize=Integer.valueOf(String.valueOf(params.get(1)));
+        List<NodeGroup> nodeGroups=nodeGroupManager.getNodeGroups();
+        int total=nodeGroups.size();
+        List<NodeGroupVo> pageList=new ArrayList<>();
+        int currIdx = (startPage > 1 ? (startPage -1) * pageSize : 0);
+        for (int i = 0; i < pageSize && i <(total - currIdx); i++){
+            NodeGroup nodeGroup= nodeGroups.get(currIdx + i);
+            NodeGroupVo  nodeGroupVo=buildNodeGroupVo(nodeGroup);
+            pageList.add(nodeGroupVo);
+        }
+        return success(1.0, "success", pageList);
+    }
 
 }

@@ -1,13 +1,13 @@
-package io.nuls.chain.dao;
+package io.nuls.chain.storage;
 
-import io.nuls.chain.model.Chain;
+import io.nuls.base.data.chain.Chain;
 
 /**
  * @author tangyi
  * @date 2018/11/8
  * @description
  */
-public interface ChainDao {
+public interface ChainStorage {
 
     /**
      * Save chain information when registering a new chain

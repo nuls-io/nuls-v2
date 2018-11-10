@@ -12,11 +12,15 @@ public class CmConstants {
     private CmConstants() {
     }
 
+    public static final String ADDRESS_TYPE_NULS = "nuls";
+    public static final String ADDRESS_TYPE_OTHER = "other";
+
     /**
      * database data path
      */
     public static final String DB = "db";
     public static final String DB_DATA_PATH = "rocksdb.datapath";
+    public static final String TB_NAME_ASSET = "asset";
     public static final String TB_NAME_CHAIN = "chain";
 
     public static final ErrorCode DB_TABLE_CREATE_ERROR = ErrorCode.init("20011");

@@ -1,9 +1,9 @@
 package io.nuls.chain.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.nuls.chain.dao.ChainDao;
-import io.nuls.chain.model.Chain;
+import io.nuls.base.data.chain.Chain;
 import io.nuls.chain.service.ChainService;
+import io.nuls.chain.storage.ChainStorage;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.parse.JSONUtils;
@@ -19,7 +19,7 @@ import java.util.List;
 public class ChainServiceImpl implements ChainService {
 
     @Autowired
-    private ChainDao chainDao;
+    private ChainStorage chainStorage;
 
     /**
      * Save chain information when registering a new chain
@@ -34,7 +34,7 @@ public class ChainServiceImpl implements ChainService {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        return chainDao.save(chain);
+        return chainStorage.save(chain);
     }
 
     /**
@@ -71,6 +71,6 @@ public class ChainServiceImpl implements ChainService {
 
     @Override
     public Chain chainInfo(String name) {
-        return chainDao.selectByName(name);
+        return chainStorage.selectByName(name);
     }
 }

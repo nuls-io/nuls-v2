@@ -6,7 +6,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.storage.TransactionStorageService;
-import io.nuls.poc.utils.ConsensusConstant;
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 

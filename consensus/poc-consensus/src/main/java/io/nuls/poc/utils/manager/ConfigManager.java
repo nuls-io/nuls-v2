@@ -26,6 +26,11 @@ public class ConfigManager {
      * */
     public static  Map<String,Boolean> param_modify = new HashMap<>();
 
+    /**
+     * 节点各条链打包状态
+     * */
+    public static Map<Integer,Boolean> packing_status = new HashMap<>();
+
     public static void initManager(List<ConfigItem> items, int chain_id) throws Exception{
         ConfigBean bean = new ConfigBean();
         Class beanClass = bean.getClass();
@@ -38,6 +43,7 @@ public class ConfigManager {
             field.set(bean,item.getValue());
         }
         config_map.put(chain_id,bean);
+        packing_status.put(chain_id,false);
         //保存配置信息到数据库
         ConfigeService configeService = SpringLiteContext.getBean(ConfigeService.class);
         configeService.save(bean,chain_id);

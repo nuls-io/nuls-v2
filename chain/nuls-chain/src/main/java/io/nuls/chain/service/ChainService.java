@@ -1,6 +1,6 @@
 package io.nuls.chain.service;
 
-import io.nuls.chain.model.Chain;
+import io.nuls.base.data.chain.Chain;
 
 import java.util.List;
 
