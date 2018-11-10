@@ -171,4 +171,54 @@ public class AccountServiceImpl implements AccountService {
         }
         return accountCacheService.localAccountMaps.get(address);
     }
+
+    /**
+     * set the password for exist account
+     * @auther EdwardChan
+     *
+     * Nov.10th 2018
+     *
+     * @param chainId
+     *
+     * @param address
+     *
+     * @param password
+     *
+     * @return true or false
+     */
+    public boolean setPassword(short chainId, String address, String password) {
+        //check if the account is legal
+        if (!AddressTool.validAddress(address, chainId)) {
+            Log.debug("the address is illegal,chainId:{},address:{}",chainId,address);
+            return false;
+        }
+        if (password == null) {
+            Log.debug("the password should't be null,chainId:{},address:{}",chainId,address);
+            return false;
+        }
+        //check if the account is exist
+        Account account = getAccountByAddress(address,chainId);
+        if (account == null) {
+            Log.debug("the account isn't exist,chainId:{},address:{}",chainId,address);
+            return false;
+        }
+        //check if the account has encrypt
+        if (account.isEncrypted()) {
+            Log.debug("the account has encrypted,chainId:{},address:{}",chainId,address);
+            return false;
+        }
+        //encrypt the account
+        try {
+            account.encrypt(password);
+        } catch (Exception e) {
+            Log.error("encrypt the account occur exception,chainId:{},address:{}",chainId,address,e);
+        }
+        //save the account
+        AccountPo po = new AccountPo(account);
+        boolean result = accountStorageService.saveAccount(po);
+        if (!result) {
+            Log.debug("save the account failed,chainId:{},address:{}",chainId,address);
+        }
+        return result;
+    }
 }
