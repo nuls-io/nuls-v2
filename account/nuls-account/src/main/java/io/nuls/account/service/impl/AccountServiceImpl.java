@@ -186,6 +186,7 @@ public class AccountServiceImpl implements AccountService {
      *
      * @return true or false
      */
+    @Override
     public boolean setPassword(short chainId, String address, String password) {
         //check if the account is legal
         if (!AddressTool.validAddress(address, chainId)) {
@@ -219,6 +220,38 @@ public class AccountServiceImpl implements AccountService {
         if (!result) {
             Log.debug("save the account failed,chainId:{},address:{}",chainId,address);
         }
+        return result;
+    }
+
+    /**
+     * check if the account is encrypted
+     *
+     * @auther EdwardChan
+     *
+     * Nov.10th 2018
+     *
+     * @param chainId
+     *
+     * @param address
+     *
+     *
+     * @return true or false
+     */
+    @Override
+    public boolean isEncrypted(short chainId, String address) {
+        //check if the account is legal
+        if (!AddressTool.validAddress(address, chainId)) {
+            Log.debug("the address is illegal,chainId:{},address:{}",chainId,address);
+            return false;
+        }
+        //check if the account is exist
+        Account account = getAccountByAddress(address,chainId);
+        if (account == null) {
+            Log.debug("the account isn't exist,chainId:{},address:{}",chainId,address);
+            return false;
+        }
+        boolean result = account.isEncrypted();
+        Log.debug("the account is Encrypted:{},chainId:{},address:{}",result,chainId,address);
         return result;
     }
 }

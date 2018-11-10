@@ -50,7 +50,6 @@ public class AccountServiceTest {
      *
      * @auther EdwardChan
      */
-    @Ignore
     @Test
     public void setPasswordTest() {
         // create account
@@ -67,6 +66,26 @@ public class AccountServiceTest {
         assertNotNull(accountAfterSetPassword);
         assertTrue(accountAfterSetPassword.isEncrypted());
         assertTrue(account.validatePassword(password));
+    }
+
+    /**
+     * the account is encrypted test
+     * <p>
+     * Nov.10th 2018
+     *
+     * @auther EdwardChan
+     */
+    @Test
+    public void isEncryptedTest() {
+        // create account
+        List<Account> result = accountService.createAccount(chainId, 1, null);
+        assertTrue(result != null && result.size() == 1);
+        Account account = result.get(0);
+        assertFalse(accountService.isEncrypted(chainId,account.getAddress().getBase58()));
+        // set password
+        String password = "abc12345890987";
+        accountService.setPassword(chainId, account.getAddress().getBase58(), password);
+        assertTrue(accountService.isEncrypted(chainId,account.getAddress().getBase58()));
     }
 
 }
