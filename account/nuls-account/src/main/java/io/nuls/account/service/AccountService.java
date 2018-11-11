@@ -68,4 +68,36 @@ public interface AccountService {
      * @return account list of all accounts.
      */
     List<Account> getAccountList();
+
+    /**
+     * set the password for exist account
+     * @auther EdwardChan
+     *
+     * Nov.10th 2018
+     *
+     * @param chainId
+     *
+     * @param address
+     *
+     * @param password
+     *
+     * @return true or false
+     */
+     boolean setPassword(short chainId, String address, String password);
+
+    /**
+     * check if the account is encrypted
+     *
+     * @auther EdwardChan
+     *
+     * Nov.10th 2018
+     *
+     * @param chainId
+     *
+     * @param address
+     *
+     *
+     * @return true or false
+     */
+    boolean isEncrypted(short chainId, String address);
 }

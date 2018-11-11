@@ -32,6 +32,7 @@ import io.nuls.tools.cache.CacheMap;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 账户缓存服务类
@@ -53,6 +54,7 @@ public class AccountCacheService {
 
     private AccountCacheService() {
         this.cacheMap = new CacheMap<>(AccountConstant.ACCOUNT_LIST_CACHE, 32, String.class, Account.class);
+        this.localAccountMaps = new ConcurrentHashMap<>();
     }
 
 
