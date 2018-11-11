@@ -11,6 +11,7 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
+import io.nuls.tools.thread.TimeService;
 
 /**
  * @author tangyi
@@ -20,18 +21,18 @@ public class ChainBootstrap {
     public static void main(String[] args) {
         try {
 
-            Log.info("Account Bootstrap start...");
+            Log.info("Chain Bootstrap start...");
 
             initCfg();
 
             //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-            RocksDBService.init(CmConstants.DB_DATA_PATH);
+            RocksDBService.init(CmRuntimeInfo.dataPath);
 
             SpringLiteContext.init("io.nuls.chain", new ModularServiceMethodInterceptor());
 
             startRpcServer();
 
-            //TimeService.getInstance().start();
+            TimeService.getInstance().start();
 
         } catch (Exception e) {
             e.printStackTrace();

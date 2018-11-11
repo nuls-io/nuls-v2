@@ -7,4 +7,8 @@ package io.nuls.chain.info;
  */
 public class CmRuntimeInfo {
     public static String dataPath;
+
+    public static String getAssetKey(short chainId, short assetId) {
+        return chainId + "-" + assetId;
+    }
 }
