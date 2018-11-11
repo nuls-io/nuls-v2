@@ -57,6 +57,9 @@ public class CmdDispatcher {
      */
     public static String call(String cmd, Object[] params, double minVersion) throws Exception {
         int id = RuntimeInfo.sequence.incrementAndGet();
+        if (params == null) {
+            params = new Object[]{};
+        }
         CmdRequest cmdRequest = new CmdRequest(id, cmd, minVersion, params);
 
         List<String> remoteUriList = RuntimeInfo.getRemoteUri(cmdRequest);
