@@ -172,7 +172,7 @@ public class Chain extends BaseNulsData {
         // magicNumber;
         size += SerializeUtils.sizeOfInt32();
         // supportInflowAsset;
-        size += SerializeUtils.sizeOfBoolean(supportInflowAsset);
+        size += SerializeUtils.sizeOfBoolean();
         // minAvailableNodeNum;
         size += SerializeUtils.sizeOfInt32();
         // singleNodeMinConnectionNum;
