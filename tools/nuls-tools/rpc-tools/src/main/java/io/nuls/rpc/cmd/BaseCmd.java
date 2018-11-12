@@ -46,23 +46,21 @@ public abstract class BaseCmd {
         RuntimeInfo.configItemMap.put(key, configItem);
     }
 
-    protected CmdResponse success(double version) {
-        return success(version, "", "");
+    protected CmdResponse success() {
+        return success("", "");
     }
 
-    protected CmdResponse success(double version, String msg, Object result) {
+    protected CmdResponse success(String msg, Object result) {
         CmdResponse cmdResponse = new CmdResponse();
         cmdResponse.setCode(Constants.SUCCESS_CODE);
-        cmdResponse.setVersion(version);
         cmdResponse.setMsg(msg);
         cmdResponse.setResult(result);
         return cmdResponse;
     }
 
-    protected CmdResponse failed(ErrorCode errorCode, double version, Object result) {
+    protected CmdResponse failed(ErrorCode errorCode, Object result) {
         CmdResponse cmdResponse = new CmdResponse();
         cmdResponse.setCode(errorCode.getCode());
-        cmdResponse.setVersion(version);
         cmdResponse.setMsg(errorCode.getMsg());
         cmdResponse.setResult(result);
         return cmdResponse;

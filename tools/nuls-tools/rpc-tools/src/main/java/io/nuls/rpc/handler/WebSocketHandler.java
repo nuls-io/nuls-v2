@@ -66,6 +66,7 @@ public class WebSocketHandler {
 
         CmdResponse cmdResponse = buildResponse(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), (List) jsonMap.get("params"));
         cmdResponse.setId((Integer) jsonMap.get("id"));
+        cmdResponse.setVersion(cmdDetail.getVersion());
 
         return JSONUtils.obj2json(cmdResponse);
     }

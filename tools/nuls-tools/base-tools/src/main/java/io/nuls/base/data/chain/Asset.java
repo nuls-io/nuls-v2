@@ -19,9 +19,12 @@ public class Asset extends BaseNulsData {
     private String symbol;
     private String name;
     private int depositNuls;
-    private long initCirculation;
+    private long initNumber;
+    private long currentNumber;
     private short decimalPlaces;
     private boolean available;
+    private long createTime;
+    private long lastUpdateTime;
 
     public short getChainId() {
         return chainId;
@@ -63,12 +66,20 @@ public class Asset extends BaseNulsData {
         this.depositNuls = depositNuls;
     }
 
-    public long getInitCirculation() {
-        return initCirculation;
+    public long getInitNumber() {
+        return initNumber;
     }
 
-    public void setInitCirculation(long initCirculation) {
-        this.initCirculation = initCirculation;
+    public void setInitNumber(long initNumber) {
+        this.initNumber = initNumber;
+    }
+
+    public long getCurrentNumber() {
+        return currentNumber;
+    }
+
+    public void setCurrentNumber(long currentNumber) {
+        this.currentNumber = currentNumber;
     }
 
     public short getDecimalPlaces() {
@@ -87,6 +98,22 @@ public class Asset extends BaseNulsData {
         this.available = available;
     }
 
+    public long getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(long createTime) {
+        this.createTime = createTime;
+    }
+
+    public long getLastUpdateTime() {
+        return lastUpdateTime;
+    }
+
+    public void setLastUpdateTime(long lastUpdateTime) {
+        this.lastUpdateTime = lastUpdateTime;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeShort(chainId);
@@ -94,10 +121,12 @@ public class Asset extends BaseNulsData {
         stream.writeString(symbol);
         stream.writeString(name);
         stream.writeUint32(depositNuls);
-        stream.writeInt64(initCirculation);
+        stream.writeInt64(initNumber);
+        stream.writeInt64(currentNumber);
         stream.writeShort(decimalPlaces);
         stream.writeBoolean(available);
-
+        stream.writeUint48(createTime);
+        stream.writeUint48(lastUpdateTime);
     }
 
     @Override
@@ -107,9 +136,12 @@ public class Asset extends BaseNulsData {
         this.symbol = byteBuffer.readString();
         this.name = byteBuffer.readString();
         this.depositNuls = byteBuffer.readInt32();
-        this.initCirculation = byteBuffer.readInt64();
+        this.initNumber = byteBuffer.readInt64();
+        this.currentNumber = byteBuffer.readInt64();
         this.decimalPlaces = byteBuffer.readShort();
         this.available = byteBuffer.readBoolean();
+        this.createTime = byteBuffer.readUint48();
+        this.lastUpdateTime = byteBuffer.readUint48();
     }
 
     @Override
@@ -123,11 +155,17 @@ public class Asset extends BaseNulsData {
         size += SerializeUtils.sizeOfString(name);
         // depositNuls
         size += SerializeUtils.sizeOfInt32();
-        // initCirculation
+        // initNumber
+        size += SerializeUtils.sizeOfInt64();
+        // currentNumber
         size += SerializeUtils.sizeOfInt64();
         // decimalPlaces
         size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfBoolean(available);
+        // createTime
+        size += SerializeUtils.sizeOfUint48();
+        // lastUpdateTime
+        size += SerializeUtils.sizeOfUint48();
 
         return size;
     }

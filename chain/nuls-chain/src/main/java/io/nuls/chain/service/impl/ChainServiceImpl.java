@@ -1,14 +1,10 @@
 package io.nuls.chain.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.data.chain.Chain;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.parse.JSONUtils;
-
-import java.util.List;
 
 /**
  * @author tangyi
@@ -22,55 +18,24 @@ public class ChainServiceImpl implements ChainService {
     private ChainStorage chainStorage;
 
     /**
-     * Save chain information when registering a new chain
+     * Save chain
      *
-     * @param chain Chain information filled in when the user registers
-     * @return Number of saves
+     * @param chain Chain object that needs to be saved
+     * @return 1 means success, 0 means failure
      */
     @Override
-    public int chainRegister(Chain chain) {
-        try {
-            System.out.println("service:" + JSONUtils.obj2json(chain));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return chainStorage.save(chain);
+    public int saveChain(Chain chain) {
+        return chainStorage.save(chain.getChainId(), chain);
     }
 
     /**
-     * Destroy a chain
+     * Find chain based on key
      *
-     * @param id The id of the chain to be deleted
-     * @return Number of deletions
-     */
-    @Override
-    public int chainDestroy(int id) {
-        return 0;
-    }
-
-    /**
-     * Query a chain by id
-     *
-     * @param id The id of the chain to be queried
+     * @param id The chain ID
      * @return Chain
      */
     @Override
-    public Chain chainInfo(int id) {
-        return null;
-    }
-
-    /**
-     * Query all the chains
-     *
-     * @return List of the chain
-     */
-    @Override
-    public List<Chain> chainsInfo() {
-        return null;
-    }
-
-    @Override
-    public Chain chainInfo(String name) {
-        return chainStorage.selectByName(name);
+    public Chain getChain(short id) {
+        return chainStorage.load(id);
     }
 }
