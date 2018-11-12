@@ -2,6 +2,7 @@ package io.nuls.chain.cmd;
 
 import io.nuls.base.data.chain.Asset;
 import io.nuls.base.data.chain.Chain;
+import io.nuls.base.data.chain.Seed;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -16,6 +17,7 @@ import io.nuls.tools.thread.TimeService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * @author tangyi
@@ -56,11 +58,20 @@ public class ChainCmd extends BaseCmd {
             chain.setMinAvailableNodeNum(Integer.valueOf(params.get(5).toString()));
             chain.setSingleNodeMinConnectionNum(Integer.valueOf(params.get(6).toString()));
             chain.setTxConfirmedBlockNum(Integer.valueOf(params.get(7).toString()));
-            chain.setSeedList(new ArrayList<>());
+            List<Seed> seedList = new ArrayList<>();
+            StringTokenizer seedStr = new StringTokenizer(params.get(8).toString(), ",");
+            while (seedStr.hasMoreTokens()) {
+                StringTokenizer ipPort = new StringTokenizer(seedStr.nextToken(), ":");
+                Seed seed = new Seed();
+                seed.setIp(ipPort.nextToken());
+                seed.setPort(Integer.parseInt(ipPort.nextToken()));
+                seedList.add(seed);
+            }
+            chain.setSeedList(seedList);
             chain.setCreateTime(TimeService.currentTimeMillis());
 
             // TODO
-            return success("sent newTx", null);
+            return success("sent newTx", chain);
         } catch (Exception e) {
             Log.error(e);
             return failed(ErrorCode.init("-100"), e.getMessage());

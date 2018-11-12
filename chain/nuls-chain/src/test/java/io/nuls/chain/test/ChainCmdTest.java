@@ -5,6 +5,7 @@ import io.nuls.base.data.chain.Seed;
 import io.nuls.chain.ChainBootstrap;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.tools.thread.TimeService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -29,7 +30,7 @@ public class ChainCmdTest {
 
     @Test
     public void chainReg() throws Exception {
-        System.out.println(CmdDispatcher.call("chainReg", new Object[]{(short) 188, "ilovess", "NULS", 19870921, true, 5, 10, 8}, 1.0));
+        System.out.println(CmdDispatcher.call("chainReg", new Object[]{(short) 867, "ilovess", "NULS", 19870921, true, 5, 10, 8, "1.1.2.2:1122,3.3.4.4:3344", false}, 1.0));
     }
 
     @Test
@@ -62,6 +63,8 @@ public class ChainCmdTest {
         seed2.setPort(3344);
         seedList.add(seed2);
         chain.setSeedList(seedList);
+        chain.setAvailable(true);
+        chain.setCreateTime(TimeService.currentTimeMillis());
         System.out.println(CmdDispatcher.call("chainRegCommit", new Object[]{chain}, 1.0));
     }
 }
