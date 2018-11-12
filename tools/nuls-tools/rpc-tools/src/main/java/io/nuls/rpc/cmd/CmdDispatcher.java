@@ -26,6 +26,9 @@ public class CmdDispatcher {
         CmdRequest cmdRequest = new CmdRequest(id, "version", 1.0, new Object[]{RuntimeInfo.local});
 
         WsClient wsClient = RuntimeInfo.getWsClient(kernelUri);
+        if (wsClient == null) {
+            throw new Exception("Kernel not available");
+        }
         wsClient.send(JSONUtils.obj2json(cmdRequest));
 
         Map rspMap = wsClient.getResponse(id);
