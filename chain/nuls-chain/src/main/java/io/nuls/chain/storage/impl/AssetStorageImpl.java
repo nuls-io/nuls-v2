@@ -10,7 +10,9 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.SerializeUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author tangyi
@@ -39,15 +41,16 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
     /**
      * Save asset
      *
+     * @param key   The key
      * @param asset Asset object that needs to be saved
      * @return 1 means success, 0 means failure
      */
     @Override
-    public int save(Asset asset) {
+    public int save(String key, Asset asset) {
         try {
-            return RocksDBService.put(CmConstants.TB_NAME_ASSET, SerializeUtils.shortToBytes(asset.getAssetId()), asset.serialize()) ? 1 : 0;
+            return RocksDBService.put(CmConstants.TB_NAME_ASSET, key.getBytes(), asset.serialize()) ? 1 : 0;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return 0;
         }
     }
@@ -55,18 +58,43 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
     /**
      * Find assets based on key
      *
-     * @param assetId key
+     * @param key The key
      * @return Asset object
      */
     @Override
-    public Asset load(short assetId) {
-        Asset asset = new Asset();
-        byte[] bytes = RocksDBService.get(CmConstants.TB_NAME_ASSET, SerializeUtils.shortToBytes(assetId));
+    public Asset load(String key) {
         try {
+            Asset asset = new Asset();
+            byte[] bytes = RocksDBService.get(CmConstants.TB_NAME_ASSET, key.getBytes());
             asset.parse(bytes, 0);
+            return asset;
         } catch (NulsException e) {
-            e.printStackTrace();
+            Log.error(e);
+            return null;
         }
-        return asset;
+    }
+
+    /**
+     * Get all the assets of the chain
+     *
+     * @param chainId The chain ID
+     * @return List of asset
+     */
+    @Override
+    public List<Asset> getByChain(short chainId) {
+        List<byte[]> bytesList = RocksDBService.valueList(CmConstants.TB_NAME_ASSET);
+        List<Asset> assetList = new ArrayList<>();
+        for (byte[] bytes : bytesList) {
+            Asset asset = new Asset();
+            try {
+                asset.parse(bytes, 0);
+                if (asset.getChainId() == chainId) {
+                    assetList.add(asset);
+                }
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+        }
+        return assetList;
     }
 }

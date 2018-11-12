@@ -30,6 +30,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.constant.ToolsConstant;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
@@ -168,7 +169,7 @@ public class NulsByteBuffer {
         if (null == bytes) {
             return 0;
         }
-        return SerializeUtils.bytes2Short(bytes);
+        return ByteUtils.bytesToShort(bytes);
     }
 
     public String readString() throws NulsException {
@@ -190,7 +191,7 @@ public class NulsByteBuffer {
         if (null == bytes) {
             return 0;
         }
-        return SerializeUtils.bytes2Double(bytes);
+        return ByteUtils.bytesToDouble(bytes);
     }
 
     public boolean isFinished() {
@@ -229,12 +230,13 @@ public class NulsByteBuffer {
 
 
     public long readUint48() {
-        long value = (payload[cursor + 0] & 0xffL) |
+        /*long value = (payload[cursor + 0] & 0xffL) |
                 ((payload[cursor + 1] & 0xffL) << 8) |
                 ((payload[cursor + 2] & 0xffL) << 16) |
                 ((payload[cursor + 3] & 0xffL) << 24) |
                 ((payload[cursor + 4] & 0xffL) << 32) |
-                ((payload[cursor + 5] & 0xffL) << 40);
+                ((payload[cursor + 5] & 0xffL) << 40);*/
+        long value = SerializeUtils.readUint48(payload,cursor);
         cursor += 6;
         if (value == 281474976710655L) {
             return -1L;

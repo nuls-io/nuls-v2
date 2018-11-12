@@ -62,10 +62,10 @@ public class KernelCmd4Test extends BaseCmd {
             result.put("available", true);
             result.put("modules", RuntimeInfo.remoteModuleMap);
 
-            return success(1.0, null, result);
+            return success(null, result);
         } catch (Exception e) {
             e.printStackTrace();
-            return failed(ErrorCode.init("-32603"), 1.0, null);
+            return failed(ErrorCode.init("-32603"), null);
         }
     }
 
@@ -81,11 +81,11 @@ public class KernelCmd4Test extends BaseCmd {
         result.put("service", service);
         result.put("modules", RuntimeInfo.remoteModuleMap);
 
-        return success(1.0, null, result);
+        return success(null, result);
     }
 
     @CmdAnnotation(cmd = "cmd1", version = 1.0, preCompatible = true)
     public Object cmd1(List params) {
-        return success(1.0, null, "kernel cmd1");
+        return success(null, "kernel cmd1");
     }
 }

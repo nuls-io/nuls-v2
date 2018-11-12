@@ -9,6 +9,7 @@ import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.thread.TimeService;
 
 import java.util.List;
 
@@ -21,44 +22,94 @@ import java.util.List;
 public class AssetCmd extends BaseCmd {
 
     @Autowired
-    AssetService assetService;
+    private AssetService assetService;
 
-    @CmdAnnotation(cmd = "getAsset", version = 1.0, preCompatible = true)
-    public CmdResponse getAsset(List params) {
+    @CmdAnnotation(cmd = "asset", version = 1.0, preCompatible = true)
+    public CmdResponse asset(List params) {
         try {
-            if (params == null || params.get(0) == null) {
-                return failed(ErrorCode.init("-100"), 1.0, "Need <asset id>");
-            }
 
-            Asset asset = assetService.getAssetById(Short.valueOf(params.get(0).toString()));
-            return success(1.0, "success", asset);
+            Asset asset = assetService.getAsset(Short.valueOf(params.get(0).toString()), Short.valueOf(params.get(1).toString()));
+            return success("success", asset);
 
         } catch (Exception e) {
             Log.error(e);
-            return failed(ErrorCode.init("-100"), 1.0, e.getMessage());
+            return failed(ErrorCode.init("-100"), e.getMessage());
         }
     }
 
-    @CmdAnnotation(cmd = "registerAsset", version = 1.0, preCompatible = true)
-    public CmdResponse registerAsset(List params) {
+    @CmdAnnotation(cmd = "assetReg", version = 1.0, preCompatible = true)
+    public CmdResponse assetReg(List params) {
         try {
-
             Asset asset = new Asset();
             asset.setChainId(Short.valueOf(params.get(0).toString()));
             asset.setAssetId(Short.valueOf(params.get(1).toString()));
             asset.setSymbol((String) params.get(2));
             asset.setName((String) params.get(3));
             asset.setDepositNuls((int) params.get(4));
-            asset.setInitCirculation(Long.valueOf(params.get(5).toString()));
+            asset.setInitNumber(Long.valueOf(params.get(5).toString()));
+            asset.setCurrentNumber(asset.getInitNumber());
             asset.setDecimalPlaces(Short.valueOf(params.get(6).toString()));
             asset.setAvailable((boolean) params.get(7));
+            asset.setCreateTime(TimeService.currentTimeMillis());
 
-            System.out.println(assetService.saveAsset(asset));
+            assetService.saveAsset(asset);
 
-            return success(1.0, "success", null);
+            return success("success", null);
         } catch (Exception e) {
             Log.error(e);
-            return failed(ErrorCode.init("-100"), 1.0, e.getMessage());
+            return failed(ErrorCode.init("-100"), e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = "assetEnable", version = 1.0, preCompatible = true)
+    public CmdResponse assetEnable(List params) {
+        try {
+
+            assetService.setStatus(Short.valueOf(params.get(0).toString()), Short.valueOf(params.get(1).toString()), true);
+
+            return success("success", null);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(ErrorCode.init("-100"), e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = "assetDisable", version = 1.0, preCompatible = true)
+    public CmdResponse assetDisable(List params) {
+        try {
+
+            assetService.setStatus(Short.valueOf(params.get(0).toString()), Short.valueOf(params.get(1).toString()), false);
+
+            return success("success", null);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(ErrorCode.init("-100"), e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = "assetCurrNumOfChain", version = 1.0, preCompatible = true)
+    public CmdResponse assetCurrNumOfChain(List params) {
+        try {
+
+            assetService.setCurrentNumber(Short.valueOf(params.get(0).toString()), Short.valueOf(params.get(1).toString()), Long.valueOf(params.get(2).toString()));
+
+            return success("success", null);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(ErrorCode.init("-100"), e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = "assetList", version = 1.0, preCompatible = true)
+    public CmdResponse assetList(List params) {
+        try {
+
+            List<Asset> assetList = assetService.getAssetListByChain(Short.valueOf(params.get(0).toString()));
+            return success("success", assetList);
+
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(ErrorCode.init("-100"), e.getMessage());
         }
     }
 }

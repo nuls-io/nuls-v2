@@ -100,4 +100,14 @@ public interface AccountService {
      * @return true or false
      */
     boolean isEncrypted(short chainId, String address);
+
+    /**
+     * 移除指定账户
+     * Remove specified account
+     * @param chainId
+     * @param address
+     * @param password
+     * @return
+     */
+    public boolean removeAccount(short chainId, String address, String password);
 }

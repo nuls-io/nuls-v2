@@ -10,12 +10,19 @@ import io.nuls.base.data.chain.Chain;
 public interface ChainStorage {
 
     /**
-     * Save chain information when registering a new chain
+     * Save chain
      *
-     * @param chain Chain information filled in when the user registers
-     * @return Number of saves
+     * @param key   The key
+     * @param chain Chain object that needs to be saved
+     * @return 1 means success, 0 means failure
      */
-    int save(Chain chain);
+    int save(short key, Chain chain);
 
-    Chain selectByName(String name);
+    /**
+     * Find chain based on key
+     *
+     * @param key The key
+     * @return Chain object
+     */
+    Chain load(short key);
 }

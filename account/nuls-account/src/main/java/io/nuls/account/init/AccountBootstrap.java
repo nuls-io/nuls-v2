@@ -33,9 +33,6 @@ public class AccountBootstrap {
             SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
             //启动时间同步线程
             TimeService.getInstance().start();
-            //初始化本地账户到缓存
-            AccountService accountService = SpringLiteContext.getBean(AccountService.class);
-            accountService.getAccountList();
             //启动账户模块服务
             initServer();
         } catch (Exception e) {

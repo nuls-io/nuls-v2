@@ -14,6 +14,7 @@ import java.io.IOException;
  * @description
  */
 public class Seed extends BaseNulsData {
+
     private String ip;
     private int port;
 
@@ -36,7 +37,7 @@ public class Seed extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(ip);
-        stream.write(port);
+        stream.writeUint32(port);
     }
 
     @Override

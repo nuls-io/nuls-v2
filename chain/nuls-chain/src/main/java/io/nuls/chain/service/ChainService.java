@@ -2,8 +2,6 @@ package io.nuls.chain.service;
 
 import io.nuls.base.data.chain.Chain;
 
-import java.util.List;
-
 /**
  * @author tangyi
  * @date 2018/11/8
@@ -11,35 +9,19 @@ import java.util.List;
  */
 public interface ChainService {
     /**
-     * Save chain information when registering a new chain
+     * Save chain
      *
-     * @param chain Chain information filled in when the user registers
-     * @return Number of saves
+     * @param chain Chain object that needs to be saved
+     * @return 1 means success, 0 means failure
      */
-    int chainRegister(Chain chain);
+    int saveChain(Chain chain);
 
     /**
-     * Destroy a chain
+     * Find chain based on key
      *
-     * @param id The id of the chain to be deleted
-     * @return Number of deletions
-     */
-    int chainDestroy(int id);
-
-    /**
-     * Query a chain by id
-     *
-     * @param id The id of the chain to be queried
+     * @param id The chain ID
      * @return Chain
      */
-    Chain chainInfo(int id);
+    Chain getChain(short id);
 
-    /**
-     * Query all the chains
-     *
-     * @return List of the chain
-     */
-    List<Chain> chainsInfo();
-
-    Chain chainInfo(String name);
 }

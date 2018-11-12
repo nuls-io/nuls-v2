@@ -116,7 +116,7 @@ public class AddressTool {
      * @param chain_id
      * @return
      */
-    public static boolean validAddress(String address, short chain_id) {
+    public static boolean validAddress(short chain_id, String address) {
         if (StringUtils.isBlank(address)) {
             return false;
         }
@@ -248,6 +248,7 @@ public class AddressTool {
     /**
      * 根据地址字符串解码出地址原始字节数组
      * base58(addressType+hash160(pubKey)+XOR(addressType+hash160(pubKey)))+Hex(chianId)
+     *
      * @param addressString
      * @return
      */

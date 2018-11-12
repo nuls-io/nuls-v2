@@ -7,9 +7,10 @@ import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.SerializeUtils;
 
 /**
  * @author tangyi
@@ -36,29 +37,38 @@ public class ChainStorageImpl implements ChainStorage, InitializingBean {
     }
 
     /**
-     * Save chain information when registering a new chain
+     * Save chain
      *
-     * @param chain Chain information filled in when the user registers
-     * @return Number of saves
+     * @param key   The key
+     * @param chain Chain object that needs to be saved
+     * @return 1 means success, 0 means failure
      */
     @Override
-    public int save(Chain chain) {
+    public int save(short key, Chain chain) {
         try {
-            System.out.println("我要开始保存数据了！");
-            RocksDBService.put(CmConstants.TB_NAME_CHAIN, SerializeUtils.shortToBytes(chain.getChainId()), "yifeng handsome".getBytes());
-            return 1;
+            return RocksDBService.put(CmConstants.TB_NAME_CHAIN, ByteUtils.shortToBytes(key), chain.serialize()) ? 1 : 0;
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return 0;
         }
     }
 
+    /**
+     * Find chain based on key
+     *
+     * @param key The key
+     * @return Chain object
+     */
     @Override
-    public Chain selectByName(String name) {
-        byte[] bytes = RocksDBService.get(CmConstants.TB_NAME_CHAIN, name.getBytes());
-        Chain chain = new Chain();
-        chain.setName(new String(bytes));
-        return chain;
+    public Chain load(short key) {
+        try {
+            Chain chain = new Chain();
+            byte[] bytes = RocksDBService.get(CmConstants.TB_NAME_CHAIN, ByteUtils.shortToBytes(key));
+            chain.parse(bytes, 0);
+            return chain;
+        } catch (NulsException e) {
+            Log.error(e);
+            return null;
+        }
     }
-
 }

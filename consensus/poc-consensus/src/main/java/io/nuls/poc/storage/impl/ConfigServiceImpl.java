@@ -57,7 +57,7 @@ public class ConfigServiceImpl implements ConfigeService , InitializingBean {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSUME_CONGIF);
             Map<Integer, ConfigBean> configBeanMap = new HashMap<>();
             for (Entry<byte[], byte[]>entry:list) {
-                int key = ByteUtils.byteToInt(entry.getKey());
+                int key = ByteUtils.bytesToInt(entry.getKey());
                 ConfigBean value = ObjectUtils.bytesToObject(entry.getValue());
                 configBeanMap.put(key,value);
             }

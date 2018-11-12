@@ -11,34 +11,53 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
+import io.nuls.tools.thread.TimeService;
 
 /**
  * @author tangyi
  * @date 2018/11/7
  */
 public class ChainBootstrap {
+
+    private static ChainBootstrap chainBootstrap = null;
+
+    private ChainBootstrap() {
+    }
+
+    public static ChainBootstrap getInstance() {
+        if (chainBootstrap == null) {
+            chainBootstrap = new ChainBootstrap();
+        }
+
+        return chainBootstrap;
+    }
+
     public static void main(String[] args) {
+        ChainBootstrap.getInstance().start();
+    }
+
+    public void start() {
         try {
 
-            Log.info("Account Bootstrap start...");
+            Log.info("Chain Bootstrap start...");
 
             initCfg();
 
             //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-            RocksDBService.init(CmConstants.DB_DATA_PATH);
+            RocksDBService.init(CmRuntimeInfo.dataPath);
 
             SpringLiteContext.init("io.nuls.chain", new ModularServiceMethodInterceptor());
 
             startRpcServer();
 
-            //TimeService.getInstance().start();
+            TimeService.getInstance().start();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void initCfg() throws Exception {
+    private void initCfg() throws Exception {
 
         NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
 
@@ -55,7 +74,7 @@ public class ChainBootstrap {
 
     }
 
-    private static void startRpcServer() throws Exception {
+    private void startRpcServer() throws Exception {
         WsServer wsServer = new WsServer(HostInfo.randomPort());
         wsServer.init("cm", new String[]{"m2", "m3"}, "io.nuls.chain.cmd");
         wsServer.startAndSyncKernel("ws://127.0.0.1:8887");
