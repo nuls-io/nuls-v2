@@ -173,6 +173,11 @@ public class RuntimeInfo {
         return find;
     }
 
+    /**
+     * Get local command
+     * Sort by version number
+     * The highest version
+     */
     public static CmdDetail getLocalInvokeCmd(String cmd) {
 
         RuntimeInfo.local.getCmdDetailList().sort(Comparator.comparingDouble(CmdDetail::getVersion));

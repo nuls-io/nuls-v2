@@ -47,7 +47,7 @@ public abstract class BaseCmd {
     }
 
     protected CmdResponse success() {
-        return success("", "");
+        return success("success", "");
     }
 
     protected CmdResponse success(String msg, Object result) {
@@ -55,6 +55,14 @@ public abstract class BaseCmd {
         cmdResponse.setCode(Constants.SUCCESS_CODE);
         cmdResponse.setMsg(msg);
         cmdResponse.setResult(result);
+        return cmdResponse;
+    }
+
+    protected CmdResponse failed(ErrorCode errorCode) {
+        CmdResponse cmdResponse = new CmdResponse();
+        cmdResponse.setCode(errorCode.getCode());
+        cmdResponse.setMsg(errorCode.getMsg());
+        cmdResponse.setResult(null);
         return cmdResponse;
     }
 
