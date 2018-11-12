@@ -65,6 +65,27 @@ public class CmdDispatcher {
         }
         CmdRequest cmdRequest = new CmdRequest(id, cmd, minVersion, params);
 
+        return response(id, cmdRequest);
+    }
+
+    /**
+     * call cmd.
+     * 1. Find the corresponding module according to cmd
+     * 2. Send to the specified module
+     * 3. Get the result returned to the caller
+     * 4. Get the highest version of cmd
+     */
+    public static String call(String cmd, Object[] params) throws Exception {
+        int id = RuntimeInfo.sequence.incrementAndGet();
+        if (params == null) {
+            params = new Object[]{};
+        }
+        CmdRequest cmdRequest = new CmdRequest(id, cmd, -1, params);
+
+        return response(id, cmdRequest);
+    }
+
+    private static String response(int id, CmdRequest cmdRequest) throws Exception {
         List<String> remoteUriList = RuntimeInfo.getRemoteUri(cmdRequest);
         switch (remoteUriList.size()) {
             case 0:
