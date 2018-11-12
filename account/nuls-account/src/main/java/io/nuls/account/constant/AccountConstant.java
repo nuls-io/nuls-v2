@@ -96,11 +96,19 @@ public interface AccountConstant {
      * --------[RPC constant] -------
      */
     /**
+     * SUCCESS_CODE
+     */
+    String SUCCESS_CODE = "0";
+    /**
      * SUCCESS_MSG
      */
-    public static final String SUCCESS_MSG = "success";
+    String SUCCESS_MSG = "success";
     /**
      * RPC_VERSION
      */
-    public static final double RPC_VERSION = 1.0;
+    double RPC_VERSION = 1.0;
+    /**
+     * DEFAULT PAGE_SIZE
+     */
+    int PAGE_SIZE = 10;
 }

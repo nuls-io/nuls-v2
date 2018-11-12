@@ -33,6 +33,7 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -43,12 +44,10 @@ import io.nuls.tools.log.Log;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -56,7 +55,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @author: qinyifeng
  */
 @Service
-public class AccountServiceImpl implements AccountService {
+public class AccountServiceImpl implements AccountService, InitializingBean {
 
     private Lock locker = new ReentrantLock();
 
@@ -66,9 +65,15 @@ public class AccountServiceImpl implements AccountService {
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     @Override
+    public void afterPropertiesSet() {
+        //Initialize local account data to cache
+        getAccountList();
+    }
+
+    @Override
     public List<Account> createAccount(short chainId, int count, String password) {
-        // check params
-        if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
+        //check params
+        if (chainId <= 0 || count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
         if (StringUtils.isNotBlank(password) && !AccountTool.validPassword(password)) {
@@ -88,15 +93,16 @@ public class AccountServiceImpl implements AccountService {
                 AccountPo po = new AccountPo(account);
                 accountPos.add(po);
             }
-            //批量保存账户数据
+            //Saving account data in batches
             boolean result = accountStorageService.saveAccountList(accountPos);
             if (result) {
-                //如果保存成功，将账户放入本地缓存
+                //If saved successfully, put the account in local cache.
                 for (Account account : accounts) {
                     accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
                 }
                 //TODO
-                //发送创建账户成功事件
+                //Sending account creation events
+
             }
         } catch (Exception e) {
             Log.error(e);
@@ -109,28 +115,27 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account getAccount(short chainId, String address) {
-        if (!AddressTool.validAddress(address, chainId)) {
+        //check params
+        if (!AddressTool.validAddress(chainId, address)) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
-        Account account = getAccountByAddress(address, chainId);
-        if (null == account) {
-            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-        }
+        //check the account is exist
+        Account account = getAccountByAddress(chainId, address);
         return account;
     }
 
     @Override
     public List<Account> getAccountList() {
         List<Account> list = new ArrayList<>();
-        if (accountCacheService.localAccountMaps != null) {
+        //If local account data is loaded into the cache
+        if (accountCacheService.localAccountMaps.size() > 0) {
             Collection<Account> values = accountCacheService.localAccountMaps.values();
             Iterator<Account> iterator = values.iterator();
             while (iterator.hasNext()) {
                 list.add(iterator.next());
             }
         } else {
-            accountCacheService.localAccountMaps = new ConcurrentHashMap<>();
-            //查询所有账户列表
+            //Query all accounts list
             List<AccountPo> poList = accountStorageService.getAccountList();
             Set<String> addressList = new HashSet<>();
             if (null == poList || poList.isEmpty()) {
@@ -141,7 +146,7 @@ public class AccountServiceImpl implements AccountService {
                 list.add(account);
                 addressList.add(account.getAddress().getBase58());
             }
-            //放入本地缓存
+            //put the account in local cache.
             for (Account account : list) {
                 accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
             }
@@ -156,17 +161,13 @@ public class AccountServiceImpl implements AccountService {
      *
      * @return Account
      */
-    private Account getAccountByAddress(String address, short chainId) {
-        if (!AddressTool.validAddress(address, chainId)) {
+    private Account getAccountByAddress(short chainId, String address) {
+        //check params
+        if (!AddressTool.validAddress(chainId, address)) {
             return null;
         }
-        // 从缓存中查询账户
-        Account accountCache = accountCacheService.getAccountByAddress(address);
-        if (null != accountCache) {
-            return accountCache;
-        }
-        // 如果还未缓存账户，则查询本地所有账户并缓存
-        if (accountCacheService.localAccountMaps == null) {
+        // If the account is not yet cached, all local accounts are queried and cached
+        if (accountCacheService.localAccountMaps == null || accountCacheService.localAccountMaps.size() == 0) {
             getAccountList();
         }
         return accountCacheService.localAccountMaps.get(address);
@@ -174,51 +175,48 @@ public class AccountServiceImpl implements AccountService {
 
     /**
      * set the password for exist account
-     * @auther EdwardChan
-     *
-     * Nov.10th 2018
      *
      * @param chainId
-     *
      * @param address
-     *
      * @param password
-     *
      * @return true or false
+     * @auther EdwardChan
+     * <p>
+     * Nov.10th 2018
      */
     @Override
     public boolean setPassword(short chainId, String address, String password) {
         //check if the account is legal
-        if (!AddressTool.validAddress(address, chainId)) {
-            Log.debug("the address is illegal,chainId:{},address:{}",chainId,address);
+        if (!AddressTool.validAddress(chainId, address)) {
+            Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
             return false;
         }
         if (password == null) {
-            Log.debug("the password should't be null,chainId:{},address:{}",chainId,address);
+            Log.debug("the password should't be null,chainId:{},address:{}", chainId, address);
             return false;
         }
         //check if the account is exist
-        Account account = getAccountByAddress(address,chainId);
+        Account account = getAccountByAddress(chainId, address);
         if (account == null) {
-            Log.debug("the account isn't exist,chainId:{},address:{}",chainId,address);
+            Log.debug("the account isn't exist,chainId:{},address:{}", chainId, address);
             return false;
         }
         //check if the account has encrypt
         if (account.isEncrypted()) {
-            Log.debug("the account has encrypted,chainId:{},address:{}",chainId,address);
+            Log.debug("the account has encrypted,chainId:{},address:{}", chainId, address);
             return false;
         }
         //encrypt the account
         try {
             account.encrypt(password);
         } catch (Exception e) {
-            Log.error("encrypt the account occur exception,chainId:{},address:{}",chainId,address,e);
+            Log.error("encrypt the account occur exception,chainId:{},address:{}", chainId, address, e);
         }
         //save the account
         AccountPo po = new AccountPo(account);
         boolean result = accountStorageService.saveAccount(po);
         if (!result) {
-            Log.debug("save the account failed,chainId:{},address:{}",chainId,address);
+            Log.debug("save the account failed,chainId:{},address:{}", chainId, address);
         }
         return result;
     }
@@ -226,32 +224,55 @@ public class AccountServiceImpl implements AccountService {
     /**
      * check if the account is encrypted
      *
-     * @auther EdwardChan
-     *
-     * Nov.10th 2018
-     *
      * @param chainId
-     *
      * @param address
-     *
-     *
      * @return true or false
+     * @auther EdwardChan
+     * <p>
+     * Nov.10th 2018
      */
     @Override
     public boolean isEncrypted(short chainId, String address) {
         //check if the account is legal
-        if (!AddressTool.validAddress(address, chainId)) {
-            Log.debug("the address is illegal,chainId:{},address:{}",chainId,address);
+        if (!AddressTool.validAddress(chainId, address)) {
+            Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
             return false;
         }
         //check if the account is exist
-        Account account = getAccountByAddress(address,chainId);
+        Account account = getAccountByAddress(chainId, address);
         if (account == null) {
-            Log.debug("the account isn't exist,chainId:{},address:{}",chainId,address);
+            Log.debug("the account isn't exist,chainId:{},address:{}", chainId, address);
             return false;
         }
         boolean result = account.isEncrypted();
-        Log.debug("the account is Encrypted:{},chainId:{},address:{}",result,chainId,address);
+        Log.debug("the account is Encrypted:{},chainId:{},address:{}", result, chainId, address);
+        return result;
+    }
+
+    @Override
+    public boolean removeAccount(short chainId, String address, String password) {
+        //check params
+        if (!AddressTool.validAddress(chainId, address)) {
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+        }
+        //Check whether the account exists
+        Account account = getAccountByAddress(chainId, address);
+        if (account == null) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        //The account is encrypted, verify password
+        if (account.isEncrypted()) {
+            if (!account.validatePassword(password)) {
+                throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
+        }
+        //Delete the account from the database
+        boolean result = accountStorageService.removeAccount(account.getAddress());
+        //Delete the account from the cache
+        accountCacheService.localAccountMaps.remove(account.getAddress().getBase58());
+
+        //TODO
+        //Sending account remove events
         return result;
     }
 }

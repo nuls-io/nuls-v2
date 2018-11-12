@@ -29,6 +29,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.cache.CacheMap;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.List;
 import java.util.Map;
@@ -44,8 +45,6 @@ public class AccountCacheService {
 
     private static final AccountCacheService INSTANCE = new AccountCacheService();
 
-    private CacheMap<String, Account> cacheMap;
-
     /**
      * 本地账户集合
      * Collection of local accounts
@@ -53,7 +52,6 @@ public class AccountCacheService {
     public Map<String, Account> localAccountMaps;
 
     private AccountCacheService() {
-        this.cacheMap = new CacheMap<>(AccountConstant.ACCOUNT_LIST_CACHE, 32, String.class, Account.class);
         this.localAccountMaps = new ConcurrentHashMap<>();
     }
 
@@ -62,87 +60,4 @@ public class AccountCacheService {
         return INSTANCE;
     }
 
-    /**
-     * 缓存一个账户
-     * Cache an account
-     *
-     * @param account Account to be cached
-     */
-    public void putAccount(Account account) {
-        this.cacheMap.put(account.getAddress().getBase58(), account);
-    }
-
-    /**
-     * 根据账户地址获取账户详细信息
-     * Get accounts based on account address
-     *
-     * @param address Account to be operated
-     */
-    public Account getAccountByAddress(String address) {
-        List<Account> list = this.getAccountList();
-        for (Account account : list) {
-            if (account.getAddress().toString().equalsIgnoreCase(address)) {
-                return account;
-            }
-        }
-        return null;
-    }
-
-    /**
-     * 验证账户是否存在
-     * Verify the existence of the account
-     */
-    public boolean contains(byte[] address) {
-        return this.cacheMap.containsKey(AddressTool.getStringAddressByBytes(address));
-    }
-
-    /**
-     * 获取所有账户
-     * Get all accounts
-     *
-     * @return List<Account>
-     */
-    public List<Account> getAccountList() {
-        return this.cacheMap.values();
-    }
-
-    /**
-     * 根据指定地址字符串移除账户
-     * @param address
-     */
-    public void removeAccount(String address) {
-        this.cacheMap.remove(address);
-    }
-
-    /**
-     * 根据指定地址字节数组移除账户
-     * @param address
-     */
-    public void removeAccount(byte[] address) {
-        this.cacheMap.remove(AddressTool.getStringAddressByBytes(address));
-    }
-
-
-    public void clear() {
-        if (null == cacheMap) {
-            return;
-        }
-        this.cacheMap.clear();
-    }
-
-    public void destroy() {
-        this.cacheMap.destroy();
-    }
-
-    /**
-     * 缓存多个账户
-     * Cache multiple accounts
-     */
-    public void putAccountList(List<Account> list) {
-        if (null != list) {
-            for (Account account : list) {
-                this.putAccount(account);
-            }
-        }
-    }
 }
