@@ -12,9 +12,9 @@ public interface ChainService {
      * Save chain
      *
      * @param chain Chain object that needs to be saved
-     * @return 1 means success, 0 means failure
+     * @return true/false
      */
-    int saveChain(Chain chain);
+    boolean saveChain(Chain chain);
 
     /**
      * Find chain based on key

@@ -6,7 +6,8 @@ import io.nuls.chain.storage.AssetStorage;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
@@ -19,7 +20,7 @@ import java.util.List;
  * @date 2018/11/9
  * @description
  */
-@Service
+@Component
 public class AssetStorageImpl implements AssetStorage, InitializingBean {
 
     /**
@@ -29,7 +30,7 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
     @Override
     public void afterPropertiesSet() {
         try {
-            RocksDBService.createTable(CmConstants.TB_NAME_ASSET);
+            RocksDBService.createTable(CmConstants.TBL_ASSET);
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 Log.error(e.getMessage());
@@ -43,15 +44,15 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      *
      * @param key   The key
      * @param asset Asset object that needs to be saved
-     * @return 1 means success, 0 means failure
+     * @return true/false
      */
     @Override
-    public int save(String key, Asset asset) {
+    public boolean save(short key, Asset asset) {
         try {
-            return RocksDBService.put(CmConstants.TB_NAME_ASSET, key.getBytes(), asset.serialize()) ? 1 : 0;
+            return RocksDBService.put(CmConstants.TBL_ASSET, ByteUtils.shortToBytes(key), asset.serialize());
         } catch (Exception e) {
             Log.error(e);
-            return 0;
+            return false;
         }
     }
 
@@ -62,15 +63,31 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      * @return Asset object
      */
     @Override
-    public Asset load(String key) {
+    public Asset load(short key) {
         try {
             Asset asset = new Asset();
-            byte[] bytes = RocksDBService.get(CmConstants.TB_NAME_ASSET, key.getBytes());
+            byte[] bytes = RocksDBService.get(CmConstants.TBL_ASSET, ByteUtils.shortToBytes(key));
             asset.parse(bytes, 0);
             return asset;
         } catch (NulsException e) {
             Log.error(e);
             return null;
+        }
+    }
+
+    /**
+     * Physical deletion
+     *
+     * @param key Asset ID
+     * @return true/false
+     */
+    @Override
+    public boolean delete(short key) {
+        try {
+            return RocksDBService.delete(CmConstants.TBL_ASSET, ByteUtils.shortToBytes(key));
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
         }
     }
 
@@ -82,7 +99,7 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      */
     @Override
     public List<Asset> getByChain(short chainId) {
-        List<byte[]> bytesList = RocksDBService.valueList(CmConstants.TB_NAME_ASSET);
+        List<byte[]> bytesList = RocksDBService.valueList(CmConstants.TBL_ASSET);
         List<Asset> assetList = new ArrayList<>();
         for (byte[] bytes : bytesList) {
             Asset asset = new Asset();
