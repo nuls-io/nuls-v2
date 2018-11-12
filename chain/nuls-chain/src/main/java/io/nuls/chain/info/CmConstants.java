@@ -20,9 +20,10 @@ public class CmConstants {
      */
     public static final String DB = "db";
     public static final String DB_DATA_PATH = "rocksdb.datapath";
-    public static final String TB_NAME_ASSET = "asset";
-    public static final String TB_NAME_ASSET_DESTROY = "asset_destroy";
-    public static final String TB_NAME_CHAIN = "chain";
+
+    public static final String TBL_CHAIN = "chain";
+    public static final String TBL_ASSET = "asset";
+    public static final String TBL_CHAIN_ASSET = "chain_asset";
 
     public static final ErrorCode DB_TABLE_CREATE_ERROR = ErrorCode.init("20011");
 

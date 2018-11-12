@@ -14,25 +14,31 @@ public interface AssetStorage {
     /**
      * Save asset
      *
-     * @param key   The key
+     * @param key   Asset ID
      * @param asset Asset object that needs to be saved
-     * @return 1 means success, 0 means failure
+     * @return true/false
      */
-    int save(String key, Asset asset);
+    boolean save(short key, Asset asset);
 
     /**
      * Find assets based on key
      *
-     * @param key The key
+     * @param key Asset ID
      * @return Asset object
      */
-    Asset load(String key);
+    Asset load(short key);
 
+    /**
+     * Physical deletion
+     * @param key Asset ID
+     * @return true/false
+     */
+    boolean delete(short key);
 
     /**
      * Get all the assets of the chain
      *
-     * @param chainId The chain ID
+     * @param chainId Chain ID
      * @return List of asset
      */
     List<Asset> getByChain(short chainId);
