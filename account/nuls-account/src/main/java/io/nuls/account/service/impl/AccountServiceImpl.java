@@ -28,9 +28,11 @@ package io.nuls.account.service.impl;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.po.AccountPo;
+import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.storage.AccountStorageService;
+import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.basic.InitializingBean;
@@ -61,6 +63,9 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
 
     @Autowired
     private AccountStorageService accountStorageService;
+
+    @Autowired
+    private AliasStorageService aliasStorageService;
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
@@ -274,5 +279,34 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         //TODO
         //Sending account remove events
         return result;
+    }
+
+    /**
+     * get the alias by address
+     * @param chainId
+     * @param address
+     * @return the alias,if the alias is not exist,it will be return null
+     * @auther EdwardChan
+     * <p>
+     * Nov.12th 2018
+     */
+    @Override
+    public String getAliasByAddress(short chainId,String address) {
+        //check if the account is legal
+        if (!AddressTool.validAddress(chainId, address)) {
+            Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
+            return null;
+        }
+        //get all of the aliasPO
+        List<AliasPo> aliasPoList = aliasStorageService.getAliasList();
+        if (aliasPoList == null) {
+            return null;
+        }
+        for (AliasPo aliasPo : aliasPoList) {
+            if (aliasPo != null && address.equals(AddressTool.getStringAddressByBytes(aliasPo.getAddress()))) {
+                return aliasPo.getAlias();
+            }
+        }
+        return null;
     }
 }
