@@ -59,7 +59,10 @@ public class WebSocketHandler {
         }
 
         Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
-        CmdDetail cmdDetail = RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"));
+        double minVersion = (Double) jsonMap.get("minVersion");
+        CmdDetail cmdDetail = minVersion >= 0
+                ? RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"))
+                : RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"));
         if (cmdDetail == null) {
             return Constants.CMD_NOT_FOUND;
         }

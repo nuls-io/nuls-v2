@@ -155,16 +155,41 @@ public class RuntimeInfo {
 
         CmdDetail find = null;
         for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
-            if (cmdDetail.getCmd().equals(cmd) && cmdDetail.getVersion() >= minVersion) {
-                if (find == null) {
-                    find = cmdDetail;
-                } else if (cmdDetail.getVersion() > cmdDetail.getVersion()) {
-                    if (cmdDetail.isPreCompatible()) {
-                        find = cmdDetail;
-                    } else {
-                        break;
-                    }
-                }
+            if (!cmdDetail.getCmd().equals(cmd) || cmdDetail.getVersion() < minVersion) {
+                continue;
+            }
+
+            if (find == null) {
+                find = cmdDetail;
+                continue;
+            }
+
+            if (!cmdDetail.isPreCompatible()) {
+                break;
+            } else {
+                find = cmdDetail;
+            }
+        }
+        return find;
+    }
+
+    public static CmdDetail getLocalInvokeCmd(String cmd) {
+
+        RuntimeInfo.local.getCmdDetailList().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+
+        CmdDetail find = null;
+        for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
+            if (!cmdDetail.getCmd().equals(cmd)) {
+                continue;
+            }
+
+            if (find == null) {
+                find = cmdDetail;
+                continue;
+            }
+
+            if (cmdDetail.getVersion() > find.getVersion()) {
+                find = cmdDetail;
             }
         }
         return find;
