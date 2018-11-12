@@ -171,4 +171,87 @@ public class AccountServiceImpl implements AccountService {
         }
         return accountCacheService.localAccountMaps.get(address);
     }
+
+    /**
+     * set the password for exist account
+     * @auther EdwardChan
+     *
+     * Nov.10th 2018
+     *
+     * @param chainId
+     *
+     * @param address
+     *
+     * @param password
+     *
+     * @return true or false
+     */
+    @Override
+    public boolean setPassword(short chainId, String address, String password) {
+        //check if the account is legal
+        if (!AddressTool.validAddress(address, chainId)) {
+            Log.debug("the address is illegal,chainId:{},address:{}",chainId,address);
+            return false;
+        }
+        if (password == null) {
+            Log.debug("the password should't be null,chainId:{},address:{}",chainId,address);
+            return false;
+        }
+        //check if the account is exist
+        Account account = getAccountByAddress(address,chainId);
+        if (account == null) {
+            Log.debug("the account isn't exist,chainId:{},address:{}",chainId,address);
+            return false;
+        }
+        //check if the account has encrypt
+        if (account.isEncrypted()) {
+            Log.debug("the account has encrypted,chainId:{},address:{}",chainId,address);
+            return false;
+        }
+        //encrypt the account
+        try {
+            account.encrypt(password);
+        } catch (Exception e) {
+            Log.error("encrypt the account occur exception,chainId:{},address:{}",chainId,address,e);
+        }
+        //save the account
+        AccountPo po = new AccountPo(account);
+        boolean result = accountStorageService.saveAccount(po);
+        if (!result) {
+            Log.debug("save the account failed,chainId:{},address:{}",chainId,address);
+        }
+        return result;
+    }
+
+    /**
+     * check if the account is encrypted
+     *
+     * @auther EdwardChan
+     *
+     * Nov.10th 2018
+     *
+     * @param chainId
+     *
+     * @param address
+     *
+     *
+     * @return true or false
+     */
+    @Override
+    public boolean isEncrypted(short chainId, String address) {
+        //check if the account is legal
+        if (!AddressTool.validAddress(address, chainId)) {
+            Log.debug("the address is illegal,chainId:{},address:{}",chainId,address);
+            return false;
+        }
+        //check if the account is exist
+        Account account = getAccountByAddress(address,chainId);
+        if (account == null) {
+            Log.debug("the account isn't exist,chainId:{},address:{}",chainId,address);
+            return false;
+        }
+        boolean result = account.isEncrypted();
+        Log.debug("the account is Encrypted:{},chainId:{},address:{}",result,chainId,address);
+        return result;
+    }
 }
