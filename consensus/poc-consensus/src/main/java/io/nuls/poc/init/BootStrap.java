@@ -52,7 +52,7 @@ public class BootStrap {
             //初始化国际资源文件语言
             initLanguage();
             //加载本地配置参数,并启动本地服务
-            //sysStart(chain_id);
+            sysStart(chain_id);
             //启动WebSocket服务,向外提供RPC接口
             initServer();
         }catch (Exception e){

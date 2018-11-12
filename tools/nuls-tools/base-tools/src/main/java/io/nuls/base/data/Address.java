@@ -30,7 +30,6 @@ import io.nuls.base.constant.BaseConstant;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.SerializeUtils;
 
 /**
  * @author: Chralie
@@ -109,7 +108,7 @@ public class Address {
             throw new NulsRuntimeException(new Exception());
         }
 
-        short chainId = SerializeUtils.bytes2Short(hashs);
+        short chainId = ByteUtils.bytesToShort(hashs);
         byte addressType = hashs[2];
         byte[] content = new byte[LENGTH];
         System.arraycopy(hashs, 3, content, 0, LENGTH);
@@ -120,7 +119,7 @@ public class Address {
 
     public byte[] calcAddressbytes() {
         byte[] body = new byte[ADDRESS_LENGTH];
-        System.arraycopy(SerializeUtils.shortToBytes(chainId), 0, body, 0, 2);
+        System.arraycopy(ByteUtils.shortToBytes(chainId), 0, body, 0, 2);
         body[2] = this.addressType;
         System.arraycopy(hash160, 0, body, 3, hash160.length);
         return body;

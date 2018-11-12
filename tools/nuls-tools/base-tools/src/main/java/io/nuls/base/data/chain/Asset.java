@@ -161,7 +161,7 @@ public class Asset extends BaseNulsData {
         size += SerializeUtils.sizeOfInt64();
         // decimalPlaces
         size += SerializeUtils.sizeOfInt16();
-        size += SerializeUtils.sizeOfBoolean(available);
+        size += SerializeUtils.sizeOfBoolean();
         // createTime
         size += SerializeUtils.sizeOfUint48();
         // lastUpdateTime

@@ -87,8 +87,8 @@ public class AssetCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "assetCurrentNumber", version = 1.0, preCompatible = true)
-    public CmdResponse assetCurrentNumber(List params) {
+    @CmdAnnotation(cmd = "assetCurrNumOfChain", version = 1.0, preCompatible = true)
+    public CmdResponse assetCurrNumOfChain(List params) {
         try {
 
             assetService.setCurrentNumber(Short.valueOf(params.get(0).toString()), Short.valueOf(params.get(1).toString()), Long.valueOf(params.get(2).toString()));

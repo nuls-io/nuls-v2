@@ -31,6 +31,7 @@ import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.Module;
 import io.nuls.tools.core.ioc.ScanUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 
@@ -102,13 +103,16 @@ public class RuntimeInfo {
      * Get the WsClient object through the url
      */
     public static WsClient getWsClient(String uri) throws Exception {
+
         if (!wsClientMap.containsKey(uri)) {
             WsClient wsClient = new WsClient(uri);
             wsClient.connect();
-            while (!wsClient.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                Thread.sleep(10);
+            Thread.sleep(3000);
+            if (wsClient.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
+                wsClientMap.put(uri, wsClient);
+            } else {
+                Log.info("Failed to connect " + uri);
             }
-            wsClientMap.put(uri, wsClient);
         }
         return wsClientMap.get(uri);
     }
@@ -151,16 +155,46 @@ public class RuntimeInfo {
 
         CmdDetail find = null;
         for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
-            if (cmdDetail.getCmd().equals(cmd) && cmdDetail.getVersion() >= minVersion) {
-                if (find == null) {
-                    find = cmdDetail;
-                } else if (cmdDetail.getVersion() > cmdDetail.getVersion()) {
-                    if (cmdDetail.isPreCompatible()) {
-                        find = cmdDetail;
-                    } else {
-                        break;
-                    }
-                }
+            if (!cmdDetail.getCmd().equals(cmd) || cmdDetail.getVersion() < minVersion) {
+                continue;
+            }
+
+            if (find == null) {
+                find = cmdDetail;
+                continue;
+            }
+
+            if (!cmdDetail.isPreCompatible()) {
+                break;
+            } else {
+                find = cmdDetail;
+            }
+        }
+        return find;
+    }
+
+    /**
+     * Get local command
+     * Sort by version number
+     * The highest version
+     */
+    public static CmdDetail getLocalInvokeCmd(String cmd) {
+
+        RuntimeInfo.local.getCmdDetailList().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+
+        CmdDetail find = null;
+        for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
+            if (!cmdDetail.getCmd().equals(cmd)) {
+                continue;
+            }
+
+            if (find == null) {
+                find = cmdDetail;
+                continue;
+            }
+
+            if (cmdDetail.getVersion() > find.getVersion()) {
+                find = cmdDetail;
             }
         }
         return find;

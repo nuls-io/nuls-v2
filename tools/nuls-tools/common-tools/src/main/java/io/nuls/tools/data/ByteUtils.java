@@ -71,17 +71,13 @@ public class ByteUtils {
     }
 
     /**
-     * 将整型数转为对应的字节数组
-     * @param num 需转换的整型数
-     * @return    转换后的字节数组
-     * */
-    public static byte[] intToBytes(int num) {
-        byte[] bytes = new byte[4];
-        bytes[0] = (byte) (0xff & (num >> 0));
-        bytes[1] = (byte) (0xff & (num >> 8));
-        bytes[2] = (byte) (0xff & (num >> 16));
-        bytes[3] = (byte) (0xff & (num >> 24));
-        return bytes;
+     * byte[]转short
+     *
+     * @param b 字节数组
+     * @short 转换得到的short
+     */
+    public static short bytesToShort(byte[] b) {
+        return (short) (((b[1] << 8) | b[0] & 0xff));
     }
 
     /**
@@ -89,7 +85,7 @@ public class ByteUtils {
      * @param bytes  需转换的字节数组
      * @return  转换得到的整型数
      * */
-    public static int byteToInt(byte[] bytes) {
+    public static int bytesToInt(byte[] bytes) {
         int num = 0;
         int temp;
         temp = (0x000000ff & (bytes[0])) << 0;
@@ -103,6 +99,90 @@ public class ByteUtils {
         return num;
     }
 
+    /**
+     * 字节数组到long的转换.
+     * @param b 字节数组
+     */
+    public static long byteToLong(byte[] b) {
+        return (b[0] & 0xffL) |
+                ((b[ 1] & 0xffL) << 8) |
+                ((b[ 2] & 0xffL) << 16) |
+                ((b[ 3] & 0xffL) << 24) |
+                ((b[4] & 0xffL) << 32) |
+                ((b[5] & 0xffL) << 40) |
+                ((b[6] & 0xffL) << 48) |
+                ((b[7] & 0xffL) << 56);
+    }
+    
+    /**
+     * 字节数组转BigInteger
+     * @param b  需转换在字节数组
+     * @return BigInteger
+     * */
+    public static BigInteger bytesToBigInteger(byte[] b) {
+        if (b[0] < 0) {
+            byte[] temp = new byte[b.length + 1];
+            temp[0] = 0;
+            System.arraycopy(b, 0, temp, 1, b.length);
+            return new BigInteger(temp);
+        }
+        return new BigInteger(b);
+    }
+
+    /***
+     * 字节数组转字符串
+     * @param bytearray  字节数组
+     * @return  转换都的字符串
+     * */
+    public static String bytesToString(byte[] bytearray) {
+        String result = "";
+        char temp;
+
+        int length = bytearray.length;
+        for (int i = 0; i < length; i++) {
+            temp = (char) bytearray[i];
+            result += temp;
+        }
+        return result;
+    }
+
+    /**
+     * 把byte[]转double
+     *
+     * @return double
+     */
+    public static double bytesToDouble(byte[] arr) {
+        long value = 0;
+        for (int i = 0; i < 8; i++) {
+            value |= ((long) (arr[i] & 0xff)) << (8 * i);
+        }
+        return Double.longBitsToDouble(value);
+    }
+
+    /**
+     * short到字节数组的转换.
+     * @param num 需转换的整型数
+     */
+    public static byte[] shortToBytes(short num) {
+        byte[] bytes = new byte[2];
+        bytes[0] = (byte) (0xff & (num >> 0));
+        bytes[1] = (byte) (0xff & (num >> 8));
+        return bytes;
+    }
+
+    /**
+     * 将整型数转为对应的字节数组
+     * @param num 需转换的整型数
+     * @return    转换后的字节数组
+     * */
+    public static byte[] intToBytes(int num) {
+        byte[] bytes = new byte[4];
+        bytes[0] = (byte) (0xff & (num >> 0));
+        bytes[1] = (byte) (0xff & (num >> 8));
+        bytes[2] = (byte) (0xff & (num >> 16));
+        bytes[3] = (byte) (0xff & (num >> 24));
+        return bytes;
+    }
 
     /**
      * 将长整型数转为对应的字节数组
@@ -119,11 +199,25 @@ public class ByteUtils {
     }
 
     /**
+     * 把double转为byte
+     *
+     * @return byte[]
+     */
+    public static byte[] doubleToBytes(double d) {
+        long value = Double.doubleToRawLongBits(d);
+        byte[] byteRet = new byte[8];
+        for (int i = 0; i < 8; i++) {
+            byteRet[i] = (byte) ((value >> 8 * i) & 0xff);
+        }
+        return byteRet;
+    }
+
+    /**
      * 将BigInteger类型数据转为byte[]
      * @param n  需要转换的数据
      * @return
      * */
-    public static byte[] byteConvert32Bytes(BigInteger n) {
+    public static byte[] bigIntegerToBytes(BigInteger n) {
         byte[] temp;
         if (n == null) {
             return null;
@@ -145,55 +239,13 @@ public class ByteUtils {
     }
 
     /**
-     * 字节数组转BigInteger
-     * @param b  需转换在字节数组
-     * @return BigInteger
-     * */
-    public static BigInteger byteConvertInteger(byte[] b) {
-        if (b[0] < 0) {
-            byte[] temp = new byte[b.length + 1];
-            temp[0] = 0;
-            System.arraycopy(b, 0, temp, 1, b.length);
-            return new BigInteger(temp);
-        }
-        return new BigInteger(b);
-    }
-
-
-    /**
-     * Hex解码时使用，字符的下标
-     * @param c  字符
-     * @return 字符下标
-     * */
-    public static byte charToByte(char c) {
-        return (byte) "0123456789ABCDEF".indexOf(c);
-    }
-
-    /***
-     * 字节数组转字符串
-     * @param bytearray  字节数组
-     * @return  转换都的字符串
-     * */
-    public static String byteToString(byte[] bytearray) {
-        String result = "";
-        char temp;
-
-        int length = bytearray.length;
-        for (int i = 0; i < length; i++) {
-            temp = (char) bytearray[i];
-            result += temp;
-        }
-        return result;
-    }
-
-    /**
      * 截取字节数组
      * @param input       源字节数组
      * @param startIndex  开始截取的下标
      * @param length      截取的长度
      * @return            截取出的自己数组
      * */
-    public static byte[] subByte(byte[] input, int startIndex, int length) {
+    public static byte[] subBytes(byte[] input, int startIndex, int length) {
         byte[] bt = new byte[length];
         for (int i = 0; i < length; i++) {
             bt[i] = input[i + startIndex];

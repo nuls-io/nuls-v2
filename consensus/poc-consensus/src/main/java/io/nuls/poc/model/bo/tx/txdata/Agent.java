@@ -40,7 +40,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author Niels
+ * @author tag
+ * 2018/11/6
  */
 public class Agent extends TransactionLogicData {
 
@@ -70,7 +71,7 @@ public class Agent extends TransactionLogicData {
     private double commissionRate;
 
     /**
-     * 打包时间
+     * 创建时间
      * */
     private transient long time;
 

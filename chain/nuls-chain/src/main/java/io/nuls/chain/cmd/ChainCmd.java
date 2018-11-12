@@ -2,6 +2,7 @@ package io.nuls.chain.cmd;
 
 import io.nuls.base.data.chain.Asset;
 import io.nuls.base.data.chain.Chain;
+import io.nuls.base.data.chain.Seed;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -11,10 +12,12 @@ import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  * @author tangyi
@@ -31,12 +34,12 @@ public class ChainCmd extends BaseCmd {
     private AssetService assetService;
 
     @CmdAnnotation(cmd = "chain", version = 1.0, preCompatible = true)
-    public CmdResponse chainInfo(List params) {
+    public CmdResponse chain(List params) {
         try {
             Chain chain = chainService.getChain(Short.valueOf(params.get(0).toString()));
             List<Asset> assetList = assetService.getAssetListByChain(Short.valueOf(params.get(0).toString()));
             chain.setAssetList(assetList);
-            return success("success", chain);
+            return success("chain", chain);
         } catch (Exception e) {
             Log.error(e);
             return failed(ErrorCode.init("-100"), e.getMessage());
@@ -55,12 +58,63 @@ public class ChainCmd extends BaseCmd {
             chain.setMinAvailableNodeNum(Integer.valueOf(params.get(5).toString()));
             chain.setSingleNodeMinConnectionNum(Integer.valueOf(params.get(6).toString()));
             chain.setTxConfirmedBlockNum(Integer.valueOf(params.get(7).toString()));
-            chain.setSeedList(new ArrayList<>());
+            List<Seed> seedList = new ArrayList<>();
+            StringTokenizer seedStr = new StringTokenizer(params.get(8).toString(), ",");
+            while (seedStr.hasMoreTokens()) {
+                StringTokenizer ipPort = new StringTokenizer(seedStr.nextToken(), ":");
+                Seed seed = new Seed();
+                seed.setIp(ipPort.nextToken());
+                seed.setPort(Integer.parseInt(ipPort.nextToken()));
+                seedList.add(seed);
+            }
+            chain.setSeedList(seedList);
             chain.setCreateTime(TimeService.currentTimeMillis());
+
+            // TODO
+            return success("sent newTx", chain);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(ErrorCode.init("-100"), e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = "chainRegValidator", version = 1.0, preCompatible = true)
+    public CmdResponse chainRegValidator(List params) {
+        try {
+            Chain chain = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Chain.class);
+            if (chain.getChainId() < 0) {
+                return failed(ErrorCode.init("-10002"));
+            }
+            if (chainService.getChain(chain.getChainId()) != null) {
+                return failed(ErrorCode.init("-10001"));
+            }
+
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(ErrorCode.init("-100"), e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = "chainRegCommit", version = 1.0, preCompatible = true)
+    public CmdResponse chainRegCommit(List params) {
+        try {
+            Chain chain = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Chain.class);
 
             chainService.saveChain(chain);
 
-            return success("success", null);
+            return success("chainRegCommit", null);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(ErrorCode.init("-100"), e.getMessage());
+        }
+    }
+
+    @CmdAnnotation(cmd = "chainRegRollback", version = 1.0, preCompatible = true)
+    public CmdResponse chainRegRollback(List params) {
+        try {
+
+            return success("chainRegRollback", null);
         } catch (Exception e) {
             Log.error(e);
             return failed(ErrorCode.init("-100"), e.getMessage());

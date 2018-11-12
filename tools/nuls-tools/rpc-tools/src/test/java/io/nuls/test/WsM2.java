@@ -51,7 +51,7 @@ public class WsM2 {
 
         System.out.println(CmdDispatcher.call("assetList", new Object[]{188}, 1.0));
 
-        System.out.println(CmdDispatcher.call("assetCurrentNumber", new Object[]{(short) 188, (short) 765, 765765765}, 1.0));
+        System.out.println(CmdDispatcher.call("assetCurrNumOfChain", new Object[]{(short) 188, (short) 765, 765765765}, 1.0));
 
         System.out.println(CmdDispatcher.call("asset", new Object[]{(short) 188, (short) 765}, 1.0));
 
