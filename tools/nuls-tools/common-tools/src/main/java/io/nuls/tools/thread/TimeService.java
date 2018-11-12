@@ -131,9 +131,9 @@ public class TimeService implements Runnable {
             client.setDefaultTimeout(1000);
             client.setSoTimeout(1000);
             InetAddress inetAddress = InetAddress.getByName(address);
-            Log.debug("start ask time....");
+            //Log.debug("start ask time....");
             TimeInfo timeInfo = client.getTime(inetAddress);
-            Log.debug("done!");
+            //Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
             return 0L;
