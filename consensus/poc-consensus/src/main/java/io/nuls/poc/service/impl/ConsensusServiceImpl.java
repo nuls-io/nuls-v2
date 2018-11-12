@@ -3,14 +3,24 @@ package io.nuls.poc.service.impl;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.service.ConsensusService;
+import io.nuls.poc.storage.AgentStorageService;
+import io.nuls.poc.storage.DepositStorageService;
+import io.nuls.poc.storage.PublishStorageService;
 import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.rpc.model.CmdResponse;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
 import java.util.List;
 
 @Service
 public class ConsensusServiceImpl implements ConsensusService {
+    @Autowired
+    private AgentStorageService agentService;
+    @Autowired
+    private DepositStorageService depositService;
+    @Autowired
+    private PublishStorageService publishService;
 
     @Override
     public CmdResponse createAgent(List<Object> params) {
@@ -96,6 +106,7 @@ public class ConsensusServiceImpl implements ConsensusService {
 
     @Override
     public CmdResponse getAgentStatus(List<Object> params) {
+        //从数据库查询节点信息，返回节点状态
         return null;
     }
 
@@ -106,7 +117,6 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         int chain_id = (Integer)params.get(0);
         ConfigManager.packing_status.put(chain_id,true);
-        System.out.println(ConfigManager.packing_status);
         return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
     }
 

@@ -24,8 +24,6 @@
  */
 package io.nuls.tools.crypto;
 
-import io.nuls.tools.data.ByteUtils;
-
 /**
  * @author tag
  */
@@ -110,9 +108,18 @@ public class HexUtil {
         byte[] d = new byte[length];
         for (int i = 0; i < length; i++) {
             int pos = i * 2;
-            d[i] = (byte) (ByteUtils.charToByte(hexChars[pos]) << 4 | ByteUtils.charToByte(hexChars[pos + 1]));
+            d[i] = (byte) (charToBytes(hexChars[pos]) << 4 | charToBytes(hexChars[pos + 1]));
         }
         return d;
+    }
+
+    /**
+     * Hex解码时使用，字符的下标
+     * @param c  字符
+     * @return 字符下标
+     * */
+    public static byte charToBytes(char c) {
+        return (byte) "0123456789ABCDEF".indexOf(c);
     }
 
     private static final char[] DIGITS_LOWER = {'0', '1', '2', '3', '4', '5',

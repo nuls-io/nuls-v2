@@ -150,6 +150,40 @@ public class SerializeUtils {
         }
     }
 
+    /**
+     * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in little endian format./从字节数组（以偏移量开始）解析2字节，以小端格式的无符号16位整数
+     *
+     * @param bytes  字节数组
+     * @param offset 偏移量（数组下标）
+     */
+    public static int readUint16LE(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xff) |
+                ((bytes[offset + 1] & 0xff) << 8);
+    }
+
+    /**
+     * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in big endian format./从字节数组（以偏移量开始）解析2字节，以大端格式的无符号32位整数
+     *
+     * @param bytes  字节数组
+     * @param offset 偏移量（数组下标）
+     */
+    public static int readUint16BE(byte[] bytes, int offset) {
+        return ((bytes[offset] & 0xff) << 8) |
+                (bytes[offset + 1] & 0xff);
+    }
+
+    /**
+     * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in little endian format.
+     * 从字节数组（以偏移量开始）解析2字节，以端格式的无符号16位整数
+     *
+     * @param bytes  byte[]
+     * @param offset int偏移量
+     * @return int
+     */
+    public static int readUint16(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xff) |
+                ((bytes[offset + 1] & 0xff) << 8);
+    }
 
     /**
      * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format./从字节数组（以偏移量开始）解析4字节，以小端格式的无符号32位整数
@@ -162,17 +196,6 @@ public class SerializeUtils {
                 ((bytes[offset + 1] & 0xffL) << 8) |
                 ((bytes[offset + 2] & 0xffL) << 16) |
                 ((bytes[offset + 3] & 0xffL) << 24);
-    }
-
-    /**
-     * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in little endian format./从字节数组（以偏移量开始）解析2字节，以小端格式的无符号16位整数
-     *
-     * @param bytes  字节数组
-     * @param offset 偏移量（数组下标）
-     */
-    public static int readUint16LE(byte[] bytes, int offset) {
-        return (bytes[offset] & 0xff) |
-                ((bytes[offset + 1] & 0xff) << 8);
     }
 
 
@@ -190,23 +213,6 @@ public class SerializeUtils {
     }
 
     /**
-     * Parse 8 bytes from the byte array (starting at the offset) as unsigned 64-bit integer in little endian format./从字节数组（以偏移量开始）解析8字节，以小端格式的无符号64位整数
-     *
-     * @param bytes  字节数组
-     * @param offset 偏移量（数组下标）
-     */
-    public static long readInt64LE(byte[] bytes, int offset) {
-        return (bytes[offset] & 0xffL) |
-                ((bytes[offset + 1] & 0xffL) << 8) |
-                ((bytes[offset + 2] & 0xffL) << 16) |
-                ((bytes[offset + 3] & 0xffL) << 24) |
-                ((bytes[offset + 4] & 0xffL) << 32) |
-                ((bytes[offset + 5] & 0xffL) << 40) |
-                ((bytes[offset + 6] & 0xffL) << 48) |
-                ((bytes[offset + 7] & 0xffL) << 56);
-    }
-
-    /**
      * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in big endian format./从字节数组（以偏移量开始）解析4字节，以大端格式的无符号32位整数
      *
      * @param bytes  字节数组
@@ -220,14 +226,136 @@ public class SerializeUtils {
     }
 
     /**
-     * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in big endian format./从字节数组（以偏移量开始）解析2字节，以大端格式的无符号32位整数
+     * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format.
+     * 从字节数组（以偏移量开始）解析4字节，以端格式的无符号32位整数
+     *
+     * @param bytes  byte[]
+     * @param offset int偏移量
+     * @return int
+     */
+    public static long readUint32(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xffL) |
+                ((bytes[offset + 1] & 0xffL) << 8) |
+                ((bytes[offset + 2] & 0xffL) << 16) |
+                ((bytes[offset + 3] & 0xffL) << 24);
+    }
+
+    /**
+     * Parse 6 bytes from the byte array (starting at the offset) as unsigned 48-bit integer in little endian format.
+     * 从字节数组（以偏移量开始）解析6字节，以端格式的无符号48位整数
+     *
+     * @param bytes  byte[]
+     * @param offset int偏移量
+     * @return int
+     */
+    public static long readUint48(byte[] bytes, int offset) {
+        return  (bytes[offset] & 0xffL) |
+                ((bytes[offset + 1] & 0xffL) << 8) |
+                ((bytes[offset + 2] & 0xffL) << 16) |
+                ((bytes[offset + 3] & 0xffL) << 24) |
+                ((bytes[offset + 4] & 0xffL) << 32) |
+                ((bytes[offset + 5] & 0xffL) << 40) |
+                ((bytes[offset + 6] & 0xffL) << 48);
+    }
+
+    /**
+     * Parse 8 bytes from the byte array (starting at the offset) as unsigned 64-bit integer in little endian format./从字节数组（以偏移量开始）解析8字节，以小端格式的无符号64位整数
      *
      * @param bytes  字节数组
      * @param offset 偏移量（数组下标）
      */
-    public static int readUint16BE(byte[] bytes, int offset) {
-        return ((bytes[offset] & 0xff) << 8) |
-                (bytes[offset + 1] & 0xff);
+    public static long readInt64LE(byte[] bytes, int offset) {
+        return  (bytes[offset] & 0xffL) |
+                ((bytes[offset + 1] & 0xffL) << 8) |
+                ((bytes[offset + 2] & 0xffL) << 16) |
+                ((bytes[offset + 3] & 0xffL) << 24) |
+                ((bytes[offset + 4] & 0xffL) << 32) |
+                ((bytes[offset + 5] & 0xffL) << 40) |
+                ((bytes[offset + 6] & 0xffL) << 48) |
+                ((bytes[offset + 7] & 0xffL) << 56);
+    }
+
+    /**
+     * Parse 8 bytes from the byte array (starting at the offset) as unsigned 64-bit integer in little endian format.
+     * 从字节数组（以偏移量开始）解析8字节，以端格式的无符号64位整数
+     *
+     * @param bytes  byte[]
+     * @param offset int偏移量
+     * @return int
+     */
+    public static long readUint64(byte[] bytes, int offset) {
+        return (bytes[offset] & 0xffL) |
+                ((bytes[offset + 1] & 0xffL) << 8) |
+                ((bytes[offset + 2] & 0xffL) << 16) |
+                ((bytes[offset + 3] & 0xffL) << 24) |
+                ((bytes[offset + 4] & 0xffL) << 32) |
+                ((bytes[offset + 5] & 0xffL) << 40) |
+                ((bytes[offset + 6] & 0xffL) << 48) |
+                ((bytes[offset + 7] & 0xffL) << 56);
+    }
+
+    /**
+     * int转byte[] (只转int数据四个字节中的两个字节)
+     *
+     * @param x int
+     * @return byte[]
+     */
+    public static byte[] int16ToBytes(int x) {
+        byte[] bb = new byte[2];
+        bb[1] = (byte) (0xFF & x >> 8);
+        bb[0] = (byte) (0xFF & x >> 0);
+        return bb;
+    }
+
+    /**
+     * int转byte[]
+     *
+     * @param x int
+     * @return byte[]
+     */
+    public static byte[] int32ToBytes(int x) {
+        byte[] bb = new byte[4];
+        bb[3] = (byte) (0xFF & x >> 24);
+        bb[2] = (byte) (0xFF & x >> 16);
+        bb[1] = (byte) (0xFF & x >> 8);
+        bb[0] = (byte) (0xFF & x >> 0);
+        return bb;
+    }
+
+    /**
+     * long数据转byte[](只转前6个字节)
+     *
+     * @param val long
+     * @return byte[]
+     */
+    public static byte[] uint48ToBytes(long val) {
+        byte[] bytes = new byte[SerializeUtils.sizeOfUint48()];
+        bytes[0] = (byte) (0xFF & val);
+        bytes[1] = (byte) (0xFF & (val >> 8));
+        bytes[2] = (byte) (0xFF & (val >> 16));
+        bytes[3] = (byte) (0xFF & (val >> 24));
+        bytes[4] = (byte) (0xFF & (val >> 32));
+        bytes[5] = (byte) (0xFF & (val >> 40));
+        return bytes;
+    }
+
+    /**
+     * long数据转byte[]
+     *
+     * @param val long
+     * @return byte[]
+     */
+    public static byte[] uint64ToByteArray(long val) {
+        byte[] out = new byte[8];
+        out[0] = (byte) (0xFF & val);
+        out[1] = (byte) (0xFF & (val >> 8));
+        out[2] = (byte) (0xFF & (val >> 16));
+        out[3] = (byte) (0xFF & (val >> 24));
+        out[4] = (byte) (0xFF & (val >> 32));
+        out[5] = (byte) (0xFF & (val >> 40));
+        out[6] = (byte) (0xFF & (val >> 48));
+        out[7] = (byte) (0xFF & (val >> 56));
+        return out;
     }
 
     /**
@@ -264,30 +392,6 @@ public class SerializeUtils {
         return bytes;
     }
 
-    /**
-     * 将一个Long型数据以大端格式存储到指定字节数组指定的偏移量的连续4个字节中
-     *
-     * @param val    long数据
-     * @param out    存放Long型数据的字节数组
-     * @param offset 偏移量
-     */
-    public static void uint32ToByteArrayBE(long val, byte[] out, int offset) {
-        out[offset] = (byte) (0xFF & (val >> 24));
-        out[offset + 1] = (byte) (0xFF & (val >> 16));
-        out[offset + 2] = (byte) (0xFF & (val >> 8));
-        out[offset + 3] = (byte) (0xFF & val);
-    }
-
-    /**
-     * Write 2 bytes to the output stream as unsigned 16-bit integer in little endian format./将2字节写入输出流作为无符号16位整数，以小端格式
-     *
-     * @param val    int数据
-     * @param stream 输出流
-     */
-    public static void uint16ToByteStreamLE(int val, OutputStream stream) throws IOException {
-        stream.write((int) (0xFF & val));
-        stream.write((int) (0xFF & (val >> 8)));
-    }
 
     /**
      * 将一个short型数据以小端格式存储到指定字节数组指定的偏移量的连续2个字节中
@@ -301,6 +405,19 @@ public class SerializeUtils {
         out[offset + 1] = (byte) (0xFF & (val >> 8));
     }
 
+    /**
+     * 将一个Long型数据以大端格式存储到指定字节数组指定的偏移量的连续4个字节中
+     *
+     * @param val    long数据
+     * @param out    存放Long型数据的字节数组
+     * @param offset 偏移量
+     */
+    public static void uint32ToByteArrayBE(long val, byte[] out, int offset) {
+        out[offset] = (byte) (0xFF & (val >> 24));
+        out[offset + 1] = (byte) (0xFF & (val >> 16));
+        out[offset + 2] = (byte) (0xFF & (val >> 8));
+        out[offset + 3] = (byte) (0xFF & val);
+    }
 
     /**
      * 将一个Long型数据以小端格式存储到指定字节数组指定的偏移量的连续4个字节中
@@ -360,6 +477,17 @@ public class SerializeUtils {
     }
 
     /**
+     * Write 2 bytes to the output stream as unsigned 16-bit integer in little endian format./将2字节写入输出流作为无符号16位整数，以小端格式
+     *
+     * @param val    int数据
+     * @param stream 输出流
+     */
+    public static void uint16ToByteStreamLE(int val, OutputStream stream) throws IOException {
+        stream.write((int) (0xFF & val));
+        stream.write((int) (0xFF & (val >> 8)));
+    }
+
+    /**
      * Write 4 bytes to the output stream as unsigned 32-bit long in little endian format./将4字节写入输出流作为无符号32位long型数据，以小端格式
      *
      * @param val    long数据
@@ -371,7 +499,6 @@ public class SerializeUtils {
         stream.write((int) (0xFF & (val >> 16)));
         stream.write((int) (0xFF & (val >> 24)));
     }
-
 
     /**
      * Write 8 bytes to the output stream as unsigned 64-bit long in little endian format./将8字节写入输出流作为无符号64位long型数据，以小端格式
@@ -418,88 +545,8 @@ public class SerializeUtils {
      * @param stream 输出流
      */
     public static void doubleToByteStream(double val, OutputStream stream) throws IOException {
-        stream.write(double2Bytes(val));
+        stream.write(ByteUtils.doubleToBytes(val));
     }
-
-    /**
-     * 把double转为byte
-     *
-     * @return byte[]
-     */
-    public static byte[] double2Bytes(double d) {
-        long value = Double.doubleToRawLongBits(d);
-        byte[] byteRet = new byte[MAGIC_8];
-        for (int i = 0; i < MAGIC_8; i++) {
-            byteRet[i] = (byte) ((value >> 8 * i) & 0xff);
-        }
-        return byteRet;
-    }
-
-    /**
-     * 把byte[]转double
-     *
-     * @return double
-     */
-    public static double bytes2Double(byte[] arr) {
-        long value = 0;
-        for (int i = 0; i < MAGIC_8; i++) {
-            value |= ((long) (arr[i] & 0xff)) << (MAGIC_8 * i);
-        }
-        return Double.longBitsToDouble(value);
-    }
-
-
-    /**
-     * byte[]转short
-     *
-     * @param b 字节数组
-     * @short 转换得到的short
-     */
-    public static short bytes2Short(byte[] b) {
-        return (short) (((b[1] << 8) | b[0] & 0xff));
-    }
-
-    /**
-     * short转byte[]
-     *
-     * @param val short
-     * @return byte[]
-     */
-    public static byte[] shortToBytes(short val) {
-        byte[] bytes = new byte[2];
-        bytes[1] = (byte) (0xFF & val >> 8);
-        bytes[0] = (byte) (0xFF & val >> 0);
-        return bytes;
-    }
-
-    /**
-     * int转byte[]
-     *
-     * @param x int
-     * @return byte[]
-     */
-    public static byte[] int32ToBytes(int x) {
-        byte[] bb = new byte[4];
-        bb[3] = (byte) (0xFF & x >> 24);
-        bb[2] = (byte) (0xFF & x >> 16);
-        bb[1] = (byte) (0xFF & x >> 8);
-        bb[0] = (byte) (0xFF & x >> 0);
-        return bb;
-    }
-
-    /**
-     * int转byte[] (只转int数据四个字节中的两个字节)
-     *
-     * @param x int
-     * @return byte[]
-     */
-    public static byte[] int16ToBytes(int x) {
-        byte[] bb = new byte[2];
-        bb[1] = (byte) (0xFF & x >> 8);
-        bb[0] = (byte) (0xFF & x >> 0);
-        return bb;
-    }
-
 
     public static int sizeOfDouble(Double val) {
         return MAGIC_8;
@@ -605,7 +652,7 @@ public class SerializeUtils {
      *
      * @return int
      */
-    public static int sizeOfBoolean(Boolean val) {
+    public static int sizeOfBoolean() {
         return 1;
     }
 
@@ -632,89 +679,4 @@ public class SerializeUtils {
         int size = val.size();
         return size == 0 ? 1 : size;
     }
-
-    /**
-     * long数据转byte[]
-     *
-     * @param val long
-     * @return byte[]
-     */
-    public static byte[] uint64ToByteArray(long val) {
-        byte[] out = new byte[8];
-        out[0] = (byte) (0xFF & val);
-        out[1] = (byte) (0xFF & (val >> 8));
-        out[2] = (byte) (0xFF & (val >> 16));
-        out[3] = (byte) (0xFF & (val >> 24));
-        out[4] = (byte) (0xFF & (val >> 32));
-        out[5] = (byte) (0xFF & (val >> 40));
-        out[6] = (byte) (0xFF & (val >> 48));
-        out[7] = (byte) (0xFF & (val >> 56));
-        return out;
-    }
-
-    /**
-     * long数据转byte[](只转前6个字节)
-     *
-     * @param val long
-     * @return byte[]
-     */
-    public static byte[] uint48ToBytes(long val) {
-        byte[] bytes = new byte[SerializeUtils.sizeOfUint48()];
-        bytes[0] = (byte) (0xFF & val);
-        bytes[1] = (byte) (0xFF & (val >> 8));
-        bytes[2] = (byte) (0xFF & (val >> 16));
-        bytes[3] = (byte) (0xFF & (val >> 24));
-        bytes[4] = (byte) (0xFF & (val >> 32));
-        bytes[5] = (byte) (0xFF & (val >> 40));
-        return bytes;
-    }
-
-    /**
-     * Parse 2 bytes from the byte array (starting at the offset) as unsigned 16-bit integer in little endian format.
-     * 从字节数组（以偏移量开始）解析2字节，以端格式的无符号16位整数
-     *
-     * @param bytes  byte[]
-     * @param offset int偏移量
-     * @return int
-     */
-    public static int readUint16(byte[] bytes, int offset) {
-        return (bytes[offset] & 0xff) |
-                ((bytes[offset + 1] & 0xff) << 8);
-    }
-
-    /**
-     * Parse 4 bytes from the byte array (starting at the offset) as unsigned 32-bit integer in little endian format.
-     * 从字节数组（以偏移量开始）解析4字节，以端格式的无符号32位整数
-     *
-     * @param bytes  byte[]
-     * @param offset int偏移量
-     * @return int
-     */
-    public static long readUint32(byte[] bytes, int offset) {
-        return (bytes[offset] & 0xffL) |
-                ((bytes[offset + 1] & 0xffL) << 8) |
-                ((bytes[offset + 2] & 0xffL) << 16) |
-                ((bytes[offset + 3] & 0xffL) << 24);
-    }
-
-
-    /**
-     * Parse 8 bytes from the byte array (starting at the offset) as unsigned 64-bit integer in little endian format.
-     * 从字节数组（以偏移量开始）解析8字节，以端格式的无符号64位整数
-     *
-     * @param bytes  byte[]
-     * @param offset int偏移量
-     * @return int
-     */
-    public static long readInt64(byte[] bytes, int offset) {
-        return (bytes[offset] & 0xffL) |
-                ((bytes[offset + 1] & 0xffL) << 8) |
-                ((bytes[offset + 2] & 0xffL) << 16) |
-                ((bytes[offset + 3] & 0xffL) << 24) |
-                ((bytes[offset + 4] & 0xffL) << 32) |
-                ((bytes[offset + 5] & 0xffL) << 40) |
-                ((bytes[offset + 6] & 0xffL) << 48) |
-                ((bytes[offset + 7] & 0xffL) << 56);
-    }
-
 }

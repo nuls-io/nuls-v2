@@ -242,7 +242,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
     @Override
     public int hashCode() {
         // Use the last 4 bytes, not the first 4 which are often zeros in Bitcoin.
-        return ByteUtils.byteToInt(ByteUtils.reverseBytes(Arrays.copyOfRange(bytes,bytes.length-4,bytes.length)));
+        return ByteUtils.bytesToInt(ByteUtils.reverseBytes(Arrays.copyOfRange(bytes,bytes.length-4,bytes.length)));
     }
 
     @Override
