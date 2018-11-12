@@ -6,7 +6,7 @@ import io.nuls.poc.service.ConsensusService;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.storage.PublishStorageService;
-import io.nuls.poc.utils.manager.ConfigManager;
+import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -116,7 +116,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             return new CmdResponse(1, ConsensusErrorCode.PARAM_NUMBER_ERROR.getCode(),ConsensusErrorCode.PARAM_NUMBER_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
         }
         int chain_id = (Integer)params.get(0);
-        ConfigManager.packing_status.put(chain_id,true);
+        ConsensusManager.packing_status.put(chain_id,true);
         return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
     }
 

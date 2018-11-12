@@ -35,14 +35,13 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author Niels
+ * @author tag
+ * 2018/11/12
  */
 public class MeetingRound {
-    //本地打包账户
-    //private Account localPacker;
     //总权重
     private double totalWeight;
-    //本地打包节点在当前轮次的下表
+    //本地打包节点在当前轮次的下标
     private long index;
     //当前轮次开始打包时间
     private long startTime;
@@ -96,7 +95,7 @@ public class MeetingRound {
         totalWeight = 0d;
         for (int i = 0; i < memberList.size(); i++) {
             MeetingMember member = memberList.get(i);
-            member.setRoundIndex(this.getIndex());
+            //member.setRoundIndex(this.getIndex());
             member.setRoundStartTime(this.getStartTime());
             member.setPackingIndexOfRound(i + 1);
             //member.setPackStartTime(startTime + i * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS);
