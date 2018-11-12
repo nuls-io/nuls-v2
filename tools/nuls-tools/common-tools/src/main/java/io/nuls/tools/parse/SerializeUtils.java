@@ -254,8 +254,7 @@ public class SerializeUtils {
                 ((bytes[offset + 2] & 0xffL) << 16) |
                 ((bytes[offset + 3] & 0xffL) << 24) |
                 ((bytes[offset + 4] & 0xffL) << 32) |
-                ((bytes[offset + 5] & 0xffL) << 40) |
-                ((bytes[offset + 6] & 0xffL) << 48);
+                ((bytes[offset + 5] & 0xffL) << 40) ;
     }
 
     /**
