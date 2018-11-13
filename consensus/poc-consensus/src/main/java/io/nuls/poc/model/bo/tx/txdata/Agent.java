@@ -98,7 +98,7 @@ public class Agent extends TransactionLogicData {
     /**
      * 总委托金额
      * */
-    private transient long totalDeposit;
+    private transient Na totalDeposit;
 
     /**
      * 交易HASH
@@ -187,11 +187,11 @@ public class Agent extends TransactionLogicData {
         return creditVal;
     }
 
-    public long getTotalDeposit() {
+    public Na getTotalDeposit() {
         return totalDeposit;
     }
 
-    public void setTotalDeposit(long totalDeposit) {
+    public void setTotalDeposit(Na totalDeposit) {
         this.totalDeposit = totalDeposit;
     }
 

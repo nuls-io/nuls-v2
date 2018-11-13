@@ -14,17 +14,24 @@ import java.io.IOException;
  * @description
  */
 public class Asset extends BaseNulsData {
+    private long assetId;
     private short chainId;
-    private short assetId;
     private String symbol;
     private String name;
     private int depositNuls;
     private long initNumber;
-    private long currentNumber;
     private short decimalPlaces;
     private boolean available;
     private long createTime;
     private long lastUpdateTime;
+
+    public long getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(long assetId) {
+        this.assetId = assetId;
+    }
 
     public short getChainId() {
         return chainId;
@@ -32,14 +39,6 @@ public class Asset extends BaseNulsData {
 
     public void setChainId(short chainId) {
         this.chainId = chainId;
-    }
-
-    public short getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(short assetId) {
-        this.assetId = assetId;
     }
 
     public String getSymbol() {
@@ -72,14 +71,6 @@ public class Asset extends BaseNulsData {
 
     public void setInitNumber(long initNumber) {
         this.initNumber = initNumber;
-    }
-
-    public long getCurrentNumber() {
-        return currentNumber;
-    }
-
-    public void setCurrentNumber(long currentNumber) {
-        this.currentNumber = currentNumber;
     }
 
     public short getDecimalPlaces() {
@@ -116,13 +107,12 @@ public class Asset extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint48(assetId);
         stream.writeShort(chainId);
-        stream.writeShort(assetId);
         stream.writeString(symbol);
         stream.writeString(name);
         stream.writeUint32(depositNuls);
         stream.writeInt64(initNumber);
-        stream.writeInt64(currentNumber);
         stream.writeShort(decimalPlaces);
         stream.writeBoolean(available);
         stream.writeUint48(createTime);
@@ -131,13 +121,12 @@ public class Asset extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.assetId = byteBuffer.readUint48();
         this.chainId = byteBuffer.readShort();
-        this.assetId = byteBuffer.readShort();
         this.symbol = byteBuffer.readString();
         this.name = byteBuffer.readString();
         this.depositNuls = byteBuffer.readInt32();
         this.initNumber = byteBuffer.readInt64();
-        this.currentNumber = byteBuffer.readInt64();
         this.decimalPlaces = byteBuffer.readShort();
         this.available = byteBuffer.readBoolean();
         this.createTime = byteBuffer.readUint48();
@@ -147,17 +136,15 @@ public class Asset extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        // chainId
-        size += SerializeUtils.sizeOfInt16();
         // assetId
+        size += SerializeUtils.sizeOfUint48();
+        // chainId
         size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfString(symbol);
         size += SerializeUtils.sizeOfString(name);
         // depositNuls
         size += SerializeUtils.sizeOfInt32();
         // initNumber
-        size += SerializeUtils.sizeOfInt64();
-        // currentNumber
         size += SerializeUtils.sizeOfInt64();
         // decimalPlaces
         size += SerializeUtils.sizeOfInt16();
