@@ -107,7 +107,7 @@ public class RuntimeInfo {
         if (!wsClientMap.containsKey(uri)) {
             WsClient wsClient = new WsClient(uri);
             wsClient.connect();
-            Thread.sleep(3000);
+            Thread.sleep(1000);
             if (wsClient.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
                 wsClientMap.put(uri, wsClient);
             } else {
