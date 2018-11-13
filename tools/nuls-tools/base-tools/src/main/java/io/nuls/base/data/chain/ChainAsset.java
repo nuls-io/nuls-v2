@@ -18,6 +18,9 @@ public class ChainAsset extends BaseNulsData {
     private short chainId;
     private long assetId;
     private long currentNumber;
+    private String chainName;
+    private String assetSymbol;
+    private String assetName;
 
     public short getChainId() {
         return chainId;
@@ -43,11 +46,38 @@ public class ChainAsset extends BaseNulsData {
         this.currentNumber = currentNumber;
     }
 
+    public String getChainName() {
+        return chainName;
+    }
+
+    public void setChainName(String chainName) {
+        this.chainName = chainName;
+    }
+
+    public String getAssetSymbol() {
+        return assetSymbol;
+    }
+
+    public void setAssetSymbol(String assetSymbol) {
+        this.assetSymbol = assetSymbol;
+    }
+
+    public String getAssetName() {
+        return assetName;
+    }
+
+    public void setAssetName(String assetName) {
+        this.assetName = assetName;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeShort(chainId);
         stream.writeUint48(assetId);
         stream.writeInt64(currentNumber);
+        stream.writeString(chainName);
+        stream.writeString(assetSymbol);
+        stream.writeString(assetName);
     }
 
     @Override
@@ -55,6 +85,9 @@ public class ChainAsset extends BaseNulsData {
         this.chainId = byteBuffer.readShort();
         this.assetId = byteBuffer.readUint48();
         this.currentNumber = byteBuffer.readInt64();
+        this.chainName = byteBuffer.readString();
+        this.assetSymbol = byteBuffer.readString();
+        this.assetName = byteBuffer.readString();
     }
 
     @Override
@@ -63,6 +96,9 @@ public class ChainAsset extends BaseNulsData {
         size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfString(chainName);
+        size += SerializeUtils.sizeOfString(assetSymbol);
+        size += SerializeUtils.sizeOfString(assetName);
         return size;
     }
 }
