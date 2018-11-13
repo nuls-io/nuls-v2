@@ -8,7 +8,7 @@ package io.nuls.chain.info;
 public class CmRuntimeInfo {
     public static String dataPath;
 
-    public static String getAssetKey(short chainId, short assetId) {
+    public static String getAssetKey(short chainId, long assetId) {
         return chainId + "-" + assetId;
     }
     //short i=32767;

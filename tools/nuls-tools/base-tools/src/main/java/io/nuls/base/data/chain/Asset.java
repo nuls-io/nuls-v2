@@ -14,8 +14,8 @@ import java.io.IOException;
  * @description
  */
 public class Asset extends BaseNulsData {
-    private long assetId;
     private short chainId;
+    private long assetId;
     private String symbol;
     private String name;
     private int depositNuls;
@@ -25,20 +25,20 @@ public class Asset extends BaseNulsData {
     private long createTime;
     private long lastUpdateTime;
 
-    public long getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(long assetId) {
-        this.assetId = assetId;
-    }
-
     public short getChainId() {
         return chainId;
     }
 
     public void setChainId(short chainId) {
         this.chainId = chainId;
+    }
+
+    public long getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(long assetId) {
+        this.assetId = assetId;
     }
 
     public String getSymbol() {
@@ -107,8 +107,8 @@ public class Asset extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint48(assetId);
         stream.writeShort(chainId);
+        stream.writeUint48(assetId);
         stream.writeString(symbol);
         stream.writeString(name);
         stream.writeUint32(depositNuls);
@@ -121,8 +121,8 @@ public class Asset extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.assetId = byteBuffer.readUint48();
         this.chainId = byteBuffer.readShort();
+        this.assetId = byteBuffer.readUint48();
         this.symbol = byteBuffer.readString();
         this.name = byteBuffer.readString();
         this.depositNuls = byteBuffer.readInt32();
@@ -136,10 +136,10 @@ public class Asset extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        // assetId
-        size += SerializeUtils.sizeOfUint48();
         // chainId
         size += SerializeUtils.sizeOfInt16();
+        // assetId
+        size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfString(symbol);
         size += SerializeUtils.sizeOfString(name);
         // depositNuls

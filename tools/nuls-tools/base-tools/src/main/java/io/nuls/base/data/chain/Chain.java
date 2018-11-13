@@ -25,7 +25,7 @@ public class Chain extends BaseNulsData {
     private int singleNodeMinConnectionNum;
     private int txConfirmedBlockNum;
     private List<Seed> seedList;
-    private List<Asset> assetList;
+    private List<ChainAsset> chainAssetList;
     private boolean available;
     private long createTime;
     private long lastUpdateTime;
@@ -102,12 +102,12 @@ public class Chain extends BaseNulsData {
         this.seedList = seedList;
     }
 
-    public List<Asset> getAssetList() {
-        return assetList;
+    public List<ChainAsset> getChainAssetList() {
+        return chainAssetList;
     }
 
-    public void setAssetList(List<Asset> assetList) {
-        this.assetList = assetList;
+    public void setChainAssetList(List<ChainAsset> chainAssetList) {
+        this.chainAssetList = chainAssetList;
     }
 
     public boolean isAvailable() {
