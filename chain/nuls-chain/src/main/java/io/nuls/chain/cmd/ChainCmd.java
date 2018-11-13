@@ -1,7 +1,6 @@
 package io.nuls.chain.cmd;
 
 import io.nuls.base.data.chain.Chain;
-import io.nuls.base.data.chain.ChainAsset;
 import io.nuls.base.data.chain.Seed;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
@@ -36,12 +35,11 @@ public class ChainCmd extends BaseCmd {
     @CmdAnnotation(cmd = "chain", version = 1.0, preCompatible = true)
     public CmdResponse chain(List params) {
         try {
-            Chain chain = chainService.getChain(Short.valueOf(params.get(0).toString()));
+            short chainId = Short.valueOf(params.get(0).toString());
+            Chain chain = chainService.getChain(chainId);
             if (chain == null) {
                 return failed("C10003");
             }
-            List<ChainAsset> chainAssetList = chainService.getChainAssetByChain(Short.valueOf(params.get(0).toString()));
-            chain.setChainAssetList(chainAssetList);
             return success("chain", chain);
         } catch (Exception e) {
             Log.error(e);

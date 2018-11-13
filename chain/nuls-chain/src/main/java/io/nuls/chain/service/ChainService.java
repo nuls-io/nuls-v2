@@ -22,10 +22,10 @@ public interface ChainService {
     /**
      * Find chain based on key
      *
-     * @param id The chain ID
+     * @param chainId The chain ID
      * @return Chain
      */
-    Chain getChain(short id);
+    Chain getChain(short chainId);
 
     /**
      * Get asset information by chain ID

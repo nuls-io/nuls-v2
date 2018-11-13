@@ -39,12 +39,15 @@ public class ChainServiceImpl implements ChainService {
     /**
      * Find chain based on key
      *
-     * @param id The chain ID
+     * @param chainId The chain ID
      * @return Chain
      */
     @Override
-    public Chain getChain(short id) {
-        return chainStorage.load(id);
+    public Chain getChain(short chainId) {
+        Chain chain = chainStorage.load(chainId);
+        List<ChainAsset> chainAssetList = getChainAssetByChain(chainId);
+        chain.setChainAssetList(chainAssetList);
+        return chain;
     }
 
     /**
