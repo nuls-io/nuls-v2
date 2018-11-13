@@ -24,6 +24,13 @@ public interface ChainAssetStorage {
     boolean save(String key, ChainAsset chainAsset);
 
     /**
+     * Physical deletion
+     * @param key chainId-assetId
+     * @return true/false
+     */
+    boolean delete(String key);
+
+    /**
      * Get asset information by chain ID
      * @param chainId The chain ID
      * @return ChainAsset object

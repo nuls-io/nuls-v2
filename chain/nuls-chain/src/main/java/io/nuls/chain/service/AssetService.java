@@ -15,7 +15,7 @@ public interface AssetService {
      * @param asset Asset object that needs to be saved
      * @return true/false
      */
-    boolean saveAsset(Asset asset);
+    boolean newAsset(Asset asset);
 
     /**
      * Find asset based on key

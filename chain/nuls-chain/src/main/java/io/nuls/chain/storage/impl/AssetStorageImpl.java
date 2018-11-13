@@ -1,15 +1,12 @@
 package io.nuls.chain.storage.impl;
 
 import io.nuls.base.data.chain.Asset;
-import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.storage.AssetStorage;
-import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -23,6 +20,8 @@ import java.util.List;
 @Component
 public class AssetStorageImpl implements AssetStorage, InitializingBean {
 
+    private final String TBL = "asset";
+
     /**
      * 该方法在所有属性被设置之后调用，用于辅助对象初始化
      * This method is invoked after all properties are set, and is used to assist object initialization.
@@ -30,12 +29,11 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
     @Override
     public void afterPropertiesSet() {
         try {
-            RocksDBService.createTable(CmConstants.TBL_ASSET);
-        } catch (Exception e) {
-            if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.error(e.getMessage());
-                throw new NulsRuntimeException(CmConstants.DB_TABLE_CREATE_ERROR);
+            if (!RocksDBService.existTable(TBL)) {
+                RocksDBService.createTable(TBL);
             }
+        } catch (Exception e) {
+            Log.error(e);
         }
     }
 
@@ -49,7 +47,7 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
     @Override
     public boolean save(long key, Asset asset) {
         try {
-            return RocksDBService.put(CmConstants.TBL_ASSET, ByteUtils.longToBytes(key), asset.serialize());
+            return RocksDBService.put(TBL, ByteUtils.longToBytes(key), asset.serialize());
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -64,9 +62,13 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      */
     @Override
     public Asset load(long key) {
+        byte[] bytes = RocksDBService.get(TBL, ByteUtils.longToBytes(key));
+        if (bytes == null) {
+            return null;
+        }
+
         try {
             Asset asset = new Asset();
-            byte[] bytes = RocksDBService.get(CmConstants.TBL_ASSET, ByteUtils.longToBytes(key));
             asset.parse(bytes, 0);
             return asset;
         } catch (NulsException e) {
@@ -79,13 +81,15 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      * Physical deletion
      *
      * @param key Asset ID
+     * @return true/false
      */
     @Override
-    public void delete(long key) {
+    public boolean delete(long key) {
         try {
-            RocksDBService.delete(CmConstants.TBL_ASSET, ByteUtils.longToBytes(key));
+            return RocksDBService.delete(TBL, ByteUtils.longToBytes(key));
         } catch (Exception e) {
             Log.error(e);
+            return false;
         }
     }
 
@@ -97,11 +101,11 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      */
     @Override
     public List<Asset> getByChain(short chainId) {
-        List<byte[]> bytesList = RocksDBService.valueList(CmConstants.TBL_ASSET);
+        List<byte[]> bytesList = RocksDBService.valueList(TBL);
         List<Asset> assetList = new ArrayList<>();
         for (byte[] bytes : bytesList) {
-            Asset asset = new Asset();
             try {
+                Asset asset = new Asset();
                 asset.parse(bytes, 0);
                 if (asset.getChainId() == chainId) {
                     assetList.add(asset);
@@ -121,7 +125,7 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      */
     @Override
     public Asset getBySymbol(String symbol) {
-        List<byte[]> bytesList = RocksDBService.valueList(CmConstants.TBL_ASSET);
+        List<byte[]> bytesList = RocksDBService.valueList(TBL);
         for (byte[] bytes : bytesList) {
             try {
                 Asset asset = new Asset();

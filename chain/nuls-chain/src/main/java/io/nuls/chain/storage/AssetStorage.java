@@ -30,9 +30,11 @@ public interface AssetStorage {
 
     /**
      * Physical deletion
+     *
      * @param key Asset ID
+     * @return true/false
      */
-    void delete(long key);
+    boolean delete(long key);
 
     /**
      * Get all the assets of the chain
@@ -44,6 +46,7 @@ public interface AssetStorage {
 
     /**
      * Get asset by symbol
+     *
      * @param symbol Asset symbol
      * @return Asset object
      */
