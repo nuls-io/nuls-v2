@@ -27,7 +27,7 @@ public class TransactionBootStrap {
             init(1);
             TimeService.getInstance().start();
         }catch (Exception e){
-            Log.error("Transaction startup error！");
+            Log.error("Transaction startup error!");
             Log.error(e);
         }
     }

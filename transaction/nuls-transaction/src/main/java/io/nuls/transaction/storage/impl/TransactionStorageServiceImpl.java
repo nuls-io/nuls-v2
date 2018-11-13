@@ -6,47 +6,29 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
-import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-import io.nuls.transaction.constant.TransactionErrorCode;
-import io.nuls.transaction.storage.TransactionCacheStorageService;
+import io.nuls.transaction.storage.TransactionStorageService;
+import io.nuls.transaction.utils.DBUtil;
 
 import java.io.IOException;
 
 /**
- * 验证通过但未打包的交易
- * Save verified transaction (unpackaged)
- *
  * @author: Charlie
  * @date: 2018/11/13
  */
-@Service
-public class TransactionCacheStorageServiceImpl implements TransactionCacheStorageService, InitializingBean {
+public class TransactionStorageServiceImpl implements TransactionStorageService, InitializingBean {
 
-    private final static String TRANSACTION_CACHE_KEY_NAME = "transactions_cache";
+    private static final String TRANSACTION_CONFIRMED = "transaction_confirmed";
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        if (RocksDBService.existTable(TRANSACTION_CACHE_KEY_NAME)) {
-            try {
-                RocksDBService.destroyTable(TRANSACTION_CACHE_KEY_NAME);
-            } catch (Exception e) {
-                Log.error(e);
-                throw new NulsRuntimeException(TransactionErrorCode.DB_DELETE_ERROR);
-            }
-        }
-        try {
-            RocksDBService.createTable(TRANSACTION_CACHE_KEY_NAME);
-        } catch (Exception e) {
-            Log.error(e);
-            throw new NulsRuntimeException(TransactionErrorCode.DB_TABLE_CREATE_ERROR);
-        }
+        DBUtil.createTable(TRANSACTION_CONFIRMED);
     }
 
     @Override
-    public boolean putTx(Transaction tx) {
+    public boolean saveTx(Transaction tx) {
         if (tx == null) {
             return false;
         }
@@ -59,13 +41,12 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
         }
         boolean result = false;
         try {
-            result = RocksDBService.put(TRANSACTION_CACHE_KEY_NAME, txHashBytes, tx.serialize());
+            result = RocksDBService.put(TRANSACTION_CONFIRMED, txHashBytes, tx.serialize());
         } catch (Exception e) {
             Log.error(e);
         }
         return result;
     }
-
 
     @Override
     public Transaction getTx(NulsDigestData hash) {
@@ -79,7 +60,7 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        byte[] txBytes = RocksDBService.get(TRANSACTION_CACHE_KEY_NAME, hashBytes);
+        byte[] txBytes = RocksDBService.get(TRANSACTION_CONFIRMED, hashBytes);
         Transaction tx = null;
         if (null != txBytes) {
             try {
@@ -99,7 +80,7 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
         }
         boolean result = false;
         try {
-            result = RocksDBService.delete(TRANSACTION_CACHE_KEY_NAME, hash.serialize());
+            result = RocksDBService.delete(TRANSACTION_CONFIRMED, hash.serialize());
         } catch (Exception e) {
             Log.error(e);
         }

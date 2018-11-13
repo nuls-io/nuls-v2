@@ -32,9 +32,4 @@ public interface TransactionConstant {
     String DB_DATA_PATH ="rocksdb.datapath";
     String DB_DATA_DEFAULT_PATH ="rocksdb.datapath";
 
-    /**
-     * Transaction module related table name
-     * 交易管理模块相关表名
-     */
-    String DB_NAME_CONSUME_LANGUAGE = "language";
 }
