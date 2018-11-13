@@ -62,7 +62,9 @@ public class SimpleAccountDto {
         this.address = account.getAddress().getBase58();
         this.alias = account.getAlias();
         this.pubkeyHex = HexUtil.encode(account.getPubKey());
-        this.encryptedPrikeyHex = HexUtil.encode(account.getEncryptedPriKey());
+        if (account.getEncryptedPriKey() != null) {
+            this.encryptedPrikeyHex = HexUtil.encode(account.getEncryptedPriKey());
+        }
     }
 
     public String getAddress() {

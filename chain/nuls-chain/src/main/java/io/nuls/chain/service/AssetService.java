@@ -3,6 +3,7 @@ package io.nuls.chain.service;
 import io.nuls.base.data.chain.Asset;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -15,7 +16,7 @@ public interface AssetService {
      * @param asset Asset object that needs to be saved
      * @return true/false
      */
-    boolean saveAsset(Asset asset);
+    boolean newAsset(Asset asset);
 
     /**
      * Find asset based on key
@@ -23,7 +24,7 @@ public interface AssetService {
      * @param assetId The asset ID
      * @return Asset object
      */
-    Asset getAsset(short assetId);
+    Asset getAsset(long assetId);
 
     /**
      * Set the status of asset
@@ -32,7 +33,7 @@ public interface AssetService {
      * @param available The status of asset
      * @return true/false
      */
-    boolean setStatus(short assetId, boolean available);
+    boolean setStatus(long assetId, boolean available);
 
     /**
      * Get all the assets of the chain
@@ -40,15 +41,26 @@ public interface AssetService {
      * @param chainId The chain ID
      * @return List of asset
      */
-    List<Asset> getAssetListByChain(short chainId);
+    List<Asset> getAssetByChain(short chainId);
 
     /**
-     * Set the currentNumber of asset
-     *
-     * @param chainId       The chain ID
-     * @param assetId       The asset ID
-     * @param currentNumber Current asset number in chain
-     * @return true/false
+     * Get asset by symbol
+     * @param symbol Asset symbol
+     * @return Asset object
      */
-    boolean setCurrentNumber(short chainId, short assetId, long currentNumber);
+    Asset getAssetBySymbol(String symbol);
+
+    /**
+     * Verification of basic data
+     * @param asset Asset object
+     * @return Error map
+     */
+    Map<String,String> basicValidator(Asset asset);
+
+    /**
+     * Verification of unique data in db
+     * @param asset Asset object
+     * @return Error map
+     */
+    Map<String,String> uniqueValidator(Asset asset);
 }

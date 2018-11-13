@@ -25,19 +25,19 @@ public class ChainCmdTest {
 
     @Test
     public void chain() throws Exception {
-        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 867}, 1.0));
+        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 867}));
     }
 
     @Test
     public void chainReg() throws Exception {
-        System.out.println(CmdDispatcher.call("chainReg", new Object[]{(short) 867, "ilovess", "NULS", 19870921, true, 5, 10, 8, "1.1.2.2:1122,3.3.4.4:3344", false}, 1.0));
+        System.out.println(CmdDispatcher.call("chainReg",
+                new Object[]{(short) 867, "ilovess", "NULS", 19870921, true, 5, 10, 8, "1.1.2.2:1122,3.3.4.4:3344", false}));
     }
 
     @Test
     public void chainRegValidator() throws Exception {
         Chain chain = new Chain();
         chain.setChainId((short) -5);
-        chain.setName("ilovess");
         chain.setAddressType(CmConstants.ADDRESS_TYPE_NULS);
         System.out.println(CmdDispatcher.call("chainRegValidator", new Object[]{chain}, 1.0));
     }
@@ -66,5 +66,12 @@ public class ChainCmdTest {
         chain.setAvailable(true);
         chain.setCreateTime(TimeService.currentTimeMillis());
         System.out.println(CmdDispatcher.call("chainRegCommit", new Object[]{chain}, 1.0));
+    }
+
+    @Test
+    public void setChainAssetCurrentNumber() throws Exception {
+        System.out.println(CmdDispatcher.call("setChainAssetCurrentNumber", new Object[]{(short) 867, 1542092573248L, 147258300}, 1.0));
+        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 867}));
+        System.out.println(CmdDispatcher.call("asset", new Object[]{1542092573248L}));
     }
 }

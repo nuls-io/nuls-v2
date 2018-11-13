@@ -2,6 +2,9 @@ package io.nuls.chain.info;
 
 import io.nuls.tools.constant.ErrorCode;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author tangyi
  * @date 2018/11/8
@@ -20,10 +23,6 @@ public class CmConstants {
      */
     public static final String DB = "db";
     public static final String DB_DATA_PATH = "rocksdb.datapath";
-
-    public static final String TBL_CHAIN = "chain";
-    public static final String TBL_ASSET = "asset";
-    public static final String TBL_CHAIN_ASSET = "chain_asset";
 
     public static final ErrorCode DB_TABLE_CREATE_ERROR = ErrorCode.init("20011");
 
@@ -44,4 +43,38 @@ public class CmConstants {
      * The field name of the code setting in the system configuration.
      */
     public static final String CFG_SYSTEM_DEFAULT_ENCODING = "encoding";
+
+    /**
+     * 初始配置参数
+     */
+    public static final Map<String, String> PARAM_MAP = new HashMap<>();
+    public static final String PARAM = "param";
+    public static final String ASSET_SYMBOL_MAX = "asset_symbol_max";
+    public static final String ASSET_NAME_MAX = "asset_name_max";
+    public static final String ASSET_DEPOSITNULS = "asset_depositNuls";
+    public static final String ASSET_INITNUMBER_MIN = "asset_initNumber_min";
+    public static final String ASSET_INITNUMBER_MAX = "asset_initNumber_max";
+    public static final String ASSET_DECIMALPLACES_MIN = "asset_decimalPlaces_min";
+    public static final String ASSET_DECIMALPLACES_MAX = "asset_decimalPlaces_max";
+    public static final String ASSET_RECOVERY_RATE = "asset_recovery_rate";
+
+    /**
+     * 错误编码
+     */
+    public static final String ERROR_ASSET_SYMBOL_NULL = "A10000";
+    public static final String ERROR_ASSET_SYMBOL_MAX = "A10001";
+    public static final String ERROR_ASSET_SYMBOL_EXIST = "A10002";
+    public static final String ERROR_JSON_TO_ASSET = "A10003";
+    public static final String ERROR_ASSET_RECOVERY_RATE = "A10004";
+    public static final String ERROR_ASSET_ID_EXIST = "A10005";
+    public static final String ERROR_ASSET_NAME_NULL = "A10006";
+    public static final String ERROR_ASSET_NAME_MAX = "A10007";
+    public static final String ERROR_ASSET_DEPOSITNULS = "A10008";
+    public static final String ERROR_ASSET_INITNUMBER_MIN = "A10009";
+    public static final String ERROR_ASSET_INITNUMBER_MAX = "A10010";
+    public static final String ERROR_ASSET_DECIMALPLACES_MIN = "A10011";
+    public static final String ERROR_ASSET_DECIMALPLACES_MAX = "A10012";
+    public static final String ERROR_CHAIN_ASSET_NOT_MATCH = "A10013";
+    public static final String ERROR_ASSET_NOT_EXIST = "A10014";
+    public static final String ERROR_ASSET_EXCEED_INIT = "A10015";
 }

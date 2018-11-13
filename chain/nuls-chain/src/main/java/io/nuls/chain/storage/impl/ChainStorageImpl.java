@@ -1,15 +1,12 @@
 package io.nuls.chain.storage.impl;
 
 import io.nuls.base.data.chain.Chain;
-import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.storage.ChainStorage;
-import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 
 /**
@@ -19,20 +16,21 @@ import io.nuls.tools.log.Log;
  */
 @Component
 public class ChainStorageImpl implements ChainStorage, InitializingBean {
+
+    private final String TBL = "chain";
+
     /**
      * 该方法在所有属性被设置之后调用，用于辅助对象初始化
      * This method is invoked after all properties are set, and is used to assist object initialization.
      */
     @Override
     public void afterPropertiesSet() {
-
         try {
-            RocksDBService.createTable(CmConstants.TBL_CHAIN);
-        } catch (Exception e) {
-            if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.error(e.getMessage());
-                throw new NulsRuntimeException(CmConstants.DB_TABLE_CREATE_ERROR);
+            if (!RocksDBService.existTable(TBL)) {
+                RocksDBService.createTable(TBL);
             }
+        } catch (Exception e) {
+            Log.error(e);
         }
     }
 
@@ -46,7 +44,7 @@ public class ChainStorageImpl implements ChainStorage, InitializingBean {
     @Override
     public boolean save(short key, Chain chain) {
         try {
-            return RocksDBService.put(CmConstants.TBL_CHAIN, ByteUtils.shortToBytes(key), chain.serialize());
+            return RocksDBService.put(TBL, ByteUtils.shortToBytes(key), chain.serialize());
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -61,9 +59,13 @@ public class ChainStorageImpl implements ChainStorage, InitializingBean {
      */
     @Override
     public Chain load(short key) {
+        byte[] bytes = RocksDBService.get(TBL, ByteUtils.shortToBytes(key));
+        if (bytes == null) {
+            return null;
+        }
+
         try {
             Chain chain = new Chain();
-            byte[] bytes = RocksDBService.get(CmConstants.TBL_CHAIN, ByteUtils.shortToBytes(key));
             chain.parse(bytes, 0);
             return chain;
         } catch (NulsException e) {

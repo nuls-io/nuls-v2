@@ -2,6 +2,8 @@ package io.nuls.chain.storage;
 
 import io.nuls.base.data.chain.ChainAsset;
 
+import java.util.List;
+
 public interface ChainAssetStorage {
 
     /**
@@ -20,4 +22,18 @@ public interface ChainAssetStorage {
      * @return true/false
      */
     boolean save(String key, ChainAsset chainAsset);
+
+    /**
+     * Physical deletion
+     * @param key chainId-assetId
+     * @return true/false
+     */
+    boolean delete(String key);
+
+    /**
+     * Get asset information by chain ID
+     * @param chainId The chain ID
+     * @return ChainAsset object
+     */
+    List<ChainAsset> getByChain(short chainId);
 }

@@ -51,6 +51,8 @@ public class BootStrap {
             SpringLiteContext.init(ConsensusConstant.CONTEXT_PATH);
             //初始化国际资源文件语言
             initLanguage();
+            //初始化本地缓存数据（共识节点，委托信息，惩罚信息等）
+
             //加载本地配置参数,并启动本地服务
             sysStart(chain_id);
             //启动WebSocket服务,向外提供RPC接口

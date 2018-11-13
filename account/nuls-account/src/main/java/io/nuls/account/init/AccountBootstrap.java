@@ -29,14 +29,10 @@ public class AccountBootstrap {
             initCfg();
             //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
             RocksDBService.init(AccountParam.getInstance().getDataPath());
-            RocksDBService.init(AccountParam.getInstance().getDataPath());
             //springLite容器初始化
             SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
             //启动时间同步线程
             TimeService.getInstance().start();
-            //初始化本地账户到缓存
-            AccountService accountService = SpringLiteContext.getBean(AccountService.class);
-            accountService.getAccountList();
             //启动账户模块服务
             initServer();
         } catch (Exception e) {
