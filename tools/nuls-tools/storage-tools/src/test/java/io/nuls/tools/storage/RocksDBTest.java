@@ -66,7 +66,7 @@ public class RocksDBTest {
         key = "test-key";
         initTest();
         //createTableTest();
-        existTableTest();
+        //existTableTest();
         //destroyTableTest();
         //listTableTest();
         //putTest();
@@ -183,7 +183,7 @@ public class RocksDBTest {
         Assert.assertEquals(value, getValue);
     }
 
-    @Ignore
+    //@Ignore
     @Test
     public void getTest() {
         String value = "testvalue";

@@ -13,6 +13,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.data.FormatValidUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -75,9 +76,7 @@ public class AccountCmd extends BaseCmd {
             //创建账户
             List<Account> accountList = accountService.createAccount(chainId, count, password);
             if (accountList != null) {
-                for (Account account : accountList) {
-                    list.add(account.getAddress().toString());
-                }
+                accountList.forEach(account -> list.add(account.getAddress().toString()));
                 map.put("list", list);
             }
         } catch (NulsRuntimeException e) {
@@ -116,7 +115,7 @@ public class AccountCmd extends BaseCmd {
             if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
                 throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
             }
-            if (StringUtils.isNotBlank(password) && !AccountTool.validPassword(password)) {
+            if (StringUtils.isNotBlank(password) && !FormatValidUtils.validPassword(password)) {
                 throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
             }
 
@@ -213,8 +212,6 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_getAddressList", version = 1.0, preCompatible = true)
     public CmdResponse getAddressList(List params) {
         Log.debug("ac_getAddressList start");
-        //Map<String, List<String>> map = new HashMap<>();
-        //List<String> returnAccountList = new ArrayList<>();
         Page<String> resultPage;
         try {
             // check parameters size
@@ -290,13 +287,121 @@ public class AccountCmd extends BaseCmd {
 
             //Remove specified account
             result = accountService.removeAccount(chainId, address, password);
-
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode(), null);
         }
         Log.debug("ac_removeAccount end");
 
         Map<String, Boolean> map = new HashMap<>();
+        map.put("value", result);
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * 根据地址查询账户私匙
+     * Inquire the account's private key according to the address.
+     *
+     * @param params [chainId,address,password]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_getPriKeyByAddress", version = 1.0, preCompatible = true)
+    public CmdResponse getPriKeyByAddress(List params) {
+        Log.debug("ac_getPriKeyByAddress start");
+        String unencryptedPrivateKey;
+        try {
+            // check parameters
+            if (params.get(0) == null || params.size() != 3) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户地址
+            String address = params.get(1) != null ? (String) params.get(1) : null;
+            //账户密码
+            String password = params.get(2) != null ? (String) params.get(2) : null;
+
+            //Get the account private key
+            unencryptedPrivateKey = accountService.getPrivateKey(chainId, address, password);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        }
+        Log.debug("ac_getPriKeyByAddress end");
+
+        Map<String, String> map = new HashMap<>();
+        map.put("priKey", unencryptedPrivateKey);
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * 获取所有本地账户账户私钥，必须保证所有账户密码一致
+     * 如果本地账户中的密码不一致，将返回错误信息
+     * Get the all local private keys
+     * If the password in the local account is different, the error message will be returned.
+     *
+     * @param params [chainId,password]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_getAllPriKey", version = 1.0, preCompatible = true)
+    public CmdResponse getAllPriKey(List params) {
+        Log.debug("ac_getAllPriKey start");
+        Map<String, List<String>> map = new HashMap<>();
+        List<String> privateKeyList = new ArrayList<>();
+        try {
+            // check parameters
+            if (params.get(0) == null || params.size() != 2) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户密码
+            String password = params.get(1) != null ? (String) params.get(1) : null;
+
+            //Get the account private key
+            privateKeyList = accountService.getAllPrivateKey(chainId, password);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        }
+        Log.debug("ac_getAllPriKey end");
+        map.put("list", privateKeyList);
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * 为账户设置备注
+     * Set remark for accounts
+     *
+     * @param params [chainId,address,remark]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_setRemark", version = 1.0, preCompatible = true)
+    public CmdResponse setRemark(List params) {
+        Log.debug("ac_setRemark start");
+        Map<String, Boolean> map = new HashMap<>();
+        boolean result;
+        try {
+            // check parameters
+            if (params.get(0) == null || params.size() != 3) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户地址
+            String address = params.get(1) != null ? (String) params.get(1) : null;
+            //账户备注
+            String remark = params.get(2) != null ? (String) params.get(2) : null;
+
+            //Get the account private key
+            result = accountService.setRemark(chainId, address, remark);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        }
+        Log.debug("ac_setRemark end");
         map.put("value", result);
         return success(AccountConstant.SUCCESS_MSG, map);
     }

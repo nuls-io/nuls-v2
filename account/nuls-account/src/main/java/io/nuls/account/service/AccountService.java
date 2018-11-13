@@ -25,7 +25,6 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Account;
-import io.nuls.tools.basic.Result;
 
 import java.util.List;
 
@@ -43,7 +42,7 @@ public interface AccountService {
      * all the accounts are encrypted by the same password
      * if the password is NULL or "", the accounts will be unencrypted.
      *
-     * @param chainId    链ID
+     * @param chainId  链ID
      * @param count    想要创建的账户个数
      * @param count    the number of account you want to create.
      * @param password the password of the accounts.
@@ -55,7 +54,7 @@ public interface AccountService {
      * 根据账户地址字符串获取完整的账户信息
      * Query account by address.
      *
-     * @param chainId    链ID
+     * @param chainId 链ID
      * @param address the address of the account you want to query.
      * @return the account.
      */
@@ -71,39 +70,33 @@ public interface AccountService {
 
     /**
      * set the password for exist account
-     * @auther EdwardChan
-     *
-     * Nov.10th 2018
      *
      * @param chainId
-     *
      * @param address
-     *
      * @param password
-     *
      * @return true or false
+     * @auther EdwardChan
+     * <p>
+     * Nov.10th 2018
      */
-     boolean setPassword(short chainId, String address, String password);
+    boolean setPassword(short chainId, String address, String password);
 
     /**
      * check if the account is encrypted
      *
-     * @auther EdwardChan
-     *
-     * Nov.10th 2018
-     *
      * @param chainId
-     *
      * @param address
-     *
-     *
      * @return true or false
+     * @auther EdwardChan
+     * <p>
+     * Nov.10th 2018
      */
     boolean isEncrypted(short chainId, String address);
 
     /**
      * 移除指定账户
      * Remove specified account
+     *
      * @param chainId
      * @param address
      * @param password
@@ -113,6 +106,7 @@ public interface AccountService {
 
     /**
      * get the alias by address
+     *
      * @param chainId
      * @param address
      * @return the alias,if the alias is not exist,it will be return null
@@ -120,5 +114,39 @@ public interface AccountService {
      * <p>
      * Nov.12th 2018
      */
-     String getAliasByAddress(short chainId,String address);
+    String getAliasByAddress(short chainId, String address);
+
+    /**
+     * 为账户设置备注
+     * Set remark for accounts
+     *
+     * @param chainId
+     * @param address
+     * @param remark
+     * @return
+     */
+    boolean setRemark(short chainId, String address, String remark);
+
+    /**
+     * 获取账户私钥
+     * Get the account private key
+     * HexUtil.encode(priKeyBytes)
+     * @param chainId
+     * @param address
+     * @param password
+     * @return
+     */
+    String getPrivateKey(short chainId, String address, String password);
+
+    /**
+     * 获取所有本地账户账户私钥，必须保证所有账户密码一致，
+     * 如果本地账户中的密码不一致，将返回错误信息
+     * Get the all local private keys
+     * If the password in the local account is different, the error message will be returned.
+     *
+     * @param chainId
+     * @param password
+     * @return
+     */
+    List<String> getAllPrivateKey(short chainId, String password);
 }

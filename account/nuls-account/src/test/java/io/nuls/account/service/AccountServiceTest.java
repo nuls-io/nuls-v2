@@ -1,7 +1,9 @@
 package io.nuls.account.service;
 
 import io.nuls.account.constant.AccountConstant;
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountParam;
+import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.init.AccountBootstrap;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.dto.AccountOfflineDto;
@@ -15,7 +17,9 @@ import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
@@ -103,19 +107,19 @@ public class AccountServiceTest {
     public void createAccountTest() throws Exception {
         int count = 1;
         //Test to create an account that is not empty.
-        List<Account> accoutList = accountService.createAccount(chainId, count, password);
+        List<Account> accountList = accountService.createAccount(chainId, count, password);
         //Checking the number of accounts returned
-        assertEquals(accoutList.size(), count);
+        assertEquals(accountList.size(), count);
 
         //Test to create an empty password account
-        accoutList = accountService.createAccount(chainId, count, null);
+        accountList = accountService.createAccount(chainId, count, null);
         //Checking the number of accounts returned
-        assertEquals(accoutList.size(), count);
+        assertEquals(accountList.size(), count);
 
         try {
             //Test the largest number of generated accounts.
-            accoutList = accountService.createAccount(chainId, 101, password);
-            assertNull(accoutList);
+            accountList = accountService.createAccount(chainId, 101, password);
+            assertNull(accountList);
         } catch (NulsRuntimeException e) {
             System.out.println(e.getMessage());
         }
@@ -127,39 +131,101 @@ public class AccountServiceTest {
     @Test
     public void removeAccounTest() {
         //create account
-        List<Account> accoutList = accountService.createAccount(chainId, 2, password);
+        List<Account> accountList = accountService.createAccount(chainId, 2, password);
         //query account
-        Account account = accountService.getAccount(chainId, accoutList.get(0).getAddress().getBase58());
+        Account account = accountService.getAccount(chainId, accountList.get(0).getAddress().getBase58());
         assertNotNull(account);
         //remove specified account
-        boolean result = accountService.removeAccount(chainId, accoutList.get(0).getAddress().getBase58(), password);
+        boolean result = accountService.removeAccount(chainId, accountList.get(0).getAddress().getBase58(), password);
         assertTrue(result);
         //once again verify that accounts exist.
-        account = accountService.getAccount(chainId, accoutList.get(0).getAddress().getBase58());
+        account = accountService.getAccount(chainId, accountList.get(0).getAddress().getBase58());
         assertNull(account);
     }
 
     @Test
-    public void getAccountTest() throws Exception {
+    public void getAccountTest() {
         //create account
-        List<Account> accoutList = accountService.createAccount(chainId, 1, password);
+        List<Account> accountList = accountService.createAccount(chainId, 1, password);
         //query account
-        Account account = accountService.getAccount(chainId, accoutList.get(0).getAddress().getBase58());
+        Account account = accountService.getAccount(chainId, accountList.get(0).getAddress().getBase58());
         assertNotNull(account);
-        assertEquals(accoutList.get(0).getAddress().getBase58(), account.getAddress().getBase58());
+        assertEquals(accountList.get(0).getAddress().getBase58(), account.getAddress().getBase58());
     }
 
     @Test
-    public void getAccountListTest() throws Exception {
+    public void getAccountListTest() {
         //query all accounts
-        List<Account> accoutList = accountService.getAccountList();
-        int oldSize = accoutList.size();
+        List<Account> accountList = accountService.getAccountList();
+        int oldSize = accountList.size();
         //create account
         List<Account> accouts = accountService.createAccount(chainId, 1, password);
         //check whether the accounts are equal in number.
-        accoutList = accountService.getAccountList();
-        int newSize = accoutList.size();
+        accountList = accountService.getAccountList();
+        int newSize = accountList.size();
         assertEquals(newSize, oldSize + accouts.size());
+    }
+
+    @Test
+    public void getAllPrivateKeyTest() {
+        try {
+            List<Account> accountList = accountService.createAccount((short) 1, 1, password);
+            //query all accounts privateKey
+            List<String> privateKeyAllList = accountService.getAllPrivateKey((short) 0, password);
+            accountService.getAllPrivateKey((short) 0, null);
+            //query all accounts privateKey the specified chain
+            List<String> privateKeyList = accountService.getAllPrivateKey((short) 1, password);
+            assertTrue(privateKeyList.size() >= accountList.size());
+            assertTrue(privateKeyAllList.size() >= privateKeyList.size());
+        } catch (NulsRuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void getPrivateKeyTest() {
+        try {
+            //Create password accounts
+            List<Account> accountList = accountService.createAccount(chainId, 1, password);
+            //Query specified account private key
+            String unencryptedPrivateKey = accountService.getPrivateKey(chainId, accountList.get(0).getAddress().getBase58(), password);
+            assertNotNull(unencryptedPrivateKey);
+
+            //Create account without password
+            List<Account> accountNoPwdList = accountService.createAccount(chainId, 1, null);
+            accountService.getPrivateKey(chainId, accountNoPwdList.get(0).getAddress().getBase58(), null);
+        } catch (NulsRuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void setRemarkTest() {
+        try {
+            String remark = "test remark";
+            String errorRemark = "test error remark test error remark test error remark test error remark测试";
+            //Create password accounts
+            List<Account> accountList = accountService.createAccount(chainId, 1, password);
+            //Set the correct remarks for the account
+            boolean result = accountService.setRemark(chainId, accountList.get(0).getAddress().getBase58(), remark);
+            Account account = accountService.getAccount(chainId, accountList.get(0).getAddress().getBase58());
+            assertTrue(result);
+            assertEquals(remark, account.getRemark());
+            //Set the correct remarks for the account
+            result = accountService.setRemark(chainId, accountList.get(0).getAddress().getBase58(), "");
+            assertTrue(result);
+            //Set incorrect remarks for the account >60 bytes
+            result = accountService.setRemark(chainId, accountList.get(0).getAddress().getBase58(), errorRemark);
+            assertFalse(result);
+        } catch (NulsRuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

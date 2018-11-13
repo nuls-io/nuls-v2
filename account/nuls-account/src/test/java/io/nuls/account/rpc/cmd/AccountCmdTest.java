@@ -1,21 +1,19 @@
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.dto.AccountOfflineDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
-import io.nuls.account.service.AccountService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.base.data.Page;
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.model.CmdResponse;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -84,7 +82,6 @@ public class AccountCmdTest {
 
     }
 
-    @Ignore
     @Test
     public void createOfflineAccountTest() throws Exception {
         int count = 10;
@@ -97,7 +94,6 @@ public class AccountCmdTest {
         }
     }
 
-    @Ignore
     @Test
     public void removeAccountTest() throws Exception {
         List<String> accoutList = createAccount(chainId, 2, password);
@@ -113,7 +109,6 @@ public class AccountCmdTest {
         assertNull(account);
     }
 
-    @Ignore
     @Test
     public void getAccountByAddressTest() throws Exception {
         List<String> accoutList = createAccount(chainId, 1, password);
@@ -148,5 +143,61 @@ public class AccountCmdTest {
         response = CmdDispatcher.call("ac_getAddressList", new Object[]{chainId, 1, -1}, version);
         cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
         assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getCode());
+    }
+
+    @Test
+    public void getAllPrivateKeyTest() {
+        try {
+            List<String> accountList = createAccount((short) 1, 1, password);
+            //query all accounts privateKey
+            String response = CmdDispatcher.call("ac_getAllPriKey", new Object[]{(short) 0, password}, version);
+            System.out.println(response);
+            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            List<String> privateKeyAllList = (List<String>) JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResult())).get("list");
+            //query all accounts privateKey the specified chain
+            response = CmdDispatcher.call("ac_getAllPriKey", new Object[]{(short) 1, password}, version);
+            List<String> privateKeyList = (List<String>) JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResult())).get("list");
+            assertTrue(privateKeyList.size() >= accountList.size());
+            assertTrue(privateKeyAllList.size() >= privateKeyList.size());
+        } catch (NulsRuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void getPrivateKeyTest() {
+        try {
+            //Create password accounts
+            List<String> accountList = createAccount(chainId, 1, password);
+            //Query specified account private key
+            String response = CmdDispatcher.call("ac_getPriKeyByAddress", new Object[]{chainId, accountList.get(0), password}, version);
+            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            HashMap result = (HashMap) cmdResp.getResult();
+            assertNotNull(result.get("priKey"));
+        } catch (NulsRuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void setRemarkTest() {
+        try {
+            String remark = "test remark";
+            //String errorRemark = "test error remark test error remark test error remark test error remark";
+            //Create password accounts
+            List<String> accountList = createAccount(chainId, 1, password);
+            //Set the correct remarks for the account
+            String response = CmdDispatcher.call("ac_setRemark", new Object[]{chainId, accountList.get(0), remark}, version);
+            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getCode());
+        } catch (NulsRuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -30,6 +30,7 @@ import io.nuls.tools.crypto.AESEncrypt;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.EncryptedData;
 import io.nuls.tools.crypto.Sha256Hash;
+import io.nuls.tools.data.FormatValidUtils;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.CryptoException;
 import io.nuls.tools.exception.NulsException;
@@ -163,7 +164,7 @@ public class Account implements Serializable {
      * Verify that the account password is correct
      */
     public boolean validatePassword(String password) {
-        boolean result = AccountTool.validPassword(password);
+        boolean result = FormatValidUtils.validPassword(password);
         if (!result) {
             return false;
         }
@@ -321,7 +322,7 @@ public class Account implements Serializable {
     }
 
     public byte[] getPriKey(String password) throws NulsException {
-        if (!AccountTool.validPassword(password)) {
+        if (!FormatValidUtils.validPassword(password)) {
             throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);
         }
         byte[] unencryptedPrivateKey;
