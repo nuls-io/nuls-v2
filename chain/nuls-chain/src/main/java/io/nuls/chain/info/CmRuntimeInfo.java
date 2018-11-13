@@ -11,4 +11,6 @@ public class CmRuntimeInfo {
     public static String getAssetKey(short chainId, short assetId) {
         return chainId + "-" + assetId;
     }
+    //short i=32767;
+    //public static short next
 }

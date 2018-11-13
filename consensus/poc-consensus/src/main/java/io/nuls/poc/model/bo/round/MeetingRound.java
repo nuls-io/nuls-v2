@@ -26,7 +26,10 @@
 package io.nuls.poc.model.bo.round;
 
 import io.nuls.base.data.Address;
+import io.nuls.poc.constant.ConsensusErrorCode;
+import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.tools.data.DoubleUtils;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.thread.TimeService;
 
 import java.util.Arrays;
@@ -35,14 +38,13 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * @author Niels
+ * @author tag
+ * 2018/11/12
  */
 public class MeetingRound {
-    //本地打包账户
-    //private Account localPacker;
     //总权重
     private double totalWeight;
-    //本地打包节点在当前轮次的下表
+    //本地打包节点在当前轮次的下标
     private long index;
     //当前轮次开始打包时间
     private long startTime;
@@ -81,52 +83,48 @@ public class MeetingRound {
         return memberCount;
     }
 
-    public void init(List<MeetingMember> memberList) {
-
+    public void init(List<MeetingMember> memberList,int chain_id) {
         assert (startTime > 0L);
-
         this.memberList = memberList;
         if (null == memberList || memberList.isEmpty()) {
-            //throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
+            throw new NulsRuntimeException(ConsensusErrorCode.DATA_ERROR);
         }
-
         Collections.sort(memberList);
-
         this.memberCount = memberList.size();
         totalWeight = 0d;
         for (int i = 0; i < memberList.size(); i++) {
             MeetingMember member = memberList.get(i);
-            member.setRoundIndex(this.getIndex());
             member.setRoundStartTime(this.getStartTime());
             member.setPackingIndexOfRound(i + 1);
-            //member.setPackStartTime(startTime + i * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS);
-            //member.setPackEndTime(member.getPackStartTime() + ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS);
-            totalWeight += DoubleUtils.mul( DoubleUtils.sum(member.getTotalDeposit().getValue() , member.getOwnDeposit().getValue()),member.getCalcCreditVal()) ;
+            member.setPackStartTime(startTime + i * ConfigManager.config_map.get(chain_id).getPacking_interval());
+            member.setPackEndTime(member.getPackStartTime() + ConfigManager.config_map.get(chain_id).getPacking_interval());
+            totalWeight += DoubleUtils.mul( DoubleUtils.sum(member.getAgent().getTotalDeposit().getValue() , member.getAgent().getDeposit().getValue()),member.getAgent().getCreditVal()) ;
         }
-        //endTime = startTime + memberCount * ProtocolConstant.BLOCK_TIME_INTERVAL_MILLIS;
+        endTime = startTime + memberCount * ConfigManager.config_map.get(chain_id).getPacking_interval();
     }
 
     public MeetingMember getMember(int order) {
         if (order == 0) {
-            //throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
+            throw new NulsRuntimeException(ConsensusErrorCode.DATA_ERROR);
         }
         if (null == memberList || memberList.isEmpty()) {
-            //throw new NulsRuntimeException(KernelErrorCode.DATA_ERROR);
+            throw new NulsRuntimeException(ConsensusErrorCode.DATA_ERROR);
         }
         return this.memberList.get(order - 1);
     }
 
     public MeetingMember getMember(byte[] address) {
         for (MeetingMember member : memberList) {
-            if (Arrays.equals(address, member.getPackingAddress())) {
+            if (Arrays.equals(address, member.getAgent().getPackingAddress())) {
                 return member;
             }
         }
         return null;
     }
+
     public MeetingMember getMemberByAgentAddress(byte[] address) {
         for (MeetingMember member : memberList) {
-            if (Arrays.equals(address, member.getAgentAddress())) {
+            if (Arrays.equals(address, member.getAgent().getAgentAddress())) {
                 return member;
             }
         }
@@ -176,10 +174,10 @@ public class MeetingRound {
     public String toString() {
         StringBuilder str = new StringBuilder();
         for (MeetingMember member : this.getMemberList()) {
-            str.append(Address.fromHashs(member.getPackingAddress()).getBase58());
+            str.append(Address.fromHashs(member.getAgent().getPackingAddress()).getBase58());
             str.append(" ,order:" + member.getPackingIndexOfRound());
             str.append(",packTime:" + new Date(member.getPackEndTime()));
-            str.append(",creditVal:" + member.getRealCreditVal());
+            str.append(",creditVal:" + member.getAgent().getCreditVal());
             str.append("\n");
         }
         if (null == this.getPreRound()) {

@@ -26,7 +26,11 @@ public class ChainBootstrap {
 
     public static ChainBootstrap getInstance() {
         if (chainBootstrap == null) {
-            chainBootstrap = new ChainBootstrap();
+            synchronized (ChainBootstrap.class) {
+                if (chainBootstrap == null) {
+                    chainBootstrap = new ChainBootstrap();
+                }
+            }
         }
 
         return chainBootstrap;

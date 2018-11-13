@@ -21,10 +21,10 @@ public class ChainServiceImpl implements ChainService {
      * Save chain
      *
      * @param chain Chain object that needs to be saved
-     * @return 1 means success, 0 means failure
+     * @return true/false
      */
     @Override
-    public int saveChain(Chain chain) {
+    public boolean saveChain(Chain chain) {
         return chainStorage.save(chain.getChainId(), chain);
     }
 

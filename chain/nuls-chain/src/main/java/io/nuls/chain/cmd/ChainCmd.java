@@ -37,6 +37,9 @@ public class ChainCmd extends BaseCmd {
     public CmdResponse chain(List params) {
         try {
             Chain chain = chainService.getChain(Short.valueOf(params.get(0).toString()));
+            if (chain == null) {
+                return failed(ErrorCode.init("-10003"));
+            }
             List<Asset> assetList = assetService.getAssetListByChain(Short.valueOf(params.get(0).toString()));
             chain.setAssetList(assetList);
             return success("chain", chain);

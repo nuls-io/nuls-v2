@@ -68,4 +68,57 @@ public interface AccountService {
      * @return account list of all accounts.
      */
     List<Account> getAccountList();
+
+    /**
+     * set the password for exist account
+     * @auther EdwardChan
+     *
+     * Nov.10th 2018
+     *
+     * @param chainId
+     *
+     * @param address
+     *
+     * @param password
+     *
+     * @return true or false
+     */
+     boolean setPassword(short chainId, String address, String password);
+
+    /**
+     * check if the account is encrypted
+     *
+     * @auther EdwardChan
+     *
+     * Nov.10th 2018
+     *
+     * @param chainId
+     *
+     * @param address
+     *
+     *
+     * @return true or false
+     */
+    boolean isEncrypted(short chainId, String address);
+
+    /**
+     * 移除指定账户
+     * Remove specified account
+     * @param chainId
+     * @param address
+     * @param password
+     * @return
+     */
+    public boolean removeAccount(short chainId, String address, String password);
+
+    /**
+     * get the alias by address
+     * @param chainId
+     * @param address
+     * @return the alias,if the alias is not exist,it will be return null
+     * @auther EdwardChan
+     * <p>
+     * Nov.12th 2018
+     */
+     String getAliasByAddress(short chainId,String address);
 }
