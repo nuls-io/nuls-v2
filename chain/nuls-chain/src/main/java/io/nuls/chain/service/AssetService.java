@@ -3,6 +3,7 @@ package io.nuls.chain.service;
 import io.nuls.base.data.chain.Asset;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -48,4 +49,18 @@ public interface AssetService {
      * @return Asset object
      */
     Asset getAssetBySymbol(String symbol);
+
+    /**
+     * Verification of basic data
+     * @param asset Asset object
+     * @return Error map
+     */
+    Map<String,String> basicValidator(Asset asset);
+
+    /**
+     * Verification of unique data in db
+     * @param asset Asset object
+     * @return Error map
+     */
+    Map<String,String> uniqueValidator(Asset asset);
 }
