@@ -110,4 +110,15 @@ public interface AccountService {
      * @return
      */
     public boolean removeAccount(short chainId, String address, String password);
+
+    /**
+     * get the alias by address
+     * @param chainId
+     * @param address
+     * @return the alias,if the alias is not exist,it will be return null
+     * @auther EdwardChan
+     * <p>
+     * Nov.12th 2018
+     */
+     String getAliasByAddress(short chainId,String address);
 }
