@@ -55,19 +55,24 @@ public class AssetCmdTest {
         System.out.println(CmdDispatcher.call("assetRegValidator", new Object[]{asset}));
 
         asset = build();
-        asset.setInitNumber(10000-1);
+        asset.setInitNumber(10000 - 1);
         System.out.println(CmdDispatcher.call("assetRegValidator", new Object[]{asset}));
 
         asset = build();
-        asset.setInitNumber(100000000+1);
+        asset.setInitNumber(100000000 + 1);
         System.out.println(CmdDispatcher.call("assetRegValidator", new Object[]{asset}));
 
         asset = build();
-        asset.setDecimalPlaces((short)3);
+        asset.setDecimalPlaces((short) 3);
         System.out.println(CmdDispatcher.call("assetRegValidator", new Object[]{asset}));
 
         asset = build();
-        asset.setDecimalPlaces((short)9);
+        asset.setDecimalPlaces((short) 9);
+        System.out.println(CmdDispatcher.call("assetRegValidator", new Object[]{asset}));
+
+        asset = new Asset();
+        asset.setAssetId(1542092573248L);
+        asset.setSymbol("￥");
         System.out.println(CmdDispatcher.call("assetRegValidator", new Object[]{asset}));
     }
 
@@ -115,5 +120,11 @@ public class AssetCmdTest {
     public void assetDisable() throws Exception {
         System.out.println(CmdDispatcher.call("assetDisable", new Object[]{1542092573248L}));
         System.out.println(CmdDispatcher.call("asset", new Object[]{1542092573248L}));
+    }
+
+    @Test
+    public void assetDisableValidator() throws Exception {
+        System.out.println(CmdDispatcher.call("assetDisableValidator", new Object[]{1, 1542092573248L}));
+        System.out.println(CmdDispatcher.call("assetDisableValidator", new Object[]{867, 1542092573248L}));
     }
 }

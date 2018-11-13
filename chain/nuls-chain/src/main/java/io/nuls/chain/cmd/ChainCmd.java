@@ -1,7 +1,9 @@
 package io.nuls.chain.cmd;
 
+import io.nuls.base.data.chain.Asset;
 import io.nuls.base.data.chain.Chain;
 import io.nuls.base.data.chain.Seed;
+import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -114,11 +116,30 @@ public class ChainCmd extends BaseCmd {
     @CmdAnnotation(cmd = "chainRegRollback", version = 1.0, preCompatible = true)
     public CmdResponse chainRegRollback(List params) {
         try {
-
             return success("chainRegRollback", null);
         } catch (Exception e) {
             Log.error(e);
             return failed(ErrorCode.init("-100"), e.getMessage());
         }
+    }
+
+    @CmdAnnotation(cmd = "setChainAssetCurrentNumber", version = 1.0, preCompatible = true)
+    public CmdResponse setChainAssetCurrentNumber(List params) {
+        short chainId = Short.valueOf(params.get(0).toString());
+        long assetId = Long.valueOf(params.get(1).toString());
+        long currentNumber = Long.valueOf(params.get(2).toString());
+        chainService.setAssetNumber(chainId, assetId, currentNumber);
+        return success("setChainAssetCurrentNumber", null);
+    }
+
+    @CmdAnnotation(cmd = "setChainAssetCurrentNumberValidator", version = 1.0, preCompatible = true)
+    public CmdResponse setChainAssetCurrentNumberValidator(List params) {
+        long assetId = Long.valueOf(params.get(1).toString());
+        long currentNumber = Long.valueOf(params.get(2).toString());
+        Asset asset = assetService.getAsset(assetId);
+        if (currentNumber > asset.getInitNumber()) {
+            return failed(CmConstants.ERROR_ASSET_EXCEED_INIT);
+        }
+        return success();
     }
 }

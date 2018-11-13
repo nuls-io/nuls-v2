@@ -62,6 +62,19 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
+     * Get ChainAsset object
+     *
+     * @param chainId The chain ID
+     * @param assetId The asset ID
+     * @return ChainAsset object
+     */
+    @Override
+    public ChainAsset getChainAsset(short chainId, long assetId) {
+        String key = CmRuntimeInfo.getAssetKey(chainId, assetId);
+        return chainAssetStorage.load(key);
+    }
+
+    /**
      * Set the currentNumber of asset
      *
      * @param chainId       The chain ID

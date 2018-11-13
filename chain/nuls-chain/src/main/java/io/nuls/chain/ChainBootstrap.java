@@ -95,6 +95,8 @@ public class ChainBootstrap {
                 CmConstants.ASSET_DECIMALPLACES_MIN, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_DECIMALPLACES_MIN, null));
         CmConstants.PARAM_MAP.put(
                 CmConstants.ASSET_DECIMALPLACES_MAX, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_DECIMALPLACES_MAX, null));
+        CmConstants.PARAM_MAP.put(
+                CmConstants.ASSET_RECOVERY_RATE, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_RECOVERY_RATE, null));
 
         /*
           Read the configuration file, store the data in the root directory

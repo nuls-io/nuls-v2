@@ -67,4 +67,11 @@ public class ChainCmdTest {
         chain.setCreateTime(TimeService.currentTimeMillis());
         System.out.println(CmdDispatcher.call("chainRegCommit", new Object[]{chain}, 1.0));
     }
+
+    @Test
+    public void setChainAssetCurrentNumber() throws Exception {
+        System.out.println(CmdDispatcher.call("setChainAssetCurrentNumber", new Object[]{(short) 867, 1542092573248L, 147258300}, 1.0));
+        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 867}));
+        System.out.println(CmdDispatcher.call("asset", new Object[]{1542092573248L}));
+    }
 }
