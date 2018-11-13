@@ -11,6 +11,9 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author tangyi
  * @date 2018/11/12
@@ -68,5 +71,29 @@ public class ChainAssetStorageImpl implements ChainAssetStorage, InitializingBea
             Log.error(e);
             return false;
         }
+    }
+
+    /**
+     * Get asset information by chain ID
+     *
+     * @param chainId The chain ID
+     * @return ChainAsset object
+     */
+    @Override
+    public List<ChainAsset> getByChain(short chainId) {
+        List<byte[]> bytesList = RocksDBService.valueList(CmConstants.TBL_CHAIN_ASSET);
+        List<ChainAsset> chainAssetList = new ArrayList<>();
+        for (byte[] bytes : bytesList) {
+            ChainAsset chainAsset = new ChainAsset();
+            try {
+                chainAsset.parse(bytes, 0);
+                if (chainAsset.getChainId() == chainId) {
+                    chainAssetList.add(chainAsset);
+                }
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+        }
+        return chainAssetList;
     }
 }

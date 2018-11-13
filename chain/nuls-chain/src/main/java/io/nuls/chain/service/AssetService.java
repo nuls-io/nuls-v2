@@ -23,7 +23,7 @@ public interface AssetService {
      * @param assetId The asset ID
      * @return Asset object
      */
-    Asset getAsset(short assetId);
+    Asset getAsset(long assetId);
 
     /**
      * Set the status of asset
@@ -32,7 +32,7 @@ public interface AssetService {
      * @param available The status of asset
      * @return true/false
      */
-    boolean setStatus(short assetId, boolean available);
+    boolean setStatus(long assetId, boolean available);
 
     /**
      * Get all the assets of the chain
@@ -40,15 +40,12 @@ public interface AssetService {
      * @param chainId The chain ID
      * @return List of asset
      */
-    List<Asset> getAssetListByChain(short chainId);
+    List<Asset> getAssetByChain(short chainId);
 
     /**
-     * Set the currentNumber of asset
-     *
-     * @param chainId       The chain ID
-     * @param assetId       The asset ID
-     * @param currentNumber Current asset number in chain
-     * @return true/false
+     * Get asset by symbol
+     * @param symbol Asset symbol
+     * @return Asset object
      */
-    boolean setCurrentNumber(short chainId, short assetId, long currentNumber);
+    Asset getAssetBySymbol(String symbol);
 }
