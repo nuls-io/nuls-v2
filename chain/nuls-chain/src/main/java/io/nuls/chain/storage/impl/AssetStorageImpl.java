@@ -47,9 +47,9 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      * @return true/false
      */
     @Override
-    public boolean save(short key, Asset asset) {
+    public boolean save(long key, Asset asset) {
         try {
-            return RocksDBService.put(CmConstants.TBL_ASSET, ByteUtils.shortToBytes(key), asset.serialize());
+            return RocksDBService.put(CmConstants.TBL_ASSET, ByteUtils.longToBytes(key), asset.serialize());
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -63,10 +63,10 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      * @return Asset object
      */
     @Override
-    public Asset load(short key) {
+    public Asset load(long key) {
         try {
             Asset asset = new Asset();
-            byte[] bytes = RocksDBService.get(CmConstants.TBL_ASSET, ByteUtils.shortToBytes(key));
+            byte[] bytes = RocksDBService.get(CmConstants.TBL_ASSET, ByteUtils.longToBytes(key));
             asset.parse(bytes, 0);
             return asset;
         } catch (NulsException e) {
@@ -79,15 +79,13 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      * Physical deletion
      *
      * @param key Asset ID
-     * @return true/false
      */
     @Override
-    public boolean delete(short key) {
+    public void delete(long key) {
         try {
-            return RocksDBService.delete(CmConstants.TBL_ASSET, ByteUtils.shortToBytes(key));
+            RocksDBService.delete(CmConstants.TBL_ASSET, ByteUtils.longToBytes(key));
         } catch (Exception e) {
             Log.error(e);
-            return false;
         }
     }
 
@@ -113,5 +111,28 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
             }
         }
         return assetList;
+    }
+
+    /**
+     * Get asset by symbol
+     *
+     * @param symbol Asset symbol
+     * @return Asset object
+     */
+    @Override
+    public Asset getBySymbol(String symbol) {
+        List<byte[]> bytesList = RocksDBService.valueList(CmConstants.TBL_ASSET);
+        for (byte[] bytes : bytesList) {
+            try {
+                Asset asset = new Asset();
+                asset.parse(bytes, 0);
+                if (asset.getSymbol().equals(symbol)) {
+                    return asset;
+                }
+            } catch (NulsException e) {
+                Log.error(e);
+            }
+        }
+        return null;
     }
 }

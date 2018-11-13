@@ -60,7 +60,7 @@ public class AssetServiceImpl implements AssetService {
      * @return Asset object
      */
     @Override
-    public Asset getAsset(short assetId) {
+    public Asset getAsset(long assetId) {
         return assetStorage.load(assetId);
     }
 
@@ -72,7 +72,7 @@ public class AssetServiceImpl implements AssetService {
      * @return true/false
      */
     @Override
-    public boolean setStatus(short assetId, boolean available) {
+    public boolean setStatus(long assetId, boolean available) {
         Asset asset = assetStorage.load(assetId);
         if (asset == null) {
             return false;
@@ -89,26 +89,18 @@ public class AssetServiceImpl implements AssetService {
      * @return List of asset
      */
     @Override
-    public List<Asset> getAssetListByChain(short chainId) {
+    public List<Asset> getAssetByChain(short chainId) {
         return assetStorage.getByChain(chainId);
     }
 
     /**
-     * Set the currentNumber of asset
+     * Get asset by symbol
      *
-     * @param chainId       The chain ID
-     * @param assetId       The asset ID
-     * @param currentNumber Current asset number in chain
-     * @return true/false
+     * @param symbol Asset symbol
+     * @return Asset object
      */
     @Override
-    public boolean setCurrentNumber(short chainId, short assetId, long currentNumber) {
-        String key = CmRuntimeInfo.getAssetKey(chainId, assetId);
-        ChainAsset chainAsset = chainAssetStorage.load(key);
-        if (chainAsset == null) {
-            return false;
-        }
-        chainAsset.setCurrentNumber(currentNumber);
-        return chainAssetStorage.save(key, chainAsset);
+    public Asset getAssetBySymbol(String symbol) {
+        return assetStorage.getBySymbol(symbol);
     }
 }
