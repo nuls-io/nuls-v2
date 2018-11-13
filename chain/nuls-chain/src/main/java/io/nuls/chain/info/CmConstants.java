@@ -2,6 +2,9 @@ package io.nuls.chain.info;
 
 import io.nuls.tools.constant.ErrorCode;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author tangyi
  * @date 2018/11/8
@@ -40,4 +43,18 @@ public class CmConstants {
      * The field name of the code setting in the system configuration.
      */
     public static final String CFG_SYSTEM_DEFAULT_ENCODING = "encoding";
+
+    /**
+     * 初始配置参数
+     */
+    public static final Map<String, String> PARAM_MAP = new HashMap<>();
+    public static final String PARAM = "param";
+    public static final String ASSET_SYMBOL_MAX = "asset_symbol_max";
+    public static final String ASSET_NAME_MAX = "asset_name_max";
+    public static final String ASSET_DEPOSITNULS = "asset_depositNuls";
+    public static final String ASSET_INITNUMBER_MIN = "asset_initNumber_min";
+    public static final String ASSET_INITNUMBER_MAX = "asset_initNumber_max";
+    public static final String ASSET_DECIMALPLACES_MIN = "asset_decimalPlaces_min";
+    public static final String ASSET_DECIMALPLACES_MAX = "asset_decimalPlaces_max";
+
 }

@@ -25,7 +25,7 @@ public class ChainCmdTest {
 
     @Test
     public void chain() throws Exception {
-        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 867}, 1.0));
+        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 867}));
     }
 
     @Test
