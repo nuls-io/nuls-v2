@@ -13,28 +13,26 @@ public interface AssetService {
      * Save asset
      *
      * @param asset Asset object that needs to be saved
-     * @return 1 means success, 0 means failure
+     * @return true/false
      */
-    int saveAsset(Asset asset);
+    boolean newAsset(Asset asset);
 
     /**
      * Find asset based on key
      *
-     * @param chainId The chain ID
      * @param assetId The asset ID
      * @return Asset object
      */
-    Asset getAsset(short chainId, short assetId);
+    Asset getAsset(long assetId);
 
     /**
      * Set the status of asset
      *
-     * @param chainId   The chain ID
      * @param assetId   The asset ID
      * @param available The status of asset
-     * @return 1 means success, 0 means failure
+     * @return true/false
      */
-    int setStatus(short chainId, short assetId, boolean available);
+    boolean setStatus(long assetId, boolean available);
 
     /**
      * Get all the assets of the chain
@@ -42,15 +40,12 @@ public interface AssetService {
      * @param chainId The chain ID
      * @return List of asset
      */
-    List<Asset> getAssetListByChain(short chainId);
+    List<Asset> getAssetByChain(short chainId);
 
     /**
-     * Set the currentNumber of asset
-     *
-     * @param chainId The chain ID
-     * @param assetId The asset ID
-     * @param currentNumber Current asset number in chain
-     * @return 1 means success, 0 means failure
+     * Get asset by symbol
+     * @param symbol Asset symbol
+     * @return Asset object
      */
-    int setCurrentNumber(short chainId, short assetId, long currentNumber);
+    Asset getAssetBySymbol(String symbol);
 }

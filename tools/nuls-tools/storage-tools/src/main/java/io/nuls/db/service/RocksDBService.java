@@ -24,6 +24,7 @@ import io.nuls.db.model.Entry;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -48,6 +49,19 @@ public class RocksDBService {
 
     public static String[] listTable() {
         return RocksDBManager.listTable();
+    }
+
+    /**
+     * 判断表是否存在
+     * @param table
+     * @return
+     */
+    public static boolean existTable(String table) {
+        String[] tables = RocksDBManager.listTable();
+        if (tables != null && Arrays.asList(tables).contains(table)) {
+            return true;
+        }
+        return false;
     }
 
     public static boolean put(String table, byte[] key, byte[] value) throws Exception {

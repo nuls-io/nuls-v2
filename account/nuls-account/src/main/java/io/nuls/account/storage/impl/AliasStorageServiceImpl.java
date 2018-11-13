@@ -57,14 +57,15 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
      */
     @Override
     public void afterPropertiesSet() throws NulsException {
-        //读取配置文件，数据存储根目录，初始化打开该目录下包含的表连接并放入缓存
-        RocksDBService.init(AccountParam.getInstance().getDataPath());
-        try {
-            RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS);
-        } catch (Exception e) {
-            if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.error(e.getMessage());
-                throw new NulsRuntimeException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
+        //If tables do not exist, create tables.
+        if (!RocksDBService.existTable(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS)) {
+            try {
+                RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS);
+            } catch (Exception e) {
+                if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
+                    Log.error(e.getMessage());
+                    throw new NulsRuntimeException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
+                }
             }
         }
     }
@@ -132,7 +133,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
         try {
             return RocksDBService.put(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS, StringUtils.bytes(aliasPo.getAlias()), aliasPo.serialize());
         } catch (Exception e) {
-            Log.error("",e);
+            Log.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_ERROR);
         }
     }

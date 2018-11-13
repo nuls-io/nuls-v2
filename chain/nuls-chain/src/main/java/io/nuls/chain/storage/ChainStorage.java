@@ -14,9 +14,9 @@ public interface ChainStorage {
      *
      * @param key   The key
      * @param chain Chain object that needs to be saved
-     * @return 1 means success, 0 means failure
+     * @return true/false
      */
-    int save(short key, Chain chain);
+    boolean save(short key, Chain chain);
 
     /**
      * Find chain based on key

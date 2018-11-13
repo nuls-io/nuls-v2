@@ -26,7 +26,11 @@ public class ChainBootstrap {
 
     public static ChainBootstrap getInstance() {
         if (chainBootstrap == null) {
-            chainBootstrap = new ChainBootstrap();
+            synchronized (ChainBootstrap.class) {
+                if (chainBootstrap == null) {
+                    chainBootstrap = new ChainBootstrap();
+                }
+            }
         }
 
         return chainBootstrap;
@@ -43,10 +47,11 @@ public class ChainBootstrap {
 
             initCfg();
 
-            //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
-            RocksDBService.init(CmRuntimeInfo.dataPath);
+            initModule();
 
             SpringLiteContext.init("io.nuls.chain", new ModularServiceMethodInterceptor());
+
+            // module init params
 
             startRpcServer();
 
@@ -72,6 +77,41 @@ public class ChainBootstrap {
         I18nUtils.loadLanguage("languages", language);
         I18nUtils.setLanguage(language);
 
+    }
+
+    private void initModule() throws Exception {
+
+        CmConstants.PARAM_MAP.put(
+                CmConstants.ASSET_SYMBOL_MAX, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_SYMBOL_MAX, null));
+        CmConstants.PARAM_MAP.put(
+                CmConstants.ASSET_NAME_MAX, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_NAME_MAX, null));
+        CmConstants.PARAM_MAP.put(
+                CmConstants.ASSET_DEPOSITNULS, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_DEPOSITNULS, null));
+        CmConstants.PARAM_MAP.put(
+                CmConstants.ASSET_INITNUMBER_MIN, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_INITNUMBER_MIN, null));
+        CmConstants.PARAM_MAP.put(
+                CmConstants.ASSET_INITNUMBER_MAX, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_INITNUMBER_MAX, null));
+        CmConstants.PARAM_MAP.put(
+                CmConstants.ASSET_DECIMALPLACES_MIN, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_DECIMALPLACES_MIN, null));
+        CmConstants.PARAM_MAP.put(
+                CmConstants.ASSET_DECIMALPLACES_MAX, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_DECIMALPLACES_MAX, null));
+
+        /*
+          Read the configuration file, store the data in the root directory
+          Initialize all table connections under the directory and put them into the cache
+         */
+        RocksDBService.init(CmRuntimeInfo.dataPath);
+
+        if (!RocksDBService.existTable(CmConstants.PARAM)) {
+            RocksDBService.createTable(CmConstants.PARAM);
+        }
+
+        for (String key : CmConstants.PARAM_MAP.keySet()) {
+            byte[] value = RocksDBService.get(CmConstants.PARAM, key.getBytes());
+            if (value != null) {
+                CmConstants.PARAM_MAP.put(key, new String(value));
+            }
+        }
     }
 
     private void startRpcServer() throws Exception {

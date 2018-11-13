@@ -39,16 +39,22 @@ import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.FormatValidUtils;
 import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import org.apache.tools.ant.taskdefs.Delete;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -81,7 +87,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (chainId <= 0 || count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
-        if (StringUtils.isNotBlank(password) && !AccountTool.validPassword(password)) {
+        if (StringUtils.isNotBlank(password) && !FormatValidUtils.validPassword(password)) {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         locker.lock();
@@ -156,6 +162,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
                 accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
             }
         }
+        ////sort by createTime desc
         Collections.sort(list, (Account o1, Account o2) -> (o2.getCreateTime().compareTo(o1.getCreateTime())));
         return list;
     }
@@ -283,6 +290,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
 
     /**
      * get the alias by address
+     *
      * @param chainId
      * @param address
      * @return the alias,if the alias is not exist,it will be return null
@@ -291,7 +299,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
      * Nov.12th 2018
      */
     @Override
-    public String getAliasByAddress(short chainId,String address) {
+    public String getAliasByAddress(short chainId, String address) {
         //check if the account is legal
         if (!AddressTool.validAddress(chainId, address)) {
             Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
@@ -308,5 +316,93 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             }
         }
         return null;
+    }
+
+    @Override
+    public boolean setRemark(short chainId, String address, String remark) {
+        //check whether the account exists
+        Account account = this.getAccountByAddress(chainId, address);
+        if (null == account) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        if (StringUtils.isBlank(remark)) {
+            remark = null;
+        }
+        //check if the remark is legal
+        if (!FormatValidUtils.validRemark(remark)) {
+            throw new NulsRuntimeException(AccountErrorCode.REMARK_TOO_LONG);
+        }
+        //save the account to the database
+        account.setRemark(remark);
+        boolean result = accountStorageService.updateAccount(new AccountPo(account));
+        //save the account to the cache
+        accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+        return result;
+    }
+
+    @Override
+    public String getPrivateKey(short chainId, String address, String password) {
+        //check whether the account exists
+        Account account = this.getAccountByAddress(chainId, address);
+        if (null == account) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        //加过密(有密码) 就验证密码 Already encrypted(Added password), verify password
+        if (account.isEncrypted()) {
+            try {
+                byte[] priKeyBytes = priKeyBytes = account.getPriKey(password);
+                return HexUtil.encode(priKeyBytes);
+            } catch (NulsException e) {
+                throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
+        } else {
+            //do not return unencrypted private key
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_UNENCRYPTED);
+        }
+    }
+
+    @Override
+    public List<String> getAllPrivateKey(short chainId, String password) {
+        //Query all accounts list
+        List<Account> localAccountList = this.getAccountList();
+        if (localAccountList == null || localAccountList.isEmpty()) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        //Query all accounts of the specified chain
+        if (chainId > 0) {
+            List<Account> chainAccountList = new ArrayList<>();
+            localAccountList.stream().filter((p) -> p.getChainId() == chainId).forEach(account -> chainAccountList.add(account));
+            localAccountList.clear();
+            localAccountList.addAll(chainAccountList);
+        }
+        //Check if the password is correct.
+        if (StringUtils.isNotBlank(password) && !FormatValidUtils.validPassword(password)) {
+            throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
+        List<String> list = new ArrayList<>();
+        for (Account account : localAccountList) {
+            if (account.isEncrypted()) {
+                //If an account is encrypted but no password is transmitted, return error.
+                if (StringUtils.isBlank(password)) {
+                    throw new NulsRuntimeException(AccountErrorCode.HAVE_ENCRYPTED_ACCOUNT);
+                }
+                try {
+                    //Decrypt unencrypted private key
+                    byte[] priKeyBytes = account.getPriKey(password);
+                    //Encryption for private key
+                    list.add(HexUtil.encode(priKeyBytes));
+                } catch (NulsException e) {
+                    throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            } else {
+                //There is an unencrypted account in the account collection, but the password is transmitted.
+                if (StringUtils.isNotBlank(password)) {
+                    throw new NulsRuntimeException(AccountErrorCode.HAVE_UNENCRYPTED_ACCOUNT);
+                }
+                //Encryption for private key
+                list.add(HexUtil.encode(account.getPriKey()));
+            }
+        }
+        return list;
     }
 }
