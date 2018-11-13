@@ -38,7 +38,7 @@ public class ConfigManager {
             field.set(bean,item.getValue());
         }
         config_map.put(chain_id,bean);
-        ConsensusManager.packing_status.put(chain_id,false);
+        ConsensusManager.getInstance().getPacking_status().put(chain_id,false);
         //保存配置信息到数据库
         ConfigeService configeService = SpringLiteContext.getBean(ConfigeService.class);
         configeService.save(bean,chain_id);
