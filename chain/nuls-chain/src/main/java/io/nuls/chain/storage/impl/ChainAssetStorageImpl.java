@@ -1,33 +1,31 @@
 package io.nuls.chain.storage.impl;
 
-import io.nuls.base.data.chain.Chain;
+import io.nuls.base.data.chain.ChainAsset;
 import io.nuls.chain.info.CmConstants;
-import io.nuls.chain.storage.ChainStorage;
+import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 
 /**
  * @author tangyi
- * @date 2018/11/8
+ * @date 2018/11/12
  * @description
  */
 @Component
-public class ChainStorageImpl implements ChainStorage, InitializingBean {
+public class ChainAssetStorageImpl implements ChainAssetStorage, InitializingBean {
     /**
      * 该方法在所有属性被设置之后调用，用于辅助对象初始化
      * This method is invoked after all properties are set, and is used to assist object initialization.
      */
     @Override
     public void afterPropertiesSet() {
-
         try {
-            RocksDBService.createTable(CmConstants.TBL_CHAIN);
+            RocksDBService.createTable(CmConstants.TBL_CHAIN_ASSET);
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 Log.error(e.getMessage());
@@ -37,38 +35,38 @@ public class ChainStorageImpl implements ChainStorage, InitializingBean {
     }
 
     /**
-     * Save chain
+     * Get specific asset values of a specific chain
      *
-     * @param key   The key
-     * @param chain Chain object that needs to be saved
-     * @return true/false
+     * @param key chainId-assetId
+     * @return ChainAsset object
      */
     @Override
-    public boolean save(short key, Chain chain) {
+    public ChainAsset load(String key) {
         try {
-            return RocksDBService.put(CmConstants.TBL_CHAIN, ByteUtils.shortToBytes(key), chain.serialize());
-        } catch (Exception e) {
+            ChainAsset chainAsset = new ChainAsset();
+            byte[] bytes = RocksDBService.get(CmConstants.TBL_CHAIN_ASSET, key.getBytes());
+            chainAsset.parse(bytes, 0);
+            return chainAsset;
+        } catch (NulsException e) {
             Log.error(e);
-            return false;
+            return null;
         }
     }
 
     /**
-     * Find chain based on key
+     * Save specific asset values of a specific chain
      *
-     * @param key The key
-     * @return Chain object
+     * @param key        chainId-assetId
+     * @param chainAsset ChainAsset object
+     * @return true/false
      */
     @Override
-    public Chain load(short key) {
+    public boolean save(String key, ChainAsset chainAsset) {
         try {
-            Chain chain = new Chain();
-            byte[] bytes = RocksDBService.get(CmConstants.TBL_CHAIN, ByteUtils.shortToBytes(key));
-            chain.parse(bytes, 0);
-            return chain;
-        } catch (NulsException e) {
+            return RocksDBService.put(CmConstants.TBL_CHAIN, key.getBytes(), chainAsset.serialize());
+        } catch (Exception e) {
             Log.error(e);
-            return null;
+            return false;
         }
     }
 }

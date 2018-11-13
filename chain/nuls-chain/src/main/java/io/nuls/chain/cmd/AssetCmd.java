@@ -27,10 +27,8 @@ public class AssetCmd extends BaseCmd {
     @CmdAnnotation(cmd = "asset", version = 1.0, preCompatible = true)
     public CmdResponse asset(List params) {
         try {
-
-            Asset asset = assetService.getAsset(Short.valueOf(params.get(0).toString()), Short.valueOf(params.get(1).toString()));
-            return success("success", asset);
-
+            Asset asset = assetService.getAsset(Short.valueOf(params.get(0).toString()));
+            return asset != null ? success("success", asset) : failed(ErrorCode.init("-20003"));
         } catch (Exception e) {
             Log.error(e);
             return failed(ErrorCode.init("-100"), e.getMessage());
@@ -42,19 +40,18 @@ public class AssetCmd extends BaseCmd {
         try {
             Asset asset = new Asset();
             asset.setChainId(Short.valueOf(params.get(0).toString()));
-            asset.setAssetId(Short.valueOf(params.get(1).toString()));
-            asset.setSymbol((String) params.get(2));
-            asset.setName((String) params.get(3));
-            asset.setDepositNuls((int) params.get(4));
-            asset.setInitNumber(Long.valueOf(params.get(5).toString()));
-            asset.setCurrentNumber(asset.getInitNumber());
-            asset.setDecimalPlaces(Short.valueOf(params.get(6).toString()));
-            asset.setAvailable((boolean) params.get(7));
+
+            asset.setSymbol((String) params.get(1));
+            asset.setName((String) params.get(2));
+            asset.setDepositNuls((int) params.get(3));
+            asset.setInitNumber(Long.valueOf(params.get(4).toString()));
+            asset.setDecimalPlaces(Short.valueOf(params.get(5).toString()));
+            asset.setAvailable((boolean) params.get(6));
             asset.setCreateTime(TimeService.currentTimeMillis());
 
             assetService.saveAsset(asset);
 
-            return success("success", null);
+            return success();
         } catch (Exception e) {
             Log.error(e);
             return failed(ErrorCode.init("-100"), e.getMessage());
@@ -65,7 +62,7 @@ public class AssetCmd extends BaseCmd {
     public CmdResponse assetEnable(List params) {
         try {
 
-            assetService.setStatus(Short.valueOf(params.get(0).toString()), Short.valueOf(params.get(1).toString()), true);
+            assetService.setStatus(Short.valueOf(params.get(0).toString()), true);
 
             return success("success", null);
         } catch (Exception e) {
@@ -78,7 +75,7 @@ public class AssetCmd extends BaseCmd {
     public CmdResponse assetDisable(List params) {
         try {
 
-            assetService.setStatus(Short.valueOf(params.get(0).toString()), Short.valueOf(params.get(1).toString()), false);
+            assetService.setStatus(Short.valueOf(params.get(0).toString()), false);
 
             return success("success", null);
         } catch (Exception e) {
