@@ -1,6 +1,7 @@
 package io.nuls.chain.cmd;
 
 import io.nuls.base.data.chain.Asset;
+import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.service.AssetService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -59,16 +60,33 @@ public class AssetCmd extends BaseCmd {
             return failed("A10003");
         }
 
-        if (asset.getSymbol().length() > 5) {
-            return failed("A10001");
-        }
         if (assetService.getAsset(asset.getAssetId()) != null) {
             return failed("A10005");
+        }
+        if (asset.getSymbol().length() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_SYMBOL_MAX))) {
+            return failed("A10001");
         }
         if (assetService.getAssetBySymbol(asset.getSymbol()) != null) {
             return failed("A10002");
         }
-
+        if (asset.getName().length() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_NAME_MAX))) {
+            return failed("A10006");
+        }
+        if (asset.getDepositNuls() != Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS))) {
+            return failed("A10007");
+        }
+        if (asset.getInitNumber() < Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_INITNUMBER_MIN))) {
+            return failed("A10008");
+        }
+        if (asset.getInitNumber() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_INITNUMBER_MAX))) {
+            return failed("A10009");
+        }
+        if (asset.getDecimalPlaces() < Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DECIMALPLACES_MIN))) {
+            return failed("A10010");
+        }
+        if (asset.getDecimalPlaces() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DECIMALPLACES_MAX))) {
+            return failed("A10011");
+        }
 
         return success();
     }

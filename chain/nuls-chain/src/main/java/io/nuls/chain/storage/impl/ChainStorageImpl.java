@@ -59,7 +59,7 @@ public class ChainStorageImpl implements ChainStorage, InitializingBean {
      */
     @Override
     public Chain load(short key) {
-        byte[] bytes = RocksDBService.get(TBL, ByteUtils.longToBytes(key));
+        byte[] bytes = RocksDBService.get(TBL, ByteUtils.shortToBytes(key));
         if (bytes == null) {
             return null;
         }
