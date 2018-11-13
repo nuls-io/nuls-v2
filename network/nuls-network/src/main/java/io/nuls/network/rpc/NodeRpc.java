@@ -100,19 +100,24 @@ public class NodeRpc extends BaseCmd {
         }
         String []peers = nodes.split(",");
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
-        List<NodePo> nodePos = new ArrayList<>();
+        List<String> nodeIds = new ArrayList<>();
         for(String nodeId:peers){
-         //移除 peer
-         // TODO:
-          Node node =  nodeGroup.getConnectNodeMap().get(nodeId);
-
-          if(null != node){
-
-          }
-
-
-
+            //移除 peer
+            Node node =  nodeGroup.getConnectNodeMap().get(nodeId);
+            if(null != node){
+                nodeGroup.removePeerNode(node,true,true);
+            }else {
+                nodeGroup.getDisConnectNodeMap().remove(nodeId);
+            }
+            node = nodeGroup.getConnectCrossNodeMap().get(nodeId);
+            if(null != node){
+                nodeGroup.removePeerNode(node,true,true);
+            }else {
+                nodeGroup.getDisConnectCrossNodeMap().remove(nodeId);
+            }
+            nodeIds.add(nodeId);
         }
+        StorageManager.getInstance().delGroupNodes(nodeIds,chainId);
         return success( "success", "");
     }
     @CmdAnnotation(cmd = "nw_getNodes", version = 1.0, preCompatible = true)

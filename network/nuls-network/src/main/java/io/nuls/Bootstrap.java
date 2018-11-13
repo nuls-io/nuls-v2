@@ -25,12 +25,12 @@
 package io.nuls;
 
 
-import io.nuls.network.cfg.ConfigLoader;
 import io.nuls.network.cfg.NulsConfig;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.*;
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.ConfigLoader;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -53,7 +53,6 @@ public class Bootstrap {
             cfgInit();
             managerInit();
             managerStart();
-            startNetty();
             //TODO:模块相关状态维护待写
         } catch (Exception e) {
             Log.error("Network Bootstrap failed", e);
@@ -61,6 +60,9 @@ public class Bootstrap {
         }
     }
 
+    /**
+     * 配置信息初始化
+     */
     public static void cfgInit() {
         try {
             NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
@@ -95,25 +97,29 @@ public class Bootstrap {
             throw new RuntimeException("Network Bootstrap cfgInit failed");
         }
     }
+
+    /**
+     *
+     * 管理器初始化
+     */
     public static void managerInit(){
+        StorageManager.getInstance().init();
         NodeGroupManager.getInstance().init();
         NodeManager.getInstance().init();
         MessageManager.getInstance().init();
         LocalInfoManager.getInstance().init();
         RpcManager.getInstance().init();
-        StorageManager.getInstance().init();
+        ConnectionManager.getInstance().init();
     }
 
+    /**
+     *
+     * 启动管理模块
+     */
     public static void managerStart(){
         NodeGroupManager.getInstance().start();
         NodeManager.getInstance().start();
-    }
-
-
-    public static void startNetty(){
-
         ConnectionManager.getInstance().nettyBoot();
-       Log.info("==========================NettyStart");
     }
 
 }

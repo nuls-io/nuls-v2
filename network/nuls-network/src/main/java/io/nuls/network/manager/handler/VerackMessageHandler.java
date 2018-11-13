@@ -25,10 +25,12 @@
 
 package io.nuls.network.manager.handler;
 
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.VerackMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.VerackMessageBody;
@@ -55,22 +57,24 @@ public class VerackMessageHandler extends BaseMessageHandler {
     public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
         long magicNumber = message.getHeader().getMagicNumber();
         Node node  = nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber()).getDisConnectNodeMap().get(nodeKey);
+        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
         if(isServer){
             //server端能收到verack消息,接收消息并将连接状态跃迁为握手完成
             Log.debug("VerackMessageHandler Recieve:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
-            nodeGroupManager.getNodeGroupByMagic(magicNumber).addConnetNode(node,true);
+            nodeGroup.addConnetNode(node,true);
             //握手完成状态
             node.getNodeGroupConnector(message.getHeader().getMagicNumber()).setStatus(Node.HANDSHAKE);
         }else{
             //client 端收到verack消息，判断ack状态
             VerackMessage verackMessage = (VerackMessage)message;
             if(VerackMessageBody.VER_CONNECT_MAX == verackMessage.getMsgBody().getAckCode()){
-                    node.removeGroupConnector(magicNumber);
-                    if(node.getNodeGroupConnectors().size() == 0){
-                        node.getChannel().close();
-                        node.setCanConnect(true);
-                        return new NetworkEventResult(true, null);
-                    }
+                node.removeGroupConnector(magicNumber);
+                nodeGroup.addFailConnect(node.getId(),NetworkConstant.CONNECT_FAIL_LOCK_MINUTE);
+                if(node.getNodeGroupConnectors().size() == 0){
+                    node.getChannel().close();
+                    node.setCanConnect(true);
+                    return new NetworkEventResult(true, null);
+                }
             }
         }
         return new NetworkEventResult(true, null);

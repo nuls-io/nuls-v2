@@ -22,29 +22,53 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.cfg;
 
-import io.nuls.tools.parse.config.IniEntity;
-import org.ini4j.Config;
-import org.ini4j.Ini;
+package io.nuls.network.model.message.body;
+
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
-import java.net.URL;
 
 /**
- * @author Niels
+ * vrack protocol message body
+ * @author  lan
  */
-public class ConfigLoader {
+public class ByeMessageBody extends MessageBody {
+    public static int CODE_BYE=1;
 
+    int byeCode =CODE_BYE;
+    public ByeMessageBody(int byeCode ) {
+        this.byeCode=byeCode;
+    }
+    public ByeMessageBody() {
 
-    public static IniEntity loadIni(String fileName) throws IOException {
-        Config cfg = new Config();
-        URL url = ConfigLoader.class.getClassLoader().getResource(fileName);
-        cfg.setMultiSection(true);
-        Ini ini = new Ini();
-        ini.setConfig(cfg);
-        ini.load(url);
-        return new IniEntity(ini);
+    }
+    @Override
+    public int size() {
+        return 1;
     }
 
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write((byte)byeCode);
+
+    }
+
+    @Override
+    public void parse(NulsByteBuffer buffer) throws NulsException {
+        byeCode= buffer.readByte() & 0xFF;   ;
+    }
+
+    public int getByeCode() {
+        return byeCode;
+    }
+
+    public void setByeCode(int byeCode) {
+        this.byeCode = byeCode;
+    }
 }

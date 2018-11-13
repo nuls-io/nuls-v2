@@ -25,6 +25,7 @@
 package io.nuls.network.manager;
 
 import io.nuls.network.constant.ManagerStatusEnum;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -87,7 +88,7 @@ public class NodeManager extends  BaseManager{
         List<String> list=networkParam.getSeedIpList();
         NodeGroup nodeGroup= NodeGroupManager.getInstance().getNodeGroupByMagic(networkParam.getPacketMagic());
         for(String seed:list){
-            String []peer=seed.split(":");
+            String []peer=seed.split(NetworkConstant.COLON);
             Node node=new Node(peer[0],Integer.valueOf(peer[1]),Node.OUT,false);
             nodeGroup.addDisConnetNode(node,false);
         }

@@ -24,6 +24,7 @@
  */
 package io.nuls.network.rpc;
 
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.NodeGroupManager;
@@ -79,16 +80,17 @@ DbService dbService=StorageManager.getInstance().getDbService();
             nodeGroup.setMaxCrossOut(maxOut);
             nodeGroup.setMinAvailableCount(minAvailableCount);
             List<String> ipList = new ArrayList<>();
-            for (String ip : seedIps.split(",")) {
+            String [] ips = seedIps.split(NetworkConstant.COMMA);
+            for (String ip : ips) {
                 ipList.add(ip);
             }
             NetworkParam.getInstance().setMoonSeedIpList(ipList);
             nodeGroup.setCrossActive(true);
-            NodeGroupPo po=(NodeGroupPo)nodeGroup.parseToPo();
-            nodeGroupPos.add(po);
+//            NodeGroupPo po=(NodeGroupPo)nodeGroup.parseToPo();
+//            nodeGroupPos.add(po);
             //更新存储
         }else{
-          //卫星链的跨链协议调用
+            //卫星链的跨链协议调用
             if(!NetworkParam.getInstance().isMoonNode()){
                 Log.info("MoonNode is false，but param isMoonNode is 1");
                 return failed(NetworkErrorCode.PARAMETER_ERROR,  "");
@@ -119,8 +121,6 @@ DbService dbService=StorageManager.getInstance().getDbService();
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
         NodeGroupVo  nodeGroupVo=buildNodeGroupVo(nodeGroup);
         return success( "success",nodeGroupVo );
-
-
     }
 
     private NodeGroupVo buildNodeGroupVo(NodeGroup nodeGroup){
@@ -153,7 +153,9 @@ DbService dbService=StorageManager.getInstance().getDbService();
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         dbService.deleteGroup(chainId);
         dbService.deleteGroupNodeKeys(chainId);
-        //TODO:删除网络连接
+        //删除网络连接
+        NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
+        nodeGroup.destroy();
         return success( "success",null );
     }
 
@@ -191,8 +193,8 @@ DbService dbService=StorageManager.getInstance().getDbService();
     public CmdResponse reconnect(List  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         Log.info("chainId:"+chainId);
-        //TODO：
-
+        NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
+        nodeGroup.reconnect();
         return success( "success", "");
     }
 

@@ -31,6 +31,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.manager.handler.NetworkMessageHandlerFactory;
 import io.nuls.network.model.BroadcastResult;
@@ -179,6 +180,41 @@ public class MessageManager extends BaseManager{
         }
         return new BroadcastResult(true, NetworkErrorCode.SUCCESS);
     }
+
+    /**
+     * 发送请求地址消息
+     * @param magicNumber
+     * @param asyn
+     */
+    public boolean sendGetAddrMessage(long magicNumber,boolean isCross,boolean asyn) {
+        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
+        if(isCross){
+            //get Cross Seed
+            List<String> seeds = NetworkParam.getInstance().getMoonSeedIpList();
+            for(String seed : seeds)
+            {
+                Node node = nodeGroup.getConnectNode(seed);
+                if(null != node){
+                     GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node,magicNumber);
+                     this.sendToNode(getAddrMessage,node,true);
+                     return true;
+                }
+            }
+        }else{
+            //get self seed
+            List<String> seeds = NetworkParam.getInstance().getSeedIpList();
+            for(String seed : seeds)
+            {
+                Node node = nodeGroup.getConnectCrossNode(seed);
+                if(null != node){
+                    GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node,magicNumber);
+                    this.sendToNode(getAddrMessage,node,true);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     public BroadcastResult broadcastAddrToAllNode(BaseMessage addrMessage, Node excludeNode,boolean asyn) {
          NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByMagic(addrMessage.getHeader().getMagicNumber());
         Collection<Node> connectNodes=nodeGroup.getConnectNodes();
@@ -254,6 +290,7 @@ public class MessageManager extends BaseManager{
         MessageFactory.putMessage(VerackMessage.class);
         MessageFactory.putMessage(GetAddrMessage.class);
         MessageFactory.putMessage(AddrMessage.class);
+        MessageFactory.putMessage(ByeMessage.class);
     }
 
     @Override

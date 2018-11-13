@@ -74,8 +74,7 @@ public class NettyClient {
         boot.attr(key, node);
         boot.group(worker)
                 .channel(NioSocketChannel.class)
-//                .option(ChannelOption.SO_BACKLOG, 128)
-                .option(ChannelOption.TCP_NODELAY, true)            //Send messages immediately
+                .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.SO_SNDBUF, 128 * 1024)
                 .option(ChannelOption.SO_RCVBUF, 128 * 1024)
@@ -92,6 +91,7 @@ public class NettyClient {
                         socketChannel = (SocketChannel) future.channel();
                     } else {
                         Log.error("Client connect to host error: " + future.cause() + ", remove node: " + node.getId());
+                        node.setBad(true);
                         node.setLastFailTime(TimeService.currentTimeMillis());
                         node.setFailCount(node.getFailCount()+1);
                         if(node.getChannel()!=null && node.getChannel().isActive()){

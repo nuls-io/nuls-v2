@@ -22,37 +22,28 @@
  * SOFTWARE.
  *
  */
+package io.nuls.network.model.message;
 
-package io.nuls.network.manager.handler;
-
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.timeout.IdleStateEvent;
-import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.handler.base.BaseChannelHandler;
-import io.nuls.network.model.Node;
-import io.nuls.tools.log.Log;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.network.model.message.base.BaseMessage;
+import io.nuls.network.model.message.body.MessageBody;
+import io.nuls.tools.exception.NulsException;
 
 /**
- *
- * @desription:
- * @author: PierreLuo
- */
-public class HeartbeatServerHandler extends BaseChannelHandler {
-
+ * @program: nuls2.0
+ * @description: peer连接主动断开，拒绝业务消息连接
+ * @author: lan
+ * @create: 2018/11/13
+ **/
+public class ByeMessage extends BaseMessage {
     @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+    protected BaseNulsData parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        return null;
+    }
 
-        if (evt instanceof IdleStateEvent) {
-            Log.info(getNodeIdByChannel(ctx.channel())+"====userEventTriggered  IdleStateEvent==");
-            String nodeId = this.getNodeIdByChannel(ctx.channel());
-            Node node = ConnectionManager.getInstance().getNodeByCache(nodeId, Node.OUT);
-            if(null != node){
-                node.setBad(true);
-            }
-            ctx.channel().close();
-
-        } else {
-            super.userEventTriggered(ctx, evt);
-        }
+    public ByeMessage(long magicNumber, String cmd, MessageBody body) {
+        super(cmd,magicNumber);
+        this.setMsgBody(body);
     }
 }

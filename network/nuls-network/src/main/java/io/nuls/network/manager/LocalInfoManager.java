@@ -57,9 +57,9 @@ public class LocalInfoManager extends BaseManager {
      */
     volatile boolean connectedMySelf;
     /**
-     * 当前节点是否是种子节点
+     * 当前节点是否是自身网络种子节点
      */
-    volatile boolean isSeed;
+    volatile boolean isSelfNetSeed;
 
     public void updateExternalAddress(String ip,int port){
         externalAddress.setIpStr(ip);
@@ -75,13 +75,14 @@ public class LocalInfoManager extends BaseManager {
         this.connectedMySelf = connectedMySelf;
     }
 
-    public boolean isSeed() {
-        return isSeed;
+    public boolean isSelfNetSeed() {
+        return isSelfNetSeed;
     }
 
-    public void setSeed(boolean seed) {
-        isSeed = seed;
+    public void setSelfNetSeed(boolean selfNetSeed) {
+        isSelfNetSeed = selfNetSeed;
     }
+
 
 
     public boolean isAddrBroadcast() {
@@ -203,16 +204,16 @@ public class LocalInfoManager extends BaseManager {
     @Override
     public void init() {
         for (String ip : ips) {
-            if (isSeedNode(ip)) {
+            if (isSelfSeedNode(ip)) {
 //                networkParam.setMaxInCount(networkParam.getMaxInCount() * 2);
-                isSeed = true;
+                isSelfNetSeed = true;
             }
         }
     }
     /**
      * 是否是种子节点
      */
-    public boolean isSeedNode(String ip) {
+    public boolean isSelfSeedNode(String ip) {
         List<String> seedList=NetworkParam.getInstance().getSeedIpList();
         for (String seedIp : seedList) {
             if (seedIp.equals(ip)) {

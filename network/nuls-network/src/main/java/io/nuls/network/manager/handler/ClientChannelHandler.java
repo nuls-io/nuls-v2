@@ -98,6 +98,9 @@ public class ClientChannelHandler extends BaseChannelHandler {
         VersionMessage versionMessage=MessageFactory.getInstance().buildVersionMessage(node,nodeGroupConnector.getMagicNumber());
         if(null == versionMessage){
             //TODO:exception
+            Log.error("build version error");
+            channel.close();
+            return;
         }
         BaseMeesageHandlerInf handler=NetworkMessageHandlerFactory.getInstance().getHandler(versionMessage);
         handler.send(versionMessage, node, false,true);
