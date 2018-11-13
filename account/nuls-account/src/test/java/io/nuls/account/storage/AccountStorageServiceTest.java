@@ -1,4 +1,4 @@
-package io.nuls.account;
+package io.nuls.account.storage;
 
 import io.nuls.account.constant.AccountParam;
 import io.nuls.account.init.AccountBootstrap;
@@ -28,7 +28,7 @@ import static org.junit.Assert.assertTrue;
  * @description:
  * @date: 2018/11/8
  */
-public class AccountStorageTest {
+public class AccountStorageServiceTest {
 
     protected static AccountStorageService accountStorageService;
     protected short chainId = 12345;

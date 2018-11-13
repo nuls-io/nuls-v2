@@ -66,6 +66,7 @@ public class RocksDBTest {
         key = "test-key";
         initTest();
         //createTableTest();
+        existTableTest();
         //destroyTableTest();
         //listTableTest();
         //putTest();
@@ -89,6 +90,23 @@ public class RocksDBTest {
         RocksDBService.init(dataPath);
         long end = System.currentTimeMillis();
         System.out.println("数据库连接初始化测试耗时：" + (end - start) + "ms");
+    }
+
+    /**
+     * 判断数据表是否存在
+     */
+    @Ignore
+    @Test
+    public void existTableTest() {
+        String tableName = table;//account chain
+        boolean result = false;
+        try {
+            result = RocksDBService.existTable(tableName);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println(result);
+        Assert.assertEquals(true, result);
     }
 
     /**
