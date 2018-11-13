@@ -26,6 +26,7 @@ public class Chain extends BaseNulsData {
     private int txConfirmedBlockNum;
     private List<Seed> seedList;
     private List<Asset> assetList;
+    private boolean available;
     private long createTime;
     private long lastUpdateTime;
 
@@ -109,6 +110,14 @@ public class Chain extends BaseNulsData {
         this.assetList = assetList;
     }
 
+    public boolean isAvailable() {
+        return available;
+    }
+
+    public void setAvailable(boolean available) {
+        this.available = available;
+    }
+
     public long getCreateTime() {
         return createTime;
     }
@@ -139,6 +148,7 @@ public class Chain extends BaseNulsData {
         for (Seed seed : seedList) {
             stream.write(seed.serialize());
         }
+        stream.writeBoolean(available);
         stream.writeUint48(createTime);
         stream.writeUint48(lastUpdateTime);
     }
@@ -158,6 +168,7 @@ public class Chain extends BaseNulsData {
         for (int i = 0; i < seedLength; i++) {
             this.seedList.add(byteBuffer.readNulsData(new Seed()));
         }
+        this.available = byteBuffer.readBoolean();
         this.createTime = byteBuffer.readUint48();
         this.lastUpdateTime = byteBuffer.readUint48();
     }
@@ -184,6 +195,8 @@ public class Chain extends BaseNulsData {
         for (Seed seed : seedList) {
             size += seed.size();
         }
+        // available
+        size += SerializeUtils.sizeOfBoolean();
         // createTime;
         size += SerializeUtils.sizeOfUint48();
         // lastUpdateTime;
