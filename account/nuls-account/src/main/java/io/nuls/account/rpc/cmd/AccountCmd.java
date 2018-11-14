@@ -7,14 +7,13 @@ import io.nuls.account.model.bo.AccountKeyStore;
 import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
+import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Page;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -25,14 +24,6 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -50,7 +41,8 @@ public class AccountCmd extends BaseCmd {
 
     @Autowired
     private AccountService accountService;
-
+    @Autowired
+    private AccountKeyStoreService keyStoreService;
     /*
      * CmdAnnotation注解包含
      * 1. 调用的命令
@@ -496,7 +488,7 @@ public class AccountCmd extends BaseCmd {
             }
 
             //导入账户
-            Account account = accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), chainId, password, overwrite);
+            Account account = keyStoreService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), chainId, password, overwrite);
             map.put("address", account.getAddress().toString());
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode(), null);
@@ -510,7 +502,7 @@ public class AccountCmd extends BaseCmd {
     /**
      * 账户备份，导出AccountKeyStore字符串
      *
-     * @param params
+     * @param params [chainId,address,password,path]
      * @return
      */
     @CmdAnnotation(cmd = "ac_exportAccountKeyStore", version = 1.0, preCompatible = true)
@@ -533,7 +525,7 @@ public class AccountCmd extends BaseCmd {
             //文件备份地址
             String filePath = params.get(3) != null ? (String) params.get(3) : null;
             //export account to keystore
-            AccountKeyStore accountKeyStore = accountService.exportAccountToKeyStore(chainId, address, password);
+            AccountKeyStore accountKeyStore = keyStoreService.exportAccountToKeyStore(chainId, address, password);
             //如果备份地址为空，则使用系统默认备份地址
             //if the backup address is empty, the default backup address of the system is used
             if (StringUtils.isBlank(filePath)) {
