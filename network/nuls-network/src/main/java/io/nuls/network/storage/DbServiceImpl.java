@@ -31,6 +31,7 @@ import io.nuls.network.model.po.GroupNodeKeys;
 import io.nuls.network.model.po.NodeGroupPo;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -47,6 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2018/11/01
  *
  */
+@Service
 public class DbServiceImpl implements DbService,InitializingBean {
     public static String DEFAULT_ENCODING = "UTF-8";
     @Override
@@ -203,9 +205,15 @@ public class DbServiceImpl implements DbService,InitializingBean {
     @Override
     public void afterPropertiesSet() throws NulsException {
         try {
-            RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_NODEGROUPS);
-            RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_NODES);
-            RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_GROUP_NODESKEYS);
+            if (!RocksDBService.existTable(NetworkConstant.DB_NAME_NETWORK_NODEGROUPS)) {
+                RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_NODEGROUPS);
+            }
+            if (!RocksDBService.existTable(NetworkConstant.DB_NAME_NETWORK_NODES)) {
+                RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_NODES);
+            }
+            if (!RocksDBService.existTable(NetworkConstant.DB_NAME_NETWORK_GROUP_NODESKEYS)) {
+                RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_GROUP_NODESKEYS);
+            }
         }catch (Exception e){
             Log.error(e);
             throw new NulsException(e);

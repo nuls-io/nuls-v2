@@ -27,6 +27,9 @@ package io.nuls.network.model;
 
 
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.network.constant.NetworkErrorCode;
+import io.nuls.tools.constant.ErrorCode;
+
 /**
  * NetworkEventResult
  * @author lan
@@ -35,13 +38,18 @@ import io.nuls.base.data.BaseNulsData;
  */
 public class NetworkEventResult {
 
-    private boolean success;
+    private boolean success = true;
+    private ErrorCode errorCode =NetworkErrorCode.SUCCESS;
+    private BaseNulsData resultData;
 
-    private BaseNulsData replyMessage;
-
-    public NetworkEventResult(boolean success, BaseNulsData replyMessage) {
+    public NetworkEventResult(boolean success,ErrorCode errorCode,BaseNulsData resultData) {
         this.success = success;
-        this.replyMessage = replyMessage;
+        this.errorCode = errorCode;
+        this.resultData = resultData;
+    }
+    public NetworkEventResult(boolean success,ErrorCode errorCode) {
+        this.success = success;
+        this.errorCode = errorCode;
     }
 
     public boolean isSuccess() {
@@ -52,11 +60,19 @@ public class NetworkEventResult {
         this.success = success;
     }
 
-    public BaseNulsData getReplyMessage() {
-        return replyMessage;
+    public ErrorCode getErrorCode() {
+        return errorCode;
     }
 
-    public void setReplyMessage(BaseNulsData replyMessage) {
-        this.replyMessage = replyMessage;
+    public void setErrorCode(ErrorCode errorCode) {
+        this.errorCode = errorCode;
+    }
+
+    public BaseNulsData getResultData() {
+        return resultData;
+    }
+
+    public void setResultData(BaseNulsData resultData) {
+        this.resultData = resultData;
     }
 }

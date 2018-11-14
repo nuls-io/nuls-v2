@@ -59,7 +59,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
         String remoteIP = channel.remoteAddress().getHostString();
         Log.info("============"+remoteIP+"====="+channel.remoteAddress().getPort());
         //查看是否是本机尝试连接本机地址 ，如果是直接关闭连接
-        if (LocalInfoManager.getInstance().isSelfConnect(remoteIP)) {
+        if (LocalInfoManager.getInstance().isSelfIp(remoteIP)) {
             Log.info("Server----------------------本机尝试连接本机地址关闭 ------------------------- " + remoteIP);
             ctx.channel().close();
             return;

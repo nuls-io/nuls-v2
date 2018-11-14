@@ -32,7 +32,6 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.vo.NodeVo;
-import io.nuls.network.storage.DbService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
@@ -50,7 +49,6 @@ import java.util.List;
  **/
 public class NodeRpc extends BaseCmd {
     NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
-    DbService dbService=StorageManager.getInstance().getDbService();
     static  final int STATE_ALL = 0;
     static  final int STATE_CONNECT = 1;
     static  final int STATE_DIS_CONNECT = 2;

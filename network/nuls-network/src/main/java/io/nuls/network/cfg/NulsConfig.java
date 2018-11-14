@@ -43,12 +43,6 @@ public class NulsConfig {
     public static  String MODULES_CONFIG_FILE = "modules.ini";
 
     /**
-     * 系统使用的编码方式
-     * The encoding used by the nuls system.
-     */
-    public static String DEFAULT_ENCODING = "UTF-8";
-
-    /**
      * 模块配置文件中加载的所有配置项
      * All the configuration items that are loaded in the module configuration file.
      */

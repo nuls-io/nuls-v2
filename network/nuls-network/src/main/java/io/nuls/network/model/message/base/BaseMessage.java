@@ -63,6 +63,9 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
         this.header = new MessageHeader(command, magicNumber);
     }
 
+    public BaseMessage(String command) {
+        this.header = new MessageHeader(command);
+    }
 
    /**
     * serialize important field
@@ -80,7 +83,7 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
     public long getCheckSum() throws IOException {
         byte [] bodyHash=Sha256Hash.hashTwice(msgBody.serialize());
         byte []get4Byte=ByteUtils.subBytes(bodyHash,0,4);
-        long checksum=ByteUtils.byteToLong(get4Byte);
+        long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
         return checksum;
     }
 

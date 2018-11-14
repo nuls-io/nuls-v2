@@ -42,7 +42,8 @@ import java.util.List;
  */
 public class NodeManager extends  BaseManager{
     private static NodeManager instance = new NodeManager();
-    StorageManager storageManager=StorageManager.getInstance();
+    StorageManager storageManager = StorageManager.getInstance();
+    LocalInfoManager localInfoManager = LocalInfoManager.getInstance();
     private ManagerStatusEnum status=ManagerStatusEnum.UNINITIALIZED;
     private NodeManager(){
 
@@ -61,7 +62,7 @@ public class NodeManager extends  BaseManager{
         Collection<NodeGroup> nodeGroups=NodeGroupManager.getNodeGroupCollection();
         for(NodeGroup nodeGroup:nodeGroups){
             if(nodeGroup.isSelf()){
-                //自有节点
+                //自有网络组，增加种子节点的加载，跨链网络组，则无此步骤
                 loadSeedsNode(nodeGroup.getMagicNumber());
             }
             //数据库获取node
@@ -89,6 +90,9 @@ public class NodeManager extends  BaseManager{
         NodeGroup nodeGroup= NodeGroupManager.getInstance().getNodeGroupByMagic(networkParam.getPacketMagic());
         for(String seed:list){
             String []peer=seed.split(NetworkConstant.COLON);
+            if(localInfoManager.isSelfIp(peer[0])){
+                continue;
+            }
             Node node=new Node(peer[0],Integer.valueOf(peer[1]),Node.OUT,false);
             nodeGroup.addDisConnetNode(node,false);
         }

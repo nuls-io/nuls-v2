@@ -119,7 +119,7 @@ public class LocalInfoManager extends BaseManager {
 
     private static final Set<String> ips = new HashSet<>();
 
-    public boolean isSelfConnect(String ip){
+    public boolean isSelfIp(String ip){
        if(externalAddress.getIp().getHostAddress().equals(ip)){
            return true;
        }
@@ -205,7 +205,6 @@ public class LocalInfoManager extends BaseManager {
     public void init() {
         for (String ip : ips) {
             if (isSelfSeedNode(ip)) {
-//                networkParam.setMaxInCount(networkParam.getMaxInCount() * 2);
                 isSelfNetSeed = true;
             }
         }
@@ -222,6 +221,7 @@ public class LocalInfoManager extends BaseManager {
         }
         return false;
     }
+
     @Override
     public void start() {
 

@@ -62,7 +62,7 @@ public class RpcTest {
             versionMessageBody.setAddrMe(addrMe);
             versionMessageBody.setPortMeCross(NetworkParam.getInstance().getCrossPort());
             VersionMessage versionMessage=new VersionMessage(5000,NetworkConstant.CMD_MESSAGE_VERSION,versionMessageBody);
-            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+            CmdDispatcher.syncKernel(TestConstant.KernelWSServer);
             String response = CmdDispatcher.call("nw_broadcast", new Object[]{100,"10.13.25.36:5003,20.30.25.65:8009",HexUtil.byteToHex(versionMessage.serialize())},1.0 );
             System.out.println(response);
         } catch (UnknownHostException e) {

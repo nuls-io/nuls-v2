@@ -41,6 +41,10 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class NodeGroupManager extends BaseManager{
+    public static NodeGroupManager getInstance(){
+        return nodeGroupManager;
+    }
+
 
     private static NodeGroupManager nodeGroupManager=new NodeGroupManager();
     StorageManager storageManager=StorageManager.getInstance();
@@ -57,6 +61,15 @@ public class NodeGroupManager extends BaseManager{
     private NodeGroupManager(){
 
     }
+
+    public static Map<String,NodeGroup> getNodeGroupMap(){
+        return nodeGroupMap;
+    }
+
+    public static Collection<NodeGroup> getNodeGroupCollection(){
+        return nodeGroupMap.values();
+    }
+
     public  NodeGroup  getNodeGroupByMagic(long magicNumber){
         String chainId=mgicNumChainIdMap.get(String.valueOf(magicNumber));
         if(null == chainId){
@@ -66,13 +79,6 @@ public class NodeGroupManager extends BaseManager{
     }
     public  NodeGroup  getNodeGroupByChainId(int chainId){
         return nodeGroupMap.get(chainId);
-    }
-    public static Map<String,NodeGroup> getNodeGroupMap(){
-        return nodeGroupMap;
-    }
-
-    public static Collection<NodeGroup> getNodeGroupCollection(){
-        return nodeGroupMap.values();
     }
 
     public List<NodeGroup> getNodeGroups(){
@@ -101,7 +107,7 @@ public class NodeGroupManager extends BaseManager{
         }
         return true;
     }
-    //TODO:
+
     public boolean validMagicNumber(long magicNumber){
         if(null != mgicNumChainIdMap.get(String.valueOf(magicNumber))) {
             return true;
@@ -109,9 +115,6 @@ public class NodeGroupManager extends BaseManager{
         return false;
     }
 
-    public static NodeGroupManager getInstance(){
-        return nodeGroupManager;
-    }
 
     @Override
     public void init() {

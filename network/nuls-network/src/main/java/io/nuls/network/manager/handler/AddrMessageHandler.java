@@ -106,6 +106,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
             if(addAddressList.size()>0){
                 //向自有网络广播
                 AddrMessage addrMessagebroadCast=MessageFactory.getInstance().buildAddrMessage(addAddressList,nodeGroup.getMagicNumber());
+                Log.info("SEND addrMessagebroadCast:"+addrMessagebroadCast.getMsgBody().size());
                 MessageManager.getInstance().broadcastAddrToAllNode(addrMessagebroadCast,node,true);
                 //存储节点信息
                 StorageManager.getInstance().saveNodes(addNodes,nodeGroup.getChainId());

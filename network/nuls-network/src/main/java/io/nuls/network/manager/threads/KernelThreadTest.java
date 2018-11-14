@@ -24,36 +24,29 @@
  */
 package io.nuls.network.manager.threads;
 
-
-import io.nuls.network.model.Node;
-import io.nuls.network.netty.NettyClient;
-
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.server.WsServer;
 
 /**
- * 网络client 连接线程池
- * @author lan
- * @date 2018/10/20
- */
-public class NetworkThreadPool {
+ * @program: nuls2
+ * @description:
+ * @author: lan
+ * @create: 2018/11/14
+ **/
+public class KernelThreadTest  implements Runnable  {
+    @Override
+    public void run() {
+        int port = 8887;
+        WsServer s = new WsServer(port);
+        try {
+            s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
+            s.start();
+            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
 
-    private static final ExecutorService executor = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-            60L, TimeUnit.SECONDS,
-            new SynchronousQueue<Runnable>());
+            Thread.sleep(Integer.MAX_VALUE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-
-    public static void doConnect(Node node) {
-
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                NettyClient client = new NettyClient(node);
-                client.start();
-            }
-        });
     }
 }

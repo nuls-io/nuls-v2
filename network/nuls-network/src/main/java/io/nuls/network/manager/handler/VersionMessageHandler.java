@@ -118,7 +118,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         //node加入到Group的连接中
         NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
         nodeGroup.addConnetNode(node,true);
-        //TODO:存储需要的信息
+        //存储需要的信息
         node.setVersionProtocolInfos(message.getHeader().getMagicNumber(),versionBody.getProtocolVersion(),versionBody.getBlockHeight(),versionBody.getBlockHash());
         node.setRemoteCrossPort(versionBody.getPortMeCross());
         //client:接收到server端消息，进行verack答复
