@@ -26,32 +26,52 @@
 package io.nuls.account.storage;
 
 import io.nuls.account.model.po.AliasPo;
-import io.nuls.tools.basic.Result;
 
 import java.util.List;
 
 /**
- *
  * @author EdwardChan
- *
  * @date
- *
  */
 public interface AliasStorageService {
 
     /**
-     *
-     *
-     *
      * @auther EdwardChan
      * @date Nov.9th 2018
      */
-    List<AliasPo> getAliasList();
+    List<AliasPo> getAliasList(short chainId);
 
-    AliasPo getAlias(String alias);
 
+    /**
+     * get alias
+     *
+     * @param chainId
+     * @param alias
+     * @return aliasPo
+     */
+    AliasPo getAlias(short chainId, String alias);
+
+
+    /**
+     * get alias by address
+     *
+     * @param chainId
+     * @param address
+     * @return
+     */
+    AliasPo getAliasByAddress(short chainId, String address);
+
+    /**
+     * save the alias
+     *
+     * @param aliasPo
+     * @return the result
+     */
     boolean saveAlias(AliasPo aliasPo);
 
-    boolean removeAlias(String alias);
+    /**
+     * remove Alias by chainId and alias
+     */
+    boolean removeAlias(short chainId, String alias);
 
 }
