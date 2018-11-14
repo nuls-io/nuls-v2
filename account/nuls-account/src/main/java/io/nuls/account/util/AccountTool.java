@@ -25,8 +25,10 @@
 
 package io.nuls.account.util;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
 import io.nuls.tools.crypto.ECKey;
@@ -34,9 +36,15 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigInteger;
 
 /**
@@ -45,6 +53,16 @@ import java.math.BigInteger;
 public class AccountTool {
 
     public static final int CREATE_MAX_SIZE = 100;
+
+    public static Address newAddress(short chainId, String prikey) {
+        ECKey key;
+        try {
+            key = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(prikey)));
+        } catch (Exception e) {
+            throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
+        }
+        return newAddress(chainId, key.getPubKey());
+    }
 
     public static Address newAddress(short chainId, ECKey key) {
         return newAddress(chainId, key.getPubKey());
@@ -84,6 +102,7 @@ public class AccountTool {
     /**
      * 创建智能合约地址
      * Create smart contract address
+     *
      * @param chainId
      * @return
      */
@@ -108,6 +127,60 @@ public class AccountTool {
         }
         //get prikey
         return new BigInteger(1, Sha256Hash.hash(pwPriBytes));
+    }
+
+    /**
+     * 直接生成文件
+     * Export file
+     */
+    public static String backUpFile(String path, AccountKeyStoreDto accountKeyStoreDto) {
+        File backupFile = new File(path);
+        //if not directory,create directory
+        if (!backupFile.isDirectory()) {
+            if (!backupFile.mkdirs()) {
+                throw new NulsRuntimeException(AccountErrorCode.FILE_OPERATION_FAILD);
+            }
+            if (!backupFile.exists() && !backupFile.mkdir()) {
+                throw new NulsRuntimeException(AccountErrorCode.FILE_OPERATION_FAILD);
+            }
+        }
+        //根据账户地址生成文件名
+        //generate filename based on account address
+        String fileName = accountKeyStoreDto.getAddress().concat(AccountConstant.ACCOUNTKEYSTORE_FILE_SUFFIX);
+        //创建备份文件
+        //create backup file
+        backupFile = new File(backupFile, fileName);
+        try {
+            //如果文件不存在，则创建该文件
+            //if the file does not exist, the file is created
+            if (!backupFile.exists() && !backupFile.createNewFile()) {
+                throw new NulsRuntimeException(AccountErrorCode.FILE_OPERATION_FAILD);
+            }
+        } catch (IOException e) {
+            throw new NulsRuntimeException(AccountErrorCode.IO_ERROR);
+        }
+        FileOutputStream fileOutputStream = null;
+        try {
+            fileOutputStream = new FileOutputStream(backupFile);
+            //convert keystore to JSON to store
+            fileOutputStream.write(JSONUtils.obj2json(accountKeyStoreDto).getBytes());
+        } catch (Exception e) {
+            throw new NulsRuntimeException(AccountErrorCode.PARSE_JSON_FAILD);
+        } finally {
+            if (fileOutputStream != null) {
+                try {
+                    fileOutputStream.close();
+                } catch (IOException e) {
+                    Log.error(e);
+                }
+            }
+        }
+        //If it is a windows system path, remove the first /
+        if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1 && path.startsWith("/")) {
+            path = path.substring(1);
+        }
+        String backupFileName = path + File.separator + fileName;
+        return backupFileName;
     }
 
 }

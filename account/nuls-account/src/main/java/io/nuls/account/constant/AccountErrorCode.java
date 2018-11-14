@@ -28,7 +28,7 @@ package io.nuls.account.constant;
 import io.nuls.tools.constant.ErrorCode;
 
 /**
- * @author: Charlie
+ * @author: qinyifeng
  */
 public interface AccountErrorCode {
 

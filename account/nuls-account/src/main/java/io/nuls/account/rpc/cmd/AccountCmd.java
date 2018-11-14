@@ -3,22 +3,38 @@ package io.nuls.account.rpc.cmd;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.AccountKeyStore;
+import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.util.AccountTool;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Page;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.FormatValidUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -154,7 +170,7 @@ public class AccountCmd extends BaseCmd {
         Account account;
         try {
             // check parameters
-            if (params.get(0) == null || params.size() != 2) {
+            if (params.get(0) == null || params.get(1) == null || params.size() != 2) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -273,7 +289,7 @@ public class AccountCmd extends BaseCmd {
         boolean result;
         try {
             // check parameters
-            if (params.get(0) == null || params.size() != 3) {
+            if (params.get(0) == null || params.get(1) == null || params.size() != 3) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -310,7 +326,7 @@ public class AccountCmd extends BaseCmd {
         String unencryptedPrivateKey;
         try {
             // check parameters
-            if (params.get(0) == null || params.size() != 3) {
+            if (params.get(0) == null || params.get(1) == null || params.size() != 3) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -403,6 +419,135 @@ public class AccountCmd extends BaseCmd {
         }
         Log.debug("ac_setRemark end");
         map.put("value", result);
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * 根据私钥导入账户
+     * Import accounts by private key
+     *
+     * @param params [chainId,priKey,password,overwrite]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_importAccountByPriKey", version = 1.0, preCompatible = true)
+    public CmdResponse importAccountByPriKey(List params) {
+        Log.debug("ac_importAccountByPriKey start");
+        Map<String, String> map = new HashMap<>();
+        try {
+            // check parameters
+            if (params.get(0) == null || params.get(1) == null || params.get(3) == null || params.size() != 4) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户私钥
+            String priKey = params.get(1) != null ? (String) params.get(1) : null;
+            //账户密码
+            String password = params.get(2) != null ? (String) params.get(2) : null;
+            //账户存在时是否覆盖
+            Boolean overwrite = params.get(3) != null ? (Boolean) params.get(3) : null;
+            //导入账户
+            Account account = accountService.importAccount(chainId, priKey, password, overwrite);
+            map.put("address", account.getAddress().toString());
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        } catch (NulsException e) {
+            return failed(e.getErrorCode(), null);
+        }
+        Log.debug("ac_importAccountByPriKey end");
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+
+    /**
+     * 根据AccountKeyStore导入账户
+     * Import accounts according to AccountKeyStore
+     *
+     * @param params [chainId,keyStore,password,overwrite]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_importAccountByKeystore", version = 1.0, preCompatible = true)
+    public CmdResponse importAccountByKeystore(List params) {
+        Log.debug("ac_importAccountByKeystore start");
+        Map<String, String> map = new HashMap<>();
+        try {
+            // check parameters
+            if (params.get(0) == null || params.get(1) == null || params.get(3) == null || params.size() != 4) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //keyStore HEX编码
+            String keyStore = params.get(1) != null ? (String) params.get(1) : null;
+            //账户密码
+            String password = params.get(2) != null ? (String) params.get(2) : null;
+            //账户存在时是否覆盖
+            Boolean overwrite = params.get(3) != null ? (Boolean) params.get(3) : null;
+
+            AccountKeyStoreDto accountKeyStoreDto;
+            try {
+                accountKeyStoreDto = JSONUtils.json2pojo(new String(HexUtil.decode(keyStore)), AccountKeyStoreDto.class);
+            } catch (IOException e) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED);
+            }
+
+            //导入账户
+            Account account = accountService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), chainId, password, overwrite);
+            map.put("address", account.getAddress().toString());
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        } catch (NulsException e) {
+            return failed(e.getErrorCode(), null);
+        }
+        Log.debug("ac_importAccountByKeystore end");
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * 账户备份，导出AccountKeyStore字符串
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_exportAccountKeyStore", version = 1.0, preCompatible = true)
+    public CmdResponse exportAccountKeyStore(List params) {
+        Log.debug("ac_exportAccountKeyStore start");
+        Map<String, String> map = new HashMap<>();
+        try {
+            // check parameters
+            if (params.get(0) == null || params.get(1) == null || params.size() != 4) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户地址
+            String address = params.get(1) != null ? (String) params.get(1) : null;
+            //账户密码
+            String password = params.get(2) != null ? (String) params.get(2) : null;
+            //文件备份地址
+            String filePath = params.get(3) != null ? (String) params.get(3) : null;
+            //export account to keystore
+            AccountKeyStore accountKeyStore = accountService.exportAccountToKeyStore(chainId, address, password);
+            //如果备份地址为空，则使用系统默认备份地址
+            //if the backup address is empty, the default backup address of the system is used
+            if (StringUtils.isBlank(filePath)) {
+                URL resource = ClassLoader.getSystemClassLoader().getResource("");
+                filePath = resource.getPath() + AccountConstant.ACCOUNTKEYSTORE_FOLDER_NAME;
+            }
+            //backup keystore files
+            String backupFileName = AccountTool.backUpFile(filePath, new AccountKeyStoreDto(accountKeyStore));
+            map.put("path", backupFileName);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        }
+
+        Log.debug("ac_exportAccountKeyStore end");
         return success(AccountConstant.SUCCESS_MSG, map);
     }
 

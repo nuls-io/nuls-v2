@@ -187,8 +187,7 @@ public class AccountCmdTest {
     public void setRemarkTest() {
         try {
             String remark = "test remark";
-            //String errorRemark = "test error remark test error remark test error remark test error remark";
-            //Create password accounts
+            //Create encrypted account
             List<String> accountList = createAccount(chainId, 1, password);
             //Set the correct remarks for the account
             String response = CmdDispatcher.call("ac_setRemark", new Object[]{chainId, accountList.get(0), remark}, version);
@@ -199,5 +198,42 @@ public class AccountCmdTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void importAccountByKeystoreTest() {
+        try {
+            //Create encrypted account
+            List<String> accountList = createAccount(chainId, 1, password);
+            String response = CmdDispatcher.call("ac_getPriKeyByAddress", new Object[]{chainId, accountList.get(0), password}, version);
+            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            HashMap result = (HashMap) cmdResp.getResult();
+            String priKey = (String) result.get("priKey");
+            assertNotNull(priKey);
+            //账户已存在则覆盖 If the account exists, it covers.
+            response = CmdDispatcher.call("ac_importAccountByPriKey", new Object[]{chainId, priKey, password, true}, version);
+            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            result = (HashMap) cmdResp.getResult();
+            String address = (String) result.get("address");
+            assertEquals(accountList.get(0), address);
+            //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
+            response = CmdDispatcher.call("ac_importAccountByPriKey", new Object[]{chainId, priKey, password, false}, version);
+            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getCode());
+        } catch (NulsRuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void importAccountByPriKeyTest() {
+
+    }
+
+    @Test
+    public void exportAccountKeyStoreTest() {
+
     }
 }
