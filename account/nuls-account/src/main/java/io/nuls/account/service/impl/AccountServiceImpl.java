@@ -306,17 +306,12 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
             return null;
         }
-        //get all of the aliasPO
-        List<AliasPo> aliasPoList = aliasStorageService.getAliasList();
-        if (aliasPoList == null) {
+        //get aliasPO
+        AliasPo result = aliasStorageService.getAliasByAddress(chainId,address);
+        if (result == null) {
             return null;
         }
-        for (AliasPo aliasPo : aliasPoList) {
-            if (aliasPo != null && address.equals(AddressTool.getStringAddressByBytes(aliasPo.getAddress()))) {
-                return aliasPo.getAlias();
-            }
-        }
-        return null;
+        return result.getAlias();
     }
 
     @Override

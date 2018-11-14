@@ -38,9 +38,15 @@ public interface AccountStorageConstant {
     String DB_NAME_MULTI_SIG_ACCOUNT = "multi_account";
 
     /**
-     * 别名表的名称
-     * The name of the account table
+     * 以别名为key的别名表名称
+     * The name of the alias table which key is alias
      */
-    String DB_NAME_ACCOUNT_ALIAS = "account_alias";
+    String DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS = "account_alias_key_alias";
+
+    /**
+     * 以地址为key的别名表名称
+     * The name of the alias table which key is address
+     */
+    String DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS = "account_alias_key_address";
 
 }
