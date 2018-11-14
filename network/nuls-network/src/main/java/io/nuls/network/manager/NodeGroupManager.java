@@ -94,6 +94,13 @@ public class NodeGroupManager extends BaseManager{
         mgicNumChainIdMap.put(String.valueOf(nodeGroup.getMagicNumber()),String.valueOf(chainId));
         return true;
     }
+    public boolean removeNodeGroup(int chainId){
+        nodeGroupMap.remove(String.valueOf(chainId));
+        if(null != mgicNumChainIdMap.get(chainId)){
+            mgicNumChainIdMap.remove(mgicNumChainIdMap.get(chainId));
+        }
+        return true;
+    }
     //TODO:
     public boolean validMagicNumber(long magicNumber){
         if(null != mgicNumChainIdMap.get(String.valueOf(magicNumber))) {

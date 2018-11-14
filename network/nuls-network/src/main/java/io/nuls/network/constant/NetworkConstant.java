@@ -41,6 +41,7 @@ public interface NetworkConstant {
     int MAX_FRAME_LENGTH = 10 * 1024 * 1024;
     int CONNETCI_TIME_OUT = 6000;
 
+    int CONNECT_FAIL_LOCK_MINUTE=10;
     /**
      * --------[network configs] -------
      */
@@ -62,6 +63,9 @@ public interface NetworkConstant {
     String CMD_MESSAGE_VERACK = "verack";
     String CMD_MESSAGE_ADDR = "addr";
     String CMD_MESSAGE_GET_ADDR = "getaddr";
+    String CMD_MESSAGE_BYE = "bye";
+
+
 
     String DB_NAME_NETWORK_NODEGROUPS="nwNodeGroups";
     String DB_NAME_NETWORK_NODES="nwNodes";

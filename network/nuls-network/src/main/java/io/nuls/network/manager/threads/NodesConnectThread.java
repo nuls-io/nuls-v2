@@ -45,17 +45,28 @@ import java.util.List;
  *
  */
 public class NodesConnectThread implements Runnable  {
-    NodeManager nodeManager= NodeManager.getInstance();
-    ConnectionManager connectionManager=ConnectionManager.getInstance();
+    NodeManager nodeManager = NodeManager.getInstance();
+    ConnectionManager connectionManager = ConnectionManager.getInstance();
+    StorageManager storageManager = StorageManager.getInstance();
     private void connectPeer(Collection<Node> nodes,long magicNumber,int leftCount){
         List<String> eliminateNodes = new ArrayList<String>();
+       NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
         for (Node node : nodes) {
             //满足丢弃条件的nodes
             if (node.isEliminate()) {
+                if(node.isCrossConnect()){
+                    nodeGroup.getDisConnectCrossNodeMap().remove(node.getId());
+                }else{
+                    nodeGroup.getDisConnectNodeMap().remove(node.getId());
+                }
                 eliminateNodes.add(node.getId());
             } else {
                 //判断peer是否已经存在
                 if(ConnectionManager.getInstance().isPeerConnectExist(node.getIp())){
+                    continue;
+                }
+                //不在重连时间内
+                if(!nodeGroup.isFreedFailLockTime(node.getId())){
                     continue;
                 }
                 if(node.isCanConnect()) {
@@ -64,7 +75,7 @@ public class NodesConnectThread implements Runnable  {
                     node.setCanConnect(false);
                     leftCount--;
                 }else{
-                    //去连接缓存中获取连接是否存在，如果存在，则直接进行业务握手
+                    //去连接缓存中获取连接是否存在，如果存在，直接进行业务握手
                     Node activeNode=ConnectionManager.getInstance().getNodeByCache(node.getId(),node.getType());
                     if(null != activeNode) {
                         NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(magicNumber);
@@ -80,15 +91,9 @@ public class NodesConnectThread implements Runnable  {
                 }
 
             }
-            if(0 == leftCount){
-                break;
-            }
         }
-        if(leftCount > 0){
-            //TODO:地址请求
-
-        }
-        //TODO:进行eliminateNodes的处理逻辑，删除连接缓存信息，删除库数据
+        //删除无效节点
+        storageManager.delGroupNodes(eliminateNodes,nodeGroup.getChainId());
     }
     @Override
     public void run() {
@@ -96,10 +101,15 @@ public class NodesConnectThread implements Runnable  {
         if(!nodeManager.isRunning()){
            return;
         }
-        try {
             Collection<NodeGroup> nodeGroups = NodeGroupManager.getNodeGroupCollection();
             for (NodeGroup nodeGroup : nodeGroups) {
+                try {
+                if(nodeGroup.isLock()){
+                    continue;
+                }
                 if (!nodeGroup.isHadMaxOutFull()) {
+                    //地址请求
+                    MessageManager.getInstance().sendGetAddrMessage(nodeGroup.getMagicNumber(),false,true);
                     Collection<Node> nodes = nodeGroup.getDisConnectNodes();
                     List <Node> nodesList=new ArrayList<>();
                     nodesList.addAll(nodes);
@@ -111,6 +121,8 @@ public class NodesConnectThread implements Runnable  {
                  * 跨链连接
                  */
                 if(!nodeGroup.isHadCrossMaxOutFull()){
+                    //地址请求
+                    MessageManager.getInstance().sendGetAddrMessage(nodeGroup.getMagicNumber(),true,true);
                     Collection<Node> nodes = nodeGroup.getDisConnectCrossNodes();
                     List <Node> nodesList=new ArrayList<>();
                     nodesList.addAll(nodes);
@@ -118,11 +130,10 @@ public class NodesConnectThread implements Runnable  {
                     int leftCount= nodeGroup.getMaxCrossOut()-nodeGroup.getHadCrossConnectOut();
                     connectPeer(nodesList,nodeGroup.getMagicNumber(),leftCount);
                 }
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
             }
-
-        }catch(Exception e){
-            e.printStackTrace();
-        }
         }
     }
 

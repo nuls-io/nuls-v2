@@ -1,11 +1,14 @@
 package io.nuls.chain.cmd;
 
 import io.nuls.base.data.chain.Asset;
+import io.nuls.base.data.chain.ChainAsset;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.service.AssetService;
+import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
@@ -13,7 +16,11 @@ import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -25,6 +32,8 @@ public class AssetCmd extends BaseCmd {
 
     @Autowired
     private AssetService assetService;
+    @Autowired
+    private ChainService chainService;
 
     @CmdAnnotation(cmd = "asset", version = 1.0, preCompatible = true)
     public CmdResponse asset(List params) {
@@ -57,38 +66,14 @@ public class AssetCmd extends BaseCmd {
             asset = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Asset.class);
         } catch (IOException e) {
             Log.error(e);
-            return failed("A10003");
+            return failed(CmConstants.ERROR_JSON_TO_ASSET);
         }
 
-        if (assetService.getAsset(asset.getAssetId()) != null) {
-            return failed("A10005");
-        }
-        if (asset.getSymbol().length() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_SYMBOL_MAX))) {
-            return failed("A10001");
-        }
-        if (assetService.getAssetBySymbol(asset.getSymbol()) != null) {
-            return failed("A10002");
-        }
-        if (asset.getName().length() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_NAME_MAX))) {
-            return failed("A10006");
-        }
-        if (asset.getDepositNuls() != Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS))) {
-            return failed("A10007");
-        }
-        if (asset.getInitNumber() < Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_INITNUMBER_MIN))) {
-            return failed("A10008");
-        }
-        if (asset.getInitNumber() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_INITNUMBER_MAX))) {
-            return failed("A10009");
-        }
-        if (asset.getDecimalPlaces() < Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DECIMALPLACES_MIN))) {
-            return failed("A10010");
-        }
-        if (asset.getDecimalPlaces() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DECIMALPLACES_MAX))) {
-            return failed("A10011");
-        }
+        Map<String, String> errMap = new HashMap<>();
+        errMap.putAll(assetService.basicValidator(asset));
+        errMap.putAll(assetService.uniqueValidator(asset));
 
-        return success();
+        return errMap.size() == 0 ? success() : failed(ErrorCode.init("Validator error"), errMap);
     }
 
     @CmdAnnotation(cmd = "assetRegCommit", version = 1.0, preCompatible = true)
@@ -98,7 +83,7 @@ public class AssetCmd extends BaseCmd {
             asset = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Asset.class);
         } catch (IOException e) {
             Log.error(e);
-            return failed("A10003");
+            return failed(CmConstants.ERROR_JSON_TO_ASSET);
         }
 
         return assetService.newAsset(asset) ? success() : failed("");
@@ -111,11 +96,46 @@ public class AssetCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "assetEnable", version = 1.0, preCompatible = true)
     public CmdResponse assetEnable(List params) {
-        return assetService.setStatus(Long.valueOf(params.get(0).toString()), true) ? success() : failed("A10004");
+        assetService.setStatus(Long.valueOf(params.get(0).toString()), true);
+        return success();
     }
 
     @CmdAnnotation(cmd = "assetDisable", version = 1.0, preCompatible = true)
     public CmdResponse assetDisable(List params) {
-        return assetService.setStatus(Long.valueOf(params.get(0).toString()), false) ? success() : failed("A10004");
+        //TODO
+
+        return success();
+    }
+
+    @CmdAnnotation(cmd = "assetDisableValidator", version = 1.0, preCompatible = true)
+    public CmdResponse assetDisableValidator(List params) {
+        short chainId = Short.valueOf(params.get(0).toString());
+        long assetId = Long.valueOf(params.get(1).toString());
+
+        Asset asset = assetService.getAsset(assetId);
+        ChainAsset chainAsset = chainService.getChainAsset(chainId, assetId);
+        if (asset == null || chainAsset == null) {
+            return failed(CmConstants.ERROR_ASSET_NOT_EXIST);
+        }
+
+        if (chainId != asset.getChainId()) {
+            return failed(CmConstants.ERROR_CHAIN_ASSET_NOT_MATCH);
+        }
+
+        BigDecimal initNumber = new BigDecimal(asset.getInitNumber());
+        BigDecimal currentNumber = new BigDecimal(chainAsset.getCurrentNumber());
+        double actual = currentNumber.divide(initNumber, 8, RoundingMode.HALF_DOWN).doubleValue();
+        double config = Double.parseDouble(CmConstants.PARAM_MAP.get(CmConstants.ASSET_RECOVERY_RATE));
+        if (actual < config) {
+            return failed(CmConstants.ERROR_ASSET_RECOVERY_RATE);
+        }
+
+        return assetService.setStatus(assetId, false) ? success() : failed(CmConstants.ERROR_ASSET_RECOVERY_RATE);
+    }
+
+    @CmdAnnotation(cmd = "assetDisableCommit", version = 1.0, preCompatible = true)
+    public CmdResponse assetDisableCommit(List params) {
+        assetService.setStatus(Long.valueOf(params.get(0).toString()), false);
+        return success();
     }
 }

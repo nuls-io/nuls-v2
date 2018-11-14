@@ -49,7 +49,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2018/11/01
  *
  */
-public class ConnectionManager {
+public class ConnectionManager extends BaseManager{
 
     private static ConnectionManager instance = new ConnectionManager();
     /**
@@ -87,7 +87,7 @@ public class ConnectionManager {
               cacheConnectNodeInMap.remove(nodeKey);
             List<NodeGroupConnector> list=node.getNodeGroupConnectors();
             for(NodeGroupConnector nodeGroupConnector:list){
-                    subGroupMaxInIp(node, nodeGroupConnector.getMagicNumber(),true);
+                subGroupMaxInIp(node, nodeGroupConnector.getMagicNumber(),true);
             }
         }
         node.disConnectNodeChannel();
@@ -183,6 +183,7 @@ public class ConnectionManager {
     public void nettyBoot(){
         serverStart();
         clientStart();
+        Log.info("==========================NettyBoot");
     }
     public static ConnectionManager getInstance() {
         return instance;
@@ -230,9 +231,22 @@ public class ConnectionManager {
         if(LocalInfoManager.getInstance().isConnectedMySelf()){
             return;
         }
+        if(LocalInfoManager.getInstance().isSelfNetSeed()){
+            return;
+        }
         IpAddress ipAddress=LocalInfoManager.getInstance().getExternalAddress();
         Node node=new Node(ipAddress.getIp().getHostAddress(),ipAddress.getPort(),Node.OUT,false);
         NetworkThreadPool.doConnect(node);
         LocalInfoManager.getInstance().setConnectedMySelf(true);
+    }
+
+    @Override
+    public void init() {
+
+    }
+
+    @Override
+    public void start() {
+
     }
 }

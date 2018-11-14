@@ -111,7 +111,18 @@ public class StorageManager extends BaseManager{
             e.printStackTrace();
         }
     }
-
+    public void delGroupNodes(List<String> list,int chainId) {
+        try {
+            GroupNodeKeys groupNodeKeys = dbService.getGroupNodeKeysByChainId(chainId);
+            List<String> groupNodeKeyList = groupNodeKeys.getNodeKeys();
+            for (String nodeId : list) {
+                groupNodeKeyList.remove(nodeId);
+            }
+            dbService.saveGroupNodeKeys(groupNodeKeys);
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+    }
    public void saveNodeGroups(List<NodeGroupPo> nodeGroups){
         dbService.saveNodeGroups(nodeGroups);
    }

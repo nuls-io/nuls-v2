@@ -31,10 +31,7 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.model.message.body.AddrMessageBody;
-import io.nuls.network.model.message.body.MessageBody;
-import io.nuls.network.model.message.body.VerackMessageBody;
-import io.nuls.network.model.message.body.VersionMessageBody;
+import io.nuls.network.model.message.body.*;
 import io.nuls.tools.log.Log;
 
 import java.net.InetAddress;
@@ -96,9 +93,14 @@ public class MessageFactory {
     }
 
     public VerackMessage buildVerackMessage(Node node,long magicNumber,int ackCode){
-        NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByMagic(magicNumber);
         VerackMessageBody verackMessageBody=new VerackMessageBody(ackCode);
-        return new VerackMessage(nodeGroup.getMagicNumber(),NetworkConstant.CMD_MESSAGE_VERACK,verackMessageBody);
+        return new VerackMessage(magicNumber,NetworkConstant.CMD_MESSAGE_VERACK,verackMessageBody);
+    }
+
+
+    public ByeMessage buildByeMessage(Node node,long magicNumber,int byeCode){
+        ByeMessageBody byeMessageBody=new ByeMessageBody(byeCode);
+        return new ByeMessage(magicNumber,NetworkConstant.CMD_MESSAGE_BYE,byeMessageBody);
     }
 
     public GetAddrMessage buildGetAddrMessage(Node node,long magicNumber){

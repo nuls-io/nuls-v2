@@ -53,6 +53,7 @@ public class NulsMessageDecoder extends ByteToMessageDecoder {
             }
         }else{
             in.clear();
+            //TODO:不该关闭连接，如果一个连接有多条链，此时通道需要保留，需要增加消息回复
             ctx.close();
         }
     }

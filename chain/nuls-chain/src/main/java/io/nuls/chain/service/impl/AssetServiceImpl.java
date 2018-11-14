@@ -3,16 +3,20 @@ package io.nuls.chain.service.impl;
 import io.nuls.base.data.chain.Asset;
 import io.nuls.base.data.chain.Chain;
 import io.nuls.base.data.chain.ChainAsset;
+import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.storage.AssetStorage;
 import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.storage.ChainStorage;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.thread.TimeService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -111,5 +115,63 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public Asset getAssetBySymbol(String symbol) {
         return assetStorage.getBySymbol(symbol);
+    }
+
+    /**
+     * Verification of basic data
+     *
+     * @param asset Asset object
+     * @return Error map
+     */
+    @Override
+    public Map<String, String> basicValidator(Asset asset) {
+        Map<String, String> errMap = new HashMap<>(16);
+        if (asset.getSymbol() == null) {
+            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_SYMBOL_NULL);
+        } else if (asset.getSymbol().length() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_SYMBOL_MAX))) {
+            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_SYMBOL_MAX);
+        }
+
+        if (asset.getName() == null) {
+            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_NAME_NULL);
+        } else if (asset.getName().length() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_NAME_MAX))) {
+            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_NAME_MAX);
+        }
+
+        if (asset.getDepositNuls() != Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS))) {
+            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_DEPOSITNULS);
+        }
+        if (asset.getInitNumber() < Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_INITNUMBER_MIN))) {
+            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_INITNUMBER_MIN);
+        }
+        if (asset.getInitNumber() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_INITNUMBER_MAX))) {
+            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_INITNUMBER_MAX);
+        }
+        if (asset.getDecimalPlaces() < Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DECIMALPLACES_MIN))) {
+            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_DECIMALPLACES_MIN);
+        }
+        if (asset.getDecimalPlaces() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DECIMALPLACES_MAX))) {
+            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_DECIMALPLACES_MAX);
+        }
+
+        return errMap;
+    }
+
+    /**
+     * Verification of unique data in db
+     *
+     * @param asset Asset object
+     * @return Error map
+     */
+    @Override
+    public Map<String, String> uniqueValidator(Asset asset) {
+        Map<String, String> errMap = new HashMap<>(16);
+        if (getAsset(asset.getAssetId()) != null) {
+            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_ID_EXIST);
+        }
+        if (getAssetBySymbol(asset.getSymbol()) != null) {
+            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_SYMBOL_EXIST);
+        }
+        return errMap;
     }
 }

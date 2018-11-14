@@ -48,11 +48,15 @@ public class NetworkMessageHandlerFactory {
         return INSTANCE;
     }
 
+    /**
+     * add handlerMap in Constructor
+     */
     private NetworkMessageHandlerFactory() {
         handlerMap.put(VersionMessage.class.getName(),VersionMessageHandler.getInstance());
         handlerMap.put(VerackMessage.class.getName(),VerackMessageHandler.getInstance());
         handlerMap.put(GetAddrMessage.class.getName(),GetAddrMessageHandler.getInstance());
         handlerMap.put(AddrMessage.class.getName(),AddrMessageHandler.getInstance());
+        handlerMap.put(ByeMessage.class.getName(),ByeMessageHandler.getInstance());
     }
 
     public BaseMeesageHandlerInf getHandler(BaseMessage message) {
