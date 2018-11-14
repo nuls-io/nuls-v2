@@ -131,8 +131,8 @@ public interface AccountService {
     boolean setRemark(short chainId, String address, String remark);
 
     /**
-     * 获取账户私钥
-     * Get the account private key
+     * 获取账户私钥，只返回加密账户私钥，未加密账户不返回
+     * Get the account private key,Only returns the private key of the encrypted account, and the unencrypted account does not return.
      * HexUtil.encode(priKeyBytes)
      *
      * @param chainId

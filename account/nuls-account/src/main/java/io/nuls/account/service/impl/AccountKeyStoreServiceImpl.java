@@ -92,9 +92,8 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
         }
         //not allowed to cover
         if (!overwrite) {
-            Address address = AccountTool.newAddress(chainId, keyStore.getAddress());
             //Query account already exists
-            Account account = accountService.getAccount(chainId, address.getBase58());
+            Account account = accountService.getAccount(chainId, keyStore.getAddress());
             if (null != account) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_EXIST);
             }
