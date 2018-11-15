@@ -34,13 +34,34 @@ package io.nuls.rpc.info;
  */
 public class Constants {
 
-    private Constants(){}
+    private Constants() {
+    }
 
     /**
      * WebSocket constant
      */
     public static final long INTERVAL_TIMEMILLIS = 100;
     public static final long TIMEOUT_TIMEMILLIS = 60 * 1000;
+
+    /**
+     * Message type
+     */
+    public static final String NEGOTIATE_CONNECTION = "NegotiateConnection";
+    public static final String NEGOTIATE_CONNECTION_RESPONSE = "NegotiateConnectionResponse";
+    public static final String REQUEST = "Request";
+    public static final String UNSUBSCRIBE = "Unsubscribe";
+    public static final String RESPONSE = "Response";
+    public static final String ACK = "Ack";
+    public static final String REGISTER_COMPOUND_METHOD = "RegisterCompoundMethod";
+    public static final String UNREGISTER_COMPOUND_METHOD = "UnregisterCompoundMethod";
+
+    /**
+     * Request type
+     */
+    public static final int REQUEST_TYPE_1 = 1;
+    public static final int REQUEST_TYPE_2 = 2;
+    public static final int REQUEST_TYPE_3 = 3;
+    public static final int REQUEST_TYPE_4 = 4;
 
     /**
      * RPC error message
