@@ -25,6 +25,7 @@
 
 package io.nuls.network.manager.handler;
 
+import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
@@ -68,6 +69,10 @@ public class AddrMessageHandler extends BaseMessageHandler {
         Log.debug("AddrMessageHandler Recieve:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         //处理
         AddrMessage addrMessage=(AddrMessage)message;
+        if(null == addrMessage.getMsgBody()){
+            Log.error("rec error addr message.");
+            return new NetworkEventResult(true, NetworkErrorCode.NET_MESSAGE_ERROR);
+        }
         List<IpAddress> ipAddressList=addrMessage.getMsgBody().getIpAddressList();
 
         //判断地址是否本地已经拥有，如果拥有不转发，PEER是跨链网络也不转发
