@@ -130,21 +130,37 @@ public class NodeRpc extends BaseCmd {
         List<Node> nodes=new ArrayList<>();
         if(0 == isCross){
             if(STATE_ALL == state) {
-                nodes.addAll(nodeGroup.getConnectNodes());
-                nodes.addAll(nodeGroup.getDisConnectNodes());
+                if(null!=nodeGroup.getConnectNodes()) {
+                    nodes.addAll(nodeGroup.getConnectNodes());
+                }
+                if(null!=nodeGroup.getDisConnectNodes()) {
+                    nodes.addAll(nodeGroup.getConnectNodes());
+                }
             }else if(STATE_CONNECT == state){
-                nodes.addAll(nodeGroup.getConnectNodes());
+                if(null!=nodeGroup.getConnectNodes()) {
+                    nodes.addAll(nodeGroup.getConnectNodes());
+                }
             }else if(STATE_DIS_CONNECT == state){
-                nodes.addAll(nodeGroup.getDisConnectNodes());
+                if(null!=nodeGroup.getDisConnectNodes()) {
+                    nodes.addAll(nodeGroup.getConnectNodes());
+                }
             }
         }else{
             if(STATE_ALL == state) {
-                nodes.addAll(nodeGroup.getConnectCrossNodes());
-                nodes.addAll(nodeGroup.getDisConnectCrossNodes());
+                if(null!=nodeGroup.getConnectCrossNodes()) {
+                    nodes.addAll(nodeGroup.getConnectCrossNodes());
+                }
+                if(null!=nodeGroup.getDisConnectCrossNodes()) {
+                    nodes.addAll(nodeGroup.getDisConnectCrossNodes());
+                }
             }else if(STATE_CONNECT == state){
-                nodes.addAll(nodeGroup.getConnectCrossNodes());
+                if(null!=nodeGroup.getConnectCrossNodes()) {
+                    nodes.addAll(nodeGroup.getConnectCrossNodes());
+                }
             }else if(STATE_DIS_CONNECT == state){
-                nodes.addAll(nodeGroup.getDisConnectCrossNodes());
+                if(null!=nodeGroup.getDisConnectCrossNodes()) {
+                    nodes.addAll(nodeGroup.getDisConnectCrossNodes());
+                }
             }
 
         }
