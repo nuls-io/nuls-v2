@@ -41,13 +41,21 @@ import java.util.Arrays;
  * @author Niels
  */
 public class PunishLogPo extends BaseNulsData {
+    //惩罚类型
     private byte type;
+    //出块地址
     private byte[] address;
+    //惩罚时间
     private long time;
+    //区块高度
     private long height;
+    //轮次下标
     private long roundIndex;
+    //惩罚原因
     private short reasonCode;
+    //证据
     private byte[] evidence;
+    //区块中惩罚下标
     private int index;
 
     /**
