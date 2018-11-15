@@ -1,5 +1,6 @@
 package io.nuls.account.rpc.cmd;
 
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
@@ -25,7 +26,9 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -527,14 +530,8 @@ public class AccountCmd extends BaseCmd {
             String filePath = params.get(3) != null ? (String) params.get(3) : null;
             //export account to keystore
             AccountKeyStore accountKeyStore = keyStoreService.exportAccountToKeyStore(chainId, address, password);
-            //如果备份地址为空，则使用系统默认备份地址
-            //if the backup address is empty, the default backup address of the system is used
-            if (StringUtils.isBlank(filePath)) {
-                URL resource = ClassLoader.getSystemClassLoader().getResource("");
-                filePath = resource.getPath() + AccountConstant.ACCOUNTKEYSTORE_FOLDER_NAME;
-            }
             //backup keystore files
-            String backupFileName = AccountTool.backUpFile(filePath, new AccountKeyStoreDto(accountKeyStore));
+            String backupFileName = AccountTool.backUpKeyStore(filePath, new AccountKeyStoreDto(accountKeyStore));
             map.put("path", backupFileName);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode(), null);

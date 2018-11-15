@@ -25,6 +25,7 @@
 
 package io.nuls.account.util;
 
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
@@ -45,7 +46,10 @@ import io.nuls.tools.thread.TimeService;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.URL;
+import java.net.URLDecoder;
 
 /**
  * @author: qinyifeng
@@ -130,10 +134,27 @@ public class AccountTool {
     }
 
     /**
-     * 直接生成文件
-     * Export file
+     * 备份keystore文件
+     * backup keystore file
      */
-    public static String backUpFile(String path, AccountKeyStoreDto accountKeyStoreDto) {
+    public static String backUpKeyStore(String path, AccountKeyStoreDto accountKeyStoreDto) {
+        //如果备份地址为空，则使用系统默认备份地址
+        //if the backup address is empty, the default backup address of the system is used
+        if (StringUtils.isBlank(path)) {
+            if (StringUtils.isBlank(NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME)) {
+                URL resource = ClassLoader.getSystemClassLoader().getResource("");
+                path = resource.getPath();
+            } else {
+                path = NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME;
+            }
+            try {
+                path = URLDecoder.decode(path, "UTF-8");
+                // + NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                //path = path;// + NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME;
+            }
+        }
         File backupFile = new File(path);
         //if not directory,create directory
         if (!backupFile.isDirectory()) {
@@ -176,8 +197,11 @@ public class AccountTool {
             }
         }
         //If it is a windows system path, remove the first /
-        if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1 && path.startsWith("/")) {
-            path = path.substring(1);
+        if (System.getProperties().getProperty("os.name").toUpperCase().indexOf("WINDOWS") != -1) {
+            if (path.startsWith("/")) {
+                path = path.substring(1);
+            }
+            path = path.replace("/", "\\");
         }
         String backupFileName = path + File.separator + fileName;
         return backupFileName;

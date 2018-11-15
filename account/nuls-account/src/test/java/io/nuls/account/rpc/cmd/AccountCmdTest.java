@@ -345,7 +345,9 @@ public class AccountCmdTest {
             //Create encrypted account
             List<String> accountList = createAccount(chainId, 1, password);
             String address = accountList.get(0);
-            String pathDir = "back/up";
+
+            //测试不指定备份路径
+            String pathDir = "";
             //导出账户keystore路径  export account keyStore path
             String response = CmdDispatcher.call("ac_exportAccountKeyStore", new Object[]{chainId, address, password, pathDir}, version);
             CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
@@ -353,6 +355,17 @@ public class AccountCmdTest {
             String path = (String) result.get("path");
             assertNotNull(path);
 
+            //测试指定非windows备份路径
+            pathDir = "测试1/back/up";
+            //导出账户keystore路径  export account keyStore path
+            response = CmdDispatcher.call("ac_exportAccountKeyStore", new Object[]{chainId, address, password, pathDir}, version);
+            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            result = (HashMap) cmdResp.getResult();
+            path = (String) result.get("path");
+            assertNotNull(path);
+
+            //测试指定windows备份路径
+            pathDir = "D:\\workspace\\github\\nuls_2.0\\测试2\\back\\up";
             //Create an unencrypted account for test
             accountList = createAccount(chainId, 1, null);
             address = accountList.get(0);
