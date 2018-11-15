@@ -61,6 +61,7 @@ public class WsClient extends WebSocketClient {
             /*
              * add to response queue, Waiting for thread pool processing
              */
+            Log.info("Client received: " + JSONUtils.json2map(paramString));
             RuntimeInfo.RESPONSE_QUEUE.add(JSONUtils.json2map(paramString));
         } catch (IOException e) {
             Log.error("WsClient.onMessage-> " + e.getMessage() + ":" + paramString);
