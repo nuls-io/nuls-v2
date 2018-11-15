@@ -59,7 +59,7 @@ public class NodeManager extends  BaseManager{
     @Override
     public void init() {
         status=ManagerStatusEnum.INITIALIZED;
-        Collection<NodeGroup> nodeGroups=NodeGroupManager.getNodeGroupCollection();
+        Collection<NodeGroup> nodeGroups=NodeGroupManager.getInstance().getNodeGroupCollection();
         for(NodeGroup nodeGroup:nodeGroups){
             if(nodeGroup.isSelf()){
                 //自有网络组，增加种子节点的加载，跨链网络组，则无此步骤

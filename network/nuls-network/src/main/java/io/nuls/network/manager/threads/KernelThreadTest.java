@@ -34,10 +34,9 @@ import io.nuls.rpc.server.WsServer;
  * @create: 2018/11/14
  **/
 public class KernelThreadTest  implements Runnable  {
+    static WsServer s = new WsServer(8887);
     @Override
     public void run() {
-        int port = 8887;
-        WsServer s = new WsServer(port);
         try {
             s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
             s.start();

@@ -101,7 +101,7 @@ public class NodesConnectThread implements Runnable  {
         if(!nodeManager.isRunning()){
            return;
         }
-            Collection<NodeGroup> nodeGroups = NodeGroupManager.getNodeGroupCollection();
+            Collection<NodeGroup> nodeGroups = NodeGroupManager.getInstance().getNodeGroupCollection();
             for (NodeGroup nodeGroup : nodeGroups) {
                 try {
                 if(nodeGroup.isLock()){

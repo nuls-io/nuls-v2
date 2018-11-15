@@ -51,7 +51,7 @@ public class NodeGroupManager extends BaseManager{
     /**
      * key:chainId
      */
-    private static Map<String,NodeGroup> nodeGroupMap=new ConcurrentHashMap<String,NodeGroup>();
+    private  Map<String,NodeGroup> nodeGroupMap=new ConcurrentHashMap<String,NodeGroup>();
     private ManagerStatusEnum status=ManagerStatusEnum.UNINITIALIZED;
 
     /**
@@ -62,11 +62,11 @@ public class NodeGroupManager extends BaseManager{
 
     }
 
-    public static Map<String,NodeGroup> getNodeGroupMap(){
+    public  Map<String,NodeGroup> getNodeGroupMap(){
         return nodeGroupMap;
     }
 
-    public static Collection<NodeGroup> getNodeGroupCollection(){
+    public  Collection<NodeGroup> getNodeGroupCollection(){
         return nodeGroupMap.values();
     }
 
@@ -78,7 +78,7 @@ public class NodeGroupManager extends BaseManager{
         return nodeGroupMap.get(chainId);
     }
     public  NodeGroup  getNodeGroupByChainId(int chainId){
-        return nodeGroupMap.get(chainId);
+        return nodeGroupMap.get(String.valueOf(chainId));
     }
 
     public List<NodeGroup> getNodeGroups(){
