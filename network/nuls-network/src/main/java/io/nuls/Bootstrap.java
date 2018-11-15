@@ -25,12 +25,17 @@
 package io.nuls;
 
 
+import io.nuls.db.service.RocksDBService;
 import io.nuls.network.cfg.NulsConfig;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.*;
+import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
+import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
+import io.nuls.tools.parse.I18nUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -43,17 +48,37 @@ import java.util.List;
  *
  */
 public class Bootstrap {
+    private static Bootstrap bootstrap = null;
+
+    private Bootstrap() {
+    }
+
+    public static Bootstrap getInstance() {
+        if (bootstrap == null) {
+            synchronized (Bootstrap.class) {
+                if (bootstrap == null) {
+                    bootstrap = new Bootstrap();
+                }
+            }
+        }
+        return bootstrap;
+    }
+
+
     public static void main(String[] args) {
-        Thread.currentThread().setName("NulsNetwork");
+
+        Bootstrap.getInstance().moduleStart();
+
+    }
+
+    private void moduleStart(){
         try {
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
 //            --add-exports java.base/jdk.internal.misc=ALL-UNNAMED
 //            --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED
-//            System.setProperty("protostuff.runtime.allow_null_array_element", "true");
             cfgInit();
             managerInit();
             managerStart();
-            //TODO:模块相关状态维护待写
         } catch (Exception e) {
             Log.error("Network Bootstrap failed", e);
             System.exit(-1);
@@ -63,10 +88,22 @@ public class Bootstrap {
     /**
      * 配置信息初始化
      */
-    public static void cfgInit() {
+    public  void cfgInit() {
         try {
-            NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
             NetworkParam networkParam = NetworkParam.getInstance();
+            NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
+            // set system language
+            String language = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_LANGUAGE,"en");
+            networkParam.setLanguage(language);
+            I18nUtils.loadLanguage("languages", language);
+            I18nUtils.setLanguage(language);
+            //set encode
+            String encoding = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_ENCODING,"UTF-8");
+            networkParam.setEncoding(encoding);
+            //set db path
+            String dbPath =  NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_DBPATH,"./data");
+            networkParam.setDbPath(dbPath);
+            //net parameters
             networkParam.setChainId(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_CHAIN_ID, 0));
             networkParam.setPacketMagic(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_MAGIC, 123456789));
             networkParam.setMaxInCount(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_NODE_MAX_IN, 10));
@@ -91,10 +128,11 @@ public class Bootstrap {
                 ipMoonList.add(ip);
             }
             networkParam.setSeedIpList(ipList);
-            Log.info(String.valueOf(networkParam.getPacketMagic()));
         } catch (IOException e) {
             Log.error("Network Bootstrap cfgInit failed", e);
             throw new RuntimeException("Network Bootstrap cfgInit failed");
+        } catch (NulsException e) {
+            e.printStackTrace();
         }
     }
 
@@ -102,13 +140,16 @@ public class Bootstrap {
      *
      * 管理器初始化
      */
-    public static void managerInit(){
+    public  void managerInit(){
+        RocksDBService.init(NetworkParam.getInstance().getDbPath());
+        SpringLiteContext.init("io.nuls.network", new ModularServiceMethodInterceptor());
         StorageManager.getInstance().init();
+        LocalInfoManager.getInstance().init();
         NodeGroupManager.getInstance().init();
         NodeManager.getInstance().init();
         MessageManager.getInstance().init();
-        LocalInfoManager.getInstance().init();
         RpcManager.getInstance().init();
+        TaskManager.getInstance().init();
         ConnectionManager.getInstance().init();
     }
 
@@ -116,10 +157,14 @@ public class Bootstrap {
      *
      * 启动管理模块
      */
-    public static void managerStart(){
+    public  void managerStart(){
         NodeGroupManager.getInstance().start();
         NodeManager.getInstance().start();
         ConnectionManager.getInstance().nettyBoot();
+        TaskManager.getInstance().start();
+
+        RpcManager.getInstance().start();
+
     }
 
 }

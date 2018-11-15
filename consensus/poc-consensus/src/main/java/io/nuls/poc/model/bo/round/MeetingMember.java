@@ -39,8 +39,6 @@ import java.util.List;
  * 2018/11/12
  */
 public class MeetingMember implements Comparable<MeetingMember> {
-    //轮次开始打包时间
-    private long roundStartTime;
     //共识节点---节点地址
     //private byte[] agentAddress;
     //共识节点---打包地址
@@ -57,7 +55,9 @@ public class MeetingMember implements Comparable<MeetingMember> {
     //private Na ownDeposit = Na.ZERO;
     //佣金比例
     //private double commissionRate;
-    
+
+    //轮次开始打包时间
+    private long roundStartTime;
     //节点在轮次中的下标（第几个出块）
     private int packingIndexOfRound;
     //共识节点对象

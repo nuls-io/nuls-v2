@@ -32,6 +32,7 @@ import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
+import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.log.Log;
 
 /**
@@ -40,7 +41,7 @@ import io.nuls.tools.log.Log;
  * @date 2018/11/01
  */
 public abstract  class BaseMessageHandler implements BaseMeesageHandlerInf {
-
+    protected  static final int PlaceHolderSize = ToolsConstant.PLACE_HOLDER.length;
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
         try {

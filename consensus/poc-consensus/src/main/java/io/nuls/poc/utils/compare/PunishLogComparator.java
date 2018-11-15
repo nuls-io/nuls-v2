@@ -22,38 +22,24 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager.threads;
 
+package io.nuls.poc.utils.compare;
 
-import io.nuls.network.model.Node;
-import io.nuls.network.netty.NettyClient;
+import io.nuls.poc.model.po.PunishLogPo;
 
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.SynchronousQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.Comparator;
 
 /**
- * 网络client 连接线程池
- * @author lan
- * @date 2018/10/20
+ * @author tag
+ * 2018/11/14
  */
-public class NetworkThreadPool {
+public class PunishLogComparator implements Comparator<PunishLogPo> {
 
-    private static final ExecutorService executor = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-            60L, TimeUnit.SECONDS,
-            new SynchronousQueue<Runnable>());
-
-
-    public static void doConnect(Node node) {
-
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                NettyClient client = new NettyClient(node);
-                client.start();
-            }
-        });
+    @Override
+    public int compare(PunishLogPo o1, PunishLogPo o2) {
+        if (o1.getHeight() == o2.getHeight()) {
+            return (int) (o1.getTime() - o2.getTime());
+        }
+        return (int) (o1.getHeight() - o2.getHeight());
     }
 }

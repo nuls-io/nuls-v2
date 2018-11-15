@@ -91,8 +91,10 @@ public class IpAddress extends BaseNulsData {
         @Override
         public int size() {
             int s = 0;
-            s += IPSIZE; // ip 16byte
-            s += SerializeUtils.sizeOfUint16(); // port 2byte
+            // ip 16byte
+            s += IPSIZE;
+            // port 2byte
+            s += SerializeUtils.sizeOfUint16();
             return s;
         }
 

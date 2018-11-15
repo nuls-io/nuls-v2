@@ -26,6 +26,7 @@ package io.nuls.network.model.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.MessageBody;
 import io.nuls.tools.exception.NulsException;
@@ -41,7 +42,9 @@ public class ByeMessage extends BaseMessage {
     protected BaseNulsData parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
         return null;
     }
-
+    public ByeMessage(){
+        super(NetworkConstant.CMD_MESSAGE_BYE);
+    }
     public ByeMessage(long magicNumber, String cmd, MessageBody body) {
         super(cmd,magicNumber);
         this.setMsgBody(body);

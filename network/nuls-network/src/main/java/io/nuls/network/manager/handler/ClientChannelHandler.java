@@ -31,7 +31,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.MessageFactory;
@@ -53,8 +52,6 @@ import java.io.IOException;
 public class ClientChannelHandler extends BaseChannelHandler {
     private AttributeKey<Node> key = AttributeKey.valueOf("node");
 
-    private NetworkParam networkParam = NetworkParam.getInstance();
-
     public ClientChannelHandler() {
          super();
     }
@@ -62,8 +59,6 @@ public class ClientChannelHandler extends BaseChannelHandler {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        Attribute<Node> nodeAttribute = ctx.channel().attr(key);
-        Node node = nodeAttribute.get();
     }
 
     @Override
@@ -75,7 +70,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         String remoteIP = socketChannel.remoteAddress().getHostString();
         //如果是本机节点访问自己的服务器，则广播本机服务器到全网
-        if (LocalInfoManager.getInstance().isSelfConnect(remoteIP)) {
+        if (LocalInfoManager.getInstance().isSelfIp(remoteIP)) {
             //广播自己的Ip
             MessageManager.getInstance().broadcastSelfAddrToAllNode(true);
             channel.close();
@@ -97,7 +92,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         nodeGroupConnector.setStatus(Node.CONNECTING);
         VersionMessage versionMessage=MessageFactory.getInstance().buildVersionMessage(node,nodeGroupConnector.getMagicNumber());
         if(null == versionMessage){
-            //TODO:exception
+            //exception
             Log.error("build version error");
             channel.close();
             return;
@@ -124,15 +119,13 @@ public class ClientChannelHandler extends BaseChannelHandler {
         try {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
-
             if (node != null) {
-                    ByteBuf buf = (ByteBuf) msg;
-                    try {
-                        MessageManager.getInstance().receiveMessage(buf,node.getId(),false);
-                    } finally {
-                        buf.release();
-                    }
-                 
+                ByteBuf buf = (ByteBuf) msg;
+                try {
+                    MessageManager.getInstance().receiveMessage(buf,node.getId(),false);
+                } finally {
+                    buf.release();
+                }
             } else {
                 SocketChannel socketChannel = (SocketChannel) ctx.channel();
                 String remoteIP = socketChannel.remoteAddress().getHostString();
@@ -153,8 +146,8 @@ public class ClientChannelHandler extends BaseChannelHandler {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         if (!(cause instanceof IOException)) {
-            //Log.error(cause);
-            Log.error("===========网路消息解析错误===========");
+            Log.error(cause);
+            Log.error("===========exceptionCaught===========");
         }
         ctx.channel().close();
     }

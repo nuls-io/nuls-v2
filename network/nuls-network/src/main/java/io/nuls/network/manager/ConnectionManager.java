@@ -27,21 +27,17 @@ package io.nuls.network.manager;
 
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.manager.threads.NetworkThreadPool;
-import io.nuls.network.manager.threads.NodesConnectThread;
+import io.nuls.network.loker.Lockers;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.netty.NettyServer;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.thread.commom.NulsThreadFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 /**
  * 连接管理器
  * connection  manager
@@ -50,8 +46,16 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public class ConnectionManager extends BaseManager{
-
+    TaskManager taskManager = TaskManager.getInstance();
     private static ConnectionManager instance = new ConnectionManager();
+    public static ConnectionManager getInstance() {
+        return instance;
+    }
+
+    private ConnectionManager() {
+
+    }
+
     /**
      *作为Server 被动连接的peer
      */
@@ -130,6 +134,13 @@ public class ConnectionManager extends BaseManager{
         return true;
     }
 
+    /**
+     * 减少链接入地址
+     * sub chain max Ip
+     * @param node
+     * @param magicNum
+     * @param isAll
+     */
     public void subGroupMaxInIp (Node node,long magicNum,boolean isAll){
         String ip=node.getId().split(NetworkConstant.COLON)[0];
         String key=ip+"_"+magicNum;
@@ -177,24 +188,19 @@ public class ConnectionManager extends BaseManager{
         }
     }
 
-    private ConnectionManager() {
-    }
 
     public void nettyBoot(){
         serverStart();
         clientStart();
         Log.info("==========================NettyBoot");
     }
-    public static ConnectionManager getInstance() {
-        return instance;
-    }
 
-    public void serverStart(){
+    private void serverStart(){
         NettyServer server=new NettyServer(NetworkParam.getInstance().getPort());
         NettyServer serverCross=new NettyServer(NetworkParam.getInstance().getCrossPort());
         server.init();
         serverCross.init();
-        TaskManager.createAndRunThread("node server start", new Runnable() {
+        taskManager.createAndRunThread("node server start", new Runnable() {
             @Override
             public void run() {
                 try {
@@ -204,7 +210,7 @@ public class ConnectionManager extends BaseManager{
                 }
             }
         }, false);
-        TaskManager.createAndRunThread("node crossServer start", new Runnable() {
+        taskManager.createAndRunThread("node crossServer start", new Runnable() {
             @Override
             public void run() {
                 try {
@@ -217,14 +223,25 @@ public class ConnectionManager extends BaseManager{
 
     }
 
-    public void clientStart() {
-        ScheduledThreadPoolExecutor executor = TaskManager.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
-        executor.scheduleAtFixedRate(new NodesConnectThread(), 5, 1000, TimeUnit.SECONDS);
+    private void clientStart() {
+        taskManager.clientConnectThreadStart();
     }
 
-    public void connectionNode(Node node) {
+    /**
+     * connect peer
+     * @param node
+     */
+    public  void connectionNode(Node node) {
         //发起连接
-        NetworkThreadPool.doConnect(node);
+        Lockers.NODE_CONNECT_LOCK.lock();
+        try {
+            if(node.isCanConnect()) {
+                node.setCanConnect(false);
+                taskManager.doConnect(node);
+            }
+        }finally {
+            Lockers.NODE_CONNECT_LOCK.unlock();
+        }
     }
     //自我连接
     public void selfConnection(){
@@ -236,7 +253,7 @@ public class ConnectionManager extends BaseManager{
         }
         IpAddress ipAddress=LocalInfoManager.getInstance().getExternalAddress();
         Node node=new Node(ipAddress.getIp().getHostAddress(),ipAddress.getPort(),Node.OUT,false);
-        NetworkThreadPool.doConnect(node);
+        connectionNode(node);
         LocalInfoManager.getInstance().setConnectedMySelf(true);
     }
 

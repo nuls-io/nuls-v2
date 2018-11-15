@@ -92,7 +92,7 @@ public class MeetingRound {
         Collections.sort(memberList);
         this.memberCount = memberList.size();
         totalWeight = 0d;
-        for (int i = 0; i < memberList.size(); i++) {
+        for (int i = 0; i < memberCount; i++) {
             MeetingMember member = memberList.get(i);
             member.setRoundStartTime(this.getStartTime());
             member.setPackingIndexOfRound(i + 1);
@@ -131,10 +131,6 @@ public class MeetingRound {
         return null;
     }
 
-    /*public Account getLocalPacker() {
-        return localPacker;
-    }*/
-
     public long getIndex() {
         return index;
     }
@@ -156,19 +152,15 @@ public class MeetingRound {
         return myMember;
     }
 
-    /*public void calcLocalPacker(Collection<Account> accountList) {
-        for (Account account : accountList) {
-            if(account.isEncrypted()) {
-                continue;
-            }
-            MeetingMember member = getMember(account.getAddress().getAddressBytes());
+    public void calcLocalPacker(List<byte[]> localAddressList) {
+        for (byte[] address:localAddressList) {
+            MeetingMember member = getMember(address);
             if (null != member) {
-                this.localPacker = account;
                 myMember = member;
                 return;
             }
         }
-    }*/
+    }
 
     @Override
     public String toString() {

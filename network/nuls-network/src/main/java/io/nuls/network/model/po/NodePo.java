@@ -90,7 +90,6 @@ public class NodePo extends  BasePo{
         size += SerializeUtils.sizeOfString(ip);
         size += SerializeUtils.sizeOfInt32();
         size += SerializeUtils.sizeOfInt32();
-        size += SerializeUtils.sizeOfInt32();
         size += SerializeUtils.sizeOfBoolean();
         return size;
     }

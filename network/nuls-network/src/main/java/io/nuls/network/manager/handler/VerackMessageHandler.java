@@ -26,6 +26,7 @@
 package io.nuls.network.manager.handler;
 
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
@@ -56,7 +57,8 @@ public class VerackMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
         long magicNumber = message.getHeader().getMagicNumber();
-        Node node  = nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber()).getDisConnectNodeMap().get(nodeKey);
+//        Node node  = nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber()).getDisConnectNodeMap().get(nodeKey);
+        Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
         if(isServer){
             //server端能收到verack消息,接收消息并将连接状态跃迁为握手完成

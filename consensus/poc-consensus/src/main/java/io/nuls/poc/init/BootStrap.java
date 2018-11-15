@@ -8,6 +8,7 @@ import io.nuls.poc.model.bo.config.ConfigItem;
 import io.nuls.poc.storage.ConfigeService;
 import io.nuls.poc.storage.LanguageService;
 import io.nuls.poc.utils.manager.ConfigManager;
+import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.SchedulerManager;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -51,8 +52,6 @@ public class BootStrap {
             SpringLiteContext.init(ConsensusConstant.CONTEXT_PATH);
             //初始化国际资源文件语言
             initLanguage();
-            //初始化本地缓存数据（共识节点，委托信息，惩罚信息等）
-
             //加载本地配置参数,并启动本地服务
             sysStart(chain_id);
             //启动WebSocket服务,向外提供RPC接口
@@ -112,6 +111,8 @@ public class BootStrap {
                 ConfigManager.initManager(configItemList,chain_id);
                 //初始化链相关表
                 initTabel(chain_id);
+                //初始化本地缓存数据（共识节点，委托信息，惩罚信息等）
+                ConsensusManager.getInstance().initData(chain_id);
                 //启动内部服务
                 SchedulerManager.createChainScheduler(chain_id,ConfigManager.config_map.get(chain_id));
             }else{
@@ -120,6 +121,8 @@ public class BootStrap {
                 //初始化各条链相关表
                 for (int id : configMap.keySet()) {
                     initTabel(id);
+                    //初始化本地缓存数据（共识节点，委托信息，惩罚信息等）
+                    ConsensusManager.getInstance().initData(chain_id);
                 }
                 //启动内部服务,先启动主链，在启动子链
                 SchedulerManager.createChainSchefuler(ConfigManager.config_map);

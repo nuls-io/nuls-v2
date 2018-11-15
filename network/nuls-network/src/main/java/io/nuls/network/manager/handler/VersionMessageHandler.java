@@ -67,14 +67,20 @@ public class VersionMessageHandler extends BaseMessageHandler {
         Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
         Log.debug("VersionMessageHandler Recieve:"+"Server"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
-        localInfoManager.updateExternalAddress(versionBody.getAddrYou().getIp().getHostAddress(),versionBody.getAddrYou().getPort());
+        String peerIp = versionBody.getAddrYou().getIp().getHostAddress();
+        int peerPort = versionBody.getAddrYou().getPort();
+        localInfoManager.updateExternalAddress(peerIp,peerPort);
         int maxIn=0;
         if(node.isCrossConnect()){
             maxIn=nodeGroup.getMaxCrossIn();
         }else{
             maxIn=nodeGroup.getMaxIn();
         }
-        if(ConnectionManager.getInstance().isPeerConnectExceedMaxIn(node.getIp(),nodeGroup.getMagicNumber(),maxIn)){
+        /**
+         *会存在情况如：种子节点 启动 无法扫描到自己的IP 只有 到握手时候才能知道自己外网IP，发现是自连。
+         */
+        //远程地址与自己地址相同 或者 连接满额处理
+        if(LocalInfoManager.getInstance().isSelfIp(node.getIp()) || ConnectionManager.getInstance().isPeerConnectExceedMaxIn(node.getIp(),nodeGroup.getMagicNumber(),maxIn)){
             if(node.getNodeGroupConnectors().size() == 0){
                 node.getChannel().close();
                 node.setCanConnect(true);
@@ -118,7 +124,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         //node加入到Group的连接中
         NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
         nodeGroup.addConnetNode(node,true);
-        //TODO:存储需要的信息
+        //存储需要的信息
         node.setVersionProtocolInfos(message.getHeader().getMagicNumber(),versionBody.getProtocolVersion(),versionBody.getBlockHeight(),versionBody.getBlockHash());
         node.setRemoteCrossPort(versionBody.getPortMeCross());
         //client:接收到server端消息，进行verack答复

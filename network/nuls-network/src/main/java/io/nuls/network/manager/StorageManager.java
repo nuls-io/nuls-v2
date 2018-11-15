@@ -25,6 +25,7 @@
 package io.nuls.network.manager;
 
 import io.nuls.db.service.RocksDBService;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupNodeKeys;
@@ -32,7 +33,7 @@ import io.nuls.network.model.po.NodeGroupPo;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.storage.DbService;
 import io.nuls.network.storage.DbServiceImpl;
-import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.ArrayList;
@@ -50,7 +51,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StorageManager extends BaseManager{
     private static StorageManager storageManager=new StorageManager();
     private static Map<String,NodePo> cacheAllNodes=new ConcurrentHashMap<>();
-    DbService dbService=new DbServiceImpl();
+    DbService dbService=null;
+    NetworkParam networkParam = NetworkParam.getInstance();
     private StorageManager(){
 
     }
@@ -131,10 +133,9 @@ public class StorageManager extends BaseManager{
     @Override
     public void init() {
         try {
-            RocksDBService.init("./data");
-            ((InitializingBean)dbService).afterPropertiesSet();
-        } catch (NulsException e) {
-            e.printStackTrace();
+
+            dbService=SpringLiteContext.getBean(DbServiceImpl.class);
+//            ((InitializingBean)dbService).afterPropertiesSet();
         } catch (Exception e) {
             e.printStackTrace();
         }

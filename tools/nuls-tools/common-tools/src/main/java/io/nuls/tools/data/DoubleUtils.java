@@ -25,7 +25,7 @@ public class DoubleUtils {
      * @param value         需处理的double数据
      * @param scale         须保留的小数位数
      * @param roundingMode  小数的保留模式
-     * @return              处理都的double数据
+     * @return              处理后的double数据
      * */
     public static double round(double value, int scale, int roundingMode) {
         BigDecimal bd = createBigDecimal(value);
@@ -38,7 +38,7 @@ public class DoubleUtils {
      * 双精度浮点数根据指定保留小数位数，默认小数保留模式处理double数据
      * @param value         需处理的double数据
      * @param scale         须保留的小数位数
-     * @return              处理都的double数据
+     * @return              处理后的double数据
      * */
     public static double round(double value, int scale) {
         return round(value, scale, BigDecimal.ROUND_HALF_UP);
@@ -47,7 +47,7 @@ public class DoubleUtils {
     /**
      * 双精度浮点数根据默认保留小数位数（八位），默认小数保留模式处理double数据
      * @param value         需处理的double数据
-     * @return              处理都的double数据
+     * @return              处理后的double数据
      * */
     public static double round(double value) {
         return round(value, DEFAULT_SCALE);
