@@ -72,7 +72,7 @@ public class NodesConnectThread implements Runnable  {
                 if(node.isCanConnect()) {
                     node.addGroupConnector(magicNumber);
                     connectionManager.connectionNode(node);
-                    node.setCanConnect(false);
+
                     leftCount--;
                 }else{
                     //去连接缓存中获取连接是否存在，如果存在，直接进行业务握手

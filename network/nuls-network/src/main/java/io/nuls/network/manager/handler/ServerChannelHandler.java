@@ -60,7 +60,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
         Log.info("============"+remoteIP+"====="+channel.remoteAddress().getPort());
         //查看是否是本机尝试连接本机地址 ，如果是直接关闭连接
         if (LocalInfoManager.getInstance().isSelfIp(remoteIP)) {
-            Log.info("Server----------------------本机尝试连接本机地址关闭 ------------------------- " + remoteIP);
+            Log.info("Server----------------------Local connect close: ------------------------- " + remoteIP+":"+channel.remoteAddress().getPort());
             ctx.channel().close();
             return;
         }
@@ -95,7 +95,10 @@ public class ServerChannelHandler extends BaseChannelHandler {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        Node node=ConnectionManager.getInstance().getNodeByCache(this.getNodeIdByChannel( ctx.channel()),Node.OUT);
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String remoteIP = channel.remoteAddress().getHostString();
+        Log.info("Server Node is Inactive:" +remoteIP + ":" + channel.remoteAddress().getPort());
+        Node node=ConnectionManager.getInstance().getNodeByCache(this.getNodeIdByChannel( ctx.channel()),Node.IN);
         if(null != node) {
             node.setCanConnect(true);
             ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),Node.IN);
@@ -105,6 +108,9 @@ public class ServerChannelHandler extends BaseChannelHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Log.error("----------------- server exceptionCaught -------------------");
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String remoteIP = channel.remoteAddress().getHostString();
+        Log.info("Server Node is exceptionCaught:" +remoteIP + ":" + channel.remoteAddress().getPort());
         if (!(cause instanceof IOException)) {
             Log.error(cause);
         }
@@ -130,6 +136,9 @@ public class ServerChannelHandler extends BaseChannelHandler {
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String remoteIP = channel.remoteAddress().getHostString();
+        Log.info("Server Node is channelUnregistered:" +remoteIP + ":" + channel.remoteAddress().getPort());
         Log.info("-----------------server channelInactive  node is channelUnregistered -----------------");
     }
 

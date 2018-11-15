@@ -63,6 +63,7 @@ public class AddrMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
+        Log.info("============================nodeKey="+nodeKey);
         Node node =nodeGroup .getConnectNodeMap().get(nodeKey);
         Log.debug("AddrMessageHandler Recieve:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         //处理

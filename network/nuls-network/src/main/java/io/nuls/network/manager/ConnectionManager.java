@@ -27,6 +27,7 @@ package io.nuls.network.manager;
 
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.loker.Lockers;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.dto.IpAddress;
@@ -230,9 +231,17 @@ public class ConnectionManager extends BaseManager{
      * connect peer
      * @param node
      */
-    public void connectionNode(Node node) {
+    public  void connectionNode(Node node) {
         //发起连接
-        taskManager.doConnect(node);
+        Lockers.NODE_CONNECT_LOCK.lock();
+        try {
+            if(node.isCanConnect()) {
+                node.setCanConnect(false);
+                taskManager.doConnect(node);
+            }
+        }finally {
+            Lockers.NODE_CONNECT_LOCK.unlock();
+        }
     }
     //自我连接
     public void selfConnection(){

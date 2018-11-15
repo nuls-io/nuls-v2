@@ -24,6 +24,7 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.network.manager.threads.DataShowMonitorTest;
 import io.nuls.network.manager.threads.GroupStatusMonitor;
 import io.nuls.network.manager.threads.KernelThreadTest;
 import io.nuls.network.manager.threads.NodesConnectThread;
@@ -82,6 +83,10 @@ public class TaskManager extends BaseManager{
     @Override
     public void start() {
         scheduleGroupStatusMonitor();
+        testThread();
+    }
+    public void testThread(){
+        //测试调试专用 开始
         KernelThreadTest test = new KernelThreadTest();
         test.run();
         try {
@@ -89,8 +94,10 @@ public class TaskManager extends BaseManager{
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        ScheduledThreadPoolExecutor executor = taskManager.createScheduledThreadPool(1, new NulsThreadFactory("DataShowMonitorTest"));
+        executor.scheduleAtFixedRate(new DataShowMonitorTest(), 5, 10, TimeUnit.SECONDS);
+        //测试调试专用 结束
     }
-
     public void scheduleGroupStatusMonitor(){
         ScheduledThreadPoolExecutor executor = taskManager.createScheduledThreadPool(1, new NulsThreadFactory("GroupStatusMonitor"));
         executor.scheduleAtFixedRate(new GroupStatusMonitor(), 5, 10, TimeUnit.SECONDS);

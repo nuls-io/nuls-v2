@@ -44,6 +44,8 @@ import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.tools.crypto.Sha256Hash;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
@@ -99,26 +101,13 @@ public class MessageManager extends BaseManager{
      * @param data
      * @return
      */
-    public boolean validate(BaseMessage data){
-        if (data.getHeader() == null) {
-            Log.error("NET_MESSAGE_ERROR");
-            return false;
-        }
-        Log.info("data.getHeader().getPayloadLength()="+data.getHeader().getPayloadLength());
-        Log.info("data.getMsgBody()="+(data.getMsgBody()== null));
-        if(data.getHeader().getPayloadLength()== 4 && data.getMsgBody() == null){
-            //ok
-            return true;
-        } else if (data.getHeader().getPayloadLength() != data.getMsgBody().size()) {
-            Log.error("NET_MESSAGE_LENGTH_ERROR");
-            return false;
-        }
-
-         if(!data.isCheckSumValid()){
-                Log.error("NET_MESSAGE_CHECKSUM_ERROR");
-                return false;
-            }
-        return true;
+    public boolean validate(byte []data,long pChecksum){
+        byte [] bodyHash=Sha256Hash.hashTwice(data);
+        byte []get4Byte=ByteUtils.subBytes(bodyHash,0,4);
+        long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
+        Log.info("==================checksum:"+checksum);
+        Log.info("==================pChecksum:"+pChecksum);
+        return checksum == pChecksum;
     }
     public void receiveMessage(ByteBuf buffer,String nodeKey,boolean isServer) throws NulsException {
         //统一接收消息处理
@@ -129,27 +118,23 @@ public class MessageManager extends BaseManager{
             while (!byteBuffer.isFinished()) {
                 MessageHeader header = byteBuffer.readNulsData(new MessageHeader());
                 Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
-                BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());
-                byteBuffer.setCursor(byteBuffer.getCursor() - header.size());
+                byte []payLoad = byteBuffer.getPayload();
+                byte []payLoadBody = byteBuffer.readBytes(payLoad.length-header.size());
+                Log.info("=================payLoad length"+payLoadBody.length);
+                if (!validate(payLoadBody,header.getChecksum())) {
+                    return;
+                }
+                byteBuffer.setCursor(0);
+                BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());             ;
                 if(null != message) {
                     BaseMeesageHandlerInf handler = NetworkMessageHandlerFactory.getInstance().getHandler(message);
-                    if(header.getCommandStr().equals(NetworkConstant.CMD_MESSAGE_ADDR)){
-                        Log.info("================go ADDR===============");
-                        message = byteBuffer.readNulsData((AddrMessage)message);
-                    }else {
-                        message = byteBuffer.readNulsData(message);
-                    }
-                    if (!validate(message)) {
-                        return;
-                    } else {
-                        handler.recieve(message, nodeKey, isServer);
-                    }
+                    message = byteBuffer.readNulsData(message);
+                    handler.recieve(message, nodeKey, isServer);
                 }else{
                     //外部消息，转外部接口
                     long magicNum=header.getMagicNumber();
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
-                    int msgSize = (int)(header.size()+header.getPayloadLength());
-                    String response = CmdDispatcher.call(header.getCommandStr(), new Object[]{chainId,nodeKey,byteBuffer.readBytes(msgSize)},1.0 );
+                    String response = CmdDispatcher.call(header.getCommandStr(), new Object[]{chainId,nodeKey,payLoad},1.0 );
                     Log.info(response);
                 }
                }

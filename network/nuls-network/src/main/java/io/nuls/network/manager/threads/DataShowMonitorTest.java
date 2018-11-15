@@ -24,47 +24,48 @@
  */
 package io.nuls.network.manager.threads;
 
-import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.tools.log.Log;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
  * @program: nuls2.0
  * @description: Group event monitor
- * 判断网络组的连接情况，是否稳定连接
+ * 测试
  * @author: lan
  * @create: 2018/11/14
  **/
-public class GroupStatusMonitor  implements Runnable  {
+public class DataShowMonitorTest implements Runnable  {
     @Override
     public void run() {
+        //test
+        printlnPeer();
+    }
+
+    void printlnPeer(){
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for(NodeGroup nodeGroup:nodeGroupList){
-            if(NodeGroup.WAIT1 == nodeGroup.getStatus() || NodeGroup.WAIT2 == nodeGroup.getStatus()){
-                if(nodeGroup.isActive()){
-                    long time = nodeGroup.getLatestHandshakeSuccTime()+ NetworkConstant.NODEGROUP_NET_STABLE_TIME_MILLIONS;
-                    if(time < System.currentTimeMillis()){
-                        if(NodeGroup.WAIT1 == nodeGroup.getStatus()){
-                            //通知链管理模块
-                        }
-                        //发布网络状态事件
-                        nodeGroup.setStatus(NodeGroup.OK);
-                        Log.info("NODE GROUP STATUS UPDATE TO OK");
-                    }
-
-                }
-            }else if(NodeGroup.OK == nodeGroup.getStatus()){
-                if(!nodeGroup.isActive()){
-                    //发布网络状态事件
-                    nodeGroup.setStatus(NodeGroup.WAIT2);
-                    Log.info("NODE GROUP STATUS UPDATE TO WAIT2");
-                }
+            Collection<Node> c1=nodeGroup.getConnectNodes();
+            for(Node n:c1){
+                Log.info("*************connect:"+n.getId());
+            }
+            Collection<Node> c2=nodeGroup.getDisConnectNodes();
+            for(Node n:c2){
+                Log.info("***********disconnect:"+n.getId());
+            }
+            Collection<Node> c3=nodeGroup.getConnectCrossNodes();
+            for(Node n:c3){
+                Log.info("************cross connect:"+n.getId());
+            }
+            Collection<Node> c4=nodeGroup.getDisConnectCrossNodes();
+            for(Node n:c4){
+                Log.info("*************cross disconnect:"+n.getId());
             }
         }
     }
-
 }

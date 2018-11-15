@@ -30,8 +30,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.network.model.base.NulsDigestData;
-
-
+import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
@@ -74,14 +73,20 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         long checksum=getCheckSum();
         header.setChecksum(checksum);
-
         stream.write(header.serialize());
         stream.write(msgBody.serialize());
     }
 
 
     public long getCheckSum() throws IOException {
-        byte [] bodyHash=Sha256Hash.hashTwice(msgBody.serialize());
+        byte[] data = null;
+        if(null == msgBody || msgBody.size() == 0){
+            data=ToolsConstant.PLACE_HOLDER;
+        }else {
+            data = msgBody.serialize();
+        }
+        Log.info("=================getCheckSum:"+data.length);
+        byte [] bodyHash=Sha256Hash.hashTwice(data);
         byte []get4Byte=ByteUtils.subBytes(bodyHash,0,4);
         long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
         return checksum;
@@ -104,7 +109,6 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
         this.header = header;
         this.msgBody = parseMessageBody(byteBuffer);
     }
-
     protected abstract T parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException;
 
 

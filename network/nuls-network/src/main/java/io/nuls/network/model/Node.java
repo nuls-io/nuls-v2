@@ -29,6 +29,7 @@ import io.netty.channel.Channel;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
 import io.nuls.network.model.po.BasePo;
@@ -298,7 +299,10 @@ public class Node extends BaseNulsData  implements Dto {
     }
 
     public boolean isEliminate(){
-       return isBad;
+        if (LocalInfoManager.getInstance().isSelfIp(ip)) {
+            return true;
+        }
+        return isBad;
     }
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {

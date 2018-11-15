@@ -382,7 +382,7 @@ public class NodeGroup  implements Dto {
 
     /**
      * 移除节点,判断是否承载有多链业务
-     * 删除peer，注销链，bye消息，重载链中调用
+     * 删除peer，注销链，bye消息，重启链rpc 中调用
      * @param node
      * @param connectChange
      */

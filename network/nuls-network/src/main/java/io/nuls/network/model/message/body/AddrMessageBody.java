@@ -32,7 +32,6 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,6 +62,9 @@ public class AddrMessageBody extends BaseNulsData {
         if(ipAddressList.size() > 0){
             s +=ipAddressList.size() * (new  IpAddress().size());
         }
+        if(0 == s){
+            s = 4;
+        }
         return s;
     }
 
@@ -78,10 +80,8 @@ public class AddrMessageBody extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
-        Log.info("=============begin addr parse");
         try {
            while(!buffer.isFinished()){
-               Log.info("=============do  addr parse");
                IpAddress address=new IpAddress();
                address.parse(buffer);
                ipAddressList.add(address);
