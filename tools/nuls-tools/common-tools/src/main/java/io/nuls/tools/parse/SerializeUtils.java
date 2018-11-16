@@ -582,12 +582,21 @@ public class SerializeUtils {
     }
 
     /**
-     * 获取Unit48数据占的字节数
+     * 获取Int16数据占的字节数
      *
      * @return int
      */
-    public static int sizeOfUint48() {
-        return ToolsConstant.INT48_VALUE_LENGTH;
+    public static int sizeOfInt16() {
+        return 2;
+    }
+
+    /**
+     * 获取Uint16数据占的字节数
+     *
+     * @return int
+     */
+    public static int sizeOfUint16() {
+        return 2;
     }
 
     /**
@@ -609,21 +618,12 @@ public class SerializeUtils {
     }
 
     /**
-     * 获取Int16数据占的字节数
+     * 获取Unit48数据占的字节数
      *
      * @return int
      */
-    public static int sizeOfInt16() {
-        return 2;
-    }
-
-    /**
-     * 获取Uint16数据占的字节数
-     *
-     * @return int
-     */
-    public static int sizeOfUint16() {
-        return 2;
+    public static int sizeOfUint48() {
+        return ToolsConstant.INT48_VALUE_LENGTH;
     }
 
     /**
@@ -644,7 +644,6 @@ public class SerializeUtils {
     public static int sizeOfVarInt(Integer val) {
         return VarInt.sizeOf(val);
     }
-
 
     /**
      * 获取Boolean数据占的字节数

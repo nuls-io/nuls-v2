@@ -480,7 +480,6 @@ public class RoundManager {
         long sumRoundVal = getPunishCountByAddress(chain_id,member.getAgent().getAgentAddress(), roundStart, roundData.getRoundIndex() - 1, PunishType.YELLOW.getCode());
         //能力系数计算
         double ability = DoubleUtils.div(blockCount, ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT);
-
         //惩罚系数计算
         double penalty = DoubleUtils.div(DoubleUtils.mul(ConsensusConstant.CREDIT_MAGIC_NUM, sumRoundVal),
                 DoubleUtils.mul(ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT, ConsensusConstant.RANGE_OF_CAPACITY_COEFFICIENT));
@@ -502,7 +501,6 @@ public class RoundManager {
         if (code == PunishType.RED.getCode()) {
             punishList = ConsensusManager.getInstance().getRedPunishMap().get(chain_id);
         }
-
         for (int i = punishList.size() - 1; i >= 0; i--) {
             if(count>=100){
                 break;
