@@ -25,6 +25,9 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.AccountKeyStore;
+import io.nuls.tools.basic.Result;
+import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
 
@@ -69,6 +72,7 @@ public interface AccountService {
     List<Account> getAccountList();
 
     /**
+     * 设置账户密码
      * set the password for exist account
      *
      * @param chainId
@@ -80,6 +84,44 @@ public interface AccountService {
      * Nov.10th 2018
      */
     boolean setPassword(short chainId, String address, String password);
+
+    /**
+     * 设置离线账户密码
+     * set the password for offline account
+     *
+     * @param chainId
+     * @param address
+     * @param priKey
+     * @param password
+     * @return encryptedPriKey
+     * <p>
+     */
+    String setOfflineAccountPassword(short chainId, String address, String priKey, String password);
+
+    /**
+     * 根据原密码修改账户密码
+     * Change the account password according to the current password
+     *
+     * @param chainId
+     * @param address
+     * @param oldPassword
+     * @param newPassword
+     * @return
+     */
+    boolean changePassword(short chainId, String address, String oldPassword, String newPassword);
+
+    /**
+     * 根据原密码修改离线账户密码
+     * Change offline account password according to current password
+     *
+     * @param chainId
+     * @param address
+     * @param priKey
+     * @param oldPassword
+     * @param newPassword
+     * @return
+     */
+    String changeOfflinePassword(short chainId, String address, String priKey, String oldPassword, String newPassword);
 
     /**
      * check if the account is encrypted
@@ -128,9 +170,10 @@ public interface AccountService {
     boolean setRemark(short chainId, String address, String remark);
 
     /**
-     * 获取账户私钥
-     * Get the account private key
+     * 获取账户私钥，只返回加密账户私钥，未加密账户不返回
+     * Get the account private key,Only returns the private key of the encrypted account, and the unencrypted account does not return.
      * HexUtil.encode(priKeyBytes)
+     *
      * @param chainId
      * @param address
      * @param password
@@ -149,4 +192,18 @@ public interface AccountService {
      * @return
      */
     List<String> getAllPrivateKey(short chainId, String password);
+
+    /**
+     * 根据私钥和密码导入账户
+     * import an account from plant private key and encrypt the account.
+     *
+     * @param chainId
+     * @param prikey
+     * @param password
+     * @param overwrite
+     * @return
+     * @throws NulsException
+     */
+    Account importAccount(short chainId, String prikey, String password, boolean overwrite) throws NulsException;
+
 }

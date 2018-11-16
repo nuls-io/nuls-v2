@@ -1,5 +1,7 @@
 package io.nuls.poc.constant;
 
+import io.nuls.base.data.Na;
+
 /**
  * @author tag
  * 2018/11/6
@@ -17,7 +19,7 @@ public interface ConsensusConstant {
     int TX_TYPE_STOP_AGENT = 9;
 
     /**
-     * Consensus module related table name/共识模块相关表明
+     * Consensus module related table name/共识模块相关表名
      * */
     String DB_NAME_CONSENSUS_AGENT = "consensus_agent";
     String DB_NAME_CONSENSUS_DEPOSIT = "consensus_deposit";
@@ -41,6 +43,8 @@ public interface ConsensusConstant {
     String PARAM_DEPOSIT_MAX = "deposit_max";
     String PARAM_COMMISSION_MIN = "commission_min";
     String PARAM_COMMISSION_MAX = "commission_max";
+    String PARAM_SEED_NODES = "seed_nodes";
+    String PARAM_PARTAKE_PACKING = "partake_packing";
 
     /**
      * context path
@@ -77,4 +81,42 @@ public interface ConsensusConstant {
      * RPC_VERSION
      */
     public static final double RPC_VERSION = 1.0;
+
+    /**
+     * Regularly clear the round before the specified number of rounds of the main chain
+     * 定期清理主链指定轮数之前的轮次信息
+     */
+    int CLEAR_MASTER_CHAIN_ROUND_COUNT = 5;
+
+    /**
+     * Maximum acceptable number of delegate
+     */
+    int MAX_ACCEPT_NUM_OF_DEPOSIT = 250;
+    int MAX_AGENT_COUNT_OF_ADRRESS = 1;
+
+    Na SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = Na.parseNuls(200000);
+    Na SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = Na.parseNuls(500000);
+
+    /**
+     * unit:round of consensus
+     * 用于计算信誉值（表示只用最近这么多轮的轮次信息来计算信誉值）
+     */
+    int RANGE_OF_CAPACITY_COEFFICIENT = 100;
+
+    /**
+     * Penalty coefficient,greater than 4.
+     */
+    int CREDIT_MAGIC_NUM = 100;
+
+    /**
+     * Load the block header of the last specified number of rounds during initialization
+     * 初始化时加载最近指定轮数的惩罚信息
+     */
+    int INIT_PUNISH_OF_ROUND_COUNT = 200;
+
+    /**
+     * 系统运行的最小连接节点数量
+     * The number of minimum connection nodes that the system runs.
+     */
+    int ALIVE_MIN_NODE_COUNT = 1;
 }

@@ -29,11 +29,12 @@ import io.netty.channel.Channel;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
 import io.nuls.network.model.po.BasePo;
 import io.nuls.network.model.po.NodePo;
-import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
@@ -53,6 +54,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Node extends BaseNulsData  implements Dto {
 
+    /**
+     * 1: inNode SERVER,  2: outNode CLIENT
+     */
+    public final static int IN = 1;
+    public final static int OUT = 2;
+
+
     private String id;
 
     private String ip;
@@ -71,12 +79,17 @@ public class Node extends BaseNulsData  implements Dto {
     /**
      * 是否可连接状态
      */
-    private boolean canConnect=true;
-    private final static int MAX_FAIL_COUNT=100;
+    private boolean isIdle=true;
+
     /**
      * 是否跨链连接
      */
     private boolean isCrossConnect;
+
+    private int type;
+
+    private volatile  boolean isBad=false;
+
 
     /**
      * 一条peer连接可以同时属于多个group
@@ -84,19 +97,6 @@ public class Node extends BaseNulsData  implements Dto {
     private Map<String,NodeGroupConnector> nodeGroupConnectors=new ConcurrentHashMap<>();
 
 
-    /**
-     * 1: inNode SERVER,  2: outNode CLIENT
-     */
-    public final static int IN = 1;
-    public final static int OUT = 2;
-    private int type;
-
-    /**
-     * 0: wait 等待中 , 1: connecting,握手连接中 2: handshake 握手成功
-     */
-    public final static int WAIT = 0;
-    public final static int CONNECTING = 1;
-    public final static int HANDSHAKE = 2;
 
     public Node(String ip, int remotePort, int type,boolean isCrossConnect) {
         this(ip+":"+remotePort,ip,remotePort,type,isCrossConnect);
@@ -116,32 +116,12 @@ public class Node extends BaseNulsData  implements Dto {
         this.channel = null;
     }
 
-    public boolean isCanConnect() {
-        return canConnect;
+    public boolean isIdle() {
+        return isIdle;
     }
 
-    public void setCanConnect(boolean canConnect) {
-        this.canConnect = canConnect;
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        sb.append("id:" + getId() + ",");
-        sb.append("type:" + type + ",");
-        sb.append("failCount:" + failCount + "}");
-
-        return sb.toString();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        Node other = (Node) obj;
-        if (StringUtils.isBlank(other.getId())) {
-            return false;
-        }
-        return other.getId().equals(this.getId());
+    public void setIdle(boolean idle) {
+        isIdle = idle;
     }
 
     public int getType() {
@@ -232,6 +212,14 @@ public class Node extends BaseNulsData  implements Dto {
         isCrossConnect = crossConnect;
     }
 
+    public boolean isBad() {
+        return isBad;
+    }
+
+    public void setBad(boolean bad) {
+        isBad = bad;
+    }
+
     /**
      * 设置peer信息
      * @param magicNumber
@@ -308,12 +296,22 @@ public class Node extends BaseNulsData  implements Dto {
     }
 
     public boolean isEliminate(){
-        return failCount>=MAX_FAIL_COUNT;
+        //自己节点Ip,移除(自己是种子节点的情况)
+        if (LocalInfoManager.getInstance().isSelfIp(ip)) {
+            return true;
+        }
+        //如果是种子节点，不去移除
+        //not eliminate if seed node
+        if(NetworkParam.getInstance().getSeedIpList().contains(id)){
+            return false;
+        }
+        return isBad;
     }
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
 
     }
+
 
     @Override
     public BasePo parseToPo() {

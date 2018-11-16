@@ -3,22 +3,31 @@ package io.nuls.account.rpc.cmd;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.AccountKeyStore;
+import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
+import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.util.AccountTool;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Page;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.AESEncrypt;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.FormatValidUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,7 +43,8 @@ public class AccountCmd extends BaseCmd {
 
     @Autowired
     private AccountService accountService;
-
+    @Autowired
+    private AccountKeyStoreService keyStoreService;
     /*
      * CmdAnnotation注解包含
      * 1. 调用的命令
@@ -154,7 +164,7 @@ public class AccountCmd extends BaseCmd {
         Account account;
         try {
             // check parameters
-            if (params.get(0) == null || params.size() != 2) {
+            if (params.get(0) == null || params.get(1) == null || params.size() != 2) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -273,7 +283,7 @@ public class AccountCmd extends BaseCmd {
         boolean result;
         try {
             // check parameters
-            if (params.get(0) == null || params.size() != 3) {
+            if (params.get(0) == null || params.get(1) == null || params.size() != 3) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -298,8 +308,9 @@ public class AccountCmd extends BaseCmd {
     }
 
     /**
-     * 根据地址查询账户私匙
+     * 根据地址查询账户私匙,只返回加密账户私钥，未加密账户不返回
      * Inquire the account's private key according to the address.
+     * Only returns the private key of the encrypted account, and the unencrypted account does not return.
      *
      * @param params [chainId,address,password]
      * @return
@@ -310,7 +321,7 @@ public class AccountCmd extends BaseCmd {
         String unencryptedPrivateKey;
         try {
             // check parameters
-            if (params.get(0) == null || params.size() != 3) {
+            if (params.get(0) == null || params.get(1) == null || params.size() != 3) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -403,6 +414,275 @@ public class AccountCmd extends BaseCmd {
         }
         Log.debug("ac_setRemark end");
         map.put("value", result);
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * 根据私钥导入账户
+     * Import accounts by private key
+     *
+     * @param params [chainId,priKey,password,overwrite]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_importAccountByPriKey", version = 1.0, preCompatible = true)
+    public CmdResponse importAccountByPriKey(List params) {
+        Log.debug("ac_importAccountByPriKey start");
+        Map<String, String> map = new HashMap<>();
+        try {
+            // check parameters
+            if (params.get(0) == null || params.get(1) == null || params.get(3) == null || params.size() != 4) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户私钥
+            String priKey = params.get(1) != null ? (String) params.get(1) : null;
+            //账户密码
+            String password = params.get(2) != null ? (String) params.get(2) : null;
+            //账户存在时是否覆盖
+            Boolean overwrite = params.get(3) != null ? (Boolean) params.get(3) : null;
+            //导入账户
+            Account account = accountService.importAccount(chainId, priKey, password, overwrite);
+            map.put("address", account.getAddress().toString());
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        } catch (NulsException e) {
+            return failed(e.getErrorCode(), null);
+        }
+        Log.debug("ac_importAccountByPriKey end");
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+
+    /**
+     * 根据AccountKeyStore导入账户
+     * Import accounts according to AccountKeyStore
+     *
+     * @param params [chainId,keyStore,password,overwrite]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_importAccountByKeystore", version = 1.0, preCompatible = true)
+    public CmdResponse importAccountByKeystore(List params) {
+        Log.debug("ac_importAccountByKeystore start");
+        Map<String, String> map = new HashMap<>();
+        try {
+            // check parameters
+            if (params.get(0) == null || params.get(1) == null || params.get(3) == null || params.size() != 4) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //keyStore HEX编码
+            String keyStore = params.get(1) != null ? (String) params.get(1) : null;
+            //账户密码
+            String password = params.get(2) != null ? (String) params.get(2) : null;
+            //账户存在时是否覆盖
+            Boolean overwrite = params.get(3) != null ? (Boolean) params.get(3) : null;
+
+            AccountKeyStoreDto accountKeyStoreDto;
+            try {
+                accountKeyStoreDto = JSONUtils.json2pojo(new String(HexUtil.decode(keyStore)), AccountKeyStoreDto.class);
+            } catch (IOException e) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNTKEYSTORE_FILE_DAMAGED);
+            }
+
+            //导入账户
+            Account account = keyStoreService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), chainId, password, overwrite);
+            map.put("address", account.getAddress().toString());
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        } catch (NulsException e) {
+            return failed(e.getErrorCode(), null);
+        }
+        Log.debug("ac_importAccountByKeystore end");
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * 账户备份，导出AccountKeyStore字符串
+     *
+     * @param params [chainId,address,password,path]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_exportAccountKeyStore", version = 1.0, preCompatible = true)
+    public CmdResponse exportAccountKeyStore(List params) {
+        Log.debug("ac_exportAccountKeyStore start");
+        Map<String, String> map = new HashMap<>();
+        try {
+            // check parameters
+            if (params.get(0) == null || params.get(1) == null || params.size() != 4) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户地址
+            String address = params.get(1) != null ? (String) params.get(1) : null;
+            //账户密码
+            String password = params.get(2) != null ? (String) params.get(2) : null;
+            //文件备份地址
+            String filePath = params.get(3) != null ? (String) params.get(3) : null;
+            //export account to keystore
+            AccountKeyStore accountKeyStore = keyStoreService.exportAccountToKeyStore(chainId, address, password);
+            //backup keystore files
+            String backupFileName = AccountTool.backUpKeyStore(filePath, new AccountKeyStoreDto(accountKeyStore));
+            map.put("path", backupFileName);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        }
+
+        Log.debug("ac_exportAccountKeyStore end");
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * 设置账户密码
+     *
+     * @param params [chainId,address,password]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_setPassword", version = 1.0, preCompatible = true)
+    public CmdResponse setPassword(List params) {
+        Log.debug("ac_setPassword start");
+        Map<String, Boolean> map = new HashMap<>();
+        try {
+            // check parameters
+            if (params.get(0) == null || params.get(1) == null || params.get(2) == null || params.size() != 3) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户地址
+            String address = params.get(1) != null ? (String) params.get(1) : null;
+            //账户密码
+            String password = params.get(2) != null ? (String) params.get(2) : null;
+
+            //set account password
+            boolean result = accountService.setPassword(chainId, address, password);
+            map.put("value", result);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        }
+
+        Log.debug("ac_setPassword end");
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * 设置离线账户密码
+     *
+     * @param params [chainId,address,priKey,password]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_setOfflineAccountPassword", version = 1.0, preCompatible = true)
+    public CmdResponse setOfflineAccountPassword(List params) {
+        Log.debug("ac_setOfflineAccountPassword start");
+        Map<String, String> map = new HashMap<>();
+        try {
+            // check parameters
+            if (params.get(0) == null || params.get(1) == null || params.get(2) == null || params.get(3) == null || params.size() != 4) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户地址
+            String address = params.get(1) != null ? (String) params.get(1) : null;
+            //账户私钥
+            String priKey = params.get(2) != null ? (String) params.get(2) : null;
+            //账户密码
+            String password = params.get(3) != null ? (String) params.get(3) : null;
+
+            //set account password
+            String encryptedPriKey = accountService.setOfflineAccountPassword(chainId, address, priKey, password);
+            map.put("encryptedPriKey", encryptedPriKey);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        }
+        Log.debug("ac_setOfflineAccountPassword end");
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * 根据原密码修改账户密码
+     *
+     * @param params [chainId,address,password,newPassword]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_updatePassword", version = 1.0, preCompatible = true)
+    public CmdResponse updatePassword(List params) {
+        Log.debug("ac_updatePassword start");
+        Map<String, Boolean> map = new HashMap<>();
+        try {
+            // check parameters
+            if (params.get(0) == null || params.get(1) == null || params.get(2) == null || params.get(3) == null || params.size() != 4) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户地址
+            String address = params.get(1) != null ? (String) params.get(1) : null;
+            //账户旧密码
+            String password = params.get(2) != null ? (String) params.get(2) : null;
+            //账户新密码
+            String newPassword = params.get(3) != null ? (String) params.get(3) : null;
+
+            //change account password
+            boolean result = accountService.changePassword(chainId, address, password, newPassword);
+            map.put("value", result);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        }
+        Log.debug("ac_updatePassword end");
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * [离线钱包修改密码] 根据原密码修改账户密码
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_updateOfflineAccountPassword", version = 1.0, preCompatible = true)
+    public CmdResponse updateOfflineAccountPassword(List params) {
+        Log.debug("ac_setOfflineAccountPassword start");
+        Map<String, String> map = new HashMap<>();
+        try {
+            // check parameters
+            if (params.get(0) == null || params.get(1) == null || params.get(2) == null || params.get(3) == null || params.get(4) == null || params.size() != 5) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户地址
+            String address = params.get(1) != null ? (String) params.get(1) : null;
+            //账户私钥
+            String priKey = params.get(2) != null ? (String) params.get(2) : null;
+            //账户旧密码
+            String password = params.get(3) != null ? (String) params.get(3) : null;
+            //账户新密码
+            String newPassword = params.get(4) != null ? (String) params.get(4) : null;
+
+
+            //set account password
+            String encryptedPriKey = accountService.changeOfflinePassword(chainId, address, priKey, password, newPassword);
+            map.put("encryptedPriKey", encryptedPriKey);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        }
+        Log.debug("ac_setOfflineAccountPassword end");
         return success(AccountConstant.SUCCESS_MSG, map);
     }
 

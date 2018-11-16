@@ -36,6 +36,13 @@ import io.nuls.tools.parse.config.IniEntity;
  * @author: Niels Wang
  */
 public class NulsConfig {
+
+    /**
+     * 模块配置文件中加载的所有配置项
+     * All the configuration items that are loaded in the module configuration file.
+     */
+    public static IniEntity MODULES_CONFIG;
+
     /**
      * 模块配置文件名称
      * Module configuration file name.
@@ -49,10 +56,8 @@ public class NulsConfig {
     public static String DEFAULT_ENCODING = "UTF-8";
 
     /**
-     * 模块配置文件中加载的所有配置项
-     * All the configuration items that are loaded in the module configuration file.
+     * 导出keystore备份文件目录
      */
-    public static IniEntity MODULES_CONFIG;
-
+    public static String ACCOUNTKEYSTORE_FOLDER_NAME ="keystore/backup";
 
 }

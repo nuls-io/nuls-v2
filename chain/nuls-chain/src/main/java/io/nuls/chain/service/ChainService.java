@@ -29,10 +29,20 @@ public interface ChainService {
 
     /**
      * Get asset information by chain ID
+     *
      * @param chainId The chain ID
      * @return ChainAsset object
      */
     List<ChainAsset> getChainAssetByChain(short chainId);
+
+    /**
+     * Get ChainAsset object
+     *
+     * @param chainId The chain ID
+     * @param assetId The asset ID
+     * @return ChainAsset object
+     */
+    ChainAsset getChainAsset(short chainId, long assetId);
 
     /**
      * Set the currentNumber of asset

@@ -24,7 +24,10 @@
  */
 package io.nuls.network.manager;
 
+import io.netty.channel.Channel;
+import io.netty.channel.socket.SocketChannel;
 import io.nuls.network.constant.ManagerStatusEnum;
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -41,7 +44,8 @@ import java.util.List;
  */
 public class NodeManager extends  BaseManager{
     private static NodeManager instance = new NodeManager();
-    StorageManager storageManager=StorageManager.getInstance();
+    StorageManager storageManager = StorageManager.getInstance();
+    LocalInfoManager localInfoManager = LocalInfoManager.getInstance();
     private ManagerStatusEnum status=ManagerStatusEnum.UNINITIALIZED;
     private NodeManager(){
 
@@ -57,10 +61,10 @@ public class NodeManager extends  BaseManager{
     @Override
     public void init() {
         status=ManagerStatusEnum.INITIALIZED;
-        Collection<NodeGroup> nodeGroups=NodeGroupManager.getNodeGroupCollection();
+        Collection<NodeGroup> nodeGroups=NodeGroupManager.getInstance().getNodeGroupCollection();
         for(NodeGroup nodeGroup:nodeGroups){
             if(nodeGroup.isSelf()){
-                //自有节点
+                //自有网络组，增加种子节点的加载，跨链网络组，则无此步骤
                 loadSeedsNode(nodeGroup.getMagicNumber());
             }
             //数据库获取node
@@ -87,9 +91,25 @@ public class NodeManager extends  BaseManager{
         List<String> list=networkParam.getSeedIpList();
         NodeGroup nodeGroup= NodeGroupManager.getInstance().getNodeGroupByMagic(networkParam.getPacketMagic());
         for(String seed:list){
-            String []peer=seed.split(":");
+            String []peer=seed.split(NetworkConstant.COLON);
+            if(localInfoManager.isSelfIp(peer[0])){
+                continue;
+            }
             Node node=new Node(peer[0],Integer.valueOf(peer[1]),Node.OUT,false);
             nodeGroup.addDisConnetNode(node,false);
         }
+    }
+    public boolean isPeerSingleGroup(Channel channel){
+        SocketChannel socketChannel = (SocketChannel) channel;
+        String remoteIP = socketChannel.remoteAddress().getHostString();
+        int port = socketChannel.remoteAddress().getPort();
+        String nodeId = remoteIP+NetworkConstant.COLON+port;
+        Node node = ConnectionManager.getInstance().getNodeByCache(nodeId);
+        if(null != node){
+            if(null != node.getNodeGroupConnectors() && node.getNodeGroupConnectors().size() > 1){
+                return false;
+            }
+        }
+        return true;
     }
 }

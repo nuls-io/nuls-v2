@@ -32,7 +32,6 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.vo.NodeVo;
-import io.nuls.network.storage.DbService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
@@ -50,7 +49,6 @@ import java.util.List;
  **/
 public class NodeRpc extends BaseCmd {
     NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
-    DbService dbService=StorageManager.getInstance().getDbService();
     static  final int STATE_ALL = 0;
     static  final int STATE_CONNECT = 1;
     static  final int STATE_DIS_CONNECT = 2;
@@ -100,19 +98,24 @@ public class NodeRpc extends BaseCmd {
         }
         String []peers = nodes.split(",");
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
-        List<NodePo> nodePos = new ArrayList<>();
+        List<String> nodeIds = new ArrayList<>();
         for(String nodeId:peers){
-         //移除 peer
-         // TODO:
-          Node node =  nodeGroup.getConnectNodeMap().get(nodeId);
-
-          if(null != node){
-
-          }
-
-
-
+            //移除 peer
+            Node node =  nodeGroup.getConnectNodeMap().get(nodeId);
+            if(null != node){
+                nodeGroup.removePeerNode(node,true,true);
+            }else {
+                nodeGroup.getDisConnectNodeMap().remove(nodeId);
+            }
+            node = nodeGroup.getConnectCrossNodeMap().get(nodeId);
+            if(null != node){
+                nodeGroup.removePeerNode(node,true,true);
+            }else {
+                nodeGroup.getDisConnectCrossNodeMap().remove(nodeId);
+            }
+            nodeIds.add(nodeId);
         }
+        StorageManager.getInstance().delGroupNodes(nodeIds,chainId);
         return success( "success", "");
     }
     @CmdAnnotation(cmd = "nw_getNodes", version = 1.0, preCompatible = true)
@@ -127,21 +130,37 @@ public class NodeRpc extends BaseCmd {
         List<Node> nodes=new ArrayList<>();
         if(0 == isCross){
             if(STATE_ALL == state) {
-                nodes.addAll(nodeGroup.getConnectNodes());
-                nodes.addAll(nodeGroup.getDisConnectNodes());
+                if(null!=nodeGroup.getConnectNodes()) {
+                    nodes.addAll(nodeGroup.getConnectNodes());
+                }
+                if(null!=nodeGroup.getDisConnectNodes()) {
+                    nodes.addAll(nodeGroup.getConnectNodes());
+                }
             }else if(STATE_CONNECT == state){
-                nodes.addAll(nodeGroup.getConnectNodes());
+                if(null!=nodeGroup.getConnectNodes()) {
+                    nodes.addAll(nodeGroup.getConnectNodes());
+                }
             }else if(STATE_DIS_CONNECT == state){
-                nodes.addAll(nodeGroup.getDisConnectNodes());
+                if(null!=nodeGroup.getDisConnectNodes()) {
+                    nodes.addAll(nodeGroup.getConnectNodes());
+                }
             }
         }else{
             if(STATE_ALL == state) {
-                nodes.addAll(nodeGroup.getConnectCrossNodes());
-                nodes.addAll(nodeGroup.getDisConnectCrossNodes());
+                if(null!=nodeGroup.getConnectCrossNodes()) {
+                    nodes.addAll(nodeGroup.getConnectCrossNodes());
+                }
+                if(null!=nodeGroup.getDisConnectCrossNodes()) {
+                    nodes.addAll(nodeGroup.getDisConnectCrossNodes());
+                }
             }else if(STATE_CONNECT == state){
-                nodes.addAll(nodeGroup.getConnectCrossNodes());
+                if(null!=nodeGroup.getConnectCrossNodes()) {
+                    nodes.addAll(nodeGroup.getConnectCrossNodes());
+                }
             }else if(STATE_DIS_CONNECT == state){
-                nodes.addAll(nodeGroup.getDisConnectCrossNodes());
+                if(null!=nodeGroup.getDisConnectCrossNodes()) {
+                    nodes.addAll(nodeGroup.getDisConnectCrossNodes());
+                }
             }
 
         }
@@ -194,7 +213,7 @@ public class NodeRpc extends BaseCmd {
         if(null != nodeGroupConnector){
             nodeVo.setBlockHash(nodeGroupConnector.getBlockHash());
             nodeVo.setBlockHeight(nodeGroupConnector.getBlockHeight());
-            nodeVo.setState(nodeGroupConnector.getStatus() == Node.HANDSHAKE ? 1 : 0);
+            nodeVo.setState(nodeGroupConnector.getStatus() == NodeGroupConnector.HANDSHAKE ? 1 : 0);
             nodeVo.setTime(nodeGroupConnector.getCreateTime());
         }else{
             nodeVo.setTime(0);

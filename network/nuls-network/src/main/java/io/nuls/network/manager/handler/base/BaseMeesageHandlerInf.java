@@ -34,7 +34,22 @@ import io.nuls.network.model.message.base.BaseMessage;
  * @date 2018/11/01
  */
 public interface BaseMeesageHandlerInf {
-
+    /**
+     *接收消息处理
+     * @param message
+     * @param nodeKey
+     * @param isServer
+     * @return
+     */
     NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer);
+
+    /**
+     * 发送消息处理
+     * @param message
+     * @param node
+     * @param isServer
+     * @param asyn
+     * @return
+     */
     NetworkEventResult send(BaseMessage message, Node node,boolean isServer, boolean asyn);
 }

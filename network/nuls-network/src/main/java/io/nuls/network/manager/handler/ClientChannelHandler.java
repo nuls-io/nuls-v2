@@ -31,7 +31,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.MessageFactory;
@@ -53,8 +52,6 @@ import java.io.IOException;
 public class ClientChannelHandler extends BaseChannelHandler {
     private AttributeKey<Node> key = AttributeKey.valueOf("node");
 
-    private NetworkParam networkParam = NetworkParam.getInstance();
-
     public ClientChannelHandler() {
          super();
     }
@@ -62,42 +59,58 @@ public class ClientChannelHandler extends BaseChannelHandler {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        Attribute<Node> nodeAttribute = ctx.channel().attr(key);
-        Node node = nodeAttribute.get();
     }
-
     @Override
-    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        super.channelActive(ctx);
+    protected   boolean validChannel(ChannelHandlerContext ctx){
         Channel channel = ctx.channel();
-        Attribute<Node> nodeAttribute = channel.attr(key);
-        Node node = nodeAttribute.get();
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         String remoteIP = socketChannel.remoteAddress().getHostString();
         //如果是本机节点访问自己的服务器，则广播本机服务器到全网
-        if (LocalInfoManager.getInstance().isSelfConnect(remoteIP)) {
+        if (LocalInfoManager.getInstance().isSelfIp(remoteIP)) {
             //广播自己的Ip
             MessageManager.getInstance().broadcastSelfAddrToAllNode(true);
             channel.close();
-            return;
+            return false;
         }
         //already exist peer ip （In or Out）
         if( ConnectionManager.getInstance().isPeerConnectExist(remoteIP)){
             Log.info("dup connect,close channel");
             channel.close();
+            return false;
+        }
+        return true;
+    }
+    @Override
+    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+        super.channelActive(ctx);
+        if(!validChannel(ctx)){
             return;
         }
+        Channel channel = ctx.channel();
+        Attribute<Node> nodeAttribute = channel.attr(key);
+        Node node = nodeAttribute.get();
+        SocketChannel socketChannel = (SocketChannel) ctx.channel();
+        String remoteIP = socketChannel.remoteAddress().getHostString();
         node.setChannel(channel);
         node.setIp(remoteIP);
         node.setRemotePort(socketChannel.remoteAddress().getPort());
-        node.setCanConnect(false);
-        boolean success = ConnectionManager.getInstance().processConnectedClientNode(node);
+        node.setIdle(false);
+
+        boolean success = ConnectionManager.getInstance().processConnectNode(node);
+        if(!success){
+            Log.debug("dup connect,close channel");
+            channel.close();
+            return;
+        }
         //非本机,发送version
         NodeGroupConnector nodeGroupConnector=node.getFirstNodeGroupConnector();
-        nodeGroupConnector.setStatus(Node.CONNECTING);
+        nodeGroupConnector.setStatus(NodeGroupConnector.CONNECTING);
         VersionMessage versionMessage=MessageFactory.getInstance().buildVersionMessage(node,nodeGroupConnector.getMagicNumber());
         if(null == versionMessage){
-            //TODO:exception
+            //exception
+            Log.error("build version error");
+            channel.close();
+            return;
         }
         BaseMeesageHandlerInf handler=NetworkMessageHandlerFactory.getInstance().getHandler(versionMessage);
         handler.send(versionMessage, node, false,true);
@@ -109,7 +122,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         super.channelInactive(ctx);
         Node node=ConnectionManager.getInstance().getNodeByCache(this.getNodeIdByChannel( ctx.channel()),Node.OUT);
         if(null != node) {
-            node.setCanConnect(true);
+            node.setIdle(true);
             //移除连接
             Log.info("Client Node is Inactive:" + node.getIp() + ":" + node.getRemotePort());
             ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),Node.OUT);
@@ -121,15 +134,13 @@ public class ClientChannelHandler extends BaseChannelHandler {
         try {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
-
             if (node != null) {
-                    ByteBuf buf = (ByteBuf) msg;
-                    try {
-                        MessageManager.getInstance().receiveMessage(buf,node.getId(),false);
-                    } finally {
-                        buf.release();
-                    }
-                 
+                ByteBuf buf = (ByteBuf) msg;
+                try {
+                    MessageManager.getInstance().receiveMessage(buf,node.getId(),false);
+                } finally {
+                    buf.release();
+                }
             } else {
                 SocketChannel socketChannel = (SocketChannel) ctx.channel();
                 String remoteIP = socketChannel.remoteAddress().getHostString();
@@ -150,8 +161,8 @@ public class ClientChannelHandler extends BaseChannelHandler {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         if (!(cause instanceof IOException)) {
-            //Log.error(cause);
-            Log.error("===========网路消息解析错误===========");
+            Log.error(cause);
+            Log.error("===========exceptionCaught===========");
         }
         ctx.channel().close();
     }

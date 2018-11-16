@@ -22,29 +22,25 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.cfg;
 
-import io.nuls.tools.parse.config.IniEntity;
-import org.ini4j.Config;
-import org.ini4j.Ini;
+package io.nuls.poc.utils.compare;
 
-import java.io.IOException;
-import java.net.URL;
+
+import io.nuls.poc.model.bo.tx.txdata.Deposit;
+
+import java.util.Comparator;
 
 /**
- * @author Niels
+ * @author tag
+ * 2018/11/14
  */
-public class ConfigLoader {
+public class DepositComparator implements Comparator<Deposit> {
 
-
-    public static IniEntity loadIni(String fileName) throws IOException {
-        Config cfg = new Config();
-        URL url = ConfigLoader.class.getClassLoader().getResource(fileName);
-        cfg.setMultiSection(true);
-        Ini ini = new Ini();
-        ini.setConfig(cfg);
-        ini.load(url);
-        return new IniEntity(ini);
+    @Override
+    public int compare(Deposit o1, Deposit o2) {
+        if (o1.getBlockHeight() == o2.getBlockHeight()) {
+            return (int) (o1.getTime() - o2.getTime());
+        }
+        return (int) (o1.getBlockHeight() - o2.getBlockHeight());
     }
-
 }

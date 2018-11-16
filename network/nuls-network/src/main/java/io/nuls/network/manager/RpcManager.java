@@ -42,6 +42,10 @@ public class RpcManager extends BaseManager{
     @Override
     public void init() {
 
+    }
+
+    @Override
+    public void start() {
         try {
             /*
              * 初始化websocket服务器，供其他模块调用本模块接口
@@ -68,10 +72,6 @@ public class RpcManager extends BaseManager{
         }
 
 
-    }
-
-    @Override
-    public void start() {
 
     }
 }

@@ -1,12 +1,14 @@
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountConstant;
+import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
 import io.nuls.account.util.AccountTool;
 import io.nuls.base.data.Page;
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.model.CmdResponse;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.BeforeClass;
@@ -40,15 +42,20 @@ public class AccountCmdTest {
         CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
     }
 
-    private List<String> createAccount(short chainId, int count, String password) throws Exception {
-        String response = CmdDispatcher.call("ac_createAccount", new Object[]{chainId, count, password}, version);
-        CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+    private List<String> createAccount(short chainId, int count, String password) {
+        List<String> accountList = null;
+        try {
+            String response = CmdDispatcher.call("ac_createAccount", new Object[]{chainId, count, password}, version);
+            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
 
-        if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getCode()) || (count <= 0 || count > AccountTool.CREATE_MAX_SIZE)) {
-            return null;
+            if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getCode()) || (count <= 0 || count > AccountTool.CREATE_MAX_SIZE)) {
+                return null;
+            }
+            accountList = (List<String>) JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResult())).get("list");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        List<String> accoutList = (List<String>) JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResult())).get("list");
-        return accoutList;
+        return accountList;
     }
 
     public SimpleAccountDto getAccountByAddress(short chainId, String address) throws Exception {
@@ -58,26 +65,47 @@ public class AccountCmdTest {
         return accountDto;
     }
 
+    /**
+     * 根据地址查询私钥
+     *
+     * @param chainId
+     * @param address
+     * @return
+     * @throws Exception
+     */
+    public String getPriKeyByAddress(short chainId, String address, String password) {
+        String priKey = null;
+        try {
+            String response = CmdDispatcher.call("ac_getPriKeyByAddress", new Object[]{chainId, address, password}, version);
+            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            HashMap result = (HashMap) cmdResp.getResult();
+            priKey = (String) result.get("priKey");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return priKey;
+    }
+
     @Ignore
     @Test
     public void createAccountTest() throws Exception {
         int count = 1;
         //Test to create an account that is not empty.
-        List<String> accoutList = createAccount(chainId, count, password);
+        List<String> accountList = createAccount(chainId, count, password);
         //Checking the number of accounts returned
-        assertEquals(accoutList.size(), count);
-        for (String address : accoutList) {
+        assertEquals(accountList.size(), count);
+        for (String address : accountList) {
             System.out.println(address);
         }
 
         //Test to create an empty password account
-        accoutList = createAccount(chainId, count, null);
+        accountList = createAccount(chainId, count, null);
         //Checking the number of accounts returned
-        assertEquals(accoutList.size(), count);
+        assertEquals(accountList.size(), count);
 
         //Test the largest number of generated accounts.
-        accoutList = createAccount(chainId, 101, null);
-        assertNull(accoutList);
+        accountList = createAccount(chainId, 101, null);
+        assertNull(accountList);
 
 
     }
@@ -87,48 +115,48 @@ public class AccountCmdTest {
         int count = 10;
         String response = CmdDispatcher.call("ac_createOfflineAccount", new Object[]{chainId, count, password}, version);
         CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-        List<AccountOfflineDto> accoutList = JSONUtils.json2list(JSONUtils.obj2json(JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResult())).get("list")), AccountOfflineDto.class);
-        assertEquals(accoutList.size(), count);
-        for (AccountOfflineDto account : accoutList) {
+        List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResult())).get("list")), AccountOfflineDto.class);
+        assertEquals(accountList.size(), count);
+        for (AccountOfflineDto account : accountList) {
             System.out.println(account.getAddress());
         }
     }
 
     @Test
     public void removeAccountTest() throws Exception {
-        List<String> accoutList = createAccount(chainId, 2, password);
+        List<String> accountList = createAccount(chainId, 2, password);
 
-        SimpleAccountDto account = getAccountByAddress(chainId, accoutList.get(0));
+        SimpleAccountDto account = getAccountByAddress(chainId, accountList.get(0));
         assertNotNull(account);
 
-        String response = CmdDispatcher.call("ac_removeAccount", new Object[]{chainId, accoutList.get(0), password}, version);
+        String response = CmdDispatcher.call("ac_removeAccount", new Object[]{chainId, accountList.get(0), password}, version);
         CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
         assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getCode());
 
-        account = getAccountByAddress(chainId, accoutList.get(0));
+        account = getAccountByAddress(chainId, accountList.get(0));
         assertNull(account);
     }
 
     @Test
     public void getAccountByAddressTest() throws Exception {
-        List<String> accoutList = createAccount(chainId, 1, password);
-        String response = CmdDispatcher.call("ac_getAccountByAddress", new Object[]{chainId, accoutList.get(0)}, version);
+        List<String> accountList = createAccount(chainId, 1, password);
+        String response = CmdDispatcher.call("ac_getAccountByAddress", new Object[]{chainId, accountList.get(0)}, version);
         CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
         SimpleAccountDto accountDto = JSONUtils.json2pojo(JSONUtils.obj2json(cmdResp.getResult()), SimpleAccountDto.class);
-        assertEquals(accoutList.get(0), accountDto.getAddress());
+        assertEquals(accountList.get(0), accountDto.getAddress());
     }
 
     @Test
     public void getAccountListTest() throws Exception {
         String response = CmdDispatcher.call("ac_getAccountList", new Object[]{}, version);
         CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-        List<SimpleAccountDto> accoutList = JSONUtils.json2list(JSONUtils.obj2json(JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResult())).get("list")), SimpleAccountDto.class);
-        accoutList.forEach(account -> System.out.println(account.getAddress()));
+        List<SimpleAccountDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResult())).get("list")), SimpleAccountDto.class);
+        accountList.forEach(account -> System.out.println(account.getAddress()));
     }
 
     @Test
     public void getAddressListTest() throws Exception {
-        List<String> accoutList = createAccount(chainId, 1, password);
+        List<String> accountList = createAccount(chainId, 1, password);
         String response = CmdDispatcher.call("ac_getAddressList", new Object[]{chainId, 1, 10}, version);
         CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
         Page<String> resultPage = JSONUtils.json2pojo(JSONUtils.obj2json(cmdResp.getResult()), Page.class);
@@ -187,8 +215,7 @@ public class AccountCmdTest {
     public void setRemarkTest() {
         try {
             String remark = "test remark";
-            //String errorRemark = "test error remark test error remark test error remark test error remark";
-            //Create password accounts
+            //Create encrypted account
             List<String> accountList = createAccount(chainId, 1, password);
             //Set the correct remarks for the account
             String response = CmdDispatcher.call("ac_setRemark", new Object[]{chainId, accountList.get(0), remark}, version);
@@ -196,6 +223,159 @@ public class AccountCmdTest {
             assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getCode());
         } catch (NulsRuntimeException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void importAccountByPriKeyTest() {
+        try {
+            //Create encrypted account
+            List<String> accountList = createAccount(chainId, 1, password);
+            String priKey = getPriKeyByAddress(chainId, accountList.get(0), password);
+            assertNotNull(priKey);
+            //账户已存在则覆盖 If the account exists, it covers.
+            String response = CmdDispatcher.call("ac_importAccountByPriKey", new Object[]{chainId, priKey, password, true}, version);
+            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            HashMap result = (HashMap) cmdResp.getResult();
+            String address = (String) result.get("address");
+            assertEquals(accountList.get(0), address);
+            //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
+            response = CmdDispatcher.call("ac_importAccountByPriKey", new Object[]{chainId, priKey, password, false}, version);
+            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getCode());
+
+            //移除账户，再导入 Remove the account and import it according to the private key.
+            CmdDispatcher.call("ac_removeAccount", new Object[]{chainId, accountList.get(0), password}, version);
+            //账户不存在则创建 If account does not exist, create
+            response = CmdDispatcher.call("ac_importAccountByPriKey", new Object[]{chainId, priKey, password, false}, version);
+            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getCode());
+
+            //测试未加密账户
+            //Create an unencrypted account for test
+            //由于getPriKeyByAddress只返回加密账户的私钥，所以无法得到未加密账户私钥，所以使用固定值测试
+            String addressx = "XfbZd1RYgTtQBb7xeP3bziAd2kmQL3930";
+            priKey = "00cf6b28b2885c550506006b72fab1ab85cbf7e1aafdc6c1661e2b82f7f0089185";
+            //账户已存在则覆盖 If the account exists, it covers.
+            response = CmdDispatcher.call("ac_importAccountByPriKey", new Object[]{chainId, priKey, null, true}, version);
+            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            result = (HashMap) cmdResp.getResult();
+            address = (String) result.get("address");
+            assertEquals(addressx, address);
+
+        } catch (NulsRuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void importAccountByKeystoreTest() {
+        try {
+            //Create encrypted account
+            List<String> accountList = createAccount(chainId, 1, password);
+            String priKey = getPriKeyByAddress(chainId, accountList.get(0), password);
+            assertNotNull(priKey);
+
+            //构造keystore对象
+            SimpleAccountDto account = getAccountByAddress(chainId, accountList.get(0));
+            AccountKeyStoreDto keyStoreDto = new AccountKeyStoreDto();
+            keyStoreDto.setAddress(account.getAddress());
+            keyStoreDto.setPubKey(account.getPubkeyHex());
+            keyStoreDto.setEncryptedPrivateKey(account.getEncryptedPrikeyHex());
+            //keyStoreDto.setPrikey(priKey);
+
+            //生成keystore HEX编码
+            String keyStoreHex = HexUtil.encode(JSONUtils.obj2json(keyStoreDto).getBytes());
+            //账户已存在则覆盖 If the account exists, it covers.
+            String response = CmdDispatcher.call("ac_importAccountByKeystore", new Object[]{chainId, keyStoreHex, password, true}, version);
+            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            HashMap result = (HashMap) cmdResp.getResult();
+            String address = (String) result.get("address");
+            assertEquals(accountList.get(0), address);
+
+            //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
+            response = CmdDispatcher.call("ac_importAccountByKeystore", new Object[]{chainId, keyStoreHex, password, false}, version);
+            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getCode());
+
+            //移除账户，再导入 Remove the account and import it according to the private key.
+            response = CmdDispatcher.call("ac_removeAccount", new Object[]{chainId, accountList.get(0), password}, version);
+            //账户不存在则创建 If account does not exist, create
+            response = CmdDispatcher.call("ac_importAccountByKeystore", new Object[]{chainId, keyStoreHex, password, false}, version);
+            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getCode());
+
+            //测试未加密账户
+            //Create an unencrypted account for test
+            //accountList = createAccount(chainId, 1, null);
+            //由于getPriKeyByAddress只返回加密账户的私钥，所以无法得到未加密账户私钥，所以使用固定值测试
+            String addressx = "XfbZd1RYgTtQBb7xeP3bziAd2kmQL3930";
+            priKey = "00cf6b28b2885c550506006b72fab1ab85cbf7e1aafdc6c1661e2b82f7f0089185";
+
+            //构造keystore对象
+            account = getAccountByAddress(chainId, addressx);
+            keyStoreDto = new AccountKeyStoreDto();
+            keyStoreDto.setAddress(account.getAddress());
+            keyStoreDto.setPubKey(account.getPubkeyHex());
+            keyStoreDto.setEncryptedPrivateKey(account.getEncryptedPrikeyHex());
+            keyStoreDto.setPrikey(priKey);
+
+            //生成keystore HEX编码
+            keyStoreHex = HexUtil.encode(JSONUtils.obj2json(keyStoreDto).getBytes());
+            //账户已存在则覆盖 If the account exists, it covers.
+            response = CmdDispatcher.call("ac_importAccountByKeystore", new Object[]{chainId, keyStoreHex, null, true}, version);
+            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            result = (HashMap) cmdResp.getResult();
+            address = (String) result.get("address");
+            assertEquals(addressx, address);
+        } catch (NulsRuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void exportAccountKeyStoreTest() {
+        try {
+            //Create encrypted account
+            List<String> accountList = createAccount(chainId, 1, password);
+            String address = accountList.get(0);
+
+            //测试不指定备份路径
+            String pathDir = "";
+            //导出账户keystore路径  export account keyStore path
+            String response = CmdDispatcher.call("ac_exportAccountKeyStore", new Object[]{chainId, address, password, pathDir}, version);
+            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            HashMap result = (HashMap) cmdResp.getResult();
+            String path = (String) result.get("path");
+            assertNotNull(path);
+
+            //测试指定非windows备份路径
+            pathDir = "测试1/back/up";
+            //导出账户keystore路径  export account keyStore path
+            response = CmdDispatcher.call("ac_exportAccountKeyStore", new Object[]{chainId, address, password, pathDir}, version);
+            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            result = (HashMap) cmdResp.getResult();
+            path = (String) result.get("path");
+            assertNotNull(path);
+
+            //测试指定windows备份路径
+            pathDir = "D:\\workspace\\github\\nuls_2.0\\测试2\\back\\up";
+            //Create an unencrypted account for test
+            accountList = createAccount(chainId, 1, null);
+            address = accountList.get(0);
+            //导出账户keystore路径  export account keyStore path
+            response = CmdDispatcher.call("ac_exportAccountKeyStore", new Object[]{chainId, address, null, pathDir}, version);
+            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
+            result = (HashMap) cmdResp.getResult();
+            path = (String) result.get("path");
+            assertNotNull(path);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

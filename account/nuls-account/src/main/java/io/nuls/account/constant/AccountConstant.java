@@ -56,6 +56,12 @@ public interface AccountConstant {
     String CFG_SYSTEM_DEFAULT_ENCODING = "encoding";
 
     /**
+     * 系统配置中语言设置的字段名
+     * The field name of the language set in the system configuration.
+     */
+    String CFG_SYSTEM_TKEYSTORE_FOLDER = "keydir";
+
+    /**
      * --------[db configs] -------
      */
     String DB_SECTION = "db";
@@ -86,11 +92,6 @@ public interface AccountConstant {
      * The suffix of the accountkeystore file
      */
     String ACCOUNTKEYSTORE_FILE_SUFFIX=".keystore";
-
-    /**
-     * 导出keystore备份文件目录
-     */
-    String ACCOUNTKEYSTORE_FOLDER_NAME ="backup";
 
     /**
      * --------[RPC constant] -------

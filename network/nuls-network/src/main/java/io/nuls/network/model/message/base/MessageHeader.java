@@ -84,6 +84,10 @@ public class MessageHeader extends BaseNulsData {
         this.magicNumber = magicNumber;
     }
 
+    public MessageHeader(String command) {
+        byte []commandBytes= command.getBytes();
+        System.arraycopy(commandBytes, 0, this.command, 0, commandBytes.length);
+    }
     /**
      * serialize important field
      */

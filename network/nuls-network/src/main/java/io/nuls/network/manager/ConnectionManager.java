@@ -27,21 +27,17 @@ package io.nuls.network.manager;
 
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.manager.threads.NetworkThreadPool;
-import io.nuls.network.manager.threads.NodesConnectThread;
+import io.nuls.network.loker.Lockers;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.netty.NettyServer;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.thread.commom.NulsThreadFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 /**
  * 连接管理器
  * connection  manager
@@ -49,9 +45,17 @@ import java.util.concurrent.TimeUnit;
  * @date 2018/11/01
  *
  */
-public class ConnectionManager {
-
+public class ConnectionManager extends BaseManager{
+    TaskManager taskManager = TaskManager.getInstance();
     private static ConnectionManager instance = new ConnectionManager();
+    public static ConnectionManager getInstance() {
+        return instance;
+    }
+
+    private ConnectionManager() {
+
+    }
+
     /**
      *作为Server 被动连接的peer
      */
@@ -62,20 +66,23 @@ public class ConnectionManager {
     private  Map<String, Node> cacheConnectNodeOutMap=new ConcurrentHashMap<>();
 
     /**
-     * Server所有in连接的IP,通过这个集合判断是否存在过载
+     * Server所有被动连接的IP,通过这个集合判断是否存在过载
      * Key:ip+"_"+magicNumber  value: connectNumber
      */
     private  Map<String, Integer> cacheConnectGroupIpInMap=new ConcurrentHashMap<>();
 
     /**
-     * Client所有out连接的IP,通过这个集合判断是否存在相互连接
+     * Client所有连接的IP,通过这个集合判断是否存在相互连接
      * Key:ip  value: connectNumber
      */
     private  Map<String, Integer> cacheConnectIpMap=new ConcurrentHashMap<>();
 
-
+    /**
+     * 在物理连接断开时时候进行调用
+     * @param nodeKey
+     * @param nodeType
+     */
     public void removeCacheConnectNodeMap(String nodeKey,int nodeType){
-        //要加同步锁
         Node node=null;
         String ip=nodeKey.split(NetworkConstant.COLON)[0];
         cacheConnectIpMap.remove(ip);
@@ -87,7 +94,7 @@ public class ConnectionManager {
               cacheConnectNodeInMap.remove(nodeKey);
             List<NodeGroupConnector> list=node.getNodeGroupConnectors();
             for(NodeGroupConnector nodeGroupConnector:list){
-                    subGroupMaxInIp(node, nodeGroupConnector.getMagicNumber(),true);
+                subGroupMaxInIp(node, nodeGroupConnector.getMagicNumber(),true);
             }
         }
         node.disConnectNodeChannel();
@@ -97,6 +104,14 @@ public class ConnectionManager {
     public Node getNodeByCache(String nodeId,int nodeType)
     {
         if(Node.OUT == nodeType){
+            return cacheConnectNodeOutMap.get(nodeId);
+        }else{
+            return cacheConnectNodeInMap.get(nodeId);
+        }
+    }
+    public Node getNodeByCache(String nodeId)
+    {
+        if(null != cacheConnectNodeOutMap.get(nodeId)){
             return cacheConnectNodeOutMap.get(nodeId);
         }else{
             return cacheConnectNodeInMap.get(nodeId);
@@ -112,10 +127,22 @@ public class ConnectionManager {
     /**
      * 处理已经成功连接的节点
      */
-    public boolean processConnectedServerNode(Node node) {
-        String ip=node.getId().split(NetworkConstant.COLON)[0];
-        cacheConnectIpMap.put(ip,1);
-        cacheConnectNodeInMap.put(node.getId(),node);
+    public boolean processConnectNode(Node node) {
+        Lockers.NODE_ESTABLISH_CONNECT_LOCK.lock();
+        try {
+            String ip = node.getId().split(NetworkConstant.COLON)[0];
+            if(null != cacheConnectIpMap.get(ip)){
+                return false;
+            }
+            cacheConnectIpMap.put(ip, 1);
+            if (Node.IN == node.getType()) {
+                cacheConnectNodeInMap.put(node.getId(), node);
+            } else {
+                cacheConnectNodeOutMap.put(node.getId(), node);
+            }
+        }finally {
+            Lockers.NODE_ESTABLISH_CONNECT_LOCK.unlock();
+        }
         return true;
     }
 
@@ -130,6 +157,13 @@ public class ConnectionManager {
         return true;
     }
 
+    /**
+     * 减少链接入地址
+     * sub chain max Ip
+     * @param node
+     * @param magicNum
+     * @param isAll
+     */
     public void subGroupMaxInIp (Node node,long magicNum,boolean isAll){
         String ip=node.getId().split(NetworkConstant.COLON)[0];
         String key=ip+"_"+magicNum;
@@ -144,15 +178,7 @@ public class ConnectionManager {
         }
     }
 
-    /**
-     * 处理已经成功连接的节点
-     */
-    public boolean processConnectedClientNode(Node node) {
-        cacheConnectNodeOutMap.put(node.getId(),node);
-        String ip=node.getId().split(NetworkConstant.COLON)[0];
-        cacheConnectIpMap.put(ip,1);
-        return true;
-    }
+
 
     /**
      * juge peer ip Exist
@@ -177,23 +203,19 @@ public class ConnectionManager {
         }
     }
 
-    private ConnectionManager() {
-    }
 
     public void nettyBoot(){
         serverStart();
         clientStart();
-    }
-    public static ConnectionManager getInstance() {
-        return instance;
+        Log.info("==========================NettyBoot");
     }
 
-    public void serverStart(){
+    private void serverStart(){
         NettyServer server=new NettyServer(NetworkParam.getInstance().getPort());
         NettyServer serverCross=new NettyServer(NetworkParam.getInstance().getCrossPort());
         server.init();
         serverCross.init();
-        TaskManager.createAndRunThread("node server start", new Runnable() {
+        taskManager.createAndRunThread("node server start", new Runnable() {
             @Override
             public void run() {
                 try {
@@ -203,7 +225,7 @@ public class ConnectionManager {
                 }
             }
         }, false);
-        TaskManager.createAndRunThread("node crossServer start", new Runnable() {
+        taskManager.createAndRunThread("node crossServer start", new Runnable() {
             @Override
             public void run() {
                 try {
@@ -216,23 +238,47 @@ public class ConnectionManager {
 
     }
 
-    public void clientStart() {
-        ScheduledThreadPoolExecutor executor = TaskManager.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
-        executor.scheduleAtFixedRate(new NodesConnectThread(), 5, 1000, TimeUnit.SECONDS);
+    private void clientStart() {
+        taskManager.clientConnectThreadStart();
     }
 
-    public void connectionNode(Node node) {
+    /**
+     * connect peer
+     * @param node
+     */
+    public  void connectionNode(Node node) {
         //发起连接
-        NetworkThreadPool.doConnect(node);
+        Lockers.NODE_LAUNCH_CONNECT_LOCK.lock();
+        try {
+            if(node.isIdle()) {
+                node.setIdle(false);
+                taskManager.doConnect(node);
+            }
+        }finally {
+            Lockers.NODE_LAUNCH_CONNECT_LOCK.unlock();
+        }
     }
     //自我连接
     public void selfConnection(){
         if(LocalInfoManager.getInstance().isConnectedMySelf()){
             return;
         }
+        if(LocalInfoManager.getInstance().isSelfNetSeed()){
+            return;
+        }
         IpAddress ipAddress=LocalInfoManager.getInstance().getExternalAddress();
         Node node=new Node(ipAddress.getIp().getHostAddress(),ipAddress.getPort(),Node.OUT,false);
-        NetworkThreadPool.doConnect(node);
+        connectionNode(node);
         LocalInfoManager.getInstance().setConnectedMySelf(true);
+    }
+
+    @Override
+    public void init() {
+
+    }
+
+    @Override
+    public void start() {
+
     }
 }

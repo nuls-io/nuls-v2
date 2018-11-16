@@ -22,22 +22,15 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager.service;
+package io.nuls.network;
 
 /**
- * 节点组服务接口
- * @author  lan
- * @date 2018/11/01
- */
-public interface NodeGroupService {
-    /**
-     * 跨链协议调用配置激活跨链
-     */
-    public void activeCrossNodeGroup();
-
-    /**
-     * 卫星链增加NodeGroup
-     */
-    public void addMoonCrossNodeGroup();
-
+ * @program: nuls2
+ * @description: test
+ * @author: lan
+ * @create: 2018/11/14
+ **/
+public class TestConstant {
+    public static String KernelWSServer="ws://127.0.0.1:8887";
 }
+
