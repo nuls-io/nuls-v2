@@ -161,7 +161,7 @@ public class MessageManager extends BaseManager{
         for(Node connectNode:connectNodes){
             List<NodeGroupConnector> nodeGroupConnectors=connectNode.getNodeGroupConnectors();
             for(NodeGroupConnector nodeGroupConnector:nodeGroupConnectors){
-                if(Node.HANDSHAKE == nodeGroupConnector.getStatus()){
+                if(NodeGroupConnector.HANDSHAKE == nodeGroupConnector.getStatus()){
                     List<IpAddress> addressesList=new ArrayList<>();
                     addressesList.add(LocalInfoManager.getInstance().getExternalAddress());
                     AddrMessage addrMessage= MessageFactory.getInstance().buildAddrMessage(addressesList,nodeGroupConnector.getMagicNumber());
@@ -236,7 +236,7 @@ public class MessageManager extends BaseManager{
 //        not handShakeMessage must be  validate peer status
         if(!isHandShakeMessage(message)) {
             NodeGroupConnector nodeGroupConnector = node.getNodeGroupConnector(message.getHeader().getMagicNumber());
-            if (Node.HANDSHAKE != nodeGroupConnector.getStatus()) {
+            if (NodeGroupConnector.HANDSHAKE != nodeGroupConnector.getStatus()) {
                 return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_DEAD);
             }
         }

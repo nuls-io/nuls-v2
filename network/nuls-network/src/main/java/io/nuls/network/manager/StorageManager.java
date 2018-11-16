@@ -24,8 +24,6 @@
  */
 package io.nuls.network.manager;
 
-import io.nuls.db.service.RocksDBService;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupNodeKeys;
@@ -52,7 +50,6 @@ public class StorageManager extends BaseManager{
     private static StorageManager storageManager=new StorageManager();
     private static Map<String,NodePo> cacheAllNodes=new ConcurrentHashMap<>();
     DbService dbService=null;
-    NetworkParam networkParam = NetworkParam.getInstance();
     private StorageManager(){
 
     }

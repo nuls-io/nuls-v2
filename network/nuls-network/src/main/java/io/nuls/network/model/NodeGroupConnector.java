@@ -35,12 +35,19 @@ import io.nuls.tools.thread.TimeService;
  *
  */
 public class NodeGroupConnector implements Dto{
+    /**
+     * 0: wait 等待中 , 1: connecting,握手连接中 2: handshake 握手成功
+     */
+    public final static int WAIT = 0;
+    public final static int CONNECTING = 1;
+    public final static int HANDSHAKE = 2;
+
     private long magicNumber;
     private boolean isSeed=false;
     private long version=0;
     private long blockHeight=0;
     private String blockHash="";
-    private volatile  int status=Node.WAIT;
+    private volatile  int status=NodeGroupConnector.WAIT;
     private long createTime = TimeService.currentTimeMillis();
     public NodeGroupConnector(long magicNumber){
         this.magicNumber=magicNumber;

@@ -213,7 +213,7 @@ public class NodeRpc extends BaseCmd {
         if(null != nodeGroupConnector){
             nodeVo.setBlockHash(nodeGroupConnector.getBlockHash());
             nodeVo.setBlockHeight(nodeGroupConnector.getBlockHeight());
-            nodeVo.setState(nodeGroupConnector.getStatus() == Node.HANDSHAKE ? 1 : 0);
+            nodeVo.setState(nodeGroupConnector.getStatus() == NodeGroupConnector.HANDSHAKE ? 1 : 0);
             nodeVo.setTime(nodeGroupConnector.getCreateTime());
         }else{
             nodeVo.setTime(0);

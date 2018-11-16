@@ -162,9 +162,7 @@ public class Bootstrap {
         NodeManager.getInstance().start();
         ConnectionManager.getInstance().nettyBoot();
         TaskManager.getInstance().start();
-
         RpcManager.getInstance().start();
-
     }
 
 }
