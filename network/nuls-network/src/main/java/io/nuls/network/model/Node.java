@@ -29,6 +29,7 @@ import io.netty.channel.Channel;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
@@ -299,8 +300,14 @@ public class Node extends BaseNulsData  implements Dto {
     }
 
     public boolean isEliminate(){
+        //自己节点Ip,移除(自己是种子节点的情况)
         if (LocalInfoManager.getInstance().isSelfIp(ip)) {
             return true;
+        }
+        //如果是种子节点，不去移除
+        //not eliminate if seed node
+        if(NetworkParam.getInstance().getSeedIpList().contains(ip)){
+            return false;
         }
         return isBad;
     }

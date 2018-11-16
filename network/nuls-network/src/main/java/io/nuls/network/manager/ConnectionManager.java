@@ -77,9 +77,12 @@ public class ConnectionManager extends BaseManager{
      */
     private  Map<String, Integer> cacheConnectIpMap=new ConcurrentHashMap<>();
 
-
+    /**
+     * 在物理连接断开时时候进行调用
+     * @param nodeKey
+     * @param nodeType
+     */
     public void removeCacheConnectNodeMap(String nodeKey,int nodeType){
-        //要加同步锁
         Node node=null;
         String ip=nodeKey.split(NetworkConstant.COLON)[0];
         cacheConnectIpMap.remove(ip);
@@ -101,6 +104,14 @@ public class ConnectionManager extends BaseManager{
     public Node getNodeByCache(String nodeId,int nodeType)
     {
         if(Node.OUT == nodeType){
+            return cacheConnectNodeOutMap.get(nodeId);
+        }else{
+            return cacheConnectNodeInMap.get(nodeId);
+        }
+    }
+    public Node getNodeByCache(String nodeId)
+    {
+        if(null != cacheConnectNodeOutMap.get(nodeId)){
             return cacheConnectNodeOutMap.get(nodeId);
         }else{
             return cacheConnectNodeInMap.get(nodeId);
