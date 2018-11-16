@@ -27,7 +27,7 @@ public class AliasStorageServiceTest {
     protected static AliasStorageService aliasStorageService;
 
     protected static AccountService accountService;
-    protected short chainId = 12345;
+    protected static short chainId = 12345;
 
     @BeforeClass
     public static void beforeTest() {
@@ -112,7 +112,10 @@ public class AliasStorageServiceTest {
      * create an AliasPo for test
      *
      * */
-    public AliasPo createAlias(){
+    public static AliasPo createAlias(){
+        if (accountService == null) {
+            accountService = SpringLiteContext.getBean(AccountService.class);
+        }
         List<Account> accounts = accountService.createAccount(chainId,1,null);
         String alias = "Hi,我的别名是" + System.currentTimeMillis();
         AliasPo aliasPo = new AliasPo();

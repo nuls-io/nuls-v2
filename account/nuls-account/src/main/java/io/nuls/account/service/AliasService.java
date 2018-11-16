@@ -25,13 +25,52 @@
 
 package io.nuls.account.service;
 
+import io.nuls.account.model.po.AliasPo;
+import io.nuls.tools.exception.NulsException;
+
 /**
  * 账户模块内部功能服务类
  * Account module internal function service class
  *
- * @author: qiinyifeng
+ * @author: EdwardChan
  */
-public class AliasService {
+public interface AliasService {
 
+
+    /**
+     * 保存别名(全网)
+     * 1.保存别名alias至数据库
+     * 2.从数据库取出对应的account账户,将别名设置进account然后保存至数据库
+     * 3.将修改后的account重新进行缓存
+     * saveAlias
+     * 1. Save the alias to the database.
+     * 2. Take the corresponding account from the database, set the alias to account and save it to the database.
+     * 3. Re-cache the modified account.
+     */
+    boolean saveAlias(AliasPo aliaspo) throws NulsException;
+
+    /**
+     * 回滚别名操作(删除别名(全网))
+     * 1.从数据库删除别名对象数据
+     * 2.取出对应的account将别名清除,重新存入数据库
+     * 3.重新缓存account
+     * rollbackAlias
+     * 1.Delete the alias data from the database.
+     * 2. Remove the corresponding account to clear the alias and restore it in the database.
+     * 3. Recache the account.
+     */
+    boolean rollbackAlias(AliasPo aliasPo) throws NulsException;
+
+    /**
+     * get the alias by address
+     *
+     * @param chainId
+     * @param address
+     * @return the alias,if the alias is not exist,it will be return null
+     * @auther EdwardChan
+     * <p>
+     * Nov.12th 2018
+     */
+    String getAliasByAddress(short chainId, String address);
 
 }
