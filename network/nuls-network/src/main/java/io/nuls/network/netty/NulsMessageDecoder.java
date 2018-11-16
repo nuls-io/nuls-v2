@@ -27,6 +27,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.manager.NodeManager;
+import io.nuls.tools.log.Log;
 
 import java.nio.ByteOrder;
 import java.util.List;
@@ -53,8 +55,13 @@ public class NulsMessageDecoder extends ByteToMessageDecoder {
             }
         }else{
             in.clear();
-            //TODO:不该关闭连接，如果一个连接有多条链，此时通道需要保留，需要增加消息回复
-            ctx.close();
+            //不该关闭连接，如果一个连接有多条链，此时通道需要保留，需要增加消息回复
+            if(NodeManager.getInstance().isPeerSingleGroup(ctx.channel())){
+                ctx.close();
+            }else{
+                Log.error("illegal message REC");
+            }
+
         }
     }
 }

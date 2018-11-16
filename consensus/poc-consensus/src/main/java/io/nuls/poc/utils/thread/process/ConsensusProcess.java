@@ -103,6 +103,26 @@ public class ConsensusProcess {
      * */
     private void packing(int chain_id,MeetingMember self, MeetingRound round) throws IOException, NulsException {
         waitReceiveNewestBlock(chain_id,self, round);
+        //开始打包
+        long start = System.currentTimeMillis();
+        Block block = doPacking(chain_id, self, round);
+        Log.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms");
+        //打包完成之后，查看打包区块和主链最新区块是否连续，如果不连续表示打包过程中收到了上一个共识节点打包的区块，此时本地节点需要重新打包区块
+        //todo
+        //从区块管理模块获取最新区块
+        BlockHeader header = new BlockHeader();
+        boolean rePacking = !block.getHeader().getPreHash().equals(header.getHash());
+        if(rePacking){
+            start = System.currentTimeMillis();
+            block=doPacking(chain_id, self, round);
+            Log.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms");
+        }
+        if (null == block) {
+            Log.error("make a null block");
+            return;
+        }
+        //todo
+        //打包成功后降区块传给区块管理模块广播
 
     }
 
@@ -171,6 +191,9 @@ public class ConsensusProcess {
     }
 
     private Block doPacking(int chain_id, MeetingMember self, MeetingRound round) throws NulsException, IOException{
+        //todo
+        //从区块管理模块获取最新区块
+        Block bestBlock = new Block();
 
         return null;
     }

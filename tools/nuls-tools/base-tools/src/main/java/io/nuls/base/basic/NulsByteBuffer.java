@@ -100,6 +100,15 @@ public class NulsByteBuffer {
         }
     }
 
+    public long readUint48() {
+        long value = SerializeUtils.readUint48(payload,cursor);
+        cursor += 6;
+        if (value == 281474976710655L) {
+            return -1L;
+        }
+        return value;
+    }
+
     public long readInt64() throws NulsException {
         try {
             long u = SerializeUtils.readInt64LE(payload, cursor);
@@ -226,22 +235,6 @@ public class NulsByteBuffer {
         }
         nulsData.parse(this);
         return nulsData;
-    }
-
-
-    public long readUint48() {
-        /*long value = (payload[cursor + 0] & 0xffL) |
-                ((payload[cursor + 1] & 0xffL) << 8) |
-                ((payload[cursor + 2] & 0xffL) << 16) |
-                ((payload[cursor + 3] & 0xffL) << 24) |
-                ((payload[cursor + 4] & 0xffL) << 32) |
-                ((payload[cursor + 5] & 0xffL) << 40);*/
-        long value = SerializeUtils.readUint48(payload,cursor);
-        cursor += 6;
-        if (value == 281474976710655L) {
-            return -1L;
-        }
-        return value;
     }
 
     public Transaction readTransaction() throws NulsException {

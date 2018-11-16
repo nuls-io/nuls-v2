@@ -24,6 +24,8 @@
  */
 package io.nuls.network.manager;
 
+import io.netty.channel.Channel;
+import io.netty.channel.socket.SocketChannel;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
@@ -96,5 +98,18 @@ public class NodeManager extends  BaseManager{
             Node node=new Node(peer[0],Integer.valueOf(peer[1]),Node.OUT,false);
             nodeGroup.addDisConnetNode(node,false);
         }
+    }
+    public boolean isPeerSingleGroup(Channel channel){
+        SocketChannel socketChannel = (SocketChannel) channel;
+        String remoteIP = socketChannel.remoteAddress().getHostString();
+        int port = socketChannel.remoteAddress().getPort();
+        String nodeId = remoteIP+NetworkConstant.COLON+port;
+        Node node = ConnectionManager.getInstance().getNodeByCache(nodeId);
+        if(null != node){
+            if(null != node.getNodeGroupConnectors() && node.getNodeGroupConnectors().size() > 1){
+                return false;
+            }
+        }
+        return true;
     }
 }

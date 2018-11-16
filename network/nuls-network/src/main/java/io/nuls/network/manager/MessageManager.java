@@ -44,6 +44,7 @@ import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
@@ -117,7 +118,11 @@ public class MessageManager extends BaseManager{
             NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
             while (!byteBuffer.isFinished()) {
                 MessageHeader header = byteBuffer.readNulsData(new MessageHeader());
+
                 Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
+                if("bl_GetBlock".equalsIgnoreCase(header.getCommandStr())){
+                    Log.info("bl_GetBlockbl_GetBlockbl_GetBlockbl_GetBlockbl_GetBlockbl_GetBlock");
+                }
                 byte []payLoad = byteBuffer.getPayload();
                 byte []payLoadBody = byteBuffer.readBytes(payLoad.length-header.size());
                 Log.info("=================payLoad length"+payLoadBody.length);
@@ -134,8 +139,9 @@ public class MessageManager extends BaseManager{
                     //外部消息，转外部接口
                     long magicNum=header.getMagicNumber();
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
-                    String response = CmdDispatcher.call(header.getCommandStr(), new Object[]{chainId,nodeKey,payLoad},1.0 );
+                    String response = CmdDispatcher.call(header.getCommandStr(), new Object[]{chainId,nodeKey,HexUtil.byteToHex(payLoad)},1.0 );
                     Log.info(response);
+                    byteBuffer.setCursor(payLoad.length);
                 }
                }
 
@@ -155,7 +161,7 @@ public class MessageManager extends BaseManager{
         for(Node connectNode:connectNodes){
             List<NodeGroupConnector> nodeGroupConnectors=connectNode.getNodeGroupConnectors();
             for(NodeGroupConnector nodeGroupConnector:nodeGroupConnectors){
-                if(Node.HANDSHAKE == nodeGroupConnector.getStatus()){
+                if(NodeGroupConnector.HANDSHAKE == nodeGroupConnector.getStatus()){
                     List<IpAddress> addressesList=new ArrayList<>();
                     addressesList.add(LocalInfoManager.getInstance().getExternalAddress());
                     AddrMessage addrMessage= MessageFactory.getInstance().buildAddrMessage(addressesList,nodeGroupConnector.getMagicNumber());
@@ -230,7 +236,7 @@ public class MessageManager extends BaseManager{
 //        not handShakeMessage must be  validate peer status
         if(!isHandShakeMessage(message)) {
             NodeGroupConnector nodeGroupConnector = node.getNodeGroupConnector(message.getHeader().getMagicNumber());
-            if (Node.HANDSHAKE != nodeGroupConnector.getStatus()) {
+            if (NodeGroupConnector.HANDSHAKE != nodeGroupConnector.getStatus()) {
                 return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_DEAD);
             }
         }

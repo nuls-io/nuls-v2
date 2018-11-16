@@ -25,10 +25,10 @@
 package io.nuls.network.manager.handler.base;
 
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.manager.ConnectionManager;
 
 /**
  * channel handler
@@ -52,5 +52,11 @@ public abstract class BaseChannelHandler  extends ChannelInboundHandlerAdapter {
         return false;
     }
 
+    /**
+     * channel校验
+     * @param ctx
+     * @return
+     */
+    protected abstract boolean validChannel(ChannelHandlerContext ctx);
 
 }

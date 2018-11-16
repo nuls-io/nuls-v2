@@ -29,6 +29,7 @@ import io.netty.channel.Channel;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
@@ -53,6 +54,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Node extends BaseNulsData  implements Dto {
 
+    /**
+     * 1: inNode SERVER,  2: outNode CLIENT
+     */
+    public final static int IN = 1;
+    public final static int OUT = 2;
+
+
     private String id;
 
     private String ip;
@@ -71,12 +79,17 @@ public class Node extends BaseNulsData  implements Dto {
     /**
      * 是否可连接状态
      */
-    private boolean canConnect=true;
-    private final static int MAX_FAIL_COUNT=100;
+    private boolean isIdle=true;
+
     /**
      * 是否跨链连接
      */
     private boolean isCrossConnect;
+
+    private int type;
+
+    private volatile  boolean isBad=false;
+
 
     /**
      * 一条peer连接可以同时属于多个group
@@ -84,21 +97,6 @@ public class Node extends BaseNulsData  implements Dto {
     private Map<String,NodeGroupConnector> nodeGroupConnectors=new ConcurrentHashMap<>();
 
 
-    /**
-     * 1: inNode SERVER,  2: outNode CLIENT
-     */
-    public final static int IN = 1;
-    public final static int OUT = 2;
-    private int type;
-
-    private volatile  boolean isBad=false;
-
-    /**
-     * 0: wait 等待中 , 1: connecting,握手连接中 2: handshake 握手成功
-     */
-    public final static int WAIT = 0;
-    public final static int CONNECTING = 1;
-    public final static int HANDSHAKE = 2;
 
     public Node(String ip, int remotePort, int type,boolean isCrossConnect) {
         this(ip+":"+remotePort,ip,remotePort,type,isCrossConnect);
@@ -118,14 +116,13 @@ public class Node extends BaseNulsData  implements Dto {
         this.channel = null;
     }
 
-    public boolean isCanConnect() {
-        return canConnect;
+    public boolean isIdle() {
+        return isIdle;
     }
 
-    public void setCanConnect(boolean canConnect) {
-        this.canConnect = canConnect;
+    public void setIdle(boolean idle) {
+        isIdle = idle;
     }
-
 
     public int getType() {
         return type;
@@ -299,8 +296,14 @@ public class Node extends BaseNulsData  implements Dto {
     }
 
     public boolean isEliminate(){
+        //自己节点Ip,移除(自己是种子节点的情况)
         if (LocalInfoManager.getInstance().isSelfIp(ip)) {
             return true;
+        }
+        //如果是种子节点，不去移除
+        //not eliminate if seed node
+        if(NetworkParam.getInstance().getSeedIpList().contains(id)){
+            return false;
         }
         return isBad;
     }

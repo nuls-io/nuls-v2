@@ -29,7 +29,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.MessageManager;
@@ -47,10 +46,6 @@ import java.io.IOException;
 
 @ChannelHandler.Sharable
 public class ServerChannelHandler extends BaseChannelHandler {
-
-
-    private NetworkParam networkParam = NetworkParam.getInstance();
-
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -70,26 +65,18 @@ public class ServerChannelHandler extends BaseChannelHandler {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
-//        String remoteIp=socketChannel.remoteAddress().getHostString();
-        //already exist peer ip （In or Out）
-//        if(!LocalInfoManager.getInstance().isSelfConnect(remoteIp)){
-//            if( ConnectionManager.getInstance().isPeerConnectExist(remoteIp)){
-//                Log.info("peer connect exist:"+socketChannel.remoteAddress().getHostString());
-//                ctx.channel().close();
-//                return;
-//            }
-//        }
-
         boolean isCrossConnect=isServerCrossConnect(ctx.channel());
         Node node = new Node(socketChannel.remoteAddress().getHostString(),socketChannel.remoteAddress().getPort(), Node.IN,isCrossConnect);
-        node.setCanConnect(false);
+        node.setIdle(false);
         node.setChannel(ctx.channel());
-        boolean success = ConnectionManager.getInstance().processConnectedServerNode(node);
+        Log.debug("Server Node is active:" +node.getId());
+        boolean success = ConnectionManager.getInstance().processConnectNode(node);
         if (!success) {
+            Log.debug("Server Node processConnectNode fail:" +node.getId());
             ctx.channel().close();
             return;
         }
-        //此时无法知道client的魔法参数，不能发送version消息,此时业务法对MaxIn做判断
+
     }
 
     @Override
@@ -100,7 +87,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
         Log.info("Server Node is Inactive:" +remoteIP + ":" + channel.remoteAddress().getPort());
         Node node=ConnectionManager.getInstance().getNodeByCache(this.getNodeIdByChannel( ctx.channel()),Node.IN);
         if(null != node) {
-            node.setCanConnect(true);
+            node.setIdle(true);
             ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),Node.IN);
             Log.info("Server Node is Inactive:" + node.getIp() + ":" + node.getRemotePort());
         }
@@ -142,4 +129,8 @@ public class ServerChannelHandler extends BaseChannelHandler {
         Log.info("-----------------server channelInactive  node is channelUnregistered -----------------");
     }
 
+    @Override
+    protected boolean validChannel(ChannelHandlerContext ctx) {
+        return true;
+    }
 }

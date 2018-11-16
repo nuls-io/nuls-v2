@@ -98,7 +98,7 @@ public class NettyClient {
                             node.getChannel().close();
                         }
                         node.disConnectNodeChannel();
-                        node.setCanConnect(true);
+                        node.setIdle(true);
                     }
                 }
             });

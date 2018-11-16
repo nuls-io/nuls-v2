@@ -66,20 +66,23 @@ public class ConnectionManager extends BaseManager{
     private  Map<String, Node> cacheConnectNodeOutMap=new ConcurrentHashMap<>();
 
     /**
-     * Server所有in连接的IP,通过这个集合判断是否存在过载
+     * Server所有被动连接的IP,通过这个集合判断是否存在过载
      * Key:ip+"_"+magicNumber  value: connectNumber
      */
     private  Map<String, Integer> cacheConnectGroupIpInMap=new ConcurrentHashMap<>();
 
     /**
-     * Client所有out连接的IP,通过这个集合判断是否存在相互连接
+     * Client所有连接的IP,通过这个集合判断是否存在相互连接
      * Key:ip  value: connectNumber
      */
     private  Map<String, Integer> cacheConnectIpMap=new ConcurrentHashMap<>();
 
-
+    /**
+     * 在物理连接断开时时候进行调用
+     * @param nodeKey
+     * @param nodeType
+     */
     public void removeCacheConnectNodeMap(String nodeKey,int nodeType){
-        //要加同步锁
         Node node=null;
         String ip=nodeKey.split(NetworkConstant.COLON)[0];
         cacheConnectIpMap.remove(ip);
@@ -106,6 +109,14 @@ public class ConnectionManager extends BaseManager{
             return cacheConnectNodeInMap.get(nodeId);
         }
     }
+    public Node getNodeByCache(String nodeId)
+    {
+        if(null != cacheConnectNodeOutMap.get(nodeId)){
+            return cacheConnectNodeOutMap.get(nodeId);
+        }else{
+            return cacheConnectNodeInMap.get(nodeId);
+        }
+    }
 
     public List<Node> getCacheAllNodeList(){
         List<Node> nodesList=new ArrayList<>();
@@ -116,10 +127,22 @@ public class ConnectionManager extends BaseManager{
     /**
      * 处理已经成功连接的节点
      */
-    public boolean processConnectedServerNode(Node node) {
-        String ip=node.getId().split(NetworkConstant.COLON)[0];
-        cacheConnectIpMap.put(ip,1);
-        cacheConnectNodeInMap.put(node.getId(),node);
+    public boolean processConnectNode(Node node) {
+        Lockers.NODE_ESTABLISH_CONNECT_LOCK.lock();
+        try {
+            String ip = node.getId().split(NetworkConstant.COLON)[0];
+            if(null != cacheConnectIpMap.get(ip)){
+                return false;
+            }
+            cacheConnectIpMap.put(ip, 1);
+            if (Node.IN == node.getType()) {
+                cacheConnectNodeInMap.put(node.getId(), node);
+            } else {
+                cacheConnectNodeOutMap.put(node.getId(), node);
+            }
+        }finally {
+            Lockers.NODE_ESTABLISH_CONNECT_LOCK.unlock();
+        }
         return true;
     }
 
@@ -155,15 +178,7 @@ public class ConnectionManager extends BaseManager{
         }
     }
 
-    /**
-     * 处理已经成功连接的节点
-     */
-    public boolean processConnectedClientNode(Node node) {
-        cacheConnectNodeOutMap.put(node.getId(),node);
-        String ip=node.getId().split(NetworkConstant.COLON)[0];
-        cacheConnectIpMap.put(ip,1);
-        return true;
-    }
+
 
     /**
      * juge peer ip Exist
@@ -233,14 +248,14 @@ public class ConnectionManager extends BaseManager{
      */
     public  void connectionNode(Node node) {
         //发起连接
-        Lockers.NODE_CONNECT_LOCK.lock();
+        Lockers.NODE_LAUNCH_CONNECT_LOCK.lock();
         try {
-            if(node.isCanConnect()) {
-                node.setCanConnect(false);
+            if(node.isIdle()) {
+                node.setIdle(false);
                 taskManager.doConnect(node);
             }
         }finally {
-            Lockers.NODE_CONNECT_LOCK.unlock();
+            Lockers.NODE_LAUNCH_CONNECT_LOCK.unlock();
         }
     }
     //自我连接
