@@ -1,15 +1,13 @@
-package io.nuls.transaction.storage.impl;
+package io.nuls.transaction.db.rocksdb.storage.impl;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.TransactionManager;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-import io.nuls.transaction.storage.TransactionStorageService;
+import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.utils.DBUtil;
 
 import java.io.IOException;
@@ -18,38 +16,39 @@ import java.io.IOException;
  * @author: Charlie
  * @date: 2018/11/13
  */
-public class TransactionStorageServiceImpl implements TransactionStorageService, InitializingBean {
+public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageService, InitializingBean {
 
-    private static final String TRANSACTION_CONFIRMED = "transaction_confirmed";
+    private static final String TRANSACTION_CROSSCHAIN = "transaction_crosschain";
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        DBUtil.createTable(TRANSACTION_CONFIRMED);
+        DBUtil.createTable(TRANSACTION_CROSSCHAIN);
     }
 
     @Override
-    public boolean saveTx(Transaction tx) {
-        if (tx == null) {
+    public boolean putTx(CrossChainTx ctx) {
+        if(null == ctx){
             return false;
         }
         byte[] txHashBytes = null;
         try {
-            txHashBytes = tx.getHash().serialize();
+            txHashBytes = ctx.getHash().serialize();
         } catch (IOException e) {
             Log.error(e);
             return false;
         }
         boolean result = false;
         try {
-            result = RocksDBService.put(TRANSACTION_CONFIRMED, txHashBytes, tx.serialize());
+            result = RocksDBService.put(TRANSACTION_CROSSCHAIN, txHashBytes, ctx.serialize());
         } catch (Exception e) {
             Log.error(e);
         }
         return result;
+
     }
 
     @Override
-    public Transaction getTx(NulsDigestData hash) {
+    public CrossChainTx getTx(NulsDigestData hash) {
         if (hash == null) {
             return null;
         }
@@ -60,15 +59,16 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        byte[] txBytes = RocksDBService.get(TRANSACTION_CONFIRMED, hashBytes);
-        Transaction tx = null;
-        if (null != txBytes) {
-            try {
-                tx = TransactionManager.getInstance(new NulsByteBuffer(txBytes, 0));
-            } catch (Exception e) {
-                Log.error(e);
-                return null;
-            }
+        byte[] txBytes = RocksDBService.get(TRANSACTION_CROSSCHAIN, hashBytes);
+
+        if(null == txBytes){
+            return null;
+        }
+        CrossChainTx tx = new CrossChainTx();
+        try {
+            tx.parse(txBytes, 0);
+        } catch (NulsException e) {
+            Log.error(e);
         }
         return tx;
     }
@@ -78,12 +78,15 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
         if (hash == null) {
             return false;
         }
-        boolean result = false;
         try {
-            result = RocksDBService.delete(TRANSACTION_CONFIRMED, hash.serialize());
+            return RocksDBService.delete(TRANSACTION_CROSSCHAIN, hash.serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
         } catch (Exception e) {
             Log.error(e);
+            return false;
         }
-        return result;
+
     }
 }
