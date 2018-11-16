@@ -72,6 +72,7 @@ public interface AccountService {
     List<Account> getAccountList();
 
     /**
+     * 设置账户密码
      * set the password for exist account
      *
      * @param chainId
@@ -83,6 +84,44 @@ public interface AccountService {
      * Nov.10th 2018
      */
     boolean setPassword(short chainId, String address, String password);
+
+    /**
+     * 设置离线账户密码
+     * set the password for offline account
+     *
+     * @param chainId
+     * @param address
+     * @param priKey
+     * @param password
+     * @return encryptedPriKey
+     * <p>
+     */
+    String setOfflineAccountPassword(short chainId, String address, String priKey, String password);
+
+    /**
+     * 根据原密码修改账户密码
+     * Change the account password according to the current password
+     *
+     * @param chainId
+     * @param address
+     * @param oldPassword
+     * @param newPassword
+     * @return
+     */
+    boolean changePassword(short chainId, String address, String oldPassword, String newPassword);
+
+    /**
+     * 根据原密码修改离线账户密码
+     * Change offline account password according to current password
+     *
+     * @param chainId
+     * @param address
+     * @param priKey
+     * @param oldPassword
+     * @param newPassword
+     * @return
+     */
+    String changeOfflinePassword(short chainId, String address, String priKey, String oldPassword, String newPassword);
 
     /**
      * check if the account is encrypted
