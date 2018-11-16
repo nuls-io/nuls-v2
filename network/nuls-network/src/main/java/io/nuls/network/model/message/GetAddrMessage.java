@@ -48,7 +48,7 @@ public class GetAddrMessage extends BaseMessage<MessageBody> {
         }
     }
     public GetAddrMessage() {
-       super(NetworkConstant.CMD_MESSAGE_GET_ADDR,0);
+       super(NetworkConstant.CMD_MESSAGE_GET_ADDR);
     }
 
     public GetAddrMessage(long magicNumber, String cmd, MessageBody body) {

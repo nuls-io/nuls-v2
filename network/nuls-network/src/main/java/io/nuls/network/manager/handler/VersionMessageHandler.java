@@ -67,17 +67,23 @@ public class VersionMessageHandler extends BaseMessageHandler {
         Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
         Log.debug("VersionMessageHandler Recieve:"+"Server"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
-        localInfoManager.updateExternalAddress(versionBody.getAddrYou().getIp().getHostAddress(),versionBody.getAddrYou().getPort());
+        String peerIp = versionBody.getAddrYou().getIp().getHostAddress();
+        int peerPort = versionBody.getAddrYou().getPort();
+        localInfoManager.updateExternalAddress(peerIp,peerPort);
         int maxIn=0;
         if(node.isCrossConnect()){
             maxIn=nodeGroup.getMaxCrossIn();
         }else{
             maxIn=nodeGroup.getMaxIn();
         }
-        if(ConnectionManager.getInstance().isPeerConnectExceedMaxIn(node.getIp(),nodeGroup.getMagicNumber(),maxIn)){
+        /**
+         *会存在情况如：种子节点 启动 无法扫描到自己的IP 只有 到握手时候才能知道自己外网IP，发现是自连。
+         */
+        //远程地址与自己地址相同 或者 连接满额处理
+        if(LocalInfoManager.getInstance().isSelfIp(node.getIp()) || ConnectionManager.getInstance().isPeerConnectExceedMaxIn(node.getIp(),nodeGroup.getMagicNumber(),maxIn)){
             if(node.getNodeGroupConnectors().size() == 0){
                 node.getChannel().close();
-                node.setCanConnect(true);
+                node.setIdle(true);
                 return;
             }else{
                 //client 回复过载消息--reply over maxIn
@@ -93,7 +99,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         node.addGroupConnector(message.getHeader().getMagicNumber());
         NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(message.getHeader().getMagicNumber());
         //node加入到Group的未连接中
-        nodeGroupConnector.setStatus(Node.CONNECTING);
+        nodeGroupConnector.setStatus(NodeGroupConnector.CONNECTING);
         nodeGroup.addDisConnetNode(node,true);
         //存储需要的信息
         node.setVersionProtocolInfos(message.getHeader().getMagicNumber(),versionBody.getProtocolVersion(),versionBody.getBlockHeight(),versionBody.getBlockHash());
@@ -114,11 +120,11 @@ public class VersionMessageHandler extends BaseMessageHandler {
         Node node = nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber()).getDisConnectNodeMap().get(nodeKey);
         Log.debug("VersionMessageHandler Recieve:Client"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(message.getHeader().getMagicNumber());
-        nodeGroupConnector.setStatus(Node.HANDSHAKE);
+        nodeGroupConnector.setStatus(NodeGroupConnector.HANDSHAKE);
         //node加入到Group的连接中
         NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
         nodeGroup.addConnetNode(node,true);
-        //TODO:存储需要的信息
+        //存储需要的信息
         node.setVersionProtocolInfos(message.getHeader().getMagicNumber(),versionBody.getProtocolVersion(),versionBody.getBlockHeight(),versionBody.getBlockHash());
         node.setRemoteCrossPort(versionBody.getPortMeCross());
         //client:接收到server端消息，进行verack答复
@@ -144,7 +150,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         Log.debug("VersionMessageHandler send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         //VERSION 协议的发送中，节点所属的网络业务状态是连接中
         NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(message.getHeader().getMagicNumber());
-        nodeGroupConnector.setStatus(Node.CONNECTING);
+        nodeGroupConnector.setStatus(NodeGroupConnector.CONNECTING);
         return super.send(message,node,isServer,asyn);
     }
 }

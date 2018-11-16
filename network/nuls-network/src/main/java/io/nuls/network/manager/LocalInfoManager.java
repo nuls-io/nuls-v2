@@ -117,13 +117,13 @@ public class LocalInfoManager extends BaseManager {
         this.blockHash = blockHash;
     }
 
-    private static final Set<String> ips = new HashSet<>();
+    private static final Set<String> IPS = new HashSet<>();
 
-    public boolean isSelfConnect(String ip){
+    public boolean isSelfIp(String ip){
        if(externalAddress.getIp().getHostAddress().equals(ip)){
            return true;
        }
-        if(ips.contains(ip)){
+        if(IPS.contains(ip)){
             return true;
         }
         return false;
@@ -131,7 +131,7 @@ public class LocalInfoManager extends BaseManager {
     static {
         List<String> localIPs = getLocalIP();
         for (String ip : localIPs) {
-            ips.add(ip);
+            IPS.add(ip);
         }
     }
 
@@ -203,10 +203,10 @@ public class LocalInfoManager extends BaseManager {
 
     @Override
     public void init() {
-        for (String ip : ips) {
+        for (String ip : IPS) {
             if (isSelfSeedNode(ip)) {
-//                networkParam.setMaxInCount(networkParam.getMaxInCount() * 2);
                 isSelfNetSeed = true;
+                break;
             }
         }
     }
@@ -222,6 +222,7 @@ public class LocalInfoManager extends BaseManager {
         }
         return false;
     }
+
     @Override
     public void start() {
 

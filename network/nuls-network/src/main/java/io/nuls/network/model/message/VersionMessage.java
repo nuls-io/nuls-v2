@@ -47,7 +47,7 @@ public class VersionMessage  extends BaseMessage<VersionMessageBody> {
         }
     }
     public VersionMessage() {
-       super(NetworkConstant.CMD_MESSAGE_VERSION,0);
+       super(NetworkConstant.CMD_MESSAGE_VERSION);
     }
     public VersionMessage(long magicNumber,String cmd,VersionMessageBody body) {
         super(cmd,magicNumber);

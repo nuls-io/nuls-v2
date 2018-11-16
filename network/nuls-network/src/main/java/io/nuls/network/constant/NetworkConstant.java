@@ -42,10 +42,18 @@ public interface NetworkConstant {
     int CONNETCI_TIME_OUT = 6000;
 
     int CONNECT_FAIL_LOCK_MINUTE=10;
+
+    int NODEGROUP_NET_STABLE_TIME_MILLIONS = 10 * 1000;
     /**
      * --------[network configs] -------
      */
     String NETWORK_SECTION = "network";
+
+    String NETWORK_LANGUAGE = "language";
+    String NETWORK_ENCODING = "encoding";
+    String NETWORK_DBPATH = "rocksdb.datapath";
+
+
     String NETWORK_SELF_SERVER_PORT = "network.self.server.port";
     String NETWORK_SELF_MAGIC = "network.self.magic";
     String NETWORK_SELF_NODE_MAX_IN = "network.self.max.in";
@@ -66,12 +74,16 @@ public interface NetworkConstant {
     String CMD_MESSAGE_BYE = "bye";
 
 
-
+    /**
+     * --------[DB tables] -------
+     */
     String DB_NAME_NETWORK_NODEGROUPS="nwNodeGroups";
     String DB_NAME_NETWORK_NODES="nwNodes";
     String DB_NAME_NETWORK_GROUP_NODESKEYS="nwGroupNodesKeys";
 
-    //特殊字符
+    /**
+     * --------[Special Splitter] -------
+     */
     String COMMA=",";
     String COLON=":";
 }

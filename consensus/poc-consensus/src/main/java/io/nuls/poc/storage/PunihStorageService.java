@@ -8,7 +8,7 @@ import java.util.List;
  * 惩罚管理类
  * @author tag
  * */
-public interface PublishStorageService {
+public interface PunihStorageService {
     /**
      * 保存
      * @param po 红/黄牌对象

@@ -31,6 +31,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.network.model.dto.IpAddress;
+import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
@@ -61,6 +62,8 @@ public class AddrMessageBody extends BaseNulsData {
         int s = 0;
         if(ipAddressList.size() > 0){
             s +=ipAddressList.size() * (new  IpAddress().size());
+        }else{
+            s = 4;
         }
         return s;
     }
@@ -70,9 +73,13 @@ public class AddrMessageBody extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-         for(IpAddress address:ipAddressList){
-             address.serializeToStream(stream);
-         }
+        if(0 == ipAddressList.size()){
+            stream.write(ToolsConstant.PLACE_HOLDER);
+        }else {
+            for (IpAddress address : ipAddressList) {
+                address.serializeToStream(stream);
+            }
+        }
     }
 
     @Override
@@ -84,6 +91,7 @@ public class AddrMessageBody extends BaseNulsData {
                ipAddressList.add(address);
            }
         } catch (Exception e) {
+            e.printStackTrace();
             throw new NulsException(e);
         }
     }

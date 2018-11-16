@@ -47,7 +47,7 @@ public class VerackMessage extends BaseMessage<VerackMessageBody> {
         }
     }
     public VerackMessage() {
-       super(NetworkConstant.CMD_MESSAGE_VERACK,0);
+       super(NetworkConstant.CMD_MESSAGE_VERACK);
     }
 
     public VerackMessage(long magicNumber, String cmd, VerackMessageBody body) {

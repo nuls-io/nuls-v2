@@ -69,6 +69,9 @@ public class NetworkParam {
 
     private boolean moonNode;
 
+    private String  language;
+    private String  encoding;
+    private String  dbPath;
 
 
     public int getPort() {
@@ -173,5 +176,29 @@ public class NetworkParam {
 
     public void setChainId(int chainId) {
         this.chainId = chainId;
+    }
+
+    public String getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getEncoding() {
+        return encoding;
+    }
+
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+
+    public String getDbPath() {
+        return dbPath;
+    }
+
+    public void setDbPath(String dbPath) {
+        this.dbPath = dbPath;
     }
 }

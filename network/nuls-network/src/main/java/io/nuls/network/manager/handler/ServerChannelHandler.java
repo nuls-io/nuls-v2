@@ -29,7 +29,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.MessageManager;
@@ -48,10 +47,6 @@ import java.io.IOException;
 @ChannelHandler.Sharable
 public class ServerChannelHandler extends BaseChannelHandler {
 
-
-    private NetworkParam networkParam = NetworkParam.getInstance();
-
-
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
@@ -59,8 +54,8 @@ public class ServerChannelHandler extends BaseChannelHandler {
         String remoteIP = channel.remoteAddress().getHostString();
         Log.info("============"+remoteIP+"====="+channel.remoteAddress().getPort());
         //查看是否是本机尝试连接本机地址 ，如果是直接关闭连接
-        if (LocalInfoManager.getInstance().isSelfConnect(remoteIP)) {
-            Log.info("Server----------------------本机尝试连接本机地址关闭 ------------------------- " + remoteIP);
+        if (LocalInfoManager.getInstance().isSelfIp(remoteIP)) {
+            Log.info("Server----------------------Local connect close: ------------------------- " + remoteIP+":"+channel.remoteAddress().getPort());
             ctx.channel().close();
             return;
         }
@@ -70,34 +65,29 @@ public class ServerChannelHandler extends BaseChannelHandler {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
-//        String remoteIp=socketChannel.remoteAddress().getHostString();
-        //already exist peer ip （In or Out）
-//        if(!LocalInfoManager.getInstance().isSelfConnect(remoteIp)){
-//            if( ConnectionManager.getInstance().isPeerConnectExist(remoteIp)){
-//                Log.info("peer connect exist:"+socketChannel.remoteAddress().getHostString());
-//                ctx.channel().close();
-//                return;
-//            }
-//        }
-
         boolean isCrossConnect=isServerCrossConnect(ctx.channel());
         Node node = new Node(socketChannel.remoteAddress().getHostString(),socketChannel.remoteAddress().getPort(), Node.IN,isCrossConnect);
-        node.setCanConnect(false);
+        node.setIdle(false);
         node.setChannel(ctx.channel());
-        boolean success = ConnectionManager.getInstance().processConnectedServerNode(node);
+        Log.debug("Server Node is active:" +node.getId());
+        boolean success = ConnectionManager.getInstance().processConnectNode(node);
         if (!success) {
+            Log.debug("Server Node processConnectNode fail:" +node.getId());
             ctx.channel().close();
             return;
         }
-        //此时无法知道client的魔法参数，不能发送version消息,此时业务法对MaxIn做判断
+
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        Node node=ConnectionManager.getInstance().getNodeByCache(this.getNodeIdByChannel( ctx.channel()),Node.OUT);
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String remoteIP = channel.remoteAddress().getHostString();
+        Log.info("Server Node is Inactive:" +remoteIP + ":" + channel.remoteAddress().getPort());
+        Node node=ConnectionManager.getInstance().getNodeByCache(this.getNodeIdByChannel( ctx.channel()),Node.IN);
         if(null != node) {
-            node.setCanConnect(true);
+            node.setIdle(true);
             ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),Node.IN);
             Log.info("Server Node is Inactive:" + node.getIp() + ":" + node.getRemotePort());
         }
@@ -105,6 +95,9 @@ public class ServerChannelHandler extends BaseChannelHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         Log.error("----------------- server exceptionCaught -------------------");
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String remoteIP = channel.remoteAddress().getHostString();
+        Log.info("Server Node is exceptionCaught:" +remoteIP + ":" + channel.remoteAddress().getPort());
         if (!(cause instanceof IOException)) {
             Log.error(cause);
         }
@@ -130,7 +123,14 @@ public class ServerChannelHandler extends BaseChannelHandler {
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String remoteIP = channel.remoteAddress().getHostString();
+        Log.info("Server Node is channelUnregistered:" +remoteIP + ":" + channel.remoteAddress().getPort());
         Log.info("-----------------server channelInactive  node is channelUnregistered -----------------");
     }
 
+    @Override
+    protected boolean validChannel(ChannelHandlerContext ctx) {
+        return true;
+    }
 }

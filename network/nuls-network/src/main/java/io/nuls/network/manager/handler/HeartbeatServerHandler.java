@@ -55,4 +55,9 @@ public class HeartbeatServerHandler extends BaseChannelHandler {
             super.userEventTriggered(ctx, evt);
         }
     }
+
+    @Override
+    protected boolean validChannel(ChannelHandlerContext ctx) {
+        return true;
+    }
 }

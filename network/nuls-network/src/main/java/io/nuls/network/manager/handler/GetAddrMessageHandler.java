@@ -31,6 +31,7 @@ import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.tools.log.Log;
 
@@ -57,7 +58,12 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
         Node node = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber()).getConnectNodeMap().get(nodeKey);
         Log.debug("GetAddrMessageHandler Recieve:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         //发送addr消息
-        MessageManager.getInstance().sendToNode(MessageFactory.getInstance().buildAddrMessage(node,message.getHeader().getMagicNumber()),node,true);
+        AddrMessage addressMessage=MessageFactory.getInstance().buildAddrMessage(node,message.getHeader().getMagicNumber());
+        if(0 == addressMessage.getMsgBody().getIpAddressList().size()){
+            Log.info("No Address");
+        }else {
+            MessageManager.getInstance().sendToNode(addressMessage, node, true);
+        }
         return new NetworkEventResult(true, null);
     }
 

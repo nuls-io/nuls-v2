@@ -56,6 +56,10 @@ public class ConfigBean implements Serializable {
      * 委托金额最大值
      * */
     private long commission_max;
+    /**
+     * 种子节点
+     **/
+    private String seedNodes;
 
     public long getPacking_interval() {
         return packing_interval;
@@ -151,5 +155,13 @@ public class ConfigBean implements Serializable {
 
     public void setCommission_max(long commission_max) {
         this.commission_max = commission_max;
+    }
+
+    public String getSeedNodes() {
+        return seedNodes;
+    }
+
+    public void setSeedNodes(String seedNodes) {
+        this.seedNodes = seedNodes;
     }
 }

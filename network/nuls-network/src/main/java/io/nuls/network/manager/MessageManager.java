@@ -34,7 +34,7 @@ import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.manager.handler.NetworkMessageHandlerFactory;
-import io.nuls.network.model.BroadcastResult;
+import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.NodeGroupConnector;
@@ -44,6 +44,9 @@ import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.crypto.Sha256Hash;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
@@ -99,24 +102,13 @@ public class MessageManager extends BaseManager{
      * @param data
      * @return
      */
-    public boolean validate(BaseMessage data){
-        if (data.getHeader() == null) {
-            Log.error("NET_MESSAGE_ERROR");
-            return false;
-        }
-        if(data.getHeader().getPayloadLength()== 4 && data.getMsgBody() == null){
-            //ok
-            return true;
-        } else if (data.getHeader().getPayloadLength() != data.getMsgBody().size()) {
-            Log.error("NET_MESSAGE_LENGTH_ERROR");
-            return false;
-        }
-
-         if(!data.isCheckSumValid()){
-                Log.error("NET_MESSAGE_CHECKSUM_ERROR");
-                return false;
-            }
-        return true;
+    public boolean validate(byte []data,long pChecksum){
+        byte [] bodyHash=Sha256Hash.hashTwice(data);
+        byte []get4Byte=ByteUtils.subBytes(bodyHash,0,4);
+        long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
+        Log.info("==================checksum:"+checksum);
+        Log.info("==================pChecksum:"+pChecksum);
+        return checksum == pChecksum;
     }
     public void receiveMessage(ByteBuf buffer,String nodeKey,boolean isServer) throws NulsException {
         //统一接收消息处理
@@ -126,25 +118,30 @@ public class MessageManager extends BaseManager{
             NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
             while (!byteBuffer.isFinished()) {
                 MessageHeader header = byteBuffer.readNulsData(new MessageHeader());
+
                 Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
-                byteBuffer.setCursor(byteBuffer.getCursor() - header.size());
-                BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());
-                if(null == message) {
+                if("bl_GetBlock".equalsIgnoreCase(header.getCommandStr())){
+                    Log.info("bl_GetBlockbl_GetBlockbl_GetBlockbl_GetBlockbl_GetBlockbl_GetBlock");
+                }
+                byte []payLoad = byteBuffer.getPayload();
+                byte []payLoadBody = byteBuffer.readBytes(payLoad.length-header.size());
+                Log.info("=================payLoad length"+payLoadBody.length);
+                if (!validate(payLoadBody,header.getChecksum())) {
+                    return;
+                }
+                byteBuffer.setCursor(0);
+                BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());             ;
+                if(null != message) {
                     BaseMeesageHandlerInf handler = NetworkMessageHandlerFactory.getInstance().getHandler(message);
                     message = byteBuffer.readNulsData(message);
-                    if (!validate(message)) {
-                        return;
-                    } else {
-                        handler.recieve(message, nodeKey, isServer);
-                    }
+                    handler.recieve(message, nodeKey, isServer);
                 }else{
                     //外部消息，转外部接口
                     long magicNum=header.getMagicNumber();
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
-                    byteBuffer.setCursor(byteBuffer.getCursor()+header.size());
-                    int msgSize = (int)(header.size()+header.getPayloadLength());
-                    String response = CmdDispatcher.call(header.getCommandStr(), new Object[]{chainId,nodeKey,byteBuffer.readBytes(msgSize)},1.0 );
+                    String response = CmdDispatcher.call(header.getCommandStr(), new Object[]{chainId,nodeKey,HexUtil.byteToHex(payLoad)},1.0 );
                     Log.info(response);
+                    byteBuffer.setCursor(payLoad.length);
                 }
                }
 
@@ -156,18 +153,19 @@ public class MessageManager extends BaseManager{
         }
     }
 
-    public BroadcastResult broadcastSelfAddrToAllNode(boolean asyn) {
+    public NetworkEventResult broadcastSelfAddrToAllNode(boolean asyn) {
         if(LocalInfoManager.getInstance().isAddrBroadcast()){
-            return new BroadcastResult(true, NetworkErrorCode.SUCCESS);
+            return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
         }
         List<Node> connectNodes= ConnectionManager.getInstance().getCacheAllNodeList();
         for(Node connectNode:connectNodes){
             List<NodeGroupConnector> nodeGroupConnectors=connectNode.getNodeGroupConnectors();
             for(NodeGroupConnector nodeGroupConnector:nodeGroupConnectors){
-                if(Node.HANDSHAKE == nodeGroupConnector.getStatus()){
+                if(NodeGroupConnector.HANDSHAKE == nodeGroupConnector.getStatus()){
                     List<IpAddress> addressesList=new ArrayList<>();
                     addressesList.add(LocalInfoManager.getInstance().getExternalAddress());
                     AddrMessage addrMessage= MessageFactory.getInstance().buildAddrMessage(addressesList,nodeGroupConnector.getMagicNumber());
+                    Log.info("broadcastSelfAddrToAllNode================"+addrMessage.getMsgBody().size()+"==getIpAddressList()=="+addrMessage.getMsgBody().getIpAddressList().size());
                     this.sendToNode(addrMessage,connectNode,asyn);
                 }
 
@@ -178,7 +176,7 @@ public class MessageManager extends BaseManager{
             //已经广播
             LocalInfoManager.getInstance().setAddrBroadcast(true);
         }
-        return new BroadcastResult(true, NetworkErrorCode.SUCCESS);
+        return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
 
     /**
@@ -193,7 +191,7 @@ public class MessageManager extends BaseManager{
             List<String> seeds = NetworkParam.getInstance().getMoonSeedIpList();
             for(String seed : seeds)
             {
-                Node node = nodeGroup.getConnectNode(seed);
+                Node node = nodeGroup.getConnectCrossNode(seed);
                 if(null != node){
                      GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node,magicNumber);
                      this.sendToNode(getAddrMessage,node,true);
@@ -205,7 +203,7 @@ public class MessageManager extends BaseManager{
             List<String> seeds = NetworkParam.getInstance().getSeedIpList();
             for(String seed : seeds)
             {
-                Node node = nodeGroup.getConnectCrossNode(seed);
+                Node node = nodeGroup.getConnectNode(seed);
                 if(null != node){
                     GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node,magicNumber);
                     this.sendToNode(getAddrMessage,node,true);
@@ -215,7 +213,7 @@ public class MessageManager extends BaseManager{
         }
         return false;
     }
-    public BroadcastResult broadcastAddrToAllNode(BaseMessage addrMessage, Node excludeNode,boolean asyn) {
+    public NetworkEventResult broadcastAddrToAllNode(BaseMessage addrMessage, Node excludeNode,boolean asyn) {
          NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByMagic(addrMessage.getHeader().getMagicNumber());
         Collection<Node> connectNodes=nodeGroup.getConnectNodes();
         if(null != connectNodes && connectNodes.size()>0){
@@ -226,7 +224,7 @@ public class MessageManager extends BaseManager{
                 this.sendToNode(addrMessage,connectNode,asyn);
             }
         }
-        return new BroadcastResult(true, NetworkErrorCode.SUCCESS);
+        return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
     private  boolean isHandShakeMessage(BaseMessage message){
         if(message.getHeader().getCommandStr().equals(NetworkConstant.CMD_MESSAGE_VERSION) || message.getHeader().getCommandStr().equals(NetworkConstant.CMD_MESSAGE_VERACK)){
@@ -234,16 +232,16 @@ public class MessageManager extends BaseManager{
         }
         return false;
     }
-    public BroadcastResult broadcastToANode(BaseMessage message, Node node, boolean asyn) {
+    public NetworkEventResult broadcastToANode(BaseMessage message, Node node, boolean asyn) {
 //        not handShakeMessage must be  validate peer status
         if(!isHandShakeMessage(message)) {
             NodeGroupConnector nodeGroupConnector = node.getNodeGroupConnector(message.getHeader().getMagicNumber());
-            if (Node.HANDSHAKE != nodeGroupConnector.getStatus()) {
-                return new BroadcastResult(false, NetworkErrorCode.NET_NODE_DEAD);
+            if (NodeGroupConnector.HANDSHAKE != nodeGroupConnector.getStatus()) {
+                return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_DEAD);
             }
         }
         if (node.getChannel() == null || !node.getChannel().isActive()) {
-            return new BroadcastResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
+            return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
         }
         try {
             MessageHeader header = message.getHeader();
@@ -254,16 +252,16 @@ public class MessageManager extends BaseManager{
                 future.await();
                 boolean success = future.isSuccess();
                 if (!success) {
-                    return new BroadcastResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
+                    return new NetworkEventResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
                 }
             }
         } catch (Exception e) {
             Log.error(e);
-            return new BroadcastResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
+            return new NetworkEventResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
         }
-        return new BroadcastResult(true, NetworkErrorCode.SUCCESS);
+        return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
-    public BroadcastResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
+    public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
         for(Node node:nodes) {
             if (node.getChannel() == null || !node.getChannel().isActive()) {
                 Log.info(node.getId() + "is inActive");
@@ -281,7 +279,7 @@ public class MessageManager extends BaseManager{
                 Log.error(e);
             }
         }
-        return new BroadcastResult(true, NetworkErrorCode.SUCCESS);
+        return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
 
     @Override

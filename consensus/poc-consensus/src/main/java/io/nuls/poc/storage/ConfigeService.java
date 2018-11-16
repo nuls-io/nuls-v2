@@ -14,22 +14,22 @@ public interface ConfigeService {
      * @param bean     配置类
      * @param chainID  链ID
      * */
-    public boolean save(ConfigBean bean,int chainID)throws Exception;
+    boolean save(ConfigBean bean,int chainID)throws Exception;
 
     /**
      * 查询某条链的配置信息
      * @param chainID 链ID
      * */
-    public ConfigBean get(int chainID);
+    ConfigBean get(int chainID);
 
     /**
      * 删除某条链的配置信息
      * @param chainID 链ID
      * */
-    public boolean delete(int chainID);
+    boolean delete(int chainID);
 
     /**
      * 获取当前节点所有的链信息
      * */
-    public Map<Integer,ConfigBean> getList();
+    Map<Integer,ConfigBean> getList();
 }
