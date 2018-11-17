@@ -33,6 +33,7 @@ import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
+import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.AccountTool;
@@ -74,7 +75,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
     private AccountStorageService accountStorageService;
 
     @Autowired
-    private AliasStorageService aliasStorageService;
+    private AliasService aliasService;
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
@@ -139,7 +140,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
         if (null == acc) {
             //查询全网该链所有别名对比地址符合就设置
             //query the whole network. All the aliases of the chain match the addresses
-            account.setAlias(accountService.getAliasByAddress(chainId, account.getAddress().getBase58()));
+            account.setAlias(aliasService.getAliasByAddress(chainId, account.getAddress().getBase58()));
         } else {
             //if the local account already exists
             account.setAlias(acc.getAlias());

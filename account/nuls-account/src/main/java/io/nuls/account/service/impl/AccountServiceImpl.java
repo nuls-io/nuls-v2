@@ -31,6 +31,7 @@ import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
+import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.AccountTool;
@@ -72,7 +73,8 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     private AccountStorageService accountStorageService;
 
     @Autowired
-    private AliasStorageService aliasStorageService;
+    private AliasService aliasService;
+
 
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
@@ -406,31 +408,6 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         return result;
     }
 
-    /**
-     * get the alias by address
-     *
-     * @param chainId
-     * @param address
-     * @return the alias,if the alias is not exist,it will be return null
-     * @auther EdwardChan
-     * <p>
-     * Nov.12th 2018
-     */
-    @Override
-    public String getAliasByAddress(short chainId, String address) {
-        //check if the account is legal
-        if (!AddressTool.validAddress(chainId, address)) {
-            Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
-            return null;
-        }
-        //get aliasPO
-        AliasPo result = aliasStorageService.getAliasByAddress(chainId, address);
-        if (result == null) {
-            return null;
-        }
-        return result.getAlias();
-    }
-
     @Override
     public boolean setRemark(short chainId, String address, String remark) {
         //check whether the account exists
@@ -553,7 +530,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (null == acc) {
             //查询全网该链所有别名对比地址符合就设置
             //query the whole network. All the aliases of the chain match the addresses
-            account.setAlias(this.getAliasByAddress(chainId, account.getAddress().getBase58()));
+            account.setAlias(aliasService.getAliasByAddress(chainId, account.getAddress().getBase58()));
         } else {
             //if the local account already exists
             account.setAlias(acc.getAlias());
