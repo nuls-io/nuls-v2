@@ -38,6 +38,7 @@ import io.nuls.account.util.AccountTool;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.AESEncrypt;
@@ -79,53 +80,13 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public boolean saveAlias(AliasPo aliaspo) throws NulsException {
-        boolean result = false;
-        try {
-            result = aliasStorageService.saveAlias(aliaspo);
-            if (!result) {
-                this.rollbackAlias(aliaspo);
-            }
-            AccountPo po = accountStorageService.getAccount(aliaspo.getAddress());
-            if (null != po) {
-                po.setAlias(aliaspo.getAlias());
-                result = accountStorageService.updateAccount(po);
-                if (!result) {
-                    this.rollbackAlias(aliaspo);
-                }
-                Account account = po.toAccount();
-                accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
-            }
-        } catch (Exception e) {
-            Log.error("",e);
-            this.rollbackAlias(aliaspo);
-            return false;
-        }
-        return result;
+    public Result<String> setAlias(short chainId, String address, String password, String aliasName) {
+        return null;
     }
 
-    public boolean rollbackAlias(AliasPo aliasPo) throws NulsException {
-        boolean result = true;
-        try {
-            AliasPo po = aliasStorageService.getAlias(aliasPo.getChainId(),aliasPo.getAlias());
-            if (po != null && Arrays.equals(po.getAddress(), aliasPo.getAddress())) {
-                aliasStorageService.removeAlias(aliasPo.getChainId(),aliasPo.getAlias());
-                AccountPo accountPo = accountStorageService.getAccount(aliasPo.getAddress());
-                if (accountPo != null) {
-                    accountPo.setAlias("");
-                    result = accountStorageService.updateAccount(accountPo);
-                    if (!result) {
-                        return result;
-                    }
-                    Account account = accountPo.toAccount();
-                    accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
-                }
-            }
-        } catch (Exception e) {
-            Log.error(e);
-            throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
-        }
-        return result;
+    @Override
+    public Result<String> getAliasFee(short chaindId, String address, String aliasName) {
+        return null;
     }
 
     /**
@@ -151,6 +112,71 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             return null;
         }
         return result.getAlias();
+    }
+
+    @Override
+    public boolean isAliasUsable(short chainId, String alias) {
+        return null == aliasStorageService.getAlias(chainId,alias);
+    }
+
+    @Override
+    public String setMultiSigAlias(short chainId, String address, String signAddress, String password, String alias) {
+        return null;
+    }
+
+    @Override
+    public boolean aliasTxValidate(short chainId, String alias) {
+        return false;
+    }
+
+    @Override
+    public boolean aliasTxCommit(AliasPo aliaspo) throws NulsException {
+        boolean result = false;
+        try {
+            result = aliasStorageService.saveAlias(aliaspo);
+            if (!result) {
+                this.rollbackAlias(aliaspo);
+            }
+            AccountPo po = accountStorageService.getAccount(aliaspo.getAddress());
+            if (null != po) {
+                po.setAlias(aliaspo.getAlias());
+                result = accountStorageService.updateAccount(po);
+                if (!result) {
+                    this.rollbackAlias(aliaspo);
+                }
+                Account account = po.toAccount();
+                accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+            }
+        } catch (Exception e) {
+            Log.error("",e);
+            this.rollbackAlias(aliaspo);
+            return false;
+        }
+        return result;
+    }
+    @Override
+    public boolean rollbackAlias(AliasPo aliasPo) throws NulsException {
+        boolean result = true;
+        try {
+            AliasPo po = aliasStorageService.getAlias(aliasPo.getChainId(),aliasPo.getAlias());
+            if (po != null && Arrays.equals(po.getAddress(), aliasPo.getAddress())) {
+                aliasStorageService.removeAlias(aliasPo.getChainId(),aliasPo.getAlias());
+                AccountPo accountPo = accountStorageService.getAccount(aliasPo.getAddress());
+                if (accountPo != null) {
+                    accountPo.setAlias("");
+                    result = accountStorageService.updateAccount(accountPo);
+                    if (!result) {
+                        return result;
+                    }
+                    Account account = accountPo.toAccount();
+                    accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
+                }
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
+        }
+        return result;
     }
 
 
