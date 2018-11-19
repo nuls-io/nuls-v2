@@ -48,7 +48,7 @@ public interface AliasService {
      * @param aliasName the alias to set
      * @return txhash
      */
-    public Result<String> setAlias(short chainId, String address, String password, String aliasName);
+     Result<String> setAlias(short chainId, String address, String password, String aliasName);
 
     /**
      * 获取设置别名交易手续费
@@ -59,7 +59,7 @@ public interface AliasService {
      * @param aliasName
      * @return
      */
-    public Result<String> getAliasFee(short chaindId, String address, String aliasName);
+     Result<String> getAliasFee(short chaindId, String address, String aliasName);
 
     /**
      * get the alias by address
@@ -78,8 +78,10 @@ public interface AliasService {
      *
      * @param chainId
      * @param alias
+     * @return true is usable,false is unusable
+     *
      */
-    public boolean isAliasUsable(short chainId, String alias);
+     boolean isAliasUsable(short chainId, String alias);
 
 
     /**
@@ -92,13 +94,13 @@ public interface AliasService {
      * @param alias
      * @return the hash of tx
      **/
-    public String setMutilSigAlias(short chainId, String address, String signAddress, String password, String alias);
+     String setMultiSigAlias(short chainId, String address, String signAddress, String password, String alias);
 
     /**
      * validate the tx of alias
      *
      * */
-    public boolean aliasTxValidate(short chainId,String alias);
+     boolean aliasTxValidate(short chainId,String alias);
 
     /**
      * 别名交易提交
