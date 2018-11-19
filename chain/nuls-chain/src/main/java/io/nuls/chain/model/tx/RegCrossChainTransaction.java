@@ -1,18 +1,18 @@
-/**
+/*
  * MIT License
- **
+ *
  * Copyright (c) 2017-2018 nuls.io
- **
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- **
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- **
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,35 +20,35 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-package io.nuls.h2.dao.impl;
+package io.nuls.chain.model.tx;
 
-import io.nuls.h2.common.BaseMapper;
-import io.nuls.h2.session.SessionManager;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.Transaction;
+import io.nuls.chain.info.ChainTxConstants;
+import io.nuls.chain.model.txdata.Chain;
+import io.nuls.tools.exception.NulsException;
 
 /**
- * @author: Charlie
- * @date: 2018/11/14
- */
-public abstract class BaseService<T extends BaseMapper> {
+ * @program: nuls2.0
+ * @description: 跨链注册交易
+ * @author: lan
+ * @create: 2018/11/19
+ **/
+public class RegCrossChainTransaction extends Transaction<Chain> {
 
-    public static SqlSessionFactory sqlSessionFactory;
-
-   /* private Class<T> mapperClass;
-
-    public BaseService(Class<T> mapperClass) {
-        this.mapperClass = mapperClass;
+    public RegCrossChainTransaction(int type) {
+        super(ChainTxConstants.TX_TYPE_REGISTER_CHAIN);
     }
 
-    private SqlSession getSession() {
-        return sqlSessionFactory.openSession(true);
+    @Override
+    protected Chain parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new Chain());
     }
 
-    protected T getMapper() {
-        SqlSession session = getSession();
-        return session.getMapper(mapperClass);
+    @Override
+    public String getInfo(byte[] address) {
+        return null;
     }
-    */
 }

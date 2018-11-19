@@ -1,8 +1,8 @@
-package io.nuls.h2.dao.impl.mapper;
+package io.nuls.transaction.db.h2.dao.impl.mapper;
 
 import io.nuls.h2.common.BaseMapper;
-import io.nuls.h2.entity.TransactionPo;
-import io.nuls.h2.entity.TxTable;
+import io.nuls.transaction.model.po.TransactionPo;
+import io.nuls.transaction.model.split.TxTable;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
@@ -17,5 +17,5 @@ public interface TransactionMapper extends BaseMapper<String, TransactionPo> {
 
     void createTxTables(@Param("list") List<TxTable> list);
 
-    int save(TransactionPo transactionPo);
+    int save(@Param("txPo") TransactionPo txPo, @Param("tableName") String tableName);
 }

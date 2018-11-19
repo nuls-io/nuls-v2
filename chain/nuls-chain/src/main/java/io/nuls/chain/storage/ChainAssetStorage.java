@@ -1,6 +1,7 @@
 package io.nuls.chain.storage;
 
-import io.nuls.base.data.chain.ChainAsset;
+
+import io.nuls.chain.model.dto.ChainAsset;
 
 import java.util.List;
 

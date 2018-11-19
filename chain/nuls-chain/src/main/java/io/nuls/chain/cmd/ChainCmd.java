@@ -1,9 +1,10 @@
 package io.nuls.chain.cmd;
 
-import io.nuls.base.data.chain.Asset;
-import io.nuls.base.data.chain.Chain;
-import io.nuls.base.data.chain.Seed;
+
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.model.dto.Seed;
+import io.nuls.chain.model.txdata.Asset;
+import io.nuls.chain.model.txdata.Chain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.cmd.BaseCmd;

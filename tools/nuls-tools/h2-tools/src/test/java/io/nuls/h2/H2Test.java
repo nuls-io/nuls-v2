@@ -36,24 +36,25 @@ public class H2Test {
     @Test
     public void init(){
         TransactionService ts = new TransactionServiceImpl();
-        TransactionPo txPo = new TransactionPo();
+       /* TransactionPo txPo = new TransactionPo();
         txPo.setAddress("address_ertyuighjk");
         txPo.setHash("hash_zxcvbnmasdfghjk");
         txPo.setAmount(800000L);
         txPo.setState(0);
         txPo.setType(1);
         txPo.setTime(new Date().getTime());
-        ts.saveTx(txPo);
+        ts.saveTx(txPo);*/
         //ts.createTable("transaction", "transaction_index",128);
+        ts.createTxTables("transaction", "transaction_index",128);
     }
 
     @Test
     public void db(){
-         String JDBC_URL = "jdbc:h2:file:./data/nuls;INIT=RUNSCRIPT FROM 'classpath:sql/schema-h2-bak.sql';LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE";
+        String JDBC_URL = "jdbc:h2:file:./data/nuls;INIT=RUNSCRIPT FROM 'classpath:sql/schema-h2-bak.sql';LOG=2;DB_CLOSE_DELAY=-1;TRACE_LEVEL_SYSTEM_OUT=1;DATABASE_TO_UPPER=FALSE";
         //连接数据库时使用的用户名
-         String USER = "sa";
+        String USER = "sa";
         //连接数据库时使用的密码
-         String PASSWORD = "123456";
+        String PASSWORD = "123456";
         String DRIVER_CLASS = "org.h2.Driver";
         try {
             Class.forName(DRIVER_CLASS);

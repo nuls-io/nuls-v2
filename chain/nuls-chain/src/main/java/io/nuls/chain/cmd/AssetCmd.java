@@ -1,8 +1,8 @@
 package io.nuls.chain.cmd;
 
-import io.nuls.base.data.chain.Asset;
-import io.nuls.base.data.chain.ChainAsset;
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.model.dto.ChainAsset;
+import io.nuls.chain.model.txdata.Asset;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.cmd.BaseCmd;

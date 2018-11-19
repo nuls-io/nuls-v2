@@ -1,6 +1,7 @@
 package io.nuls.chain.storage;
 
-import io.nuls.base.data.chain.Asset;
+
+import io.nuls.chain.model.txdata.Asset;
 
 import java.util.List;
 

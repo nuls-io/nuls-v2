@@ -1,21 +1,25 @@
-package io.nuls.base.data.chain;
+package io.nuls.chain.model.txdata;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.chain.model.dto.ChainAsset;
+import io.nuls.chain.model.dto.Seed;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author tangyi
  * @date 2018/11/7
  * @description
  */
-public class Chain extends BaseNulsData {
+public class Chain extends TransactionLogicData {
     private short chainId;
     private String name;
     private String addressType;
@@ -29,6 +33,7 @@ public class Chain extends BaseNulsData {
     private boolean available;
     private long createTime;
     private long lastUpdateTime;
+    private byte[] address;
 
     public short getChainId() {
         return chainId;
@@ -134,6 +139,14 @@ public class Chain extends BaseNulsData {
         this.lastUpdateTime = lastUpdateTime;
     }
 
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeShort(chainId);
@@ -151,6 +164,7 @@ public class Chain extends BaseNulsData {
         stream.writeBoolean(available);
         stream.writeUint48(createTime);
         stream.writeUint48(lastUpdateTime);
+        stream.writeBytesWithLength(address);
     }
 
     @Override
@@ -171,6 +185,7 @@ public class Chain extends BaseNulsData {
         this.available = byteBuffer.readBoolean();
         this.createTime = byteBuffer.readUint48();
         this.lastUpdateTime = byteBuffer.readUint48();
+        this.address = byteBuffer.readByLengthByte();
     }
 
     @Override
@@ -201,6 +216,14 @@ public class Chain extends BaseNulsData {
         size += SerializeUtils.sizeOfUint48();
         // lastUpdateTime;
         size += SerializeUtils.sizeOfUint48();
+        size+= SerializeUtils.sizeOfBytes(address);
         return size;
+    }
+
+    @Override
+    public Set<byte[]> getAddresses() {
+        Set<byte[]> addressSet = new HashSet<>();
+        addressSet.add(this.address);
+        return addressSet;
     }
 }

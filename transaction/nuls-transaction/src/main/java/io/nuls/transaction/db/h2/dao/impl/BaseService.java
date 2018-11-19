@@ -21,10 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.h2.dao.impl;
+package io.nuls.transaction.db.h2.dao.impl;
 
 import io.nuls.h2.common.BaseMapper;
-import io.nuls.h2.session.SessionManager;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
@@ -36,7 +35,7 @@ public abstract class BaseService<T extends BaseMapper> {
 
     public static SqlSessionFactory sqlSessionFactory;
 
-   /* private Class<T> mapperClass;
+    /*private Class<T> mapperClass;
 
     public BaseService(Class<T> mapperClass) {
         this.mapperClass = mapperClass;
@@ -49,6 +48,6 @@ public abstract class BaseService<T extends BaseMapper> {
     protected T getMapper() {
         SqlSession session = getSession();
         return session.getMapper(mapperClass);
-    }
-    */
+    }*/
+
 }
