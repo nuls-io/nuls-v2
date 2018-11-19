@@ -1,11 +1,13 @@
 package io.nuls.transaction.db.h2.dao.impl.mapper;
 
 import io.nuls.h2.common.BaseMapper;
+import io.nuls.h2.utils.Searchable;
 import io.nuls.transaction.model.po.TransactionPo;
 import io.nuls.transaction.model.split.TxTable;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -18,4 +20,8 @@ public interface TransactionMapper extends BaseMapper<String, TransactionPo> {
     void createTxTables(@Param("list") List<TxTable> list);
 
     int save(@Param("txPo") TransactionPo txPo, @Param("tableName") String tableName);
+
+    List<TransactionPo> getTxs(@Param("searchable") Searchable searchable, @Param("tableName") String tableName);
+
+    long queryCount(@Param("searchable") Searchable searchable, @Param("tableName") String tableName);
 }

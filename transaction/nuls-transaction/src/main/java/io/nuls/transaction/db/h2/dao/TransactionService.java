@@ -12,7 +12,7 @@ import java.util.List;
 public interface TransactionService {
 
     Page<TransactionPo> getTxs(String address, Integer type, Integer state,
-                               Long startTime, Long endTime, int pageNumber, int pageSize, String orderBy);
+                               Long startTime, Long endTime, int pageNumber, int pageSize);
 
     int saveTx(TransactionPo txPo);
 

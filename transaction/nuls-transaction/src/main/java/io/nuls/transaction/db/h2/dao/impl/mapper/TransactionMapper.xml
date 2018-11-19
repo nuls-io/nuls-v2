@@ -4,6 +4,16 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="io.nuls.transaction.db.h2.dao.impl.mapper.TransactionMapper">
 
+    <resultMap id="BaseResultMap" type="io.nuls.transaction.model.po.TransactionPo">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="address" jdbcType="VARCHAR" property="address" />
+        <result column="hash" jdbcType="VARCHAR" property="hash" />
+        <result column="type" jdbcType="INTEGER" property="type" />
+        <result column="amount" jdbcType="BIGINT" property="amount" />
+        <result column="state" jdbcType="INTEGER" property="state" />
+        <result column="time" jdbcType="BIGINT" property="time" />
+    </resultMap>
+
     <update id="createTable" parameterType="String">
         CREATE TABLE IF NOT EXISTS ${tableName} (
             ADDRESS VARCHAR(40) not null
@@ -47,4 +57,18 @@
             (#{item.address}, #{item.hash}, #{item.type}, #{item.amount}, #{item.state}, #{item.time})
         </foreach>
     </insert>
+
+
+    <select id="getTxs" parameterType="io.nuls.h2.utils.Searchable" resultMap="BaseResultMap">
+        select id, address, hash, `type`, amount, state, `time`
+         from ${tableName}
+        <include refid="io.nuls.h2.common.CommonMapper.Search_Where_multiple"/>
+    </select>
+
+    <select id="queryCount" resultType="java.lang.Long">
+        select count(id)
+        from ${tableName}
+        <include refid="io.nuls.h2.common.CommonMapper.Search_Where_multiple"/>
+    </select>
+
 </mapper>
