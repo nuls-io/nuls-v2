@@ -9,11 +9,11 @@ import io.nuls.poc.storage.PunihStorageService;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 
 import java.util.List;
 
-@Service
+@Component
 public class ConsensusServiceImpl implements ConsensusService {
     @Autowired
     private AgentStorageService agentService;
@@ -28,6 +28,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         if(params == null || params.size() != 7){
             return new CmdResponse(1, ConsensusErrorCode.PARAM_NUMBER_ERROR.getCode(),ConsensusErrorCode.PARAM_NUMBER_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
         }
+
         //2.账户验证（调用账户模块接口）
         //3.组装创建节点交易
         //3.1.组装共识节点信息
