@@ -27,7 +27,7 @@
 
 package io.nuls.test;
 
-import io.nuls.rpc.server.WsServer;
+import io.nuls.rpc.info.RuntimeInfo;
 import org.junit.Test;
 
 /**
@@ -39,13 +39,7 @@ public class WsKernel {
 
     @Test
     public void kernel() throws Exception {
-        int port = 8887;
-        WsServer s = new WsServer(port);
-        // 注意，下面这句话不要改，模拟实现在"io.nuls.rpc.cmd.kernel"中
-        s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
-
-        s.startAndSyncKernel("ws://127.0.0.1:8887");
-
-        Thread.sleep(Integer.MAX_VALUE);
+        // url: "ws://127.0.0.1:8887"
+        RuntimeInfo.mockKernel();
     }
 }
