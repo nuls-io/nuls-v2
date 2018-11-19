@@ -27,6 +27,8 @@ package io.nuls.rpc.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import java.util.List;
+
 /**
  * @author tangyi
  * @date 2018/10/15
@@ -35,31 +37,36 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class CmdDetail {
 
-    private String cmd;
+    private String methodName;
+    private String methodDescription;
+    private int methodMinEvent;
+    private int methodMinPeriod;
+    private String methodScope;
+    private List<Parameter> parameters;
+    @JsonIgnore
     private double version;
     @JsonIgnore
     private String invokeClass;
     @JsonIgnore
     private String invokeMethod;
-    @JsonIgnore
-    private boolean preCompatible;
 
-    public CmdDetail(){}
-
-    public CmdDetail(String cmd, double version, String invokeClass, String invokeMethod, boolean preCompatible) {
-        this.cmd = cmd;
-        this.version = version;
-        this.invokeClass = invokeClass;
-        this.invokeMethod = invokeMethod;
-        this.preCompatible = preCompatible;
+    public CmdDetail() {
     }
 
-    public String getCmd() {
-        return cmd;
+    public String getMethodName() {
+        return methodName;
     }
 
-    public void setCmd(String cmd) {
-        this.cmd = cmd;
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
+
+    public String getMethodDescription() {
+        return methodDescription;
+    }
+
+    public void setMethodDescription(String methodDescription) {
+        this.methodDescription = methodDescription;
     }
 
     public double getVersion() {
@@ -68,6 +75,38 @@ public class CmdDetail {
 
     public void setVersion(double version) {
         this.version = version;
+    }
+
+    public int getMethodMinEvent() {
+        return methodMinEvent;
+    }
+
+    public void setMethodMinEvent(int methodMinEvent) {
+        this.methodMinEvent = methodMinEvent;
+    }
+
+    public int getMethodMinPeriod() {
+        return methodMinPeriod;
+    }
+
+    public void setMethodMinPeriod(int methodMinPeriod) {
+        this.methodMinPeriod = methodMinPeriod;
+    }
+
+    public String getMethodScope() {
+        return methodScope;
+    }
+
+    public void setMethodScope(String methodScope) {
+        this.methodScope = methodScope;
+    }
+
+    public List<Parameter> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(List<Parameter> parameters) {
+        this.parameters = parameters;
     }
 
     public String getInvokeClass() {
@@ -84,18 +123,5 @@ public class CmdDetail {
 
     public void setInvokeMethod(String invokeMethod) {
         this.invokeMethod = invokeMethod;
-    }
-
-    public boolean isPreCompatible() {
-        return preCompatible;
-    }
-
-    public void setPreCompatible(boolean preCompatible) {
-        this.preCompatible = preCompatible;
-    }
-
-    @Override
-    public String toString() {
-        return "[cmd=" + cmd + "][version=" + version + "][preCompatible=" + preCompatible + "][invokeClass=" + invokeClass + "][invokeMethod=" + invokeMethod + "]";
     }
 }

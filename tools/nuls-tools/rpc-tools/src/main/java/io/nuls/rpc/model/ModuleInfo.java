@@ -36,7 +36,7 @@ import java.util.List;
  * @date 2018/10/19
  * @description
  */
-public class Module {
+public class ModuleInfo {
     private String name;
     private ModuleStatus status;
     private boolean available;
@@ -45,10 +45,10 @@ public class Module {
     private List<CmdDetail> cmdDetailList;
     private List<String> dependsModule;
 
-    public Module() {
+    public ModuleInfo() {
     }
 
-    public Module(String name, ModuleStatus status, boolean available, String addr, int port, List<CmdDetail> cmdDetailList, List<String> dependsModule) {
+    public ModuleInfo(String name, ModuleStatus status, boolean available, String addr, int port, List<CmdDetail> cmdDetailList, List<String> dependsModule) {
         this.name = name;
         this.status = status;
         this.available = available;

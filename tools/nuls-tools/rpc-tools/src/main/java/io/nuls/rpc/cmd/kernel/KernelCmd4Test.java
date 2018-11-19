@@ -46,7 +46,7 @@ import java.util.*;
  */
 public class KernelCmd4Test extends BaseCmd {
 
-    @CmdAnnotation(cmd = "version", version = 1.0, preCompatible = true)
+    @CmdAnnotation(cmd = "version", version = 1.0)
     public CmdResponse version(List params) {
         try {
             System.out.println("join之前的kernel remote接口数：" + RuntimeInfo.remoteModuleMap.size());
@@ -69,7 +69,7 @@ public class KernelCmd4Test extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "fetch", version = 1.0, preCompatible = true)
+    @CmdAnnotation(cmd = "fetch", version = 1.0)
     public Object fetch(List params) {
         Iterator<String> keyIterator = RuntimeInfo.remoteModuleMap.keySet().iterator();
         List<String> service = new ArrayList<>();
@@ -84,7 +84,7 @@ public class KernelCmd4Test extends BaseCmd {
         return success(null, result);
     }
 
-    @CmdAnnotation(cmd = "cmd1", version = 1.0, preCompatible = true)
+    @CmdAnnotation(cmd = "cmd1", version = 1.0)
     public Object cmd1(List params) {
         return success(null, "kernel cmd1");
     }

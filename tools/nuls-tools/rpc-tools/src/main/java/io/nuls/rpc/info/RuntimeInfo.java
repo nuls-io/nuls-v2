@@ -29,10 +29,11 @@ package io.nuls.rpc.info;
 
 import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.model.*;
-import io.nuls.rpc.model.Module;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.tools.thread.commom.NulsThreadFactory;
 import org.java_websocket.WebSocket;
 
 import java.io.IOException;
@@ -42,7 +43,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -52,17 +52,18 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RuntimeInfo {
 
+
     /**
      * local module(io.nuls.rpc.Module) information
      */
-    public static Module local;
+    public static ModuleInfo local;
 
     /**
      * remote module information
      * key: module name/code
      * value: module(io.nuls.rpc.Module)
      */
-    public static ConcurrentMap<String, Module> remoteModuleMap = new ConcurrentHashMap<>();
+    public static ConcurrentMap<String, ModuleInfo> remoteModuleMap = new ConcurrentHashMap<>();
 
     /**
      * local Config item information
@@ -85,7 +86,8 @@ public class RuntimeInfo {
     /**
      * The thread pool object that handles the request
      */
-    public static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
+    public static ExecutorService fixedThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handRequest"));
+    //    public static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
 
     /**
      * The response of the cmd invoked through RPC
@@ -131,7 +133,7 @@ public class RuntimeInfo {
      */
     public static List<String> getRemoteUri(CmdRequest cmdRequest) {
         List<String> remoteUriList = new ArrayList<>();
-        for (Module module : RuntimeInfo.remoteModuleMap.values()) {
+        for (ModuleInfo module : RuntimeInfo.remoteModuleMap.values()) {
             for (CmdDetail cmdDetail : module.getCmdDetailList()) {
                 if (cmdDetail.getCmd().equals(cmdRequest.getCmd())) {
                     remoteUriList.add("ws://" + module.getAddr() + ":" + module.getPort());
@@ -164,11 +166,11 @@ public class RuntimeInfo {
                 continue;
             }
 
-            if (!cmdDetail.isPreCompatible()) {
-                break;
-            } else {
-                find = cmdDetail;
-            }
+//            if (!cmdDetail.isPreCompatible()) {
+//                break;
+//            } else {
+//                find = cmdDetail;
+//            }
         }
         return find;
     }
@@ -235,7 +237,7 @@ public class RuntimeInfo {
         for (Annotation annotation : annotations) {
             if (CmdAnnotation.class.getName().equals(annotation.annotationType().getName())) {
                 CmdAnnotation cmdAnnotation = (CmdAnnotation) annotation;
-                return new CmdDetail(cmdAnnotation.cmd(), cmdAnnotation.version(), method.getDeclaringClass().getName(), method.getName(), cmdAnnotation.preCompatible());
+                return new CmdDetail(cmdAnnotation.cmd(), cmdAnnotation.version(), method.getDeclaringClass().getName(), method.getName());
             }
         }
         return null;
