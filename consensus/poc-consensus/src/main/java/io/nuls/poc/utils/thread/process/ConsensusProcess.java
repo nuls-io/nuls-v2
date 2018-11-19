@@ -113,6 +113,7 @@ public class ConsensusProcess {
         //从区块管理模块获取最新区块
         BlockHeader header = new BlockHeader();
         boolean rePacking = !block.getHeader().getPreHash().equals(header.getHash());
+        //如果本地打包的区块与本地最新区块不连续，则需要重新打包
         if(rePacking){
             start = System.currentTimeMillis();
             block=doPacking(chain_id, self, round);
@@ -123,7 +124,7 @@ public class ConsensusProcess {
             return;
         }
         //todo
-        //打包成功后降区块传给区块管理模块广播
+        //打包成功后将区块传给区块管理模块广播
 
     }
 
@@ -195,7 +196,6 @@ public class ConsensusProcess {
         //todo
         //从区块管理模块获取最新区块
         Block bestBlock = new Block();
-
         //区块参数组装
         BlockData bd = new BlockData();
         bd.setHeight(bestBlock.getHeader().getHeight() + 1);
@@ -215,15 +215,9 @@ public class ConsensusProcess {
         str.append(",packTime:" + new Date(self.getPackEndTime()));
         str.append("\n");
         Log.debug("pack round:" + str);
-
         //获取打包交易
 
-        //检查本地是否有待打包的红牌交易
-
-        //检查是否有黄牌交易生成
-
-        //组装CoinBase交易
-
+        //组装系统交易（CoinBase/红牌/黄牌）
         return null;
     }
 }

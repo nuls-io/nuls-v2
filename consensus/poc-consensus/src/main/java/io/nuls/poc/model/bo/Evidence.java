@@ -22,26 +22,26 @@
  * SOFTWARE.
  *
  */
-package io.nuls.poc.model.po;
+package io.nuls.poc.model.bo;
 
 
 import io.nuls.base.data.BlockHeader;
 
 /**
- * @author: Charlie
- * @date: 2018/9/4
+ * @author: tag
+ * @date: 2018/11/19
  */
-public class EvidencePo {
+public class Evidence {
 
     private long roundIndex;
     private BlockHeader blockHeader1;
     private BlockHeader blockHeader2;
 
-    public EvidencePo(){
+    public Evidence(){
 
     }
 
-    public EvidencePo(long roundIndex, BlockHeader blockHeader1, BlockHeader blockHeader2){
+    public Evidence(long roundIndex, BlockHeader blockHeader1, BlockHeader blockHeader2){
         this.roundIndex = roundIndex;
         this.blockHeader1 = blockHeader1;
         this.blockHeader2 = blockHeader2;
