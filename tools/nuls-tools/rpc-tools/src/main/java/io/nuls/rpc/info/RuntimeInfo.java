@@ -29,11 +29,16 @@ package io.nuls.rpc.info;
 
 import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.model.*;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.NegotiateConnection;
+import io.nuls.rpc.model.message.NegotiateConnectionResponse;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.ScanUtil;
+import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.tools.thread.TimeService;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 import org.java_websocket.WebSocket;
 
@@ -294,6 +299,29 @@ public class RuntimeInfo {
         cmdResponse.setCode(Constants.FAILED_CODE);
         cmdResponse.setMsg(msg);
         return JSONUtils.json2map(JSONUtils.obj2json(cmdResponse));
+    }
+
+    public static Message buildMessage(int messageId) {
+        Message message = new Message();
+        message.setMessageId(messageId);
+        message.setTimestamp(TimeService.currentTimeMillis());
+        message.setTimezone(Integer.valueOf(DateUtils.getTimeZone()));
+        return message;
+    }
+
+    public static NegotiateConnection buildNegotiateConnection() {
+        NegotiateConnection negotiateConnection = new NegotiateConnection();
+        negotiateConnection.setProtocolVersion("");
+        negotiateConnection.setCompressionAlgorithm("zlib");
+        negotiateConnection.setCompressionRate(0);
+        return negotiateConnection;
+    }
+
+    public static NegotiateConnectionResponse buildNegotiateConnectionResponse() {
+        NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
+        negotiateConnectionResponse.setNegotiationStatus(0);
+        negotiateConnectionResponse.setNegotiationComment("Incompatible protocol version");
+        return negotiateConnectionResponse;
     }
 
     public static void mockKernel() throws Exception {

@@ -10,6 +10,9 @@ public class NegotiateConnection {
     private String compressionAlgorithm;
     private int compressionRate;
 
+    public NegotiateConnection() {
+    }
+
     public String getProtocolVersion() {
         return protocolVersion;
     }
