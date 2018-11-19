@@ -1,6 +1,6 @@
 package io.nuls.chain.storage.impl;
 
-import io.nuls.base.data.chain.Chain;
+import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
@@ -42,9 +42,9 @@ public class ChainStorageImpl implements ChainStorage, InitializingBean {
      * @return true/false
      */
     @Override
-    public boolean save(short key, Chain chain) {
+    public boolean save(int key, Chain chain) {
         try {
-            return RocksDBService.put(TBL, ByteUtils.shortToBytes(key), chain.serialize());
+            return RocksDBService.put(TBL, ByteUtils.intToBytes(key), chain.serialize());
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -58,8 +58,8 @@ public class ChainStorageImpl implements ChainStorage, InitializingBean {
      * @return Chain object
      */
     @Override
-    public Chain load(short key) {
-        byte[] bytes = RocksDBService.get(TBL, ByteUtils.shortToBytes(key));
+    public Chain load(int key) {
+        byte[] bytes = RocksDBService.get(TBL, ByteUtils.intToBytes(key));
         if (bytes == null) {
             return null;
         }

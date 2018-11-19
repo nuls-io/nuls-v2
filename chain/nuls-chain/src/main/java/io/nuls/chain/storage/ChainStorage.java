@@ -1,6 +1,7 @@
 package io.nuls.chain.storage;
 
-import io.nuls.base.data.chain.Chain;
+
+import io.nuls.chain.model.dto.Chain;
 
 /**
  * @author tangyi
@@ -16,7 +17,7 @@ public interface ChainStorage {
      * @param chain Chain object that needs to be saved
      * @return true/false
      */
-    boolean save(short key, Chain chain);
+    boolean save(int key, Chain chain);
 
     /**
      * Find chain based on key
@@ -24,5 +25,5 @@ public interface ChainStorage {
      * @param key The key
      * @return Chain object
      */
-    Chain load(short key);
+    Chain load(int key);
 }

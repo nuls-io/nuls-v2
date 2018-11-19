@@ -92,8 +92,9 @@ public class MeetingRound {
         Collections.sort(memberList);
         this.memberCount = memberList.size();
         totalWeight = 0d;
+        MeetingMember member = null;
         for (int i = 0; i < memberCount; i++) {
-            MeetingMember member = memberList.get(i);
+            member = memberList.get(i);
             member.setRoundStartTime(this.getStartTime());
             member.setPackingIndexOfRound(i + 1);
             member.setPackStartTime(startTime + i * ConfigManager.config_map.get(chain_id).getPacking_interval());

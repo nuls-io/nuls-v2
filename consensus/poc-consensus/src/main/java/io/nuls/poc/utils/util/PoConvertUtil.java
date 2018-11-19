@@ -24,7 +24,7 @@
  *
  */
 
-package io.nuls.poc.utils;
+package io.nuls.poc.utils.util;
 
 
 import io.nuls.base.data.NulsDigestData;

@@ -27,8 +27,8 @@
 
 package io.nuls.test;
 
-import io.nuls.rpc.info.HostInfo;
-import io.nuls.rpc.server.WsServer;
+import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.info.RuntimeInfo;
 import org.junit.Test;
 
 /**
@@ -38,14 +38,8 @@ import org.junit.Test;
  */
 public class WsM1 {
     @Test
-    public void test() throws Exception {
-
-        WsServer s = new WsServer(HostInfo.randomPort());
-
-        s.init("m1", new String[]{"m2", "m3"}, "io.nuls.rpc.cmd.test");
-
-        s.startAndSyncKernel("ws://127.0.0.1:8887");
-
-        Thread.sleep(Integer.MAX_VALUE);
+    public void handshake() throws Exception {
+        RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
+        System.out.println("handshake:" + CmdDispatcher.handshakeKernel());
     }
 }

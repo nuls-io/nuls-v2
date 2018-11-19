@@ -184,7 +184,7 @@ public class Agent extends TransactionLogicData {
     }
 
     public double getCreditVal() {
-        return creditVal;
+        return creditVal < 0d ? 0D : this.creditVal;
     }
 
     public Na getTotalDeposit() {
@@ -253,24 +253,6 @@ public class Agent extends TransactionLogicData {
 
     @Override
     public Agent clone() throws CloneNotSupportedException {
-//        Agent agent = new Agent();
-//
-//        agent.setAgentAddress(getAgentAddress());
-//        agent.setAgentName(getAgentName());
-//        agent.setBlockHeight(getBlockHeight());
-//        agent.setCommissionRate(getCommissionRate());
-//        agent.setCreditVal(getCreditVal());
-//        agent.setDelHeight(getDelHeight());
-//        agent.setDeposit(getDeposit());
-//        agent.setIntroduction(getIntroduction());
-//        agent.setStatus(getStatus());
-//        agent.setTime(getTime());
-//        agent.setPackingAddress(getPackingAddress());
-//        agent.setTotalDeposit(getTotalDeposit());
-//        agent.setTxHash(getTxHash());
-//
-//        return agent;
-
         return (Agent) super.clone();
     }
 
