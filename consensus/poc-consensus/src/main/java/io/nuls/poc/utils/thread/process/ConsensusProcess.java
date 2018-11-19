@@ -4,6 +4,7 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.poc.constant.ConsensusConstant;
+import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.consensus.ConsensusStatus;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
@@ -194,6 +195,34 @@ public class ConsensusProcess {
         //todo
         //从区块管理模块获取最新区块
         Block bestBlock = new Block();
+
+        //区块参数组装
+        BlockData bd = new BlockData();
+        bd.setHeight(bestBlock.getHeader().getHeight() + 1);
+        bd.setPreHash(bestBlock.getHeader().getHash());
+        bd.setTime(self.getPackEndTime());
+        BlockExtendsData extendsData = new BlockExtendsData();
+        extendsData.setRoundIndex(round.getIndex());
+        extendsData.setConsensusMemberCount(round.getMemberCount());
+        extendsData.setPackingIndexOfRound(self.getPackingIndexOfRound());
+        extendsData.setRoundStartTime(round.getStartTime());
+        bd.setExtendsData(extendsData);
+
+        //日志打印
+        StringBuilder str = new StringBuilder();
+        str.append(self.getAgent().getPackingAddress());
+        str.append(" ,order:" + self.getPackingIndexOfRound());
+        str.append(",packTime:" + new Date(self.getPackEndTime()));
+        str.append("\n");
+        Log.debug("pack round:" + str);
+
+        //获取打包交易
+
+        //检查本地是否有待打包的红牌交易
+
+        //检查是否有黄牌交易生成
+
+        //组装CoinBase交易
 
         return null;
     }

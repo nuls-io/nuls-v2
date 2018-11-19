@@ -1,18 +1,17 @@
-package io.nuls.transaction.storage;
+package io.nuls.transaction.db.rocksdb.storage;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 
 /**
- * 验证通过但未打包的交易
- * Save verified transaction (unpackaged)
+ * 已打包进区块确认的交易
  *
  * @author: Charlie
  * @date: 2018/11/13
  */
-public interface TransactionCacheStorageService {
+public interface TransactionStorageService {
 
-    boolean putTx(Transaction tx);
+    boolean saveTx(Transaction tx);
 
     Transaction getTx(NulsDigestData hash);
 

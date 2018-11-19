@@ -1,4 +1,4 @@
-package io.nuls.transaction.storage;
+package io.nuls.transaction.db.rocksdb.storage;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.transaction.model.bo.CrossChainTx;

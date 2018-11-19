@@ -8,7 +8,7 @@ import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.TimeService;
 import io.nuls.transaction.constant.TransactionConstant;
-import io.nuls.transaction.storage.LanguageStorageService;
+import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;

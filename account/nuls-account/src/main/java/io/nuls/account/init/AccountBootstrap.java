@@ -54,7 +54,7 @@ public class AccountBootstrap {
                 NulsConfig.DEFAULT_ENCODING = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_DEFAULT_ENCODING);
                 //set system language
                 String language = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_LANGUAGE);
-                I18nUtils.loadLanguage("/", language);
+                I18nUtils.loadLanguage("languages", language);
                 I18nUtils.setLanguage(language);
                 //ACCOUNTKEYSTORE_FOLDER_NAME
                 NulsConfig.DEFAULT_ENCODING = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER);
