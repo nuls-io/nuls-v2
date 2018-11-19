@@ -7,6 +7,7 @@ import io.nuls.rpc.model.CmdRequest;
 import io.nuls.rpc.model.ModuleInfo;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.Request;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -20,6 +21,9 @@ import java.util.Map;
  */
 public class CmdDispatcher {
 
+    /**
+     * Handshake with kernel
+     */
     public static boolean handshakeKernel() throws Exception {
         int messageId = RuntimeInfo.nextSequence();
         Message message = RuntimeInfo.buildMessage(messageId);
@@ -40,17 +44,26 @@ public class CmdDispatcher {
      * 1. send local module information to kernel
      * 2. receive all the modules' interfaces from kernel
      */
-    public static void syncKernel(String kernelUri) throws Exception {
-        int id = RuntimeInfo.nextSequence();
-        CmdRequest cmdRequest = new CmdRequest(id, "version", 1.0, new Object[]{RuntimeInfo.local});
+    public static void syncKernel() throws Exception {
+        int messageId = RuntimeInfo.nextSequence();
+        Message message=RuntimeInfo.buildMessage(messageId);
+        message.setMessageType(MessageType.Request.name());
+        Request request=new Request();
+        request.setRequestAck(0);
+        request.setSubscriptionEventCounter(0);
+        request.setSubscriptionPeriod(0);
+        request.setSubscriptionRange("");
+        request.setResponseMaxSize(0);
+//        request.setRequestMethods();
+        message.setMessageData(request);
 
-        WsClient wsClient = RuntimeInfo.getWsClient(kernelUri);
+        WsClient wsClient = RuntimeInfo.getWsClient(RuntimeInfo.kernelUrl);
         if (wsClient == null) {
             throw new Exception("Kernel not available");
         }
-        wsClient.send(JSONUtils.obj2json(cmdRequest));
+        wsClient.send(JSONUtils.obj2json(message));
 
-        Map rspMap = wsClient.getResponse(id);
+        Map rspMap = wsClient.getResponse(messageId);
 
         Map resultMap = (Map) rspMap.get("result");
         if (resultMap == null) {
