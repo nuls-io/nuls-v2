@@ -5,10 +5,8 @@ import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.storage.AgentStorageService;
-import io.nuls.poc.utils.ConsensusConstant;
-import io.nuls.tools.basic.InitializingBean;
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -20,7 +18,7 @@ import java.util.List;
  * 2018/11/06
  * */
 @Service
-public class AgentStorageServiceImpl implements AgentStorageService, InitializingBean {
+public class AgentStorageServiceImpl implements AgentStorageService{
 
     @Override
     /**
@@ -34,7 +32,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
         try {
             byte[] key = agentPo.getHash().serialize();
             byte[] value = agentPo.serialize();
-            return  RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_AGENT,key,value);
+            return  RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID,key,value);
         }catch (Exception e){
             Log.error(e);
             return  false;
@@ -52,7 +50,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
         }
         try {
             byte[] key = hash.serialize();
-            byte[] value = RocksDBService.get(ConsensusConstant.DB_NAME_CONSENSUS_AGENT,key);
+            byte[] value = RocksDBService.get(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID,key);
             if(value == null){
                 return  null;
             }
@@ -77,7 +75,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
         }
         try {
             byte[] key = hash.serialize();
-            return  RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_AGENT,key);
+            return  RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID,key);
         }catch (Exception e){
             Log.error(e);
             return  false;
@@ -90,7 +88,7 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
      * */
     public List<AgentPo> getList(int chainID) throws  Exception{
         try {
-            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT);
+            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID);
             List<AgentPo> agentList = new ArrayList<>();
             for (Entry<byte[], byte[]> entry:list) {
                 AgentPo po = new AgentPo();
@@ -112,14 +110,14 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
      * 获取当前网络节点数量
      * */
     public int size(int chainID) {
-        List<byte[]> keyList = RocksDBService.keyList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT);
+        List<byte[]> keyList = RocksDBService.keyList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID);
         if(keyList != null){
             return keyList.size();
         }
         return 0;
     }
 
-    @Override
+    /*@Override
     public void afterPropertiesSet() throws NulsException {
         try {
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_AGENT);
@@ -127,5 +125,5 @@ public class AgentStorageServiceImpl implements AgentStorageService, Initializin
             Log.error(e);
             throw new NulsException(e);
         }
-    }
+    }*/
 }

@@ -1,14 +1,21 @@
 package io.nuls.poc.model.bo.config;
+
+import java.io.Serializable;
+
 /**
  * 共识模块配置类
  * @author tag
  * 2018/11/7
  * */
-public class ConfigBean {
+public class ConfigBean implements Serializable {
     /**
      * 打包间隔时间
      * */
     private long packing_interval;
+    /**
+     * 区块大小
+     * */
+    private int block_size;
     /**
      * 出块最小金额
      * */
@@ -49,6 +56,10 @@ public class ConfigBean {
      * 委托金额最大值
      * */
     private long commission_max;
+    /**
+     * 种子节点
+     **/
+    private String seedNodes;
 
     public long getPacking_interval() {
         return packing_interval;
@@ -56,6 +67,14 @@ public class ConfigBean {
 
     public void setPacking_interval(long packing_interval) {
         this.packing_interval = packing_interval;
+    }
+
+    public int getBlock_size() {
+        return block_size;
+    }
+
+    public void setBlock_size(int block_size) {
+        this.block_size = block_size;
     }
 
     public long getPacking_amount() {
@@ -136,5 +155,13 @@ public class ConfigBean {
 
     public void setCommission_max(long commission_max) {
         this.commission_max = commission_max;
+    }
+
+    public String getSeedNodes() {
+        return seedNodes;
+    }
+
+    public void setSeedNodes(String seedNodes) {
+        this.seedNodes = seedNodes;
     }
 }

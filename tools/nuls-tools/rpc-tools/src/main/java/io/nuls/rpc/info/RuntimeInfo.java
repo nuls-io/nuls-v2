@@ -31,11 +31,11 @@ import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.Module;
 import io.nuls.tools.core.ioc.ScanUtil;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
@@ -58,16 +58,16 @@ public class RuntimeInfo {
     public static Module local;
 
     /**
-     * local Config item information
-     */
-    public static List<ConfigItem> configItemList = Collections.synchronizedList(new ArrayList<>());
-
-    /**
      * remote module information
      * key: module name/code
      * value: module(io.nuls.rpc.Module)
      */
     public static ConcurrentMap<String, Module> remoteModuleMap = new ConcurrentHashMap<>();
+
+    /**
+     * local Config item information
+     */
+    public static Map<String, ConfigItem> configItemMap = new ConcurrentHashMap<>();
 
     /**
      * cmd sequence
@@ -76,42 +76,49 @@ public class RuntimeInfo {
 
 
     /**
-     * all the call cmd from other module
+     * The pending request command received through RPC
+     * Array [0] is the Websocket object for communication
+     * Array [1] is the content of the communication
      */
-    public static final List<Object[]> requestQueue = Collections.synchronizedList(new ArrayList<>());
+    public static final List<Object[]> REQUEST_QUEUE = Collections.synchronizedList(new ArrayList<>());
 
+    /**
+     * The thread pool object that handles the request
+     */
     public static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
 
     /**
-     * the response from other module
+     * The response of the cmd invoked through RPC
      */
-    public static final List<Map> responseQueue = Collections.synchronizedList(new ArrayList<>());
+    public static final List<Map> RESPONSE_QUEUE = Collections.synchronizedList(new ArrayList<>());
 
     /**
-     * WebSocket clients
-     * The client and the module correspond one by one
-     * key: uri(ws://127.0.0.1:8887)
+     * WsClient object that communicates with other modules
+     * key: uri(ex: ws://127.0.0.1:8887)
      * value: WsClient
      */
     private static ConcurrentMap<String, WsClient> wsClientMap = new ConcurrentHashMap<>();
 
     /**
-     * get WsClient through uri
+     * Get the WsClient object through the url
      */
     public static WsClient getWsClient(String uri) throws Exception {
+
         if (!wsClientMap.containsKey(uri)) {
             WsClient wsClient = new WsClient(uri);
             wsClient.connect();
-            while (!wsClient.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                Thread.sleep(10);
+            Thread.sleep(1000);
+            if (wsClient.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
+                wsClientMap.put(uri, wsClient);
+            } else {
+                Log.info("Failed to connect " + uri);
             }
-            wsClientMap.put(uri, wsClient);
         }
         return wsClientMap.get(uri);
     }
 
     /**
-     * get the next call counter
+     * get the next call counter(unique identifier)
      */
     public static int nextSequence() {
         return sequence.incrementAndGet();
@@ -119,18 +126,8 @@ public class RuntimeInfo {
 
 
     /**
-     * Object to bytes
-     */
-    public static byte[] obj2Bytes(Object object) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
-        objectOutputStream.writeObject(object);
-        return byteArrayOutputStream.toByteArray();
-    }
-
-
-    /**
-     * get remote rpc uri based on cmd
+     * Get the url of the module that provides the cmd through the CmdRequest object
+     * The resulting url may not be unique, returning all found
      */
     public static List<String> getRemoteUri(CmdRequest cmdRequest) {
         List<String> remoteUriList = new ArrayList<>();
@@ -146,7 +143,11 @@ public class RuntimeInfo {
     }
 
     /**
-     * get local Rpc based on cmd & minimum version
+     * Get local command
+     * Sort by version number
+     * 1. Not less than the incoming version number
+     * 2. Forward compatible
+     * 3. The highest version that meet conditions 1 and 2 at the same time
      */
     public static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
@@ -154,23 +155,54 @@ public class RuntimeInfo {
 
         CmdDetail find = null;
         for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
-            if (cmdDetail.getCmd().equals(cmd) && cmdDetail.getVersion() >= minVersion) {
-                if (find == null) {
-                    find = cmdDetail;
-                } else if (cmdDetail.getVersion() > cmdDetail.getVersion()) {
-                    if (cmdDetail.isPreCompatible()) {
-                        find = cmdDetail;
-                    } else {
-                        break;
-                    }
-                }
+            if (!cmdDetail.getCmd().equals(cmd) || cmdDetail.getVersion() < minVersion) {
+                continue;
+            }
+
+            if (find == null) {
+                find = cmdDetail;
+                continue;
+            }
+
+            if (!cmdDetail.isPreCompatible()) {
+                break;
+            } else {
+                find = cmdDetail;
             }
         }
         return find;
     }
 
     /**
-     * scan package, auto register cmd
+     * Get local command
+     * Sort by version number
+     * The highest version
+     */
+    public static CmdDetail getLocalInvokeCmd(String cmd) {
+
+        RuntimeInfo.local.getCmdDetailList().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+
+        CmdDetail find = null;
+        for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
+            if (!cmdDetail.getCmd().equals(cmd)) {
+                continue;
+            }
+
+            if (find == null) {
+                find = cmdDetail;
+                continue;
+            }
+
+            if (cmdDetail.getVersion() > find.getVersion()) {
+                find = cmdDetail;
+            }
+        }
+        return find;
+    }
+
+    /**
+     * Scan the provided package
+     * Analysis annotation, register cmd
      */
     public static void scanPackage(String packageName) throws Exception {
         if (packageName == null || packageName.length() == 0) {
@@ -181,16 +213,22 @@ public class RuntimeInfo {
             Method[] methods = clz.getMethods();
             for (Method method : methods) {
                 CmdDetail cmdDetail = annotation2CmdDetail(method);
-                if (cmdDetail != null) {
-                    registerCmdDetail(cmdDetail);
+                if (cmdDetail == null) {
+                    continue;
+                }
+
+                if (!isRegister(cmdDetail)) {
+                    RuntimeInfo.local.getCmdDetailList().add(cmdDetail);
+                } else {
+                    throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getCmd() + "-" + cmdDetail.getVersion());
                 }
             }
-            System.out.println("====================");
         }
     }
 
     /**
-     * get the annotation of method, if it was instance of CmdInfo, build CmdInfo
+     * Get annotation of methods
+     * If the annotation is CmdAnnotation, it means that the cmd needs to be registered
      */
     private static CmdDetail annotation2CmdDetail(Method method) {
         Annotation[] annotations = method.getDeclaredAnnotations();
@@ -204,16 +242,10 @@ public class RuntimeInfo {
     }
 
     /**
-     * scan & register rpc
+     * Determine if the cmd has been registered
+     * 1. The same cmd
+     * 2. The same version
      */
-    private static void registerCmdDetail(CmdDetail cmdDetail) throws Exception {
-        if (isRegister(cmdDetail)) {
-            throw new Exception("Duplicate cmd found: " + cmdDetail.getCmd() + "-" + cmdDetail.getVersion());
-        } else {
-            RuntimeInfo.local.getCmdDetailList().add(cmdDetail);
-        }
-    }
-
     private static boolean isRegister(CmdDetail sourceCmdDetail) {
         boolean exist = false;
         for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
@@ -225,4 +257,13 @@ public class RuntimeInfo {
 
         return exist;
     }
+
+    public static Map buildCmdResponseMap(int id, String msg) throws IOException {
+        CmdResponse cmdResponse = new CmdResponse();
+        cmdResponse.setId(id);
+        cmdResponse.setCode(Constants.FAILED_CODE);
+        cmdResponse.setMsg(msg);
+        return JSONUtils.json2map(JSONUtils.obj2json(cmdResponse));
+    }
+
 }

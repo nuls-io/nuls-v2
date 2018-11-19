@@ -27,6 +27,7 @@ package io.nuls.base.basic;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.constant.ToolsConstant;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
@@ -88,12 +89,17 @@ public class NulsOutputStreamBuffer {
         SerializeUtils.uint32ToByteStreamLE(val, out);
     }
 
+    public void writeUint48(long time) throws IOException {
+        byte[] bytes = SerializeUtils.uint48ToBytes(time);
+        this.write(bytes);
+    }
+
     public void writeInt64(long val) throws IOException {
         SerializeUtils.int64ToByteStreamLE(val, out);
     }
 
     public void writeDouble(double val) throws IOException {
-        out.write(SerializeUtils.double2Bytes(val));
+        out.write(ByteUtils.doubleToBytes(val));
     }
 
     public void writeString(String val) {
@@ -120,10 +126,5 @@ public class NulsOutputStreamBuffer {
         } else {
             this.write(data.serialize());
         }
-    }
-
-    public void writeUint48(long time) throws IOException {
-        byte[] bytes = SerializeUtils.uint48ToBytes(time);
-        this.write(bytes);
     }
 }

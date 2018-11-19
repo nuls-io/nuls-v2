@@ -30,7 +30,6 @@ import io.nuls.base.constant.BaseConstant;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.SerializeUtils;
 
 /**
  * @author: Chralie
@@ -41,6 +40,11 @@ public class Address {
      * hash length
      */
     public static final int ADDRESS_LENGTH = 23;
+
+    /**
+     * origin address hash length：addressType+hash160(pubKey)
+     */
+    public static final int ADDRESS_ORIGIN_LENGTH = 21;
 
     /**
      * RIPEMD160 length
@@ -64,9 +68,6 @@ public class Address {
 
     protected byte[] addressBytes;
 
-    //    /**
-//     * @param address
-//     */
     public Address(String address) {
         try {
             byte[] bytes = AddressTool.getAddress(address);
@@ -97,7 +98,7 @@ public class Address {
         return chainId;
     }
 
-    public static Address fromHashs(String address) throws Exception {
+    public static Address fromHashs(String address) {
         byte[] bytes = AddressTool.getAddress(address);
         return fromHashs(bytes);
     }
@@ -107,7 +108,7 @@ public class Address {
             throw new NulsRuntimeException(new Exception());
         }
 
-        short chainId = SerializeUtils.bytes2Short(hashs);
+        short chainId = ByteUtils.bytesToShort(hashs);
         byte addressType = hashs[2];
         byte[] content = new byte[LENGTH];
         System.arraycopy(hashs, 3, content, 0, LENGTH);
@@ -118,7 +119,7 @@ public class Address {
 
     public byte[] calcAddressbytes() {
         byte[] body = new byte[ADDRESS_LENGTH];
-        System.arraycopy(SerializeUtils.shortToBytes(chainId), 0, body, 0, 2);
+        System.arraycopy(ByteUtils.shortToBytes(chainId), 0, body, 0, 2);
         body[2] = this.addressType;
         System.arraycopy(hash160, 0, body, 3, hash160.length);
         return body;

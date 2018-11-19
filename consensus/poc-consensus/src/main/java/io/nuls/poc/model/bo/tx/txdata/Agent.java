@@ -40,7 +40,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author Niels
+ * @author tag
+ * 2018/11/6
  */
 public class Agent extends TransactionLogicData {
 
@@ -70,7 +71,7 @@ public class Agent extends TransactionLogicData {
     private double commissionRate;
 
     /**
-     * 打包时间
+     * 创建时间
      * */
     private transient long time;
 
@@ -97,7 +98,7 @@ public class Agent extends TransactionLogicData {
     /**
      * 总委托金额
      * */
-    private transient long totalDeposit;
+    private transient Na totalDeposit;
 
     /**
      * 交易HASH
@@ -186,11 +187,11 @@ public class Agent extends TransactionLogicData {
         return creditVal;
     }
 
-    public long getTotalDeposit() {
+    public Na getTotalDeposit() {
         return totalDeposit;
     }
 
-    public void setTotalDeposit(long totalDeposit) {
+    public void setTotalDeposit(Na totalDeposit) {
         this.totalDeposit = totalDeposit;
     }
 

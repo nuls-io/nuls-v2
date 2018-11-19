@@ -24,6 +24,11 @@
 
 package io.nuls.account.service;
 
+import io.nuls.account.model.bo.Account;
+import io.nuls.tools.basic.Result;
+
+import java.util.List;
+
 /**
  * 账户模块提供给外部的服务接口定义
  * account service definition
@@ -32,5 +37,88 @@ package io.nuls.account.service;
  */
 public interface AccountService {
 
+    /**
+     * 创建指定个数的账户（包含地址）
+     * Create a specified number of accounts,and encrypt the accounts,
+     * all the accounts are encrypted by the same password
+     * if the password is NULL or "", the accounts will be unencrypted.
+     *
+     * @param chainId    链ID
+     * @param count    想要创建的账户个数
+     * @param count    the number of account you want to create.
+     * @param password the password of the accounts.
+     * @return the account list created.
+     */
+    List<Account> createAccount(short chainId, int count, String password);
 
+    /**
+     * 根据账户地址字符串获取完整的账户信息
+     * Query account by address.
+     *
+     * @param chainId    链ID
+     * @param address the address of the account you want to query.
+     * @return the account.
+     */
+    Account getAccount(short chainId, String address);
+
+    /**
+     * 获取所有账户集合,并放入缓存
+     * Query all account collections and put them in cache.
+     *
+     * @return account list of all accounts.
+     */
+    List<Account> getAccountList();
+
+    /**
+     * set the password for exist account
+     * @auther EdwardChan
+     *
+     * Nov.10th 2018
+     *
+     * @param chainId
+     *
+     * @param address
+     *
+     * @param password
+     *
+     * @return true or false
+     */
+     boolean setPassword(short chainId, String address, String password);
+
+    /**
+     * check if the account is encrypted
+     *
+     * @auther EdwardChan
+     *
+     * Nov.10th 2018
+     *
+     * @param chainId
+     *
+     * @param address
+     *
+     *
+     * @return true or false
+     */
+    boolean isEncrypted(short chainId, String address);
+
+    /**
+     * 移除指定账户
+     * Remove specified account
+     * @param chainId
+     * @param address
+     * @param password
+     * @return
+     */
+    public boolean removeAccount(short chainId, String address, String password);
+
+    /**
+     * get the alias by address
+     * @param chainId
+     * @param address
+     * @return the alias,if the alias is not exist,it will be return null
+     * @auther EdwardChan
+     * <p>
+     * Nov.12th 2018
+     */
+     String getAliasByAddress(short chainId,String address);
 }
