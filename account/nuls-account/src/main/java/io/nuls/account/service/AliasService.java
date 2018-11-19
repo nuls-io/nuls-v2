@@ -26,6 +26,7 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.po.AliasPo;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
 
 /**
@@ -38,16 +39,80 @@ public interface AliasService {
 
 
     /**
-     * 保存别名(全网)
+     * 设置别名
+     * set the alias of acount
+     *
+     * @param chainId
+     * @param address   Address of account
+     * @param password  password of account
+     * @param aliasName the alias to set
+     * @return txhash
+     */
+     Result<String> setAlias(short chainId, String address, String password, String aliasName);
+
+    /**
+     * 获取设置别名交易手续费
+     * Gets to set the alias transaction fee
+     *
+     * @param chaindId
+     * @param address
+     * @param aliasName
+     * @return
+     */
+     Result<String> getAliasFee(short chaindId, String address, String aliasName);
+
+    /**
+     * get the alias by address
+     *
+     * @param chainId
+     * @param address
+     * @return the alias,if the alias is not exist,it will be return null
+     * @auther EdwardChan
+     * <p>
+     * Nov.12th 2018
+     */
+    String getAliasByAddress(short chainId, String address);
+
+    /**
+     * check whether the account is usable
+     *
+     * @param chainId
+     * @param alias
+     * @return true is usable,false is unusable
+     *
+     */
+     boolean isAliasUsable(short chainId, String alias);
+
+
+    /**
+     * setMutilSigAlias
+     *
+     * @param chainId
+     * @param address
+     * @param signAddress
+     * @param password
+     * @param alias
+     * @return the hash of tx
+     **/
+     String setMultiSigAlias(short chainId, String address, String signAddress, String password, String alias);
+
+    /**
+     * validate the tx of alias
+     *
+     * */
+     boolean aliasTxValidate(short chainId,String alias);
+
+    /**
+     * 别名交易提交
      * 1.保存别名alias至数据库
      * 2.从数据库取出对应的account账户,将别名设置进account然后保存至数据库
      * 3.将修改后的account重新进行缓存
-     * saveAlias
+     * aliasTxCommit
      * 1. Save the alias to the database.
      * 2. Take the corresponding account from the database, set the alias to account and save it to the database.
      * 3. Re-cache the modified account.
      */
-    boolean saveAlias(AliasPo aliaspo) throws NulsException;
+    boolean aliasTxCommit(AliasPo aliaspo) throws NulsException;
 
     /**
      * 回滚别名操作(删除别名(全网))
@@ -61,16 +126,5 @@ public interface AliasService {
      */
     boolean rollbackAlias(AliasPo aliasPo) throws NulsException;
 
-    /**
-     * get the alias by address
-     *
-     * @param chainId
-     * @param address
-     * @return the alias,if the alias is not exist,it will be return null
-     * @auther EdwardChan
-     * <p>
-     * Nov.12th 2018
-     */
-    String getAliasByAddress(short chainId, String address);
 
 }
