@@ -64,12 +64,13 @@ public class WsServer extends WebSocketServer {
         this.start();
         Thread.sleep(1000);
         RuntimeInfo.kernelUrl = kernelUrl;
-        CmdDispatcher.handKernel();
+        if (!CmdDispatcher.handshakeKernel()) {
+            throw new Exception("Handshake kernel failed");
+        }
     }
 
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake handshake) {
-        Log.info("new connection join->" + webSocket.getRemoteSocketAddress().getHostName() + ":" + webSocket.getRemoteSocketAddress().getPort());
     }
 
     @Override
@@ -79,7 +80,7 @@ public class WsServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket webSocket, String message) {
         try {
-            Log.info("ws server-> receive msg: " + message);
+            Log.info("Server<" + RuntimeInfo.local.getAbbr() + ":" + RuntimeInfo.local.getPort() + "> receive:" + message);
             RuntimeInfo.REQUEST_QUEUE.add(new Object[]{webSocket, message});
             RuntimeInfo.fixedThreadPool.execute(new WsProcessor());
         } catch (Exception e) {

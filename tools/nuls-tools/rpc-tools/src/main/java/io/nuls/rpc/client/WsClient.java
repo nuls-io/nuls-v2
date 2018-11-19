@@ -61,8 +61,7 @@ public class WsClient extends WebSocketClient {
             /*
              * add to response queue, Waiting for thread pool processing
              */
-            Log.info("Client received: " + paramString);
-            Log.info("Client received: " + JSONUtils.json2map(paramString));
+            Log.info("Client<" + RuntimeInfo.local.getAbbr() + ":" + RuntimeInfo.local.getPort() + "> receive:" + paramString);
             RuntimeInfo.RESPONSE_QUEUE.add(JSONUtils.json2map(paramString));
         } catch (IOException e) {
             Log.error("WsClient.onMessage-> " + e.getMessage() + ":" + paramString);
@@ -79,13 +78,13 @@ public class WsClient extends WebSocketClient {
     }
 
     /**
-     * get response by id
+     * Get response by messageId
      */
-    public Map getResponse(int id) throws InterruptedException, IOException {
+    public Map getResponse(int messageId) throws InterruptedException, IOException {
         long timeMillis = System.currentTimeMillis();
         do {
             for (Map map : RuntimeInfo.RESPONSE_QUEUE) {
-                if ((Integer) map.get("id") == id) {
+                if ((Integer) map.get("messageId") == messageId) {
                     RuntimeInfo.RESPONSE_QUEUE.remove(map);
                     return map;
                 }
@@ -93,7 +92,7 @@ public class WsClient extends WebSocketClient {
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
 
-        return RuntimeInfo.buildCmdResponseMap(id, Constants.RESPONSE_TIMEOUT);
+        return RuntimeInfo.buildCmdResponseMap(messageId, Constants.RESPONSE_TIMEOUT);
     }
 
 

@@ -5,6 +5,8 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdRequest;
 import io.nuls.rpc.model.ModuleInfo;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -17,6 +19,23 @@ import java.util.Map;
  * @description
  */
 public class CmdDispatcher {
+
+    public static boolean handshakeKernel() throws Exception {
+        int messageId = RuntimeInfo.nextSequence();
+        Message message = RuntimeInfo.buildMessage(messageId);
+        message.setMessageType(MessageType.NegotiateConnection.name());
+        message.setMessageData(RuntimeInfo.buildNegotiateConnection());
+
+        WsClient wsClient = RuntimeInfo.getWsClient(RuntimeInfo.kernelUrl);
+        if (wsClient == null) {
+            throw new Exception("Kernel not available");
+        }
+        wsClient.send(JSONUtils.obj2json(message));
+
+        Map rspMap = wsClient.getResponse(messageId);
+        return MessageType.NegotiateConnectionResponse.name().equals(rspMap.get("messageType"));
+    }
+
     /**
      * 1. send local module information to kernel
      * 2. receive all the modules' interfaces from kernel
@@ -36,10 +55,6 @@ public class CmdDispatcher {
         Map resultMap = (Map) rspMap.get("result");
         if (resultMap == null) {
             return;
-        }
-
-        if (RuntimeInfo.local != null) {
-            RuntimeInfo.local.setAvailable((Boolean) resultMap.get("available"));
         }
 
         //Map<String, Object> moduleMap = JSONUtils.json2map(JSONUtils.obj2json(resultMap.get("modules")));
