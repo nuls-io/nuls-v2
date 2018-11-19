@@ -20,9 +20,9 @@ public class CmdTest {
     }
 
     @Test
-    public void lg_test() throws Exception {
+    public void lg_getBalance() throws Exception {
         double version = 1.0;
-        String response = CmdDispatcher.call("lg_test", new Object[]{"123", "test"}, version);
+        String response = CmdDispatcher.call("lg_getBalance", new Object[]{"123"}, version);
         CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
         logger.info("cmdResp {}", cmdResp);
     }
