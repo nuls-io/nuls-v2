@@ -29,11 +29,6 @@ package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.RuntimeInfo;
-import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
-import io.nuls.rpc.model.Module;
-import io.nuls.tools.constant.ErrorCode;
-import io.nuls.tools.parse.JSONUtils;
 
 import java.util.*;
 
@@ -46,30 +41,30 @@ import java.util.*;
  */
 public class KernelCmd4Test extends BaseCmd {
 
-    @CmdAnnotation(cmd = "version", version = 1.0)
-    public CmdResponse version(List params) {
-        try {
-            System.out.println("join之前的kernel remote接口数：" + RuntimeInfo.remoteModuleMap.size());
-            Module module = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Module.class);
-            if (module != null) {
-                System.out.println(module.getName() + " added");
-                RuntimeInfo.remoteModuleMap.put(module.getName(), module);
-            }
-            System.out.println("join之后的kernel remote接口数：" + RuntimeInfo.remoteModuleMap.size());
+    //@CmdAnnotation(cmd = "version", version = 1.0)
+//    public CmdResponse version(List params) {
+//        try {
+//            System.out.println("join之前的kernel remote接口数：" + RuntimeInfo.remoteModuleMap.size());
+//            Module module = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Module.class);
+//            if (module != null) {
+//                System.out.println(module.getName() + " added");
+//                RuntimeInfo.remoteModuleMap.put(module.getName(), module);
+//            }
+//            System.out.println("join之后的kernel remote接口数：" + RuntimeInfo.remoteModuleMap.size());
+//
+//            Map<String, Object> result = new HashMap<>(16);
+//            result.put("service", new String[]{"a", "b", "c"});
+//            result.put("available", true);
+//            result.put("modules", RuntimeInfo.remoteModuleMap);
+//
+//            return success(null, result);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return failed(ErrorCode.init("-32603"), null);
+//        }
+//    }
 
-            Map<String, Object> result = new HashMap<>(16);
-            result.put("service", new String[]{"a", "b", "c"});
-            result.put("available", true);
-            result.put("modules", RuntimeInfo.remoteModuleMap);
-
-            return success(null, result);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return failed(ErrorCode.init("-32603"), null);
-        }
-    }
-
-    @CmdAnnotation(cmd = "fetch", version = 1.0)
+//    @CmdAnnotation(cmd = "fetch", version = 1.0)
     public Object fetch(List params) {
         Iterator<String> keyIterator = RuntimeInfo.remoteModuleMap.keySet().iterator();
         List<String> service = new ArrayList<>();
@@ -84,7 +79,7 @@ public class KernelCmd4Test extends BaseCmd {
         return success(null, result);
     }
 
-    @CmdAnnotation(cmd = "cmd1", version = 1.0)
+//    @CmdAnnotation(cmd = "cmd1", version = 1.0)
     public Object cmd1(List params) {
         return success(null, "kernel cmd1");
     }

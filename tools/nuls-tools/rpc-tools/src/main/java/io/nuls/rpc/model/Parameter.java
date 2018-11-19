@@ -1,45 +1,21 @@
 package io.nuls.rpc.model;
 
+import java.lang.annotation.*;
+
 /**
  * @author tangyi
  * @date 2018/11/19
  * @description
  */
-public class Parameter {
-    private String parameterName;
-    private String parameterType;
-    private String parameterValidRange;
-    private String parameterValidRegExp;
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+@Repeatable(Parameters.class)
+public @interface Parameter {
+    String parameterName();
 
-    public String getParameterName() {
-        return parameterName;
-    }
+    String parameterType();
 
-    public void setParameterName(String parameterName) {
-        this.parameterName = parameterName;
-    }
+    String parameterValidRange();
 
-    public String getParameterType() {
-        return parameterType;
-    }
-
-    public void setParameterType(String parameterType) {
-        this.parameterType = parameterType;
-    }
-
-    public String getParameterValidRange() {
-        return parameterValidRange;
-    }
-
-    public void setParameterValidRange(String parameterValidRange) {
-        this.parameterValidRange = parameterValidRange;
-    }
-
-    public String getParameterValidRegExp() {
-        return parameterValidRegExp;
-    }
-
-    public void setParameterValidRegExp(String parameterValidRegExp) {
-        this.parameterValidRegExp = parameterValidRegExp;
-    }
+    String parameterValidRegExp();
 }

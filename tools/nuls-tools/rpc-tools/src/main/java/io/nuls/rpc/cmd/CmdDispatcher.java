@@ -4,7 +4,7 @@ import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdRequest;
-import io.nuls.rpc.model.Module;
+import io.nuls.rpc.model.ModuleInfo;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -47,7 +47,7 @@ public class CmdDispatcher {
         Map<String, Object> moduleMap = (Map<String, Object>) resultMap.get("modules");
         Log.info(JSONUtils.obj2json(moduleMap));
         for (String key : moduleMap.keySet()) {
-            Module module = JSONUtils.json2pojo(JSONUtils.obj2json(moduleMap.get(key)), Module.class);
+            ModuleInfo module = JSONUtils.json2pojo(JSONUtils.obj2json(moduleMap.get(key)), ModuleInfo.class);
             RuntimeInfo.remoteModuleMap.put(key, module);
         }
     }

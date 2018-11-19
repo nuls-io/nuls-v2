@@ -30,7 +30,7 @@ package io.nuls.rpc.server;
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.RuntimeInfo;
-import io.nuls.rpc.model.Module;
+import io.nuls.rpc.model.ModuleInfo;
 import io.nuls.rpc.model.ModuleStatus;
 import io.nuls.tools.log.Log;
 import org.java_websocket.WebSocket;
@@ -54,7 +54,7 @@ public class WsServer extends WebSocketServer {
 
     public void init(String moduleName, String[] depends, String scanPackage) throws Exception {
         List<String> dps = depends == null ? new ArrayList<>() : Arrays.asList(depends);
-        RuntimeInfo.local = new Module(moduleName, ModuleStatus.READY, true, HostInfo.getIpAdd(), getPort(), new ArrayList<>(), dps);
+        RuntimeInfo.local = new ModuleInfo(moduleName, ModuleStatus.READY, true, HostInfo.getIpAdd(), getPort(), new ArrayList<>(), dps);
 
         RuntimeInfo.scanPackage(scanPackage);
     }
