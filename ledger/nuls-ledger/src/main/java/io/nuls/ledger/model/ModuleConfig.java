@@ -8,7 +8,7 @@ import lombok.ToString;
  * Created by wangkun23 on 2018/11/19.
  */
 @ToString
-public class LedgerConfig {
+public class ModuleConfig {
 
     @Setter
     @Getter
@@ -16,22 +16,13 @@ public class LedgerConfig {
 
     @Setter
     @Getter
+    private String databaseName;
+
+    @Setter
+    @Getter
     private Boolean databaseReset;
 
     @Setter
     @Getter
-    private String projectVersion;
-
-    @Setter
-    @Getter
-    private String projectVersionModifier;
-
-    @Setter
-    @Getter
     protected Integer databaseVersion;
-
-    @Setter
-    @Getter
-    private Boolean syncEnabled;
-
 }

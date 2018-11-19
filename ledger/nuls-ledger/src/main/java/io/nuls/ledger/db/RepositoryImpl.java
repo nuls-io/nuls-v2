@@ -1,13 +1,16 @@
 package io.nuls.ledger.db;
 
 import io.nuls.ledger.model.AccountState;
+import io.nuls.tools.core.annotation.Service;
 
 import java.math.BigInteger;
 
 /**
  * Created by wangkun23 on 2018/11/19.
  */
+@Service
 public class RepositoryImpl implements Repository {
+
     @Override
     public AccountState createAccount(byte[] addr) {
         return null;
