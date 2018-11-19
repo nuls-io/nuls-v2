@@ -1,7 +1,7 @@
 package io.nuls.chain.test;
 
-import io.nuls.base.data.chain.Asset;
 import io.nuls.chain.ChainBootstrap;
+import io.nuls.chain.model.dto.Asset;
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.tools.thread.TimeService;
 import org.junit.Before;
