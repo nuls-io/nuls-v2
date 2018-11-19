@@ -25,8 +25,6 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Account;
-import io.nuls.account.model.bo.AccountKeyStore;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
@@ -86,6 +84,18 @@ public interface AccountService {
     boolean setPassword(short chainId, String address, String password);
 
     /**
+     * 根据原密码修改账户密码
+     * Change the account password according to the current password
+     *
+     * @param chainId
+     * @param address
+     * @param oldPassword
+     * @param newPassword
+     * @return
+     */
+    boolean changePassword(short chainId, String address, String oldPassword, String newPassword);
+
+    /**
      * 设置离线账户密码
      * set the password for offline account
      *
@@ -97,18 +107,6 @@ public interface AccountService {
      * <p>
      */
     String setOfflineAccountPassword(short chainId, String address, String priKey, String password);
-
-    /**
-     * 根据原密码修改账户密码
-     * Change the account password according to the current password
-     *
-     * @param chainId
-     * @param address
-     * @param oldPassword
-     * @param newPassword
-     * @return
-     */
-    boolean changePassword(short chainId, String address, String oldPassword, String newPassword);
 
     /**
      * 根据原密码修改离线账户密码
@@ -124,6 +122,7 @@ public interface AccountService {
     String changeOfflinePassword(short chainId, String address, String priKey, String oldPassword, String newPassword);
 
     /**
+     * 验证账户是否加密
      * check if the account is encrypted
      *
      * @param chainId

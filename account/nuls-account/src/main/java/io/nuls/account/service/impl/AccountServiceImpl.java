@@ -28,16 +28,15 @@ package io.nuls.account.service.impl;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.po.AccountPo;
-import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
-import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.AESEncrypt;
@@ -50,7 +49,6 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -240,37 +238,6 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public String setOfflineAccountPassword(short chainId, String address, String priKey, String password) {
-        //check params
-        if (StringUtils.isBlank(address) || !AddressTool.validAddress(chainId, address)) {
-            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-        }
-        if (StringUtils.isBlank(priKey) || !ECKey.isValidPrivteHex(priKey)) {
-            throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
-        }
-        if (StringUtils.isBlank(password) || !FormatValidUtils.validPassword(password)) {
-            throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
-        }
-
-        //验证地址是否正确 Verify that the address is correct.
-        ECKey key = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(priKey)));
-        String newAddress = AccountTool.newAddress(chainId, key).getBase58();
-        if (!newAddress.equals(address)) {
-            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-        }
-
-        try {
-            //create account by private key
-            Account account = AccountTool.createAccount(chainId, priKey);
-            //encrypt for account
-            account.encrypt(password);
-            return HexUtil.encode(account.getEncryptedPriKey());
-        } catch (NulsException e) {
-            throw new NulsRuntimeException(e.getErrorCode());
-        }
-    }
-
-    @Override
     public boolean changePassword(short chainId, String address, String oldPassword, String newPassword) {
         //check params
         if (!AddressTool.validAddress(chainId, address)) {
@@ -287,15 +254,15 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (null == account) {
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
         }
+        //If the account is not encrypted
+        if (!account.isEncrypted()) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_UNENCRYPTED);
+        }
+        //Verify that the account password is correct
+        if (!account.validatePassword(oldPassword)) {
+            throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
+        }
         try {
-            //If the account is not encrypted
-            if (!account.isEncrypted()) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_UNENCRYPTED);
-            }
-            //Verify that the account password is correct
-            if (!account.validatePassword(oldPassword)) {
-                throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
-            }
             //Unlock account by password
             account.unlock(oldPassword);
             //Encrypting the account by the new password
@@ -308,6 +275,33 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             return result;
         } catch (NulsException e) {
             Log.error(e);
+            throw new NulsRuntimeException(e.getErrorCode());
+        }
+    }
+
+    @Override
+    public String setOfflineAccountPassword(short chainId, String address, String priKey, String password) {
+        //check params
+        if (StringUtils.isBlank(address) || !AddressTool.validAddress(chainId, address)) {
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+        }
+        if (StringUtils.isBlank(priKey) || !ECKey.isValidPrivteHex(priKey)) {
+            throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
+        }
+        if (StringUtils.isBlank(password) || !FormatValidUtils.validPassword(password)) {
+            throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
+        }
+        try {
+            //create account by private key
+            Account account = AccountTool.createAccount(chainId, priKey);
+            //验证地址是否正确 Verify that the address is correct.
+            if (!address.equals(account.getAddress().getBase58())) {
+                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+            }
+            //encrypt for account
+            account.encrypt(password);
+            return HexUtil.encode(account.getEncryptedPriKey());
+        } catch (NulsException e) {
             throw new NulsRuntimeException(e.getErrorCode());
         }
     }
@@ -328,29 +322,25 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
 
-        Account account = null;
         try {
+            //The private key is decrypted by password
             byte[] priKeyBytes = AESEncrypt.decrypt(HexUtil.decode(priKey), oldPassword);
-            Account tempAccount = AccountTool.createAccount(chainId, HexUtil.encode(priKeyBytes));
-            if (!address.equals(tempAccount.getAddress().getBase58())) {
-                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-            }
-            if (!ECKey.isValidPrivteHex(priKey)) {
+            if (!ECKey.isValidPrivteHex(HexUtil.encode(priKeyBytes))) {
                 throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
             }
-            account = AccountTool.createAccount(chainId, priKey);
+            //create offline account by private key
+            Account account = AccountTool.createAccount(chainId, HexUtil.encode(priKeyBytes));
             if (!address.equals(account.getAddress().getBase58())) {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
+            //Encrypting the account by the new password
             account.encrypt(newPassword);
-
+            return HexUtil.encode(account.getEncryptedPriKey());
         } catch (NulsException e) {
-            Log.error(e);
             throw new NulsRuntimeException(e.getErrorCode());
         } catch (CryptoException e) {
-            e.printStackTrace();
+            throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
         }
-        return HexUtil.encode(account.getEncryptedPriKey());
     }
 
     /**

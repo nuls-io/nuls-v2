@@ -10,15 +10,12 @@ import io.nuls.account.model.dto.SimpleAccountDto;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Page;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.AESEncrypt;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.FormatValidUtils;
 import io.nuls.tools.data.StringUtils;
@@ -45,18 +42,6 @@ public class AccountCmd extends BaseCmd {
     private AccountService accountService;
     @Autowired
     private AccountKeyStoreService keyStoreService;
-    /*
-     * CmdAnnotation注解包含
-     * 1. 调用的命令
-     * 2. 调用的命令的版本
-     * 3. 调用的命令是否兼容前一个版本
-     *
-     * 返回的结果包含：
-     * 1. 内置编码
-     * 2. 真正调用的版本号
-     * 3. 返回的文本
-     * 4. 返回的对象，由接口自己约定
-     */
 
     /**
      * 创建指定个数的账户
@@ -72,7 +57,7 @@ public class AccountCmd extends BaseCmd {
         List<String> list = new ArrayList<>();
         try {
             // check parameters
-            if (params.get(0) == null || params.size() != 3) {
+            if (params.size() != 3 || params.get(0) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -109,7 +94,7 @@ public class AccountCmd extends BaseCmd {
         Map<String, List<AccountOfflineDto>> map = new HashMap<>();
         try {
             // check parameters size
-            if (params.get(0) == null || params.size() != 3) {
+            if (params.size() != 3 || params.get(0) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -164,7 +149,7 @@ public class AccountCmd extends BaseCmd {
         Account account;
         try {
             // check parameters
-            if (params.get(0) == null || params.get(1) == null || params.size() != 2) {
+            if (params.size() != 2 || params.get(0) == null || params.get(1) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -283,7 +268,7 @@ public class AccountCmd extends BaseCmd {
         boolean result;
         try {
             // check parameters
-            if (params.get(0) == null || params.get(1) == null || params.size() != 3) {
+            if (params.size() != 3 || params.get(0) == null || params.get(1) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -321,7 +306,7 @@ public class AccountCmd extends BaseCmd {
         String unencryptedPrivateKey;
         try {
             // check parameters
-            if (params.get(0) == null || params.get(1) == null || params.size() != 3) {
+            if (params.size() != 3 || params.get(0) == null || params.get(1) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -361,7 +346,7 @@ public class AccountCmd extends BaseCmd {
         List<String> privateKeyList = new ArrayList<>();
         try {
             // check parameters
-            if (params.get(0) == null || params.size() != 2) {
+            if (params.size() != 2 || params.get(0) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -391,11 +376,11 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_setRemark", version = 1.0, preCompatible = true)
     public CmdResponse setRemark(List params) {
         Log.debug("ac_setRemark start");
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new HashMap<>(1);
         boolean result;
         try {
             // check parameters
-            if (params.get(0) == null || params.size() != 3) {
+            if (params.size() != 3 || params.get(0) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -427,10 +412,10 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_importAccountByPriKey", version = 1.0, preCompatible = true)
     public CmdResponse importAccountByPriKey(List params) {
         Log.debug("ac_importAccountByPriKey start");
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params.get(0) == null || params.get(1) == null || params.get(3) == null || params.size() != 4) {
+            if (params.size() != 4 || params.get(0) == null || params.get(1) == null || params.get(3) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -466,10 +451,10 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_importAccountByKeystore", version = 1.0, preCompatible = true)
     public CmdResponse importAccountByKeystore(List params) {
         Log.debug("ac_importAccountByKeystore start");
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params.get(0) == null || params.get(1) == null || params.get(3) == null || params.size() != 4) {
+            if (params.size() != 4 || params.get(0) == null || params.get(1) == null || params.get(3) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -511,10 +496,10 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_exportAccountKeyStore", version = 1.0, preCompatible = true)
     public CmdResponse exportAccountKeyStore(List params) {
         Log.debug("ac_exportAccountKeyStore start");
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params.get(0) == null || params.get(1) == null || params.size() != 4) {
+            if (params.size() != 4 || params.get(0) == null || params.get(1) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -549,10 +534,10 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_setPassword", version = 1.0, preCompatible = true)
     public CmdResponse setPassword(List params) {
         Log.debug("ac_setPassword start");
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params.get(0) == null || params.get(1) == null || params.get(2) == null || params.size() != 3) {
+            if (params.size() != 3 || params.get(0) == null || params.get(1) == null || params.get(2) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -584,10 +569,10 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_setOfflineAccountPassword", version = 1.0, preCompatible = true)
     public CmdResponse setOfflineAccountPassword(List params) {
         Log.debug("ac_setOfflineAccountPassword start");
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params.get(0) == null || params.get(1) == null || params.get(2) == null || params.get(3) == null || params.size() != 4) {
+            if (params.size() != 4 || params.get(0) == null || params.get(1) == null || params.get(2) == null || params.get(3) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -620,10 +605,10 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_updatePassword", version = 1.0, preCompatible = true)
     public CmdResponse updatePassword(List params) {
         Log.debug("ac_updatePassword start");
-        Map<String, Boolean> map = new HashMap<>();
+        Map<String, Boolean> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params.get(0) == null || params.get(1) == null || params.get(2) == null || params.get(3) == null || params.size() != 4) {
+            if (params.size() != 4 || params.get(0) == null || params.get(1) == null || params.get(2) == null || params.get(3) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -650,16 +635,16 @@ public class AccountCmd extends BaseCmd {
     /**
      * [离线钱包修改密码] 根据原密码修改账户密码
      *
-     * @param params
+     * @param params [chainId,address,priKey,password,newPassword]
      * @return
      */
     @CmdAnnotation(cmd = "ac_updateOfflineAccountPassword", version = 1.0, preCompatible = true)
     public CmdResponse updateOfflineAccountPassword(List params) {
-        Log.debug("ac_setOfflineAccountPassword start");
-        Map<String, String> map = new HashMap<>();
+        Log.debug("ac_updateOfflineAccountPassword start");
+        Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params.get(0) == null || params.get(1) == null || params.get(2) == null || params.get(3) == null || params.get(4) == null || params.size() != 5) {
+            if (params.size() != 5 || params.get(0) == null || params.get(1) == null || params.get(2) == null || params.get(3) == null || params.get(4) == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -675,14 +660,86 @@ public class AccountCmd extends BaseCmd {
             //账户新密码
             String newPassword = params.get(4) != null ? (String) params.get(4) : null;
 
-
             //set account password
             String encryptedPriKey = accountService.changeOfflinePassword(chainId, address, priKey, password, newPassword);
             map.put("encryptedPriKey", encryptedPriKey);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode(), null);
         }
-        Log.debug("ac_setOfflineAccountPassword end");
+        Log.debug("ac_updateOfflineAccountPassword end");
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * 根据账户地址获取账户是否加密
+     * Whether the account is encrypted according to the account address.
+     *
+     * @param params [chainId,address]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_isEncrypted", version = 1.0, preCompatible = true)
+    public CmdResponse isEncrypted(List params) {
+        Log.debug("ac_isEncrypted start");
+        Map<String, Boolean> map = new HashMap<>(1);
+        try {
+            // check parameters
+            if (params.size() != 2 || params.get(0) == null || params.get(1) == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户地址
+            String address = params.get(1) != null ? (String) params.get(1) : null;
+            //账户是否加密
+            boolean result = accountService.isEncrypted(chainId, address);
+            map.put("value", result);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        }
+        Log.debug("ac_isEncrypted end");
+        return success(AccountConstant.SUCCESS_MSG, map);
+    }
+
+    /**
+     * 验证账户密码是否正确
+     * verify that the account password is correct
+     *
+     * @param params [chainId,address,password]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_validationPassword", version = 1.0, preCompatible = true)
+    public CmdResponse validationPassword(List params) {
+        Log.debug("ac_validationPassword start");
+        Map<String, Boolean> map = new HashMap<>(1);
+        try {
+            // check parameters
+            if (params.size() != 3 || params.get(0) == null || params.get(1) == null || params.get(2) == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+
+            // parse params
+            //链ID
+            short chainId = 0;
+            chainId += (Integer) params.get(0);
+            //账户地址
+            String address = params.get(1) != null ? (String) params.get(1) : null;
+            //账户密码
+            String password = params.get(2) != null ? (String) params.get(2) : null;
+
+            //check the account is exist
+            Account account = accountService.getAccount(chainId, address);
+            if (null == account) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            //verify that the account password is correct
+            boolean result = account.validatePassword(password);
+            map.put("value", result);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode(), null);
+        }
+        Log.debug("ac_validationPassword end");
         return success(AccountConstant.SUCCESS_MSG, map);
     }
 
