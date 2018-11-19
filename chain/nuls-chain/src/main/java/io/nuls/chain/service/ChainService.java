@@ -1,7 +1,8 @@
 package io.nuls.chain.service;
 
-import io.nuls.base.data.chain.Chain;
-import io.nuls.base.data.chain.ChainAsset;
+
+import io.nuls.chain.model.dto.ChainAsset;
+import io.nuls.chain.model.txdata.Chain;
 
 import java.util.List;
 

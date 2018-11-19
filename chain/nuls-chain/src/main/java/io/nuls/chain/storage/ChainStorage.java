@@ -1,6 +1,7 @@
 package io.nuls.chain.storage;
 
-import io.nuls.base.data.chain.Chain;
+
+import io.nuls.chain.model.txdata.Chain;
 
 /**
  * @author tangyi

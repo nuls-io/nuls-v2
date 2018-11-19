@@ -1,15 +1,14 @@
 package io.nuls.chain.service.impl;
 
-import io.nuls.base.data.chain.Asset;
-import io.nuls.base.data.chain.Chain;
-import io.nuls.base.data.chain.ChainAsset;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.model.dto.ChainAsset;
+import io.nuls.chain.model.txdata.Asset;
+import io.nuls.chain.model.txdata.Chain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.storage.AssetStorage;
 import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.storage.ChainStorage;
-import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.thread.TimeService;

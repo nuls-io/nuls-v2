@@ -1,8 +1,8 @@
 package io.nuls.chain.service.impl;
 
-import io.nuls.base.data.chain.Chain;
-import io.nuls.base.data.chain.ChainAsset;
 import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.model.dto.ChainAsset;
+import io.nuls.chain.model.txdata.Chain;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.storage.ChainStorage;
