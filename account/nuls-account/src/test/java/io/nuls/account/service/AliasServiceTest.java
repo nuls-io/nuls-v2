@@ -55,7 +55,7 @@ public class AliasServiceTest {
     public void saveAliasTest() throws Exception {
         // create account
         AliasPo aliasPo = AliasStorageServiceTest.createAlias();
-        boolean result = aliasService.saveAlias(aliasPo);
+        boolean result = aliasService.aliasTxCommit(aliasPo);
         assertTrue(result);
         Account account = accountService.getAccount(chainId, AddressTool.getStringAddressByBytes(aliasPo.getAddress()));
         assertNotNull(account);

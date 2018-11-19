@@ -38,6 +38,7 @@ import io.nuls.account.util.AccountTool;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.AESEncrypt;
@@ -79,7 +80,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public boolean saveAlias(AliasPo aliaspo) throws NulsException {
+    public boolean aliasTxCommit(AliasPo aliaspo) throws NulsException {
         boolean result = false;
         try {
             result = aliasStorageService.saveAlias(aliaspo);
@@ -128,6 +129,16 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         return result;
     }
 
+    @Override
+    public Result<String> setAlias(short chainId, String address, String password, String aliasName) {
+        return null;
+    }
+
+    @Override
+    public Result<String> getAliasFee(short chaindId, String address, String aliasName) {
+        return null;
+    }
+
     /**
      * get the alias by address
      *
@@ -151,6 +162,21 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             return null;
         }
         return result.getAlias();
+    }
+
+    @Override
+    public boolean isAliasUsable(short chainId, String alias) {
+        return false;
+    }
+
+    @Override
+    public String setMutilSigAlias(short chainId, String address, String signAddress, String password, String alias) {
+        return null;
+    }
+
+    @Override
+    public boolean aliasTxValidate(short chainId, String alias) {
+        return false;
     }
 
 
