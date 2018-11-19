@@ -22,28 +22,33 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.info;
+package io.nuls.chain.model.tx;
+
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.Transaction;
+import io.nuls.chain.info.ChainTxConstants;
+import io.nuls.chain.model.tx.txdata.ChainDestroyTx;
+import io.nuls.tools.exception.NulsException;
 
 /**
- * @program: nuls2
- * @description: 交易类型常量
+ * @program: nuls2.0
+ * @description: 跨链注册交易
  * @author: lan
  * @create: 2018/11/19
  **/
-public interface ChainTxConstants {
-    /**
-     * 交易注册
-     */
-    String TX_REGISTER_CMD="tx_register";
-    /**
-     * 创建交易
-     */
-    String TX_NEW_TX_CMD="newTx";
+public class AssetRegTransaction extends Transaction<ChainDestroyTx> {
 
+    public AssetRegTransaction(int type) {
+        super(ChainTxConstants.TX_TYPE_ADD_CHAIN_ASSET);
+    }
 
+    @Override
+    protected ChainDestroyTx parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new ChainDestroyTx());
+    }
 
-    int TX_TYPE_REGISTER_CHAIN = 5001;
-    int TX_TYPE_DESTROY_CHAIN = 5002;
-    int TX_TYPE_ADD_CHAIN_ASSET = 5011;
-    int TX_TYPE_DISABLE_CHAIN_ASSET = 5012;
+    @Override
+    public String getInfo(byte[] address) {
+        return null;
+    }
 }

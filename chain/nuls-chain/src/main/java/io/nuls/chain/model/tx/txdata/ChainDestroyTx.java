@@ -1,4 +1,4 @@
-package io.nuls.chain.model.txdata;
+package io.nuls.chain.model.tx.txdata;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -15,7 +15,7 @@ import java.util.Set;
  * @date 2018/11/7
  * @description
  */
-public class ChainRegTx extends TransactionLogicData {
+public class ChainDestroyTx extends TransactionLogicData {
     private int chainId;
     private String name;
     private String addressType;
