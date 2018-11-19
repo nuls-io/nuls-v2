@@ -1,6 +1,6 @@
 package io.nuls.chain.storage.impl;
 
-import io.nuls.base.data.chain.ChainAsset;
+import io.nuls.chain.model.dto.ChainAsset;
 import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
@@ -98,7 +98,7 @@ public class ChainAssetStorageImpl implements ChainAssetStorage, InitializingBea
      * @return ChainAsset object
      */
     @Override
-    public List<ChainAsset> getByChain(short chainId) {
+    public List<ChainAsset> getByChain(int chainId) {
         List<byte[]> bytesList = RocksDBService.valueList(TBL);
         List<ChainAsset> chainAssetList = new ArrayList<>();
         for (byte[] bytes : bytesList) {

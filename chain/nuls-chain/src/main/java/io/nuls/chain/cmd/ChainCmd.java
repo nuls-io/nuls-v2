@@ -1,9 +1,10 @@
 package io.nuls.chain.cmd;
 
-import io.nuls.base.data.chain.Asset;
-import io.nuls.base.data.chain.Chain;
-import io.nuls.base.data.chain.Seed;
+
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.model.dto.Asset;
+import io.nuls.chain.model.dto.Chain;
+import io.nuls.chain.model.dto.Seed;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -73,7 +74,8 @@ public class ChainCmd extends BaseCmd {
             chain.setSeedList(seedList);
             chain.setCreateTime(TimeService.currentTimeMillis());
 
-            // TODO
+            // TODO 组装交易发送
+
             return success("sent newTx", chain);
         } catch (Exception e) {
             Log.error(e);
@@ -103,8 +105,12 @@ public class ChainCmd extends BaseCmd {
     public CmdResponse chainRegCommit(List params) {
         try {
             Chain chain = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Chain.class);
-
             chainService.saveChain(chain);
+
+            int chainId = Integer.valueOf(String.valueOf(params.get(0)));
+            String txHex = String.valueOf(params.get(1));
+            String secondaryData = String.valueOf(params.get(2));
+            //TODO:通知网络模块创建链
 
             return success("chainRegCommit", null);
         } catch (Exception e) {
@@ -116,11 +122,40 @@ public class ChainCmd extends BaseCmd {
     @CmdAnnotation(cmd = "chainRegRollback", version = 1.0, preCompatible = true)
     public CmdResponse chainRegRollback(List params) {
         try {
+            //TODO:通知网络模块注销链
             return success("chainRegRollback", null);
         } catch (Exception e) {
             Log.error(e);
             return failed(ErrorCode.init("-100"), e.getMessage());
         }
+    }
+
+    /**
+     * 删除链
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "chainDestroy", version = 1.0, preCompatible = true)
+    public CmdResponse chainDestroy(List params) {
+        //TODO 组装交易发送
+        return null;
+    }
+
+    @CmdAnnotation(cmd = "chainDestroyCommit", version = 1.0, preCompatible = true)
+    public CmdResponse chainDestroyCommit(List params) {
+        //TODO:通知网络模块注销链
+        return null;
+    }
+
+    @CmdAnnotation(cmd = "chainDestroyRollback", version = 1.0, preCompatible = true)
+    public CmdResponse chainDestroyRollback(List params) {
+        //TODO:通知网络模块回滚注销链
+        return null;
+    }
+    @CmdAnnotation(cmd = "chainDestroyValidator", version = 1.0, preCompatible = true)
+    public CmdResponse chainDestroyValidator(List params) {
+        //TODO
+        return null;
     }
 
     @CmdAnnotation(cmd = "setChainAssetCurrentNumber", version = 1.0, preCompatible = true)
