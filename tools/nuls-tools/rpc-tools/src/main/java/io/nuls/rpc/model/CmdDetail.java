@@ -42,8 +42,7 @@ public class CmdDetail {
     private int methodMinEvent;
     private int methodMinPeriod;
     private String methodScope;
-    private List<Parameter> parameters;
-    @JsonIgnore
+    private List<CmdParameter> parameters;
     private double version;
     @JsonIgnore
     private String invokeClass;
@@ -67,14 +66,6 @@ public class CmdDetail {
 
     public void setMethodDescription(String methodDescription) {
         this.methodDescription = methodDescription;
-    }
-
-    public double getVersion() {
-        return version;
-    }
-
-    public void setVersion(double version) {
-        this.version = version;
     }
 
     public int getMethodMinEvent() {
@@ -101,12 +92,20 @@ public class CmdDetail {
         this.methodScope = methodScope;
     }
 
-    public List<Parameter> getParameters() {
+    public List<CmdParameter> getParameters() {
         return parameters;
     }
 
-    public void setParameters(List<Parameter> parameters) {
+    public void setParameters(List<CmdParameter> parameters) {
         this.parameters = parameters;
+    }
+
+    public double getVersion() {
+        return version;
+    }
+
+    public void setVersion(double version) {
+        this.version = version;
     }
 
     public String getInvokeClass() {

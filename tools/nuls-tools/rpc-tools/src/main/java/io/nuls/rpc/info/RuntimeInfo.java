@@ -135,7 +135,7 @@ public class RuntimeInfo {
         List<String> remoteUriList = new ArrayList<>();
         for (ModuleInfo module : RuntimeInfo.remoteModuleMap.values()) {
             for (CmdDetail cmdDetail : module.getCmdDetailList()) {
-                if (cmdDetail.getCmd().equals(cmdRequest.getCmd())) {
+                if (cmdDetail.getMethodName().equals(cmdRequest.getCmd())) {
                     remoteUriList.add("ws://" + module.getAddr() + ":" + module.getPort());
                     break;
                 }
@@ -157,7 +157,7 @@ public class RuntimeInfo {
 
         CmdDetail find = null;
         for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
-            if (!cmdDetail.getCmd().equals(cmd) || cmdDetail.getVersion() < minVersion) {
+            if (!cmdDetail.getMethodName().equals(cmd) || cmdDetail.getVersion() < minVersion) {
                 continue;
             }
 
@@ -186,7 +186,7 @@ public class RuntimeInfo {
 
         CmdDetail find = null;
         for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
-            if (!cmdDetail.getCmd().equals(cmd)) {
+            if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
 
@@ -222,7 +222,7 @@ public class RuntimeInfo {
                 if (!isRegister(cmdDetail)) {
                     RuntimeInfo.local.getCmdDetailList().add(cmdDetail);
                 } else {
-                    throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getCmd() + "-" + cmdDetail.getVersion());
+                    throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
             }
         }
@@ -233,14 +233,36 @@ public class RuntimeInfo {
      * If the annotation is CmdAnnotation, it means that the cmd needs to be registered
      */
     private static CmdDetail annotation2CmdDetail(Method method) {
+        CmdDetail cmdDetail = null;
+        List<CmdParameter> cmdParameters = new ArrayList<>();
         Annotation[] annotations = method.getDeclaredAnnotations();
         for (Annotation annotation : annotations) {
             if (CmdAnnotation.class.getName().equals(annotation.annotationType().getName())) {
                 CmdAnnotation cmdAnnotation = (CmdAnnotation) annotation;
-                return new CmdDetail(cmdAnnotation.cmd(), cmdAnnotation.version(), method.getDeclaringClass().getName(), method.getName());
+                cmdDetail = new CmdDetail();
+                cmdDetail.setMethodName(cmdAnnotation.cmd());
+                cmdDetail.setMethodDescription(cmdAnnotation.description());
+                cmdDetail.setMethodMinEvent(cmdAnnotation.minEvent());
+                cmdDetail.setMethodMinPeriod(cmdAnnotation.minPeriod());
+                cmdDetail.setMethodScope(cmdAnnotation.scope());
+                cmdDetail.setVersion(cmdAnnotation.version());
+                cmdDetail.setInvokeClass(method.getDeclaringClass().getName());
+                cmdDetail.setInvokeMethod(method.getName());
+            }
+            if (Parameters.class.getName().equals(annotation.annotationType().getName())) {
+                Parameters parameters = (Parameters) annotation;
+                for (Parameter parameter : parameters.value()) {
+                    CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());
+                    cmdParameters.add(cmdParameter);
+                }
             }
         }
-        return null;
+        if (cmdDetail == null) {
+            return null;
+        }
+        cmdDetail.setParameters(cmdParameters);
+
+        return cmdDetail;
     }
 
     /**
@@ -251,7 +273,7 @@ public class RuntimeInfo {
     private static boolean isRegister(CmdDetail sourceCmdDetail) {
         boolean exist = false;
         for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
-            if (cmdDetail.getCmd().equals(sourceCmdDetail.getCmd()) && cmdDetail.getVersion() == sourceCmdDetail.getVersion()) {
+            if (cmdDetail.getMethodName().equals(sourceCmdDetail.getMethodName()) && cmdDetail.getVersion() == sourceCmdDetail.getVersion()) {
                 exist = true;
                 break;
             }

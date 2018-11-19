@@ -18,11 +18,11 @@ public enum ModuleE {
     TX("tx", "Transaction")
     ;
 
-    public final String prefix;
+    public final String abbr;
     public final String name;
 
-    ModuleE(String prefix, String name) {
-        this.prefix = prefix;
+    ModuleE(String abbr, String name) {
+        this.abbr = abbr;
         this.name = name;
     }
 }

@@ -27,6 +27,10 @@
 
 package io.nuls.test;
 
+import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.server.WsServer;
+import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
 
 /**
@@ -38,6 +42,9 @@ public class WsM1 {
     @Test
     public void test() throws Exception {
 
-//        ModuleE.AC.name="a";
+        WsServer wsServer = new WsServer(8887);
+
+        wsServer.init(ModuleE.CM.prefix,new String[]{},"io.nuls.rpc.cmd.test");
+        System.out.println(JSONUtils.obj2json(RuntimeInfo.local));
     }
 }
