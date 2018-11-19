@@ -30,4 +30,6 @@ public interface TransactionService {
      * @param number number of tables 分表的数量
      */
     void createTable(String tableName, String indexName, int number);
+
+    void createTxTables(String tableName, String indexName, int number);
 }
