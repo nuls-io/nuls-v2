@@ -25,21 +25,52 @@
  *
  */
 
-package io.nuls.test;
-
-import io.nuls.rpc.info.RuntimeInfo;
-import org.junit.Test;
+package io.nuls.rpc.model;
 
 /**
  * @author tangyi
- * @date 2018/10/30
+ * @date 2018/10/19
  * @description
  */
-public class WsKernel {
+public class ModuleInfo {
+    private String abbr;
+    private String address;
+    private int port;
+    private RegisterApi registerApi;
 
-    @Test
-    public void kernel() throws Exception {
-        // url: "ws://127.0.0.1:8887"
-        RuntimeInfo.mockKernel();
+    public ModuleInfo() {
     }
+
+    public String getAbbr() {
+        return abbr;
+    }
+
+    public void setAbbr(String abbr) {
+        this.abbr = abbr;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
+    }
+
+    public RegisterApi getRegisterApi() {
+        return registerApi;
+    }
+
+    public void setRegisterApi(RegisterApi registerApi) {
+        this.registerApi = registerApi;
+    }
+
 }

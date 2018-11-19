@@ -54,10 +54,6 @@ public class WebSocketHandler {
      */
     public static String callCmd(String formParamAsJson) throws Exception {
 
-        if (!RuntimeInfo.local.isAvailable()) {
-            return Constants.SERVICE_NOT_AVAILABLE;
-        }
-
         Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
         double minVersion = (Double) jsonMap.get("minVersion");
         CmdDetail cmdDetail = minVersion >= 0
@@ -67,7 +63,7 @@ public class WebSocketHandler {
             return Constants.CMD_NOT_FOUND;
         }
 
-        CmdResponse cmdResponse = buildResponse(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), (List) jsonMap.get("params"));
+        CmdResponse cmdResponse = buildResponse(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), (List) jsonMap.get("MessageData"));
         cmdResponse.setId((Integer) jsonMap.get("id"));
         cmdResponse.setVersion(cmdDetail.getVersion());
 

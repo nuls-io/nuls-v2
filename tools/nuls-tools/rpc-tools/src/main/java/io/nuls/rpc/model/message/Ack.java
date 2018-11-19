@@ -8,6 +8,10 @@ package io.nuls.rpc.model.message;
 public class Ack {
     private String requestID;
 
+    public Ack(String requestID) {
+        this.requestID = requestID;
+    }
+
     public String getRequestID() {
         return requestID;
     }

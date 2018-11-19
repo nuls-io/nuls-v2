@@ -39,5 +39,11 @@ public @interface CmdAnnotation {
 
     double version();
 
-    boolean preCompatible();
+    String scope();
+
+    int minEvent();
+
+    int minPeriod();
+
+    String description();
 }
