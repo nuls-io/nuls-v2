@@ -1,4 +1,6 @@
-package io.nuls.h2.entity;
+package io.nuls.transaction.model.po;
+
+import io.nuls.transaction.constant.TransactionConstant;
 
 /**
  * @author: Charlie
@@ -29,8 +31,8 @@ public class TransactionPo {
      * 得到本条数据存在哪张表里面
      * @return
      */
-    public int getTableIndex(){
-        return this.address.hashCode() % 100;
+    public int createTableIndex(){
+        return (this.address.hashCode() & Integer.MAX_VALUE) % TransactionConstant.H2_TX_TABLE_NUMBER;
     }
 
     public String getAddress() {

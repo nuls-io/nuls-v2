@@ -43,6 +43,12 @@
         </dependency>
 
         <dependency>
+            <groupId>io.nuls.nuls-tools</groupId>
+            <artifactId>h2-tools</artifactId>
+            <version>${tool.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
@@ -63,5 +69,17 @@
                 </configuration>
             </plugin>
         </plugins>
+
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <includes>
+                    <include>**/*.xml</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
     </build>
+
 </project>
