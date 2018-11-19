@@ -25,6 +25,7 @@ import static java.lang.System.arraycopy;
  * rocksdb implements
  * Created by wangkun23 on 2018/11/19.
  */
+//@Service
 public class RocksDbDataSource implements DbSource<byte[]> {
 
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger("db");
@@ -47,14 +48,16 @@ public class RocksDbDataSource implements DbSource<byte[]> {
         RocksDB.loadLibrary();
     }
 
-    public RocksDbDataSource(String databaseDir) {
-        this.databaseDir = databaseDir;
+    public RocksDbDataSource() {
+
     }
 
-    public RocksDbDataSource(String databaseDir, String name) {
+    public String getDatabaseDir() {
+        return databaseDir;
+    }
+
+    public void setDatabaseDir(String databaseDir) {
         this.databaseDir = databaseDir;
-        this.name = name;
-        logger.debug("New RocksDbDataSource: " + name);
     }
 
     @Override

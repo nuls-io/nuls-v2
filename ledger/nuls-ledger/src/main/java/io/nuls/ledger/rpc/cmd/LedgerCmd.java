@@ -35,12 +35,10 @@ public class LedgerCmd extends BaseCmd {
         for (Object param : params) {
             logger.info("param {}", param);
         }
-        //TODO.. 验证参数个数个格式
+        //TODO.. 验证参数个数和格式
         String address = (String) params.get(0);
         BigInteger balance = ledgerService.getBalance(address);
-        Map<String, String> data = new HashMap<>();
-        data.put("result", balance.toString());
-        return success(0, "", data);
+        return success("", balance);
     }
 
     /**
@@ -55,6 +53,6 @@ public class LedgerCmd extends BaseCmd {
             logger.info("param {}", param);
         }
         Map<String, String> data = new HashMap<>();
-        return success(0, "", data);
+        return success("", data);
     }
 }

@@ -1,5 +1,7 @@
 package io.nuls.ledger;
 
+import io.nuls.db.service.RocksDBService;
+import io.nuls.ledger.config.AppConfig;
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
@@ -15,6 +17,10 @@ public class LedgerBootstrap {
     public static void main(String[] args) {
         Log.info("ledger Bootstrap start...");
         try {
+            AppConfig.loadModuleConfig();
+
+            initRocksDb();
+
             initServer();
             //springLite容器初始化
             SpringLiteContext.init("io.nuls.ledger", new ModularServiceMethodInterceptor());
@@ -32,15 +38,27 @@ public class LedgerBootstrap {
      *
      * @throws Exception
      */
-    public static void initServer(){
+    public static void initServer() {
         try {
             WsServer server = new WsServer(8956);
             server.init("ledger", new String[]{}, "io.nuls.ledger.rpc.cmd");
             server.start();
             CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
-        }catch (Exception e)
-        {
-            Log.error("Account initServer failed", e);
+        } catch (Exception e) {
+            Log.error("ledger initServer failed", e);
+        }
+    }
+
+
+    /**
+     * 初始化数据库
+     */
+    public static void initRocksDb() {
+        try {
+            RocksDBService.init(AppConfig.moduleConfig.getDatabaseDir());
+            RocksDBService.createTable(AppConfig.moduleConfig.getDatabaseName());
+        } catch (Exception e) {
+            Log.error(e);
         }
     }
 }

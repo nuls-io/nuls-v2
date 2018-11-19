@@ -7,13 +7,14 @@ import java.math.BigInteger;
  */
 public class AccountState {
 
+    private final Integer chaiId;
 
     private final BigInteger nonce;
 
     private final BigInteger balance;
 
-
-    public AccountState(BigInteger nonce, BigInteger balance) {
+    public AccountState(Integer chaiId, BigInteger nonce, BigInteger balance) {
+        this.chaiId = chaiId;
         this.nonce = nonce;
         this.balance = balance;
     }
