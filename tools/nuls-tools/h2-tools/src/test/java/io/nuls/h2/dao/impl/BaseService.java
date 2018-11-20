@@ -36,7 +36,7 @@ public abstract class BaseService<T extends BaseMapper> {
 
     public static SqlSessionFactory sqlSessionFactory;
 
-    private Class<T> mapperClass;
+   /* private Class<T> mapperClass;
 
     public BaseService(Class<T> mapperClass) {
         this.mapperClass = mapperClass;
@@ -50,5 +50,5 @@ public abstract class BaseService<T extends BaseMapper> {
         SqlSession session = getSession();
         return session.getMapper(mapperClass);
     }
-
+    */
 }

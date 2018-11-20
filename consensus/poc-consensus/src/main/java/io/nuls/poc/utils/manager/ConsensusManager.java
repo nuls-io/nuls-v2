@@ -13,7 +13,7 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.storage.PunihStorageService;
-import io.nuls.poc.utils.PoConvertUtil;
+import io.nuls.poc.utils.util.PoConvertUtil;
 import io.nuls.poc.utils.compare.AgentComparator;
 import io.nuls.poc.utils.compare.DepositComparator;
 import io.nuls.poc.utils.compare.PunishLogComparator;
@@ -49,19 +49,9 @@ public class ConsensusManager {
     private Map<Integer,List<Agent>> allAgentMap = new HashMap<>();
 
     /**
-     * 存放各条链处于打包状态的共识节点信息列表
-     * */
-    private Map<Integer,List<Agent>> validAgentMap = new HashMap<>();
-
-    /**
      * 存放各条链所有的共识信息列表
      * */
      private Map<Integer,List<Deposit>> allDepositMap = new HashMap<>();
-
-     /**
-     * 存放各条条链所有处于共识中的共识信息
-     * */
-    private Map<Integer,List<Deposit>> validDepositMap = new HashMap<>();
 
     /**
      * 存放各条链黄牌交易列表
@@ -127,19 +117,13 @@ public class ConsensusManager {
      * */
     public void loadAgents(int chain_id) throws Exception{
         List<Agent> allAgentList = new ArrayList<>();
-        List<Agent> validAgentList = new ArrayList<>();
         List<AgentPo> poList = this.agentStorageService.getList(chain_id);
         for (AgentPo po : poList) {
             Agent agent = PoConvertUtil.poToAgent(po);
             allAgentList.add(agent);
-            if(agent.getDelHeight() == -1){
-                validAgentList.add(agent);
-            }
         }
         Collections.sort(allAgentList, new AgentComparator());
-        Collections.sort(validAgentList, new AgentComparator());
         allAgentMap.put(chain_id,allAgentList);
-        validAgentMap.put(chain_id,validAgentList);
     }
 
     /**
@@ -147,19 +131,13 @@ public class ConsensusManager {
      * */
     public void loadDeposits(int chain_id) throws Exception{
         List<Deposit> allDepositList = new ArrayList<>();
-        List<Deposit> validDepositList = new ArrayList<>();
         List<DepositPo> poList = depositStorageService.getList(chain_id);
         for (DepositPo po : poList) {
             Deposit deposit = PoConvertUtil.poToDeposit(po);
             allDepositList.add(deposit);
-            if(deposit.getDelHeight() == -1){
-                validDepositList.add(deposit);
-            }
         }
         Collections.sort(allDepositList, new DepositComparator());
-        Collections.sort(validDepositList, new DepositComparator());
         allDepositMap.put(chain_id,allDepositList);
-        validDepositMap.put(chain_id,validDepositList);
     }
 
     /**
@@ -212,28 +190,12 @@ public class ConsensusManager {
         this.allAgentMap = allAgentMap;
     }
 
-    public Map<Integer, List<Agent>> getValidAgentMap() {
-        return validAgentMap;
-    }
-
-    public void setValidAgentMap(Map<Integer, List<Agent>> validAgentMap) {
-        this.validAgentMap = validAgentMap;
-    }
-
     public Map<Integer, List<Deposit>> getAllDepositMap() {
         return allDepositMap;
     }
 
     public void setAllDepositMap(Map<Integer, List<Deposit>> allDepositMap) {
         this.allDepositMap = allDepositMap;
-    }
-
-    public Map<Integer, List<Deposit>> getValidDepositMap() {
-        return validDepositMap;
-    }
-
-    public void setValidDepositMap(Map<Integer, List<Deposit>> validDepositMap) {
-        this.validDepositMap = validDepositMap;
     }
 
     public Map<Integer, List<PunishLogPo>> getYellowPunishMap() {

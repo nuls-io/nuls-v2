@@ -22,52 +22,28 @@
  * SOFTWARE.
  *
  */
-package io.nuls.poc.model.po;
-
-
-import io.nuls.base.data.BlockHeader;
+package io.nuls.chain.info;
 
 /**
- * @author: Charlie
- * @date: 2018/9/4
- */
-public class EvidencePo {
+ * @program: nuls2
+ * @description: 交易类型常量
+ * @author: lan
+ * @create: 2018/11/19
+ **/
+public interface ChainTxConstants {
+    /**
+     * 交易注册
+     */
+    String TX_REGISTER_CMD="tx_register";
+    /**
+     * 创建交易
+     */
+    String TX_NEW_TX_CMD="newTx";
 
-    private long roundIndex;
-    private BlockHeader blockHeader1;
-    private BlockHeader blockHeader2;
 
-    public EvidencePo(){
 
-    }
-
-    public EvidencePo(long roundIndex, BlockHeader blockHeader1, BlockHeader blockHeader2){
-        this.roundIndex = roundIndex;
-        this.blockHeader1 = blockHeader1;
-        this.blockHeader2 = blockHeader2;
-    }
-
-    public long getRoundIndex() {
-        return roundIndex;
-    }
-
-    public void setRoundIndex(long roundIndex) {
-        this.roundIndex = roundIndex;
-    }
-
-    public BlockHeader getBlockHeader1() {
-        return blockHeader1;
-    }
-
-    public void setBlockHeader1(BlockHeader blockHeader1) {
-        this.blockHeader1 = blockHeader1;
-    }
-
-    public BlockHeader getBlockHeader2() {
-        return blockHeader2;
-    }
-
-    public void setBlockHeader2(BlockHeader blockHeader2) {
-        this.blockHeader2 = blockHeader2;
-    }
+    int TX_TYPE_REGISTER_CHAIN = 5001;
+    int TX_TYPE_DESTROY_CHAIN = 5002;
+    int TX_TYPE_ADD_CHAIN_ASSET = 5011;
+    int TX_TYPE_DISABLE_CHAIN_ASSET = 5012;
 }

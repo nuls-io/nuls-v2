@@ -1,4 +1,4 @@
-package io.nuls.base.data.chain;
+package io.nuls.chain.model.dto;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -16,7 +16,7 @@ import java.util.List;
  * @description
  */
 public class Chain extends BaseNulsData {
-    private short chainId;
+    private int chainId;
     private String name;
     private String addressType;
     private int magicNumber;
@@ -29,12 +29,13 @@ public class Chain extends BaseNulsData {
     private boolean available;
     private long createTime;
     private long lastUpdateTime;
+    private byte[] address;
 
-    public short getChainId() {
+    public int getChainId() {
         return chainId;
     }
 
-    public void setChainId(short chainId) {
+    public void setChainId(int chainId) {
         this.chainId = chainId;
     }
 
@@ -134,9 +135,17 @@ public class Chain extends BaseNulsData {
         this.lastUpdateTime = lastUpdateTime;
     }
 
+    public byte[] getAddress() {
+        return address;
+    }
+
+    public void setAddress(byte[] address) {
+        this.address = address;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeShort(chainId);
+        stream.writeUint16(chainId);
         stream.writeString(name);
         stream.writeString(addressType);
         stream.writeUint32(magicNumber);
@@ -151,11 +160,12 @@ public class Chain extends BaseNulsData {
         stream.writeBoolean(available);
         stream.writeUint48(createTime);
         stream.writeUint48(lastUpdateTime);
+        stream.writeBytesWithLength(address);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readShort();
+        this.chainId = byteBuffer.readUint16();
         this.name = byteBuffer.readString();
         this.addressType = byteBuffer.readString();
         this.magicNumber = byteBuffer.readInt32();
@@ -171,13 +181,14 @@ public class Chain extends BaseNulsData {
         this.available = byteBuffer.readBoolean();
         this.createTime = byteBuffer.readUint48();
         this.lastUpdateTime = byteBuffer.readUint48();
+        this.address = byteBuffer.readByLengthByte();
     }
 
     @Override
     public int size() {
         int size = 0;
         // chainId;
-        size += SerializeUtils.sizeOfInt16();
+        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(name);
         size += SerializeUtils.sizeOfString(addressType);
         // magicNumber;
@@ -201,6 +212,9 @@ public class Chain extends BaseNulsData {
         size += SerializeUtils.sizeOfUint48();
         // lastUpdateTime;
         size += SerializeUtils.sizeOfUint48();
+        size+= SerializeUtils.sizeOfBytes(address);
         return size;
     }
+
+
 }

@@ -36,6 +36,8 @@ import java.util.List;
  * 2018/11/12
  */
 public class MeetingMember implements Comparable<MeetingMember> {
+    //所属轮次下标
+    private long roundIndex;
     //轮次开始打包时间
     private long roundStartTime;
     //节点在轮次中的下标（第几个出块）
@@ -114,5 +116,13 @@ public class MeetingMember implements Comparable<MeetingMember> {
 
     public void setRoundStartTime(long roundStartTime) {
         this.roundStartTime = roundStartTime;
+    }
+
+    public long getRoundIndex() {
+        return roundIndex;
+    }
+
+    public void setRoundIndex(long roundIndex) {
+        this.roundIndex = roundIndex;
     }
 }

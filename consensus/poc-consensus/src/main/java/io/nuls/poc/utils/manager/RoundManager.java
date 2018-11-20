@@ -395,6 +395,7 @@ public class RoundManager {
             agent.setCreditVal(0);
             member.setRoundStartTime(round.getStartTime());
             member.setAgent(agent);
+            member.setRoundIndex(round.getIndex());
             memberList.add(member);
         }
         List<Agent> agentList = getAliveAgentList(chain_id,startBlockHeader.getHeight());
@@ -407,6 +408,7 @@ public class RoundManager {
                 agent.setTotalDeposit(agent.getTotalDeposit().add(dtx.getDeposit()));
             }
             member.setDepositList(cdlist);
+            member.setRoundIndex(round.getIndex());
             boolean isItIn = agent.getTotalDeposit().isGreaterOrEquals(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT);
             if (isItIn) {
                 agent.setCreditVal(calcCreditVal(chain_id,member, startBlockHeader));

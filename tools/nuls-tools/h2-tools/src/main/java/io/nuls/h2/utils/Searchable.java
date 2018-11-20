@@ -94,5 +94,12 @@ public class Searchable {
     public void removeAll() {
     	operators = new ArrayList<Condition>();
     }
-    
+
+	public List<Condition> getOperators() {
+		return operators;
+	}
+
+	public void setOperators(List<Condition> operators) {
+		this.operators = operators;
+	}
 }

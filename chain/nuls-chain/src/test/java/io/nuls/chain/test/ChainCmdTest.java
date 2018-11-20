@@ -1,9 +1,10 @@
 package io.nuls.chain.test;
 
-import io.nuls.base.data.chain.Chain;
-import io.nuls.base.data.chain.Seed;
+
 import io.nuls.chain.ChainBootstrap;
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.model.dto.Chain;
+import io.nuls.chain.model.dto.Seed;
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.tools.thread.TimeService;
 import org.junit.Before;

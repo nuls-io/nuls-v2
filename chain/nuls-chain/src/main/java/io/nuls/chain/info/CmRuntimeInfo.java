@@ -12,7 +12,7 @@ import java.util.Map;
 public class CmRuntimeInfo {
     public static String dataPath;
 
-    public static String getAssetKey(short chainId, long assetId) {
+    public static String getAssetKey(int chainId, long assetId) {
         return chainId + "-" + assetId;
     }
 

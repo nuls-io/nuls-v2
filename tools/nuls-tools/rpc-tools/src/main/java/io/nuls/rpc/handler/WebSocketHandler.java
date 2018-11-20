@@ -32,6 +32,8 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.CmdResponse;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -54,24 +56,30 @@ public class WebSocketHandler {
      */
     public static String callCmd(String formParamAsJson) throws Exception {
 
-        if (!RuntimeInfo.local.isAvailable()) {
-            return Constants.SERVICE_NOT_AVAILABLE;
-        }
-
         Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
-        double minVersion = (Double) jsonMap.get("minVersion");
-        CmdDetail cmdDetail = minVersion >= 0
-                ? RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"))
-                : RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"));
-        if (cmdDetail == null) {
-            return Constants.CMD_NOT_FOUND;
+        MessageType messageType = MessageType.valueOf(jsonMap.get("messageType").toString());
+        switch (messageType) {
+            case NegotiateConnection:
+                Message message = RuntimeInfo.buildMessage((Integer) jsonMap.get("messageId"));
+                message.setMessageType(MessageType.NegotiateConnectionResponse.name());
+                message.setMessageData(RuntimeInfo.buildNegotiateConnectionResponse());
+                return JSONUtils.obj2json(message);
+            default:
+                double minVersion = (Double) jsonMap.get("minVersion");
+                CmdDetail cmdDetail = minVersion >= 0
+                        ? RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"))
+                        : RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"));
+                if (cmdDetail == null) {
+                    return Constants.CMD_NOT_FOUND;
+                }
+
+                CmdResponse cmdResponse = buildResponse(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), (List) jsonMap.get("MessageData"));
+                cmdResponse.setId((Integer) jsonMap.get("id"));
+                cmdResponse.setVersion(cmdDetail.getVersion());
+
+                return JSONUtils.obj2json(cmdResponse);
         }
 
-        CmdResponse cmdResponse = buildResponse(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), (List) jsonMap.get("params"));
-        cmdResponse.setId((Integer) jsonMap.get("id"));
-        cmdResponse.setVersion(cmdDetail.getVersion());
-
-        return JSONUtils.obj2json(cmdResponse);
     }
 
     /**

@@ -12,6 +12,8 @@ public class TransactionPo {
 
     private Integer type;
 
+    private Long amount;
+
     /**
      * 0:转出, 1:转入, 2:冻结
      */
@@ -19,7 +21,7 @@ public class TransactionPo {
 
     private Long time;
 
-    private Long amount;
+
 
     /**
      * 以账户地址来分表储存
