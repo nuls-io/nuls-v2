@@ -29,6 +29,7 @@ package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.model.message.MessageType;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
@@ -84,9 +85,18 @@ public class WsClient extends WebSocketClient {
         long timeMillis = System.currentTimeMillis();
         do {
             for (Map map : RuntimeInfo.RESPONSE_QUEUE) {
-                if ((Integer) map.get("messageId") == messageId) {
-                    RuntimeInfo.RESPONSE_QUEUE.remove(map);
-                    return map;
+                MessageType messageType = MessageType.valueOf(map.get("messageType").toString());
+                switch (messageType) {
+                    case NegotiateConnectionResponse:
+                        RuntimeInfo.RESPONSE_QUEUE.remove(map);
+                        return map;
+                    case Response:
+                        Map messageData = (Map) map.get("messageData");
+                        if ((Integer) messageData.get("requestId") == messageId) {
+                            RuntimeInfo.RESPONSE_QUEUE.remove(map);
+                            return map;
+                        }
+                    default:
                 }
             }
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);

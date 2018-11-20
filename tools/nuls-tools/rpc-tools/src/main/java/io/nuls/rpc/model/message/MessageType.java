@@ -9,5 +9,7 @@ public enum MessageType {
      */
     NegotiateConnection,
     NegotiateConnectionResponse,
-    Request
+    Request,
+    Response,
+    Ack
 }
