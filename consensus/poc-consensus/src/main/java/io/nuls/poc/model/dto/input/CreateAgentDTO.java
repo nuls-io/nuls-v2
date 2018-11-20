@@ -1,4 +1,4 @@
-package io.nuls.poc.model.dto;
+package io.nuls.poc.model.dto.input;
 /**
  * @author tag
  * 2018/11/12

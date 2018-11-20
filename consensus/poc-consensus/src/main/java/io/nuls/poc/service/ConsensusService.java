@@ -40,22 +40,22 @@ public interface ConsensusService {
     /**
      * 查询黄牌列表
      * */
-    public CmdResponse getPublishList(List<Object> params);
+    public CmdResponse getPublishList(Map<String,Object> params);
 
     /**
      * 查询委托信息列表
      * */
-    public CmdResponse getDepositList(List<Object> params);
+    public CmdResponse getDepositList(Map<String,Object> params);
 
     /**
      * 查询全网共识信息
      * */
-    public CmdResponse getWholeInfo(List<Object> params);
+    public CmdResponse getWholeInfo(Map<String,Object> params);
 
     /**
      * 查询指定账户的共识信息
      * */
-    public CmdResponse getInfo(List<Object> params);
+    public CmdResponse getInfo(Map<String,Object> params);
 
     /**
      * 验证区块正确性

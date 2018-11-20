@@ -12,4 +12,6 @@ public interface ConsensusErrorCode {
     ErrorCode TX_NOT_EXIST = ErrorCode.init("70002");
     ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("70003");
     ErrorCode ACCOUNT_IS_ALREADY_ENCRYPTED = ErrorCode.init("70004");
+    ErrorCode AGENT_NOT_EXIST = ErrorCode.init("70005");
+    ErrorCode DATA_NOT_EXIST = ErrorCode.init("70006");
 }
