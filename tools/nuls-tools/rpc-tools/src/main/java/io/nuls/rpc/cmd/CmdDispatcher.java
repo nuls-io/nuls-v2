@@ -1,9 +1,7 @@
 package io.nuls.rpc.cmd;
 
 import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
-import io.nuls.rpc.model.CmdRequest;
 import io.nuls.rpc.model.ModuleInfo;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
@@ -11,7 +9,6 @@ import io.nuls.rpc.model.message.Request;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,8 +23,7 @@ public class CmdDispatcher {
      */
     public static boolean handshakeKernel() throws Exception {
         int messageId = RuntimeInfo.nextSequence();
-        Message message = RuntimeInfo.buildMessage(messageId);
-        message.setMessageType(MessageType.NegotiateConnection.name());
+        Message message = RuntimeInfo.buildMessage(messageId, MessageType.NegotiateConnection);
         message.setMessageData(RuntimeInfo.defaultNegotiateConnection());
 
         WsClient wsClient = RuntimeInfo.getWsClient(RuntimeInfo.kernelUrl);
@@ -46,10 +42,9 @@ public class CmdDispatcher {
      */
     public static void syncKernel() throws Exception {
         int messageId = RuntimeInfo.nextSequence();
-        Message message = RuntimeInfo.buildMessage(messageId);
-        message.setMessageType(MessageType.Request.name());
+        Message message = RuntimeInfo.buildMessage(messageId, MessageType.Request);
         Request request = RuntimeInfo.defaultRequest();
-        request.getRequestMethods().put("RegisterAPI", RuntimeInfo.local.getRegisterApi());
+        request.getRequestMethods().put("registerAPI", RuntimeInfo.local.getRegisterApi());
         message.setMessageData(request);
 
         WsClient wsClient = RuntimeInfo.getWsClient(RuntimeInfo.kernelUrl);
@@ -59,7 +54,7 @@ public class CmdDispatcher {
         wsClient.send(JSONUtils.obj2json(message));
 
         Map rspMap = wsClient.getResponse(messageId);
-
+        System.out.println("Current APIMethods:" + JSONUtils.obj2json(rspMap));
         Map resultMap = (Map) rspMap.get("result");
         if (resultMap == null) {
             return;
@@ -82,13 +77,18 @@ public class CmdDispatcher {
      * 3. Get the result returned to the caller
      */
     public static String call(String cmd, Object[] params, double minVersion) throws Exception {
-        int id = RuntimeInfo.sequence.incrementAndGet();
-        if (params == null) {
-            params = new Object[]{};
-        }
-        CmdRequest cmdRequest = new CmdRequest(id, cmd, minVersion, params);
+        int messageId = RuntimeInfo.sequence.incrementAndGet();
+        Message message = RuntimeInfo.buildMessage(messageId, MessageType.Request);
+        Request request = RuntimeInfo.defaultRequest();
+        request.getRequestMethods().put(cmd, params);
 
-        return response(id, cmdRequest);
+        String uri = RuntimeInfo.getRemoteUri(cmd);
+        WsClient wsClient = RuntimeInfo.getWsClient(uri);
+
+        wsClient.send(JSONUtils.obj2json(message));
+        Map response = wsClient.getResponse(messageId);
+
+        return JSONUtils.obj2json(response);
     }
 
     /**
@@ -98,29 +98,38 @@ public class CmdDispatcher {
      * 3. Get the result returned to the caller
      * 4. Get the highest version of cmd
      */
-    public static String call(String cmd, Object[] params) throws Exception {
-        int id = RuntimeInfo.sequence.incrementAndGet();
-        if (params == null) {
-            params = new Object[]{};
-        }
-        CmdRequest cmdRequest = new CmdRequest(id, cmd, -1, params);
+    public static String call(String cmd, Map params) throws Exception {
+        int messageId = RuntimeInfo.sequence.incrementAndGet();
+        Message message = RuntimeInfo.buildMessage(messageId, MessageType.Request);
+        Request request = RuntimeInfo.defaultRequest();
+        request.getRequestMethods().put(cmd, params);
+        message.setMessageData(request);
 
-        return response(id, cmdRequest);
+        String uri = RuntimeInfo.getRemoteUri(cmd);
+        if (uri == null) {
+            return "No cmd found:" + cmd;
+        }
+        WsClient wsClient = RuntimeInfo.getWsClient(uri);
+
+        wsClient.send(JSONUtils.obj2json(message));
+        Map response = wsClient.getResponse(messageId);
+
+        return JSONUtils.obj2json(response);
     }
 
-    private static String response(int id, CmdRequest cmdRequest) throws Exception {
-        List<String> remoteUriList = RuntimeInfo.getRemoteUri(cmdRequest);
-        switch (remoteUriList.size()) {
-            case 0:
-                return JSONUtils.obj2json(RuntimeInfo.buildCmdResponseMap(id, Constants.CMD_NOT_FOUND));
-            case 1:
-                String remoteUri = remoteUriList.get(0);
-                WsClient wsClient = RuntimeInfo.getWsClient(remoteUri);
-                wsClient.send(JSONUtils.obj2json(cmdRequest));
-                Map remoteMap = wsClient.getResponse(id);
-                return JSONUtils.obj2json(remoteMap);
-            default:
-                return JSONUtils.obj2json(RuntimeInfo.buildCmdResponseMap(id, Constants.CMD_DUPLICATE));
-        }
-    }
+//    private static String response(int id, CmdRequest cmdRequest) throws Exception {
+//        List<String> remoteUriList = RuntimeInfo.getRemoteUri(cmdRequest);
+//        switch (remoteUriList.size()) {
+//            case 0:
+//                return JSONUtils.obj2json(RuntimeInfo.buildCmdResponseMap(id, Constants.CMD_NOT_FOUND));
+//            case 1:
+//                String remoteUri = remoteUriList.get(0);
+//                WsClient wsClient = RuntimeInfo.getWsClient(remoteUri);
+//                wsClient.send(JSONUtils.obj2json(cmdRequest));
+//                Map remoteMap = wsClient.getResponse(id);
+//                return JSONUtils.obj2json(remoteMap);
+//            default:
+//                return JSONUtils.obj2json(RuntimeInfo.buildCmdResponseMap(id, Constants.CMD_DUPLICATE));
+//        }
+//    }
 }

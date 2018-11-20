@@ -14,6 +14,10 @@ public class RegisterApi {
     private String serviceName;
     private String serviceRole;
     private String serviceVersion;
+    private String abbr;
+    private String name;
+    private String address;
+    private int port;
 
     public List<CmdDetail> getApiMethods() {
         return apiMethods;
@@ -61,5 +65,37 @@ public class RegisterApi {
 
     public void setServiceVersion(String serviceVersion) {
         this.serviceVersion = serviceVersion;
+    }
+
+    public String getAbbr() {
+        return abbr;
+    }
+
+    public void setAbbr(String abbr) {
+        this.abbr = abbr;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 }

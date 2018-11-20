@@ -41,17 +41,33 @@ import org.junit.Test;
  */
 public class WsM1 {
     @Test
+    public void test() throws Exception {
+        System.out.println((int)3.1415f);
+        System.out.println((int)3.99415d);
+    }
+
+    @Test
     public void handshake() throws Exception {
         RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
         System.out.println("handshake:" + CmdDispatcher.handshakeKernel());
     }
 
     @Test
-    public void register() throws Exception{
-        WsServer wsServer=new WsServer(HostInfo.randomPort());
-        wsServer.init(ModuleE.CM,"io.nuls.rpc.cmd.test");
+    public void register() throws Exception {
+        WsServer wsServer = new WsServer(HostInfo.randomPort());
+        wsServer.init(ModuleE.CM, "io.nuls.rpc.cmd.test");
         wsServer.connect("ws://127.0.0.1:8887");
 
         CmdDispatcher.syncKernel();
+
+        Thread.sleep(Integer.MAX_VALUE);
+    }
+
+    @Test
+    public void testHeight() throws Exception{
+        RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
+        CmdDispatcher.syncKernel();
+
+        System.out.println(CmdDispatcher.call("getHeight",null));
     }
 }

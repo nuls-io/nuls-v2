@@ -31,7 +31,9 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.ModuleInfo;
+import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Message;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.HashMap;
@@ -76,5 +78,27 @@ public class KernelCmd4Test extends BaseCmd {
         System.out.println("CompressionRate: " + map.get("CompressionRate"));
         System.out.println("CompressionAlgorithm: " + map.get("CompressionAlgorithm"));
         return new Message();
+    }
+
+    @CmdAnnotation(cmd = "registerAPI", version = 1.0, scope = "private", minEvent = 1, minPeriod = 0,
+            description = "Register API")
+    public Object registerAPI(Map<String, Object> map) {
+        try {
+            RegisterApi registerApi = JSONUtils.json2pojo(JSONUtils.obj2json(map), RegisterApi.class);
+            if (registerApi != null) {
+                ModuleInfo moduleInfo = new ModuleInfo();
+                String address = registerApi.getAddress();
+                int port = registerApi.getPort();
+                moduleInfo.setAddress(address);
+                moduleInfo.setPort(port);
+                moduleInfo.setRegisterApi(registerApi);
+                RuntimeInfo.remoteModuleMap.put(address + ":" + port, moduleInfo);
+            }
+            System.out.println("Current APIMethods:" + JSONUtils.obj2json(RuntimeInfo.remoteModuleMap));
+            return RuntimeInfo.remoteModuleMap;
+        } catch (Exception e) {
+            Log.error(e);
+            return e.getMessage();
+        }
     }
 }

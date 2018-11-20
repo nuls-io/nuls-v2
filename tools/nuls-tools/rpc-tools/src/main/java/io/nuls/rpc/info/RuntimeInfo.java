@@ -28,11 +28,9 @@
 package io.nuls.rpc.info;
 
 import io.nuls.rpc.client.WsClient;
+import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.model.*;
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.NegotiateConnection;
-import io.nuls.rpc.model.message.NegotiateConnectionResponse;
-import io.nuls.rpc.model.message.Request;
+import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.data.DateUtils;
@@ -68,7 +66,7 @@ public class RuntimeInfo {
     /**
      * remote module information
      * key: module name/code
-     * value: module(io.nuls.rpc.Module)
+     * value: moduleInfo(io.nuls.rpc.ModuleInfo)
      */
     public static ConcurrentMap<String, ModuleInfo> remoteModuleMap = new ConcurrentHashMap<>();
 
@@ -143,17 +141,15 @@ public class RuntimeInfo {
      * Get the url of the module that provides the cmd through the CmdRequest object
      * The resulting url may not be unique, returning all found
      */
-    public static List<String> getRemoteUri(CmdRequest cmdRequest) {
-        List<String> remoteUriList = new ArrayList<>();
+    public static String getRemoteUri(String cmd) {
         for (ModuleInfo module : RuntimeInfo.remoteModuleMap.values()) {
             for (CmdDetail cmdDetail : module.getRegisterApi().getApiMethods()) {
-                if (cmdDetail.getMethodName().equals(cmdRequest.getCmd())) {
-                    remoteUriList.add("ws://" + module.getAddress() + ":" + module.getPort());
-                    break;
+                if (cmdDetail.getMethodName().equals(cmd)) {
+                    return "ws://" + module.getRegisterApi().getAddress() + ":" + module.getRegisterApi().getPort();
                 }
             }
         }
-        return remoteUriList;
+        return null;
     }
 
     /**
@@ -169,20 +165,20 @@ public class RuntimeInfo {
 
         CmdDetail find = null;
         for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getApiMethods()) {
-            if (!cmdDetail.getMethodName().equals(cmd) || cmdDetail.getVersion() < minVersion) {
+            if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
-
+            if ((int) minVersion != (int) cmdDetail.getVersion()) {
+                continue;
+            }
             if (find == null) {
                 find = cmdDetail;
                 continue;
             }
 
-//            if (!cmdDetail.isPreCompatible()) {
-//                break;
-//            } else {
-//                find = cmdDetail;
-//            }
+            if (cmdDetail.getVersion() > find.getVersion()) {
+                find = cmdDetail;
+            }
         }
         return find;
     }
@@ -302,17 +298,17 @@ public class RuntimeInfo {
         return JSONUtils.json2map(JSONUtils.obj2json(cmdResponse));
     }
 
-    public static Message buildMessage(int messageId) {
+    public static Message buildMessage(int messageId, MessageType messageType) {
         Message message = new Message();
         message.setMessageId(messageId);
+        message.setMessageType(messageType.name());
         message.setTimestamp(TimeService.currentTimeMillis());
-        message.setTimezone(Integer.valueOf(DateUtils.getTimeZone()));
+        message.setTimezone(DateUtils.getTimeZone());
         return message;
     }
 
     public static NegotiateConnection defaultNegotiateConnection() {
         NegotiateConnection negotiateConnection = new NegotiateConnection();
-        negotiateConnection.setProtocolVersion("");
         negotiateConnection.setCompressionAlgorithm("zlib");
         negotiateConnection.setCompressionRate(0);
         return negotiateConnection;
@@ -325,8 +321,8 @@ public class RuntimeInfo {
         return negotiateConnectionResponse;
     }
 
-    public static Request defaultRequest(){
-        Request request=new Request();
+    public static Request defaultRequest() {
+        Request request = new Request();
         request.setRequestAck(0);
         request.setSubscriptionEventCounter(0);
         request.setSubscriptionPeriod(0);
@@ -336,10 +332,22 @@ public class RuntimeInfo {
         return request;
     }
 
+    public static Response defaultResponse(int requestId) {
+        Response response = new Response();
+        response.setRequestId(requestId);
+        response.setResponseProcessingTime(TimeService.currentTimeMillis());
+        response.setResponseStatus(1);
+        response.setResponseComment("Congratulations! Processing completed！");
+        response.setResponseMaxSize(0);
+        return response;
+    }
+
     public static void mockKernel() throws Exception {
         WsServer wsServer = new WsServer(8887);
         wsServer.init(ModuleE.KE, "io.nuls.rpc.cmd.kernel");
         wsServer.connect("ws://127.0.0.1:8887");
+
+        CmdDispatcher.syncKernel();
         Thread.sleep(Integer.MAX_VALUE);
     }
 }
