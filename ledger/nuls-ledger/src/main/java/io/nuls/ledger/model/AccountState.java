@@ -46,6 +46,9 @@ public class AccountState extends BaseNulsData {
         return new AccountState(chaiId, nonce + 1, balance);
     }
 
+    public AccountState withBalanceIncrement(long value) {
+        return new AccountState(chaiId, nonce, balance + value);
+    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {

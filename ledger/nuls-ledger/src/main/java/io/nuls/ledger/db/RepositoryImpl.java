@@ -1,6 +1,5 @@
 package io.nuls.ledger.db;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.config.AppConfig;
 import io.nuls.ledger.model.AccountState;
@@ -62,9 +61,10 @@ public class RepositoryImpl implements Repository {
     }
 
     @Override
-    public long increaseNonce(byte[] addr) {
+    public synchronized long increaseNonce(byte[] addr) {
         AccountState accountState = getAccountState(addr);
         try {
+            accountState = accountState.withIncrementedNonce();
             RocksDBService.put(DataBaseArea.TB_LEDGER_ACCOUNT, addr, accountState.serialize());
         } catch (Exception e) {
             logger.error("createAccount serialize error.", e);
@@ -73,10 +73,11 @@ public class RepositoryImpl implements Repository {
     }
 
     @Override
-    public long setNonce(byte[] addr, long nonce) {
+    public synchronized long setNonce(byte[] addr, long nonce) {
         AccountState accountState = getAccountState(addr);
         try {
-            RocksDBService.put(DataBaseArea.TB_LEDGER_ACCOUNT, addr, accountState.withNonce(nonce).serialize());
+            accountState = accountState.withNonce(nonce);
+            RocksDBService.put(DataBaseArea.TB_LEDGER_ACCOUNT, addr, accountState.serialize());
         } catch (Exception e) {
             logger.error("createAccount serialize error.", e);
         }
@@ -84,18 +85,26 @@ public class RepositoryImpl implements Repository {
     }
 
     @Override
-    public long getNonce(byte[] addr) {
-
-        return 0L;
+    public synchronized long getNonce(byte[] addr) {
+        AccountState accountState = getAccountState(addr);
+        return accountState.getNonce();
     }
 
     @Override
-    public long getBalance(byte[] addr) {
-        return 0L;
+    public synchronized long getBalance(byte[] addr) {
+        AccountState accountState = getAccountState(addr);
+        return accountState.getBalance();
     }
 
     @Override
-    public long addBalance(byte[] addr, long value) {
-        return 0L;
+    public synchronized long addBalance(byte[] addr, long value) {
+        AccountState accountState = getAccountState(addr);
+        try {
+            accountState = accountState.withBalanceIncrement(value);
+            RocksDBService.put(DataBaseArea.TB_LEDGER_ACCOUNT, addr, accountState.serialize());
+        } catch (Exception e) {
+            logger.error("createAccount serialize error.", e);
+        }
+        return accountState.getBalance();
     }
 }
