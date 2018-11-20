@@ -37,8 +37,11 @@ public class TransactionServiceImpl extends BaseService<TransactionMapper> imple
         if(!StringUtils.isNullOrEmpty(address)){
             searchable.addCondition("address", SearchOperator.eq, address);
         }
-        if (null != type) {
-            searchable.addCondition("type", SearchOperator.eq, type);
+        if (null != startTime) {
+            searchable.addCondition("time", SearchOperator.gte, startTime);
+        }
+        if (null != endTime) {
+            searchable.addCondition("time", SearchOperator.lte, endTime);
         }
         if (null != type) {
             searchable.addCondition("type", SearchOperator.eq, type);

@@ -24,8 +24,8 @@
             STATE   TINYINT     not null,
             TIME    BIGINT      not null
         );
-        create index IF NOT EXISTS ${indexName}
-        on ${tableName} (ADDRESS);
+        create index IF NOT EXISTS #{indexName}
+        on #{tableName} (address, time, type);
     </update>
 
     <update id="createTxTables" parameterType="java.util.List">
