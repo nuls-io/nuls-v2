@@ -3,6 +3,7 @@ package io.nuls.poc.service;
 import io.nuls.rpc.model.CmdResponse;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ConsensusService {
 
@@ -29,12 +30,12 @@ public interface ConsensusService {
     /**
      * 获取节点列表
      * */
-    public CmdResponse getAgentList(List<Object> params);
+    public CmdResponse getAgentList(Map<String,Object> params);
 
     /**
      * 获取指定节点信息·
      * */
-    public CmdResponse getAgentInfo(List<Object> params);
+    public CmdResponse getAgentInfo(Map<String,Object> params);
 
     /**
      * 查询黄牌列表

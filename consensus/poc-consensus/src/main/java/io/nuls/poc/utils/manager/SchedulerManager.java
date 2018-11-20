@@ -1,6 +1,8 @@
 package io.nuls.poc.utils.manager;
 
 import io.nuls.poc.model.bo.config.ConfigBean;
+import io.nuls.poc.utils.thread.ConsensusProcessTask;
+import io.nuls.poc.utils.thread.process.ConsensusProcess;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -39,7 +41,8 @@ public class SchedulerManager {
     public static void createChainScheduler(int chain_id, ConfigBean config){
         ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = ThreadUtils.createScheduledThreadPool(3,new NulsThreadFactory("consensus"+chain_id));
         //创建链相关的任务
-        scheduledThreadPoolExecutor.scheduleAtFixedRate(new TestRunnable(),1000L,100L, TimeUnit.MILLISECONDS);
+        ConsensusProcess consensusProcess = new ConsensusProcess();
+        scheduledThreadPoolExecutor.scheduleAtFixedRate(new ConsensusProcessTask(chain_id,consensusProcess),1000L,100L, TimeUnit.MILLISECONDS);
         scheduleMap.put(chain_id,scheduledThreadPoolExecutor);
     }
 }
