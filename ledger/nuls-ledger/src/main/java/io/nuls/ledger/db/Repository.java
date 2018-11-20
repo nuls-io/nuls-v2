@@ -6,7 +6,7 @@ import java.math.BigInteger;
 
 public interface Repository {
 
-    AccountState createAccount(byte[] addr);
+    AccountState createAccount(short chainId, byte[] addr);
 
     boolean isExist(byte[] addr);
 
