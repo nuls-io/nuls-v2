@@ -32,6 +32,7 @@ import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.NegotiateConnection;
 import io.nuls.rpc.model.message.NegotiateConnectionResponse;
+import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.data.DateUtils;
@@ -145,7 +146,7 @@ public class RuntimeInfo {
     public static List<String> getRemoteUri(CmdRequest cmdRequest) {
         List<String> remoteUriList = new ArrayList<>();
         for (ModuleInfo module : RuntimeInfo.remoteModuleMap.values()) {
-            for (CmdDetail cmdDetail : module.getRegisterApi().getMethods()) {
+            for (CmdDetail cmdDetail : module.getRegisterApi().getApiMethods()) {
                 if (cmdDetail.getMethodName().equals(cmdRequest.getCmd())) {
                     remoteUriList.add("ws://" + module.getAddress() + ":" + module.getPort());
                     break;
@@ -164,10 +165,10 @@ public class RuntimeInfo {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
-        RuntimeInfo.local.getRegisterApi().getMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        RuntimeInfo.local.getRegisterApi().getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getMethods()) {
+        for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getApiMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd) || cmdDetail.getVersion() < minVersion) {
                 continue;
             }
@@ -193,10 +194,10 @@ public class RuntimeInfo {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd) {
 
-        RuntimeInfo.local.getRegisterApi().getMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        RuntimeInfo.local.getRegisterApi().getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getMethods()) {
+        for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getApiMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
@@ -231,7 +232,7 @@ public class RuntimeInfo {
                 }
 
                 if (!isRegister(cmdDetail)) {
-                    RuntimeInfo.local.getRegisterApi().getMethods().add(cmdDetail);
+                    RuntimeInfo.local.getRegisterApi().getApiMethods().add(cmdDetail);
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
@@ -283,7 +284,7 @@ public class RuntimeInfo {
      */
     private static boolean isRegister(CmdDetail sourceCmdDetail) {
         boolean exist = false;
-        for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getMethods()) {
+        for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getApiMethods()) {
             if (cmdDetail.getMethodName().equals(sourceCmdDetail.getMethodName()) && cmdDetail.getVersion() == sourceCmdDetail.getVersion()) {
                 exist = true;
                 break;
@@ -309,7 +310,7 @@ public class RuntimeInfo {
         return message;
     }
 
-    public static NegotiateConnection buildNegotiateConnection() {
+    public static NegotiateConnection defaultNegotiateConnection() {
         NegotiateConnection negotiateConnection = new NegotiateConnection();
         negotiateConnection.setProtocolVersion("");
         negotiateConnection.setCompressionAlgorithm("zlib");
@@ -317,16 +318,27 @@ public class RuntimeInfo {
         return negotiateConnection;
     }
 
-    public static NegotiateConnectionResponse buildNegotiateConnectionResponse() {
+    public static NegotiateConnectionResponse defaultNegotiateConnectionResponse() {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
         negotiateConnectionResponse.setNegotiationStatus(0);
         negotiateConnectionResponse.setNegotiationComment("Incompatible protocol version");
         return negotiateConnectionResponse;
     }
 
+    public static Request defaultRequest(){
+        Request request=new Request();
+        request.setRequestAck(0);
+        request.setSubscriptionEventCounter(0);
+        request.setSubscriptionPeriod(0);
+        request.setSubscriptionRange("");
+        request.setResponseMaxSize(0);
+        request.setRequestMethods(new HashMap<>(16));
+        return request;
+    }
+
     public static void mockKernel() throws Exception {
         WsServer wsServer = new WsServer(8887);
-        wsServer.init("kernel", "io.nuls.rpc.cmd.kernel");
+        wsServer.init(ModuleE.KE, "io.nuls.rpc.cmd.kernel");
         wsServer.connect("ws://127.0.0.1:8887");
         Thread.sleep(Integer.MAX_VALUE);
     }

@@ -57,7 +57,6 @@ public class BootStrap {
             //启动WebSocket服务,向外提供RPC接口
             initServer();
             //向交易管理模块注册本地交易验证器，处理器等信息
-
         }catch (Exception e){
             Log.error(e);
         }

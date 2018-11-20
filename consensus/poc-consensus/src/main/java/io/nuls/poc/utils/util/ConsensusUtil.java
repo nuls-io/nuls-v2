@@ -2,8 +2,11 @@ package io.nuls.poc.utils.util;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.base.signture.BlockSignature;
+import io.nuls.base.signture.SignatureUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
+import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.consensus.PunishReasonEnum;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
@@ -20,7 +23,7 @@ import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-
+import io.nuls.tools.crypto.ECKey;
 import java.io.IOException;
 import java.util.*;
 /**
@@ -140,7 +143,7 @@ public class ConsensusUtil {
      * @param self      agent meeting data/节点打包信息
      * @param round     latest local round/本地最新轮次信息
      */
-    private static void addConsensusTx(int chain_id ,Block bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
+    public static void addConsensusTx(int chain_id ,Block bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
         CoinBaseTransaction coinBaseTransaction = createCoinBaseTx(self, txList, round, bestBlock.getHeader().getHeight() + 1 + ConfigManager.config_map.get(chain_id).getCoinbase_unlock_height());
         txList.add(0, coinBaseTransaction);
         punishTx(chain_id,bestBlock, txList, self, round);
@@ -358,5 +361,46 @@ public class ConsensusUtil {
         punishTx.setTime(self.getPackEndTime());
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx.serializeForHash()));
         return punishTx;
+    }
+
+
+    /**
+     * 创建区块
+     * */
+    public static Block createBlock(BlockData blockData, byte[] packingAddress) throws NulsException{
+        //todo
+        //从账户管理模块验证
+        //打包地址账户是否存在
+        //判断打包账户是否为加密账户
+        //获取账户公钥用于签名账户
+        ECKey eckey = new ECKey();
+        Block block = new Block();
+        block.setTxs(blockData.getTxList());
+        BlockHeader header = new BlockHeader();
+        block.setHeader(header);
+        try {
+            block.getHeader().setExtend(blockData.getExtendsData().serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+        header.setHeight(blockData.getHeight());
+        header.setTime(blockData.getTime());
+        header.setPreHash(blockData.getPreHash());
+        header.setTxCount(blockData.getTxList().size());
+        List<NulsDigestData> txHashList = new ArrayList<>();
+        for (int i = 0; i < blockData.getTxList().size(); i++) {
+            Transaction tx = blockData.getTxList().get(i);
+            tx.setBlockHeight(header.getHeight());
+            txHashList.add(tx.getHash());
+        }
+        header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
+        header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
+        BlockSignature scriptSig = new BlockSignature();
+        NulsSignData signData = SignatureUtil.signDigest(header.getHash().getDigestBytes(), eckey);
+        scriptSig.setSignData(signData);
+        scriptSig.setPublicKey(eckey.getPubKey());
+        header.setBlockSignature(scriptSig);
+        return block;
     }
 }
