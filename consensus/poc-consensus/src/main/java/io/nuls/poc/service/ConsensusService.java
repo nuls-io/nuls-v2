@@ -3,6 +3,7 @@ package io.nuls.poc.service;
 import io.nuls.rpc.model.CmdResponse;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ConsensusService {
 
@@ -29,32 +30,32 @@ public interface ConsensusService {
     /**
      * 获取节点列表
      * */
-    public CmdResponse getAgentList(List<Object> params);
+    public CmdResponse getAgentList(Map<String,Object> params);
 
     /**
      * 获取指定节点信息·
      * */
-    public CmdResponse getAgentInfo(List<Object> params);
+    public CmdResponse getAgentInfo(Map<String,Object> params);
 
     /**
      * 查询黄牌列表
      * */
-    public CmdResponse getPublishList(List<Object> params);
+    public CmdResponse getPublishList(Map<String,Object> params);
 
     /**
      * 查询委托信息列表
      * */
-    public CmdResponse getDepositList(List<Object> params);
+    public CmdResponse getDepositList(Map<String,Object> params);
 
     /**
      * 查询全网共识信息
      * */
-    public CmdResponse getWholeInfo(List<Object> params);
+    public CmdResponse getWholeInfo(Map<String,Object> params);
 
     /**
      * 查询指定账户的共识信息
      * */
-    public CmdResponse getInfo(List<Object> params);
+    public CmdResponse getInfo(Map<String,Object> params);
 
     /**
      * 验证区块正确性

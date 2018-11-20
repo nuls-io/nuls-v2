@@ -8,19 +8,23 @@ import java.util.List;
  * @description
  */
 public class RegisterApi {
-    private List<CmdDetail> methods;
+    private List<CmdDetail> apiMethods;
     private List<String> serviceSupportedAPIVersions;
     private String serviceDomain;
     private String serviceName;
     private String serviceRole;
     private String serviceVersion;
+    private String abbr;
+    private String name;
+    private String address;
+    private int port;
 
-    public List<CmdDetail> getMethods() {
-        return methods;
+    public List<CmdDetail> getApiMethods() {
+        return apiMethods;
     }
 
-    public void setMethods(List<CmdDetail> methods) {
-        this.methods = methods;
+    public void setApiMethods(List<CmdDetail> apiMethods) {
+        this.apiMethods = apiMethods;
     }
 
     public List<String> getServiceSupportedAPIVersions() {
@@ -61,5 +65,37 @@ public class RegisterApi {
 
     public void setServiceVersion(String serviceVersion) {
         this.serviceVersion = serviceVersion;
+    }
+
+    public String getAbbr() {
+        return abbr;
+    }
+
+    public void setAbbr(String abbr) {
+        this.abbr = abbr;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 }

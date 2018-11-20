@@ -60,10 +60,22 @@ public class WebSocketHandler {
         MessageType messageType = MessageType.valueOf(jsonMap.get("messageType").toString());
         switch (messageType) {
             case NegotiateConnection:
-                Message message = RuntimeInfo.buildMessage((Integer) jsonMap.get("messageId"));
+                Message message = RuntimeInfo.buildMessage((Integer) jsonMap.get("messageId"), MessageType.NegotiateConnectionResponse);
                 message.setMessageType(MessageType.NegotiateConnectionResponse.name());
-                message.setMessageData(RuntimeInfo.buildNegotiateConnectionResponse());
+                message.setMessageData(RuntimeInfo.defaultNegotiateConnectionResponse());
                 return JSONUtils.obj2json(message);
+            case Request:
+                Map messageData = (Map) jsonMap.get("messageData");
+                Map requestMethods = (Map) messageData.get("requestMethods");
+                for (Object method : requestMethods.keySet()) {
+                    Map params = (Map) requestMethods.get(method);
+                    CmdDetail cmdDetail = params.get("protocolVersion") == null ? RuntimeInfo.getLocalInvokeCmd((String) method) : RuntimeInfo.getLocalInvokeCmd((String) method, (double) params.get("protocolVersion"));
+                    CmdResponse cmdResponse = buildResponse(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), (List) jsonMap.get("MessageData"));
+                    return JSONUtils.obj2json(cmdResponse);
+                }
+                System.out.println(messageData.get("requestMethods"));
+                return "";
+//                return
             default:
                 double minVersion = (Double) jsonMap.get("minVersion");
                 CmdDetail cmdDetail = minVersion >= 0

@@ -3,6 +3,7 @@ package io.nuls.poc.utils.thread.process;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.Transaction;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.consensus.ConsensusStatus;
@@ -11,15 +12,17 @@ import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.RoundManager;
+import io.nuls.poc.utils.util.ConsensusUtil;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-
+import java.util.List;
 /**
  * 共识处理器
  * @author tag
@@ -51,7 +54,7 @@ public class ConsensusProcess {
         if(availableNodes < ConsensusConstant.ALIVE_MIN_NODE_COUNT){
             return false;
         }
-        //检查节点状态是否可打包
+        //检查节点状态是否可打包(区块管理模块同步完成之后设置该状态)
         if(!ConsensusManager.getInstance().getPacking_status().get(chain_id)){
             return false;
         }
@@ -215,9 +218,16 @@ public class ConsensusProcess {
         str.append(",packTime:" + new Date(self.getPackEndTime()));
         str.append("\n");
         Log.debug("pack round:" + str);
-        //获取打包交易
-
+        //todo
+        //从交易管理模块获取打包交易
+        List<Transaction> packingTxList = new ArrayList<>();
         //组装系统交易（CoinBase/红牌/黄牌）
-        return null;
+        ConsensusUtil.addConsensusTx(chain_id,bestBlock,packingTxList,self,round);
+        bd.setTxList(packingTxList);
+        //创建区块
+        Block newBlock = ConsensusUtil.createBlock(bd, self.getAgent().getPackingAddress());
+        Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
+                DateUtils.convertDate(new Date(self.getPackEndTime())));
+        return newBlock;
     }
 }

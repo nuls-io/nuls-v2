@@ -687,14 +687,14 @@ public class DateUtils {
     /**
      * 获取时区信息
      * */
-    public static String getTimeZone(){
+    public static long getTimeZone(){
         Calendar cal = Calendar.getInstance();
         int offset = cal.get(Calendar.ZONE_OFFSET);
         cal.add(Calendar.MILLISECOND, -offset);
         Long timeStampUTC = cal.getTimeInMillis();
         Long timeStamp = System.currentTimeMillis();
-        Long timeZone = (timeStamp - timeStampUTC) / (1000 * 3600); System.out.println(timeZone.intValue());
-        return String.valueOf(timeZone+1);
+        Long timeZone = (timeStamp - timeStampUTC) / (1000 * 3600);
+        return timeZone+1;
 
     }
 }
