@@ -9,14 +9,14 @@ public enum ModuleE {
     /**
      * prefix + name
      */
+    KE("ke", "Kernel"),
     CM("cm", "Chain Manager"),
     AC("ac", "Account Manager"),
     NW("nw", "Network"),
     CS("cs", "Consensus"),
     BL("bl", "Block"),
     LG("lg", "Ledger"),
-    TX("tx", "Transaction")
-    ;
+    TX("tx", "Transaction");
 
     public final String abbr;
     public final String name;

@@ -1,5 +1,7 @@
 package io.nuls.rpc.model.message;
 
+import java.util.Map;
+
 /**
  * @author tangyi
  * @date 2018/11/15
@@ -11,7 +13,7 @@ public class Request {
     private int subscriptionPeriod;
     private String subscriptionRange;
     private int responseMaxSize;
-    private Object[] requestMethods;
+    private Map<String,Object> requestMethods;
 
     public int isRequestAck() {
         return requestAck;
@@ -53,11 +55,11 @@ public class Request {
         this.responseMaxSize = responseMaxSize;
     }
 
-    public Object[] getRequestMethods() {
+    public Map<String,Object> getRequestMethods() {
         return requestMethods;
     }
 
-    public void setRequestMethods(Object[] requestMethods) {
+    public void setRequestMethods(Map<String,Object> requestMethods) {
         this.requestMethods = requestMethods;
     }
 }

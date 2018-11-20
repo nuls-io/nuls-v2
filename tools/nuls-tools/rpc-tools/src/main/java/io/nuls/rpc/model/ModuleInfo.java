@@ -34,6 +34,7 @@ package io.nuls.rpc.model;
  */
 public class ModuleInfo {
     private String abbr;
+    private String name;
     private String address;
     private int port;
     private RegisterApi registerApi;
@@ -47,6 +48,14 @@ public class ModuleInfo {
 
     public void setAbbr(String abbr) {
         this.abbr = abbr;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getAddress() {
@@ -72,5 +81,4 @@ public class ModuleInfo {
     public void setRegisterApi(RegisterApi registerApi) {
         this.registerApi = registerApi;
     }
-
 }
