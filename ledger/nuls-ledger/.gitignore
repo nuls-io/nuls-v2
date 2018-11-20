@@ -1,5 +1,5 @@
 *.iml
 .idea
 target/
-ledger/
+/ledger
 logs/
