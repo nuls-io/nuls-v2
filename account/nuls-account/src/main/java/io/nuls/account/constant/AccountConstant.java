@@ -26,6 +26,7 @@
 package io.nuls.account.constant;
 
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Na;
 
 /**
@@ -112,4 +113,6 @@ public interface AccountConstant {
      * DEFAULT PAGE_SIZE
      */
     int PAGE_SIZE = 10;
+
+    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
 }
