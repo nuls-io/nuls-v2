@@ -17,6 +17,7 @@ public interface ConsensusConstant {
     int TX_TYPE_YELLOW_PUNISH = 7;
     int TX_TYPE_RED_PUNISH = 8;
     int TX_TYPE_STOP_AGENT = 9;
+    int TX_TYPE_COINBASE = 1;
 
     /**
      * Consensus module related table name/共识模块相关表名
@@ -119,4 +120,26 @@ public interface ConsensusConstant {
      * The number of minimum connection nodes that the system runs.
      */
     int ALIVE_MIN_NODE_COUNT = 1;
+
+    /**
+     * 同一个出块地址连续3轮发出两个相同高度，但不同hash的block，节点将会被红牌惩罚
+     */
+    byte REDPUNISH_BIFURCATION = 3;
+
+    /**
+     * 空值占位符
+     * Null placeholder.
+     */
+    byte[] PLACE_HOLDER = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
+
+    /**
+     * 每出一个块获得的共识奖励，一年总的共识奖励金5000000，一年总出块数3154600,相除得到每一块的奖励金
+     * value = 5000000/3154600
+     */
+    Na BLOCK_REWARD = Na.valueOf(158548960);
+
+    /**
+     * 信誉值的最小值，小于等于该值会给红牌处罚
+     * */
+    double RED_PUNISH_CREDIT_VAL = -1D;
 }

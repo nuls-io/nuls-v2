@@ -1,10 +1,9 @@
 package io.nuls.transaction.init;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.Page;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
@@ -14,7 +13,6 @@ import io.nuls.transaction.db.h2.dao.impl.BaseService;
 import io.nuls.transaction.db.h2.dao.impl.TransactionServiceImpl;
 import io.nuls.transaction.model.po.TransactionPo;
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import java.io.InputStream;
@@ -29,15 +27,27 @@ import java.util.Random;
 public class H2Test {
 
     public static void main(String[] args) throws Exception{
+        //System.out.println(("QYAnNNfGKwUGJwPQHCpUa1WU8Qzhzb822".hashCode() & Integer.MAX_VALUE)%TransactionConstant.H2_TX_TABLE_NUMBER);
         before();
         long start = System.currentTimeMillis();
         initTestTable();
         System.out.println("花费时间：" + String.valueOf(System.currentTimeMillis() - start));
-
         start = System.currentTimeMillis();
-        initTestData();
-        System.out.println("插入数据花费时间：" + String.valueOf(System.currentTimeMillis() - start));
+        select();
+        System.out.println("查询数据花费时间：" + String.valueOf(System.currentTimeMillis() - start));
     }
+
+    private static void select(){
+        String address = "QYAnNNfGKwUGJwPQHCpUa1WU8Qzhzb822";
+        TransactionService ts = new TransactionServiceImpl();
+        Page<TransactionPo> page =  ts.getTxs(address, null, null, null, null, 1,30);
+        try {
+            System.out.println(JSONUtils.obj2json(page));
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void before() throws Exception{
         String resource = "mybatis/mybatis-config.xml";
         InputStream in = Resources.getResourceAsStream(resource);
@@ -55,12 +65,9 @@ public class H2Test {
     public static void initTestData(){
         TransactionService ts = new TransactionServiceImpl();
         List<TransactionPo> listPo = new ArrayList<>();
-        for (int i=0;i<50000000;i++) {
-            listPo.add(createTxPo());
+        for (int i=0;i<50;i++) {
+            ts.saveTx(createTxPo());
         }
-        ts.saveTxs(listPo);
-
-
     }
 
     //模拟TransactionPo的数据

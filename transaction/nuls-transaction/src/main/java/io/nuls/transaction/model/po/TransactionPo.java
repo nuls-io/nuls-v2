@@ -8,6 +8,8 @@ import io.nuls.transaction.constant.TransactionConstant;
  */
 public class TransactionPo {
 
+    private Integer id;
+
     private String address;
 
     private String hash;
@@ -33,6 +35,14 @@ public class TransactionPo {
      */
     public int createTableIndex(){
         return (this.address.hashCode() & Integer.MAX_VALUE) % TransactionConstant.H2_TX_TABLE_NUMBER;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getAddress() {

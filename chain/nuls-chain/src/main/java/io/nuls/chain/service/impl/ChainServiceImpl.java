@@ -1,8 +1,8 @@
 package io.nuls.chain.service.impl;
 
 import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.model.dto.ChainAsset;
-import io.nuls.chain.model.txdata.Chain;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.storage.ChainStorage;
@@ -43,7 +43,7 @@ public class ChainServiceImpl implements ChainService {
      * @return Chain
      */
     @Override
-    public Chain getChain(short chainId) {
+    public Chain getChain(int chainId) {
         Chain chain = chainStorage.load(chainId);
         List<ChainAsset> chainAssetList = getChainAssetByChain(chainId);
         chain.setChainAssetList(chainAssetList);
@@ -57,7 +57,7 @@ public class ChainServiceImpl implements ChainService {
      * @return ChainAsset object
      */
     @Override
-    public List<ChainAsset> getChainAssetByChain(short chainId) {
+    public List<ChainAsset> getChainAssetByChain(int chainId) {
         return chainAssetStorage.getByChain(chainId);
     }
 
@@ -69,7 +69,7 @@ public class ChainServiceImpl implements ChainService {
      * @return ChainAsset object
      */
     @Override
-    public ChainAsset getChainAsset(short chainId, long assetId) {
+    public ChainAsset getChainAsset(int chainId, long assetId) {
         String key = CmRuntimeInfo.getAssetKey(chainId, assetId);
         return chainAssetStorage.load(key);
     }
@@ -83,7 +83,7 @@ public class ChainServiceImpl implements ChainService {
      * @return true/false
      */
     @Override
-    public boolean setAssetNumber(short chainId, long assetId, long currentNumber) {
+    public boolean setAssetNumber(int chainId, long assetId, long currentNumber) {
         String key = CmRuntimeInfo.getAssetKey(chainId, assetId);
         ChainAsset chainAsset = chainAssetStorage.load(key);
         if (chainAsset == null) {

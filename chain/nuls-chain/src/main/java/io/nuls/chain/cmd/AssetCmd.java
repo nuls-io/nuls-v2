@@ -1,8 +1,8 @@
 package io.nuls.chain.cmd;
 
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.ChainAsset;
-import io.nuls.chain.model.txdata.Asset;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -81,6 +81,8 @@ public class AssetCmd extends BaseCmd {
         Asset asset = null;
         try {
             asset = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Asset.class);
+            //TODO:通知账本模块创建链资产
+
         } catch (IOException e) {
             Log.error(e);
             return failed(CmConstants.ERROR_JSON_TO_ASSET);
@@ -91,9 +93,15 @@ public class AssetCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "assetRegRollback", version = 1.0, preCompatible = true)
     public CmdResponse assetRegRollback(List params) {
+        //TODO:通知账本模块删除链资产
         return success();
     }
 
+    /**
+     * 链资产在Disable后，再次启用。预留，未实现。
+     * @param params
+     * @return
+     */
     @CmdAnnotation(cmd = "assetEnable", version = 1.0, preCompatible = true)
     public CmdResponse assetEnable(List params) {
         assetService.setStatus(Long.valueOf(params.get(0).toString()), true);
@@ -136,6 +144,13 @@ public class AssetCmd extends BaseCmd {
     @CmdAnnotation(cmd = "assetDisableCommit", version = 1.0, preCompatible = true)
     public CmdResponse assetDisableCommit(List params) {
         assetService.setStatus(Long.valueOf(params.get(0).toString()), false);
+        //TODO:通知账本模块删除链资产
         return success();
+    }
+
+    @CmdAnnotation(cmd = "assetDisableRoolback", version = 1.0, preCompatible = true)
+    public CmdResponse assetDisableRoolback(List params) {
+        //TODO:通知账本模块取消删除资产
+        return null;
     }
 }

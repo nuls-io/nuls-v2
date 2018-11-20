@@ -15,18 +15,18 @@ import java.io.IOException;
  */
 public class ChainAsset extends BaseNulsData {
 
-    private short chainId;
+    private int chainId;
     private long assetId;
     private long currentNumber;
     private String chainName;
     private String assetSymbol;
     private String assetName;
 
-    public short getChainId() {
+    public int getChainId() {
         return chainId;
     }
 
-    public void setChainId(short chainId) {
+    public void setChainId(int chainId) {
         this.chainId = chainId;
     }
 
@@ -72,7 +72,7 @@ public class ChainAsset extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeShort(chainId);
+        stream.writeUint16(chainId);
         stream.writeUint48(assetId);
         stream.writeInt64(currentNumber);
         stream.writeString(chainName);
@@ -82,7 +82,7 @@ public class ChainAsset extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readShort();
+        this.chainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint48();
         this.currentNumber = byteBuffer.readInt64();
         this.chainName = byteBuffer.readString();
@@ -93,7 +93,7 @@ public class ChainAsset extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfInt16();
+        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfInt64();
         size += SerializeUtils.sizeOfString(chainName);

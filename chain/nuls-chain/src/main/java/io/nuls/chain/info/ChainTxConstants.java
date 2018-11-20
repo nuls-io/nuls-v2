@@ -31,8 +31,19 @@ package io.nuls.chain.info;
  * @create: 2018/11/19
  **/
 public interface ChainTxConstants {
+    /**
+     * 交易注册
+     */
+    String TX_REGISTER_CMD="tx_register";
+    /**
+     * 创建交易
+     */
+    String TX_NEW_TX_CMD="newTx";
+
+
+
     int TX_TYPE_REGISTER_CHAIN = 5001;
-    int TX_TYPE_DELETE_CHAIN = 5002;
+    int TX_TYPE_DESTROY_CHAIN = 5002;
     int TX_TYPE_ADD_CHAIN_ASSET = 5011;
-    int TX_TYPE_DELETE_CHAIN_ASSET = 5012;
+    int TX_TYPE_DISABLE_CHAIN_ASSET = 5012;
 }

@@ -36,5 +36,5 @@ public interface ChainAssetStorage {
      * @param chainId The chain ID
      * @return ChainAsset object
      */
-    List<ChainAsset> getByChain(short chainId);
+    List<ChainAsset> getByChain(int chainId);
 }

@@ -30,8 +30,8 @@ package io.nuls.rpc.server;
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.RuntimeInfo;
-import io.nuls.rpc.model.Module;
-import io.nuls.rpc.model.ModuleStatus;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.RegisterApi;
 import io.nuls.tools.log.Log;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -39,8 +39,6 @@ import org.java_websocket.server.WebSocketServer;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * @author tangyi
@@ -52,22 +50,31 @@ public class WsServer extends WebSocketServer {
         super(new InetSocketAddress(port));
     }
 
-    public void init(String moduleName, String[] depends, String scanPackage) throws Exception {
-        List<String> dps = depends == null ? new ArrayList<>() : Arrays.asList(depends);
-        RuntimeInfo.local = new Module(moduleName, ModuleStatus.READY, true, HostInfo.getIpAdd(), getPort(), new ArrayList<>(), dps);
-
+    public void init(ModuleE moduleE, String scanPackage) throws Exception {
+        RuntimeInfo.local.setAbbr(moduleE.abbr);
+        RuntimeInfo.local.setName(moduleE.name);
+        RuntimeInfo.local.setAddress(HostInfo.getIpAdd());
+        RuntimeInfo.local.setPort(this.getPort());
+        RegisterApi registerApi = new RegisterApi();
+        registerApi.setApiMethods(new ArrayList<>());
+        registerApi.setServiceSupportedAPIVersions(new ArrayList<>());
+        RuntimeInfo.local.setRegisterApi(registerApi);
         RuntimeInfo.scanPackage(scanPackage);
     }
 
-    public void startAndSyncKernel(String kernelUri) throws Exception {
+    public void connect(String kernelUrl) throws Exception {
         this.start();
         Thread.sleep(1000);
-        CmdDispatcher.syncKernel(kernelUri);
+        RuntimeInfo.kernelUrl = kernelUrl;
+        if (!CmdDispatcher.handshakeKernel()) {
+            throw new Exception("Handshake kernel failed");
+        } else {
+            Log.info("Handshake success." + RuntimeInfo.local.getName() + " ready!");
+        }
     }
 
     @Override
     public void onOpen(WebSocket webSocket, ClientHandshake handshake) {
-        Log.info("new connection join->" + webSocket.getRemoteSocketAddress().getHostName() + ":" + webSocket.getRemoteSocketAddress().getPort());
     }
 
     @Override
@@ -77,7 +84,7 @@ public class WsServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket webSocket, String message) {
         try {
-            Log.info("ws server-> receive msg: " + message);
+            Log.info("Server<" + RuntimeInfo.local.getAbbr() + ":" + RuntimeInfo.local.getPort() + "> receive:" + message);
             RuntimeInfo.REQUEST_QUEUE.add(new Object[]{webSocket, message});
             RuntimeInfo.fixedThreadPool.execute(new WsProcessor());
         } catch (Exception e) {

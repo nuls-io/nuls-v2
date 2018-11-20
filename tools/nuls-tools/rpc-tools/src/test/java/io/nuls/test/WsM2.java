@@ -28,6 +28,7 @@
 package io.nuls.test;
 
 import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.info.RuntimeInfo;
 import org.junit.Test;
 
 /**
@@ -38,8 +39,8 @@ import org.junit.Test;
 public class WsM2 {
     @Test
     public void asset() throws Exception {
-
-        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+        RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
+        CmdDispatcher.syncKernel();
 
         System.out.println(CmdDispatcher.call("asset", new Object[]{(short) 188, (short) 765}, 1.0));
 
@@ -60,7 +61,8 @@ public class WsM2 {
 
     @Test
     public void chain() throws Exception {
-        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+        RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
+        CmdDispatcher.syncKernel();
 
         System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 99}, 1.0));
         System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 188}, 1.0));

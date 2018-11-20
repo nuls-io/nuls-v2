@@ -22,52 +22,33 @@
  * SOFTWARE.
  *
  */
-package io.nuls.poc.model.po;
+package io.nuls.chain.model.tx;
 
-
-import io.nuls.base.data.BlockHeader;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.Transaction;
+import io.nuls.chain.info.ChainTxConstants;
+import io.nuls.chain.model.tx.txdata.ChainDestroyTx;
+import io.nuls.tools.exception.NulsException;
 
 /**
- * @author: Charlie
- * @date: 2018/9/4
- */
-public class EvidencePo {
+ * @program: nuls2.0
+ * @description: 跨链注册交易
+ * @author: lan
+ * @create: 2018/11/19
+ **/
+public class CrossChainDestroyTransaction extends Transaction<ChainDestroyTx> {
 
-    private long roundIndex;
-    private BlockHeader blockHeader1;
-    private BlockHeader blockHeader2;
-
-    public EvidencePo(){
-
+    public CrossChainDestroyTransaction(int type) {
+        super(ChainTxConstants.TX_TYPE_DESTROY_CHAIN);
     }
 
-    public EvidencePo(long roundIndex, BlockHeader blockHeader1, BlockHeader blockHeader2){
-        this.roundIndex = roundIndex;
-        this.blockHeader1 = blockHeader1;
-        this.blockHeader2 = blockHeader2;
+    @Override
+    protected ChainDestroyTx parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new ChainDestroyTx());
     }
 
-    public long getRoundIndex() {
-        return roundIndex;
-    }
-
-    public void setRoundIndex(long roundIndex) {
-        this.roundIndex = roundIndex;
-    }
-
-    public BlockHeader getBlockHeader1() {
-        return blockHeader1;
-    }
-
-    public void setBlockHeader1(BlockHeader blockHeader1) {
-        this.blockHeader1 = blockHeader1;
-    }
-
-    public BlockHeader getBlockHeader2() {
-        return blockHeader2;
-    }
-
-    public void setBlockHeader2(BlockHeader blockHeader2) {
-        this.blockHeader2 = blockHeader2;
+    @Override
+    public String getInfo(byte[] address) {
+        return null;
     }
 }

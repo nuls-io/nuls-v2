@@ -683,4 +683,18 @@ public class DateUtils {
          SimpleDateFormat sdf = new SimpleDateFormat(format);
          return sdf.format(new Date(time));
     }
+
+    /**
+     * 获取时区信息
+     * */
+    public static long getTimeZone(){
+        Calendar cal = Calendar.getInstance();
+        int offset = cal.get(Calendar.ZONE_OFFSET);
+        cal.add(Calendar.MILLISECOND, -offset);
+        Long timeStampUTC = cal.getTimeInMillis();
+        Long timeStamp = System.currentTimeMillis();
+        Long timeZone = (timeStamp - timeStampUTC) / (1000 * 3600);
+        return timeZone+1;
+
+    }
 }
