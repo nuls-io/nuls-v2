@@ -54,19 +54,18 @@ public class CmdDispatcher {
         wsClient.send(JSONUtils.obj2json(message));
 
         Map rspMap = wsClient.getResponse(messageId);
-        System.out.println("Current APIMethods:" + JSONUtils.obj2json(rspMap));
-        Map resultMap = (Map) rspMap.get("result");
-        if (resultMap == null) {
+        Map messageData = (Map) rspMap.get("messageData");
+        if (messageData == null) {
             return;
         }
 
         //Map<String, Object> moduleMap = JSONUtils.json2map(JSONUtils.obj2json(resultMap.get("modules")));
         @SuppressWarnings("unchecked")
-        Map<String, Object> moduleMap = (Map<String, Object>) resultMap.get("modules");
-        Log.info(JSONUtils.obj2json(moduleMap));
-        for (String key : moduleMap.keySet()) {
-            ModuleInfo module = JSONUtils.json2pojo(JSONUtils.obj2json(moduleMap.get(key)), ModuleInfo.class);
-            RuntimeInfo.remoteModuleMap.put(key, module);
+        Map<String, Object> responseData = (Map<String, Object>) messageData.get("responseData");
+        Log.info("APIMethods from kernel:"+JSONUtils.obj2json(responseData));
+        for (String key : responseData.keySet()) {
+            ModuleInfo moduleInfo = JSONUtils.json2pojo(JSONUtils.obj2json(responseData.get(key)), ModuleInfo.class);
+            RuntimeInfo.remoteModuleMap.put(key, moduleInfo);
         }
     }
 

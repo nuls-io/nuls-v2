@@ -142,10 +142,10 @@ public class RuntimeInfo {
      * The resulting url may not be unique, returning all found
      */
     public static String getRemoteUri(String cmd) {
-        for (ModuleInfo module : RuntimeInfo.remoteModuleMap.values()) {
-            for (CmdDetail cmdDetail : module.getRegisterApi().getApiMethods()) {
+        for (ModuleInfo moduleInfo : RuntimeInfo.remoteModuleMap.values()) {
+            for (CmdDetail cmdDetail : moduleInfo.getRegisterApi().getApiMethods()) {
                 if (cmdDetail.getMethodName().equals(cmd)) {
-                    return "ws://" + module.getRegisterApi().getAddress() + ":" + module.getRegisterApi().getPort();
+                    return "ws://" + moduleInfo.getRegisterApi().getAddress() + ":" + moduleInfo.getRegisterApi().getPort();
                 }
             }
         }
