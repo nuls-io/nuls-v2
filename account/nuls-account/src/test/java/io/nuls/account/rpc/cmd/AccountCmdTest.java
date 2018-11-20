@@ -90,7 +90,6 @@ public class AccountCmdTest {
         return priKey;
     }
 
-    @Ignore
     @Test
     public void createAccountTest() throws Exception {
         int count = 1;
@@ -325,7 +324,7 @@ public class AccountCmdTest {
             keyStoreDto = new AccountKeyStoreDto();
             keyStoreDto.setAddress(account.getAddress());
             keyStoreDto.setPubKey(account.getPubkeyHex());
-            keyStoreDto.setEncryptedPrivateKey(account.getEncryptedPrikeyHex());
+            //keyStoreDto.setEncryptedPrivateKey(account.getEncryptedPrikeyHex());
             keyStoreDto.setPrikey(priKey);
 
             //生成keystore HEX编码

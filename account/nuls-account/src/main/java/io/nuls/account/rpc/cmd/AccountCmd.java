@@ -429,7 +429,7 @@ public class AccountCmd extends BaseCmd {
             //账户存在时是否覆盖
             Boolean overwrite = params.get(3) != null ? (Boolean) params.get(3) : null;
             //导入账户
-            Account account = accountService.importAccount(chainId, priKey, password, overwrite);
+            Account account = accountService.importAccountByPrikey(chainId, priKey, password, overwrite);
             map.put("address", account.getAddress().toString());
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode(), null);
@@ -476,7 +476,7 @@ public class AccountCmd extends BaseCmd {
             }
 
             //导入账户
-            Account account = keyStoreService.importAccountFormKeyStore(accountKeyStoreDto.toAccountKeyStore(), chainId, password, overwrite);
+            Account account = accountService.importAccountByKeyStore(accountKeyStoreDto.toAccountKeyStore(), chainId, password, overwrite);
             map.put("address", account.getAddress().toString());
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode(), null);
@@ -512,10 +512,11 @@ public class AccountCmd extends BaseCmd {
             String password = params.get(2) != null ? (String) params.get(2) : null;
             //文件备份地址
             String filePath = params.get(3) != null ? (String) params.get(3) : null;
-            //export account to keystore
-            AccountKeyStore accountKeyStore = keyStoreService.exportAccountToKeyStore(chainId, address, password);
-            //backup keystore files
-            String backupFileName = AccountTool.backUpKeyStore(filePath, new AccountKeyStoreDto(accountKeyStore));
+            //backup account to keystore
+            String backupFileName = keyStoreService.backupAccountToKeyStore(filePath, chainId, address, password);
+//            AccountKeyStore accountKeyStore = keyStoreService.exportAccountToKeyStore(chainId, address, password);
+//            //backup keystore files
+//            String backupFileName = AccountTool.backUpKeyStore(filePath, new AccountKeyStoreDto(accountKeyStore));
             map.put("path", backupFileName);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode(), null);
