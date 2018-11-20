@@ -28,7 +28,7 @@ public class CmdDispatcher {
         int messageId = RuntimeInfo.nextSequence();
         Message message = RuntimeInfo.buildMessage(messageId);
         message.setMessageType(MessageType.NegotiateConnection.name());
-        message.setMessageData(RuntimeInfo.buildNegotiateConnection());
+        message.setMessageData(RuntimeInfo.defaultNegotiateConnection());
 
         WsClient wsClient = RuntimeInfo.getWsClient(RuntimeInfo.kernelUrl);
         if (wsClient == null) {
@@ -46,15 +46,10 @@ public class CmdDispatcher {
      */
     public static void syncKernel() throws Exception {
         int messageId = RuntimeInfo.nextSequence();
-        Message message=RuntimeInfo.buildMessage(messageId);
+        Message message = RuntimeInfo.buildMessage(messageId);
         message.setMessageType(MessageType.Request.name());
-        Request request=new Request();
-        request.setRequestAck(0);
-        request.setSubscriptionEventCounter(0);
-        request.setSubscriptionPeriod(0);
-        request.setSubscriptionRange("");
-        request.setResponseMaxSize(0);
-//        request.setRequestMethods();
+        Request request = RuntimeInfo.defaultRequest();
+        request.getRequestMethods().put("RegisterAPI", RuntimeInfo.local.getRegisterApi());
         message.setMessageData(request);
 
         WsClient wsClient = RuntimeInfo.getWsClient(RuntimeInfo.kernelUrl);

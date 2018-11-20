@@ -28,6 +28,7 @@
 package io.nuls.test;
 
 import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.info.RuntimeInfo;
 import org.junit.Test;
 
 /**
@@ -39,8 +40,8 @@ public class WsM3 {
     @Test
     public void test() throws Exception {
 
-
-        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+        RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
+        CmdDispatcher.syncKernel();
 
 
 

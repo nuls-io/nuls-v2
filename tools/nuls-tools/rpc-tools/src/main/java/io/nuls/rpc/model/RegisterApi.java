@@ -8,19 +8,19 @@ import java.util.List;
  * @description
  */
 public class RegisterApi {
-    private List<CmdDetail> methods;
+    private List<CmdDetail> apiMethods;
     private List<String> serviceSupportedAPIVersions;
     private String serviceDomain;
     private String serviceName;
     private String serviceRole;
     private String serviceVersion;
 
-    public List<CmdDetail> getMethods() {
-        return methods;
+    public List<CmdDetail> getApiMethods() {
+        return apiMethods;
     }
 
-    public void setMethods(List<CmdDetail> methods) {
-        this.methods = methods;
+    public void setApiMethods(List<CmdDetail> apiMethods) {
+        this.apiMethods = apiMethods;
     }
 
     public List<String> getServiceSupportedAPIVersions() {

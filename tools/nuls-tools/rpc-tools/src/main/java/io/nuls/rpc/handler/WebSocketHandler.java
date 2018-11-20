@@ -62,8 +62,10 @@ public class WebSocketHandler {
             case NegotiateConnection:
                 Message message = RuntimeInfo.buildMessage((Integer) jsonMap.get("messageId"));
                 message.setMessageType(MessageType.NegotiateConnectionResponse.name());
-                message.setMessageData(RuntimeInfo.buildNegotiateConnectionResponse());
+                message.setMessageData(RuntimeInfo.defaultNegotiateConnectionResponse());
                 return JSONUtils.obj2json(message);
+            case Request:
+//                return
             default:
                 double minVersion = (Double) jsonMap.get("minVersion");
                 CmdDetail cmdDetail = minVersion >= 0

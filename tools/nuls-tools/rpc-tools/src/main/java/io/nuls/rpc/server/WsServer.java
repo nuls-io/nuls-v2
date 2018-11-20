@@ -30,6 +30,7 @@ package io.nuls.rpc.server;
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.tools.log.Log;
 import org.java_websocket.WebSocket;
@@ -49,12 +50,13 @@ public class WsServer extends WebSocketServer {
         super(new InetSocketAddress(port));
     }
 
-    public void init(String abbr, String scanPackage) throws Exception {
-        RuntimeInfo.local.setAbbr(abbr);
+    public void init(ModuleE moduleE, String scanPackage) throws Exception {
+        RuntimeInfo.local.setAbbr(moduleE.abbr);
+        RuntimeInfo.local.setName(moduleE.name);
         RuntimeInfo.local.setAddress(HostInfo.getIpAdd());
         RuntimeInfo.local.setPort(this.getPort());
         RegisterApi registerApi = new RegisterApi();
-        registerApi.setMethods(new ArrayList<>());
+        registerApi.setApiMethods(new ArrayList<>());
         registerApi.setServiceSupportedAPIVersions(new ArrayList<>());
         RuntimeInfo.local.setRegisterApi(registerApi);
         RuntimeInfo.scanPackage(scanPackage);
@@ -66,6 +68,8 @@ public class WsServer extends WebSocketServer {
         RuntimeInfo.kernelUrl = kernelUrl;
         if (!CmdDispatcher.handshakeKernel()) {
             throw new Exception("Handshake kernel failed");
+        } else {
+            Log.info("Handshake success." + RuntimeInfo.local.getName() + " ready!");
         }
     }
 
