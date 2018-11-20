@@ -14,13 +14,13 @@ public interface Repository {
 
     void delete(byte[] addr);
 
-    BigInteger increaseNonce(byte[] addr);
+    long increaseNonce(byte[] addr);
 
-    BigInteger setNonce(byte[] addr, BigInteger nonce);
+    long setNonce(byte[] addr, long nonce);
 
-    BigInteger getNonce(byte[] addr);
+    long getNonce(byte[] addr);
 
-    BigInteger getBalance(byte[] addr);
+    long getBalance(byte[] addr);
 
-    BigInteger addBalance(byte[] addr, BigInteger value);
+    long addBalance(byte[] addr, long value);
 }
