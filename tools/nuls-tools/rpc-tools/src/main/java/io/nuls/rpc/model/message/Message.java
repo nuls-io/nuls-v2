@@ -9,7 +9,7 @@ public class Message {
 
     private int messageId;
     private long timestamp;
-    private int timezone;
+    private long timezone;
     private String messageType;
     private Object messageData;
 
@@ -29,11 +29,11 @@ public class Message {
         this.timestamp = timestamp;
     }
 
-    public int getTimezone() {
+    public long getTimezone() {
         return timezone;
     }
 
-    public void setTimezone(int timezone) {
+    public void setTimezone(long timezone) {
         this.timezone = timezone;
     }
 

@@ -58,6 +58,10 @@ public class WsServer extends WebSocketServer {
         RegisterApi registerApi = new RegisterApi();
         registerApi.setApiMethods(new ArrayList<>());
         registerApi.setServiceSupportedAPIVersions(new ArrayList<>());
+        registerApi.setAbbr(RuntimeInfo.local.getAbbr());
+        registerApi.setName(RuntimeInfo.local.getName());
+        registerApi.setAddress(RuntimeInfo.local.getAddress());
+        registerApi.setPort(RuntimeInfo.local.getPort());
         RuntimeInfo.local.setRegisterApi(registerApi);
         RuntimeInfo.scanPackage(scanPackage);
     }
@@ -82,10 +86,10 @@ public class WsServer extends WebSocketServer {
     }
 
     @Override
-    public void onMessage(WebSocket webSocket, String message) {
+    public void onMessage(WebSocket webSocket, String msg) {
         try {
-            Log.info("Server<" + RuntimeInfo.local.getAbbr() + ":" + RuntimeInfo.local.getPort() + "> receive:" + message);
-            RuntimeInfo.REQUEST_QUEUE.add(new Object[]{webSocket, message});
+            Log.info("Server<" + RuntimeInfo.local.getAbbr() + ":" + RuntimeInfo.local.getPort() + "> receive:" + msg);
+            RuntimeInfo.REQUEST_QUEUE.add(new Object[]{webSocket, msg});
             RuntimeInfo.fixedThreadPool.execute(new WsProcessor());
         } catch (Exception e) {
             e.printStackTrace();
@@ -100,7 +104,7 @@ public class WsServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-        Log.info("ws server-> started.");
+        Log.info("Server<" + RuntimeInfo.local.getAbbr() + ":" + RuntimeInfo.local.getPort() + ">-> started.");
     }
 
 }

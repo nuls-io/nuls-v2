@@ -32,15 +32,24 @@ public class H2Test {
         long start = System.currentTimeMillis();
         initTestTable();
         System.out.println("花费时间：" + String.valueOf(System.currentTimeMillis() - start));
+
         start = System.currentTimeMillis();
-        select();
+        //initTestData();
+        //select();
         System.out.println("查询数据花费时间：" + String.valueOf(System.currentTimeMillis() - start));
+
+        for(int i=0;i<20;i++){
+            long s = System.currentTimeMillis();
+            select();
+            System.out.println("查询数据花费时间：" + String.valueOf(System.currentTimeMillis() - s));
+        }
     }
 
     private static void select(){
         String address = "QYAnNNfGKwUGJwPQHCpUa1WU8Qzhzb822";
         TransactionService ts = new TransactionServiceImpl();
-        Page<TransactionPo> page =  ts.getTxs(address, null, null, null, null, 1,30);
+        //Page<TransactionPo> page =  ts.getTxs(ranAddress(), 1, null, 1540138501L, System.currentTimeMillis(), 1,15);
+        Page<TransactionPo> page =  ts.getTxs(ranAddress(), 1, null, null, null, 1,15);
         try {
             System.out.println(JSONUtils.obj2json(page));
         } catch (JsonProcessingException e) {
@@ -64,9 +73,13 @@ public class H2Test {
 
     public static void initTestData(){
         TransactionService ts = new TransactionServiceImpl();
-        List<TransactionPo> listPo = new ArrayList<>();
-        for (int i=0;i<50;i++) {
-            ts.saveTx(createTxPo());
+        for (int i=0;i<15;i++) {
+            List<TransactionPo> listPo = new ArrayList<>();
+            for (int j=0;j<100000;j++) {
+               listPo.add(createTxPo());
+            }
+            ts.saveTxs(listPo);
+            System.out.println("OK-"+i);
         }
     }
 

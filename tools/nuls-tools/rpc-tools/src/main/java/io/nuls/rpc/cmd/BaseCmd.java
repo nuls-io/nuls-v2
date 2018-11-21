@@ -29,7 +29,14 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdResponse;
 import io.nuls.rpc.model.ConfigItem;
+import io.nuls.rpc.model.message.Ack;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
 import io.nuls.tools.constant.ErrorCode;
+import io.nuls.tools.data.DateUtils;
+import io.nuls.tools.thread.TimeService;
+
+import java.util.HashMap;
 
 /**
  * @author tangyi
@@ -74,5 +81,9 @@ public abstract class BaseCmd {
         cmdResponse.setMsg(errorCode.getMsg());
         cmdResponse.setResult(result);
         return cmdResponse;
+    }
+
+    protected Object ack(){
+        return new Ack();
     }
 }

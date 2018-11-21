@@ -32,6 +32,8 @@ import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.Na;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.poc.utils.manager.ConfigManager;
+import io.nuls.tools.data.LongUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -110,6 +112,10 @@ public class Agent extends TransactionLogicData {
      * */
     private transient int memberCount;
 
+    /**
+     * 别名不序列化
+     * */
+    private transient String alais;
     @Override
     public int size() {
         int size = 0;
@@ -243,13 +249,13 @@ public class Agent extends TransactionLogicData {
         this.memberCount = memberCount;
     }
 
-    /*public long getAvailableDepositAmount() {
-        return LongUtils.sub(PocConsensusProtocolConstant.SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT.getValue(), this.getTotalDeposit());
+    public long getAvailableDepositAmount(int chain_id) {
+        return LongUtils.sub(ConfigManager.config_map.get(chain_id).getCommission_max(), this.getTotalDeposit().getValue());
     }
 
-    public boolean canDeposit() {
-        return getAvailableDepositAmount() >= PocConsensusProtocolConstant.ENTRUSTER_DEPOSIT_LOWER_LIMIT.getValue();
-    }*/
+    public boolean canDeposit(int chain_id) {
+        return getAvailableDepositAmount(chain_id) >= ConfigManager.config_map.get(chain_id).getCommission_min();
+    }
 
     @Override
     public Agent clone() throws CloneNotSupportedException {
@@ -261,5 +267,13 @@ public class Agent extends TransactionLogicData {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(this.agentAddress);
         return addressSet;
+    }
+
+    public String getAlais() {
+        return alais;
+    }
+
+    public void setAlais(String alais) {
+        this.alais = alais;
     }
 }
