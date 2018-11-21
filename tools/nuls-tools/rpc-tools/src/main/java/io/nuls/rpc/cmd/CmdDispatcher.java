@@ -75,7 +75,7 @@ public class CmdDispatcher {
      * 2. Send to the specified module
      * 3. Get the result returned to the caller
      */
-    public static String call(String cmd, Object[] params, double minVersion) throws Exception {
+    public static String sendRequest(String cmd, Object[] params, double minVersion) throws Exception {
         int messageId = RuntimeInfo.sequence.incrementAndGet();
         Message message = RuntimeInfo.buildMessage(messageId, MessageType.Request);
         Request request = RuntimeInfo.defaultRequest();
@@ -97,7 +97,7 @@ public class CmdDispatcher {
      * 3. Get the result returned to the caller
      * 4. Get the highest version of cmd
      */
-    public static String call(String cmd, Map params) throws Exception {
+    public static String request(String cmd, Map params) throws Exception {
         int messageId = RuntimeInfo.sequence.incrementAndGet();
         Message message = RuntimeInfo.buildMessage(messageId, MessageType.Request);
         Request request = RuntimeInfo.defaultRequest();

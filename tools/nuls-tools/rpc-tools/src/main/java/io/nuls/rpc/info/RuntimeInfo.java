@@ -28,10 +28,8 @@
 package io.nuls.rpc.info;
 
 import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.message.*;
-import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.log.Log;
@@ -342,12 +340,7 @@ public class RuntimeInfo {
         return response;
     }
 
-    public static void mockKernel() throws Exception {
-        WsServer wsServer = new WsServer(8887);
-        wsServer.init(ModuleE.KE, "io.nuls.rpc.cmd.kernel");
-        wsServer.connect("ws://127.0.0.1:8887");
 
-        CmdDispatcher.syncKernel();
-        Thread.sleep(Integer.MAX_VALUE);
-    }
+
+
 }

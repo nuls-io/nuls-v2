@@ -79,9 +79,9 @@ public class WsProcessor implements Runnable {
 
                                 Map params = (Map) requestMethods.get(method);
 
-                                CmdDetail cmdDetail = params == null || params.get("version") == null
+                                CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
                                         ? RuntimeInfo.getLocalInvokeCmd((String) method)
-                                        : RuntimeInfo.getLocalInvokeCmd((String) method, (double) params.get("version"));
+                                        : RuntimeInfo.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
                                 Object responseData = buildResponse(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
 
                                 response.setResponseProcessingTime(TimeService.currentTimeMillis() - response.getResponseProcessingTime());
