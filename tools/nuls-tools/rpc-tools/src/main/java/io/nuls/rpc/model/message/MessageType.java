@@ -11,5 +11,10 @@ public enum MessageType {
     NegotiateConnectionResponse,
     Request,
     Response,
-    Ack
+    Unsubscribe,
+    Ack,
+    Notification,
+    RegisterCompoundMethod,
+    UnregisterCompoundMethod,
+
 }
