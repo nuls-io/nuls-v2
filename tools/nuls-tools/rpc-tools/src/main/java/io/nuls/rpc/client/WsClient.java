@@ -29,6 +29,7 @@ package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.model.message.MessageType;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
@@ -61,8 +62,7 @@ public class WsClient extends WebSocketClient {
             /*
              * add to response queue, Waiting for thread pool processing
              */
-            Log.info("Client received: " + paramString);
-            Log.info("Client received: " + JSONUtils.json2map(paramString));
+            Log.info("Client<" + RuntimeInfo.local.getAbbr() + ":" + RuntimeInfo.local.getPort() + "> receive:" + paramString);
             RuntimeInfo.RESPONSE_QUEUE.add(JSONUtils.json2map(paramString));
         } catch (IOException e) {
             Log.error("WsClient.onMessage-> " + e.getMessage() + ":" + paramString);
@@ -79,21 +79,30 @@ public class WsClient extends WebSocketClient {
     }
 
     /**
-     * get response by id
+     * Get response by messageId
      */
-    public Map getResponse(int id) throws InterruptedException, IOException {
+    public Map getResponse(int messageId) throws InterruptedException, IOException {
         long timeMillis = System.currentTimeMillis();
         do {
             for (Map map : RuntimeInfo.RESPONSE_QUEUE) {
-                if ((Integer) map.get("id") == id) {
-                    RuntimeInfo.RESPONSE_QUEUE.remove(map);
-                    return map;
+                MessageType messageType = MessageType.valueOf(map.get("messageType").toString());
+                switch (messageType) {
+                    case NegotiateConnectionResponse:
+                        RuntimeInfo.RESPONSE_QUEUE.remove(map);
+                        return map;
+                    case Response:
+                        Map messageData = (Map) map.get("messageData");
+                        if ((Integer) messageData.get("requestId") == messageId) {
+                            RuntimeInfo.RESPONSE_QUEUE.remove(map);
+                            return map;
+                        }
+                    default:
                 }
             }
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
 
-        return RuntimeInfo.buildCmdResponseMap(id, Constants.RESPONSE_TIMEOUT);
+        return RuntimeInfo.buildCmdResponseMap(messageId, Constants.RESPONSE_TIMEOUT);
     }
 
 

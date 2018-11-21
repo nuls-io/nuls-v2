@@ -27,12 +27,18 @@
 
 package io.nuls.rpc.info;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.client.WsClient;
+import io.nuls.rpc.handler.WebSocketHandler;
 import io.nuls.rpc.model.*;
-import io.nuls.rpc.model.Module;
+import io.nuls.rpc.model.message.*;
 import io.nuls.tools.core.ioc.ScanUtil;
+import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.tools.thread.TimeService;
+import io.nuls.tools.thread.commom.NulsThreadFactory;
 import org.java_websocket.WebSocket;
 
 import java.io.IOException;
@@ -42,7 +48,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -52,17 +57,18 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class RuntimeInfo {
 
+
     /**
      * local module(io.nuls.rpc.Module) information
      */
-    public static Module local;
+    public static ModuleInfo local = new ModuleInfo();
 
     /**
      * remote module information
      * key: module name/code
-     * value: module(io.nuls.rpc.Module)
+     * value: moduleInfo(io.nuls.rpc.ModuleInfo)
      */
-    public static ConcurrentMap<String, Module> remoteModuleMap = new ConcurrentHashMap<>();
+    public static ConcurrentMap<String, ModuleInfo> remoteModuleMap = new ConcurrentHashMap<>();
 
     /**
      * local Config item information
@@ -73,6 +79,11 @@ public class RuntimeInfo {
      * cmd sequence
      */
     public static AtomicInteger sequence = new AtomicInteger(0);
+
+    /**
+     * Kernel URL
+     */
+    public static String kernelUrl;
 
 
     /**
@@ -85,7 +96,8 @@ public class RuntimeInfo {
     /**
      * The thread pool object that handles the request
      */
-    public static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
+    public static ExecutorService fixedThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handRequest"));
+    //    public static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
 
     /**
      * The response of the cmd invoked through RPC
@@ -129,17 +141,15 @@ public class RuntimeInfo {
      * Get the url of the module that provides the cmd through the CmdRequest object
      * The resulting url may not be unique, returning all found
      */
-    public static List<String> getRemoteUri(CmdRequest cmdRequest) {
-        List<String> remoteUriList = new ArrayList<>();
-        for (Module module : RuntimeInfo.remoteModuleMap.values()) {
-            for (CmdDetail cmdDetail : module.getCmdDetailList()) {
-                if (cmdDetail.getCmd().equals(cmdRequest.getCmd())) {
-                    remoteUriList.add("ws://" + module.getAddr() + ":" + module.getPort());
-                    break;
+    public static String getRemoteUri(String cmd) {
+        for (ModuleInfo moduleInfo : RuntimeInfo.remoteModuleMap.values()) {
+            for (CmdDetail cmdDetail : moduleInfo.getRegisterApi().getApiMethods()) {
+                if (cmdDetail.getMethodName().equals(cmd)) {
+                    return "ws://" + moduleInfo.getRegisterApi().getAddress() + ":" + moduleInfo.getRegisterApi().getPort();
                 }
             }
         }
-        return remoteUriList;
+        return null;
     }
 
     /**
@@ -151,22 +161,22 @@ public class RuntimeInfo {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
-        RuntimeInfo.local.getCmdDetailList().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        RuntimeInfo.local.getRegisterApi().getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
-            if (!cmdDetail.getCmd().equals(cmd) || cmdDetail.getVersion() < minVersion) {
+        for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getApiMethods()) {
+            if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
-
+            if ((int) minVersion != (int) cmdDetail.getVersion()) {
+                continue;
+            }
             if (find == null) {
                 find = cmdDetail;
                 continue;
             }
 
-            if (!cmdDetail.isPreCompatible()) {
-                break;
-            } else {
+            if (cmdDetail.getVersion() > find.getVersion()) {
                 find = cmdDetail;
             }
         }
@@ -180,11 +190,11 @@ public class RuntimeInfo {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd) {
 
-        RuntimeInfo.local.getCmdDetailList().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        RuntimeInfo.local.getRegisterApi().getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
-            if (!cmdDetail.getCmd().equals(cmd)) {
+        for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getApiMethods()) {
+            if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
 
@@ -218,9 +228,9 @@ public class RuntimeInfo {
                 }
 
                 if (!isRegister(cmdDetail)) {
-                    RuntimeInfo.local.getCmdDetailList().add(cmdDetail);
+                    RuntimeInfo.local.getRegisterApi().getApiMethods().add(cmdDetail);
                 } else {
-                    throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getCmd() + "-" + cmdDetail.getVersion());
+                    throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
             }
         }
@@ -231,14 +241,36 @@ public class RuntimeInfo {
      * If the annotation is CmdAnnotation, it means that the cmd needs to be registered
      */
     private static CmdDetail annotation2CmdDetail(Method method) {
+        CmdDetail cmdDetail = null;
+        List<CmdParameter> cmdParameters = new ArrayList<>();
         Annotation[] annotations = method.getDeclaredAnnotations();
         for (Annotation annotation : annotations) {
             if (CmdAnnotation.class.getName().equals(annotation.annotationType().getName())) {
                 CmdAnnotation cmdAnnotation = (CmdAnnotation) annotation;
-                return new CmdDetail(cmdAnnotation.cmd(), cmdAnnotation.version(), method.getDeclaringClass().getName(), method.getName(), cmdAnnotation.preCompatible());
+                cmdDetail = new CmdDetail();
+                cmdDetail.setMethodName(cmdAnnotation.cmd());
+                cmdDetail.setMethodDescription(cmdAnnotation.description());
+                cmdDetail.setMethodMinEvent(cmdAnnotation.minEvent());
+                cmdDetail.setMethodMinPeriod(cmdAnnotation.minPeriod());
+                cmdDetail.setMethodScope(cmdAnnotation.scope());
+                cmdDetail.setVersion(cmdAnnotation.version());
+                cmdDetail.setInvokeClass(method.getDeclaringClass().getName());
+                cmdDetail.setInvokeMethod(method.getName());
+            }
+            if (Parameters.class.getName().equals(annotation.annotationType().getName())) {
+                Parameters parameters = (Parameters) annotation;
+                for (Parameter parameter : parameters.value()) {
+                    CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());
+                    cmdParameters.add(cmdParameter);
+                }
             }
         }
-        return null;
+        if (cmdDetail == null) {
+            return null;
+        }
+        cmdDetail.setParameters(cmdParameters);
+
+        return cmdDetail;
     }
 
     /**
@@ -248,8 +280,8 @@ public class RuntimeInfo {
      */
     private static boolean isRegister(CmdDetail sourceCmdDetail) {
         boolean exist = false;
-        for (CmdDetail cmdDetail : RuntimeInfo.local.getCmdDetailList()) {
-            if (cmdDetail.getCmd().equals(sourceCmdDetail.getCmd()) && cmdDetail.getVersion() == sourceCmdDetail.getVersion()) {
+        for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getApiMethods()) {
+            if (cmdDetail.getMethodName().equals(sourceCmdDetail.getMethodName()) && cmdDetail.getVersion() == sourceCmdDetail.getVersion()) {
                 exist = true;
                 break;
             }
@@ -265,5 +297,90 @@ public class RuntimeInfo {
         cmdResponse.setMsg(msg);
         return JSONUtils.json2map(JSONUtils.obj2json(cmdResponse));
     }
+
+    public static Message buildMessage(int messageId, MessageType messageType) {
+        Message message = new Message();
+        message.setMessageId(messageId);
+        message.setMessageType(messageType.name());
+        message.setTimestamp(TimeService.currentTimeMillis());
+        message.setTimezone(DateUtils.getTimeZone());
+        return message;
+    }
+
+    public static NegotiateConnection defaultNegotiateConnection() {
+        NegotiateConnection negotiateConnection = new NegotiateConnection();
+        negotiateConnection.setCompressionAlgorithm("zlib");
+        negotiateConnection.setCompressionRate(0);
+        return negotiateConnection;
+    }
+
+    public static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
+        NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
+        negotiateConnectionResponse.setNegotiationStatus(0);
+        negotiateConnectionResponse.setNegotiationComment("Incompatible protocol version");
+
+        Message rspMsg = RuntimeInfo.buildMessage(RuntimeInfo.nextSequence(), MessageType.NegotiateConnectionResponse);
+        rspMsg.setMessageData(negotiateConnectionResponse);
+        webSocket.send(JSONUtils.obj2json(rspMsg));
+    }
+
+    public static void response(WebSocket webSocket, Map<String, Object> messageMap) throws Exception {
+        int messageId = (Integer) messageMap.get("messageId");
+        Map messageData = (Map) messageMap.get("messageData");
+        Map requestMethods = (Map) messageData.get("requestMethods");
+        for (Object method : requestMethods.keySet()) {
+            Response response = defaultResponse(messageId);
+
+            Map params = (Map) requestMethods.get(method);
+
+            CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
+                    ? RuntimeInfo.getLocalInvokeCmd((String) method)
+                    : RuntimeInfo.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
+            Message message;
+            if (cmdDetail == null) {
+                response.setResponseProcessingTime(TimeService.currentTimeMillis() - response.getResponseProcessingTime());
+                response.setResponseData("No such version: " + method + "," + params.get(Constants.VERSION_KEY_STR));
+                message = RuntimeInfo.buildMessage(RuntimeInfo.nextSequence(), MessageType.Response);
+                message.setMessageData(response);
+                webSocket.send(JSONUtils.obj2json(message));
+                continue;
+            }
+
+            Object responseData = WebSocketHandler.invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
+
+            response.setResponseProcessingTime(TimeService.currentTimeMillis() - response.getResponseProcessingTime());
+            response.setResponseData(responseData);
+
+            message = RuntimeInfo.buildMessage(RuntimeInfo.nextSequence(), MessageType.Response);
+            message.setMessageData(response);
+            webSocket.send(JSONUtils.obj2json(message));
+        }
+    }
+
+    public static void unsubscribe(){
+
+    }
+
+    public static Request defaultRequest() {
+        Request request = new Request();
+        request.setRequestAck(0);
+        request.setSubscriptionEventCounter(0);
+        request.setSubscriptionPeriod(0);
+        request.setSubscriptionRange("");
+        request.setResponseMaxSize(0);
+        request.setRequestMethods(new HashMap<>(16));
+        return request;
+    }
+
+    private static Response defaultResponse(int requestId) {
+        Response response = new Response();
+        response.setRequestId(requestId);
+        response.setResponseProcessingTime(TimeService.currentTimeMillis());
+        response.setResponseStatus(1);
+        response.setResponseComment("Congratulations! Processing completed！");
+        response.setResponseMaxSize(0);
+        return response;
+    }
+
 
 }

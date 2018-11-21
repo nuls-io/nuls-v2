@@ -1,7 +1,8 @@
 package io.nuls.chain.service;
 
-import io.nuls.base.data.chain.Chain;
-import io.nuls.base.data.chain.ChainAsset;
+
+import io.nuls.chain.model.dto.Chain;
+import io.nuls.chain.model.dto.ChainAsset;
 
 import java.util.List;
 
@@ -25,7 +26,7 @@ public interface ChainService {
      * @param chainId The chain ID
      * @return Chain
      */
-    Chain getChain(short chainId);
+    Chain getChain(int chainId);
 
     /**
      * Get asset information by chain ID
@@ -33,7 +34,7 @@ public interface ChainService {
      * @param chainId The chain ID
      * @return ChainAsset object
      */
-    List<ChainAsset> getChainAssetByChain(short chainId);
+    List<ChainAsset> getChainAssetByChain(int chainId);
 
     /**
      * Get ChainAsset object
@@ -42,7 +43,7 @@ public interface ChainService {
      * @param assetId The asset ID
      * @return ChainAsset object
      */
-    ChainAsset getChainAsset(short chainId, long assetId);
+    ChainAsset getChainAsset(int chainId, long assetId);
 
     /**
      * Set the currentNumber of asset
@@ -52,5 +53,5 @@ public interface ChainService {
      * @param currentNumber Current asset number in chain
      * @return true/false
      */
-    public boolean setAssetNumber(short chainId, long assetId, long currentNumber);
+    public boolean setAssetNumber(int chainId, long assetId, long currentNumber);
 }

@@ -1,26 +1,24 @@
 package io.nuls.rpc.model.message;
 
-import java.util.Map;
-
 /**
  * @author tangyi
  * @date 2018/11/15
  * @description
  */
 public class Response {
-    private String requestID;
+    private int requestId;
     private long responseProcessingTime;
     private int responseStatus;
     private String responseComment;
     private int responseMaxSize;
-    private Map<String, Object> responseData;
+    private Object responseData;
 
-    public String getRequestID() {
-        return requestID;
+    public int getRequestId() {
+        return requestId;
     }
 
-    public void setRequestID(String requestID) {
-        this.requestID = requestID;
+    public void setRequestId(int requestId) {
+        this.requestId = requestId;
     }
 
     public long getResponseProcessingTime() {
@@ -55,11 +53,11 @@ public class Response {
         this.responseMaxSize = responseMaxSize;
     }
 
-    public Map<String, Object> getResponseData() {
+    public Object getResponseData() {
         return responseData;
     }
 
-    public void setResponseData(Map<String, Object> responseData) {
+    public void setResponseData(Object responseData) {
         this.responseData = responseData;
     }
 }

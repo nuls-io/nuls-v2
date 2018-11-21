@@ -27,35 +27,27 @@
 
 package io.nuls.rpc.model;
 
-import io.protostuff.Rpc;
-
-import java.util.List;
-
 /**
  * @author tangyi
  * @date 2018/10/19
  * @description
  */
-public class Module {
+public class ModuleInfo {
+    private String abbr;
     private String name;
-    private ModuleStatus status;
-    private boolean available;
-    private String addr;
+    private String address;
     private int port;
-    private List<CmdDetail> cmdDetailList;
-    private List<String> dependsModule;
+    private RegisterApi registerApi;
 
-    public Module() {
+    public ModuleInfo() {
     }
 
-    public Module(String name, ModuleStatus status, boolean available, String addr, int port, List<CmdDetail> cmdDetailList, List<String> dependsModule) {
-        this.name = name;
-        this.status = status;
-        this.available = available;
-        this.addr = addr;
-        this.port = port;
-        this.cmdDetailList = cmdDetailList;
-        this.dependsModule = dependsModule;
+    public String getAbbr() {
+        return abbr;
+    }
+
+    public void setAbbr(String abbr) {
+        this.abbr = abbr;
     }
 
     public String getName() {
@@ -66,28 +58,12 @@ public class Module {
         this.name = name;
     }
 
-    public ModuleStatus getStatus() {
-        return status;
+    public String getAddress() {
+        return address;
     }
 
-    public void setStatus(ModuleStatus status) {
-        this.status = status;
-    }
-
-    public boolean isAvailable() {
-        return available;
-    }
-
-    public void setAvailable(boolean available) {
-        this.available = available;
-    }
-
-    public String getAddr() {
-        return addr;
-    }
-
-    public void setAddr(String addr) {
-        this.addr = addr;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public int getPort() {
@@ -98,19 +74,11 @@ public class Module {
         this.port = port;
     }
 
-    public List<CmdDetail> getCmdDetailList() {
-        return cmdDetailList;
+    public RegisterApi getRegisterApi() {
+        return registerApi;
     }
 
-    public void setCmdDetailList(List<CmdDetail> cmdDetailList) {
-        this.cmdDetailList = cmdDetailList;
-    }
-
-    public List<String> getDependsModule() {
-        return dependsModule;
-    }
-
-    public void setDependsModule(List<String> dependsModule) {
-        this.dependsModule = dependsModule;
+    public void setRegisterApi(RegisterApi registerApi) {
+        this.registerApi = registerApi;
     }
 }

@@ -1,4 +1,4 @@
-package io.nuls.base.data.chain;
+package io.nuls.chain.model.dto;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;

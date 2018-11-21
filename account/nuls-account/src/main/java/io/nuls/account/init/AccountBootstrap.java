@@ -6,9 +6,12 @@ import io.nuls.account.constant.AccountParam;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.service.AccountService;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
@@ -58,8 +61,10 @@ public class AccountBootstrap {
                 I18nUtils.setLanguage(language);
                 //ACCOUNTKEYSTORE_FOLDER_NAME
                 NulsConfig.DEFAULT_ENCODING = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER);
-                System.out.println(NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER));
-                NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME= NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER);
+                String keystoreFolder = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER);
+                if (StringUtils.isNotBlank(keystoreFolder)) {
+                    NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = keystoreFolder;
+                }
             } catch (Exception e) {
                 Log.error(e);
             }
@@ -78,10 +83,15 @@ public class AccountBootstrap {
     public static void initServer() {
 
         try {
-            WsServer s = new WsServer(8888);
-            //WsServer s = new WsServer(HostInfo.randomPort());
-            s.init("ac", new String[]{}, "io.nuls.account.rpc.cmd");
-            s.startAndSyncKernel("ws://127.0.0.1:8887");
+//            WsServer s = new WsServer(8888);
+//            s.init("ac", new String[]{}, "io.nuls.account.rpc.cmd");
+//            s.startAndSyncKernel("ws://127.0.0.1:8887");
+            // Start server instance
+            WsServer.getInstance(ModuleE.AC).setScanPackage("io.nuls.account.rpc.cmd").connect("ws://127.0.0.1:8887");
+
+            // Get information from kernel
+            CmdDispatcher.syncKernel();
+
         } catch (Exception e) {
             Log.error("Account initServer failed", e);
         }

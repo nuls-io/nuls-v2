@@ -1,6 +1,6 @@
 package io.nuls.chain.storage.impl;
 
-import io.nuls.base.data.chain.Asset;
+import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.storage.AssetStorage;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;

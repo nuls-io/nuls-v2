@@ -5,9 +5,11 @@ import com.github.pagehelper.PageHelper;
 import io.nuls.h2.dao.TransactionService;
 import io.nuls.h2.dao.impl.mapper.TransactionMapper;
 import io.nuls.h2.entity.TransactionPo;
+import io.nuls.h2.entity.TxTable;
 import io.nuls.h2.utils.SearchOperator;
 import io.nuls.h2.utils.Searchable;
 import io.nuls.tools.core.annotation.Service;
+import org.apache.ibatis.session.SqlSession;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +20,6 @@ import java.util.List;
  */
 @Service
 public class TransactionServiceImpl extends BaseService<TransactionMapper> implements TransactionService {
-    public TransactionServiceImpl() {
-        super(TransactionMapper.class);
-    }
 
     @Override
     public Page<TransactionPo> getTxs(String address, Integer type, Integer state, Long startTime, Long endTime, int pageNumber, int pageSize, String orderBy) {
@@ -43,7 +42,11 @@ public class TransactionServiceImpl extends BaseService<TransactionMapper> imple
 
     @Override
     public int saveTx(TransactionPo txPo) {
-        return this.getMapper().insert(txPo);
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        int rs = sqlSession.getMapper(TransactionMapper.class).save(txPo);
+        sqlSession.commit();
+        sqlSession.close();
+        return rs;
     }
 
     @Override
@@ -59,8 +62,29 @@ public class TransactionServiceImpl extends BaseService<TransactionMapper> imple
 
     @Override
     public void createTable(String tableName, String indexName, int number) {
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        TransactionMapper mapper = sqlSession.getMapper(TransactionMapper.class);
         for (int i = 0; i <= number; i++) {
-            this.getMapper().createTable(tableName + "_" + i, indexName + "_" + i);
+            mapper.createTable(tableName + "_" + i, indexName + "_" + i);
         }
+        sqlSession.commit();
+        sqlSession.close();
+        System.out.println("OK");
+    }
+
+
+    @Override
+    public void createTxTables(String tableName, String indexName, int number) {
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        TransactionMapper mapper = sqlSession.getMapper(TransactionMapper.class);
+        List<TxTable> list = new ArrayList<>();
+        for (int i = 0; i <= number; i++) {
+            TxTable txTable = new TxTable(tableName + "_" + i, indexName + "_" + i);
+            list.add(txTable);
+        }
+        mapper.createTxTables(list);
+        sqlSession.commit();
+        sqlSession.close();
+        System.out.println("batch OK");
     }
 }

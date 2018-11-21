@@ -151,7 +151,8 @@ public class PocConsensusResource extends BaseCmd{
      * */
     @CmdAnnotation(cmd = "cs_getAgentList", version = 1.0, preCompatible = true)
     public CmdResponse getAgentList(List<Object> params){
-        return service.getAgentList(params);
+        //return service.getAgentList(params);
+        return null;
     }
 
     /**
@@ -159,7 +160,8 @@ public class PocConsensusResource extends BaseCmd{
      * */
     @CmdAnnotation(cmd = "cs_getAgent", version = 1.0, preCompatible = true)
     public CmdResponse getAgentInfo(List<Object> params){
-        return service.getAgentInfo(params);
+        //return service.getAgentInfo(params);
+        return null;
     }
 
     /**

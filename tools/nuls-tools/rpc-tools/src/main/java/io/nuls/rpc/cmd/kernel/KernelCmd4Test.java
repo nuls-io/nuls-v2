@@ -30,12 +30,14 @@ package io.nuls.rpc.cmd.kernel;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
-import io.nuls.rpc.model.Module;
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.rpc.model.ModuleInfo;
+import io.nuls.rpc.model.RegisterApi;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * this class is only used by testing.
@@ -46,46 +48,59 @@ import java.util.*;
  */
 public class KernelCmd4Test extends BaseCmd {
 
-    @CmdAnnotation(cmd = "version", version = 1.0, preCompatible = true)
-    public CmdResponse version(List params) {
+    @CmdAnnotation(cmd = "register", version = 1.0, scope = "private", minEvent = 1, minPeriod = 0,
+            description = "Register to manager")
+    public Message version(Map<String, Object> map) {
         try {
-            System.out.println("join之前的kernel remote接口数：" + RuntimeInfo.remoteModuleMap.size());
-            Module module = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Module.class);
-            if (module != null) {
-                System.out.println(module.getName() + " added");
-                RuntimeInfo.remoteModuleMap.put(module.getName(), module);
+            System.out.println("join之前的kernel remote模块数：" + RuntimeInfo.remoteModuleMap.size());
+            ModuleInfo moduleInfo = JSONUtils.json2pojo(JSONUtils.obj2json(map.get("RegisterAPI")), ModuleInfo.class);
+            if (moduleInfo != null) {
+                System.out.println(moduleInfo.getAbbr() + " added");
+                RuntimeInfo.remoteModuleMap.put(moduleInfo.getAbbr(), moduleInfo);
             }
-            System.out.println("join之后的kernel remote接口数：" + RuntimeInfo.remoteModuleMap.size());
+            System.out.println("join之后的kernel remote模块数：" + RuntimeInfo.remoteModuleMap.size());
 
             Map<String, Object> result = new HashMap<>(16);
             result.put("service", new String[]{"a", "b", "c"});
             result.put("available", true);
             result.put("modules", RuntimeInfo.remoteModuleMap);
 
-            return success(null, result);
+            return new Message();
         } catch (Exception e) {
             e.printStackTrace();
-            return failed(ErrorCode.init("-32603"), null);
+            return new Message();
         }
     }
 
-    @CmdAnnotation(cmd = "fetch", version = 1.0, preCompatible = true)
-    public Object fetch(List params) {
-        Iterator<String> keyIterator = RuntimeInfo.remoteModuleMap.keySet().iterator();
-        List<String> service = new ArrayList<>();
-        while (keyIterator.hasNext()) {
-            service.add(keyIterator.next());
-        }
-
-        Map<String, Object> result = new HashMap<>(16);
-        result.put("service", service);
-        result.put("modules", RuntimeInfo.remoteModuleMap);
-
-        return success(null, result);
+    @CmdAnnotation(cmd = "negotiateConnection", version = 1.0, scope = "private", minEvent = 1, minPeriod = 0,
+            description = "Negotiate connection")
+    public Message negotiateConnection(Map<String, Object> map) {
+        System.out.println("CompressionRate: " + map.get("CompressionRate"));
+        System.out.println("CompressionAlgorithm: " + map.get("CompressionAlgorithm"));
+        return new Message();
     }
 
-    @CmdAnnotation(cmd = "cmd1", version = 1.0, preCompatible = true)
-    public Object cmd1(List params) {
-        return success(null, "kernel cmd1");
+    @CmdAnnotation(cmd = "registerAPI", version = 1.0, scope = "private", minEvent = 1, minPeriod = 0,
+            description = "Register API")
+    public Object registerAPI(Map<String, Object> map) {
+        try {
+            RegisterApi registerApi = JSONUtils.json2pojo(JSONUtils.obj2json(map), RegisterApi.class);
+            if (registerApi != null) {
+                ModuleInfo moduleInfo = new ModuleInfo();
+                String address = registerApi.getAddress();
+                int port = registerApi.getPort();
+                moduleInfo.setAddress(address);
+                moduleInfo.setPort(port);
+                moduleInfo.setAbbr(registerApi.getAbbr());
+                moduleInfo.setName(registerApi.getName());
+                moduleInfo.setRegisterApi(registerApi);
+                RuntimeInfo.remoteModuleMap.put(registerApi.getName(), moduleInfo);
+            }
+            System.out.println("Current APIMethods:" + JSONUtils.obj2json(RuntimeInfo.remoteModuleMap));
+            return RuntimeInfo.remoteModuleMap;
+        } catch (Exception e) {
+            Log.error(e);
+            return e.getMessage();
+        }
     }
 }

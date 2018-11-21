@@ -42,6 +42,10 @@ public class Constants {
      */
     public static final long INTERVAL_TIMEMILLIS = 100;
     public static final long TIMEOUT_TIMEMILLIS = 60 * 1000;
+    public static final String VERSION_KEY_STR = "version";
+    public static final String PUBLIC = "public";
+    public static final String PRIVATE = "private";
+    public static final String ADMIN = "admin";
 
     /**
      * Message type
