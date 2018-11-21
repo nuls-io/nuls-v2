@@ -20,6 +20,9 @@ public class RepositoryImpl implements Repository {
 
     @Override
     public AccountState createAccount(short chainId, byte[] addr) {
+        if (isExist(addr)) {
+            return getAccountState(addr);
+        }
         Long initialNonce = BigInteger.ZERO.longValue();
         AccountState state = new AccountState(chainId, initialNonce, BigInteger.ZERO.longValue());
         try {

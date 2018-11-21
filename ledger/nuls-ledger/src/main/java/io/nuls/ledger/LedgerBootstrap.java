@@ -2,6 +2,7 @@ package io.nuls.ledger;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.config.AppConfig;
+import io.nuls.ledger.db.DataBaseArea;
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
@@ -56,7 +57,11 @@ public class LedgerBootstrap {
     public static void initRocksDb() {
         try {
             RocksDBService.init(AppConfig.moduleConfig.getDatabaseDir());
-            RocksDBService.createTable(AppConfig.moduleConfig.getDatabaseName());
+            if (!RocksDBService.existTable(DataBaseArea.TB_LEDGER_ACCOUNT)) {
+                RocksDBService.createTable(DataBaseArea.TB_LEDGER_ACCOUNT);
+            } else {
+                Log.info("table {} exist.", DataBaseArea.TB_LEDGER_ACCOUNT);
+            }
         } catch (Exception e) {
             Log.error(e);
         }

@@ -16,10 +16,6 @@ public class ModuleConfig {
 
     @Setter
     @Getter
-    private String databaseName;
-
-    @Setter
-    @Getter
     private Boolean databaseReset;
 
     @Setter

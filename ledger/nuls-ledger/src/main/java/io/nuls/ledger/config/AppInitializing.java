@@ -1,6 +1,5 @@
 package io.nuls.ledger.config;
 
-import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;

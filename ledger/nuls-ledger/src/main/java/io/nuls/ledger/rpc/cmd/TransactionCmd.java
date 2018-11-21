@@ -28,8 +28,8 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "lg_saveUncomfirmTx", version = 1.0, preCompatible = true)
-    public CmdResponse saveUncomfirmTx(List params) {
+    @CmdAnnotation(cmd = "lg_saveUnConfirmTx", version = 1.0, preCompatible = true)
+    public CmdResponse saveUnConfirmTx(List params) {
         for (Object param : params) {
             logger.info("param {}", param);
         }

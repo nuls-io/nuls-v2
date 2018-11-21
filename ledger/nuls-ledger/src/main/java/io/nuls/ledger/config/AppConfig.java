@@ -35,10 +35,6 @@ public class AppConfig {
             if (StringUtils.isNotBlank(databaseDir)) {
                 moduleConfig.setDatabaseDir(databaseDir);
             }
-            String databaseName = moduleIni.getCfgValue(section, "database.name");
-            if (StringUtils.isNotBlank(databaseName)) {
-                moduleConfig.setDatabaseName(databaseName);
-            }
             String reset = moduleIni.getCfgValue(section, "database.reset");
             if (StringUtils.isNotBlank(reset)) {
                 moduleConfig.setDatabaseReset(Boolean.valueOf(reset));
