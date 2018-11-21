@@ -28,11 +28,14 @@
 package io.nuls.test;
 
 import io.nuls.rpc.cmd.CmdDispatcher;
-import io.nuls.rpc.info.HostInfo;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -42,8 +45,8 @@ import org.junit.Test;
 public class WsM1 {
     @Test
     public void test() throws Exception {
-        System.out.println((int)3.1415f);
-        System.out.println((int)3.99415d);
+        System.out.println((int) 3.1415f);
+        System.out.println((int) 3.99415d);
     }
 
     @Test
@@ -54,20 +57,29 @@ public class WsM1 {
 
     @Test
     public void register() throws Exception {
-        WsServer wsServer = new WsServer(HostInfo.randomPort());
-        wsServer.init(ModuleE.CM, "io.nuls.rpc.cmd.test");
-        wsServer.connect("ws://127.0.0.1:8887");
+        // Start server instance
+        WsServer.getInstance(ModuleE.CM).setScanPackage("io.nuls.rpc.cmd.test").connect("ws://127.0.0.1:8887");
 
+        // Get information from kernel
         CmdDispatcher.syncKernel();
 
         Thread.sleep(Integer.MAX_VALUE);
     }
 
     @Test
-    public void testHeight() throws Exception{
+    public void testHeight() throws Exception {
+        // Set kernel url
         RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
+
+        // Get information from kernel
         CmdDispatcher.syncKernel();
 
-        System.out.println(CmdDispatcher.call("getHeight",null));
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+
+        // Call cmd
+        System.out.println(CmdDispatcher.request("getHeight", params));
     }
 }

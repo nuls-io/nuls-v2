@@ -42,19 +42,19 @@ public class WsM2 {
         RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
         CmdDispatcher.syncKernel();
 
-        System.out.println(CmdDispatcher.call("asset", new Object[]{(short) 188, (short) 765}, 1.0));
-
-        System.out.println(CmdDispatcher.call("assetReg", new Object[]{188, 867, "G", "Gold", 20000, 88888888, 7, false}, 1.0));
-        System.out.println(CmdDispatcher.call("assetReg", new Object[]{188, 765, "G", "Gold", 20000, 77777777, 7, false}, 1.0));
-        System.out.println(CmdDispatcher.call("assetReg", new Object[]{188, 801, "G", "Gold", 20000, 11111111, 7, false}, 1.0));
-
-        System.out.println(CmdDispatcher.call("asset", new Object[]{(short) 188, (short) 765}, 1.0));
-
-        System.out.println(CmdDispatcher.call("assetList", new Object[]{188}, 1.0));
-
-        System.out.println(CmdDispatcher.call("assetCurrNumOfChain", new Object[]{(short) 188, (short) 765, 765765765}, 1.0));
-
-        System.out.println(CmdDispatcher.call("asset", new Object[]{(short) 188, (short) 765}, 1.0));
+//        System.out.println(CmdDispatcher.call("asset", new Object[]{(short) 188, (short) 765}, 1.0));
+//
+//        System.out.println(CmdDispatcher.call("assetReg", new Object[]{188, 867, "G", "Gold", 20000, 88888888, 7, false}, 1.0));
+//        System.out.println(CmdDispatcher.call("assetReg", new Object[]{188, 765, "G", "Gold", 20000, 77777777, 7, false}, 1.0));
+//        System.out.println(CmdDispatcher.call("assetReg", new Object[]{188, 801, "G", "Gold", 20000, 11111111, 7, false}, 1.0));
+//
+//        System.out.println(CmdDispatcher.call("asset", new Object[]{(short) 188, (short) 765}, 1.0));
+//
+//        System.out.println(CmdDispatcher.call("assetList", new Object[]{188}, 1.0));
+//
+//        System.out.println(CmdDispatcher.call("assetCurrNumOfChain", new Object[]{(short) 188, (short) 765, 765765765}, 1.0));
+//
+//        System.out.println(CmdDispatcher.call("asset", new Object[]{(short) 188, (short) 765}, 1.0));
 
 
     }
@@ -64,11 +64,11 @@ public class WsM2 {
         RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
         CmdDispatcher.syncKernel();
 
-        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 99}, 1.0));
-        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 188}, 1.0));
-
-        System.out.println(CmdDispatcher.call("chainReg", new Object[]{(short) 188, "ilovess", "NULS", 19870921, true, 5, 10, 8}, 1.0));
-
-        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 188}, 1.0));
+//        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 99}, 1.0));
+//        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 188}, 1.0));
+//
+//        System.out.println(CmdDispatcher.call("chainReg", new Object[]{(short) 188, "ilovess", "NULS", 19870921, true, 5, 10, 8}, 1.0));
+//
+//        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 188}, 1.0));
     }
 }

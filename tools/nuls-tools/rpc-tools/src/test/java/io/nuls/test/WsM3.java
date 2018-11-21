@@ -45,7 +45,7 @@ public class WsM3 {
 
 
 
-        System.out.println(CmdDispatcher.call("cmd1", null, 1.0));
+//        System.out.println(CmdDispatcher.request("cmd1", null, 1.0));
 
 
         Thread.sleep(Integer.MAX_VALUE);
