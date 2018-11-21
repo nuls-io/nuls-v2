@@ -1,6 +1,7 @@
 package io.nuls.ledger.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -11,6 +12,7 @@ import java.io.Serializable;
  * Created by wangkun23 on 2018/11/21.
  */
 @ToString
+@NoArgsConstructor
 public class FreezeState implements Serializable {
 
     /**

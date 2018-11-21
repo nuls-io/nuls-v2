@@ -6,9 +6,7 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.data.LongUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,6 +16,8 @@ import java.util.List;
  * Created by wangkun23 on 2018/11/19.
  */
 @ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class AccountState extends BaseNulsData {
 
     @Setter
@@ -39,10 +39,6 @@ public class AccountState extends BaseNulsData {
     @Getter
     private List<FreezeState> freezeStates = new ArrayList<>();
 
-
-    public AccountState() {
-
-    }
 
     public AccountState(short chaiId, long nonce, long balance) {
         this.chaiId = chaiId;
