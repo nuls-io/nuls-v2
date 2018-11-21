@@ -6,6 +6,8 @@ import io.nuls.account.constant.AccountParam;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.service.AccountService;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -81,10 +83,15 @@ public class AccountBootstrap {
     public static void initServer() {
 
         try {
-            WsServer s = new WsServer(8888);
-            //WsServer s = new WsServer(HostInfo.randomPort());
-            s.init("ac", new String[]{}, "io.nuls.account.rpc.cmd");
-            s.startAndSyncKernel("ws://127.0.0.1:8887");
+//            WsServer s = new WsServer(8888);
+//            s.init("ac", new String[]{}, "io.nuls.account.rpc.cmd");
+//            s.startAndSyncKernel("ws://127.0.0.1:8887");
+            // Start server instance
+            WsServer.getInstance(ModuleE.AC).setScanPackage("io.nuls.account.rpc.cmd").connect("ws://127.0.0.1:8887");
+
+            // Get information from kernel
+            CmdDispatcher.syncKernel();
+
         } catch (Exception e) {
             Log.error("Account initServer failed", e);
         }
