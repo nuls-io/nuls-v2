@@ -56,4 +56,22 @@ public class RepositoryTest {
         Long nonce = repository.getNonce(address.getBytes());
         logger.info("nonce {}", nonce);
     }
+
+
+    @Test
+    public void addBalance() {
+        String address = "Nse1EUja45SVamtwwmx9cusFhmyyYmtG";
+        for (int i = 0; i < 100; i++) {
+            long balance = 100L;
+            balance = repository.addBalance(address.getBytes(), balance);
+            logger.info("balance {}", balance);
+        }
+    }
+
+    @Test
+    public void getBalance() {
+        String address = "Nse1EUja45SVamtwwmx9cusFhmyyYmtG";
+        long balance = repository.getBalance(address.getBytes());
+        logger.info("balance {}", balance);
+    }
 }
