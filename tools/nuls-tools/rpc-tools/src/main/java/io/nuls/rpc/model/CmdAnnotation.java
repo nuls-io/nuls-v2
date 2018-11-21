@@ -35,15 +35,36 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CmdAnnotation {
+    /*
+    The string used to invoke method
+     */
     String cmd();
 
+    /*
+    The version of the method
+     */
     double version();
 
-    String scope();
+    /*
+    The permission level of the method. Includes: public, private, admin
+    Default: private
+     */
+    String scope() default "private";
 
-    int minEvent();
+    /*
+    Calling frequency of a connection
+    Unit: block number
+     */
+    int minEvent() default 0;
 
-    int minPeriod();
+    /*
+    Call frequency of a connection
+    Unit: Second
+     */
+    int minPeriod() default 0;
 
+    /*
+    Description information of method
+     */
     String description();
 }
