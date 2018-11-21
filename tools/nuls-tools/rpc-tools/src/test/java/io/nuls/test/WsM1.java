@@ -31,6 +31,7 @@ import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Ack;
 import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
 
@@ -47,6 +48,10 @@ public class WsM1 {
     public void test() throws Exception {
         System.out.println((int) 3.1415f);
         System.out.println((int) 3.99415d);
+        System.out.println(new Ack().toString());
+        Ack ack = new Ack("asdfasdf");
+        System.out.println(ack.getRequestID());
+
     }
 
     @Test
@@ -86,6 +91,7 @@ public class WsM1 {
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
         params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("paramName", "value");
 
         // Call cmd
         System.out.println(CmdDispatcher.request("getHeight", params));
