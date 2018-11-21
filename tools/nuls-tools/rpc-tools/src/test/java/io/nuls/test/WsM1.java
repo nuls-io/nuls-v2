@@ -56,7 +56,7 @@ public class WsM1 {
     }
 
     @Test
-    public void register() throws Exception {
+    public void startServer() throws Exception {
         // Start server instance
         WsServer.getInstance(ModuleE.CM).setScanPackage("io.nuls.rpc.cmd.test").connect("ws://127.0.0.1:8887");
 
@@ -68,11 +68,19 @@ public class WsM1 {
 
     @Test
     public void testHeight() throws Exception {
+        /*
+        单元测试专用：单元测试时需要告知内核地址，以及同步接口列表
+        如果不是单元测试，在模块中进行连调测试，下面两句话是不需要的
+         */
         // Set kernel url
         RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
 
         // Get information from kernel
         CmdDispatcher.syncKernel();
+        /*
+        单元测试专用结束
+         */
+
 
         // Build params map
         Map<String, Object> params = new HashMap<>();
