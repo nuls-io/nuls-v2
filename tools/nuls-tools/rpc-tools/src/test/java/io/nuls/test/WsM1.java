@@ -90,7 +90,7 @@ public class WsM1 {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.VERSION_KEY_STR, "3.0");
         params.put("paramName", "value");
 
         // Call cmd
