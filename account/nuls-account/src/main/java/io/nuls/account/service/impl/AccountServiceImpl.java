@@ -29,6 +29,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
 import io.nuls.account.model.po.AccountPo;
+import io.nuls.account.rpc.call.EventCmdCall;
 import io.nuls.account.service.AccountCacheService;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
@@ -116,10 +117,10 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
                     accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
                     //backup account to keystore
                     keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
+                    //TODO
+                    //Sending account creation events
+                    EventCmdCall.sendEvent("evt_ac_createAccount","{address,isEncrypted}");
                 }
-                //TODO
-                //Sending account creation events
-
             }
         } catch (Exception e) {
             Log.error(e);
