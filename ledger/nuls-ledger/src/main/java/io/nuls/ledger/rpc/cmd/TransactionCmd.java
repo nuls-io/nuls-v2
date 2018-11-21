@@ -23,7 +23,7 @@ public class TransactionCmd extends BaseCmd {
     private LedgerService ledgerService;
 
     /**
-     * save uncomfirm transaction
+     * save pendingState transaction
      *
      * @param params
      * @return
@@ -34,6 +34,17 @@ public class TransactionCmd extends BaseCmd {
             logger.info("param {}", param);
         }
         //TODO.. 验证参数个数和格式
+        return success("", "hash");
+    }
+
+    /**
+     * delete pendingState transaction
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "lg_deleteUnConfirmTx", version = 1.0, preCompatible = true)
+    public CmdResponse deleteTransaction(List params) {
         return success("", "hash");
     }
 }

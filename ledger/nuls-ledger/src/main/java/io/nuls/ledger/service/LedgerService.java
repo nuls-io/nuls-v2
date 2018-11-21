@@ -1,8 +1,6 @@
 package io.nuls.ledger.service;
 
-import io.nuls.ledger.db.Repository;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.ledger.model.AccountState;
 
 import java.math.BigInteger;
 
@@ -11,6 +9,13 @@ import java.math.BigInteger;
  */
 public interface LedgerService {
 
+    /**
+     * create
+     *
+     * @param address
+     * @return
+     */
+    AccountState createAccount(short chainId, String address);
 
     /**
      * get user account balance
