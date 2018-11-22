@@ -59,6 +59,25 @@ public class CmConstants {
     public static final String ASSET_RECOVERY_RATE = "asset_recovery_rate";
 
     /**
+     * 远程RPC指令
+     */
+    /**
+     * 交易注册
+     */
+    public static final String  CMD_TX_REGISTER = "tx_register";
+    /**
+     * 创建交易
+     */
+    public static final String  CMD_TX_NEW_TX = "newTx";
+
+    public static final String CMD_NW_CROSS_SEEDS = "nw_getSeeds";
+
+    public static final String CMD_NW_CREATE_NODEGROUP = "nw_createNodeGroup";
+
+    public static final String CMD_NW_DELETE_NODEGROUP = "nw_delNodeGroup";
+
+
+    /**
      * 错误编码
      */
     public static final String ERROR_ASSET_SYMBOL_NULL = "A10000";
@@ -77,4 +96,7 @@ public class CmConstants {
     public static final String ERROR_CHAIN_ASSET_NOT_MATCH = "A10013";
     public static final String ERROR_ASSET_NOT_EXIST = "A10014";
     public static final String ERROR_ASSET_EXCEED_INIT = "A10015";
+
+
+    public static final String ERROR_TX_REG_RPC = "A10026";
 }

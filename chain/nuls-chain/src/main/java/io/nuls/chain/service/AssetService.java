@@ -17,7 +17,15 @@ public interface AssetService {
      * @param asset Asset object that needs to be saved
      * @return true/false
      */
-    boolean newAsset(Asset asset);
+//    boolean newAsset(Asset asset);
+
+    /**
+     * save asset
+     *
+     * @param asset
+     * @return
+     */
+    boolean addAsset(Asset asset);
 
     /**
      * Find asset based on key
@@ -42,8 +50,15 @@ public interface AssetService {
      * @param chainId The chain ID
      * @return List of asset
      */
-    List<Asset> getAssetByChain(short chainId);
+    List<Asset> getAssetByChain(int chainId);
 
+    /**
+     * juge asset exist in chain
+     *
+     * @param asset
+     * @return
+     */
+    boolean assetExist(Asset asset);
     /**
      * Get asset by symbol
      * @param symbol Asset symbol

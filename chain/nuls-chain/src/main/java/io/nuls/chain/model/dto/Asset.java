@@ -3,6 +3,7 @@ package io.nuls.chain.model.dto;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.chain.model.tx.txdata.AssetTx;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -25,6 +26,7 @@ public class Asset extends BaseNulsData {
     private long createTime;
     private long lastUpdateTime;
     private byte[] address;
+    private String txHash;
 
     public int getChainId() {
         return chainId;
@@ -114,6 +116,14 @@ public class Asset extends BaseNulsData {
         this.address = address;
     }
 
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
@@ -127,6 +137,7 @@ public class Asset extends BaseNulsData {
         stream.writeUint48(createTime);
         stream.writeUint48(lastUpdateTime);
         stream.writeBytesWithLength(address);
+        stream.writeString(txHash);
     }
 
     @Override
@@ -142,6 +153,7 @@ public class Asset extends BaseNulsData {
         this.createTime = byteBuffer.readUint48();
         this.lastUpdateTime = byteBuffer.readUint48();
         this.address=byteBuffer.readByLengthByte();
+        this.txHash = byteBuffer.readString();
     }
 
     @Override
@@ -165,8 +177,33 @@ public class Asset extends BaseNulsData {
         // lastUpdateTime
         size += SerializeUtils.sizeOfUint48();
         size+=SerializeUtils.sizeOfBytes(address);
-
+        size += SerializeUtils.sizeOfString(txHash);
         return size;
     }
+    public AssetTx parseToTransaction(){
+        AssetTx assetTx = new AssetTx();
+        assetTx.setAddress(this.getAddress());
+        assetTx.setAssetId(this.getAssetId());
+        assetTx.setChainId(this.getChainId());
+        assetTx.setDecimalPlaces(this.getDecimalPlaces());
+        assetTx.setDepositNuls(this.getDepositNuls());
+        assetTx.setInitNumber(this.getInitNumber());
+        assetTx.setName(this.getName());
+        assetTx.setSymbol(this.getSymbol());
+        return assetTx;
+    }
+    public Asset(AssetTx tx){
+        this.address = tx.getAddress();
+        this.assetId = tx.getAssetId();
+        this.chainId = tx.getChainId();
+        this.decimalPlaces = tx.getDecimalPlaces();
+        this.depositNuls = tx.getDepositNuls();
+        this.initNumber = tx.getInitNumber();
+        this.symbol = tx.getSymbol();
+        this.name = tx.getName();
+    }
 
+    public Asset(){
+        super();
+    }
 }

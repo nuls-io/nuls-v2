@@ -3,7 +3,6 @@ package io.nuls.chain.service.impl;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.model.dto.ChainAsset;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.storage.AssetStorage;
@@ -41,21 +40,14 @@ public class AssetServiceImpl implements AssetService {
      * @return true/false
      */
     @Override
-    public boolean newAsset(Asset asset) {
-        String key = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
-
+    public boolean addAsset(Asset asset) {
         boolean s1 = assetStorage.save(asset.getAssetId(), asset);
-
-        Chain chain = chainStorage.load(asset.getChainId());
+        String key = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
         ChainAsset chainAsset = new ChainAsset();
         chainAsset.setChainId(asset.getChainId());
         chainAsset.setAssetId(asset.getAssetId());
         chainAsset.setCurrentNumber(asset.getInitNumber());
-        chainAsset.setChainName(chain.getName());
-        chainAsset.setAssetSymbol(asset.getSymbol());
-        chainAsset.setAssetName(asset.getName());
         boolean s2 = chainAssetStorage.save(key, chainAsset);
-
         if (s1 && s2) {
             return true;
         } else {
@@ -94,6 +86,8 @@ public class AssetServiceImpl implements AssetService {
         return assetStorage.save(assetId, asset);
     }
 
+
+
     /**
      * Get all the assets of the chain
      *
@@ -101,8 +95,17 @@ public class AssetServiceImpl implements AssetService {
      * @return List of asset
      */
     @Override
-    public List<Asset> getAssetByChain(short chainId) {
+    public List<Asset> getAssetByChain(int chainId) {
         return assetStorage.getByChain(chainId);
+    }
+
+    @Override
+    public boolean assetExist(Asset asset) {
+        Map<String, String> errorMap = uniqueValidator(asset);
+        if(errorMap.size()> 0){
+            return true;
+        }
+        return false;
     }
 
     /**

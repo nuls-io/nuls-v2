@@ -118,7 +118,7 @@ public class ChainBootstrap {
 
     private void startRpcServer() throws Exception {
         WsServer wsServer = new WsServer(HostInfo.randomPort());
-        wsServer.init("cm", new String[]{"m2", "m3"}, "io.nuls.chain.cmd");
-        wsServer.startAndSyncKernel("ws://127.0.0.1:8887");
+//        wsServer.init("cm", new String[]{"m2", "m3"}, "io.nuls.chain.cmd");
+//        wsServer.startAndSyncKernel("ws://127.0.0.1:8887");
     }
 }
