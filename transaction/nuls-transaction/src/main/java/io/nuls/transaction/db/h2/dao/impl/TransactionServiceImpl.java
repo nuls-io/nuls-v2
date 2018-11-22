@@ -150,34 +150,6 @@ public class TransactionServiceImpl extends BaseService<TransactionMapper> imple
         return rs;
     }
 
-   /* @Override
-    public int deleteTx(List<String> txHashList) {
-        SqlSession sqlSession = sqlSessionFactory.openSession();
-        int rs = 0;
-        for (String txhash : txHashList){
-            for (int i = 0; i< TransactionConstant.H2_TX_TABLE_NUMBER; i++){
-                String tableName = TransactionConstant.H2_TX_TABLE_NAME_PREFIX + i;
-                if(sqlSession.getMapper(TransactionMapper.class).delete(txhash, tableName) == 1){
-                    rs++;
-                }
-            }
-        }
-        sqlSession.commit();
-        sqlSession.close();
-        return rs;
-    }*/
-
-    @Override
-    public void createTable(String tableName, String indexName, String uniqueName, int number) {
-        SqlSession sqlSession = sqlSessionFactory.openSession();
-        TransactionMapper mapper = sqlSession.getMapper(TransactionMapper.class);
-        for (int i = 0; i <= number; i++) {
-            mapper.createTable(tableName + i, indexName + i, uniqueName + i);
-        }
-        sqlSession.commit();
-        sqlSession.close();
-    }
-
     @Override
     public void createTxTables(String tableName, String indexName, String uniqueName, int number) {
         SqlSession sqlSession = sqlSessionFactory.openSession();

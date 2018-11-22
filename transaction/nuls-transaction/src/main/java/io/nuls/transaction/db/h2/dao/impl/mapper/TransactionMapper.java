@@ -14,8 +14,6 @@ import java.util.List;
  */
 public interface TransactionMapper extends BaseMapper<String, TransactionPo> {
 
-    void createTable(@Param("tableName") String tableName, @Param("indexName") String indexName, @Param("uniqueName") String uniqueName);
-
     void createTxTables(@Param("list") List<TxTable> list);
 
     int insert(@Param("txPo") TransactionPo txPo, @Param("tableName") String tableName);
