@@ -26,6 +26,8 @@
         );
         create index IF NOT EXISTS #{indexName}
         on #{tableName} (address, time, type);
+        create UNIQUE index IF NOT EXISTS #{uniqueName}
+        on #{tableName} (address, hash);
     </update>
 
     <update id="createTxTables" parameterType="java.util.List">
@@ -41,16 +43,18 @@
             );
             create index IF NOT EXISTS ${tx.indexName}
             on ${tx.tableName} (address, time, type);
+            create UNIQUE index IF NOT EXISTS ${tx.uniqueName}
+            on ${tx.tableName} (address, hash);
         </foreach>
     </update>
 
-    <insert id="save">
+    <insert id="insert">
       insert into ${tableName} (address, hash, `type`, amount, state, `time`)
         values
         (#{txPo.address}, #{txPo.hash}, #{txPo.type}, #{txPo.amount}, #{txPo.state}, #{txPo.time})
     </insert>
 
-    <insert id="batchInsert" parameterType="java.util.List">
+    <insert id="batchInsert">
         insert into ${tableName} (address, hash, `type`, amount, state, `time`)
         values
         <foreach collection="list" item="item" index="index" separator=",">
@@ -70,5 +74,9 @@
         from ${tableName}
         <include refid="io.nuls.h2.common.CommonMapper.Search_Where_multiple"/>
     </select>
+    
+    <delete id="delete" parameterType="String" >
+        delete from ${tableName} where address=#{address} and hash = #{hash}
+    </delete>
 
 </mapper>

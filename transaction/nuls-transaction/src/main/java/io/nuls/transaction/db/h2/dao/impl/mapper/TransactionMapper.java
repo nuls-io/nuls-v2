@@ -7,7 +7,6 @@ import io.nuls.transaction.model.split.TxTable;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author: Charlie
@@ -15,13 +14,17 @@ import java.util.Map;
  */
 public interface TransactionMapper extends BaseMapper<String, TransactionPo> {
 
-    void createTable(@Param("tableName") String tableName, @Param("indexName") String indexName);
+    void createTable(@Param("tableName") String tableName, @Param("indexName") String indexName, @Param("uniqueName") String uniqueName);
 
     void createTxTables(@Param("list") List<TxTable> list);
 
-    int save(@Param("txPo") TransactionPo txPo, @Param("tableName") String tableName);
+    int insert(@Param("txPo") TransactionPo txPo, @Param("tableName") String tableName);
+
+    int batchInsert(@Param("list") List<TransactionPo> list, @Param("tableName") String tableName);
 
     List<TransactionPo> getTxs(@Param("searchable") Searchable searchable, @Param("tableName") String tableName);
 
     long queryCount(@Param("searchable") Searchable searchable, @Param("tableName") String tableName);
+
+    int delete(@Param("address")String address, @Param("hash")String hash, @Param("tableName") String tableName);
 }

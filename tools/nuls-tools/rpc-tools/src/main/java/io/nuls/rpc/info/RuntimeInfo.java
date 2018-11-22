@@ -27,11 +27,11 @@
 
 package io.nuls.rpc.info;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.handler.CmdHandler;
 import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.message.*;
-import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.log.Log;
@@ -298,56 +298,7 @@ public class RuntimeInfo {
         return JSONUtils.json2map(JSONUtils.obj2json(cmdResponse));
     }
 
-    public static Message buildMessage(int messageId, MessageType messageType) {
-        Message message = new Message();
-        message.setMessageId(messageId);
-        message.setMessageType(messageType.name());
-        message.setTimestamp(TimeService.currentTimeMillis());
-        message.setTimezone(DateUtils.getTimeZone());
-        return message;
-    }
 
-    public static NegotiateConnection defaultNegotiateConnection() {
-        NegotiateConnection negotiateConnection = new NegotiateConnection();
-        negotiateConnection.setCompressionAlgorithm("zlib");
-        negotiateConnection.setCompressionRate(0);
-        return negotiateConnection;
-    }
 
-    public static NegotiateConnectionResponse defaultNegotiateConnectionResponse() {
-        NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
-        negotiateConnectionResponse.setNegotiationStatus(0);
-        negotiateConnectionResponse.setNegotiationComment("Incompatible protocol version");
-        return negotiateConnectionResponse;
-    }
 
-    public static Request defaultRequest() {
-        Request request = new Request();
-        request.setRequestAck(0);
-        request.setSubscriptionEventCounter(0);
-        request.setSubscriptionPeriod(0);
-        request.setSubscriptionRange("");
-        request.setResponseMaxSize(0);
-        request.setRequestMethods(new HashMap<>(16));
-        return request;
-    }
-
-    public static Response defaultResponse(int requestId) {
-        Response response = new Response();
-        response.setRequestId(requestId);
-        response.setResponseProcessingTime(TimeService.currentTimeMillis());
-        response.setResponseStatus(1);
-        response.setResponseComment("Congratulations! Processing completed！");
-        response.setResponseMaxSize(0);
-        return response;
-    }
-
-    public static void mockKernel() throws Exception {
-        WsServer wsServer = new WsServer(8887);
-        wsServer.init(ModuleE.KE, "io.nuls.rpc.cmd.kernel");
-        wsServer.connect("ws://127.0.0.1:8887");
-
-        CmdDispatcher.syncKernel();
-        Thread.sleep(Integer.MAX_VALUE);
-    }
 }

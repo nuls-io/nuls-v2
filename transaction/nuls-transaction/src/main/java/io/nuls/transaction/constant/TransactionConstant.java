@@ -37,6 +37,7 @@ public interface TransactionConstant {
      */
     String H2_TX_TABLE_NAME_PREFIX = "transaction_";
     String H2_TX_TABLE_INDEX_NAME_PREFIX = "tx_index_";
-    int H2_TX_TABLE_NUMBER = 8;
+    String H2_TX_TABLE_UNIQUE_NAME_PREFIX = "tx_unique_";
+    int H2_TX_TABLE_NUMBER = 128;
 
 }

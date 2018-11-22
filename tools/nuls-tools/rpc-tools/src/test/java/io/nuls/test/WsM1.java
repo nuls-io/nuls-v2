@@ -28,11 +28,15 @@
 package io.nuls.test;
 
 import io.nuls.rpc.cmd.CmdDispatcher;
-import io.nuls.rpc.info.HostInfo;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Ack;
 import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -42,8 +46,12 @@ import org.junit.Test;
 public class WsM1 {
     @Test
     public void test() throws Exception {
-        System.out.println((int)3.1415f);
-        System.out.println((int)3.99415d);
+        System.out.println((int) 3.1415f);
+        System.out.println((int) 3.99415d);
+        System.out.println(new Ack().toString());
+        Ack ack = new Ack("asdfasdf");
+        System.out.println(ack.getRequestID());
+
     }
 
     @Test
@@ -53,21 +61,39 @@ public class WsM1 {
     }
 
     @Test
-    public void register() throws Exception {
-        WsServer wsServer = new WsServer(HostInfo.randomPort());
-        wsServer.init(ModuleE.CM, "io.nuls.rpc.cmd.test");
-        wsServer.connect("ws://127.0.0.1:8887");
+    public void startServer() throws Exception {
+        // Start server instance
+        WsServer.getInstance(ModuleE.CM).setScanPackage("io.nuls.rpc.cmd.test").connect("ws://127.0.0.1:8887");
 
+        // Get information from kernel
         CmdDispatcher.syncKernel();
 
         Thread.sleep(Integer.MAX_VALUE);
     }
 
     @Test
-    public void testHeight() throws Exception{
+    public void testHeight() throws Exception {
+        /*
+        单元测试专用：单元测试时需要告知内核地址，以及同步接口列表
+        如果不是单元测试，在模块中进行连调测试，下面两句话是不需要的
+         */
+        // Set kernel url
         RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
-        CmdDispatcher.syncKernel();
 
-        System.out.println(CmdDispatcher.call("getHeight",null));
+        // Get information from kernel
+        CmdDispatcher.syncKernel();
+        /*
+        单元测试专用结束
+         */
+
+
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        params.put(Constants.VERSION_KEY_STR, "3.0");
+        params.put("paramName", "value");
+
+        // Call cmd
+        System.out.println(CmdDispatcher.request("getHeight", params));
     }
 }

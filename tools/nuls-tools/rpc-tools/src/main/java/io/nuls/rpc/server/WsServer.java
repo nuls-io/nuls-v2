@@ -50,21 +50,21 @@ public class WsServer extends WebSocketServer {
         super(new InetSocketAddress(port));
     }
 
-    public void init(ModuleE moduleE, String scanPackage) throws Exception {
-        RuntimeInfo.local.setAbbr(moduleE.abbr);
-        RuntimeInfo.local.setName(moduleE.name);
-        RuntimeInfo.local.setAddress(HostInfo.getIpAdd());
-        RuntimeInfo.local.setPort(this.getPort());
-        RegisterApi registerApi = new RegisterApi();
-        registerApi.setApiMethods(new ArrayList<>());
-        registerApi.setServiceSupportedAPIVersions(new ArrayList<>());
-        registerApi.setAbbr(RuntimeInfo.local.getAbbr());
-        registerApi.setName(RuntimeInfo.local.getName());
-        registerApi.setAddress(RuntimeInfo.local.getAddress());
-        registerApi.setPort(RuntimeInfo.local.getPort());
-        RuntimeInfo.local.setRegisterApi(registerApi);
-        RuntimeInfo.scanPackage(scanPackage);
-    }
+//    public void init(ModuleE moduleE, String scanPackage) throws Exception {
+//        RuntimeInfo.local.setAbbr(moduleE.abbr);
+//        RuntimeInfo.local.setName(moduleE.name);
+//        RuntimeInfo.local.setAddress(HostInfo.getIpAdd());
+//        RuntimeInfo.local.setPort(this.getPort());
+//        RegisterApi registerApi = new RegisterApi();
+//        registerApi.setApiMethods(new ArrayList<>());
+//        registerApi.setServiceSupportedAPIVersions(new ArrayList<>());
+//        registerApi.setAbbr(RuntimeInfo.local.getAbbr());
+//        registerApi.setName(RuntimeInfo.local.getName());
+//        registerApi.setAddress(RuntimeInfo.local.getAddress());
+//        registerApi.setPort(RuntimeInfo.local.getPort());
+//        RuntimeInfo.local.setRegisterApi(registerApi);
+//        RuntimeInfo.scanPackage(scanPackage);
+//    }
 
     public void connect(String kernelUrl) throws Exception {
         this.start();
@@ -107,4 +107,53 @@ public class WsServer extends WebSocketServer {
         Log.info("Server<" + RuntimeInfo.local.getAbbr() + ":" + RuntimeInfo.local.getPort() + ">-> started.");
     }
 
+    public static void mockKernel() throws Exception {
+        WsServer wsServer = new WsServer(8887);
+        // Start server instance
+        wsServer.setModuleE(ModuleE.KE);
+        wsServer.setScanPackage("io.nuls.rpc.cmd.kernel").connect("ws://127.0.0.1:8887");
+
+        // Get information from kernel
+        CmdDispatcher.syncKernel();
+
+        Thread.sleep(Integer.MAX_VALUE);
+    }
+
+    private void setModuleE(ModuleE moduleE) {
+        RuntimeInfo.local.setAbbr(moduleE.abbr);
+        RuntimeInfo.local.setName(moduleE.name);
+        RuntimeInfo.local.setAddress(HostInfo.getIpAdd());
+        RuntimeInfo.local.setPort(getPort());
+    }
+
+    public static WsServer getInstance(ModuleE moduleE) {
+        WsServer wsServer = new WsServer(HostInfo.randomPort());
+        RuntimeInfo.local.setAbbr(moduleE.abbr);
+        RuntimeInfo.local.setName(moduleE.name);
+        RuntimeInfo.local.setAddress(HostInfo.getIpAdd());
+        RuntimeInfo.local.setPort(wsServer.getPort());
+        return wsServer;
+    }
+
+    public static WsServer getInstance(String abbr, String name) {
+        WsServer wsServer = new WsServer(HostInfo.randomPort());
+        RuntimeInfo.local.setAbbr(abbr);
+        RuntimeInfo.local.setName(name);
+        RuntimeInfo.local.setAddress(HostInfo.getIpAdd());
+        RuntimeInfo.local.setPort(wsServer.getPort());
+        return wsServer;
+    }
+
+    public WsServer setScanPackage(String scanPackage) throws Exception {
+        RegisterApi registerApi = new RegisterApi();
+        registerApi.setApiMethods(new ArrayList<>());
+        registerApi.setServiceSupportedAPIVersions(new ArrayList<>());
+        registerApi.setAbbr(RuntimeInfo.local.getAbbr());
+        registerApi.setName(RuntimeInfo.local.getName());
+        registerApi.setAddress(RuntimeInfo.local.getAddress());
+        registerApi.setPort(RuntimeInfo.local.getPort());
+        RuntimeInfo.local.setRegisterApi(registerApi);
+        RuntimeInfo.scanPackage(scanPackage);
+        return this;
+    }
 }

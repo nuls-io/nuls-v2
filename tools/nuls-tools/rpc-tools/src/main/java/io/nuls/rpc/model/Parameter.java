@@ -15,7 +15,7 @@ public @interface Parameter {
 
     String parameterType();
 
-    String parameterValidRange();
+    String parameterValidRange() default "";
 
-    String parameterValidRegExp();
+    String parameterValidRegExp() default "";
 }
