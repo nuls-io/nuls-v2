@@ -12,7 +12,6 @@ import io.nuls.account.util.AccountTool;
 import io.nuls.base.data.Page;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -57,7 +56,7 @@ public class AccountCmd extends BaseCmd {
         List<String> list = new ArrayList<>();
         try {
             // check parameters
-            if (params == null || params.size() != 4 || params.get("chainId") == null) {
+            if (params == null || params.get("chainId") == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -73,14 +72,13 @@ public class AccountCmd extends BaseCmd {
             List<Account> accountList = accountService.createAccount(chainId, count, password);
             if (accountList != null) {
                 accountList.forEach(account -> list.add(account.getAddress().toString()));
-                map.put("list", list);
+                //map.put("list", list);
             }
-            return list;
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
-        //Log.debug("ac_createAccount end");
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Log.debug("ac_createAccount end");
+        return success(list);
     }
 
     /**
@@ -94,9 +92,10 @@ public class AccountCmd extends BaseCmd {
     public Object createOfflineAccount(Map params) {
         Log.debug("ac_createOfflineAccount start");
         Map<String, List<AccountOfflineDto>> map = new HashMap<>();
+        List<AccountOfflineDto> accounts = new ArrayList<>();
         try {
             // check parameters size
-            if (params == null || params.size() != 4 || params.get("chainId") == null) {
+            if (params == null || params.get("chainId") == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -116,7 +115,6 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
             }
 
-            List<AccountOfflineDto> accounts = new ArrayList<>();
             try {
                 for (int i = 0; i < count; i++) {
                     Account account = AccountTool.createAccount(chainId);
@@ -128,15 +126,14 @@ public class AccountCmd extends BaseCmd {
             } catch (NulsException e) {
                 throw e;
             }
-            map.put("list", accounts);
-            return accounts;
+            //map.put("list", accounts);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         } catch (NulsException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
-        //Log.debug("ac_createOfflineAccount end");
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Log.debug("ac_createOfflineAccount end");
+        return success(accounts);
     }
 
     /**
@@ -152,7 +149,7 @@ public class AccountCmd extends BaseCmd {
         Account account;
         try {
             // check parameters
-            if (params == null || params.size() != 3 || params.get("chainId") == null || params.get("address") == null) {
+            if (params == null || params.get("chainId") == null || params.get("address") == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -164,15 +161,13 @@ public class AccountCmd extends BaseCmd {
             //根据地址查询账户
             account = accountService.getAccount(chainId, address);
             if (null == account) {
-                return null;
-                //return success(AccountConstant.SUCCESS_MSG, null);
+                return success(null);
             }
-            return new SimpleAccountDto(account);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
-        //Log.debug("ac_getAccountByAddress end");
-        //return success(AccountConstant.SUCCESS_MSG, new SimpleAccountDto(account));
+        Log.debug("ac_getAccountByAddress end");
+        return success(new SimpleAccountDto(account));
     }
 
     /**
@@ -191,16 +186,15 @@ public class AccountCmd extends BaseCmd {
             //query all accounts
             List<Account> accountList = accountService.getAccountList();
             if (null == accountList) {
-                return success(AccountConstant.SUCCESS_MSG, null);
+                return success(null);
             }
             accountList.forEach(account -> simpleAccountList.add(new SimpleAccountDto((account))));
             //map.put("list", simpleAccountList);
-            return simpleAccountList;
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
-        //Log.debug("ac_getAccountList end");
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Log.debug("ac_getAccountList end");
+        return success(simpleAccountList);
     }
 
     /**
@@ -216,7 +210,7 @@ public class AccountCmd extends BaseCmd {
         Page<String> resultPage;
         try {
             // check parameters size
-            if (params == null || params.size() != 4 || params.get("chainId") == null || params.get("pageNumber") == null || params.get("pageSize") == null) {
+            if (params == null || params.get("chainId") == null || params.get("pageNumber") == null || params.get("pageSize") == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -235,14 +229,14 @@ public class AccountCmd extends BaseCmd {
             //query all accounts
             List<Account> accountList = accountService.getAccountList();
             if (null == accountList) {
-                return success(AccountConstant.SUCCESS_MSG, null);
+                return success(null);
             }
             //根据分页参数返回账户地址列表 Returns the account address list according to paging parameters
             Page<String> page = new Page<>(pageNumber, pageSize);
             page.setTotal(accountList.size());
             int start = (pageNumber - 1) * pageSize;
             if (start >= accountList.size()) {
-                return success(AccountConstant.SUCCESS_MSG, page);
+                return success(page);
             }
             int end = pageNumber * pageSize;
             if (end > accountList.size()) {
@@ -254,12 +248,11 @@ public class AccountCmd extends BaseCmd {
             //只返回账户地址 Only return to account address
             accountList.forEach(account -> addressList.add(account.getAddress().getBase58()));
             resultPage.setList(addressList);
-            return resultPage;
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
-        //Log.debug("ac_getAddressList end");
-        //return success(AccountConstant.SUCCESS_MSG, resultPage);
+        Log.debug("ac_getAddressList end");
+        return success(resultPage);
     }
 
     /**
@@ -275,7 +268,7 @@ public class AccountCmd extends BaseCmd {
         boolean result;
         try {
             // check parameters
-            if (params == null || params.size() != 4 || params.get("chainId") == null || params.get("address") == null) {
+            if (params == null || params.get("chainId") == null || params.get("address") == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -290,13 +283,12 @@ public class AccountCmd extends BaseCmd {
             //Remove specified account
             result = accountService.removeAccount(chainId, address, password);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
         Log.debug("ac_removeAccount end");
-        return result;
-        //Map<String, Boolean> map = new HashMap<>();
-        //map.put("value", result);
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Map<String, Boolean> map = new HashMap<>();
+        map.put("value", result);
+        return success(map);
     }
 
     /**
@@ -313,7 +305,7 @@ public class AccountCmd extends BaseCmd {
         String unencryptedPrivateKey;
         try {
             // check parameters
-            if (params == null || params.size() != 4 || params.get("chainId") == null || params.get("address") == null) {
+            if (params == null || params.get("chainId") == null || params.get("address") == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -328,13 +320,12 @@ public class AccountCmd extends BaseCmd {
             //Get the account private key
             unencryptedPrivateKey = accountService.getPrivateKey(chainId, address, password);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
         Log.debug("ac_getPriKeyByAddress end");
-        return unencryptedPrivateKey;
-        //Map<String, String> map = new HashMap<>();
-        //map.put("priKey", unencryptedPrivateKey);
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Map<String, String> map = new HashMap<>();
+        map.put("priKey", unencryptedPrivateKey);
+        return success(map);
     }
 
     /**
@@ -353,7 +344,7 @@ public class AccountCmd extends BaseCmd {
         List<String> privateKeyList = new ArrayList<>();
         try {
             // check parameters
-            if (params == null || params.size() != 3 || params.get("chainId") == null) {
+            if (params == null || params.get("chainId") == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -366,12 +357,10 @@ public class AccountCmd extends BaseCmd {
             //Get the account private key
             privateKeyList = accountService.getAllPrivateKey(chainId, password);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
         Log.debug("ac_getAllPriKey end");
-        return privateKeyList;
-        //map.put("list", privateKeyList);
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        return success(privateKeyList);
     }
 
     /**
@@ -405,13 +394,12 @@ public class AccountCmd extends BaseCmd {
 
             //Get the account private key
             result = accountService.setRemark(chainId, address, remark);
+            map.put("value", result);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
         Log.debug("ac_setRemark end");
-        return result;
-        //map.put("value", result);
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        return success(map);
     }
 
     /**
@@ -442,15 +430,14 @@ public class AccountCmd extends BaseCmd {
             Boolean overwrite = params.get("overwrite") != null ? (Boolean) params.get("overwrite") : null;
             //导入账户
             Account account = accountService.importAccountByPrikey(chainId, priKey, password, overwrite);
-            //map.put("address", account.getAddress().toString());
-            return account.getAddress().toString();
+            map.put("address", account.getAddress().toString());
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         } catch (NulsException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
-        //Log.debug("ac_importAccountByPriKey end");
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Log.debug("ac_importAccountByPriKey end");
+        return success(map);
     }
 
 
@@ -490,15 +477,14 @@ public class AccountCmd extends BaseCmd {
 
             //导入账户
             Account account = accountService.importAccountByKeyStore(accountKeyStoreDto.toAccountKeyStore(), chainId, password, overwrite);
-            //map.put("address", account.getAddress().toString());
-            return account.getAddress().toString();
+            map.put("address", account.getAddress().toString());
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         } catch (NulsException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
-        //Log.debug("ac_importAccountByKeystore end");
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Log.debug("ac_importAccountByKeystore end");
+        return success(map);
     }
 
     /**
@@ -529,14 +515,13 @@ public class AccountCmd extends BaseCmd {
             String filePath = params.get("filePath") != null ? (String) params.get("filePath") : null;
             //backup account to keystore
             String backupFileName = keyStoreService.backupAccountToKeyStore(filePath, chainId, address, password);
-            //map.put("path", backupFileName);
-            return backupFileName;
+            map.put("path", backupFileName);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
 
-        //Log.debug("ac_exportAccountKeyStore end");
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Log.debug("ac_exportAccountKeyStore end");
+        return success(map);
     }
 
     /**
@@ -550,6 +535,7 @@ public class AccountCmd extends BaseCmd {
     public Object setPassword(Map params) {
         Log.debug("ac_setPassword start");
         Map<String, Boolean> map = new HashMap<>(1);
+        boolean result;
         try {
             // check parameters
             if (params == null || params.get("chainId") == null || params.get("address") == null || params.get("password") == null) {
@@ -565,15 +551,14 @@ public class AccountCmd extends BaseCmd {
             String password = params.get("password") != null ? (String) params.get("password") : null;
 
             //set account password
-            boolean result = accountService.setPassword(chainId, address, password);
-            //map.put("value", result);
-            return result;
+            result = accountService.setPassword(chainId, address, password);
+            map.put("value", result);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
 
-        //Log.debug("ac_setPassword end");
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Log.debug("ac_setPassword end");
+        return success(map);
     }
 
     /**
@@ -589,7 +574,7 @@ public class AccountCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null || params.get("priKey") == null ||params.get("password") == null) {
+            if (params == null || params.get("chainId") == null || params.get("address") == null || params.get("priKey") == null || params.get("password") == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -605,13 +590,12 @@ public class AccountCmd extends BaseCmd {
 
             //set account password
             String encryptedPriKey = accountService.setOfflineAccountPassword(chainId, address, priKey, password);
-            //map.put("encryptedPriKey", encryptedPriKey);
-            return encryptedPriKey;
+            map.put("encryptedPriKey", encryptedPriKey);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
-        //Log.debug("ac_setOfflineAccountPassword end");
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Log.debug("ac_setOfflineAccountPassword end");
+        return success(map);
     }
 
     /**
@@ -625,9 +609,10 @@ public class AccountCmd extends BaseCmd {
     public Object updatePassword(Map params) {
         Log.debug("ac_updatePassword start");
         Map<String, Boolean> map = new HashMap<>(1);
+        boolean result;
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null || params.get("password") == null ||params.get("newPassword") == null) {
+            if (params == null || params.get("chainId") == null || params.get("address") == null || params.get("password") == null || params.get("newPassword") == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -642,14 +627,13 @@ public class AccountCmd extends BaseCmd {
             String newPassword = params.get("newPassword") != null ? (String) params.get("newPassword") : null;
 
             //change account password
-            boolean result = accountService.changePassword(chainId, address, password, newPassword);
-            //map.put("value", result);
-            return result;
+            result = accountService.changePassword(chainId, address, password, newPassword);
+            map.put("value", result);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
-        //Log.debug("ac_updatePassword end");
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Log.debug("ac_updatePassword end");
+        return success(map);
     }
 
     /**
@@ -665,7 +649,7 @@ public class AccountCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null || params.get("priKey") == null || params.get("password") == null ||params.get("newPassword") == null){
+            if (params == null || params.get("chainId") == null || params.get("address") == null || params.get("priKey") == null || params.get("password") == null || params.get("newPassword") == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
@@ -683,13 +667,12 @@ public class AccountCmd extends BaseCmd {
 
             //set account password
             String encryptedPriKey = accountService.changeOfflinePassword(chainId, address, priKey, password, newPassword);
-            //map.put("encryptedPriKey", encryptedPriKey);
-            return encryptedPriKey;
+            map.put("encryptedPriKey", encryptedPriKey);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
-        //Log.debug("ac_updateOfflineAccountPassword end");
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Log.debug("ac_updateOfflineAccountPassword end");
+        return success( map);
     }
 
     /**
@@ -716,13 +699,12 @@ public class AccountCmd extends BaseCmd {
             String address = params.get("address") != null ? (String) params.get("address") : null;
             //账户是否加密
             boolean result = accountService.isEncrypted(chainId, address);
-            //map.put("value", result);
-            return result;
+            map.put("value", result);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
-        //Log.debug("ac_isEncrypted end");
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Log.debug("ac_isEncrypted end");
+        return success(map);
     }
 
     /**
@@ -758,13 +740,12 @@ public class AccountCmd extends BaseCmd {
             }
             //verify that the account password is correct
             boolean result = account.validatePassword(password);
-            //map.put("value", result);
-            return result;
+            map.put("value", result);
         } catch (NulsRuntimeException e) {
-            return failed(e.getErrorCode(), null);
+            return failed(e.getErrorCode());
         }
-        //Log.debug("ac_validationPassword end");
-        //return success(AccountConstant.SUCCESS_MSG, map);
+        Log.debug("ac_validationPassword end");
+        return success(map);
     }
 
 }

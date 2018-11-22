@@ -100,7 +100,7 @@ public interface AccountConstant {
     /**
      * SUCCESS_CODE
      */
-    String SUCCESS_CODE = "0";
+    int SUCCESS_CODE = 1;
     /**
      * SUCCESS_MSG
      */
@@ -115,4 +115,26 @@ public interface AccountConstant {
     int PAGE_SIZE = 10;
 
     byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
+
+    /**
+     * --------[EVENT constant] -------
+     */
+    /**
+     * 创建账户事件的主题
+     * topic of account create events
+     */
+    String EVENT_TOPIC_CREATE_ACCOUNT = "evt_ac_createAccount";
+
+    /**
+     * 移除账户事件的主题
+     * topic of account remove events
+     */
+    String EVENT_TOPIC_REMOVE_ACCOUNT = "evt_ac_removeAccount";
+
+    /**
+     * 修改账户密码事件的主题
+     * topic of update account password events
+     */
+    String EVENT_TOPIC_UPDATE_PASSWORD = "evt_ac_updatePassword";
+
 }
