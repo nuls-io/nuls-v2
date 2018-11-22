@@ -35,7 +35,6 @@ import io.nuls.network.model.po.NodeGroupPo;
 import io.nuls.network.model.vo.NodeGroupVo;
 import io.nuls.network.storage.DbService;
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.log.Log;
 
@@ -55,7 +54,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
      * nw_createNodeGroup
      * 创建跨链网络
      */
-    @CmdAnnotation(cmd = "nw_createNodeGroup", version = 1.0, preCompatible = true)
+//    @CmdAnnotation(cmd = "nw_createNodeGroup", version = 1.0)
     public CmdResponse createNodeGroup(List  params) {
         List<NodeGroupPo> nodeGroupPos=new ArrayList<>();
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
@@ -115,7 +114,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
      * nw_getGroupByChainId
      * 查看指定网络组信息
      */
-    @CmdAnnotation(cmd = "nw_getGroupByChainId", version = 1.0, preCompatible = true)
+//    @CmdAnnotation(cmd = "nw_getGroupByChainId", version = 1.0, preCompatible = true)
     public CmdResponse getGroupByChainId(List  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
@@ -148,7 +147,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
      * nw_delNodeGroup
      * 注销指定网络组信息
      */
-    @CmdAnnotation(cmd = "nw_delNodeGroup", version = 1.0, preCompatible = true)
+//    @CmdAnnotation(cmd = "nw_delNodeGroup", version = 1.0, preCompatible = true)
     public CmdResponse delGroupByChainId(List  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         dbService.deleteGroup(chainId);
@@ -163,7 +162,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
      * nw_getSeeds
      * 查询跨链种子节点
      */
-    @CmdAnnotation(cmd = "nw_getSeeds", version = 1.0, preCompatible = true)
+//    @CmdAnnotation(cmd = "nw_getSeeds", version = 1.0, preCompatible = true)
     public CmdResponse getCrossSeeds(List  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         Log.info("chainId:"+chainId);
@@ -189,7 +188,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
      * nw_reconnect
      * 重连网络
      */
-    @CmdAnnotation(cmd = "nw_reconnect", version = 1.0, preCompatible = true)
+//    @CmdAnnotation(cmd = "nw_reconnect", version = 1.0, preCompatible = true)
     public CmdResponse reconnect(List  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         Log.info("chainId:"+chainId);
@@ -202,7 +201,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
      * nw_getGroups
      * 重连网络
      */
-    @CmdAnnotation(cmd = "nw_getGroups", version = 1.0, preCompatible = true)
+//    @CmdAnnotation(cmd = "nw_getGroups", version = 1.0, preCompatible = true)
     public CmdResponse getGroups(List  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         Log.info("chainId:"+chainId);

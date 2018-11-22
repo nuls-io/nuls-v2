@@ -24,7 +24,6 @@
  */
 package io.nuls.network.manager.threads;
 
-import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.server.WsServer;
 
 /**
@@ -38,9 +37,9 @@ public class KernelThreadTest  implements Runnable  {
     @Override
     public void run() {
         try {
-            s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
-            s.start();
-            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+//            s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
+//            s.start();
+//            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
         } catch (Exception e) {
             e.printStackTrace();
         }
