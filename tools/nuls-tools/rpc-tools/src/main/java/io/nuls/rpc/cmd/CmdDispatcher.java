@@ -5,9 +5,7 @@ import io.nuls.rpc.handler.CmdHandler;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.ModuleInfo;
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.MessageType;
-import io.nuls.rpc.model.message.Request;
+import io.nuls.rpc.model.message.*;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -103,13 +101,27 @@ public class CmdDispatcher {
         return messageId;
     }
 
+    public static void unsubscribe(int messageId, String cmd) throws Exception {
+        Message message = CmdHandler.basicMessage(messageId, MessageType.Unsubscribe);
+        Unsubscribe unsubscribe = new Unsubscribe();
+        unsubscribe.setUnsubscribeMethods(new String[]{messageId + cmd});
+        message.setMessageData(unsubscribe);
+
+        String uri = RuntimeInfo.getRemoteUri(cmd);
+        if (uri != null) {
+            WsClient wsClient = RuntimeInfo.getWsClient(uri);
+            wsClient.send(JSONUtils.obj2json(message));
+        }
+    }
+
     /**
      * Get response by messageId
      */
     public static String getResponse(int messageId) throws InterruptedException, IOException {
 
         if (messageId < 0) {
-            return Constants.CMD_NOT_FOUND;
+            Response response = CmdHandler.defaultResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.CMD_NOT_FOUND);
+            return JSONUtils.obj2json(response);
         }
 
         long timeMillis = System.currentTimeMillis();
@@ -134,4 +146,6 @@ public class CmdDispatcher {
 
         return JSONUtils.obj2json(CmdHandler.defaultResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.RESPONSE_TIMEOUT));
     }
+
+
 }

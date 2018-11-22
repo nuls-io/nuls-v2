@@ -32,15 +32,14 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.manager.handler.NetworkMessageHandlerFactory;
+import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.*;
-
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.rpc.cmd.CmdDispatcher;
@@ -50,10 +49,9 @@ import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * 消息管理器，用于收发消息
@@ -73,7 +71,12 @@ public class MessageManager extends BaseManager{
         broadcastToANode(message,node,aysn);
 
     }
-
+    public long getCheckSum(byte []msgBody) throws IOException {
+        byte [] bodyHash=Sha256Hash.hashTwice(msgBody);
+        byte []get4Byte=ByteUtils.subBytes(bodyHash,0,4);
+        long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
+        return checksum;
+    }
     public  BaseMessage getMessageInstance(String command) {
         Class<? extends BaseMessage> msgClass  = MessageFactory.getMessage(command);
         if (null == msgClass) {
@@ -135,8 +138,12 @@ public class MessageManager extends BaseManager{
                     //外部消息，转外部接口
                     long magicNum=header.getMagicNumber();
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
-                    String response = CmdDispatcher.call(header.getCommandStr(), new Object[]{chainId,nodeKey,HexUtil.byteToHex(payLoad)},1.0 );
-                    Log.info(response);
+                    Map<String,Object> paramMap = new HashMap<>();
+                    paramMap.put("chainId",chainId);
+                    paramMap.put("nodeId",nodeKey);
+                    paramMap.put("messageBody",HexUtil.byteToHex(payLoadBody));
+                    int response = CmdDispatcher.request(header.getCommandStr(),paramMap);
+                    Log.info("response："+response);
                     byteBuffer.setCursor(payLoad.length);
                 }
              }
