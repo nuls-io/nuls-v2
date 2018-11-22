@@ -56,7 +56,7 @@ public class CmdHandler {
      * 1. If the interface is injected via @Autowired, the injected object is used
      * 2. If the interface has no special annotations, construct a new object by reflection
      */
-    public static Object invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
+    private static Response invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
 
         Class clz = Class.forName(invokeClass);
         @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
@@ -69,7 +69,7 @@ public class CmdHandler {
             cmd = (BaseCmd) SpringLiteContext.getBeanByClass(invokeClass);
         }
 
-        return method.invoke(cmd, params);
+        return (Response) method.invoke(cmd, params);
     }
 
 
@@ -112,22 +112,26 @@ public class CmdHandler {
         int messageId = (Integer) messageMap.get("messageId");
         Map messageData = (Map) messageMap.get("messageData");
         Map requestMethods = (Map) messageData.get("requestMethods");
+
         for (Object method : requestMethods.keySet()) {
-            Response response = defaultResponse(messageId);
+            long startTimemillis = TimeService.currentTimeMillis();
 
             Map params = (Map) requestMethods.get(method);
             CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
                     ? RuntimeInfo.getLocalInvokeCmd((String) method)
                     : RuntimeInfo.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
-            response.setResponseData(cmdDetail == null
-                    ? "No such version: " + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : "")
-                    : CmdHandler.invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params));
+            Response response = cmdDetail == null
+                    ? defaultResponse(messageId, Constants.RESPONSE_STATUS_FAILED,
+                    Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""))
+                    : CmdHandler.invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
+            response.setResponseProcessingTime(TimeService.currentTimeMillis() - startTimemillis);
+            response.setRequestId(messageId);
 
             Message message = basicMessage(RuntimeInfo.nextSequence(), MessageType.Response);
             message.setMessageData(response);
-            response.setResponseProcessingTime(TimeService.currentTimeMillis() - response.getResponseProcessingTime());
             webSocket.send(JSONUtils.obj2json(message));
+
         }
     }
 
@@ -146,12 +150,11 @@ public class CmdHandler {
         return request;
     }
 
-    private static Response defaultResponse(int requestId) {
+    public static Response defaultResponse(int requestId, int status, String comment) {
         Response response = new Response();
         response.setRequestId(requestId);
-        response.setResponseProcessingTime(TimeService.currentTimeMillis());
-        response.setResponseStatus(1);
-        response.setResponseComment("Congratulations! Processing completed！");
+        response.setResponseStatus(status);
+        response.setResponseComment(comment);
         response.setResponseMaxSize(0);
         return response;
     }

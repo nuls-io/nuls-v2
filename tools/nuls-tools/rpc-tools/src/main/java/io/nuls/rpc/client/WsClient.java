@@ -27,9 +27,7 @@
 
 package io.nuls.rpc.client;
 
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
-import io.nuls.rpc.model.message.MessageType;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
@@ -38,7 +36,6 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Map;
 
 /**
  * @author tangyi
@@ -78,31 +75,6 @@ public class WsClient extends WebSocketClient {
         e.printStackTrace();
     }
 
-    /**
-     * Get response by messageId
-     */
-    public Object getResponse(int messageId) throws InterruptedException, IOException {
-        long timeMillis = System.currentTimeMillis();
-        do {
-            for (Map map : RuntimeInfo.RESPONSE_QUEUE) {
-                MessageType messageType = MessageType.valueOf(map.get("messageType").toString());
-                switch (messageType) {
-                    case NegotiateConnectionResponse:
-                        RuntimeInfo.RESPONSE_QUEUE.remove(map);
-                        return map;
-                    case Response:
-                        Map messageData = (Map) map.get("messageData");
-                        if ((Integer) messageData.get("requestId") == messageId) {
-                            RuntimeInfo.RESPONSE_QUEUE.remove(map);
-                            return messageData;
-                        }
-                    default:
-                }
-            }
-            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-        } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
 
-        return RuntimeInfo.buildCmdResponseMap(messageId, Constants.RESPONSE_TIMEOUT);
-    }
 
 }
