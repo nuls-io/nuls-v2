@@ -27,17 +27,12 @@
 
 package io.nuls.rpc.info;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.handler.CmdHandler;
 import io.nuls.rpc.model.*;
-import io.nuls.rpc.model.message.*;
 import io.nuls.tools.core.ioc.ScanUtil;
-import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.TimeService;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 import org.java_websocket.WebSocket;
 
@@ -59,9 +54,12 @@ public class RuntimeInfo {
 
 
     /**
-     * local module(io.nuls.rpc.Module) information
+     * local module(io.nuls.rpc.ModuleInfo) information
      */
     public static ModuleInfo local = new ModuleInfo();
+
+    public static Map<String, Long> cmdInvokeTime = new HashMap<>();
+    public static Map<String, Integer> cmdInvokeHeight = new HashMap<>();
 
     /**
      * remote module information
@@ -297,8 +295,6 @@ public class RuntimeInfo {
         cmdResponse.setMsg(msg);
         return JSONUtils.json2map(JSONUtils.obj2json(cmdResponse));
     }
-
-
 
 
 }

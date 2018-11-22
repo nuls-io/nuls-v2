@@ -46,6 +46,8 @@ public class Constants {
     public static final String PUBLIC = "public";
     public static final String PRIVATE = "private";
     public static final String ADMIN = "admin";
+    public static final int RESPONSE_STATUS_SUCCESS = 1;
+    public static final int RESPONSE_STATUS_FAILED = 0;
 
     /**
      * Message type

@@ -15,7 +15,7 @@ import java.util.Set;
  * @date 2018/11/6
  * @description
  */
-public class AssetDisableTx extends TransactionLogicData {
+public class AssetTx extends TransactionLogicData {
     private int chainId;
     private long assetId;
     private String symbol;

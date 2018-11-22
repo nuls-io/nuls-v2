@@ -33,7 +33,6 @@ import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.vo.NodeVo;
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
@@ -57,7 +56,7 @@ public class NodeRpc extends BaseCmd {
      * nw_addNodes
      * 增加节点
      */
-    @CmdAnnotation(cmd = "nw_addNodes", version = 1.0, preCompatible = true)
+//    @CmdAnnotation(cmd = "nw_addNodes", version = 1.0, preCompatible = true)
     public CmdResponse addNodes(List params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         int isCross = Integer.valueOf(String.valueOf(params.get(1)));
@@ -88,7 +87,7 @@ public class NodeRpc extends BaseCmd {
      * nw_delNodes
      * 增加节点
      */
-    @CmdAnnotation(cmd = "nw_delNodes", version = 1.0, preCompatible = true)
+//    @CmdAnnotation(cmd = "nw_delNodes", version = 1.0, preCompatible = true)
     public CmdResponse delNodes(List params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         String nodes=String.valueOf(params.get(1));
@@ -118,7 +117,7 @@ public class NodeRpc extends BaseCmd {
         StorageManager.getInstance().delGroupNodes(nodeIds,chainId);
         return success( "success", "");
     }
-    @CmdAnnotation(cmd = "nw_getNodes", version = 1.0, preCompatible = true)
+//    @CmdAnnotation(cmd = "nw_getNodes", version = 1.0, preCompatible = true)
     public CmdResponse nw_getNodes(List params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         int state = Integer.valueOf(String.valueOf(params.get(1)));
@@ -179,7 +178,7 @@ public class NodeRpc extends BaseCmd {
      * nw_updateNodeInfo
      * 更新区块高度与hash
      */
-    @CmdAnnotation(cmd = "nw_updateNodeInfo", version = 1.0, preCompatible = true)
+//    @CmdAnnotation(cmd = "nw_updateNodeInfo", version = 1.0, preCompatible = true)
     public CmdResponse updateNodeInfo(List params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         String nodeId = String.valueOf(params.get(1));

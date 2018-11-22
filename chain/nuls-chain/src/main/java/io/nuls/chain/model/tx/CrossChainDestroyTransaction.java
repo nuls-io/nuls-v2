@@ -27,7 +27,7 @@ package io.nuls.chain.model.tx;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.ChainTxConstants;
-import io.nuls.chain.model.tx.txdata.ChainDestroyTx;
+import io.nuls.chain.model.tx.txdata.ChainTx;
 import io.nuls.tools.exception.NulsException;
 
 /**
@@ -36,15 +36,15 @@ import io.nuls.tools.exception.NulsException;
  * @author: lan
  * @create: 2018/11/19
  **/
-public class CrossChainDestroyTransaction extends Transaction<ChainDestroyTx> {
+public class CrossChainDestroyTransaction extends Transaction<ChainTx> {
 
-    public CrossChainDestroyTransaction(int type) {
+    public CrossChainDestroyTransaction() {
         super(ChainTxConstants.TX_TYPE_DESTROY_CHAIN);
     }
 
     @Override
-    protected ChainDestroyTx parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new ChainDestroyTx());
+    protected ChainTx parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
+        return byteBuffer.readNulsData(new ChainTx());
     }
 
     @Override

@@ -35,6 +35,7 @@ import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.message.*;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.DateUtils;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 import org.java_websocket.WebSocket;
@@ -56,7 +57,7 @@ public class CmdHandler {
      * 1. If the interface is injected via @Autowired, the injected object is used
      * 2. If the interface has no special annotations, construct a new object by reflection
      */
-    public static Object invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
+    private static Response invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
 
         Class clz = Class.forName(invokeClass);
         @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
@@ -69,7 +70,7 @@ public class CmdHandler {
             cmd = (BaseCmd) SpringLiteContext.getBeanByClass(invokeClass);
         }
 
-        return method.invoke(cmd, params);
+        return (Response) method.invoke(cmd, params);
     }
 
 
@@ -108,27 +109,59 @@ public class CmdHandler {
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 
-    public static void response(WebSocket webSocket, Map<String, Object> messageMap) throws Exception {
+    public static boolean response(WebSocket webSocket, Map<String, Object> messageMap) throws Exception {
         int messageId = (Integer) messageMap.get("messageId");
-        Map messageData = (Map) messageMap.get("messageData");
-        Map requestMethods = (Map) messageData.get("requestMethods");
+        Request request = JSONUtils.json2pojo(JSONUtils.obj2json(messageMap.get("messageData")), Request.class);
+        Map requestMethods = request.getRequestMethods();
+
+        int subscriptionPeriod = request.getSubscriptionPeriod();
+
+        boolean addBack = false;
         for (Object method : requestMethods.keySet()) {
-            Response response = defaultResponse(messageId);
+
+            /*
+            subscriptionPeriod > 0, means send response every time.
+            subscriptionPeriod <= 0, means send response only once.
+             */
+            if (subscriptionPeriod > 0) {
+                addBack = true;
+
+                String key = messageId + (String) method;
+                if (!RuntimeInfo.cmdInvokeTime.containsKey(key)) {
+                    RuntimeInfo.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
+                } else if (TimeService.currentTimeMillis() - RuntimeInfo.cmdInvokeTime.get(key) >= subscriptionPeriod * 1000) {
+                    RuntimeInfo.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
+                } else {
+                    continue;
+                }
+            }
+
+
+            long startTimemillis = TimeService.currentTimeMillis();
 
             Map params = (Map) requestMethods.get(method);
             CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
                     ? RuntimeInfo.getLocalInvokeCmd((String) method)
                     : RuntimeInfo.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
-            response.setResponseData(cmdDetail == null
-                    ? "No such version: " + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : "")
-                    : CmdHandler.invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params));
+            Response response = cmdDetail == null
+                    ? defaultResponse(messageId, Constants.RESPONSE_STATUS_FAILED,
+                    Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""))
+                    : CmdHandler.invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
+            response.setResponseProcessingTime(TimeService.currentTimeMillis() - startTimemillis);
+            response.setRequestId(messageId);
 
             Message message = basicMessage(RuntimeInfo.nextSequence(), MessageType.Response);
             message.setMessageData(response);
-            response.setResponseProcessingTime(TimeService.currentTimeMillis() - response.getResponseProcessingTime());
-            webSocket.send(JSONUtils.obj2json(message));
+            Log.info("webSocket.send: " + JSONUtils.obj2json(message));
+            try {
+                webSocket.send(JSONUtils.obj2json(message));
+            } catch (Exception e) {
+                Log.error("Socket disconnect, remove!");
+                addBack = false;
+            }
         }
+        return addBack;
     }
 
     public static void unsubscribe() {
@@ -146,12 +179,11 @@ public class CmdHandler {
         return request;
     }
 
-    private static Response defaultResponse(int requestId) {
+    public static Response defaultResponse(int requestId, int status, String comment) {
         Response response = new Response();
         response.setRequestId(requestId);
-        response.setResponseProcessingTime(TimeService.currentTimeMillis());
-        response.setResponseStatus(1);
-        response.setResponseComment("Congratulations! Processing completed！");
+        response.setResponseStatus(status);
+        response.setResponseComment(comment);
         response.setResponseMaxSize(0);
         return response;
     }

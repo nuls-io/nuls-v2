@@ -100,7 +100,7 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      * @return List of asset
      */
     @Override
-    public List<Asset> getByChain(short chainId) {
+    public List<Asset> getByChain(int chainId) {
         List<byte[]> bytesList = RocksDBService.valueList(TBL);
         List<Asset> assetList = new ArrayList<>();
         for (byte[] bytes : bytesList) {

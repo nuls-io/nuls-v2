@@ -51,7 +51,7 @@ public class WsM1 {
         System.out.println(new Ack().toString());
         Ack ack = new Ack("asdfasdf");
         System.out.println(ack.getRequestID());
-
+        System.out.println(Integer.MAX_VALUE / 6f / 60f / 24f / 365f);
     }
 
     @Test
@@ -90,10 +90,13 @@ public class WsM1 {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put(Constants.VERSION_KEY_STR, "3.0");
+        params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("paramName", "value");
 
         // Call cmd
-        System.out.println(CmdDispatcher.request("getHeight", params));
+        int messageId = CmdDispatcher.request("getHeight", params,5);
+        System.out.println(CmdDispatcher.getResponse(messageId));
+
+        //Thread.sleep(Integer.MAX_VALUE);
     }
 }

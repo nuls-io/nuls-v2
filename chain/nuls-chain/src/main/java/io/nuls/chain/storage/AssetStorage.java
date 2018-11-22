@@ -43,7 +43,7 @@ public interface AssetStorage {
      * @param chainId Chain ID
      * @return List of asset
      */
-    List<Asset> getByChain(short chainId);
+    List<Asset> getByChain(int chainId);
 
     /**
      * Get asset by symbol

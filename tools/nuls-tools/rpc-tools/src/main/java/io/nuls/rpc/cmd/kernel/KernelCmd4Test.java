@@ -33,6 +33,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.ModuleInfo;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -72,17 +73,10 @@ public class KernelCmd4Test extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "negotiateConnection", version = 1.0, scope = "private", minEvent = 1, minPeriod = 0,
-            description = "Negotiate connection")
-    public Message negotiateConnection(Map<String, Object> map) {
-        System.out.println("CompressionRate: " + map.get("CompressionRate"));
-        System.out.println("CompressionAlgorithm: " + map.get("CompressionAlgorithm"));
-        return new Message();
-    }
 
     @CmdAnnotation(cmd = "registerAPI", version = 1.0, scope = "private", minEvent = 1, minPeriod = 0,
             description = "Register API")
-    public Object registerAPI(Map<String, Object> map) {
+    public Response registerAPI(Map<String, Object> map) {
         try {
             RegisterApi registerApi = JSONUtils.json2pojo(JSONUtils.obj2json(map), RegisterApi.class);
             if (registerApi != null) {
@@ -97,10 +91,10 @@ public class KernelCmd4Test extends BaseCmd {
                 RuntimeInfo.remoteModuleMap.put(registerApi.getName(), moduleInfo);
             }
             System.out.println("Current APIMethods:" + JSONUtils.obj2json(RuntimeInfo.remoteModuleMap));
-            return RuntimeInfo.remoteModuleMap;
+            return success(RuntimeInfo.remoteModuleMap);
         } catch (Exception e) {
             Log.error(e);
-            return e.getMessage();
+            return failed(e.getMessage());
         }
     }
 }

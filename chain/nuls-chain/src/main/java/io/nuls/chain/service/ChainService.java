@@ -21,6 +21,22 @@ public interface ChainService {
     boolean saveChain(Chain chain);
 
     /**
+     * updateChain
+     *
+     * @param chain
+     * @return
+     */
+    boolean updateChain(Chain chain);
+
+    /**
+     * delChain
+     *
+     * @param chain
+     * @return
+     */
+    boolean delChain(Chain chain);
+
+    /**
      * Find chain based on key
      *
      * @param chainId The chain ID

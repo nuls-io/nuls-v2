@@ -20,10 +20,30 @@ public interface ChainStorage {
     boolean save(int key, Chain chain);
 
     /**
+     * Update chain
+     *
+     * @param key
+     * @param chain
+     * @return
+     */
+    boolean update(int key, Chain chain);
+
+    /**
+     * delete chain
+     *
+     * @param key
+     * @return
+     */
+    boolean delete(int key);
+
+
+    /**
      * Find chain based on key
      *
      * @param key The key
      * @return Chain object
      */
     Chain load(int key);
+
+
 }

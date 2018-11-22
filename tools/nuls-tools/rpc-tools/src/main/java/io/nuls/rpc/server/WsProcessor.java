@@ -68,7 +68,12 @@ public class WsProcessor implements Runnable {
                         CmdHandler.negotiateConnectionResponse(webSocket);
                         break;
                     case Request:
-                        CmdHandler.response(webSocket, messageMap);
+                        if (CmdHandler.response(webSocket, messageMap)) {
+                            synchronized (RuntimeInfo.REQUEST_QUEUE) {
+                                RuntimeInfo.REQUEST_QUEUE.add(objects);
+                            }
+                        }
+                        //Log.info("Current REQUEST_QUEUE size: " + RuntimeInfo.REQUEST_QUEUE.size());
                         break;
                     case Unsubscribe:
                         CmdHandler.unsubscribe();
