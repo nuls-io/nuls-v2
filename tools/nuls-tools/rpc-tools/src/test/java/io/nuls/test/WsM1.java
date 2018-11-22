@@ -94,7 +94,9 @@ public class WsM1 {
         params.put("paramName", "value");
 
         // Call cmd
-        int messageId = CmdDispatcher.request("getHeight", params);
+        int messageId = CmdDispatcher.request("getHeight", params,5);
         System.out.println(CmdDispatcher.getResponse(messageId));
+
+        //Thread.sleep(Integer.MAX_VALUE);
     }
 }
