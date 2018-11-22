@@ -24,10 +24,6 @@
  */
 package io.nuls.network.manager;
 
-import io.nuls.rpc.cmd.CmdDispatcher;
-import io.nuls.rpc.info.HostInfo;
-import io.nuls.rpc.server.WsServer;
-
 /**
  * @program: nuls2.0
  * @description: Rpc init
@@ -47,26 +43,7 @@ public class RpcManager extends BaseManager{
     @Override
     public void start() {
         try {
-            /*
-             * 初始化websocket服务器，供其他模块调用本模块接口
-             * 端口随机，会自动分配未占用端口
-             */
-            WsServer s = new WsServer(HostInfo.randomPort());
-            /*
-             * 初始化，参数说明：
-             * 1. 本模块的code
-             * 2. 依赖的模块的code，类型为String[]
-             * 3. 本模块提供的对外接口所在的包路径
-             */
-            s.init("nw", null, "io.nuls.network.rpc");
-            /*
-             * 启动服务
-             */
-            s.start();
-            /*
-             * 向核心模块汇报本模块信息
-             */
-            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+
         } catch (Exception e) {
             e.printStackTrace();
         }

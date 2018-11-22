@@ -30,9 +30,9 @@ import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,16 +45,22 @@ import java.util.List;
  * @create: 2018/11/12
  **/
 public class MessageRpc extends BaseCmd{
-
     /**
      * nw_broadcast
      * 外部广播接收
      */
-    @CmdAnnotation(cmd = "nw_broadcast", version = 1.0, preCompatible = true)
+//    @CmdAnnotation(cmd = "nw_broadcast", version = 1.0, preCompatible = true)
     public CmdResponse broadcast(List params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         String excludeNodes = String.valueOf(params.get(1));
         byte [] message =HexUtil.hexStringToBytes(String.valueOf(params.get(2)));
+        //补充魔法参数
+        byte [] magicNumber = new byte[4];
+        System.arraycopy(message, 0, magicNumber, 0, magicNumber.length);
+        if(0 == ByteUtils.byteToLong(magicNumber)){
+            long magicNumberLong = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId).getMagicNumber();
+            System.arraycopy(ByteUtils.longToBytes(magicNumberLong), 0, message, 0, 4);
+        }
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
         Collection<Node> nodesCollection=nodeGroup.getConnectNodes();
@@ -78,13 +84,20 @@ public class MessageRpc extends BaseCmd{
      * nw_sendPeersMsg
      *
      */
-    @CmdAnnotation(cmd = "nw_sendPeersMsg", version = 1.0, preCompatible = true)
+//    @CmdAnnotation(cmd = "nw_sendPeersMsg", version = 1.0, preCompatible = true)
     public CmdResponse sendPeersMsg(List params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         String nodes = String.valueOf(params.get(1));
         byte [] message =HexUtil.hexStringToBytes(String.valueOf(params.get(2)));
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
+        //补充魔法参数
+        byte [] magicNumber = new byte[4];
+        System.arraycopy(message, 0, magicNumber, 0, magicNumber.length);
+        if(0 == ByteUtils.byteToLong(magicNumber)){
+            long magicNumberLong = nodeGroup.getMagicNumber();
+            System.arraycopy(ByteUtils.longToBytes(magicNumberLong), 0, message, 0, magicNumber.length);
+        }
         try {
             String []nodeIds=nodes.split(",");
             List<Node> nodesList = new ArrayList<>();

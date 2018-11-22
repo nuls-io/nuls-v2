@@ -116,21 +116,17 @@ public class MessageManager extends BaseManager{
             byte[] bytes = new byte[buffer.readableBytes()];
             buffer.readBytes(bytes);
             NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+            byte []payLoad = byteBuffer.getPayload();
+            byte []payLoadBody = byteBuffer.readBytes(payLoad.length-24);
+            Log.info("=================payLoad length"+payLoadBody.length);
+            MessageHeader header = byteBuffer.readNulsData(new MessageHeader());
+            if (!validate(payLoadBody,header.getChecksum())) {
+                return;
+            }
+            byteBuffer.setCursor(0);
             while (!byteBuffer.isFinished()) {
-                MessageHeader header = byteBuffer.readNulsData(new MessageHeader());
-
                 Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
-                if("bl_GetBlock".equalsIgnoreCase(header.getCommandStr())){
-                    Log.info("bl_GetBlockbl_GetBlockbl_GetBlockbl_GetBlockbl_GetBlockbl_GetBlock");
-                }
-                byte []payLoad = byteBuffer.getPayload();
-                byte []payLoadBody = byteBuffer.readBytes(payLoad.length-header.size());
-                Log.info("=================payLoad length"+payLoadBody.length);
-                if (!validate(payLoadBody,header.getChecksum())) {
-                    return;
-                }
-                byteBuffer.setCursor(0);
-                BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());             ;
+                BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());
                 if(null != message) {
                     BaseMeesageHandlerInf handler = NetworkMessageHandlerFactory.getInstance().getHandler(message);
                     message = byteBuffer.readNulsData(message);
@@ -143,7 +139,7 @@ public class MessageManager extends BaseManager{
                     Log.info(response);
                     byteBuffer.setCursor(payLoad.length);
                 }
-               }
+             }
 
         } catch (Exception e) {
             e.printStackTrace();
