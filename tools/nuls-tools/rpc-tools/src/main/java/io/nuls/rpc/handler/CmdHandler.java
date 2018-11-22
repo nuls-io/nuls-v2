@@ -137,7 +137,6 @@ public class CmdHandler {
                 }
             }
 
-
             long startTimemillis = TimeService.currentTimeMillis();
 
             Map params = (Map) requestMethods.get(method);
@@ -165,8 +164,14 @@ public class CmdHandler {
         return addBack;
     }
 
-    public static void unsubscribe() {
+    public static void unsubscribe(WebSocket webSocket, Map<String, Object> messageMap) throws Exception {
+        Unsubscribe unsubscribe = JSONUtils.json2pojo(JSONUtils.obj2json(messageMap.get("messageData")), Unsubscribe.class);
+        for (String str : unsubscribe.getUnsubscribeMethods()) {
+            String key = webSocket.toString() + str;
+            synchronized (RuntimeInfo.REQUEST_QUEUE){
 
+            }
+        }
     }
 
     public static Request defaultRequest() {

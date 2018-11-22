@@ -5,10 +5,7 @@ import io.nuls.rpc.handler.CmdHandler;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.ModuleInfo;
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.MessageType;
-import io.nuls.rpc.model.message.Request;
-import io.nuls.rpc.model.message.Unsubscribe;
+import io.nuls.rpc.model.message.*;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -123,7 +120,8 @@ public class CmdDispatcher {
     public static String getResponse(int messageId) throws InterruptedException, IOException {
 
         if (messageId < 0) {
-            return Constants.CMD_NOT_FOUND;
+            Response response = CmdHandler.defaultResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.CMD_NOT_FOUND);
+            return JSONUtils.obj2json(response);
         }
 
         long timeMillis = System.currentTimeMillis();
