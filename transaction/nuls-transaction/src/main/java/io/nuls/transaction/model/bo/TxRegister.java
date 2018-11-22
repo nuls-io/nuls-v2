@@ -26,6 +26,16 @@ public class TxRegister {
      */
     private String rollback;
 
+    /**
+     * module code
+     */
+    private String moduleValidator;
+
+    /**
+     * Module unified validator cmd name
+     */
+    private String moduleCode;
+
     public int getTxType() {
         return txType;
     }
@@ -56,5 +66,21 @@ public class TxRegister {
 
     public void setRollback(String rollback) {
         this.rollback = rollback;
+    }
+
+    public String getModuleValidator() {
+        return moduleValidator;
+    }
+
+    public void setModuleValidator(String moduleValidator) {
+        this.moduleValidator = moduleValidator;
+    }
+
+    public String getModuleCode() {
+        return moduleCode;
+    }
+
+    public void setModuleCode(String moduleCode) {
+        this.moduleCode = moduleCode;
     }
 }
