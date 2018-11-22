@@ -3,13 +3,8 @@ package io.nuls.h2;
 import io.nuls.h2.dao.TransactionService;
 import io.nuls.h2.dao.impl.BaseService;
 import io.nuls.h2.dao.impl.TransactionServiceImpl;
-import io.nuls.h2.entity.TransactionPo;
-import io.nuls.h2.session.SessionManager;
 import org.apache.ibatis.io.Resources;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -17,7 +12,6 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.Date;
 
 /**
  * @author: Charlie

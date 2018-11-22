@@ -1,8 +1,6 @@
 package io.nuls.transaction.db.h2.dao.impl;
 
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
-import com.github.pagehelper.util.StringUtil;
 import io.nuls.base.data.Page;
 import io.nuls.h2.utils.SearchOperator;
 import io.nuls.h2.utils.Searchable;
@@ -91,7 +89,38 @@ public class TransactionServiceImpl extends BaseService<TransactionMapper> imple
     public int saveTx(TransactionPo txPo) {
         SqlSession sqlSession = sqlSessionFactory.openSession();
         String tableName = TransactionConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
-        int rs = sqlSession.getMapper(TransactionMapper.class).save(txPo, tableName);
+        int rs = sqlSession.getMapper(TransactionMapper.class).insert(txPo, tableName);
+        sqlSession.commit();
+        sqlSession.close();
+        return rs;
+    }
+
+
+    private Map<String, List<TransactionPo>> assembleMap(List<TransactionPo> txPoList){
+        Map<String, List<TransactionPo>> map = new HashMap<>();
+        for (TransactionPo txPo : txPoList) {
+            String tableName = TransactionConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
+            if(!map.containsKey(tableName)){
+                List<TransactionPo> list = new ArrayList<>();
+                list.add(txPo);
+                map.put(tableName,list);
+            }else{
+                map.get(tableName).add(txPo);
+            }
+        }
+        return map;
+    }
+
+    @Override
+    public int saveTxsTables(List<TransactionPo> txPoList) {
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        Map<String, List<TransactionPo>> map = assembleMap(txPoList);
+        int rs = 0;
+        for (Map.Entry<String, List<TransactionPo>> entry : map.entrySet()){
+            if(sqlSession.getMapper(TransactionMapper.class).batchInsert(entry.getValue(), entry.getKey()) == 1){
+                rs+=entry.getValue().size();
+            }
+        }
         sqlSession.commit();
         sqlSession.close();
         return rs;
@@ -103,7 +132,7 @@ public class TransactionServiceImpl extends BaseService<TransactionMapper> imple
         int rs = 0;
         for (TransactionPo txPo : txPoList){
             String tableName = TransactionConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
-            if(sqlSession.getMapper(TransactionMapper.class).save(txPo,tableName) == 1){
+            if(sqlSession.getMapper(TransactionMapper.class).insert(txPo,tableName) == 1){
                 rs++;
             }
         }
@@ -113,35 +142,53 @@ public class TransactionServiceImpl extends BaseService<TransactionMapper> imple
     }
 
     @Override
-    public int deleteTx(TransactionPo txPo) {
-        return 0;
+    public int deleteTx(String address, String txhash) {
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        int rs = sqlSession.getMapper(TransactionMapper.class).delete(address, txhash, getTableName(address));
+        sqlSession.commit();
+        sqlSession.close();
+        return rs;
     }
 
-
-    @Override
-    public void createTable(String tableName, String indexName, int number) {
+   /* @Override
+    public int deleteTx(List<String> txHashList) {
         SqlSession sqlSession = sqlSessionFactory.openSession();
-        TransactionMapper mapper = sqlSession.getMapper(TransactionMapper.class);
-        for (int i = 0; i <= number; i++) {
-            mapper.createTable(tableName + i, indexName + i);
+        int rs = 0;
+        for (String txhash : txHashList){
+            for (int i = 0; i< TransactionConstant.H2_TX_TABLE_NUMBER; i++){
+                String tableName = TransactionConstant.H2_TX_TABLE_NAME_PREFIX + i;
+                if(sqlSession.getMapper(TransactionMapper.class).delete(txhash, tableName) == 1){
+                    rs++;
+                }
+            }
         }
         sqlSession.commit();
         sqlSession.close();
-        System.out.println("OK");
+        return rs;
+    }*/
+
+    @Override
+    public void createTable(String tableName, String indexName, String uniqueName, int number) {
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+        TransactionMapper mapper = sqlSession.getMapper(TransactionMapper.class);
+        for (int i = 0; i <= number; i++) {
+            mapper.createTable(tableName + i, indexName + i, uniqueName + i);
+        }
+        sqlSession.commit();
+        sqlSession.close();
     }
 
     @Override
-    public void createTxTables(String tableName, String indexName, int number) {
+    public void createTxTables(String tableName, String indexName, String uniqueName, int number) {
         SqlSession sqlSession = sqlSessionFactory.openSession();
         TransactionMapper mapper = sqlSession.getMapper(TransactionMapper.class);
         List<TxTable> list = new ArrayList<>();
         for (int i = 0; i < number; i++) {
-            TxTable txTable = new TxTable(tableName + i, indexName + i);
+            TxTable txTable = new TxTable(tableName + i, indexName + i, uniqueName + i);
             list.add(txTable);
         }
         mapper.createTxTables(list);
         sqlSession.commit();
         sqlSession.close();
-        System.out.println("batch OK");
     }
 }
