@@ -6,7 +6,7 @@ import io.nuls.h2.utils.SearchOperator;
 import io.nuls.h2.utils.Searchable;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.transaction.constant.TransactionConstant;
-import io.nuls.transaction.db.h2.dao.TransactionService;
+import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.h2.dao.impl.mapper.TransactionMapper;
 import io.nuls.transaction.model.po.TransactionPo;
 import io.nuls.transaction.model.split.TxTable;
@@ -23,7 +23,7 @@ import java.util.Map;
  * @date: 2018/11/14
  */
 @Service
-public class TransactionServiceImpl extends BaseService<TransactionMapper> implements TransactionService {
+public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> implements TransactionH2Service {
 
 
 

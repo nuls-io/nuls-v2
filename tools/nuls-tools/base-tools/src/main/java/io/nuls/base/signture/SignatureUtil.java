@@ -251,7 +251,8 @@ public class SignatureUtil {
      *
      * @param tx 交易
      */
-    public static boolean createOutputScript(Transaction tx) {
+    //TODO (修改Transaction引起的编译错误)
+/*    public static boolean createOutputScript(Transaction tx) {
         CoinData coinData = tx.getCoinData();
         //生成锁定脚本
         for (Coin coin : coinData.getTo()) {
@@ -267,7 +268,7 @@ public class SignatureUtil {
             }
         }
         return true;
-    }
+    }*/
 
     /**
      * 生成交易的脚本（多重签名，P2SH）

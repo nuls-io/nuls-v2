@@ -9,7 +9,7 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018/11/14
  */
-public interface TransactionService {
+public interface TransactionH2Service {
 
     Page<TransactionPo> getTxs(String address, Integer type, Integer state,
                                Long startTime, Long endTime, int pageNumber, int pageSize);
