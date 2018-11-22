@@ -73,7 +73,18 @@ public class CmdDispatcher {
      * 3. Get the result returned to the caller
      * 4. Get the highest version of cmd
      */
-    public static int request(String cmd, Map params,int subscriptionPeriod) throws Exception {
+    public static int request(String cmd, Map params) throws Exception {
+        return request(cmd, params, 0);
+    }
+
+    /**
+     * call cmd.
+     * 1. Find the corresponding module according to cmd
+     * 2. Send to the specified module
+     * 3. Get the result returned to the caller
+     * 4. Get the highest version of cmd
+     */
+    public static int request(String cmd, Map params, int subscriptionPeriod) throws Exception {
         int messageId = RuntimeInfo.sequence.incrementAndGet();
         Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
         Request request = CmdHandler.defaultRequest();
