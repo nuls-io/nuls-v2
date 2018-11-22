@@ -18,7 +18,11 @@ public interface TransactionService {
 
     int saveTxs(List<TransactionPo> txPoList);
 
-    int deleteTx(TransactionPo txPo);
+    int saveTxsTables(List<TransactionPo> txPoList);
+
+    int deleteTx(String address, String txhash);
+
+    //int deleteTx(List<String> txHashList);
 
 
     /**
@@ -29,7 +33,7 @@ public interface TransactionService {
      * @param indexName table index name
      * @param number number of tables 分表的数量
      */
-    void createTable(String tableName, String indexName, int number);
+    void createTable(String tableName, String indexName, String uniqueName, int number);
 
-    void createTxTables(String tableName, String indexName, int number);
+    void createTxTables(String tableName, String indexName, String uniqueName, int number);
 }
