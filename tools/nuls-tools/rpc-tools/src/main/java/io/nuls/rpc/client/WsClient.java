@@ -81,7 +81,7 @@ public class WsClient extends WebSocketClient {
     /**
      * Get response by messageId
      */
-    public Map getResponse(int messageId) throws InterruptedException, IOException {
+    public Object getResponse(int messageId) throws InterruptedException, IOException {
         long timeMillis = System.currentTimeMillis();
         do {
             for (Map map : RuntimeInfo.RESPONSE_QUEUE) {
@@ -94,7 +94,7 @@ public class WsClient extends WebSocketClient {
                         Map messageData = (Map) map.get("messageData");
                         if ((Integer) messageData.get("requestId") == messageId) {
                             RuntimeInfo.RESPONSE_QUEUE.remove(map);
-                            return map;
+                            return messageData.get("responseData");
                         }
                     default:
                 }
@@ -104,6 +104,5 @@ public class WsClient extends WebSocketClient {
 
         return RuntimeInfo.buildCmdResponseMap(messageId, Constants.RESPONSE_TIMEOUT);
     }
-
 
 }
