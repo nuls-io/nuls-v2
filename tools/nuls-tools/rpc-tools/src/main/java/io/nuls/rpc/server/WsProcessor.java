@@ -73,7 +73,6 @@ public class WsProcessor implements Runnable {
                                 RuntimeInfo.REQUEST_QUEUE.add(objects);
                             }
                         }
-                        //Log.info("Current REQUEST_QUEUE size: " + RuntimeInfo.REQUEST_QUEUE.size());
                         break;
                     case Unsubscribe:
                         CmdHandler.unsubscribe();
