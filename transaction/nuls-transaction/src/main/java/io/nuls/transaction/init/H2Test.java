@@ -8,9 +8,9 @@ import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.constant.TransactionConstant;
-import io.nuls.transaction.db.h2.dao.TransactionService;
+import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.h2.dao.impl.BaseService;
-import io.nuls.transaction.db.h2.dao.impl.TransactionServiceImpl;
+import io.nuls.transaction.db.h2.dao.impl.TransactionH2ServiceImpl;
 import io.nuls.transaction.model.po.TransactionPo;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -69,7 +69,7 @@ public class H2Test {
 
     private static void delete(){
         Map<String, String> map = new HashMap<>();
-        TransactionService ts = new TransactionServiceImpl();
+        TransactionH2Service ts = new TransactionH2ServiceImpl();
         ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","00bb56982981c1fce2eee1c21db9ab016676ecea5ae047b0f6fa87b15aceba8f1279");
         ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","00847cebbea85690903e2d0a241d2f8b9ea1d088866f9e12271adc62ec9cce33d61c");
         ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","004015dee1d84f73ba41526966369dc4799b699e0ddf39fe04a9c10965469be119e8");
@@ -85,7 +85,7 @@ public class H2Test {
 
     private static void insert(){
         //saveTxsTables
-        TransactionService ts = new TransactionServiceImpl();
+        TransactionH2Service ts = new TransactionH2ServiceImpl();
         for (int i=0;i<1;i++) {
             List<TransactionPo> listPo = new ArrayList<>();
             for (int j=0;j<200000;j++) {
@@ -97,7 +97,7 @@ public class H2Test {
     }
 
     private static void select(String address){
-        TransactionService ts = new TransactionServiceImpl();
+        TransactionH2Service ts = new TransactionH2ServiceImpl();
         String addr = StringUtils.isNullOrEmpty(address) ? ranAddress() : address;
 //        Page<TransactionPo> page =  ts.getTxs(addr, null, null, 1540138501L, System.currentTimeMillis(), 1,15);
         Page<TransactionPo> page =  ts.getTxs(addr, 1, null, null, null, 1,15);
@@ -115,7 +115,7 @@ public class H2Test {
     }
 
     public static void initTestData(){
-        TransactionService ts = new TransactionServiceImpl();
+        TransactionH2Service ts = new TransactionH2ServiceImpl();
         for (int i=0;i<1;i++) {
             List<TransactionPo> listPo = new ArrayList<>();
             for (int j=0;j<100;j++) {
@@ -355,7 +355,7 @@ public class H2Test {
     }
 
     public static void initTestTable(){
-        TransactionService ts = new TransactionServiceImpl();
+        TransactionH2Service ts = new TransactionH2ServiceImpl();
         //ts.createTable("transaction", "transaction_index",128);
         ts.createTxTables(TransactionConstant.H2_TX_TABLE_NAME_PREFIX,
                 TransactionConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,

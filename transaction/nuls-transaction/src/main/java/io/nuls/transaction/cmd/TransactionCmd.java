@@ -1,8 +1,7 @@
 package io.nuls.transaction.cmd;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
+import io.nuls.rpc.model.message.Response;
 
 import java.util.List;
 
@@ -18,9 +17,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public CmdResponse register(List params) {
+    public Response register(List params) {
 
-        return success("success", null);
+        return success("success");
     }
 
     /**
@@ -29,9 +28,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public CmdResponse newTx(List params) {
+    public Response newTx(List params) {
 
-        return success("success", null);
+        return success("success");
     }
 
     /**
@@ -40,9 +39,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public CmdResponse packableTxs(List params) {
+    public Response packableTxs(List params) {
 
-        return success("success", null);
+        return success("success");
     }
 
     /**
@@ -51,9 +50,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public CmdResponse commit(List params) {
+    public Response commit(List params) {
 
-        return success("success", null);
+        return success("success");
     }
 
     /**
@@ -62,9 +61,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public CmdResponse rollback(List params) {
+    public Response rollback(List params) {
 
-        return success("success", null);
+        return success("success");
     }
 
     /**
@@ -74,9 +73,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public CmdResponse save(List params) {
+    public Response save(List params) {
 
-        return success("success", null);
+        return success("success");
     }
 
     /**
@@ -85,9 +84,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public CmdResponse getTx(List params) {
+    public Response getTx(List params) {
 
-        return success("success", null);
+        return success("success");
     }
 
     /**
@@ -96,9 +95,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public CmdResponse delete(List params) {
+    public Response delete(List params) {
 
-        return success("success", null);
+        return success("success");
     }
 
     /**
@@ -109,9 +108,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public CmdResponse verify(List params) {
+    public Response verify(List params) {
 
-        return success("success", null);
+        return success("success");
     }
 
     /**
@@ -120,9 +119,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public CmdResponse getTxProcessors(List params) {
+    public Response getTxProcessors(List params) {
 
-        return success("success", null);
+        return success("success");
     }
 
     /**
@@ -131,9 +130,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public CmdResponse getTxs(List params) {
+    public Response getTxs(List params) {
 
-        return success("success", null);
+        return success("success");
     }
 
 
