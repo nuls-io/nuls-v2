@@ -46,6 +46,10 @@ public abstract class BaseCmd {
         RuntimeInfo.configItemMap.put(key, configItem);
     }
 
+    protected Response success() {
+        return success(null);
+    }
+
     protected Response success(Object responseData) {
         Response response = new Response();
         response.setResponseStatus(Constants.RESPONSE_STATUS_SUCCESS);

@@ -126,7 +126,8 @@ public class CmdHandler {
             if (subscriptionPeriod > 0) {
                 addBack = true;
 
-                String key = messageId + (String) method;
+                String key = webSocket.toString() + messageId + (String) method;
+                System.out.println(key);
                 if (!RuntimeInfo.cmdInvokeTime.containsKey(key)) {
                     RuntimeInfo.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
                 } else if (TimeService.currentTimeMillis() - RuntimeInfo.cmdInvokeTime.get(key) >= subscriptionPeriod * 1000) {
