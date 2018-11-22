@@ -30,6 +30,7 @@ package io.nuls.rpc.cmd.test;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.Log;
 
 import java.util.Map;
@@ -47,22 +48,22 @@ public class ExampleCmd extends BaseCmd {
             description = "test getHeight 1.0")
     @Parameter(parameterName = "aaa", parameterType = "int", parameterValidRange = "", parameterValidRegExp = "")
     @Parameter(parameterName = "bbb", parameterType = "string")
-    public Object getHeight1(Map map) {
+    public Response getHeight1(Map map) {
         Log.info("getHeight version 1");
-        return "Here is your real return value";
+        return success("Here is your real return value");
     }
 
     @CmdAnnotation(cmd = "getHeight", version = 1.3, scope = "public", minEvent = 1, minPeriod = 10,
             description = "test getHeight 1")
-    public Object getHeight2(Map map) {
+    public Response getHeight2(Map map) {
         Log.info("getHeight version 1.3");
-        return success("getHeight->1.3", null);
+        return success("getHeight->1.3");
     }
 
     @CmdAnnotation(cmd = "getHeight", version = 2.0,
             description = "test getHeight 1")
-    public Object getHeight3(Map map) {
+    public Response getHeight3(Map map) {
         Log.info("getHeight version 1.3");
-        return "getHeight->2.0";
+        return failed("getHeight->2.0");
     }
 }

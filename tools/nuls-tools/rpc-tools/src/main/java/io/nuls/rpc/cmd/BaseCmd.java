@@ -27,16 +27,9 @@ package io.nuls.rpc.cmd;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
-import io.nuls.rpc.model.CmdResponse;
 import io.nuls.rpc.model.ConfigItem;
-import io.nuls.rpc.model.message.Ack;
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;
-import io.nuls.tools.data.DateUtils;
-import io.nuls.tools.thread.TimeService;
-
-import java.util.HashMap;
 
 /**
  * @author tangyi
@@ -53,37 +46,25 @@ public abstract class BaseCmd {
         RuntimeInfo.configItemMap.put(key, configItem);
     }
 
-    protected CmdResponse success() {
-        return success("Success", "");
+    protected Response success(Object responseData) {
+        Response response = new Response();
+        response.setResponseStatus(Constants.RESPONSE_STATUS_SUCCESS);
+        response.setResponseData(responseData);
+        response.setResponseComment("Congratulations! Processing completed！");
+        return response;
     }
 
-    protected CmdResponse success(String msg, Object result) {
-        CmdResponse cmdResponse = new CmdResponse();
-        cmdResponse.setCode(Constants.SUCCESS_CODE);
-        cmdResponse.setMsg(msg);
-        cmdResponse.setResult(result);
-        return cmdResponse;
+    protected Response failed(ErrorCode errorCode) {
+        Response response = new Response();
+        response.setResponseStatus(Constants.RESPONSE_STATUS_FAILED);
+        response.setResponseComment(errorCode.getCode() + ":" + errorCode.getMsg());
+        return response;
     }
 
-
-    protected CmdResponse failed(String code) {
-        ErrorCode errorCode = ErrorCode.init(code);
-        CmdResponse cmdResponse = new CmdResponse();
-        cmdResponse.setCode(errorCode.getCode());
-        cmdResponse.setMsg(errorCode.getMsg());
-        cmdResponse.setResult(null);
-        return cmdResponse;
-    }
-
-    protected CmdResponse failed(ErrorCode errorCode, Object result) {
-        CmdResponse cmdResponse = new CmdResponse();
-        cmdResponse.setCode(errorCode.getCode());
-        cmdResponse.setMsg(errorCode.getMsg());
-        cmdResponse.setResult(result);
-        return cmdResponse;
-    }
-
-    protected Object ack(){
-        return new Ack();
+    protected Response failed(String errMsg) {
+        Response response = new Response();
+        response.setResponseStatus(Constants.RESPONSE_STATUS_FAILED);
+        response.setResponseComment(errMsg);
+        return response;
     }
 }
