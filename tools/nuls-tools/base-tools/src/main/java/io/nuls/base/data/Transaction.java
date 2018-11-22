@@ -155,6 +155,10 @@ public class Transaction extends BaseNulsData implements Cloneable {
         this.type = type;
     }
 
+    public byte[] getTxData() {
+        return txData;
+    }
+
     public long getTime() {
         return time;
     }
