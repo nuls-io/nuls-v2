@@ -28,18 +28,10 @@
 package io.nuls.rpc.handler;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.RuntimeInfo;
-import io.nuls.rpc.model.CmdDetail;
-import io.nuls.rpc.model.CmdResponse;
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.MessageType;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.parse.JSONUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -51,58 +43,13 @@ public class WebSocketHandler {
 
     /**
      * Call local cmd.
-     * 1. Determine if service is available
-     * 2. Determine if the cmd exists
-     */
-    public static String callCmd(String formParamAsJson) throws Exception {
-
-        Map<String, Object> jsonMap = JSONUtils.json2map(formParamAsJson);
-        MessageType messageType = MessageType.valueOf(jsonMap.get("messageType").toString());
-        switch (messageType) {
-            case NegotiateConnection:
-                Message message = RuntimeInfo.buildMessage((Integer) jsonMap.get("messageId"), MessageType.NegotiateConnectionResponse);
-                message.setMessageType(MessageType.NegotiateConnectionResponse.name());
-                message.setMessageData(RuntimeInfo.defaultNegotiateConnectionResponse());
-                return JSONUtils.obj2json(message);
-            case Request:
-                Map messageData = (Map) jsonMap.get("messageData");
-                Map requestMethods = (Map) messageData.get("requestMethods");
-                for (Object method : requestMethods.keySet()) {
-                    Map params = (Map) requestMethods.get(method);
-                    CmdDetail cmdDetail = params.get("protocolVersion") == null ? RuntimeInfo.getLocalInvokeCmd((String) method) : RuntimeInfo.getLocalInvokeCmd((String) method, (double) params.get("protocolVersion"));
-                    CmdResponse cmdResponse = buildResponse(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), (List) jsonMap.get("MessageData"));
-                    return JSONUtils.obj2json(cmdResponse);
-                }
-                System.out.println(messageData.get("requestMethods"));
-                return "";
-//                return
-            default:
-                double minVersion = (Double) jsonMap.get("minVersion");
-                CmdDetail cmdDetail = minVersion >= 0
-                        ? RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"), (Double) jsonMap.get("minVersion"))
-                        : RuntimeInfo.getLocalInvokeCmd((String) jsonMap.get("cmd"));
-                if (cmdDetail == null) {
-                    return Constants.CMD_NOT_FOUND;
-                }
-
-                CmdResponse cmdResponse = buildResponse(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), (List) jsonMap.get("MessageData"));
-                cmdResponse.setId((Integer) jsonMap.get("id"));
-                cmdResponse.setVersion(cmdDetail.getVersion());
-
-                return JSONUtils.obj2json(cmdResponse);
-        }
-
-    }
-
-    /**
-     * Call local cmd.
      * 1. If the interface is injected via @Autowired, the injected object is used
      * 2. If the interface has no special annotations, construct a new object by reflection
      */
-    private static CmdResponse buildResponse(String invokeClass, String invokeMethod, List params) throws Exception {
+    public static Object invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
 
         Class clz = Class.forName(invokeClass);
-        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(invokeMethod, List.class);
+        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
 
         BaseCmd cmd;
         if (SpringLiteContext.getBeanByClass(invokeClass) == null) {
@@ -112,7 +59,7 @@ public class WebSocketHandler {
             cmd = (BaseCmd) SpringLiteContext.getBeanByClass(invokeClass);
         }
 
-        return (CmdResponse) method.invoke(cmd, params);
+        return method.invoke(cmd, params);
     }
 
 }

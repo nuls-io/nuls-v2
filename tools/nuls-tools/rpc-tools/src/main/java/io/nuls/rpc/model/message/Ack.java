@@ -1,24 +1,17 @@
 package io.nuls.rpc.model.message;
 
+import lombok.*;
+
 /**
  * @author tangyi
  * @date 2018/11/15
  * @description
  */
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class Ack {
+    @Getter
+    @Setter
     private String requestID;
-
-    public Ack(){}
-
-    public Ack(String requestID) {
-        this.requestID = requestID;
-    }
-
-    public String getRequestID() {
-        return requestID;
-    }
-
-    public void setRequestID(String requestID) {
-        this.requestID = requestID;
-    }
 }

@@ -91,8 +91,10 @@ public class KernelCmd4Test extends BaseCmd {
                 int port = registerApi.getPort();
                 moduleInfo.setAddress(address);
                 moduleInfo.setPort(port);
+                moduleInfo.setAbbr(registerApi.getAbbr());
+                moduleInfo.setName(registerApi.getName());
                 moduleInfo.setRegisterApi(registerApi);
-                RuntimeInfo.remoteModuleMap.put(address + ":" + port, moduleInfo);
+                RuntimeInfo.remoteModuleMap.put(registerApi.getName(), moduleInfo);
             }
             System.out.println("Current APIMethods:" + JSONUtils.obj2json(RuntimeInfo.remoteModuleMap));
             return RuntimeInfo.remoteModuleMap;

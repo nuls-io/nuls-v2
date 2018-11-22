@@ -27,7 +27,7 @@
 
 package io.nuls.test;
 
-import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
 
 /**
@@ -40,6 +40,6 @@ public class WsKernel {
     @Test
     public void kernel() throws Exception {
         // url: "ws://127.0.0.1:8887"
-        RuntimeInfo.mockKernel();
+        WsServer.mockKernel();
     }
 }

@@ -27,11 +27,11 @@
 
 package io.nuls.rpc.info;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.handler.WebSocketHandler;
 import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.message.*;
-import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.log.Log;
@@ -314,11 +314,51 @@ public class RuntimeInfo {
         return negotiateConnection;
     }
 
-    public static NegotiateConnectionResponse defaultNegotiateConnectionResponse() {
+    public static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
         negotiateConnectionResponse.setNegotiationStatus(0);
         negotiateConnectionResponse.setNegotiationComment("Incompatible protocol version");
-        return negotiateConnectionResponse;
+
+        Message rspMsg = RuntimeInfo.buildMessage(RuntimeInfo.nextSequence(), MessageType.NegotiateConnectionResponse);
+        rspMsg.setMessageData(negotiateConnectionResponse);
+        webSocket.send(JSONUtils.obj2json(rspMsg));
+    }
+
+    public static void response(WebSocket webSocket, Map<String, Object> messageMap) throws Exception {
+        int messageId = (Integer) messageMap.get("messageId");
+        Map messageData = (Map) messageMap.get("messageData");
+        Map requestMethods = (Map) messageData.get("requestMethods");
+        for (Object method : requestMethods.keySet()) {
+            Response response = defaultResponse(messageId);
+
+            Map params = (Map) requestMethods.get(method);
+
+            CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
+                    ? RuntimeInfo.getLocalInvokeCmd((String) method)
+                    : RuntimeInfo.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
+            Message message;
+            if (cmdDetail == null) {
+                response.setResponseProcessingTime(TimeService.currentTimeMillis() - response.getResponseProcessingTime());
+                response.setResponseData("No such version: " + method + "," + params.get(Constants.VERSION_KEY_STR));
+                message = RuntimeInfo.buildMessage(RuntimeInfo.nextSequence(), MessageType.Response);
+                message.setMessageData(response);
+                webSocket.send(JSONUtils.obj2json(message));
+                continue;
+            }
+
+            Object responseData = WebSocketHandler.invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
+
+            response.setResponseProcessingTime(TimeService.currentTimeMillis() - response.getResponseProcessingTime());
+            response.setResponseData(responseData);
+
+            message = RuntimeInfo.buildMessage(RuntimeInfo.nextSequence(), MessageType.Response);
+            message.setMessageData(response);
+            webSocket.send(JSONUtils.obj2json(message));
+        }
+    }
+
+    public static void unsubscribe(){
+
     }
 
     public static Request defaultRequest() {
@@ -332,7 +372,7 @@ public class RuntimeInfo {
         return request;
     }
 
-    public static Response defaultResponse(int requestId) {
+    private static Response defaultResponse(int requestId) {
         Response response = new Response();
         response.setRequestId(requestId);
         response.setResponseProcessingTime(TimeService.currentTimeMillis());
@@ -342,12 +382,5 @@ public class RuntimeInfo {
         return response;
     }
 
-    public static void mockKernel() throws Exception {
-        WsServer wsServer = new WsServer(8887);
-        wsServer.init(ModuleE.KE, "io.nuls.rpc.cmd.kernel");
-        wsServer.connect("ws://127.0.0.1:8887");
 
-        CmdDispatcher.syncKernel();
-        Thread.sleep(Integer.MAX_VALUE);
-    }
 }

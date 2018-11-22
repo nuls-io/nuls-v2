@@ -27,6 +27,8 @@
 
 package io.nuls.rpc.model;
 
+import io.nuls.rpc.info.Constants;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -35,15 +37,36 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CmdAnnotation {
+    /*
+    The string used to invoke method
+     */
     String cmd();
 
+    /*
+    The version of the method
+     */
     double version();
 
-    String scope();
+    /*
+    The permission level of the method. Includes: Constants.PUBLIC, Constants.PRIVATE, Constants.ADMIN
+    Default: Constants.PRIVATE
+     */
+    String scope() default Constants.PRIVATE;
 
-    int minEvent();
+    /*
+    Calling frequency of a connection
+    Unit: block number
+     */
+    int minEvent() default 0;
 
-    int minPeriod();
+    /*
+    Call frequency of a connection
+    Unit: Second
+     */
+    int minPeriod() default 0;
 
+    /*
+    Description information of method
+     */
     String description();
 }
