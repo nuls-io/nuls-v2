@@ -22,18 +22,15 @@ public interface TransactionService {
 
     int deleteTx(String address, String txhash);
 
-    //int deleteTx(List<String> txHashList);
-
-
     /**
+     * 初始化创建存储账户交易的表
+     * 主要为了存储账户和交易的关系,
+     * 采用分表机制，创建表同时创建联合索引(address,time,type)主要用于查询,
+     * 以及唯一索引(address,hash)主要用于删除.
      *
-     *
-     * 初始化创建存储交易的表
      * @param tableName  table name
      * @param indexName table index name
      * @param number number of tables 分表的数量
      */
-    void createTable(String tableName, String indexName, String uniqueName, int number);
-
     void createTxTables(String tableName, String indexName, String uniqueName, int number);
 }

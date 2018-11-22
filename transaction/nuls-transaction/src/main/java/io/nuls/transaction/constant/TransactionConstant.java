@@ -40,4 +40,6 @@ public interface TransactionConstant {
     String H2_TX_TABLE_UNIQUE_NAME_PREFIX = "tx_unique_";
     int H2_TX_TABLE_NUMBER = 128;
 
+
+
 }
