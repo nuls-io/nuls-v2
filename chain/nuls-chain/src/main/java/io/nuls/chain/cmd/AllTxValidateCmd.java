@@ -22,21 +22,25 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.info;
+package io.nuls.chain.cmd;
+
+import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.model.CmdResponse;
+
+import java.util.List;
 
 /**
- * @program: nuls2
- * @description: 交易类型常量
+ * @program: nuls2.0
+ * @description: moduleValidateCmd
  * @author: lan
- * @create: 2018/11/19
+ * @create: 2018/11/22
  **/
-public interface ChainTxConstants {
+public class AllTxValidateCmd extends BaseCmd {
 
-
-    int TX_TYPE_REGISTER_CHAIN = 5001;
-    int TX_TYPE_DESTROY_CHAIN = 5002;
-    int TX_TYPE_ADD_CHAIN_ASSET = 5011;
-    int TX_TYPE_DISABLE_CHAIN_ASSET = 5012;
-    int TX_TYPE_CROSS_CHAIN_ASSET = 5021;
-
+    public CmdResponse chainModuleTxValidate(List params){
+        //1获取交易类型
+        //2进入不同验证器里处理
+        //3封装失败交易返回
+        return null;
+    }
 }

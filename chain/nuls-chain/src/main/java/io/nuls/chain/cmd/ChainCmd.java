@@ -1,20 +1,21 @@
 package io.nuls.chain.cmd;
 
 
-import io.nuls.chain.info.CmConstants;
-import io.nuls.chain.model.dto.Asset;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.model.dto.Seed;
+import io.nuls.chain.model.tx.CrossChainDestroyTransaction;
+import io.nuls.chain.model.tx.CrossChainRegTransaction;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
+import io.nuls.chain.service.RpcService;
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.util.ArrayList;
@@ -35,10 +36,12 @@ public class ChainCmd extends BaseCmd {
     @Autowired
     private AssetService assetService;
 
-    @CmdAnnotation(cmd = "chain", version = 1.0, preCompatible = true)
+    @Autowired
+    private RpcService rpcService;
+
     public CmdResponse chain(List params) {
         try {
-            short chainId = Short.valueOf(params.get(0).toString());
+            int chainId = Integer.valueOf(params.get(0).toString());
             Chain chain = chainService.getChain(chainId);
             if (chain == null) {
                 return failed("C10003");
@@ -50,7 +53,7 @@ public class ChainCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "chainReg", version = 1.0, preCompatible = true)
+
     public CmdResponse chainReg(List params) {
         try {
             Chain chain = new Chain();
@@ -72,109 +75,78 @@ public class ChainCmd extends BaseCmd {
                 seedList.add(seed);
             }
             chain.setSeedList(seedList);
+            chain.setAddress(AddressTool.getAddress(String.valueOf(params.get(9))));
+
             chain.setCreateTime(TimeService.currentTimeMillis());
-
-            // TODO 组装交易发送
-
-            return success("sent newTx", chain);
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(ErrorCode.init("-100"), e.getMessage());
-        }
-    }
-
-    @CmdAnnotation(cmd = "chainRegValidator", version = 1.0, preCompatible = true)
-    public CmdResponse chainRegValidator(List params) {
-        try {
-            Chain chain = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Chain.class);
-            if (chain.getChainId() < 0) {
-                return failed("C10002");
-            }
-            if (chainService.getChain(chain.getChainId()) != null) {
+            Chain dbChain = chainService.getChain(chain.getChainId());
+            if (dbChain != null) {
                 return failed("C10001");
             }
 
-            return success();
+            // 组装交易发送
+            CrossChainRegTransaction crossChainRegTransaction = new CrossChainRegTransaction();
+            crossChainRegTransaction.setTxData(chain.parseToTransaction());
+            //TODO:coindata 未封装
+            boolean rpcReslt = rpcService.newTx(crossChainRegTransaction);
+            if(rpcReslt) {
+                return success("sent reg chain newTx", chain);
+            }else{
+                return failed(new ErrorCode(),chain);
+            }
         } catch (Exception e) {
             Log.error(e);
             return failed(ErrorCode.init("-100"), e.getMessage());
         }
     }
 
-    @CmdAnnotation(cmd = "chainRegCommit", version = 1.0, preCompatible = true)
-    public CmdResponse chainRegCommit(List params) {
-        try {
-            Chain chain = JSONUtils.json2pojo(JSONUtils.obj2json(params.get(0)), Chain.class);
-            chainService.saveChain(chain);
 
-            int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-            String txHex = String.valueOf(params.get(1));
-            String secondaryData = String.valueOf(params.get(2));
-            //TODO:通知网络模块创建链
-
-            return success("chainRegCommit", null);
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(ErrorCode.init("-100"), e.getMessage());
-        }
-    }
-
-    @CmdAnnotation(cmd = "chainRegRollback", version = 1.0, preCompatible = true)
-    public CmdResponse chainRegRollback(List params) {
-        try {
-            //TODO:通知网络模块注销链
-            return success("chainRegRollback", null);
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(ErrorCode.init("-100"), e.getMessage());
-        }
-    }
 
     /**
      * 删除链
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "chainDestroy", version = 1.0, preCompatible = true)
+
     public CmdResponse chainDestroy(List params) {
-        //TODO 组装交易发送
-        return null;
-    }
-
-    @CmdAnnotation(cmd = "chainDestroyCommit", version = 1.0, preCompatible = true)
-    public CmdResponse chainDestroyCommit(List params) {
-        //TODO:通知网络模块注销链
-        return null;
-    }
-
-    @CmdAnnotation(cmd = "chainDestroyRollback", version = 1.0, preCompatible = true)
-    public CmdResponse chainDestroyRollback(List params) {
-        //TODO:通知网络模块回滚注销链
-        return null;
-    }
-    @CmdAnnotation(cmd = "chainDestroyValidator", version = 1.0, preCompatible = true)
-    public CmdResponse chainDestroyValidator(List params) {
-        //TODO
-        return null;
-    }
-
-    @CmdAnnotation(cmd = "setChainAssetCurrentNumber", version = 1.0, preCompatible = true)
-    public CmdResponse setChainAssetCurrentNumber(List params) {
-        short chainId = Short.valueOf(params.get(0).toString());
-        long assetId = Long.valueOf(params.get(1).toString());
-        long currentNumber = Long.valueOf(params.get(2).toString());
-        chainService.setAssetNumber(chainId, assetId, currentNumber);
-        return success("setChainAssetCurrentNumber", null);
-    }
-
-    @CmdAnnotation(cmd = "setChainAssetCurrentNumberValidator", version = 1.0, preCompatible = true)
-    public CmdResponse setChainAssetCurrentNumberValidator(List params) {
-        long assetId = Long.valueOf(params.get(1).toString());
-        long currentNumber = Long.valueOf(params.get(2).toString());
-        Asset asset = assetService.getAsset(assetId);
-        if (currentNumber > asset.getInitNumber()) {
-            return failed(CmConstants.ERROR_ASSET_EXCEED_INIT);
+        int chainId = Integer.valueOf(params.get(0).toString());
+       byte [] address = (AddressTool.getAddress(String.valueOf(params.get(1))));
+        //身份的校验，地址账户校验
+        Chain chain = chainService.getChain(chainId);
+        if (chain == null) {
+            return failed("C10003");
         }
-        return success();
+        if(!ByteUtils.arrayEquals(chain.getAddress(),address)){
+            return failed("C10004");
+        }
+        CrossChainDestroyTransaction crossChainDestroyTransaction = new CrossChainDestroyTransaction();
+        crossChainDestroyTransaction.setTxData(chain.parseToTransaction());
+        //TODO:coindata 未封装
+        boolean rpcReslt = rpcService.newTx(crossChainDestroyTransaction);
+        if(rpcReslt) {
+            return success("sent destroy chain newTx", chain);
+        }else{
+            return failed(new ErrorCode(),chain);
+        }
     }
+
+
+
+//    public CmdResponse setChainAssetCurrentNumber(List params) {
+//        short chainId = Short.valueOf(params.get(0).toString());
+//        long assetId = Long.valueOf(params.get(1).toString());
+//        long currentNumber = Long.valueOf(params.get(2).toString());
+//        chainService.setAssetNumber(chainId, assetId, currentNumber);
+//        return success("setChainAssetCurrentNumber", null);
+//    }
+//
+//    public CmdResponse setChainAssetCurrentNumberValidator(List params) {
+//        long assetId = Long.valueOf(params.get(1).toString());
+//        long currentNumber = Long.valueOf(params.get(2).toString());
+//        Asset asset = assetService.getAsset(assetId);
+//        if (currentNumber > asset.getInitNumber()) {
+//            return failed(CmConstants.ERROR_ASSET_EXCEED_INIT);
+//        }
+//        return success();
+//    }
+
 }

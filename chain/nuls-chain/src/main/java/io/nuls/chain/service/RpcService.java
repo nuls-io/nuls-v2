@@ -22,21 +22,33 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.info;
+package io.nuls.chain.service;
+
+import io.nuls.base.data.Transaction;
+import io.nuls.chain.model.dto.Chain;
 
 /**
- * @program: nuls2
- * @description: 交易类型常量
- * @author: lan
- * @create: 2018/11/19
- **/
-public interface ChainTxConstants {
+ * 调用外部接口
+ */
+public interface RpcService {
+    /**
+     * 跨链种子节点获取
+     * @return
+     */
+    String getCrossChainSeeds();
 
+    /**
+     * 注册交易验证器
+     * @return
+     */
+    boolean regTx();
 
-    int TX_TYPE_REGISTER_CHAIN = 5001;
-    int TX_TYPE_DESTROY_CHAIN = 5002;
-    int TX_TYPE_ADD_CHAIN_ASSET = 5011;
-    int TX_TYPE_DISABLE_CHAIN_ASSET = 5012;
-    int TX_TYPE_CROSS_CHAIN_ASSET = 5021;
+    boolean newTx(Transaction tx);
+
+    boolean createCrossGroup(Chain chain);
+
+    boolean destroyCrossGroup(Chain chain);
+
 
 }
+

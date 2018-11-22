@@ -3,6 +3,7 @@ package io.nuls.chain.model.dto;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.chain.model.tx.txdata.ChainTx;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -19,17 +20,19 @@ public class Chain extends BaseNulsData {
     private int chainId;
     private String name;
     private String addressType;
-    private int magicNumber;
+    private long magicNumber;
     private boolean supportInflowAsset;
     private int minAvailableNodeNum;
     private int singleNodeMinConnectionNum;
     private int txConfirmedBlockNum;
     private List<Seed> seedList;
     private List<ChainAsset> chainAssetList;
-    private boolean available;
+    /**删除链时，置位为true*/
+    private boolean isDelete = false;
     private long createTime;
     private long lastUpdateTime;
     private byte[] address;
+    private String txHash;
 
     public int getChainId() {
         return chainId;
@@ -55,11 +58,11 @@ public class Chain extends BaseNulsData {
         this.addressType = addressType;
     }
 
-    public int getMagicNumber() {
+    public long getMagicNumber() {
         return magicNumber;
     }
 
-    public void setMagicNumber(int magicNumber) {
+    public void setMagicNumber(long magicNumber) {
         this.magicNumber = magicNumber;
     }
 
@@ -111,13 +114,6 @@ public class Chain extends BaseNulsData {
         this.chainAssetList = chainAssetList;
     }
 
-    public boolean isAvailable() {
-        return available;
-    }
-
-    public void setAvailable(boolean available) {
-        this.available = available;
-    }
 
     public long getCreateTime() {
         return createTime;
@@ -143,6 +139,22 @@ public class Chain extends BaseNulsData {
         this.address = address;
     }
 
+    public boolean isDelete() {
+        return isDelete;
+    }
+
+    public void setDelete(boolean delete) {
+        isDelete = delete;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = txHash;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
@@ -157,10 +169,11 @@ public class Chain extends BaseNulsData {
         for (Seed seed : seedList) {
             stream.write(seed.serialize());
         }
-        stream.writeBoolean(available);
+        stream.writeBoolean(isDelete);
         stream.writeUint48(createTime);
         stream.writeUint48(lastUpdateTime);
         stream.writeBytesWithLength(address);
+        stream.writeString(txHash);
     }
 
     @Override
@@ -178,10 +191,11 @@ public class Chain extends BaseNulsData {
         for (int i = 0; i < seedLength; i++) {
             this.seedList.add(byteBuffer.readNulsData(new Seed()));
         }
-        this.available = byteBuffer.readBoolean();
+        this.isDelete = byteBuffer.readBoolean();
         this.createTime = byteBuffer.readUint48();
         this.lastUpdateTime = byteBuffer.readUint48();
         this.address = byteBuffer.readByLengthByte();
+        this.txHash = byteBuffer.readString();
     }
 
     @Override
@@ -206,15 +220,40 @@ public class Chain extends BaseNulsData {
         for (Seed seed : seedList) {
             size += seed.size();
         }
-        // available
+        // isDelete
         size += SerializeUtils.sizeOfBoolean();
         // createTime;
         size += SerializeUtils.sizeOfUint48();
         // lastUpdateTime;
         size += SerializeUtils.sizeOfUint48();
         size+= SerializeUtils.sizeOfBytes(address);
+        //txHash
+        size += SerializeUtils.sizeOfString(txHash);
         return size;
     }
-
-
+    public Chain(){
+        super();
+    }
+    public Chain(ChainTx chainRegTx){
+        this.address = chainRegTx.getAddress();
+        this.addressType = chainRegTx.getAddressType();
+        this.chainId = chainRegTx.getChainId();
+        this.magicNumber = chainRegTx.getMagicNumber();
+        this.minAvailableNodeNum = chainRegTx.getMinAvailableNodeNum();
+        this.name =  chainRegTx.getName();
+        this.singleNodeMinConnectionNum = chainRegTx.getSingleNodeMinConnectionNum();
+        this.supportInflowAsset = chainRegTx.isSupportInflowAsset();
+    }
+    public ChainTx parseToTransaction(){
+        ChainTx chainRegTx = new ChainTx();
+        chainRegTx.setAddress(this.address);
+        chainRegTx.setAddressType(this.addressType);
+        chainRegTx.setChainId(this.chainId);
+        chainRegTx.setMagicNumber(this.magicNumber);
+        chainRegTx.setMinAvailableNodeNum(this.minAvailableNodeNum);
+        chainRegTx.setName(this.name);
+        chainRegTx.setSingleNodeMinConnectionNum(this.singleNodeMinConnectionNum);
+        chainRegTx.setSupportInflowAsset(this.supportInflowAsset);
+        return chainRegTx;
+    }
 }

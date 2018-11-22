@@ -50,6 +50,37 @@ public class ChainStorageImpl implements ChainStorage, InitializingBean {
             return false;
         }
     }
+    /**
+     * update chain
+     *
+     * @param key   The key
+     * @param chain Chain object that needs to be update
+     * @return true/false
+     */
+    @Override
+    public boolean update(int key, Chain chain) {
+        try {
+            return RocksDBService.put(TBL, ByteUtils.intToBytes(key), chain.serialize());
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+    }
+    /**
+     * delete chain
+     *
+     * @param key   The key
+     * @return true/false
+     */
+    @Override
+    public boolean delete(int key) {
+        try {
+            return RocksDBService.delete(TBL, ByteUtils.intToBytes(key));
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+    }
 
     /**
      * Find chain based on key
