@@ -33,7 +33,7 @@ import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.vo.NodeVo;
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdResponse;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 
@@ -57,13 +57,13 @@ public class NodeRpc extends BaseCmd {
      * 增加节点
      */
 //    @CmdAnnotation(cmd = "nw_addNodes", version = 1.0, preCompatible = true)
-    public CmdResponse addNodes(List params) {
+    public Response addNodes(List params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         int isCross = Integer.valueOf(String.valueOf(params.get(1)));
         String nodes=String.valueOf(params.get(2));
         Log.info("chainId:"+chainId+"==nodes:"+nodes);
         if( chainId < 0 || StringUtils.isBlank(nodes)){
-            return failed(NetworkErrorCode.PARAMETER_ERROR,  "");
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         boolean blCross=false;
         if(1 == isCross){
@@ -79,7 +79,7 @@ public class NodeRpc extends BaseCmd {
             nodePos.add((NodePo) node.parseToPo());
         }
         StorageManager.getInstance().saveNodes(nodePos,chainId);
-        return success( "success", "");
+        return success( );
     }
 
 
@@ -88,12 +88,12 @@ public class NodeRpc extends BaseCmd {
      * 增加节点
      */
 //    @CmdAnnotation(cmd = "nw_delNodes", version = 1.0, preCompatible = true)
-    public CmdResponse delNodes(List params) {
+    public Response delNodes(List params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         String nodes=String.valueOf(params.get(1));
         Log.info("chainId:"+chainId+"==nodes:"+nodes);
         if( chainId < 0 || StringUtils.isBlank(nodes)){
-            return failed(NetworkErrorCode.PARAMETER_ERROR,  "");
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         String []peers = nodes.split(",");
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
@@ -115,10 +115,10 @@ public class NodeRpc extends BaseCmd {
             nodeIds.add(nodeId);
         }
         StorageManager.getInstance().delGroupNodes(nodeIds,chainId);
-        return success( "success", "");
+        return success( );
     }
 //    @CmdAnnotation(cmd = "nw_getNodes", version = 1.0, preCompatible = true)
-    public CmdResponse nw_getNodes(List params) {
+    public Response nw_getNodes(List params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         int state = Integer.valueOf(String.valueOf(params.get(1)));
         int isCross = Integer.valueOf(String.valueOf(params.get(2)));
@@ -171,7 +171,7 @@ public class NodeRpc extends BaseCmd {
             NodeVo  nodeVo=buildNodeVo(node,nodeGroup.getMagicNumber(),chainId);
             pageList.add(nodeVo);
         }
-        return success( "success", pageList);
+        return success( pageList);
     }
 
     /**
@@ -179,18 +179,18 @@ public class NodeRpc extends BaseCmd {
      * 更新区块高度与hash
      */
 //    @CmdAnnotation(cmd = "nw_updateNodeInfo", version = 1.0, preCompatible = true)
-    public CmdResponse updateNodeInfo(List params) {
+    public Response updateNodeInfo(List params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         String nodeId = String.valueOf(params.get(1));
         long blockHeight = Long.valueOf(String.valueOf(params.get(2)));
         String blockHash=String.valueOf(params.get(3));
         NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByChainId(chainId);
         if(null == nodeGroup){
-            return failed(NetworkErrorCode.PARAMETER_ERROR,  "");
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         Node node = nodeGroup.getConnectNodeMap().get(nodeId);
         if(null == node){
-            return failed(NetworkErrorCode.PARAMETER_ERROR,  "");
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(nodeGroup.getMagicNumber());
         if(null != nodeGroupConnector){
@@ -201,7 +201,7 @@ public class NodeRpc extends BaseCmd {
             nodeGroup.setHightest(blockHeight);
             nodeGroup.setHightestBlockNodeId(node.getId());
         }
-        return success("success", "");
+        return success();
     }
 
 

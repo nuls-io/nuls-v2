@@ -29,10 +29,10 @@ import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdResponse;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ByteUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -50,33 +50,34 @@ public class MessageRpc extends BaseCmd{
      * 外部广播接收
      */
 //    @CmdAnnotation(cmd = "nw_broadcast", version = 1.0, preCompatible = true)
-    public CmdResponse broadcast(List params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-        String excludeNodes = String.valueOf(params.get(1));
-        byte [] message =HexUtil.hexStringToBytes(String.valueOf(params.get(2)));
-        //补充魔法参数
-        byte [] magicNumber = new byte[4];
-        System.arraycopy(message, 0, magicNumber, 0, magicNumber.length);
-        if(0 == ByteUtils.byteToLong(magicNumber)){
-            long magicNumberLong = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId).getMagicNumber();
-            System.arraycopy(ByteUtils.longToBytes(magicNumberLong), 0, message, 0, 4);
-        }
-        NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
-        NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
-        Collection<Node> nodesCollection=nodeGroup.getConnectNodes();
+    public Response broadcast(List params) {
         try {
-            excludeNodes=","+excludeNodes+",";
-            List<Node> nodes = new ArrayList<>();
-            for(Node node:nodesCollection){
-                if(!excludeNodes.contains(node.getId())){
-                nodes.add(node);
-                }
-            }
+            int chainId = Integer.valueOf(String.valueOf(params.get(0)));
+            String excludeNodes = String.valueOf(params.get(1));
+            byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get(2)));
+            String cmd =String.valueOf(params.get(3));
             MessageManager messageManager=MessageManager.getInstance();
-            messageManager.broadcastToNodes(message,nodes,true);
+            long magicNumber = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId).getMagicNumber();
+            long checksum = messageManager.getCheckSum(messageBody);
+            MessageHeader header = new MessageHeader(cmd,magicNumber,checksum,messageBody.length);
+            byte [] headerByte = header.serialize();
+            byte [] message = new byte[headerByte.length+messageBody.length];
+            System.arraycopy(headerByte, 0, message, 0, headerByte.length);
+            System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
+            NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
+            NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
+            Collection<Node> nodesCollection=nodeGroup.getConnectNodes();
+                excludeNodes=","+excludeNodes+",";
+                List<Node> nodes = new ArrayList<>();
+                for(Node node:nodesCollection){
+                    if(!excludeNodes.contains(node.getId())){
+                    nodes.add(node);
+                    }
+                }
+               messageManager.broadcastToNodes(message,nodes,true);
         } catch (Exception e) {
             e.printStackTrace();
-            return failed(NetworkErrorCode.PARAMETER_ERROR,  e.getMessage());
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
     }
@@ -85,20 +86,22 @@ public class MessageRpc extends BaseCmd{
      *
      */
 //    @CmdAnnotation(cmd = "nw_sendPeersMsg", version = 1.0, preCompatible = true)
-    public CmdResponse sendPeersMsg(List params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-        String nodes = String.valueOf(params.get(1));
-        byte [] message =HexUtil.hexStringToBytes(String.valueOf(params.get(2)));
-        NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
-        NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
-        //补充魔法参数
-        byte [] magicNumber = new byte[4];
-        System.arraycopy(message, 0, magicNumber, 0, magicNumber.length);
-        if(0 == ByteUtils.byteToLong(magicNumber)){
-            long magicNumberLong = nodeGroup.getMagicNumber();
-            System.arraycopy(ByteUtils.longToBytes(magicNumberLong), 0, message, 0, magicNumber.length);
-        }
+    public Response sendPeersMsg(List params) {
         try {
+            int chainId = Integer.valueOf(String.valueOf(params.get(0)));
+            String nodes = String.valueOf(params.get(1));
+            byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get(2)));
+            String cmd =String.valueOf(params.get(3));
+            MessageManager messageManager=MessageManager.getInstance();
+            NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
+            NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
+            long magicNumber = nodeGroup.getMagicNumber();
+            long checksum = messageManager.getCheckSum(messageBody);
+            MessageHeader header = new MessageHeader(cmd,magicNumber,checksum,messageBody.length);
+            byte [] headerByte = header.serialize();
+            byte [] message = new byte[headerByte.length+messageBody.length];
+            System.arraycopy(headerByte, 0, message, 0, headerByte.length);
+            System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
             String []nodeIds=nodes.split(",");
             List<Node> nodesList = new ArrayList<>();
             for(String nodeId:nodeIds){
@@ -106,11 +109,10 @@ public class MessageRpc extends BaseCmd{
                     nodesList.add(nodeGroup.getConnectNode(nodeId));
                 }
             }
-            MessageManager messageManager=MessageManager.getInstance();
             messageManager.broadcastToNodes(message,nodesList,true);
         } catch (Exception e) {
             e.printStackTrace();
-            return failed(NetworkErrorCode.PARAMETER_ERROR,  e.getMessage());
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         return success();
     }

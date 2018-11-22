@@ -24,9 +24,7 @@
  */
 package io.nuls.network;
 
-import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.info.HostInfo;
-import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.data.ByteUtils;
 import org.junit.Test;
@@ -70,10 +68,10 @@ public class Test1 {
 
 // 注意，下面这句话不要改，模拟实现在"io.nuls.rpc.cmd.kernel"中
         try {
-            WsServer wsServer = new WsServer(HostInfo.randomPort());
-            wsServer.init(ModuleE.CM, "io.nuls.rpc.cmd.test");
-            wsServer.connect("ws://127.0.0.1:8887");
-            CmdDispatcher.syncKernel();
+//            WsServer wsServer = new WsServer(HostInfo.randomPort());
+//            wsServer.init(ModuleE.CM, "io.nuls.rpc.cmd.test");
+//            wsServer.connect("ws://127.0.0.1:8887");
+//            CmdDispatcher.syncKernel();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -81,9 +79,9 @@ public class Test1 {
    public static void main(String []args){
             WsServer wsServer = new WsServer(HostInfo.randomPort());
        try {
-           wsServer.init(ModuleE.CM, "io.nuls.rpc.cmd.test");
-           wsServer.connect("ws://127.0.0.1:8887");
-           CmdDispatcher.syncKernel();
+//           wsServer.init(ModuleE.CM, "io.nuls.rpc.cmd.test");
+//           wsServer.connect("ws://127.0.0.1:8887");
+//           CmdDispatcher.syncKernel();
        } catch (Exception e) {
            e.printStackTrace();
        }
