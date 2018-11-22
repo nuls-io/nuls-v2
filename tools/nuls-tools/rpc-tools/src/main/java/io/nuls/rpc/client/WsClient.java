@@ -94,7 +94,7 @@ public class WsClient extends WebSocketClient {
                         Map messageData = (Map) map.get("messageData");
                         if ((Integer) messageData.get("requestId") == messageId) {
                             RuntimeInfo.RESPONSE_QUEUE.remove(map);
-                            return messageData.get("responseData");
+                            return messageData;
                         }
                     default:
                 }

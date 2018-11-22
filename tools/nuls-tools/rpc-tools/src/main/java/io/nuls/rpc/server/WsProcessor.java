@@ -1,5 +1,6 @@
 package io.nuls.rpc.server;
 
+import io.nuls.rpc.handler.CmdHandler;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.message.MessageType;
@@ -64,13 +65,13 @@ public class WsProcessor implements Runnable {
                 MessageType messageType = MessageType.valueOf(messageMap.get("messageType").toString());
                 switch (messageType) {
                     case NegotiateConnection:
-                        RuntimeInfo.negotiateConnectionResponse(webSocket);
+                        CmdHandler.negotiateConnectionResponse(webSocket);
                         break;
                     case Request:
-                        RuntimeInfo.response(webSocket, messageMap);
+                        CmdHandler.response(webSocket, messageMap);
                         break;
                     case Unsubscribe:
-                        RuntimeInfo.unsubscribe();
+                        CmdHandler.unsubscribe();
                         break;
                     default:
                         break;
