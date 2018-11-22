@@ -75,7 +75,7 @@ public class WsProcessor implements Runnable {
                         }
                         break;
                     case Unsubscribe:
-                        CmdHandler.unsubscribe();
+                        CmdHandler.unsubscribe(webSocket, messageMap);
                         break;
                     default:
                         break;
