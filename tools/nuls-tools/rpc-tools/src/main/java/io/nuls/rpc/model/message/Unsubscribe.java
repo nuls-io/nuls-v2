@@ -1,18 +1,17 @@
 package io.nuls.rpc.model.message;
 
+import lombok.*;
+
 /**
  * @author tangyi
  * @date 2018/11/15
  * @description
  */
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
 public class Unsubscribe {
+    @Getter
+    @Setter
     private String[] unsubscribeMethods;
-
-    public String[] getUnsubscribeMethods() {
-        return unsubscribeMethods;
-    }
-
-    public void setUnsubscribeMethods(String[] unsubscribeMethods) {
-        this.unsubscribeMethods = unsubscribeMethods;
-    }
 }
