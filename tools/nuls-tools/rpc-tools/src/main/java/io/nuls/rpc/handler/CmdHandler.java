@@ -123,19 +123,23 @@ public class CmdHandler {
             subscriptionPeriod > 0, means send response every time.
             subscriptionPeriod <= 0, means send response only once.
              */
+            String key = webSocket.toString() + messageId + method;
             if (subscriptionPeriod > 0) {
                 addBack = true;
+                if (RuntimeInfo.cmdInvokeTime.containsKey(key)) {
+                    if (RuntimeInfo.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
+                        RuntimeInfo.cmdInvokeTime.remove(key);
+                        Log.info("Remove: " + key);
+                        return false;
+                    }
 
-                String key = webSocket.toString() + messageId + (String) method;
-                System.out.println(key);
-                if (!RuntimeInfo.cmdInvokeTime.containsKey(key)) {
-                    RuntimeInfo.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
-                } else if (TimeService.currentTimeMillis() - RuntimeInfo.cmdInvokeTime.get(key) >= subscriptionPeriod * 1000) {
-                    RuntimeInfo.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
-                } else {
-                    continue;
+                    if (TimeService.currentTimeMillis() - RuntimeInfo.cmdInvokeTime.get(key) < subscriptionPeriod * 1000) {
+                        continue;
+                    }
                 }
             }
+
+            RuntimeInfo.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
 
             long startTimemillis = TimeService.currentTimeMillis();
 
@@ -168,9 +172,7 @@ public class CmdHandler {
         Unsubscribe unsubscribe = JSONUtils.json2pojo(JSONUtils.obj2json(messageMap.get("messageData")), Unsubscribe.class);
         for (String str : unsubscribe.getUnsubscribeMethods()) {
             String key = webSocket.toString() + str;
-            synchronized (RuntimeInfo.REQUEST_QUEUE){
-
-            }
+            RuntimeInfo.cmdInvokeTime.put(key, Constants.UNSUBSCRIBE_TIMEMILLIS);
         }
     }
 
