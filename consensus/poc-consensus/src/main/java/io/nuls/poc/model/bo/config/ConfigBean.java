@@ -49,13 +49,19 @@ public class ConfigBean implements Serializable {
      * */
     private long deposit_max;
     /**
-     * 委托金额最小值
+     * 节点出块委托金额最小值
      * */
     private long commission_min;
     /**
-     * 委托金额最大值
+     * 节点委托金额最大值
      * */
     private long commission_max;
+
+    //委托最小金额
+    private long entruster_deposit_min;
+
+    //节点最多能被多少人委托
+    private int deposit_number_max;
     /**
      * 种子节点
      **/
@@ -157,11 +163,27 @@ public class ConfigBean implements Serializable {
         this.commission_max = commission_max;
     }
 
+    public long getEntruster_deposit_min() {
+        return entruster_deposit_min;
+    }
+
+    public void setEntruster_deposit_min(long entruster_deposit_min) {
+        this.entruster_deposit_min = entruster_deposit_min;
+    }
+
     public String getSeedNodes() {
         return seedNodes;
     }
 
     public void setSeedNodes(String seedNodes) {
         this.seedNodes = seedNodes;
+    }
+
+    public int getDeposit_number_max() {
+        return deposit_number_max;
+    }
+
+    public void setDeposit_number_max(int deposit_number_max) {
+        this.deposit_number_max = deposit_number_max;
     }
 }

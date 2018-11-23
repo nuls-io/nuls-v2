@@ -71,7 +71,7 @@ public class Alias extends TransactionLogicData {
     }
 
 
-    @Override
+    //@Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(this.address);

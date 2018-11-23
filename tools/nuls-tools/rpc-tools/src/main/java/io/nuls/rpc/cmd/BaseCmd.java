@@ -26,7 +26,7 @@
 package io.nuls.rpc.cmd;
 
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.info.ServerRuntime;
 import io.nuls.rpc.model.ConfigItem;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;
@@ -43,7 +43,7 @@ public abstract class BaseCmd {
      */
     protected void setConfigItem(String key, Object value, boolean readOnly) {
         ConfigItem configItem = new ConfigItem(key, value, readOnly);
-        RuntimeInfo.configItemMap.put(key, configItem);
+        ServerRuntime.configItemMap.put(key, configItem);
     }
 
     protected Response success() {
@@ -61,13 +61,21 @@ public abstract class BaseCmd {
     protected Response failed(ErrorCode errorCode) {
         Response response = new Response();
         response.setResponseStatus(Constants.RESPONSE_STATUS_FAILED);
-        response.setResponseComment(errorCode.getCode() + ":" + errorCode.getMsg());
+        response.setResponseData(errorCode);
         return response;
     }
 
     protected Response failed(String errMsg) {
         Response response = new Response();
         response.setResponseStatus(Constants.RESPONSE_STATUS_FAILED);
+        response.setResponseComment(errMsg);
+        return response;
+    }
+
+    protected Response failed(ErrorCode errorCode, String errMsg) {
+        Response response = new Response();
+        response.setResponseStatus(Constants.RESPONSE_STATUS_FAILED);
+        response.setResponseData(errorCode);
         response.setResponseComment(errMsg);
         return response;
     }

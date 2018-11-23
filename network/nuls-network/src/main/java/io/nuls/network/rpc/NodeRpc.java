@@ -33,12 +33,15 @@ import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.vo.NodeVo;
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: nuls2.0
@@ -56,11 +59,15 @@ public class NodeRpc extends BaseCmd {
      * nw_addNodes
      * 增加节点
      */
-//    @CmdAnnotation(cmd = "nw_addNodes", version = 1.0, preCompatible = true)
-    public Response addNodes(List params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-        int isCross = Integer.valueOf(String.valueOf(params.get(1)));
-        String nodes=String.valueOf(params.get(2));
+    @CmdAnnotation(cmd = "nw_addNodes", version = 1.0,
+            description = "addNodes")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "isCross", parameterType = "int", parameterValidRange = "[0,1]", parameterValidRegExp = "")
+    @Parameter(parameterName = "nodes", parameterType = "String")
+    public Response addNodes(Map params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        int isCross = Integer.valueOf(String.valueOf(params.get("isCross")));
+        String nodes=String.valueOf(params.get("nodes"));
         Log.info("chainId:"+chainId+"==nodes:"+nodes);
         if( chainId < 0 || StringUtils.isBlank(nodes)){
             return failed(NetworkErrorCode.PARAMETER_ERROR);
@@ -79,18 +86,20 @@ public class NodeRpc extends BaseCmd {
             nodePos.add((NodePo) node.parseToPo());
         }
         StorageManager.getInstance().saveNodes(nodePos,chainId);
-        return success( );
+        return success();
     }
 
 
     /**
      * nw_delNodes
-     * 增加节点
+     * 删除节点
      */
-//    @CmdAnnotation(cmd = "nw_delNodes", version = 1.0, preCompatible = true)
-    public Response delNodes(List params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-        String nodes=String.valueOf(params.get(1));
+    @CmdAnnotation(cmd = "nw_delNodes", version = 1.0,description = "delNodes")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "nodes", parameterType = "String")
+    public Response delNodes(Map params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        String nodes=String.valueOf(params.get("nodes"));
         Log.info("chainId:"+chainId+"==nodes:"+nodes);
         if( chainId < 0 || StringUtils.isBlank(nodes)){
             return failed(NetworkErrorCode.PARAMETER_ERROR);
@@ -117,13 +126,18 @@ public class NodeRpc extends BaseCmd {
         StorageManager.getInstance().delGroupNodes(nodeIds,chainId);
         return success( );
     }
-//    @CmdAnnotation(cmd = "nw_getNodes", version = 1.0, preCompatible = true)
-    public Response nw_getNodes(List params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-        int state = Integer.valueOf(String.valueOf(params.get(1)));
-        int isCross = Integer.valueOf(String.valueOf(params.get(2)));
-        int startPage = Integer.valueOf(String.valueOf(params.get(3)));
-        int pageSize = Integer.valueOf(String.valueOf(params.get(4)));
+    @CmdAnnotation(cmd = "nw_getNodes", version = 1.0,description = "getNodes")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "state", parameterType = "int", parameterValidRange = "[0,2]", parameterValidRegExp = "")
+    @Parameter(parameterName = "isCross", parameterType = "int", parameterValidRange = "[0,1]", parameterValidRegExp = "")
+    @Parameter(parameterName = "startPage", parameterType = "int", parameterValidRange = "[0,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "pageSize", parameterType = "int", parameterValidRange = "[0,65535]", parameterValidRegExp = "")
+    public Response getNodes(Map params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        int state = Integer.valueOf(String.valueOf(params.get("state")));
+        int isCross = Integer.valueOf(String.valueOf(params.get("isCross")));
+        int startPage = Integer.valueOf(String.valueOf(params.get("startPage")));
+        int pageSize = Integer.valueOf(String.valueOf(params.get("pageSize")));
         Log.info("chainId:"+chainId+"==state:"+state+"==isCross:"+isCross+"==startPage："+startPage+"==pageSize:"+pageSize);
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
         List<Node> nodes=new ArrayList<>();
@@ -165,11 +179,19 @@ public class NodeRpc extends BaseCmd {
         }
         int total=nodes.size();
         List<NodeVo> pageList=new ArrayList<>();
-        int currIdx = (startPage > 1 ? (startPage -1) * pageSize : 0);
-        for (int i = 0; i < pageSize && i <(total - currIdx); i++){
-            Node node= nodes.get(currIdx + i);
-            NodeVo  nodeVo=buildNodeVo(node,nodeGroup.getMagicNumber(),chainId);
-            pageList.add(nodeVo);
+        if(0 == startPage && 0 == pageSize){
+            //get all datas
+            for(Node node : nodes){
+                pageList.add(buildNodeVo(node,nodeGroup.getMagicNumber(),chainId));
+            }
+        }else {
+            //get by page
+            int currIdx = (startPage > 1 ? (startPage - 1) * pageSize : 0);
+            for (int i = 0; i < pageSize && i < (total - currIdx); i++) {
+                Node node = nodes.get(currIdx + i);
+                NodeVo nodeVo = buildNodeVo(node, nodeGroup.getMagicNumber(), chainId);
+                pageList.add(nodeVo);
+            }
         }
         return success( pageList);
     }
@@ -178,12 +200,16 @@ public class NodeRpc extends BaseCmd {
      * nw_updateNodeInfo
      * 更新区块高度与hash
      */
-//    @CmdAnnotation(cmd = "nw_updateNodeInfo", version = 1.0, preCompatible = true)
-    public Response updateNodeInfo(List params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-        String nodeId = String.valueOf(params.get(1));
-        long blockHeight = Long.valueOf(String.valueOf(params.get(2)));
-        String blockHash=String.valueOf(params.get(3));
+    @CmdAnnotation(cmd = "nw_updateNodeInfo", version = 1.0,description = "updateNodeInfo")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "nodeId", parameterType = "String")
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    @Parameter(parameterName = "blockHash", parameterType = "String")
+    public Response updateNodeInfo(Map params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        String nodeId = String.valueOf(params.get("nodeId"));
+        long blockHeight = Long.valueOf(String.valueOf(params.get("blockHeight")));
+        String blockHash=String.valueOf(params.get("blockHash"));
         NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByChainId(chainId);
         if(null == nodeGroup){
             return failed(NetworkErrorCode.PARAMETER_ERROR);

@@ -3,9 +3,11 @@ package io.nuls.poc.storage.impl;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.storage.AgentStorageService;
-import io.nuls.poc.constant.ConsensusConstant;
+import io.nuls.poc.utils.manager.ConsensusManager;
+import io.nuls.poc.utils.util.PoConvertUtil;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 
@@ -32,7 +34,13 @@ public class AgentStorageServiceImpl implements AgentStorageService{
         try {
             byte[] key = agentPo.getHash().serialize();
             byte[] value = agentPo.serialize();
-            return  RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID,key,value);
+            boolean dbSuccess = RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID,key,value);
+            if(!dbSuccess){
+                return false;
+            }
+            //更新缓存
+            ConsensusManager.getInstance().addAgent(chainID,PoConvertUtil.poToAgent(agentPo));
+            return true;
         }catch (Exception e){
             Log.error(e);
             return  false;
@@ -75,7 +83,13 @@ public class AgentStorageServiceImpl implements AgentStorageService{
         }
         try {
             byte[] key = hash.serialize();
-            return  RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID,key);
+            boolean dbSuccess = RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID,key);
+            if(!dbSuccess){
+                return false;
+            }
+            //更新缓存
+            ConsensusManager.getInstance().removeAgent(chainID,hash);
+            return true;
         }catch (Exception e){
             Log.error(e);
             return  false;

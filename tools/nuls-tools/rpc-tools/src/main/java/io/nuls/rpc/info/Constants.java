@@ -27,6 +27,8 @@
 
 package io.nuls.rpc.info;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @author tangyi
  * @date 2018/10/19
@@ -94,4 +96,21 @@ public class Constants {
     public static final String SUCCESS_CODE = "0";
     public static final String FAILED_CODE = "-1";
 
+    /**
+     * cmd sequence
+     */
+    public static final AtomicInteger SEQUENCE = new AtomicInteger(0);
+
+
+    /**
+     * get the next call counter(unique identifier)
+     */
+    public static int nextSequence() {
+        return SEQUENCE.incrementAndGet();
+    }
+
+    /**
+     * Kernel URL
+     */
+    public static String kernelUrl = "";
 }
