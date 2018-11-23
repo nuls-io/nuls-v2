@@ -1,57 +1,23 @@
-/*
- *
- *  * MIT License
- *  *
- *  * Copyright (c) 2017-2018 nuls.io
- *  *
- *  * Permission is hereby granted, free of charge, to any person obtaining a copy
- *  * of this software and associated documentation files (the "Software"), to deal
- *  * in the Software without restriction, including without limitation the rights
- *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  * copies of the Software, and to permit persons to whom the Software is
- *  * furnished to do so, subject to the following conditions:
- *  *
- *  * The above copyright notice and this permission notice shall be included in all
- *  * copies or substantial portions of the Software.
- *  *
- *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  * SOFTWARE.
- *  *
- *
- */
-
 package io.nuls.rpc.info;
 
-import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.model.*;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.ScanUtil;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
-import org.java_websocket.WebSocket;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author tangyi
- * @date 2018/10/13
+ * @date 2018/11/23
  * @description
  */
-public class RuntimeInfo {
-
+public class ServerRuntime {
 
     /**
      * local module(io.nuls.rpc.ModuleInfo) information
@@ -62,26 +28,10 @@ public class RuntimeInfo {
     public static Map<String, Integer> cmdInvokeHeight = new HashMap<>();
 
     /**
-     * remote module information
-     * key: module name/code
-     * value: moduleInfo(io.nuls.rpc.ModuleInfo)
-     */
-    public static ConcurrentMap<String, ModuleInfo> remoteModuleMap = new ConcurrentHashMap<>();
-
-    /**
      * local Config item information
      */
     public static Map<String, ConfigItem> configItemMap = new ConcurrentHashMap<>();
 
-    /**
-     * cmd sequence
-     */
-    public static AtomicInteger sequence = new AtomicInteger(0);
-
-    /**
-     * Kernel URL
-     */
-    public static String kernelUrl;
 
 
     /**
@@ -94,61 +44,7 @@ public class RuntimeInfo {
     /**
      * The thread pool object that handles the request
      */
-    public static ExecutorService fixedThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handRequest"));
-    //    public static ExecutorService fixedThreadPool = Executors.newFixedThreadPool(5);
-
-    /**
-     * The response of the cmd invoked through RPC
-     */
-    public static final List<Map> RESPONSE_QUEUE = Collections.synchronizedList(new ArrayList<>());
-
-    /**
-     * WsClient object that communicates with other modules
-     * key: uri(ex: ws://127.0.0.1:8887)
-     * value: WsClient
-     */
-    private static ConcurrentMap<String, WsClient> wsClientMap = new ConcurrentHashMap<>();
-
-    /**
-     * Get the WsClient object through the url
-     */
-    public static WsClient getWsClient(String uri) throws Exception {
-
-        if (!wsClientMap.containsKey(uri)) {
-            WsClient wsClient = new WsClient(uri);
-            wsClient.connect();
-            Thread.sleep(1000);
-            if (wsClient.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                wsClientMap.put(uri, wsClient);
-            } else {
-                Log.info("Failed to connect " + uri);
-            }
-        }
-        return wsClientMap.get(uri);
-    }
-
-    /**
-     * get the next call counter(unique identifier)
-     */
-    public static int nextSequence() {
-        return sequence.incrementAndGet();
-    }
-
-
-    /**
-     * Get the url of the module that provides the cmd through the CmdRequest object
-     * The resulting url may not be unique, returning all found
-     */
-    public static String getRemoteUri(String cmd) {
-        for (ModuleInfo moduleInfo : RuntimeInfo.remoteModuleMap.values()) {
-            for (CmdDetail cmdDetail : moduleInfo.getRegisterApi().getApiMethods()) {
-                if (cmdDetail.getMethodName().equals(cmd)) {
-                    return "ws://" + moduleInfo.getRegisterApi().getAddress() + ":" + moduleInfo.getRegisterApi().getPort();
-                }
-            }
-        }
-        return null;
-    }
+    public static ExecutorService fixedThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
 
     /**
      * Get local command
@@ -159,10 +55,10 @@ public class RuntimeInfo {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
-        RuntimeInfo.local.getRegisterApi().getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        local.getRegisterApi().getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getApiMethods()) {
+        for (CmdDetail cmdDetail : local.getRegisterApi().getApiMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
@@ -188,10 +84,10 @@ public class RuntimeInfo {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd) {
 
-        RuntimeInfo.local.getRegisterApi().getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        local.getRegisterApi().getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getApiMethods()) {
+        for (CmdDetail cmdDetail : local.getRegisterApi().getApiMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
@@ -226,7 +122,7 @@ public class RuntimeInfo {
                 }
 
                 if (!isRegister(cmdDetail)) {
-                    RuntimeInfo.local.getRegisterApi().getApiMethods().add(cmdDetail);
+                    local.getRegisterApi().getApiMethods().add(cmdDetail);
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
@@ -278,7 +174,7 @@ public class RuntimeInfo {
      */
     private static boolean isRegister(CmdDetail sourceCmdDetail) {
         boolean exist = false;
-        for (CmdDetail cmdDetail : RuntimeInfo.local.getRegisterApi().getApiMethods()) {
+        for (CmdDetail cmdDetail : local.getRegisterApi().getApiMethods()) {
             if (cmdDetail.getMethodName().equals(sourceCmdDetail.getMethodName()) && cmdDetail.getVersion() == sourceCmdDetail.getVersion()) {
                 exist = true;
                 break;
@@ -288,13 +184,15 @@ public class RuntimeInfo {
         return exist;
     }
 
-    public static Map buildCmdResponseMap(int id, String msg) throws IOException {
-        CmdResponse cmdResponse = new CmdResponse();
-        cmdResponse.setId(id);
-        cmdResponse.setCode(Constants.FAILED_CODE);
-        cmdResponse.setMsg(msg);
-        return JSONUtils.json2map(JSONUtils.obj2json(cmdResponse));
+    /**
+     * Constructing a new Response object
+     */
+    public static Response newResponse(int requestId, int status, String comment) {
+        Response response = new Response();
+        response.setRequestId(requestId);
+        response.setResponseStatus(status);
+        response.setResponseComment(comment);
+        response.setResponseMaxSize(0);
+        return response;
     }
-
-
 }

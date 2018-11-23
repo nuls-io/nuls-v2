@@ -2,14 +2,14 @@ package io.nuls.rpc.server;
 
 import io.nuls.rpc.handler.CmdHandler;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.info.ServerRuntime;
+import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author tangyi
@@ -31,17 +31,17 @@ public class WsProcessor implements Runnable {
     @Override
     public void run() {
 
-        while (RuntimeInfo.REQUEST_QUEUE.size() > 0) {
+        while (ServerRuntime.REQUEST_QUEUE.size() > 0) {
 
             Object[] objects = null;
             /*
             Get the first item of the queue.
             First in, first out
              */
-            synchronized (RuntimeInfo.REQUEST_QUEUE) {
-                if (RuntimeInfo.REQUEST_QUEUE.size() > 0) {
-                    objects = RuntimeInfo.REQUEST_QUEUE.get(0);
-                    RuntimeInfo.REQUEST_QUEUE.remove(0);
+            synchronized (ServerRuntime.REQUEST_QUEUE) {
+                if (ServerRuntime.REQUEST_QUEUE.size() > 0) {
+                    objects = ServerRuntime.REQUEST_QUEUE.get(0);
+                    ServerRuntime.REQUEST_QUEUE.remove(0);
                 }
             }
 
@@ -53,29 +53,28 @@ public class WsProcessor implements Runnable {
                 WebSocket webSocket = (WebSocket) objects[0];
                 String msg = (String) objects[1];
 
-                Map<String, Object> messageMap;
+                Message message;
                 try {
-                    messageMap = JSONUtils.json2map(msg);
+                    message = JSONUtils.json2pojo(msg,Message.class);
                 } catch (IOException e) {
                     Log.error(e);
-                    Log.error("Message【" + msg + "】 doesn't match the rule, Discard!");
                     continue;
                 }
 
-                MessageType messageType = MessageType.valueOf(messageMap.get("messageType").toString());
+                MessageType messageType = MessageType.valueOf(message.getMessageType());
                 switch (messageType) {
                     case NegotiateConnection:
                         CmdHandler.negotiateConnectionResponse(webSocket);
                         break;
                     case Request:
-                        if (CmdHandler.response(webSocket, messageMap)) {
-                            synchronized (RuntimeInfo.REQUEST_QUEUE) {
-                                RuntimeInfo.REQUEST_QUEUE.add(objects);
+                        if (CmdHandler.response(webSocket, message)) {
+                            synchronized (ServerRuntime.REQUEST_QUEUE) {
+                                ServerRuntime.REQUEST_QUEUE.add(objects);
                             }
                         }
                         break;
                     case Unsubscribe:
-                        CmdHandler.unsubscribe(webSocket, messageMap);
+                        CmdHandler.unsubscribe(webSocket, message);
                         break;
                     default:
                         break;
