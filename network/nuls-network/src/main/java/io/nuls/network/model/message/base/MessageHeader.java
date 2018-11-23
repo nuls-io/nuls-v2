@@ -83,6 +83,13 @@ public class MessageHeader extends BaseNulsData {
         System.arraycopy(commandBytes, 0, this.command, 0, commandBytes.length);
         this.magicNumber = magicNumber;
     }
+    public MessageHeader(String command, long magicNumber,long checksum,long payloadLength) {
+        byte []commandBytes= command.getBytes();
+        System.arraycopy(commandBytes, 0, this.command, 0, commandBytes.length);
+        this.magicNumber = magicNumber;
+        this.payloadLength = payloadLength;
+        this.checksum = checksum;
+    }
 
     public MessageHeader(String command) {
         byte []commandBytes= command.getBytes();

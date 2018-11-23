@@ -24,19 +24,7 @@
  */
 package io.nuls.network;
 
-import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.manager.LocalInfoManager;
-import io.nuls.network.model.dto.IpAddress;
-import io.nuls.network.model.message.VersionMessage;
-import io.nuls.network.model.message.body.VersionMessageBody;
-import io.nuls.rpc.cmd.CmdDispatcher;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.log.Log;
 import org.junit.Test;
-
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /**
  * @program: nuls2.0
@@ -53,22 +41,19 @@ public class RpcTest {
     @Test
     public void broadcast(){
         try{
-            VersionMessageBody versionMessageBody=new VersionMessageBody();
-            InetAddress inetAddrYou=InetAddress.getByName("192.168.2.3");
-            IpAddress addrYou=new IpAddress(inetAddrYou,8282);
-            versionMessageBody.setAddrYou(addrYou);
-            versionMessageBody.setPortYouCross(8686);
-            IpAddress addrMe=LocalInfoManager.getInstance().getExternalAddress();
-            versionMessageBody.setAddrMe(addrMe);
-            versionMessageBody.setPortMeCross(NetworkParam.getInstance().getCrossPort());
-            VersionMessage versionMessage=new VersionMessage(5000,NetworkConstant.CMD_MESSAGE_VERSION,versionMessageBody);
-            CmdDispatcher.syncKernel(TestConstant.KernelWSServer);
-            String response = CmdDispatcher.call("nw_broadcast", new Object[]{100,"10.13.25.36:5003,20.30.25.65:8009",HexUtil.byteToHex(versionMessage.serialize())},1.0 );
-            System.out.println(response);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            Log.error(e);
-        } catch (Exception e) {
+//            VersionMessageBody versionMessageBody=new VersionMessageBody();
+//            InetAddress inetAddrYou=InetAddress.getByName("192.168.2.3");
+//            IpAddress addrYou=new IpAddress(inetAddrYou,8282);
+//            versionMessageBody.setAddrYou(addrYou);
+//            versionMessageBody.setPortYouCross(8686);
+//            IpAddress addrMe=LocalInfoManager.getInstance().getExternalAddress();
+//            versionMessageBody.setAddrMe(addrMe);
+//            versionMessageBody.setPortMeCross(NetworkParam.getInstance().getCrossPort());
+//            VersionMessage versionMessage=new VersionMessage(5000,NetworkConstant.CMD_MESSAGE_VERSION,versionMessageBody);
+//            CmdDispatcher.syncKernel(TestConstant.KernelWSServer);
+//            String response = CmdDispatcher.call("nw_broadcast", new Object[]{100,"10.13.25.36:5003,20.30.25.65:8009",HexUtil.byteToHex(versionMessage.serialize())},1.0 );
+//            System.out.println(response);
+        }  catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -76,9 +61,9 @@ public class RpcTest {
     @Test
     public void  nwGetNodes(){
         try {
-            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
-            String response = CmdDispatcher.call("nw_getNodes", new Object[]{9861, 1, 0, 0, 0}, 1.0);
-            System.out.println(response);
+//            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+//            String response = CmdDispatcher.call("nw_getNodes", new Object[]{9861, 1, 0, 0, 0}, 1.0);
+//            System.out.println(response);
         } catch (Exception e) {
             e.printStackTrace();
         }

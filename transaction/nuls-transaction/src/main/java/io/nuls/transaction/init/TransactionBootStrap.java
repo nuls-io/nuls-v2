@@ -101,8 +101,8 @@ public class TransactionBootStrap {
     public static void initServer(){
         try {
             WsServer s = new WsServer(TransactionConstant.TX_CMD_PORT);
-            s.init(TransactionConstant.TX_MODULE_NAME, null, TransactionConstant.TX_CMD_PATH);
-            s.startAndSyncKernel(TransactionConstant.KERNEL_URL);
+           /* s.init(TransactionConstant.TX_MODULE_NAME, null, TransactionConstant.TX_CMD_PATH);
+            s.startAndSyncKernel(TransactionConstant.KERNEL_URL);*/
         }catch (Exception e){
             Log.error("Transaction startup webSocket server error!");
             e.printStackTrace();

@@ -33,7 +33,7 @@ import io.nuls.tools.exception.NulsException;
 /**
  * @author: qinyifeng
  */
-public class AliasTransaction extends Transaction<Alias> {
+public class AliasTransaction extends Transaction {
 
 //    public AliasTransaction() {
 //        super(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
@@ -41,17 +41,6 @@ public class AliasTransaction extends Transaction<Alias> {
 
     protected AliasTransaction(int type) {
         super(type);
-    }
-
-    @Override
-    public String getInfo(byte[] address) {
-        return null;
-    }
-
-    @Override
-    protected Alias parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-
-        return null;
     }
 
 }

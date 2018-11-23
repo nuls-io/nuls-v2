@@ -10,13 +10,16 @@ public class TxTable {
 
     private String indexName;
 
+    private String uniqueName;
+
     public TxTable(){
 
     }
 
-    public TxTable(String tableName, String indexName) {
+    public TxTable(String tableName, String indexName, String uniqueName) {
         this.tableName = tableName;
         this.indexName = indexName;
+        this.uniqueName = uniqueName;
     }
 
     public String getTableName() {
@@ -33,5 +36,13 @@ public class TxTable {
 
     public void setIndexName(String indexName) {
         this.indexName = indexName;
+    }
+
+    public String getUniqueName() {
+        return uniqueName;
+    }
+
+    public void setUniqueName(String uniqueName) {
+        this.uniqueName = uniqueName;
     }
 }

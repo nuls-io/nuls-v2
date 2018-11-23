@@ -1,24 +1,15 @@
 package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.model.bo.Account;
-import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
-import io.nuls.account.util.AccountTool;
-import io.nuls.base.data.Page;
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.CmdResponse;
-import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -27,7 +18,6 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -43,7 +33,7 @@ public class AccountCmdTest {
 
     protected short chainId = 12345;
     protected String password = "a12345678";
-    protected String passwordNew = "c12345678";
+    protected String newPassword = "c12345678";
     protected double version2 = 1.0;
     protected String version = "1.0";
 
@@ -75,14 +65,13 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("count", count);
             params.put("password", password);
-            String response = CmdDispatcher.request("ac_createAccount", params);
-//            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-//            if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getCode()) || (count <= 0 || count > AccountTool.CREATE_MAX_SIZE)) {
-//                return null;
-//            }
-//            accountList = (List<String>) JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResult())).get("list");
-            Message cmdResp = JSONUtils.json2pojo(response, Message.class);
-            accountList = (List<String>)JSONUtils.json2pojo(JSONUtils.obj2json(cmdResp.getMessageData()), Response.class).getResponseData();
+            int messageId = CmdDispatcher.request("ac_createAccount", params);
+            String response = CmdDispatcher.getResponse(messageId);
+            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            if (AccountConstant.SUCCESS_CODE != cmdResp.getResponseStatus()) {
+                return null;
+            }
+            accountList = (List<String>) cmdResp.getResponseData();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,9 +83,10 @@ public class AccountCmdTest {
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
         params.put("address", address);
-        String response = CmdDispatcher.request("ac_getAccountByAddress", params);
-        CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-        SimpleAccountDto accountDto = JSONUtils.json2pojo(JSONUtils.obj2json(cmdResp.getResult()), SimpleAccountDto.class);
+        int messageId = CmdDispatcher.request("ac_getAccountByAddress", params);
+        String response = CmdDispatcher.getResponse(messageId);
+        Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+        SimpleAccountDto accountDto = JSONUtils.json2pojo(JSONUtils.obj2json(cmdResp.getResponseData()), SimpleAccountDto.class);
         return accountDto;
     }
 
@@ -116,9 +106,10 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", address);
             params.put("password", password);
-            String response = CmdDispatcher.request("ac_getPriKeyByAddress", params);
-            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-            HashMap result = (HashMap) cmdResp.getResult();
+            int messageId = CmdDispatcher.request("ac_getPriKeyByAddress", params);
+            String response = CmdDispatcher.getResponse(messageId);
+            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            HashMap result = (HashMap) cmdResp.getResponseData();
             priKey = (String) result.get("priKey");
         } catch (Exception e) {
             e.printStackTrace();
@@ -157,9 +148,10 @@ public class AccountCmdTest {
         params.put("chainId", chainId);
         params.put("count", count);
         params.put("password", password);
-        String response = CmdDispatcher.request("ac_createOfflineAccount", params);
-        Message cmdResp = JSONUtils.json2pojo(response, Message.class);
-        List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(JSONUtils.json2pojo(JSONUtils.obj2json(cmdResp.getMessageData()), Response.class).getResponseData()), AccountOfflineDto.class);
+        int messageId = CmdDispatcher.request("ac_createOfflineAccount", params);
+        String response = CmdDispatcher.getResponse(messageId);
+        Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+        List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(cmdResp.getResponseData()), AccountOfflineDto.class);
         //List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResult())).get("list")), AccountOfflineDto.class);
         assertEquals(accountList.size(), count);
         for (AccountOfflineDto account : accountList) {
@@ -167,29 +159,37 @@ public class AccountCmdTest {
         }
     }
 
-//    @Test
-//    public void removeAccountTest() throws Exception {
-//        List<String> accountList = createAccount(chainId, 2, password);
-//
-//        SimpleAccountDto account = getAccountByAddress(chainId, accountList.get(0));
-//        assertNotNull(account);
-//
+    @Test
+    public void removeAccountTest() throws Exception {
+        List<String> accountList = createAccount(chainId, 2, password);
+
+        SimpleAccountDto account = getAccountByAddress(chainId, accountList.get(0));
+        assertNotNull(account);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("chainId", chainId);
+        params.put("address", accountList.get(0));
+        params.put("password", password);
+        int messageId = CmdDispatcher.request("ac_removeAccount", params);
+        String response = CmdDispatcher.getResponse(messageId);
+        Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+        assertTrue(AccountConstant.SUCCESS_CODE == cmdResp.getResponseStatus());
+
 //        String response = CmdDispatcher.call("ac_removeAccount", new Object[]{chainId, accountList.get(0), password}, version);
 //        CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
 //        assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getCode());
-//
-//        account = getAccountByAddress(chainId, accountList.get(0));
-//        assertNull(account);
-//    }
-//
-//    @Test
-//    public void getAccountByAddressTest() throws Exception {
-//        List<String> accountList = createAccount(chainId, 1, password);
-//        String response = CmdDispatcher.call("ac_getAccountByAddress", new Object[]{chainId, accountList.get(0)}, version);
-//        CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-//        SimpleAccountDto accountDto = JSONUtils.json2pojo(JSONUtils.obj2json(cmdResp.getResult()), SimpleAccountDto.class);
-//        assertEquals(accountList.get(0), accountDto.getAddress());
-//    }
+
+        account = getAccountByAddress(chainId, accountList.get(0));
+        assertNull(account);
+    }
+
+    @Test
+    public void getAccountByAddressTest() throws Exception {
+        List<String> accountList = createAccount(chainId, 1, password);
+        SimpleAccountDto accountDto = getAccountByAddress(chainId, accountList.get(0));
+        assertEquals(accountList.get(0), accountDto.getAddress());
+    }
 //
 //    @Test
 //    public void getAccountListTest() throws Exception {
@@ -449,44 +449,54 @@ public class AccountCmdTest {
 //            e.printStackTrace();
 //        }
 //    }
-//
-//    @Test
-//    public void updatePasswordTest() {
-//        try {
-//            //创建未加密账户 create unencrypted account
-//            List<String> accountList = createAccount(chainId, 1, null);
-//            String address = accountList.get(0);
-//
-//            //为未设置密码的账户修改密码 change password for account
-//            String response = CmdDispatcher.call("ac_updatePassword", new Object[]{chainId, address, password, passwordNew}, version);
-//            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-//            //未设置密码不能修改密码，必须先设置密码再修改 No password can be changed, password must be set first, then password should be changed.
-//            assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getCode());
-//
-//            //为账户设置密码 set password for account
-//            response = CmdDispatcher.call("ac_setPassword", new Object[]{chainId, address, password}, version);
-//            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-//            HashMap result = (HashMap) cmdResp.getResult();
-//            Boolean value = (Boolean) result.get("value");
-//            assertTrue(value);
-//
-//            //为账户修改密码 change password for account
-//            response = CmdDispatcher.call("ac_updatePassword", new Object[]{chainId, address, password, passwordNew}, version);
-//            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-//            result = (HashMap) cmdResp.getResult();
-//            value = (Boolean) result.get("value");
-//            assertTrue(value);
-//
-//            //使用错误旧密码为账户修改密码 using old password to change password for account
-//            response = CmdDispatcher.call("ac_updatePassword", new Object[]{chainId, address, "errorpwd123", passwordNew}, version);
-//            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-//            assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getCode());
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
+
+    @Test
+    public void updatePasswordTest() {
+        try {
+            //创建未加密账户 create unencrypted account
+            List<String> accountList = createAccount(chainId, 1, null);
+            String address = accountList.get(0);
+
+            //为未设置密码的账户修改密码 change password for account
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("address", address);
+            params.put("password", password);
+            params.put("newPassword", newPassword);
+            int messageId = CmdDispatcher.request("ac_updatePassword", params);
+            String response = CmdDispatcher.getResponse(messageId);
+            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            //未设置密码不能修改密码，必须先设置密码再修改 No password can be changed, password must be set first, then password should be changed.
+            assertTrue(AccountConstant.SUCCESS_CODE != cmdResp.getResponseStatus());
+
+            //为账户设置密码 set password for account
+            messageId = CmdDispatcher.request("ac_setPassword", params);
+            response = CmdDispatcher.getResponse(messageId);
+            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            Map result = (HashMap) cmdResp.getResponseData();
+            Boolean value = (Boolean) result.get("value");
+            assertTrue(value);
+
+            //为账户修改密码 change password for account
+            messageId = CmdDispatcher.request("ac_updatePassword", params);
+            response = CmdDispatcher.getResponse(messageId);
+            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            result = (HashMap) cmdResp.getResponseData();
+            value = (Boolean) result.get("value");
+            assertTrue(value);
+
+            //使用错误旧密码为账户修改密码 using old password to change password for account
+            params.put("password", "errorpwd123");
+            messageId = CmdDispatcher.request("ac_updatePassword", params);
+            response = CmdDispatcher.getResponse(messageId);
+            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            assertTrue(AccountConstant.SUCCESS_CODE != cmdResp.getResponseStatus());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 //    @Test
 //    public void setOfflineAccountPasswordTest() {
 //        try {
@@ -505,7 +515,7 @@ public class AccountCmdTest {
 //            assertNotNull(encryptedPriKey);
 //
 //            //为离线账户重复设置密码 repeat password for account
-//            response = CmdDispatcher.call("ac_setOfflineAccountPassword", new Object[]{chainId, address, encryptedPriKey, passwordNew}, version);
+//            response = CmdDispatcher.call("ac_setOfflineAccountPassword", new Object[]{chainId, address, encryptedPriKey, newPassword}, version);
 //            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
 //            result = (HashMap) cmdResp.getResult();
 //            String encryptedPriKeyNew = (String) result.get("encryptedPriKey");
@@ -540,22 +550,22 @@ public class AccountCmdTest {
 //            assertNotNull(encryptedPriKey);
 //
 //            //测试错误的地址 testing the wrong address
-//            response = CmdDispatcher.call("ac_updateOfflineAccountPassword", new Object[]{chainId, address, encryptedPriKey2, password, passwordNew}, version);
+//            response = CmdDispatcher.call("ac_updateOfflineAccountPassword", new Object[]{chainId, address, encryptedPriKey2, password, newPassword}, version);
 //            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
 //            assertEquals(AccountErrorCode.ADDRESS_ERROR.getCode(), cmdResp.getCode());
 //
 //            //测试错误的私钥 testing the wrong private key
-//            response = CmdDispatcher.call("ac_updateOfflineAccountPassword", new Object[]{chainId, address, "86" + encryptedPriKey, password, passwordNew}, version);
+//            response = CmdDispatcher.call("ac_updateOfflineAccountPassword", new Object[]{chainId, address, "86" + encryptedPriKey, password, newPassword}, version);
 //            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
 //            assertEquals(AccountErrorCode.PASSWORD_IS_WRONG.getCode(), cmdResp.getCode());//ADDRESS_ERROR
 //
 //            //测试错误的密码 testing the wrong password
-//            response = CmdDispatcher.call("ac_updateOfflineAccountPassword", new Object[]{chainId, address, encryptedPriKey, password + "errorpwd123", passwordNew}, version);
+//            response = CmdDispatcher.call("ac_updateOfflineAccountPassword", new Object[]{chainId, address, encryptedPriKey, password + "errorpwd123", newPassword}, version);
 //            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
 //            assertEquals(AccountErrorCode.PASSWORD_IS_WRONG.getCode(), cmdResp.getCode());
 //
 //            //为离线账户修改密码 modify password for offline account
-//            response = CmdDispatcher.call("ac_updateOfflineAccountPassword", new Object[]{chainId, address, encryptedPriKey, password, passwordNew}, version);
+//            response = CmdDispatcher.call("ac_updateOfflineAccountPassword", new Object[]{chainId, address, encryptedPriKey, password, newPassword}, version);
 //            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
 //            result = (HashMap) cmdResp.getResult();
 //            String encryptedPriKeyNew = (String) result.get("encryptedPriKey");
@@ -612,38 +622,27 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", address);
             params.put("password", password);
-            String response = CmdDispatcher.request("ac_validationPassword", params);
-            Message cmdResp = JSONUtils.json2pojo(response, Message.class);
-            Boolean value = (Boolean)JSONUtils.json2pojo(JSONUtils.obj2json(cmdResp.getMessageData()), Response.class).getResponseData();
+            int messageId = CmdDispatcher.request("ac_validationPassword", params);
+            String response = CmdDispatcher.getResponse(messageId);
+            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            HashMap result = (HashMap) cmdResp.getResponseData();
+            Boolean value = (Boolean) result.get("value");
             assertFalse(value);
 
-//            CmdResponse cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-//            HashMap result = (HashMap) cmdResp.getResult();
-//            Boolean value = (Boolean) result.get("value");
-//            assertFalse(value);
-
             //为账户设置密码 set password for account
-            response = CmdDispatcher.request("ac_setPassword", params);
-            cmdResp = JSONUtils.json2pojo(response, Message.class);
-            value = (Boolean)JSONUtils.json2pojo(JSONUtils.obj2json(cmdResp.getMessageData()), Response.class).getResponseData();
+            messageId = CmdDispatcher.request("ac_setPassword", params);
+            response = CmdDispatcher.getResponse(messageId);
+            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            result = (HashMap) cmdResp.getResponseData();
+            value = (Boolean) result.get("value");
             assertTrue(value);
-
-//            response = CmdDispatcher.call("ac_setPassword", new Object[]{chainId, address, password}, version);
-//            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-//            result = (HashMap) cmdResp.getResult();
-//            value = (Boolean) result.get("value");
-//            assertTrue(value);
 
             //验证账户是否正确 verify that the account password is correct
-            response = CmdDispatcher.request("ac_validationPassword", params);
-            cmdResp = JSONUtils.json2pojo(response, Message.class);
-            value = (Boolean)JSONUtils.json2pojo(JSONUtils.obj2json(cmdResp.getMessageData()), Response.class).getResponseData();
+            messageId = CmdDispatcher.request("ac_validationPassword", params);
+            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            result = (HashMap) cmdResp.getResponseData();
+            value = (Boolean) result.get("value");
             assertTrue(value);
-//            response = CmdDispatcher.call("ac_validationPassword", new Object[]{chainId, address, password}, version);
-//            cmdResp = JSONUtils.json2pojo(response, CmdResponse.class);
-//            result = (HashMap) cmdResp.getResult();
-//            value = (Boolean) result.get("value");
-//            assertTrue(value);
         } catch (Exception e) {
             e.printStackTrace();
         }

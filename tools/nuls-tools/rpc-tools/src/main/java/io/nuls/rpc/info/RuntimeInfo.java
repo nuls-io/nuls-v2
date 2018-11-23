@@ -27,17 +27,12 @@
 
 package io.nuls.rpc.info;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.handler.WebSocketHandler;
 import io.nuls.rpc.model.*;
-import io.nuls.rpc.model.message.*;
 import io.nuls.tools.core.ioc.ScanUtil;
-import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.TimeService;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 import org.java_websocket.WebSocket;
 
@@ -59,9 +54,12 @@ public class RuntimeInfo {
 
 
     /**
-     * local module(io.nuls.rpc.Module) information
+     * local module(io.nuls.rpc.ModuleInfo) information
      */
     public static ModuleInfo local = new ModuleInfo();
+
+    public static Map<String, Long> cmdInvokeTime = new HashMap<>();
+    public static Map<String, Integer> cmdInvokeHeight = new HashMap<>();
 
     /**
      * remote module information
@@ -296,90 +294,6 @@ public class RuntimeInfo {
         cmdResponse.setCode(Constants.FAILED_CODE);
         cmdResponse.setMsg(msg);
         return JSONUtils.json2map(JSONUtils.obj2json(cmdResponse));
-    }
-
-    public static Message buildMessage(int messageId, MessageType messageType) {
-        Message message = new Message();
-        message.setMessageId(messageId);
-        message.setMessageType(messageType.name());
-        message.setTimestamp(TimeService.currentTimeMillis());
-        message.setTimezone(DateUtils.getTimeZone());
-        return message;
-    }
-
-    public static NegotiateConnection defaultNegotiateConnection() {
-        NegotiateConnection negotiateConnection = new NegotiateConnection();
-        negotiateConnection.setCompressionAlgorithm("zlib");
-        negotiateConnection.setCompressionRate(0);
-        return negotiateConnection;
-    }
-
-    public static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
-        NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
-        negotiateConnectionResponse.setNegotiationStatus(0);
-        negotiateConnectionResponse.setNegotiationComment("Incompatible protocol version");
-
-        Message rspMsg = RuntimeInfo.buildMessage(RuntimeInfo.nextSequence(), MessageType.NegotiateConnectionResponse);
-        rspMsg.setMessageData(negotiateConnectionResponse);
-        webSocket.send(JSONUtils.obj2json(rspMsg));
-    }
-
-    public static void response(WebSocket webSocket, Map<String, Object> messageMap) throws Exception {
-        int messageId = (Integer) messageMap.get("messageId");
-        Map messageData = (Map) messageMap.get("messageData");
-        Map requestMethods = (Map) messageData.get("requestMethods");
-        for (Object method : requestMethods.keySet()) {
-            Response response = defaultResponse(messageId);
-
-            Map params = (Map) requestMethods.get(method);
-
-            CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
-                    ? RuntimeInfo.getLocalInvokeCmd((String) method)
-                    : RuntimeInfo.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
-            Message message;
-            if (cmdDetail == null) {
-                response.setResponseProcessingTime(TimeService.currentTimeMillis() - response.getResponseProcessingTime());
-                response.setResponseData("No such version: " + method + "," + params.get(Constants.VERSION_KEY_STR));
-                message = RuntimeInfo.buildMessage(RuntimeInfo.nextSequence(), MessageType.Response);
-                message.setMessageData(response);
-                webSocket.send(JSONUtils.obj2json(message));
-                continue;
-            }
-
-            Object responseData = WebSocketHandler.invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
-
-            response.setResponseProcessingTime(TimeService.currentTimeMillis() - response.getResponseProcessingTime());
-            response.setResponseData(responseData);
-
-            message = RuntimeInfo.buildMessage(RuntimeInfo.nextSequence(), MessageType.Response);
-            message.setMessageData(response);
-            webSocket.send(JSONUtils.obj2json(message));
-        }
-    }
-
-    public static void unsubscribe(){
-
-    }
-
-    public static Request defaultRequest() {
-        Request request = new Request();
-        request.setRequestAck(0);
-        request.setSubscriptionEventCounter(0);
-        request.setSubscriptionPeriod(0);
-        request.setSubscriptionRange("");
-        request.setResponseMaxSize(0);
-        request.setRequestMethods(new HashMap<>(16));
-        return request;
-    }
-
-    private static Response defaultResponse(int requestId) {
-        Response response = new Response();
-        response.setRequestId(requestId);
-        response.setResponseProcessingTime(TimeService.currentTimeMillis());
-        response.setResponseStatus(1);
-        response.setResponseComment("Congratulations! Processing completed！");
-        response.setResponseMaxSize(0);
-        return response;
     }
 
 

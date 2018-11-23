@@ -25,6 +25,7 @@
 
 package io.nuls.account.service.impl;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
@@ -50,10 +51,12 @@ import io.nuls.tools.exception.CryptoException;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -118,8 +121,12 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
                     //backup account to keystore
                     keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
                     //TODO
+                    //build event data
+                    HashMap<String, Object> eventData = new HashMap<>();
+                    eventData.put("address", account.getAddress().getBase58());
+                    eventData.put("isEncrypted", account.isEncrypted());
                     //Sending account creation events
-                    EventCmdCall.sendEvent("evt_ac_createAccount","{address,isEncrypted}");
+                    EventCmdCall.sendEvent(AccountConstant.EVENT_TOPIC_CREATE_ACCOUNT, JSONUtils.obj2json(eventData));
                 }
             }
         } catch (Exception e) {
@@ -282,10 +289,18 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
             //backup account to keystore
             keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), newPassword);
+            //build event data
+            HashMap<String, Object> eventData = new HashMap<>();
+            eventData.put("address", account.getAddress().getBase58());
+            //Sending update account password events
+            EventCmdCall.sendEvent(AccountConstant.EVENT_TOPIC_UPDATE_PASSWORD, JSONUtils.obj2json(eventData));
             return result;
         } catch (NulsException e) {
             Log.error(e);
             throw new NulsRuntimeException(e.getErrorCode());
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
     }
 
@@ -398,13 +413,22 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
                 throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         }
-        //Delete the account from the database
-        boolean result = accountStorageService.removeAccount(account.getAddress());
-        //Delete the account from the cache
-        accountCacheService.localAccountMaps.remove(account.getAddress().getBase58());
+        boolean result;
+        try {
+            //Delete the account from the database
+            result = accountStorageService.removeAccount(account.getAddress());
+            //Delete the account from the cache
+            accountCacheService.localAccountMaps.remove(account.getAddress().getBase58());
 
-        //TODO
-        //Sending account remove events
+            //build event data
+            HashMap<String, Object> eventData = new HashMap<>();
+            eventData.put("address", account.getAddress().getBase58());
+            //Sending account remove events
+            EventCmdCall.sendEvent(AccountConstant.EVENT_TOPIC_REMOVE_ACCOUNT, JSONUtils.obj2json(eventData));
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+        }
         return result;
     }
 

@@ -37,6 +37,28 @@ public class ChainServiceImpl implements ChainService {
     }
 
     /**
+     * updateChain
+     *
+     * @param chain
+     * @return
+     */
+    @Override
+    public  boolean updateChain(Chain chain){
+        return chainStorage.update(chain.getChainId(), chain);
+    }
+
+    /**
+     * delChain
+     *
+     * @param chain
+     * @return
+     */
+    @Override
+    public  boolean delChain(Chain chain){
+        return chainStorage.delete(chain.getChainId());
+    }
+
+    /**
      * Find chain based on key
      *
      * @param chainId The chain ID
