@@ -105,7 +105,7 @@ public class WsM1 {
 
         Thread.sleep(3000);
         // Call cmd
-        System.out.println(CmdDispatcher.request("getHeight", params));
+        System.out.println(CmdDispatcher.requestAndResponse("getHeight", params));
         //Thread.sleep(Integer.MAX_VALUE);
     }
 }
