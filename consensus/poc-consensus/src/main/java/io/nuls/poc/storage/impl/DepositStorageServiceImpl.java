@@ -6,6 +6,8 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.constant.ConsensusConstant;
+import io.nuls.poc.utils.manager.ConsensusManager;
+import io.nuls.poc.utils.util.PoConvertUtil;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 
@@ -28,7 +30,12 @@ public class DepositStorageServiceImpl implements DepositStorageService {
         try {
             byte[] key = depositPo.getTxHash().serialize();
             byte[] value = depositPo.serialize();
-            return RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID,key,value);
+            boolean dbSuccess = RocksDBService.put(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID,key,value);
+            if(!dbSuccess){
+                return false;
+            }
+            ConsensusManager.getInstance().addDeposit(chainID,PoConvertUtil.poToDeposit(depositPo));
+            return true;
         }catch (Exception e){
             Log.error(e);
             return false;
@@ -62,7 +69,12 @@ public class DepositStorageServiceImpl implements DepositStorageService {
         }
         try {
             byte[] key = hash.serialize();
-            return  RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID,key);
+            boolean dbSuccess = RocksDBService.delete(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID,key);
+            if(!dbSuccess){
+                return false;
+            }
+            ConsensusManager.getInstance().removeDeposit(chainID,hash);
+            return true;
         }catch (Exception e){
             Log.error(e);
             return  false;

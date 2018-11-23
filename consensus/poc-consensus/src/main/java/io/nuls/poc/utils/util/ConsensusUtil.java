@@ -56,7 +56,7 @@ public class ConsensusUtil {
      * @param agent    节点对象
      * @param lockTime 锁定的结束时间点(锁定开始时间点+锁定时长)，之前为锁定的时长
      */
-    public static CoinData getStopAgentCoinData(int chain_id, Agent agent, long lockTime) throws IOException {
+    public static CoinData getStopAgentCoinData(int chain_id, Agent agent, long lockTime) throws NulsRuntimeException,IOException {
         return getStopAgentCoinData(chain_id, agent, lockTime, null);
     }
 
@@ -67,7 +67,7 @@ public class ConsensusUtil {
      * @param lockTime  锁定时间
      * @param hight     锁定区块
      * */
-    public static CoinData getStopAgentCoinData(int chain_id, Agent agent, long lockTime, Long hight) throws IOException {
+    public static CoinData getStopAgentCoinData(int chain_id, Agent agent, long lockTime, Long hight) throws NulsRuntimeException,IOException {
         if (null == agent) {
             return null;
         }

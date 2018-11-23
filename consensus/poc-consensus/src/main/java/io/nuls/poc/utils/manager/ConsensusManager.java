@@ -2,6 +2,7 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.consensus.ConsensusStatus;
 import io.nuls.poc.model.bo.consensus.PunishType;
@@ -13,10 +14,10 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.storage.PunihStorageService;
-import io.nuls.poc.utils.util.PoConvertUtil;
 import io.nuls.poc.utils.compare.AgentComparator;
 import io.nuls.poc.utils.compare.DepositComparator;
 import io.nuls.poc.utils.compare.PunishLogComparator;
+import io.nuls.poc.utils.util.PoConvertUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 
@@ -172,6 +173,44 @@ public class ConsensusManager {
         Collections.sort(redPunishList, new PunishLogComparator());
         yellowPunishMap.put(chain_id,yellowPunishList);
         redPunishMap.put(chain_id,redPunishList);
+    }
+
+    public void addAgent(int chain_id,Agent agent) throws Exception{
+        removeAgent(chain_id,agent.getTxHash());
+        allAgentMap.get(chain_id).add(agent);
+    }
+
+    public void removeAgent(int chain_id, NulsDigestData txHash)throws Exception {
+        List<Agent> agentList = allAgentMap.get(chain_id);
+        if(agentList == null || agentList.size() == 0){
+            loadAgents(chain_id);
+            return;
+        }
+        for (Agent agent:agentList) {
+            if(Arrays.equals(txHash.serialize(),agent.getTxHash().serialize())){
+                agentList.remove(agent);
+                return;
+            }
+        }
+    }
+
+    public void addDeposit(int chain_id,Deposit deposit) throws  Exception{
+        removeAgent(chain_id,deposit.getTxHash());
+        allDepositMap.get(chain_id).add(deposit);
+    }
+
+    public void removeDeposit(int chain_id,NulsDigestData txHash) throws Exception{
+        List<Deposit> depositList = allDepositMap.get(chain_id);
+        if(depositList == null || depositList.size() == 0){
+            loadDeposits(chain_id);
+            return;
+        }
+        for (Deposit deposit:depositList) {
+            if(Arrays.equals(txHash.serialize(),deposit.getTxHash().serialize())){
+                depositList.remove(deposit);
+                return;
+            }
+        }
     }
 
     public Map<Integer, Boolean> getPacking_status() {

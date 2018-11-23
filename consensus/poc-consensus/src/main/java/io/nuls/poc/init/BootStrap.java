@@ -57,6 +57,7 @@ public class BootStrap {
             //启动WebSocket服务,向外提供RPC接口
             initServer();
             //向交易管理模块注册本地交易验证器，处理器等信息
+
         }catch (Exception e){
             Log.error(e);
         }
@@ -139,8 +140,8 @@ public class BootStrap {
     public static void initServer(){
         try {
             WsServer s = new WsServer(ConsensusConstant.CONSENSUS_RPC_PORT);
-            s.init(ConsensusConstant.CONSENSUS_MODULE_NAME, null, ConsensusConstant.CONSENSUS_RPC_PATH);
-            s.startAndSyncKernel(ConsensusConstant.KERNEL_URL);
+            /*s.init(ConsensusConstant.CONSENSUS_MODULE_NAME, null, ConsensusConstant.CONSENSUS_RPC_PATH);
+            s.startAndSyncKernel(ConsensusConstant.KERNEL_URL);*/
         }catch (Exception e){
             Log.error("Consensus startup webSocket server error!");
             e.printStackTrace();

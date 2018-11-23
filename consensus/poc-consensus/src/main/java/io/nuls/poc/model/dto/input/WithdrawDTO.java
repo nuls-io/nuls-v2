@@ -1,4 +1,5 @@
 /*
+ *
  * MIT License
  *
  * Copyright (c) 2017-2018 nuls.io
@@ -23,15 +24,53 @@
  *
  */
 
-package io.nuls.base.basic;
+package io.nuls.poc.model.dto.input;
 
-import io.nuls.base.data.BaseNulsData;
-
-import java.util.Set;
+import io.nuls.tools.data.StringUtils;
 
 /**
- * author Facjas
- * date 2018/5/10.
+ * @author tag
+ * 2018/11/21
  */
-public abstract class TransactionLogicData extends BaseNulsData {
+public class WithdrawDTO {
+
+    private int chainId;
+
+    private String address;
+
+    private String txHash;
+
+    private String password;
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = (address == null) ? null : address.trim();
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getTxHash() {
+        return txHash;
+    }
+
+    public void setTxHash(String txHash) {
+        this.txHash = StringUtils.strTrim(txHash);
+    }
 }
