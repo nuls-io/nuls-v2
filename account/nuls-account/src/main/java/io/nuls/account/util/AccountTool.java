@@ -25,8 +25,11 @@
 
 package io.nuls.account.util;
 
+import io.nuls.account.config.NulsConfig;
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
 import io.nuls.tools.crypto.ECKey;
@@ -34,10 +37,19 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.net.URL;
+import java.net.URLDecoder;
 
 /**
  * @author: qinyifeng
@@ -46,15 +58,25 @@ public class AccountTool {
 
     public static final int CREATE_MAX_SIZE = 100;
 
-    public static Address newAddress(short chainId, ECKey key) {
+    public static Address newAddress(int chainId, String prikey) {
+        ECKey key;
+        try {
+            key = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(prikey)));
+        } catch (Exception e) {
+            throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
+        }
         return newAddress(chainId, key.getPubKey());
     }
 
-    public static Address newAddress(short chainId, byte[] publicKey) {
+    public static Address newAddress(int chainId, ECKey key) {
+        return newAddress(chainId, key.getPubKey());
+    }
+
+    public static Address newAddress(int chainId, byte[] publicKey) {
         return new Address(chainId, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(publicKey));
     }
 
-    public static Account createAccount(short chainId, String prikey) throws NulsException {
+    public static Account createAccount(int chainId, String prikey) throws NulsException {
         ECKey key = null;
         if (StringUtils.isBlank(prikey)) {
             key = new ECKey();
@@ -77,17 +99,18 @@ public class AccountTool {
         return account;
     }
 
-    public static Account createAccount(short chainId) throws NulsException {
+    public static Account createAccount(int chainId) throws NulsException {
         return createAccount(chainId, null);
     }
 
     /**
      * 创建智能合约地址
      * Create smart contract address
+     *
      * @param chainId
      * @return
      */
-    public static Address createContractAddress(short chainId) {
+    public static Address createContractAddress(int chainId) {
         ECKey key = new ECKey();
         return new Address(chainId, BaseConstant.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
     }
@@ -110,26 +133,6 @@ public class AccountTool {
         return new BigInteger(1, Sha256Hash.hash(pwPriBytes));
     }
 
-    /**
-     * Check the difficulty of the password
-     * length between 8 and 20, the combination of characters and numbers
-     *
-     * @return boolean
-     */
-    public static boolean validPassword(String password) {
-        if (StringUtils.isBlank(password)) {
-            return false;
-        }
-        if (password.length() < 8 || password.length() > 20) {
-            return false;
-        }
-        if (password.matches("(.*)[a-zA-z](.*)")
-                && password.matches("(.*)\\d+(.*)")
-                && !password.matches("(.*)\\s+(.*)")
-                && !password.matches("(.*)[\u4e00-\u9fa5\u3000]+(.*)")) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+
+
 }

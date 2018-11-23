@@ -26,7 +26,6 @@
 package io.nuls.account.storage.impl;
 
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.constant.AccountParam;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.storage.AccountStorageService;
@@ -51,12 +50,15 @@ public class AccountStorageServiceImpl implements AccountStorageService, Initial
 
     @Override
     public void afterPropertiesSet() {
-        try {
-            RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT);
-        } catch (Exception e) {
-            if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.error(e.getMessage());
-                throw new NulsRuntimeException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
+        //If tables do not exist, create tables.
+        if (!RocksDBService.existTable(AccountStorageConstant.DB_NAME_ACCOUNT)) {
+            try {
+                RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT);
+            } catch (Exception e) {
+                if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
+                    Log.error(e.getMessage());
+                    throw new NulsRuntimeException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
+                }
             }
         }
     }

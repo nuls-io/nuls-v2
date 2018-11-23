@@ -23,24 +23,80 @@
  *
  */
 
-package io.nuls.account.model.bo.tx;
+package io.nuls.account.constant;
 
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Transaction;
-import io.nuls.tools.exception.NulsException;
 
 /**
- * @author: qinyifeng
+ * @author: EdwardChan
+ *
+ * @description: the parameter name of RCP
  */
-public class AliasTransaction extends Transaction {
+public interface RpcParameterNameConstant {
 
-//    public AliasTransaction() {
-//        super(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
-//    }
+    /**
+     * chainId
+     */
+    String CHAIN_ID = "chainId";
 
-    protected AliasTransaction(int type) {
-        super(type);
-    }
+    /**
+     * address
+     */
+    String ADDRESS = "address";
+
+    /**
+     * alias
+     */
+    String ALIAS = "alias";
+
+    /**
+     * password
+     */
+    String PASSWORD = "password";
+
+    /**
+     * newPassword
+     */
+    String NEW_PASSWORD = "newPassword";
+
+    /**
+     * priKey
+     */
+    String PRIKEY = "priKey";
+
+    /**
+     * remark
+     */
+    String REMARK = "remark";
+
+    /**
+     * count
+     */
+    String COUNT = "count";
+
+    /**
+     * overwrite
+     */
+    String OVERWRITE = "overwrite";
+
+    /**
+     * filePath
+     */
+    String FILE_PATH = "filePath";
+
+    /**
+     * keyStore
+     */
+    String KEYSTORE = "keyStore";
+
+    /**
+     * pageNumber
+     */
+    String PAGE_NUMBER = "pageNumber";
+
+    /**
+     * pageSize
+     */
+    String PAGE_SIZE = "pageSize";
+
 
 }

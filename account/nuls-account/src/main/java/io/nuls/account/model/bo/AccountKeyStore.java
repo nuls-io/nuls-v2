@@ -20,46 +20,43 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package io.nuls.account.model.bo.tx.txdata;
-
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.SerializeUtils;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
+package io.nuls.account.model.bo;
 
 /**
- * @author: qinyifeng
+ * @author qinyifeng
  */
-public class Alias extends TransactionLogicData {
+public class AccountKeyStore {
 
-    private byte[] address;
-
-
+    private String address;
+    private String encryptedPrivateKey;
+    private byte[] prikey;
     private String alias;
+    private byte[] pubKey;
 
-
-    public Alias() {
+    public AccountKeyStore() {
     }
 
-    public Alias(byte[] address, String alias) {
+    public AccountKeyStore(String address, String encryptedPrivateKey) {
         this.address = address;
-        this.alias = alias;
+        this.encryptedPrivateKey = encryptedPrivateKey;
     }
 
-    public byte[] getAddress() {
+    public String getAddress() {
         return address;
     }
 
-    public void setAddress(byte[] address) {
+    public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getEncryptedPrivateKey() {
+        return encryptedPrivateKey;
+    }
+
+    public void setEncryptedPrivateKey(String encryptedPrivateKey) {
+        this.encryptedPrivateKey = encryptedPrivateKey;
     }
 
     public String getAlias() {
@@ -70,32 +67,19 @@ public class Alias extends TransactionLogicData {
         this.alias = alias;
     }
 
-
-    //@Override
-    public Set<byte[]> getAddresses() {
-        Set<byte[]> addressSet = new HashSet<>();
-        addressSet.add(this.address);
-        return addressSet;
+    public byte[] getPubKey() {
+        return pubKey;
     }
 
-    @Override
-    public int size() {
-        int s = 0;
-        s += SerializeUtils.sizeOfBytes(address);
-        s += SerializeUtils.sizeOfString(alias);
-        return s;
+    public void setPubKey(byte[] pubKey) {
+        this.pubKey = pubKey;
     }
 
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeBytesWithLength(address);
-        stream.writeString(alias);
+    public byte[] getPrikey() {
+        return prikey;
     }
 
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.address = byteBuffer.readByLengthByte();
-        this.alias = byteBuffer.readString();
-
+    public void setPrikey(byte[] prikey) {
+        this.prikey = prikey;
     }
 }

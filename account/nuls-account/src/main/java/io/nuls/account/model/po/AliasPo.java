@@ -40,6 +40,8 @@ import java.io.IOException;
  */
 public class AliasPo extends BaseNulsData {
 
+    private int chainId;
+
     private String alias;
 
     private byte[] address;
@@ -55,6 +57,14 @@ public class AliasPo extends BaseNulsData {
 
     public Alias toAlias() {
         return new Alias(this.address, this.getAlias().trim());
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
     }
 
     public String getAlias() {
@@ -75,6 +85,7 @@ public class AliasPo extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint16(chainId);
         stream.writeString(this.alias);
         stream.writeBytesWithLength(this.address);
 
@@ -82,6 +93,7 @@ public class AliasPo extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.chainId = byteBuffer.readUint16();
         this.alias = byteBuffer.readString();
         this.address = byteBuffer.readByLengthByte();;
     }
@@ -89,6 +101,7 @@ public class AliasPo extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
+        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(alias);
         size += SerializeUtils.sizeOfBytes(address);
         return size;

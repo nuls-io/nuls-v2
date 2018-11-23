@@ -64,15 +64,15 @@ public class AddressTool {
      * 根据公钥查询地址字节数组
      *
      * @param publicKey
-     * @param chain_id
+     * @param chainId
      * @return
      */
-    public static byte[] getAddress(byte[] publicKey, short chain_id) {
+    public static byte[] getAddress(byte[] publicKey, int chainId) {
         if (publicKey == null) {
             return null;
         }
         byte[] hash160 = SerializeUtils.sha256hash160(publicKey);
-        Address address = new Address(chain_id, BaseConstant.DEFAULT_ADDRESS_TYPE, hash160);
+        Address address = new Address(chainId, BaseConstant.DEFAULT_ADDRESS_TYPE, hash160);
         return address.getAddressBytes();
     }
 
@@ -113,10 +113,10 @@ public class AddressTool {
      * 验证地址字符串是否是有效地址
      *
      * @param address
-     * @param chain_id
+     * @param chainId
      * @return
      */
-    public static boolean validAddress(short chain_id, String address) {
+    public static boolean validAddress(int chainId, String address) {
         if (StringUtils.isBlank(address)) {
             return false;
         }
@@ -130,18 +130,18 @@ public class AddressTool {
             return false;
         }
         NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
-        short chainId;
+        int chainid;
         byte type;
         byte[] hash160Bytes = new byte[Address.ADDRESS_ORIGIN_LENGTH + 1];
         try {
-            chainId = byteBuffer.readShort();
+            chainid = byteBuffer.readShort();
             type = byteBuffer.readByte();
             System.arraycopy(bytes, 2, hash160Bytes, 0, Address.ADDRESS_ORIGIN_LENGTH + 1);
         } catch (NulsException e) {
             Log.error(e);
             return false;
         }
-        if (chain_id != chainId) {
+        if (chainId != chainid) {
             return false;
         }
         if (BaseConstant.MAIN_NET_VERSION <= 1 && BaseConstant.DEFAULT_ADDRESS_TYPE != type) {
@@ -162,24 +162,24 @@ public class AddressTool {
      * 校验是否是普通地址
      *
      * @param bytes
-     * @param chain_id
+     * @param chainId
      * @return
      */
-    public static boolean validNormalAddress(byte[] bytes, short chain_id) {
+    public static boolean validNormalAddress(byte[] bytes, int chainId) {
         if (null == bytes || bytes.length != Address.ADDRESS_LENGTH) {
             return false;
         }
         NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
-        short chainId;
+        int chainid;
         byte type;
         try {
-            chainId = byteBuffer.readShort();
+            chainid = byteBuffer.readShort();
             type = byteBuffer.readByte();
         } catch (NulsException e) {
             Log.error(e);
             return false;
         }
-        if (chain_id != chainId) {
+        if (chainId != chainid) {
             return false;
         }
         if (BaseConstant.DEFAULT_ADDRESS_TYPE != type) {
@@ -192,10 +192,10 @@ public class AddressTool {
      * 校验是否是智能合约地址
      *
      * @param addressBytes
-     * @param chain_id
+     * @param chainId
      * @return
      */
-    public static boolean validContractAddress(byte[] addressBytes, short chain_id) {
+    public static boolean validContractAddress(byte[] addressBytes, int chainId) {
         if (addressBytes == null) {
             return false;
         }
@@ -203,16 +203,16 @@ public class AddressTool {
             return false;
         }
         NulsByteBuffer byteBuffer = new NulsByteBuffer(addressBytes);
-        short chainId;
+        int chainid;
         byte type;
         try {
-            chainId = byteBuffer.readShort();
+            chainid = byteBuffer.readShort();
             type = byteBuffer.readByte();
         } catch (NulsException e) {
             Log.error(e);
             return false;
         }
-        if (chain_id != chainId) {
+        if (chainId != chainid) {
             return false;
         }
         if (BaseConstant.CONTRACT_ADDRESS_TYPE != type) {
@@ -297,7 +297,7 @@ public class AddressTool {
         return false;
     }
 
-    public static boolean isPackingAddress(String address, short chain_id) {
+    public static boolean isPackingAddress(String address, int chainId) {
         if (StringUtils.isBlank(address)) {
             return false;
         }
@@ -311,18 +311,18 @@ public class AddressTool {
             return false;
         }
         NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
-        short chainId;
+        int chainid;
         byte type;
         byte[] hash160Bytes = new byte[Address.ADDRESS_ORIGIN_LENGTH + 1];
         try {
-            chainId = byteBuffer.readShort();
+            chainid = byteBuffer.readShort();
             type = byteBuffer.readByte();
             System.arraycopy(bytes, 2, hash160Bytes, 0, Address.ADDRESS_ORIGIN_LENGTH + 1);
         } catch (NulsException e) {
             Log.error(e);
             return false;
         }
-        if (chain_id != chainId) {
+        if (chainId != chainid) {
             return false;
         }
         if (BaseConstant.DEFAULT_ADDRESS_TYPE != type) {

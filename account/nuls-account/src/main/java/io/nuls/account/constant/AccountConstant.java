@@ -26,6 +26,7 @@
 package io.nuls.account.constant;
 
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Na;
 
 /**
@@ -54,6 +55,12 @@ public interface AccountConstant {
      * The field name of the code setting in the system configuration.
      */
     String CFG_SYSTEM_DEFAULT_ENCODING = "encoding";
+
+    /**
+     * 系统配置中语言设置的字段名
+     * The field name of the language set in the system configuration.
+     */
+    String CFG_SYSTEM_TKEYSTORE_FOLDER = "keydir";
 
     /**
      * --------[db configs] -------
@@ -88,17 +95,12 @@ public interface AccountConstant {
     String ACCOUNTKEYSTORE_FILE_SUFFIX=".keystore";
 
     /**
-     * 导出keystore备份文件目录
-     */
-    String ACCOUNTKEYSTORE_FOLDER_NAME ="backup";
-
-    /**
      * --------[RPC constant] -------
      */
     /**
      * SUCCESS_CODE
      */
-    String SUCCESS_CODE = "0";
+    int SUCCESS_CODE = 1;
     /**
      * SUCCESS_MSG
      */
@@ -111,4 +113,28 @@ public interface AccountConstant {
      * DEFAULT PAGE_SIZE
      */
     int PAGE_SIZE = 10;
+
+    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
+
+    /**
+     * --------[EVENT constant] -------
+     */
+    /**
+     * 创建账户事件的主题
+     * topic of account create events
+     */
+    String EVENT_TOPIC_CREATE_ACCOUNT = "evt_ac_createAccount";
+
+    /**
+     * 移除账户事件的主题
+     * topic of account remove events
+     */
+    String EVENT_TOPIC_REMOVE_ACCOUNT = "evt_ac_removeAccount";
+
+    /**
+     * 修改账户密码事件的主题
+     * topic of update account password events
+     */
+    String EVENT_TOPIC_UPDATE_PASSWORD = "evt_ac_updatePassword";
+
 }

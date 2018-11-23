@@ -9,6 +9,7 @@ import io.nuls.account.util.AccountTool;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
@@ -16,6 +17,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -31,7 +33,7 @@ import static org.junit.Assert.assertTrue;
 public class AccountStorageServiceTest {
 
     protected static AccountStorageService accountStorageService;
-    protected short chainId = 12345;
+    protected int chainId = 12345;
 
     @BeforeClass
     public static void beforeTest() {
@@ -46,7 +48,6 @@ public class AccountStorageServiceTest {
         accountStorageService = SpringLiteContext.getBean(AccountStorageService.class);
     }
 
-    @Ignore
     @Test
     public void saveAccountListTest() throws Exception {
         List<AccountPo> accountPos = new ArrayList<>();
@@ -70,7 +71,6 @@ public class AccountStorageServiceTest {
         }
     }
 
-    @Ignore
     @Test
     public void saveAccountTest() throws Exception {
         Account account = AccountTool.createAccount(chainId);
@@ -78,7 +78,6 @@ public class AccountStorageServiceTest {
         assertTrue(result);
     }
 
-    @Ignore
     @Test
     public void removeAccountTest() throws Exception {
         Account account = AccountTool.createAccount(chainId);
@@ -89,7 +88,6 @@ public class AccountStorageServiceTest {
         assertNull(accountPo);
     }
 
-    @Ignore
     @Test
     public void updateAccountTest() throws Exception {
         Account account = AccountTool.createAccount(chainId);
@@ -104,7 +102,6 @@ public class AccountStorageServiceTest {
         assertTrue(result);
     }
 
-    @Ignore
     @Test
     public void getAccountTest() throws Exception {
         Account account = AccountTool.createAccount(chainId);
@@ -114,12 +111,13 @@ public class AccountStorageServiceTest {
         assertEquals(account.getAddress().getBase58(), accountPo.getAddress());
     }
 
-    @Ignore
     @Test
     public void getAccountListTest() {
         List<AccountPo> accountList = accountStorageService.getAccountList();
+        //sort by createTime desc
+        Collections.sort(accountList, (AccountPo o1, AccountPo o2) -> (o2.getCreateTime().compareTo(o1.getCreateTime())));
         for (AccountPo account : accountList) {
-            System.out.println(account.getAddress());
+            System.out.println(DateUtils.timeStamp2DateStr(account.getCreateTime()) + "==" + account.getAddress());
         }
     }
 }

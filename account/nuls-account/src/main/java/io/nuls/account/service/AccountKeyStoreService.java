@@ -20,15 +20,28 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package io.nuls.account.validator;
+package io.nuls.account.service;
 
 /**
+ * 账户模块提供给外部的服务接口定义
+ * account service definition
+ *
  * @author: qinyifeng
  */
-public class AliasTransactionValidator {
+public interface AccountKeyStoreService {
 
+    /**
+     * 备份账户到keyStore
+     * backup account to keyStore
+     *
+     * @param path
+     * @param chainId
+     * @param address  the address of the account.
+     * @param password the password of the account key store.
+     * @return KeyStore path
+     */
+    String backupAccountToKeyStore(String path, int chainId, String address, String password);
 
 }

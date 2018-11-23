@@ -66,7 +66,7 @@ public class RocksDBTest {
         key = "test-key";
         initTest();
         //createTableTest();
-        existTableTest();
+        //existTableTest();
         //destroyTableTest();
         //listTableTest();
         //putTest();
@@ -187,8 +187,11 @@ public class RocksDBTest {
     @Test
     public void getTest() {
         String value = "testvalue";
-        String getValue = new String(get(table, key.getBytes(UTF_8)), UTF_8);
-        Assert.assertEquals(value, getValue);
+        byte[] getByte = get(table, key.getBytes(UTF_8));
+        if (getByte != null) {
+            String getValue = new String(getByte, UTF_8);
+            Assert.assertEquals(value, getValue);
+        }
     }
 
     @Ignore
