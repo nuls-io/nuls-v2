@@ -81,9 +81,9 @@ public class CmdDispatcher {
      *
      * @return Result with JSON string
      */
-    public static String request(String cmd, Map params) throws Exception {
+    public static Response requestAndResponse(String cmd, Map params) throws Exception {
         int messageId = request(cmd, params, 0);
-        return callValue(messageId);
+        return callValueWithResponse(messageId);
     }
 
     /**
