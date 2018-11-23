@@ -27,7 +27,8 @@
 
 package io.nuls.rpc.client;
 
-import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.info.ClientRuntime;
+import io.nuls.rpc.info.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
@@ -57,12 +58,12 @@ public class WsClient extends WebSocketClient {
     public void onMessage(String paramString) {
         try {
             /*
-             * add to response queue, Waiting for thread pool processing
+             Add to response queue, Waiting for thread pool processing
              */
-            Log.info("Client<" + RuntimeInfo.local.getAbbr() + ":" + RuntimeInfo.local.getPort() + "> receive:" + paramString);
-            RuntimeInfo.CALLED_VALUE_QUEUE.add(JSONUtils.json2map(paramString));
+            Log.info("Client<" + ServerRuntime.local.getAbbr() + ":" + ServerRuntime.local.getPort() + "> receive:" + paramString);
+            ClientRuntime.CALLED_VALUE_QUEUE.add(JSONUtils.json2map(paramString));
         } catch (IOException e) {
-            Log.error("WsClient.onMessage-> " + e.getMessage() + ":" + paramString);
+            Log.error(e);
         }
     }
 
@@ -72,7 +73,7 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        e.printStackTrace();
+        Log.error(e);
     }
 
 

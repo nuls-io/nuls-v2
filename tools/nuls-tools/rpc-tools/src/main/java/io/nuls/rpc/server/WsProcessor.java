@@ -2,7 +2,7 @@ package io.nuls.rpc.server;
 
 import io.nuls.rpc.handler.CmdHandler;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.info.ServerRuntime;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.tools.log.Log;
@@ -31,17 +31,17 @@ public class WsProcessor implements Runnable {
     @Override
     public void run() {
 
-        while (RuntimeInfo.REQUEST_QUEUE.size() > 0) {
+        while (ServerRuntime.REQUEST_QUEUE.size() > 0) {
 
             Object[] objects = null;
             /*
             Get the first item of the queue.
             First in, first out
              */
-            synchronized (RuntimeInfo.REQUEST_QUEUE) {
-                if (RuntimeInfo.REQUEST_QUEUE.size() > 0) {
-                    objects = RuntimeInfo.REQUEST_QUEUE.get(0);
-                    RuntimeInfo.REQUEST_QUEUE.remove(0);
+            synchronized (ServerRuntime.REQUEST_QUEUE) {
+                if (ServerRuntime.REQUEST_QUEUE.size() > 0) {
+                    objects = ServerRuntime.REQUEST_QUEUE.get(0);
+                    ServerRuntime.REQUEST_QUEUE.remove(0);
                 }
             }
 
@@ -58,7 +58,6 @@ public class WsProcessor implements Runnable {
                     message = JSONUtils.json2pojo(msg,Message.class);
                 } catch (IOException e) {
                     Log.error(e);
-                    Log.error("Message【" + msg + "】 doesn't match the rule, Discard!");
                     continue;
                 }
 
@@ -69,8 +68,8 @@ public class WsProcessor implements Runnable {
                         break;
                     case Request:
                         if (CmdHandler.response(webSocket, message)) {
-                            synchronized (RuntimeInfo.REQUEST_QUEUE) {
-                                RuntimeInfo.REQUEST_QUEUE.add(objects);
+                            synchronized (ServerRuntime.REQUEST_QUEUE) {
+                                ServerRuntime.REQUEST_QUEUE.add(objects);
                             }
                         }
                         break;
