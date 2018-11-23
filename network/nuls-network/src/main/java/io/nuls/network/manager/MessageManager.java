@@ -142,7 +142,7 @@ public class MessageManager extends BaseManager{
                     paramMap.put("chainId",chainId);
                     paramMap.put("nodeId",nodeKey);
                     paramMap.put("messageBody",HexUtil.byteToHex(payLoadBody));
-                    int response = CmdDispatcher.request(header.getCommandStr(),paramMap);
+                    String response = CmdDispatcher.request(header.getCommandStr(),paramMap);
                     Log.info("response："+response);
                     byteBuffer.setCursor(payLoad.length);
                 }
