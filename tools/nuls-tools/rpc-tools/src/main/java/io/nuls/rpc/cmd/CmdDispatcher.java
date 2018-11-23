@@ -39,8 +39,8 @@ public class CmdDispatcher {
         Log.info("NegotiateConnection:" + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
-        Message rspMessage = JSONUtils.json2pojo(callValue(messageId), Message.class);
-        return MessageType.NegotiateConnectionResponse.name().equals(rspMessage.getMessageType());
+        Message rspMessage = callMessage(MessageType.NegotiateConnectionResponse);
+        return rspMessage != null;
     }
 
     /**
@@ -62,9 +62,9 @@ public class CmdDispatcher {
         wsClient.send(JSONUtils.obj2json(message));
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> messageData = JSONUtils.json2map(callValue(messageId));
-        Log.info("APIMethods from kernel:" + JSONUtils.obj2json(messageData));
-        Map<String, Object> responseData = JSONUtils.json2map(JSONUtils.obj2json(messageData.get("responseData")));
+        Response response = callMessageResponse(messageId);
+        Log.info("APIMethods from kernel:" + JSONUtils.obj2json(response));
+        Map<String, Object> responseData = (Map) response.getResponseData();
         for (String key : responseData.keySet()) {
             ModuleInfo moduleInfo = JSONUtils.json2pojo(JSONUtils.obj2json(responseData.get(key)), ModuleInfo.class);
             ClientRuntime.remoteModuleMap.put(key, moduleInfo);
@@ -83,7 +83,7 @@ public class CmdDispatcher {
      */
     public static Response requestAndResponse(String cmd, Map params) throws Exception {
         int messageId = request(cmd, params, 0);
-        return callValueWithResponse(messageId);
+        return callMessageResponse(messageId);
     }
 
     /**
@@ -139,56 +139,43 @@ public class CmdDispatcher {
     /**
      * Get response by messageId
      */
-    public static String callValue(int messageId) throws InterruptedException, IOException {
-
-        if (messageId < 0) {
-            return JSONUtils.obj2json(ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.CMD_NOT_FOUND));
-        }
+    public static Message callMessage(MessageType messageType) throws InterruptedException, IOException {
 
         long timeMillis = System.currentTimeMillis();
         do {
+            synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
+                for (Map map : ClientRuntime.CALLED_VALUE_QUEUE) {
+                    Message message = JSONUtils.map2pojo(map, Message.class);
+                    if (messageType.name().equals(message.getMessageType())) {
+                        ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
+                        Log.info("NegotiateConnectionResponse:" + JSONUtils.obj2json(message));
+                        return message;
+                    }
 
-            for (Map map : ClientRuntime.CALLED_VALUE_QUEUE) {
-                Message message = JSONUtils.map2pojo(map, Message.class);
-                MessageType messageType = MessageType.valueOf(message.getMessageType());
-                switch (messageType) {
-                    case Response:
-                        Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
-                        if (response.getRequestId() == messageId) {
-                            synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
-                                ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
-                            }
-                            Log.info("Response:" + JSONUtils.obj2json(response));
-                            return JSONUtils.obj2json(response);
-                        }
-                        break;
-                    case NegotiateConnectionResponse:
-                        synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
-                            ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
-                        }
-                        Log.info("NegotiateConnectionResponse:" + JSONUtils.obj2json(map));
-                        return JSONUtils.obj2json(map);
-                    case Ack:
-                        synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
-                            ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
-                        }
-                        Log.info("Ack:" + JSONUtils.obj2json(map));
-                        return JSONUtils.obj2json(map);
-                    default:
-                        break;
+//                    switch (messageType) {
+//                        case NegotiateConnectionResponse:
+//                            ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
+//                            Log.info("NegotiateConnectionResponse:" + JSONUtils.obj2json(message));
+//                            return JSONUtils.obj2json(message);
+//                        case Ack:
+//                            ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
+//                            Log.info("Ack:" + JSONUtils.obj2json(message));
+//                            return JSONUtils.obj2json(message);
+//                        default:
+//                            break;
+//                    }
                 }
             }
-
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
 
-        return JSONUtils.obj2json(ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.RESPONSE_TIMEOUT));
+        return null;
     }
 
     /**
      * Get response by messageId
      */
-    public static Response callValueWithResponse(int messageId) throws InterruptedException, IOException {
+    public static Response callMessageResponse(int messageId) throws InterruptedException, IOException {
 
         if (messageId < 0) {
             return ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.CMD_NOT_FOUND);
@@ -196,26 +183,22 @@ public class CmdDispatcher {
 
         long timeMillis = System.currentTimeMillis();
         do {
+            synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
+                for (Map map : ClientRuntime.CALLED_VALUE_QUEUE) {
+                    Message message = JSONUtils.map2pojo(map, Message.class);
+                    if (!MessageType.Response.name().equals(message.getMessageType())) {
+                        continue;
+                    }
 
-            for (Map map : ClientRuntime.CALLED_VALUE_QUEUE) {
-                Message message = JSONUtils.map2pojo(map, Message.class);
-                MessageType messageType = MessageType.valueOf(message.getMessageType());
-                switch (messageType) {
-                    case Response:
-                        Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
-                        if (response.getRequestId() == messageId) {
-                            synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
-                                ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
-                            }
-                            Log.info("Response:" + JSONUtils.obj2json(response));
-                            return response;
-                        }
-                        break;
-                    default:
-                        break;
+                    Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
+                    if (response.getRequestId() == messageId) {
+                        ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
+                        Log.info("Response:" + JSONUtils.obj2json(response));
+                        return response;
+                    }
+
                 }
             }
-
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
 
