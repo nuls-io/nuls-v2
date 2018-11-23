@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
+ * Command dispatcher
+ * All commands should be invoked through this class
+ *
  * @author tangyi
  * @date 2018/11/5
  * @description
@@ -31,10 +34,11 @@ public class CmdDispatcher {
         if (wsClient == null) {
             throw new Exception("Kernel not available");
         }
+        Log.info("NegotiateConnection:" + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
-        Map rspMap = JSONUtils.json2map(getResponse(messageId));
-        return MessageType.NegotiateConnectionResponse.name().equals(rspMap.get("messageType"));
+        Message rspMessage = JSONUtils.json2pojo(callValue(messageId), Message.class);
+        return MessageType.NegotiateConnectionResponse.name().equals(rspMessage.getMessageType());
     }
 
     /**
@@ -55,7 +59,7 @@ public class CmdDispatcher {
         wsClient.send(JSONUtils.obj2json(message));
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> messageData = JSONUtils.json2map(getResponse(messageId));
+        Map<String, Object> messageData = JSONUtils.json2map(callValue(messageId));
         Log.info("APIMethods from kernel:" + JSONUtils.obj2json(messageData));
         Map<String, Object> responseData = JSONUtils.json2map(JSONUtils.obj2json(messageData.get("responseData")));
         for (String key : responseData.keySet()) {
@@ -71,11 +75,12 @@ public class CmdDispatcher {
      * 2. Send to the specified module
      * 3. Get the result returned to the caller
      * 4. Get the highest version of cmd
+     *
      * @return Result with JSON string
      */
     public static String request(String cmd, Map params) throws Exception {
         int messageId = request(cmd, params, 0);
-        return getResponse(messageId);
+        return callValue(messageId);
     }
 
     /**
@@ -84,6 +89,7 @@ public class CmdDispatcher {
      * 2. Send to the specified module
      * 3. Get the result returned to the caller
      * 4. Get the highest version of cmd
+     *
      * @return Message ID
      */
     public static int request(String cmd, Map params, int subscriptionPeriod) throws Exception {
@@ -99,12 +105,19 @@ public class CmdDispatcher {
             return -1;
         }
         WsClient wsClient = RuntimeInfo.getWsClient(uri);
-
+        Log.info("Request:" + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
         return messageId;
     }
 
+    /**
+     * Method of Unsubscribe
+     * A call that responds only once does not need to be cancelled
+     *
+     * @param messageId Request message ID
+     * @param cmd       Request command
+     */
     public static void unsubscribe(int messageId, String cmd) throws Exception {
         Message message = CmdHandler.basicMessage(messageId, MessageType.Unsubscribe);
         Unsubscribe unsubscribe = new Unsubscribe();
@@ -121,7 +134,7 @@ public class CmdDispatcher {
     /**
      * Get response by messageId
      */
-    public static String getResponse(int messageId) throws InterruptedException, IOException {
+    public static String callValue(int messageId) throws InterruptedException, IOException {
 
         if (messageId < 0) {
             Response response = CmdHandler.defaultResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.CMD_NOT_FOUND);
@@ -130,19 +143,30 @@ public class CmdDispatcher {
 
         long timeMillis = System.currentTimeMillis();
         do {
-            for (Map map : RuntimeInfo.RESPONSE_QUEUE) {
-                MessageType messageType = MessageType.valueOf(map.get("messageType").toString());
-                switch (messageType) {
-                    case NegotiateConnectionResponse:
-                        RuntimeInfo.RESPONSE_QUEUE.remove(map);
-                        return JSONUtils.obj2json(map);
-                    case Response:
-                        Map messageData = (Map) map.get("messageData");
-                        if ((Integer) messageData.get("requestId") == messageId) {
-                            RuntimeInfo.RESPONSE_QUEUE.remove(map);
-                            return JSONUtils.obj2json(messageData);
-                        }
-                    default:
+            synchronized (RuntimeInfo.CALLED_VALUE_QUEUE) {
+                for (Map map : RuntimeInfo.CALLED_VALUE_QUEUE) {
+                    Message message = JSONUtils.map2pojo(map, Message.class);
+                    MessageType messageType = MessageType.valueOf(message.getMessageType());
+                    switch (messageType) {
+                        case NegotiateConnectionResponse:
+                            RuntimeInfo.CALLED_VALUE_QUEUE.remove(map);
+                            Log.info("NegotiateConnectionResponse:" + JSONUtils.obj2json(map));
+                            return JSONUtils.obj2json(map);
+                        case Response:
+                            Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
+                            if (response.getRequestId() == messageId) {
+                                RuntimeInfo.CALLED_VALUE_QUEUE.remove(map);
+                                Log.info("Response:" + JSONUtils.obj2json(response));
+                                return JSONUtils.obj2json(response);
+                            }
+                            break;
+                        case Ack:
+                            RuntimeInfo.CALLED_VALUE_QUEUE.remove(map);
+                            Log.info("Ack:" + JSONUtils.obj2json(map));
+                            return JSONUtils.obj2json(map);
+                        default:
+                            break;
+                    }
                 }
             }
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
