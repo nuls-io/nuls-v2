@@ -10,22 +10,82 @@ public interface ConsensusService {
     /**
      * 创建节点
      * */
-    public CmdResponse createAgent(List<Object> params);
+    public CmdResponse createAgent(Map<String,Object> params);
+
+    /**
+     * 创建节点交易验证
+     * */
+    public CmdResponse createAgentValid(Map<String,Object> params);
+
+    /**
+     * 创建节点交易提交
+     * */
+    public CmdResponse createAgentCommit(Map<String,Object> params);
+
+    /**
+     * 创建节点交易回滚
+     * */
+    public CmdResponse createAgentRollBack(Map<String,Object> params);
 
     /**
      * 注销节点
      * */
-    public CmdResponse stopAgent(List<Object> params);
+    public CmdResponse stopAgent(Map<String,Object> params);
+
+    /**
+     * 注销节点交易验证
+     * */
+    public CmdResponse stopAgentValid(Map<String,Object> params);
+
+    /**
+     * 注销节点交易提交
+     * */
+    public CmdResponse stopAgentCommit(Map<String,Object> params);
+
+    /**
+     * 注销节点交易回滚
+     * */
+    public CmdResponse stopAgentRollBack(Map<String,Object> params);
 
     /**
      * 委托共识
      * */
-    public CmdResponse depositToAgent(List<Object> params);
+    public CmdResponse depositToAgent(Map<String,Object> params);
+
+    /**
+     * 委托共识交易验证
+     * */
+    public CmdResponse depositValid(Map<String,Object> params);
+
+    /**
+     * 委托共识交易提交
+     * */
+    public CmdResponse depositCommit(Map<String,Object> params);
+
+    /**
+     * 委托共识交易回滚
+     * */
+    public CmdResponse depositRollBack(Map<String,Object> params);
 
     /**
      * 退出共识
      * */
-    public CmdResponse withdraw(List<Object> params);
+    public CmdResponse withdraw(Map<String,Object> params);
+
+    /**
+     * 退出共识交易验证
+     * */
+    public CmdResponse withdrawValid(Map<String,Object> params);
+
+    /**
+     * 退出共识交易提交
+     * */
+    public CmdResponse withdrawCommit(Map<String,Object> params);
+
+    /**
+     * 退出共识交易回滚
+     * */
+    public CmdResponse withdrawRollBack(Map<String,Object> params);
 
     /**
      * 获取节点列表
@@ -60,7 +120,7 @@ public interface ConsensusService {
     /**
      * 验证区块正确性
      * */
-    public CmdResponse validSmallBlock(List<Object> params);
+    public CmdResponse validBlock(Map<String,Object> params);
 
     /**
      * 批量验证共识模块交易

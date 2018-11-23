@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.base.basic;
+package io.nuls.base.data;
 
 /**
  * @author vivi
