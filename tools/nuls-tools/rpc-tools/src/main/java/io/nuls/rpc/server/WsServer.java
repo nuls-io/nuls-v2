@@ -28,8 +28,9 @@
 package io.nuls.rpc.server;
 
 import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
-import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.info.ServerRuntime;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.tools.log.Log;
@@ -50,30 +51,14 @@ public class WsServer extends WebSocketServer {
         super(new InetSocketAddress(port));
     }
 
-//    public void init(ModuleE moduleE, String scanPackage) throws Exception {
-//        RuntimeInfo.local.setAbbr(moduleE.abbr);
-//        RuntimeInfo.local.setName(moduleE.name);
-//        RuntimeInfo.local.setAddress(HostInfo.getIpAdd());
-//        RuntimeInfo.local.setPort(this.getPort());
-//        RegisterApi registerApi = new RegisterApi();
-//        registerApi.setApiMethods(new ArrayList<>());
-//        registerApi.setServiceSupportedAPIVersions(new ArrayList<>());
-//        registerApi.setAbbr(RuntimeInfo.local.getAbbr());
-//        registerApi.setName(RuntimeInfo.local.getName());
-//        registerApi.setAddress(RuntimeInfo.local.getAddress());
-//        registerApi.setPort(RuntimeInfo.local.getPort());
-//        RuntimeInfo.local.setRegisterApi(registerApi);
-//        RuntimeInfo.scanPackage(scanPackage);
-//    }
-
     public void connect(String kernelUrl) throws Exception {
         this.start();
         Thread.sleep(1000);
-        RuntimeInfo.kernelUrl = kernelUrl;
+        Constants.kernelUrl = kernelUrl;
         if (!CmdDispatcher.handshakeKernel()) {
             throw new Exception("Handshake kernel failed");
         } else {
-            Log.info("Handshake success." + RuntimeInfo.local.getName() + " ready!");
+            Log.info("Handshake success." + ServerRuntime.local.getName() + " ready!");
         }
     }
 
@@ -88,9 +73,9 @@ public class WsServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket webSocket, String msg) {
         try {
-            Log.info("Server<" + RuntimeInfo.local.getAbbr() + ":" + RuntimeInfo.local.getPort() + "> receive:" + msg);
-            RuntimeInfo.REQUEST_QUEUE.add(new Object[]{webSocket, msg});
-            RuntimeInfo.fixedThreadPool.execute(new WsProcessor());
+            Log.info("Server<" + ServerRuntime.local.getAbbr() + ":" + ServerRuntime.local.getPort() + "> receive:" + msg);
+            ServerRuntime.REQUEST_QUEUE.add(new Object[]{webSocket, msg});
+            ServerRuntime.fixedThreadPool.execute(new WsProcessor());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -98,62 +83,68 @@ public class WsServer extends WebSocketServer {
 
     @Override
     public void onError(WebSocket webSocket, Exception ex) {
-        Log.error("ws server-> on error");
-        ex.printStackTrace();
+        Log.error(ex);
     }
 
     @Override
     public void onStart() {
-        Log.info("Server<" + RuntimeInfo.local.getAbbr() + ":" + RuntimeInfo.local.getPort() + ">-> started.");
+        Log.info("Server<" + ServerRuntime.local.getAbbr() + ":" + ServerRuntime.local.getPort() + ">-> started.");
     }
 
+    /**
+     * Get a server instance
+     * Using predefined
+     */
+    public static WsServer getInstance(ModuleE moduleE) {
+        return getInstance(moduleE.abbr, moduleE.name);
+    }
+
+    /**
+     * Get a server instance
+     * Using Abbreviation & Name
+     */
+    public static WsServer getInstance(String abbr, String name) {
+        WsServer wsServer = new WsServer(HostInfo.randomPort());
+        ServerRuntime.local.setAbbr(abbr);
+        ServerRuntime.local.setName(name);
+        ServerRuntime.local.setAddress(HostInfo.getIpAdd());
+        ServerRuntime.local.setPort(wsServer.getPort());
+        return wsServer;
+    }
+
+    /**
+     * Scanning the CMD provided by this module
+     */
+    public WsServer setScanPackage(String scanPackage) throws Exception {
+        RegisterApi registerApi = new RegisterApi();
+        registerApi.setApiMethods(new ArrayList<>());
+        registerApi.setServiceSupportedAPIVersions(new ArrayList<>());
+        registerApi.setAbbr(ServerRuntime.local.getAbbr());
+        registerApi.setName(ServerRuntime.local.getName());
+        registerApi.setAddress(ServerRuntime.local.getAddress());
+        registerApi.setPort(ServerRuntime.local.getPort());
+        ServerRuntime.local.setRegisterApi(registerApi);
+        ServerRuntime.scanPackage(scanPackage);
+        return this;
+    }
+
+    /**
+     * For internal debugging only
+     * Simulate a kernel module
+     */
     public static void mockKernel() throws Exception {
         WsServer wsServer = new WsServer(8887);
         // Start server instance
-        wsServer.setModuleE(ModuleE.KE);
+        ServerRuntime.local.setAbbr(ModuleE.KE.abbr);
+        ServerRuntime.local.setName(ModuleE.KE.name);
+        ServerRuntime.local.setAddress(HostInfo.getIpAdd());
+        ServerRuntime.local.setPort(wsServer.getPort());
+
         wsServer.setScanPackage("io.nuls.rpc.cmd.kernel").connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
         CmdDispatcher.syncKernel();
 
         Thread.sleep(Integer.MAX_VALUE);
-    }
-
-    private void setModuleE(ModuleE moduleE) {
-        RuntimeInfo.local.setAbbr(moduleE.abbr);
-        RuntimeInfo.local.setName(moduleE.name);
-        RuntimeInfo.local.setAddress(HostInfo.getIpAdd());
-        RuntimeInfo.local.setPort(getPort());
-    }
-
-    public static WsServer getInstance(ModuleE moduleE) {
-        WsServer wsServer = new WsServer(HostInfo.randomPort());
-        RuntimeInfo.local.setAbbr(moduleE.abbr);
-        RuntimeInfo.local.setName(moduleE.name);
-        RuntimeInfo.local.setAddress(HostInfo.getIpAdd());
-        RuntimeInfo.local.setPort(wsServer.getPort());
-        return wsServer;
-    }
-
-    public static WsServer getInstance(String abbr, String name) {
-        WsServer wsServer = new WsServer(HostInfo.randomPort());
-        RuntimeInfo.local.setAbbr(abbr);
-        RuntimeInfo.local.setName(name);
-        RuntimeInfo.local.setAddress(HostInfo.getIpAdd());
-        RuntimeInfo.local.setPort(wsServer.getPort());
-        return wsServer;
-    }
-
-    public WsServer setScanPackage(String scanPackage) throws Exception {
-        RegisterApi registerApi = new RegisterApi();
-        registerApi.setApiMethods(new ArrayList<>());
-        registerApi.setServiceSupportedAPIVersions(new ArrayList<>());
-        registerApi.setAbbr(RuntimeInfo.local.getAbbr());
-        registerApi.setName(RuntimeInfo.local.getName());
-        registerApi.setAddress(RuntimeInfo.local.getAddress());
-        registerApi.setPort(RuntimeInfo.local.getPort());
-        RuntimeInfo.local.setRegisterApi(registerApi);
-        RuntimeInfo.scanPackage(scanPackage);
-        return this;
     }
 }

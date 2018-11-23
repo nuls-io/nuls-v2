@@ -28,7 +28,7 @@
 package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.info.ClientRuntime;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.ModuleInfo;
 import io.nuls.rpc.model.RegisterApi;
@@ -62,10 +62,10 @@ public class KernelCmd4Test extends BaseCmd {
                 moduleInfo.setAbbr(registerApi.getAbbr());
                 moduleInfo.setName(registerApi.getName());
                 moduleInfo.setRegisterApi(registerApi);
-                RuntimeInfo.remoteModuleMap.put(registerApi.getName(), moduleInfo);
+                ClientRuntime.remoteModuleMap.put(registerApi.getName(), moduleInfo);
             }
-            System.out.println("Current APIMethods:" + JSONUtils.obj2json(RuntimeInfo.remoteModuleMap));
-            return success(RuntimeInfo.remoteModuleMap);
+            System.out.println("Current APIMethods:" + JSONUtils.obj2json(ClientRuntime.remoteModuleMap));
+            return success(ClientRuntime.remoteModuleMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
