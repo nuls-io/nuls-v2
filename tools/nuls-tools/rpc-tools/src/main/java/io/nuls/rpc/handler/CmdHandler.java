@@ -46,6 +46,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Call the correct method based on request information
+ *
  * @author tangyi
  * @date 2018/10/30
  * @description
@@ -53,6 +55,7 @@ import java.util.Map;
 public class CmdHandler {
 
     /**
+     * For Request
      * Call local cmd.
      * 1. If the interface is injected via @Autowired, the injected object is used
      * 2. If the interface has no special annotations, construct a new object by reflection
@@ -87,6 +90,7 @@ public class CmdHandler {
     }
 
     /**
+     * For NegotiateConnection
      * Default NegotiateConnection object
      */
     public static NegotiateConnection defaultNegotiateConnection() {
@@ -97,6 +101,7 @@ public class CmdHandler {
     }
 
     /**
+     * For NegotiateConnectionResponse
      * Send NegotiateConnectionResponse
      */
     public static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
@@ -109,9 +114,12 @@ public class CmdHandler {
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 
-    public static boolean response(WebSocket webSocket, Map<String, Object> messageMap) throws Exception {
-        int messageId = (Integer) messageMap.get("messageId");
-        Request request = JSONUtils.json2pojo(JSONUtils.obj2json(messageMap.get("messageData")), Request.class);
+    /**
+     * For Response
+     */
+    public static boolean response(WebSocket webSocket, Message message) throws Exception {
+        int messageId = message.getMessageId();
+        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         Map requestMethods = request.getRequestMethods();
 
         int subscriptionPeriod = request.getSubscriptionPeriod();
@@ -155,11 +163,11 @@ public class CmdHandler {
             response.setResponseProcessingTime(TimeService.currentTimeMillis() - startTimemillis);
             response.setRequestId(messageId);
 
-            Message message = basicMessage(RuntimeInfo.nextSequence(), MessageType.Response);
-            message.setMessageData(response);
-            Log.info("webSocket.send: " + JSONUtils.obj2json(message));
+            Message rspMessage = basicMessage(RuntimeInfo.nextSequence(), MessageType.Response);
+            rspMessage.setMessageData(response);
+            Log.info("webSocket.send: " + JSONUtils.obj2json(rspMessage));
             try {
-                webSocket.send(JSONUtils.obj2json(message));
+                webSocket.send(JSONUtils.obj2json(rspMessage));
             } catch (Exception e) {
                 Log.error("Socket disconnect, remove!");
                 addBack = false;
@@ -168,8 +176,11 @@ public class CmdHandler {
         return addBack;
     }
 
-    public static void unsubscribe(WebSocket webSocket, Map<String, Object> messageMap) throws Exception {
-        Unsubscribe unsubscribe = JSONUtils.json2pojo(JSONUtils.obj2json(messageMap.get("messageData")), Unsubscribe.class);
+    /**
+     * For Unsubscribe
+     */
+    public static void unsubscribe(WebSocket webSocket, Message message) throws Exception {
+        Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
         for (String str : unsubscribe.getUnsubscribeMethods()) {
             String key = webSocket.toString() + str;
             RuntimeInfo.cmdInvokeTime.put(key, Constants.UNSUBSCRIBE_TIMEMILLIS);

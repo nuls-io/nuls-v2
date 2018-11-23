@@ -97,7 +97,7 @@ public class WsM1 {
         int messageId = CmdDispatcher.request("getHeight", params, 5);
 
         for (int i = 0; i < 5; i++) {
-            System.out.println(CmdDispatcher.getResponse(messageId));
+            System.out.println(CmdDispatcher.callValue(messageId));
             Thread.sleep(5000);
         }
 
