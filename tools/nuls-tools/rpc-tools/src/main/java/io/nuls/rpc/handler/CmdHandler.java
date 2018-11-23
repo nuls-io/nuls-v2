@@ -106,29 +106,29 @@ public class CmdHandler {
         subscriptionPeriod > 0, means send response every time.
         subscriptionPeriod <= 0, means send response only once.
          */
+        String key = webSocket.toString() + messageId;
         if (subscriptionPeriod > 0) {
             addBack = true;
-            String key = webSocket.toString() + messageId;
 
             if (!ServerRuntime.cmdInvokeTime.containsKey(key)) {
                 ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
-            }
+            } else {
+                /*
+                If the value is unsubscribed magic parameter, returns immediately without execution
+                Return false
+                 */
+                if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
+                    ServerRuntime.cmdInvokeTime.remove(key);
+                    Log.info("Remove: " + key);
+                    return false;
+                }
 
-            /*
-            If the value is unsubscribed magic parameter, returns immediately without execution
-            Return false
-             */
-            if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
-                ServerRuntime.cmdInvokeTime.remove(key);
-                Log.info("Remove: " + key);
-                return false;
-            }
-
-            /*
-            If the execution interval is not yet reached, returns immediately without execution
-             */
-            if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * 1000) {
-                return true;
+                /*
+                If the execution interval is not yet reached, returns immediately without execution
+                 */
+                if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * 1000) {
+                    return true;
+                }
             }
         }
 
@@ -153,6 +153,7 @@ public class CmdHandler {
             Log.info("webSocket.send: " + JSONUtils.obj2json(rspMessage));
             try {
                 webSocket.send(JSONUtils.obj2json(rspMessage));
+                ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
             } catch (Exception e) {
                 Log.error("Socket disconnect, remove!");
                 addBack = false;

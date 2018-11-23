@@ -32,6 +32,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Ack;
 import io.nuls.rpc.server.WsServer;
+import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -50,7 +51,7 @@ public class WsM1 {
         System.out.println(new Ack().toString());
         Ack ack = new Ack("asdfasdf");
         System.out.println(ack.getRequestID());
-        System.out.println(Integer.MAX_VALUE / 6f / 60f / 24f / 365f);
+        System.out.println(Integer.MAX_VALUE /1000f/  3600f / 24f );
     }
 
     @Test
@@ -96,7 +97,7 @@ public class WsM1 {
         int messageId = CmdDispatcher.request("getHeight", params, 5);
 
         for (int i = 0; i < 5; i++) {
-            System.out.println(CmdDispatcher.callValue(messageId));
+            System.out.println(JSONUtils.obj2json(CmdDispatcher.callMessageResponse(messageId)));
             Thread.sleep(5000);
         }
 

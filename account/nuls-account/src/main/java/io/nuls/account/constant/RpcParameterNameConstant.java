@@ -23,16 +23,80 @@
  *
  */
 
-package io.nuls.base.basic;
+package io.nuls.account.constant;
 
-import io.nuls.base.data.BaseNulsData;
-
-import java.util.Set;
 
 /**
- * author Facjas
- * date 2018/5/10.
+ * @author: EdwardChan
+ *
+ * @description: the parameter name of RCP
  */
-public abstract class TransactionLogicData extends BaseNulsData {
-    public abstract Set<byte[]> getAddresses();
+public interface RpcParameterNameConstant {
+
+    /**
+     * chainId
+     */
+    String CHAIN_ID = "chainId";
+
+    /**
+     * address
+     */
+    String ADDRESS = "address";
+
+    /**
+     * alias
+     */
+    String ALIAS = "alias";
+
+    /**
+     * password
+     */
+    String PASSWORD = "password";
+
+    /**
+     * newPassword
+     */
+    String NEW_PASSWORD = "newPassword";
+
+    /**
+     * priKey
+     */
+    String PRIKEY = "priKey";
+
+    /**
+     * remark
+     */
+    String REMARK = "remark";
+
+    /**
+     * count
+     */
+    String COUNT = "count";
+
+    /**
+     * overwrite
+     */
+    String OVERWRITE = "overwrite";
+
+    /**
+     * filePath
+     */
+    String FILE_PATH = "filePath";
+
+    /**
+     * keyStore
+     */
+    String KEYSTORE = "keyStore";
+
+    /**
+     * pageNumber
+     */
+    String PAGE_NUMBER = "pageNumber";
+
+    /**
+     * pageSize
+     */
+    String PAGE_SIZE = "pageSize";
+
+
 }

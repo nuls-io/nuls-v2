@@ -23,35 +23,56 @@
  *
  */
 
-package io.nuls.account.process;
+package io.nuls.account.constant;
 
-import io.nuls.account.model.bo.tx.AliasTransaction;
-import io.nuls.base.basic.TransactionProcessor;
-import io.nuls.base.data.Transaction;
-import io.nuls.tools.basic.Result;
 
-import java.util.List;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Na;
 
 /**
- * 设置别名处理器
- *
  * @author: qinyifeng
+ * @description: RPC常量 RPC constants
  */
-public class AliasTxProcessor implements TransactionProcessor<AliasTransaction> {
+public interface RpcConstant {
 
+    /**
+     * --------[call other module RPC constants] -------
+     */
+    /**
+     * EVENT_SEND_CMD
+     */
+    String EVENT_SEND_CMD = "send";
+    /**
+     * EVENT_SEND_VERSION
+     */
+    String EVENT_SEND_VERSION = "1.0";
+    /**
+     * EVENT_SEND_TOPIC
+     */
+    String EVENT_SEND_TOPIC = "topic";
+    /**
+     * EVENT_SEND_DATA
+     */
+    String EVENT_SEND_DATA = "data";
 
-    @Override
-    public Result onRollback(AliasTransaction tx, Object secondaryData) {
-        return null;
-    }
+    /**
+     * --------[RPC response constants] -------
+     */
+    /**
+     * value
+     */
+    String VALUE = "value";
+    /**
+     * address
+     */
+    String ADDRESS = "address";
+    /**
+     * encryptedPriKey
+     */
+    String ENCRYPTED_PRIKEY = "encryptedPriKey";
+    /**
+     * path
+     */
+    String PATH = "path";
 
-    @Override
-    public Result onCommit(AliasTransaction tx, Object secondaryData) {
-        return null;
-    }
-
-    @Override
-    public Result conflictDetect(List<Transaction> txList) {
-        return null;
-    }
 }

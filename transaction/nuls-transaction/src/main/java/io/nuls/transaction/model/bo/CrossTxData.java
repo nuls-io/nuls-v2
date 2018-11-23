@@ -7,6 +7,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * @author: Charlie
@@ -23,6 +24,12 @@ public class CrossTxData extends TransactionLogicData {
      * 原始交易hash
      */
     private byte[] originalTxHash;
+
+
+    @Override
+    public Set<byte[]> getAddresses() {
+        return null;
+    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -42,5 +49,21 @@ public class CrossTxData extends TransactionLogicData {
         s += SerializeUtils.sizeOfUint16();
         s += SerializeUtils.sizeOfBytes(originalTxHash);
         return s;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public byte[] getOriginalTxHash() {
+        return originalTxHash;
+    }
+
+    public void setOriginalTxHash(byte[] originalTxHash) {
+        this.originalTxHash = originalTxHash;
     }
 }
