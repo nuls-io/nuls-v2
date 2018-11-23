@@ -25,7 +25,7 @@ public class ClientRuntime {
      * value: moduleInfo(io.nuls.rpc.ModuleInfo)
      */
     public static ConcurrentMap<String, ModuleInfo> remoteModuleMap = new ConcurrentHashMap<>();
-    
+
     /**
      * The response of the cmd invoked through RPC
      */
@@ -55,6 +55,14 @@ public class ClientRuntime {
         }
         return wsClientMap.get(uri);
     }
+
+    /**
+     * WsClient object that communicates with other modules
+     * Used to unsubscribe
+     * key: messageId
+     * value: WsClient
+     */
+    public static ConcurrentMap<Integer, WsClient> msgIdKeyWsClientMap = new ConcurrentHashMap<>();
 
     /**
      * Get the url of the module that provides the cmd through the cmd

@@ -99,43 +99,51 @@ public class CmdHandler {
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         Map requestMethods = request.getRequestMethods();
 
+        boolean addBack = false;
         int subscriptionPeriod = request.getSubscriptionPeriod();
 
-        boolean addBack = false;
-        for (Object method : requestMethods.keySet()) {
+        /*
+        subscriptionPeriod > 0, means send response every time.
+        subscriptionPeriod <= 0, means send response only once.
+         */
+        if (subscriptionPeriod > 0) {
+            addBack = true;
+            String key = webSocket.toString() + messageId;
 
-            /*
-            subscriptionPeriod > 0, means send response every time.
-            subscriptionPeriod <= 0, means send response only once.
-             */
-            String key = webSocket.toString() + messageId + method;
-            if (subscriptionPeriod > 0) {
-                addBack = true;
-                if (ServerRuntime.cmdInvokeTime.containsKey(key)) {
-                    if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
-                        ServerRuntime.cmdInvokeTime.remove(key);
-                        Log.info("Remove: " + key);
-                        return false;
-                    }
-
-                    if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * 1000) {
-                        continue;
-                    }
-                }
+            if (!ServerRuntime.cmdInvokeTime.containsKey(key)) {
+                ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
             }
 
-            ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
+            /*
+            If the value is unsubscribed magic parameter, returns immediately without execution
+            Return false
+             */
+            if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
+                ServerRuntime.cmdInvokeTime.remove(key);
+                Log.info("Remove: " + key);
+                return false;
+            }
 
+            /*
+            If the execution interval is not yet reached, returns immediately without execution
+             */
+            if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * 1000) {
+                return true;
+            }
+        }
+
+        for (Object method : requestMethods.keySet()) {
+            /*
+            Execute at once
+             */
             long startTimemillis = TimeService.currentTimeMillis();
-
             Map params = (Map) requestMethods.get(method);
             CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
                     ? ServerRuntime.getLocalInvokeCmd((String) method)
                     : ServerRuntime.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
             Response response = cmdDetail == null
-                    ? ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED,
-                    Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""))
+                    ? ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""))
                     : invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
             response.setResponseProcessingTime(TimeService.currentTimeMillis() - startTimemillis);
             response.setRequestId(messageId);
@@ -150,6 +158,7 @@ public class CmdHandler {
                 addBack = false;
             }
         }
+
         return addBack;
     }
 
