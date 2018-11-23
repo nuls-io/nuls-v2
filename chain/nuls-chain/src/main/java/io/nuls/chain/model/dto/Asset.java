@@ -180,7 +180,7 @@ public class Asset extends BaseNulsData {
         size += SerializeUtils.sizeOfString(txHash);
         return size;
     }
-    public AssetTx parseToTransaction(){
+    public byte [] parseToTransaction() throws IOException {
         AssetTx assetTx = new AssetTx();
         assetTx.setAddress(this.getAddress());
         assetTx.setAssetId(this.getAssetId());
@@ -190,7 +190,7 @@ public class Asset extends BaseNulsData {
         assetTx.setInitNumber(this.getInitNumber());
         assetTx.setName(this.getName());
         assetTx.setSymbol(this.getSymbol());
-        return assetTx;
+        return assetTx.serialize();
     }
     public Asset(AssetTx tx){
         this.address = tx.getAddress();

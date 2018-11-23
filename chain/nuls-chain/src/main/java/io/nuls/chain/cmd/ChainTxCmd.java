@@ -10,7 +10,9 @@ import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.CmdResponse;
+import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -18,7 +20,7 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.log.Log;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * @author lan
@@ -35,11 +37,14 @@ public class ChainTxCmd extends BaseCmd {
     private RpcService rpcService;
 
 
-
-    public CmdResponse chainRegValidator(List params) {
+    @CmdAnnotation(cmd = "cm_chainRegValidator", version = 1.0,description = "chainRegValidator")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
+    public Response chainRegValidator(Map params) {
         try {
-            String txHex = String.valueOf(params.get(1));
-            String secondaryData = String.valueOf(params.get(2));
+            String txHex = String.valueOf(params.get("txHex"));
+            String secondaryData = String.valueOf(params.get("secondaryData"));
             Chain  chain = buildChainTxData(txHex,new CrossChainRegTransaction());
             int chainId = chain.getChainId();
             if (chainId < 0) {
@@ -55,12 +60,14 @@ public class ChainTxCmd extends BaseCmd {
             return failed(ErrorCode.init("-100"), e.getMessage());
         }
     }
-
-
-    public CmdResponse chainRegCommit(List params) {
+    @CmdAnnotation(cmd = "cm_chainRegCommit", version = 1.0,description = "chainRegCommit")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
+    public Response chainRegCommit(Map params) {
         try {
-            String txHex = String.valueOf(params.get(1));
-            String secondaryData = String.valueOf(params.get(2));
+            String txHex = String.valueOf(params.get("txHex"));
+            String secondaryData = String.valueOf(params.get("secondaryData"));
             Chain  chain = buildChainTxData(txHex,new CrossChainRegTransaction());
             Chain dbChain = chainService.getChain(chain.getChainId());
             if (dbChain != null ) {
@@ -70,18 +77,21 @@ public class ChainTxCmd extends BaseCmd {
             chainService.saveChain(chain);
             //通知网络模块创建链
             rpcService.createCrossGroup(chain);
-            return success("chainRegCommit", null);
+            return success();
         } catch (Exception e) {
             Log.error(e);
             return failed(ErrorCode.init("-100"), e.getMessage());
         }
     }
 
-
-    public CmdResponse chainRegRollback(List params) {
+    @CmdAnnotation(cmd = "cm_chainRegRollback", version = 1.0,description = "chainRegRollback")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
+    public Response chainRegRollback(Map params) {
         try {
-            String txHex = String.valueOf(params.get(1));
-            String secondaryData = String.valueOf(params.get(2));
+            String txHex = String.valueOf(params.get("txHex"));
+            String secondaryData = String.valueOf(params.get("secondaryData"));
             Chain  chain = buildChainTxData(txHex,new CrossChainRegTransaction());
             Chain dbChain = chainService.getChain(chain.getChainId());
             if ( null == chain || null == dbChain || !chain.getTxHash().equalsIgnoreCase(dbChain.getTxHash())) {
@@ -90,18 +100,24 @@ public class ChainTxCmd extends BaseCmd {
             chain.setDelete(true);
              chainService.updateChain(chain);
              rpcService.destroyCrossGroup(chain);
-            return success("chainRegRollback", null);
+            return success(chain);
         } catch (Exception e) {
             Log.error(e);
             return failed(ErrorCode.init("-100"), e.getMessage());
         }
     }
-
-    public CmdResponse chainDestroyValidator(List params) {
-        try {
-            String txHex = String.valueOf(params.get(1));
-            String secondaryData = String.valueOf(params.get(2));
+    @CmdAnnotation(cmd = "cm_chainDestroyValidator", version = 1.0,description = "chainDestroyValidator")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
+    public Response chainDestroyValidator(Map params) {
+            String txHex = String.valueOf(params.get("txHex"));
+            String secondaryData = String.valueOf(params.get("secondaryData"));
             Chain chain = buildChainTxData(txHex,new CrossChainDestroyTransaction());
+            return destroyValidator(chain);
+    }
+    private Response destroyValidator(Chain chain){
+        try {
             if(null == chain) {
                 return failed("C10003");
             }
@@ -109,8 +125,8 @@ public class ChainTxCmd extends BaseCmd {
             if(null == dbChain || !dbChain.getTxHash().equalsIgnoreCase(chain.getTxHash())){
                 return failed("C10003");
             }
-           if(!ByteUtils.arrayEquals(dbChain.getAddress(),chain.getAddress())){
-               return failed("C10004");
+            if(!ByteUtils.arrayEquals(dbChain.getAddress(),chain.getAddress())){
+                return failed("C10004");
             }
             return success();
         } catch (Exception e) {
@@ -118,15 +134,20 @@ public class ChainTxCmd extends BaseCmd {
             return failed(ErrorCode.init("-100"), e.getMessage());
         }
     }
-
-    public CmdResponse chainDestroyCommit(List params) {
+    @CmdAnnotation(cmd = "cm_chainDestroyCommit", version = 1.0,description = "chainDestroyCommit")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
+    public Response chainDestroyCommit(Map params) {
         try {
-            CmdResponse cmdResponse =   chainDestroyValidator(params);
-            if(!cmdResponse.getCode().equalsIgnoreCase(Constants.SUCCESS_CODE)){
+            String txHex = String.valueOf(params.get("txHex"));
+            String secondaryData = String.valueOf(params.get("secondaryData"));
+            Chain chain = buildChainTxData(txHex,new CrossChainDestroyTransaction());
+            Response cmdResponse =  destroyValidator(chain);
+            if(cmdResponse.getResponseStatus() != (Constants.RESPONSE_STATUS_SUCCESS)){
                 return cmdResponse;
             }
-            int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-            Chain dbChain = chainService.getChain(chainId);
+            Chain dbChain = chainService.getChain(chain.getChainId());
             dbChain.setDelete(true);
             chainService.updateChain(dbChain);
             rpcService.destroyCrossGroup(dbChain);
@@ -136,15 +157,20 @@ public class ChainTxCmd extends BaseCmd {
             return failed(ErrorCode.init("-100"), e.getMessage());
         }
     }
-
-    public CmdResponse chainDestroyRollback(List params) {
+    @CmdAnnotation(cmd = "cm_chainDestroyRollback", version = 1.0,description = "chainDestroyRollback")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
+    public Response chainDestroyRollback(Map params) {
         try {
-            CmdResponse cmdResponse =   chainDestroyValidator(params);
-            if(!cmdResponse.getCode().equalsIgnoreCase(Constants.SUCCESS_CODE)){
+            String txHex = String.valueOf(params.get("txHex"));
+            String secondaryData = String.valueOf(params.get("secondaryData"));
+            Chain chain = buildChainTxData(txHex,new CrossChainDestroyTransaction());
+            Response cmdResponse =  destroyValidator(chain);
+            if(cmdResponse.getResponseStatus() != (Constants.RESPONSE_STATUS_SUCCESS)){
                 return cmdResponse;
             }
-            int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-            Chain dbChain = chainService.getChain(chainId);
+            Chain dbChain = chainService.getChain(chain.getChainId());
             if(!dbChain.isDelete()){
                 return failed("C10005");
             }
@@ -158,11 +184,13 @@ public class ChainTxCmd extends BaseCmd {
         }
     }
 
-    private Chain buildChainTxData(String txHex, Transaction<ChainTx> tx){
+    private Chain buildChainTxData(String txHex, Transaction tx){
         try {
             byte []txBytes = HexUtil.hexToByte(txHex);
             tx.parse(txBytes,0);
-            Chain chain = new Chain(tx.getTxData());
+            ChainTx chainTx =  new ChainTx();
+            chainTx.parse(tx.getTxData(),0);
+            Chain chain = new Chain(chainTx);
             chain.setTxHash(tx.getHash().toString());
             return chain;
         } catch (Exception e) {

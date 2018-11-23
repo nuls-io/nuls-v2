@@ -62,7 +62,6 @@ public class ChainCmdTest {
         seed2.setIp("3.3.4.4");
         seed2.setPort(3344);
         seedList.add(seed2);
-        chain.setSeedList(seedList);
         chain.setDelete(false);
         chain.setCreateTime(TimeService.currentTimeMillis());
 //        System.out.println(CmdDispatcher.call("chainRegCommit", new Object[]{chain}, 1.0));

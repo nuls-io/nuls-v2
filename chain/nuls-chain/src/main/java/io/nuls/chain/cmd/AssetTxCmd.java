@@ -10,7 +10,9 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.CmdResponse;
+import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -21,6 +23,7 @@ import io.nuls.tools.log.Log;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lan
@@ -35,11 +38,13 @@ public class AssetTxCmd extends BaseCmd {
     @Autowired
     private ChainService chainService;
 
-    private Asset buildAssetTxData(String txHex, Transaction<AssetTx> tx){
+    private Asset buildAssetTxData(String txHex, Transaction tx){
         try {
             byte []txBytes = HexUtil.hexToByte(txHex);
             tx.parse(txBytes,0);
-            Asset asset = new Asset(tx.getTxData());
+            AssetTx assetTx = new AssetTx();
+            assetTx.parse(tx.getTxData(),0);
+            Asset asset = new Asset(assetTx);
             asset.setTxHash(tx.getHash().toString());
             return asset;
         } catch (Exception e) {
@@ -47,10 +52,15 @@ public class AssetTxCmd extends BaseCmd {
             return null;
         }
     }
-    public CmdResponse assetRegValidator(List params) {
+    @CmdAnnotation(cmd = "cm_assetRegValidator", version = 1.0,
+            description = "assetRegValidator")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
+    public Response assetRegValidator(Map params) {
         try {
-            String txHex = String.valueOf(params.get(1));
-            String secondaryData = String.valueOf(params.get(2));
+            String txHex = String.valueOf(params.get("txHex"));
+            String secondaryData = String.valueOf(params.get("secondaryData"));
             Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
             if (asset.getChainId() < 0) {
                 return failed("10015");
@@ -62,17 +72,28 @@ public class AssetTxCmd extends BaseCmd {
             return success();
         } catch (Exception e) {
             Log.error(e);
-            return failed(ErrorCode.init("-100"), e.getMessage());
+            return failed(ErrorCode.init("-100"));
         }
 
 
     }
 
-
-    public CmdResponse assetRegCommit(List params) {
+    /**
+     *
+     * 资产提交
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "cm_assetRegCommit", version = 1.0,
+            description = "assetRegCommit")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
+    public Response assetRegCommit(Map params) {
         try {
-            CmdResponse cmdResponse = assetRegValidator(params);
-            if(!cmdResponse.getCode().equalsIgnoreCase(Constants.SUCCESS_CODE)){
+            Response cmdResponse = assetRegValidator(params);
+            if(cmdResponse.getResponseStatus() != Constants.RESPONSE_STATUS_SUCCESS){
                 return cmdResponse;
             }
             int chainId = Integer.valueOf(String.valueOf(params.get(0)));
@@ -89,9 +110,20 @@ public class AssetTxCmd extends BaseCmd {
         return success();
     }
 
-    public CmdResponse assetRegRollback(List params) {
-        String txHex = String.valueOf(params.get(1));
-        String secondaryData = String.valueOf(params.get(2));
+    /**
+     * 资产回滚
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "cm_assetRegRollback", version = 1.0,
+            description = "assetRegRollback")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
+    public Response assetRegRollback(Map params) {
+        String txHex = String.valueOf(params.get("txHex"));
+        String secondaryData = String.valueOf(params.get("secondaryData"));
         Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
         //判断库中的asset是否存在，数据正确，则删除
         Asset dbAsset = assetService.getAsset(asset.getAssetId());
@@ -105,13 +137,24 @@ public class AssetTxCmd extends BaseCmd {
         return failed(CmConstants.ERROR_ASSET_NOT_EXIST);
     }
 
-    public CmdResponse assetDisableValidator(List params) {
-        String txHex = String.valueOf(params.get(1));
-        String secondaryData = String.valueOf(params.get(2));
+    /**
+     * 资产注销校验
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "cm_assetDisableValidator", version = 1.0,
+            description = "assetDisableValidator")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
+    public Response assetDisableValidator(Map params) {
+        String txHex = String.valueOf(params.get("txHex"));
+        String secondaryData = String.valueOf(params.get("secondaryData"));
         Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
         return assetDisableValidator(asset);
     }
-    private CmdResponse assetDisableValidator(Asset asset) {
+    private Response assetDisableValidator(Asset asset) {
 
         Asset dbAsset = assetService.getAsset(asset.getAssetId());
         ChainAsset chainAsset = chainService.getChainAsset(asset.getChainId(), asset.getAssetId());
@@ -139,22 +182,44 @@ public class AssetTxCmd extends BaseCmd {
         return  success();
     }
 
-    public CmdResponse assetDisableCommit(List params) {
-        String txHex = String.valueOf(params.get(1));
-        String secondaryData = String.valueOf(params.get(2));
+    /**
+     * 资产注销提交
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "cm_assetDisableCommit", version = 1.0,
+            description = "assetDisableCommit")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
+    public Response assetDisableCommit(Map params) {
+        String txHex = String.valueOf(params.get("txHex"));
+        String secondaryData = String.valueOf(params.get("secondaryData"));
         Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
-        CmdResponse cmdResponse = assetDisableValidator(asset);
-        if(!cmdResponse.getCode().equalsIgnoreCase(Constants.SUCCESS_CODE)){
+        Response cmdResponse = assetDisableValidator(asset);
+        if(cmdResponse.getResponseStatus() != Constants.RESPONSE_STATUS_SUCCESS){
             return cmdResponse;
         }
         assetService.setStatus(asset.getAssetId(), false);
         return success();
     }
 
-    public CmdResponse assetDisableRollback(List params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-        String txHex = String.valueOf(params.get(1));
-        String secondaryData = String.valueOf(params.get(2));
+    /**
+     *
+     * 链注销回滚
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "cm_assetDisableRollback", version = 1.0,description = "assetDisableRollback")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
+    public Response assetDisableRollback(Map params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        String txHex = String.valueOf(params.get("txHex"));
+        String secondaryData = String.valueOf(params.get("secondaryData"));
         Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
         /*判断资产是否可用*/
         Asset dbAsset = assetService.getAsset(asset.getAssetId());
@@ -174,7 +239,7 @@ public class AssetTxCmd extends BaseCmd {
      * @return
      */
 
-    public CmdResponse assetCirculateValidator(List params) {
+    public Response assetCirculateValidator(List params) {
         //TODO:校验跨链交易上是否有该资产，并且资产金额是否充足。
         return null;
     }
@@ -186,7 +251,7 @@ public class AssetTxCmd extends BaseCmd {
      */
 
 
-    public CmdResponse assetCirculateCommit(List params) {
+    public Response assetCirculateCommit(List params) {
         //TODO:A链转B链资产X，数量N ;A链X资产减少N, B链 X资产 增加N。
 
         return null;
@@ -198,7 +263,7 @@ public class AssetTxCmd extends BaseCmd {
      * @return
      */
 
-    public CmdResponse assetCirculateRollBack(List params) {
+    public Response assetCirculateRollBack(List params) {
         //TODO:
         return null;
     }
