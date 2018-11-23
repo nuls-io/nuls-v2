@@ -64,15 +64,18 @@ public class CmdDispatcher {
         }
     }
 
+
     /**
      * call cmd.
      * 1. Find the corresponding module according to cmd
      * 2. Send to the specified module
      * 3. Get the result returned to the caller
      * 4. Get the highest version of cmd
+     * @return Result with JSON string
      */
-    public static int request(String cmd, Map params) throws Exception {
-        return request(cmd, params, 0);
+    public static String request(String cmd, Map params) throws Exception {
+        int messageId = request(cmd, params, 0);
+        return getResponse(messageId);
     }
 
     /**
@@ -81,6 +84,7 @@ public class CmdDispatcher {
      * 2. Send to the specified module
      * 3. Get the result returned to the caller
      * 4. Get the highest version of cmd
+     * @return Message ID
      */
     public static int request(String cmd, Map params, int subscriptionPeriod) throws Exception {
         int messageId = RuntimeInfo.sequence.incrementAndGet();
