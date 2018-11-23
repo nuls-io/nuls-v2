@@ -50,9 +50,9 @@ public class SignatureUtil {
      */
     public static boolean validateTransactionSignture(Transaction tx) throws NulsException {
         try {
-            if (!tx.needVerifySignature()) {
+           /* if (!tx.needVerifySignature()) {
                 return true;
-            }
+            }*/
             if (tx.getTransactionSignature() == null && tx.getTransactionSignature().length == 0) {
                 throw new NulsException(new Exception());
             }

@@ -32,6 +32,8 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.script.Script;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.tools.data.ByteArrayWrapper;
+import io.nuls.tools.data.LongUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -39,13 +41,13 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * @author ln
+ * @author Charlie
  */
 public class CoinData extends BaseNulsData {
 
-    private List<Coin> from;
+    private List<CoinFrom> from;
 
-    private List<Coin> to;
+    private List<CoinTo> to;
 
     public CoinData() {
         from = new ArrayList<>();
@@ -60,14 +62,14 @@ public class CoinData extends BaseNulsData {
         int fromCount = from == null ? 0 : from.size();
         stream.writeVarInt(fromCount);
         if (null != from) {
-            for (Coin coin : from) {
+            for (CoinFrom coin : from) {
                 stream.writeNulsData(coin);
             }
         }
         int toCount = to == null ? 0 : to.size();
         stream.writeVarInt(toCount);
         if (null != to) {
-            for (Coin coin : to) {
+            for (CoinTo coin : to) {
                 stream.writeNulsData(coin);
             }
         }
@@ -78,9 +80,9 @@ public class CoinData extends BaseNulsData {
         int fromCount = (int) byteBuffer.readVarInt();
 
         if (0 < fromCount) {
-            List<Coin> from = new ArrayList<>();
+            List<CoinFrom> from = new ArrayList<>();
             for (int i = 0; i < fromCount; i++) {
-                from.add(byteBuffer.readNulsData(new Coin()));
+                from.add(byteBuffer.readNulsData(new CoinFrom()));
             }
             this.from = from;
         }
@@ -88,9 +90,9 @@ public class CoinData extends BaseNulsData {
         int toCount = (int) byteBuffer.readVarInt();
 
         if (0 < toCount) {
-            List<Coin> to = new ArrayList<>();
+            List<CoinTo> to = new ArrayList<>();
             for (int i = 0; i < toCount; i++) {
-                to.add(byteBuffer.readNulsData(new Coin()));
+                to.add(byteBuffer.readNulsData(new CoinTo()));
             }
             this.to = to;
         }
@@ -100,32 +102,32 @@ public class CoinData extends BaseNulsData {
     public int size() {
         int size = SerializeUtils.sizeOfVarInt(from == null ? 0 : from.size());
         if (null != from) {
-            for (Coin coin : from) {
+            for (CoinFrom coin : from) {
                 size += SerializeUtils.sizeOfNulsData(coin);
             }
         }
         size += SerializeUtils.sizeOfVarInt(to == null ? 0 : to.size());
         if (null != to) {
-            for (Coin coin : to) {
+            for (CoinTo coin : to) {
                 size += SerializeUtils.sizeOfNulsData(coin);
             }
         }
         return size;
     }
 
-    public List<Coin> getFrom() {
+    public List<CoinFrom> getFrom() {
         return from;
     }
 
-    public void setFrom(List<Coin> from) {
+    public void setFrom(List<CoinFrom> from) {
         this.from = from;
     }
 
-    public List<Coin> getTo() {
+    public List<CoinTo> getTo() {
         return to;
     }
 
-    public void setTo(List<Coin> to) {
+    public void setTo(List<CoinTo> to) {
         this.to = to;
     }
 
@@ -136,54 +138,62 @@ public class CoinData extends BaseNulsData {
      * @return tx fee
      */
     @JsonIgnore
-    public Na getFee() {
-        Na toNa = Na.ZERO;
-        for (Coin coin : to) {
-            toNa = toNa.add(coin.getNa());
+    public long getFee() {
+        long toNa = 0L;
+        for (CoinTo coinTo : to) {
+            toNa = LongUtils.add(toNa,coinTo.getAmount());
         }
-        Na fromNa = Na.ZERO;
-        for (Coin coin : from) {
-            fromNa = fromNa.add(coin.getNa());
+        long fromNa = 0L;
+        for (CoinFrom coinFrom : from) {
+            fromNa = LongUtils.add(fromNa, coinFrom.getAmount());
         }
-        return fromNa.subtract(toNa);
+        return LongUtils.sub(fromNa,toNa);
     }
 
-    public void addTo(Coin coin) {
+    public void addTo(CoinTo coinTo) {
         if (null == to) {
             to = new ArrayList<>();
         }
-        if(coin.getOwner().length == 23 && coin.getOwner()[2] == BaseConstant.P2SH_ADDRESS_TYPE){
-            Script scriptPubkey = SignatureUtil.createOutputScript(coin.getOwner());
-            coin.setOwner(scriptPubkey.getProgram());
+        if(coinTo.getAddress().length == 23 && coinTo.getAddress()[0] == BaseConstant.P2SH_ADDRESS_TYPE){
+            Script scriptPubkey = SignatureUtil.createOutputScript(coinTo.getAddress());
+            coinTo.setAddress(scriptPubkey.getProgram());
         }
-        to.add(coin);
+        to.add(coinTo);
     }
 
-    public void addFrom(Coin coin) {
+    public void addFrom(CoinFrom coinFrom) {
         if (null == from) {
             from = new ArrayList<>();
         }
-        from.add(coin);
+        from.add(coinFrom);
     }
 
+    /**
+     * 从CoinData中获取和交易相关的地址(缺少txData中相关地址，需要对应的交易单独获取)
+     * @return
+     */
     @JsonIgnore
     public Set<byte[]> getAddresses() {
-        Set<byte[]> addressSet = new HashSet<>();
+
+        Set<ByteArrayWrapper> addressSetWrapper = new HashSet<>();
         if (to != null && to.size() != 0) {
             for (int i = 0; i < to.size(); i++) {
-                byte[] owner = to.get(i).getAddress();
-                boolean hasExist = false;
-                for (byte[] address : addressSet) {
-                    //todo 20180919 这里处理脚本的情况
-                    if (Arrays.equals(owner, address)) {
-                        hasExist = true;
-                        break;
-                    }
-                }
-                if (!hasExist) {
-                    addressSet.add(owner);
-                }
+                byte[] address = to.get(i).getAddress();
+                ByteArrayWrapper baw = new ByteArrayWrapper(address);
+                addressSetWrapper.add(baw);
             }
+        }
+        if (from != null && from.size() != 0) {
+            for (int i = 0; i < from.size(); i++) {
+                byte[] address = from.get(i).getAddress();
+                ByteArrayWrapper baw = new ByteArrayWrapper(address);
+                addressSetWrapper.add(baw);
+            }
+        }
+        Set<byte[]> addressSet = new HashSet<>();
+        Iterator<ByteArrayWrapper> it = addressSetWrapper.iterator();
+        while (it.hasNext()){
+            addressSet.add(it.next().getBytes());
         }
         return addressSet;
     }
