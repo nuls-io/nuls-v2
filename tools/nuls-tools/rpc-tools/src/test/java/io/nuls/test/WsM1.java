@@ -100,7 +100,7 @@ public class WsM1 {
             Thread.sleep(5000);
         }
 
-        CmdDispatcher.unsubscribe(messageId, "getHeight");
+        CmdDispatcher.unsubscribe(messageId);
         System.out.println("我已经取消了订阅");
 
         Thread.sleep(3000);

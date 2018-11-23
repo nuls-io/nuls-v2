@@ -111,6 +111,10 @@ public class CmdDispatcher {
         Log.info("Request:" + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
+        if (subscriptionPeriod > 0) {
+            ClientRuntime.msgIdKeyWsClientMap.put(messageId, wsClient);
+        }
+
         return messageId;
     }
 
@@ -119,17 +123,15 @@ public class CmdDispatcher {
      * A call that responds only once does not need to be cancelled
      *
      * @param messageId Request message ID
-     * @param cmd       Request command
      */
-    public static void unsubscribe(int messageId, String cmd) throws Exception {
+    public static void unsubscribe(int messageId) throws Exception {
         Message message = CmdHandler.basicMessage(messageId, MessageType.Unsubscribe);
         Unsubscribe unsubscribe = new Unsubscribe();
-        unsubscribe.setUnsubscribeMethods(new String[]{messageId + cmd});
+        unsubscribe.setUnsubscribeMethods(new String[]{messageId + ""});
         message.setMessageData(unsubscribe);
 
-        String uri = ClientRuntime.getRemoteUri(cmd);
-        if (uri != null) {
-            WsClient wsClient = ClientRuntime.getWsClient(uri);
+        WsClient wsClient = ClientRuntime.msgIdKeyWsClientMap.get(messageId);
+        if (wsClient != null) {
             wsClient.send(JSONUtils.obj2json(message));
         }
     }
@@ -181,6 +183,43 @@ public class CmdDispatcher {
         } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
 
         return JSONUtils.obj2json(ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.RESPONSE_TIMEOUT));
+    }
+
+    /**
+     * Get response by messageId
+     */
+    public static Response callValueWithResponse(int messageId) throws InterruptedException, IOException {
+
+        if (messageId < 0) {
+            return ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.CMD_NOT_FOUND);
+        }
+
+        long timeMillis = System.currentTimeMillis();
+        do {
+
+            for (Map map : ClientRuntime.CALLED_VALUE_QUEUE) {
+                Message message = JSONUtils.map2pojo(map, Message.class);
+                MessageType messageType = MessageType.valueOf(message.getMessageType());
+                switch (messageType) {
+                    case Response:
+                        Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
+                        if (response.getRequestId() == messageId) {
+                            synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
+                                ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
+                            }
+                            Log.info("Response:" + JSONUtils.obj2json(response));
+                            return response;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+        } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
+
+        return ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.RESPONSE_TIMEOUT);
     }
 
 
