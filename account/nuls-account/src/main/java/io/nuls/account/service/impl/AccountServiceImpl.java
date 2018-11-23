@@ -90,7 +90,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public List<Account> createAccount(short chainId, int count, String password) {
+    public List<Account> createAccount(int chainId, int count, String password) {
         //check params
         if (chainId <= 0 || count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
@@ -139,7 +139,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public Account getAccount(short chainId, String address) {
+    public Account getAccount(int chainId, String address) {
         //check params
         if (!AddressTool.validAddress(chainId, address)) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
@@ -176,7 +176,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
                 accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
             }
         }
-        ////sort by createTime desc
+        //sort by createTime desc
         Collections.sort(list, (Account o1, Account o2) -> (o2.getCreateTime().compareTo(o1.getCreateTime())));
         return list;
     }
@@ -187,7 +187,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
      *
      * @return Account
      */
-    private Account getAccountByAddress(short chainId, String address) {
+    private Account getAccountByAddress(int chainId, String address) {
         //check params
         if (!AddressTool.validAddress(chainId, address)) {
             return null;
@@ -211,7 +211,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
      * Nov.10th 2018
      */
     @Override
-    public boolean setPassword(short chainId, String address, String password) {
+    public boolean setPassword(int chainId, String address, String password) {
         //check if the account is legal
         if (!AddressTool.validAddress(chainId, address)) {
             Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
@@ -253,7 +253,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public boolean changePassword(short chainId, String address, String oldPassword, String newPassword) {
+    public boolean changePassword(int chainId, String address, String oldPassword, String newPassword) {
         //check params
         if (!AddressTool.validAddress(chainId, address)) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
@@ -305,7 +305,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public String setOfflineAccountPassword(short chainId, String address, String priKey, String password) {
+    public String setOfflineAccountPassword(int chainId, String address, String priKey, String password) {
         //check params
         if (StringUtils.isBlank(address) || !AddressTool.validAddress(chainId, address)) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
@@ -332,7 +332,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public String changeOfflinePassword(short chainId, String address, String priKey, String oldPassword, String newPassword) {
+    public String changeOfflinePassword(int chainId, String address, String priKey, String oldPassword, String newPassword) {
         //check params
         if (StringUtils.isBlank(address) || !AddressTool.validAddress(chainId, address)) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
@@ -379,7 +379,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
      * Nov.10th 2018
      */
     @Override
-    public boolean isEncrypted(short chainId, String address) {
+    public boolean isEncrypted(int chainId, String address) {
         //check if the account is legal
         if (!AddressTool.validAddress(chainId, address)) {
             Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
@@ -397,7 +397,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public boolean removeAccount(short chainId, String address, String password) {
+    public boolean removeAccount(int chainId, String address, String password) {
         //check params
         if (!AddressTool.validAddress(chainId, address)) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
@@ -433,7 +433,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public boolean setRemark(short chainId, String address, String remark) {
+    public boolean setRemark(int chainId, String address, String remark) {
         //check whether the account exists
         Account account = this.getAccountByAddress(chainId, address);
         if (null == account) {
@@ -455,7 +455,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public String getPrivateKey(short chainId, String address, String password) {
+    public String getPrivateKey(int chainId, String address, String password) {
         //check whether the account exists
         Account account = this.getAccountByAddress(chainId, address);
         if (null == account) {
@@ -476,7 +476,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public List<String> getAllPrivateKey(short chainId, String password) {
+    public List<String> getAllPrivateKey(int chainId, String password) {
         //Query all accounts list
         List<Account> localAccountList = this.getAccountList();
         if (localAccountList == null || localAccountList.isEmpty()) {
@@ -521,7 +521,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public Account importAccountByPrikey(short chainId, String prikey, String password, boolean overwrite) throws NulsException {
+    public Account importAccountByPrikey(int chainId, String prikey, String password, boolean overwrite) throws NulsException {
         //check params
         if (!ECKey.isValidPrivteHex(prikey)) {
             throw new NulsRuntimeException(AccountErrorCode.PRIVATE_KEY_WRONG);
@@ -569,7 +569,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public Account importAccountByKeyStore(AccountKeyStore keyStore, short chainId, String password, boolean overwrite) throws NulsException {
+    public Account importAccountByKeyStore(AccountKeyStore keyStore, int chainId, String password, boolean overwrite) throws NulsException {
         //check params
         if (null == keyStore || StringUtils.isBlank(keyStore.getAddress())) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);

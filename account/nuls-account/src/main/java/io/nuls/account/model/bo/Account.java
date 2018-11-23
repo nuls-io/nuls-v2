@@ -49,7 +49,7 @@ public class Account implements Serializable {
     /**
      * chain id
      */
-    private short chainId;
+    private int chainId;
 
     /**
      * 账户地址
@@ -253,11 +253,11 @@ public class Account implements Serializable {
         return account;
     }
 
-    public short getChainId() {
+    public int getChainId() {
         return chainId;
     }
 
-    public void setChainId(short chainId) {
+    public void setChainId(int chainId) {
         this.chainId = chainId;
     }
 

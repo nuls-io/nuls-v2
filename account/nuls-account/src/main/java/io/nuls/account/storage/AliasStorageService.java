@@ -39,7 +39,7 @@ public interface AliasStorageService {
      * @auther EdwardChan
      * @date Nov.9th 2018
      */
-    List<AliasPo> getAliasList(short chainId);
+    List<AliasPo> getAliasList(int chainId);
 
 
     /**
@@ -49,7 +49,7 @@ public interface AliasStorageService {
      * @param alias
      * @return aliasPo
      */
-    AliasPo getAlias(short chainId, String alias);
+    AliasPo getAlias(int chainId, String alias);
 
 
     /**
@@ -59,7 +59,7 @@ public interface AliasStorageService {
      * @param address
      * @return
      */
-    AliasPo getAliasByAddress(short chainId, String address);
+    AliasPo getAliasByAddress(int chainId, String address);
 
     /**
      * save the alias
@@ -72,6 +72,6 @@ public interface AliasStorageService {
     /**
      * remove Alias by chainId and alias
      */
-    boolean removeAlias(short chainId, String alias);
+    boolean removeAlias(int chainId, String alias);
 
 }

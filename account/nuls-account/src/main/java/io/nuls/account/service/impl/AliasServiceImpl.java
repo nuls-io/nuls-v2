@@ -77,7 +77,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public Result<String> setAlias(short chainId, String address, String password, String aliasName) {
+    public Result<String> setAlias(int chainId, String address, String password, String aliasName) {
         return null;
     }
 
@@ -87,7 +87,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public String getAliasByAddress(short chainId, String address) {
+    public String getAliasByAddress(int chainId, String address) {
         //check if the account is legal
         if (!AddressTool.validAddress(chainId, address)) {
             Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
@@ -102,17 +102,17 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public boolean isAliasUsable(short chainId, String alias) {
+    public boolean isAliasUsable(int chainId, String alias) {
         return null == aliasStorageService.getAlias(chainId, alias);
     }
 
     @Override
-    public String setMultiSigAlias(short chainId, String address, String signAddress, String password, String alias) {
+    public String setMultiSigAlias(int chainId, String address, String signAddress, String password, String alias) {
         return null;
     }
 
     @Override
-    public List<Transaction> accountTxValidate(short chainId, List<Transaction> txList) {
+    public List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) {
         Set<Transaction> result = new HashSet<>();
         if (null == txList || txList.isEmpty()) {
             return new ArrayList<>(result);
@@ -153,7 +153,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public boolean aliasTxValidate(short chainId, AliasTransaction transaction) {
+    public boolean aliasTxValidate(int chainId, AliasTransaction transaction) {
         Alias alias = new Alias();
         try {
             alias.parse(transaction.getTxData(), 0);
