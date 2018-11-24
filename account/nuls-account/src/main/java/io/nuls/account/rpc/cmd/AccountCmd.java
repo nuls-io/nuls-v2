@@ -1,7 +1,8 @@
 package io.nuls.account.rpc.cmd;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
+import io.nuls.account.constant.RpcConstant;
+import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
@@ -56,23 +57,24 @@ public class AccountCmd extends BaseCmd {
         List<String> list = new ArrayList<>();
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object countObj = params == null ? null : params.get(RpcParameterNameConstant.COUNT);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            if (params == null || chainIdObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //创建账户个数
-            Integer count = params.get("count") != null ? (Integer) params.get("count") : 0;
+            int count = countObj != null ? (int) countObj : 0;
             //账户密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
             //创建账户
             List<Account> accountList = accountService.createAccount(chainId, count, password);
             if (accountList != null) {
                 accountList.forEach(account -> list.add(account.getAddress().toString()));
-                //map.put("list", list);
             }
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
@@ -94,18 +96,20 @@ public class AccountCmd extends BaseCmd {
         Map<String, List<AccountOfflineDto>> map = new HashMap<>();
         List<AccountOfflineDto> accounts = new ArrayList<>();
         try {
-            // check parameters size
-            if (params == null || params.get("chainId") == null) {
+            // check parameters
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object countObj = params == null ? null : params.get(RpcParameterNameConstant.COUNT);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            if (params == null || chainIdObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //创建账户个数
-            Integer count = params.get("count") != null ? (Integer) params.get("count") : 0;
+            int count = countObj != null ? (int) countObj : 0;
             //账户密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
 
             //Check parameter is correct.
             if (count <= 0 || count > AccountTool.CREATE_MAX_SIZE) {
@@ -126,7 +130,6 @@ public class AccountCmd extends BaseCmd {
             } catch (NulsException e) {
                 throw e;
             }
-            //map.put("list", accounts);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         } catch (NulsException e) {
@@ -149,15 +152,16 @@ public class AccountCmd extends BaseCmd {
         Account account;
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            if (params == null || chainIdObj == null || addressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户地址
-            String address = params.get("address") != null ? (String) params.get("address") : null;
+            String address = (String) addressObj;
             //根据地址查询账户
             account = accountService.getAccount(chainId, address);
             if (null == account) {
@@ -189,7 +193,6 @@ public class AccountCmd extends BaseCmd {
                 return success(null);
             }
             accountList.forEach(account -> simpleAccountList.add(new SimpleAccountDto((account))));
-            //map.put("list", simpleAccountList);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
@@ -209,18 +212,20 @@ public class AccountCmd extends BaseCmd {
         Log.debug("ac_getAddressList start");
         Page<String> resultPage;
         try {
-            // check parameters size
-            if (params == null || params.get("chainId") == null || params.get("pageNumber") == null || params.get("pageSize") == null) {
+            // check parameters
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object pageNumberObj = params == null ? null : params.get(RpcParameterNameConstant.PAGE_NUMBER);
+            Object pageSizeObj = params == null ? null : params.get(RpcParameterNameConstant.PAGE_SIZE);
+            if (params == null || chainIdObj == null || pageNumberObj == null || pageSizeObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //页码
-            Integer pageNumber = params.get("pageNumber") != null ? (Integer) params.get("pageNumber") : 0;
+            Integer pageNumber = pageNumberObj != null ? (Integer) pageNumberObj : 0;
             //每页显示数量
-            Integer pageSize = params.get("pageSize") != null ? (Integer) params.get("pageSize") : 0;
+            Integer pageSize = pageSizeObj != null ? (Integer) pageSizeObj : 0;
 
             if (chainId <= 0 || pageNumber < 1 || pageSize < 1) {
                 throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
@@ -268,17 +273,19 @@ public class AccountCmd extends BaseCmd {
         boolean result;
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            if (params == null || chainIdObj == null || addressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户地址
-            String address = params.get("address") != null ? (String) params.get("address") : null;
+            String address = (String) addressObj;
             //账户密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
 
             //Remove specified account
             result = accountService.removeAccount(chainId, address, password);
@@ -287,7 +294,7 @@ public class AccountCmd extends BaseCmd {
         }
         Log.debug("ac_removeAccount end");
         Map<String, Boolean> map = new HashMap<>();
-        map.put("value", result);
+        map.put(RpcConstant.VALUE, result);
         return success(map);
     }
 
@@ -305,17 +312,19 @@ public class AccountCmd extends BaseCmd {
         String unencryptedPrivateKey;
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            if (params == null || chainIdObj == null || addressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户地址
-            String address = params.get("address") != null ? (String) params.get("address") : null;
+            String address = (String) addressObj;
             //账户密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
 
             //Get the account private key
             unencryptedPrivateKey = accountService.getPrivateKey(chainId, address, password);
@@ -344,15 +353,16 @@ public class AccountCmd extends BaseCmd {
         List<String> privateKeyList = new ArrayList<>();
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            if (params == null || chainIdObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
 
             //Get the account private key
             privateKeyList = accountService.getAllPrivateKey(chainId, password);
@@ -380,21 +390,23 @@ public class AccountCmd extends BaseCmd {
         boolean result;
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.REMARK);
+            if (params == null || chainIdObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户地址
-            String address = params.get("address") != null ? (String) params.get("address") : null;
+            String address = (String) addressObj;
             //账户备注
-            String remark = params.get("remark") != null ? (String) params.get("remark") : null;
+            String remark = (String) remarkObj;
 
             //Get the account private key
             result = accountService.setRemark(chainId, address, remark);
-            map.put("value", result);
+            map.put(RpcConstant.VALUE, result);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
@@ -415,22 +427,25 @@ public class AccountCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("priKey") == null || params.get("overwrite") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object priKeyObj = params == null ? null : params.get(RpcParameterNameConstant.PRIKEY);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            Object overwriteObj = params == null ? null : params.get(RpcParameterNameConstant.OVERWRITE);
+            if (params == null || chainIdObj == null || priKeyObj == null || overwriteObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户私钥
-            String priKey = params.get("priKey") != null ? (String) params.get("priKey") : null;
+            String priKey = (String) priKeyObj;
             //账户密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
             //账户存在时是否覆盖
-            Boolean overwrite = params.get("overwrite") != null ? (Boolean) params.get("overwrite") : null;
+            Boolean overwrite = (Boolean) overwriteObj;
             //导入账户
             Account account = accountService.importAccountByPrikey(chainId, priKey, password, overwrite);
-            map.put("address", account.getAddress().toString());
+            map.put(RpcConstant.ADDRESS, account.getAddress().toString());
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         } catch (NulsException e) {
@@ -454,19 +469,22 @@ public class AccountCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("keyStore") == null || params.get("overwrite") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object keyStoreObj = params == null ? null : params.get(RpcParameterNameConstant.KEYSTORE);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            Object overwriteObj = params == null ? null : params.get(RpcParameterNameConstant.OVERWRITE);
+            if (params == null || chainIdObj == null || keyStoreObj == null || overwriteObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //keyStore HEX编码
-            String keyStore = params.get("keyStore") != null ? (String) params.get("keyStore") : null;
+            String keyStore = (String) keyStoreObj;
             //账户密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
             //账户存在时是否覆盖
-            Boolean overwrite = params.get("overwrite") != null ? (Boolean) params.get("overwrite") : null;
+            Boolean overwrite = (Boolean) overwriteObj;
 
             AccountKeyStoreDto accountKeyStoreDto;
             try {
@@ -500,22 +518,24 @@ public class AccountCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            Object filePathObj = params == null ? null : params.get(RpcParameterNameConstant.FILE_PATH);
+            if (params == null || chainIdObj == null || addressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
-            //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户地址
-            String address = params.get("address") != null ? (String) params.get("address") : null;
+            String address = (String) addressObj;
             //账户密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
             //文件备份地址
-            String filePath = params.get("filePath") != null ? (String) params.get("filePath") : null;
+            String filePath = (String) filePathObj;
             //backup account to keystore
             String backupFileName = keyStoreService.backupAccountToKeyStore(filePath, chainId, address, password);
-            map.put("path", backupFileName);
+            map.put(RpcConstant.PATH, backupFileName);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
@@ -538,21 +558,23 @@ public class AccountCmd extends BaseCmd {
         boolean result;
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null || params.get("password") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户地址
-            String address = params.get("address") != null ? (String) params.get("address") : null;
+            String address = (String) addressObj;
             //账户密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
 
             //set account password
             result = accountService.setPassword(chainId, address, password);
-            map.put("value", result);
+            map.put(RpcConstant.VALUE, result);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
@@ -574,23 +596,26 @@ public class AccountCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null || params.get("priKey") == null || params.get("password") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object priKeyObj = params == null ? null : params.get(RpcParameterNameConstant.PRIKEY);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            if (params == null || chainIdObj == null || addressObj == null || priKeyObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户地址
-            String address = params.get("address") != null ? (String) params.get("address") : null;
+            String address = (String) addressObj;
             //账户私钥
-            String priKey = params.get("priKey") != null ? (String) params.get("priKey") : null;
+            String priKey = (String) priKeyObj;
             //账户密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
 
             //set account password
             String encryptedPriKey = accountService.setOfflineAccountPassword(chainId, address, priKey, password);
-            map.put("encryptedPriKey", encryptedPriKey);
+            map.put(RpcConstant.ENCRYPTED_PRIKEY, encryptedPriKey);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
@@ -612,23 +637,26 @@ public class AccountCmd extends BaseCmd {
         boolean result;
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null || params.get("password") == null || params.get("newPassword") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            Object newPasswordObj = params == null ? null : params.get(RpcParameterNameConstant.NEW_PASSWORD);
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || newPasswordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户地址
-            String address = params.get("address") != null ? (String) params.get("address") : null;
+            String address = (String) addressObj;
             //账户旧密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
             //账户新密码
-            String newPassword = params.get("newPassword") != null ? (String) params.get("newPassword") : null;
+            String newPassword = (String) newPasswordObj;
 
             //change account password
             result = accountService.changePassword(chainId, address, password, newPassword);
-            map.put("value", result);
+            map.put(RpcConstant.VALUE, result);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
@@ -649,30 +677,34 @@ public class AccountCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null || params.get("priKey") == null || params.get("password") == null || params.get("newPassword") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object priKeyObj = params == null ? null : params.get(RpcParameterNameConstant.PRIKEY);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            Object newPasswordObj = params == null ? null : params.get(RpcParameterNameConstant.NEW_PASSWORD);
+            if (params == null || chainIdObj == null || addressObj == null || priKeyObj == null || passwordObj == null || newPasswordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户地址
-            String address = params.get("address") != null ? (String) params.get("address") : null;
+            String address = (String) addressObj;
             //账户私钥
-            String priKey = params.get("priKey") != null ? (String) params.get("priKey") : null;
+            String priKey = (String) priKeyObj;
             //账户旧密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
             //账户新密码
-            String newPassword = params.get("newPassword") != null ? (String) params.get("newPassword") : null;
+            String newPassword = (String) newPasswordObj;
 
             //set account password
             String encryptedPriKey = accountService.changeOfflinePassword(chainId, address, priKey, password, newPassword);
-            map.put("encryptedPriKey", encryptedPriKey);
+            map.put(RpcConstant.ENCRYPTED_PRIKEY, encryptedPriKey);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
         Log.debug("ac_updateOfflineAccountPassword end");
-        return success( map);
+        return success(map);
     }
 
     /**
@@ -688,18 +720,19 @@ public class AccountCmd extends BaseCmd {
         Map<String, Boolean> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            if (params == null || chainIdObj == null || addressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户地址
-            String address = params.get("address") != null ? (String) params.get("address") : null;
+            String address = (String) addressObj;
             //账户是否加密
             boolean result = accountService.isEncrypted(chainId, address);
-            map.put("value", result);
+            map.put(RpcConstant.VALUE, result);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
@@ -720,18 +753,20 @@ public class AccountCmd extends BaseCmd {
         Map<String, Boolean> map = new HashMap<>(1);
         try {
             // check parameters
-            if (params == null || params.get("chainId") == null || params.get("address") == null || params.get("password") == null) {
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
             // parse params
             //链ID
-            short chainId = 0;
-            chainId += (Integer) params.get("chainId");
+            int chainId = (int) chainIdObj;
             //账户地址
-            String address = params.get("address") != null ? (String) params.get("address") : null;
+            String address = (String) addressObj;
             //账户密码
-            String password = params.get("password") != null ? (String) params.get("password") : null;
+            String password = (String) passwordObj;
 
             //check the account is exist
             Account account = accountService.getAccount(chainId, address);
@@ -740,7 +775,7 @@ public class AccountCmd extends BaseCmd {
             }
             //verify that the account password is correct
             boolean result = account.validatePassword(password);
-            map.put("value", result);
+            map.put(RpcConstant.VALUE, result);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }

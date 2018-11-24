@@ -52,7 +52,7 @@ public interface AliasService {
      * @param aliasName the alias to set
      * @return txhash
      */
-     Result<String> setAlias(short chainId, String address, String password, String aliasName);
+     Result<String> setAlias(int chainId, String address, String password, String aliasName);
 
     /**
      * 获取设置别名交易手续费
@@ -75,7 +75,7 @@ public interface AliasService {
      * <p>
      * Nov.12th 2018
      */
-    String getAliasByAddress(short chainId, String address);
+    String getAliasByAddress(int chainId, String address);
 
     /**
      * check whether the account is usable
@@ -85,7 +85,7 @@ public interface AliasService {
      * @return true is usable,false is unusable
      *
      */
-     boolean isAliasUsable(short chainId, String alias);
+     boolean isAliasUsable(int chainId, String alias);
 
 
     /**
@@ -98,7 +98,7 @@ public interface AliasService {
      * @param alias
      * @return the hash of tx
      **/
-     String setMultiSigAlias(short chainId, String address, String signAddress, String password, String alias);
+     String setMultiSigAlias(int chainId, String address, String signAddress, String password, String alias);
 
     /**
      * accountTxValidate
@@ -113,7 +113,7 @@ public interface AliasService {
      *
      * @return
      */
-     List<Transaction> accountTxValidate(short chainId, List<Transaction> txList);
+     List<Transaction> accountTxValidate(int chainId, List<Transaction> txList);
 
     /**
      * validate the tx of alias
@@ -125,7 +125,7 @@ public interface AliasService {
      * @return the result of validate
      *
      * */
-     boolean aliasTxValidate(short chainId, AliasTransaction transaction);
+     boolean aliasTxValidate(int chainId, AliasTransaction transaction);
 
     /**
      * 别名交易提交

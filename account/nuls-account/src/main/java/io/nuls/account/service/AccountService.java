@@ -50,7 +50,7 @@ public interface AccountService {
      * @param password the password of the accounts.
      * @return the account list created.
      */
-    List<Account> createAccount(short chainId, int count, String password);
+    List<Account> createAccount(int chainId, int count, String password);
 
     /**
      * 根据账户地址字符串获取完整的账户信息
@@ -60,7 +60,7 @@ public interface AccountService {
      * @param address the address of the account you want to query.
      * @return the account.
      */
-    Account getAccount(short chainId, String address);
+    Account getAccount(int chainId, String address);
 
     /**
      * 获取所有账户集合,并放入缓存
@@ -82,7 +82,7 @@ public interface AccountService {
      * <p>
      * Nov.10th 2018
      */
-    boolean setPassword(short chainId, String address, String password);
+    boolean setPassword(int chainId, String address, String password);
 
     /**
      * 根据原密码修改账户密码
@@ -94,7 +94,7 @@ public interface AccountService {
      * @param newPassword
      * @return
      */
-    boolean changePassword(short chainId, String address, String oldPassword, String newPassword);
+    boolean changePassword(int chainId, String address, String oldPassword, String newPassword);
 
     /**
      * 设置离线账户密码
@@ -107,7 +107,7 @@ public interface AccountService {
      * @return encryptedPriKey
      * <p>
      */
-    String setOfflineAccountPassword(short chainId, String address, String priKey, String password);
+    String setOfflineAccountPassword(int chainId, String address, String priKey, String password);
 
     /**
      * 根据原密码修改离线账户密码
@@ -120,7 +120,7 @@ public interface AccountService {
      * @param newPassword
      * @return
      */
-    String changeOfflinePassword(short chainId, String address, String priKey, String oldPassword, String newPassword);
+    String changeOfflinePassword(int chainId, String address, String priKey, String oldPassword, String newPassword);
 
     /**
      * 验证账户是否加密
@@ -133,7 +133,7 @@ public interface AccountService {
      * <p>
      * Nov.10th 2018
      */
-    boolean isEncrypted(short chainId, String address);
+    boolean isEncrypted(int chainId, String address);
 
     /**
      * 移除指定账户
@@ -144,7 +144,7 @@ public interface AccountService {
      * @param password
      * @return
      */
-    public boolean removeAccount(short chainId, String address, String password);
+    boolean removeAccount(int chainId, String address, String password);
 
     /**
      * 为账户设置备注
@@ -155,7 +155,7 @@ public interface AccountService {
      * @param remark
      * @return
      */
-    boolean setRemark(short chainId, String address, String remark);
+    boolean setRemark(int chainId, String address, String remark);
 
     /**
      * 获取账户私钥，只返回加密账户私钥，未加密账户不返回
@@ -167,7 +167,7 @@ public interface AccountService {
      * @param password
      * @return
      */
-    String getPrivateKey(short chainId, String address, String password);
+    String getPrivateKey(int chainId, String address, String password);
 
     /**
      * 获取所有本地账户账户私钥，必须保证所有账户密码一致，
@@ -179,7 +179,7 @@ public interface AccountService {
      * @param password
      * @return
      */
-    List<String> getAllPrivateKey(short chainId, String password);
+    List<String> getAllPrivateKey(int chainId, String password);
 
     /**
      * 根据私钥和密码导入账户
@@ -192,7 +192,7 @@ public interface AccountService {
      * @return
      * @throws NulsException
      */
-    Account importAccountByPrikey(short chainId, String prikey, String password, boolean overwrite) throws NulsException;
+    Account importAccountByPrikey(int chainId, String prikey, String password, boolean overwrite) throws NulsException;
 
     /**
      * 从keyStore导入账户(密码用来验证keystore)
@@ -209,6 +209,6 @@ public interface AccountService {
      * @return the result of the operation.
      * @throws NulsException
      */
-    Account importAccountByKeyStore(AccountKeyStore keyStore, short chainId, String password, boolean overwrite) throws NulsException;
+    Account importAccountByKeyStore(AccountKeyStore keyStore, int chainId, String password, boolean overwrite) throws NulsException;
 
 }

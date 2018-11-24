@@ -58,7 +58,7 @@ public class AccountTool {
 
     public static final int CREATE_MAX_SIZE = 100;
 
-    public static Address newAddress(short chainId, String prikey) {
+    public static Address newAddress(int chainId, String prikey) {
         ECKey key;
         try {
             key = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(prikey)));
@@ -68,15 +68,15 @@ public class AccountTool {
         return newAddress(chainId, key.getPubKey());
     }
 
-    public static Address newAddress(short chainId, ECKey key) {
+    public static Address newAddress(int chainId, ECKey key) {
         return newAddress(chainId, key.getPubKey());
     }
 
-    public static Address newAddress(short chainId, byte[] publicKey) {
+    public static Address newAddress(int chainId, byte[] publicKey) {
         return new Address(chainId, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(publicKey));
     }
 
-    public static Account createAccount(short chainId, String prikey) throws NulsException {
+    public static Account createAccount(int chainId, String prikey) throws NulsException {
         ECKey key = null;
         if (StringUtils.isBlank(prikey)) {
             key = new ECKey();
@@ -99,7 +99,7 @@ public class AccountTool {
         return account;
     }
 
-    public static Account createAccount(short chainId) throws NulsException {
+    public static Account createAccount(int chainId) throws NulsException {
         return createAccount(chainId, null);
     }
 
@@ -110,7 +110,7 @@ public class AccountTool {
      * @param chainId
      * @return
      */
-    public static Address createContractAddress(short chainId) {
+    public static Address createContractAddress(int chainId) {
         ECKey key = new ECKey();
         return new Address(chainId, BaseConstant.CONTRACT_ADDRESS_TYPE, SerializeUtils.sha256hash160(key.getPubKey()));
     }

@@ -79,7 +79,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
 
 
     @Override
-    public String backupAccountToKeyStore(String path, short chainId, String address, String password) {
+    public String backupAccountToKeyStore(String path, int chainId, String address, String password) {
         //export account to keystore
         AccountKeyStore accountKeyStore = this.accountToKeyStore(chainId, address, password);
         //backup keystore files
@@ -94,7 +94,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
      * @param password
      * @return
      */
-    public AccountKeyStore accountToKeyStore(short chainId, String address, String password) {
+    public AccountKeyStore accountToKeyStore(int chainId, String address, String password) {
         //check params
         if (!AddressTool.validAddress(chainId, address)) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);

@@ -27,7 +27,7 @@ public class AliasServiceTest {
 
     protected static AccountService accountService;
     protected static AliasService aliasService;
-    protected short chainId = 12345;
+    protected int chainId = 12345;
     protected String password = "a12345678";
 
     @BeforeClass

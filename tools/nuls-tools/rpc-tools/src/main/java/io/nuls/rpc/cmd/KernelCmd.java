@@ -27,54 +27,10 @@
 
 package io.nuls.rpc.cmd;
 
-import io.nuls.rpc.model.CmdResponse;
-
-import java.util.List;
-
 /**
  * @author tangyi
  */
 public interface KernelCmd {
 
-    /**
-     * receive msg from kernel
-     * @param params：
-     * @return Object
-     */
-    public CmdResponse status(List params);
 
-    /**
-     * shutdown module: after business completed
-     * @param params：
-     * @return Object
-     */
-    public CmdResponse shutdown(List params);
-
-    /**
-     * shutdown module: immediate
-     * @param params：
-     * @return Object
-     */
-    public CmdResponse terminate(List params);
-
-    /**
-     * provide local configuration
-     * @param params：
-     * @return Object
-     */
-    public CmdResponse confGet(List params);
-
-    /**
-     * update local configuration
-     * @param params：
-     * @return Object
-     */
-    public CmdResponse confSet(List params);
-
-    /**
-     * reset local configuration
-     * @param params：
-     * @return Object
-     */
-    public CmdResponse confReset(List params);
 }

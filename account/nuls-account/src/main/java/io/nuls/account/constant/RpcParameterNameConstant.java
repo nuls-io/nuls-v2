@@ -47,4 +47,56 @@ public interface RpcParameterNameConstant {
      * alias
      */
     String ALIAS = "alias";
+
+    /**
+     * password
+     */
+    String PASSWORD = "password";
+
+    /**
+     * newPassword
+     */
+    String NEW_PASSWORD = "newPassword";
+
+    /**
+     * priKey
+     */
+    String PRIKEY = "priKey";
+
+    /**
+     * remark
+     */
+    String REMARK = "remark";
+
+    /**
+     * count
+     */
+    String COUNT = "count";
+
+    /**
+     * overwrite
+     */
+    String OVERWRITE = "overwrite";
+
+    /**
+     * filePath
+     */
+    String FILE_PATH = "filePath";
+
+    /**
+     * keyStore
+     */
+    String KEYSTORE = "keyStore";
+
+    /**
+     * pageNumber
+     */
+    String PAGE_NUMBER = "pageNumber";
+
+    /**
+     * pageSize
+     */
+    String PAGE_SIZE = "pageSize";
+
+
 }

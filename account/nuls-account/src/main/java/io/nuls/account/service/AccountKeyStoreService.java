@@ -42,6 +42,6 @@ public interface AccountKeyStoreService {
      * @param password the password of the account key store.
      * @return KeyStore path
      */
-    String backupAccountToKeyStore(String path, short chainId, String address, String password);
+    String backupAccountToKeyStore(String path, int chainId, String address, String password);
 
 }

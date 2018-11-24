@@ -5,6 +5,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.storage.ConfigeService;
 import io.nuls.poc.constant.ConsensusConstant;
+import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
@@ -27,7 +28,12 @@ public class ConfigServiceImpl implements ConfigeService , InitializingBean {
         if(bean == null){
             return  false;
         }
-        return RocksDBService.put(ConsensusConstant.DB_NAME_CONSUME_CONGIF, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(bean));
+        boolean dbSuccess = RocksDBService.put(ConsensusConstant.DB_NAME_CONSUME_CONGIF, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(bean));
+        if(!dbSuccess){
+            return false;
+        }
+        ConfigManager.config_map.put(chainID,bean);
+        return true;
     }
 
     @Override
@@ -44,7 +50,12 @@ public class ConfigServiceImpl implements ConfigeService , InitializingBean {
     @Override
     public boolean delete(int chainID) {
         try {
-            return  RocksDBService.delete(ConsensusConstant.DB_NAME_CONSUME_CONGIF,ByteUtils.intToBytes(chainID));
+            boolean dbSuccess = RocksDBService.delete(ConsensusConstant.DB_NAME_CONSUME_CONGIF,ByteUtils.intToBytes(chainID));
+            if(!dbSuccess){
+                return false;
+            }
+            ConfigManager.config_map.remove(chainID);
+            return true;
         }catch (Exception e){
             Log.error(e);
             return  false;

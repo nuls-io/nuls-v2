@@ -66,7 +66,7 @@ public class AliasCmd extends BaseCmd {
     public Object getAliasByAddress(Map params) {
         Log.debug("ac_getAliasByAddress start,params size:{}", params == null ? 0 : params.size());
         String alias;
-        short chainId = 0;
+        int chainId = 0;
         String address;
         try {
             // check parameters
@@ -75,7 +75,7 @@ public class AliasCmd extends BaseCmd {
             if (params == null || chainIdObj == null || addressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            chainId += (Integer) chainIdObj;
+            chainId = (Integer) chainIdObj;
             address = (String) addressObj;
             alias = aliasService.getAliasByAddress(chainId, address);
         } catch (NulsRuntimeException e) {
@@ -101,7 +101,7 @@ public class AliasCmd extends BaseCmd {
     public Object isAliasUsable(Map params) {
         Log.debug("ac_isAliasUsable start,params size:{}", params == null ? 0 : params.size());
         boolean isAliasUsable = false;
-        short chainId = 0;
+        int chainId = 0;
         String alias;
         try {
             // check parameters
@@ -110,7 +110,7 @@ public class AliasCmd extends BaseCmd {
             if (params == null || chainIdObj == null || aliasObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
-            chainId += (Integer) chainIdObj;
+            chainId = (Integer) chainIdObj;
             alias = (String) aliasObj;
             isAliasUsable = aliasService.isAliasUsable(chainId, alias);
         } catch (NulsRuntimeException e) {

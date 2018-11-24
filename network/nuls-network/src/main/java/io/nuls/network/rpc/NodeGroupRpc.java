@@ -35,11 +35,14 @@ import io.nuls.network.model.po.NodeGroupPo;
 import io.nuls.network.model.vo.NodeGroupVo;
 import io.nuls.network.storage.DbService;
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: nuls2.0
@@ -54,69 +57,90 @@ DbService dbService=StorageManager.getInstance().getDbService();
      * nw_createNodeGroup
      * 创建跨链网络
      */
-//    @CmdAnnotation(cmd = "nw_createNodeGroup", version = 1.0)
-    public Response createNodeGroup(List  params) {
+    @CmdAnnotation(cmd = "nw_createNodeGroup", version = 1.0,
+            description = "createNodeGroup")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "magicNumber", parameterType = "long", parameterValidRange = "[1,4294967295]")
+    @Parameter(parameterName = "maxOut", parameterType = "int",parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "maxIn", parameterType = "int",parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "minAvailableCount", parameterType = "int",parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "seedIps", parameterType = "String")
+    @Parameter(parameterName = "isMoonNode", parameterType = "int",parameterValidRange = "[0,1]")
+    public Response createNodeGroup(Map params) {
         List<NodeGroupPo> nodeGroupPos=new ArrayList<>();
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-        long magicNumber = Long.valueOf(String.valueOf(params.get(1)));
-        int maxOut = Integer.valueOf(String.valueOf(params.get(2)));
-        int maxIn = Integer.valueOf(String.valueOf(params.get(3)));
-        int minAvailableCount = Integer.valueOf(String.valueOf(params.get(4)));
-        String seedIps=String.valueOf(params.get(5));
-        int isMoonNode=Integer.valueOf(String.valueOf(params.get(6)));
-        if(0 == isMoonNode){
-          //友链的跨链协议调用
-            NodeGroup nodeGroup= nodeGroupManager.getNodeGroupByMagic(magicNumber);
-            if(null == nodeGroup){
-                Log.info("getNodeGroupByMagic is null");
-                return failed(NetworkErrorCode.PARAMETER_ERROR);
-            }
-            if(chainId != nodeGroup.getChainId()){
-                Log.info("chainId != nodeGroup.getChainId()");
-                return failed(NetworkErrorCode.PARAMETER_ERROR);
-            }
-            nodeGroup.setMaxCrossIn(maxIn);
-            nodeGroup.setMaxCrossOut(maxOut);
-            nodeGroup.setMinAvailableCount(minAvailableCount);
-            List<String> ipList = new ArrayList<>();
-            String [] ips = seedIps.split(NetworkConstant.COMMA);
-            for (String ip : ips) {
-                ipList.add(ip);
-            }
-            NetworkParam.getInstance().setMoonSeedIpList(ipList);
-            nodeGroup.setCrossActive(true);
-//            NodeGroupPo po=(NodeGroupPo)nodeGroup.parseToPo();
-//            nodeGroupPos.add(po);
-            //更新存储
-        }else{
-            //卫星链的跨链协议调用
-            if(!NetworkParam.getInstance().isMoonNode()){
-                Log.info("MoonNode is false，but param isMoonNode is 1");
-                return failed(NetworkErrorCode.PARAMETER_ERROR);
-            }
-            NodeGroup nodeGroup= nodeGroupManager.getNodeGroupByMagic(magicNumber);
-            if(null != nodeGroup){
-                Log.info("getNodeGroupByMagic: nodeGroup  exist");
-                return failed(NetworkErrorCode.PARAMETER_ERROR);
-            }
-
-            nodeGroup = new NodeGroup(magicNumber,chainId,maxIn,maxOut,minAvailableCount,true);
-            nodeGroup.setSelf(false);
-            //存储nodegroup
-            nodeGroupPos.add((NodeGroupPo)nodeGroup.parseToPo());
-            dbService.saveNodeGroups(nodeGroupPos);
-            nodeGroupManager.addNodeGroup(nodeGroup.getChainId(),nodeGroup);
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        long magicNumber = Long.valueOf(String.valueOf(params.get("magicNumber")));
+        int maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
+        int maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
+        int minAvailableCount = Integer.valueOf(String.valueOf(params.get("minAvailableCount")));
+        String seedIps=String.valueOf(params.get("seedIps"));
+        int isMoonNode=Integer.valueOf(String.valueOf(params.get("isMoonNode")));
+        boolean isMoonNet = isMoonNode == 1 ? true : false;
+        //友链创建的是链工厂，isSelf 为true
+        boolean isSelf = isMoonNet? false : true;
+        if(!NetworkParam.getInstance().isMoonNode()){
+            Log.info("MoonNode is false，but param isMoonNode is 1");
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
+        NodeGroup nodeGroup= nodeGroupManager.getNodeGroupByMagic(magicNumber);
+        if(null != nodeGroup){
+            Log.info("getNodeGroupByMagic: nodeGroup  exist");
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
+        }
+        nodeGroup = new NodeGroup(magicNumber,chainId,maxIn,maxOut,minAvailableCount,true);
+        nodeGroup.setSelf(isSelf);
+        //存储nodegroup
+        nodeGroupPos.add((NodeGroupPo)nodeGroup.parseToPo());
+        dbService.saveNodeGroups(nodeGroupPos);
+        nodeGroupManager.addNodeGroup(nodeGroup.getChainId(),nodeGroup);
         // 成功
+        return success();
+    }
+    /**
+     * nw_activeCross
+     * 友链激活跨链
+     */
+    @CmdAnnotation(cmd = "nw_activeCross", version = 1.0,
+            description = "activeCross")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "maxOut", parameterType = "int",parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "maxIn", parameterType = "int",parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "seedIps", parameterType = "String")
+    public Response activeCross(Map  params) {
+        List<NodeGroupPo> nodeGroupPos=new ArrayList<>();
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        int maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
+        int maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
+        String seedIps=String.valueOf(params.get("seedIps"));
+        //友链的跨链协议调用
+        NodeGroup nodeGroup= nodeGroupManager.getNodeGroupByChainId(chainId);
+        if(null == nodeGroup){
+            Log.info("getNodeGroupByMagic is null");
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
+        }if(chainId != nodeGroup.getChainId()){
+            Log.info("chainId != nodeGroup.getChainId()");
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
+        }
+        nodeGroup.setMaxCrossIn(maxIn);
+        nodeGroup.setMaxCrossOut(maxOut);
+        List<String> ipList = new ArrayList<>();
+        String [] ips = seedIps.split(NetworkConstant.COMMA);
+        for (String ip : ips) {
+            ipList.add(ip);
+        }
+        NetworkParam.getInstance().setMoonSeedIpList(ipList);
+        nodeGroup.setCrossActive(true);
         return success();
     }
     /**
      * nw_getGroupByChainId
      * 查看指定网络组信息
      */
-//    @CmdAnnotation(cmd = "nw_getGroupByChainId", version = 1.0, preCompatible = true)
-    public Response getGroupByChainId(List  params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
+    @CmdAnnotation(cmd = "nw_getGroupByChainId", version = 1.0,
+            description = "getGroupByChainId")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    public Response getGroupByChainId(Map  params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
         NodeGroupVo  nodeGroupVo=buildNodeGroupVo(nodeGroup);
         return success(nodeGroupVo );
@@ -147,22 +171,26 @@ DbService dbService=StorageManager.getInstance().getDbService();
      * nw_delNodeGroup
      * 注销指定网络组信息
      */
-//    @CmdAnnotation(cmd = "nw_delNodeGroup", version = 1.0, preCompatible = true)
-    public Response delGroupByChainId(List  params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
+    @CmdAnnotation(cmd = "nw_delNodeGroup", version = 1.0,
+            description = "delGroupByChainId")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    public Response delGroupByChainId(Map  params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         dbService.deleteGroup(chainId);
         dbService.deleteGroupNodeKeys(chainId);
         //删除网络连接
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
         nodeGroup.destroy();
-        return success( null );
+        return success();
     }
 
     /**
      * nw_getSeeds
      * 查询跨链种子节点
      */
-//    @CmdAnnotation(cmd = "nw_getSeeds", version = 1.0, preCompatible = true)
+    @CmdAnnotation(cmd = "nw_getSeeds", version = 1.0,
+            description = "delGroupByChainId")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
     public Response getCrossSeeds(List  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         Log.info("chainId:"+chainId);
@@ -189,8 +217,11 @@ DbService dbService=StorageManager.getInstance().getDbService();
      * 重连网络
      */
 //    @CmdAnnotation(cmd = "nw_reconnect", version = 1.0, preCompatible = true)
-    public Response reconnect(List  params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
+    @CmdAnnotation(cmd = "nw_reconnect", version = 1.0,
+            description = "reconnect")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    public Response reconnect(Map  params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         Log.info("chainId:"+chainId);
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
         nodeGroup.reconnect();
@@ -201,20 +232,27 @@ DbService dbService=StorageManager.getInstance().getDbService();
      * nw_getGroups
      * 重连网络
      */
-//    @CmdAnnotation(cmd = "nw_getGroups", version = 1.0, preCompatible = true)
-    public Response getGroups(List  params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-        Log.info("chainId:"+chainId);
-        int startPage=Integer.valueOf(String.valueOf(params.get(0)));
-        int pageSize=Integer.valueOf(String.valueOf(params.get(1)));
+    @CmdAnnotation(cmd = "nw_getGroups", version = 1.0,
+            description = "getGroups")
+    @Parameter(parameterName = "startPage", parameterType = "int", parameterValidRange = "[0,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "pageSize", parameterType = "int", parameterValidRange = "[0,65535]", parameterValidRegExp = "")
+    public Response getGroups(Map  params) {
+        int startPage=Integer.valueOf(String.valueOf(params.get("startPage")));
+        int pageSize=Integer.valueOf(String.valueOf(params.get("pageSize")));
         List<NodeGroup> nodeGroups=nodeGroupManager.getNodeGroups();
         int total=nodeGroups.size();
         List<NodeGroupVo> pageList=new ArrayList<>();
-        int currIdx = (startPage > 1 ? (startPage -1) * pageSize : 0);
-        for (int i = 0; i < pageSize && i <(total - currIdx); i++){
-            NodeGroup nodeGroup= nodeGroups.get(currIdx + i);
-            NodeGroupVo  nodeGroupVo=buildNodeGroupVo(nodeGroup);
-            pageList.add(nodeGroupVo);
+        if(startPage == 0 && pageSize == 0){
+          for(NodeGroup nodeGroup:nodeGroups){
+              pageList.add(buildNodeGroupVo(nodeGroup));
+          }
+        }else {
+            int currIdx = (startPage > 1 ? (startPage - 1) * pageSize : 0);
+            for (int i = 0; i < pageSize && i < (total - currIdx); i++) {
+                NodeGroup nodeGroup = nodeGroups.get(currIdx + i);
+                NodeGroupVo nodeGroupVo = buildNodeGroupVo(nodeGroup);
+                pageList.add(nodeGroupVo);
+            }
         }
         return success(pageList);
     }

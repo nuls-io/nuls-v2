@@ -29,7 +29,6 @@ package io.nuls.test;
 
 import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.RuntimeInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Ack;
 import io.nuls.rpc.server.WsServer;
@@ -56,7 +55,7 @@ public class WsM1 {
 
     @Test
     public void handshake() throws Exception {
-        RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
+        Constants.kernelUrl = "ws://127.0.0.1:8887";
         System.out.println("handshake:" + CmdDispatcher.handshakeKernel());
     }
 
@@ -78,7 +77,7 @@ public class WsM1 {
         如果不是单元测试，在模块中进行连调测试，下面两句话是不需要的
          */
         // Set kernel url
-        RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
+        Constants.kernelUrl = "ws://127.0.0.1:8887";
 
         // Get information from kernel
         CmdDispatcher.syncKernel();
@@ -94,14 +93,19 @@ public class WsM1 {
         params.put("paramName", "value");
 
         // Call cmd
-        int messageId = CmdDispatcher.request("getHeight11111", params, 5);
+        int messageId = CmdDispatcher.request("getHeight", params, 5);
 
         for (int i = 0; i < 5; i++) {
-            System.out.println(CmdDispatcher.getResponse(messageId));
+            System.out.println(CmdDispatcher.callValue(messageId));
             Thread.sleep(5000);
         }
 
-        CmdDispatcher.unsubscribe(messageId, "getHeight");
+        CmdDispatcher.unsubscribe(messageId);
+        System.out.println("我已经取消了订阅");
+
+        Thread.sleep(3000);
+        // Call cmd
+        System.out.println(CmdDispatcher.requestAndResponse("getHeight", params));
         //Thread.sleep(Integer.MAX_VALUE);
     }
 }

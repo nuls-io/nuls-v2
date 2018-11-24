@@ -31,7 +31,7 @@ import io.nuls.base.data.Na;
 
 /**
  * @author: qinyifeng
- * @description: 调用其他模块RPC常量 call other module RPC constants
+ * @description: RPC常量 RPC constants
  */
 public interface RpcConstant {
 
@@ -54,4 +54,25 @@ public interface RpcConstant {
      * EVENT_SEND_DATA
      */
     String EVENT_SEND_DATA = "data";
+
+    /**
+     * --------[RPC response constants] -------
+     */
+    /**
+     * value
+     */
+    String VALUE = "value";
+    /**
+     * address
+     */
+    String ADDRESS = "address";
+    /**
+     * encryptedPriKey
+     */
+    String ENCRYPTED_PRIKEY = "encryptedPriKey";
+    /**
+     * path
+     */
+    String PATH = "path";
+
 }

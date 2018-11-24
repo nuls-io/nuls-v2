@@ -33,7 +33,7 @@ import static org.junit.Assert.assertTrue;
 public class AccountStorageServiceTest {
 
     protected static AccountStorageService accountStorageService;
-    protected short chainId = 12345;
+    protected int chainId = 12345;
 
     @BeforeClass
     public static void beforeTest() {

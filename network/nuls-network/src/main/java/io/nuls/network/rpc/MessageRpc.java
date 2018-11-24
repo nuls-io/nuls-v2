@@ -31,12 +31,15 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: nuls2.0
@@ -49,13 +52,18 @@ public class MessageRpc extends BaseCmd{
      * nw_broadcast
      * 外部广播接收
      */
-//    @CmdAnnotation(cmd = "nw_broadcast", version = 1.0, preCompatible = true)
-    public Response broadcast(List params) {
+    @CmdAnnotation(cmd = "nw_broadcast", version = 1.0,
+            description = "broadcast message")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "excludeNodes", parameterType = "string")
+    @Parameter(parameterName = "messageBody", parameterType = "string")
+    @Parameter(parameterName = "command", parameterType = "string")
+    public Response broadcast(Map params) {
         try {
-            int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-            String excludeNodes = String.valueOf(params.get(1));
-            byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get(2)));
-            String cmd =String.valueOf(params.get(3));
+            int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+            String excludeNodes = String.valueOf(params.get("excludeNodes"));
+            byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
+            String cmd =String.valueOf(params.get("command"));
             MessageManager messageManager=MessageManager.getInstance();
             long magicNumber = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId).getMagicNumber();
             long checksum = messageManager.getCheckSum(messageBody);
@@ -85,13 +93,18 @@ public class MessageRpc extends BaseCmd{
      * nw_sendPeersMsg
      *
      */
-//    @CmdAnnotation(cmd = "nw_sendPeersMsg", version = 1.0, preCompatible = true)
-    public Response sendPeersMsg(List params) {
+    @CmdAnnotation(cmd = "nw_sendPeersMsg", version = 1.0,
+            description = "send peer message")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "nodes", parameterType = "string")
+    @Parameter(parameterName = "messageBody", parameterType = "string")
+    @Parameter(parameterName = "command", parameterType = "string")
+    public Response sendPeersMsg(Map params) {
         try {
-            int chainId = Integer.valueOf(String.valueOf(params.get(0)));
-            String nodes = String.valueOf(params.get(1));
-            byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get(2)));
-            String cmd =String.valueOf(params.get(3));
+            int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+            String nodes = String.valueOf(params.get("nodes"));
+            byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
+            String cmd =String.valueOf(params.get("command"));
             MessageManager messageManager=MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);

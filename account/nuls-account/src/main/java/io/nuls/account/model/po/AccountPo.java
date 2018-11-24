@@ -49,7 +49,7 @@ public class AccountPo extends BaseNulsData {
 
     private String address;
 
-    private short chainId;
+    private int chainId;
 
     private Long createTime;
 
@@ -110,7 +110,7 @@ public class AccountPo extends BaseNulsData {
     public int size() {
         int size = 0;
         //chainId
-        size += 2;
+        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(address);
         size += SerializeUtils.sizeOfString(alias);
         //createTime
@@ -125,7 +125,7 @@ public class AccountPo extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeShort(chainId);
+        stream.writeUint16(chainId);
         stream.writeString(address);
         stream.writeString(alias);
         stream.writeUint48(createTime);
@@ -138,7 +138,7 @@ public class AccountPo extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readShort();
+        this.chainId = byteBuffer.readUint16();
         this.address = byteBuffer.readString();
         this.alias = byteBuffer.readString();
         this.createTime = byteBuffer.readUint48();
@@ -165,11 +165,11 @@ public class AccountPo extends BaseNulsData {
         this.address = address;
     }
 
-    public short getChainId() {
+    public int getChainId() {
         return chainId;
     }
 
-    public void setChainId(short chainId) {
+    public void setChainId(int chainId) {
         this.chainId = chainId;
     }
 

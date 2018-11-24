@@ -80,7 +80,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
      * @return the aliaspo list
      */
     @Override
-    public List<AliasPo> getAliasList(short chainId) {
+    public List<AliasPo> getAliasList(int chainId) {
         List<AliasPo> aliasPoList = new ArrayList<>();
         try {
             List<byte[]> list = RocksDBService.valueList(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId);
@@ -106,7 +106,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
      * @return AliasPo
      */
     @Override
-    public AliasPo getAlias(short chainId,String alias) {
+    public AliasPo getAlias(int chainId,String alias) {
         if (alias == null || "".equals(alias.trim())) {
             return null;
         }
@@ -126,7 +126,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
     }
 
     @Override
-    public AliasPo getAliasByAddress(short chainId, String address) {
+    public AliasPo getAliasByAddress(int chainId, String address) {
         if (!AddressTool.validAddress(chainId, address)) {
             Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
             return null;
@@ -193,7 +193,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
      */
 
     @Override
-    public boolean removeAlias(short chainId,String alias) {
+    public boolean removeAlias(int chainId,String alias) {
         try {
             return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId, StringUtils.bytes(alias));
         } catch (Exception e) {

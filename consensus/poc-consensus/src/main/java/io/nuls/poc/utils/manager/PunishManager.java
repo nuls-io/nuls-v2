@@ -1,10 +1,7 @@
 package io.nuls.poc.utils.manager;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.BlockExtendsData;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.*;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Evidence;
 import io.nuls.poc.model.bo.consensus.PunishReasonEnum;
@@ -49,7 +46,7 @@ public class PunishManager {
     /**
      * 添加分叉证据
      * */
-    public void addEvidence(int chain_id, BlockHeader firstHeader, BlockHeader secondHeader){
+    public void addEvidenceRecord(int chain_id, BlockHeader firstHeader, BlockHeader secondHeader){
         //找到分叉的节点
         Agent agent = null;
         for (Agent a:ConsensusManager.getInstance().getAllAgentMap().get(chain_id)) {
@@ -69,6 +66,48 @@ public class PunishManager {
         //创建红牌交易
         if(isRedPunish){
             createRedPunishTransaction(chain_id,agent);
+        }
+    }
+
+    /**
+     * 添加双花红牌记录
+     * */
+    public void addDoubleSpendRecord(int chain_id, List<Transaction> txs,Block block){
+        byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey(),(short)chain_id);
+        List<Agent> agentList = ConsensusManager.getInstance().getAllAgentMap().get(chain_id);
+        Agent agent = null;
+        for (Agent a : agentList) {
+            if (a.getDelHeight() > 0) {
+                continue;
+            }
+            if (Arrays.equals(a.getPackingAddress(), packingAddress)) {
+                agent = a;
+                break;
+            }
+        }
+        if(agent == null){
+            return;
+        }
+        try {
+            RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
+            RedPunishData redPunishData = new RedPunishData();
+            redPunishData.setAddress(agent.getAgentAddress());
+            SmallBlock smallBlock = new SmallBlock();
+            smallBlock.setHeader(block.getHeader());
+            smallBlock.setTxHashList(block.getTxHashList());
+            for (Transaction tx : txs) {
+                smallBlock.addBaseTx(tx);
+            }
+            redPunishData.setEvidence(smallBlock.serialize());
+            redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
+            redPunishTransaction.setTxData(redPunishData);
+            redPunishTransaction.setTime(smallBlock.getHeader().getTime());
+            CoinData coinData = ConsensusUtil.getStopAgentCoinData(chain_id, agent, redPunishTransaction.getTime() + ConfigManager.config_map.get(chain_id).getRedPublish_lockTime());
+            redPunishTransaction.setCoinData(coinData);
+            redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
+            redPunishTransactionMap.put(chain_id,redPunishTransaction);
+        }catch (IOException e){
+            Log.error(e);
         }
     }
 

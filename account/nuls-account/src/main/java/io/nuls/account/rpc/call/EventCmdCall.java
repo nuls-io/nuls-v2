@@ -30,8 +30,7 @@ public class EventCmdCall {
             params.put(Constants.VERSION_KEY_STR, RpcConstant.EVENT_SEND_VERSION);
             params.put(RpcConstant.EVENT_SEND_TOPIC, topic);
             params.put(RpcConstant.EVENT_SEND_DATA, data);
-            int messageId = CmdDispatcher.request(RpcConstant.EVENT_SEND_CMD, params);
-            String response = CmdDispatcher.getResponse(messageId);
+            String response = CmdDispatcher.request(RpcConstant.EVENT_SEND_CMD, params);
             Response cmdResp = JSONUtils.json2pojo(response, Response.class);
         } catch (Exception e) {
             e.printStackTrace();

@@ -4,12 +4,21 @@ package io.nuls.poc.model.dto.input;
  * 2018/11/12
  * */
 public class CreateAgentDTO {
+    private int chainId;
     private String agentAddress;
     private String packingAddress;
     private String rewardAddress;
     private double commissionRate;
     private long deposit;
     private String password;
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
 
     public String getAgentAddress() {
         return agentAddress;

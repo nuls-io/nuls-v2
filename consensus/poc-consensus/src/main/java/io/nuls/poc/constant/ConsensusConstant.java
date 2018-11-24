@@ -142,4 +142,14 @@ public interface ConsensusConstant {
      * 信誉值的最小值，小于等于该值会给红牌处罚
      * */
     double RED_PUNISH_CREDIT_VAL = -1D;
+
+    /**
+     * 共识锁定时间
+     * */
+    long CONSENSUS_LOCK_TIME = -1;
+
+    /**
+     * lock of lockTime,(max of int48)(281474976710655L)
+     */
+    long LOCK_OF_LOCK_TIME = -1L ;
 }

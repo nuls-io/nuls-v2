@@ -42,6 +42,8 @@ import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
+import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
@@ -49,9 +51,7 @@ import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 /**
  * 消息管理器，用于收发消息
@@ -138,8 +138,12 @@ public class MessageManager extends BaseManager{
                     //外部消息，转外部接口
                     long magicNum=header.getMagicNumber();
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
-//                    String response = CmdDispatcher.call(header.getCommandStr(), new Object[]{chainId,nodeKey,HexUtil.byteToHex(payLoad)},1.0 );
-//                    Log.info(response);
+                    Map<String,Object> paramMap = new HashMap<>();
+                    paramMap.put("chainId",chainId);
+                    paramMap.put("nodeId",nodeKey);
+                    paramMap.put("messageBody",HexUtil.byteToHex(payLoadBody));
+                    String response = CmdDispatcher.request(header.getCommandStr(),paramMap);
+                    Log.info("response："+response);
                     byteBuffer.setCursor(payLoad.length);
                 }
              }
