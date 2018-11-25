@@ -5,7 +5,6 @@ import io.nuls.rpc.handler.CmdHandler;
 import io.nuls.rpc.info.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.ServerRuntime;
-import io.nuls.rpc.model.ModuleInfo;
 import io.nuls.rpc.model.message.*;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -65,9 +64,10 @@ public class CmdDispatcher {
         Response response = callMessageResponse(messageId);
         Log.info("APIMethods from kernel:" + JSONUtils.obj2json(response));
         Map<String, Object> responseData = (Map) response.getResponseData();
-        for (String key : responseData.keySet()) {
-            ModuleInfo moduleInfo = JSONUtils.json2pojo(JSONUtils.obj2json(responseData.get(key)), ModuleInfo.class);
-            ClientRuntime.remoteModuleMap.put(key, moduleInfo);
+        Map methodMap = (Map) responseData.get("RegisterAPI");
+        Map dependMap = (Map) methodMap.get("Dependencies");
+        for (Object key : dependMap.keySet()) {
+            ClientRuntime.roleMap.put(key.toString(), (Map) dependMap.get(key));
         }
     }
 
@@ -81,8 +81,8 @@ public class CmdDispatcher {
      *
      * @return Result with JSON string
      */
-    public static Response requestAndResponse(String cmd, Map params) throws Exception {
-        String messageId = request(cmd, params, "0");
+    public static Response requestAndResponse(String role, String cmd, Map params) throws Exception {
+        String messageId = request(role, cmd, params, "0");
         return callMessageResponse(messageId);
     }
 
@@ -95,7 +95,7 @@ public class CmdDispatcher {
      *
      * @return Message ID
      */
-    public static String request(String cmd, Map params, String subscriptionPeriod) throws Exception {
+    public static String request(String role, String cmd, Map params, String subscriptionPeriod) throws Exception {
         String messageId = Constants.nextSequence();
         Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
         Request request = defaultRequest();
@@ -103,7 +103,7 @@ public class CmdDispatcher {
         request.getRequestMethods().put(cmd, params);
         message.setMessageData(request);
 
-        String uri = ClientRuntime.getRemoteUri(cmd);
+        String uri = ClientRuntime.getRemoteUri(role);
         if (uri == null) {
             return "-1";
         }

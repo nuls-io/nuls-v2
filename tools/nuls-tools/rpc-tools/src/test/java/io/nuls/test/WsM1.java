@@ -28,6 +28,7 @@
 package io.nuls.test;
 
 import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.info.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Ack;
@@ -64,8 +65,8 @@ public class WsM1 {
     public void startServer() throws Exception {
         // Start server instance
         WsServer.getInstance(ModuleE.CM)
-                .supportedAPIVersions(new String[]{"1.1","1.2"})
-                .moduleRoles("Role_Chain", new String[]{"1.1","1.2"})
+                .supportedAPIVersions(new String[]{"1.1", "1.2"})
+                .moduleRoles(ModuleE.CM.abbr, new String[]{"1.1", "1.2"})
                 .moduleVersion("1.2")
                 .dependencies("Role_Ledger", "1.1")
                 .scanPackage("io.nuls.rpc.cmd.test")
@@ -83,11 +84,7 @@ public class WsM1 {
         单元测试专用：单元测试时需要告知内核地址，以及同步接口列表
         如果不是单元测试，在模块中进行连调测试，下面两句话是不需要的
          */
-        // Set kernel url
-        Constants.kernelUrl = "ws://127.0.0.1:8887";
-
-        // Get information from kernel
-        CmdDispatcher.syncKernel();
+        WsServer.mockModule();
         /*
         单元测试专用结束
          */
@@ -100,7 +97,7 @@ public class WsM1 {
         params.put("paramName", "value");
 
         // Call cmd
-        String messageId = CmdDispatcher.request("getHeight", params, "5");
+        String messageId = CmdDispatcher.request(ClientRuntime.ROLE_CM, "getHeight", params, "5");
 
         for (int i = 0; i < 5; i++) {
             System.out.println(JSONUtils.obj2json(CmdDispatcher.callMessageResponse(messageId)));
@@ -112,7 +109,7 @@ public class WsM1 {
 
         Thread.sleep(3000);
         // Call cmd
-        System.out.println(CmdDispatcher.requestAndResponse("getHeight", params));
+        System.out.println(CmdDispatcher.requestAndResponse(ClientRuntime.ROLE_CM, "getHeight", params));
         //Thread.sleep(Integer.MAX_VALUE);
     }
 }

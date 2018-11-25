@@ -54,6 +54,7 @@ public class Constants {
 
     public static final String KEY_IP = "IP";
     public static final String KEY_PORT = "Port";
+    public static final String KEY_API_VERSION="APIVersion";
 
     /**
      * Message type

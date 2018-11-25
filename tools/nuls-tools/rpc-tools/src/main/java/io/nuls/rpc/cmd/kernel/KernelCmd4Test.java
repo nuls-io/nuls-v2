@@ -31,13 +31,13 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.ModuleInfo;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -56,16 +56,17 @@ public class KernelCmd4Test extends BaseCmd {
         try {
             RegisterApi registerApi = JSONUtils.map2pojo(map, RegisterApi.class);
             if (registerApi != null) {
-                ModuleInfo moduleInfo = new ModuleInfo();
-                String address = (String) registerApi.getConnectionInformation().get(Constants.KEY_IP);
-                int port = Integer.parseInt(registerApi.getConnectionInformation().get(Constants.KEY_PORT));
-                moduleInfo.setAbbr(registerApi.getModuleAbbreviation());
-                moduleInfo.setName(registerApi.getModuleName());
-                moduleInfo.setRegisterApi(registerApi);
-                ClientRuntime.remoteModuleMap.put(registerApi.getModuleName(), moduleInfo);
+                Map<String, Object> role = new HashMap<>(3);
+                role.put(Constants.KEY_IP, registerApi.getConnectionInformation().get(Constants.KEY_IP));
+                role.put(Constants.KEY_PORT, registerApi.getConnectionInformation().get(Constants.KEY_PORT));
+                role.put(Constants.KEY_API_VERSION, registerApi.getSupportedAPIVersions());
+                ClientRuntime.roleMap.put(registerApi.getModuleAbbreviation(), role);
             }
-            System.out.println("Current APIMethods:" + JSONUtils.obj2json(ClientRuntime.remoteModuleMap));
-            return success(ClientRuntime.remoteModuleMap);
+            Map<String, Object> methodMap = new HashMap<>(1);
+            Map<String, Object> dependMap = new HashMap<>(1);
+            dependMap.put("Dependencies", ClientRuntime.roleMap);
+            methodMap.put("RegisterAPI", dependMap);
+            return success(methodMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());

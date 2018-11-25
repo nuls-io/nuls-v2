@@ -177,4 +177,17 @@ public class WsServer extends WebSocketServer {
 
         Thread.sleep(Integer.MAX_VALUE);
     }
+
+    public static void mockModule() throws Exception {
+        WsServer.getInstance(ModuleE.TEST)
+                .supportedAPIVersions(new String[]{"1.0"})
+                .moduleRoles(ModuleE.TEST.abbr, new String[]{"1.0"})
+                .moduleVersion("1.0")
+                .dependencies(ModuleE.CM.abbr, "1.1")
+                .scanPackage("io.nuls.rpc.cmd.test")
+                .connect("ws://127.0.0.1:8887");
+
+        // Get information from kernel
+        CmdDispatcher.syncKernel();
+    }
 }
