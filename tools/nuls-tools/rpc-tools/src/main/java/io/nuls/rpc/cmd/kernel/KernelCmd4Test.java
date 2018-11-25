@@ -29,13 +29,15 @@ package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.ClientRuntime;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.ModuleInfo;
+import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -54,21 +56,28 @@ public class KernelCmd4Test extends BaseCmd {
         try {
             RegisterApi registerApi = JSONUtils.map2pojo(map, RegisterApi.class);
             if (registerApi != null) {
-                ModuleInfo moduleInfo = new ModuleInfo();
-                String address = registerApi.getAddress();
-                int port = registerApi.getPort();
-                moduleInfo.setAddress(address);
-                moduleInfo.setPort(port);
-                moduleInfo.setAbbr(registerApi.getAbbr());
-                moduleInfo.setName(registerApi.getName());
-                moduleInfo.setRegisterApi(registerApi);
-                ClientRuntime.remoteModuleMap.put(registerApi.getName(), moduleInfo);
+                Map<String, Object> role = new HashMap<>(3);
+                role.put(Constants.KEY_IP, registerApi.getConnectionInformation().get(Constants.KEY_IP));
+                role.put(Constants.KEY_PORT, registerApi.getConnectionInformation().get(Constants.KEY_PORT));
+                role.put(Constants.KEY_API_VERSION, registerApi.getSupportedAPIVersions());
+                ClientRuntime.roleMap.put(registerApi.getModuleAbbreviation(), role);
             }
-            System.out.println("Current APIMethods:" + JSONUtils.obj2json(ClientRuntime.remoteModuleMap));
-            return success(ClientRuntime.remoteModuleMap);
+            Map<String, Object> methodMap = new HashMap<>(1);
+            Map<String, Object> dependMap = new HashMap<>(1);
+            dependMap.put("Dependencies", ClientRuntime.roleMap);
+            methodMap.put("RegisterAPI", dependMap);
+            return success(methodMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
         }
     }
+
+    @CmdAnnotation(cmd = "method1", version = 1.0, scope = "private", minEvent = 1, minPeriod = 0,
+            description = "Test method1")
+    @Parameter(parameterName = "param1", parameterType = "string")
+    public Response method1(Map<String, Object> map) {
+        return success();
+    }
+
 }

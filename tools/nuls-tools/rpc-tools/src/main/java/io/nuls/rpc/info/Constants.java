@@ -49,8 +49,12 @@ public class Constants {
     public static final String PUBLIC = "public";
     public static final String PRIVATE = "private";
     public static final String ADMIN = "admin";
-    public static final int RESPONSE_STATUS_SUCCESS = 1;
-    public static final int RESPONSE_STATUS_FAILED = 0;
+    public static final String RESPONSE_STATUS_SUCCESS = "1";
+    public static final String RESPONSE_STATUS_FAILED = "0";
+
+    public static final String KEY_IP = "IP";
+    public static final String KEY_PORT = "Port";
+    public static final String KEY_API_VERSION="APIVersion";
 
     /**
      * Message type
@@ -105,8 +109,8 @@ public class Constants {
     /**
      * get the next call counter(unique identifier)
      */
-    public static int nextSequence() {
-        return SEQUENCE.incrementAndGet();
+    public static String nextSequence() {
+        return SEQUENCE.incrementAndGet() + "";
     }
 
     /**

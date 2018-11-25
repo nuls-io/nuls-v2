@@ -6,34 +6,34 @@ package io.nuls.rpc.model.message;
  * @description
  */
 public class Response {
-    private int requestId;
-    private long responseProcessingTime;
-    private int responseStatus;
+    private String requestId;
+    private String responseProcessingTime;
+    private String responseStatus;
     private String responseComment;
-    private int responseMaxSize;
+    private String responseMaxSize;
     private Object responseData;
 
-    public int getRequestId() {
+    public String getRequestId() {
         return requestId;
     }
 
-    public void setRequestId(int requestId) {
+    public void setRequestId(String requestId) {
         this.requestId = requestId;
     }
 
-    public long getResponseProcessingTime() {
+    public String getResponseProcessingTime() {
         return responseProcessingTime;
     }
 
-    public void setResponseProcessingTime(long responseProcessingTime) {
+    public void setResponseProcessingTime(String responseProcessingTime) {
         this.responseProcessingTime = responseProcessingTime;
     }
 
-    public int getResponseStatus() {
+    public String getResponseStatus() {
         return responseStatus;
     }
 
-    public void setResponseStatus(int responseStatus) {
+    public void setResponseStatus(String responseStatus) {
         this.responseStatus = responseStatus;
     }
 
@@ -45,11 +45,11 @@ public class Response {
         this.responseComment = responseComment;
     }
 
-    public int getResponseMaxSize() {
+    public String getResponseMaxSize() {
         return responseMaxSize;
     }
 
-    public void setResponseMaxSize(int responseMaxSize) {
+    public void setResponseMaxSize(String responseMaxSize) {
         this.responseMaxSize = responseMaxSize;
     }
 

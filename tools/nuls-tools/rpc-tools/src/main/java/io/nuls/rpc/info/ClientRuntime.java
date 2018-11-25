@@ -1,8 +1,6 @@
 package io.nuls.rpc.info;
 
 import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.model.CmdDetail;
-import io.nuls.rpc.model.ModuleInfo;
 import io.nuls.tools.log.Log;
 import org.java_websocket.WebSocket;
 
@@ -19,12 +17,15 @@ import java.util.concurrent.ConcurrentMap;
  * @description
  */
 public class ClientRuntime {
+
+    public static final String ROLE_CM = "cm";
+
     /**
      * remote module information
      * key: module name/code
      * value: moduleInfo(io.nuls.rpc.ModuleInfo)
      */
-    public static ConcurrentMap<String, ModuleInfo> remoteModuleMap = new ConcurrentHashMap<>();
+    public static ConcurrentMap<String, Map> roleMap = new ConcurrentHashMap<>();
 
     /**
      * The response of the cmd invoked through RPC
@@ -62,20 +63,28 @@ public class ClientRuntime {
      * key: messageId
      * value: WsClient
      */
-    public static ConcurrentMap<Integer, WsClient> msgIdKeyWsClientMap = new ConcurrentHashMap<>();
+    public static ConcurrentMap<String, WsClient> msgIdKeyWsClientMap = new ConcurrentHashMap<>();
 
     /**
      * Get the url of the module that provides the cmd through the cmd
      * The resulting url may not be unique, returning all found
      */
-    public static String getRemoteUri(String cmd) {
-        for (ModuleInfo moduleInfo : remoteModuleMap.values()) {
-            for (CmdDetail cmdDetail : moduleInfo.getRegisterApi().getApiMethods()) {
-                if (cmdDetail.getMethodName().equals(cmd)) {
-                    return "ws://" + moduleInfo.getRegisterApi().getAddress() + ":" + moduleInfo.getRegisterApi().getPort();
-                }
-            }
-        }
-        return null;
+    public static String getRemoteUri(String role) {
+//        for (Map role : roleMap.values()) {
+//            for (CmdDetail cmdDetail : moduleInfo.getRegisterApi().getApiMethods()) {
+//                if (cmdDetail.getMethodName().equals(cmd)) {
+//                    String address = (String) moduleInfo.getRegisterApi().getConnectionInformation().get(Constants.KEY_IP);
+//                    int port = Integer.parseInt(moduleInfo.getRegisterApi().getConnectionInformation().get(Constants.KEY_PORT));
+//                    return "ws://" + address + ":" + port;
+//                }
+//            }
+//        }
+//        return null;
+        Map map = roleMap.get(role);
+
+        return map != null
+                ? "ws://" + map.get(Constants.KEY_IP) + ":" + map.get(Constants.KEY_PORT)
+                : null;
+
     }
 }

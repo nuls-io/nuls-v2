@@ -144,8 +144,8 @@ public class ServerRuntime {
                 cmdDetail = new CmdDetail();
                 cmdDetail.setMethodName(cmdAnnotation.cmd());
                 cmdDetail.setMethodDescription(cmdAnnotation.description());
-                cmdDetail.setMethodMinEvent(cmdAnnotation.minEvent());
-                cmdDetail.setMethodMinPeriod(cmdAnnotation.minPeriod());
+                cmdDetail.setMethodMinEvent(cmdAnnotation.minEvent()+"");
+                cmdDetail.setMethodMinPeriod(cmdAnnotation.minPeriod()+"");
                 cmdDetail.setMethodScope(cmdAnnotation.scope());
                 cmdDetail.setVersion(cmdAnnotation.version());
                 cmdDetail.setInvokeClass(method.getDeclaringClass().getName());
@@ -187,12 +187,12 @@ public class ServerRuntime {
     /**
      * Constructing a new Response object
      */
-    public static Response newResponse(int requestId, int status, String comment) {
+    public static Response newResponse(String requestId, String status, String comment) {
         Response response = new Response();
         response.setRequestId(requestId);
         response.setResponseStatus(status);
         response.setResponseComment(comment);
-        response.setResponseMaxSize(0);
+        response.setResponseMaxSize("0");
         return response;
     }
 }

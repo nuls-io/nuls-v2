@@ -36,7 +36,7 @@ public class ModuleInfo {
     private String abbr;
     private String name;
     private String address;
-    private int port;
+    private String port;
     private RegisterApi registerApi;
 
     public ModuleInfo() {
@@ -66,11 +66,11 @@ public class ModuleInfo {
         this.address = address;
     }
 
-    public int getPort() {
+    public String getPort() {
         return port;
     }
 
-    public void setPort(int port) {
+    public void setPort(String port) {
         this.port = port;
     }
 

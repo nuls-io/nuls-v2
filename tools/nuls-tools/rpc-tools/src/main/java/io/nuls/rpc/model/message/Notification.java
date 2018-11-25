@@ -6,16 +6,16 @@ package io.nuls.rpc.model.message;
  * @description
  */
 public class Notification {
-    private int notificationAck;
+    private String notificationAck;
     private String notificationType;
     private String notificationComment;
     private String notificationData;
 
-    public int isNotificationAck() {
+    public String getNotificationAck() {
         return notificationAck;
     }
 
-    public void setNotificationAck(int notificationAck) {
+    public void setNotificationAck(String notificationAck) {
         this.notificationAck = notificationAck;
     }
 
