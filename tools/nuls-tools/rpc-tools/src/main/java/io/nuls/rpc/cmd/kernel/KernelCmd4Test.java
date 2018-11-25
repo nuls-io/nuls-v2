@@ -62,11 +62,11 @@ public class KernelCmd4Test extends BaseCmd {
                 role.put(Constants.KEY_API_VERSION, registerApi.getSupportedAPIVersions());
                 ClientRuntime.roleMap.put(registerApi.getModuleAbbreviation(), role);
             }
-            Map<String, Object> methodMap = new HashMap<>(1);
+//            Map<String, Object> methodMap = new HashMap<>(1);
             Map<String, Object> dependMap = new HashMap<>(1);
             dependMap.put("Dependencies", ClientRuntime.roleMap);
-            methodMap.put("RegisterAPI", dependMap);
-            return success(methodMap);
+//            methodMap.put("RegisterAPI", dependMap);
+            return success(dependMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());

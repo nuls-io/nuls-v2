@@ -55,6 +55,7 @@ public abstract class BaseCmd {
         response.setResponseStatus(Constants.RESPONSE_STATUS_SUCCESS);
         response.setResponseData(responseData);
         response.setResponseComment("Congratulations! Processing completed！");
+        response.setResponseMaxSize("0");
         return response;
     }
 
@@ -62,6 +63,7 @@ public abstract class BaseCmd {
         Response response = new Response();
         response.setResponseStatus(Constants.RESPONSE_STATUS_FAILED);
         response.setResponseData(errorCode);
+        response.setResponseMaxSize("0");
         return response;
     }
 
