@@ -64,7 +64,7 @@ public class CmdDispatcher {
         Response response = callMessageResponse(messageId);
         Log.info("APIMethods from kernel:" + JSONUtils.obj2json(response));
         Map<String, Object> responseData = (Map) response.getResponseData();
-        Map methodMap = (Map) responseData.get("RegisterAPI");
+        Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
         for (Object key : dependMap.keySet()) {
             ClientRuntime.roleMap.put(key.toString(), (Map) dependMap.get(key));
