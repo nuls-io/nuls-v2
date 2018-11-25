@@ -28,7 +28,7 @@ public class CmdDispatcher {
      * Handshake with kernel
      */
     public static boolean handshakeKernel() throws Exception {
-        int messageId = Constants.nextSequence();
+        String messageId = Constants.nextSequence();
         Message message = CmdHandler.basicMessage(messageId, MessageType.NegotiateConnection);
         message.setMessageData(CmdHandler.defaultNegotiateConnection());
 
@@ -49,7 +49,7 @@ public class CmdDispatcher {
      * 这个方法在Berzeck确定了他的最终JSON格式之后还要进行修改
      */
     public static void syncKernel() throws Exception {
-        int messageId = Constants.nextSequence();
+        String messageId = Constants.nextSequence();
         Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
         Request request = defaultRequest();
         request.getRequestMethods().put("registerAPI", ServerRuntime.local.getRegisterApi());
@@ -82,7 +82,7 @@ public class CmdDispatcher {
      * @return Result with JSON string
      */
     public static Response requestAndResponse(String cmd, Map params) throws Exception {
-        int messageId = request(cmd, params, 0);
+        String messageId = request(cmd, params, "0");
         return callMessageResponse(messageId);
     }
 
@@ -95,8 +95,8 @@ public class CmdDispatcher {
      *
      * @return Message ID
      */
-    public static int request(String cmd, Map params, int subscriptionPeriod) throws Exception {
-        int messageId = Constants.SEQUENCE.incrementAndGet();
+    public static String request(String cmd, Map params, String subscriptionPeriod) throws Exception {
+        String messageId = Constants.nextSequence();
         Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
         Request request = defaultRequest();
         request.setSubscriptionPeriod(subscriptionPeriod);
@@ -105,13 +105,13 @@ public class CmdDispatcher {
 
         String uri = ClientRuntime.getRemoteUri(cmd);
         if (uri == null) {
-            return -1;
+            return "-1";
         }
         WsClient wsClient = ClientRuntime.getWsClient(uri);
         Log.info("Request:" + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
-        if (subscriptionPeriod > 0) {
+        if (Integer.parseInt(subscriptionPeriod) > 0) {
             ClientRuntime.msgIdKeyWsClientMap.put(messageId, wsClient);
         }
 
@@ -124,10 +124,10 @@ public class CmdDispatcher {
      *
      * @param messageId Request message ID
      */
-    public static void unsubscribe(int messageId) throws Exception {
+    public static void unsubscribe(String messageId) throws Exception {
         Message message = CmdHandler.basicMessage(messageId, MessageType.Unsubscribe);
         Unsubscribe unsubscribe = new Unsubscribe();
-        unsubscribe.setUnsubscribeMethods(new String[]{messageId + ""});
+        unsubscribe.setUnsubscribeMethods(new String[]{messageId});
         message.setMessageData(unsubscribe);
 
         WsClient wsClient = ClientRuntime.msgIdKeyWsClientMap.get(messageId);
@@ -175,9 +175,9 @@ public class CmdDispatcher {
     /**
      * Get response by messageId
      */
-    public static Response callMessageResponse(int messageId) throws InterruptedException, IOException {
+    public static Response callMessageResponse(String messageId) throws InterruptedException, IOException {
 
-        if (messageId < 0) {
+        if (Integer.parseInt(messageId) < 0) {
             return ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.CMD_NOT_FOUND);
         }
 
@@ -191,7 +191,7 @@ public class CmdDispatcher {
                     }
 
                     Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
-                    if (response.getRequestId() == messageId) {
+                    if (response.getRequestId().equals(messageId)) {
                         ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
                         Log.info("Response:" + JSONUtils.obj2json(response));
                         return response;
@@ -211,11 +211,11 @@ public class CmdDispatcher {
      */
     private static Request defaultRequest() {
         Request request = new Request();
-        request.setRequestAck(0);
-        request.setSubscriptionEventCounter(0);
-        request.setSubscriptionPeriod(0);
-        request.setSubscriptionRange("");
-        request.setResponseMaxSize(0);
+        request.setRequestAck("0");
+        request.setSubscriptionEventCounter("0");
+        request.setSubscriptionPeriod("0");
+        request.setSubscriptionRange("0");
+        request.setResponseMaxSize("0");
         request.setRequestMethods(new HashMap<>(16));
         return request;
     }

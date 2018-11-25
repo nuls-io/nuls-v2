@@ -7,33 +7,33 @@ package io.nuls.rpc.model.message;
  */
 public class Message {
 
-    private int messageId;
-    private long timestamp;
-    private long timezone;
+    private String messageId;
+    private String timestamp;
+    private String timezone;
     private String messageType;
     private Object messageData;
 
-    public int getMessageId() {
+    public String getMessageId() {
         return messageId;
     }
 
-    public void setMessageId(int messageId) {
+    public void setMessageId(String messageId) {
         this.messageId = messageId;
     }
 
-    public long getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
     }
 
-    public long getTimezone() {
+    public String getTimezone() {
         return timezone;
     }
 
-    public void setTimezone(long timezone) {
+    public void setTimezone(String timezone) {
         this.timezone = timezone;
     }
 

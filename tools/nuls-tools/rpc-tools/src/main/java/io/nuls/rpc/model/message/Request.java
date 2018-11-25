@@ -8,34 +8,34 @@ import java.util.Map;
  * @description
  */
 public class Request {
-    private int requestAck;
-    private int subscriptionEventCounter;
-    private int subscriptionPeriod;
+    private String requestAck;
+    private String subscriptionEventCounter;
+    private String subscriptionPeriod;
     private String subscriptionRange;
-    private int responseMaxSize;
+    private String responseMaxSize;
     private Map<String,Object> requestMethods;
 
-    public int isRequestAck() {
+    public String getRequestAck() {
         return requestAck;
     }
 
-    public void setRequestAck(int requestAck) {
+    public void setRequestAck(String requestAck) {
         this.requestAck = requestAck;
     }
 
-    public int getSubscriptionEventCounter() {
+    public String getSubscriptionEventCounter() {
         return subscriptionEventCounter;
     }
 
-    public void setSubscriptionEventCounter(int subscriptionEventCounter) {
+    public void setSubscriptionEventCounter(String subscriptionEventCounter) {
         this.subscriptionEventCounter = subscriptionEventCounter;
     }
 
-    public int getSubscriptionPeriod() {
+    public String getSubscriptionPeriod() {
         return subscriptionPeriod;
     }
 
-    public void setSubscriptionPeriod(int subscriptionPeriod) {
+    public void setSubscriptionPeriod(String subscriptionPeriod) {
         this.subscriptionPeriod = subscriptionPeriod;
     }
 
@@ -47,19 +47,19 @@ public class Request {
         this.subscriptionRange = subscriptionRange;
     }
 
-    public int getResponseMaxSize() {
+    public String getResponseMaxSize() {
         return responseMaxSize;
     }
 
-    public void setResponseMaxSize(int responseMaxSize) {
+    public void setResponseMaxSize(String responseMaxSize) {
         this.responseMaxSize = responseMaxSize;
     }
 
-    public Map<String,Object> getRequestMethods() {
+    public Map<String, Object> getRequestMethods() {
         return requestMethods;
     }
 
-    public void setRequestMethods(Map<String,Object> requestMethods) {
+    public void setRequestMethods(Map<String, Object> requestMethods) {
         this.requestMethods = requestMethods;
     }
 }

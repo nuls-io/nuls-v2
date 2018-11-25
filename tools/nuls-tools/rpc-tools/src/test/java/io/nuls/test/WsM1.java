@@ -51,7 +51,7 @@ public class WsM1 {
         System.out.println(new Ack().toString());
         Ack ack = new Ack("asdfasdf");
         System.out.println(ack.getRequestID());
-        System.out.println(Integer.MAX_VALUE /1000f/  3600f / 24f );
+        System.out.println(Integer.MAX_VALUE / 1000f / 3600f / 24f);
     }
 
     @Test
@@ -63,7 +63,13 @@ public class WsM1 {
     @Test
     public void startServer() throws Exception {
         // Start server instance
-        WsServer.getInstance(ModuleE.CM).setScanPackage("io.nuls.rpc.cmd.test").connect("ws://127.0.0.1:8887");
+        WsServer.getInstance(ModuleE.CM)
+                .supportedAPIVersions(new String[]{"1.1","1.2"})
+                .moduleRoles("Role_Chain", new String[]{"1.1","1.2"})
+                .moduleVersion("1.2")
+                .dependencies("Role_Ledger", "1.1")
+                .scanPackage("io.nuls.rpc.cmd.test")
+                .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
         CmdDispatcher.syncKernel();
@@ -94,7 +100,7 @@ public class WsM1 {
         params.put("paramName", "value");
 
         // Call cmd
-        int messageId = CmdDispatcher.request("getHeight", params, 5);
+        String messageId = CmdDispatcher.request("getHeight", params, "5");
 
         for (int i = 0; i < 5; i++) {
             System.out.println(JSONUtils.obj2json(CmdDispatcher.callMessageResponse(messageId)));

@@ -29,8 +29,10 @@ package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.ClientRuntime;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.ModuleInfo;
+import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.Log;
@@ -55,14 +57,12 @@ public class KernelCmd4Test extends BaseCmd {
             RegisterApi registerApi = JSONUtils.map2pojo(map, RegisterApi.class);
             if (registerApi != null) {
                 ModuleInfo moduleInfo = new ModuleInfo();
-                String address = registerApi.getAddress();
-                int port = registerApi.getPort();
-                moduleInfo.setAddress(address);
-                moduleInfo.setPort(port);
-                moduleInfo.setAbbr(registerApi.getAbbr());
-                moduleInfo.setName(registerApi.getName());
+                String address = (String) registerApi.getConnectionInformation().get(Constants.KEY_IP);
+                int port = Integer.parseInt(registerApi.getConnectionInformation().get(Constants.KEY_PORT));
+                moduleInfo.setAbbr(registerApi.getModuleAbbreviation());
+                moduleInfo.setName(registerApi.getModuleName());
                 moduleInfo.setRegisterApi(registerApi);
-                ClientRuntime.remoteModuleMap.put(registerApi.getName(), moduleInfo);
+                ClientRuntime.remoteModuleMap.put(registerApi.getModuleName(), moduleInfo);
             }
             System.out.println("Current APIMethods:" + JSONUtils.obj2json(ClientRuntime.remoteModuleMap));
             return success(ClientRuntime.remoteModuleMap);
@@ -71,4 +71,12 @@ public class KernelCmd4Test extends BaseCmd {
             return failed(e.getMessage());
         }
     }
+
+    @CmdAnnotation(cmd = "method1", version = 1.0, scope = "private", minEvent = 1, minPeriod = 0,
+            description = "Test method1")
+    @Parameter(parameterName = "param1", parameterType = "string")
+    public Response method1(Map<String, Object> map) {
+        return success();
+    }
+
 }

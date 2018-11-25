@@ -57,12 +57,12 @@ public class CmdHandler {
     /**
      * Build basic message object
      */
-    public static Message basicMessage(int messageId, MessageType messageType) {
+    public static Message basicMessage(String messageId, MessageType messageType) {
         Message message = new Message();
         message.setMessageId(messageId);
         message.setMessageType(messageType.name());
-        message.setTimestamp(TimeService.currentTimeMillis());
-        message.setTimezone(DateUtils.getTimeZone());
+        message.setTimestamp(TimeService.currentTimeMillis() + "");
+        message.setTimezone(DateUtils.getTimeZone() + "");
         return message;
     }
 
@@ -73,7 +73,7 @@ public class CmdHandler {
     public static NegotiateConnection defaultNegotiateConnection() {
         NegotiateConnection negotiateConnection = new NegotiateConnection();
         negotiateConnection.setCompressionAlgorithm("zlib");
-        negotiateConnection.setCompressionRate(0);
+        negotiateConnection.setCompressionRate("0");
         return negotiateConnection;
     }
 
@@ -83,10 +83,10 @@ public class CmdHandler {
      */
     public static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
-        negotiateConnectionResponse.setNegotiationStatus(0);
+        negotiateConnectionResponse.setNegotiationStatus("0");
         negotiateConnectionResponse.setNegotiationComment("Incompatible protocol version");
 
-        Message rspMsg = basicMessage(Constants.nextSequence(), MessageType.NegotiateConnectionResponse);
+        Message rspMsg = basicMessage(Constants.nextSequence() + "", MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
@@ -95,12 +95,12 @@ public class CmdHandler {
      * For Response
      */
     public static boolean response(WebSocket webSocket, Message message) throws Exception {
-        int messageId = message.getMessageId();
+        String messageId = message.getMessageId();
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         Map requestMethods = request.getRequestMethods();
 
         boolean addBack = false;
-        int subscriptionPeriod = request.getSubscriptionPeriod();
+        int subscriptionPeriod = Integer.parseInt(request.getSubscriptionPeriod());
 
         /*
         subscriptionPeriod > 0, means send response every time.
@@ -145,7 +145,7 @@ public class CmdHandler {
             Response response = cmdDetail == null
                     ? ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""))
                     : invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
-            response.setResponseProcessingTime(TimeService.currentTimeMillis() - startTimemillis);
+            response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
             response.setRequestId(messageId);
 
             Message rspMessage = basicMessage(Constants.nextSequence(), MessageType.Response);

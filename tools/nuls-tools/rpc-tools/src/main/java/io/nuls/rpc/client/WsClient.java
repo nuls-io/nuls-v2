@@ -28,6 +28,7 @@
 package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.ClientRuntime;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -60,7 +61,7 @@ public class WsClient extends WebSocketClient {
             /*
              Add to response queue, Waiting for thread pool processing
              */
-            Log.info("Client<" + ServerRuntime.local.getAbbr() + ":" + ServerRuntime.local.getPort() + "> receive:" + paramString);
+            Log.info("Client<" + ServerRuntime.local.getRegisterApi().getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.local.getRegisterApi().getConnectionInformation().get(Constants.KEY_PORT) + "> receive:" + paramString);
             ClientRuntime.CALLED_VALUE_QUEUE.add(JSONUtils.json2map(paramString));
         } catch (IOException e) {
             Log.error(e);

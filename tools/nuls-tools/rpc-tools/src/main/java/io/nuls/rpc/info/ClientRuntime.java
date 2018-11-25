@@ -62,7 +62,7 @@ public class ClientRuntime {
      * key: messageId
      * value: WsClient
      */
-    public static ConcurrentMap<Integer, WsClient> msgIdKeyWsClientMap = new ConcurrentHashMap<>();
+    public static ConcurrentMap<String, WsClient> msgIdKeyWsClientMap = new ConcurrentHashMap<>();
 
     /**
      * Get the url of the module that provides the cmd through the cmd
@@ -72,7 +72,9 @@ public class ClientRuntime {
         for (ModuleInfo moduleInfo : remoteModuleMap.values()) {
             for (CmdDetail cmdDetail : moduleInfo.getRegisterApi().getApiMethods()) {
                 if (cmdDetail.getMethodName().equals(cmd)) {
-                    return "ws://" + moduleInfo.getRegisterApi().getAddress() + ":" + moduleInfo.getRegisterApi().getPort();
+                    String address = (String) moduleInfo.getRegisterApi().getConnectionInformation().get(Constants.KEY_IP);
+                    int port = Integer.parseInt(moduleInfo.getRegisterApi().getConnectionInformation().get(Constants.KEY_PORT));
+                    return "ws://" + address + ":" + port;
                 }
             }
         }

@@ -6,14 +6,14 @@ package io.nuls.rpc.model.message;
  * @description
  */
 public class NegotiateConnectionResponse {
-    private int negotiationStatus;
+    private String negotiationStatus;
     private String negotiationComment;
 
-    public int getNegotiationStatus() {
+    public String getNegotiationStatus() {
         return negotiationStatus;
     }
 
-    public void setNegotiationStatus(int negotiationStatus) {
+    public void setNegotiationStatus(String negotiationStatus) {
         this.negotiationStatus = negotiationStatus;
     }
 
