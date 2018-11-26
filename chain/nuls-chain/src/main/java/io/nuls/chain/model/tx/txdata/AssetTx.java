@@ -7,6 +7,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * @author tangyi
@@ -131,4 +132,8 @@ public class AssetTx extends TransactionLogicData {
         return size;
     }
 
+    @Override
+    public Set<byte[]> getAddresses() {
+        return null;
+    }
 }
