@@ -11,15 +11,11 @@ import java.util.Map;
  * @description
  */
 @ToString
-@AllArgsConstructor
 @NoArgsConstructor
 public class RegisterApi {
     @Getter
     @Setter
     private List<CmdDetail> apiMethods;
-    @Getter
-    @Setter
-    private String[] supportedAPIVersions;
     @Getter
     @Setter
     private Map<String, String> dependencies;

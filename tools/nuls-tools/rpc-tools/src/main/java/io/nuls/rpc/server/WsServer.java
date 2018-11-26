@@ -122,13 +122,13 @@ public class WsServer extends WebSocketServer {
         return wsServer;
     }
 
-    public WsServer supportedAPIVersions(String[] supportedAPIVersions) {
-        ServerRuntime.local.setSupportedAPIVersions(supportedAPIVersions);
+    public WsServer dependencies(String key, String value) {
+        ServerRuntime.local.getDependencies().put(key, value);
         return this;
     }
 
-    public WsServer dependencies(String key, String value) {
-        ServerRuntime.local.getDependencies().put(key, value);
+    public WsServer moduleRoles(String[] value) {
+        ServerRuntime.local.getModuleRoles().put(ServerRuntime.local.getModuleAbbreviation(), value);
         return this;
     }
 
@@ -179,8 +179,7 @@ public class WsServer extends WebSocketServer {
 
     public static void mockModule() throws Exception {
         WsServer.getInstance(ModuleE.TEST)
-                .supportedAPIVersions(new String[]{"1.0"})
-                .moduleRoles(ModuleE.TEST.abbr, new String[]{"1.0"})
+                .moduleRoles(new String[]{"1.0"})
                 .moduleVersion("1.0")
                 .dependencies(ModuleE.CM.abbr, "1.1")
                 .scanPackage("io.nuls.rpc.cmd.test")

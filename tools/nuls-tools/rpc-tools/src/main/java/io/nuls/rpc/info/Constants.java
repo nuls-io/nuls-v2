@@ -49,12 +49,12 @@ public class Constants {
     public static final String PUBLIC = "public";
     public static final String PRIVATE = "private";
     public static final String ADMIN = "admin";
-    public static final String RESPONSE_STATUS_SUCCESS = "1";
-    public static final String RESPONSE_STATUS_FAILED = "0";
+    private static final String BOOLEAN_TRUE = "1";
+    private static final String BOOLEAN_FALSE = "0";
 
     public static final String KEY_IP = "IP";
     public static final String KEY_PORT = "Port";
-    public static final String KEY_API_VERSION="APIVersion";
+    public static final String KEY_API_VERSION = "APIVersion";
 
     /**
      * Message type
@@ -103,7 +103,7 @@ public class Constants {
     /**
      * cmd sequence
      */
-    public static final AtomicInteger SEQUENCE = new AtomicInteger(0);
+    private static final AtomicInteger SEQUENCE = new AtomicInteger(0);
 
 
     /**
@@ -111,6 +111,10 @@ public class Constants {
      */
     public static String nextSequence() {
         return SEQUENCE.incrementAndGet() + "";
+    }
+
+    public static String booleanString(boolean bool) {
+        return bool ? BOOLEAN_TRUE : BOOLEAN_FALSE;
     }
 
     /**

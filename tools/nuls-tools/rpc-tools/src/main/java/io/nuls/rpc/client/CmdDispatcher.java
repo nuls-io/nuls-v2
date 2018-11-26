@@ -176,7 +176,7 @@ public class CmdDispatcher {
     public static Response callMessageResponse(String messageId) throws InterruptedException, IOException {
 
         if (Integer.parseInt(messageId) < 0) {
-            return ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.CMD_NOT_FOUND);
+            return ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.CMD_NOT_FOUND);
         }
 
         long timeMillis = System.currentTimeMillis();
@@ -200,7 +200,7 @@ public class CmdDispatcher {
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
 
-        return ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.RESPONSE_TIMEOUT);
+        return ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.RESPONSE_TIMEOUT);
     }
 
 
