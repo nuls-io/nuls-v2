@@ -39,8 +39,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 /**
- * 连接管理器
- * connection  manager
+ * 连接管理器,连接的启动，停止，连接引用缓存管理
+ * Connection manager, connection start, stop, connection reference cache management
  * @author lan
  * @date 2018/11/01
  *
@@ -58,15 +58,18 @@ public class ConnectionManager extends BaseManager{
 
     /**
      *作为Server 被动连接的peer
+     * Passer as a server passive connection
      */
     private Map<String, Node> cacheConnectNodeInMap=new ConcurrentHashMap<>();
     /**
      * 作为client 主动连接的peer
+     *As the client actively connected peer
      */
     private  Map<String, Node> cacheConnectNodeOutMap=new ConcurrentHashMap<>();
 
     /**
      * Server所有被动连接的IP,通过这个集合判断是否存在过载
+     * As the Server all passively connected IP, through this set to determine whether there is overload
      * Key:ip+"_"+magicNumber  value: connectNumber
      */
     private  Map<String, Integer> cacheConnectGroupIpInMap=new ConcurrentHashMap<>();
@@ -79,28 +82,40 @@ public class ConnectionManager extends BaseManager{
 
     /**
      * 在物理连接断开时时候进行调用
+     * Called when the physical connection is broken
      * @param nodeKey
      * @param nodeType
      */
     public void removeCacheConnectNodeMap(String nodeKey,int nodeType){
-        Node node=null;
-        String ip=nodeKey.split(NetworkConstant.COLON)[0];
-        cacheConnectIpMap.remove(ip);
-        if(Node.OUT == nodeType) {
-              node = cacheConnectNodeOutMap.get(nodeKey);
-              cacheConnectNodeOutMap.remove(nodeKey);
-        }else{
-              node=cacheConnectNodeInMap.get(nodeKey);
-              cacheConnectNodeInMap.remove(nodeKey);
-            List<NodeGroupConnector> list=node.getNodeGroupConnectors();
-            for(NodeGroupConnector nodeGroupConnector:list){
-                subGroupMaxInIp(node, nodeGroupConnector.getMagicNumber(),true);
+        Lockers.NODE_ESTABLISH_CONNECT_LOCK.lock();
+        try {
+            Node node = null;
+            String ip = nodeKey.split(NetworkConstant.COLON)[0];
+            cacheConnectIpMap.remove(ip);
+            if (Node.OUT == nodeType) {
+                node = cacheConnectNodeOutMap.get(nodeKey);
+                cacheConnectNodeOutMap.remove(nodeKey);
+            } else {
+                node = cacheConnectNodeInMap.get(nodeKey);
+                cacheConnectNodeInMap.remove(nodeKey);
+                List<NodeGroupConnector> list = node.getNodeGroupConnectors();
+                for (NodeGroupConnector nodeGroupConnector : list) {
+                    subGroupMaxInIp(node, nodeGroupConnector.getMagicNumber(), true);
+                }
             }
+            node.disConnectNodeChannel();
+        }finally {
+            Lockers.NODE_ESTABLISH_CONNECT_LOCK.unlock();
         }
-        node.disConnectNodeChannel();
     }
 
-
+    /**
+     * 通过连接类型来获取peer连接信息
+     * Get peer connection information by connection type
+     * @param nodeId
+     * @param nodeType
+     * @return
+     */
     public Node getNodeByCache(String nodeId,int nodeType)
     {
         if(Node.OUT == nodeType){
@@ -109,6 +124,14 @@ public class ConnectionManager extends BaseManager{
             return cacheConnectNodeInMap.get(nodeId);
         }
     }
+
+    /**
+     * 通过nodeId来获取peer连接信息，从主动与被动连接缓存中查找
+     *Get peer connection information through nodeId,
+     * find from active and passive connection cache
+     * @param nodeId
+     * @return
+     */
     public Node getNodeByCache(String nodeId)
     {
         if(null != cacheConnectNodeOutMap.get(nodeId)){

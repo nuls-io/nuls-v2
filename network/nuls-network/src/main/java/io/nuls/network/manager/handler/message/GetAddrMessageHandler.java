@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.network.manager.handler;
+package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
@@ -52,7 +52,15 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
     public static GetAddrMessageHandler getInstance() {
         return instance;
     }
-
+    /**
+     *
+     * 接收消息处理
+     * Receive message processing
+     * @param message
+     * @param nodeKey
+     * @param isServer
+     * @return
+     */
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
         Node node = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber()).getConnectNodeMap().get(nodeKey);

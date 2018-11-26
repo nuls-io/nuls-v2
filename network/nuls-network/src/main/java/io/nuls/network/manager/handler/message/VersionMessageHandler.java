@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.network.manager.handler;
+package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.*;
@@ -32,9 +32,9 @@ import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.NodeGroupConnector;
-import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.VerackMessage;
 import io.nuls.network.model.message.VersionMessage;
+import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.VerackMessageBody;
 import io.nuls.network.model.message.body.VersionMessageBody;
 import io.nuls.tools.log.Log;
@@ -135,6 +135,15 @@ public class VersionMessageHandler extends BaseMessageHandler {
         //自我连接
         ConnectionManager.getInstance().selfConnection();
     }
+    /**
+     *
+     * 接收消息处理
+     * Receive message processing
+     * @param message
+     * @param nodeKey
+     * @param isServer
+     * @return
+     */
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
         if(isServer){

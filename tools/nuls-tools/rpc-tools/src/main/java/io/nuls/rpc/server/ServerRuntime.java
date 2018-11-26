@@ -1,5 +1,6 @@
-package io.nuls.rpc.info;
+package io.nuls.rpc.server;
 
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.ScanUtil;
@@ -20,11 +21,11 @@ import java.util.concurrent.ExecutorService;
 public class ServerRuntime {
 
     /**
-     * local module(io.nuls.rpc.ModuleInfo) information
+     * local module(io.nuls.rpc.RegisterApi) information
      */
-    public static ModuleInfo local = new ModuleInfo();
+    public static RegisterApi local = new RegisterApi();
 
-    public static Map<String, Long> cmdInvokeTime = new HashMap<>();
+    static Map<String, Long> cmdInvokeTime = new HashMap<>();
     public static Map<String, Integer> cmdInvokeHeight = new HashMap<>();
 
     /**
@@ -39,12 +40,12 @@ public class ServerRuntime {
      * Array [0] is the Websocket object for communication
      * Array [1] is the content of the communication
      */
-    public static final List<Object[]> REQUEST_QUEUE = Collections.synchronizedList(new ArrayList<>());
+    static final List<Object[]> REQUEST_QUEUE = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * The thread pool object that handles the request
      */
-    public static ExecutorService fixedThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
+    static ExecutorService fixedThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
 
     /**
      * Get local command
@@ -53,12 +54,12 @@ public class ServerRuntime {
      * 2. Forward compatible
      * 3. The highest version that meet conditions 1 and 2 at the same time
      */
-    public static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
+    static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
-        local.getRegisterApi().getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        local.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : local.getRegisterApi().getApiMethods()) {
+        for (CmdDetail cmdDetail : local.getApiMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
@@ -82,12 +83,12 @@ public class ServerRuntime {
      * Sort by version number
      * The highest version
      */
-    public static CmdDetail getLocalInvokeCmd(String cmd) {
+    static CmdDetail getLocalInvokeCmd(String cmd) {
 
-        local.getRegisterApi().getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        local.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : local.getRegisterApi().getApiMethods()) {
+        for (CmdDetail cmdDetail : local.getApiMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
@@ -108,7 +109,7 @@ public class ServerRuntime {
      * Scan the provided package
      * Analysis annotation, register cmd
      */
-    public static void scanPackage(String packageName) throws Exception {
+    static void scanPackage(String packageName) throws Exception {
         if (packageName == null || packageName.length() == 0) {
             return;
         }
@@ -122,7 +123,7 @@ public class ServerRuntime {
                 }
 
                 if (!isRegister(cmdDetail)) {
-                    local.getRegisterApi().getApiMethods().add(cmdDetail);
+                    local.getApiMethods().add(cmdDetail);
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
@@ -174,7 +175,7 @@ public class ServerRuntime {
      */
     private static boolean isRegister(CmdDetail sourceCmdDetail) {
         boolean exist = false;
-        for (CmdDetail cmdDetail : local.getRegisterApi().getApiMethods()) {
+        for (CmdDetail cmdDetail : local.getApiMethods()) {
             if (cmdDetail.getMethodName().equals(sourceCmdDetail.getMethodName()) && cmdDetail.getVersion() == sourceCmdDetail.getVersion()) {
                 exist = true;
                 break;

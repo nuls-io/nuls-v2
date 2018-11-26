@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager.handler;
+package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.manager.NodeGroupManager;
@@ -49,7 +49,15 @@ public class ByeMessageHandler extends BaseMessageHandler {
     public static ByeMessageHandler getInstance() {
         return instance;
     }
-
+    /**
+     *
+     * 接收消息处理
+     * Receive message processing
+     * @param message
+     * @param nodeKey
+     * @param isServer
+     * @return
+     */
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey, boolean isServer) {
         long magicNumber = message.getHeader().getMagicNumber();

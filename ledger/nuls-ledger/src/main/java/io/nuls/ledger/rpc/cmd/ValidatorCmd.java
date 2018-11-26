@@ -2,7 +2,7 @@ package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +22,10 @@ public class ValidatorCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "lg_validateCoinData", version = 1.0, preCompatible = true)
-    public CmdResponse validateCoinData(List params) {
+    @CmdAnnotation(cmd = "lg_validateCoinData",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "test getHeight 1.0")
+    public Response validateCoinData(List params) {
         for (Object param : params) {
             logger.info("param {}", param);
         }
@@ -35,7 +37,7 @@ public class ValidatorCmd extends BaseCmd {
 
         //TODO.. validate
 
-        return success("", "hash");
+        return success("hash");
     }
 
 }

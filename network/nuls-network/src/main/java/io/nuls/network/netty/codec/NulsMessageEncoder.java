@@ -21,31 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.network.netty;
+package io.nuls.network.netty.codec;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.MessageToMessageEncoder;
 
-import java.nio.ByteOrder;
+import java.util.List;
 
 /**
- * @desription:
  * @author: PierreLuo
- * @date: 2018/8/7
+ * @date: 2018/7/30
  */
-public class NulsLengthFieldBasedFrameDecoder extends LengthFieldBasedFrameDecoder {
-
-    public NulsLengthFieldBasedFrameDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip) {
-        super(maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip);
-    }
-
-    public NulsLengthFieldBasedFrameDecoder(ByteOrder byteOrder, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip, boolean failFast) {
-        super(byteOrder, maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip, failFast);
-    }
-
+public class NulsMessageEncoder extends MessageToMessageEncoder<ByteBuf> {
     @Override
-    public Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        return super.decode(ctx, in);
+    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
+        // new protocol
+            out.add(msg.retain());
+
     }
 }

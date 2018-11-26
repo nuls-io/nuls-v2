@@ -25,12 +25,11 @@
  *
  */
 
-package io.nuls.rpc.handler;
+package io.nuls.rpc.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.ServerRuntime;
 import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.message.*;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -73,6 +72,7 @@ public class CmdHandler {
      */
     public static NegotiateConnection defaultNegotiateConnection() {
         NegotiateConnection negotiateConnection = new NegotiateConnection();
+        negotiateConnection.setProtocolVersion("1.0");
         negotiateConnection.setCompressionAlgorithm("zlib");
         negotiateConnection.setCompressionRate("0");
         return negotiateConnection;
@@ -144,14 +144,12 @@ public class CmdHandler {
                     : ServerRuntime.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
             Response response = cmdDetail == null
-                    ? ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""))
+                    ? ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""))
                     : invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
             // 在结果外面自动封装方法名
-//            if (!"registerAPI".equals(method.toString())) {
-                Map<String, Object> responseData = new HashMap<>(1);
-                responseData.put(method.toString(), response.getResponseData());
-                response.setResponseData(responseData);
-//            }
+            Map<String, Object> responseData = new HashMap<>(1);
+            responseData.put(method.toString(), response.getResponseData());
+            response.setResponseData(responseData);
             response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
             response.setRequestId(messageId);
 

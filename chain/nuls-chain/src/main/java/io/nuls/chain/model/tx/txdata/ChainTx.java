@@ -7,6 +7,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * @author tangyi
@@ -204,4 +205,8 @@ public class ChainTx extends TransactionLogicData {
     }
 
 
+    @Override
+    public Set<byte[]> getAddresses() {
+        return null;
+    }
 }

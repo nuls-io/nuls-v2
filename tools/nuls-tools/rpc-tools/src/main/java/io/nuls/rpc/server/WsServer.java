@@ -27,10 +27,9 @@
 
 package io.nuls.rpc.server;
 
-import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
-import io.nuls.rpc.info.ServerRuntime;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.tools.log.Log;
@@ -60,7 +59,7 @@ public class WsServer extends WebSocketServer {
         if (!CmdDispatcher.handshakeKernel()) {
             throw new Exception("Handshake kernel failed");
         } else {
-            Log.info("Handshake success." + ServerRuntime.local.getName() + " ready!");
+            Log.info("Handshake success." + ServerRuntime.local.getModuleName() + " ready!");
         }
     }
 
@@ -75,9 +74,9 @@ public class WsServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket webSocket, String msg) {
         try {
-            Log.info("Server<" + ServerRuntime.local.getAbbr() + ":" + ServerRuntime.local.getPort() + "> receive:" + msg);
+            Log.info("Server<" + ServerRuntime.local.getModuleAbbreviation() + ":" + ServerRuntime.local.getModuleName() + "> receive:" + msg);
             ServerRuntime.REQUEST_QUEUE.add(new Object[]{webSocket, msg});
-            ServerRuntime.fixedThreadPool.execute(new WsProcessor());
+            ServerRuntime.fixedThreadPool.execute(new ServerProcessor());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -90,7 +89,7 @@ public class WsServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-        Log.info("Server<" + ServerRuntime.local.getRegisterApi().getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.local.getRegisterApi().getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
+        Log.info("Server<" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
     }
 
     /**
@@ -118,28 +117,28 @@ public class WsServer extends WebSocketServer {
         registerApi.setApiMethods(new ArrayList<>());
         registerApi.setDependencies(new HashMap<>(16));
         registerApi.setModuleRoles(new HashMap<>(1));
-        ServerRuntime.local.setRegisterApi(registerApi);
+        ServerRuntime.local = registerApi;
 
         return wsServer;
     }
 
-    public WsServer supportedAPIVersions(String[] supportedAPIVersions) {
-        ServerRuntime.local.getRegisterApi().setSupportedAPIVersions(supportedAPIVersions);
+    public WsServer dependencies(String key, String value) {
+        ServerRuntime.local.getDependencies().put(key, value);
         return this;
     }
 
-    public WsServer dependencies(String key, String value) {
-        ServerRuntime.local.getRegisterApi().getDependencies().put(key, value);
+    public WsServer moduleRoles(String[] value) {
+        ServerRuntime.local.getModuleRoles().put(ServerRuntime.local.getModuleAbbreviation(), value);
         return this;
     }
 
     public WsServer moduleRoles(String key, String[] value) {
-        ServerRuntime.local.getRegisterApi().getModuleRoles().put(key, value);
+        ServerRuntime.local.getModuleRoles().put(key, value);
         return this;
     }
 
     public WsServer moduleVersion(String moduleVersion) {
-        ServerRuntime.local.getRegisterApi().setModuleVersion(moduleVersion);
+        ServerRuntime.local.setModuleVersion(moduleVersion);
         return this;
     }
 
@@ -168,7 +167,7 @@ public class WsServer extends WebSocketServer {
         connectionInformation.put(Constants.KEY_PORT, wsServer.getPort() + "");
         registerApi.setConnectionInformation(connectionInformation);
 
-        ServerRuntime.local.setRegisterApi(registerApi);
+        ServerRuntime.local = registerApi;
 
         wsServer.scanPackage("io.nuls.rpc.cmd.kernel").connect("ws://127.0.0.1:8887");
 
@@ -180,8 +179,7 @@ public class WsServer extends WebSocketServer {
 
     public static void mockModule() throws Exception {
         WsServer.getInstance(ModuleE.TEST)
-                .supportedAPIVersions(new String[]{"1.0"})
-                .moduleRoles(ModuleE.TEST.abbr, new String[]{"1.0"})
+                .moduleRoles(new String[]{"1.0"})
                 .moduleVersion("1.0")
                 .dependencies(ModuleE.CM.abbr, "1.1")
                 .scanPackage("io.nuls.rpc.cmd.test")

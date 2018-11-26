@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.network.manager.handler;
+package io.nuls.network.netty.handler;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;

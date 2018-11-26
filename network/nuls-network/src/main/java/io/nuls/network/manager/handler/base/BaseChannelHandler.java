@@ -36,6 +36,12 @@ import io.nuls.network.constant.NetworkParam;
  * @date 2018/11/01
  */
 public abstract class BaseChannelHandler  extends ChannelInboundHandlerAdapter {
+    /**
+     * 通过channel获取nodeId
+     *Get the nodeId through the channel
+     * @param channel
+     * @return
+     */
     protected String getNodeIdByChannel( Channel channel){
         SocketChannel socketChannel = (SocketChannel) channel;
         String remoteIP = socketChannel.remoteAddress().getHostString();
@@ -43,6 +49,12 @@ public abstract class BaseChannelHandler  extends ChannelInboundHandlerAdapter {
         return (remoteIP+":"+port);
     }
 
+    /**
+     * 判断是否跨连连接
+     *Determine whether to connect across connections
+     * @param channel
+     * @return
+     */
     protected boolean isServerCrossConnect(Channel channel){
         SocketChannel socketChannel = (SocketChannel) channel;
         int port=socketChannel.localAddress().getPort();
@@ -53,7 +65,8 @@ public abstract class BaseChannelHandler  extends ChannelInboundHandlerAdapter {
     }
 
     /**
-     * channel校验
+     * 校验channel是否可用
+     * Verify that the channel is available
      * @param ctx
      * @return
      */

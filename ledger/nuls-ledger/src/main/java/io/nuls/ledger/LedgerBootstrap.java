@@ -3,7 +3,8 @@ package io.nuls.ledger;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.config.AppConfig;
 import io.nuls.ledger.db.DataBaseArea;
-import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -41,10 +42,17 @@ public class LedgerBootstrap {
      */
     public static void initServer() {
         try {
-            WsServer server = new WsServer(8956);
-            server.init("ledger", new String[]{}, "io.nuls.ledger.rpc.cmd");
-            server.start();
-            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+            String packageC = "io.nuls.ledger.rpc.cmd";
+            String kernelUrl = AppConfig.moduleConfig.getKernelHost()+":"+AppConfig.moduleConfig.getKernelPort();
+            WsServer.getInstance(ModuleE.LG)
+                    .supportedAPIVersions(new String[]{"1.1", "1.2"})
+                    .moduleRoles(ModuleE.LG.abbr, new String[]{"1.1", "1.2"})
+                    .moduleVersion("1.2")
+                    .dependencies("Role_Ledger", "1.1")
+                    .scanPackage(packageC)
+                    .connect(kernelUrl);
+
+            CmdDispatcher.syncKernel();
         } catch (Exception e) {
             Log.error("ledger initServer failed", e);
         }
