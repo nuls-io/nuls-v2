@@ -5,10 +5,11 @@ import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
 import io.nuls.base.data.Page;
-import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.RuntimeInfo;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
@@ -42,22 +43,7 @@ public class AccountCmdTest {
 
     @BeforeClass
     public static void start() throws Exception {
-        //CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
-        RuntimeInfo.kernelUrl = "ws://127.0.0.1:8887";
-        CmdDispatcher.syncKernel();
-    }
-
-    private void request() {
-        try {
-            // Build params map
-            Map<String, Object> params = new HashMap<>();
-            // Version information ("1.1" or 1.1 is both available)
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            // Call cmd
-            System.out.println(CmdDispatcher.request("getHeight", params));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        WsServer.mockModule();
     }
 
     private List<String> createAccount(int chainId, int count, String password) {
@@ -68,9 +54,8 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("count", count);
             params.put("password", password);
-            String response = CmdDispatcher.request("ac_createAccount", params);
-            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
-            if (AccountConstant.SUCCESS_CODE != cmdResp.getResponseStatus()) {
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
                 return null;
             }
             accountList = (List<String>) cmdResp.getResponseData();
@@ -85,8 +70,7 @@ public class AccountCmdTest {
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
         params.put("address", address);
-        String response = CmdDispatcher.request("ac_getAccountByAddress", params);
-        Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
         SimpleAccountDto accountDto = JSONUtils.json2pojo(JSONUtils.obj2json(cmdResp.getResponseData()), SimpleAccountDto.class);
         return accountDto;
     }
@@ -107,8 +91,7 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", address);
             params.put("password", password);
-            String response = CmdDispatcher.request("ac_getPriKeyByAddress", params);
-            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
             HashMap result = (HashMap) cmdResp.getResponseData();
             priKey = (String) result.get("priKey");
         } catch (Exception e) {
@@ -148,9 +131,9 @@ public class AccountCmdTest {
         params.put("chainId", chainId);
         params.put("count", count);
         params.put("password", password);
-        String response = CmdDispatcher.request("ac_createOfflineAccount", params);
-        Response cmdResp = JSONUtils.json2pojo(response, Response.class);
-        List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(cmdResp.getResponseData()), AccountOfflineDto.class);
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
+        //List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(cmdResp.getResponseData()), AccountOfflineDto.class);
+        List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap)cmdResp.getResponseData()).get("ac_createOfflineAccount")), AccountOfflineDto.class);
         assertEquals(accountList.size(), count);
         for (AccountOfflineDto account : accountList) {
             System.out.println(account.getAddress());
@@ -169,8 +152,7 @@ public class AccountCmdTest {
         params.put("chainId", chainId);
         params.put("address", accountList.get(0));
         params.put("password", password);
-        String response = CmdDispatcher.request("ac_removeAccount", params);
-        Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
         assertTrue(AccountConstant.SUCCESS_CODE == cmdResp.getResponseStatus());
         account = getAccountByAddress(chainId, accountList.get(0));
         assertNull(account);
@@ -185,8 +167,7 @@ public class AccountCmdTest {
 
     @Test
     public void getAccountListTest() throws Exception {
-        String response = CmdDispatcher.request("ac_getAccountList", null);
-        Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountList", null);
         List<SimpleAccountDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(cmdResp.getResponseData()), SimpleAccountDto.class);
         accountList.forEach(account -> System.out.println(account.getAddress()));
     }
@@ -199,22 +180,19 @@ public class AccountCmdTest {
         params.put("chainId", chainId);
         params.put("pageNumber", 1);
         params.put("pageSize", 10);
-        String response = CmdDispatcher.request("ac_getAddressList", params);
-        Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAddressList", params);
         Page<String> resultPage = JSONUtils.json2pojo(JSONUtils.obj2json(cmdResp.getResponseData()), Page.class);
         assertTrue(resultPage.getTotal() > 0);
         resultPage.getList().forEach(System.out::println);
 
         //test paging parameter pageNumber error
         params.put("pageNumber", 1);
-        response = CmdDispatcher.request("ac_getAddressList", params);
-        cmdResp = JSONUtils.json2pojo(response, Response.class);
+        cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAddressList", params);
         assertTrue(AccountConstant.SUCCESS_CODE != cmdResp.getResponseStatus());
         //Test paging parameter pageSize error
         params.put("pageNumber", 1);
         params.put("pageSize", -1);
-        response = CmdDispatcher.request("ac_getAddressList", params);
-        cmdResp = JSONUtils.json2pojo(response, Response.class);
+        cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAddressList", params);
         assertTrue(AccountConstant.SUCCESS_CODE != cmdResp.getResponseStatus());
     }
 
@@ -227,13 +205,11 @@ public class AccountCmdTest {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", 0);
             params.put("password", password);
-            String response = CmdDispatcher.request("ac_getAllPriKey", params);
-            System.out.println(response);
-            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAllPriKey", params);
             List<String> privateKeyAllList = (List<String>) cmdResp.getResponseData();
             //query all accounts privateKey the specified chain
             params.put("chainId", 1);
-            response = CmdDispatcher.request("ac_getAllPriKey", params);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAllPriKey", params);
             List<String> privateKeyList = (List<String>) cmdResp.getResponseData();
             assertTrue(privateKeyList.size() >= accountList.size());
             assertTrue(privateKeyAllList.size() >= privateKeyList.size());
@@ -255,8 +231,7 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", accountList.get(0));
             params.put("password", password);
-            String response = CmdDispatcher.request("ac_getPriKeyByAddress", params);
-            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
             HashMap result = (HashMap) cmdResp.getResponseData();
             assertNotNull(result.get("priKey"));
         } catch (NulsRuntimeException e) {
@@ -278,8 +253,7 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", accountList.get(0));
             params.put("remark", remark);
-            String response = CmdDispatcher.request("ac_setRemark", params);
-            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setRemark", params);
             assertTrue(AccountConstant.SUCCESS_CODE == cmdResp.getResponseStatus());
         } catch (NulsRuntimeException e) {
             e.printStackTrace();
@@ -302,16 +276,13 @@ public class AccountCmdTest {
             params.put("priKey", priKey);
             params.put("password", password);
             params.put("overwrite", true);
-            String response = CmdDispatcher.request("ac_importAccountByPriKey", params);
-            //String response = CmdDispatcher.call("ac_importAccountByPriKey", new Object[]{chainId, priKey, password, true}, version);
-            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             HashMap result = (HashMap) cmdResp.getResponseData();
             String address = (String) result.get("address");
             assertEquals(accountList.get(0), address);
             //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
             params.put("overwrite", false);
-            response = CmdDispatcher.request("ac_importAccountByPriKey", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             assertTrue(AccountConstant.SUCCESS_CODE != cmdResp.getResponseStatus());
 
             //移除账户，再导入 Remove the account and import it according to the private key.
@@ -320,10 +291,9 @@ public class AccountCmdTest {
             params2.put("chainId", chainId);
             params2.put("address", accountList.get(0));
             params2.put("password", password);
-            CmdDispatcher.request("ac_removeAccount", params2);
+            CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params2);
             //账户不存在则创建 If account does not exist, create
-            response = CmdDispatcher.request("ac_importAccountByPriKey", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             assertTrue(AccountConstant.SUCCESS_CODE == cmdResp.getResponseStatus());
 
             //测试未加密账户
@@ -334,8 +304,7 @@ public class AccountCmdTest {
             //账户已存在则覆盖 If the account exists, it covers.
             params.remove("password");
             params.put("overwrite", true);
-            response = CmdDispatcher.request("ac_importAccountByPriKey", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             result = (HashMap) cmdResp.getResponseData();
             address = (String) result.get("address");
             assertEquals(addressx, address);
@@ -372,16 +341,14 @@ public class AccountCmdTest {
             params.put("keyStore", keyStoreHex);
             params.put("password", password);
             params.put("overwrite", true);
-            String response = CmdDispatcher.request("ac_importAccountByKeystore", params);
-            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
             HashMap result = (HashMap) cmdResp.getResponseData();
             String address = (String) result.get("address");
             assertEquals(accountList.get(0), address);
 
             //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
             params.put("overwrite", false);
-            response = CmdDispatcher.request("ac_importAccountByKeystore", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
             assertTrue(AccountConstant.SUCCESS_CODE != cmdResp.getResponseStatus());
 
             //移除账户，再导入 Remove the account and import it according to the private key.
@@ -390,10 +357,9 @@ public class AccountCmdTest {
             params2.put("chainId", chainId);
             params2.put("address", accountList.get(0));
             params2.put("password", password);
-            CmdDispatcher.request("ac_removeAccount", params2);
+            CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params2);
             //账户不存在则创建 If account does not exist, create
-            response = CmdDispatcher.request("ac_importAccountByKeystore", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
             assertTrue(AccountConstant.SUCCESS_CODE == cmdResp.getResponseStatus());
 
             //测试未加密账户
@@ -416,8 +382,7 @@ public class AccountCmdTest {
             params.put("keyStore", keyStoreHex);
             params.remove("password");
             params.put("overwrite", true);
-            response = CmdDispatcher.request("ac_importAccountByKeystore", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
             result = (HashMap) cmdResp.getResponseData();
             address = (String) result.get("address");
             assertEquals(addressx, address);
@@ -444,8 +409,7 @@ public class AccountCmdTest {
             params.put("password", password);
             params.put("pathDir", pathDir);
             //导出账户keystore路径  export account keyStore path
-            String response = CmdDispatcher.request("ac_exportAccountKeyStore", params);
-            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_exportAccountKeyStore", params);
             HashMap result = (HashMap) cmdResp.getResponseData();
             String path = (String) result.get("path");
             assertNotNull(path);
@@ -454,8 +418,7 @@ public class AccountCmdTest {
             pathDir = "测试1/back/up";
             params.put("pathDir", pathDir);
             //导出账户keystore路径  export account keyStore path
-            response = CmdDispatcher.request("ac_exportAccountKeyStore", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_exportAccountKeyStore", params);
             result = (HashMap) cmdResp.getResponseData();
             path = (String) result.get("path");
             assertNotNull(path);
@@ -468,8 +431,7 @@ public class AccountCmdTest {
             params.remove("password");
             params.put("pathDir", pathDir);
             //导出账户keystore路径  export account keyStore path
-            response = CmdDispatcher.request("ac_exportAccountKeyStore", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_exportAccountKeyStore", params);
             result = (HashMap) cmdResp.getResponseData();
             path = (String) result.get("path");
             assertNotNull(path);
@@ -492,15 +454,13 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", address);
             params.put("password", password);
-            String response = CmdDispatcher.request("ac_setPassword", params);
-            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
             HashMap result = (HashMap) cmdResp.getResponseData();
             Boolean value = (Boolean) result.get("value");
             assertTrue(value);
 
             //为账户重复设置密码 Repeat password for account
-            response = CmdDispatcher.request("ac_setPassword", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
             //不能再次设置密码 Password cannot be set again.
             assertTrue(AccountConstant.SUCCESS_CODE != cmdResp.getResponseStatus());
         } catch (Exception e) {
@@ -522,29 +482,25 @@ public class AccountCmdTest {
             params.put("address", address);
             params.put("password", password);
             params.put("newPassword", newPassword);
-            String response = CmdDispatcher.request("ac_updatePassword", params);
-            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_updatePassword", params);
             //未设置密码不能修改密码，必须先设置密码再修改 No password can be changed, password must be set first, then password should be changed.
             assertTrue(AccountConstant.SUCCESS_CODE != cmdResp.getResponseStatus());
 
             //为账户设置密码 set password for account
-            response = CmdDispatcher.request("ac_setPassword", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
             Map result = (HashMap) cmdResp.getResponseData();
             Boolean value = (Boolean) result.get("value");
             assertTrue(value);
 
             //为账户修改密码 change password for account
-            response = CmdDispatcher.request("ac_updatePassword", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_updatePassword", params);
             result = (HashMap) cmdResp.getResponseData();
             value = (Boolean) result.get("value");
             assertTrue(value);
 
             //使用错误旧密码为账户修改密码 using old password to change password for account
             params.put("password", "errorpwd123");
-            response = CmdDispatcher.request("ac_updatePassword", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_updatePassword", params);
             assertTrue(AccountConstant.SUCCESS_CODE != cmdResp.getResponseStatus());
         } catch (Exception e) {
             e.printStackTrace();
@@ -555,7 +511,7 @@ public class AccountCmdTest {
 //    public void setOfflineAccountPasswordTest() {
 //        try {
 //            //创建未加密离线账户 create unencrypted account
-//            String response = CmdDispatcher.call("ac_createOfflineAccount", new Object[]{chainId, 1, null}, version);
+//            Response cmdResp = CmdDispatcher.call("ac_createOfflineAccount", new Object[]{chainId, 1, null}, version);
 //            CmdResponse cmdResp = JSONUtils.json2pojo(response, Response.class);
 //            List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResponseData())).get("list")), AccountOfflineDto.class);
 //            String address = accountList.get(0).getAddress();
@@ -584,7 +540,7 @@ public class AccountCmdTest {
 //    public void updateOfflineAccountPasswordTest() {
 //        try {
 //            //创建未加密离线账户 create unencrypted account
-//            String response = CmdDispatcher.call("ac_createOfflineAccount", new Object[]{chainId, 1, null}, version);
+//            Response cmdResp = CmdDispatcher.call("ac_createOfflineAccount", new Object[]{chainId, 1, null}, version);
 //            CmdResponse cmdResp = JSONUtils.json2pojo(response, Response.class);
 //            List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResponseData())).get("list")), AccountOfflineDto.class);
 //            String address = accountList.get(0).getAddress();
@@ -638,7 +594,7 @@ public class AccountCmdTest {
 //            String address = accountList.get(0);
 //
 //            //验证账户是否加密 verify that the account is encrypted
-//            String response = CmdDispatcher.call("ac_isEncrypted", new Object[]{chainId, address}, version);
+//            Response cmdResp = CmdDispatcher.call("ac_isEncrypted", new Object[]{chainId, address}, version);
 //            CmdResponse cmdResp = JSONUtils.json2pojo(response, Response.class);
 //            HashMap result = (HashMap) cmdResp.getResponseData();
 //            Boolean value = (Boolean) result.get("value");
@@ -676,22 +632,19 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", address);
             params.put("password", password);
-            String response = CmdDispatcher.request("ac_validationPassword", params);
-            Response cmdResp = JSONUtils.json2pojo(response, Response.class);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_validationPassword", params);
             HashMap result = (HashMap) cmdResp.getResponseData();
             Boolean value = (Boolean) result.get("value");
             assertFalse(value);
 
             //为账户设置密码 set password for account
-            response = CmdDispatcher.request("ac_setPassword", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
             result = (HashMap) cmdResp.getResponseData();
             value = (Boolean) result.get("value");
             assertTrue(value);
 
             //验证账户是否正确 verify that the account password is correct
-            response = CmdDispatcher.request("ac_validationPassword", params);
-            cmdResp = JSONUtils.json2pojo(response, Response.class);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_validationPassword", params);
             result = (HashMap) cmdResp.getResponseData();
             value = (Boolean) result.get("value");
             assertTrue(value);

@@ -100,7 +100,11 @@ public interface AccountConstant {
     /**
      * SUCCESS_CODE
      */
-    int SUCCESS_CODE = 1;
+    String SUCCESS_CODE = "1";
+    /**
+     * ERROR_CODE
+     */
+    String ERROR_CODE = "0";
     /**
      * SUCCESS_MSG
      */

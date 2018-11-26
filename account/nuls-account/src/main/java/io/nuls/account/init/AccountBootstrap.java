@@ -3,10 +3,8 @@ package io.nuls.account.init;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountParam;
-import io.nuls.account.constant.AccountStorageConstant;
-import io.nuls.account.service.AccountService;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
@@ -83,11 +81,13 @@ public class AccountBootstrap {
     public static void initServer() {
 
         try {
-//            WsServer s = new WsServer(8888);
-//            s.init("ac", new String[]{}, "io.nuls.account.rpc.cmd");
-//            s.startAndSyncKernel("ws://127.0.0.1:8887");
             // Start server instance
-            WsServer.getInstance(ModuleE.AC).setScanPackage("io.nuls.account.rpc.cmd").connect("ws://127.0.0.1:8887");
+            WsServer.getInstance(ModuleE.AC)
+                    .moduleRoles(new String[]{"1.0"})
+                    .moduleVersion("1.0")
+                    .dependencies(ModuleE.LG.abbr, "1.0")
+                    .scanPackage("io.nuls.account.rpc.cmd")
+                    .connect("ws://127.0.0.1:8887");
 
             // Get information from kernel
             CmdDispatcher.syncKernel();
