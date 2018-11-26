@@ -147,11 +147,9 @@ public class CmdHandler {
                     ? ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""))
                     : invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
             // 在结果外面自动封装方法名
-//            if (!"registerAPI".equals(method.toString())) {
-                Map<String, Object> responseData = new HashMap<>(1);
-                responseData.put(method.toString(), response.getResponseData());
-                response.setResponseData(responseData);
-//            }
+            Map<String, Object> responseData = new HashMap<>(1);
+            responseData.put(method.toString(), response.getResponseData());
+            response.setResponseData(responseData);
             response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
             response.setRequestId(messageId);
 
