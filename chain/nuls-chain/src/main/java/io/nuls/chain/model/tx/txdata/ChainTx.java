@@ -7,7 +7,6 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -24,6 +23,12 @@ public class ChainTx extends TransactionLogicData {
     private int minAvailableNodeNum;
     private int singleNodeMinConnectionNum;
     private byte[] address;
+    private long assetId;
+    private String symbol;
+    private String assetName;
+    private int depositNuls;
+    private long initNumber;
+    private short decimalPlaces;
 
     public int getChainId() {
         return chainId;
@@ -89,6 +94,54 @@ public class ChainTx extends TransactionLogicData {
         this.address = address;
     }
 
+    public long getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(long assetId) {
+        this.assetId = assetId;
+    }
+
+    public String getSymbol() {
+        return symbol;
+    }
+
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public String getAssetName() {
+        return assetName;
+    }
+
+    public void setAssetName(String assetName) {
+        this.assetName = assetName;
+    }
+
+    public int getDepositNuls() {
+        return depositNuls;
+    }
+
+    public void setDepositNuls(int depositNuls) {
+        this.depositNuls = depositNuls;
+    }
+
+    public long getInitNumber() {
+        return initNumber;
+    }
+
+    public void setInitNumber(long initNumber) {
+        this.initNumber = initNumber;
+    }
+
+    public short getDecimalPlaces() {
+        return decimalPlaces;
+    }
+
+    public void setDecimalPlaces(short decimalPlaces) {
+        this.decimalPlaces = decimalPlaces;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
@@ -99,6 +152,12 @@ public class ChainTx extends TransactionLogicData {
         stream.writeUint32(minAvailableNodeNum);
         stream.writeUint32(singleNodeMinConnectionNum);
         stream.writeBytesWithLength(address);
+        stream.writeUint32(assetId);
+        stream.writeString(symbol);
+        stream.writeString(assetName);
+        stream.writeUint16(depositNuls);
+        stream.writeUint32(initNumber);
+        stream.writeShort(decimalPlaces);
     }
 
     @Override
@@ -111,6 +170,12 @@ public class ChainTx extends TransactionLogicData {
         this.minAvailableNodeNum = byteBuffer.readInt32();
         this.singleNodeMinConnectionNum = byteBuffer.readInt32();
         this.address = byteBuffer.readByLengthByte();
+        this.assetId = byteBuffer.readUint32();
+        this.symbol = byteBuffer.readString();
+        this.assetName = byteBuffer.readString();
+        this.depositNuls = byteBuffer.readUint16();
+        this.initNumber = byteBuffer.readUint32();
+        this.decimalPlaces = byteBuffer.readShort();
     }
 
     @Override
@@ -129,13 +194,19 @@ public class ChainTx extends TransactionLogicData {
         // singleNodeMinConnectionNum;
         size += SerializeUtils.sizeOfInt32();
         size+= SerializeUtils.sizeOfBytes(address);
+
+        size+=SerializeUtils.sizeOfUint32();
+        size+=SerializeUtils.sizeOfString(symbol);
+        size+=SerializeUtils.sizeOfString(assetName);
+        size += SerializeUtils.sizeOfUint16();
+        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfInt16();
         return size;
     }
 
+
     @Override
     public Set<byte[]> getAddresses() {
-        Set<byte[]> addressSet = new HashSet<>();
-        addressSet.add(this.address);
-        return addressSet;
+        return null;
     }
 }

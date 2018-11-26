@@ -6,18 +6,18 @@ package io.nuls.rpc.model.message;
  * @description
  */
 public class NegotiateConnection {
-    private double protocolVersion;
+    private String protocolVersion;
     private String compressionAlgorithm;
-    private int compressionRate;
+    private String compressionRate;
 
     public NegotiateConnection() {
     }
 
-    public double getProtocolVersion() {
+    public String getProtocolVersion() {
         return protocolVersion;
     }
 
-    public void setProtocolVersion(double protocolVersion) {
+    public void setProtocolVersion(String protocolVersion) {
         this.protocolVersion = protocolVersion;
     }
 
@@ -29,11 +29,11 @@ public class NegotiateConnection {
         this.compressionAlgorithm = compressionAlgorithm;
     }
 
-    public int getCompressionRate() {
+    public String getCompressionRate() {
         return compressionRate;
     }
 
-    public void setCompressionRate(int compressionRate) {
+    public void setCompressionRate(String compressionRate) {
         this.compressionRate = compressionRate;
     }
 }

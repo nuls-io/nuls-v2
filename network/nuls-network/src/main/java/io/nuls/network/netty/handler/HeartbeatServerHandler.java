@@ -22,55 +22,42 @@
  * SOFTWARE.
  *
  */
-package io.nuls.poc.model.bo.tx;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.TransactionLogicData;
-import io.nuls.base.data.Coin;
-import io.nuls.base.data.Na;
-import io.nuls.poc.constant.ConsensusConstant;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.base.data.Transaction;
-import java.util.Arrays;
+
+package io.nuls.network.netty.handler;
+
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.timeout.IdleStateEvent;
+import io.nuls.network.manager.ConnectionManager;
+import io.nuls.network.manager.handler.base.BaseChannelHandler;
+import io.nuls.network.model.Node;
+import io.nuls.tools.log.Log;
 
 /**
- * @author tag
- * 2018/11/19
+ *
+ * @desription:
+ * @author: PierreLuo
  */
-public class CoinBaseTransaction extends Transaction {
-
-    public CoinBaseTransaction() {
-        this(ConsensusConstant.TX_TYPE_COINBASE);
-    }
+public class HeartbeatServerHandler extends BaseChannelHandler {
 
     @Override
-    protected TransactionLogicData parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        byteBuffer.readBytes(ConsensusConstant.PLACE_HOLDER.length);
-        return null;
-    }
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
 
-    protected CoinBaseTransaction(int type) {
-        super(type);
-    }
-
-    @Override
-    public String getInfo(byte[] address) {
-        Na to = Na.ZERO;
-        for (Coin coin : coinData.getTo()) {
-            if (Arrays.equals(address, coin.getAddress()))
-            {
-                to = to.add(coin.getNa());
+        if (evt instanceof IdleStateEvent) {
+            Log.info(getNodeIdByChannel(ctx.channel())+"====userEventTriggered  IdleStateEvent==");
+            String nodeId = this.getNodeIdByChannel(ctx.channel());
+            Node node = ConnectionManager.getInstance().getNodeByCache(nodeId, Node.OUT);
+            if(null != node){
+                node.setBad(true);
             }
+            ctx.channel().close();
+
+        } else {
+            super.userEventTriggered(ctx, evt);
         }
-        return "+" + to.toText();
     }
 
     @Override
-    public boolean isSystemTx() {
+    protected boolean validChannel(ChannelHandlerContext ctx) {
         return true;
-    }
-
-    @Override
-    public boolean needVerifySignature() {
-        return false;
     }
 }

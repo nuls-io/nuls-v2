@@ -6,12 +6,10 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
-import io.nuls.poc.model.bo.tx.CancelDepositTransaction;
-import io.nuls.poc.model.bo.tx.CreateAgentTransaction;
-import io.nuls.poc.model.bo.tx.DepositTransaction;
-import io.nuls.poc.model.bo.tx.StopAgentTransaction;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
+import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
+import io.nuls.poc.model.bo.tx.txdata.StopAgent;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
@@ -36,11 +34,16 @@ public class ValidatorManager {
     @Autowired
     private DepositStorageService depositStorageService;
 
-    public boolean validateCreateAgent(int chain_id,CreateAgentTransaction tx)throws NulsException{
-        if(!createAgentBasicValid(chain_id,tx)){
+    public boolean validateCreateAgent(int chain_id,Transaction tx)throws NulsException{
+        if(tx.getTxData() == null){
+            throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
+        }
+        Agent agent = new Agent();
+        agent.parse(tx.getTxData(),0);
+        if(!createAgentBasicValid(chain_id,tx,agent)){
             return false;
         }
-        if(!createAgentAddrValide(chain_id,tx)){
+        if(!createAgentAddrValide(chain_id,tx,agent)){
             return false;
         }
         return  true;
@@ -49,11 +52,7 @@ public class ValidatorManager {
     /**
      * 创建节点交易基础验证
      * */
-    private boolean createAgentBasicValid(int chain_id,CreateAgentTransaction tx)throws NulsException{
-        Agent agent = tx.getTxData();
-        if(agent == null){
-            throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
-        }
+    private boolean createAgentBasicValid(int chain_id,Transaction tx,Agent agent)throws NulsException{
         if (!AddressTool.validNormalAddress(agent.getPackingAddress(),(short)chain_id)) {
             throw new NulsException(ConsensusErrorCode.ADDRESS_ERROR);
         }
@@ -74,13 +73,14 @@ public class ValidatorManager {
         if(deposit<ConfigManager.config_map.get(chain_id).getDeposit_min() && deposit > ConfigManager.config_map.get(chain_id).getDeposit_max()){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OUT_OF_RANGE);
         }
-        if (!isDepositOk(agent.getDeposit(), tx.getCoinData())) {
+        CoinData coinData = new CoinData();
+        coinData.parse(tx.getCoinData(),0);
+        if (!isDepositOk(agent.getDeposit(), coinData)) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_ERROR);
         }
         if(!validSignature(tx,agent.getAgentAddress())){
             return false;
         }
-        CoinData coinData = tx.getCoinData();
         Set<String> addressSet = new HashSet<>();
         int lockCount = 0;
         for (Coin coin : coinData.getTo()) {
@@ -98,8 +98,7 @@ public class ValidatorManager {
     /**
      * 创建节点交易节点地址及出块地址验证
      * */
-    private boolean createAgentAddrValide(int chain_id,CreateAgentTransaction tx)throws NulsException{
-        Agent agent = tx.getTxData();
+    private boolean createAgentAddrValide(int chain_id,Transaction tx,Agent agent)throws NulsException{
         String seedNodesStr = ConfigManager.config_map.get(chain_id).getSeedNodes();
         if (StringUtils.isBlank(seedNodesStr)){
             return true;
@@ -143,18 +142,25 @@ public class ValidatorManager {
         return true;
     }
 
-    public boolean validateStopAgent(int chain_id,StopAgentTransaction tx)throws NulsException{
-        AgentPo agentPo = agentStorageService.get(tx.getTxData().getCreateTxHash(),chain_id);
+    public boolean validateStopAgent(int chain_id,Transaction tx)throws NulsException{
+        if(tx.getTxData() == null){
+            throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
+        }
+        StopAgent stopAgent = new StopAgent();
+        stopAgent.parse(tx.getTxData(),0);
+        AgentPo agentPo = agentStorageService.get(stopAgent.getCreateTxHash(),chain_id);
         if(agentPo == null || agentPo.getDelHeight() > 0){
             throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
         if(!validSignature(tx,agentPo.getAgentAddress())){
             return false;
         }
-        if (tx.getCoinData().getTo() == null || tx.getCoinData().getTo().isEmpty()) {
+        CoinData coinData = new CoinData();
+        coinData.parse(tx.getCoinData(),0);
+        if (coinData.getTo() == null || coinData.getTo().isEmpty()) {
             throw new NulsException(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
         }
-        if(!stopAgentCoinDataValid(chain_id,tx,agentPo)){
+        if(!stopAgentCoinDataValid(chain_id,tx,agentPo,stopAgent,coinData)){
             return false;
         }
         return true;
@@ -163,7 +169,7 @@ public class ValidatorManager {
     /**
      * 停止节点交易CoinData验证
      * */
-    private boolean stopAgentCoinDataValid(int chain_id,StopAgentTransaction tx,AgentPo agentPo)throws NulsException{
+    private boolean stopAgentCoinDataValid(int chain_id,Transaction tx,AgentPo agentPo,StopAgent stopAgent,CoinData coinData)throws NulsException{
         List<Deposit> depositList = ConsensusManager.getInstance().getAllDepositMap().get(chain_id);
         Map<NulsDigestData, Deposit> depositMap = new HashMap<>();
         //节点总委托金额（创建节点保证金+委托共识金额）
@@ -172,7 +178,7 @@ public class ValidatorManager {
         Deposit ownDeposit = new Deposit();
         ownDeposit.setDeposit(agentPo.getDeposit());
         ownDeposit.setAddress(agentPo.getAgentAddress());
-        depositMap.put(tx.getTxData().getCreateTxHash(), ownDeposit);
+        depositMap.put(stopAgent.getCreateTxHash(), ownDeposit);
         //遍历所有委托信息，找出委托本节点的委托信息
         for (Deposit deposit:depositList) {
             if (deposit.getDelHeight() > -1L && (tx.getBlockHeight() == -1L || deposit.getDelHeight() < tx.getBlockHeight())) {
@@ -189,7 +195,7 @@ public class ValidatorManager {
         //存放每个账户的委托金额
         Map<String, Na> verifyToMap = new HashMap<>();
         //验证注销节点交易的输入
-        for (Coin coin : tx.getCoinData().getFrom()) {
+        for (Coin coin : coinData.getFrom()) {
             //如果该笔UTXO有锁定时间则不能使用
             if (coin.getLockTime() != -1L) {
                throw new NulsException(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
@@ -232,12 +238,12 @@ public class ValidatorManager {
             throw new NulsException(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         //创建节点账户注销节点之后返回的金额（保证金-手续费）
-        Na ownToCoin = ownDeposit.getDeposit().subtract(tx.getFee());
+        Na ownToCoin = ownDeposit.getDeposit().subtract(coinData.getFee());
         //注销节点后保证金锁定时间
         long ownLockTime = 0L;
         boolean isDeposit = true;
         //验证注销节点交易的输出
-        for (Coin coin : tx.getCoinData().getTo()) {
+        for (Coin coin : coinData.getTo()) {
             String address = AddressTool.getStringAddressByBytes(coin.getAddress());
             Na na = verifyToMap.get(address);
             //如果委托金额与返回金额相等则验证通过
@@ -265,21 +271,26 @@ public class ValidatorManager {
         return true;
     }
 
-    public boolean validateDeposit(int chain_id, DepositTransaction tx)throws NulsException{
-        if (null == tx || null == tx.getTxData() || null == tx.getTxData().getAgentHash() || null == tx.getTxData().getDeposit() || null == tx.getTxData().getAddress()) {
+    public boolean validateDeposit(int chain_id, Transaction tx)throws NulsException{
+        if (null == tx || null == tx.getTxData() || tx.getCoinData() == null) {
             throw new NulsException(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
         }
-        Deposit deposit = tx.getTxData();
+        Deposit deposit = new Deposit();
+        deposit.parse(tx.getTxData(),0);
+        if(deposit.getAddress() == null || deposit.getAgentHash()==null || deposit.getDeposit() == null){
+            throw new NulsException(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
         if(!createDepositInfoValid(chain_id,deposit)){
             return false;
         }
-        if (!isDepositOk(deposit.getDeposit(), tx.getCoinData())) {
+        CoinData coinData = new CoinData();
+        coinData.parse(tx.getCoinData(),0);
+        if (!isDepositOk(deposit.getDeposit(), coinData)) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_ERROR);
         }
         if(!validSignature(tx,deposit.getAddress())){
             return false;
         }
-        CoinData coinData = tx.getCoinData();
         Set<String> addressSet = new HashSet<>();
         int lockCount = 0;
         for (Coin coin : coinData.getTo()) {
@@ -317,8 +328,10 @@ public class ValidatorManager {
         return true;
     }
 
-    public boolean validateWithdraw(int chain_id, CancelDepositTransaction tx)throws NulsException{
-        DepositPo depositPo = depositStorageService.get(tx.getTxData().getJoinTxHash(),chain_id);
+    public boolean validateWithdraw(int chain_id, Transaction tx)throws NulsException{
+        CancelDeposit cancelDeposit = new CancelDeposit();
+        cancelDeposit.parse(tx.getTxData(),0);
+        DepositPo depositPo = depositStorageService.get(cancelDeposit.getJoinTxHash(),chain_id);
         if(depositPo == null || depositPo.getDelHeight() > 0){
             throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
         }

@@ -25,9 +25,11 @@
 package io.nuls.chain.cmd;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdResponse;
+import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
+import io.nuls.rpc.model.message.Response;
 
-import java.util.List;
+import java.util.Map;
 
 /**
  * @program: nuls2.0
@@ -36,8 +38,15 @@ import java.util.List;
  * @create: 2018/11/22
  **/
 public class AllTxValidateCmd extends BaseCmd {
-
-    public CmdResponse chainModuleTxValidate(List params){
+    /**
+     * chainModuleTxValidate
+     * 重连网络
+     */
+    @CmdAnnotation(cmd = "cm_chainModuleTxValidate", version = 1.0,
+            description = "chainModuleTxValidate")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "txHexs", parameterType = "array")
+    public Response chainModuleTxValidate(Map params){
         //1获取交易类型
         //2进入不同验证器里处理
         //3封装失败交易返回

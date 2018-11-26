@@ -65,16 +65,12 @@ public class Test1 {
     }
     @Test
     public void test3(){
-
-// 注意，下面这句话不要改，模拟实现在"io.nuls.rpc.cmd.kernel"中
         try {
-//            WsServer wsServer = new WsServer(HostInfo.randomPort());
-//            wsServer.init(ModuleE.CM, "io.nuls.rpc.cmd.test");
-//            wsServer.connect("ws://127.0.0.1:8887");
-//            CmdDispatcher.syncKernel();
+            WsServer.mockKernel();
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
    public static void main(String []args){
             WsServer wsServer = new WsServer(HostInfo.randomPort());

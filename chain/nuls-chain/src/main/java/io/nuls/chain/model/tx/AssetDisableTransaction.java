@@ -24,11 +24,8 @@
  */
 package io.nuls.chain.model.tx;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.ChainTxConstants;
-import io.nuls.chain.model.tx.txdata.AssetTx;
-import io.nuls.tools.exception.NulsException;
 
 /**
  * @program: nuls2.0
@@ -36,19 +33,10 @@ import io.nuls.tools.exception.NulsException;
  * @author: lan
  * @create: 2018/11/19
  **/
-public class AssetDisableTransaction extends Transaction<AssetTx> {
+public class AssetDisableTransaction extends Transaction{
 
     public AssetDisableTransaction() {
         super(ChainTxConstants.TX_TYPE_DISABLE_CHAIN_ASSET);
     }
 
-    @Override
-    protected AssetTx parseTxData(NulsByteBuffer byteBuffer) throws NulsException {
-        return byteBuffer.readNulsData(new AssetTx());
-    }
-
-    @Override
-    public String getInfo(byte[] address) {
-        return null;
-    }
 }

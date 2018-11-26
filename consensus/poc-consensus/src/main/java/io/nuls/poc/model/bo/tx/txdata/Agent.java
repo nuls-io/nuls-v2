@@ -262,7 +262,6 @@ public class Agent extends TransactionLogicData {
         return (Agent) super.clone();
     }
 
-    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(this.agentAddress);

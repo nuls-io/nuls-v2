@@ -332,8 +332,10 @@ public class AccountCmd extends BaseCmd {
             return failed(e.getErrorCode());
         }
         Log.debug("ac_getPriKeyByAddress end");
-        Map<String, String> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("priKey", unencryptedPrivateKey);
+        //账户是否存在
+        map.put("valid", true);
         return success(map);
     }
 

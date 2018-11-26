@@ -75,4 +75,15 @@ public interface RpcConstant {
      */
     String PATH = "path";
 
+    /**
+     * --------[RPC Module role constants] -------
+     */
+    /**
+     * Role_Account
+     */
+    String ROLE_AC = "Role_Account";
+    /**
+     * Role_Event
+     */
+    String ROLE_EV = "Role_Event";
 }

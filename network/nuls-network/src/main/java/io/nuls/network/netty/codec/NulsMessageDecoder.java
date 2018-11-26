@@ -21,31 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.network.netty;
+package io.nuls.network.netty.codec;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
+import io.netty.handler.codec.ByteToMessageDecoder;
+import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.manager.NodeManager;
+import io.nuls.tools.log.Log;
 
 import java.nio.ByteOrder;
+import java.util.List;
+
+import static io.nuls.network.constant.NetworkConstant.MAX_FRAME_LENGTH;
 
 /**
  * @desription:
  * @author: PierreLuo
  * @date: 2018/8/7
  */
-public class NulsLengthFieldBasedFrameDecoder extends LengthFieldBasedFrameDecoder {
+public class NulsMessageDecoder extends ByteToMessageDecoder {
 
-    public NulsLengthFieldBasedFrameDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip) {
-        super(maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip);
-    }
+    private NulsLengthFieldBasedFrameDecoder newDecoder = new NulsLengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, MAX_FRAME_LENGTH, 4, 4, 16, 0, true);
 
-    public NulsLengthFieldBasedFrameDecoder(ByteOrder byteOrder, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip, boolean failFast) {
-        super(byteOrder, maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip, failFast);
-    }
 
     @Override
-    public Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
-        return super.decode(ctx, in);
+    protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+        long readMagicNumber = in.getUnsignedIntLE(0);
+        if (NodeGroupManager.getInstance().validMagicNumber(readMagicNumber)) {
+            Object decoded = newDecoder.decode(ctx, in);
+            if (decoded != null) {
+                out.add(decoded);
+            }
+        }else{
+            in.clear();
+            //不该关闭连接，如果一个连接有多条链，此时通道需要保留，需要增加消息回复
+            if(NodeManager.getInstance().isPeerSingleGroup(ctx.channel())){
+                ctx.close();
+            }else{
+                Log.error("illegal message REC");
+            }
+
+        }
     }
 }

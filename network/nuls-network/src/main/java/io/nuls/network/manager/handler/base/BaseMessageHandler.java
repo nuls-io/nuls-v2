@@ -42,6 +42,16 @@ import io.nuls.tools.log.Log;
  */
 public abstract  class BaseMessageHandler implements BaseMeesageHandlerInf {
     protected  static final int PlaceHolderSize = ToolsConstant.PLACE_HOLDER.length;
+
+    /**
+     * 实现发送消息
+     * Implement sending a message
+     * @param message
+     * @param node
+     * @param isServer
+     * @param asyn
+     * @return
+     */
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
         try {

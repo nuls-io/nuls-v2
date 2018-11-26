@@ -8,7 +8,6 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,7 +24,6 @@ public class Chain extends BaseNulsData {
     private int minAvailableNodeNum;
     private int singleNodeMinConnectionNum;
     private int txConfirmedBlockNum;
-    private List<Seed> seedList;
     private List<ChainAsset> chainAssetList;
     /**删除链时，置位为true*/
     private boolean isDelete = false;
@@ -33,6 +31,8 @@ public class Chain extends BaseNulsData {
     private long lastUpdateTime;
     private byte[] address;
     private String txHash;
+
+    private long assetId;
 
     public int getChainId() {
         return chainId;
@@ -98,14 +98,6 @@ public class Chain extends BaseNulsData {
         this.txConfirmedBlockNum = txConfirmedBlockNum;
     }
 
-    public List<Seed> getSeedList() {
-        return seedList;
-    }
-
-    public void setSeedList(List<Seed> seedList) {
-        this.seedList = seedList;
-    }
-
     public List<ChainAsset> getChainAssetList() {
         return chainAssetList;
     }
@@ -155,6 +147,14 @@ public class Chain extends BaseNulsData {
         this.txHash = txHash;
     }
 
+    public long getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(long assetId) {
+        this.assetId = assetId;
+    }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
@@ -165,15 +165,12 @@ public class Chain extends BaseNulsData {
         stream.writeUint32(minAvailableNodeNum);
         stream.writeUint32(singleNodeMinConnectionNum);
         stream.writeUint32(txConfirmedBlockNum);
-        stream.writeUint32(seedList.size());
-        for (Seed seed : seedList) {
-            stream.write(seed.serialize());
-        }
         stream.writeBoolean(isDelete);
         stream.writeUint48(createTime);
         stream.writeUint48(lastUpdateTime);
         stream.writeBytesWithLength(address);
         stream.writeString(txHash);
+        stream.writeUint32(assetId);
     }
 
     @Override
@@ -186,16 +183,12 @@ public class Chain extends BaseNulsData {
         this.minAvailableNodeNum = byteBuffer.readInt32();
         this.singleNodeMinConnectionNum = byteBuffer.readInt32();
         this.txConfirmedBlockNum = byteBuffer.readInt32();
-        int seedLength = byteBuffer.readInt32();
-        this.seedList = new ArrayList<>();
-        for (int i = 0; i < seedLength; i++) {
-            this.seedList.add(byteBuffer.readNulsData(new Seed()));
-        }
         this.isDelete = byteBuffer.readBoolean();
         this.createTime = byteBuffer.readUint48();
         this.lastUpdateTime = byteBuffer.readUint48();
         this.address = byteBuffer.readByLengthByte();
         this.txHash = byteBuffer.readString();
+        this.assetId = byteBuffer.readUint32();
     }
 
     @Override
@@ -215,11 +208,6 @@ public class Chain extends BaseNulsData {
         size += SerializeUtils.sizeOfInt32();
         // txConfirmedBlockNum;
         size += SerializeUtils.sizeOfInt32();
-        // seed length
-        size += SerializeUtils.sizeOfInt32();
-        for (Seed seed : seedList) {
-            size += seed.size();
-        }
         // isDelete
         size += SerializeUtils.sizeOfBoolean();
         // createTime;
@@ -229,6 +217,7 @@ public class Chain extends BaseNulsData {
         size+= SerializeUtils.sizeOfBytes(address);
         //txHash
         size += SerializeUtils.sizeOfString(txHash);
+        size += SerializeUtils.sizeOfInt32();
         return size;
     }
     public Chain(){
@@ -243,8 +232,9 @@ public class Chain extends BaseNulsData {
         this.name =  chainRegTx.getName();
         this.singleNodeMinConnectionNum = chainRegTx.getSingleNodeMinConnectionNum();
         this.supportInflowAsset = chainRegTx.isSupportInflowAsset();
+        this.assetId = chainRegTx.getAssetId();
     }
-    public ChainTx parseToTransaction(){
+    public byte [] parseToTransaction() throws IOException {
         ChainTx chainRegTx = new ChainTx();
         chainRegTx.setAddress(this.address);
         chainRegTx.setAddressType(this.addressType);
@@ -254,6 +244,6 @@ public class Chain extends BaseNulsData {
         chainRegTx.setName(this.name);
         chainRegTx.setSingleNodeMinConnectionNum(this.singleNodeMinConnectionNum);
         chainRegTx.setSupportInflowAsset(this.supportInflowAsset);
-        return chainRegTx;
+        return chainRegTx.serialize();
     }
 }

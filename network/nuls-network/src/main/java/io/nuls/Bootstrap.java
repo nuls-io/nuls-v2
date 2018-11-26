@@ -87,6 +87,7 @@ public class Bootstrap {
 
     /**
      * 配置信息初始化
+     *Configuration information initialization
      */
     public  void cfgInit() {
         try {
@@ -137,8 +138,8 @@ public class Bootstrap {
     }
 
     /**
-     *
      * 管理器初始化
+     *Manager initialization
      */
     public  void managerInit(){
         RocksDBService.init(NetworkParam.getInstance().getDbPath());
@@ -156,13 +157,16 @@ public class Bootstrap {
     /**
      *
      * 启动管理模块
+     * Manager start
      */
     public  void managerStart(){
+        Log.debug("managerStart begin=========");
         NodeGroupManager.getInstance().start();
         NodeManager.getInstance().start();
         ConnectionManager.getInstance().nettyBoot();
         TaskManager.getInstance().start();
         RpcManager.getInstance().start();
+        Log.debug("managerStart end============");
     }
 
 }

@@ -25,7 +25,7 @@ public class AppConfig {
      * load module ini config
      */
     public static void loadModuleConfig() {
-        logger.info("AppInitializing......");
+        logger.info("loadModuleConfig......");
         IniEntity moduleIni = loadIni(LedgerConstant.MODULES_CONFIG_FILE);
         ModuleConfig moduleConfig = new ModuleConfig();
 
@@ -43,6 +43,20 @@ public class AppConfig {
             if (StringUtils.isNotBlank(dbVersion)) {
                 moduleConfig.setDatabaseVersion(Integer.valueOf(dbVersion));
             }
+
+            /**
+             * kernel config
+             */
+            String kernelSection = "kernel";
+            String kernelHost = moduleIni.getCfgValue(kernelSection, "host");
+            if (StringUtils.isNotBlank(kernelHost)) {
+                moduleConfig.setKernelHost(kernelHost);
+            }
+            String kernelPort = moduleIni.getCfgValue(kernelSection, "port");
+            if (StringUtils.isNotBlank(kernelPort)) {
+                moduleConfig.setKernelPort(Integer.valueOf(kernelPort));
+            }
+
             logger.info("moduleConfig is {}", moduleConfig);
         } catch (Exception e) {
             logger.error("load module ini failed.", e);

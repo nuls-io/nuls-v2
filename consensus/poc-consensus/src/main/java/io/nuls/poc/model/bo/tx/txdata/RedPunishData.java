@@ -95,7 +95,6 @@ public class RedPunishData extends TransactionLogicData {
         this.evidence = evidence;
     }
 
-    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> set = new HashSet<>();
         set.add(address);

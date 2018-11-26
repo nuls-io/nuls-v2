@@ -55,7 +55,6 @@ public class YellowPunishData extends TransactionLogicData {
         this.addressList = addressList;
     }
 
-    @Override
     public Set<byte[]> getAddresses() {
         return new HashSet<>(addressList);
     }

@@ -160,9 +160,9 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         } catch (Exception e) {
             Log.error(e.getMessage());
         }
-        if (transaction.isSystemTx()) {
-            throw new NulsRuntimeException(AccountErrorCode.TX_TYPE_ERROR);
-        }
+//        if (transaction.isSystemTx()) {
+//            throw new NulsRuntimeException(AccountErrorCode.TX_TYPE_ERROR);
+//        }
         if (BaseConstant.CONTRACT_ADDRESS_TYPE == alias.getAddress()[2]) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }

@@ -36,6 +36,7 @@ import io.nuls.network.model.message.base.BaseMessage;
 public interface BaseMeesageHandlerInf {
     /**
      *接收消息处理
+     *Receive message processing
      * @param message
      * @param nodeKey
      * @param isServer
@@ -45,6 +46,7 @@ public interface BaseMeesageHandlerInf {
 
     /**
      * 发送消息处理
+     * Send message processing
      * @param message
      * @param node
      * @param isServer

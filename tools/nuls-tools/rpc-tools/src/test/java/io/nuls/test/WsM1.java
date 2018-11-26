@@ -27,11 +27,12 @@
 
 package io.nuls.test;
 
-import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Ack;
 import io.nuls.rpc.server.WsServer;
+import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -50,7 +51,7 @@ public class WsM1 {
         System.out.println(new Ack().toString());
         Ack ack = new Ack("asdfasdf");
         System.out.println(ack.getRequestID());
-        System.out.println(Integer.MAX_VALUE / 6f / 60f / 24f / 365f);
+        System.out.println(Integer.MAX_VALUE / 1000f / 3600f / 24f);
     }
 
     @Test
@@ -62,7 +63,13 @@ public class WsM1 {
     @Test
     public void startServer() throws Exception {
         // Start server instance
-        WsServer.getInstance(ModuleE.CM).setScanPackage("io.nuls.rpc.cmd.test").connect("ws://127.0.0.1:8887");
+        WsServer.getInstance(ModuleE.CM)
+                .moduleRoles(new String[]{"1.1", "1.2"})
+                .moduleVersion("1.2")
+                .dependencies(ModuleE.LG.abbr, "1.1")
+                .dependencies(ModuleE.BL.abbr, "2.1")
+                .scanPackage("io.nuls.rpc.cmd.test")
+                .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
         CmdDispatcher.syncKernel();
@@ -76,11 +83,7 @@ public class WsM1 {
         单元测试专用：单元测试时需要告知内核地址，以及同步接口列表
         如果不是单元测试，在模块中进行连调测试，下面两句话是不需要的
          */
-        // Set kernel url
-        Constants.kernelUrl = "ws://127.0.0.1:8887";
-
-        // Get information from kernel
-        CmdDispatcher.syncKernel();
+        WsServer.mockModule();
         /*
         单元测试专用结束
          */
@@ -93,10 +96,9 @@ public class WsM1 {
         params.put("paramName", "value");
 
         // Call cmd
-        int messageId = CmdDispatcher.request("getHeight", params, 5);
-
+        String messageId = CmdDispatcher.request(ModuleE.CM.abbr, "getHeight", params, "5");
         for (int i = 0; i < 5; i++) {
-            System.out.println(CmdDispatcher.callValue(messageId));
+            System.out.println(JSONUtils.obj2json(CmdDispatcher.callMessageResponse(messageId)));
             Thread.sleep(5000);
         }
 
@@ -105,7 +107,7 @@ public class WsM1 {
 
         Thread.sleep(3000);
         // Call cmd
-        System.out.println(CmdDispatcher.requestAndResponse("getHeight", params));
+        System.out.println(CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "getHeight", params));
         //Thread.sleep(Integer.MAX_VALUE);
     }
 }

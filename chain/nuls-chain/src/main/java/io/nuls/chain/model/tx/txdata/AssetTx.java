@@ -7,7 +7,6 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -92,7 +91,7 @@ public class AssetTx extends TransactionLogicData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
-        stream.writeUint48(assetId);
+        stream.writeUint32(assetId);
         stream.writeString(symbol);
         stream.writeString(name);
         stream.writeUint32(depositNuls);
@@ -104,7 +103,7 @@ public class AssetTx extends TransactionLogicData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
-        this.assetId = byteBuffer.readUint48();
+        this.assetId = byteBuffer.readUint32();
         this.symbol = byteBuffer.readString();
         this.name = byteBuffer.readString();
         this.depositNuls = byteBuffer.readInt32();
@@ -135,8 +134,6 @@ public class AssetTx extends TransactionLogicData {
 
     @Override
     public Set<byte[]> getAddresses() {
-        Set<byte[]> addressSet = new HashSet<>();
-        addressSet.add(this.address);
-        return addressSet;
+        return null;
     }
 }

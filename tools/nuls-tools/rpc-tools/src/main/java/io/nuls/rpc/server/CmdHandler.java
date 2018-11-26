@@ -25,12 +25,11 @@
  *
  */
 
-package io.nuls.rpc.handler;
+package io.nuls.rpc.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.ServerRuntime;
 import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.message.*;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -42,6 +41,7 @@ import org.java_websocket.WebSocket;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -57,12 +57,12 @@ public class CmdHandler {
     /**
      * Build basic message object
      */
-    public static Message basicMessage(int messageId, MessageType messageType) {
+    public static Message basicMessage(String messageId, MessageType messageType) {
         Message message = new Message();
         message.setMessageId(messageId);
         message.setMessageType(messageType.name());
-        message.setTimestamp(TimeService.currentTimeMillis());
-        message.setTimezone(DateUtils.getTimeZone());
+        message.setTimestamp(TimeService.currentTimeMillis() + "");
+        message.setTimezone(DateUtils.getTimeZone() + "");
         return message;
     }
 
@@ -72,8 +72,9 @@ public class CmdHandler {
      */
     public static NegotiateConnection defaultNegotiateConnection() {
         NegotiateConnection negotiateConnection = new NegotiateConnection();
+        negotiateConnection.setProtocolVersion("1.0");
         negotiateConnection.setCompressionAlgorithm("zlib");
-        negotiateConnection.setCompressionRate(0);
+        negotiateConnection.setCompressionRate("0");
         return negotiateConnection;
     }
 
@@ -83,10 +84,10 @@ public class CmdHandler {
      */
     public static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
-        negotiateConnectionResponse.setNegotiationStatus(0);
+        negotiateConnectionResponse.setNegotiationStatus("0");
         negotiateConnectionResponse.setNegotiationComment("Incompatible protocol version");
 
-        Message rspMsg = basicMessage(Constants.nextSequence(), MessageType.NegotiateConnectionResponse);
+        Message rspMsg = basicMessage(Constants.nextSequence() + "", MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
@@ -95,40 +96,40 @@ public class CmdHandler {
      * For Response
      */
     public static boolean response(WebSocket webSocket, Message message) throws Exception {
-        int messageId = message.getMessageId();
+        String messageId = message.getMessageId();
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         Map requestMethods = request.getRequestMethods();
 
         boolean addBack = false;
-        int subscriptionPeriod = request.getSubscriptionPeriod();
+        int subscriptionPeriod = Integer.parseInt(request.getSubscriptionPeriod());
 
         /*
         subscriptionPeriod > 0, means send response every time.
         subscriptionPeriod <= 0, means send response only once.
          */
+        String key = webSocket.toString() + messageId;
         if (subscriptionPeriod > 0) {
             addBack = true;
-            String key = webSocket.toString() + messageId;
 
             if (!ServerRuntime.cmdInvokeTime.containsKey(key)) {
                 ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
-            }
+            } else {
+                /*
+                If the value is unsubscribed magic parameter, returns immediately without execution
+                Return false
+                 */
+                if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
+                    ServerRuntime.cmdInvokeTime.remove(key);
+                    Log.info("Remove: " + key);
+                    return false;
+                }
 
-            /*
-            If the value is unsubscribed magic parameter, returns immediately without execution
-            Return false
-             */
-            if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
-                ServerRuntime.cmdInvokeTime.remove(key);
-                Log.info("Remove: " + key);
-                return false;
-            }
-
-            /*
-            If the execution interval is not yet reached, returns immediately without execution
-             */
-            if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * 1000) {
-                return true;
+                /*
+                If the execution interval is not yet reached, returns immediately without execution
+                 */
+                if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * 1000) {
+                    return true;
+                }
             }
         }
 
@@ -143,9 +144,13 @@ public class CmdHandler {
                     : ServerRuntime.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
             Response response = cmdDetail == null
-                    ? ServerRuntime.newResponse(messageId, Constants.RESPONSE_STATUS_FAILED, Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""))
+                    ? ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""))
                     : invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
-            response.setResponseProcessingTime(TimeService.currentTimeMillis() - startTimemillis);
+            // 在结果外面自动封装方法名
+            Map<String, Object> responseData = new HashMap<>(1);
+            responseData.put(method.toString(), response.getResponseData());
+            response.setResponseData(responseData);
+            response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
             response.setRequestId(messageId);
 
             Message rspMessage = basicMessage(Constants.nextSequence(), MessageType.Response);
@@ -153,6 +158,7 @@ public class CmdHandler {
             Log.info("webSocket.send: " + JSONUtils.obj2json(rspMessage));
             try {
                 webSocket.send(JSONUtils.obj2json(rspMessage));
+                ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
             } catch (Exception e) {
                 Log.error("Socket disconnect, remove!");
                 addBack = false;

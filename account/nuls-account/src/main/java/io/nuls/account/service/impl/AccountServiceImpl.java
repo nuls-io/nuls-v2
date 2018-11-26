@@ -464,14 +464,15 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         //加过密(有密码) 就验证密码 Already encrypted(Added password), verify password
         if (account.isEncrypted()) {
             try {
-                byte[] priKeyBytes = priKeyBytes = account.getPriKey(password);
+                byte[] priKeyBytes = account.getPriKey(password);
                 return HexUtil.encode(priKeyBytes);
             } catch (NulsException e) {
                 throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         } else {
+            return null;
             //do not return unencrypted private key
-            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_UNENCRYPTED);
+            //throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_UNENCRYPTED);
         }
     }
 

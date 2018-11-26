@@ -1,8 +1,6 @@
 package io.nuls.rpc.server;
 
-import io.nuls.rpc.handler.CmdHandler;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.ServerRuntime;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.tools.log.Log;
@@ -16,7 +14,7 @@ import java.io.IOException;
  * @date 2018/11/7
  * @description
  */
-public class WsProcessor implements Runnable {
+public class ServerProcessor implements Runnable {
     /**
      * When an object implementing interface <code>Runnable</code> is used
      * to create a thread, starting the thread causes the object's

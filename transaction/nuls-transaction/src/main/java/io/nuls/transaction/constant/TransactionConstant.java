@@ -41,7 +41,7 @@ public interface TransactionConstant {
     int H2_TX_TABLE_NUMBER = 128;
 
 
-    //int ORPHAN_CONTAINER_MAX_SIZE = 200000;
+    int ORPHAN_CONTAINER_MAX_SIZE = 200000;
 
     int CROSSCHAIN_TRANSFER_TX_TYPE = 23;
 

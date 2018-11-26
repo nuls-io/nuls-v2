@@ -30,7 +30,9 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.nuls.network.manager.handler.HeartbeatServerHandler;
+import io.nuls.network.netty.codec.NulsMessageDecoder;
+import io.nuls.network.netty.codec.NulsMessageEncoder;
+import io.nuls.network.netty.handler.HeartbeatServerHandler;
 
 import java.util.concurrent.TimeUnit;
 
