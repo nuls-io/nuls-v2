@@ -25,12 +25,11 @@
  *
  */
 
-package io.nuls.rpc.handler;
+package io.nuls.rpc.server;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.ServerRuntime;
 import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.message.*;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -73,6 +72,7 @@ public class CmdHandler {
      */
     public static NegotiateConnection defaultNegotiateConnection() {
         NegotiateConnection negotiateConnection = new NegotiateConnection();
+        negotiateConnection.setProtocolVersion("1.0");
         negotiateConnection.setCompressionAlgorithm("zlib");
         negotiateConnection.setCompressionRate("0");
         return negotiateConnection;

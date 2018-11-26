@@ -1,6 +1,6 @@
-package io.nuls.rpc.info;
+package io.nuls.rpc.client;
 
-import io.nuls.rpc.client.WsClient;
+import io.nuls.rpc.info.Constants;
 import io.nuls.tools.log.Log;
 import org.java_websocket.WebSocket;
 
@@ -23,7 +23,6 @@ public class ClientRuntime {
     /**
      * remote module information
      * key: module name/code
-     * value: moduleInfo(io.nuls.rpc.ModuleInfo)
      */
     public static ConcurrentMap<String, Map> roleMap = new ConcurrentHashMap<>();
 

@@ -27,8 +27,8 @@
 
 package io.nuls.test;
 
-import io.nuls.rpc.cmd.CmdDispatcher;
-import io.nuls.rpc.info.ClientRuntime;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.client.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Ack;

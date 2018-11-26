@@ -1,5 +1,6 @@
-package io.nuls.rpc.info;
+package io.nuls.rpc.server;
 
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.ScanUtil;
@@ -20,9 +21,9 @@ import java.util.concurrent.ExecutorService;
 public class ServerRuntime {
 
     /**
-     * local module(io.nuls.rpc.ModuleInfo) information
+     * local module(io.nuls.rpc.RegisterApi) information
      */
-    public static ModuleInfo local = new ModuleInfo();
+    public static RegisterApi local = new RegisterApi();
 
     public static Map<String, Long> cmdInvokeTime = new HashMap<>();
     public static Map<String, Integer> cmdInvokeHeight = new HashMap<>();
@@ -55,10 +56,10 @@ public class ServerRuntime {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
-        local.getRegisterApi().getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        local.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : local.getRegisterApi().getApiMethods()) {
+        for (CmdDetail cmdDetail : local.getApiMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
@@ -84,10 +85,10 @@ public class ServerRuntime {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd) {
 
-        local.getRegisterApi().getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        local.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : local.getRegisterApi().getApiMethods()) {
+        for (CmdDetail cmdDetail : local.getApiMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
@@ -122,7 +123,7 @@ public class ServerRuntime {
                 }
 
                 if (!isRegister(cmdDetail)) {
-                    local.getRegisterApi().getApiMethods().add(cmdDetail);
+                    local.getApiMethods().add(cmdDetail);
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
@@ -174,7 +175,7 @@ public class ServerRuntime {
      */
     private static boolean isRegister(CmdDetail sourceCmdDetail) {
         boolean exist = false;
-        for (CmdDetail cmdDetail : local.getRegisterApi().getApiMethods()) {
+        for (CmdDetail cmdDetail : local.getApiMethods()) {
             if (cmdDetail.getMethodName().equals(sourceCmdDetail.getMethodName()) && cmdDetail.getVersion() == sourceCmdDetail.getVersion()) {
                 exist = true;
                 break;
