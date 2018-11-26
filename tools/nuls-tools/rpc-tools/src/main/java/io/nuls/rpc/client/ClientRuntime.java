@@ -18,7 +18,6 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ClientRuntime {
 
-    public static final String ROLE_CM = "cm";
 
     /**
      * remote module information

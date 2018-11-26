@@ -14,7 +14,7 @@ import java.io.IOException;
  * @date 2018/11/7
  * @description
  */
-public class WsProcessor implements Runnable {
+public class ServerProcessor implements Runnable {
     /**
      * When an object implementing interface <code>Runnable</code> is used
      * to create a thread, starting the thread causes the object's

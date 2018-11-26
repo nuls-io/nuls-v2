@@ -28,7 +28,6 @@
 package io.nuls.test;
 
 import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.client.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Ack;
@@ -97,7 +96,7 @@ public class WsM1 {
         params.put("paramName", "value");
 
         // Call cmd
-        String messageId = CmdDispatcher.request(ClientRuntime.ROLE_CM, "getHeight", params, "5");
+        String messageId = CmdDispatcher.request(ModuleE.CM.abbr, "getHeight", params, "5");
         for (int i = 0; i < 5; i++) {
             System.out.println(JSONUtils.obj2json(CmdDispatcher.callMessageResponse(messageId)));
             Thread.sleep(5000);
@@ -108,7 +107,7 @@ public class WsM1 {
 
         Thread.sleep(3000);
         // Call cmd
-        System.out.println(CmdDispatcher.requestAndResponse(ClientRuntime.ROLE_CM, "getHeight", params));
+        System.out.println(CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "getHeight", params));
         //Thread.sleep(Integer.MAX_VALUE);
     }
 }
