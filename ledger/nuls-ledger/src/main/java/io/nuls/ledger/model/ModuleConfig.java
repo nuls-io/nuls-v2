@@ -23,4 +23,18 @@ public class ModuleConfig {
     @Setter
     @Getter
     protected Integer databaseVersion;
+
+    /**
+     * kernel module host
+     */
+    @Setter
+    @Getter
+    private String kernelHost;
+
+    /**
+     * kernel module webSocket port
+     */
+    @Setter
+    @Getter
+    private Integer kernelPort;
 }

@@ -4,13 +4,14 @@ import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.AccountState;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by wangkun23 on 2018/11/19.
@@ -29,8 +30,10 @@ public class AccountStateCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "lg_createAccount", version = 1.0, preCompatible = true)
-    public CmdResponse createAccount(List params) {
+    @CmdAnnotation(cmd = "lg_createAccount",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "test getHeight 1.0")
+    public Response createAccount(List params) {
         for (Object param : params) {
             logger.info("param {}", param);
         }
@@ -38,7 +41,7 @@ public class AccountStateCmd extends BaseCmd {
         short chainId = (short) params.get(0);
         String address = (String) params.get(1);
         AccountState state = repository.createAccount(chainId, address.getBytes());
-        return success("", state);
+        return success(state);
     }
 
     /**
@@ -47,16 +50,19 @@ public class AccountStateCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "lg_getBalance", version = 1.0, preCompatible = true)
-    public CmdResponse getBalance(List params) {
-        for (Object param : params) {
-            logger.info("param {}", param);
-        }
+    @CmdAnnotation(cmd = "lg_getBalance",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "test getHeight 1.0")
+    public Response getBalance(Map params) {
         //TODO.. 验证参数个数和格式
-        short chainId = (short) params.get(0);
-        String address = (String) params.get(1);
+        short chainId = (short) params.get("chainId");
+        String address = (String) params.get("address");
+
+        logger.info("chainId {}", chainId);
+        logger.info("address {}", address);
+
         long balance = repository.getBalance(address.getBytes());
-        return success("", balance);
+        return success(balance);
     }
 
     /**
@@ -65,14 +71,16 @@ public class AccountStateCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "lg_getNonce", version = 1.0, preCompatible = true)
-    public CmdResponse getNonce(List params) {
+    @CmdAnnotation(cmd = "lg_getNonce",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "test getHeight 1.0")
+    public Response getNonce(List params) {
         for (Object param : params) {
             logger.info("param {}", param);
         }
         //TODO.. 验证参数个数和格式
         String address = (String) params.get(1);
         long nonce = repository.getNonce(address.getBytes());
-        return success("", nonce);
+        return success(nonce);
     }
 }
