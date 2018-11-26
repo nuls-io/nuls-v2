@@ -41,7 +41,8 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * @author Charlie
+ * @author
+ *
  */
 public class CoinData extends BaseNulsData {
 
