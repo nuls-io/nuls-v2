@@ -46,7 +46,7 @@ public class LedgerBootstrap {
             String kernelUrl = AppConfig.moduleConfig.getKernelHost()+":"+AppConfig.moduleConfig.getKernelPort();
             WsServer.getInstance(ModuleE.LG)
                     .supportedAPIVersions(new String[]{"1.1", "1.2"})
-                    .moduleRoles(ModuleE.CM.abbr, new String[]{"1.1", "1.2"})
+                    .moduleRoles(ModuleE.LG.abbr, new String[]{"1.1", "1.2"})
                     .moduleVersion("1.2")
                     .dependencies("Role_Ledger", "1.1")
                     .scanPackage(packageC)

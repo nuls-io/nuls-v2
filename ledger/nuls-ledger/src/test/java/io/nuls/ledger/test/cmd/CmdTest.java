@@ -3,6 +3,7 @@ package io.nuls.ledger.test.cmd;
 import io.nuls.rpc.client.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.parse.JSONUtils;
@@ -33,9 +34,9 @@ public class CmdTest {
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", "8096");
+        params.put("chainId", 8096);
         params.put("address", "123");
-        Response response = CmdDispatcher.requestAndResponse(ClientRuntime.ROLE_CM, "lg_getBalance", params);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "lg_getBalance", params);
         logger.info("response {}", response);
     }
 }

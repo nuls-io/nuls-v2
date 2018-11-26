@@ -38,9 +38,9 @@ public class AccountStateCmd extends BaseCmd {
             logger.info("param {}", param);
         }
         //TODO.. 验证参数个数和格式
-        short chainId = (short) params.get(0);
+        Integer chainId = (Integer) params.get(0);
         String address = (String) params.get(1);
-        AccountState state = repository.createAccount(chainId, address.getBytes());
+        AccountState state = repository.createAccount(chainId.shortValue(), address.getBytes());
         return success(state);
     }
 
@@ -55,7 +55,7 @@ public class AccountStateCmd extends BaseCmd {
             description = "test getHeight 1.0")
     public Response getBalance(Map params) {
         //TODO.. 验证参数个数和格式
-        short chainId = (short) params.get("chainId");
+        Integer chainId = (Integer) params.get("chainId");
         String address = (String) params.get("address");
 
         logger.info("chainId {}", chainId);
