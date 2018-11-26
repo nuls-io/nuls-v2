@@ -24,6 +24,10 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.server.WsServer;
+
 /**
  * @program: nuls2.0
  * @description: Rpc init
@@ -43,7 +47,16 @@ public class RpcManager extends BaseManager{
     @Override
     public void start() {
         try {
-
+            // Start server instance
+            WsServer.getInstance(ModuleE.NW)
+                    .supportedAPIVersions(new String[]{"1.1", "1.2"})
+                    .moduleRoles(ModuleE.NW.abbr, new String[]{"1.1", "1.2"})
+                    .moduleVersion("1.2")
+                    .dependencies("Role_Ledger", "1.1")
+                    .scanPackage("io.nuls.rpc.cmd.test")
+                    .connect("ws://127.0.0.1:8887");
+            // Get information from kernel
+            CmdDispatcher.syncKernel();
         } catch (Exception e) {
             e.printStackTrace();
         }

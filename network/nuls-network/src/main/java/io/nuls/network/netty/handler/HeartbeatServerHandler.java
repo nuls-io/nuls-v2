@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.network.manager.handler;
+package io.nuls.network.netty.handler;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleStateEvent;

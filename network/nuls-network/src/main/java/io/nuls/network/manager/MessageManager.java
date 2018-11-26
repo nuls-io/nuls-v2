@@ -42,7 +42,8 @@ import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
-import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
@@ -142,7 +143,7 @@ public class MessageManager extends BaseManager{
                     paramMap.put("chainId",chainId);
                     paramMap.put("nodeId",nodeKey);
                     paramMap.put("messageBody",HexUtil.byteToHex(payLoadBody));
-                    String response = CmdDispatcher.request(header.getCommandStr(),paramMap);
+                    Response response = CmdDispatcher.requestAndResponse(null,header.getCommandStr(),paramMap);
                     Log.info("response："+response);
                     byteBuffer.setCursor(payLoad.length);
                 }

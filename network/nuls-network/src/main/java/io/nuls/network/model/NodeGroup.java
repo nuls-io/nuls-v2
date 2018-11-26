@@ -118,7 +118,7 @@ public class NodeGroup  implements Dto {
 
     private volatile  int hadCrossConnectIn=0;
 
-    private static ReentrantLock NETWORK_GROUP_NODE_CONNECT_LOCK = new ReentrantLock();
+    private ReentrantLock NETWORK_GROUP_NODE_CONNECT_LOCK = new ReentrantLock();
 
 
     /**

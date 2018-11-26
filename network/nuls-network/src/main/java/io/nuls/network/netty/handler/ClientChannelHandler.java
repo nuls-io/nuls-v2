@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.network.manager.handler;
+package io.nuls.network.netty.handler;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -35,6 +35,7 @@ import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
+import io.nuls.network.manager.handler.NetworkMessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.Node;
@@ -43,6 +44,7 @@ import io.nuls.network.model.message.VersionMessage;
 import io.nuls.tools.log.Log;
 
 import java.io.IOException;
+
 /**
  * client channel handler
  * @author lan

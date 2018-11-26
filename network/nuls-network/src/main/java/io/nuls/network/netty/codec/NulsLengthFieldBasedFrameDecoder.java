@@ -21,23 +21,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.network.netty;
+package io.nuls.network.netty.codec;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageEncoder;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 
-import java.util.List;
+import java.nio.ByteOrder;
 
 /**
+ * @desription:
  * @author: PierreLuo
- * @date: 2018/7/30
+ * @date: 2018/8/7
  */
-public class NulsMessageEncoder extends MessageToMessageEncoder<ByteBuf> {
-    @Override
-    protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
-        // new protocol
-            out.add(msg.retain());
+public class NulsLengthFieldBasedFrameDecoder extends LengthFieldBasedFrameDecoder {
 
+    public NulsLengthFieldBasedFrameDecoder(int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip) {
+        super(maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip);
+    }
+
+    public NulsLengthFieldBasedFrameDecoder(ByteOrder byteOrder, int maxFrameLength, int lengthFieldOffset, int lengthFieldLength, int lengthAdjustment, int initialBytesToStrip, boolean failFast) {
+        super(byteOrder, maxFrameLength, lengthFieldOffset, lengthFieldLength, lengthAdjustment, initialBytesToStrip, failFast);
+    }
+
+    @Override
+    public Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
+        return super.decode(ctx, in);
     }
 }

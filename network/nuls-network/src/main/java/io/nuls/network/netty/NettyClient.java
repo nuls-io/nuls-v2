@@ -34,8 +34,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
-import io.nuls.network.manager.handler.ClientChannelHandler;
 import io.nuls.network.model.Node;
+import io.nuls.network.netty.handler.ClientChannelHandler;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
@@ -90,7 +90,11 @@ public class NettyClient {
                     if (future.isSuccess()) {
                         socketChannel = (SocketChannel) future.channel();
                     } else {
-                        Log.error("Client connect to host error: " + future.cause() + ", remove node: " + node.getId());
+                        /*
+                         * 连接失败,进行记录，在NodesConnectThread中统一处理
+                         * Connection failed, record, unified processing in NodesConnectThread
+                         */
+                        Log.error("Client connect to host error: " + future.cause() + ", node: " + node.getId());
                         node.setBad(true);
                         node.setLastFailTime(TimeService.currentTimeMillis());
                         node.setFailCount(node.getFailCount()+1);

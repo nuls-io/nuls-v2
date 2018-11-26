@@ -37,7 +37,9 @@ import org.junit.Test;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @program: nuls2.0
@@ -56,7 +58,7 @@ public class MessageRpcTest {
     public void broadcast() {
         try {
             addNodeGroup();
-            List<Object> params = new ArrayList<>();
+            Map params = new HashMap<>();
             int chainId = 1000;
             String excludeNodes = "20.30.1020:5599,26.35.52.64:6688";
             VersionMessageBody versionMessageBody = new VersionMessageBody();
@@ -70,9 +72,10 @@ public class MessageRpcTest {
             VersionMessage versionMessage = new VersionMessage(0, NetworkConstant.CMD_MESSAGE_VERSION, versionMessageBody);
             versionMessage.getHeader().setPayloadLength(versionMessageBody.size());
 //            versionMessage.getHeader().setChecksum(  versionMessage.getHeader().);
-            params.add(chainId);
-            params.add(excludeNodes);
-            params.add(HexUtil.byteToHex(versionMessage.serialize()));
+            params.put("chainId",chainId);
+            params.put("excludeNodes",excludeNodes);
+            params.put("messageBody",HexUtil.byteToHex(versionMessageBody.serialize()));
+            params.put("command",HexUtil.byteToHex(versionMessage.getHeader().getCommand()));
             new MessageRpc().broadcast(params);
 
         }catch (Exception e){

@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.network.manager.handler;
+package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageFactory;
@@ -61,6 +61,15 @@ public class AddrMessageHandler extends BaseMessageHandler {
         return instance;
     }
 
+    /**
+     *
+     * 接收消息处理
+     * Receive message processing
+     * @param message
+     * @param nodeKey
+     * @param isServer
+     * @return
+     */
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
@@ -121,6 +130,15 @@ public class AddrMessageHandler extends BaseMessageHandler {
         return new NetworkEventResult(true, null);
     }
 
+    /**
+     *
+     * AddrMessageHandler sending a message
+     * @param message
+     * @param node
+     * @param isServer
+     * @param asyn
+     * @return
+     */
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
         Log.debug("AddrMessageHandler Send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
