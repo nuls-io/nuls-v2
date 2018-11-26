@@ -30,9 +30,9 @@ public class CoinFrom extends BaseNulsData {
     private int assetsId;
 
     /**
-     * uint64，转出数量
+     * 转出数量
      */
-    private long amount;
+    private String amount;
 
     /**
      * uint32 交易顺序号，递增
@@ -45,7 +45,7 @@ public class CoinFrom extends BaseNulsData {
         stream.writeBytesWithLength(address);
         stream.writeUint16(assetsChainId);
         stream.writeUint16(assetsId);
-        stream.writeInt64(amount);
+        stream.writeString(amount);
         stream.writeBytesWithLength(nonce);
     }
 
@@ -54,7 +54,7 @@ public class CoinFrom extends BaseNulsData {
         this.address = byteBuffer.readByLengthByte();
         this.assetsChainId = byteBuffer.readUint16();
         this.assetsId = byteBuffer.readUint16();
-        this.amount = byteBuffer.readInt64();
+        this.amount = byteBuffer.readString();
         this.nonce = byteBuffer.readByLengthByte();
     }
 
@@ -64,7 +64,7 @@ public class CoinFrom extends BaseNulsData {
         size += SerializeUtils.sizeOfBytes(address);
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
-        size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfString(amount);
         size += SerializeUtils.sizeOfBytes(nonce);
         return size;
     }
@@ -104,11 +104,11 @@ public class CoinFrom extends BaseNulsData {
         this.assetsId = assetsId;
     }
 
-    public long getAmount() {
+    public String getAmount() {
         return amount;
     }
 
-    public void setAmount(long amount) {
+    public void setAmount(String amount) {
         this.amount = amount;
     }
 
