@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Set;
 
 /**
+ * 跨链交易的txData
  * @author: Charlie
  * @date: 2018/11/22
  */
