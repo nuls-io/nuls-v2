@@ -84,6 +84,15 @@ public class CmdDispatcher {
         return callMessageResponse(messageId);
     }
 
+    public static void requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String method) throws Exception {
+        String messageId = request(role, cmd, params, "0");
+        Response response=callMessageResponse(messageId);
+        /*
+        Call through reflection
+         */
+
+    }
+
     /**
      * call cmd.
      * 1. Find the corresponding module according to cmd
@@ -115,6 +124,8 @@ public class CmdDispatcher {
 
         return messageId;
     }
+
+
 
     /**
      * Method of Unsubscribe

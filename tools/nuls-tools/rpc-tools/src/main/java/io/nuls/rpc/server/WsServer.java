@@ -76,7 +76,7 @@ public class WsServer extends WebSocketServer {
         try {
             Log.info("Server<" + ServerRuntime.local.getModuleAbbreviation() + ":" + ServerRuntime.local.getModuleName() + "> receive:" + msg);
             ServerRuntime.REQUEST_QUEUE.add(new Object[]{webSocket, msg});
-            ServerRuntime.fixedThreadPool.execute(new WsProcessor());
+            ServerRuntime.fixedThreadPool.execute(new ServerProcessor());
         } catch (Exception e) {
             e.printStackTrace();
         }
