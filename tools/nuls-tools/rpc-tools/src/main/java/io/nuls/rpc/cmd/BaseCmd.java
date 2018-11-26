@@ -26,7 +26,7 @@
 package io.nuls.rpc.cmd;
 
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.ServerRuntime;
+import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.rpc.model.ConfigItem;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;

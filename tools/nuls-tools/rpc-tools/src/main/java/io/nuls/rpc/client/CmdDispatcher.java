@@ -1,11 +1,9 @@
-package io.nuls.rpc.cmd;
+package io.nuls.rpc.client;
 
-import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.handler.CmdHandler;
-import io.nuls.rpc.info.ClientRuntime;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.ServerRuntime;
 import io.nuls.rpc.model.message.*;
+import io.nuls.rpc.server.CmdHandler;
+import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -51,7 +49,7 @@ public class CmdDispatcher {
         String messageId = Constants.nextSequence();
         Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
         Request request = defaultRequest();
-        request.getRequestMethods().put("registerAPI", ServerRuntime.local.getRegisterApi());
+        request.getRequestMethods().put("registerAPI", ServerRuntime.local);
         message.setMessageData(request);
 
         WsClient wsClient = ClientRuntime.getWsClient(Constants.kernelUrl);
@@ -125,7 +123,7 @@ public class CmdDispatcher {
      * @param messageId Request message ID
      */
     public static void unsubscribe(String messageId) throws Exception {
-        Message message = CmdHandler.basicMessage(messageId, MessageType.Unsubscribe);
+        Message message = CmdHandler.basicMessage(Constants.nextSequence(), MessageType.Unsubscribe);
         Unsubscribe unsubscribe = new Unsubscribe();
         unsubscribe.setUnsubscribeMethods(new String[]{messageId});
         message.setMessageData(unsubscribe);
