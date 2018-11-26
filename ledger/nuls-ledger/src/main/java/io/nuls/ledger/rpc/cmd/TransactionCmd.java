@@ -3,7 +3,7 @@ package io.nuls.ledger.rpc.cmd;
 import io.nuls.ledger.service.LedgerService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import org.slf4j.Logger;
@@ -28,13 +28,15 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "lg_saveUnConfirmTx", version = 1.0, preCompatible = true)
-    public CmdResponse saveUnConfirmTx(List params) {
+    @CmdAnnotation(cmd = "lg_saveUnConfirmTx",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "test getHeight 1.0")
+    public Object saveUnConfirmTx(List params) {
         for (Object param : params) {
             logger.info("param {}", param);
         }
         //TODO.. 验证参数个数和格式
-        return success("", "hash");
+        return success("hash");
     }
 
     /**
@@ -43,8 +45,10 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "lg_deleteUnConfirmTx", version = 1.0, preCompatible = true)
-    public CmdResponse deleteTransaction(List params) {
-        return success("", "hash");
+    @CmdAnnotation(cmd = "lg_deleteUnConfirmTx",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "test getHeight 1.0")
+    public Response deleteTransaction(List params) {
+        return success("hash");
     }
 }
