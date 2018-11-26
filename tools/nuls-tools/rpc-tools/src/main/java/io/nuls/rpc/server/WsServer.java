@@ -76,7 +76,7 @@ public class WsServer extends WebSocketServer {
         try {
             Log.info("Server<" + ServerRuntime.local.getModuleAbbreviation() + ":" + ServerRuntime.local.getModuleName() + "> receive:" + msg);
             ServerRuntime.REQUEST_QUEUE.add(new Object[]{webSocket, msg});
-            ServerRuntime.fixedThreadPool.execute(new ServerProcessor());
+            ServerRuntime.serverThreadPool.execute(new ServerProcessor());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -182,7 +182,6 @@ public class WsServer extends WebSocketServer {
                 .moduleRoles(new String[]{"1.0"})
                 .moduleVersion("1.0")
                 .dependencies(ModuleE.CM.abbr, "1.1")
-                .scanPackage("io.nuls.rpc.cmd.test")
                 .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel

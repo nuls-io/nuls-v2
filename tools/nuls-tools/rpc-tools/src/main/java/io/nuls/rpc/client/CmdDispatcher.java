@@ -43,7 +43,6 @@ public class CmdDispatcher {
     /**
      * 1. send local module information to kernel
      * 2. receive all the modules' interfaces from kernel
-     * 这个方法在Berzeck确定了他的最终JSON格式之后还要进行修改
      */
     public static void syncKernel() throws Exception {
         String messageId = Constants.nextSequence();
@@ -61,7 +60,7 @@ public class CmdDispatcher {
         @SuppressWarnings("unchecked")
         Response response = callMessageResponse(messageId);
         Log.info("APIMethods from kernel:" + JSONUtils.obj2json(response));
-        Map<String, Object> responseData = (Map) response.getResponseData();
+        Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
         for (Object key : dependMap.keySet()) {
@@ -79,18 +78,20 @@ public class CmdDispatcher {
      *
      * @return Result with JSON string
      */
-    public static Response requestAndResponse(String role, String cmd, Map params) throws Exception {
+    public static Object requestAndResponse(String role, String cmd, Map params) throws Exception {
         String messageId = request(role, cmd, params, "0");
-        return callMessageResponse(messageId);
+        Response response = callMessageResponse(messageId);
+        Map responseData = (Map) response.getResponseData();
+        return responseData.get(cmd);
     }
 
-    public static void requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String method) throws Exception {
-        String messageId = request(role, cmd, params, "0");
-        Response response=callMessageResponse(messageId);
-        /*
-        Call through reflection
-         */
-
+    public static String requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
+        if (Integer.parseInt(subscriptionPeriod) <= 0) {
+            throw new Exception("subscriptionPeriod must great than 0");
+        }
+        String messageId = request(role, cmd, params, subscriptionPeriod);
+        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod, cmd});
+        return messageId;
     }
 
     /**
@@ -102,7 +103,7 @@ public class CmdDispatcher {
      *
      * @return Message ID
      */
-    public static String request(String role, String cmd, Map params, String subscriptionPeriod) throws Exception {
+    private static String request(String role, String cmd, Map params, String subscriptionPeriod) throws Exception {
         String messageId = Constants.nextSequence();
         Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
         Request request = defaultRequest();
@@ -126,7 +127,6 @@ public class CmdDispatcher {
     }
 
 
-
     /**
      * Method of Unsubscribe
      * A call that responds only once does not need to be cancelled
@@ -142,13 +142,14 @@ public class CmdDispatcher {
         WsClient wsClient = ClientRuntime.msgIdKeyWsClientMap.get(messageId);
         if (wsClient != null) {
             wsClient.send(JSONUtils.obj2json(message));
+            ClientRuntime.INVOKE_MAP.remove(messageId);
         }
     }
 
     /**
      * Get response by messageId
      */
-    public static Message callMessage(MessageType messageType) throws InterruptedException, IOException {
+    private static Message callMessage(MessageType messageType) throws InterruptedException, IOException {
 
         long timeMillis = System.currentTimeMillis();
         do {
@@ -157,22 +158,9 @@ public class CmdDispatcher {
                     Message message = JSONUtils.map2pojo(map, Message.class);
                     if (messageType.name().equals(message.getMessageType())) {
                         ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
-                        Log.info("NegotiateConnectionResponse:" + JSONUtils.obj2json(message));
+                        Log.info(message.getMessageType() + ":" + JSONUtils.obj2json(message));
                         return message;
                     }
-
-//                    switch (messageType) {
-//                        case NegotiateConnectionResponse:
-//                            ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
-//                            Log.info("NegotiateConnectionResponse:" + JSONUtils.obj2json(message));
-//                            return JSONUtils.obj2json(message);
-//                        case Ack:
-//                            ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
-//                            Log.info("Ack:" + JSONUtils.obj2json(message));
-//                            return JSONUtils.obj2json(message);
-//                        default:
-//                            break;
-//                    }
                 }
             }
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
@@ -184,8 +172,7 @@ public class CmdDispatcher {
     /**
      * Get response by messageId
      */
-    public static Response callMessageResponse(String messageId) throws InterruptedException, IOException {
-
+    private static Response callMessageResponse(String messageId) throws InterruptedException, IOException {
         if (Integer.parseInt(messageId) < 0) {
             return ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.CMD_NOT_FOUND);
         }
