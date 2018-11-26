@@ -62,7 +62,7 @@ public class StopAgent extends TransactionLogicData {
     public int size() {
         return this.createTxHash.size();
     }
-    @Override
+
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         if(null!=address){

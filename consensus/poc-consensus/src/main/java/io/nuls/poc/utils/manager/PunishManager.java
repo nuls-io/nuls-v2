@@ -5,12 +5,12 @@ import io.nuls.base.data.*;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Evidence;
 import io.nuls.poc.model.bo.consensus.PunishReasonEnum;
-import io.nuls.poc.model.bo.tx.RedPunishTransaction;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
 import io.nuls.poc.utils.compare.EvidenceComparator;
 import io.nuls.poc.utils.util.ConsensusUtil;
 import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.io.IOException;
@@ -26,7 +26,7 @@ public class PunishManager {
     /**
      * 保存本节点需打包的红牌交易,节点打包时需把该集合中所有红牌交易打包并删除
      * */
-    private Map<Integer, RedPunishTransaction> redPunishTransactionMap = new HashMap<>();
+    private Map<Integer,Transaction> redPunishTransactionMap = new HashMap<>();
 
     /**
      * 控制该类为单例模式
@@ -46,7 +46,7 @@ public class PunishManager {
     /**
      * 添加分叉证据
      * */
-    public void addEvidenceRecord(int chain_id, BlockHeader firstHeader, BlockHeader secondHeader){
+    public void addEvidenceRecord(int chain_id, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
         //找到分叉的节点
         Agent agent = null;
         for (Agent a:ConsensusManager.getInstance().getAllAgentMap().get(chain_id)) {
@@ -72,7 +72,7 @@ public class PunishManager {
     /**
      * 添加双花红牌记录
      * */
-    public void addDoubleSpendRecord(int chain_id, List<Transaction> txs,Block block){
+    public void addDoubleSpendRecord(int chain_id, List<Transaction> txs,Block block)throws NulsException {
         byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey(),(short)chain_id);
         List<Agent> agentList = ConsensusManager.getInstance().getAllAgentMap().get(chain_id);
         Agent agent = null;
@@ -89,7 +89,7 @@ public class PunishManager {
             return;
         }
         try {
-            RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
+            Transaction redPunishTransaction = new Transaction(ConsensusConstant.TX_TYPE_RED_PUNISH);
             RedPunishData redPunishData = new RedPunishData();
             redPunishData.setAddress(agent.getAgentAddress());
             SmallBlock smallBlock = new SmallBlock();
@@ -100,10 +100,10 @@ public class PunishManager {
             }
             redPunishData.setEvidence(smallBlock.serialize());
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
-            redPunishTransaction.setTxData(redPunishData);
+            redPunishTransaction.setTxData(redPunishData.serialize());
             redPunishTransaction.setTime(smallBlock.getHeader().getTime());
             CoinData coinData = ConsensusUtil.getStopAgentCoinData(chain_id, agent, redPunishTransaction.getTime() + ConfigManager.config_map.get(chain_id).getRedPublish_lockTime());
-            redPunishTransaction.setCoinData(coinData);
+            redPunishTransaction.setCoinData(coinData.serialize());
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             redPunishTransactionMap.put(chain_id,redPunishTransaction);
         }catch (IOException e){
@@ -158,8 +158,8 @@ public class PunishManager {
     /**
      * 创建红牌交易并放入缓存中
      * */
-    private void createRedPunishTransaction(int chain_id, Agent agent){
-        RedPunishTransaction redPunishTransaction = new RedPunishTransaction();
+    private void createRedPunishTransaction(int chain_id, Agent agent)throws NulsException{
+        Transaction redPunishTransaction = new Transaction(ConsensusConstant.TX_TYPE_RED_PUNISH);
         RedPunishData redPunishData = new RedPunishData();
         redPunishData.setAddress(agent.getAgentAddress());
         long txTime = 0;
@@ -179,13 +179,13 @@ public class PunishManager {
         }catch (IOException e){
             Log.error(e);
         }
-        redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
-        redPunishTransaction.setTxData(redPunishData);
-        redPunishTransaction.setTime(txTime);
         try {
+            redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
+            redPunishTransaction.setTxData(redPunishData.serialize());
+            redPunishTransaction.setTime(txTime);
             //组装CoinData
             CoinData coinData = ConsensusUtil.getStopAgentCoinData(chain_id,agent,redPunishTransaction.getTime()+ConfigManager.config_map.get(chain_id).getRedPublish_lockTime());
-            redPunishTransaction.setCoinData(coinData);
+            redPunishTransaction.setCoinData(coinData.serialize());
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             //缓存红牌交易
             redPunishTransactionMap.put(chain_id,redPunishTransaction);
@@ -202,11 +202,11 @@ public class PunishManager {
         this.bifurcationEvidenceMap = bifurcationEvidenceMap;
     }
 
-    public Map<Integer, RedPunishTransaction> getRedPunishTransactionMap() {
+    public Map<Integer, Transaction> getRedPunishTransactionMap() {
         return redPunishTransactionMap;
     }
 
-    public void setRedPunishTransactionMap(Map<Integer, RedPunishTransaction> redPunishTransactionMap) {
+    public void setRedPunishTransactionMap(Map<Integer, Transaction> redPunishTransactionMap) {
         this.redPunishTransactionMap = redPunishTransactionMap;
     }
 }

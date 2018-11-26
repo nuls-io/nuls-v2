@@ -8,10 +8,6 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
-import io.nuls.poc.model.bo.tx.CancelDepositTransaction;
-import io.nuls.poc.model.bo.tx.CreateAgentTransaction;
-import io.nuls.poc.model.bo.tx.DepositTransaction;
-import io.nuls.poc.model.bo.tx.StopAgentTransaction;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
@@ -33,7 +29,6 @@ import io.nuls.poc.utils.manager.RoundManager;
 import io.nuls.poc.utils.util.ConsensusUtil;
 import io.nuls.poc.utils.util.PoConvertUtil;
 import io.nuls.poc.utils.validator.ValidatorManager;
-import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -46,7 +41,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
-
+import io.nuls.tools.basic.Result;
 import java.io.IOException;
 import java.util.*;
 
@@ -65,9 +60,9 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 创建节点
      * */
     @Override
-    public CmdResponse createAgent(Map<String,Object> params) {
+    public Result createAgent(Map<String,Object> params) {
         if(params == null){
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             CreateAgentDTO dto = JSONUtils.map2pojo(params,CreateAgentDTO.class);
@@ -84,10 +79,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             //todo 调用账户模块接口  验证账户是否正确
             /*boolean validResult = true;
             if(!validResult){
-                return new CmdResponse(1, ConsensusErrorCode.ACCOUNT_INFO_ERROR.getCode(),ConsensusErrorCode.ACCOUNT_INFO_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return new Result(1, ConsensusErrorCode.ACCOUNT_INFO_ERROR.getCode(),ConsensusErrorCode.ACCOUNT_INFO_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
             }*/
             //3.组装创建节点交易
-            CreateAgentTransaction tx = new CreateAgentTransaction();
+            Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
             tx.setTime(TimeService.currentTimeMillis());
             //3.1.组装共识节点信息
             Agent agent = new Agent();
@@ -100,21 +95,24 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             agent.setDeposit(Na.valueOf(dto.getDeposit()));
             agent.setCommissionRate(dto.getCommissionRate());
-            tx.setTxData(agent);
+            tx.setTxData(agent.serialize());
             //3.2.组装coinData(调用账户模块)
             CoinData coinData = new CoinData();
             List<Coin> toList = new ArrayList<>();
             toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), ConsensusConstant.CONSENSUS_LOCK_TIME));
             coinData.setTo(toList);
-            tx.setCoinData(coinData);
+            tx.setCoinData(coinData.serialize());
             //todo 4.交易签名
 
             //todo 5.将交易发送给交易管理模块
 
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsRuntimeException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
+        }catch (IOException io){
+            Log.error(io);
+            return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
 
@@ -122,9 +120,9 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 停止节点
      * */
     @Override
-    public CmdResponse stopAgent(Map<String,Object> params) {
+    public Result stopAgent(Map<String,Object> params) {
         if(params == null || params.get("chain_id") == null || params.get("address") == null){
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chainId = (Integer)params.get("chain_id");
@@ -138,7 +136,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             //todo  验证账户正确性（账户模块）
 
-            StopAgentTransaction tx = new StopAgentTransaction();
+            Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
             StopAgent stopAgent = new StopAgent();
             stopAgent.setAddress(AddressTool.getAddress(address));
             List<Agent> agentList = ConsensusManager.getInstance().getAllAgentMap().get(chainId);
@@ -153,26 +151,25 @@ public class ConsensusServiceImpl implements ConsensusService {
                 }
             }
             if (agent == null || agent.getDelHeight() > 0) {
-                return new CmdResponse(1, ConsensusErrorCode.AGENT_NOT_EXIST.getCode(),ConsensusErrorCode.AGENT_NOT_EXIST.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
             }
             stopAgent.setCreateTxHash(agent.getTxHash());
-            tx.setTxData(stopAgent);
+            tx.setTxData(stopAgent.serialize());
             CoinData coinData = ConsensusUtil.getStopAgentCoinData(chainId, agent, TimeService.currentTimeMillis() + ConfigManager.config_map.get(chainId).getStopAgent_lockTime());
-            tx.setCoinData(coinData);
+            tx.setCoinData(coinData.serialize());
             Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
             coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
-
             //todo 交易签名
 
             //todo 将交易传递给交易管理模块
 
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
-        }catch (NulsRuntimeException e){
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+        }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }catch (IOException io){
             Log.error(io);
-            return new CmdResponse(1, ConsensusErrorCode.DATA_PARSE_ERROR.getCode(),ConsensusErrorCode.DATA_PARSE_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
 
@@ -180,9 +177,9 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 委托共识
      * */
     @Override
-    public CmdResponse depositToAgent(Map<String,Object> params) {
+    public Result depositToAgent(Map<String,Object> params) {
         if(params == null){
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             CreateDepositDTO dto = JSONUtils.map2pojo(params,CreateDepositDTO.class);
@@ -197,27 +194,30 @@ public class ConsensusServiceImpl implements ConsensusService {
                 throw new NulsException(ConsensusErrorCode.ADDRESS_ERROR);
             }
             //todo 账户验证（账户模块）
-            DepositTransaction tx = new DepositTransaction();
+            Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
             Deposit deposit = new Deposit();
             deposit.setAddress(AddressTool.getAddress(dto.getAddress()));
             deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
             deposit.setDeposit(Na.valueOf(dto.getDeposit()));
-            tx.setTxData(deposit);
+            tx.setTxData(deposit.serialize());
             CoinData coinData = new CoinData();
             List<Coin> toList = new ArrayList<>();
             toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), ConsensusConstant.CONSENSUS_LOCK_TIME));
             coinData.setTo(toList);
-            tx.setCoinData(coinData);
+            tx.setCoinData(coinData.serialize());
             //todo 获取coindata （账本模块），处理返回结果
 
             //todo 交易签名
 
             //todo 将交易传递给交易管理模块
 
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
+        }catch (IOException io){
+            Log.error(io);
+            return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
 
@@ -225,38 +225,42 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 退出共识
      * */
     @Override
-    public CmdResponse withdraw(Map<String,Object> params) {
+    public Result withdraw(Map<String,Object> params) {
         if(params == null){
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             WithdrawDTO dto = JSONUtils.map2pojo(params,WithdrawDTO.class);
             if (!NulsDigestData.validHash(dto.getTxHash())) {
-                throw new NulsException(ConsensusErrorCode.PARAM_ERROR);
+                return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
             }
             if (!AddressTool.validAddress((short)dto.getChainId(),dto.getAddress())) {
-                throw new NulsException(ConsensusErrorCode.ADDRESS_ERROR);
+                return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
             }
             //todo 账户验证（账户模块）
 
-            CancelDepositTransaction tx = new CancelDepositTransaction();
+            Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             CancelDeposit cancelDeposit = new CancelDeposit();
             NulsDigestData hash = NulsDigestData.fromDigestHex(dto.getTxHash());
             //todo 从交易模块获取委托交易（交易模块）+ 返回数据处理
-            DepositTransaction depositTransaction = new DepositTransaction();
+            Transaction depositTransaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
 
             cancelDeposit.setAddress(AddressTool.getAddress(dto.getAddress()));
             cancelDeposit.setJoinTxHash(hash);
-            tx.setTxData(cancelDeposit);
+            tx.setTxData(cancelDeposit.serialize());
             CoinData coinData = new CoinData();
             List<Coin> toList = new ArrayList<>();
-            toList.add(new Coin(cancelDeposit.getAddress(), depositTransaction.getTxData().getDeposit(), 0));
+            Deposit deposit = new Deposit();
+            deposit.parse(depositTransaction.getTxData(),0);
+            toList.add(new Coin(cancelDeposit.getAddress(), deposit.getDeposit(), 0));
             coinData.setTo(toList);
-
             List<Coin> fromList = new ArrayList<>();
-            for (int index = 0; index < depositTransaction.getCoinData().getTo().size(); index++) {
-                Coin coin = depositTransaction.getCoinData().getTo().get(index);
-                if (coin.getLockTime() == -1L && coin.getNa().equals(depositTransaction.getTxData().getDeposit())) {
+
+            CoinData dtCoinData = new CoinData();
+            dtCoinData.parse(depositTransaction.getCoinData(),0);
+            for (int index = 0; index <dtCoinData.getTo().size(); index++) {
+                Coin coin = dtCoinData.getTo().get(index);
+                if (coin.getLockTime() == -1L && coin.getNa().equals(deposit.getDeposit())) {
                     coin.setOwner(ByteUtils.concatenate(hash.serialize(), new VarInt(index).encode()));
                     fromList.add(coin);
                     break;
@@ -266,7 +270,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 throw new NulsException(ConsensusErrorCode.DATA_ERROR);
             }
             coinData.setFrom(fromList);
-            tx.setCoinData(coinData);
+            tx.setCoinData(coinData.serialize());
             Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
             coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
 
@@ -274,13 +278,13 @@ public class ConsensusServiceImpl implements ConsensusService {
 
             //todo 将交易传递给交易管理模块
 
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }catch (IOException io){
             Log.error(io);
-            return new CmdResponse(1, ConsensusErrorCode.DATA_PARSE_ERROR.getCode(),ConsensusErrorCode.DATA_PARSE_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
 
@@ -288,7 +292,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 获取节点列表信息
      * */
     @Override
-    public CmdResponse getAgentList(Map<String,Object> params) {
+    public Result getAgentList(Map<String,Object> params) {
         int pageNumber = 0;
         if(params.get("pageNumber") != null){
             pageNumber = (Integer) params.get("pageNumber");
@@ -304,7 +308,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             pageSize = 10;
         }
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100 || params.get("chain_id") == null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chain_id = (Integer) params.get("chain_id");
         List<Agent> agentList = ConsensusManager.getInstance().getAllAgentMap().get(chain_id);
@@ -344,8 +348,9 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         int start = pageNumber * pageSize - pageSize;
         Page<AgentDTO> page = new Page<>(pageNumber, pageSize, handleList.size());
+        //表示查询的起始位置大于数据总数即查询的该页不存在数据
         if (start >= page.getTotal()) {
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,page);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
         }
         fillAgentList(chain_id, handleList, null);
         //todo 是否要添加排序功能
@@ -355,21 +360,20 @@ public class ConsensusServiceImpl implements ConsensusService {
             resultList.add(agentDTO);
         }
         page.setList(resultList);
-        return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,page);
-
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
     }
 
     /**
      * 获取指定节点信息
      * */
     @Override
-    public CmdResponse getAgentInfo(Map<String,Object> params) {
+    public Result getAgentInfo(Map<String,Object> params) {
         if(params.get("agentHash") == null || params.get("chain_id") == null ){
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         String agentHash = (String)params.get("agentHash");
         if (!NulsDigestData.validHash(agentHash)) {
-            return new CmdResponse(1, ConsensusErrorCode.AGENT_NOT_EXIST.getCode(),ConsensusErrorCode.AGENT_NOT_EXIST.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
         try {
             NulsDigestData agentHashData = NulsDigestData.fromDigestHex(agentHash);
@@ -380,22 +384,22 @@ public class ConsensusServiceImpl implements ConsensusService {
                     MeetingRound round = RoundManager.getInstance().getCurrentRound(chain_id);
                     this.fillAgent(chain_id, agent, round, null);
                     AgentDTO dto = new AgentDTO(agent);
-                    return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,dto);
+                    return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(dto);
                 }
             }
-        }catch (Exception e){
+        }catch (NulsException e){
             Log.error(e);
         }
-        return new CmdResponse(1, ConsensusErrorCode.AGENT_NOT_EXIST.getCode(),ConsensusErrorCode.AGENT_NOT_EXIST.getMsg(), ConsensusConstant.RPC_VERSION,null);
+        return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
     }
 
     /**
      * 获取惩罚信息
      * */
     @Override
-    public CmdResponse getPublishList(Map<String,Object> params) {
+    public Result getPublishList(Map<String,Object> params) {
         if(params.get("chain_id") == null){
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chain_id = (Integer)params.get("chain_id");
         String address = null;
@@ -427,14 +431,14 @@ public class ConsensusServiceImpl implements ConsensusService {
         Map<String,List<PunishLogDTO>> resultMap = new HashMap<>();
         resultMap.put("redPunish",redPunishList);
         resultMap.put("yellowPunish",yellowPunishList);
-        return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,resultMap);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
     }
 
     /**
      * 获取委托列表信息
      * */
     @Override
-    public CmdResponse getDepositList(Map<String,Object> params) {
+    public Result getDepositList(Map<String,Object> params) {
         int pageNumber = 0;
         if(params.get("pageNumber") != null){
             pageNumber = (Integer) params.get("pageNumber");
@@ -450,7 +454,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             pageSize = 10;
         }
         if (pageNumber < 0 || pageSize < 0 || pageSize > 100 || params.get("chain_id") == null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chain_id = (Integer) params.get("chain_id");
         String address = null;
@@ -487,7 +491,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         int start = pageNumber * pageSize - pageSize;
         Page<DepositDTO> page = new Page<>(pageNumber, pageSize, handleList.size());
         if (start >= handleList.size()) {
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,page);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
         }
         List<DepositDTO> resultList = new ArrayList<>();
         for (int i = start; i < depositList.size() && i < (start + pageSize); i++) {
@@ -504,22 +508,22 @@ public class ConsensusServiceImpl implements ConsensusService {
             resultList.add(new DepositDTO(deposit, agent));
         }
         page.setList(resultList);
-        return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,page);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
     }
 
     /**
      * 获取全网信息
      * */
     @Override
-    public CmdResponse getWholeInfo(Map<String,Object> params) {
+    public Result getWholeInfo(Map<String,Object> params) {
         if (params.get("chain_id") == null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chain_id = (Integer) params.get("chain_id");
         WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
         List<Agent> agentList = ConsensusManager.getInstance().getAllAgentMap().get(chain_id);
         if(agentList == null ){
-            return new CmdResponse(1, ConsensusErrorCode.DATA_NOT_EXIST.getCode(),ConsensusErrorCode.DATA_NOT_EXIST.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.DATA_NOT_EXIST);
         }
         List<Agent> handleList = new ArrayList<>();
         //todo 从区块管理模块获取本地最新高度
@@ -547,16 +551,16 @@ public class ConsensusServiceImpl implements ConsensusService {
         dto.setTotalDeposit(totalDeposit);
         dto.setConsensusAccountNumber(handleList.size());
         dto.setPackingAgentCount(packingAgentCount);
-        return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,dto);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(dto);
     }
 
     /**
      * 获取指定账户信息
      * */
     @Override
-    public CmdResponse getInfo(Map<String,Object> params) {
+    public Result getInfo(Map<String,Object> params) {
         if (params.get("chain_id") == null || params.get("address")==null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chain_id = (Integer) params.get("chain_id");
         String address = (String)params.get("address");
@@ -610,16 +614,16 @@ public class ConsensusServiceImpl implements ConsensusService {
             Log.error(e);
             dto.setUsableBalance(0L);
         }
-        return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,dto);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(dto);
     }
 
     /**
      * 验证区块正确性
      * */
     @Override
-    public CmdResponse validBlock(Map<String,Object> params) {
+    public Result validBlock(Map<String,Object> params) {
         if (params.get("chain_id") == null || params.get("block")==null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
@@ -630,10 +634,10 @@ public class ConsensusServiceImpl implements ConsensusService {
 
             //验证轮次信息及打包人
 
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, ConsensusErrorCode.DATA_PARSE_ERROR.getCode(),ConsensusErrorCode.DATA_PARSE_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
 
@@ -641,7 +645,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 批量验证共识模块交易
      * */
     @Override
-    public CmdResponse batchValid(List<Object> params) {
+    public Result batchValid(Map<String,Object> params) {
         return null;
     }
 
@@ -649,12 +653,13 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 获取当前轮次信息
      * */
     @Override
-    public CmdResponse getRoundInfo(List<Object> params) {
-        if(params == null){
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+    public Result getCurrentRoundInfo(Map<String,Object> params) {
+        if(params == null || params.get("chain_id") == null){
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        MeetingRound round = RoundManager.getInstance().getOrResetCurrentRound((Integer)params.get(0),true);
-        return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,round);
+        int chain_id = (Integer) params.get("chain_id");
+        MeetingRound round = RoundManager.getInstance().getOrResetCurrentRound(chain_id,true);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(round);
 
     }
 
@@ -662,16 +667,18 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 获取指定节点状态
      * */
     @Override
-    public CmdResponse getAgentStatus(List<Object> params) {
+    public Result getAgentStatus(Map<String,Object> params) {
         //从数据库查询节点信息，返回节点状态
-        if(params == null || params.size() != 2){
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+        if (params.get("chain_id") == null || params.get("agentHash")==null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         Map<String,Integer> result = new HashMap<>();
         try {
+            int chain_id = (Integer) params.get("chain_id");
+            String agentHashStr = (String)params.get("agentHash");
             NulsDigestData agentHash = new NulsDigestData();
-            agentHash.parse(new NulsByteBuffer(HexUtil.decode((String) params.get(0))));
-            AgentPo agent = agentService.get(agentHash,(Integer)params.get(1));
+            agentHash.parse(new NulsByteBuffer(HexUtil.decode(agentHashStr)));
+            AgentPo agent = agentService.get(agentHash,chain_id);
             if(agent.getDelHeight() > 0){
                 result.put("status",0);
             }else{
@@ -680,27 +687,27 @@ public class ConsensusServiceImpl implements ConsensusService {
         }catch (Exception e){
             Log.error(e);
         }
-        return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,result);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
     }
 
     /**
      * 修改节点状态
      * */
     @Override
-    public CmdResponse updateAgentStatus(List<Object> params) {
-        if(params == null || params.size() != 1){
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+    public Result updateAgentStatus(Map<String,Object> params) {
+        if(params == null || params.get("chain_id") == null){
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        int chain_id = (Integer)params.get(0);
+        int chain_id = (Integer) params.get("chain_id");
         ConsensusManager.getInstance().getPacking_status().put(chain_id,true);
-        return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS);
     }
 
     /**
      * 停止一条链
      * */
     @Override
-    public CmdResponse stopChain(List<Object> params) {
+    public Result stopChain(Map<String,Object> params) {
         return null;
     }
 
@@ -708,7 +715,12 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 启动一条新链
      * */
     @Override
-    public CmdResponse runChain(List<Object> params) {
+    public Result runChain(Map<String,Object> params) {
+        return null;
+    }
+
+    @Override
+    public Result runMainChain(Map<String, Object> params) {
         return null;
     }
 
@@ -716,23 +728,23 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 创建节点交易验证
      * */
     @Override
-    public CmdResponse createAgentValid(Map<String, Object> params) {
+    public Result createAgentValid(Map<String, Object> params) {
         if (params.get("chain_id") == null || params.get("tx")==null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
             String txHex = (String) params.get("tx");
-            CreateAgentTransaction transaction = new CreateAgentTransaction();
+            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
             boolean result = validatorManager.validateCreateAgent(chain_id,transaction);
             if(!result){
-                return new CmdResponse(1, ConsensusErrorCode.TX_DATA_VALIDATION_ERROR.getCode(),ConsensusErrorCode.TX_DATA_VALIDATION_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 
@@ -740,31 +752,32 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 创建节点交易提交
      * */
     @Override
-    public CmdResponse createAgentCommit(Map<String, Object> params) {
+    public Result createAgentCommit(Map<String, Object> params) {
         if (params.get("chain_id") == null || params.get("tx")==null || params.get("blockHeader") == null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
             String txHex = (String) params.get("tx");
-            CreateAgentTransaction transaction = new CreateAgentTransaction();
+            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
             String headerHex = (String) params.get("blockHeader");
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.parse(HexUtil.decode(headerHex),0);
-            Agent agent = transaction.getTxData();
+            Agent agent = new Agent();
+            agent.parse(transaction.getTxData(),0);
             agent.setTxHash(transaction.getHash());
             agent.setBlockHeight(blockHeader.getHeight());
             agent.setTime(transaction.getTime());
             AgentPo agentPo = PoConvertUtil.agentToPo(agent);
             //保存数据库和缓存
             if(!agentService.save(agentPo,chain_id)){
-                return new CmdResponse(1, ConsensusErrorCode.SAVE_FAILED.getCode(),ConsensusErrorCode.SAVE_FAILED.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.SAVE_FAILED);
             }
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 
@@ -772,23 +785,23 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 创建节点交易回滚
      * */
     @Override
-    public CmdResponse createAgentRollBack(Map<String, Object> params) {
+    public Result createAgentRollBack(Map<String, Object> params) {
         if (params.get("chain_id") == null || params.get("tx")==null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
             String txHex = (String) params.get("tx");
-            CreateAgentTransaction transaction = new CreateAgentTransaction();
+            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
             //删除数据库数据和缓存数据
             if(!agentService.delete(transaction.getHash(),chain_id)){
-                return new CmdResponse(1, ConsensusErrorCode.ROLLBACK_FAILED.getCode(),ConsensusErrorCode.ROLLBACK_FAILED.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.ROLLBACK_FAILED);
             }
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 
@@ -796,23 +809,23 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 停止节点交易验证
      * */
     @Override
-    public CmdResponse stopAgentValid(Map<String, Object> params) {
+    public Result stopAgentValid(Map<String, Object> params) {
         if (params.get("chain_id") == null || params.get("tx")==null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
             String txHex = (String) params.get("tx");
-            StopAgentTransaction transaction = new StopAgentTransaction();
+            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
             boolean result = validatorManager.validateStopAgent(chain_id,transaction);
             if(!result){
-                return new CmdResponse(1, ConsensusErrorCode.TX_DATA_VALIDATION_ERROR.getCode(),ConsensusErrorCode.TX_DATA_VALIDATION_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 
@@ -820,25 +833,27 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 停止节点交易提交
      * */
     @Override
-    public CmdResponse stopAgentCommit(Map<String, Object> params) {
+    public Result stopAgentCommit(Map<String, Object> params) {
         if (params.get("chain_id") == null || params.get("tx")==null || params.get("blockHeader") == null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
             String txHex = (String) params.get("tx");
-            StopAgentTransaction transaction = new StopAgentTransaction();
+            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
             String headerHex = (String) params.get("blockHeader");
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.parse(HexUtil.decode(headerHex),0);
             if (transaction.getTime() < (blockHeader.getTime() - 300000L)) {
-                return new CmdResponse(1, ConsensusErrorCode.LOCK_TIME_NOT_REACHED.getCode(),ConsensusErrorCode.LOCK_TIME_NOT_REACHED.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.LOCK_TIME_NOT_REACHED);
             }
             //找到需要注销的节点信息
-            AgentPo agentPo = agentService.get(transaction.getTxData().getCreateTxHash(),chain_id);
+            StopAgent stopAgent = new StopAgent();
+            stopAgent.parse(transaction.getTxData(),0);
+            AgentPo agentPo = agentService.get(stopAgent.getCreateTxHash(),chain_id);
             if(agentPo == null || agentPo.getDelHeight() > 0){
-                return new CmdResponse(1, ConsensusErrorCode.AGENT_NOT_EXIST.getCode(),ConsensusErrorCode.AGENT_NOT_EXIST.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
             }
             //找到该节点的委托信息,并设置委托状态为退出
             List<DepositPo> depositPoList = depositService.getList(chain_id);
@@ -855,15 +870,15 @@ public class ConsensusServiceImpl implements ConsensusService {
             agentPo.setDelHeight(transaction.getBlockHeight());
             //保存数据库和缓存
             if(!agentService.save(agentPo,chain_id)){
-                return new CmdResponse(1, ConsensusErrorCode.SAVE_FAILED.getCode(),ConsensusErrorCode.SAVE_FAILED.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.SAVE_FAILED);
             }
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }catch (Exception et){
             Log.error(et);
-            return new CmdResponse(1, ConsensusErrorCode.DATA_ERROR.getCode(),ConsensusErrorCode.DATA_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
 
@@ -871,16 +886,18 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 停止节点交易回滚
      * */
     @Override
-    public CmdResponse stopAgentRollBack(Map<String, Object> params) {
+    public Result stopAgentRollBack(Map<String, Object> params) {
         if (params.get("chain_id") == null || params.get("tx")==null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
             String txHex = (String) params.get("tx");
-            StopAgentTransaction transaction = new StopAgentTransaction();
+            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
-            AgentPo agentPo = agentService.get(transaction.getTxData().getCreateTxHash(),chain_id);
+            StopAgent stopAgent = new StopAgent();
+            stopAgent.parse(transaction.getTxData(),0);
+            AgentPo agentPo = agentService.get(stopAgent.getCreateTxHash(),chain_id);
             agentPo.setDelHeight(-1);
             //找到该节点的委托信息,并设置委托状态为退出
             List<DepositPo> depositPoList = depositService.getList(chain_id);
@@ -896,15 +913,15 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             //保存数据库和缓存
             if(!agentService.save(agentPo,chain_id)){
-                return new CmdResponse(1, ConsensusErrorCode.ROLLBACK_FAILED.getCode(),ConsensusErrorCode.ROLLBACK_FAILED.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.ROLLBACK_FAILED);
             }
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }catch (Exception et){
             Log.error(et);
-            return new CmdResponse(1, ConsensusErrorCode.DATA_ERROR.getCode(),ConsensusErrorCode.DATA_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
 
@@ -912,23 +929,23 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 委托共识交易验证
      * */
     @Override
-    public CmdResponse depositValid(Map<String, Object> params) {
+    public Result depositValid(Map<String, Object> params) {
         if (params.get("chain_id") == null || params.get("tx")==null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
             String txHex = (String) params.get("tx");
-            DepositTransaction transaction = new DepositTransaction();
+            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
             transaction.parse(HexUtil.decode(txHex),0);
             boolean result = validatorManager.validateDeposit(chain_id,transaction);
             if(!result){
-                return new CmdResponse(1, ConsensusErrorCode.TX_DATA_VALIDATION_ERROR.getCode(),ConsensusErrorCode.TX_DATA_VALIDATION_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 
@@ -936,30 +953,31 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 委托共识交易提交
      * */
     @Override
-    public CmdResponse depositCommit(Map<String, Object> params) {
+    public Result depositCommit(Map<String, Object> params) {
         if (params.get("chain_id") == null || params.get("tx")==null || params.get("blockHeader") == null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
             String txHex = (String) params.get("tx");
-            DepositTransaction transaction = new DepositTransaction();
+            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
             transaction.parse(HexUtil.decode(txHex),0);
             String headerHex = (String) params.get("blockHeader");
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.parse(HexUtil.decode(headerHex),0);
-            Deposit deposit = transaction.getTxData();
+            Deposit deposit = new Deposit();
+            deposit.parse(transaction.getTxData(),0);
             deposit.setTxHash(transaction.getHash());
             deposit.setTime(transaction.getTime());
             deposit.setBlockHeight(blockHeader.getHeight());
             DepositPo depositPo = PoConvertUtil.depositToPo(deposit);
             if(!depositService.save(depositPo,chain_id)){
-                return new CmdResponse(1, ConsensusErrorCode.SAVE_FAILED.getCode(),ConsensusErrorCode.SAVE_FAILED.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.SAVE_FAILED);
             }
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 
@@ -967,22 +985,22 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 委托共识交易回滚
      * */
     @Override
-    public CmdResponse depositRollBack(Map<String, Object> params) {
+    public Result depositRollBack(Map<String, Object> params) {
         if (params.get("chain_id") == null || params.get("tx")==null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
             String txHex = (String) params.get("tx");
-            DepositTransaction transaction = new DepositTransaction();
+            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
             transaction.parse(HexUtil.decode(txHex),0);
             if(!depositService.delete(transaction.getHash(),chain_id)){
-                return new CmdResponse(1, ConsensusErrorCode.ROLLBACK_FAILED.getCode(),ConsensusErrorCode.ROLLBACK_FAILED.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.ROLLBACK_FAILED);
             }
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 
@@ -990,23 +1008,23 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 退出共识交易验证
      * */
     @Override
-    public CmdResponse withdrawValid(Map<String, Object> params) {
+    public Result withdrawValid(Map<String, Object> params) {
         if (params.get("chain_id") == null || params.get("tx")==null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
             String txHex = (String) params.get("tx");
-            CancelDepositTransaction transaction = new CancelDepositTransaction();
+            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             transaction.parse(HexUtil.decode(txHex),0);
             boolean result = validatorManager.validateWithdraw(chain_id,transaction);
             if(!result){
-                return new CmdResponse(1, ConsensusErrorCode.TX_DATA_VALIDATION_ERROR.getCode(),ConsensusErrorCode.TX_DATA_VALIDATION_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 
@@ -1014,34 +1032,36 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 退出共识交易提交
      * */
     @Override
-    public CmdResponse withdrawCommit(Map<String, Object> params) {
+    public Result withdrawCommit(Map<String, Object> params) {
         if (params.get("chain_id") == null || params.get("tx")==null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
             String txHex = (String) params.get("tx");
-            CancelDepositTransaction transaction = new CancelDepositTransaction();
+            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             transaction.parse(HexUtil.decode(txHex),0);
+            CancelDeposit cancelDeposit = new CancelDeposit();
+            cancelDeposit.parse(transaction.getTxData(),0);
             //获取该笔交易对应的加入共识委托交易
-            DepositPo po = depositService.get(transaction.getTxData().getJoinTxHash(),chain_id);
+            DepositPo po = depositService.get(cancelDeposit.getJoinTxHash(),chain_id);
             //委托交易不存在
             if(po == null){
-                return new CmdResponse(1, ConsensusErrorCode.DATA_NOT_EXIST.getCode(),ConsensusErrorCode.DATA_NOT_EXIST.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.DATA_NOT_EXIST);
             }
             //委托交易已退出
             if(po.getDelHeight() > 0){
-                return new CmdResponse(1, ConsensusErrorCode.DEPOSIT_WAS_CANCELED.getCode(),ConsensusErrorCode.DEPOSIT_WAS_CANCELED.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.DEPOSIT_WAS_CANCELED);
             }
             //设置退出共识高度
             po.setDelHeight(transaction.getBlockHeight());
             if(!depositService.save(po,chain_id)){
-                return new CmdResponse(1, ConsensusErrorCode.SAVE_FAILED.getCode(),ConsensusErrorCode.SAVE_FAILED.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.SAVE_FAILED);
             }
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 
@@ -1049,31 +1069,33 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 退出共识交易回滚
      * */
     @Override
-    public CmdResponse withdrawRollBack(Map<String, Object> params) {
+    public Result withdrawRollBack(Map<String, Object> params) {
         if (params.get("chain_id") == null || params.get("tx")==null) {
-            return new CmdResponse(1, ConsensusErrorCode.PARAM_ERROR.getCode(),ConsensusErrorCode.PARAM_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }try {
             int chain_id = (Integer) params.get("chain_id");
             String txHex = (String) params.get("tx");
-            CancelDepositTransaction transaction = new CancelDepositTransaction();
+            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             transaction.parse(HexUtil.decode(txHex),0);
+            CancelDeposit cancelDeposit = new CancelDeposit();
+            cancelDeposit.parse(transaction.getTxData(),0);
             //获取该笔交易对应的加入共识委托交易
-            DepositPo po = depositService.get(transaction.getTxData().getJoinTxHash(),chain_id);
+            DepositPo po = depositService.get(cancelDeposit.getJoinTxHash(),chain_id);
             //委托交易不存在
             if(po == null){
-                return new CmdResponse(1, ConsensusErrorCode.DATA_NOT_EXIST.getCode(),ConsensusErrorCode.DATA_NOT_EXIST.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.DATA_NOT_EXIST);
             }
             if(po.getDelHeight() != transaction.getBlockHeight()){
-                return new CmdResponse(1, ConsensusErrorCode.DEPOSIT_NEVER_CANCELED.getCode(),ConsensusErrorCode.DEPOSIT_NEVER_CANCELED.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.DEPOSIT_NEVER_CANCELED);
             }
             po.setDelHeight(-1L);
             if(!depositService.save(po,chain_id)){
-                return new CmdResponse(1, ConsensusErrorCode.ROLLBACK_FAILED.getCode(),ConsensusErrorCode.ROLLBACK_FAILED.getMsg(), ConsensusConstant.RPC_VERSION,null);
+                return Result.getFailed(ConsensusErrorCode.ROLLBACK_FAILED);
             }
-            return new CmdResponse(1, ConsensusErrorCode.SUCCESS.getCode(),ConsensusErrorCode.SUCCESS.getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
-            return new CmdResponse(1, e.getErrorCode().getCode(),e.getErrorCode().getMsg(), ConsensusConstant.RPC_VERSION,null);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 

@@ -75,7 +75,6 @@ public class Deposit extends TransactionLogicData {
         this.agentHash = byteBuffer.readHash();
     }
 
-    @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfInt64(); // deposit.getValue()
@@ -148,7 +147,6 @@ public class Deposit extends TransactionLogicData {
         this.address = address;
     }
 
-    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(this.address);

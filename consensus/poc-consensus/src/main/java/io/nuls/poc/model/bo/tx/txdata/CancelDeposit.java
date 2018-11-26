@@ -45,7 +45,6 @@ public class CancelDeposit extends TransactionLogicData {
 
     private NulsDigestData joinTxHash;
 
-    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         if (null != address) {
