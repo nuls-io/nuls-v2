@@ -52,7 +52,7 @@ public abstract class BaseCmd {
 
     protected Response success(Object responseData) {
         Response response = new Response();
-        response.setResponseStatus(Constants.RESPONSE_STATUS_SUCCESS);
+        response.setResponseStatus(Constants.booleanString(true));
         response.setResponseData(responseData);
         response.setResponseComment("Congratulations! Processing completed！");
         response.setResponseMaxSize("0");
@@ -61,7 +61,7 @@ public abstract class BaseCmd {
 
     protected Response failed(ErrorCode errorCode) {
         Response response = new Response();
-        response.setResponseStatus(Constants.RESPONSE_STATUS_FAILED);
+        response.setResponseStatus(Constants.booleanString(false));
         response.setResponseData(errorCode);
         response.setResponseMaxSize("0");
         return response;
@@ -69,14 +69,14 @@ public abstract class BaseCmd {
 
     protected Response failed(String errMsg) {
         Response response = new Response();
-        response.setResponseStatus(Constants.RESPONSE_STATUS_FAILED);
+        response.setResponseStatus(Constants.booleanString(false));
         response.setResponseComment(errMsg);
         return response;
     }
 
     protected Response failed(ErrorCode errorCode, String errMsg) {
         Response response = new Response();
-        response.setResponseStatus(Constants.RESPONSE_STATUS_FAILED);
+        response.setResponseStatus(Constants.booleanString(false));
         response.setResponseData(errorCode);
         response.setResponseComment(errMsg);
         return response;

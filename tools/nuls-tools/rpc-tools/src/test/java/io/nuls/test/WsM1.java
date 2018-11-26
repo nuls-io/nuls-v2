@@ -65,10 +65,10 @@ public class WsM1 {
     public void startServer() throws Exception {
         // Start server instance
         WsServer.getInstance(ModuleE.CM)
-                .supportedAPIVersions(new String[]{"1.1", "1.2"})
-                .moduleRoles(ModuleE.CM.abbr, new String[]{"1.1", "1.2"})
+                .moduleRoles(new String[]{"1.1", "1.2"})
                 .moduleVersion("1.2")
-                .dependencies("Role_Ledger", "1.1")
+                .dependencies(ModuleE.LG.abbr, "1.1")
+                .dependencies(ModuleE.BL.abbr, "2.1")
                 .scanPackage("io.nuls.rpc.cmd.test")
                 .connect("ws://127.0.0.1:8887");
 
@@ -98,7 +98,6 @@ public class WsM1 {
 
         // Call cmd
         String messageId = CmdDispatcher.request(ClientRuntime.ROLE_CM, "getHeight", params, "5");
-
         for (int i = 0; i < 5; i++) {
             System.out.println(JSONUtils.obj2json(CmdDispatcher.callMessageResponse(messageId)));
             Thread.sleep(5000);

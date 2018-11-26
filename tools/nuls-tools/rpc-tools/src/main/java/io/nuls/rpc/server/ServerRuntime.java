@@ -25,7 +25,7 @@ public class ServerRuntime {
      */
     public static RegisterApi local = new RegisterApi();
 
-    public static Map<String, Long> cmdInvokeTime = new HashMap<>();
+    static Map<String, Long> cmdInvokeTime = new HashMap<>();
     public static Map<String, Integer> cmdInvokeHeight = new HashMap<>();
 
     /**
@@ -40,12 +40,12 @@ public class ServerRuntime {
      * Array [0] is the Websocket object for communication
      * Array [1] is the content of the communication
      */
-    public static final List<Object[]> REQUEST_QUEUE = Collections.synchronizedList(new ArrayList<>());
+    static final List<Object[]> REQUEST_QUEUE = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * The thread pool object that handles the request
      */
-    public static ExecutorService fixedThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
+    static ExecutorService fixedThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
 
     /**
      * Get local command
@@ -54,7 +54,7 @@ public class ServerRuntime {
      * 2. Forward compatible
      * 3. The highest version that meet conditions 1 and 2 at the same time
      */
-    public static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
+    static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
         local.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
@@ -83,7 +83,7 @@ public class ServerRuntime {
      * Sort by version number
      * The highest version
      */
-    public static CmdDetail getLocalInvokeCmd(String cmd) {
+    static CmdDetail getLocalInvokeCmd(String cmd) {
 
         local.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
@@ -109,7 +109,7 @@ public class ServerRuntime {
      * Scan the provided package
      * Analysis annotation, register cmd
      */
-    public static void scanPackage(String packageName) throws Exception {
+    static void scanPackage(String packageName) throws Exception {
         if (packageName == null || packageName.length() == 0) {
             return;
         }
