@@ -33,7 +33,7 @@ package io.nuls.account.constant;
 public interface RpcConstant {
 
     /**
-     * --------[call other module RPC constants] -------
+     * --------[call EventBus module RPC constants] -------
      */
     /**
      * EVENT_SEND_CMD
@@ -51,7 +51,57 @@ public interface RpcConstant {
      * EVENT_SEND_DATA
      */
     String EVENT_SEND_DATA = "data";
-
+    /**
+     * --------[call Transaction module RPC constants] -------
+     */
+    /**
+     * TX_REGISTER_VERSION
+     */
+    String TX_REGISTER_VERSION = "1.0";
+    /**
+     * TX_REGISTER_CMD
+     */
+    String TX_REGISTER_CMD = "tx_register";
+    /**
+     * TX_MODULE_CODE
+     */
+    String TX_MODULE_CODE = "moduleCode";
+    /**
+     * TX_MODULE_VALIDATE_CMD
+     */
+    String TX_MODULE_VALIDATE_CMD = "moduleValidateCmd";
+    /**
+     * TX_TYPE
+     */
+    String TX_TYPE = "txType";
+    /**
+     * TX_VALIDATE_CMD
+     */
+    String TX_VALIDATE_CMD = "validateCmd";
+    /**
+     * TX_COMMIT_CMD
+     */
+    String TX_COMMIT_CMD = "commitCmd";
+    /**
+     * TX_ROLLBACK_CMD
+     */
+    String TX_ROLLBACK_CMD = "rollbackCmd";
+    /**
+     * TX_NEW_VERSION
+     */
+    String TX_NEW_VERSION = "1.0";
+    /**
+     * TX_NEW_CMD
+     */
+    String TX_NEW_CMD = "newTx";
+    /**
+     * TX_DATA_HEX
+     */
+    String TX_DATA_HEX = "txHex";
+    /**
+     * TX_CHAIN_ID
+     */
+    String TX_CHAIN_ID = "chainId";
     /**
      * --------[RPC response constants] -------
      */
