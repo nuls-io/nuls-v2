@@ -26,63 +26,61 @@
 package io.nuls.base.basic;
 
 
-import io.nuls.base.data.Na;
+import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 /**
- * @author Niels
+ * @author tag
+ * 2018/11/27
  */
 public class TransactionFeeCalculator {
 
-    public static final Na MIN_PRECE_PRE_1024_BYTES = Na.valueOf(100000);
-    public static final Na OTHER_PRECE_PRE_1024_BYTES = Na.valueOf(1000000);
+    public static final String MIN_PRECE_PRE_1024_BYTES = String.valueOf(100000);
+    public static final String OTHER_PRECE_PRE_1024_BYTES = String.valueOf(1000000);
 
     public static final int KB = 1024;
 
-    //    /**
-//     * 根据交易大小计算需要交纳的手续费
-//     * According to the transaction size calculate the handling fee.
-//     *
-//     * @param size 交易大小/size of the transaction
-//     */
-    public static final Na getTransferFee(int size) {
-        Na fee = MIN_PRECE_PRE_1024_BYTES.multiply(size / KB);
+    /**
+     * 根据交易大小计算需要交纳的手续费
+     * According to the transaction size calculate the handling fee.
+     * @param size 交易大小/size of the transaction
+     */
+    public static final String getTransferFee(int size) {
+        String fee = BigIntegerUtils.mulToString(MIN_PRECE_PRE_1024_BYTES,String.valueOf(size/KB));
         if (size % KB > 0) {
-            fee = fee.add(MIN_PRECE_PRE_1024_BYTES);
+            fee = BigIntegerUtils.addToString(fee,MIN_PRECE_PRE_1024_BYTES);
         }
         return fee;
     }
 
-    //    /**
-//     * 根据交易大小计算需要交纳的手续费
-//     * According to the transaction size calculate the handling fee.
-//     *
-//     * @param size 交易大小/size of the transaction
-//     */
-    public static final Na getMaxFee(int size) {
-        Na fee = OTHER_PRECE_PRE_1024_BYTES.multiply(size / KB);
+    /**
+     * 根据交易大小计算需要交纳的手续费
+     * According to the transaction size calculate the handling fee.
+     * @param size 交易大小/size of the transaction
+     */
+    public static final String getMaxFee(int size) {
+        String fee = BigIntegerUtils.mulToString(OTHER_PRECE_PRE_1024_BYTES,String.valueOf(size/KB));
         if (size % KB > 0) {
-            fee = fee.add(OTHER_PRECE_PRE_1024_BYTES);
+            fee = BigIntegerUtils.addToString(fee,OTHER_PRECE_PRE_1024_BYTES);
         }
         return fee;
     }
 
-    //    /**
-//     * 根据交易大小计算需要交纳的手续费
-//     * According to the transaction size calculate the handling fee.
-//     *
-//     * @param size 交易大小/size of the transaction
-//     */
-    public static final Na getFee(int size, Na price) {
-        if (price.isLessThan(MIN_PRECE_PRE_1024_BYTES)) {
+    /**
+     * 根据交易大小计算需要交纳的手续费
+     * According to the transaction size calculate the handling fee.
+     * @param size 交易大小/size of the transaction
+     */
+    public static final String getFee(int size, String price) {
+        if (BigIntegerUtils.compare(price,MIN_PRECE_PRE_1024_BYTES)<0) {
             throw new NulsRuntimeException(new Exception("data is error"));
         }
-        if (price.isGreaterThan(OTHER_PRECE_PRE_1024_BYTES)) {
+        if (BigIntegerUtils.compare(price,OTHER_PRECE_PRE_1024_BYTES)>0) {
             throw new NulsRuntimeException(new Exception("data is error"));
         }
-        Na fee = price.multiply(size / KB);
+        String fee =  BigIntegerUtils.mulToString(price,String.valueOf(size/KB));
         if (size % KB > 0) {
-            fee = fee.add(price);
+            fee = BigIntegerUtils.addToString(fee,price);
         }
         return fee;
     }

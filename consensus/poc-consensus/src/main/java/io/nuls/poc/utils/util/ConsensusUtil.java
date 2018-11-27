@@ -78,8 +78,8 @@ public class ConsensusUtil {
         try {
             NulsDigestData createTxHash = agent.getTxHash();
             CoinData coinData = new CoinData();
-            List<Coin> toList = new ArrayList<>();
-            toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), lockTime));
+            List<CoinTo> toList = new ArrayList<>();
+            toList.add(new CoinTo(agent.getAgentAddress(), agent.getDeposit(), lockTime));
             coinData.setTo(toList);
             //todo
             //充交易模块获取创建该节点时的交易

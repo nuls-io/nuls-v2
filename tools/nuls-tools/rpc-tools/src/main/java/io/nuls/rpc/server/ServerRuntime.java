@@ -34,7 +34,6 @@ public class ServerRuntime {
     public static Map<String, ConfigItem> configItemMap = new ConcurrentHashMap<>();
 
 
-
     /**
      * The pending request command received through RPC
      * Array [0] is the Websocket object for communication
@@ -45,7 +44,7 @@ public class ServerRuntime {
     /**
      * The thread pool object that handles the request
      */
-    static ExecutorService fixedThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
+    static ExecutorService serverThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
 
     /**
      * Get local command
@@ -145,19 +144,19 @@ public class ServerRuntime {
                 cmdDetail = new CmdDetail();
                 cmdDetail.setMethodName(cmdAnnotation.cmd());
                 cmdDetail.setMethodDescription(cmdAnnotation.description());
-                cmdDetail.setMethodMinEvent(cmdAnnotation.minEvent()+"");
-                cmdDetail.setMethodMinPeriod(cmdAnnotation.minPeriod()+"");
+                cmdDetail.setMethodMinEvent(cmdAnnotation.minEvent() + "");
+                cmdDetail.setMethodMinPeriod(cmdAnnotation.minPeriod() + "");
                 cmdDetail.setMethodScope(cmdAnnotation.scope());
                 cmdDetail.setVersion(cmdAnnotation.version());
                 cmdDetail.setInvokeClass(method.getDeclaringClass().getName());
                 cmdDetail.setInvokeMethod(method.getName());
             }
-            if (Parameters.class.getName().equals(annotation.annotationType().getName())) {
-                Parameters parameters = (Parameters) annotation;
-                for (Parameter parameter : parameters.value()) {
+            if (Parameter.class.getName().equals(annotation.annotationType().getName())) {
+                Parameter parameter = (Parameter) annotation;
+//                for (Parameter parameter : parameters.value()) {
                     CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());
                     cmdParameters.add(cmdParameter);
-                }
+//                }
             }
         }
         if (cmdDetail == null) {

@@ -27,8 +27,6 @@
 
 package io.nuls.rpc.client;
 
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
@@ -60,8 +58,9 @@ public class WsClient extends WebSocketClient {
             /*
              Add to response queue, Waiting for thread pool processing
              */
-            Log.info("Client<" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_PORT) + "> receive:" + paramString);
-            ClientRuntime.CALLED_VALUE_QUEUE.add(JSONUtils.json2map(paramString));
+            Log.info("ClientMsgFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + paramString);
+            ClientRuntime.SERVER_RESPONSE_QUEUE.add(JSONUtils.json2map(paramString));
+            ClientRuntime.clientThreadPool.execute(new ClientProcessor());
         } catch (IOException e) {
             Log.error(e);
         }
@@ -75,7 +74,6 @@ public class WsClient extends WebSocketClient {
     public void onError(Exception e) {
         Log.error(e);
     }
-
 
 
 }

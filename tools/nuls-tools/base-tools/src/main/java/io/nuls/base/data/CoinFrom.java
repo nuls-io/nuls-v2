@@ -39,6 +39,17 @@ public class CoinFrom extends BaseNulsData {
      */
     private byte[] nonce;
 
+    public CoinFrom(byte[] address,int assetsChainId,int assetsId,String amount){
+        this.address = address;
+        this.assetsChainId = assetsChainId;
+        this.assetsId = assetsId;
+        this.amount = amount;
+    }
+
+    public CoinFrom(byte[] address,int assetsChainId,int assetsId,String amount,byte[] nonce){
+        this(address,assetsChainId,assetsId,amount);
+        this.nonce = nonce;
+    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {

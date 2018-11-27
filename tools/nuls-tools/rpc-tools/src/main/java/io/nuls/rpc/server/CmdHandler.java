@@ -31,9 +31,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdDetail;
+import io.nuls.rpc.model.CmdParameter;
 import io.nuls.rpc.model.message.*;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.DateUtils;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
@@ -42,7 +44,9 @@ import org.java_websocket.WebSocket;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Call the correct method based on request information
@@ -82,13 +86,26 @@ public class CmdHandler {
      * For NegotiateConnectionResponse
      * Send NegotiateConnectionResponse
      */
-    public static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
+    static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
         negotiateConnectionResponse.setNegotiationStatus("0");
         negotiateConnectionResponse.setNegotiationComment("Incompatible protocol version");
 
-        Message rspMsg = basicMessage(Constants.nextSequence() + "", MessageType.NegotiateConnectionResponse);
+        Message rspMsg = basicMessage(Constants.nextSequence(), MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
+        webSocket.send(JSONUtils.obj2json(rspMsg));
+    }
+
+    /**
+     * For NegotiateConnectionResponse
+     * Send NegotiateConnectionResponse
+     */
+    static void ack(WebSocket webSocket, String messageId) throws JsonProcessingException {
+        Ack ack = new Ack();
+        ack.setRequestId(messageId);
+
+        Message rspMsg = basicMessage(Constants.nextSequence(), MessageType.Ack);
+        rspMsg.setMessageData(ack);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 
@@ -127,7 +144,7 @@ public class CmdHandler {
                 /*
                 If the execution interval is not yet reached, returns immediately without execution
                  */
-                if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * 1000) {
+                if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
                     return true;
                 }
             }
@@ -143,6 +160,33 @@ public class CmdHandler {
                     ? ServerRuntime.getLocalInvokeCmd((String) method)
                     : ServerRuntime.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
+            Message rspMessage = basicMessage(Constants.nextSequence(), MessageType.Response);
+
+            // 判断参数是否正确
+            List<CmdParameter> cmdParameterList = cmdDetail.getParameters();
+            for (CmdParameter cmdParameter : cmdParameterList) {
+                if (!StringUtils.isNull(cmdParameter.getParameterValidRange())) {
+
+                }
+                if (!StringUtils.isNull(cmdParameter.getParameterValidRegExp())) {
+                    try {
+                        String value = Objects.requireNonNull(params).get(cmdParameter.getParameterName()).toString();
+                        if (!value.matches(cmdParameter.getParameterValidRegExp())) {
+                            Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_WRONG_FORMAT + ":" + cmdParameter.getParameterName());
+                            rspMessage.setMessageData(response);
+                            webSocket.send(JSONUtils.obj2json(rspMessage));
+                            return false;
+                        }
+                    } catch (Exception e) {
+                        Log.error(e);
+                        Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), e.getMessage());
+                        rspMessage.setMessageData(response);
+                        webSocket.send(JSONUtils.obj2json(rspMessage));
+                        return false;
+                    }
+                }
+            }
+
             Response response = cmdDetail == null
                     ? ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""))
                     : invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
@@ -153,7 +197,7 @@ public class CmdHandler {
             response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
             response.setRequestId(messageId);
 
-            Message rspMessage = basicMessage(Constants.nextSequence(), MessageType.Response);
+
             rspMessage.setMessageData(response);
             Log.info("webSocket.send: " + JSONUtils.obj2json(rspMessage));
             try {
@@ -171,7 +215,7 @@ public class CmdHandler {
     /**
      * For Unsubscribe
      */
-    public static void unsubscribe(WebSocket webSocket, Message message) throws Exception {
+    static void unsubscribe(WebSocket webSocket, Message message) {
         Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
         for (String str : unsubscribe.getUnsubscribeMethods()) {
             String key = webSocket.toString() + str;

@@ -13,5 +13,5 @@ import lombok.*;
 public class Ack {
     @Getter
     @Setter
-    private String requestID;
+    private String requestId;
 }

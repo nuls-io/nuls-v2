@@ -19,7 +19,7 @@ public class ConfigBean implements Serializable {
     /**
      * 出块最小金额
      * */
-    private long packing_amount;
+    private String packing_amount;
     /**
      * 奖励金锁定块数
      * */
@@ -43,22 +43,22 @@ public class ConfigBean implements Serializable {
     /**
      * 创建节点的保证金最小值
      * */
-    private long deposit_min;
+    private String deposit_min;
     /**
      * 创建节点的保证金最大值
      * */
-    private long deposit_max;
+    private String deposit_max;
     /**
      * 节点出块委托金额最小值
      * */
-    private long commission_min;
+    private String commission_min;
     /**
      * 节点委托金额最大值
      * */
-    private long commission_max;
+    private String commission_max;
 
     //委托最小金额
-    private long entruster_deposit_min;
+    private String entruster_deposit_min;
 
     //节点最多能被多少人委托
     private int deposit_number_max;
@@ -83,14 +83,6 @@ public class ConfigBean implements Serializable {
         this.block_size = block_size;
     }
 
-    public long getPacking_amount() {
-        return packing_amount;
-    }
-
-    public void setPacking_amount(long packing_amount) {
-        this.packing_amount = packing_amount;
-    }
-
     public int getCoinbase_unlock_height() {
         return coinbase_unlock_height;
     }
@@ -98,7 +90,6 @@ public class ConfigBean implements Serializable {
     public void setCoinbase_unlock_height(int coinbase_unlock_height) {
         this.coinbase_unlock_height = coinbase_unlock_height;
     }
-
     public long getRedPublish_lockTime() {
         return redPublish_lockTime;
     }
@@ -131,46 +122,6 @@ public class ConfigBean implements Serializable {
         this.commissionRate_max = commissionRate_max;
     }
 
-    public long getDeposit_min() {
-        return deposit_min;
-    }
-
-    public void setDeposit_min(long deposit_min) {
-        this.deposit_min = deposit_min;
-    }
-
-    public long getDeposit_max() {
-        return deposit_max;
-    }
-
-    public void setDeposit_max(long deposit_max) {
-        this.deposit_max = deposit_max;
-    }
-
-    public long getCommission_min() {
-        return commission_min;
-    }
-
-    public void setCommission_min(long commission_min) {
-        this.commission_min = commission_min;
-    }
-
-    public long getCommission_max() {
-        return commission_max;
-    }
-
-    public void setCommission_max(long commission_max) {
-        this.commission_max = commission_max;
-    }
-
-    public long getEntruster_deposit_min() {
-        return entruster_deposit_min;
-    }
-
-    public void setEntruster_deposit_min(long entruster_deposit_min) {
-        this.entruster_deposit_min = entruster_deposit_min;
-    }
-
     public String getSeedNodes() {
         return seedNodes;
     }
@@ -185,5 +136,53 @@ public class ConfigBean implements Serializable {
 
     public void setDeposit_number_max(int deposit_number_max) {
         this.deposit_number_max = deposit_number_max;
+    }
+
+    public String getPacking_amount() {
+        return packing_amount;
+    }
+
+    public void setPacking_amount(String packing_amount) {
+        this.packing_amount = packing_amount;
+    }
+
+    public String getDeposit_min() {
+        return deposit_min;
+    }
+
+    public void setDeposit_min(String deposit_min) {
+        this.deposit_min = deposit_min;
+    }
+
+    public String getDeposit_max() {
+        return deposit_max;
+    }
+
+    public void setDeposit_max(String deposit_max) {
+        this.deposit_max = deposit_max;
+    }
+
+    public String getCommission_min() {
+        return commission_min;
+    }
+
+    public void setCommission_min(String commission_min) {
+        this.commission_min = commission_min;
+    }
+
+    public String getCommission_max() {
+        return commission_max;
+    }
+
+    public void setCommission_max(String commission_max) {
+        this.commission_max = commission_max;
+    }
+
+    public String getEntruster_deposit_min() {
+        return entruster_deposit_min;
+    }
+
+    public void setEntruster_deposit_min(String entruster_deposit_min) {
+        this.entruster_deposit_min = entruster_deposit_min;
     }
 }

@@ -31,7 +31,6 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.Na;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
@@ -50,7 +49,7 @@ public class AgentPo extends BaseNulsData {
 
     private byte[] rewardAddress;
 
-    private Na deposit;
+    private String deposit;
 
     private double commissionRate;
 
@@ -69,7 +68,7 @@ public class AgentPo extends BaseNulsData {
         stream.write(agentAddress);
         stream.write(packingAddress);
         stream.write(rewardAddress);
-        stream.writeInt64(deposit.getValue());
+        stream.writeString(deposit);
         stream.writeDouble(commissionRate);
         stream.writeUint48(time);
         stream.writeVarInt(blockHeight);
@@ -82,7 +81,7 @@ public class AgentPo extends BaseNulsData {
         this.agentAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.packingAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.rewardAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
-        this.deposit = Na.valueOf(byteBuffer.readInt64());
+        this.deposit = byteBuffer.readString();
         this.commissionRate = byteBuffer.readDouble();
         this.time = byteBuffer.readUint48();
         this.blockHeight = byteBuffer.readVarInt();
@@ -93,7 +92,7 @@ public class AgentPo extends BaseNulsData {
     public int size() {
         int size = SerializeUtils.sizeOfNulsData(hash);
         size += Address.ADDRESS_LENGTH * 3;
-        size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfString(deposit);
         size += SerializeUtils.sizeOfDouble(commissionRate);
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfVarInt(blockHeight);
@@ -133,11 +132,11 @@ public class AgentPo extends BaseNulsData {
         this.rewardAddress = rewardAddress;
     }
 
-    public Na getDeposit() {
+    public String getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(Na deposit) {
+    public void setDeposit(String  deposit) {
         this.deposit = deposit;
     }
 

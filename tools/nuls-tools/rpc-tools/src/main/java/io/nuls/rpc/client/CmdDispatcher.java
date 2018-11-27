@@ -6,9 +6,9 @@ import io.nuls.rpc.server.CmdHandler;
 import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -36,19 +36,17 @@ public class CmdDispatcher {
         Log.info("NegotiateConnection:" + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
-        Message rspMessage = callMessage(MessageType.NegotiateConnectionResponse);
-        return rspMessage != null;
+        return getNegotiateConnectionResponse();
     }
 
     /**
      * 1. send local module information to kernel
      * 2. receive all the modules' interfaces from kernel
-     * 这个方法在Berzeck确定了他的最终JSON格式之后还要进行修改
      */
     public static void syncKernel() throws Exception {
         String messageId = Constants.nextSequence();
         Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
-        Request request = defaultRequest();
+        Request request = ClientRuntime.defaultRequest();
         request.getRequestMethods().put("registerAPI", ServerRuntime.local);
         message.setMessageData(request);
 
@@ -58,10 +56,9 @@ public class CmdDispatcher {
         }
         wsClient.send(JSONUtils.obj2json(message));
 
-        @SuppressWarnings("unchecked")
-        Response response = callMessageResponse(messageId);
+        Response response = getResponse(messageId);
         Log.info("APIMethods from kernel:" + JSONUtils.obj2json(response));
-        Map<String, Object> responseData = (Map) response.getResponseData();
+        Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
         for (Object key : dependMap.keySet()) {
@@ -71,26 +68,40 @@ public class CmdDispatcher {
 
 
     /**
-     * call cmd.
-     * 1. Find the corresponding module according to cmd
-     * 2. Send to the specified module
-     * 3. Get the result returned to the caller
-     * 4. Get the highest version of cmd
-     *
-     * @return Result with JSON string
+     * 1. Send request
+     * 2. Get messageId
+     * 3. Obtain Response Based on MessageId
      */
     public static Response requestAndResponse(String role, String cmd, Map params) throws Exception {
-        String messageId = request(role, cmd, params, "0");
-        return callMessageResponse(messageId);
+        String messageId = request(role, cmd, params, Constants.booleanString(false), "0");
+        return getResponse(messageId);
     }
 
-    public static void requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String method) throws Exception {
-        String messageId = request(role, cmd, params, "0");
-        Response response=callMessageResponse(messageId);
-        /*
-        Call through reflection
-         */
+    /**
+     * 1. Send request
+     * 2. Get messageId
+     * 3. Put the messageId to INVOKE_MAP
+     * End. The requester can handle other things
+     * A separate thread listens for new messages.
+     * Messages are automatically sent to the correct method
+     */
+    public static String requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
+        if (Integer.parseInt(subscriptionPeriod) <= 0) {
+            throw new Exception("subscriptionPeriod must great than 0");
+        }
+        String messageId = request(role, cmd, params, Constants.booleanString(false), subscriptionPeriod);
+        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
+        return messageId;
+    }
 
+    /**
+     * The same as requestAndInvoke
+     * The difference is that messageId will be returned only when Ack is true .
+     */
+    public static String requestAndInvokeWithAck(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
+        String messageId = request(role, cmd, params, Constants.booleanString(true), subscriptionPeriod);
+        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
+        return getAck(messageId) ? messageId : null;
     }
 
     /**
@@ -102,10 +113,11 @@ public class CmdDispatcher {
      *
      * @return Message ID
      */
-    public static String request(String role, String cmd, Map params, String subscriptionPeriod) throws Exception {
+    private static String request(String role, String cmd, Map params, String ack, String subscriptionPeriod) throws Exception {
         String messageId = Constants.nextSequence();
         Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
-        Request request = defaultRequest();
+        Request request = ClientRuntime.defaultRequest();
+        request.setRequestAck(ack);
         request.setSubscriptionPeriod(subscriptionPeriod);
         request.getRequestMethods().put(cmd, params);
         message.setMessageData(request);
@@ -115,7 +127,7 @@ public class CmdDispatcher {
             return "-1";
         }
         WsClient wsClient = ClientRuntime.getWsClient(uri);
-        Log.info("Request:" + JSONUtils.obj2json(message));
+        Log.info("SendRequest to " + wsClient.getRemoteSocketAddress().getHostString() + ":" + wsClient.getRemoteSocketAddress().getPort() + "->" + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
         if (Integer.parseInt(subscriptionPeriod) > 0) {
@@ -124,7 +136,6 @@ public class CmdDispatcher {
 
         return messageId;
     }
-
 
 
     /**
@@ -142,90 +153,149 @@ public class CmdDispatcher {
         WsClient wsClient = ClientRuntime.msgIdKeyWsClientMap.get(messageId);
         if (wsClient != null) {
             wsClient.send(JSONUtils.obj2json(message));
+            ClientRuntime.INVOKE_MAP.remove(messageId);
         }
     }
 
     /**
      * Get response by messageId
      */
-    public static Message callMessage(MessageType messageType) throws InterruptedException, IOException {
+    private static boolean getNegotiateConnectionResponse() throws InterruptedException, IOException {
 
         long timeMillis = System.currentTimeMillis();
-        do {
-            synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
-                for (Map map : ClientRuntime.CALLED_VALUE_QUEUE) {
-                    Message message = JSONUtils.map2pojo(map, Message.class);
-                    if (messageType.name().equals(message.getMessageType())) {
-                        ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
-                        Log.info("NegotiateConnectionResponse:" + JSONUtils.obj2json(message));
-                        return message;
-                    }
-
-//                    switch (messageType) {
-//                        case NegotiateConnectionResponse:
-//                            ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
-//                            Log.info("NegotiateConnectionResponse:" + JSONUtils.obj2json(message));
-//                            return JSONUtils.obj2json(message);
-//                        case Ack:
-//                            ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
-//                            Log.info("Ack:" + JSONUtils.obj2json(message));
-//                            return JSONUtils.obj2json(message);
-//                        default:
-//                            break;
-//                    }
-                }
+        while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
+            /*
+            Get the first item of the queue
+            If it is an empty object, discard
+             */
+            Map map = ClientRuntime.firstItemInServerResponseQueue();
+            if (map == null) {
+                continue;
             }
-            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-        } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
 
-        return null;
+            /*
+            Message type should be "NegotiateConnectionResponse"
+            If not NegotiateConnectionResponse, add back to the queue and wait for other threads to process
+             */
+            Message message = JSONUtils.map2pojo(map, Message.class);
+            if (MessageType.NegotiateConnectionResponse.name().equals(message.getMessageType())) {
+                Log.info("NegotiateConnectionResponse:" + JSONUtils.obj2json(message));
+                return true;
+            } else {
+                ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
+            }
+
+            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+        }
+
+        /*
+        Timeout Error
+         */
+        return false;
     }
 
     /**
      * Get response by messageId
      */
-    public static Response callMessageResponse(String messageId) throws InterruptedException, IOException {
-
+    private static Response getResponse(String messageId) throws InterruptedException, IOException {
         if (Integer.parseInt(messageId) < 0) {
             return ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.CMD_NOT_FOUND);
         }
 
         long timeMillis = System.currentTimeMillis();
-        do {
-            synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
-                for (Map map : ClientRuntime.CALLED_VALUE_QUEUE) {
-                    Message message = JSONUtils.map2pojo(map, Message.class);
-                    if (!MessageType.Response.name().equals(message.getMessageType())) {
-                        continue;
-                    }
-
-                    Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
-                    if (response.getRequestId().equals(messageId)) {
-                        ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
-                        Log.info("Response:" + JSONUtils.obj2json(response));
-                        return response;
-                    }
-
-                }
+        while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
+            /*
+            Get the first item of the queue
+            If it is an empty object, discard
+             */
+            Map map = ClientRuntime.firstItemInServerResponseQueue();
+            if (map == null) {
+                continue;
             }
-            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-        } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
 
+            /*
+            Message type should be "Response"
+            If not Response, add back to the queue and wait for other threads to process
+             */
+            Message message = JSONUtils.map2pojo(map, Message.class);
+            if (!MessageType.Response.name().equals(message.getMessageType())) {
+                ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
+                continue;
+            }
+
+            Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
+            if (response.getRequestId().equals(messageId)) {
+                /*
+                If messageId is the same, then the response is needed
+                 */
+                Log.info("Response:" + JSONUtils.obj2json(message));
+                return response;
+            } else {
+                /*
+                Add back to the queue and wait for other threads to process
+                 */
+                ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
+            }
+
+            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+        }
+
+        /*
+        Timeout Error
+         */
         return ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.RESPONSE_TIMEOUT);
     }
 
-
     /**
-     * Constructing a default Request object
+     * Get ack by messageId
      */
-    private static Request defaultRequest() {
-        Request request = new Request();
-        request.setRequestAck("0");
-        request.setSubscriptionEventCounter("0");
-        request.setSubscriptionPeriod("0");
-        request.setSubscriptionRange("0");
-        request.setResponseMaxSize("0");
-        request.setRequestMethods(new HashMap<>(16));
-        return request;
+    private static boolean getAck(String messageId) throws InterruptedException, IOException {
+        if (Integer.parseInt(messageId) < 0) {
+            return false;
+        }
+
+        long timeMillis = TimeService.currentTimeMillis();
+        while (TimeService.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
+            /*
+            Get the first item of the queue
+            If it is an empty object, discard
+             */
+            Map map = ClientRuntime.firstItemInServerResponseQueue();
+            if (map == null) {
+                continue;
+            }
+
+            /*
+            Message type should be "Ack"
+            If not Ack, add back to the queue and wait for other threads to process
+             */
+            Message message = JSONUtils.map2pojo(map, Message.class);
+            if (!MessageType.Ack.name().equals(message.getMessageType())) {
+                ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
+                continue;
+            }
+
+            Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
+            if (ack.getRequestId().equals(messageId)) {
+                /*
+                If messageId is the same, then the ack is needed
+                 */
+                Log.info("Ack:" + JSONUtils.obj2json(ack));
+                return true;
+            } else {
+                /*
+                Add back to the queue and wait for other threads to process
+                 */
+                ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
+            }
+
+            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+        }
+
+        /*
+        Timeout Error
+         */
+        return false;
     }
+
 }

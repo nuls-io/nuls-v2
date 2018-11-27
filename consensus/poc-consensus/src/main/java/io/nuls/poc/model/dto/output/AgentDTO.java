@@ -40,7 +40,7 @@ public class AgentDTO {
     private String agentAddress;
     private String packingAddress;
     private String rewardAddress;
-    private long deposit;
+    private String deposit;
     private double commissionRate;
     private String agentName;
     private String agentId;
@@ -51,7 +51,7 @@ public class AgentDTO {
     private long delHeight = -1L;
     private int status;
     private double creditVal;
-    private long totalDeposit;
+    private String totalDeposit;
     private String txHash;
     private final int memberCount;
     private String version;
@@ -60,7 +60,7 @@ public class AgentDTO {
         this.agentAddress = AddressTool.getStringAddressByBytes(agent.getAgentAddress());
         this.packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress());
         this.rewardAddress = AddressTool.getStringAddressByBytes(agent.getRewardAddress());
-        this.deposit = agent.getDeposit().getValue();
+        this.deposit = agent.getDeposit();
         this.commissionRate = agent.getCommissionRate();
         this.agentName = agent.getAlais();
         this.agentId = PoConvertUtil.getAgentId(agent.getTxHash());
@@ -69,7 +69,7 @@ public class AgentDTO {
         this.delHeight = agent.getDelHeight();
         this.status = agent.getStatus();
         this.creditVal = agent.getCreditVal();
-        this.totalDeposit = agent.getTotalDeposit().getValue();
+        this.totalDeposit = agent.getTotalDeposit();
         this.txHash = agent.getTxHash().getDigestHex();
         this.memberCount = agent.getMemberCount();
     }
@@ -97,13 +97,6 @@ public class AgentDTO {
         this.rewardAddress = rewardAddress;
     }
 
-    public long getDeposit() {
-        return deposit;
-    }
-
-    public void setDeposit(long deposit) {
-        this.deposit = deposit;
-    }
 
     public double getCommissionRate() {
         return commissionRate;
@@ -169,14 +162,6 @@ public class AgentDTO {
         this.creditVal = creditVal;
     }
 
-    public long getTotalDeposit() {
-        return totalDeposit;
-    }
-
-    public void setTotalDeposit(long totalDeposit) {
-        this.totalDeposit = totalDeposit;
-    }
-
     public String getTxHash() {
         return txHash;
     }
@@ -211,5 +196,21 @@ public class AgentDTO {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getDeposit() {
+        return deposit;
+    }
+
+    public void setDeposit(String deposit) {
+        this.deposit = deposit;
+    }
+
+    public String getTotalDeposit() {
+        return totalDeposit;
+    }
+
+    public void setTotalDeposit(String totalDeposit) {
+        this.totalDeposit = totalDeposit;
     }
 }

@@ -28,9 +28,10 @@
 package io.nuls.test;
 
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.client.InvokeMethod;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Ack;
+import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
@@ -46,12 +47,13 @@ import java.util.Map;
 public class WsM1 {
     @Test
     public void test() throws Exception {
-        System.out.println((int) 3.1415f);
-        System.out.println((int) 3.99415d);
-        System.out.println(new Ack().toString());
-        Ack ack = new Ack("asdfasdf");
-        System.out.println(ack.getRequestID());
-        System.out.println(Integer.MAX_VALUE / 1000f / 3600f / 24f);
+        Map a = new HashMap();
+        a.put("key", "hello");
+        Map b = a;
+        System.out.println(a == b);
+        System.out.println(a.get("key"));
+        b.remove("key");
+        System.out.println(a.get("key"));
     }
 
     @Test
@@ -64,7 +66,7 @@ public class WsM1 {
     public void startServer() throws Exception {
         // Start server instance
         WsServer.getInstance(ModuleE.CM)
-                .moduleRoles(new String[]{"1.1", "1.2"})
+                .moduleRoles(new String[]{"1.0", "2.4"})
                 .moduleVersion("1.2")
                 .dependencies(ModuleE.LG.abbr, "1.1")
                 .dependencies(ModuleE.BL.abbr, "2.1")
@@ -73,6 +75,8 @@ public class WsM1 {
 
         // Get information from kernel
         CmdDispatcher.syncKernel();
+
+        System.out.println("Local:"+ JSONUtils.obj2json(ServerRuntime.local));
 
         Thread.sleep(Integer.MAX_VALUE);
     }
@@ -92,22 +96,23 @@ public class WsM1 {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.VERSION_KEY_STR, "2.0");
         params.put("paramName", "value");
 
-        // Call cmd
-        String messageId = CmdDispatcher.request(ModuleE.CM.abbr, "getHeight", params, "5");
-        for (int i = 0; i < 5; i++) {
-            System.out.println(JSONUtils.obj2json(CmdDispatcher.callMessageResponse(messageId)));
-            Thread.sleep(5000);
-        }
+        // Call cmd, get response immediately
+        Object object = CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "getHeight", params);
+        System.out.println("requestAndResponse:" + JSONUtils.obj2json(object));
 
+        System.out.println(CmdDispatcher.requestAndInvokeWithAck(ModuleE.CM.abbr, "getHeight", params, "2", InvokeMethod.class, "invokeGetHeight"));
+        Thread.sleep(5000);
+
+        // Call cmd, auto invoke local method after response
+        String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getHeight", params, "1", InvokeMethod.class, "invokeGetHeight2");
+        Thread.sleep(5000);
+
+        // Unsubscribe
         CmdDispatcher.unsubscribe(messageId);
         System.out.println("我已经取消了订阅");
 
-        Thread.sleep(3000);
-        // Call cmd
-        System.out.println(CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "getHeight", params));
-        //Thread.sleep(Integer.MAX_VALUE);
     }
 }

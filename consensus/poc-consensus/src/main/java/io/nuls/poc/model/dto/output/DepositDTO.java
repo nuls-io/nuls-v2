@@ -37,7 +37,7 @@ import io.nuls.poc.utils.util.PoConvertUtil;
  */
 public class DepositDTO {
 
-    private Long deposit;
+    private String deposit;
 
     private String agentHash;
 
@@ -61,7 +61,7 @@ public class DepositDTO {
     private String agentAddress;
 
     public DepositDTO(Deposit deposit) {
-        this.deposit = deposit.getDeposit().getValue();
+        this.deposit = deposit.getDeposit();
         this.agentHash = deposit.getAgentHash().getDigestHex();
         this.address = AddressTool.getStringAddressByBytes(deposit.getAddress());
         this.time = deposit.getTime();
@@ -79,11 +79,11 @@ public class DepositDTO {
         }
     }
 
-    public Long getDeposit() {
+    public String getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(Long deposit) {
+    public void setDeposit(String deposit) {
         this.deposit = deposit;
     }
 

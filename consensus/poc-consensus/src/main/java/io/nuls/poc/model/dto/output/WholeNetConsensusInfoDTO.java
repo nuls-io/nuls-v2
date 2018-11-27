@@ -35,9 +35,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class WholeNetConsensusInfoDTO {
     private int agentCount;
-    private long totalDeposit;
+    private String totalDeposit;
     @JsonIgnore
-    private long rewardOfDay;
+    private String rewardOfDay;
     private int consensusAccountNumber;
     private int packingAgentCount;
     public int getConsensusAccountNumber() {
@@ -55,19 +55,19 @@ public class WholeNetConsensusInfoDTO {
         this.agentCount = agentCount;
     }
 
-    public long getTotalDeposit() {
+    public String getTotalDeposit() {
         return totalDeposit;
     }
 
-    public void setTotalDeposit(long totalDeposit) {
+    public void setTotalDeposit(String totalDeposit) {
         this.totalDeposit = totalDeposit;
     }
 
-    public long getRewardOfDay() {
+    public String getRewardOfDay() {
         return rewardOfDay;
     }
 
-    public void setRewardOfDay(long rewardOfDay) {
+    public void setRewardOfDay(String rewardOfDay) {
         this.rewardOfDay = rewardOfDay;
     }
 

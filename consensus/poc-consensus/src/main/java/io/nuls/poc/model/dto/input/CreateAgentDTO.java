@@ -4,13 +4,23 @@ package io.nuls.poc.model.dto.input;
  * 2018/11/12
  * */
 public class CreateAgentDTO {
+    //资产ID
+    private int assetId;
     private int chainId;
     private String agentAddress;
     private String packingAddress;
     private String rewardAddress;
     private double commissionRate;
-    private long deposit;
+    private String deposit;
     private String password;
+
+    public int getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(int assetId) {
+        this.assetId = assetId;
+    }
 
     public int getChainId() {
         return chainId;
@@ -52,11 +62,11 @@ public class CreateAgentDTO {
         this.commissionRate = commissionRate;
     }
 
-    public long getDeposit() {
+    public String getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(long deposit) {
+    public void setDeposit(String deposit) {
         this.deposit = deposit;
     }
 

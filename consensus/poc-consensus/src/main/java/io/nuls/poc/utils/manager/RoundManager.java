@@ -101,18 +101,23 @@ public class RoundManager {
             //初始化轮次信息
             initRound(chain_id);
         }else{
-            //本地计算的最新轮次
-            MeetingRound lastRound = roundList.get(roundList.size() - 1);
-            /**
-             * todo
-             * 调用区块管理模块获取最新区块头
-             */
-            BlockHeader blockHeader = new BlockHeader();
-            BlockExtendsData blockRoundData = new BlockExtendsData(blockHeader.getExtend());
-            if(blockRoundData.getRoundIndex() < lastRound.getIndex()){
-                roundList.clear();
-                //重新初始化轮次信息
-                initRound(chain_id);
+            ROUND_LOCK.lock();
+            try {
+                //本地计算的最新轮次
+                MeetingRound lastRound = roundList.get(roundList.size() - 1);
+                /**
+                 * todo
+                 * 调用区块管理模块获取最新区块头
+                 */
+                BlockHeader blockHeader = new BlockHeader();
+                BlockExtendsData blockRoundData = new BlockExtendsData(blockHeader.getExtend());
+                if(blockRoundData.getRoundIndex() < lastRound.getIndex()){
+                    roundList.clear();
+                    //重新初始化轮次信息
+                    initRound(chain_id);
+                }
+            } finally {
+                ROUND_LOCK.unlock();
             }
         }
     }
@@ -160,7 +165,7 @@ public class RoundManager {
                     break;
                 }
             }*/
-            MeetingRound preRound = getNextRound(chain_id,extendsData,false);
+            MeetingRound preRound = getRound(chain_id,extendsData,false);
             currentRound.setPreRound(preRound);
         }
         return currentRound;
@@ -185,7 +190,7 @@ public class RoundManager {
             if (isRealTime) {
                 //如果本地最新轮次为空或本地最新轮次打包结束时间小于当前时间则需要计算下一轮次信息
                 if (round == null || round.getEndTime() < TimeService.currentTimeMillis()) {
-                    MeetingRound nextRound = getNextRound(chain_id,null, true);
+                    MeetingRound nextRound = getRound(chain_id,null, true);
                     nextRound.setPreRound(round);
                     addRound(chain_id,nextRound);
                     round = nextRound;
@@ -203,7 +208,7 @@ public class RoundManager {
             if (round != null && extendsData.getRoundIndex() == round.getIndex() && extendsData.getPackingIndexOfRound() != extendsData.getConsensusMemberCount()) {
                 return round;
             }
-            MeetingRound nextRound = getNextRound(chain_id,extendsData, false);
+            MeetingRound nextRound = getRound(chain_id,extendsData, false);
             //如果当前轮次不为空且计算出的下一轮次下标小于当前轮次下标则直接返回计算出的下一轮次信息
             if (round != null && nextRound.getIndex() <= round.getIndex()) {
                 return nextRound;
@@ -222,15 +227,15 @@ public class RoundManager {
      * @param roundData   轮次数据
      * @param isRealTime  是否根据最新时间计算轮次
      * */
-    public MeetingRound getNextRound(int chain_id,BlockExtendsData roundData, boolean isRealTime) {
+    public MeetingRound getRound(int chain_id,BlockExtendsData roundData, boolean isRealTime) {
         ROUND_LOCK.lock();
         try {
             if (isRealTime && roundData == null) {
-                return getNextRoundByRealTime(chain_id);
+                return getRoundByRealTime(chain_id);
             } else if (!isRealTime && roundData == null) {
-                return getNextRoundByNotRealTime(chain_id);
+                return getRoundByNotRealTime(chain_id);
             } else {
-                return getNextRoundByExpectedRound(chain_id,roundData);
+                return getRoundByExpectedRound(chain_id,roundData);
             }
         } finally {
             ROUND_LOCK.unlock();
@@ -241,7 +246,7 @@ public class RoundManager {
      * 根据时间计算下一轮次信息
      * @param chain_id  链ID
      * */
-    private MeetingRound getNextRoundByRealTime(int chain_id) {
+    private MeetingRound getRoundByRealTime(int chain_id) {
         /**
          * todo
          * 区块管理模块获取最新区块头
@@ -279,7 +284,7 @@ public class RoundManager {
      * 根据最新区块数据计算下一轮轮次信息
      * @param chain_id   链ID
      * */
-    private MeetingRound getNextRoundByNotRealTime(int chain_id) {
+    private MeetingRound getRoundByNotRealTime(int chain_id) {
         /**
          * todo
          * 区块管理模块获取最新区块头
@@ -289,7 +294,7 @@ public class RoundManager {
         BlockExtendsData extendsData = new BlockExtendsData(bestBlockHeader.getExtend());
         extendsData.setRoundStartTime(extendsData.getRoundEndTime(ConfigManager.config_map.get(chain_id).getPacking_interval()));
         extendsData.setRoundIndex(extendsData.getRoundIndex() + 1);
-        return getNextRoundByExpectedRound(chain_id,extendsData);
+        return getRoundByExpectedRound(chain_id,extendsData);
     }
 
     /**
@@ -297,7 +302,7 @@ public class RoundManager {
      * @param chain_id   链ID
      * @param roundData  区块里的轮次信息
      * */
-    private MeetingRound getNextRoundByExpectedRound(int chain_id,BlockExtendsData roundData) {
+    private MeetingRound getRoundByExpectedRound(int chain_id,BlockExtendsData roundData) {
         /**
          * todo
          * 区块管理模块获取最新区块头

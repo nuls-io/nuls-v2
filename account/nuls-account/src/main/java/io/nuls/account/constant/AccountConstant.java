@@ -27,7 +27,6 @@ package io.nuls.account.constant;
 
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Na;
 
 /**
  * @author: qinyifeng
@@ -80,7 +79,7 @@ public interface AccountConstant {
      * 设置别名的费用(烧毁)
      * The cost of setting an alias
      */
-    Na ALIAS_NA = Na.parseNuls(1);
+    //Na ALIAS_NA = Na.parseNuls(1);
 
     /**
      * 设置账户别名的交易类型
@@ -118,6 +117,10 @@ public interface AccountConstant {
      */
     int PAGE_SIZE = 10;
 
+    /**
+     * 黑洞地址，该地址的资产无法找回
+     * //TODO 该地址需要加上链ID，否则无法适配新的地址规则
+     */
     byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
 
     /**

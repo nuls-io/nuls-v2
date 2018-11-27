@@ -42,6 +42,7 @@ public class Constants {
     /**
      * WebSocket constant
      */
+    public static final long MILLIS_PER_SECOND = 1000;
     public static final long INTERVAL_TIMEMILLIS = 100;
     public static final long TIMEOUT_TIMEMILLIS = 60 * 1000;
     public static final long UNSUBSCRIBE_TIMEMILLIS = -20140217;
@@ -82,7 +83,8 @@ public class Constants {
     public static final String RESPONSE_TIMEOUT = "Response timeout";
     public static final String CMD_NOT_FOUND = "Cmd not found";
     public static final String CMD_DUPLICATE = "Duplicate cmd found";
-    public static final String SERVICE_NOT_AVAILABLE = "Service not available";
+    public static final String PARAM_WRONG_RANGE = "Param wrong range";
+    public static final String PARAM_WRONG_FORMAT = "Param wrong format";
 
     /**
      * predetermined cmd (used by kernel & module)

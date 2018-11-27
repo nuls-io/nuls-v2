@@ -22,17 +22,18 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.service.ConsensusService;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
-import io.nuls.poc.storage.PunihStorageService;
+import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.RoundManager;
 import io.nuls.poc.utils.util.ConsensusUtil;
 import io.nuls.poc.utils.util.PoConvertUtil;
 import io.nuls.poc.utils.validator.ValidatorManager;
-import io.nuls.tools.basic.VarInt;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.data.StringUtils;
@@ -41,7 +42,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
-import io.nuls.tools.basic.Result;
+
 import java.io.IOException;
 import java.util.*;
 
@@ -52,7 +53,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     @Autowired
     private DepositStorageService depositService;
     @Autowired
-    private PunihStorageService publishService;
+    private PunishStorageService publishService;
     @Autowired
     private ValidatorManager validatorManager;
 
@@ -77,6 +78,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 throw new NulsRuntimeException(ConsensusErrorCode.ADDRESS_ERROR);
             }
             //todo 调用账户模块接口  验证账户是否正确
+            //2.验证账户正确性
             /*boolean validResult = true;
             if(!validResult){
                 return new Result(1, ConsensusErrorCode.ACCOUNT_INFO_ERROR.getCode(),ConsensusErrorCode.ACCOUNT_INFO_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
@@ -93,26 +95,27 @@ public class ConsensusServiceImpl implements ConsensusService {
             } else {
                 agent.setRewardAddress(AddressTool.getAddress(dto.getRewardAddress()));
             }
-            agent.setDeposit(Na.valueOf(dto.getDeposit()));
+            agent.setDeposit(dto.getDeposit());
             agent.setCommissionRate(dto.getCommissionRate());
             tx.setTxData(agent.serialize());
-            //3.2.组装coinData(调用账户模块)
+            //3.2.调用账本模块获取账户可用余额和nonce值，组装coinData
             CoinData coinData = new CoinData();
-            List<Coin> toList = new ArrayList<>();
+            List<CoinFrom> fromList = new ArrayList<>();
+            List<CoinTo> toList = new ArrayList<>();
+            /*List<Coin> toList = new ArrayList<>();
             toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), ConsensusConstant.CONSENSUS_LOCK_TIME));
-            coinData.setTo(toList);
+            coinData.setTo(toList);*/
             tx.setCoinData(coinData.serialize());
             //todo 4.交易签名
 
             //todo 5.将交易发送给交易管理模块
-
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
-        }catch (NulsRuntimeException e){
-            Log.error(e);
-            return Result.getFailed(e.getErrorCode());
         }catch (IOException io){
             Log.error(io);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
+        }catch (NulsRuntimeException e){
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
         }
     }
 
@@ -121,11 +124,12 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result stopAgent(Map<String,Object> params) {
-        if(params == null || params.get("chain_id") == null || params.get("address") == null){
+        if(params == null || params.get("chain_id") == null || params.get("address") == null || params.get("assetId") == null){
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chainId = (Integer)params.get("chain_id");
+            int assetId = (Integer)params.get("assetId");
             String address = (String) params.get("address");
             String password = null;
             if(params.get("password") != null){
@@ -157,8 +161,8 @@ public class ConsensusServiceImpl implements ConsensusService {
             tx.setTxData(stopAgent.serialize());
             CoinData coinData = ConsensusUtil.getStopAgentCoinData(chainId, agent, TimeService.currentTimeMillis() + ConfigManager.config_map.get(chainId).getStopAgent_lockTime());
             tx.setCoinData(coinData.serialize());
-            Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
-            coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
+            String fee = TransactionFeeCalculator.getMaxFee(tx.size());
+            coinData.getTo().get(0).setAmount(BigIntegerUtils.subToString(coinData.getTo().get(0).getAmount(),fee));
             //todo 交易签名
 
             //todo 将交易传递给交易管理模块
@@ -194,19 +198,23 @@ public class ConsensusServiceImpl implements ConsensusService {
                 throw new NulsException(ConsensusErrorCode.ADDRESS_ERROR);
             }
             //todo 账户验证（账户模块）
+
             Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
             Deposit deposit = new Deposit();
             deposit.setAddress(AddressTool.getAddress(dto.getAddress()));
             deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
-            deposit.setDeposit(Na.valueOf(dto.getDeposit()));
+            deposit.setDeposit(dto.getDeposit());
             tx.setTxData(deposit.serialize());
             CoinData coinData = new CoinData();
-            List<Coin> toList = new ArrayList<>();
+            List<CoinFrom> fromList = new ArrayList<>();
+            List<CoinTo> toList = new ArrayList<>();
+            /*List<Coin> toList = new ArrayList<>();
             toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), ConsensusConstant.CONSENSUS_LOCK_TIME));
-            coinData.setTo(toList);
-            tx.setCoinData(coinData.serialize());
-            //todo 获取coindata （账本模块），处理返回结果
+            coinData.setTo(toList);*/
+            //todo 获取coinData （账本模块），处理返回结果
+            Map<String,Object> result = new HashMap<>();
 
+            tx.setCoinData(coinData.serialize());
             //todo 交易签名
 
             //todo 将交易传递给交易管理模块
@@ -239,23 +247,21 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             //todo 账户验证（账户模块）
 
-            Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
+            Transaction concalDepositTransaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             CancelDeposit cancelDeposit = new CancelDeposit();
             NulsDigestData hash = NulsDigestData.fromDigestHex(dto.getTxHash());
             //todo 从交易模块获取委托交易（交易模块）+ 返回数据处理
             Transaction depositTransaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
-
             cancelDeposit.setAddress(AddressTool.getAddress(dto.getAddress()));
             cancelDeposit.setJoinTxHash(hash);
-            tx.setTxData(cancelDeposit.serialize());
+            concalDepositTransaction.setTxData(cancelDeposit.serialize());
             CoinData coinData = new CoinData();
-            List<Coin> toList = new ArrayList<>();
+            /*List<Coin> toList = new ArrayList<>();
             Deposit deposit = new Deposit();
             deposit.parse(depositTransaction.getTxData(),0);
             toList.add(new Coin(cancelDeposit.getAddress(), deposit.getDeposit(), 0));
             coinData.setTo(toList);
             List<Coin> fromList = new ArrayList<>();
-
             CoinData dtCoinData = new CoinData();
             dtCoinData.parse(depositTransaction.getCoinData(),0);
             for (int index = 0; index <dtCoinData.getTo().size(); index++) {
@@ -269,11 +275,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             if (fromList.isEmpty()) {
                 throw new NulsException(ConsensusErrorCode.DATA_ERROR);
             }
-            coinData.setFrom(fromList);
-            tx.setCoinData(coinData.serialize());
-            Na fee = TransactionFeeCalculator.getMaxFee(tx.size());
-            coinData.getTo().get(0).setNa(coinData.getTo().get(0).getNa().subtract(fee));
-
+            coinData.setFrom(fromList);*/
+            concalDepositTransaction.setCoinData(coinData.serialize());
+            String fee = TransactionFeeCalculator.getMaxFee(concalDepositTransaction.size());
+            coinData.getTo().get(0).setAmount(BigIntegerUtils.subToString(coinData.getTo().get(0).getAmount(),fee));
             //todo 交易签名
 
             //todo 将交易传递给交易管理模块
@@ -537,11 +542,11 @@ public class ConsensusServiceImpl implements ConsensusService {
             handleList.add(agent);
         }
         MeetingRound round = RoundManager.getInstance().getCurrentRound(chain_id);
-        long totalDeposit = 0;
+        String totalDeposit = BigIntegerUtils.ZERO;
         int packingAgentCount = 0;
         if (null != round) {
             for (MeetingMember member : round.getMemberList()) {
-                totalDeposit += (member.getAgent().getTotalDeposit().getValue() + member.getAgent().getDeposit().getValue());
+                totalDeposit = BigIntegerUtils.addToString(totalDeposit,BigIntegerUtils.addToString(member.getAgent().getTotalDeposit(),member.getAgent().getDeposit()));
                 if (member.getAgent() != null) {
                     packingAgentCount++;
                 }
@@ -586,7 +591,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         List<Deposit> depositList = ConsensusManager.getInstance().getAllDepositMap().get(chain_id);
         Set<NulsDigestData> agentSet = new HashSet<>();
-        long totalDeposit = 0;
+        String totalDeposit = BigIntegerUtils.ZERO;
         for (Deposit deposit : depositList) {
             if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
                 continue;
@@ -598,7 +603,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 continue;
             }
             agentSet.add(deposit.getAgentHash());
-            totalDeposit += deposit.getDeposit().getValue();
+            totalDeposit = BigIntegerUtils.addToString(totalDeposit,deposit.getDeposit());
         }
         dto.setAgentCount(agentCount);
         dto.setAgentHash(agentHash);
@@ -612,7 +617,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             //dto.setUsableBalance(accountLedgerService.getBalance(addressBytes).getData().getUsable().getValue());
         } catch (Exception e) {
             Log.error(e);
-            dto.setUsableBalance(0L);
+            dto.setUsableBalance(BigIntegerUtils.ZERO);
         }
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(dto);
     }
@@ -622,18 +627,95 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result validBlock(Map<String,Object> params) {
-        if (params.get("chain_id") == null || params.get("block")==null) {
+        if (params.get("chain_id") == null || params.get("block")==null || params.get("isDownload") == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
+            boolean isDownload = (Boolean) params.get("isDownload");
             String blockHex = (String)params.get("block");
             Block block = new Block();
             block.parse(new NulsByteBuffer(HexUtil.decode(blockHex)));
+            BlockHeader blockHeader = block.getHeader();
             //验证梅克尔哈希
+            if(!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))){
+                return Result.getFailed(ConsensusErrorCode.MERKEL_HASH_ERROR);
+            }
 
-            //验证轮次信息及打包人
+            BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
+            //todo 获取本地最新区块头,区块管理模块获取
+            BlockHeader bestBlockHeader = new BlockHeader();
+            BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlockHeader.getExtend());
+            //该区块为本地最新区块之前的区块
+            if(extendsData.getRoundIndex() < bestExtendsData.getRoundIndex() || (extendsData.getRoundIndex() == bestExtendsData.getRoundIndex() && extendsData.getPackingIndexOfRound() <= bestExtendsData.getPackingIndexOfRound())){
+                Log.error("new block rounddata error, block height : " + blockHeader.getHeight() + " , hash :" + blockHeader.getHash());
+                return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
+            }
 
+            MeetingRound currentRound = RoundManager.getInstance().getCurrentRound(chain_id);
+            //1.当前区块轮次 < 本地最新轮次 && 区块同步已完成
+            if(isDownload && extendsData.getRoundIndex() < currentRound.getIndex()){
+                MeetingRound round = RoundManager.getInstance().getRoundByIndex(chain_id,extendsData.getRoundIndex());
+                if (round != null) {
+                    currentRound = round;
+                }
+            }
+            //标志是否有轮次信息变化
+            boolean hasChangeRound = false;
+            //2.当前区块轮次 > 本地最新轮次
+            if (extendsData.getRoundIndex() > currentRound.getIndex()) {
+                //未来区块
+                if (extendsData.getRoundStartTime() > TimeService.currentTimeMillis() + ConfigManager.config_map.get(chain_id).getPacking_interval()) {
+                    Log.error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash());
+                    return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
+                }
+                if (!isDownload && (extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * ConfigManager.config_map.get(chain_id).getPacking_interval()) > TimeService.currentTimeMillis() + ConfigManager.config_map.get(chain_id).getPacking_interval()) {
+                    Log.error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash());
+                    return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
+                }
+                if (extendsData.getRoundStartTime() < currentRound.getEndTime()) {
+                    Log.error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash());
+                    return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
+                }
+                MeetingRound tempRound = RoundManager.getInstance().getRound(chain_id,extendsData, !isDownload);
+                if (tempRound.getIndex() > currentRound.getIndex()) {
+                    tempRound.setPreRound(currentRound);
+                    hasChangeRound = true;
+                }
+                currentRound = tempRound;
+            }else if(extendsData.getRoundIndex() < currentRound.getIndex()){
+                MeetingRound preRound = currentRound.getPreRound();
+                while (preRound != null) {
+                    if (extendsData.getRoundIndex() == preRound.getIndex()) {
+                        currentRound = preRound;
+                        break;
+                    }
+                    preRound = preRound.getPreRound();
+                }
+            }
+            if (extendsData.getRoundIndex() != currentRound.getIndex() || extendsData.getRoundStartTime() != currentRound.getStartTime()) {
+                Log.error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeader.getHash());
+                return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
+            }
+            if (extendsData.getConsensusMemberCount() != currentRound.getMemberCount()) {
+                Log.error("block height " + blockHeader.getHeight() + " packager count is error! hash :" + blockHeader.getHash());
+                return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
+            }
+            Log.debug(currentRound.toString());
+            // 验证打包人是否正确
+            MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
+            if (!Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress())) {
+                Log.error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeader.getHash());
+                return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
+            }
+            if (member.getPackEndTime() != block.getHeader().getTime()) {
+                Log.error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeader.getHash());
+                return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
+            }
+            if (hasChangeRound) {
+                RoundManager.getInstance().addRound(chain_id,currentRound);
+            }
+            //系统交易验证
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             Log.error(e);
@@ -660,7 +742,6 @@ public class ConsensusServiceImpl implements ConsensusService {
         int chain_id = (Integer) params.get("chain_id");
         MeetingRound round = RoundManager.getInstance().getOrResetCurrentRound(chain_id,true);
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(round);
-
     }
 
     /**
@@ -1111,7 +1192,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             depositList = ConsensusManager.getInstance().getAllDepositMap().get(chain_id);
         }
         Set<String> memberSet = new HashSet<>();
-        Na total = Na.ZERO;
+        String total = BigIntegerUtils.ZERO;
         for (int i = 0; i < depositList.size(); i++) {
             Deposit deposit = depositList.get(i);
             if (!agent.getTxHash().equals(deposit.getAgentHash())) {
@@ -1120,7 +1201,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             if (deposit.getDelHeight() >= 0) {
                 continue;
             }
-            total = total.add(deposit.getDeposit());
+            total = BigIntegerUtils.addToString(total,deposit.getDeposit());
             memberSet.add(AddressTool.getStringAddressByBytes(deposit.getAddress()));
         }
         agent.setMemberCount(memberSet.size());

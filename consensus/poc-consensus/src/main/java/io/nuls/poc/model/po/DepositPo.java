@@ -29,7 +29,6 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.Na;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
@@ -42,7 +41,7 @@ public class DepositPo extends BaseNulsData {
 
 
     private NulsDigestData txHash;
-    private Na deposit;
+    private String deposit;
     private NulsDigestData agentHash;
     private byte[] address;
     private long time;
@@ -54,7 +53,7 @@ public class DepositPo extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt64(deposit.getValue());
+        stream.writeString(deposit);
         stream.writeNulsData(agentHash);
         stream.write(address);
         stream.writeUint48(time);
@@ -65,7 +64,7 @@ public class DepositPo extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.deposit = Na.valueOf(byteBuffer.readInt64());
+        this.deposit = byteBuffer.readString();
         this.agentHash = byteBuffer.readHash();
         this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.time = byteBuffer.readUint48();
@@ -77,7 +76,7 @@ public class DepositPo extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfInt64(); // deposit.getValue()
+        size += SerializeUtils.sizeOfString(deposit); // deposit.getValue()
         size += SerializeUtils.sizeOfNulsData(agentHash);
         size += address.length;
         size += SerializeUtils.sizeOfUint48();
@@ -87,11 +86,11 @@ public class DepositPo extends BaseNulsData {
         return size;
     }
 
-    public Na getDeposit() {
+    public String getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(Na deposit) {
+    public void setDeposit(String deposit) {
         this.deposit = deposit;
     }
 
