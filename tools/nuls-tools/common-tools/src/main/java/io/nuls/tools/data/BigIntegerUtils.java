@@ -7,7 +7,7 @@ import java.math.BigInteger;
  * 2018/11/27
  * */
 public class BigIntegerUtils {
-    public static final String ZERO = "0";
+    public static final String ZERO = String.valueOf(0);
     /**
      * String 转 BigInteger
      * @param str  数字字符串
