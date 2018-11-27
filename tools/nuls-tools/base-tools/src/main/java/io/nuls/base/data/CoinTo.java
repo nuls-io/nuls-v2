@@ -44,6 +44,17 @@ public class CoinTo extends BaseNulsData {
      */
     private long lockTime;
 
+    public CoinTo(byte[] address,int assetsChainId,int assetsId,String amount){
+        this.address = address;
+        this.assetsChainId = assetsChainId;
+        this.assetsId = assetsId;
+        this.amount = amount;
+    }
+
+    public CoinTo(byte[] address,int assetsChainId,int assetsId,String amount,long lockTime){
+       this(address,assetsChainId,assetsId,amount);
+       this.lockTime = lockTime;
+    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {

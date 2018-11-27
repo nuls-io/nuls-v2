@@ -51,34 +51,24 @@ public abstract class BaseCmd {
     }
 
     protected Response success(Object responseData) {
-        Response response = new Response();
-        response.setResponseStatus(Constants.booleanString(true));
+        Response response = ServerRuntime.newResponse("", Constants.booleanString(true), "Congratulations! Processing completed！");
         response.setResponseData(responseData);
-        response.setResponseComment("Congratulations! Processing completed！");
-        response.setResponseMaxSize("0");
         return response;
     }
 
     protected Response failed(ErrorCode errorCode) {
-        Response response = new Response();
-        response.setResponseStatus(Constants.booleanString(false));
+        Response response = ServerRuntime.newResponse("", Constants.booleanString(false), "");
         response.setResponseData(errorCode);
-        response.setResponseMaxSize("0");
         return response;
     }
 
     protected Response failed(String errMsg) {
-        Response response = new Response();
-        response.setResponseStatus(Constants.booleanString(false));
-        response.setResponseComment(errMsg);
-        return response;
+        return ServerRuntime.newResponse("", Constants.booleanString(false), errMsg);
     }
 
     protected Response failed(ErrorCode errorCode, String errMsg) {
-        Response response = new Response();
-        response.setResponseStatus(Constants.booleanString(false));
+        Response response = ServerRuntime.newResponse("", Constants.booleanString(false), errMsg);
         response.setResponseData(errorCode);
-        response.setResponseComment(errMsg);
         return response;
     }
 }

@@ -59,7 +59,7 @@ public class WsClient extends WebSocketClient {
              Add to response queue, Waiting for thread pool processing
              */
             Log.info("ClientMsgFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + paramString);
-            ClientRuntime.CALLED_VALUE_QUEUE.add(JSONUtils.json2map(paramString));
+            ClientRuntime.SERVER_RESPONSE_QUEUE.add(JSONUtils.json2map(paramString));
             ClientRuntime.clientThreadPool.execute(new ClientProcessor());
         } catch (IOException e) {
             Log.error(e);

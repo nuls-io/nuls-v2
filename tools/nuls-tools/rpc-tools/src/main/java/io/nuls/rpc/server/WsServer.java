@@ -33,6 +33,7 @@ import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -174,6 +175,7 @@ public class WsServer extends WebSocketServer {
         // Get information from kernel
         CmdDispatcher.syncKernel();
 
+        System.out.println("Local:" + JSONUtils.obj2json(ServerRuntime.local));
         Thread.sleep(Integer.MAX_VALUE);
     }
 

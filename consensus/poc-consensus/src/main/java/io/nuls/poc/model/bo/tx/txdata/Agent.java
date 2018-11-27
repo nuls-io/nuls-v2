@@ -32,7 +32,7 @@ import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.poc.utils.manager.ConfigManager;
-import io.nuls.tools.data.LongUtils;
+import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -64,7 +64,7 @@ public class Agent extends TransactionLogicData {
     /**
      * 保证金
      * */
-    private Na deposit;
+    private String deposit;
 
     /**
      * 佣金比例
@@ -99,7 +99,7 @@ public class Agent extends TransactionLogicData {
     /**
      * 总委托金额
      * */
-    private transient Na totalDeposit;
+    private transient String totalDeposit;
 
     /**
      * 交易HASH
@@ -118,7 +118,7 @@ public class Agent extends TransactionLogicData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfInt64();  // deposit.getValue()
+        size += SerializeUtils.sizeOfString(deposit);  // deposit.getValue()
         size += this.agentAddress.length;
         size += this.rewardAddress.length;
         size += this.packingAddress.length;
@@ -128,7 +128,7 @@ public class Agent extends TransactionLogicData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt64(deposit.getValue());
+        stream.writeString(deposit);
         stream.write(agentAddress);
         stream.write(packingAddress);
         stream.write(rewardAddress);
@@ -137,20 +137,13 @@ public class Agent extends TransactionLogicData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.deposit = Na.valueOf(byteBuffer.readInt64());
+        this.deposit = byteBuffer.readString();
         this.agentAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.packingAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.rewardAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.commissionRate = byteBuffer.readDouble();
     }
 
-    public Na getDeposit() {
-        return deposit;
-    }
-
-    public void setDeposit(Na deposit) {
-        this.deposit = deposit;
-    }
 
     public byte[] getPackingAddress() {
         return packingAddress;
@@ -190,14 +183,6 @@ public class Agent extends TransactionLogicData {
 
     public double getCreditVal() {
         return creditVal < 0d ? 0D : this.creditVal;
-    }
-
-    public Na getTotalDeposit() {
-        return totalDeposit;
-    }
-
-    public void setTotalDeposit(Na totalDeposit) {
-        this.totalDeposit = totalDeposit;
     }
 
     public void setTxHash(NulsDigestData txHash) {
@@ -248,12 +233,30 @@ public class Agent extends TransactionLogicData {
         this.memberCount = memberCount;
     }
 
-    public long getAvailableDepositAmount(int chain_id) {
-        return LongUtils.sub(ConfigManager.config_map.get(chain_id).getCommission_max(), this.getTotalDeposit().getValue());
+    public String getAvailableDepositAmount(int chain_id) {
+        return BigIntegerUtils.subToString(ConfigManager.config_map.get(chain_id).getCommission_max(), this.getTotalDeposit());
+    }
+    public String getDeposit() {
+        return deposit;
+    }
+
+    public void setDeposit(String deposit) {
+        this.deposit = deposit;
+    }
+
+    public String getTotalDeposit() {
+        return totalDeposit;
+    }
+
+    public void setTotalDeposit(String totalDeposit) {
+        this.totalDeposit = totalDeposit;
     }
 
     public boolean canDeposit(int chain_id) {
-        return getAvailableDepositAmount(chain_id) >= ConfigManager.config_map.get(chain_id).getCommission_min();
+        if(!BigIntegerUtils.isLessThan(getAvailableDepositAmount(chain_id),ConfigManager.config_map.get(chain_id).getCommission_min())){
+            return true;
+        }
+        return false;
     }
 
     @Override

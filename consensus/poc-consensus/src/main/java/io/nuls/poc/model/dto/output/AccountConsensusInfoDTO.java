@@ -31,11 +31,11 @@ package io.nuls.poc.model.dto.output;
  */
 public class AccountConsensusInfoDTO {
     private int agentCount;
-    private long totalDeposit;
+    private String totalDeposit;
     private int joinAgentCount;
-    private long usableBalance;
-    private long reward;
-    private long rewardOfDay;
+    private String usableBalance;
+    private String reward;
+    private String rewardOfDay;
     private String agentHash;
 
     public int getAgentCount() {
@@ -46,11 +46,11 @@ public class AccountConsensusInfoDTO {
         this.agentCount = agentCount;
     }
 
-    public long getTotalDeposit() {
+    public String getTotalDeposit() {
         return totalDeposit;
     }
 
-    public void setTotalDeposit(long totalDeposit) {
+    public void setTotalDeposit(String totalDeposit) {
         this.totalDeposit = totalDeposit;
     }
 
@@ -62,35 +62,35 @@ public class AccountConsensusInfoDTO {
         this.joinAgentCount = joinAgentCount;
     }
 
-    public long getUsableBalance() {
+    public String getUsableBalance() {
         return usableBalance;
     }
 
-    public void setUsableBalance(long usableBalance) {
+    public void setUsableBalance(String usableBalance) {
         this.usableBalance = usableBalance;
     }
 
-    public long getReward() {
+    public String getReward() {
         return reward;
     }
 
-    public void setReward(long reward) {
+    public void setReward(String reward) {
         this.reward = reward;
     }
 
-    public long getRewardOfDay() {
+    public String getRewardOfDay() {
         return rewardOfDay;
     }
 
-    public void setRewardOfDay(long rewardOfDay) {
+    public void setRewardOfDay(String rewardOfDay) {
         this.rewardOfDay = rewardOfDay;
-    }
-
-    public void setAgentHash(String agentHash) {
-        this.agentHash = agentHash;
     }
 
     public String getAgentHash() {
         return agentHash;
+    }
+
+    public void setAgentHash(String agentHash) {
+        this.agentHash = agentHash;
     }
 }

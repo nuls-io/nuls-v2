@@ -31,6 +31,7 @@ import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.client.InvokeMethod;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
@@ -75,6 +76,8 @@ public class WsM1 {
         // Get information from kernel
         CmdDispatcher.syncKernel();
 
+        System.out.println("Local:"+ JSONUtils.obj2json(ServerRuntime.local));
+
         Thread.sleep(Integer.MAX_VALUE);
     }
 
@@ -93,14 +96,14 @@ public class WsM1 {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put(Constants.VERSION_KEY_STR, "2.0");
         params.put("paramName", "value");
 
         // Call cmd, get response immediately
         Object object = CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "getHeight", params);
         System.out.println("requestAndResponse:" + JSONUtils.obj2json(object));
 
-        System.out.println(CmdDispatcher.requestAndAck(ModuleE.CM.abbr, "getHeight", params, "2", InvokeMethod.class, "invokeGetHeight"));
+        System.out.println(CmdDispatcher.requestAndInvokeWithAck(ModuleE.CM.abbr, "getHeight", params, "2", InvokeMethod.class, "invokeGetHeight"));
         Thread.sleep(5000);
 
         // Call cmd, auto invoke local method after response
