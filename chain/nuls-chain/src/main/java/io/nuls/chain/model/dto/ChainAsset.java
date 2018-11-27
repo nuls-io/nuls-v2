@@ -16,11 +16,10 @@ import java.io.IOException;
 public class ChainAsset extends BaseNulsData {
 
     private int chainId;
-    private long assetId;
-    private long currentNumber;
-    private String chainName;
-    private String assetSymbol;
-    private String assetName;
+    private int assetId;
+    private long initNumber=0;
+    private String inNumber="0";
+    private String outNumber="0";
 
     public int getChainId() {
         return chainId;
@@ -30,64 +29,54 @@ public class ChainAsset extends BaseNulsData {
         this.chainId = chainId;
     }
 
-    public long getAssetId() {
+    public int getAssetId() {
         return assetId;
     }
 
-    public void setAssetId(long assetId) {
+    public void setAssetId(int assetId) {
         this.assetId = assetId;
     }
 
-    public long getCurrentNumber() {
-        return currentNumber;
+    public long getInitNumber() {
+        return initNumber;
     }
 
-    public void setCurrentNumber(long currentNumber) {
-        this.currentNumber = currentNumber;
+    public void setInitNumber(long initNumber) {
+        this.initNumber = initNumber;
     }
 
-    public String getChainName() {
-        return chainName;
+    public String getInNumber() {
+        return inNumber;
     }
 
-    public void setChainName(String chainName) {
-        this.chainName = chainName;
+    public void setInNumber(String inNumber) {
+        this.inNumber = inNumber;
     }
 
-    public String getAssetSymbol() {
-        return assetSymbol;
+    public String getOutNumber() {
+        return outNumber;
     }
 
-    public void setAssetSymbol(String assetSymbol) {
-        this.assetSymbol = assetSymbol;
-    }
-
-    public String getAssetName() {
-        return assetName;
-    }
-
-    public void setAssetName(String assetName) {
-        this.assetName = assetName;
+    public void setOutNumber(String outNumber) {
+        this.outNumber = outNumber;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
-        stream.writeUint48(assetId);
-        stream.writeInt64(currentNumber);
-        stream.writeString(chainName);
-        stream.writeString(assetSymbol);
-        stream.writeString(assetName);
+        stream.writeUint16(assetId);
+        stream.writeUint32(initNumber);
+        stream.writeString(inNumber);
+        stream.writeString(outNumber);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
-        this.assetId = byteBuffer.readUint48();
-        this.currentNumber = byteBuffer.readInt64();
-        this.chainName = byteBuffer.readString();
-        this.assetSymbol = byteBuffer.readString();
-        this.assetName = byteBuffer.readString();
+        this.assetId = byteBuffer.readUint16();
+        this.initNumber = byteBuffer.readUint32();
+        this.inNumber = byteBuffer.readString();
+        this.outNumber = byteBuffer.readString();
     }
 
     @Override
@@ -95,10 +84,9 @@ public class ChainAsset extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint48();
-        size += SerializeUtils.sizeOfInt64();
-        size += SerializeUtils.sizeOfString(chainName);
-        size += SerializeUtils.sizeOfString(assetSymbol);
-        size += SerializeUtils.sizeOfString(assetName);
+        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfString(inNumber);
+        size += SerializeUtils.sizeOfString(outNumber);
         return size;
     }
 }

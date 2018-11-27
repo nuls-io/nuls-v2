@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class AssetTx extends TransactionLogicData {
     private int chainId;
-    private long assetId;
+    private int assetId;
     private String symbol;
     private String name;
     private int depositNuls;
@@ -32,11 +32,11 @@ public class AssetTx extends TransactionLogicData {
         this.chainId = chainId;
     }
 
-    public long getAssetId() {
+    public int getAssetId() {
         return assetId;
     }
 
-    public void setAssetId(long assetId) {
+    public void setAssetId(int assetId) {
         this.assetId = assetId;
     }
 
@@ -103,7 +103,7 @@ public class AssetTx extends TransactionLogicData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
-        this.assetId = byteBuffer.readUint32();
+        this.assetId = byteBuffer.readUint16();
         this.symbol = byteBuffer.readString();
         this.name = byteBuffer.readString();
         this.depositNuls = byteBuffer.readInt32();
@@ -118,7 +118,7 @@ public class AssetTx extends TransactionLogicData {
         // chainId
         size += SerializeUtils.sizeOfUint16();
         // assetId
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(symbol);
         size += SerializeUtils.sizeOfString(name);
         // depositNuls

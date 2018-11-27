@@ -1,13 +1,19 @@
 package io.nuls.chain.cmd;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.info.CmErrorCode;
+import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.Asset;
+import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.model.tx.AssetDisableTransaction;
 import io.nuls.chain.model.tx.AssetRegTransaction;
+import io.nuls.chain.model.tx.CrossChainDestroyTransaction;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
+import io.nuls.chain.service.SeqService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -35,11 +41,17 @@ public class AssetCmd extends BaseCmd {
     private ChainService chainService;
     @Autowired
     private RpcService rpcService;
+    @Autowired
+    private SeqService seqService;
 
     @CmdAnnotation(cmd = "cm_asset", version = 1.0,
             description = "asset")
-    public Response asset(List params) {
-        Asset asset = assetService.getAsset(Long.valueOf(params.get(0).toString()));
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    public Response asset(Map params) {
+        int chainId = Integer.valueOf(params.get("chainId").toString());
+        int assetId = Integer.valueOf(params.get("assetId").toString());
+        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId,assetId));
         return success(asset);
     }
 
@@ -58,9 +70,10 @@ public class AssetCmd extends BaseCmd {
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]", parameterValidRegExp = "")
     @Parameter(parameterName = "address", parameterType = "String")
     public Response assetReg(Map params) {
-        Asset asset = new Asset();
-        asset.setChainId(Integer.valueOf(params.get("chainId").toString()));
-        asset.setAssetId(TimeService.currentTimeMillis());
+        int chainId = Integer.valueOf(params.get("chainId").toString());
+        int assetId =  seqService.createAssetId(chainId);
+        Asset asset = new Asset(chainId);
+        asset.setChainId(chainId);
         asset.setSymbol((String) params.get("symbol"));
         asset.setName((String) params.get("name"));
         asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS)));
@@ -71,7 +84,7 @@ public class AssetCmd extends BaseCmd {
         asset.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
         if(assetService.assetExist(asset))
         {
-            return failed("A10005");
+            return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
         }
         // 组装交易发送
         AssetRegTransaction assetRegTransaction = new AssetRegTransaction();
@@ -93,28 +106,48 @@ public class AssetCmd extends BaseCmd {
     @CmdAnnotation(cmd = "cm_assetDisable", version = 1.0,
             description = "assetDisable")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,4294967295]", parameterValidRegExp = "")
+    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
     @Parameter(parameterName = "address", parameterType = "String")
     public Response assetDisable(Map params) {
-        long assetId = Long.valueOf(params.get("assetId").toString());
+        int chainId = Integer.valueOf(params.get("chainId").toString());
+        int assetId = Integer.valueOf(params.get("assetId").toString());
         byte []address = AddressTool.getAddress(params.get("address").toString());
         //身份的校验，账户地址的校验
-        Asset asset = assetService.getAsset(assetId);
+        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId,assetId));
         if (asset == null) {
-            return failed("A10014");
+            return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
         }
         if(!ByteUtils.arrayEquals(asset.getAddress(),address)){
-            return failed("A10014");
+            return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
         }
-        AssetDisableTransaction assetDisableTransaction = new AssetDisableTransaction();
-        try {
-            assetDisableTransaction.setTxData(asset.parseToTransaction());
-        } catch (IOException e) {
-            e.printStackTrace();
-            return failed("parseToTransaction fail");
+        /**
+         * 判断链下是否只有这一个资产了，如果是，则进行带链注销交易
+         */
+        Chain dbChain = chainService.getChain(chainId);
+        Transaction transaction = null;
+        if(dbChain.getAssetIds().size() == 1 && dbChain.getAssetIds().get(0) == assetId){
+            //带链注销
+            transaction = new CrossChainDestroyTransaction();
+            try {
+                transaction.setTxData(dbChain.parseToTransaction(asset,true));
+            } catch (IOException e) {
+                e.printStackTrace();
+                return failed("parseToTransaction fail");
+            }
+            //TODO:coindata 未封装
+        }else{
+              //只走资产注销
+              transaction = new AssetDisableTransaction();
+            try {
+                transaction.setTxData(asset.parseToTransaction());
+            } catch (IOException e) {
+                e.printStackTrace();
+                return failed("parseToTransaction fail");
+            }
+            //TODO:coindata 未封装
+
         }
-        //TODO:coindata 未封装
-        boolean rpcReslt = rpcService.newTx(assetDisableTransaction);
+        boolean rpcReslt = rpcService.newTx(transaction);
         if(rpcReslt) {
             return success(asset);
         }else{

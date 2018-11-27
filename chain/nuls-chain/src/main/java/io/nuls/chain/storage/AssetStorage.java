@@ -15,27 +15,27 @@ public interface AssetStorage {
     /**
      * Save asset
      *
-     * @param key   Asset ID
+     * @param key   ChainId_AssetId
      * @param asset Asset object that needs to be saved
      * @return true/false
      */
-    boolean save(long key, Asset asset);
+    boolean save(String key, Asset asset);
 
     /**
      * Find assets based on key
      *
-     * @param key Asset ID
+     * @param key ChainId_AssetId
      * @return Asset object
      */
-    Asset load(long key);
+    Asset load(String key);
 
     /**
      * Physical deletion
      *
-     * @param key Asset ID
+     * @param key ChainId_AssetId
      * @return true/false
      */
-    boolean delete(long key);
+    boolean delete(String key);
 
     /**
      * Get all the assets of the chain
@@ -45,11 +45,5 @@ public interface AssetStorage {
      */
     List<Asset> getByChain(int chainId);
 
-    /**
-     * Get asset by symbol
-     *
-     * @param symbol Asset symbol
-     * @return Asset object
-     */
-    Asset getBySymbol(String symbol);
+
 }
