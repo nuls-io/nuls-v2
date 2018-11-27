@@ -68,19 +68,23 @@ public class CmdDispatcher {
 
 
     /**
-     * call cmd.
-     * 1. Find the corresponding module according to cmd
-     * 2. Send to the specified module
-     * 3. Get the result returned to the caller
-     * 4. Get the highest version of cmd
-     *
-     * @return Result with JSON string
+     * 1. Send request
+     * 2. Get messageId
+     * 3. Obtain Response Based on MessageId
      */
     public static Response requestAndResponse(String role, String cmd, Map params) throws Exception {
         String messageId = request(role, cmd, params, Constants.booleanString(false), "0");
         return getResponse(messageId);
     }
 
+    /**
+     * 1. Send request
+     * 2. Get messageId
+     * 3. Put the messageId to INVOKE_MAP
+     * End. The requester can handle other things
+     * A separate thread listens for new messages.
+     * Messages are automatically sent to the correct method
+     */
     public static String requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
         if (Integer.parseInt(subscriptionPeriod) <= 0) {
             throw new Exception("subscriptionPeriod must great than 0");
@@ -90,10 +94,14 @@ public class CmdDispatcher {
         return messageId;
     }
 
-    public static boolean requestAndAck(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
+    /**
+     * The same as requestAndInvoke
+     * The difference is that messageId will be returned only when Ack is true .
+     */
+    public static String requestAndAck(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
         String messageId = request(role, cmd, params, Constants.booleanString(true), subscriptionPeriod);
         ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
-        return getAck(messageId);
+        return getAck(messageId) ? messageId : null;
     }
 
     /**
