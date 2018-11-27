@@ -26,9 +26,6 @@
 package io.nuls.account.constant;
 
 
-import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Na;
-
 /**
  * @author: qinyifeng
  * @description: RPC常量 RPC constants
@@ -74,6 +71,10 @@ public interface RpcConstant {
      * path
      */
     String PATH = "path";
+    /**
+     * signatureHex
+     */
+    String SIGNATURE_HEX = "signatureHex";
 
     /**
      * --------[RPC Module role constants] -------

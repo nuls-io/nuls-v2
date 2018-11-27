@@ -39,6 +39,8 @@ import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.NulsSignData;
+import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -649,4 +651,18 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         return account;
     }
 
+    @Override
+    public byte[] signDigest(byte[] digest, int chainId, String address, String password) throws NulsException {
+        if (null == digest || digest.length == 0) {
+            throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
+        }
+        //check whether the account exists
+        Account account = this.getAccountByAddress(chainId, address);
+        if (null == account) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        //根据密码获得ECKey get ECKey from Password
+        ECKey ecKey = account.getEcKey(password);
+        return SignatureUtil.signDigest(digest, ecKey).getSignBytes();
+    }
 }
