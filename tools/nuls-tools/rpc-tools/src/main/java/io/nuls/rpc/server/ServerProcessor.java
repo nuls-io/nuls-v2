@@ -3,11 +3,13 @@ package io.nuls.rpc.server;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.Request;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -53,7 +55,7 @@ public class ServerProcessor implements Runnable {
 
                 Message message;
                 try {
-                    message = JSONUtils.json2pojo(msg,Message.class);
+                    message = JSONUtils.json2pojo(msg, Message.class);
                 } catch (IOException e) {
                     Log.error(e);
                     continue;
@@ -65,9 +67,19 @@ public class ServerProcessor implements Runnable {
                         CmdHandler.negotiateConnectionResponse(webSocket);
                         break;
                     case Request:
+                        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+                        if (Constants.booleanString(true).equals(request.getRequestAck())) {
+                            CmdHandler.ack(webSocket, message.getMessageId());
+                        }
                         if (CmdHandler.response(webSocket, message)) {
                             synchronized (ServerRuntime.REQUEST_QUEUE) {
-                                ServerRuntime.REQUEST_QUEUE.add(objects);
+                                /*
+                                Whether an Ack needs to be sent or not, it is set to false after execution once.
+                                That is to say, send Ack only once at most.
+                                 */
+                                request.setRequestAck(Constants.booleanString(false));
+                                message.setMessageData(request);
+                                ServerRuntime.REQUEST_QUEUE.add(new Object[]{webSocket, JSONUtils.obj2json(message)});
                             }
                         }
                         break;
@@ -76,7 +88,6 @@ public class ServerProcessor implements Runnable {
                         break;
                     default:
                         break;
-
                 }
 
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);

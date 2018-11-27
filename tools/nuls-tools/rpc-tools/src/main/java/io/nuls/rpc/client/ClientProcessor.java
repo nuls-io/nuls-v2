@@ -30,7 +30,7 @@ public class ClientProcessor implements Runnable {
     @Override
     public void run() {
         synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
-            Map removeMap = null;
+
             for (Map map : ClientRuntime.CALLED_VALUE_QUEUE) {
                 Message message = JSONUtils.map2pojo(map, Message.class);
                 if (!MessageType.Response.name().equals(message.getMessageType())) {
@@ -43,21 +43,16 @@ public class ClientProcessor implements Runnable {
                     Object[] objects = ClientRuntime.INVOKE_MAP.get(messageId);
                     Class clazz = (Class) objects[0];
                     String invokeMethod = (String) objects[1];
-                    String cmd = (String) objects[2];
                     try {
-                        Constructor constructor = clazz.getConstructor();
-                        Method method = clazz.getDeclaredMethod(invokeMethod, Object.class);
-                        Map responseData = (Map) response.getResponseData();
-                        method.invoke(constructor.newInstance(), responseData.get(cmd));
-                        removeMap = map;
+                        @SuppressWarnings("unchecked") Constructor constructor = clazz.getConstructor();
+                        @SuppressWarnings("unchecked") Method method = clazz.getDeclaredMethod(invokeMethod, Object.class);
+                        method.invoke(constructor.newInstance(), response);
+                        ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
                         break;
                     } catch (Exception e) {
                         Log.error(e);
                     }
                 }
-            }
-            if (removeMap != null) {
-                ClientRuntime.CALLED_VALUE_QUEUE.remove(removeMap);
             }
         }
     }

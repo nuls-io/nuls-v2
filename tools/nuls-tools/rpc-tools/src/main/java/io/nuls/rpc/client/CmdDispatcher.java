@@ -6,9 +6,9 @@ import io.nuls.rpc.server.CmdHandler;
 import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -47,7 +47,7 @@ public class CmdDispatcher {
     public static void syncKernel() throws Exception {
         String messageId = Constants.nextSequence();
         Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
-        Request request = defaultRequest();
+        Request request = ClientRuntime.defaultRequest();
         request.getRequestMethods().put("registerAPI", ServerRuntime.local);
         message.setMessageData(request);
 
@@ -57,8 +57,7 @@ public class CmdDispatcher {
         }
         wsClient.send(JSONUtils.obj2json(message));
 
-        @SuppressWarnings("unchecked")
-        Response response = callMessageResponse(messageId);
+        Response response = getResponseByMessageId(messageId);
         Log.info("APIMethods from kernel:" + JSONUtils.obj2json(response));
         Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("registerAPI");
@@ -78,20 +77,24 @@ public class CmdDispatcher {
      *
      * @return Result with JSON string
      */
-    public static Object requestAndResponse(String role, String cmd, Map params) throws Exception {
-        String messageId = request(role, cmd, params, "0");
-        Response response = callMessageResponse(messageId);
-        Map responseData = (Map) response.getResponseData();
-        return responseData.get(cmd);
+    public static Response requestAndResponse(String role, String cmd, Map params) throws Exception {
+        String messageId = request(role, cmd, params, Constants.booleanString(false), "0");
+        return getResponseByMessageId(messageId);
     }
 
     public static String requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
         if (Integer.parseInt(subscriptionPeriod) <= 0) {
             throw new Exception("subscriptionPeriod must great than 0");
         }
-        String messageId = request(role, cmd, params, subscriptionPeriod);
-        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod, cmd});
+        String messageId = request(role, cmd, params, Constants.booleanString(false), subscriptionPeriod);
+        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
         return messageId;
+    }
+
+    public static boolean requestAndAck(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
+        String messageId = request(role, cmd, params, Constants.booleanString(true), subscriptionPeriod);
+        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
+        return getAckByMessageId(messageId);
     }
 
     /**
@@ -103,10 +106,11 @@ public class CmdDispatcher {
      *
      * @return Message ID
      */
-    private static String request(String role, String cmd, Map params, String subscriptionPeriod) throws Exception {
+    private static String request(String role, String cmd, Map params, String ack, String subscriptionPeriod) throws Exception {
         String messageId = Constants.nextSequence();
         Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
-        Request request = defaultRequest();
+        Request request = ClientRuntime.defaultRequest();
+        request.setRequestAck(ack);
         request.setSubscriptionPeriod(subscriptionPeriod);
         request.getRequestMethods().put(cmd, params);
         message.setMessageData(request);
@@ -116,7 +120,7 @@ public class CmdDispatcher {
             return "-1";
         }
         WsClient wsClient = ClientRuntime.getWsClient(uri);
-        Log.info("Request:" + JSONUtils.obj2json(message));
+        Log.info("SendRequest to " + wsClient.getRemoteSocketAddress().getHostString() + ":" + wsClient.getRemoteSocketAddress().getPort() + "->" + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
         if (Integer.parseInt(subscriptionPeriod) > 0) {
@@ -152,7 +156,7 @@ public class CmdDispatcher {
     private static Message callMessage(MessageType messageType) throws InterruptedException, IOException {
 
         long timeMillis = System.currentTimeMillis();
-        do {
+        while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
             synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
                 for (Map map : ClientRuntime.CALLED_VALUE_QUEUE) {
                     Message message = JSONUtils.map2pojo(map, Message.class);
@@ -164,7 +168,7 @@ public class CmdDispatcher {
                 }
             }
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-        } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
+        }
 
         return null;
     }
@@ -172,13 +176,13 @@ public class CmdDispatcher {
     /**
      * Get response by messageId
      */
-    private static Response callMessageResponse(String messageId) throws InterruptedException, IOException {
+    private static Response getResponseByMessageId(String messageId) throws InterruptedException, IOException {
         if (Integer.parseInt(messageId) < 0) {
             return ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.CMD_NOT_FOUND);
         }
 
         long timeMillis = System.currentTimeMillis();
-        do {
+        while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
             synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
                 for (Map map : ClientRuntime.CALLED_VALUE_QUEUE) {
                     Message message = JSONUtils.map2pojo(map, Message.class);
@@ -196,23 +200,40 @@ public class CmdDispatcher {
                 }
             }
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-        } while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS);
+        }
 
         return ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.RESPONSE_TIMEOUT);
     }
 
-
     /**
-     * Constructing a default Request object
+     * Get ack by messageId
      */
-    private static Request defaultRequest() {
-        Request request = new Request();
-        request.setRequestAck("0");
-        request.setSubscriptionEventCounter("0");
-        request.setSubscriptionPeriod("0");
-        request.setSubscriptionRange("0");
-        request.setResponseMaxSize("0");
-        request.setRequestMethods(new HashMap<>(16));
-        return request;
+    private static boolean getAckByMessageId(String messageId) throws InterruptedException, IOException {
+        if (Integer.parseInt(messageId) < 0) {
+            return false;
+        }
+
+        long timeMillis = TimeService.currentTimeMillis();
+        while (TimeService.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
+            synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
+                for (Map map : ClientRuntime.CALLED_VALUE_QUEUE) {
+                    Message message = JSONUtils.map2pojo(map, Message.class);
+                    if (!MessageType.Ack.name().equals(message.getMessageType())) {
+                        continue;
+                    }
+
+                    Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
+                    if (ack.getRequestId().equals(messageId)) {
+                        ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
+                        Log.info("Ack:" + JSONUtils.obj2json(ack));
+                        return true;
+                    }
+                }
+            }
+            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+        }
+
+        return false;
     }
+
 }
