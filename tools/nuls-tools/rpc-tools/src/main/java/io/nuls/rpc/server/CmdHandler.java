@@ -165,7 +165,47 @@ public class CmdHandler {
             List<CmdParameter> cmdParameterList = cmdDetail.getParameters();
             for (CmdParameter cmdParameter : cmdParameterList) {
                 if (!StringUtils.isNull(cmdParameter.getParameterValidRange())) {
+                    if (params == null || params.get(cmdParameter.getParameterName()) == null) {
+                        Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_NULL + ":" + cmdParameter.getParameterName());
+                        response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+                        rspMessage.setMessageData(response);
+                        System.out.println("你参数空了：" + JSONUtils.obj2json(rspMessage));
+                        webSocket.send(JSONUtils.obj2json(rspMessage));
+                        return false;
+                    }
+                    if (cmdParameter.getParameterValidRange().matches(Constants.RANGE_REGEX)) {
+                        String range = cmdParameter.getParameterValidRange();
+                        int start;
+                        int end;
+                        if (range.contains("(")) {
+                            start = Integer.parseInt(range.substring(range.indexOf("(") + 1, range.indexOf(","))) + 1;
+                        } else {
+                            start = Integer.parseInt(range.substring(range.indexOf("[") + 1, range.indexOf(",")));
+                        }
+                        if (range.contains(")")) {
+                            end = Integer.parseInt(range.substring(range.indexOf(",") + 1, range.indexOf(")"))) + 1;
+                        } else {
+                            end = Integer.parseInt(range.substring(range.indexOf(",") + 1, range.indexOf("]")));
+                        }
+                        int value = Integer.parseInt(params.get(cmdParameter.getParameterName()).toString());
+                        if (start > value || value > end) {
+                            Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_WRONG_RANGE + ":" + cmdParameter.getParameterName());
+                            response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+                            rspMessage.setMessageData(response);
+                            System.out.println("你Range错了：" + JSONUtils.obj2json(rspMessage));
+                            webSocket.send(JSONUtils.obj2json(rspMessage));
+                            return false;
+                        }
+                    } else {
+                        Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_NULL + ":" + cmdParameter.getParameterName());
+                        response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+                        rspMessage.setMessageData(response);
+                        System.out.println("你Range错了：" + JSONUtils.obj2json(rspMessage));
+                        webSocket.send(JSONUtils.obj2json(rspMessage));
+                        return false;
+                    }
 
+                    //if
                 }
                 if (!StringUtils.isNull(cmdParameter.getParameterValidRegExp())) {
                     try {
@@ -173,7 +213,7 @@ public class CmdHandler {
                             Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_NULL + ":" + cmdParameter.getParameterName());
                             response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
                             rspMessage.setMessageData(response);
-                            System.out.println("你真的错了：" + JSONUtils.obj2json(rspMessage));
+                            System.out.println("你参数空了：" + JSONUtils.obj2json(rspMessage));
                             webSocket.send(JSONUtils.obj2json(rspMessage));
                             return false;
                         }
@@ -182,7 +222,7 @@ public class CmdHandler {
                             Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_WRONG_FORMAT + ":" + cmdParameter.getParameterName());
                             response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
                             rspMessage.setMessageData(response);
-                            System.out.println("你又错了：" + JSONUtils.obj2json(rspMessage));
+                            System.out.println("你Format错了：" + JSONUtils.obj2json(rspMessage));
                             webSocket.send(JSONUtils.obj2json(rspMessage));
                             return false;
                         }
