@@ -2,14 +2,14 @@ package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.tools.thread.commom.NulsThreadFactory;
 import org.java_websocket.WebSocket;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author tangyi
@@ -28,7 +28,11 @@ public class ClientRuntime {
     /**
      * The response of the cmd invoked through RPC
      */
-    public static final List<Map> CALLED_VALUE_QUEUE = Collections.synchronizedList(new ArrayList<>());
+    static final List<Map> CALLED_VALUE_QUEUE = Collections.synchronizedList(new ArrayList<>());
+
+    public static final Map<String, Object[]> INVOKE_MAP = new HashMap<>();
+
+    static ExecutorService clientThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleResponse"));
 
     /**
      * WsClient object that communicates with other modules
@@ -40,7 +44,7 @@ public class ClientRuntime {
     /**
      * Get the WsClient object through the url
      */
-    public static WsClient getWsClient(String uri) throws Exception {
+    static WsClient getWsClient(String uri) throws Exception {
 
         if (!wsClientMap.containsKey(uri)) {
             WsClient wsClient = new WsClient(uri);
@@ -61,28 +65,16 @@ public class ClientRuntime {
      * key: messageId
      * value: WsClient
      */
-    public static ConcurrentMap<String, WsClient> msgIdKeyWsClientMap = new ConcurrentHashMap<>();
+    static ConcurrentMap<String, WsClient> msgIdKeyWsClientMap = new ConcurrentHashMap<>();
 
     /**
      * Get the url of the module that provides the cmd through the cmd
      * The resulting url may not be unique, returning all found
      */
-    public static String getRemoteUri(String role) {
-//        for (Map role : roleMap.values()) {
-//            for (CmdDetail cmdDetail : moduleInfo.getRegisterApi().getApiMethods()) {
-//                if (cmdDetail.getMethodName().equals(cmd)) {
-//                    String address = (String) moduleInfo.getRegisterApi().getConnectionInformation().get(Constants.KEY_IP);
-//                    int port = Integer.parseInt(moduleInfo.getRegisterApi().getConnectionInformation().get(Constants.KEY_PORT));
-//                    return "ws://" + address + ":" + port;
-//                }
-//            }
-//        }
-//        return null;
+    static String getRemoteUri(String role) {
         Map map = roleMap.get(role);
-
         return map != null
                 ? "ws://" + map.get(Constants.KEY_IP) + ":" + map.get(Constants.KEY_PORT)
                 : null;
-
     }
 }

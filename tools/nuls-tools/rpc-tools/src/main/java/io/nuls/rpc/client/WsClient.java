@@ -62,6 +62,7 @@ public class WsClient extends WebSocketClient {
              */
             Log.info("Client<" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_PORT) + "> receive:" + paramString);
             ClientRuntime.CALLED_VALUE_QUEUE.add(JSONUtils.json2map(paramString));
+            ClientRuntime.clientThreadPool.execute(new ClientProcessor());
         } catch (IOException e) {
             Log.error(e);
         }
@@ -75,7 +76,6 @@ public class WsClient extends WebSocketClient {
     public void onError(Exception e) {
         Log.error(e);
     }
-
 
 
 }

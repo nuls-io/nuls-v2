@@ -34,7 +34,6 @@ public class ServerRuntime {
     public static Map<String, ConfigItem> configItemMap = new ConcurrentHashMap<>();
 
 
-
     /**
      * The pending request command received through RPC
      * Array [0] is the Websocket object for communication
@@ -45,7 +44,7 @@ public class ServerRuntime {
     /**
      * The thread pool object that handles the request
      */
-    static ExecutorService fixedThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
+    static ExecutorService serverThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
 
     /**
      * Get local command
@@ -145,8 +144,8 @@ public class ServerRuntime {
                 cmdDetail = new CmdDetail();
                 cmdDetail.setMethodName(cmdAnnotation.cmd());
                 cmdDetail.setMethodDescription(cmdAnnotation.description());
-                cmdDetail.setMethodMinEvent(cmdAnnotation.minEvent()+"");
-                cmdDetail.setMethodMinPeriod(cmdAnnotation.minPeriod()+"");
+                cmdDetail.setMethodMinEvent(cmdAnnotation.minEvent() + "");
+                cmdDetail.setMethodMinPeriod(cmdAnnotation.minPeriod() + "");
                 cmdDetail.setMethodScope(cmdAnnotation.scope());
                 cmdDetail.setVersion(cmdAnnotation.version());
                 cmdDetail.setInvokeClass(method.getDeclaringClass().getName());
