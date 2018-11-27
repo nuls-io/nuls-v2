@@ -13,7 +13,7 @@ import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
-import io.nuls.poc.storage.PunihStorageService;
+import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.utils.compare.AgentComparator;
 import io.nuls.poc.utils.compare.DepositComparator;
 import io.nuls.poc.utils.compare.PunishLogComparator;
@@ -32,7 +32,7 @@ import java.util.*;
 public class ConsensusManager {
     private AgentStorageService agentStorageService = SpringLiteContext.getBean(AgentStorageService.class);
     private DepositStorageService depositStorageService = SpringLiteContext.getBean(DepositStorageService.class);
-    private PunihStorageService punishStorageService = SpringLiteContext.getBean(PunihStorageService.class);
+    private PunishStorageService punishStorageService = SpringLiteContext.getBean(PunishStorageService.class);
 
     /**
      * 节点各条链的状态
@@ -88,6 +88,7 @@ public class ConsensusManager {
             loadAgents(chain_id);
             loadDeposits(chain_id);
             loadPunishes(chain_id);
+            RoundManager.getInstance().initRound(chain_id);
         }catch (Exception e){
             Log.error(e);
         }

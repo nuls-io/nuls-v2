@@ -3,7 +3,7 @@ package io.nuls.poc.storage.impl;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.model.po.PunishLogPo;
-import io.nuls.poc.storage.PunihStorageService;
+import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
@@ -17,7 +17,7 @@ import java.util.List;
  * 2018/11/6
  * */
 @Service
-public class PunishStorageServiceImpl implements PunihStorageService {
+public class PunishStorageServiceImpl implements PunishStorageService {
     @Override
     public boolean save(PunishLogPo po,int chainID) {
         if (po == null || po.getKey() == null) {
