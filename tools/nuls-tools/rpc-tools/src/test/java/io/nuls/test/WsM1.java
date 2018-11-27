@@ -100,9 +100,11 @@ public class WsM1 {
         Object object = CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "getHeight", params);
         System.out.println("requestAndResponse:" + JSONUtils.obj2json(object));
 
+        System.out.println(CmdDispatcher.requestAndAck(ModuleE.CM.abbr, "getHeight", params, "2", InvokeMethod.class, "invokeGetHeight"));
+        Thread.sleep(5000);
+
         // Call cmd, auto invoke local method after response
         String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getHeight", params, "1", InvokeMethod.class, "invokeGetHeight2");
-
         Thread.sleep(5000);
 
         // Unsubscribe

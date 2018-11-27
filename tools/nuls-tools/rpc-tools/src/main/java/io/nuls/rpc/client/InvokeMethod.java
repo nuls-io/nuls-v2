@@ -6,7 +6,7 @@ import io.nuls.tools.parse.JSONUtils;
 /**
  * @author tangyi
  * @date 2018/11/26
- * @description
+ * @description For testing only
  */
 public class InvokeMethod {
     public void invokeGetHeight(Object object) throws JsonProcessingException {

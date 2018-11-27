@@ -1,7 +1,5 @@
 package io.nuls.poc.constant;
 
-import io.nuls.base.data.Na;
-
 /**
  * @author tag
  * 2018/11/6

@@ -74,7 +74,7 @@ public class WsServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket webSocket, String msg) {
         try {
-            Log.info("Server<" + ServerRuntime.local.getModuleAbbreviation() + ":" + ServerRuntime.local.getModuleName() + "> receive:" + msg);
+            Log.info("ServerMsgFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
             ServerRuntime.REQUEST_QUEUE.add(new Object[]{webSocket, msg});
             ServerRuntime.serverThreadPool.execute(new ServerProcessor());
         } catch (Exception e) {

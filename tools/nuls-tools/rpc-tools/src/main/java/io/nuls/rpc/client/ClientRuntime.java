@@ -1,6 +1,7 @@
 package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.message.Request;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
@@ -76,5 +77,19 @@ public class ClientRuntime {
         return map != null
                 ? "ws://" + map.get(Constants.KEY_IP) + ":" + map.get(Constants.KEY_PORT)
                 : null;
+    }
+
+    /**
+     * Constructing a default Request object
+     */
+    public static Request defaultRequest() {
+        Request request = new Request();
+        request.setRequestAck("0");
+        request.setSubscriptionEventCounter("0");
+        request.setSubscriptionPeriod("0");
+        request.setSubscriptionRange("0");
+        request.setResponseMaxSize("0");
+        request.setRequestMethods(new HashMap<>(16));
+        return request;
     }
 }

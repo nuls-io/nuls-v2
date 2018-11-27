@@ -87,8 +87,21 @@ public class CmdHandler {
         negotiateConnectionResponse.setNegotiationStatus("0");
         negotiateConnectionResponse.setNegotiationComment("Incompatible protocol version");
 
-        Message rspMsg = basicMessage(Constants.nextSequence() + "", MessageType.NegotiateConnectionResponse);
+        Message rspMsg = basicMessage(Constants.nextSequence(), MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
+        webSocket.send(JSONUtils.obj2json(rspMsg));
+    }
+
+    /**
+     * For NegotiateConnectionResponse
+     * Send NegotiateConnectionResponse
+     */
+    public static void ack(WebSocket webSocket, String messageId) throws JsonProcessingException {
+        Ack ack = new Ack();
+        ack.setRequestId(messageId);
+
+        Message rspMsg = basicMessage(Constants.nextSequence(), MessageType.Ack);
+        rspMsg.setMessageData(ack);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 

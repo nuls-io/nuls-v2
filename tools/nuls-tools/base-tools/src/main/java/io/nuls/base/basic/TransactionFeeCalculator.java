@@ -26,7 +26,6 @@
 package io.nuls.base.basic;
 
 
-import io.nuls.base.data.Na;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 /**
