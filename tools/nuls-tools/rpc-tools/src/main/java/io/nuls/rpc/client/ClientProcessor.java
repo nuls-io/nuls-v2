@@ -1,5 +1,6 @@
 package io.nuls.rpc.client;
 
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Response;
@@ -29,31 +30,52 @@ public class ClientProcessor implements Runnable {
      */
     @Override
     public void run() {
-        synchronized (ClientRuntime.CALLED_VALUE_QUEUE) {
+        try {
+            while (ClientRuntime.SERVER_RESPONSE_QUEUE.size() > 0) {
+                /*
+                Get the first item of the queue
+                If it is an empty object, discard
+                 */
+                Map map = ClientRuntime.firstItemInServerResponseQueue();
+                if (map == null) {
+                    continue;
+                }
 
-            for (Map map : ClientRuntime.CALLED_VALUE_QUEUE) {
+                /*
+                Message type should be "Response"
+                If not Response, add back to the queue and wait for other threads to process
+                 */
                 Message message = JSONUtils.map2pojo(map, Message.class);
                 if (!MessageType.Response.name().equals(message.getMessageType())) {
+                    ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
                     continue;
                 }
 
                 Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
                 String messageId = response.getRequestId();
                 if (ClientRuntime.INVOKE_MAP.containsKey(messageId)) {
+                    /*
+                    Automatic invoke method
+                     */
                     Object[] objects = ClientRuntime.INVOKE_MAP.get(messageId);
                     Class clazz = (Class) objects[0];
                     String invokeMethod = (String) objects[1];
-                    try {
-                        @SuppressWarnings("unchecked") Constructor constructor = clazz.getConstructor();
-                        @SuppressWarnings("unchecked") Method method = clazz.getDeclaredMethod(invokeMethod, Object.class);
-                        method.invoke(constructor.newInstance(), response);
-                        ClientRuntime.CALLED_VALUE_QUEUE.remove(map);
-                        break;
-                    } catch (Exception e) {
-                        Log.error(e);
-                    }
+
+                    @SuppressWarnings("unchecked") Constructor constructor = clazz.getConstructor();
+                    @SuppressWarnings("unchecked") Method method = clazz.getDeclaredMethod(invokeMethod, Object.class);
+                    method.invoke(constructor.newInstance(), response);
+
+                } else {
+                    /*
+                    If no need to invoke, add back to the queue and wait for other threads to process
+                     */
+                    ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
                 }
             }
+
+            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+        } catch (Exception e) {
+            Log.error(e);
         }
     }
 }
