@@ -151,12 +151,12 @@ public class ServerRuntime {
                 cmdDetail.setInvokeClass(method.getDeclaringClass().getName());
                 cmdDetail.setInvokeMethod(method.getName());
             }
-            if (Parameters.class.getName().equals(annotation.annotationType().getName())) {
-                Parameters parameters = (Parameters) annotation;
-                for (Parameter parameter : parameters.value()) {
+            if (Parameter.class.getName().equals(annotation.annotationType().getName())) {
+                Parameter parameter = (Parameter) annotation;
+//                for (Parameter parameter : parameters.value()) {
                     CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());
                     cmdParameters.add(cmdParameter);
-                }
+//                }
             }
         }
         if (cmdDetail == null) {
