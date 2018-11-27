@@ -32,8 +32,8 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.script.Script;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.ByteArrayWrapper;
-import io.nuls.tools.data.LongUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -139,16 +139,16 @@ public class CoinData extends BaseNulsData {
      * @return tx fee
      */
     @JsonIgnore
-    public long getFee() {
-        long toNa = 0L;
+    public String getFee() {
+        String toAmount = BigIntegerUtils.ZERO;
         for (CoinTo coinTo : to) {
-            toNa = LongUtils.add(toNa,coinTo.getAmount());
+            toAmount = BigIntegerUtils.addToString(toAmount,coinTo.getAmount());
         }
-        long fromNa = 0L;
+        String fromAmount = BigIntegerUtils.ZERO;
         for (CoinFrom coinFrom : from) {
-            fromNa = LongUtils.add(fromNa, coinFrom.getAmount());
+            fromAmount =  BigIntegerUtils.addToString(fromAmount,coinFrom.getAmount());
         }
-        return LongUtils.sub(fromNa,toNa);
+        return BigIntegerUtils.subToString(toAmount,fromAmount);
     }
 
     public void addTo(CoinTo coinTo) {

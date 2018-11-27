@@ -36,4 +36,6 @@ public interface ConsensusErrorCode {
     ErrorCode DEPOSIT_WAS_CANCELED= ErrorCode.init("70026");
     ErrorCode DEPOSIT_NEVER_CANCELED= ErrorCode.init("70027");
     ErrorCode LOCK_TIME_NOT_REACHED= ErrorCode.init("70028");
+    ErrorCode MERKEL_HASH_ERROR= ErrorCode.init("70029");
+    ErrorCode BLOCK_ROUND_VALIDATE_ERROR= ErrorCode.init("70030");
 }
