@@ -46,8 +46,6 @@ public class ExampleCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "getHeight", version = 1.1,
             description = "test getHeight 1.1")
-    @Parameter(parameterName = "aaa", parameterType = "int", parameterValidRange = "(1,100]")
-    @Parameter(parameterName = "bbb", parameterType = "string", parameterValidRegExp = "^[A-Za-z0-9\\-]+$")
     public Response getHeight1(Map map) {
         Log.info("getHeight version 1.1");
         return success("Here is your real return value");
@@ -55,6 +53,7 @@ public class ExampleCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "getHeight", version = 1.3, scope = "public", minEvent = 1, minPeriod = 10,
             description = "test getHeight 1.3")
+    @Parameter(parameterName = "aaa", parameterType = "int", parameterValidRange = "(1,100]")
     public Response getHeight2(Map map) {
         Log.info("getHeight version 1.3");
         return success("getHeight->1.3");
@@ -62,8 +61,9 @@ public class ExampleCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "getHeight", version = 2.0,
             description = "test getHeight 2.0")
+    @Parameter(parameterName = "bbb", parameterType = "string", parameterValidRegExp = "^[A-Za-z0-9\\-]+$")
     public Response getHeight3(Map map) {
         Log.info("getHeight version 2.0");
-        return failed("getHeight->2.0");
+        return success("getHeight->2.0");
     }
 }
