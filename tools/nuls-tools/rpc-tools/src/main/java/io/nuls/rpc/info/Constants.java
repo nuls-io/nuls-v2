@@ -85,6 +85,7 @@ public class Constants {
     public static final String CMD_DUPLICATE = "Duplicate cmd found";
     public static final String PARAM_WRONG_RANGE = "Param wrong range";
     public static final String PARAM_WRONG_FORMAT = "Param wrong format";
+    public static final String PARAM_NULL = "Param null";
 
     /**
      * predetermined cmd (used by kernel & module)
