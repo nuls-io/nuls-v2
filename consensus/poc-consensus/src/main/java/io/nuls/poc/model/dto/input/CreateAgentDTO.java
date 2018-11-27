@@ -11,7 +11,7 @@ public class CreateAgentDTO {
     private String packingAddress;
     private String rewardAddress;
     private double commissionRate;
-    private long deposit;
+    private String deposit;
     private String password;
 
     public int getAssetId() {
@@ -62,11 +62,11 @@ public class CreateAgentDTO {
         this.commissionRate = commissionRate;
     }
 
-    public long getDeposit() {
+    public String getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(long deposit) {
+    public void setDeposit(String deposit) {
         this.deposit = deposit;
     }
 

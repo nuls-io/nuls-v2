@@ -44,7 +44,7 @@ import java.util.Set;
 public class Deposit extends TransactionLogicData {
 
 
-    private Na deposit;
+    private String deposit;
 
     private NulsDigestData agentHash;
 
@@ -61,7 +61,7 @@ public class Deposit extends TransactionLogicData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeInt64(deposit.getValue());
+        stream.writeString(deposit);
         stream.write(address);
         stream.writeNulsData(agentHash);
 
@@ -69,24 +69,24 @@ public class Deposit extends TransactionLogicData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.deposit = Na.valueOf(byteBuffer.readInt64());
+        this.deposit = byteBuffer.readString();
         this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.agentHash = byteBuffer.readHash();
     }
 
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfInt64(); // deposit.getValue()
+        size += SerializeUtils.sizeOfString(deposit); // deposit.getValue()
         size += Address.ADDRESS_LENGTH;
         size += this.agentHash.size();
         return size;
     }
 
-    public Na getDeposit() {
+    public String getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(Na deposit) {
+    public void setDeposit(String deposit) {
         this.deposit = deposit;
     }
 

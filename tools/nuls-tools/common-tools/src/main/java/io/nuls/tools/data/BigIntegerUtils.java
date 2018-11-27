@@ -136,4 +136,34 @@ public class BigIntegerUtils {
     public static int compare(String str1,String str2){
         return stringToBigInteger(str1).compareTo(stringToBigInteger(str2));
     }
+
+    /**
+     * 第一个是等于第二个数
+     * */
+    public static boolean isEqual(String str1,String str2){
+        if(compare(str1,str2)==0){
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 第一个是小于第二个数
+     * */
+    public static boolean isLessThan(String str1,String str2){
+        if(compare(str1,str2)>=0){
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * 第一个是大于第二个数
+     * */
+    public static boolean isGreaterThan(String str1,String str2){
+        if(compare(str1,str2) <= 0){
+            return false;
+        }
+        return true;
+    }
 }
