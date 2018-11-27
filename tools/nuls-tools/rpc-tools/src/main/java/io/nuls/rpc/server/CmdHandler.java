@@ -46,7 +46,6 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Call the correct method based on request information
@@ -170,16 +169,27 @@ public class CmdHandler {
                 }
                 if (!StringUtils.isNull(cmdParameter.getParameterValidRegExp())) {
                     try {
-                        String value = Objects.requireNonNull(params).get(cmdParameter.getParameterName()).toString();
+                        if (params == null || params.get(cmdParameter.getParameterName()) == null) {
+                            Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_NULL + ":" + cmdParameter.getParameterName());
+                            response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+                            rspMessage.setMessageData(response);
+                            System.out.println("你真的错了：" + JSONUtils.obj2json(rspMessage));
+                            webSocket.send(JSONUtils.obj2json(rspMessage));
+                            return false;
+                        }
+                        String value = params.get(cmdParameter.getParameterName()).toString();
                         if (!value.matches(cmdParameter.getParameterValidRegExp())) {
                             Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_WRONG_FORMAT + ":" + cmdParameter.getParameterName());
+                            response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
                             rspMessage.setMessageData(response);
+                            System.out.println("你又错了：" + JSONUtils.obj2json(rspMessage));
                             webSocket.send(JSONUtils.obj2json(rspMessage));
                             return false;
                         }
                     } catch (Exception e) {
                         Log.error(e);
                         Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), e.getMessage());
+                        response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
                         rspMessage.setMessageData(response);
                         webSocket.send(JSONUtils.obj2json(rspMessage));
                         return false;
