@@ -98,7 +98,7 @@ public class CmdDispatcher {
      * The same as requestAndInvoke
      * The difference is that messageId will be returned only when Ack is true .
      */
-    public static String requestAndAck(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
+    public static String requestAndInvokeWithAck(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
         String messageId = request(role, cmd, params, Constants.booleanString(true), subscriptionPeriod);
         ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
         return getAck(messageId) ? messageId : null;
