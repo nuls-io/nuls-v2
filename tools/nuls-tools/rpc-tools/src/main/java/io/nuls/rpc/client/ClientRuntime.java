@@ -29,9 +29,20 @@ public class ClientRuntime {
     /**
      * The response of the cmd invoked through RPC
      */
-    static final List<Map> CALLED_VALUE_QUEUE = Collections.synchronizedList(new ArrayList<>());
+    static final List<Map> SERVER_RESPONSE_QUEUE = Collections.synchronizedList(new ArrayList<>());
 
-    public static final Map<String, Object[]> INVOKE_MAP = new HashMap<>();
+    static Map firstItemInServerResponseQueue() {
+        Map map = null;
+        synchronized (ClientRuntime.SERVER_RESPONSE_QUEUE) {
+            if (ClientRuntime.SERVER_RESPONSE_QUEUE.size() > 0) {
+                map = ClientRuntime.SERVER_RESPONSE_QUEUE.get(0);
+                ClientRuntime.SERVER_RESPONSE_QUEUE.remove(0);
+            }
+        }
+        return map ;
+    }
+
+    static final Map<String, Object[]> INVOKE_MAP = new HashMap<>();
 
     static ExecutorService clientThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleResponse"));
 
