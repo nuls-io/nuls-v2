@@ -22,86 +22,19 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.account.constant;
-
+package io.nuls.chain.service;
 
 /**
- * @author: EdwardChan
- *
- * @description: the parameter name of RCP
- */
-public interface RpcParameterNameConstant {
-
+ * @program: nuls2.0
+ * @description:
+ * @author: lan
+ * @create: 2018/11/26
+ **/
+public interface SeqService {
     /**
-     * chainId
+     * createAssetId
+     * @param chainId
+     * @return
      */
-    String CHAIN_ID = "chainId";
-
-    /**
-     * address
-     */
-    String ADDRESS = "address";
-
-    /**
-     * alias
-     */
-    String ALIAS = "alias";
-
-    /**
-     * password
-     */
-    String PASSWORD = "password";
-
-    /**
-     * newPassword
-     */
-    String NEW_PASSWORD = "newPassword";
-
-    /**
-     * priKey
-     */
-    String PRIKEY = "priKey";
-
-    /**
-     * remark
-     */
-    String REMARK = "remark";
-
-    /**
-     * count
-     */
-    String COUNT = "count";
-
-    /**
-     * overwrite
-     */
-    String OVERWRITE = "overwrite";
-
-    /**
-     * filePath
-     */
-    String FILE_PATH = "filePath";
-
-    /**
-     * keyStore
-     */
-    String KEYSTORE = "keyStore";
-
-    /**
-     * dataHex
-     */
-    String DATA_HEX = "dataHex";
-
-    /**
-     * pageNumber
-     */
-    String PAGE_NUMBER = "pageNumber";
-
-    /**
-     * pageSize
-     */
-    String PAGE_SIZE = "pageSize";
-
-
+      int  createAssetId(int chainId);
 }

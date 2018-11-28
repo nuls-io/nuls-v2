@@ -22,86 +22,34 @@
  * SOFTWARE.
  *
  */
+package io.nuls.chain.service.impl;
 
-package io.nuls.account.constant;
-
+import io.nuls.chain.service.SeqService;
+import io.nuls.chain.storage.SeqStorage;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Service;
 
 /**
- * @author: EdwardChan
- *
- * @description: the parameter name of RCP
- */
-public interface RpcParameterNameConstant {
+ * @program: nuls2.0
+ * @description:
+ * @author: lan
+ * @create: 2018/11/26
+ **/
+@Service
+public class SeqServiceImpl implements SeqService {
+    @Autowired
+    private SeqStorage seqStorage;
 
     /**
-     * chainId
+     *
+     * createAssetId
+     * @param chainId
+     * @return
      */
-    String CHAIN_ID = "chainId";
+    @Override
+    public synchronized  int createAssetId(int chainId) {
 
-    /**
-     * address
-     */
-    String ADDRESS = "address";
+        return seqStorage.createSeqAsset(chainId);
 
-    /**
-     * alias
-     */
-    String ALIAS = "alias";
-
-    /**
-     * password
-     */
-    String PASSWORD = "password";
-
-    /**
-     * newPassword
-     */
-    String NEW_PASSWORD = "newPassword";
-
-    /**
-     * priKey
-     */
-    String PRIKEY = "priKey";
-
-    /**
-     * remark
-     */
-    String REMARK = "remark";
-
-    /**
-     * count
-     */
-    String COUNT = "count";
-
-    /**
-     * overwrite
-     */
-    String OVERWRITE = "overwrite";
-
-    /**
-     * filePath
-     */
-    String FILE_PATH = "filePath";
-
-    /**
-     * keyStore
-     */
-    String KEYSTORE = "keyStore";
-
-    /**
-     * dataHex
-     */
-    String DATA_HEX = "dataHex";
-
-    /**
-     * pageNumber
-     */
-    String PAGE_NUMBER = "pageNumber";
-
-    /**
-     * pageSize
-     */
-    String PAGE_SIZE = "pageSize";
-
-
+    }
 }

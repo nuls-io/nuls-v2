@@ -62,6 +62,12 @@ public interface AccountConstant {
     String CFG_SYSTEM_TKEYSTORE_FOLDER = "keydir";
 
     /**
+     * 内核模块地址
+     * Kernel module address
+     */
+    String KERNEL_MODULE_URL = "kernelUrl";
+
+    /**
      * --------[db configs] -------
      */
     String DB_SECTION = "db";

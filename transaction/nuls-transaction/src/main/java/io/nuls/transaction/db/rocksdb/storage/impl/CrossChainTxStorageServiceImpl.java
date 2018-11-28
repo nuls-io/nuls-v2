@@ -32,7 +32,7 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
         }
         byte[] txHashBytes = null;
         try {
-            txHashBytes = ctx.getHash().serialize();
+            txHashBytes = ctx.getTx().getHash().serialize();
         } catch (IOException e) {
             Log.error(e);
             return false;

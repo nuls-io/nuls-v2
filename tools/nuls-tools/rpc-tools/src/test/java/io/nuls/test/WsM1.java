@@ -47,13 +47,11 @@ import java.util.Map;
 public class WsM1 {
     @Test
     public void test() throws Exception {
-        Map a = new HashMap();
-        a.put("key", "hello");
-        Map b = a;
-        System.out.println(a == b);
-        System.out.println(a.get("key"));
-        b.remove("key");
-        System.out.println(a.get("key"));
+        String range="[11,100.2]";
+//        System.out.println(range.substring(range.indexOf("(")+1,range.indexOf(",")));
+//        System.out.println(range.substring(range.indexOf(",")+1,range.indexOf("]")));
+        String regex="[(\\[]\\d+,\\d+[)\\]]";
+        System.out.println(range.matches(regex));
     }
 
     @Test
@@ -96,8 +94,8 @@ public class WsM1 {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put(Constants.VERSION_KEY_STR, "2.0");
-        params.put("paramName", "value");
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("aaa", "100");
 
         // Call cmd, get response immediately
         Object object = CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "getHeight", params);

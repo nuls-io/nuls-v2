@@ -44,6 +44,8 @@ public class CoinTo extends BaseNulsData {
      */
     private long lockTime;
 
+    public  CoinTo (){ }
+
     public CoinTo(byte[] address,int assetsChainId,int assetsId,String amount){
         this.address = address;
         this.assetsChainId = assetsChainId;

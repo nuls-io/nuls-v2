@@ -26,6 +26,10 @@
 package io.nuls.rpc.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -34,94 +38,37 @@ import java.util.List;
  * @date 2018/10/15
  * @description
  */
-
+@ToString
+@NoArgsConstructor
 public class CmdDetail {
-
+    @Getter
+    @Setter
     private String methodName;
+    @Getter
+    @Setter
     private String methodDescription;
+    @Getter
+    @Setter
     private String methodMinEvent;
+    @Getter
+    @Setter
     private String methodMinPeriod;
+    @Getter
+    @Setter
     private String methodScope;
+    @Getter
+    @Setter
     private List<CmdParameter> parameters;
+    @Getter
+    @Setter
     @JsonIgnore
     private double version;
+    @Getter
+    @Setter
     @JsonIgnore
     private String invokeClass;
+    @Getter
+    @Setter
     @JsonIgnore
     private String invokeMethod;
-
-    public CmdDetail() {
-    }
-
-    public String getMethodName() {
-        return methodName;
-    }
-
-    public void setMethodName(String methodName) {
-        this.methodName = methodName;
-    }
-
-    public String getMethodDescription() {
-        return methodDescription;
-    }
-
-    public void setMethodDescription(String methodDescription) {
-        this.methodDescription = methodDescription;
-    }
-
-    public String getMethodMinEvent() {
-        return methodMinEvent;
-    }
-
-    public void setMethodMinEvent(String methodMinEvent) {
-        this.methodMinEvent = methodMinEvent;
-    }
-
-    public String getMethodMinPeriod() {
-        return methodMinPeriod;
-    }
-
-    public void setMethodMinPeriod(String methodMinPeriod) {
-        this.methodMinPeriod = methodMinPeriod;
-    }
-
-    public String getMethodScope() {
-        return methodScope;
-    }
-
-    public void setMethodScope(String methodScope) {
-        this.methodScope = methodScope;
-    }
-
-    public List<CmdParameter> getParameters() {
-        return parameters;
-    }
-
-    public void setParameters(List<CmdParameter> parameters) {
-        this.parameters = parameters;
-    }
-
-    public double getVersion() {
-        return version;
-    }
-
-    public void setVersion(double version) {
-        this.version = version;
-    }
-
-    public String getInvokeClass() {
-        return invokeClass;
-    }
-
-    public void setInvokeClass(String invokeClass) {
-        this.invokeClass = invokeClass;
-    }
-
-    public String getInvokeMethod() {
-        return invokeMethod;
-    }
-
-    public void setInvokeMethod(String invokeMethod) {
-        this.invokeMethod = invokeMethod;
-    }
 }

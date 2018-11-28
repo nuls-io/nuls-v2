@@ -60,4 +60,10 @@ public class NulsConfig {
      */
     public static String ACCOUNTKEYSTORE_FOLDER_NAME ="keystore/backup";
 
+    /**
+     * 内核模块地址
+     * Kernel module address
+     */
+    public static String KERNEL_MODULE_URL;
+
 }

@@ -53,10 +53,28 @@ public class WsServer extends WebSocketServer {
         super(new InetSocketAddress(port));
     }
 
+    /**
+     * 连接核心模块（Manager）
+     * Connection Core Module (Manager)
+     */
     public void connect(String kernelUrl) throws Exception {
+        /*
+        启动自身服务，等待一秒是为了确保启动成功
+        Start self service, Waiting for a second is to ensure that the startup is successful
+         */
         this.start();
         Thread.sleep(1000);
+
+        /*
+        设置核心模块（Manager）连接地址
+        Setting the Connection URL of Core Module(Manager)
+         */
         Constants.kernelUrl = kernelUrl;
+
+        /*
+        与核心模块（Manager）握手
+        Shake hands with the core module (Manager)
+         */
         if (!CmdDispatcher.handshakeKernel()) {
             throw new Exception("Handshake kernel failed");
         } else {
@@ -75,8 +93,12 @@ public class WsServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket webSocket, String msg) {
         try {
+            /*
+            收到的所有消息都放入队列，等待其他线程处理
+            All messages received are queued, waiting for other threads to process
+             */
             Log.info("ServerMsgFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
-            ServerRuntime.REQUEST_QUEUE.add(new Object[]{webSocket, msg});
+            ServerRuntime.CLIENT_MESSAGE_QUEUE.add(new Object[]{webSocket, msg});
             ServerRuntime.serverThreadPool.execute(new ServerProcessor());
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,16 +116,16 @@ public class WsServer extends WebSocketServer {
     }
 
     /**
-     * Get a server instance
-     * Using predefined
+     * 根据预定义模块获得一个服务实例
+     * Get a server instance with predefined module
      */
     public static WsServer getInstance(ModuleE moduleE) {
         return getInstance(moduleE.abbr, moduleE.name, moduleE.domain);
     }
 
     /**
-     * Get a server instance
-     * Using Abbreviation & Name
+     * 根据参数获得一个服务实例
+     * Get a server instance with Abbreviation & Name
      */
     public static WsServer getInstance(String abbr, String name, String domain) {
         WsServer wsServer = new WsServer(HostInfo.randomPort());
@@ -123,28 +145,45 @@ public class WsServer extends WebSocketServer {
         return wsServer;
     }
 
+    /**
+     * 设置本模块的依赖角色
+     * Setting Dependent Roles for this Module
+     */
     public WsServer dependencies(String key, String value) {
         ServerRuntime.local.getDependencies().put(key, value);
         return this;
     }
 
+    /**
+     * 设置本模块的角色（角色名默认为模块编号）
+     * Setting up the role of this module(Role name defaults to module code)
+     */
     public WsServer moduleRoles(String[] value) {
         ServerRuntime.local.getModuleRoles().put(ServerRuntime.local.getModuleAbbreviation(), value);
         return this;
     }
 
+    /**
+     * 设置本模块的角色
+     * Setting up the role of this module
+     */
     public WsServer moduleRoles(String key, String[] value) {
         ServerRuntime.local.getModuleRoles().put(key, value);
         return this;
     }
 
+    /**
+     * 设置模块版本
+     * Set module version
+     */
     public WsServer moduleVersion(String moduleVersion) {
         ServerRuntime.local.setModuleVersion(moduleVersion);
         return this;
     }
 
     /**
-     * Scanning the CMD provided by this module
+     * 扫描指定路径，得到所有接口的详细信息
+     * Scan the specified path for details of all interfaces
      */
     public WsServer scanPackage(String scanPackage) throws Exception {
         ServerRuntime.scanPackage(scanPackage);
@@ -152,6 +191,7 @@ public class WsServer extends WebSocketServer {
     }
 
     /**
+     * 模拟核心模块（Manager），测试专用
      * For internal debugging only
      * Simulate a kernel module
      */
@@ -179,6 +219,10 @@ public class WsServer extends WebSocketServer {
         Thread.sleep(Integer.MAX_VALUE);
     }
 
+    /**
+     * 模拟启动模块，单元测试专用
+     * Analog Startup Module, Unit Test Specific
+     */
     public static void mockModule() throws Exception {
         WsServer.getInstance(ModuleE.TEST)
                 .moduleRoles(new String[]{"1.0"})

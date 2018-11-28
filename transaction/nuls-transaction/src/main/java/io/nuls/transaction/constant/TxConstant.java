@@ -4,7 +4,9 @@ package io.nuls.transaction.constant;
  * @author: Charlie
  * @date: 2018/11/12
  */
-public interface TransactionConstant {
+public interface TxConstant {
+
+    String MODULE_CODE = "tx";
 
     /**
      * context path
@@ -43,7 +45,14 @@ public interface TransactionConstant {
 
     int ORPHAN_CONTAINER_MAX_SIZE = 200000;
 
-    int CROSSCHAIN_TRANSFER_TX_TYPE = 23;
+    /**
+     * 跨链交易
+     */
+    int CROSS_TRANSFER_TYPE = 23;
+    String TX_MODULE_VALIDATOR = "txValidator";
+    String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
+    String CROSS_TRANSFER_COMMIT = "crossTxCommit";
+    String CROSS_TRANSFER_ROLLBACK = "crossTxCommit";
 
 
 

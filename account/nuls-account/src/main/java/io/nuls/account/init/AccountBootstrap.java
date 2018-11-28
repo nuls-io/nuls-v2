@@ -3,6 +3,7 @@ package io.nuls.account.init;
 import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountParam;
+import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
@@ -36,6 +37,8 @@ public class AccountBootstrap {
             TimeService.getInstance().start();
             //启动账户模块服务
             initServer();
+            //注册账户交易
+            TransactionCmdCall.register();
         } catch (Exception e) {
             Log.error("Account Bootstrap failed", e);
             System.exit(-1);
@@ -63,6 +66,7 @@ public class AccountBootstrap {
                 if (StringUtils.isNotBlank(keystoreFolder)) {
                     NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = keystoreFolder;
                 }
+                NulsConfig.KERNEL_MODULE_URL = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.KERNEL_MODULE_URL);
             } catch (Exception e) {
                 Log.error(e);
             }
@@ -87,7 +91,7 @@ public class AccountBootstrap {
                     .moduleVersion("1.0")
                     .dependencies(ModuleE.LG.abbr, "1.0")
                     .scanPackage("io.nuls.account.rpc.cmd")
-                    .connect("ws://127.0.0.1:8887");
+                    .connect(NulsConfig.KERNEL_MODULE_URL);
 
             // Get information from kernel
             CmdDispatcher.syncKernel();

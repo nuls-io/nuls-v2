@@ -801,8 +801,8 @@ public class AccountCmd extends BaseCmd {
             Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
             Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
             Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
-            Object digestHexObj = params == null ? null : params.get(RpcParameterNameConstant.DIGEST_HEX);
-            if (params == null || chainIdObj == null || addressObj == null || digestHexObj == null) {
+            Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
+            if (params == null || chainIdObj == null || addressObj == null || dataHexObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
 
@@ -813,12 +813,12 @@ public class AccountCmd extends BaseCmd {
             String address = (String) addressObj;
             //账户密码
             String password = (String) passwordObj;
-            //数据摘要
-            String digestHex = (String) digestHexObj;
+            //待签名的数据
+            String dataHex = (String) dataHexObj;
             //数据解码为字节数组
-            byte[] digest = HexUtil.decode(digestHex);
+            byte[] data = HexUtil.decode(dataHex);
             //sign digest data
-            byte[] signBytes = accountService.signDigest(digest, chainId, address, password);
+            byte[] signBytes = accountService.signDigest(data, chainId, address, password);
             if (null == signBytes || signBytes.length == 0) {
                 throw new NulsRuntimeException(AccountErrorCode.SIGNATURE_ERROR);
             }

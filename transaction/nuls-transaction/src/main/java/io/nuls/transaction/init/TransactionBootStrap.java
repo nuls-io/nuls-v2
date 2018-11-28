@@ -7,7 +7,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.TimeService;
-import io.nuls.transaction.constant.TransactionConstant;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 
 import java.lang.reflect.Field;
@@ -38,7 +38,7 @@ public class TransactionBootStrap {
             //初始化数据库配置文件
             initDB();
             //初始化上下文
-            SpringLiteContext.init(TransactionConstant.CONTEXT_PATH);
+            SpringLiteContext.init(TxConstant.CONTEXT_PATH);
             //初始化国际资源文件语言
             initLanguage();
             //加载本地配置参数,并启动本地服务
@@ -55,8 +55,8 @@ public class TransactionBootStrap {
      * */
     public static void initSys(){
         try {
-            System.setProperty(TransactionConstant.SYS_ALLOW_NULL_ARRAY_ELEMENT, "true");
-            System.setProperty(TransactionConstant.SYS_FILE_ENCODING, UTF_8.name());
+            System.setProperty(TxConstant.SYS_ALLOW_NULL_ARRAY_ELEMENT, "true");
+            System.setProperty(TxConstant.SYS_FILE_ENCODING, UTF_8.name());
             Field charset = Charset.class.getDeclaredField("defaultCharset");
             charset.setAccessible(true);
             charset.set(null, UTF_8);
@@ -87,8 +87,8 @@ public class TransactionBootStrap {
      * */
     public static void initDB(){
         try {
-            Properties properties = ConfigLoader.loadProperties(TransactionConstant.DB_CONFIG_NAME);
-            String path = properties.getProperty(TransactionConstant.DB_DATA_PATH, TransactionConstant.DB_DATA_DEFAULT_PATH);
+            Properties properties = ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
+            String path = properties.getProperty(TxConstant.DB_DATA_PATH, TxConstant.DB_DATA_DEFAULT_PATH);
             RocksDBService.init(path);
         }catch (Exception e){
             Log.error(e);
@@ -100,9 +100,9 @@ public class TransactionBootStrap {
      * */
     public static void initServer(){
         try {
-            WsServer s = new WsServer(TransactionConstant.TX_CMD_PORT);
-           /* s.init(TransactionConstant.TX_MODULE_NAME, null, TransactionConstant.TX_CMD_PATH);
-            s.startAndSyncKernel(TransactionConstant.KERNEL_URL);*/
+            WsServer s = new WsServer(TxConstant.TX_CMD_PORT);
+           /* s.init(TxConstant.TX_MODULE_NAME, null, TxConstant.TX_CMD_PATH);
+            s.startAndSyncKernel(TxConstant.KERNEL_URL);*/
         }catch (Exception e){
             Log.error("Transaction startup webSocket server error!");
             e.printStackTrace();

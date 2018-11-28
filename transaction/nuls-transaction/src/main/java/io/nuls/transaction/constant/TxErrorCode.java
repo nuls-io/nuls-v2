@@ -6,7 +6,7 @@ import io.nuls.tools.constant.ErrorCode;
  * @author: Charlie
  * @date: 2018/11/12
  */
-public interface TransactionErrorCode {
+public interface TxErrorCode {
 
     ErrorCode SUCCESS = ErrorCode.init("10000");
     ErrorCode FAILED = ErrorCode.init("10001");

@@ -77,12 +77,12 @@ public class AssetCmdTest {
 
     private Asset build() {
         Asset asset = new Asset();
-        asset.setChainId((short) 867);
-        asset.setAssetId(TimeService.currentTimeMillis());
+        asset.setChainId(867);
+        asset.setAssetId(3);
         asset.setSymbol("HH");
         asset.setName("HHHHHH");
         asset.setDepositNuls(200000);
-        asset.setInitNumber(11111111);
+        asset.setInitNumber("95565");
         asset.setDecimalPlaces((short) 8);
         asset.setAvailable(true);
         asset.setCreateTime(TimeService.currentTimeMillis());
@@ -93,11 +93,11 @@ public class AssetCmdTest {
     public void assetRegCommit() throws Exception {
         Asset asset = new Asset();
         asset.setChainId((short) 867);
-        asset.setAssetId(1542092573248L);
+        asset.setAssetId(23);
         asset.setSymbol("B");
         asset.setName("bts");
         asset.setDepositNuls(200000);
-        asset.setInitNumber(147258369);
+        asset.setInitNumber("32232");
         asset.setDecimalPlaces((short) 8);
         asset.setAvailable(true);
         asset.setCreateTime(TimeService.currentTimeMillis());

@@ -77,26 +77,5 @@ public class CmConstants {
     public static final String CMD_NW_DELETE_NODEGROUP = "nw_delNodeGroup";
 
 
-    /**
-     * 错误编码
-     */
-    public static final String ERROR_ASSET_SYMBOL_NULL = "A10000";
-    public static final String ERROR_ASSET_SYMBOL_MAX = "A10001";
-    public static final String ERROR_ASSET_SYMBOL_EXIST = "A10002";
-    public static final String ERROR_JSON_TO_ASSET = "A10003";
-    public static final String ERROR_ASSET_RECOVERY_RATE = "A10004";
-    public static final String ERROR_ASSET_ID_EXIST = "A10005";
-    public static final String ERROR_ASSET_NAME_NULL = "A10006";
-    public static final String ERROR_ASSET_NAME_MAX = "A10007";
-    public static final String ERROR_ASSET_DEPOSITNULS = "A10008";
-    public static final String ERROR_ASSET_INITNUMBER_MIN = "A10009";
-    public static final String ERROR_ASSET_INITNUMBER_MAX = "A10010";
-    public static final String ERROR_ASSET_DECIMALPLACES_MIN = "A10011";
-    public static final String ERROR_ASSET_DECIMALPLACES_MAX = "A10012";
-    public static final String ERROR_CHAIN_ASSET_NOT_MATCH = "A10013";
-    public static final String ERROR_ASSET_NOT_EXIST = "A10014";
-    public static final String ERROR_ASSET_EXCEED_INIT = "A10015";
 
-
-    public static final String ERROR_TX_REG_RPC = "A10026";
 }

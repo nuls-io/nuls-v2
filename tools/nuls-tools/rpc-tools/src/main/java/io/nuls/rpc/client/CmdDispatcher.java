@@ -2,7 +2,6 @@ package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.*;
-import io.nuls.rpc.server.CmdHandler;
 import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -22,12 +21,12 @@ import java.util.Map;
 public class CmdDispatcher {
 
     /**
-     * Handshake with kernel
+     * 与核心模块（Manager）握手
+     * Shake hands with the core module (Manager)
      */
     public static boolean handshakeKernel() throws Exception {
-        String messageId = Constants.nextSequence();
-        Message message = CmdHandler.basicMessage(messageId, MessageType.NegotiateConnection);
-        message.setMessageData(CmdHandler.defaultNegotiateConnection());
+        Message message = Constants.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnection);
+        message.setMessageData(Constants.defaultNegotiateConnection());
 
         WsClient wsClient = ClientRuntime.getWsClient(Constants.kernelUrl);
         if (wsClient == null) {
@@ -36,16 +35,24 @@ public class CmdDispatcher {
         Log.info("NegotiateConnection:" + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
+        /*
+        是否收到正确的握手确认
+        Whether received the correct handshake confirmation?
+         */
         return getNegotiateConnectionResponse();
     }
 
     /**
-     * 1. send local module information to kernel
-     * 2. receive all the modules' interfaces from kernel
+     * 同步本地模块与核心模块（Manager）
+     * 1. 发送本地信息给Manager
+     * 2. 获取本地所依赖的角色的连接信息
+     * Synchronize Local Module and Core Module (Manager)
+     * 1. Send local information to Manager
+     * 2. Get connection information for locally dependent roles
      */
     public static void syncKernel() throws Exception {
         String messageId = Constants.nextSequence();
-        Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
+        Message message = Constants.basicMessage(messageId, MessageType.Request);
         Request request = ClientRuntime.defaultRequest();
         request.getRequestMethods().put("registerAPI", ServerRuntime.local);
         message.setMessageData(request);
@@ -68,9 +75,8 @@ public class CmdDispatcher {
 
 
     /**
-     * 1. Send request
-     * 2. Get messageId
-     * 3. Obtain Response Based on MessageId
+     * 发送Request，并等待Response，如果等待超过1分钟，则抛出超时异常
+     * Send Request and wait for Response, and throw a timeout exception if the waiting time more than one minute
      */
     public static Response requestAndResponse(String role, String cmd, Map params) throws Exception {
         String messageId = request(role, cmd, params, Constants.booleanString(false), "0");
@@ -78,12 +84,10 @@ public class CmdDispatcher {
     }
 
     /**
-     * 1. Send request
-     * 2. Get messageId
-     * 3. Put the messageId to INVOKE_MAP
-     * End. The requester can handle other things
-     * A separate thread listens for new messages.
-     * Messages are automatically sent to the correct method
+     * 发送Request，并根据返回结果自动调用本地方法
+     * 返回值为messageId，用以取消订阅
+     * Send the Request and automatically call the local method based on the return result
+     * The return value is messageId, used to unsubscribe
      */
     public static String requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
         if (Integer.parseInt(subscriptionPeriod) <= 0) {
@@ -95,8 +99,8 @@ public class CmdDispatcher {
     }
 
     /**
-     * The same as requestAndInvoke
-     * The difference is that messageId will be returned only when Ack is true .
+     * 与requestAndInvoke类似，但是发送之后必须接收到一个Ack作为确认
+     * Similar to requestAndInvoke, but after sending, an Ack must be received as an acknowledgement
      */
     public static String requestAndInvokeWithAck(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
         String messageId = request(role, cmd, params, Constants.booleanString(true), subscriptionPeriod);
@@ -105,32 +109,35 @@ public class CmdDispatcher {
     }
 
     /**
-     * call cmd.
-     * 1. Find the corresponding module according to cmd
-     * 2. Send to the specified module
-     * 3. Get the result returned to the caller
-     * 4. Get the highest version of cmd
-     *
-     * @return Message ID
+     * 发送Request
+     * Send Request
      */
     private static String request(String role, String cmd, Map params, String ack, String subscriptionPeriod) throws Exception {
         String messageId = Constants.nextSequence();
-        Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
+        Message message = Constants.basicMessage(messageId, MessageType.Request);
         Request request = ClientRuntime.defaultRequest();
         request.setRequestAck(ack);
         request.setSubscriptionPeriod(subscriptionPeriod);
         request.getRequestMethods().put(cmd, params);
         message.setMessageData(request);
 
-        String uri = ClientRuntime.getRemoteUri(role);
-        if (uri == null) {
+        /*
+        从roleMap获取命令需发送到的地址
+        Get the url from roleMap which the command needs to be sent to
+         */
+        String url = ClientRuntime.getRemoteUri(role);
+        if (url == null) {
             return "-1";
         }
-        WsClient wsClient = ClientRuntime.getWsClient(uri);
+        WsClient wsClient = ClientRuntime.getWsClient(url);
         Log.info("SendRequest to " + wsClient.getRemoteSocketAddress().getHostString() + ":" + wsClient.getRemoteSocketAddress().getPort() + "->" + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
         if (Integer.parseInt(subscriptionPeriod) > 0) {
+            /*
+            如果是需要重复发送的消息（订阅消息），记录messageId与客户端的对应关系，用于取消订阅
+            If it is a message (subscription message) that needs to be sent repeatedly, record the relationship between the messageId and the WsClient
+             */
             ClientRuntime.msgIdKeyWsClientMap.put(messageId, wsClient);
         }
 
@@ -139,17 +146,19 @@ public class CmdDispatcher {
 
 
     /**
-     * Method of Unsubscribe
-     * A call that responds only once does not need to be cancelled
-     *
-     * @param messageId Request message ID
+     * 取消订阅
+     * Unsubscribe
      */
     public static void unsubscribe(String messageId) throws Exception {
-        Message message = CmdHandler.basicMessage(Constants.nextSequence(), MessageType.Unsubscribe);
+        Message message = Constants.basicMessage(Constants.nextSequence(), MessageType.Unsubscribe);
         Unsubscribe unsubscribe = new Unsubscribe();
         unsubscribe.setUnsubscribeMethods(new String[]{messageId});
         message.setMessageData(unsubscribe);
 
+        /*
+        根据messageId获取WsClient，发送取消订阅命令，然后移除本地信息
+        Get the WsClient according to messageId, send the unsubscribe command, and then remove the local information
+         */
         WsClient wsClient = ClientRuntime.msgIdKeyWsClientMap.get(messageId);
         if (wsClient != null) {
             wsClient.send(JSONUtils.obj2json(message));
@@ -158,31 +167,31 @@ public class CmdDispatcher {
     }
 
     /**
-     * Get response by messageId
+     * 是否握手成功
+     * Whether shake hands successfully?
      */
     private static boolean getNegotiateConnectionResponse() throws InterruptedException, IOException {
 
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
             /*
-            Get the first item of the queue
-            If it is an empty object, discard
+            获取队列中的第一个对象，如果是空，舍弃
+            Get the first item of the queue, If it is an empty object, discard
              */
-            Map map = ClientRuntime.firstItemInServerResponseQueue();
-            if (map == null) {
+            Message message = ClientRuntime.firstItemInServerMessageQueue();
+            if (message == null) {
                 continue;
             }
 
             /*
-            Message type should be "NegotiateConnectionResponse"
-            If not NegotiateConnectionResponse, add back to the queue and wait for other threads to process
+            消息类型应该是NegotiateConnectionResponse，如果不是，放回队列等待其他线程处理
+            Message type should be "NegotiateConnectionResponse". If not, add back to the queue and wait for other threads to process
              */
-            Message message = JSONUtils.map2pojo(map, Message.class);
             if (MessageType.NegotiateConnectionResponse.name().equals(message.getMessageType())) {
                 Log.info("NegotiateConnectionResponse:" + JSONUtils.obj2json(message));
                 return true;
             } else {
-                ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
+                ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
             }
 
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
@@ -195,6 +204,7 @@ public class CmdDispatcher {
     }
 
     /**
+     * 根据messageId获取Response
      * Get response by messageId
      */
     private static Response getResponse(String messageId) throws InterruptedException, IOException {
@@ -205,36 +215,37 @@ public class CmdDispatcher {
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
             /*
-            Get the first item of the queue
-            If it is an empty object, discard
+            获取队列中的第一个对象，如果是空，舍弃
+            Get the first item of the queue, If it is an empty object, discard
              */
-            Map map = ClientRuntime.firstItemInServerResponseQueue();
-            if (map == null) {
+            Message message = ClientRuntime.firstItemInServerMessageQueue();
+            if (message == null) {
                 continue;
             }
 
             /*
-            Message type should be "Response"
-            If not Response, add back to the queue and wait for other threads to process
+            消息类型应该是Response，如果不是，放回队列等待其他线程处理
+            Message type should be "Response". If not, add back to the queue and wait for other threads to process
              */
-            Message message = JSONUtils.map2pojo(map, Message.class);
             if (!MessageType.Response.name().equals(message.getMessageType())) {
-                ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
+                ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
                 continue;
             }
 
             Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
             if (response.getRequestId().equals(messageId)) {
                 /*
+                messageId匹配，说明就是需要的结果，返回
                 If messageId is the same, then the response is needed
                  */
                 Log.info("Response:" + JSONUtils.obj2json(message));
                 return response;
             } else {
                 /*
+                messageId不匹配，放回队列等待其他线程处理
                 Add back to the queue and wait for other threads to process
                  */
-                ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
+                ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
             }
 
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
@@ -247,7 +258,8 @@ public class CmdDispatcher {
     }
 
     /**
-     * Get ack by messageId
+     * 获取收到Request的确认
+     * Get confirmation of receipt(Ack) of Request
      */
     private static boolean getAck(String messageId) throws InterruptedException, IOException {
         if (Integer.parseInt(messageId) < 0) {
@@ -257,36 +269,37 @@ public class CmdDispatcher {
         long timeMillis = TimeService.currentTimeMillis();
         while (TimeService.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
             /*
-            Get the first item of the queue
-            If it is an empty object, discard
+            获取队列中的第一个对象，如果是空，舍弃
+            Get the first item of the queue, If it is an empty object, discard
              */
-            Map map = ClientRuntime.firstItemInServerResponseQueue();
-            if (map == null) {
+            Message message = ClientRuntime.firstItemInServerMessageQueue();
+            if (message == null) {
                 continue;
             }
 
             /*
-            Message type should be "Ack"
-            If not Ack, add back to the queue and wait for other threads to process
+            消息类型应该是Ack，如果不是，放回队列等待其他线程处理
+            Message type should be "Ack". If not, add back to the queue and wait for other threads to process
              */
-            Message message = JSONUtils.map2pojo(map, Message.class);
             if (!MessageType.Ack.name().equals(message.getMessageType())) {
-                ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
+                ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
                 continue;
             }
 
             Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
             if (ack.getRequestId().equals(messageId)) {
                 /*
+                messageId匹配，说明就是需要的结果，返回
                 If messageId is the same, then the ack is needed
                  */
                 Log.info("Ack:" + JSONUtils.obj2json(ack));
                 return true;
             } else {
                 /*
+                messageId不匹配，放回队列等待其他线程处理
                 Add back to the queue and wait for other threads to process
                  */
-                ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
+                ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
             }
 
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
