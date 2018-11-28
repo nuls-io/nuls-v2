@@ -145,7 +145,7 @@ public class ChainTxCmd extends BaseCmd {
             }
             Chain dbChain = chainService.getChain(chain.getChainId());
             /*获取链下剩余的资产*/
-            List<int> assetIds = dbChain.getAssetIds();
+            List<Integer> assetIds = dbChain.getAssetIds();
             if(assetIds.size()> 0){
                 return failed(CmErrorCode.ERROR_CHAIN_ASSET_MUTI);
             }
