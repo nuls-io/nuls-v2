@@ -1,45 +1,28 @@
 package io.nuls.rpc.model.message;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * @author tangyi
  * @date 2018/11/15
  * @description
  */
+@ToString
+@NoArgsConstructor
 public class Notification {
+    @Getter
+    @Setter
     private String notificationAck;
+    @Getter
+    @Setter
     private String notificationType;
+    @Getter
+    @Setter
     private String notificationComment;
+    @Getter
+    @Setter
     private String notificationData;
-
-    public String getNotificationAck() {
-        return notificationAck;
-    }
-
-    public void setNotificationAck(String notificationAck) {
-        this.notificationAck = notificationAck;
-    }
-
-    public String getNotificationType() {
-        return notificationType;
-    }
-
-    public void setNotificationType(String notificationType) {
-        this.notificationType = notificationType;
-    }
-
-    public String getNotificationComment() {
-        return notificationComment;
-    }
-
-    public void setNotificationComment(String notificationComment) {
-        this.notificationComment = notificationComment;
-    }
-
-    public String getNotificationData() {
-        return notificationData;
-    }
-
-    public void setNotificationData(String notificationData) {
-        this.notificationData = notificationData;
-    }
 }

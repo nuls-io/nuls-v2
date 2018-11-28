@@ -1,27 +1,22 @@
 package io.nuls.rpc.model.message;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * @author tangyi
  * @date 2018/11/15
  * @description
  */
+@ToString
+@NoArgsConstructor
 public class NegotiateConnectionResponse {
+    @Getter
+    @Setter
     private String negotiationStatus;
+    @Getter
+    @Setter
     private String negotiationComment;
-
-    public String getNegotiationStatus() {
-        return negotiationStatus;
-    }
-
-    public void setNegotiationStatus(String negotiationStatus) {
-        this.negotiationStatus = negotiationStatus;
-    }
-
-    public String getNegotiationComment() {
-        return negotiationComment;
-    }
-
-    public void setNegotiationComment(String negotiationComment) {
-        this.negotiationComment = negotiationComment;
-    }
 }

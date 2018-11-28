@@ -27,46 +27,26 @@
 
 package io.nuls.rpc.model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * @author tangyi
  * @date 2018/10/29
  * @description
  */
+@ToString
+@NoArgsConstructor
 public class ConfigItem {
+    @Getter
+    @Setter
     private String key;
+    @Getter
+    @Setter
     private Object value;
+    @Getter
+    @Setter
     private boolean readOnly;
-
-    public ConfigItem() {
-    }
-
-    public ConfigItem(String key, Object value, boolean readOnly) {
-        this.key = key;
-        this.value = value;
-        this.readOnly = readOnly;
-    }
-
-    public String getKey() {
-        return key;
-    }
-
-    public void setKey(String key) {
-        this.key = key;
-    }
-
-    public Object getValue() {
-        return value;
-    }
-
-    public void setValue(Object value) {
-        this.value = value;
-    }
-
-    public boolean isReadOnly() {
-        return readOnly;
-    }
-
-    public void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
-    }
 }

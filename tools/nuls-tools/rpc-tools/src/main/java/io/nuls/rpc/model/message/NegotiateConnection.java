@@ -1,39 +1,25 @@
 package io.nuls.rpc.model.message;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * @author tangyi
  * @date 2018/11/15
  * @description
  */
+@ToString
+@NoArgsConstructor
 public class NegotiateConnection {
+    @Getter
+    @Setter
     private String protocolVersion;
+    @Getter
+    @Setter
     private String compressionAlgorithm;
+    @Getter
+    @Setter
     private String compressionRate;
-
-    public NegotiateConnection() {
-    }
-
-    public String getProtocolVersion() {
-        return protocolVersion;
-    }
-
-    public void setProtocolVersion(String protocolVersion) {
-        this.protocolVersion = protocolVersion;
-    }
-
-    public String getCompressionAlgorithm() {
-        return compressionAlgorithm;
-    }
-
-    public void setCompressionAlgorithm(String compressionAlgorithm) {
-        this.compressionAlgorithm = compressionAlgorithm;
-    }
-
-    public String getCompressionRate() {
-        return compressionRate;
-    }
-
-    public void setCompressionRate(String compressionRate) {
-        this.compressionRate = compressionRate;
-    }
 }
