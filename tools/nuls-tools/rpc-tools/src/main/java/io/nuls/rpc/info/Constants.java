@@ -53,21 +53,15 @@ public class Constants {
     private static final String BOOLEAN_TRUE = "1";
     private static final String BOOLEAN_FALSE = "0";
 
+    public static final int INVOKE_EXECUTE_KEEP = 1;
+    public static final int INVOKE_EXECUTE_REMOVE = 2;
+    public static final int INVOKE_SKIP_KEEP = 3;
+    public static final int INVOKE_SKIP_REMOVE = 4;
+
+
     public static final String KEY_IP = "IP";
     public static final String KEY_PORT = "Port";
     public static final String KEY_API_VERSION = "APIVersion";
-
-    /**
-     * Message type
-     */
-    public static final String NEGOTIATE_CONNECTION = "NegotiateConnection";
-    public static final String NEGOTIATE_CONNECTION_RESPONSE = "NegotiateConnectionResponse";
-    public static final String REQUEST = "Request";
-    public static final String UNSUBSCRIBE = "Unsubscribe";
-    public static final String RESPONSE = "Response";
-    public static final String ACK = "Ack";
-    public static final String REGISTER_COMPOUND_METHOD = "RegisterCompoundMethod";
-    public static final String UNREGISTER_COMPOUND_METHOD = "UnregisterCompoundMethod";
 
     /**
      * Request type
@@ -83,26 +77,11 @@ public class Constants {
     public static final String RESPONSE_TIMEOUT = "Response timeout";
     public static final String CMD_NOT_FOUND = "Cmd not found";
     public static final String CMD_DUPLICATE = "Duplicate cmd found";
-    public static final String RANGE_REGEX="[(\\[]\\d+,\\d+[)\\]]";
+    public static final String RANGE_REGEX = "[(\\[]\\d+,\\d+[)\\]]";
     public static final String PARAM_WRONG_RANGE = "Param wrong range";
     public static final String PARAM_WRONG_FORMAT = "Param wrong format";
     public static final String PARAM_NULL = "Param null";
 
-    /**
-     * predetermined cmd (used by kernel & module)
-     */
-    public static final String STATUS = "status";
-    public static final String SHUTDOWN = "shutdown";
-    public static final String TERMINATE = "terminate";
-    public static final String CONF_GET = "conf_get";
-    public static final String CONF_SET = "conf_set";
-    public static final String CONF_RESET = "conf_reset";
-
-    /**
-     * RESPONSE_CODE
-     */
-    public static final String SUCCESS_CODE = "0";
-    public static final String FAILED_CODE = "-1";
 
     /**
      * cmd sequence

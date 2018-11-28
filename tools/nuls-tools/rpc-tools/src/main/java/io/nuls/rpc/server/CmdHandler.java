@@ -109,46 +109,43 @@ public class CmdHandler {
     }
 
     /**
-     * For Response
+     * @return After current processing, do need to keep the Request information and wait for the next processing?
+     * True: keep, False: remove
      */
-    public static boolean response(WebSocket webSocket, Message message) throws Exception {
+    public static boolean response(WebSocket webSocket, Message message) {
+        /*
+        Get Request from message
+         */
         String messageId = message.getMessageId();
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-        Map requestMethods = request.getRequestMethods();
 
-        boolean addBack = false;
-        int subscriptionPeriod = Integer.parseInt(request.getSubscriptionPeriod());
-
-        /*
-        subscriptionPeriod > 0, means send response every time.
-        subscriptionPeriod <= 0, means send response only once.
-         */
         String key = webSocket.toString() + messageId;
-        if (subscriptionPeriod > 0) {
-            addBack = true;
-
-            if (!ServerRuntime.cmdInvokeTime.containsKey(key)) {
-                ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
-            } else {
-                /*
-                If the value is unsubscribed magic parameter, returns immediately without execution
-                Return false
-                 */
-                if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
-                    ServerRuntime.cmdInvokeTime.remove(key);
-                    Log.info("Remove: " + key);
-                    return false;
-                }
-
-                /*
-                If the execution interval is not yet reached, returns immediately without execution
-                 */
-                if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
+        int nextProcess = nextProcess(key, Integer.parseInt(request.getSubscriptionPeriod()));
+        try {
+            switch (nextProcess) {
+                case Constants.INVOKE_EXECUTE_KEEP:
+                    execute(webSocket, request.getRequestMethods(), messageId);
+                    ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
                     return true;
-                }
+                case Constants.INVOKE_EXECUTE_REMOVE:
+                    execute(webSocket, request.getRequestMethods(), messageId);
+                    ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
+                    return false;
+                case Constants.INVOKE_SKIP_KEEP:
+                    return true;
+                case Constants.INVOKE_SKIP_REMOVE:
+                    return false;
+                default:
+                    return false;
             }
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
         }
+    }
 
+    private static void execute(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
+//        Map requestMethods = request.getRequestMethods();
         for (Object method : requestMethods.keySet()) {
             /*
             Execute at once
@@ -160,107 +157,182 @@ public class CmdHandler {
                     : ServerRuntime.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
             Message rspMessage = basicMessage(Constants.nextSequence(), MessageType.Response);
+            Response response = ServerRuntime.newResponse(messageId, "", "");
+            response.setRequestId(messageId);
+            response.setResponseStatus(Constants.booleanString(false));
 
-            // 判断参数是否正确
-            List<CmdParameter> cmdParameterList = cmdDetail.getParameters();
-            for (CmdParameter cmdParameter : cmdParameterList) {
-                if (!StringUtils.isNull(cmdParameter.getParameterValidRange())) {
-                    if (params == null || params.get(cmdParameter.getParameterName()) == null) {
-                        Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_NULL + ":" + cmdParameter.getParameterName());
-                        response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-                        rspMessage.setMessageData(response);
-                        System.out.println("你参数空了：" + JSONUtils.obj2json(rspMessage));
-                        webSocket.send(JSONUtils.obj2json(rspMessage));
-                        return false;
-                    }
-                    if (cmdParameter.getParameterValidRange().matches(Constants.RANGE_REGEX)) {
-                        String range = cmdParameter.getParameterValidRange();
-                        int start;
-                        int end;
-                        if (range.contains("(")) {
-                            start = Integer.parseInt(range.substring(range.indexOf("(") + 1, range.indexOf(","))) + 1;
-                        } else {
-                            start = Integer.parseInt(range.substring(range.indexOf("[") + 1, range.indexOf(",")));
-                        }
-                        if (range.contains(")")) {
-                            end = Integer.parseInt(range.substring(range.indexOf(",") + 1, range.indexOf(")"))) + 1;
-                        } else {
-                            end = Integer.parseInt(range.substring(range.indexOf(",") + 1, range.indexOf("]")));
-                        }
-                        int value = Integer.parseInt(params.get(cmdParameter.getParameterName()).toString());
-                        if (start > value || value > end) {
-                            Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_WRONG_RANGE + ":" + cmdParameter.getParameterName());
-                            response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-                            rspMessage.setMessageData(response);
-                            System.out.println("你Range错了：" + JSONUtils.obj2json(rspMessage));
-                            webSocket.send(JSONUtils.obj2json(rspMessage));
-                            return false;
-                        }
-                    } else {
-                        Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_NULL + ":" + cmdParameter.getParameterName());
-                        response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-                        rspMessage.setMessageData(response);
-                        System.out.println("你Range错了：" + JSONUtils.obj2json(rspMessage));
-                        webSocket.send(JSONUtils.obj2json(rspMessage));
-                        return false;
-                    }
-
-                    //if
-                }
-                if (!StringUtils.isNull(cmdParameter.getParameterValidRegExp())) {
-                    try {
-                        if (params == null || params.get(cmdParameter.getParameterName()) == null) {
-                            Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_NULL + ":" + cmdParameter.getParameterName());
-                            response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-                            rspMessage.setMessageData(response);
-                            System.out.println("你参数空了：" + JSONUtils.obj2json(rspMessage));
-                            webSocket.send(JSONUtils.obj2json(rspMessage));
-                            return false;
-                        }
-                        String value = params.get(cmdParameter.getParameterName()).toString();
-                        if (!value.matches(cmdParameter.getParameterValidRegExp())) {
-                            Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_WRONG_FORMAT + ":" + cmdParameter.getParameterName());
-                            response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-                            rspMessage.setMessageData(response);
-                            System.out.println("你Format错了：" + JSONUtils.obj2json(rspMessage));
-                            webSocket.send(JSONUtils.obj2json(rspMessage));
-                            return false;
-                        }
-                    } catch (Exception e) {
-                        Log.error(e);
-                        Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), e.getMessage());
-                        response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-                        rspMessage.setMessageData(response);
-                        webSocket.send(JSONUtils.obj2json(rspMessage));
-                        return false;
-                    }
-                }
+            if (cmdDetail == null) {
+                response.setResponseComment(Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""));
+                response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+                rspMessage.setMessageData(response);
+                webSocket.send(JSONUtils.obj2json(rspMessage));
+                return;
             }
 
-            Response response = cmdDetail == null
-                    ? ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""))
-                    : invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
+            String validationString = paramsValidation(cmdDetail, params);
+            if (validationString != null) {
+                response.setResponseComment(validationString);
+                response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+                rspMessage.setMessageData(response);
+                webSocket.send(JSONUtils.obj2json(rspMessage));
+                return;
+            }
+
+            response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
+            response.setRequestId(messageId);
             // 在结果外面自动封装方法名
             Map<String, Object> responseData = new HashMap<>(1);
             responseData.put(method.toString(), response.getResponseData());
             response.setResponseData(responseData);
             response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-            response.setRequestId(messageId);
-
-
             rspMessage.setMessageData(response);
             Log.info("webSocket.send: " + JSONUtils.obj2json(rspMessage));
-            try {
-                webSocket.send(JSONUtils.obj2json(rspMessage));
-                ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
-            } catch (Exception e) {
-                Log.error("Socket disconnect, remove!");
-                addBack = false;
-            }
+
+            webSocket.send(JSONUtils.obj2json(rspMessage));
+        }
+    }
+
+    /**
+     * Judging the Logic of Processing
+     * 1: Process only once, then discarding
+     * 2:
+     */
+    private static int nextProcess(String key, int subscriptionPeriod) {
+        if (subscriptionPeriod <= 0) {
+            /*
+            Execute
+             */
+            return Constants.INVOKE_EXECUTE_REMOVE;
         }
 
-        return addBack;
+        if (!ServerRuntime.cmdInvokeTime.containsKey(key)) {
+            /*
+            If the key doesn't in map, Set the current time to invoke time
+            Then execute at once
+             */
+            ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
+            return Constants.INVOKE_EXECUTE_KEEP;
+        } else if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
+            /*
+            If the value is UNSUBSCRIBE_TIMEMILLIS, remove immediately without execution
+             */
+            ServerRuntime.cmdInvokeTime.remove(key);
+            Log.info("Remove: " + key);
+            return Constants.INVOKE_SKIP_REMOVE;
+        } else if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
+            /*
+            If the execution interval is not yet reached, skip this time without execution
+             */
+            return Constants.INVOKE_SKIP_KEEP;
+        } else {
+            /*
+            Execute
+             */
+            return Constants.INVOKE_EXECUTE_KEEP;
+        }
     }
+
+    private static String paramsValidation(CmdDetail cmdDetail, Map params) {
+        // 判断参数是否正确
+        List<CmdParameter> cmdParameterList = cmdDetail.getParameters();
+        for (CmdParameter cmdParameter : cmdParameterList) {
+
+            /*
+            If the parameter format is specified, but the incoming parameter is empty, an error message is returned.
+             */
+            if (!StringUtils.isNull(cmdParameter.getParameterValidRange()) || !StringUtils.isNull(cmdParameter.getParameterValidRegExp())) {
+                if (params == null || params.get(cmdParameter.getParameterName()) == null) {
+                    return Constants.PARAM_NULL + ":" + cmdParameter.getParameterName();
+//                    Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_NULL + ":" + cmdParameter.getParameterName());
+//                    response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+//                    rspMessage.setMessageData(response);
+//                    System.out.println("你参数空了：" + JSONUtils.obj2json(rspMessage));
+//                    webSocket.send(JSONUtils.obj2json(rspMessage));
+//                    return false;
+                }
+            }
+
+            if (!paramsRangeValidation(cmdParameter, params)) {
+                return Constants.PARAM_WRONG_RANGE + ":" + cmdParameter.getParameterName();
+            }
+
+            if (!paramsRegexValidation(cmdParameter, params)) {
+                return Constants.PARAM_WRONG_FORMAT + ":" + cmdParameter.getParameterName();
+            }
+
+        }
+
+        return null;
+    }
+
+    /**
+     * Verify that the range is correct
+     * Note:
+     * If no range is set, skipped directly.
+     * If the format in the Annotation is incorrect, skipped directly.
+     */
+    private static boolean paramsRangeValidation(CmdParameter cmdParameter, Map params) {
+        if (StringUtils.isNull(cmdParameter.getParameterValidRange())) {
+            return true;
+        }
+        if (!cmdParameter.getParameterValidRange().matches(Constants.RANGE_REGEX)) {
+            return true;
+        }
+        if (params == null || params.get(cmdParameter.getParameterName()) == null) {
+            return false;
+        }
+
+        String range = cmdParameter.getParameterValidRange();
+        int start = range.startsWith("(")
+                ? Integer.parseInt(range.substring(range.indexOf("(") + 1, range.indexOf(","))) + 1
+                : Integer.parseInt(range.substring(range.indexOf("[") + 1, range.indexOf(",")));
+        int end = range.endsWith(")")
+                ? Integer.parseInt(range.substring(range.indexOf(",") + 1, range.indexOf(")"))) + 1
+                : Integer.parseInt(range.substring(range.indexOf(",") + 1, range.indexOf("]")));
+        int value = Integer.parseInt(params.get(cmdParameter.getParameterName()).toString());
+
+        return start <= value && value <= end;
+    }
+
+    private static boolean paramsRegexValidation(CmdParameter cmdParameter, Map params) {
+        if (StringUtils.isNull(cmdParameter.getParameterValidRegExp())) {
+            return true;
+        }
+        if (params == null || params.get(cmdParameter.getParameterName()) == null) {
+            return false;
+        }
+
+//            try {
+//                if (params == null || params.get(cmdParameter.getParameterName()) == null) {
+//                    Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_NULL + ":" + cmdParameter.getParameterName());
+//                    response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+//                    rspMessage.setMessageData(response);
+//                    System.out.println("你参数空了：" + JSONUtils.obj2json(rspMessage));
+//                    webSocket.send(JSONUtils.obj2json(rspMessage));
+//                    return false;
+//                }
+        String value = params.get(cmdParameter.getParameterName()).toString();
+        return value.matches(cmdParameter.getParameterValidRegExp());
+//        if (!value.matches(cmdParameter.getParameterValidRegExp())) {
+//            Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_WRONG_FORMAT + ":" + cmdParameter.getParameterName());
+//            response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+//            rspMessage.setMessageData(response);
+//            System.out.println("你Format错了：" + JSONUtils.obj2json(rspMessage));
+//            webSocket.send(JSONUtils.obj2json(rspMessage));
+//            return false;
+//        }
+//            } catch (Exception e) {
+//                Log.error(e);
+//                Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), e.getMessage());
+//                response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+//                rspMessage.setMessageData(response);
+//                webSocket.send(JSONUtils.obj2json(rspMessage));
+//                return false;
+//            }
+
+    }
+
+
 
     /**
      * For Unsubscribe

@@ -95,7 +95,7 @@ public class WsM1 {
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("aaa", "101");
+        params.put("aaa", "100");
 
         // Call cmd, get response immediately
         Object object = CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "getHeight", params);
