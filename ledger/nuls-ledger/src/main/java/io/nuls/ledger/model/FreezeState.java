@@ -1,42 +1,57 @@
 package io.nuls.ledger.model;
 
+import io.nuls.tools.data.LongUtils;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * account balance lock
- * Created by wangkun23 on 2018/11/21.
+ * Created by wangkun23 on 2018/11/28.
  */
 @ToString
 @NoArgsConstructor
-public class FreezeState implements Serializable {
-
+public class FreezeState {
     /**
-     * 交易的hash值
+     * 锁定金额,如加入共识的金额
      */
     @Setter
     @Getter
-    private String txHash;
+    private long amount = 0L;
 
     /**
-     * 锁定金额
+     * 账户冻结的资产(高度冻结)
      */
     @Setter
     @Getter
-    private long amount;
+    private List<FreezeHeightState> freezeHeightStates = new ArrayList<>();
 
     /**
-     * 锁定时间
+     * 账户冻结的资产(时间冻结)
      */
     @Setter
     @Getter
-    private long lockTime;
+    private List<FreezeLockTimeState> freezeLockTimeStates = new ArrayList<>();
 
-    @Setter
-    @Getter
-    private long createTime;
+
+    /**
+     * 查询用户所有可用金额
+     *
+     * @return
+     */
+    public long getTotal() {
+        long freeze = 0L;
+        for (FreezeHeightState heightState : freezeHeightStates) {
+            freeze = LongUtils.add(freeze, heightState.getAmount());
+        }
+
+        for (FreezeLockTimeState lockTimeState : freezeLockTimeStates) {
+            freeze = LongUtils.add(freeze, lockTimeState.getAmount());
+        }
+        long total = LongUtils.add(amount, freeze);
+        return total;
+    }
 }
