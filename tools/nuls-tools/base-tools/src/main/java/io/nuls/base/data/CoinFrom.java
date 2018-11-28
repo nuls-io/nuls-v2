@@ -39,6 +39,11 @@ public class CoinFrom extends BaseNulsData {
      */
     private byte[] nonce;
 
+    /**
+     * 0普通交易，-1解锁金额交易（退出共识，退出委托）
+     */
+    private long lockTime;
+
     public  CoinFrom(){}
 
     public CoinFrom(byte[] address,int assetsChainId,int assetsId){
@@ -47,13 +52,14 @@ public class CoinFrom extends BaseNulsData {
         this.assetsId = assetsId;
     }
 
-    public CoinFrom(byte[] address,int assetsChainId,int assetsId,String amount){
+    public CoinFrom(byte[] address,int assetsChainId,int assetsId,String amount,long lockTime){
         this(address,assetsChainId,assetsId);
         this.amount = amount;
+        this.lockTime = lockTime;
     }
 
-    public CoinFrom(byte[] address,int assetsChainId,int assetsId,String amount,byte[] nonce){
-        this(address,assetsChainId,assetsId,amount);
+    public CoinFrom(byte[] address,int assetsChainId,int assetsId,String amount,byte[] nonce,long lockTime){
+        this(address,assetsChainId,assetsId,amount,lockTime);
         this.nonce = nonce;
     }
 
@@ -64,6 +70,7 @@ public class CoinFrom extends BaseNulsData {
         stream.writeUint16(assetsId);
         stream.writeString(amount);
         stream.writeBytesWithLength(nonce);
+        stream.writeUint48(lockTime);
     }
 
     @Override
@@ -73,6 +80,7 @@ public class CoinFrom extends BaseNulsData {
         this.assetsId = byteBuffer.readUint16();
         this.amount = byteBuffer.readString();
         this.nonce = byteBuffer.readByLengthByte();
+        this.lockTime = byteBuffer.readUint48();
     }
 
     @Override
@@ -83,6 +91,7 @@ public class CoinFrom extends BaseNulsData {
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(amount);
         size += SerializeUtils.sizeOfBytes(nonce);
+        size += SerializeUtils.sizeOfUint48();
         return size;
     }
 
@@ -135,5 +144,13 @@ public class CoinFrom extends BaseNulsData {
 
     public void setNonce(byte[] nonce) {
         this.nonce = nonce;
+    }
+
+    public long getLockTime() {
+        return lockTime;
+    }
+
+    public void setLockTime(long lockTime) {
+        this.lockTime = lockTime;
     }
 }
