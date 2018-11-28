@@ -17,7 +17,7 @@ public class ChainAsset extends BaseNulsData {
 
     private int chainId;
     private int assetId;
-    private long initNumber=0;
+    private String initNumber="0";
     private String inNumber="0";
     private String outNumber="0";
 
@@ -37,11 +37,11 @@ public class ChainAsset extends BaseNulsData {
         this.assetId = assetId;
     }
 
-    public long getInitNumber() {
+    public String getInitNumber() {
         return initNumber;
     }
 
-    public void setInitNumber(long initNumber) {
+    public void setInitNumber(String initNumber) {
         this.initNumber = initNumber;
     }
 
@@ -65,7 +65,7 @@ public class ChainAsset extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
         stream.writeUint16(assetId);
-        stream.writeUint32(initNumber);
+        stream.writeString(initNumber);
         stream.writeString(inNumber);
         stream.writeString(outNumber);
     }
@@ -74,7 +74,7 @@ public class ChainAsset extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
-        this.initNumber = byteBuffer.readUint32();
+        this.initNumber = byteBuffer.readString();
         this.inNumber = byteBuffer.readString();
         this.outNumber = byteBuffer.readString();
     }

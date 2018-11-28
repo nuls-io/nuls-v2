@@ -277,7 +277,7 @@ public class AssetTxCmd extends BaseCmd {
         if(null == chainAsset){
             return failed("from asset is not exsit");
         }
-        BigDecimal currentAsset = BigDecimal.valueOf(chainAsset.getInitNumber()).add(new BigDecimal(chainAsset.getInNumber())).subtract(new BigDecimal(chainAsset.getOutNumber()));
+        BigDecimal currentAsset =new BigDecimal(chainAsset.getInitNumber()).add(new BigDecimal(chainAsset.getInNumber())).subtract(new BigDecimal(chainAsset.getOutNumber()));
         BigDecimal amount = new BigDecimal(params.get("amount").toString());
         if(currentAsset.doubleValue()>= amount.doubleValue()){
             return success();
@@ -322,7 +322,7 @@ public class AssetTxCmd extends BaseCmd {
         if(null == fromChainAsset){
             return failed("from asset is not exsit");
         }
-        BigDecimal currentAsset = BigDecimal.valueOf(fromChainAsset.getInitNumber()).add(new BigDecimal(fromChainAsset.getInNumber())).subtract(new BigDecimal(fromChainAsset.getOutNumber()));
+        BigDecimal currentAsset = new BigDecimal(fromChainAsset.getInitNumber()).add(new BigDecimal(fromChainAsset.getInNumber())).subtract(new BigDecimal(fromChainAsset.getOutNumber()));
         BigDecimal amount = new BigDecimal(params.get("amount").toString());
         if(currentAsset.doubleValue() >=  amount.doubleValue()){
             BigDecimal out =  new BigDecimal(fromChainAsset.getOutNumber()).add(amount);

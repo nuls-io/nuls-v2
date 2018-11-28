@@ -66,7 +66,7 @@ public class AssetCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
     @Parameter(parameterName = "symbol", parameterType = "array")
     @Parameter(parameterName = "name", parameterType = "String")
-    @Parameter(parameterName = "initNumber", parameterType = "long", parameterValidRange = "[1,4294967295]", parameterValidRegExp = "")
+    @Parameter(parameterName = "initNumber", parameterType = "String")
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]", parameterValidRegExp = "")
     @Parameter(parameterName = "address", parameterType = "String")
     public Response assetReg(Map params) {
@@ -77,7 +77,7 @@ public class AssetCmd extends BaseCmd {
         asset.setSymbol((String) params.get("symbol"));
         asset.setName((String) params.get("name"));
         asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS)));
-        asset.setInitNumber(Long.valueOf(params.get("initNumber").toString()));
+        asset.setInitNumber(String.valueOf(params.get("initNumber")));
         asset.setDecimalPlaces(Short.valueOf(params.get("decimalPlaces").toString()));
         asset.setAvailable(true);
         asset.setCreateTime(TimeService.currentTimeMillis());
@@ -103,8 +103,7 @@ public class AssetCmd extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "cm_assetDisable", version = 1.0,
-            description = "assetDisable")
+    @CmdAnnotation(cmd = "cm_assetDisable", version = 1.0,description = "assetDisable")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
     @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
     @Parameter(parameterName = "address", parameterType = "String")
