@@ -1,55 +1,32 @@
 package io.nuls.rpc.model.message;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
  * @author tangyi
  * @date 2018/11/15
  * @description
  */
+@ToString
+@NoArgsConstructor
 public class Message {
 
+    @Getter
+    @Setter
     private String messageId;
+    @Getter
+    @Setter
     private String timestamp;
+    @Getter
+    @Setter
     private String timezone;
+    @Getter
+    @Setter
     private String messageType;
+    @Getter
+    @Setter
     private Object messageData;
-
-    public String getMessageId() {
-        return messageId;
-    }
-
-    public void setMessageId(String messageId) {
-        this.messageId = messageId;
-    }
-
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public String getTimezone() {
-        return timezone;
-    }
-
-    public void setTimezone(String timezone) {
-        this.timezone = timezone;
-    }
-
-    public String getMessageType() {
-        return messageType;
-    }
-
-    public void setMessageType(String messageType) {
-        this.messageType = messageType;
-    }
-
-    public Object getMessageData() {
-        return messageData;
-    }
-
-    public void setMessageData(Object messageData) {
-        this.messageData = messageData;
-    }
 }

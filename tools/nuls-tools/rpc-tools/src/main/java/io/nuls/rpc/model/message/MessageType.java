@@ -5,6 +5,7 @@ package io.nuls.rpc.model.message;
  */
 public enum MessageType {
     /**
+     * 消息类型
      * Message type
      */
     NegotiateConnection,

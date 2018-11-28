@@ -40,6 +40,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 import org.java_websocket.WebSocket;
+import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -138,6 +139,9 @@ public class CmdHandler {
                 default:
                     return false;
             }
+        } catch (WebsocketNotConnectedException e) {
+            Log.error("Socket disconnected, remove");
+            return false;
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -145,7 +149,6 @@ public class CmdHandler {
     }
 
     private static void execute(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
-//        Map requestMethods = request.getRequestMethods();
         for (Object method : requestMethods.keySet()) {
             /*
             Execute at once
@@ -331,7 +334,6 @@ public class CmdHandler {
 //            }
 
     }
-
 
 
     /**
