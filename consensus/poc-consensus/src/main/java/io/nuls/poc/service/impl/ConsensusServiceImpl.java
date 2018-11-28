@@ -159,7 +159,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTxData(stopAgent.serialize());
-            CoinData coinData = ConsensusUtil.getStopAgentCoinData(chainId, agent, TimeService.currentTimeMillis() + ConfigManager.config_map.get(chainId).getStopAgent_lockTime());
+            CoinData coinData = ConsensusUtil.getStopAgentCoinData(chainId, assetId, agent, TimeService.currentTimeMillis() + ConfigManager.config_map.get(chainId).getStopAgent_lockTime());
             tx.setCoinData(coinData.serialize());
             String fee = TransactionFeeCalculator.getMaxFee(tx.size());
             coinData.getTo().get(0).setAmount(BigIntegerUtils.subToString(coinData.getTo().get(0).getAmount(),fee));
@@ -891,15 +891,16 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result stopAgentValid(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null) {
+        if (params.get("chain_id") == null || params.get("tx")==null || params.get("assetId") == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
+            int assetId = (Integer) params.get("assetId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
-            boolean result = validatorManager.validateStopAgent(chain_id,transaction);
+            boolean result = validatorManager.validateStopAgent(chain_id,assetId,transaction);
             if(!result){
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
@@ -907,6 +908,9 @@ public class ConsensusServiceImpl implements ConsensusService {
         }catch (NulsException e){
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
+        }catch (IOException et){
+            Log.error(et);
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
 

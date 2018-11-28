@@ -36,17 +36,17 @@ import io.nuls.tools.log.Log;
 public class ConsensusProcessTask implements Runnable {
 
     private ConsensusProcess consensusProcess;
-    private int chain_id;
+    private int chainId;
 
-    public ConsensusProcessTask(int chain_id,ConsensusProcess consensusProcess) {
-        this.chain_id = chain_id;
+    public ConsensusProcessTask(int chainId,ConsensusProcess consensusProcess) {
+        this.chainId = chainId;
         this.consensusProcess = consensusProcess;
     }
 
     @Override
     public void run() {
         try {
-            consensusProcess.process(chain_id);
+            consensusProcess.process(chainId);
         } catch (Exception e) {
             Log.error(e);
         }
