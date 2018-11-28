@@ -1,9 +1,6 @@
 package io.nuls.rpc.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 /**
  * @author tangyi
@@ -12,6 +9,7 @@ import lombok.ToString;
  */
 @ToString
 @NoArgsConstructor
+@AllArgsConstructor
 public class CmdParameter {
     @Getter
     @Setter

@@ -2,7 +2,6 @@ package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.*;
-import io.nuls.rpc.server.CmdHandler;
 import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -26,8 +25,8 @@ public class CmdDispatcher {
      * Shake hands with the core module (Manager)
      */
     public static boolean handshakeKernel() throws Exception {
-        Message message = CmdHandler.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnection);
-        message.setMessageData(CmdHandler.defaultNegotiateConnection());
+        Message message = Constants.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnection);
+        message.setMessageData(Constants.defaultNegotiateConnection());
 
         WsClient wsClient = ClientRuntime.getWsClient(Constants.kernelUrl);
         if (wsClient == null) {
@@ -53,7 +52,7 @@ public class CmdDispatcher {
      */
     public static void syncKernel() throws Exception {
         String messageId = Constants.nextSequence();
-        Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
+        Message message = Constants.basicMessage(messageId, MessageType.Request);
         Request request = ClientRuntime.defaultRequest();
         request.getRequestMethods().put("registerAPI", ServerRuntime.local);
         message.setMessageData(request);
@@ -115,7 +114,7 @@ public class CmdDispatcher {
      */
     private static String request(String role, String cmd, Map params, String ack, String subscriptionPeriod) throws Exception {
         String messageId = Constants.nextSequence();
-        Message message = CmdHandler.basicMessage(messageId, MessageType.Request);
+        Message message = Constants.basicMessage(messageId, MessageType.Request);
         Request request = ClientRuntime.defaultRequest();
         request.setRequestAck(ack);
         request.setSubscriptionPeriod(subscriptionPeriod);
@@ -151,7 +150,7 @@ public class CmdDispatcher {
      * Unsubscribe
      */
     public static void unsubscribe(String messageId) throws Exception {
-        Message message = CmdHandler.basicMessage(Constants.nextSequence(), MessageType.Unsubscribe);
+        Message message = Constants.basicMessage(Constants.nextSequence(), MessageType.Unsubscribe);
         Unsubscribe unsubscribe = new Unsubscribe();
         unsubscribe.setUnsubscribeMethods(new String[]{messageId});
         message.setMessageData(unsubscribe);
@@ -179,7 +178,7 @@ public class CmdDispatcher {
             获取队列中的第一个对象，如果是空，舍弃
             Get the first item of the queue, If it is an empty object, discard
              */
-            Message message = ClientRuntime.firstItemInServerResponseQueue();
+            Message message = ClientRuntime.firstItemInServerMessageQueue();
             if (message == null) {
                 continue;
             }
@@ -219,7 +218,7 @@ public class CmdDispatcher {
             获取队列中的第一个对象，如果是空，舍弃
             Get the first item of the queue, If it is an empty object, discard
              */
-            Message message = ClientRuntime.firstItemInServerResponseQueue();
+            Message message = ClientRuntime.firstItemInServerMessageQueue();
             if (message == null) {
                 continue;
             }
@@ -273,7 +272,7 @@ public class CmdDispatcher {
             获取队列中的第一个对象，如果是空，舍弃
             Get the first item of the queue, If it is an empty object, discard
              */
-            Message message = ClientRuntime.firstItemInServerResponseQueue();
+            Message message = ClientRuntime.firstItemInServerMessageQueue();
             if (message == null) {
                 continue;
             }

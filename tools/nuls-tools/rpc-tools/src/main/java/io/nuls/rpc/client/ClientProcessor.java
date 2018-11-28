@@ -36,7 +36,7 @@ public class ClientProcessor implements Runnable {
                 获取队列中的第一个对象，如果是空，舍弃
                 Get the first item of the queue, If it is an empty object, discard
                  */
-                Message message = ClientRuntime.firstItemInServerResponseQueue();
+                Message message = ClientRuntime.firstItemInServerMessageQueue();
                 if (message == null) {
                     continue;
                 }

@@ -52,7 +52,7 @@ public class ClientRuntime {
      *
      * @return 队列的第一个元素. The first item in SERVER_RESPONSE_QUEUE.
      */
-    static synchronized Message firstItemInServerResponseQueue() {
+    static synchronized Message firstItemInServerMessageQueue() {
         Message message = null;
         if (ClientRuntime.SERVER_MESSAGE_QUEUE.size() > 0) {
             message = ClientRuntime.SERVER_MESSAGE_QUEUE.get(0);

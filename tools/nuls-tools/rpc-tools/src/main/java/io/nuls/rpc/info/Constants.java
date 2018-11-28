@@ -27,6 +27,12 @@
 
 package io.nuls.rpc.info;
 
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.NegotiateConnection;
+import io.nuls.tools.data.DateUtils;
+import io.nuls.tools.thread.TimeService;
+
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -163,4 +169,36 @@ public class Constants {
      * URL of Core Module (Manager)
      */
     public static String kernelUrl = "";
+
+    /**
+     * 我是华丽的分隔符
+     * I am a gorgeous separator
+     */
+
+    /**
+     * 默认Message对象
+     * Default Message object
+     */
+    public static Message basicMessage(String messageId, MessageType messageType) {
+        Message message = new Message();
+        message.setMessageId(messageId);
+        message.setMessageType(messageType.name());
+        message.setTimestamp(TimeService.currentTimeMillis() + "");
+        message.setTimezone(DateUtils.getTimeZone() + "");
+        return message;
+    }
+
+    /**
+     * 默认握手对象
+     * Default NegotiateConnection object
+     */
+    public static NegotiateConnection defaultNegotiateConnection() {
+        NegotiateConnection negotiateConnection = new NegotiateConnection();
+        negotiateConnection.setProtocolVersion("1.0");
+        negotiateConnection.setCompressionAlgorithm("zlib");
+        negotiateConnection.setCompressionRate("0");
+        return negotiateConnection;
+    }
+
+
 }
