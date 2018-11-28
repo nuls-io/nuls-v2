@@ -38,4 +38,5 @@ public interface ConsensusErrorCode {
     ErrorCode LOCK_TIME_NOT_REACHED= ErrorCode.init("70028");
     ErrorCode MERKEL_HASH_ERROR= ErrorCode.init("70029");
     ErrorCode BLOCK_ROUND_VALIDATE_ERROR= ErrorCode.init("70030");
+    ErrorCode BANANCE_NOT_ENNOUGH= ErrorCode.init("70031");
 }

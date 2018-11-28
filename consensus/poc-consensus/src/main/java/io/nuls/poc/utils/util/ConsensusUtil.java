@@ -99,9 +99,8 @@ public class ConsensusUtil {
                 CoinFrom from = new CoinFrom(agent.getAgentAddress(),chain_id,assetsId);
                 if(BigIntegerUtils.isEqual(to.getAmount(),agent.getDeposit()) && to.getLockTime() == -1L){
                     from.setAmount(to.getAmount());
-                    //todo 从账本模块获取nonce
-                    byte[] nonce = null;
-                    from.setNonce(nonce);
+                    from.setLockTime(-1);
+                    from.setNonce(createTxHash.getDigestBytes());
                 }
             }
             if (fromList.isEmpty()) {
@@ -131,10 +130,8 @@ public class ConsensusUtil {
                     if (!BigIntegerUtils.isEqual(to.getAmount(),deposit.getDeposit()) || to.getLockTime() != -1L) {
                         continue;
                     }
-                    //todo 从账本模块获取nonce
-                    byte[] nonce = null;
-                    from.setNonce(nonce);
-                    from = new CoinFrom(deposit.getAddress(),chain_id,assetsId,to.getAmount(),nonce);
+                    byte[] nonce = deposit.getTxHash().getDigestBytes();
+                    from = new CoinFrom(deposit.getAddress(),chain_id,assetsId,to.getAmount(),nonce,-1);
                     fromList.add(from);
                     break;
                 }
