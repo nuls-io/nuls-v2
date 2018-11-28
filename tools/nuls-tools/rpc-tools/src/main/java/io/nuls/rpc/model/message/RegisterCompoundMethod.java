@@ -1,5 +1,10 @@
 package io.nuls.rpc.model.message;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import java.util.List;
 
 /**
@@ -7,32 +12,16 @@ import java.util.List;
  * @date 2018/11/15
  * @description
  */
+@ToString
+@NoArgsConstructor
 public class RegisterCompoundMethod {
+    @Getter
+    @Setter
     private String compoundMethodName;
+    @Getter
+    @Setter
     private String compoundMethodDescription;
+    @Getter
+    @Setter
     private List<Object> compoundMethods;
-
-    public String getCompoundMethodName() {
-        return compoundMethodName;
-    }
-
-    public void setCompoundMethodName(String compoundMethodName) {
-        this.compoundMethodName = compoundMethodName;
-    }
-
-    public String getCompoundMethodDescription() {
-        return compoundMethodDescription;
-    }
-
-    public void setCompoundMethodDescription(String compoundMethodDescription) {
-        this.compoundMethodDescription = compoundMethodDescription;
-    }
-
-    public List<Object> getCompoundMethods() {
-        return compoundMethods;
-    }
-
-    public void setCompoundMethods(List<Object> compoundMethods) {
-        this.compoundMethods = compoundMethods;
-    }
 }

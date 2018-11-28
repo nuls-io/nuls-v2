@@ -31,10 +31,4 @@ public interface ChainAssetStorage {
      */
     boolean delete(String key);
 
-    /**
-     * Get asset information by chain ID
-     * @param chainId The chain ID
-     * @return ChainAsset object
-     */
-    List<ChainAsset> getByChain(int chainId);
 }

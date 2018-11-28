@@ -22,26 +22,34 @@
  * SOFTWARE.
  *
  */
+package io.nuls.chain.service.impl;
 
-package io.nuls.account.model.bo.tx;
-
-import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Transaction;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.chain.service.SeqService;
+import io.nuls.chain.storage.SeqStorage;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Service;
 
 /**
- * @author: qinyifeng
- */
-public class AliasTransaction extends Transaction {
+ * @program: nuls2.0
+ * @description:
+ * @author: lan
+ * @create: 2018/11/26
+ **/
+@Service
+public class SeqServiceImpl implements SeqService {
+    @Autowired
+    private SeqStorage seqStorage;
 
-    public AliasTransaction() {
-        super(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
+    /**
+     *
+     * createAssetId
+     * @param chainId
+     * @return
+     */
+    @Override
+    public synchronized  int createAssetId(int chainId) {
+
+        return seqStorage.createSeqAsset(chainId);
+
     }
-
-    protected AliasTransaction(int type) {
-        super(type);
-    }
-
 }

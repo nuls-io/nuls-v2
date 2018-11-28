@@ -23,25 +23,46 @@
  *
  */
 
-package io.nuls.account.model.bo.tx;
+package io.nuls.account.model.dto;
 
-import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Transaction;
-import io.nuls.tools.exception.NulsException;
+
+import java.util.List;
 
 /**
- * @author: qinyifeng
+ * @author: EdwardChan
+ *
+ * Nov.28th 2018
+ *
+ *
+ *
  */
-public class AliasTransaction extends Transaction {
 
-    public AliasTransaction() {
-        super(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
+public class CoinDataDto {
+    /**
+     * the collect of from coin
+     */
+    private List<CoinFromDto> froms;
+
+    /**
+     * the collect of to coin
+     */
+    private List<CoinToDto> to;
+
+    public List<CoinFromDto> getFroms() {
+        return froms;
     }
 
-    protected AliasTransaction(int type) {
-        super(type);
+    public void setFroms(List<CoinFromDto> froms) {
+        this.froms = froms;
     }
+
+    public List<CoinToDto> getTo() {
+        return to;
+    }
+
+    public void setTo(List<CoinToDto> to) {
+        this.to = to;
+    }
+
 
 }

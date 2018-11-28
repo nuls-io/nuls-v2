@@ -102,7 +102,7 @@ public class PunishManager {
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
             redPunishTransaction.setTxData(redPunishData.serialize());
             redPunishTransaction.setTime(smallBlock.getHeader().getTime());
-            CoinData coinData = ConsensusUtil.getStopAgentCoinData(chain_id, agent, redPunishTransaction.getTime() + ConfigManager.config_map.get(chain_id).getRedPublish_lockTime());
+            CoinData coinData = ConsensusUtil.getStopAgentCoinData(chain_id,ConfigManager.config_map.get(chain_id).getAssetsId(), agent, redPunishTransaction.getTime() + ConfigManager.config_map.get(chain_id).getRedPublish_lockTime());
             redPunishTransaction.setCoinData(coinData.serialize());
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             redPunishTransactionMap.put(chain_id,redPunishTransaction);
@@ -184,7 +184,7 @@ public class PunishManager {
             redPunishTransaction.setTxData(redPunishData.serialize());
             redPunishTransaction.setTime(txTime);
             //组装CoinData
-            CoinData coinData = ConsensusUtil.getStopAgentCoinData(chain_id,agent,redPunishTransaction.getTime()+ConfigManager.config_map.get(chain_id).getRedPublish_lockTime());
+            CoinData coinData = ConsensusUtil.getStopAgentCoinData(chain_id,ConfigManager.config_map.get(chain_id).getAssetsId(),agent,redPunishTransaction.getTime()+ConfigManager.config_map.get(chain_id).getRedPublish_lockTime());
             redPunishTransaction.setCoinData(coinData.serialize());
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             //缓存红牌交易

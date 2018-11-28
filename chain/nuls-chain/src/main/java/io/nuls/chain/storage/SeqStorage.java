@@ -22,26 +22,27 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.account.model.bo.tx;
-
-import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Transaction;
-import io.nuls.tools.exception.NulsException;
+package io.nuls.chain.storage;
 
 /**
- * @author: qinyifeng
- */
-public class AliasTransaction extends Transaction {
+ * @program: nuls2.0
+ * @description:
+ * @author: lan
+ * @create: 2018/11/26
+ **/
+public interface SeqStorage{
+    /**
+     *createSeqAsset
+     * @param chainId
+     * @return
+     */
+    int createSeqAsset(int chainId);
 
-    public AliasTransaction() {
-        super(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
-    }
-
-    protected AliasTransaction(int type) {
-        super(type);
-    }
+    /**
+     * getSeqAsset
+     * @param chainId
+     * @return
+     */
+    int getSeqAsset(int chainId);
 
 }

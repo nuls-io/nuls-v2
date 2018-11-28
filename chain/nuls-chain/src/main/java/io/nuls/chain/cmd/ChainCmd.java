@@ -2,12 +2,15 @@ package io.nuls.chain.cmd;
 
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.model.tx.CrossChainDestroyTransaction;
 import io.nuls.chain.model.tx.CrossChainRegTransaction;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
+import io.nuls.chain.service.SeqService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -39,6 +42,9 @@ public class ChainCmd extends BaseCmd {
 
     @Autowired
     private RpcService rpcService;
+    @Autowired
+    private SeqService seqService;
+
     @CmdAnnotation(cmd = "cm_chain", version = 1.0,
             description = "chain")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
@@ -68,7 +74,7 @@ public class ChainCmd extends BaseCmd {
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "symbol", parameterType = "array")
     @Parameter(parameterName = "name", parameterType = "String")
-    @Parameter(parameterName = "initNumber", parameterType = "long", parameterValidRange = "[1,4294967295]", parameterValidRegExp = "")
+    @Parameter(parameterName = "initNumber", parameterType = "String")
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]", parameterValidRegExp = "")
     public Response chainReg(Map params) {
         try {
@@ -83,15 +89,26 @@ public class ChainCmd extends BaseCmd {
             chain.setTxConfirmedBlockNum(Integer.valueOf(params.get("txConfirmedBlockNum").toString()));
             Map<String,Object> paramMap = new HashMap<>();
             paramMap.put("chainId",chain.getChainId());
-            chain.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
+            chain.setRegAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
             chain.setCreateTime(TimeService.currentTimeMillis());
             Chain dbChain = chainService.getChain(chain.getChainId());
             if (dbChain != null) {
                 return failed("C10001");
             }
+            int assetId =  seqService.createAssetId(chain.getChainId());
+            Asset asset =  new Asset(assetId);
+            asset.setChainId(chain.getChainId());
+            asset.setSymbol((String) params.get("symbol"));
+            asset.setName((String) params.get("name"));
+            asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS)));
+            asset.setInitNumber(params.get("initNumber").toString());
+            asset.setDecimalPlaces(Short.valueOf(params.get("decimalPlaces").toString()));
+            asset.setAvailable(true);
+            asset.setCreateTime(TimeService.currentTimeMillis());
+            asset.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
             // 组装交易发送
             CrossChainRegTransaction crossChainRegTransaction = new CrossChainRegTransaction();
-            crossChainRegTransaction.setTxData(chain.parseToTransaction());
+            crossChainRegTransaction.setTxData(chain.parseToTransaction(asset,false));
             //TODO:coindata 未封装
             boolean rpcReslt = rpcService.newTx(crossChainRegTransaction);
             if(rpcReslt) {
@@ -105,42 +122,6 @@ public class ChainCmd extends BaseCmd {
         }
     }
 
-
-
-    /**
-     * 删除链
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "cm_chainDestroy", version = 1.0,description = "chainDestroy")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "address", parameterType = "String")
-    public Response chainDestroy(Map params) {
-        int chainId = Integer.valueOf(params.get("chainId").toString());
-       byte [] address = (AddressTool.getAddress(String.valueOf(params.get("address"))));
-        //身份的校验，地址账户校验
-        Chain chain = chainService.getChain(chainId);
-        if (chain == null) {
-            return failed("C10003");
-        }
-        if(!ByteUtils.arrayEquals(chain.getAddress(),address)){
-            return failed("C10004");
-        }
-        CrossChainDestroyTransaction crossChainDestroyTransaction = new CrossChainDestroyTransaction();
-        try {
-            crossChainDestroyTransaction.setTxData(chain.parseToTransaction());
-            //TODO:coindata 未封装
-            boolean rpcReslt = rpcService.newTx(crossChainDestroyTransaction);
-            if(rpcReslt) {
-                return success(chain);
-            }else{
-                return failed(new ErrorCode());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return failed(new ErrorCode());
-    }
 
 
 

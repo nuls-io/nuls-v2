@@ -67,51 +67,8 @@ public class ChainServiceImpl implements ChainService {
     @Override
     public Chain getChain(int chainId) {
         Chain chain = chainStorage.load(chainId);
-        List<ChainAsset> chainAssetList = getChainAssetByChain(chainId);
-        chain.setChainAssetList(chainAssetList);
         return chain;
     }
 
-    /**
-     * Get asset information by chain ID
-     *
-     * @param chainId The chain ID
-     * @return ChainAsset object
-     */
-    @Override
-    public List<ChainAsset> getChainAssetByChain(int chainId) {
-        return chainAssetStorage.getByChain(chainId);
-    }
 
-    /**
-     * Get ChainAsset object
-     *
-     * @param chainId The chain ID
-     * @param assetId The asset ID
-     * @return ChainAsset object
-     */
-    @Override
-    public ChainAsset getChainAsset(int chainId, long assetId) {
-        String key = CmRuntimeInfo.getAssetKey(chainId, assetId);
-        return chainAssetStorage.load(key);
-    }
-
-    /**
-     * Set the currentNumber of asset
-     *
-     * @param chainId       The chain ID
-     * @param assetId       The asset ID
-     * @param currentNumber Current asset number in chain
-     * @return true/false
-     */
-    @Override
-    public boolean setAssetNumber(int chainId, long assetId, long currentNumber) {
-        String key = CmRuntimeInfo.getAssetKey(chainId, assetId);
-        ChainAsset chainAsset = chainAssetStorage.load(key);
-        if (chainAsset == null) {
-            return false;
-        }
-        chainAsset.setCurrentNumber(currentNumber);
-        return chainAssetStorage.save(key, chainAsset);
-    }
 }

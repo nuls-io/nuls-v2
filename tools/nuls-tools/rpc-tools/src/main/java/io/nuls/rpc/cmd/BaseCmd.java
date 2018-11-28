@@ -46,39 +46,49 @@ public abstract class BaseCmd {
         ServerRuntime.configItemMap.put(key, configItem);
     }
 
+    /**
+     * 返回基本的成功对象
+     * Returns the basic success object
+     */
     protected Response success() {
         return success(null);
     }
 
+    /**
+     * 返回有特定内容的成功对象
+     * Returns a success object with specific content
+     */
     protected Response success(Object responseData) {
-        Response response = new Response();
-        response.setResponseStatus(Constants.booleanString(true));
+        Response response = ServerRuntime.newResponse("", Constants.booleanString(true), "Congratulations! Processing completed！");
         response.setResponseData(responseData);
-        response.setResponseComment("Congratulations! Processing completed！");
-        response.setResponseMaxSize("0");
         return response;
     }
 
+    /**
+     * 返回预定义的失败对象
+     * Returns the predefined failed object
+     */
     protected Response failed(ErrorCode errorCode) {
-        Response response = new Response();
-        response.setResponseStatus(Constants.booleanString(false));
+        Response response = ServerRuntime.newResponse("", Constants.booleanString(false), "");
         response.setResponseData(errorCode);
-        response.setResponseMaxSize("0");
         return response;
     }
 
+    /**
+     * 返回自定义错误消息的失败对象
+     * Returns the failed object of the custom error message
+     */
     protected Response failed(String errMsg) {
-        Response response = new Response();
-        response.setResponseStatus(Constants.booleanString(false));
-        response.setResponseComment(errMsg);
-        return response;
+        return ServerRuntime.newResponse("", Constants.booleanString(false), errMsg);
     }
 
+    /**
+     * 预定义失败对象，同时带有自定义错误消息
+     * Predefined failed object with a custom error message
+     */
     protected Response failed(ErrorCode errorCode, String errMsg) {
-        Response response = new Response();
-        response.setResponseStatus(Constants.booleanString(false));
+        Response response = ServerRuntime.newResponse("", Constants.booleanString(false), errMsg);
         response.setResponseData(errorCode);
-        response.setResponseComment(errMsg);
         return response;
     }
 }

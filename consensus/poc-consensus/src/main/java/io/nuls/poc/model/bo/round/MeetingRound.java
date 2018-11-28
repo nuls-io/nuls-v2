@@ -28,10 +28,12 @@ package io.nuls.poc.model.bo.round;
 import io.nuls.base.data.Address;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.utils.manager.ConfigManager;
+import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.thread.TimeService;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -99,7 +101,8 @@ public class MeetingRound {
             member.setPackingIndexOfRound(i + 1);
             member.setPackStartTime(startTime + i * ConfigManager.config_map.get(chain_id).getPacking_interval());
             member.setPackEndTime(member.getPackStartTime() + ConfigManager.config_map.get(chain_id).getPacking_interval());
-            totalWeight += DoubleUtils.mul( DoubleUtils.sum(member.getAgent().getTotalDeposit().getValue() , member.getAgent().getDeposit().getValue()),member.getAgent().getCreditVal()) ;
+            String allDeposit = BigIntegerUtils.addToString(member.getAgent().getTotalDeposit(),member.getAgent().getDeposit());
+            totalWeight += DoubleUtils.round(DoubleUtils.mul( new BigDecimal(allDeposit),member.getAgent().getCreditVal()).doubleValue());
         }
         endTime = startTime + memberCount * ConfigManager.config_map.get(chain_id).getPacking_interval();
     }

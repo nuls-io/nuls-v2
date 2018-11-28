@@ -23,47 +23,88 @@
  *
  */
 
-package io.nuls.account.config;
-
-
-import io.nuls.tools.parse.config.IniEntity;
+package io.nuls.account.model.dto;
 
 /**
- * 用来管理配置项
- * <p>
- * Used to manage system configuration items.
- *
- * @author: Niels Wang
+ * @author: EdwardChan
  */
-public class NulsConfig {
+
+public class TransactionDto<T> {
+    /**
+     * the type of transaction
+     */
+    private int type;
 
     /**
-     * 模块配置文件中加载的所有配置项
-     * All the configuration items that are loaded in the module configuration file.
+     * transaction time
      */
-    public static IniEntity MODULES_CONFIG;
+    private String time;
 
     /**
-     * 模块配置文件名称
-     * Module configuration file name.
+     * scriptSig
      */
-    public static  String MODULES_CONFIG_FILE = "modules.ini";
+    private String scriptSig;
 
     /**
-     * 系统使用的编码方式
-     * The encoding used by the nuls system.
+     * hash
      */
-    public static String DEFAULT_ENCODING = "UTF-8";
+    private String hash;
 
     /**
-     * 导出keystore备份文件目录
+     * coinData
      */
-    public static String ACCOUNTKEYSTORE_FOLDER_NAME ="keystore/backup";
+    private CoinDataDto coinData;
 
     /**
-     * 内核模块地址
-     * Kernel module address
+     * transaction data
      */
-    public static String KERNEL_MODULE_URL;
+    private T txData;
 
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public String getScriptSig() {
+        return scriptSig;
+    }
+
+    public void setScriptSig(String scriptSig) {
+        this.scriptSig = scriptSig;
+    }
+
+    public String getHash() {
+        return hash;
+    }
+
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
+
+    public CoinDataDto getCoinData() {
+        return coinData;
+    }
+
+    public void setCoinData(CoinDataDto coinData) {
+        this.coinData = coinData;
+    }
+
+    public T getTxData() {
+        return txData;
+    }
+
+    public void setTxData(T txData) {
+        this.txData = txData;
+    }
 }

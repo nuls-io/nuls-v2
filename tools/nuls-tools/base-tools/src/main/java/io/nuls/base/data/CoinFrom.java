@@ -39,10 +39,16 @@ public class CoinFrom extends BaseNulsData {
      */
     private byte[] nonce;
 
-    public CoinFrom(byte[] address,int assetsChainId,int assetsId,String amount){
+    public  CoinFrom(){}
+
+    public CoinFrom(byte[] address,int assetsChainId,int assetsId){
         this.address = address;
         this.assetsChainId = assetsChainId;
         this.assetsId = assetsId;
+    }
+
+    public CoinFrom(byte[] address,int assetsChainId,int assetsId,String amount){
+        this(address,assetsChainId,assetsId);
         this.amount = amount;
     }
 

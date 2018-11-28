@@ -44,30 +44,5 @@ public interface ChainService {
      */
     Chain getChain(int chainId);
 
-    /**
-     * Get asset information by chain ID
-     *
-     * @param chainId The chain ID
-     * @return ChainAsset object
-     */
-    List<ChainAsset> getChainAssetByChain(int chainId);
 
-    /**
-     * Get ChainAsset object
-     *
-     * @param chainId The chain ID
-     * @param assetId The asset ID
-     * @return ChainAsset object
-     */
-    ChainAsset getChainAsset(int chainId, long assetId);
-
-    /**
-     * Set the currentNumber of asset
-     *
-     * @param chainId       The chain ID
-     * @param assetId       The asset ID
-     * @param currentNumber Current asset number in chain
-     * @return true/false
-     */
-    public boolean setAssetNumber(int chainId, long assetId, long currentNumber);
 }

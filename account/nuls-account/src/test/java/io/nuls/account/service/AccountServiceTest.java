@@ -3,33 +3,40 @@ package io.nuls.account.service;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountParam;
-import io.nuls.account.constant.AccountStorageConstant;
+import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.init.AccountBootstrap;
 import io.nuls.account.model.bo.Account;
-import io.nuls.account.model.dto.AccountOfflineDto;
-import io.nuls.account.model.dto.SimpleAccountDto;
-import io.nuls.account.model.po.AccountPo;
-import io.nuls.account.storage.AccountStorageService;
-import io.nuls.account.util.AccountTool;
+import io.nuls.account.model.bo.tx.AliasTransaction;
+import io.nuls.account.model.bo.tx.txdata.Alias;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.rpc.cmd.CmdDispatcher;
-import io.nuls.rpc.model.CmdResponse;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author: qinyifeng
@@ -228,4 +235,48 @@ public class AccountServiceTest {
         }
     }
 
+    @Test
+    public void signDigestTest() {
+        try {
+            //创建加密账户 create encrypted account
+            List<Account> accountList = accountService.createAccount(chainId, 1, password);
+            String address = accountList.get(0).getAddress().getBase58();
+            byte[] addressBytes = accountList.get(0).getAddress().getAddressBytes();
+
+            //创建一笔设置别名的交易
+            AliasTransaction tx = new AliasTransaction();
+            tx.setTime(TimeService.currentTimeMillis());
+            Alias alias = new Alias(addressBytes, "别名");
+            tx.setTxData(alias.serialize());
+
+//            CoinDataResult coinDataResult = accountLedgerService.getCoinData(addressBytes, AccountConstant.ALIAS_NA, tx.size() , TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+//            if (!coinDataResult.isEnough()) {
+//                return Result.getFailed(AccountErrorCode.INSUFFICIENT_BALANCE);
+//            }
+            CoinData coinData = new CoinData();
+            //coinData.setFrom(coinDataResult.getCoinList());
+            CoinTo coin = new CoinTo();
+            coin.setAddress(AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs" + HexUtil.encode(ByteUtils.shortToBytes((short) chainId))));
+            coin.setAmount("1");
+            coin.setAssetsChainId(chainId);
+            coin.setAssetsId(1);
+            coinData.addTo(coin);
+
+            tx.setCoinData(coinData.serialize());
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+
+            //测试密码正确
+            String signatureHex = HexUtil.encode(accountService.signDigest(tx.getHash().getDigestBytes(), chainId, address, password));
+            assertNotNull(signatureHex);
+
+            //测试密码不正确
+            try {
+                accountService.signDigest(tx.getHash().getDigestBytes(), chainId, address, password + "error");
+            } catch (NulsException ex) {
+                assertEquals(AccountErrorCode.PASSWORD_IS_WRONG.getCode(), ex.getErrorCode().getCode());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

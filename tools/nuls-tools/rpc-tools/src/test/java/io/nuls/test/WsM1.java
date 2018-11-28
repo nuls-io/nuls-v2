@@ -31,6 +31,7 @@ import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.client.InvokeMethod;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
@@ -46,13 +47,11 @@ import java.util.Map;
 public class WsM1 {
     @Test
     public void test() throws Exception {
-        Map a = new HashMap();
-        a.put("key", "hello");
-        Map b = a;
-        System.out.println(a == b);
-        System.out.println(a.get("key"));
-        b.remove("key");
-        System.out.println(a.get("key"));
+        String range="[11,100.2]";
+//        System.out.println(range.substring(range.indexOf("(")+1,range.indexOf(",")));
+//        System.out.println(range.substring(range.indexOf(",")+1,range.indexOf("]")));
+        String regex="[(\\[]\\d+,\\d+[)\\]]";
+        System.out.println(range.matches(regex));
     }
 
     @Test
@@ -75,6 +74,8 @@ public class WsM1 {
         // Get information from kernel
         CmdDispatcher.syncKernel();
 
+        System.out.println("Local:"+ JSONUtils.obj2json(ServerRuntime.local));
+
         Thread.sleep(Integer.MAX_VALUE);
     }
 
@@ -94,7 +95,7 @@ public class WsM1 {
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("paramName", "value");
+        params.put("aaa", "100");
 
         // Call cmd, get response immediately
         Object object = CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "getHeight", params);
