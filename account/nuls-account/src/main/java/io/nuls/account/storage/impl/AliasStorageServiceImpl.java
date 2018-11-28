@@ -27,6 +27,7 @@ package io.nuls.account.storage.impl;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
+import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.base.basic.AddressTool;
@@ -148,14 +149,14 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
 
     /**
      * save the alias to db
-     *
-     * @param aliasPo
+     * @param chainId
+     * @param alias
      * @return
      */
     @Override
-    public boolean saveAlias(AliasPo aliasPo) {
-        String tableNameKeyIsAlias = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + aliasPo.getChainId();
-        String tableNameKeyIsAddress = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS + aliasPo.getChainId();
+    public boolean saveAlias(int chainId, Alias alias) {
+        String tableNameKeyIsAlias = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId;
+        String tableNameKeyIsAddress = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS + chainId;
         boolean result = false;
         try {
             //check if the table is exist
@@ -171,11 +172,11 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
                     return false;
                 }
             }
-            result = RocksDBService.put(tableNameKeyIsAlias, StringUtils.bytes(aliasPo.getAlias()), aliasPo.serialize());
+            result = RocksDBService.put(tableNameKeyIsAlias, StringUtils.bytes(alias.getAlias()), alias.serialize());
             if (!result) {
                 return false;
             }
-            result = RocksDBService.put(tableNameKeyIsAddress, aliasPo.getAddress(), aliasPo.serialize());
+            result = RocksDBService.put(tableNameKeyIsAddress, alias.getAddress(), alias.serialize());
             return result;
         } catch (Exception e) {
             Log.error("", e);

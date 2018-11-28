@@ -25,6 +25,7 @@
 
 package io.nuls.account.storage;
 
+import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AliasPo;
 
 import java.util.List;
@@ -64,10 +65,10 @@ public interface AliasStorageService {
     /**
      * save the alias
      *
-     * @param aliasPo
+     * @param alias
      * @return the result
      */
-    boolean saveAlias(AliasPo aliasPo);
+    boolean saveAlias(int chainId, Alias alias);
 
     /**
      * remove Alias by chainId and alias

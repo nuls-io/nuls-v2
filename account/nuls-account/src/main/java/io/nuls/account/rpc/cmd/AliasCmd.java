@@ -2,16 +2,23 @@ package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
+import io.nuls.account.model.bo.tx.txdata.Alias;
+import io.nuls.account.model.dto.AliasDto;
+import io.nuls.account.model.dto.TransactionDto;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -156,7 +163,32 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_aliasTxValidate", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "validate the transaction of alias")
     public Object aliasTxValidate(Map params) {
-        return null;
+        Log.debug("ac_aliasTxValidate start,params size:{}", params == null ? 0 : params.size());
+        boolean result = false;
+        int chainId = 0;
+        String txHex;
+        try {
+            // check parameters
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+            if (params == null || chainIdObj == null || txHexObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            chainId = (Integer) chainIdObj;
+            txHex = (String) txHexObj;
+            TransactionDto<AliasDto> transactionDto = JSONUtils.json2pojo(txHex, TransactionDto.class,AliasDto.class);
+            result = aliasService.aliasTxValidate(chainId,transactionDto);
+        } catch (NulsRuntimeException e) {
+            Log.info("", e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            Log.error("", e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", result);
+        Log.debug("ac_aliasTxCommit end");
+        return success(result);
     }
 
     /**
@@ -164,7 +196,37 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_aliasTxCommit", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "commit the alias transaction")
     public Object aliasTxCommit(Map params) throws NulsException {
-        return null;
+        Log.debug("ac_aliasTxCommit start,params size:{}", params == null ? 0 : params.size());
+        boolean result = false;
+        int chainId = 0;
+        String txHex;
+        //TODO is it need to verify secondaryDataHex?
+        String secondaryDataHex;
+        try {
+            // check parameters
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+            Object secondaryDataHexObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
+            if (params == null || chainIdObj == null || txHexObj == null || secondaryDataHexObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            chainId = (Integer) chainIdObj;
+            txHex = (String) txHexObj;
+            secondaryDataHex = (String) secondaryDataHexObj;
+            Alias alias = new Alias();
+            alias.parse(new NulsByteBuffer(HexUtil.hexStringToBytes(txHex)));
+            result = aliasService.aliasTxCommit(chainId,alias);
+        } catch (NulsRuntimeException e) {
+            Log.info("", e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            Log.error("", e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", result);
+        Log.debug("ac_aliasTxCommit end");
+        return success(result);
     }
 
     /**
@@ -173,9 +235,39 @@ public class AliasCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_rollbackAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "rollback the alias info which saved in the db")
+    @CmdAnnotation(cmd = "ac_aliasTxRollback", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "rollback the alias info which saved in the db")
     public Object rollbackAlias(Map params) throws NulsException {
-        return null;
+        Log.debug("ac_aliasTxRollback start,params size:{}", params == null ? 0 : params.size());
+        boolean result = false;
+        int chainId = 0;
+        String txHex;
+        //TODO is it need to verify secondaryDataHex?
+        String secondaryDataHex;
+        try {
+            // check parameters
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+            Object secondaryDataHexObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
+            if (params == null || chainIdObj == null || txHexObj == null || secondaryDataHexObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            chainId = (Integer) chainIdObj;
+            txHex = (String) txHexObj;
+            secondaryDataHex = (String) secondaryDataHexObj;
+            Alias alias = new Alias();
+            alias.parse(new NulsByteBuffer(HexUtil.hexStringToBytes(txHex)));
+            result = aliasService.rollbackAlias(chainId,alias);
+        } catch (NulsRuntimeException e) {
+            Log.info("", e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            Log.error("", e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", result);
+        Log.debug("ac_aliasTxRollback end");
+        return success(result);
     }
 
 }
