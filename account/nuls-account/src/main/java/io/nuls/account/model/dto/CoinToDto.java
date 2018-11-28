@@ -23,25 +23,45 @@
  *
  */
 
-package io.nuls.account.model.bo.tx;
-
-import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Transaction;
-import io.nuls.tools.exception.NulsException;
+package io.nuls.account.model.dto;
 
 /**
- * @author: qinyifeng
+ *
+ * The dto represent the target coin  of the transaction
+ *
+ * @author: EdwardChan
+ *
+ * Nov.28th 2018
+ *
  */
-public class AliasTransaction extends Transaction {
 
-    public AliasTransaction() {
-        super(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
+
+public class CoinToDto {
+
+    /**
+     * the address
+     */
+    private String address;
+
+    /**
+     * the amount
+     */
+    private String amount;
+
+
+    public String getAddress() {
+        return address;
     }
 
-    protected AliasTransaction(int type) {
-        super(type);
+    public void setAddress(String address) {
+        this.address = address;
     }
 
+    public String getAmount() {
+        return amount;
+    }
+
+    public void setAmount(String amount) {
+        this.amount = amount;
+    }
 }

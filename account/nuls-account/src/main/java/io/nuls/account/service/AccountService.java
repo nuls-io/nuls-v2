@@ -26,6 +26,7 @@ package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
+import io.nuls.base.data.NulsSignData;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
@@ -211,4 +212,16 @@ public interface AccountService {
      */
     Account importAccountByKeyStore(AccountKeyStore keyStore, int chainId, String password, boolean overwrite) throws NulsException;
 
+    /**
+     * 数据摘要签名
+     * sign digest data
+     *
+     * @param digest   data digest.
+     * @param chainId
+     * @param address  address of account.
+     * @param password password of account.
+     * @return the signData byte[].
+     * @throws NulsException nulsException
+     */
+    byte[] signDigest(byte[] digest, int chainId, String address, String password) throws NulsException;
 }

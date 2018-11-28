@@ -332,8 +332,10 @@ public class AccountCmd extends BaseCmd {
             return failed(e.getErrorCode());
         }
         Log.debug("ac_getPriKeyByAddress end");
-        Map<String, String> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         map.put("priKey", unencryptedPrivateKey);
+        //账户是否存在
+        map.put("valid", true);
         return success(map);
     }
 
@@ -780,6 +782,53 @@ public class AccountCmd extends BaseCmd {
             return failed(e.getErrorCode());
         }
         Log.debug("ac_validationPassword end");
+        return success(map);
+    }
+
+    /**
+     * 数据摘要签名
+     * data digest signature
+     *
+     * @param params [chainId,address,password,digestHex]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_signDigest", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "data digest signature")
+    public Object signDigest(Map params) {
+        Log.debug("ac_signDigest start");
+        Map<String, String> map = new HashMap<>(1);
+        try {
+            // check parameters
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            Object digestHexObj = params == null ? null : params.get(RpcParameterNameConstant.DIGEST_HEX);
+            if (params == null || chainIdObj == null || addressObj == null || digestHexObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+
+            // parse params
+            //链ID
+            int chainId = (int) chainIdObj;
+            //账户地址
+            String address = (String) addressObj;
+            //账户密码
+            String password = (String) passwordObj;
+            //数据摘要
+            String digestHex = (String) digestHexObj;
+            //数据解码为字节数组
+            byte[] digest = HexUtil.decode(digestHex);
+            //sign digest data
+            byte[] signBytes = accountService.signDigest(digest, chainId, address, password);
+            if (null == signBytes || signBytes.length == 0) {
+                throw new NulsRuntimeException(AccountErrorCode.SIGNATURE_ERROR);
+            }
+            map.put(RpcConstant.SIGNATURE_HEX, HexUtil.encode(signBytes));
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        }
+        Log.debug("ac_signDigest end");
         return success(map);
     }
 
