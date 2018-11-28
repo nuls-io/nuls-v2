@@ -34,7 +34,6 @@ import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.CmdParameter;
 import io.nuls.rpc.model.message.*;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -57,72 +56,70 @@ import java.util.Map;
  */
 public class CmdHandler {
 
-
     /**
-     * Build basic message object
-     */
-    public static Message basicMessage(String messageId, MessageType messageType) {
-        Message message = new Message();
-        message.setMessageId(messageId);
-        message.setMessageType(messageType.name());
-        message.setTimestamp(TimeService.currentTimeMillis() + "");
-        message.setTimezone(DateUtils.getTimeZone() + "");
-        return message;
-    }
-
-    /**
-     * For NegotiateConnection
-     * Default NegotiateConnection object
-     */
-    public static NegotiateConnection defaultNegotiateConnection() {
-        NegotiateConnection negotiateConnection = new NegotiateConnection();
-        negotiateConnection.setProtocolVersion("1.0");
-        negotiateConnection.setCompressionAlgorithm("zlib");
-        negotiateConnection.setCompressionRate("0");
-        return negotiateConnection;
-    }
-
-    /**
-     * For NegotiateConnectionResponse
-     * Send NegotiateConnectionResponse
+     * 确认握手成功
+     * Confirm successful handshake
      */
     static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
         negotiateConnectionResponse.setNegotiationStatus("0");
         negotiateConnectionResponse.setNegotiationComment("Incompatible protocol version");
 
-        Message rspMsg = basicMessage(Constants.nextSequence(), MessageType.NegotiateConnectionResponse);
+        Message rspMsg = Constants.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 
     /**
-     * For NegotiateConnectionResponse
-     * Send NegotiateConnectionResponse
+     * 确认收到Request
+     * Confirm receipt of Request
      */
     static void ack(WebSocket webSocket, String messageId) throws JsonProcessingException {
         Ack ack = new Ack();
         ack.setRequestId(messageId);
 
-        Message rspMsg = basicMessage(Constants.nextSequence(), MessageType.Ack);
+        Message rspMsg = Constants.basicMessage(Constants.nextSequence(), MessageType.Ack);
         rspMsg.setMessageData(ack);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 
     /**
-     * @return After current processing, do need to keep the Request information and wait for the next processing?
+     * 取消订阅
+     * For Unsubscribe
+     */
+    static void unsubscribe(WebSocket webSocket, Message message) {
+        Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
+        for (String str : unsubscribe.getUnsubscribeMethods()) {
+            String key = webSocket.toString() + str;
+            ServerRuntime.cmdInvokeTime.put(key, Constants.UNSUBSCRIBE_TIMEMILLIS);
+        }
+    }
+
+    /**
+     * 处理Request，返回bool类型表示处理完之后是保留还是丢弃
+     * After current processing, do need to keep the Request information and wait for the next processing?
      * True: keep, False: remove
      */
     public static boolean response(WebSocket webSocket, Message message) {
         /*
+        从Message对象中获得Request
         Get Request from message
          */
         String messageId = message.getMessageId();
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
 
         String key = webSocket.toString() + messageId;
+
+        /*
+        计算如何处理该Request
+        Calculate how to handle the Request
+         */
         int nextProcess = nextProcess(key, Integer.parseInt(request.getSubscriptionPeriod()));
         try {
+            /*
+            nextProcess的具体含义参考"Constants.INVOKE_EXECUTE_KEEP"的注释
+            The specific meaning of nextProcess refers to the annotation of "Constants.INVOKE_EXECUTE_KEEP"
+             */
             switch (nextProcess) {
                 case Constants.INVOKE_EXECUTE_KEEP:
                     execute(webSocket, request.getRequestMethods(), messageId);
@@ -148,22 +145,37 @@ public class CmdHandler {
         }
     }
 
+    /**
+     * 处理Request，自动调用正确的方法，返回结果
+     * Processing Request, automatically calling the correct method, returning the result
+     */
     private static void execute(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
         for (Object method : requestMethods.keySet()) {
-            /*
-            Execute at once
-             */
+
             long startTimemillis = TimeService.currentTimeMillis();
             Map params = (Map) requestMethods.get(method);
-            CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
-                    ? ServerRuntime.getLocalInvokeCmd((String) method)
-                    : ServerRuntime.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
-            Message rspMessage = basicMessage(Constants.nextSequence(), MessageType.Response);
+            /*
+            构造返回的消息对象
+            Construct the returned message object
+             */
+            Message rspMessage = Constants.basicMessage(Constants.nextSequence(), MessageType.Response);
             Response response = ServerRuntime.newResponse(messageId, "", "");
             response.setRequestId(messageId);
             response.setResponseStatus(Constants.booleanString(false));
 
+            /*
+            从本地注册的cmd中得到对应的方法
+            Get the corresponding method from the locally registered CMD
+             */
+            CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
+                    ? ServerRuntime.getLocalInvokeCmd((String) method)
+                    : ServerRuntime.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
+
+            /*
+            找不到本地方法，则返回"CMD_NOT_FOUND"错误
+            If the local method cannot be found, the "CMD_NOT_FOUND" error is returned
+             */
             if (cmdDetail == null) {
                 response.setResponseComment(Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""));
                 response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
@@ -172,6 +184,10 @@ public class CmdHandler {
                 return;
             }
 
+            /*
+            根据注册信息进行参数的基础验证
+            Basic verification of parameters based on registration information
+             */
             String validationString = paramsValidation(cmdDetail, params);
             if (validationString != null) {
                 response.setResponseComment(validationString);
@@ -181,9 +197,12 @@ public class CmdHandler {
                 return;
             }
 
+            /*
+            调用本地方法，把结果封装为Message对象，通过Websocket返回
+            Call the local method, encapsulate the result as a Message object, and return it through Websocket
+             */
             response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
             response.setRequestId(messageId);
-            // 在结果外面自动封装方法名
             Map<String, Object> responseData = new HashMap<>(1);
             responseData.put(method.toString(), response.getResponseData());
             response.setResponseData(responseData);
@@ -196,95 +215,119 @@ public class CmdHandler {
     }
 
     /**
-     * Judging the Logic of Processing
-     * 1: Process only once, then discarding
-     * 2:
+     * 计算如何处理该Request
+     * Calculate how to handle the Request
      */
     private static int nextProcess(String key, int subscriptionPeriod) {
         if (subscriptionPeriod <= 0) {
             /*
-            Execute
+            不需要重复执行，返回INVOKE_EXECUTE_REMOVE（执行，然后丢弃）
+            No duplication of execution is required, return INVOKE_EXECUTE_REMOVE (execute, then discard)
              */
             return Constants.INVOKE_EXECUTE_REMOVE;
         }
 
         if (!ServerRuntime.cmdInvokeTime.containsKey(key)) {
             /*
-            If the key doesn't in map, Set the current time to invoke time
-            Then execute at once
+            第一次执行，设置当前时间为执行时间，返回INVOKE_EXECUTE_KEEP（执行，然后保留）
+            First execution, set the current time as execution time, return INVOKE_EXECUTE_KEEP (execution, then keep)
              */
             ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
             return Constants.INVOKE_EXECUTE_KEEP;
         } else if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
             /*
-            If the value is UNSUBSCRIBE_TIMEMILLIS, remove immediately without execution
+            得到取消订阅命令，返回INVOKE_SKIP_REMOVE（不执行，然后丢弃）
+            Get the unsubscribe command, return INVOKE_SKIP_REMOVE (not executed, then discarded)
              */
             ServerRuntime.cmdInvokeTime.remove(key);
             Log.info("Remove: " + key);
             return Constants.INVOKE_SKIP_REMOVE;
         } else if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
             /*
-            If the execution interval is not yet reached, skip this time without execution
+            没有达到执行条件，返回INVOKE_SKIP_KEEP（不执行，然后保留）
+            If the execution condition is not met, return INVOKE_SKIP_KEEP (not executed, then keep)
              */
             return Constants.INVOKE_SKIP_KEEP;
         } else {
             /*
-            Execute
+            以上都不是，返回INVOKE_EXECUTE_KEEP（执行，然后保留）
+            None of the above, return INVOKE_EXECUTE_KEEP (execute, then keep)
              */
             return Constants.INVOKE_EXECUTE_KEEP;
         }
     }
 
+    /**
+     * 验证参数的有效性
+     * Verify the validity of the parameters
+     */
     private static String paramsValidation(CmdDetail cmdDetail, Map params) {
-        // 判断参数是否正确
+
         List<CmdParameter> cmdParameterList = cmdDetail.getParameters();
         for (CmdParameter cmdParameter : cmdParameterList) {
-
             /*
+            如果定义了参数格式，但是参数为空，返回错误
             If the parameter format is specified, but the incoming parameter is empty, an error message is returned.
              */
             if (!StringUtils.isNull(cmdParameter.getParameterValidRange()) || !StringUtils.isNull(cmdParameter.getParameterValidRegExp())) {
                 if (params == null || params.get(cmdParameter.getParameterName()) == null) {
                     return Constants.PARAM_NULL + ":" + cmdParameter.getParameterName();
-//                    Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_NULL + ":" + cmdParameter.getParameterName());
-//                    response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-//                    rspMessage.setMessageData(response);
-//                    System.out.println("你参数空了：" + JSONUtils.obj2json(rspMessage));
-//                    webSocket.send(JSONUtils.obj2json(rspMessage));
-//                    return false;
                 }
             }
 
+            /*
+            验证参数是否在定义的范围内
+            Verify that the parameters are within the defined range
+             */
             if (!paramsRangeValidation(cmdParameter, params)) {
                 return Constants.PARAM_WRONG_RANGE + ":" + cmdParameter.getParameterName();
             }
 
+            /*
+            验证参数是否匹配定义的正则
+            Verify that parameters match defined regular expressions
+             */
             if (!paramsRegexValidation(cmdParameter, params)) {
                 return Constants.PARAM_WRONG_FORMAT + ":" + cmdParameter.getParameterName();
             }
-
         }
 
         return null;
     }
 
     /**
+     * 验证参数是否在定义的范围内
      * Verify that the range is correct
-     * Note:
-     * If no range is set, skipped directly.
-     * If the format in the Annotation is incorrect, skipped directly.
      */
     private static boolean paramsRangeValidation(CmdParameter cmdParameter, Map params) {
+        /*
+        没有设定范围，验证为真
+        If no range is set, Validation is true.
+         */
         if (StringUtils.isNull(cmdParameter.getParameterValidRange())) {
             return true;
         }
+
+        /*
+        设定范围格式错误，验证为真
+        If the format in the Annotation is incorrect, Validation is true.
+         */
         if (!cmdParameter.getParameterValidRange().matches(Constants.RANGE_REGEX)) {
             return true;
         }
+
+        /*
+        参数为空，验证为假
+        The parameter is empty, Validation is false
+         */
         if (params == null || params.get(cmdParameter.getParameterName()) == null) {
             return false;
         }
 
+        /*
+        获取设定的范围
+        Get the set range
+         */
         String range = cmdParameter.getParameterValidRange();
         int start = range.startsWith("(")
                 ? Integer.parseInt(range.substring(range.indexOf("(") + 1, range.indexOf(","))) + 1
@@ -294,58 +337,44 @@ public class CmdHandler {
                 : Integer.parseInt(range.substring(range.indexOf(",") + 1, range.indexOf("]")));
         int value = Integer.parseInt(params.get(cmdParameter.getParameterName()).toString());
 
+        /*
+        判断是否在范围内
+        Judge whether it is within the range
+         */
         return start <= value && value <= end;
     }
 
+    /**
+     * 验证参数是否匹配定义的正则
+     * Verify that parameters match defined regular expressions
+     */
     private static boolean paramsRegexValidation(CmdParameter cmdParameter, Map params) {
+        /*
+        没有设定正则，验证为真
+        If no regex is set, Validation is true.
+         */
         if (StringUtils.isNull(cmdParameter.getParameterValidRegExp())) {
             return true;
         }
+
+        /*
+        参数为空，验证为假
+        The parameter is empty, Validation is false
+         */
         if (params == null || params.get(cmdParameter.getParameterName()) == null) {
             return false;
         }
 
-//            try {
-//                if (params == null || params.get(cmdParameter.getParameterName()) == null) {
-//                    Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_NULL + ":" + cmdParameter.getParameterName());
-//                    response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-//                    rspMessage.setMessageData(response);
-//                    System.out.println("你参数空了：" + JSONUtils.obj2json(rspMessage));
-//                    webSocket.send(JSONUtils.obj2json(rspMessage));
-//                    return false;
-//                }
+        /*
+        判断是否匹配正则表达式
+        Verify that parameters match defined regular expressions
+         */
         String value = params.get(cmdParameter.getParameterName()).toString();
         return value.matches(cmdParameter.getParameterValidRegExp());
-//        if (!value.matches(cmdParameter.getParameterValidRegExp())) {
-//            Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.PARAM_WRONG_FORMAT + ":" + cmdParameter.getParameterName());
-//            response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-//            rspMessage.setMessageData(response);
-//            System.out.println("你Format错了：" + JSONUtils.obj2json(rspMessage));
-//            webSocket.send(JSONUtils.obj2json(rspMessage));
-//            return false;
-//        }
-//            } catch (Exception e) {
-//                Log.error(e);
-//                Response response = ServerRuntime.newResponse(messageId, Constants.booleanString(false), e.getMessage());
-//                response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-//                rspMessage.setMessageData(response);
-//                webSocket.send(JSONUtils.obj2json(rspMessage));
-//                return false;
-//            }
-
     }
 
 
-    /**
-     * For Unsubscribe
-     */
-    static void unsubscribe(WebSocket webSocket, Message message) {
-        Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
-        for (String str : unsubscribe.getUnsubscribeMethods()) {
-            String key = webSocket.toString() + str;
-            ServerRuntime.cmdInvokeTime.put(key, Constants.UNSUBSCRIBE_TIMEMILLIS);
-        }
-    }
+
 
 
     /**
