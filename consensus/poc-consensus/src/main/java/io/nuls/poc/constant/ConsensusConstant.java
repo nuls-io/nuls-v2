@@ -93,8 +93,8 @@ public interface ConsensusConstant {
     int MAX_ACCEPT_NUM_OF_DEPOSIT = 250;
     int MAX_AGENT_COUNT_OF_ADRRESS = 1;
 
-    Na SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = Na.parseNuls(200000);
-    Na SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = Na.parseNuls(500000);
+    String SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = String.valueOf(200000);
+    String SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = String.valueOf(500000);
 
     /**
      * unit:round of consensus
@@ -134,7 +134,7 @@ public interface ConsensusConstant {
      * 每出一个块获得的共识奖励，一年总的共识奖励金5000000，一年总出块数3154600,相除得到每一块的奖励金
      * value = 5000000/3154600
      */
-    Na BLOCK_REWARD = Na.valueOf(158548960);
+    String BLOCK_REWARD = String.valueOf(158548960);
 
     /**
      * 信誉值的最小值，小于等于该值会给红牌处罚

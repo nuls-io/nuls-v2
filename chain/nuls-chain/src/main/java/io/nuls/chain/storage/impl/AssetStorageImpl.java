@@ -45,9 +45,9 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      * @return true/false
      */
     @Override
-    public boolean save(long key, Asset asset) {
+    public boolean save(String key, Asset asset) {
         try {
-            return RocksDBService.put(TBL, ByteUtils.longToBytes(key), asset.serialize());
+            return RocksDBService.put(TBL, key.getBytes(), asset.serialize());
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -61,8 +61,8 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      * @return Asset object
      */
     @Override
-    public Asset load(long key) {
-        byte[] bytes = RocksDBService.get(TBL, ByteUtils.longToBytes(key));
+    public Asset load(String key) {
+        byte[] bytes = RocksDBService.get(TBL, key.getBytes());
         if (bytes == null) {
             return null;
         }
@@ -84,9 +84,9 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      * @return true/false
      */
     @Override
-    public boolean delete(long key) {
+    public boolean delete(String key) {
         try {
-            return RocksDBService.delete(TBL, ByteUtils.longToBytes(key));
+            return RocksDBService.delete(TBL, key.getBytes());
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -117,26 +117,4 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
         return assetList;
     }
 
-    /**
-     * Get asset by symbol
-     *
-     * @param symbol Asset symbol
-     * @return Asset object
-     */
-    @Override
-    public Asset getBySymbol(String symbol) {
-        List<byte[]> bytesList = RocksDBService.valueList(TBL);
-        for (byte[] bytes : bytesList) {
-            try {
-                Asset asset = new Asset();
-                asset.parse(bytes, 0);
-                if (asset.getSymbol().equals(symbol)) {
-                    return asset;
-                }
-            } catch (NulsException e) {
-                Log.error(e);
-            }
-        }
-        return null;
-    }
 }

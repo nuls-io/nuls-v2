@@ -1,6 +1,7 @@
 package io.nuls.chain.service.impl;
 
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.ChainAsset;
@@ -34,56 +35,100 @@ public class AssetServiceImpl implements AssetService {
     private ChainStorage chainStorage;
 
     /**
+     * delete asset
+     *
+     * @param asset Asset object that needs to be delete
+     * @return true/false
+     */
+
+    @Override
+    public boolean deleteAsset(Asset asset) {
+        String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId());
+        String key = CmRuntimeInfo.getChainAssetKey(asset.getChainId(), assetKey);
+        assetStorage.delete(assetKey);
+        chainAssetStorage.delete(key);
+        return true;
+    }
+    /**
      * Save asset
      *
      * @param asset Asset object that needs to be saved
      * @return true/false
      */
     @Override
-    public boolean addAsset(Asset asset) {
-        boolean s1 = assetStorage.save(asset.getAssetId(), asset);
-        String key = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
+    public boolean createAsset(Asset asset) {
+        String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId());
+        String key = CmRuntimeInfo.getChainAssetKey(asset.getChainId(), assetKey);
+        asset.addChainId(asset.getChainId());
+        boolean s1 = assetStorage.save(key, asset);
         ChainAsset chainAsset = new ChainAsset();
         chainAsset.setChainId(asset.getChainId());
         chainAsset.setAssetId(asset.getAssetId());
-        chainAsset.setCurrentNumber(asset.getInitNumber());
+        chainAsset.setInitNumber(asset.getInitNumber());
         boolean s2 = chainAssetStorage.save(key, chainAsset);
         if (s1 && s2) {
             return true;
         } else {
-            assetStorage.delete(asset.getAssetId());
+            assetStorage.delete(key);
             chainAssetStorage.delete(key);
             return false;
         }
     }
+    /**
+     * saveOrUpdate chainAsset
+     *
+     *@param    chainAsset
+     * @param    chainId
+     * @return true/false
+     */
+    @Override
+    public boolean saveOrUpdateChainAsset(int chainId,ChainAsset chainAsset) {
+        String assetKey = CmRuntimeInfo.getAssetKey(chainAsset.getChainId(),chainAsset.getAssetId());
+        String key = CmRuntimeInfo.getChainAssetKey(chainId, assetKey);
+       return chainAssetStorage.save(key, chainAsset);
+    }
+
+    /**
+     * update asset
+     *
+     * @param asset
+     * @return
+     */
+    @Override
+    public boolean updateAsset(Asset asset) {
+        String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId());
+        assetStorage.save(assetKey,asset);
+        return true;
+    }
+
 
     /**
      * Find asset based on key
      *
-     * @param assetId The asset ID
+     * @param assetKey The asset key
      * @return Asset object
      */
     @Override
-    public Asset getAsset(long assetId) {
-        return assetStorage.load(assetId);
+    public Asset getAsset(String assetKey) {
+        return assetStorage.load(assetKey);
     }
 
     /**
      * Set the status of asset
      *
-     * @param assetId   The asset ID
+     * @param assetKey   The asset key
      * @param available The status of asset
      * @return true/false
      */
     @Override
-    public boolean setStatus(long assetId, boolean available) {
-        Asset asset = assetStorage.load(assetId);
+    public boolean setStatus(String assetKey, boolean available) {
+        Asset asset = assetStorage.load(assetKey);
         if (asset == null) {
             return false;
         }
         asset.setAvailable(available);
         asset.setLastUpdateTime(TimeService.currentTimeMillis());
-        return assetStorage.save(assetId, asset);
+        return assetStorage.save(assetKey, asset);
     }
 
 
@@ -101,23 +146,14 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public boolean assetExist(Asset asset) {
-        Map<String, String> errorMap = uniqueValidator(asset);
-        if(errorMap.size()> 0){
+       Asset dbAsset =  assetStorage.load(CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId()));
+        if(null !=dbAsset){
             return true;
         }
         return false;
     }
 
-    /**
-     * Get asset by symbol
-     *
-     * @param symbol Asset symbol
-     * @return Asset object
-     */
-    @Override
-    public Asset getAssetBySymbol(String symbol) {
-        return assetStorage.getBySymbol(symbol);
-    }
+
 
     /**
      * Verification of basic data
@@ -128,52 +164,47 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public Map<String, String> basicValidator(Asset asset) {
         Map<String, String> errMap = new HashMap<>(16);
-        if (asset.getSymbol() == null) {
-            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_SYMBOL_NULL);
-        } else if (asset.getSymbol().length() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_SYMBOL_MAX))) {
-            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_SYMBOL_MAX);
-        }
-
-        if (asset.getName() == null) {
-            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_NAME_NULL);
-        } else if (asset.getName().length() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_NAME_MAX))) {
-            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_NAME_MAX);
-        }
-
-        if (asset.getDepositNuls() != Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS))) {
-            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_DEPOSITNULS);
-        }
-        if (asset.getInitNumber() < Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_INITNUMBER_MIN))) {
-            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_INITNUMBER_MIN);
-        }
-        if (asset.getInitNumber() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_INITNUMBER_MAX))) {
-            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_INITNUMBER_MAX);
-        }
-        if (asset.getDecimalPlaces() < Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DECIMALPLACES_MIN))) {
-            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_DECIMALPLACES_MIN);
-        }
-        if (asset.getDecimalPlaces() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DECIMALPLACES_MAX))) {
-            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_DECIMALPLACES_MAX);
-        }
+//        if (asset.getSymbol() == null) {
+//            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_SYMBOL_NULL);
+//        } else if (asset.getSymbol().length() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_SYMBOL_MAX))) {
+//            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_SYMBOL_MAX);
+//        }
+//
+//        if (asset.getName() == null) {
+//            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_NAME_NULL);
+//        } else if (asset.getName().length() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_NAME_MAX))) {
+//            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_NAME_MAX);
+//        }
+//
+//        if (asset.getDepositNuls() != Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS))) {
+//            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_DEPOSITNULS);
+//        }
+//        if (asset.getInitNumber() < Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_INITNUMBER_MIN))) {
+//            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_INITNUMBER_MIN);
+//        }
+//        if (asset.getInitNumber() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_INITNUMBER_MAX))) {
+//            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_INITNUMBER_MAX);
+//        }
+//        if (asset.getDecimalPlaces() < Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DECIMALPLACES_MIN))) {
+//            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_DECIMALPLACES_MIN);
+//        }
+//        if (asset.getDecimalPlaces() > Integer.parseInt(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DECIMALPLACES_MAX))) {
+//            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_DECIMALPLACES_MAX);
+//        }
 
         return errMap;
     }
 
+
     /**
-     * Verification of unique data in db
-     *
+     * getChainAsset
      * @param asset Asset object
      * @return Error map
      */
     @Override
-    public Map<String, String> uniqueValidator(Asset asset) {
-        Map<String, String> errMap = new HashMap<>(16);
-        if (getAsset(asset.getAssetId()) != null) {
-            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_ID_EXIST);
-        }
-        if (getAssetBySymbol(asset.getSymbol()) != null) {
-            CmRuntimeInfo.addError(errMap, CmConstants.ERROR_ASSET_SYMBOL_EXIST);
-        }
-        return errMap;
+    public ChainAsset getChainAsset(int chainId,Asset asset) {
+        ChainAsset chainAsset =chainAssetStorage.load(CmRuntimeInfo.getChainAssetKey(chainId,CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId())));
+        return chainAsset;
+
     }
 }

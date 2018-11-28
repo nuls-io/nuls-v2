@@ -4,10 +4,13 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.chain.model.tx.txdata.AssetTx;
+import io.nuls.chain.model.tx.txdata.ChainTx;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author tangyi
@@ -16,7 +19,7 @@ import java.io.IOException;
  */
 public class Asset extends BaseNulsData {
     private int chainId;
-    private long assetId;
+    private int assetId;
     private String symbol;
     private String name;
     private int depositNuls;
@@ -27,6 +30,8 @@ public class Asset extends BaseNulsData {
     private long lastUpdateTime;
     private byte[] address;
     private String txHash;
+    /*资产流通的链集合*/
+    List<int> chainIds = new ArrayList();
 
     public int getChainId() {
         return chainId;
@@ -36,11 +41,11 @@ public class Asset extends BaseNulsData {
         this.chainId = chainId;
     }
 
-    public long getAssetId() {
+    public int getAssetId() {
         return assetId;
     }
 
-    public void setAssetId(long assetId) {
+    public void setAssetId(int assetId) {
         this.assetId = assetId;
     }
 
@@ -124,6 +129,16 @@ public class Asset extends BaseNulsData {
         this.txHash = txHash;
     }
 
+    public List<int> getChainIds() {
+        return chainIds;
+    }
+
+    public void setChainIds(List<int> chainIds) {
+        this.chainIds = chainIds;
+    }
+    public void addChainId(int chainId){
+        chainIds.add(chainId);
+    }
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
@@ -138,12 +153,19 @@ public class Asset extends BaseNulsData {
         stream.writeUint48(lastUpdateTime);
         stream.writeBytesWithLength(address);
         stream.writeString(txHash);
+        int chainIdsSize = (chainIds == null ? 0 : chainIds.size());
+        stream.writeVarInt(chainIdsSize);
+        if (null != chainIds) {
+            for (int chainId : chainIds) {
+                stream.writeUint16(chainId);
+            }
+        }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
-        this.assetId = byteBuffer.readUint48();
+        this.assetId = byteBuffer.readUint16();
         this.symbol = byteBuffer.readString();
         this.name = byteBuffer.readString();
         this.depositNuls = byteBuffer.readInt32();
@@ -154,6 +176,14 @@ public class Asset extends BaseNulsData {
         this.lastUpdateTime = byteBuffer.readUint48();
         this.address=byteBuffer.readByLengthByte();
         this.txHash = byteBuffer.readString();
+        int chainIdSize = (int)byteBuffer.readVarInt();
+        if (0 < chainIdSize) {
+            for (int i = 0; i < chainIdSize; i++) {
+                int  chainId=byteBuffer.readUint16();
+                chainIds.add(chainId);
+            }
+        }
+
     }
 
     @Override
@@ -162,7 +192,7 @@ public class Asset extends BaseNulsData {
         // chainId
         size += SerializeUtils.sizeOfUint16();
         // assetId
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(symbol);
         size += SerializeUtils.sizeOfString(name);
         // depositNuls
@@ -178,6 +208,13 @@ public class Asset extends BaseNulsData {
         size += SerializeUtils.sizeOfUint48();
         size+=SerializeUtils.sizeOfBytes(address);
         size += SerializeUtils.sizeOfString(txHash);
+
+        size+= SerializeUtils.sizeOfVarInt(chainIds == null ? 0 : chainIds.size());
+        if (null != chainIds) {
+            for (int chainId : chainIds) {
+                size += SerializeUtils.sizeOfUint16();
+            }
+        }
         return size;
     }
     public byte [] parseToTransaction() throws IOException {
@@ -192,6 +229,9 @@ public class Asset extends BaseNulsData {
         assetTx.setSymbol(this.getSymbol());
         return assetTx.serialize();
     }
+    public Asset(int assetId){
+        this.assetId = assetId;
+    }
     public Asset(AssetTx tx){
         this.address = tx.getAddress();
         this.assetId = tx.getAssetId();
@@ -202,7 +242,16 @@ public class Asset extends BaseNulsData {
         this.symbol = tx.getSymbol();
         this.name = tx.getName();
     }
-
+    public Asset(ChainTx tx){
+        this.address = tx.getAddress();
+        this.assetId = tx.getAssetId();
+        this.chainId = tx.getChainId();
+        this.decimalPlaces = tx.getDecimalPlaces();
+        this.depositNuls = tx.getDepositNuls();
+        this.initNumber = tx.getInitNumber();
+        this.symbol = tx.getSymbol();
+        this.name = tx.getName();
+    }
     public Asset(){
         super();
     }

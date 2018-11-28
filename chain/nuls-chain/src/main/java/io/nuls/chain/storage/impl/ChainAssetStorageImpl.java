@@ -91,27 +91,5 @@ public class ChainAssetStorageImpl implements ChainAssetStorage, InitializingBea
         }
     }
 
-    /**
-     * Get asset information by chain ID
-     *
-     * @param chainId The chain ID
-     * @return ChainAsset object
-     */
-    @Override
-    public List<ChainAsset> getByChain(int chainId) {
-        List<byte[]> bytesList = RocksDBService.valueList(TBL);
-        List<ChainAsset> chainAssetList = new ArrayList<>();
-        for (byte[] bytes : bytesList) {
-            try {
-                ChainAsset chainAsset = new ChainAsset();
-                chainAsset.parse(bytes, 0);
-                if (chainAsset.getChainId() == chainId) {
-                    chainAssetList.add(chainAsset);
-                }
-            } catch (NulsException e) {
-                Log.error(e);
-            }
-        }
-        return chainAssetList;
-    }
+
 }
