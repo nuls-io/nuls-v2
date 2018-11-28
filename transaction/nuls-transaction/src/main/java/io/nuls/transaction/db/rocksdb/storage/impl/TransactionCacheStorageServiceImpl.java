@@ -10,7 +10,7 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-import io.nuls.transaction.constant.TransactionErrorCode;
+import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.rocksdb.storage.TransactionCacheStorageService;
 
 import java.io.IOException;
@@ -34,14 +34,14 @@ public class TransactionCacheStorageServiceImpl implements TransactionCacheStora
                 RocksDBService.destroyTable(TRANSACTION_CACHE_KEY_NAME);
             } catch (Exception e) {
                 Log.error(e);
-                throw new NulsRuntimeException(TransactionErrorCode.DB_DELETE_ERROR);
+                throw new NulsRuntimeException(TxErrorCode.DB_DELETE_ERROR);
             }
         }
         try {
             RocksDBService.createTable(TRANSACTION_CACHE_KEY_NAME);
         } catch (Exception e) {
             Log.error(e);
-            throw new NulsRuntimeException(TransactionErrorCode.DB_TABLE_CREATE_ERROR);
+            throw new NulsRuntimeException(TxErrorCode.DB_TABLE_CREATE_ERROR);
         }
     }
 

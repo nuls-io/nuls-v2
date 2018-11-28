@@ -90,7 +90,7 @@ public class TxRegister {
         this.rollback = rollback;
     }
 
-    public boolean isSystemTx() {
+    public boolean getSystemTx() {
         return systemTx;
     }
 
@@ -98,7 +98,7 @@ public class TxRegister {
         this.systemTx = systemTx;
     }
 
-    public boolean isUnlockTx() {
+    public boolean getUnlockTx() {
         return unlockTx;
     }
 
@@ -106,7 +106,7 @@ public class TxRegister {
         this.unlockTx = unlockTx;
     }
 
-    public boolean isVerifySignature() {
+    public boolean getVerifySignature() {
         return verifySignature;
     }
 
