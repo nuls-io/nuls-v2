@@ -32,65 +32,57 @@ import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
- * @program: nuls2.0
- * @description:
- * @author: lan
- * @create: 2018/11/26
+ * @program nuls2.0
+ * @description
+ * @author lan
+ * @date 2018/11/26
  **/
 @Component
 public class SeqStorageImpl implements SeqStorage, InitializingBean {
     private static final String TBL = "seq";
-    /**
-     * 创建assetId
-     * create asset id
-     * @return
-     */
-//    @Override
-//    public int createSeqAsset(int chainId) {
-//        try {
-//            int assetId = getSeqAsset(chainId);
-//            assetId = assetId+1;
-//            RocksDBService.put(TBL, ByteUtils.intToBytes(chainId), ByteUtils.intToBytes(assetId));
-//            return assetId;
-//        } catch (Exception e) {
-//            Log.error(e);
-//        }
-//        return 0;
-//    }
+    private static final Map<Integer, Integer> SEQ_MAP = new HashMap<>();
 
     /**
-     * 获取 assetId
-     * get asset id
-     *
-     * @return
+     * 得到链的下一个序列号
      */
     @Override
-    public int getSeqAsset(int chainId) {
+    public int nextSeq(int chainId) {
         try {
-            byte[] assetSeq = RocksDBService.get(TBL, ByteUtils.intToBytes(chainId));
-            if (null == assetSeq) {
-                return 0;
+            int nextSeq = SEQ_MAP.get(chainId) + 1;
+            if (setSeq(chainId, nextSeq)) {
+                return nextSeq;
+            } else {
+                return nextSeq(chainId);
             }
-            int currSeq = ByteUtils.bytesToInt(assetSeq);
-            setSeqAsset(chainId, currSeq + 1);
-            return ByteUtils.bytesToInt(assetSeq);
         } catch (Exception e) {
             Log.error(e);
         }
         return 0;
     }
 
+    /**
+     * 设置链的序列号
+     */
     @Override
-    public void setSeqAsset(int chainId, int seq) {
-        try {
-            byte[] currSeqByte = RocksDBService.get(TBL, ByteUtils.intToBytes(chainId));
-            int currSeq = currSeqByte == null ? 0 : ByteUtils.bytesToInt(currSeqByte);
-            if (seq > currSeq) {
-                RocksDBService.put(TBL, ByteUtils.intToBytes(chainId), ByteUtils.intToBytes(seq));
+    public boolean setSeq(int chainId, int tarSeq) {
+        synchronized (SEQ_MAP) {
+            int currSeq = SEQ_MAP.get(chainId);
+            if (tarSeq > currSeq) {
+                SEQ_MAP.put(chainId, tarSeq);
+                try {
+                    return RocksDBService.put(TBL, ByteUtils.intToBytes(chainId), ByteUtils.intToBytes(tarSeq));
+                } catch (Exception e) {
+                    Log.error(e);
+                    return false;
+                }
+            } else {
+                return false;
             }
-        } catch (Exception e) {
-            Log.error(e);
         }
     }
 
@@ -103,6 +95,15 @@ public class SeqStorageImpl implements SeqStorage, InitializingBean {
         try {
             if (!RocksDBService.existTable(TBL)) {
                 RocksDBService.createTable(TBL);
+            }
+
+            List<byte[]> keyList = RocksDBService.keyList(TBL);
+            for (byte[] key : keyList) {
+                byte[] value = RocksDBService.get(TBL, key);
+                try {
+                    SEQ_MAP.put(ByteUtils.bytesToInt(key), ByteUtils.bytesToInt(value));
+                } catch (Exception ignored) {
+                }
             }
         } catch (Exception e) {
             Log.error(e);
