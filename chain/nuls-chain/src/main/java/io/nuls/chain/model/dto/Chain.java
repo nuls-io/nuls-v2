@@ -40,7 +40,7 @@ public class Chain extends BaseNulsData {
     private int delAssetId;
 
     /*链上创建的资产*/
-    List<int> assetIds = new ArrayList();
+    List<Integer> assetIds = new ArrayList();
     /*链上的流通资产*/
     List<String> assetsKey = new ArrayList<>();
     public int getChainId() {
@@ -157,11 +157,11 @@ public class Chain extends BaseNulsData {
         this.regAssetId = regAssetId;
     }
 
-    public List<int> getAssetIds() {
+    public List<Integer> getAssetIds() {
         return assetIds;
     }
 
-    public void setAssetIds(List<int> assetIds) {
+    public void setAssetIds(List<Integer> assetIds) {
         this.assetIds = assetIds;
     }
 

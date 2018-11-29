@@ -74,7 +74,7 @@ public class ChainCmd extends BaseCmd {
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "symbol", parameterType = "array")
     @Parameter(parameterName = "name", parameterType = "String")
-    @Parameter(parameterName = "initNumber", parameterType = "long", parameterValidRange = "[1,4294967295]", parameterValidRegExp = "")
+    @Parameter(parameterName = "initNumber", parameterType = "String")
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]", parameterValidRegExp = "")
     public Response chainReg(Map params) {
         try {
@@ -101,7 +101,7 @@ public class ChainCmd extends BaseCmd {
             asset.setSymbol((String) params.get("symbol"));
             asset.setName((String) params.get("name"));
             asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS)));
-            asset.setInitNumber(Long.valueOf(params.get("initNumber").toString()));
+            asset.setInitNumber(params.get("initNumber").toString());
             asset.setDecimalPlaces(Short.valueOf(params.get("decimalPlaces").toString()));
             asset.setAvailable(true);
             asset.setCreateTime(TimeService.currentTimeMillis());

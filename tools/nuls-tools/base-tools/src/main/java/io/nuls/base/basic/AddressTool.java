@@ -61,6 +61,25 @@ public class AddressTool {
     }
 
     /**
+     * 根据地址字符串查询地址所属链ID
+     *
+     * @param addressString
+     * @return
+     */
+    public static int getChainIdByAddress(String addressString) {
+        int chainId;
+        try {
+            byte[] addressBytes = AddressTool.getAddressBytes(addressString);
+            NulsByteBuffer byteBuffer = new NulsByteBuffer(addressBytes);
+            chainId = byteBuffer.readShort();
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+        return chainId;
+    }
+
+    /**
      * 根据公钥查询地址字节数组
      *
      * @param publicKey
@@ -156,6 +175,25 @@ public class AddressTool {
             return false;
         }
         return true;
+    }
+
+    /**
+     *通过地址获得chainId
+     * @param bytes
+     * @return
+     */
+    public static int getChainIdByAddress(byte[] bytes) {
+        if (null == bytes || bytes.length != Address.ADDRESS_LENGTH) {
+            return 0;
+        }
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+        try {
+            return (int) byteBuffer.readShort();
+        } catch (NulsException e) {
+            Log.error(e);
+            return 0;
+        }
+
     }
 
     /**

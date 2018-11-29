@@ -4,6 +4,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.round.MeetingMember;
@@ -26,6 +27,7 @@ import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.RoundManager;
+import io.nuls.poc.utils.util.CoinDataUtil;
 import io.nuls.poc.utils.util.ConsensusUtil;
 import io.nuls.poc.utils.util.PoConvertUtil;
 import io.nuls.poc.utils.validator.ValidatorManager;
@@ -98,13 +100,8 @@ public class ConsensusServiceImpl implements ConsensusService {
             agent.setDeposit(dto.getDeposit());
             agent.setCommissionRate(dto.getCommissionRate());
             tx.setTxData(agent.serialize());
-            //3.2.调用账本模块获取账户可用余额和nonce值，组装coinData
-            CoinData coinData = new CoinData();
-            List<CoinFrom> fromList = new ArrayList<>();
-            List<CoinTo> toList = new ArrayList<>();
-            /*List<Coin> toList = new ArrayList<>();
-            toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), ConsensusConstant.CONSENSUS_LOCK_TIME));
-            coinData.setTo(toList);*/
+            //3.2.组装coinData
+            CoinData coinData = CoinDataUtil.getCoinData(agent.getAgentAddress(),dto.getChainId(),dto.getAssetId(),dto.getDeposit(),ConsensusConstant.CONSENSUS_LOCK_TIME,tx.size()+ P2PHKSignature.SERIALIZE_LENGTH);
             tx.setCoinData(coinData.serialize());
             //todo 4.交易签名
 
@@ -159,7 +156,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTxData(stopAgent.serialize());
-            CoinData coinData = ConsensusUtil.getStopAgentCoinData(chainId, agent, TimeService.currentTimeMillis() + ConfigManager.config_map.get(chainId).getStopAgent_lockTime());
+            CoinData coinData = ConsensusUtil.getStopAgentCoinData(chainId, assetId, agent, TimeService.currentTimeMillis() + ConfigManager.config_map.get(chainId).getStopAgent_lockTime());
             tx.setCoinData(coinData.serialize());
             String fee = TransactionFeeCalculator.getMaxFee(tx.size());
             coinData.getTo().get(0).setAmount(BigIntegerUtils.subToString(coinData.getTo().get(0).getAmount(),fee));
@@ -205,15 +202,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             deposit.setAgentHash(NulsDigestData.fromDigestHex(dto.getAgentHash()));
             deposit.setDeposit(dto.getDeposit());
             tx.setTxData(deposit.serialize());
-            CoinData coinData = new CoinData();
-            List<CoinFrom> fromList = new ArrayList<>();
-            List<CoinTo> toList = new ArrayList<>();
-            /*List<Coin> toList = new ArrayList<>();
-            toList.add(new Coin(deposit.getAddress(), deposit.getDeposit(), ConsensusConstant.CONSENSUS_LOCK_TIME));
-            coinData.setTo(toList);*/
-            //todo 获取coinData （账本模块），处理返回结果
-            Map<String,Object> result = new HashMap<>();
-
+            CoinData coinData = CoinDataUtil.getCoinData(deposit.getAddress(),dto.getChainId(),dto.getAssetId(),dto.getDeposit(),ConsensusConstant.CONSENSUS_LOCK_TIME,tx.size()+ P2PHKSignature.SERIALIZE_LENGTH);
             tx.setCoinData(coinData.serialize());
             //todo 交易签名
 
@@ -247,38 +236,34 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             //todo 账户验证（账户模块）
 
-            Transaction concalDepositTransaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
-            CancelDeposit cancelDeposit = new CancelDeposit();
             NulsDigestData hash = NulsDigestData.fromDigestHex(dto.getTxHash());
             //todo 从交易模块获取委托交易（交易模块）+ 返回数据处理
             Transaction depositTransaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
-            cancelDeposit.setAddress(AddressTool.getAddress(dto.getAddress()));
-            cancelDeposit.setJoinTxHash(hash);
-            concalDepositTransaction.setTxData(cancelDeposit.serialize());
-            CoinData coinData = new CoinData();
-            /*List<Coin> toList = new ArrayList<>();
+            if(depositTransaction == null){
+                return Result.getFailed(ConsensusErrorCode.TX_NOT_EXIST);
+            }
+            CoinData depositCoinData = new CoinData();
+            depositCoinData.parse(depositTransaction.getCoinData(),0);
             Deposit deposit = new Deposit();
             deposit.parse(depositTransaction.getTxData(),0);
-            toList.add(new Coin(cancelDeposit.getAddress(), deposit.getDeposit(), 0));
-            coinData.setTo(toList);
-            List<Coin> fromList = new ArrayList<>();
-            CoinData dtCoinData = new CoinData();
-            dtCoinData.parse(depositTransaction.getCoinData(),0);
-            for (int index = 0; index <dtCoinData.getTo().size(); index++) {
-                Coin coin = dtCoinData.getTo().get(index);
-                if (coin.getLockTime() == -1L && coin.getNa().equals(deposit.getDeposit())) {
-                    coin.setOwner(ByteUtils.concatenate(hash.serialize(), new VarInt(index).encode()));
-                    fromList.add(coin);
+            boolean flag = false;
+            for (CoinTo to:depositCoinData.getTo()) {
+                if(to.getLockTime() == -1L && BigIntegerUtils.isEqual(to.getAmount(),deposit.getDeposit())){
+                    flag = true;
                     break;
                 }
             }
-            if (fromList.isEmpty()) {
-                throw new NulsException(ConsensusErrorCode.DATA_ERROR);
+            if(!flag){
+                return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
             }
-            coinData.setFrom(fromList);*/
+            Transaction concalDepositTransaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
+            CancelDeposit cancelDeposit = new CancelDeposit();
+            cancelDeposit.setAddress(AddressTool.getAddress(dto.getAddress()));
+            cancelDeposit.setJoinTxHash(hash);
+            concalDepositTransaction.setTxData(cancelDeposit.serialize());
+            CoinData coinData = CoinDataUtil.getUnlockCoinData(cancelDeposit.getAddress(),dto.getChainId(),dto.getAssetId(),deposit.getDeposit(),0,concalDepositTransaction.size()+P2PHKSignature.SERIALIZE_LENGTH);
+            coinData.getFrom().get(0).setNonce(hash.getDigestBytes());
             concalDepositTransaction.setCoinData(coinData.serialize());
-            String fee = TransactionFeeCalculator.getMaxFee(concalDepositTransaction.size());
-            coinData.getTo().get(0).setAmount(BigIntegerUtils.subToString(coinData.getTo().get(0).getAmount(),fee));
             //todo 交易签名
 
             //todo 将交易传递给交易管理模块
@@ -891,15 +876,16 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result stopAgentValid(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null) {
+        if (params.get("chain_id") == null || params.get("tx")==null || params.get("assetId") == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
             int chain_id = (Integer) params.get("chain_id");
+            int assetId = (Integer) params.get("assetId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
-            boolean result = validatorManager.validateStopAgent(chain_id,transaction);
+            boolean result = validatorManager.validateStopAgent(chain_id,assetId,transaction);
             if(!result){
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
@@ -907,6 +893,9 @@ public class ConsensusServiceImpl implements ConsensusService {
         }catch (NulsException e){
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
+        }catch (IOException et){
+            Log.error(et);
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
 

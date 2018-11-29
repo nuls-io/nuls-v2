@@ -76,8 +76,8 @@ public class HostInfo {
     }
 
     /**
-     * Randomly get the port number
-     * Range from 10,000 to 20,000
+     * 在10000-20000中随机生成端口号，如果已经被使用则重新生成
+     * Randomly get the port number, range from 10,000 to 20,000
      * Re-random if the port already exists
      */
     public static int randomPort() {
@@ -94,6 +94,7 @@ public class HostInfo {
     }
 
     /**
+     * 验证端口是否已经在本地被使用
      * Test if the local port is being used
      */
     private static boolean isLocalPortUsing(int port) {

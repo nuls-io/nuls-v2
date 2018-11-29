@@ -38,34 +38,37 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CmdAnnotation {
     /*
+    调用接口的字符串
     The string used to invoke method
      */
     String cmd();
 
     /*
+    接口的版本号
     The version of the method
      */
     double version();
 
     /*
-    The permission level of the method. Includes: Constants.PUBLIC, Constants.PRIVATE, Constants.ADMIN
-    Default: Constants.PRIVATE
+    接口权限级别，参考Constants.PUBLIC的注释，默认为PRIVATE
+    Interface permission level, refer to Constants.PUBLIC's annotation, default value is PRIVATE
      */
     String scope() default Constants.PRIVATE;
 
     /*
-    Calling frequency of a connection
-    Unit: block number
+    返回结果的改变次数
+    Number of changes of return value
      */
     int minEvent() default 0;
 
     /*
-    Call frequency of a connection
-    Unit: Second
+    调用最小间隔，单位是秒
+    Minimum interval of call, unit is seconds
      */
     int minPeriod() default 0;
 
     /*
+    方法描述信息
     Description information of method
      */
     String description();

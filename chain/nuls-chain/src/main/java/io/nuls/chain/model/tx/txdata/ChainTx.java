@@ -27,7 +27,7 @@ public class ChainTx extends TransactionLogicData {
     private String symbol;
     private String assetName;
     private int depositNuls;
-    private long initNumber;
+    private String initNumber;
     private short decimalPlaces;
 
     public int getChainId() {
@@ -126,11 +126,11 @@ public class ChainTx extends TransactionLogicData {
         this.depositNuls = depositNuls;
     }
 
-    public long getInitNumber() {
+    public String getInitNumber() {
         return initNumber;
     }
 
-    public void setInitNumber(long initNumber) {
+    public void setInitNumber(String initNumber) {
         this.initNumber = initNumber;
     }
 
@@ -156,7 +156,7 @@ public class ChainTx extends TransactionLogicData {
         stream.writeString(symbol);
         stream.writeString(assetName);
         stream.writeUint16(depositNuls);
-        stream.writeUint32(initNumber);
+        stream.writeString(initNumber);
         stream.writeShort(decimalPlaces);
     }
 
@@ -174,7 +174,7 @@ public class ChainTx extends TransactionLogicData {
         this.symbol = byteBuffer.readString();
         this.assetName = byteBuffer.readString();
         this.depositNuls = byteBuffer.readUint16();
-        this.initNumber = byteBuffer.readUint32();
+        this.initNumber = byteBuffer.readString();
         this.decimalPlaces = byteBuffer.readShort();
     }
 
@@ -201,7 +201,7 @@ public class ChainTx extends TransactionLogicData {
         //depositNuls
         size += SerializeUtils.sizeOfUint16();
         //initNumber
-        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfString(initNumber);
         //decimalPlaces
         size += SerializeUtils.sizeOfInt16();
         return size;

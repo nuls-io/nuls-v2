@@ -8,7 +8,6 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -31,59 +30,69 @@ public class ServerProcessor implements Runnable {
     @Override
     public void run() {
 
-        while (ServerRuntime.REQUEST_QUEUE.size() > 0) {
-
-            Object[] objects = null;
+        while (ServerRuntime.CLIENT_MESSAGE_QUEUE.size() > 0) {
             /*
-            Get the first item of the queue.
-            First in, first out
+            获取队列中的第一个对象，如果是空，舍弃
+            Get the first item of the queue, If it is an empty object, discard
              */
-            synchronized (ServerRuntime.REQUEST_QUEUE) {
-                if (ServerRuntime.REQUEST_QUEUE.size() > 0) {
-                    objects = ServerRuntime.REQUEST_QUEUE.get(0);
-                    ServerRuntime.REQUEST_QUEUE.remove(0);
-                }
+            Object[] objects = ServerRuntime.firstItemInClientMessageQueue();
+            if (objects == null) {
+                continue;
             }
 
             try {
-                if (objects == null) {
-                    continue;
-                }
-
                 WebSocket webSocket = (WebSocket) objects[0];
                 String msg = (String) objects[1];
+                Message message = JSONUtils.json2pojo(msg, Message.class);
 
-                Message message;
-                try {
-                    message = JSONUtils.json2pojo(msg, Message.class);
-                } catch (IOException e) {
-                    Log.error(e);
-                    continue;
-                }
-
+                /*
+                根据MessageType进行不同处理
+                Processing differently according to MessageType
+                 */
                 MessageType messageType = MessageType.valueOf(message.getMessageType());
                 switch (messageType) {
                     case NegotiateConnection:
+                        /*
+                        握手消息，返回确认握手成功
+                        If it is a handshake message, return confirmation that the handshake was successful
+                         */
                         CmdHandler.negotiateConnectionResponse(webSocket);
                         break;
                     case Request:
                         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+
                         if (Constants.booleanString(true).equals(request.getRequestAck())) {
+                            /*
+                            如果需要一个Ack，则发送
+                            Send Ack if needed
+                             */
                             CmdHandler.ack(webSocket, message.getMessageId());
+
+                            /*
+                            Ack只发送一次（发送之后改变requestAck的值为0）
+                            Ack is sent only once (change the value of requestAck to 0 after sending)
+                             */
+                            request.setRequestAck(Constants.booleanString(false));
                         }
-                        if (CmdHandler.response(webSocket, message)) {
-                            synchronized (ServerRuntime.REQUEST_QUEUE) {
-                                /*
-                                Whether an Ack needs to be sent or not, it is set to false after execution once.
-                                That is to say, send Ack only once at most.
-                                 */
-                                request.setRequestAck(Constants.booleanString(false));
-                                message.setMessageData(request);
-                                ServerRuntime.REQUEST_QUEUE.add(new Object[]{webSocket, JSONUtils.obj2json(message)});
-                            }
+                        message.setMessageData(request);
+
+                        /*
+                        Request，调用本地方法
+                        If it is Request, call the local method
+                         */
+                        if (CmdHandler.response(webSocket, message.getMessageId(), request)) {
+                            /*
+                            需要继续发送，添加回队列
+                            Need to continue sending, add back to queue
+                             */
+                            ServerRuntime.CLIENT_MESSAGE_QUEUE.add(new Object[]{webSocket, JSONUtils.obj2json(message)});
                         }
                         break;
                     case Unsubscribe:
+                        /*
+                        如果是取消订阅，从订阅列表中把Request移除
+                        If unsubscribed, remove Request from the subscription list
+                         */
                         CmdHandler.unsubscribe(webSocket, message);
                         break;
                     default:
@@ -95,6 +104,5 @@ public class ServerProcessor implements Runnable {
                 Log.error(e);
             }
         }
-
     }
 }

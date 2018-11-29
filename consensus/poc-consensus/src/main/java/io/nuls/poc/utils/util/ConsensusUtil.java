@@ -16,16 +16,15 @@ import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
 import io.nuls.poc.model.bo.tx.txdata.YellowPunishData;
 import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
+import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.crypto.ECKey;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -100,9 +99,8 @@ public class ConsensusUtil {
                 CoinFrom from = new CoinFrom(agent.getAgentAddress(),chain_id,assetsId);
                 if(BigIntegerUtils.isEqual(to.getAmount(),agent.getDeposit()) && to.getLockTime() == -1L){
                     from.setAmount(to.getAmount());
-                    //todo 从账本模块获取nonce
-                    byte[] nonce = null;
-                    from.setNonce(nonce);
+                    from.setLockTime(-1);
+                    from.setNonce(createTxHash.getDigestBytes());
                 }
             }
             if (fromList.isEmpty()) {
@@ -132,10 +130,9 @@ public class ConsensusUtil {
                     if (!BigIntegerUtils.isEqual(to.getAmount(),deposit.getDeposit()) || to.getLockTime() != -1L) {
                         continue;
                     }
-                    //todo 从账本模块获取nonce
-                    byte[] nonce = null;
-                    from.setNonce(nonce);
-                    from = new CoinFrom(deposit.getAddress(),chain_id,assetsId,to.getAmount(),nonce);
+                    byte[] nonce = deposit.getTxHash().getDigestBytes();
+                    from = new CoinFrom(deposit.getAddress(),chain_id,assetsId,to.getAmount(),nonce,-1);
+                    fromList.add(from);
                     break;
                 }
                 String address = AddressTool.getStringAddressByBytes(deposit.getAddress());
@@ -166,7 +163,8 @@ public class ConsensusUtil {
      * @param self      agent meeting data/节点打包信息
      * @param round     latest local round/本地最新轮次信息
      */
-    public static void addConsensusTx(int chain_id,int assetsId, Block bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
+    public static void addConsensusTx(int chain_id, Block bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
+        int assetsId = ConfigManager.config_map.get(chain_id).getAssetsId();
         Transaction coinBaseTransaction = createCoinBaseTx(chain_id,assetsId,self, txList, round, bestBlock.getHeader().getHeight() + 1 + ConfigManager.config_map.get(chain_id).getCoinbase_unlock_height());
         txList.add(0, coinBaseTransaction);
         punishTx(chain_id,assetsId, bestBlock, txList, self, round);
@@ -224,8 +222,8 @@ public class ConsensusUtil {
         //佣金比例
         double commissionRate = DoubleUtils.div(self.getAgent().getCommissionRate(), 100, 2);
         //节点权重
-        String allDeposit = BigIntegerUtils.addToString(self.getAgent().getDeposit(), self.getAgent().getTotalDeposit());
-        BigDecimal agentWeight = DoubleUtils.mul(new BigDecimal(allDeposit), self.getAgent().getCreditVal());
+        String selfAllDeposit = BigIntegerUtils.addToString(self.getAgent().getDeposit(), self.getAgent().getTotalDeposit());
+        BigDecimal agentWeight = DoubleUtils.mul(new BigDecimal(selfAllDeposit), self.getAgent().getCreditVal());
         //节点总的奖励金额（交易手续费+共识奖励）
         double blockReword = Double.valueOf(totalFee);
         if (localRound.getTotalWeight() > 0d && agentWeight.doubleValue() > 0d) {
@@ -235,14 +233,12 @@ public class ConsensusUtil {
         if (blockReword == 0d) {
             return rewardList;
         }
-        //节点总委托金额（创建节点保证金+总的委托金额）
-        long realTotalAllDeposit = self.getAgent().getDeposit().getValue() + self.getAgent().getTotalDeposit().getValue();
         //创建节点账户所得奖励金，总的奖励金*（保证金/（保证金+委托金额））+ 佣金
-        double caReward = DoubleUtils.mul(blockReword, DoubleUtils.div(self.getAgent().getDeposit().getValue(), realTotalAllDeposit));
+        double caReward = DoubleUtils.mul(blockReword, new BigDecimal(BigIntegerUtils.divToString(self.getAgent().getDeposit(), selfAllDeposit)).doubleValue());
         //计算各委托账户获得的奖励金
         for (Deposit deposit : self.getDepositList()) {
             //计算各委托账户权重（委托金额/总的委托金）
-            double weight = DoubleUtils.div(deposit.getDeposit().getValue(), realTotalAllDeposit);
+            double weight = new BigDecimal(BigIntegerUtils.divToString(deposit.getDeposit(), selfAllDeposit)).doubleValue();
             if (Arrays.equals(deposit.getAddress(), self.getAgent().getAgentAddress())) {
                 caReward = caReward + DoubleUtils.mul(blockReword, weight);
             } else {
@@ -255,29 +251,29 @@ public class ConsensusUtil {
                 if (hisReward == 0D) {
                     continue;
                 }
-                Na depositReward = Na.valueOf(DoubleUtils.longValue(hisReward));
-                Coin rewardCoin = null;
-                for (Coin coin : rewardList) {
+                long depositReward = DoubleUtils.longValue(hisReward);
+                CoinTo rewardCoin = null;
+                for (CoinTo coin : rewardList) {
                     if (Arrays.equals(coin.getAddress(), deposit.getAddress())) {
                         rewardCoin = coin;
                         break;
                     }
                 }
                 if (rewardCoin == null) {
-                    rewardCoin = new Coin(deposit.getAddress(), depositReward, unlockHeight);
+                    rewardCoin = new CoinTo(deposit.getAddress(),chain_id,assetsId, String.valueOf(depositReward), unlockHeight);
                     rewardList.add(rewardCoin);
                 } else {
-                    rewardCoin.setNa(rewardCoin.getNa().add(depositReward));
+                    rewardCoin.setAmount(BigIntegerUtils.addToString(rewardCoin.getAmount(),String.valueOf(depositReward)));
                 }
             }
         }
-        rewardList.sort(new Comparator<Coin>() {
+        rewardList.sort(new Comparator<CoinTo>() {
             @Override
-            public int compare(Coin o1, Coin o2) {
-                return Arrays.hashCode(o1.getOwner()) > Arrays.hashCode(o2.getOwner()) ? 1 : -1;
+            public int compare(CoinTo o1, CoinTo o2) {
+                return Arrays.hashCode(o1.getAddress()) > Arrays.hashCode(o2.getAddress()) ? 1 : -1;
             }
         });
-        Coin agentReward = new Coin(self.getAgent().getRewardAddress(), Na.valueOf(DoubleUtils.longValue(caReward)), unlockHeight);
+        CoinTo agentReward = new CoinTo(self.getAgent().getRewardAddress(),chain_id,assetsId, String.valueOf(DoubleUtils.longValue(caReward)), unlockHeight);
         rewardList.add(0, agentReward);
         return rewardList;
     }

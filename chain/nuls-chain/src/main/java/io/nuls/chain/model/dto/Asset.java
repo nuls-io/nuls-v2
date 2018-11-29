@@ -23,7 +23,7 @@ public class Asset extends BaseNulsData {
     private String symbol;
     private String name;
     private int depositNuls;
-    private long initNumber;
+    private String initNumber;
     private short decimalPlaces;
     private boolean available;
     private long createTime;
@@ -31,7 +31,7 @@ public class Asset extends BaseNulsData {
     private byte[] address;
     private String txHash;
     /*资产流通的链集合*/
-    List<int> chainIds = new ArrayList();
+    List<Integer> chainIds = new ArrayList();
 
     public int getChainId() {
         return chainId;
@@ -73,11 +73,11 @@ public class Asset extends BaseNulsData {
         this.depositNuls = depositNuls;
     }
 
-    public long getInitNumber() {
+    public String getInitNumber() {
         return initNumber;
     }
 
-    public void setInitNumber(long initNumber) {
+    public void setInitNumber(String initNumber) {
         this.initNumber = initNumber;
     }
 
@@ -129,11 +129,11 @@ public class Asset extends BaseNulsData {
         this.txHash = txHash;
     }
 
-    public List<int> getChainIds() {
+    public List<Integer> getChainIds() {
         return chainIds;
     }
 
-    public void setChainIds(List<int> chainIds) {
+    public void setChainIds(List<Integer> chainIds) {
         this.chainIds = chainIds;
     }
     public void addChainId(int chainId){
@@ -146,7 +146,7 @@ public class Asset extends BaseNulsData {
         stream.writeString(symbol);
         stream.writeString(name);
         stream.writeUint32(depositNuls);
-        stream.writeInt64(initNumber);
+        stream.writeString(initNumber);
         stream.writeShort(decimalPlaces);
         stream.writeBoolean(available);
         stream.writeUint48(createTime);
@@ -169,7 +169,7 @@ public class Asset extends BaseNulsData {
         this.symbol = byteBuffer.readString();
         this.name = byteBuffer.readString();
         this.depositNuls = byteBuffer.readInt32();
-        this.initNumber = byteBuffer.readInt64();
+        this.initNumber = byteBuffer.readString();
         this.decimalPlaces = byteBuffer.readShort();
         this.available = byteBuffer.readBoolean();
         this.createTime = byteBuffer.readUint48();
@@ -198,7 +198,7 @@ public class Asset extends BaseNulsData {
         // depositNuls
         size += SerializeUtils.sizeOfInt32();
         // initNumber
-        size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfString(initNumber);
         // decimalPlaces
         size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfBoolean();

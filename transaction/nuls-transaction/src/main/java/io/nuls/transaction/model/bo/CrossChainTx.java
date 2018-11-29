@@ -4,6 +4,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
@@ -17,14 +18,19 @@ import java.io.IOException;
 public class CrossChainTx extends BaseNulsData {
 
 
-    private NulsDigestData hash;
+    private Transaction tx;
 
+
+    /**
+     * 该跨链交易在本链中的验证状态
+     */
     private int state;
 
     //TODO
     /**
      * 1.收到的跨链节点验证结果(数量？)
      * 2.收到的本链节点验证结果(签名？)
+     *
      */
 
     @Override
@@ -42,13 +48,12 @@ public class CrossChainTx extends BaseNulsData {
         return 0;
     }
 
-
-    public NulsDigestData getHash() {
-        return hash;
+    public Transaction getTx() {
+        return tx;
     }
 
-    public void setHash(NulsDigestData hash) {
-        this.hash = hash;
+    public void setTx(Transaction tx) {
+        this.tx = tx;
     }
 
     public int getState() {

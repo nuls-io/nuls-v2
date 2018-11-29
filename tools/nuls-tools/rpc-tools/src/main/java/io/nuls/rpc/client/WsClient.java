@@ -27,6 +27,7 @@
 
 package io.nuls.rpc.client;
 
+import io.nuls.rpc.model.message.Message;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
@@ -44,7 +45,7 @@ import java.net.URISyntaxException;
 public class WsClient extends WebSocketClient {
 
 
-    public WsClient(String url) throws URISyntaxException {
+    WsClient(String url) throws URISyntaxException {
         super(new URI(url));
     }
 
@@ -56,10 +57,11 @@ public class WsClient extends WebSocketClient {
     public void onMessage(String paramString) {
         try {
             /*
-             Add to response queue, Waiting for thread pool processing
+            收到的所有消息都放入队列，等待其他线程处理
+            All messages received are queued, waiting for other threads to process
              */
-            Log.info("ClientMsgFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + paramString);
-            ClientRuntime.SERVER_RESPONSE_QUEUE.add(JSONUtils.json2map(paramString));
+            ClientRuntime.SERVER_MESSAGE_QUEUE.add(JSONUtils.json2pojo(paramString, Message.class));
+            Log.info("ClientMsgFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + "><QueueSize="+ClientRuntime.SERVER_MESSAGE_QUEUE.size()+">: " + paramString);
             ClientRuntime.clientThreadPool.execute(new ClientProcessor());
         } catch (IOException e) {
             Log.error(e);

@@ -89,6 +89,11 @@ public interface RpcParameterNameConstant {
     String KEYSTORE = "keyStore";
 
     /**
+     * digestHex
+     */
+    String DIGEST_HEX = "digestHex";
+
+    /**
      * pageNumber
      */
     String PAGE_NUMBER = "pageNumber";

@@ -27,10 +27,12 @@
 
 package io.nuls.test;
 
+import io.nuls.rpc.client.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.client.InvokeMethod;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.parse.JSONUtils;
@@ -46,11 +48,11 @@ import java.util.Map;
  */
 public class WsM1 {
     @Test
-    public void test() throws Exception {
-        String range="[11,100.2]";
+    public void test() {
+        String range = "[11,100.2]";
 //        System.out.println(range.substring(range.indexOf("(")+1,range.indexOf(",")));
 //        System.out.println(range.substring(range.indexOf(",")+1,range.indexOf("]")));
-        String regex="[(\\[]\\d+,\\d+[)\\]]";
+        String regex = "[(\\[]\\d+,\\d+[)\\]]";
         System.out.println(range.matches(regex));
     }
 
@@ -74,7 +76,7 @@ public class WsM1 {
         // Get information from kernel
         CmdDispatcher.syncKernel();
 
-        System.out.println("Local:"+ JSONUtils.obj2json(ServerRuntime.local));
+        System.out.println("Local:" + JSONUtils.obj2json(ServerRuntime.local));
 
         Thread.sleep(Integer.MAX_VALUE);
     }
@@ -95,13 +97,13 @@ public class WsM1 {
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("aaa", "101");
+        params.put("aaa", "100");
 
         // Call cmd, get response immediately
         Object object = CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "getHeight", params);
         System.out.println("requestAndResponse:" + JSONUtils.obj2json(object));
 
-        System.out.println(CmdDispatcher.requestAndInvokeWithAck(ModuleE.CM.abbr, "getHeight", params, "2", InvokeMethod.class, "invokeGetHeight"));
+        String messageId1 = CmdDispatcher.requestAndInvokeWithAck(ModuleE.CM.abbr, "getBalance", params, "2", InvokeMethod.class, "invokeGetHeight");
         Thread.sleep(5000);
 
         // Call cmd, auto invoke local method after response
@@ -110,7 +112,24 @@ public class WsM1 {
 
         // Unsubscribe
         CmdDispatcher.unsubscribe(messageId);
-        System.out.println("我已经取消了订阅");
+        System.out.println("我已经取消了订阅:" + messageId);
 
+        Thread.sleep(5000);
+        CmdDispatcher.unsubscribe(messageId1);
+        System.out.println("我已经取消了订阅:" + messageId1);
+
+        System.out.println("我开始一次调用多个方法");
+        Request request = ClientRuntime.defaultRequest();
+        request.setRequestAck("1");
+        request.setSubscriptionPeriod("3");
+        request.getRequestMethods().put("getHeight", params);
+        request.getRequestMethods().put("getBalance", params);
+        String messageId3 = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, request, InvokeMethod.class, "invokeGetHeight");
+        Thread.sleep(10000);
+        CmdDispatcher.unsubscribe(messageId3);
+        System.out.println("我已经取消了订阅:" + messageId3);
+
+        Thread.sleep(5000);
+        System.out.println("当前消息队列：" + ClientRuntime.SERVER_MESSAGE_QUEUE.size());
     }
 }

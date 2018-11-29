@@ -67,6 +67,12 @@ public class ConfigBean implements Serializable {
      **/
     private String seedNodes;
 
+    //资产ID
+    private int assetsId;
+
+    //链ID
+    private int chainId;
+
     public long getPacking_interval() {
         return packing_interval;
     }
@@ -184,5 +190,21 @@ public class ConfigBean implements Serializable {
 
     public void setEntruster_deposit_min(String entruster_deposit_min) {
         this.entruster_deposit_min = entruster_deposit_min;
+    }
+
+    public int getAssetsId() {
+        return assetsId;
+    }
+
+    public void setAssetsId(int assetsId) {
+        this.assetsId = assetsId;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
     }
 }

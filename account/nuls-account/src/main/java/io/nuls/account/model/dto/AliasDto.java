@@ -23,25 +23,53 @@
  *
  */
 
-package io.nuls.account.model.bo.tx;
-
-import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Transaction;
-import io.nuls.tools.exception.NulsException;
+package io.nuls.account.model.dto;
 
 /**
- * @author: qinyifeng
+ * @author: EdwardChan
  */
-public class AliasTransaction extends Transaction {
 
-    public AliasTransaction() {
-        super(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
+public class AliasDto {
+
+    public AliasDto() {
     }
 
-    protected AliasTransaction(int type) {
-        super(type);
+    /**
+     * chainId
+     */
+    private int chainId;
+
+    /**
+     * address
+     */
+    private String address;
+
+    /**
+     * alias
+     */
+    private String alias;
+
+    public int getChainId() {
+        return chainId;
     }
 
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
 }

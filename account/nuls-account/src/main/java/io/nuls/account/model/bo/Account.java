@@ -358,9 +358,9 @@ public class Account implements Serializable {
     public ECKey getEcKey(String password) throws NulsException {
         ECKey eckey = null;
         byte[] unencryptedPrivateKey;
-        //判断当前账户是否存在私钥，如果不存在私钥这为锁定账户
+        //判断当前账户是否存在私钥，如果不存在私钥这为加密账户
         BigInteger newPriv = null;
-        if (this.isLocked()) {
+        if (this.isEncrypted()) {
             ObjectUtils.canNotEmpty(password, "the password can not be empty");
             if (!validatePassword(password)) {
                 throw new NulsException(AccountErrorCode.PASSWORD_IS_WRONG);

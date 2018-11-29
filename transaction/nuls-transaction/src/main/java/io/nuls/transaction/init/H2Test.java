@@ -7,7 +7,7 @@ import io.nuls.base.data.Page;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
-import io.nuls.transaction.constant.TransactionConstant;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.h2.dao.impl.BaseService;
 import io.nuls.transaction.db.h2.dao.impl.TransactionH2ServiceImpl;
@@ -26,7 +26,7 @@ import java.util.*;
 public class H2Test {
 
     public static void main(String[] args) throws Exception{
-        //System.out.println(("Y31vkMqXEViqpkZ29vysnDG2XPz9Eb822".hashCode() & Integer.MAX_VALUE)%TransactionConstant.H2_TX_TABLE_NUMBER);
+        //System.out.println(("Y31vkMqXEViqpkZ29vysnDG2XPz9Eb822".hashCode() & Integer.MAX_VALUE)%TxConstant.H2_TX_TABLE_NUMBER);
         before();
         long start = System.currentTimeMillis();
         initTestTable();
@@ -170,7 +170,7 @@ public class H2Test {
             String addr = getAddr();
             System.out.println("\"" + addr + "\""  + (i==99  ? "" : ",") );
 //            System.out.println(addr.hashCode());
-//            System.out.println((addr.hashCode() & Integer.MAX_VALUE) % TransactionConstant.H2_TX_TABLE_NUMBER);
+//            System.out.println((addr.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER);
 
         }
         System.out.println("}");
@@ -183,11 +183,11 @@ public class H2Test {
         System.out.println("{");
         while (count < 40){
             String addr = getAddr();
-            if((addr.hashCode() & Integer.MAX_VALUE) % TransactionConstant.H2_TX_TABLE_NUMBER == 0){
+            if((addr.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER == 0){
                 System.out.println("\"" + addr + "\""  + (count == 39  ? "" : ",") );
                 count++;
             }
-            //System.out.println((addr.hashCode() & Integer.MAX_VALUE) % TransactionConstant.H2_TX_TABLE_NUMBER);
+            //System.out.println((addr.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER);
 
         }
         System.out.println("}");
@@ -357,9 +357,9 @@ public class H2Test {
     public static void initTestTable(){
         TransactionH2Service ts = new TransactionH2ServiceImpl();
         //ts.createTable("transaction", "transaction_index",128);
-        ts.createTxTables(TransactionConstant.H2_TX_TABLE_NAME_PREFIX,
-                TransactionConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
-                TransactionConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
-                TransactionConstant.H2_TX_TABLE_NUMBER);
+        ts.createTxTables(TxConstant.H2_TX_TABLE_NAME_PREFIX,
+                TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
+                TxConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
+                TxConstant.H2_TX_TABLE_NUMBER);
     }
 }

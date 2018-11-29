@@ -31,23 +31,22 @@ public class ClientProcessor implements Runnable {
     @Override
     public void run() {
         try {
-            while (ClientRuntime.SERVER_RESPONSE_QUEUE.size() > 0) {
+            while (ClientRuntime.SERVER_MESSAGE_QUEUE.size() > 0) {
                 /*
-                Get the first item of the queue
-                If it is an empty object, discard
+                获取队列中的第一个对象，如果是空，舍弃
+                Get the first item of the queue, If it is an empty object, discard
                  */
-                Map map = ClientRuntime.firstItemInServerResponseQueue();
-                if (map == null) {
+                Message message = ClientRuntime.firstItemInServerMessageQueue();
+                if (message == null) {
                     continue;
                 }
 
                 /*
-                Message type should be "Response"
-                If not Response, add back to the queue and wait for other threads to process
+                消息类型应该是Response，如果不是，放回队列等待其他线程处理
+                Message type should be "Response". If not, add back to the queue and wait for other threads to process
                  */
-                Message message = JSONUtils.map2pojo(map, Message.class);
                 if (!MessageType.Response.name().equals(message.getMessageType())) {
-                    ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
+                    ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
                     continue;
                 }
 
@@ -55,7 +54,8 @@ public class ClientProcessor implements Runnable {
                 String messageId = response.getRequestId();
                 if (ClientRuntime.INVOKE_MAP.containsKey(messageId)) {
                     /*
-                    Automatic invoke method
+                    如果需要自动调用，则自动调用本地方法
+                    If need to invoke local method automatically, do it
                      */
                     Object[] objects = ClientRuntime.INVOKE_MAP.get(messageId);
                     Class clazz = (Class) objects[0];
@@ -67,9 +67,10 @@ public class ClientProcessor implements Runnable {
 
                 } else {
                     /*
-                    If no need to invoke, add back to the queue and wait for other threads to process
+                    如果不需要自动调用，放回队列等待其他线程处理
+                    If no need to invoke automatically, add back to the queue and wait for other threads to process
                      */
-                    ClientRuntime.SERVER_RESPONSE_QUEUE.add(map);
+                    ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
                 }
             }
 

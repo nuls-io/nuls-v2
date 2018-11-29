@@ -5,7 +5,7 @@ import io.nuls.base.data.Page;
 import io.nuls.h2.utils.SearchOperator;
 import io.nuls.h2.utils.Searchable;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.transaction.constant.TransactionConstant;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.h2.dao.impl.mapper.TransactionMapper;
 import io.nuls.transaction.model.po.TransactionPo;
@@ -80,15 +80,15 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
      * @return
      */
     private String getTableName(String address){
-        int tabNumber = (address.hashCode() & Integer.MAX_VALUE) % TransactionConstant.H2_TX_TABLE_NUMBER;
-        return TransactionConstant.H2_TX_TABLE_NAME_PREFIX + tabNumber;
+        int tabNumber = (address.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER;
+        return TxConstant.H2_TX_TABLE_NAME_PREFIX + tabNumber;
     }
 
 
     @Override
     public int saveTx(TransactionPo txPo) {
         SqlSession sqlSession = sqlSessionFactory.openSession();
-        String tableName = TransactionConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
+        String tableName = TxConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
         int rs = sqlSession.getMapper(TransactionMapper.class).insert(txPo, tableName);
         sqlSession.commit();
         sqlSession.close();
@@ -99,7 +99,7 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
     private Map<String, List<TransactionPo>> assembleMap(List<TransactionPo> txPoList){
         Map<String, List<TransactionPo>> map = new HashMap<>();
         for (TransactionPo txPo : txPoList) {
-            String tableName = TransactionConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
+            String tableName = TxConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
             if(!map.containsKey(tableName)){
                 List<TransactionPo> list = new ArrayList<>();
                 list.add(txPo);
@@ -131,7 +131,7 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
         SqlSession sqlSession = sqlSessionFactory.openSession();
         int rs = 0;
         for (TransactionPo txPo : txPoList){
-            String tableName = TransactionConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
+            String tableName = TxConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
             if(sqlSession.getMapper(TransactionMapper.class).insert(txPo,tableName) == 1){
                 rs++;
             }
