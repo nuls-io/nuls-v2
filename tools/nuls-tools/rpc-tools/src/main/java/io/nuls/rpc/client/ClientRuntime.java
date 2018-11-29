@@ -44,7 +44,7 @@ public class ClientRuntime {
      * 从服务端获取的消息集合
      * Message set received from the server
      */
-    static final List<Message> SERVER_MESSAGE_QUEUE = Collections.synchronizedList(new ArrayList<>());
+    public static final List<Message> SERVER_MESSAGE_QUEUE = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * 获取队列中的第一个元素，然后移除队列
@@ -129,7 +129,7 @@ public class ClientRuntime {
      * 构造默认Request对象
      * Constructing a default Request object
      */
-    static Request defaultRequest() {
+    public static Request defaultRequest() {
         Request request = new Request();
         request.setRequestAck("0");
         request.setSubscriptionEventCounter("0");

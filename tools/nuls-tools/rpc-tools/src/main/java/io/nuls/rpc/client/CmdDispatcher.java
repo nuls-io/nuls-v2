@@ -90,9 +90,6 @@ public class CmdDispatcher {
      * The return value is messageId, used to unsubscribe
      */
     public static String requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
-        if (Integer.parseInt(subscriptionPeriod) <= 0) {
-            throw new Exception("subscriptionPeriod must great than 0");
-        }
         String messageId = request(role, cmd, params, Constants.booleanString(false), subscriptionPeriod);
         ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
         return messageId;
@@ -109,16 +106,38 @@ public class CmdDispatcher {
     }
 
     /**
-     * 发送Request
-     * Send Request
+     * 发送Request，用于一次调用多个方法（需要自己封装Request对象）
+     * Send Request for calling multiple methods at a time (need to wrap the Request object manually)
+     */
+    public static String requestAndInvoke(String role, Request request, Class clazz, String invokeMethod) throws Exception {
+        String messageId = request(role, request);
+        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
+        if (Constants.booleanString(false).equals(request.getRequestAck())) {
+            return messageId;
+        } else {
+            return getAck(messageId) ? messageId : null;
+        }
+    }
+
+    /**
+     * 根据参数构造Request对象，然后发送Request
+     * Construct the Request object according to the parameters, and then send the Request
      */
     private static String request(String role, String cmd, Map params, String ack, String subscriptionPeriod) throws Exception {
-        String messageId = Constants.nextSequence();
-        Message message = Constants.basicMessage(messageId, MessageType.Request);
         Request request = ClientRuntime.defaultRequest();
         request.setRequestAck(ack);
         request.setSubscriptionPeriod(subscriptionPeriod);
         request.getRequestMethods().put(cmd, params);
+        return request(role, request);
+    }
+
+    /**
+     * 发送Request，返回该Request的messageId
+     * Send Request, return the messageId of the Request
+     */
+    private static String request(String role, Request request) throws Exception {
+        String messageId = Constants.nextSequence();
+        Message message = Constants.basicMessage(messageId, MessageType.Request);
         message.setMessageData(request);
 
         /*
@@ -133,7 +152,7 @@ public class CmdDispatcher {
         Log.info("SendRequest to " + wsClient.getRemoteSocketAddress().getHostString() + ":" + wsClient.getRemoteSocketAddress().getPort() + "->" + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
-        if (Integer.parseInt(subscriptionPeriod) > 0) {
+        if (Integer.parseInt(request.getSubscriptionPeriod()) > 0) {
             /*
             如果是需要重复发送的消息（订阅消息），记录messageId与客户端的对应关系，用于取消订阅
             If it is a message (subscription message) that needs to be sent repeatedly, record the relationship between the messageId and the WsClient
