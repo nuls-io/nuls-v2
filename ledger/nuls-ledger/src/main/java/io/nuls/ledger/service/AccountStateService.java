@@ -34,7 +34,7 @@ public interface AccountStateService {
      */
     long freezeByHeight(String addr, int assetId, String txHash, long amount, long height);
 
-    long unfreezeByHeight(String addr);
+    long unfreezeByHeight(String address, int assetId, long latestHeight);
 
     /**
      * 根据时间冻结用户的余额
@@ -47,5 +47,5 @@ public interface AccountStateService {
      */
     long freezeByLockTime(String addr, int assetId, String txHash, long amount, long lockTime);
 
-    long unfreezeLockTime(String addr);
+    long unfreezeLockTime(String address, int assetId, long latestBlockTime);
 }
