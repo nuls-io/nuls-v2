@@ -1,6 +1,5 @@
 package io.nuls.transaction.cache;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 
 import java.util.ArrayList;
@@ -15,6 +14,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  * @date: 2018/11/26
  */
 public class LocalTxUnverifiedPool {
+
     private static final LocalTxUnverifiedPool INSTANCE = new LocalTxUnverifiedPool();
 
     private Queue<Transaction> localTxQueue;
