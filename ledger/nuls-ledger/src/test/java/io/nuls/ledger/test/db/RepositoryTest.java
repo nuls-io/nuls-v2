@@ -34,44 +34,4 @@ public class RepositoryTest {
         }
         repository = new RepositoryImpl();
     }
-
-    @Test
-    public void createAccount() {
-        short chainId = 1;
-        String address = "Nse1EUja45SVamtwwmx9cusFhmyyYmtG";
-        AccountState state = repository.createAccount(chainId, address.getBytes());
-        logger.info("state {}", state);
-    }
-
-    @Test
-    public void increaseNonce() {
-        String address = "Nse1EUja45SVamtwwmx9cusFhmyyYmtG";
-        Long nonce = repository.increaseNonce(address.getBytes());
-        logger.info("nonce {}", nonce);
-    }
-
-    @Test
-    public void getNonce() {
-        String address = "Nse1EUja45SVamtwwmx9cusFhmyyYmtG";
-        Long nonce = repository.getNonce(address.getBytes());
-        logger.info("nonce {}", nonce);
-    }
-
-
-    @Test
-    public void addBalance() {
-        String address = "Nse1EUja45SVamtwwmx9cusFhmyyYmtG";
-        for (int i = 0; i < 100; i++) {
-            long balance = 100L;
-            balance = repository.addBalance(address.getBytes(), balance);
-            logger.info("balance {}", balance);
-        }
-    }
-
-    @Test
-    public void getBalance() {
-        String address = "Nse1EUja45SVamtwwmx9cusFhmyyYmtG";
-        long balance = repository.getBalance(address.getBytes());
-        logger.info("balance {}", balance);
-    }
 }
