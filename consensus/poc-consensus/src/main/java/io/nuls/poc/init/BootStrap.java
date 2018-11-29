@@ -8,8 +8,6 @@ import io.nuls.poc.model.bo.config.ConfigItem;
 import io.nuls.poc.storage.ConfigeService;
 import io.nuls.poc.storage.LanguageService;
 import io.nuls.poc.utils.manager.ConfigManager;
-import io.nuls.poc.utils.manager.ConsensusManager;
-import io.nuls.poc.utils.manager.SchedulerManager;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
@@ -115,9 +113,9 @@ public class BootStrap {
                 //初始化链相关表
                 initTabel(chain_id);
                 //初始化本地缓存数据（共识节点，委托信息，惩罚信息等）
-                ConsensusManager.getInstance().initData(chain_id);
+                //ConsensusManager.getInstance().initData(chain_id);
                 //启动内部服务
-                SchedulerManager.createChainScheduler(chain_id,ConfigManager.config_map.get(chain_id));
+                //SchedulerManager.createChainScheduler(chain_id);
             }else{
                 //初始化配置管理类
                 ConfigManager.config_map.putAll(configMap);
@@ -125,10 +123,10 @@ public class BootStrap {
                 for (int id : configMap.keySet()) {
                     initTabel(id);
                     //初始化本地缓存数据（共识节点，委托信息，惩罚信息等）
-                    ConsensusManager.getInstance().initData(chain_id);
+                    //ConsensusManager.getInstance().initData(chain_id);
                 }
                 //启动内部服务,先启动主链，在启动子链
-                SchedulerManager.createChainSchefuler(ConfigManager.config_map);
+                //SchedulerManager.createChainSchefuler(ConfigManager.config_map);
             }
         }catch (Exception e){
             Log.error(e);

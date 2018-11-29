@@ -106,7 +106,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             //todo 4.交易签名
 
             //todo 5.将交易发送给交易管理模块
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+
+            Map<String,Object> result = new HashMap<>();
+            result.put("txHex",HexUtil.encode(tx.serialize()));
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         }catch (IOException io){
             Log.error(io);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);

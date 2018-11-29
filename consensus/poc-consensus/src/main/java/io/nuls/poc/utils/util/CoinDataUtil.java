@@ -29,7 +29,7 @@ public class CoinDataUtil {
         txSize += to.size();
         //todo 账本模块获取nonce 可用余额
         byte[] nonce = null;
-        String available = "10000";
+        String available = "50000000000";
         //手续费
         CoinFrom from = new CoinFrom(address,chainId,assetsId,amount,nonce, 0);
         txSize += from.size();

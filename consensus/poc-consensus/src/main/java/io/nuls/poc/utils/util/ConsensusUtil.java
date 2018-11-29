@@ -437,6 +437,8 @@ public class ConsensusUtil {
 
     /**
      * 创建区块
+     * @param blockData       区块数据
+     * @param packingAddress  打包地址
      */
     public static Block createBlock(BlockData blockData, byte[] packingAddress) throws NulsException {
         //todo
