@@ -3,8 +3,12 @@ package io.nuls.ledger.db;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.config.AppConfig;
 import io.nuls.ledger.model.AccountState;
+import io.nuls.ledger.model.FreezeHeightState;
+import io.nuls.ledger.model.FreezeLockTimeState;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.data.LongUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.thread.TimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,5 +113,55 @@ public class RepositoryImpl implements Repository {
             logger.error("createAccount serialize error.", e);
         }
         return accountState.getBalance();
+    }
+
+    @Override
+    public long freezeByHeight(byte[] addr, String txHash, long amount, long height) {
+        AccountState accountState = getAccountState(addr);
+        FreezeHeightState state = new FreezeHeightState();
+
+        state.setTxHash(txHash);
+        state.setAmount(amount);
+        state.setHeight(height);
+        state.setCreateTime(TimeService.currentTimeMillis());
+        accountState.getFreezeState().getFreezeHeightStates().add(state);
+        //减去锁定金额
+        LongUtils.sub(accountState.getBalance(), amount);
+        try {
+            RocksDBService.put(DataBaseArea.TB_LEDGER_ACCOUNT, addr, accountState.serialize());
+        } catch (Exception e) {
+            logger.error("createAccount serialize error.", e);
+        }
+        return accountState.getBalance();
+    }
+
+    @Override
+    public long unfreezeByHeight(byte[] addr) {
+        return 0;
+    }
+
+    @Override
+    public long freezeByLockTime(byte[] addr, String txHash, long amount, long lockTime) {
+        AccountState accountState = getAccountState(addr);
+        FreezeLockTimeState state = new FreezeLockTimeState();
+
+        state.setTxHash(txHash);
+        state.setAmount(amount);
+        state.setLockTime(lockTime);
+        state.setCreateTime(TimeService.currentTimeMillis());
+        accountState.getFreezeState().getFreezeLockTimeStates().add(state);
+        //减去锁定金额
+        LongUtils.sub(accountState.getBalance(), amount);
+        try {
+            RocksDBService.put(DataBaseArea.TB_LEDGER_ACCOUNT, addr, accountState.serialize());
+        } catch (Exception e) {
+            logger.error("createAccount serialize error.", e);
+        }
+        return accountState.getBalance();
+    }
+
+    @Override
+    public long unfreezeLockTime(byte[] addr) {
+        return 0;
     }
 }

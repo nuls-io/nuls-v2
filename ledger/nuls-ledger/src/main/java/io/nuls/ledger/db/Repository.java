@@ -23,4 +23,30 @@ public interface Repository {
     long getBalance(byte[] addr);
 
     long addBalance(byte[] addr, long value);
+
+    /**
+     * 根据高度冻结用户的余额
+     *
+     * @param addr
+     * @param txHash
+     * @param amount
+     * @param height
+     * @return
+     */
+    long freezeByHeight(byte[] addr, String txHash, long amount, long height);
+
+    long unfreezeByHeight(byte[] addr);
+
+    /**
+     * 根据时间冻结用户的余额
+     *
+     * @param addr
+     * @param txHash
+     * @param amount
+     * @param lockTime
+     * @return
+     */
+    long freezeByLockTime(byte[] addr, String txHash, long amount, long lockTime);
+
+    long unfreezeLockTime(byte[] addr);
 }
