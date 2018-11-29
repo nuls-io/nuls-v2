@@ -6,47 +6,20 @@ import java.math.BigInteger;
 
 public interface Repository {
 
-    AccountState createAccount(short chainId, byte[] addr);
-
-    boolean isExist(byte[] addr);
-
-    AccountState getAccountState(byte[] addr);
-
-    void delete(byte[] addr);
-
-    long increaseNonce(byte[] addr);
-
-    long setNonce(byte[] addr, long nonce);
-
-    long getNonce(byte[] addr);
-
-    long getBalance(byte[] addr);
-
-    long addBalance(byte[] addr, long value);
 
     /**
-     * 根据高度冻结用户的余额
+     * put accountState to rocksdb
      *
-     * @param addr
-     * @param txHash
-     * @param amount
-     * @param height
-     * @return
+     * @param key
+     * @param accountState
      */
-    long freezeByHeight(byte[] addr, String txHash, long amount, long height);
-
-    long unfreezeByHeight(byte[] addr);
+    void putAccountState(byte[] key, AccountState accountState);
 
     /**
-     * 根据时间冻结用户的余额
+     * get accountState from rocksdb
      *
-     * @param addr
-     * @param txHash
-     * @param amount
-     * @param lockTime
+     * @param key
      * @return
      */
-    long freezeByLockTime(byte[] addr, String txHash, long amount, long lockTime);
-
-    long unfreezeLockTime(byte[] addr);
+    AccountState getAccountState(byte[] key);
 }

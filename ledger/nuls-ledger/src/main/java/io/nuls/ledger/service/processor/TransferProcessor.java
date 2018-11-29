@@ -18,6 +18,5 @@ public class TransferProcessor implements TxProcessor {
         //2 获取coinDaData的数据
 
         //3 增减用户账户的余额
-
     }
 }

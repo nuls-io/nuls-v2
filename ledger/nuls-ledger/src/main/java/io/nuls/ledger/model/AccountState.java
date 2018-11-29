@@ -20,7 +20,11 @@ public class AccountState extends BaseNulsData {
 
     @Setter
     @Getter
-    private short chaiId;
+    private int chaiId;
+
+    @Setter
+    @Getter
+    private int assetId;
 
     @Setter
     @Getter
@@ -43,8 +47,9 @@ public class AccountState extends BaseNulsData {
     private FreezeState freezeState;
 
 
-    public AccountState(short chaiId, long nonce, long balance) {
+    public AccountState(int chaiId, int assetId, long nonce, long balance) {
         this.chaiId = chaiId;
+        this.assetId = assetId;
         this.nonce = nonce;
         this.balance = balance;
         this.freezeState = new FreezeState();
@@ -60,27 +65,29 @@ public class AccountState extends BaseNulsData {
     }
 
     public AccountState withNonce(long nonce) {
-        return new AccountState(chaiId, nonce, balance);
+        return new AccountState(chaiId, assetId, nonce, balance);
     }
 
     public AccountState withIncrementedNonce() {
-        return new AccountState(chaiId, nonce + 1, balance);
+        return new AccountState(chaiId, assetId, nonce + 1, balance);
     }
 
     public AccountState withBalanceIncrement(long value) {
-        return new AccountState(chaiId, nonce, balance + value);
+        return new AccountState(chaiId, assetId, nonce, balance + value);
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeShort(chaiId);
+        stream.writeUint16(chaiId);
+        stream.writeUint16(assetId);
         stream.writeUint32(nonce);
         stream.writeUint32(balance);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chaiId = byteBuffer.readShort();
+        this.chaiId = byteBuffer.readUint16();
+        this.assetId = byteBuffer.readUint16();
         this.nonce = byteBuffer.readUint32();
         this.balance = byteBuffer.readUint32();
     }
@@ -89,7 +96,9 @@ public class AccountState extends BaseNulsData {
     public int size() {
         int size = 0;
         //chainId
-        size += 2;
+        size += SerializeUtils.sizeOfInt16();
+        //assetId
+        size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfInt32();
         size += SerializeUtils.sizeOfInt32();
         return size;

@@ -1,7 +1,6 @@
 package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.ledger.db.Repository;
-import io.nuls.ledger.model.AccountState;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
@@ -23,26 +22,6 @@ public class AccountStateCmd extends BaseCmd {
 
     @Autowired
     private Repository repository;
-
-    /**
-     * when account module create new account,then create accountState
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "lg_createAccount",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "test getHeight 1.0")
-    public Response createAccount(List params) {
-        for (Object param : params) {
-            logger.info("param {}", param);
-        }
-        //TODO.. 验证参数个数和格式
-        Integer chainId = (Integer) params.get(0);
-        String address = (String) params.get(1);
-        AccountState state = repository.createAccount(chainId.shortValue(), address.getBytes());
-        return success(state);
-    }
 
     /**
      * get user account balance
