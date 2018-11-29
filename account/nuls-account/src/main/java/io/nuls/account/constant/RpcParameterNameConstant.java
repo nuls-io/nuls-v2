@@ -103,5 +103,17 @@ public interface RpcParameterNameConstant {
      */
     String PAGE_SIZE = "pageSize";
 
+    /**
+     * the hex of transaction
+     */
+    String TX_HEX = "txHex";
+
+    /**
+     * secondaryDataHex
+     */
+    String SECONDARY_DATA_Hex = "secondaryDataHex";
+
+
+
 
 }
