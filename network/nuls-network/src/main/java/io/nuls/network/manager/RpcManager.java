@@ -49,13 +49,11 @@ public class RpcManager extends BaseManager{
         try {
             // Start server instance
             WsServer.getInstance(ModuleE.NW)
-                    .supportedAPIVersions(new String[]{"1.1", "1.2"})
                     .moduleRoles(ModuleE.NW.abbr, new String[]{"1.1", "1.2"})
                     .moduleVersion("1.2")
                     .dependencies("Role_Ledger", "1.1")
-                    .scanPackage("io.nuls.rpc.cmd.test")
+                    .scanPackage("io.nuls.network.rpc")
                     .connect("ws://127.0.0.1:8887");
-            // Get information from kernel
             CmdDispatcher.syncKernel();
         } catch (Exception e) {
             e.printStackTrace();
