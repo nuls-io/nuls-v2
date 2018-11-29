@@ -30,19 +30,21 @@ package io.nuls.chain.storage;
  * @author: lan
  * @create: 2018/11/26
  **/
-public interface SeqStorage{
+public interface SeqStorage {
     /**
      *createSeqAsset
      * @param chainId
      * @return
      */
-    int createSeqAsset(int chainId);
+//    int createSeqAsset(int chainId);
 
     /**
      * getSeqAsset
+     *
      * @param chainId
      * @return
      */
     int getSeqAsset(int chainId);
 
+    void setSeqAsset(int chainId, int seq);
 }

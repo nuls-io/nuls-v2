@@ -12,6 +12,14 @@ import java.util.List;
  * @description
  */
 public interface ChainService {
+
+    /**
+     * init chain
+     *
+     * @return true/false
+     */
+    boolean initChain();
+
     /**
      * Save chain
      *

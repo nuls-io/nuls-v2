@@ -12,24 +12,24 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
- * 交易已完成交易管理模块的校验
+ * 交易已完成交易管理模块的校验, 包括孤儿交易
  * @author: Charlie
  * @date: 2018/11/13
  */
-public class TxMemoryPool {
+public class TxVerifiedPool {
 
-    private final static TxMemoryPool INSTANCE = new TxMemoryPool();
+    private final static TxVerifiedPool INSTANCE = new TxVerifiedPool();
 
     private Queue<Transaction> txQueue;
 
     private LimitHashMap<NulsDigestData, Transaction> orphanContainer;
 
-    private TxMemoryPool() {
+    private TxVerifiedPool() {
         this.txQueue = new LinkedBlockingDeque<>();
         this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
     }
 
-    public static TxMemoryPool getInstance() {
+    public static TxVerifiedPool getInstance() {
         return INSTANCE;
     }
 

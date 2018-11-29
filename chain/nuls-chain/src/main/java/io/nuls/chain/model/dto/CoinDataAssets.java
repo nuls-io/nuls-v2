@@ -22,43 +22,34 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.cmd;
+package io.nuls.chain.model.dto;
 
-import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.Parameter;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
-
+import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @program: nuls2.0
- * @description: moduleValidateCmd
+ * @description:
  * @author: lan
- * @create: 2018/11/22
+ * @create: 2018/11/29
  **/
-@Component
-public class AllTxValidateCmd extends BaseCmd {
-    @Autowired
-    private AssetTxCmd assetTxCmd;
-    @Autowired
-    private ChainTxCmd chainTxCmd;
-    /**
-     * chainModuleTxValidate
-     *  批量校验
-     */
-    @CmdAnnotation(cmd = "cm_chainModuleTxValidate", version = 1.0,
-            description = "chainModuleTxValidate")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "txHexs", parameterType = "array")
-    public Response chainModuleTxValidate(Map params){
-         //TODO:
-        //1获取交易类型
-        //2进入不同验证器里处理
-        //3封装失败交易返回
-        int chainId =  Integer.valueOf(params.get("chainId").toString());
-        return success();
+public class CoinDataAssets {
+    private int chainId;
+    Map<String,String> assetsMap= new HashMap<>() ;
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
+
+    public Map<String, String> getAssetsMap() {
+        return assetsMap;
+    }
+
+    public void setAssetsMap(Map<String, String> assetsMap) {
+        this.assetsMap = assetsMap;
     }
 }

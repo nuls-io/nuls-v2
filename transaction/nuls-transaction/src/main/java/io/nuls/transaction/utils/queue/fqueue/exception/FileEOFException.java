@@ -22,34 +22,34 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.service.impl;
-
-import io.nuls.chain.service.SeqService;
-import io.nuls.chain.storage.SeqStorage;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+package io.nuls.kernel.utils.queue.fqueue.exception;
 
 /**
- * @program: nuls2.0
- * @description:
- * @author: lan
- * @create: 2018/11/26
- **/
-@Service
-public class SeqServiceImpl implements SeqService {
-    @Autowired
-    private SeqStorage seqStorage;
+ * @author opensource
+ */
+public class FileEOFException extends Exception {
 
-    /**
-     *
-     * createAssetId
-     * @param chainId
-     * @return
-     */
-    @Override
-    public synchronized  int createAssetId(int chainId) {
+    private static final long serialVersionUID = -1L;
 
-        return seqStorage.getSeqAsset(chainId);
-
+    public FileEOFException() {
+        super();
     }
+
+    public FileEOFException(String message) {
+        super(message);
+    }
+
+    public FileEOFException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public FileEOFException(Throwable cause) {
+        super(cause);
+    }
+
+    @Override
+    public Throwable fillInStackTrace() {
+        return this;
+    }
+
 }
