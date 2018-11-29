@@ -3,6 +3,7 @@ package io.nuls.chain;
 import io.nuls.chain.config.NulsConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.service.ChainService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.server.WsServer;
@@ -52,9 +53,8 @@ public class ChainBootstrap {
             SpringLiteContext.init("io.nuls.chain", new ModularServiceMethodInterceptor());
 
             // module init params
-
+            initChain();
             startRpcServer();
-
             TimeService.getInstance().start();
 
         } catch (Exception e) {
@@ -98,6 +98,18 @@ public class ChainBootstrap {
         CmConstants.PARAM_MAP.put(
                 CmConstants.ASSET_RECOVERY_RATE, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_RECOVERY_RATE, null));
 
+        CmConstants.CHAIN_ASSET_MAP.put(
+                CmConstants.NULS_CHAIN_ID, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CHAIN_ASSET, CmConstants.NULS_CHAIN_ID, null));
+        CmConstants.CHAIN_ASSET_MAP.put(
+                CmConstants.NULS_CHAIN_NAME, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CHAIN_ASSET, CmConstants.NULS_CHAIN_NAME, null));
+        CmConstants.CHAIN_ASSET_MAP.put(
+                CmConstants.NULS_ASSET_ID, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CHAIN_ASSET, CmConstants.NULS_ASSET_ID, null));
+        CmConstants.CHAIN_ASSET_MAP.put(
+                CmConstants.NULS_ASSET_MAX, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CHAIN_ASSET, CmConstants.NULS_ASSET_MAX, null));
+        CmConstants.CHAIN_ASSET_MAP.put(
+                CmConstants.NULS_ASSET_SYMBOL, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CHAIN_ASSET, CmConstants.NULS_ASSET_SYMBOL, null));
+
+
         /*
           Read the configuration file, store the data in the root directory
           Initialize all table connections under the directory and put them into the cache
@@ -114,8 +126,14 @@ public class ChainBootstrap {
                 CmConstants.PARAM_MAP.put(key, new String(value));
             }
         }
-    }
 
+    }
+    private void initChain() throws Exception {
+        //初始化数据，在数据库初始化后进行处理
+        ChainService chainService = SpringLiteContext.getBean(ChainService.class);
+        chainService.initChain();
+
+    }
     private void startRpcServer() throws Exception {
         WsServer wsServer = new WsServer(HostInfo.randomPort());
 //        wsServer.init("cm", new String[]{"m2", "m3"}, "io.nuls.chain.cmd");

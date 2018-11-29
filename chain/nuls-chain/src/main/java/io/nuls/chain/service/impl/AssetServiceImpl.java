@@ -207,4 +207,10 @@ public class AssetServiceImpl implements AssetService {
         return chainAsset;
 
     }
+
+    @Override
+    public ChainAsset getChainAsset(int chainId, String assetKey) {
+        ChainAsset chainAsset =chainAssetStorage.load(CmRuntimeInfo.getChainAssetKey(chainId,assetKey));
+        return chainAsset;
+    }
 }

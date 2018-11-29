@@ -95,6 +95,13 @@ public interface AssetService {
      */
     ChainAsset getChainAsset(int chainId,Asset asset);
 
+    /**
+     *
+     * @param chainId
+     * @param assetKey
+     * @return
+     */
+    ChainAsset getChainAsset(int chainId,String assetKey);
 
     /**
      * saveOrUpdate chainAsset
