@@ -26,6 +26,9 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.bo.tx.AliasTransaction;
+import io.nuls.account.model.bo.tx.txdata.Alias;
+import io.nuls.account.model.dto.AliasDto;
+import io.nuls.account.model.dto.TransactionDto;
 import io.nuls.account.model.po.AliasPo;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.Result;
@@ -50,9 +53,10 @@ public interface AliasService {
      * @param address   Address of account
      * @param password  password of account
      * @param aliasName the alias to set
+     * @return set alias result,true is success,false is failed
      * @return txhash
      */
-     Result<String> setAlias(int chainId, String address, String password, String aliasName);
+     boolean setAlias(int chainId, String address, String password, String aliasName);
 
     /**
      * 获取设置别名交易手续费
@@ -113,7 +117,7 @@ public interface AliasService {
      *
      * @return
      */
-     List<Transaction> accountTxValidate(int chainId, List<Transaction> txList);
+     List<TransactionDto<AliasDto>> accountTxValidate(int chainId, List<TransactionDto<AliasDto>> txList);
 
     /**
      * validate the tx of alias
@@ -125,7 +129,7 @@ public interface AliasService {
      * @return the result of validate
      *
      * */
-     boolean aliasTxValidate(int chainId, AliasTransaction transaction);
+     boolean aliasTxValidate(int chainId, TransactionDto<AliasDto> transaction);
 
     /**
      * 别名交易提交
@@ -137,7 +141,7 @@ public interface AliasService {
      * 2. Take the corresponding account from the database, set the alias to account and save it to the database.
      * 3. Re-cache the modified account.
      */
-    boolean aliasTxCommit(AliasPo aliaspo) throws NulsException;
+    boolean aliasTxCommit(int chainId, Alias alias) throws NulsException;
 
     /**
      * 回滚别名操作(删除别名(全网))
@@ -149,7 +153,7 @@ public interface AliasService {
      * 2. Remove the corresponding account to clear the alias and restore it in the database.
      * 3. Recache the account.
      */
-    boolean rollbackAlias(AliasPo aliasPo) throws NulsException;
+    boolean rollbackAlias(int chainId, Alias alias) throws NulsException;
 
 
 }

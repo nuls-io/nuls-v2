@@ -30,9 +30,12 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
+import io.nuls.account.model.dto.AliasDto;
+import io.nuls.account.model.dto.TransactionDto;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.service.AccountCacheService;
+import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.storage.AliasStorageService;
@@ -46,16 +49,21 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.FormatValidUtils;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.thread.TimeService;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author: EdwardChan
+ *
+ * The service about alias
  * <p>
  * Nov.16th 2018
  */
@@ -70,6 +78,9 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     @Autowired
     private AliasStorageService aliasStorageService;
 
+    @Autowired
+    private AccountService accountService;
+
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     @Override
@@ -77,8 +88,55 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public Result<String> setAlias(int chainId, String address, String password, String aliasName) {
-        return null;
+    public boolean setAlias(int chainId, String address, String password, String aliasName) {
+        //First:check parameter
+        if (!AddressTool.validAddress(chainId,address)) {
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+        }
+        Account account = accountService.getAccount(chainId,address);
+        if (null == account) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        if (account.isEncrypted() && account.isLocked()) {
+            if (!account.validatePassword(password)) {
+                throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
+        }
+        if (StringUtils.isNotBlank(account.getAlias())) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
+        }
+        if (!FormatValidUtils.validAlias(aliasName)) {
+            throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
+        }
+        if (!isAliasUsable(chainId,aliasName)) {
+            throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
+        }
+        byte[] addressBytes = account.getAddress().getAddressBytes();
+        try {
+            //Second:build the transaction
+            Transaction tx = new Transaction(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
+            tx.setTime(TimeService.currentTimeMillis());
+            Alias alias = new Alias();
+            alias.setAlias(aliasName);
+            alias.setAddress(AddressTool.getAddress(address));
+            //TODO how to save the chainId?EdwardChan
+            tx.setTxData(alias.serialize());
+            //Third:build the coinData
+            CoinData coinData = new CoinData();
+            //List<Coin> toList = new ArrayList<>();
+            //toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), ConsensusConstant.CONSENSUS_LOCK_TIME));
+            //coinData.setTo(toList);
+            tx.setCoinData(coinData.serialize());
+            //todo Fourth.sign the transaction
+            //todo Fifth.send the transaction to transaction manage module
+            return true;
+        } catch (NulsRuntimeException e) {
+            Log.error("",e);
+            return false;
+        } catch (IOException e) {
+            Log.error("",e);
+            return false;
+        }
     }
 
     @Override
@@ -112,40 +170,33 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) {
-        Set<Transaction> result = new HashSet<>();
+    public List<TransactionDto<AliasDto>> accountTxValidate(int chainId, List<TransactionDto<AliasDto>> txList) {
+        Set<TransactionDto<AliasDto>> result = new HashSet<>();
         if (null == txList || txList.isEmpty()) {
             return new ArrayList<>(result);
         }
-        Map<String, Transaction> aliasNamesMap = new HashMap<>();
-        Map<String, Transaction> accountAddressMap = new HashMap<>();
-        for (Transaction transaction : txList) {
+        Map<String, TransactionDto<AliasDto>> aliasNamesMap = new HashMap<>();
+        Map<String, TransactionDto<AliasDto>> accountAddressMap = new HashMap<>();
+        for (TransactionDto<AliasDto> transaction : txList) {
             if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS) {
-                AliasTransaction aliasTransaction = (AliasTransaction) transaction;
-                Alias alias = new Alias();
-                try {
-                    alias.parse(aliasTransaction.getTxData(), 0);
-                } catch (Exception e) {
-                    Log.error(e.getMessage());
-                }
+                AliasDto aliasDto = transaction.getTxData();
                 //check alias
-                Transaction tmp = aliasNamesMap.get(alias.getAlias());
+                TransactionDto<AliasDto> tmp = aliasNamesMap.get(aliasDto.getAlias());
                 if (tmp != null) { // the alias is already exist
                     result.add(transaction);
                     result.add(tmp);
                     continue;
                 } else {
-                    aliasNamesMap.put(alias.getAlias(), transaction);
+                    aliasNamesMap.put(aliasDto.getAlias(), transaction);
                 }
                 //check address
-                String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-                tmp = accountAddressMap.get(address);
+                tmp = accountAddressMap.get(aliasDto.getAddress());
                 if (tmp != null) { // the address is already exist
                     result.add(transaction);
                     result.add(tmp);
                     continue;
                 } else {
-                    accountAddressMap.put(address, transaction);
+                    accountAddressMap.put(aliasDto.getAddress(), transaction);
                 }
             }
         }
@@ -153,29 +204,26 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public boolean aliasTxValidate(int chainId, AliasTransaction transaction) {
-        Alias alias = new Alias();
-        try {
-            alias.parse(transaction.getTxData(), 0);
-        } catch (Exception e) {
-            Log.error(e.getMessage());
-        }
+    public boolean aliasTxValidate(int chainId, TransactionDto<AliasDto> transactionDto) {
+        AliasDto aliasDto = transactionDto.getTxData();
+        byte[] addressBytes = AddressTool.getAddress(aliasDto.getAddress());
 //        if (transaction.isSystemTx()) {
 //            throw new NulsRuntimeException(AccountErrorCode.TX_TYPE_ERROR);
 //        }
-        if (BaseConstant.CONTRACT_ADDRESS_TYPE == alias.getAddress()[2]) {
+        if (BaseConstant.CONTRACT_ADDRESS_TYPE == addressBytes[2]) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
-        if (!FormatValidUtils.validAlias(alias.getAlias())) {
+        if (!FormatValidUtils.validAlias(aliasDto.getAlias())) {
             throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
         }
-        if (!isAliasUsable(chainId, alias.getAlias())) {
+        if (!isAliasUsable(chainId, aliasDto.getAlias())) {
             throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
         }
-        AliasPo aliasPo = aliasStorageService.getAliasByAddress(chainId, AddressTool.getStringAddressByBytes(alias.getAddress()));
+        AliasPo aliasPo = aliasStorageService.getAliasByAddress(chainId, aliasDto.getAddress());
         if (aliasPo != null) {
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
         }
+        // check the CoinData
 
 //        CoinData coinData = transaction.getCoinData();
 //        if (null == coinData) {
@@ -193,59 +241,60 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
 //                throw new NulsRuntimeException(AccountErrorCode.MUST_BURN_A_NULS);
 //            }
 //        }
-        TransactionSignature sig = new TransactionSignature();
-        try {
-            sig.parse(transaction.getTransactionSignature(), 0);
-        } catch (NulsException e) {
-            Log.error("", e);
-            throw new NulsRuntimeException(e.getErrorCode());
-        }
-        boolean sign;
-        try {
-            sign = SignatureUtil.containsAddress(transaction, alias.getAddress());
-        } catch (NulsException e) {
-            sign = false;
-        }
-        if (!sign) {
-            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-        }
+        //TODO 验证签名
+//        TransactionSignature sig = new TransactionSignature();
+//        try {
+//            sig.parse(transaction.getTransactionSignature(), 0);
+//        } catch (NulsException e) {
+//            Log.error("", e);
+//            throw new NulsRuntimeException(e.getErrorCode());
+//        }
+//        boolean sign;
+//        try {
+//            sign = SignatureUtil.containsAddress(transaction, alias.getAddress());
+//        } catch (NulsException e) {
+//            sign = false;
+//        }
+//        if (!sign) {
+//            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+//        }
         return true;
     }
 
     @Override
-    public boolean aliasTxCommit(AliasPo aliaspo) throws NulsException {
+    public boolean aliasTxCommit(int chainId, Alias alias) throws NulsException {
         boolean result = false;
         try {
-            result = aliasStorageService.saveAlias(aliaspo);
+            result = aliasStorageService.saveAlias(chainId,alias);
             if (!result) {
-                this.rollbackAlias(aliaspo);
+                this.rollbackAlias(chainId,alias);
             }
-            AccountPo po = accountStorageService.getAccount(aliaspo.getAddress());
+            AccountPo po = accountStorageService.getAccount(alias.getAddress());
             if (null != po) {
-                po.setAlias(aliaspo.getAlias());
+                po.setAlias(alias.getAlias());
                 result = accountStorageService.updateAccount(po);
                 if (!result) {
-                    this.rollbackAlias(aliaspo);
+                    this.rollbackAlias(chainId,alias);
                 }
                 Account account = po.toAccount();
                 accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
             }
         } catch (Exception e) {
             Log.error("", e);
-            this.rollbackAlias(aliaspo);
+            this.rollbackAlias(chainId,alias);
             return false;
         }
         return result;
     }
 
     @Override
-    public boolean rollbackAlias(AliasPo aliasPo) throws NulsException {
+    public boolean rollbackAlias(int chainId, Alias alias) throws NulsException {
         boolean result = true;
         try {
-            AliasPo po = aliasStorageService.getAlias(aliasPo.getChainId(), aliasPo.getAlias());
-            if (po != null && Arrays.equals(po.getAddress(), aliasPo.getAddress())) {
-                aliasStorageService.removeAlias(aliasPo.getChainId(), aliasPo.getAlias());
-                AccountPo accountPo = accountStorageService.getAccount(aliasPo.getAddress());
+            AliasPo po = aliasStorageService.getAlias(chainId, alias.getAlias());
+            if (po != null && Arrays.equals(po.getAddress(), alias.getAddress())) {
+                aliasStorageService.removeAlias(chainId, alias.getAlias());
+                AccountPo accountPo = accountStorageService.getAccount(alias.getAddress());
                 if (accountPo != null) {
                     accountPo.setAlias("");
                     result = accountStorageService.updateAccount(accountPo);

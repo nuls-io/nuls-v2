@@ -3,6 +3,7 @@ package io.nuls.account.storage;
 import io.nuls.account.constant.AccountParam;
 import io.nuls.account.init.AccountBootstrap;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.service.AccountService;
 import io.nuls.base.basic.AddressTool;
@@ -54,21 +55,21 @@ public class AliasStorageServiceTest {
      */
     @Test
     public void removeAliasTest() throws Exception {
-        AliasPo aliasPo = createAlias();
+        Alias alias = createAlias();
         ////Fist:save the alias to DB
-        boolean result = aliasStorageService.saveAlias(aliasPo);
+        boolean result = aliasStorageService.saveAlias(chainId,alias);
         assertTrue(result);
         ////Second:get the aliasPO by alias from DB
-        AliasPo savedAliasPo = aliasStorageService.getAlias(chainId,aliasPo.getAlias());
+        AliasPo savedAliasPo = aliasStorageService.getAlias(chainId,alias.getAlias());
         //Third:check the saved alias is right
         assertNotNull(savedAliasPo);
-        assertTrue(Arrays.equals(aliasPo.getAddress(),savedAliasPo.getAddress()));
-        assertEquals(aliasPo.getAlias(), savedAliasPo.getAlias());
+        assertTrue(Arrays.equals(alias.getAddress(),savedAliasPo.getAddress()));
+        assertEquals(alias.getAlias(), savedAliasPo.getAlias());
         //Forth:remove the alias
-        result = aliasStorageService.removeAlias(chainId,aliasPo.getAlias());
+        result = aliasStorageService.removeAlias(chainId,alias.getAlias());
         assertTrue(result);
         //Fifth:get the alias from db and check
-        AliasPo aliasPoAfterRemove = aliasStorageService.getAlias(chainId,aliasPo.getAlias());
+        AliasPo aliasPoAfterRemove = aliasStorageService.getAlias(chainId,alias.getAlias());
         assertNull(aliasPoAfterRemove);
     }
 
@@ -81,11 +82,11 @@ public class AliasStorageServiceTest {
      */
     @Test
     public void getAliasListTest() throws Exception {
-        AliasPo aliasPo1 = createAlias();
-        boolean result = aliasStorageService.saveAlias(aliasPo1);
+        Alias alias1 = createAlias();
+        boolean result = aliasStorageService.saveAlias(chainId,alias1);
         assertTrue(result);
-        AliasPo aliasPo2 = createAlias();
-        result = aliasStorageService.saveAlias(aliasPo2);
+        Alias alias2 = createAlias();
+        result = aliasStorageService.saveAlias(chainId,alias2);
         assertTrue(result);
         List<AliasPo> aliasPoList = aliasStorageService.getAliasList(chainId);
         assertTrue(aliasPoList != null && aliasPoList.size() >= 2);
@@ -100,28 +101,27 @@ public class AliasStorageServiceTest {
      */
     @Test
     public void getAliasByAddressTest() throws Exception {
-        AliasPo aliasPo = createAlias();
-        boolean result = aliasStorageService.saveAlias(aliasPo);
+        Alias alias = createAlias();
+        boolean result = aliasStorageService.saveAlias(chainId,alias);
         assertTrue(result);
-        AliasPo aliasPoAfterGet = aliasStorageService.getAliasByAddress(chainId, AddressTool.getStringAddressByBytes(aliasPo.getAddress()));
+        AliasPo aliasPoAfterGet = aliasStorageService.getAliasByAddress(chainId, AddressTool.getStringAddressByBytes(alias.getAddress()));
         assertNotNull(aliasPoAfterGet);
-        assertEquals(aliasPo.getAlias(),aliasPoAfterGet.getAlias());
+        assertEquals(alias.getAlias(),aliasPoAfterGet.getAlias());
     }
 
     /**
      * create an AliasPo for test
      *
      * */
-    public static AliasPo createAlias(){
+    public static Alias createAlias(){
         if (accountService == null) {
             accountService = SpringLiteContext.getBean(AccountService.class);
         }
         List<Account> accounts = accountService.createAccount(chainId,1,null);
-        String alias = "Hi,我的别名是" + System.currentTimeMillis();
-        AliasPo aliasPo = new AliasPo();
-        aliasPo.setChainId(chainId);
-        aliasPo.setAddress(accounts.get(0).getAddress().getAddressBytes());
-        aliasPo.setAlias(alias);
-        return aliasPo;
+        String aliasStr = "Hi,我的别名是" + System.currentTimeMillis();
+        Alias alias = new Alias();
+        alias.setAddress(accounts.get(0).getAddress().getAddressBytes());
+        alias.setAlias(aliasStr);
+        return alias;
     }
 }

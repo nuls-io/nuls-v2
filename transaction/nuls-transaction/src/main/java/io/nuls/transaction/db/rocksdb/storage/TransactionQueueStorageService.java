@@ -22,57 +22,19 @@
  * SOFTWARE.
  *
  */
+package io.nuls.transaction.db.rocksdb.storage;
 
-package io.nuls.account.storage;
-
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.model.po.AliasPo;
-
-import java.util.List;
+import io.nuls.base.data.Transaction;
 
 /**
- * @author EdwardChan
- * @date
+ * 本链内发起的所有未验证的交易，包括普通交易和跨链交易
+ *
+ * @author: qinyifeng
+ * @date: 2018/11/29
  */
-public interface AliasStorageService {
+public interface TransactionQueueStorageService {
 
-    /**
-     * @auther EdwardChan
-     * @date Nov.9th 2018
-     */
-    List<AliasPo> getAliasList(int chainId);
+    boolean putTx(Transaction tx);
 
-
-    /**
-     * get alias
-     *
-     * @param chainId
-     * @param alias
-     * @return aliasPo
-     */
-    AliasPo getAlias(int chainId, String alias);
-
-
-    /**
-     * get alias by address
-     *
-     * @param chainId
-     * @param address
-     * @return
-     */
-    AliasPo getAliasByAddress(int chainId, String address);
-
-    /**
-     * save the alias
-     *
-     * @param alias
-     * @return the result
-     */
-    boolean saveAlias(int chainId, Alias alias);
-
-    /**
-     * remove Alias by chainId and alias
-     */
-    boolean removeAlias(int chainId, String alias);
-
+    Transaction pollTx();
 }

@@ -89,9 +89,9 @@ public interface RpcParameterNameConstant {
     String KEYSTORE = "keyStore";
 
     /**
-     * digestHex
+     * dataHex
      */
-    String DIGEST_HEX = "digestHex";
+    String DATA_HEX = "dataHex";
 
     /**
      * pageNumber
@@ -102,6 +102,18 @@ public interface RpcParameterNameConstant {
      * pageSize
      */
     String PAGE_SIZE = "pageSize";
+
+    /**
+     * the hex of transaction
+     */
+    String TX_HEX = "txHex";
+
+    /**
+     * secondaryDataHex
+     */
+    String SECONDARY_DATA_Hex = "secondaryDataHex";
+
+
 
 
 }
