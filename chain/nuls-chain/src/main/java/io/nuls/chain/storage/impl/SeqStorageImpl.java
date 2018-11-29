@@ -32,7 +32,6 @@ import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,7 +45,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class SeqStorageImpl implements SeqStorage, InitializingBean {
     private static final String TBL = "seq";
-    /**key :chainId  value:current seq*/
+    /**
+     * key :chainId  value:current seq
+     */
     private static final Map<Integer, Integer> SEQ_MAP = new ConcurrentHashMap<>();
 
     /**
@@ -55,15 +56,27 @@ public class SeqStorageImpl implements SeqStorage, InitializingBean {
     @Override
     public int nextSeq(int chainId) {
         try {
+            /*
+            空，则从1开始
+             */
             if (SEQ_MAP.get(chainId) == null) {
                 setSeq(chainId, 1);
                 return 1;
             }
 
+            /*
+            非空，则尝试返回当前值+1
+             */
             int nextSeq = SEQ_MAP.get(chainId) + 1;
             if (setSeq(chainId, nextSeq)) {
+                /*
+                符合规范
+                 */
                 return nextSeq;
             } else {
+                /*
+                不符合规范，递归调用
+                 */
                 return nextSeq(chainId);
             }
         } catch (Exception e) {
@@ -78,6 +91,10 @@ public class SeqStorageImpl implements SeqStorage, InitializingBean {
     @Override
     public boolean setSeq(int chainId, int tarSeq) {
         synchronized (SEQ_MAP) {
+            /*
+            空：第一次添加链的序列号信息，直接保存
+            非空：待添加序列号大于当前序列号，保存；否则丢弃
+             */
             if (SEQ_MAP.get(chainId) == null || tarSeq > SEQ_MAP.get(chainId)) {
                 SEQ_MAP.put(chainId, tarSeq);
                 try {
