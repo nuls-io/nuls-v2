@@ -67,4 +67,11 @@ public class ExampleCmd extends BaseCmd {
         Log.info("getHeight version 2.0");
         return success("getHeight->2.0");
     }
+
+    @CmdAnnotation(cmd = "getBalance", version = 1.0, scope = Constants.ADMIN,
+            description= "test getBalance")
+    public Response getBalance(Map map) {
+        Log.info("getBalance invoked");
+        return success("getBalance->ha-ha-ha");
+    }
 }

@@ -100,13 +100,13 @@ public class CmdHandler {
      * After current processing, do need to keep the Request information and wait for the next processing?
      * True: keep, False: remove
      */
-    public static boolean response(WebSocket webSocket, Message message) {
-        /*
-        从Message对象中获得Request
-        Get Request from message
-         */
-        String messageId = message.getMessageId();
-        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+    public static boolean response(WebSocket webSocket, String messageId, Request request) {
+//        /*
+//        从Message对象中获得Request
+//        Get Request from message
+//         */
+//        String messageId = message.getMessageId();
+//        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
 
         String key = webSocket.toString() + messageId;
 
@@ -372,9 +372,6 @@ public class CmdHandler {
         String value = params.get(cmdParameter.getParameterName()).toString();
         return value.matches(cmdParameter.getParameterValidRegExp());
     }
-
-
-
 
 
     /**

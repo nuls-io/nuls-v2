@@ -170,9 +170,9 @@ public class Constants {
      */
     public static String kernelUrl = "";
 
-    /**
-     * 我是华丽的分隔符
-     * I am a gorgeous separator
+    /*
+      我是华丽的分隔符
+      I am a gorgeous separator
      */
 
     /**
