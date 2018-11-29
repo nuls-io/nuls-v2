@@ -1,10 +1,12 @@
 package io.nuls.chain.cmd;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.model.tx.AssetDisableTransaction;
@@ -33,7 +35,7 @@ import java.util.Map;
  * @description
  */
 @Component
-public class AssetCmd extends BaseCmd {
+public class AssetCmd extends BaseChainCmd {
 
     @Autowired
     private AssetService assetService;
@@ -90,11 +92,16 @@ public class AssetCmd extends BaseCmd {
         AssetRegTransaction assetRegTransaction = new AssetRegTransaction();
         try {
             assetRegTransaction.setTxData(asset.parseToTransaction());
-            return failed("parseToTransaction fail");
+            AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(),asset.getAssetId(),String.valueOf(params.get("address")));
+            CoinData coinData = this.getRegCoinData(asset.getAddress(),asset.getChainId(),
+                    asset.getAssetId(),String.valueOf(asset.getDepositNuls()),assetRegTransaction.size(),accountBalance);
+            assetRegTransaction.setCoinData(coinData.serialize());
+            //todo 交易签名
         } catch (IOException e) {
             e.printStackTrace();
+            return failed("parseToTransaction fail");
         }
-        //TODO:coindata 未封装
+
         boolean rpcReslt = rpcService.newTx(assetRegTransaction);
         if(rpcReslt) {
             return success("sent asset newTx");
