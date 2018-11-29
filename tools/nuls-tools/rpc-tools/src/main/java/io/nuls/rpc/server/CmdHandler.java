@@ -62,8 +62,8 @@ public class CmdHandler {
      */
     static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
-        negotiateConnectionResponse.setNegotiationStatus("0");
-        negotiateConnectionResponse.setNegotiationComment("Incompatible protocol version");
+        negotiateConnectionResponse.setNegotiationStatus("1");
+        negotiateConnectionResponse.setNegotiationComment("Connection true!");
 
         Message rspMsg = Constants.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
