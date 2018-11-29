@@ -10,6 +10,8 @@ import io.nuls.poc.storage.LanguageService;
 import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.SchedulerManager;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.io.IoUtils;
@@ -57,7 +59,6 @@ public class BootStrap {
             //启动WebSocket服务,向外提供RPC接口
             initServer();
             //向交易管理模块注册本地交易验证器，处理器等信息
-
         }catch (Exception e){
             Log.error(e);
         }
@@ -139,9 +140,18 @@ public class BootStrap {
      * */
     public static void initServer(){
         try {
-            WsServer s = new WsServer(ConsensusConstant.CONSENSUS_RPC_PORT);
-            /*s.init(ConsensusConstant.CONSENSUS_MODULE_NAME, null, ConsensusConstant.CONSENSUS_RPC_PATH);
-            s.startAndSyncKernel(ConsensusConstant.KERNEL_URL);*/
+            try {
+                WsServer.getInstance(ModuleE.CS)
+                        .moduleRoles(new String[]{"1.0"})
+                        .moduleVersion("1.0")
+                        .dependencies(ModuleE.LG.abbr, "1.0")
+                        .scanPackage("io.nuls.poc.rpc")
+                        .connect("ws://127.0.0.1:8887");
+                // Get information from kernel
+                CmdDispatcher.syncKernel();
+            } catch (Exception e) {
+                Log.error("Account initServer failed", e);
+            }
         }catch (Exception e){
             Log.error("Consensus startup webSocket server error!");
             e.printStackTrace();

@@ -121,11 +121,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result stopAgent(Map<String,Object> params) {
-        if(params == null || params.get("chain_id") == null || params.get("address") == null || params.get("assetId") == null){
+        if(params == null || params.get("chainId") == null || params.get("address") == null || params.get("assetId") == null){
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chainId = (Integer)params.get("chain_id");
+            int chainId = (Integer)params.get("chainId");
             int assetId = (Integer)params.get("assetId");
             String address = (String) params.get("address");
             String password = null;
@@ -297,10 +297,10 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (pageSize == 0) {
             pageSize = 10;
         }
-        if (pageNumber < 0 || pageSize < 0 || pageSize > 100 || params.get("chain_id") == null) {
+        if (pageNumber < 0 || pageSize < 0 || pageSize > 100 || params.get("chainId") == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        int chain_id = (Integer) params.get("chain_id");
+        int chain_id = (Integer) params.get("chainId");
         List<Agent> agentList = ConsensusManager.getInstance().getAllAgentMap().get(chain_id);
         List<Agent> handleList = new ArrayList<>();
         String keyword = null;
@@ -358,7 +358,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result getAgentInfo(Map<String,Object> params) {
-        if(params.get("agentHash") == null || params.get("chain_id") == null ){
+        if(params.get("agentHash") == null || params.get("chainId") == null ){
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         String agentHash = (String)params.get("agentHash");
@@ -367,7 +367,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         try {
             NulsDigestData agentHashData = NulsDigestData.fromDigestHex(agentHash);
-            int chain_id = (Integer)params.get("chain_id");
+            int chain_id = (Integer)params.get("chainId");
             List<Agent> agentList = ConsensusManager.getInstance().getAllAgentMap().get(chain_id);
             for (Agent agent:agentList) {
                 if (agent.getTxHash().equals(agentHashData)) {
@@ -388,10 +388,10 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result getPublishList(Map<String,Object> params) {
-        if(params.get("chain_id") == null){
+        if(params.get("chainId") == null){
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        int chain_id = (Integer)params.get("chain_id");
+        int chain_id = (Integer)params.get("chainId");
         String address = null;
         if(params.get("address") != null){
             address = (String)params.get("address");
@@ -443,10 +443,10 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (pageSize == 0) {
             pageSize = 10;
         }
-        if (pageNumber < 0 || pageSize < 0 || pageSize > 100 || params.get("chain_id") == null) {
+        if (pageNumber < 0 || pageSize < 0 || pageSize > 100 || params.get("chainId") == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        int chain_id = (Integer) params.get("chain_id");
+        int chain_id = (Integer) params.get("chainId");
         String address = null;
         if(params.get("address") != null){
             address = (String)params.get("address");
@@ -506,10 +506,10 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result getWholeInfo(Map<String,Object> params) {
-        if (params.get("chain_id") == null) {
+        if (params.get("chainId") == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        int chain_id = (Integer) params.get("chain_id");
+        int chain_id = (Integer) params.get("chainId");
         WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
         List<Agent> agentList = ConsensusManager.getInstance().getAllAgentMap().get(chain_id);
         if(agentList == null ){
@@ -549,10 +549,10 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result getInfo(Map<String,Object> params) {
-        if (params.get("chain_id") == null || params.get("address")==null) {
+        if (params.get("chainId") == null || params.get("address")==null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        int chain_id = (Integer) params.get("chain_id");
+        int chain_id = (Integer) params.get("chainId");
         String address = (String)params.get("address");
         AccountConsensusInfoDTO dto = new AccountConsensusInfoDTO();
         //todo 从共识模块获取本地最新高度
@@ -612,11 +612,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result validBlock(Map<String,Object> params) {
-        if (params.get("chain_id") == null || params.get("block")==null || params.get("isDownload") == null) {
+        if (params.get("chainId") == null || params.get("block")==null || params.get("isDownload") == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             boolean isDownload = (Boolean) params.get("isDownload");
             String blockHex = (String)params.get("block");
             Block block = new Block();
@@ -721,10 +721,10 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result getCurrentRoundInfo(Map<String,Object> params) {
-        if(params == null || params.get("chain_id") == null){
+        if(params == null || params.get("chainId") == null){
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        int chain_id = (Integer) params.get("chain_id");
+        int chain_id = (Integer) params.get("chainId");
         MeetingRound round = RoundManager.getInstance().getOrResetCurrentRound(chain_id,true);
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(round);
     }
@@ -735,12 +735,12 @@ public class ConsensusServiceImpl implements ConsensusService {
     @Override
     public Result getAgentStatus(Map<String,Object> params) {
         //从数据库查询节点信息，返回节点状态
-        if (params.get("chain_id") == null || params.get("agentHash")==null) {
+        if (params.get("chainId") == null || params.get("agentHash")==null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         Map<String,Integer> result = new HashMap<>();
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             String agentHashStr = (String)params.get("agentHash");
             NulsDigestData agentHash = new NulsDigestData();
             agentHash.parse(new NulsByteBuffer(HexUtil.decode(agentHashStr)));
@@ -761,10 +761,10 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result updateAgentStatus(Map<String,Object> params) {
-        if(params == null || params.get("chain_id") == null){
+        if(params == null || params.get("chainId") == null){
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
-        int chain_id = (Integer) params.get("chain_id");
+        int chain_id = (Integer) params.get("chainId");
         ConsensusManager.getInstance().getPacking_status().put(chain_id,true);
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
     }
@@ -795,11 +795,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result createAgentValid(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null) {
+        if (params.get("chainId") == null || params.get("tx")==null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
@@ -819,11 +819,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result createAgentCommit(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null || params.get("blockHeader") == null) {
+        if (params.get("chainId") == null || params.get("tx")==null || params.get("blockHeader") == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
@@ -852,11 +852,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result createAgentRollBack(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null) {
+        if (params.get("chainId") == null || params.get("tx")==null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
@@ -876,11 +876,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result stopAgentValid(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null || params.get("assetId") == null) {
+        if (params.get("chainId") == null || params.get("tx")==null || params.get("assetId") == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             int assetId = (Integer) params.get("assetId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
@@ -904,11 +904,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result stopAgentCommit(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null || params.get("blockHeader") == null) {
+        if (params.get("chainId") == null || params.get("tx")==null || params.get("blockHeader") == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
@@ -957,11 +957,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result stopAgentRollBack(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null) {
+        if (params.get("chainId") == null || params.get("tx")==null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
@@ -1000,11 +1000,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result depositValid(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null) {
+        if (params.get("chainId") == null || params.get("tx")==null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
             transaction.parse(HexUtil.decode(txHex),0);
@@ -1024,11 +1024,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result depositCommit(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null || params.get("blockHeader") == null) {
+        if (params.get("chainId") == null || params.get("tx")==null || params.get("blockHeader") == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
             transaction.parse(HexUtil.decode(txHex),0);
@@ -1056,11 +1056,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result depositRollBack(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null) {
+        if (params.get("chainId") == null || params.get("tx")==null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
             transaction.parse(HexUtil.decode(txHex),0);
@@ -1079,11 +1079,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result withdrawValid(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null) {
+        if (params.get("chainId") == null || params.get("tx")==null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             transaction.parse(HexUtil.decode(txHex),0);
@@ -1103,11 +1103,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result withdrawCommit(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null) {
+        if (params.get("chainId") == null || params.get("tx")==null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chainId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             transaction.parse(HexUtil.decode(txHex),0);
@@ -1140,10 +1140,10 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result withdrawRollBack(Map<String, Object> params) {
-        if (params.get("chain_id") == null || params.get("tx")==null) {
+        if (params.get("chainId") == null || params.get("tx")==null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }try {
-            int chain_id = (Integer) params.get("chain_id");
+            int chain_id = (Integer) params.get("chaiId");
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             transaction.parse(HexUtil.decode(txHex),0);
