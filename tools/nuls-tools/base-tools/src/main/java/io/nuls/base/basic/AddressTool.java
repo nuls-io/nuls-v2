@@ -178,6 +178,25 @@ public class AddressTool {
     }
 
     /**
+     *通过地址获得chainId
+     * @param bytes
+     * @return
+     */
+    public static int getChainIdByAddress(byte[] bytes) {
+        if (null == bytes || bytes.length != Address.ADDRESS_LENGTH) {
+            return 0;
+        }
+        NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+        try {
+            return (int) byteBuffer.readShort();
+        } catch (NulsException e) {
+            Log.error(e);
+            return 0;
+        }
+
+    }
+
+    /**
      * 校验是否是普通地址
      *
      * @param bytes
