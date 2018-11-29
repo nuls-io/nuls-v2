@@ -1,9 +1,9 @@
 package io.nuls.chain.test;
 
-import io.nuls.chain.ChainBootstrap;
 import io.nuls.chain.model.dto.Asset;
+import io.nuls.chain.storage.impl.SeqStorageImpl;
+import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.thread.TimeService;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -14,6 +14,20 @@ import java.math.BigDecimal;
  * @description
  */
 public class AssetCmdTest {
+
+    @Test
+    public void mapSpeed() throws Exception {
+        RocksDBService.init("../data");
+        if (!RocksDBService.existTable("seq")) {
+            RocksDBService.createTable("seq");
+        }
+        long start=System.currentTimeMillis();
+        while(System.currentTimeMillis()-start<1000){
+            new SeqStorageImpl().nextSeq(1);
+        }
+        System.out.println(new SeqStorageImpl().nextSeq(1));
+    }
+
     @Test
     public void asset() throws Exception {
 //        System.out.println(CmdDispatcher.call("asset", new Object[]{1542092573248L}));
