@@ -49,7 +49,7 @@ public class SeqServiceImpl implements SeqService {
     @Override
     public synchronized  int createAssetId(int chainId) {
 
-        return seqStorage.createSeqAsset(chainId);
+        return seqStorage.getSeqAsset(chainId);
 
     }
 }
