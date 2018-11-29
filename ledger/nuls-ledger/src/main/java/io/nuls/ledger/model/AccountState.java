@@ -3,12 +3,14 @@ package io.nuls.ledger.model;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.ledger.utils.RLP;
 import io.nuls.tools.data.LongUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.*;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
  * Created by wangkun23 on 2018/11/19.
@@ -20,7 +22,7 @@ public class AccountState extends BaseNulsData {
 
     @Setter
     @Getter
-    private int chaiId;
+    private int chainId;
 
     @Setter
     @Getter
@@ -46,13 +48,37 @@ public class AccountState extends BaseNulsData {
     @Getter
     private FreezeState freezeState;
 
+    @Setter
+    @Getter
+    private byte[] rlpEncoded;
 
-    public AccountState(int chaiId, int assetId, long nonce, long balance) {
-        this.chaiId = chaiId;
+    public AccountState(int chainId, int assetId, long nonce, long balance) {
+        this.chainId = chainId;
         this.assetId = assetId;
         this.nonce = nonce;
         this.balance = balance;
         this.freezeState = new FreezeState();
+    }
+
+    public AccountState(byte[] rlpData) {
+        this.rlpEncoded = rlpData;
+//        RLPList items = (RLPList) RLP.decode2(rlpEncoded).get(0);
+//        this.nonce = ByteUtil.bytesToBigInteger(items.get(0).getRLPData());
+//        this.balance = ByteUtil.bytesToBigInteger(items.get(1).getRLPData());
+//        this.stateRoot = items.get(2).getRLPData();
+//        this.codeHash = items.get(3).getRLPData();
+    }
+
+    public byte[] getEncoded() {
+        if (rlpEncoded == null) {
+            byte[] chainId = RLP.encodeInt(this.chainId);
+            byte[] assetId = RLP.encodeInt(this.assetId);
+            byte[] nonce = RLP.encodeBigInteger(BigInteger.valueOf(this.nonce));
+            byte[] balance = RLP.encodeBigInteger(BigInteger.valueOf(this.balance));
+            byte[] freezeState = this.freezeState.getEncoded();
+            this.rlpEncoded = RLP.encodeList(chainId, assetId, nonce, balance, freezeState);
+        }
+        return rlpEncoded;
     }
 
     /**
@@ -65,20 +91,20 @@ public class AccountState extends BaseNulsData {
     }
 
     public AccountState withNonce(long nonce) {
-        return new AccountState(chaiId, assetId, nonce, balance);
+        return new AccountState(chainId, assetId, nonce, balance);
     }
 
     public AccountState withIncrementedNonce() {
-        return new AccountState(chaiId, assetId, nonce + 1, balance);
+        return new AccountState(chainId, assetId, nonce + 1, balance);
     }
 
     public AccountState withBalanceIncrement(long value) {
-        return new AccountState(chaiId, assetId, nonce, balance + value);
+        return new AccountState(chainId, assetId, nonce, balance + value);
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(chaiId);
+        stream.writeUint16(chainId);
         stream.writeUint16(assetId);
         stream.writeUint32(nonce);
         stream.writeUint32(balance);
@@ -86,7 +112,7 @@ public class AccountState extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chaiId = byteBuffer.readUint16();
+        this.chainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
         this.nonce = byteBuffer.readUint32();
         this.balance = byteBuffer.readUint32();
