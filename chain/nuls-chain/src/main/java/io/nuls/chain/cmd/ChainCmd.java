@@ -5,7 +5,9 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.model.tx.CrossChainDestroyTransaction;
@@ -37,7 +39,7 @@ import java.util.Map;
  * @description
  */
 @Component
-public class ChainCmd extends BaseCmd {
+public class ChainCmd extends BaseChainCmd {
 
     @Autowired
     private ChainService chainService;
@@ -114,17 +116,12 @@ public class ChainCmd extends BaseCmd {
             // 组装交易发送
             CrossChainRegTransaction crossChainRegTransaction = new CrossChainRegTransaction();
             crossChainRegTransaction.setTxData(chain.parseToTransaction(asset,false));
-            //TODO:coindata 封装
-            CoinData coinData = new CoinData();
-            List<CoinFrom> fromList = new ArrayList<>();
-            //
-            CoinFrom coinFrom = new CoinFrom();
-//            coinFrom.setAddress(asset.getAddress());
-//            coinFrom.setAmount(String.valueOf(asset.getDepositNuls()));
-//            coinFrom.setAssetsChainId();
-//            coinFrom.setAssetsId();
-//            coinFrom.setNonce();
-            List<CoinTo> toList = new ArrayList<>();
+            crossChainRegTransaction.setTime(TimeService.currentTimeMillis());
+            AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(),asset.getAssetId(),String.valueOf(params.get("address")));
+            CoinData coinData = this.getRegCoinData(asset.getAddress(),asset.getChainId(),
+                    asset.getAssetId(),String.valueOf(asset.getDepositNuls()),crossChainRegTransaction.size(),accountBalance);
+            crossChainRegTransaction.setCoinData(coinData.serialize());
+            //todo 交易签名
             boolean rpcReslt = rpcService.newTx(crossChainRegTransaction);
             if(rpcReslt) {
                 return success(chain);

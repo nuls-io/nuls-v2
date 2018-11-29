@@ -35,11 +35,16 @@ import io.nuls.tools.constant.ErrorCode;
 public class CmErrorCode {
 
     public final static ErrorCode Err10002 = ErrorCode.init("10002");
+
+    public final static ErrorCode   BALANCE_NOT_ENOUGH = ErrorCode.init("30001");
+
+
     public final static ErrorCode C10001 = ErrorCode.init("C10001");
     public final static ErrorCode C10002 = ErrorCode.init("C10002");
     public final static ErrorCode ERROR_CHAIN_NOT_FOUND = ErrorCode.init("C10003");
     public final static ErrorCode ERROR_CHAIN_STATUS = ErrorCode.init("C10005");
     public final static ErrorCode ERROR_CHAIN_ASSET_MUTI = ErrorCode.init("C10006");
+
 
 
     public final static ErrorCode ERROR_ASSET_ID_EXIST = ErrorCode.init("A10005");

@@ -1,5 +1,6 @@
 package io.nuls.chain.info;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.constant.ErrorCode;
 
 import java.util.HashMap;
@@ -89,6 +90,14 @@ public class CmConstants {
      * 账本获取数据
      */
     public static final String CMD_LG_GET_COINDATA = "getCoinData";
+
+
+    /**
+     * 黑洞地址，该地址的资产无法找回
+     * //TODO 该地址需要加上链ID，否则无法适配新的地址规则
+     */
+    public static final byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
+
 
 
 }
