@@ -37,9 +37,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * @author lan
  * @program nuls2.0
  * @description
- * @author lan
  * @date 2018/11/26
  **/
 @Component
@@ -53,6 +53,11 @@ public class SeqStorageImpl implements SeqStorage, InitializingBean {
     @Override
     public int nextSeq(int chainId) {
         try {
+            if (SEQ_MAP.get(chainId) == null) {
+                setSeq(chainId, 1);
+                return 1;
+            }
+
             int nextSeq = SEQ_MAP.get(chainId) + 1;
             if (setSeq(chainId, nextSeq)) {
                 return nextSeq;
@@ -71,8 +76,7 @@ public class SeqStorageImpl implements SeqStorage, InitializingBean {
     @Override
     public boolean setSeq(int chainId, int tarSeq) {
         synchronized (SEQ_MAP) {
-            int currSeq = SEQ_MAP.get(chainId);
-            if (tarSeq > currSeq) {
+            if (SEQ_MAP.get(chainId) == null || tarSeq > SEQ_MAP.get(chainId)) {
                 SEQ_MAP.put(chainId, tarSeq);
                 try {
                     return RocksDBService.put(TBL, ByteUtils.intToBytes(chainId), ByteUtils.intToBytes(tarSeq));
