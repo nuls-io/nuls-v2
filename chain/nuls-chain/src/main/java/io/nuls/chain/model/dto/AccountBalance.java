@@ -22,46 +22,31 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.service;
-
-import io.nuls.base.data.Transaction;
-import io.nuls.chain.model.dto.AccountBalance;
-import io.nuls.chain.model.dto.Chain;
-import io.nuls.rpc.model.message.Response;
-
-import java.util.Map;
+package io.nuls.chain.model.dto;
 
 /**
- * 调用外部接口
+ * @program
+ * @description
  * @author lan
- */
-public interface RpcService {
-    /**
-     * 跨链种子节点获取
-     * @return
-     */
-    String getCrossChainSeeds();
+ * @create 2018/11/29
+ **/
+public class AccountBalance {
+    private String available;
+    private String nonce;
 
-    /**
-     * 注册交易验证器
-     * @return
-     */
-    boolean regTx();
+    public String getAvailable() {
+        return available;
+    }
 
-    boolean newTx(Transaction tx);
+    public void setAvailable(String available) {
+        this.available = available;
+    }
 
-    boolean createCrossGroup(Chain chain);
+    public String getNonce() {
+        return nonce;
+    }
 
-    boolean destroyCrossGroup(Chain chain);
-
-
-    /**
-     *获取账户余额
-     * @param chainId
-     * @param assetId
-     * @param address
-     * @return
-     */
-    AccountBalance getCoinData(int chainId,int assetId,String address);
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
 }
-

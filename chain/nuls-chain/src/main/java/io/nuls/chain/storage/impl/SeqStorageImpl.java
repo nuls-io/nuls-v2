@@ -35,6 +35,7 @@ import io.nuls.tools.log.Log;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author lan
@@ -45,7 +46,8 @@ import java.util.Map;
 @Component
 public class SeqStorageImpl implements SeqStorage, InitializingBean {
     private static final String TBL = "seq";
-    private static final Map<Integer, Integer> SEQ_MAP = new HashMap<>();
+    /**key :chainId  value:current seq*/
+    private static final Map<Integer, Integer> SEQ_MAP = new ConcurrentHashMap<>();
 
     /**
      * 得到链的下一个序列号
