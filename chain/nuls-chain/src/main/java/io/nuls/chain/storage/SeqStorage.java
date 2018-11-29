@@ -25,26 +25,20 @@
 package io.nuls.chain.storage;
 
 /**
- * @program: nuls2.0
- * @description:
- * @author: lan
- * @create: 2018/11/26
+ * @program nuls2.0
+ * @description Get sequence of chain
+ * @author lan
+ * @date 2018/11/26
  **/
 public interface SeqStorage {
-    /**
-     *createSeqAsset
-     * @param chainId
-     * @return
-     */
-//    int createSeqAsset(int chainId);
 
     /**
-     * getSeqAsset
-     *
-     * @param chainId
-     * @return
+     * 得到链的下一个序列号
      */
-    int getSeqAsset(int chainId);
+    int nextSeq(int chainId);
 
-    void setSeqAsset(int chainId, int seq);
+    /**
+     * 设置链的序列号
+     */
+    boolean setSeq(int chainId, int seq);
 }

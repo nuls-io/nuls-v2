@@ -70,7 +70,7 @@ public class AssetServiceImpl implements AssetService {
         chainAsset.setInitNumber(asset.getInitNumber());
         boolean s2 = chainAssetStorage.save(key, chainAsset);
         if (s1 && s2) {
-            seqStorage.setSeqAsset(asset.getChainId(), asset.getAssetId());
+            seqStorage.setSeq(asset.getChainId(), asset.getAssetId());
             return true;
         } else {
             assetStorage.delete(key);
