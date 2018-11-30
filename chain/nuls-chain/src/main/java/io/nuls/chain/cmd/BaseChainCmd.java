@@ -65,6 +65,19 @@ public class BaseChainCmd extends BaseCmd {
         return CmRuntimeInfo.getAssetKey(Integer.valueOf(chainId),Integer.valueOf(assetId)).equals(assetKey);
     }
 
+    /**
+     *
+     * 注册链或资产封装coinData,x%资产进入黑洞，y%资产进入锁定
+     *
+     * @param address
+     * @param chainId
+     * @param assetsId
+     * @param amount
+     * @param txSize
+     * @param accountBalance
+     * @return
+     * @throws NulsRuntimeException
+     */
     public CoinData getRegCoinData(byte[] address, int chainId, int assetsId, String amount,
                                    int txSize, AccountBalance accountBalance)throws NulsRuntimeException {
         txSize =txSize+ P2PHKSignature.SERIALIZE_LENGTH;
@@ -93,4 +106,38 @@ public class BaseChainCmd extends BaseCmd {
         return  coinData;
     }
 
+    /**
+     *
+     * 注销资产进行处理
+     * @param address
+     * @param chainId
+     * @param assetsId
+     * @param amount
+     * @param txSize
+     * @param txHash
+     * @param accountBalance
+     * @return
+     * @throws NulsRuntimeException
+     */
+    public CoinData getDisableCoinData(byte[] address, int chainId, int assetsId, String amount,
+                                   int txSize, String txHash,AccountBalance accountBalance)throws NulsRuntimeException {
+        txSize =txSize+ P2PHKSignature.SERIALIZE_LENGTH;
+        CoinData coinData = new CoinData();
+        String lockRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS_lOCK);
+        String backAmount = new BigDecimal(amount).multiply(new BigDecimal(lockRate)).toString();
+        CoinTo to= new CoinTo(address,chainId,assetsId,backAmount, 0);
+        coinData.addTo(to);
+        txSize += to.size();
+        //手续费
+        CoinFrom from = new CoinFrom(address,chainId,assetsId,amount,ByteUtils.copyOf(txHash.getBytes(),8), -1);
+        txSize += from.size();
+        String fee = TransactionFeeCalculator.getMaxFee(txSize);
+        String fromAmount = BigIntegerUtils.addToString(amount ,fee);
+        if(BigIntegerUtils.isLessThan(accountBalance.getAvailable(),fromAmount)){
+            throw new NulsRuntimeException(CmErrorCode.BALANCE_NOT_ENOUGH);
+        }
+        from.setAmount(fromAmount);
+        coinData.addFrom(from);
+        return  coinData;
+    }
 }

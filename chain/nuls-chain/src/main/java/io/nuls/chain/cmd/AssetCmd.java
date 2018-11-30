@@ -136,11 +136,11 @@ public class AssetCmd extends BaseChainCmd {
             transaction = new CrossChainDestroyTransaction();
             try {
                 transaction.setTxData(dbChain.parseToTransaction(asset,true));
+
             } catch (IOException e) {
                 e.printStackTrace();
                 return failed("parseToTransaction fail");
             }
-            //TODO:coindata 未封装
         }else{
               //只走资产注销
               transaction = new AssetDisableTransaction();
@@ -150,15 +150,26 @@ public class AssetCmd extends BaseChainCmd {
                 e.printStackTrace();
                 return failed("parseToTransaction fail");
             }
-            //TODO:coindata 未封装
+        }
+        try {
+            AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(),asset.getAssetId(),String.valueOf(params.get("address")));
+            if(null == accountBalance){
+                return failed("get  rpc CoinData fail.");
+            }
+            CoinData coinData = this.getDisableCoinData(address,chainId,assetId,String.valueOf(asset.getDepositNuls()),transaction.size(),dbChain.getRegTxHash(),accountBalance);
+            transaction.setCoinData(coinData.serialize());
+            //TODO:交易签名
+            boolean rpcReslt = rpcService.newTx(transaction);
+            if(rpcReslt) {
+                return success(asset);
+            }else{
+                return failed("sent tx fail");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return failed("parseToTransaction fail");
+        }
 
-        }
-        boolean rpcReslt = rpcService.newTx(transaction);
-        if(rpcReslt) {
-            return success(asset);
-        }else{
-            return failed("sent tx fail");
-        }
     }
 
 }
