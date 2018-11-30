@@ -36,7 +36,7 @@ import io.nuls.chain.info.ChainTxConstants;
 public class CrossChainRegTransaction extends Transaction {
 
     public CrossChainRegTransaction() {
-        super(ChainTxConstants.TX_TYPE_REGISTER_CHAIN);
+        super(ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET);
     }
 
 }

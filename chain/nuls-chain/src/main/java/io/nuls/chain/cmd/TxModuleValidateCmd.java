@@ -50,9 +50,9 @@ import java.util.Map;
 @Component
 public class TxModuleValidateCmd extends BaseCmd {
     @Autowired
-    private AssetTxCmd assetTxCmd;
+    private TxAssetCmd txAssetCmd;
     @Autowired
-    private ChainTxCmd chainTxCmd;
+    private TxChainCmd txChainCmd;
 
     /**
      * chainModuleTxValidate
@@ -69,10 +69,10 @@ public class TxModuleValidateCmd extends BaseCmd {
             //2进入不同验证器里处理
             //3封装失败交易返回
             int chainId = Integer.valueOf(params.get("chainId").toString());
-            List<Transaction> chainRegisterTxList = new ArrayList<>();
-            List<Transaction> chainDestroyTxList = new ArrayList<>();
-            List<Transaction> assetRegisterTxList = new ArrayList<>();
-            List<Transaction> assetDestroyTxList = new ArrayList<>();
+            List<Transaction> registerChainAndAssetList = new ArrayList<>();
+            List<Transaction> destroyAssetAndChainList = new ArrayList<>();
+            List<Transaction> addAssetToChainList = new ArrayList<>();
+            List<Transaction> removeAssetFromChainList = new ArrayList<>();
             for (String txHex : (String[]) params.get("txHexs")) {
                 byte[] txBytes = HexUtil.hexToByte(txHex);
                 byte[] typeByte = ByteUtils.copyOf(txBytes, 2);
@@ -82,24 +82,40 @@ public class TxModuleValidateCmd extends BaseCmd {
 
                 switch (type) {
                     case ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET:
-                        chainRegisterTxList.add(tx);
+                        registerChainAndAssetList.add(tx);
                         break;
                     case ChainTxConstants.TX_TYPE_DESTROY_ASSET_AND_CHAIN:
+                        destroyAssetAndChainList.add(tx);
                         break;
                     case ChainTxConstants.TX_TYPE_ADD_ASSET_TO_CHAIN:
+                        addAssetToChainList.add(tx);
                         break;
                     case ChainTxConstants.TX_TYPE_REMOVE_ASSET_FROM_CHAIN:
+                        removeAssetFromChainList.add(tx);
                         break;
                     default:
                         break;
                 }
             }
 
+            /*
+            验证注册链
+             */
 
             return success();
         } catch (NulsException e) {
             Log.error(e);
             return failed(e.getMessage());
         }
+    }
+
+    private List<Transaction> errorInRegisterChainAndAssetList(List<Transaction> registerChainAndAssetList) {
+        List<Transaction> error = new ArrayList<>();
+        List<Integer> chainIdList = new ArrayList<>();
+        List<Integer> assetIdList = new ArrayList<>();
+        for (Transaction tx : registerChainAndAssetList) {
+//            ChainTx chainTx=(ChainTx)tx;
+        }
+        return error;
     }
 }
