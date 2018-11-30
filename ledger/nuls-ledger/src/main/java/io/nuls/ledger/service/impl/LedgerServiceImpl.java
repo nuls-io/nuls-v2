@@ -17,17 +17,6 @@ public class LedgerServiceImpl implements LedgerService {
     @Autowired
     private Repository repository;
 
-    /**
-     * create new AccountState
-     *
-     * @param chainId
-     * @param address
-     * @return
-     */
-    @Override
-    public AccountState createAccount(short chainId, String address) {
-        return repository.createAccount(chainId, address.getBytes());
-    }
 
     /**
      * get user account balance
