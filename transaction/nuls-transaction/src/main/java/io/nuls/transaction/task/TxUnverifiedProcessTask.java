@@ -3,6 +3,7 @@ package io.nuls.transaction.task;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.cache.TxVerifiedPool;
 import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
@@ -14,13 +15,12 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018/11/28
  */
-@Service
 public class TxUnverifiedProcessTask implements Runnable {
 
     private TxVerifiedPool txVerifiedPool = TxVerifiedPool.getInstance();
 
-    @Autowired
-    private TxUnverifiedStorageService txUnverifiedStorageService;
+    //@Autowired
+    private TxUnverifiedStorageService txUnverifiedStorageService = SpringLiteContext.getBean(TxUnverifiedStorageService.class);
 
     private List<Transaction> orphanTxList = new ArrayList<>();
 
@@ -42,8 +42,6 @@ public class TxUnverifiedProcessTask implements Runnable {
             Log.error(e);
         }
        //System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
-
-        System.out.println("TxUnverifiedProcessTask:ok");
     }
 
     private void doTask(){

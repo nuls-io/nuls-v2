@@ -1,5 +1,7 @@
 package io.nuls.transaction.scheduler;
 
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.constant.TxConstant;
