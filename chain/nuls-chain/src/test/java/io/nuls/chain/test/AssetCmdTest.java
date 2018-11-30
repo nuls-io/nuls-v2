@@ -6,17 +6,14 @@ import io.nuls.tools.thread.TimeService;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigDecimal;
+
 /**
  * @author tangyi
  * @date 2018/11/12
  * @description
  */
 public class AssetCmdTest {
-    @Before
-    public void init() {
-        ChainBootstrap.getInstance().start();
-    }
-
     @Test
     public void asset() throws Exception {
 //        System.out.println(CmdDispatcher.call("asset", new Object[]{1542092573248L}));
@@ -125,5 +122,10 @@ public class AssetCmdTest {
     public void assetDisableValidator() throws Exception {
 //        System.out.println(CmdDispatcher.call("assetDisableValidator", new Object[]{1, 1542092573248L}));
 //        System.out.println(CmdDispatcher.call("assetDisableValidator", new Object[]{867, 1542092573248L}));
+    }
+    @Test
+    public void assetStringTest(){
+        BigDecimal b = new BigDecimal("999999999999999999999999999999999999999999");
+        System.out.println(b.toString());
     }
 }

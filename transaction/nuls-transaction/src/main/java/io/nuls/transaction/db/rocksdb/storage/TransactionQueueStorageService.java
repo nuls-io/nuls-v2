@@ -22,34 +22,19 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.service.impl;
+package io.nuls.transaction.db.rocksdb.storage;
 
-import io.nuls.chain.service.SeqService;
-import io.nuls.chain.storage.SeqStorage;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.base.data.Transaction;
 
 /**
- * @program: nuls2.0
- * @description:
- * @author: lan
- * @create: 2018/11/26
- **/
-@Service
-public class SeqServiceImpl implements SeqService {
-    @Autowired
-    private SeqStorage seqStorage;
+ * 本链内发起的所有未验证的交易，包括普通交易和跨链交易
+ *
+ * @author: qinyifeng
+ * @date: 2018/11/29
+ */
+public interface TransactionQueueStorageService {
 
-    /**
-     *
-     * createAssetId
-     * @param chainId
-     * @return
-     */
-    @Override
-    public synchronized  int createAssetId(int chainId) {
+    boolean putTx(Transaction tx);
 
-        return seqStorage.getSeqAsset(chainId);
-
-    }
+    Transaction pollTx();
 }

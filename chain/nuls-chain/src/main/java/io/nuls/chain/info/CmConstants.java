@@ -52,12 +52,22 @@ public class CmConstants {
     public static final String ASSET_SYMBOL_MAX = "asset_symbol_max";
     public static final String ASSET_NAME_MAX = "asset_name_max";
     public static final String ASSET_DEPOSITNULS = "asset_depositNuls";
+    public static final String ASSET_DEPOSITNULS_DESTROY = "asset_depositNuls_destroy_rate";
+    public static final String ASSET_DEPOSITNULS_lOCK = "asset_depositNuls_lock_rate";
+
     public static final String ASSET_INITNUMBER_MIN = "asset_initNumber_min";
     public static final String ASSET_INITNUMBER_MAX = "asset_initNumber_max";
     public static final String ASSET_DECIMALPLACES_MIN = "asset_decimalPlaces_min";
     public static final String ASSET_DECIMALPLACES_MAX = "asset_decimalPlaces_max";
     public static final String ASSET_RECOVERY_RATE = "asset_recovery_rate";
 
+    public static final Map<String, String> CHAIN_ASSET_MAP = new HashMap<>();
+    public static final String CHAIN_ASSET = "defaultAsset";
+    public static final String NULS_CHAIN_ID = "nuls_chain_id";
+    public static final String NULS_CHAIN_NAME = "nuls_chain_name";
+    public static final String NULS_ASSET_ID = "nuls_asset_id";
+    public static final String NULS_ASSET_MAX = "nuls_asset_initNumber_max";
+    public static final String NULS_ASSET_SYMBOL = "nuls_asset_symbol";
     /**
      * 远程RPC指令
      */
@@ -75,7 +85,10 @@ public class CmConstants {
     public static final String CMD_NW_CREATE_NODEGROUP = "nw_createNodeGroup";
 
     public static final String CMD_NW_DELETE_NODEGROUP = "nw_delNodeGroup";
-
+    /**
+     * 账本获取数据
+     */
+    public static final String CMD_LG_GET_COINDATA = "getCoinData";
 
 
 }

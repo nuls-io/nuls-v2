@@ -60,8 +60,8 @@ public class WsClient extends WebSocketClient {
             收到的所有消息都放入队列，等待其他线程处理
             All messages received are queued, waiting for other threads to process
              */
-            Log.info("ClientMsgFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + paramString);
             ClientRuntime.SERVER_MESSAGE_QUEUE.add(JSONUtils.json2pojo(paramString, Message.class));
+            Log.info("ClientMsgFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + "><QueueSize="+ClientRuntime.SERVER_MESSAGE_QUEUE.size()+">: " + paramString);
             ClientRuntime.clientThreadPool.execute(new ClientProcessor());
         } catch (IOException e) {
             Log.error(e);

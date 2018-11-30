@@ -1,5 +1,7 @@
 package io.nuls.transaction.constant;
 
+import java.io.File;
+
 /**
  * @author: Charlie
  * @date: 2018/11/12
@@ -15,7 +17,7 @@ public interface TxConstant {
 
     /**
      * webSocket config
-     * */
+     */
     String TX_MODULE_NAME = "transaction";
     String TX_CMD_PATH = "io.nuls.transaction.cmd";
     int TX_CMD_PORT = 8823;
@@ -30,9 +32,8 @@ public interface TxConstant {
     /**
      * DB config
      */
-    String DB_CONFIG_NAME ="db_config.properties";
-    String DB_DATA_PATH ="rocksdb.datapath";
-    String DB_DATA_DEFAULT_PATH ="rocksdb.datapath";
+    String DB_CONFIG_NAME = "db_config.properties";
+    String DB_DATA_PATH = "rocksdb.datapath";
 
     /**
      * H2
@@ -53,7 +54,6 @@ public interface TxConstant {
     String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
     String CROSS_TRANSFER_COMMIT = "crossTxCommit";
     String CROSS_TRANSFER_ROLLBACK = "crossTxCommit";
-
 
 
 }

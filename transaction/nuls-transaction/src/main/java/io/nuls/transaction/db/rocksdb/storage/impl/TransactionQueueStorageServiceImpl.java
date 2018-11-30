@@ -22,44 +22,54 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager;
 
-import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.server.WsServer;
+package io.nuls.transaction.db.rocksdb.storage.impl;
+
+
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.TransactionManager;
+import io.nuls.base.data.Transaction;
+import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.log.Log;
+import io.nuls.transaction.db.rocksdb.storage.TransactionQueueStorageService;
+import io.nuls.transaction.utils.queue.entity.PersistentQueue;
+
+import java.io.IOException;
 
 /**
- * @program: nuls2.0
- * @description: Rpc init
- * @author: lan
- * @create: 2018/11/07
- **/
-public class RpcManager extends BaseManager{
-    private static RpcManager instance = new RpcManager();
-    public static RpcManager getInstance(){
-        return instance;
-    }
-    @Override
-    public void init() {
+ * @author: qinyifeng
+ * @date: 2018/11/29
+ */
+@Component
+public class TransactionQueueStorageServiceImpl implements TransactionQueueStorageService {
 
+    private PersistentQueue queue = new PersistentQueue("tx-cache-queue", 10000000L);
+
+    public TransactionQueueStorageServiceImpl() throws Exception {
     }
 
     @Override
-    public void start() {
+    public boolean putTx(Transaction tx) {
         try {
-            // Start server instance
-            WsServer.getInstance(ModuleE.NW)
-                    .moduleRoles(ModuleE.NW.abbr, new String[]{"1.1", "1.2"})
-                    .moduleVersion("1.2")
-                    .dependencies("Role_Ledger", "1.1")
-                    .scanPackage("io.nuls.network.rpc")
-                    .connect("ws://127.0.0.1:8887");
-            CmdDispatcher.syncKernel();
-        } catch (Exception e) {
-            e.printStackTrace();
+            queue.offer(tx.serialize());
+            return true;
+        } catch (IOException e) {
+            Log.error(e);
         }
+        return false;
+    }
 
-
-
+    @Override
+    public Transaction pollTx() {
+        byte[] bytes = queue.poll();
+        if (null == bytes) {
+            return null;
+        }
+        try {
+            return TransactionManager.getInstance(new NulsByteBuffer(bytes));
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
     }
 }
