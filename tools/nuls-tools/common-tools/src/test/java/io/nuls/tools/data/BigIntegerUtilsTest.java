@@ -1,6 +1,7 @@
 package io.nuls.tools.data;
 
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.parse.SerializeUtils;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -17,10 +18,10 @@ public class BigIntegerUtilsTest {
         BigInteger value = new BigInteger(str);
 
         System.out.println(HexUtil.encode(value.toByteArray()));
-        System.out.println(HexUtil.encodeHex(BigIntegerUtils.toBytes(value)));
+        System.out.println(HexUtil.encodeHex(SerializeUtils.bigInteger2Bytes(value)));
 
         String old = value.toString();
-        String newStr = BigIntegerUtils.fromBytes(BigIntegerUtils.toBytes(value)).toString();
+        String newStr = SerializeUtils.bigIntegerFromBytes(SerializeUtils.bigInteger2Bytes(value)).toString();
         assertEquals(old, newStr);
     }
 
@@ -30,7 +31,7 @@ public class BigIntegerUtilsTest {
         String str = "1234567890123";
         BigInteger value = new BigInteger(str);
 
-        String newstr = HexUtil.encode(BigIntegerUtils.toBytes(value));
+        String newstr = HexUtil.encode(SerializeUtils.bigInteger2Bytes(value));
         String right = HexUtil.encode(ByteUtils.longToBytes(1234567890123L));
         System.out.println(HexUtil.encode(value.toByteArray()));
         System.out.println(newstr);

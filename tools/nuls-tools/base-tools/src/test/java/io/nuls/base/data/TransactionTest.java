@@ -1,9 +1,7 @@
 package io.nuls.base.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.constant.BaseConstant;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
@@ -20,7 +18,7 @@ import java.util.Arrays;
 public class TransactionTest {
 
     @Test
-    public void serialization(){
+    public void serialization() throws Exception{
         Transaction tx = new Transaction();
         tx.setType(10);
         tx.setTime(TimeService.currentTimeMillis());
@@ -36,6 +34,13 @@ public class TransactionTest {
         coinFrom.setAssetsId(2);
         coinFrom.setLocked((byte)0);
         coinFrom.setNonce("ABCDEFG".getBytes());
+
+        System.out.println(JSONUtils.obj2json(coinFrom));
+
+        CoinFrom cf1 = new CoinFrom();
+        cf1.parse(new NulsByteBuffer(coinFrom.serialize()));
+        System.out.println(JSONUtils.obj2json(cf1));
+
         coinData.addFrom(coinFrom);
 
         CoinTo coinTo = new CoinTo();
@@ -53,6 +58,12 @@ public class TransactionTest {
             System.out.println(hex);
             Transaction transaction = Transaction.getInstance(hex);
             Assert.assertTrue(Arrays.equals(tx.getCoinData(), transaction.getCoinData()));
+
+           /* CoinData cd = new CoinData();
+            cd.parse(new NulsByteBuffer(transaction.getCoinData()));
+
+            CoinFrom cf= cd.getFrom().get(0);
+            System.out.println(JSONUtils.obj2json(cf));*/
             System.out.println(JSONUtils.obj2json(transaction));
         } catch (Exception e) {
             e.printStackTrace();
