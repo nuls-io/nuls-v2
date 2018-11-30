@@ -3,7 +3,6 @@ package io.nuls.chain.model.dto;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.chain.model.tx.txdata.ChainDestroyTx;
 import io.nuls.chain.model.tx.txdata.ChainTx;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
@@ -31,6 +30,7 @@ public class Chain extends BaseNulsData {
     private boolean isDelete = false;
     private long createTime;
     private long lastUpdateTime;
+    /*REG链伴随的资产信息*/
     private byte[] regAddress;
     private String regTxHash;
     private int regAssetId;

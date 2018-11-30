@@ -31,8 +31,28 @@ package io.nuls.chain.info;
  * @date 2018/11/19
  */
 public interface ChainTxConstants {
-    int TX_TYPE_REGISTER_CHAIN = 5001;
-    int TX_TYPE_DESTROY_CHAIN = 5002;
-    int TX_TYPE_ADD_CHAIN_ASSET = 5011;
-    int TX_TYPE_DISABLE_CHAIN_ASSET = 5012;
+
+    /**
+     * 注册链的时候必须同时注册一种资产（增加注册链成本，防止恶意使用）
+     * When register a chain, must register an asset at the same time (increase the cost of the registration chain to prevent malicious use)
+     */
+    int TX_TYPE_REGISTER_CHAIN_AND_ASSET = 5001;
+
+    /**
+     * 当销毁链上最后一种资产的时候，同时销毁链
+     * When the last asset in the chain is destroyed, the chain is destroyed at the same time
+     */
+    int TX_TYPE_DESTROY_ASSET_AND_CHAIN = 5002;
+
+    /**
+     * 为一条链增加一种资产
+     * Adding an asset to a chain
+     */
+    int TX_TYPE_ADD_ASSET_TO_CHAIN = 5011;
+
+    /**
+     * 从一条链上删除一种资产
+     * Delete an asset from a chain
+     */
+    int TX_TYPE_REMOVE_ASSET_FROM_CHAIN = 5012;
 }
