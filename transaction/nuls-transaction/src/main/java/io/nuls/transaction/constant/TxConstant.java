@@ -34,6 +34,10 @@ public interface TxConstant {
      */
     String DB_CONFIG_NAME = "db_config.properties";
     String DB_DATA_PATH = "rocksdb.datapath";
+    String TX_UNVERIFIED_QUEUE = "tx_unverified_queue";
+    long TX_UNVERIFIED_QUEUE_MAXSIZE = 10000000L;
+
+
 
     /**
      * H2

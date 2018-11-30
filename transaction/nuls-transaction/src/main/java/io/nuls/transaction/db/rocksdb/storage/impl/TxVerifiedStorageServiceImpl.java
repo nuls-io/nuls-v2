@@ -11,7 +11,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.db.rocksdb.storage.TransactionCacheStorageService;
+import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 
 import java.io.IOException;
 
@@ -23,7 +23,7 @@ import java.io.IOException;
  * @date: 2018/11/13
  */
 @Service
-public class TransactionCacheStorageServiceImpl implements TransactionCacheStorageService, InitializingBean {
+public class TxVerifiedStorageServiceImpl implements TxVerifiedStorageService, InitializingBean {
 
     private final static String TRANSACTION_CACHE_KEY_NAME = "transactions_cache";
 

@@ -10,7 +10,7 @@ import io.nuls.base.data.Transaction;
  * @author: Charlie
  * @date: 2018/11/13
  */
-public interface TransactionCacheStorageService {
+public interface TxVerifiedStorageService {
 
     boolean putTx(Transaction tx);
 
