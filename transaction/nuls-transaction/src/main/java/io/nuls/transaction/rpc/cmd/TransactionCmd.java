@@ -1,9 +1,18 @@
-package io.nuls.transaction.cmd;
+package io.nuls.transaction.rpc.cmd;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.parse.JSONUtils;
+import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.model.dto.ModuleTxRegisterDto;
+import io.nuls.transaction.model.dto.TxRegisterDto;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -17,8 +26,24 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public Response register(List params) {
+    @CmdAnnotation(cmd = "tx_register", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "module transaction registration")
+    public Response register(Map params) {
+        // check parameters
+        if (params == null) {
+            throw new NulsRuntimeException(TxErrorCode.NULL_PARAMETER);
+        }
+        try {
+            //ModuleTxRegisterDto moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDto.class, TxRegisterDto.class);
+            JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            ModuleTxRegisterDto moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDto.class);
+            List<TxRegisterDto> txRegisterList = moduleTxRegisterDto.getList();
+            //List<TxRegisterDto> txRegisterList = JSONUtils.json2list(JSONUtils.obj2json(params.get("list")), TxRegisterDto.class);
 
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
+        }
         return success("success");
     }
 
@@ -134,7 +159,6 @@ public class TransactionCmd extends BaseCmd {
 
         return success("success");
     }
-
 
 
 }

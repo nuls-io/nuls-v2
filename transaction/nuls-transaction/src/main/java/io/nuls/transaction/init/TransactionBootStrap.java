@@ -1,6 +1,8 @@
 package io.nuls.transaction.init;
 
 import io.nuls.db.service.RocksDBService;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
@@ -107,9 +109,16 @@ public class TransactionBootStrap {
      * */
     public static void initServer(){
         try {
-            WsServer s = new WsServer(TxConstant.TX_CMD_PORT);
-           /* s.init(TxConstant.TX_MODULE_NAME, null, TxConstant.TX_CMD_PATH);
-            s.startAndSyncKernel(TxConstant.KERNEL_URL);*/
+            // Start server instance
+            WsServer.getInstance(ModuleE.AC)
+                    .moduleRoles(new String[]{"1.0"})
+                    .moduleVersion("1.0")
+                    .dependencies(ModuleE.LG.abbr, "1.0")
+                    .scanPackage("io.nuls.transaction.rpc.cmd")
+                    .connect("ws://127.0.0.1:8887");
+
+            // Get information from kernel
+            CmdDispatcher.syncKernel();
         }catch (Exception e){
             Log.error("Transaction startup webSocket server error!");
             e.printStackTrace();
