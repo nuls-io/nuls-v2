@@ -30,7 +30,7 @@ import io.nuls.poc.utils.manager.RoundManager;
 import io.nuls.poc.utils.util.CoinDataUtil;
 import io.nuls.poc.utils.util.ConsensusUtil;
 import io.nuls.poc.utils.util.PoConvertUtil;
-import io.nuls.poc.utils.validator.ValidatorManager;
+import io.nuls.poc.utils.validator.TxValidator;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -57,7 +57,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     @Autowired
     private PunishStorageService publishService;
     @Autowired
-    private ValidatorManager validatorManager;
+    private TxValidator validatorManager;
 
     /**
      * 创建节点
@@ -80,11 +80,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 throw new NulsRuntimeException(ConsensusErrorCode.ADDRESS_ERROR);
             }
             //todo 调用账户模块接口  验证账户是否正确
-            //2.验证账户正确性
-            /*boolean validResult = true;
-            if(!validResult){
-                return new Result(1, ConsensusErrorCode.ACCOUNT_INFO_ERROR.getCode(),ConsensusErrorCode.ACCOUNT_INFO_ERROR.getMsg(), ConsensusConstant.RPC_VERSION,null);
-            }*/
+
             //3.组装创建节点交易
             Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
             tx.setTime(TimeService.currentTimeMillis());
@@ -629,7 +625,6 @@ public class ConsensusServiceImpl implements ConsensusService {
             if(!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))){
                 return Result.getFailed(ConsensusErrorCode.MERKEL_HASH_ERROR);
             }
-
             BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
             //todo 获取本地最新区块头,区块管理模块获取
             BlockHeader bestBlockHeader = new BlockHeader();
@@ -639,7 +634,6 @@ public class ConsensusServiceImpl implements ConsensusService {
                 Log.error("new block rounddata error, block height : " + blockHeader.getHeight() + " , hash :" + blockHeader.getHash());
                 return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
             }
-
             MeetingRound currentRound = RoundManager.getInstance().getCurrentRound(chain_id);
             //1.当前区块轮次 < 本地最新轮次 && 区块同步已完成
             if(isDownload && extendsData.getRoundIndex() < currentRound.getIndex()){
@@ -806,7 +800,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
-            boolean result = validatorManager.validateCreateAgent(chain_id,transaction);
+            boolean result = validatorManager.validateTx(chain_id,transaction);
             if(!result){
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
@@ -814,6 +808,9 @@ public class ConsensusServiceImpl implements ConsensusService {
         }catch (NulsException e){
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
+        }catch (IOException et){
+            Log.error(et);
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
 
@@ -888,7 +885,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
             transaction.parse(HexUtil.decode(txHex),0);
-            boolean result = validatorManager.validateStopAgent(chain_id,assetId,transaction);
+            boolean result = validatorManager.validateTx(chain_id,transaction);
             if(!result){
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
@@ -1011,7 +1008,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
             transaction.parse(HexUtil.decode(txHex),0);
-            boolean result = validatorManager.validateDeposit(chain_id,transaction);
+            boolean result = validatorManager.validateTx(chain_id,transaction);
             if(!result){
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
@@ -1019,6 +1016,9 @@ public class ConsensusServiceImpl implements ConsensusService {
         }catch (NulsException e){
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
+        }catch (IOException et){
+            Log.error(et);
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
 
@@ -1090,7 +1090,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get("tx");
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             transaction.parse(HexUtil.decode(txHex),0);
-            boolean result = validatorManager.validateWithdraw(chain_id,transaction);
+            boolean result = validatorManager.validateTx(chain_id,transaction);
             if(!result){
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
@@ -1098,6 +1098,9 @@ public class ConsensusServiceImpl implements ConsensusService {
         }catch (NulsException e){
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
+        }catch (IOException et){
+            Log.error(et);
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
 

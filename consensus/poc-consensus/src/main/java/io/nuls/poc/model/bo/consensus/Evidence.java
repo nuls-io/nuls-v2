@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.poc.model.bo;
+package io.nuls.poc.model.bo.consensus;
 
 
 import io.nuls.base.data.BlockHeader;
