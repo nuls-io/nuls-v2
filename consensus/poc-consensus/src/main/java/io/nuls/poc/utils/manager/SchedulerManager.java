@@ -29,16 +29,15 @@ public class SchedulerManager {
      * */
     public static void createChainSchefuler(Map<Integer,ConfigBean> chainMap){
         for (Map.Entry<Integer,ConfigBean> entry:chainMap.entrySet()) {
-            createChainScheduler(entry.getKey(),entry.getValue());
+            createChainScheduler(entry.getKey());
         }
     }
 
     /**
      * 创建一条链的任务
      * @param chain_id 链ID
-     * @param config   链配置对象
      * */
-    public static void createChainScheduler(int chain_id, ConfigBean config){
+    public static void createChainScheduler(int chain_id){
         ScheduledThreadPoolExecutor scheduledThreadPoolExecutor = ThreadUtils.createScheduledThreadPool(3,new NulsThreadFactory("consensus"+chain_id));
         //创建链相关的任务
         ConsensusProcess consensusProcess = new ConsensusProcess();

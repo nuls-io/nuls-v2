@@ -1,10 +1,12 @@
 package io.nuls.chain.test;
 
-import io.nuls.chain.ChainBootstrap;
 import io.nuls.chain.model.dto.Asset;
+import io.nuls.chain.storage.impl.SeqStorageImpl;
+import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.thread.TimeService;
-import org.junit.Before;
 import org.junit.Test;
+
+import java.math.BigDecimal;
 
 /**
  * @author tangyi
@@ -12,9 +14,18 @@ import org.junit.Test;
  * @description
  */
 public class AssetCmdTest {
-    @Before
-    public void init() {
-        ChainBootstrap.getInstance().start();
+
+    @Test
+    public void mapSpeed() throws Exception {
+        RocksDBService.init("../data");
+        if (!RocksDBService.existTable("seq")) {
+            RocksDBService.createTable("seq");
+        }
+        long start=System.currentTimeMillis();
+        while(System.currentTimeMillis()-start<1000){
+            new SeqStorageImpl().nextSeq(1);
+        }
+        System.out.println(new SeqStorageImpl().nextSeq(1));
     }
 
     @Test
@@ -125,5 +136,10 @@ public class AssetCmdTest {
     public void assetDisableValidator() throws Exception {
 //        System.out.println(CmdDispatcher.call("assetDisableValidator", new Object[]{1, 1542092573248L}));
 //        System.out.println(CmdDispatcher.call("assetDisableValidator", new Object[]{867, 1542092573248L}));
+    }
+    @Test
+    public void assetStringTest(){
+        BigDecimal b = new BigDecimal("999999999999999999999999999999999999999999");
+        System.out.println(b.toString());
     }
 }

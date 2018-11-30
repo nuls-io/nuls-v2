@@ -2,7 +2,12 @@ package io.nuls.chain.cmd;
 
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.model.tx.CrossChainDestroyTransaction;
@@ -23,7 +28,9 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -32,7 +39,7 @@ import java.util.Map;
  * @description
  */
 @Component
-public class ChainCmd extends BaseCmd {
+public class ChainCmd extends BaseChainCmd {
 
     @Autowired
     private ChainService chainService;
@@ -109,7 +116,12 @@ public class ChainCmd extends BaseCmd {
             // 组装交易发送
             CrossChainRegTransaction crossChainRegTransaction = new CrossChainRegTransaction();
             crossChainRegTransaction.setTxData(chain.parseToTransaction(asset,false));
-            //TODO:coindata 未封装
+            crossChainRegTransaction.setTime(TimeService.currentTimeMillis());
+            AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(),asset.getAssetId(),String.valueOf(params.get("address")));
+            CoinData coinData = this.getRegCoinData(asset.getAddress(),asset.getChainId(),
+                    asset.getAssetId(),String.valueOf(asset.getDepositNuls()),crossChainRegTransaction.size(),accountBalance);
+            crossChainRegTransaction.setCoinData(coinData.serialize());
+            //todo 交易签名
             boolean rpcReslt = rpcService.newTx(crossChainRegTransaction);
             if(rpcReslt) {
                 return success(chain);
@@ -121,26 +133,5 @@ public class ChainCmd extends BaseCmd {
             return failed(ErrorCode.init("-100"));
         }
     }
-
-
-
-
-//    public CmdResponse setChainAssetCurrentNumber(List params) {
-//        short chainId = Short.valueOf(params.get(0).toString());
-//        long assetId = Long.valueOf(params.get(1).toString());
-//        long currentNumber = Long.valueOf(params.get(2).toString());
-//        chainService.setAssetNumber(chainId, assetId, currentNumber);
-//        return success("setChainAssetCurrentNumber", null);
-//    }
-//
-//    public CmdResponse setChainAssetCurrentNumberValidator(List params) {
-//        long assetId = Long.valueOf(params.get(1).toString());
-//        long currentNumber = Long.valueOf(params.get(2).toString());
-//        Asset asset = assetService.getAsset(assetId);
-//        if (currentNumber > asset.getInitNumber()) {
-//            return failed(CmConstants.ERROR_ASSET_EXCEED_INIT);
-//        }
-//        return success();
-//    }
 
 }

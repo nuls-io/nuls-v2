@@ -3,6 +3,7 @@ package io.nuls.account.service;
 import io.nuls.account.constant.AccountParam;
 import io.nuls.account.init.AccountBootstrap;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.storage.AliasStorageServiceTest;
 import io.nuls.base.basic.AddressTool;
@@ -54,11 +55,11 @@ public class AliasServiceTest {
     @Test
     public void saveAliasTest() throws Exception {
         // create account
-        AliasPo aliasPo = AliasStorageServiceTest.createAlias();
-        boolean result = aliasService.aliasTxCommit(aliasPo);
+        Alias alias = AliasStorageServiceTest.createAlias();
+        boolean result = aliasService.aliasTxCommit(chainId,alias);
         assertTrue(result);
-        Account account = accountService.getAccount(chainId, AddressTool.getStringAddressByBytes(aliasPo.getAddress()));
+        Account account = accountService.getAccount(chainId, AddressTool.getStringAddressByBytes(alias.getAddress()));
         assertNotNull(account);
-        assertEquals(account.getAlias(),aliasPo.getAlias());
+        assertEquals(account.getAlias(),alias.getAlias());
     }
 }

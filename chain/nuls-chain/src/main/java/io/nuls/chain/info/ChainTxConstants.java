@@ -25,18 +25,14 @@
 package io.nuls.chain.info;
 
 /**
- * @program: nuls2
- * @description: 交易类型常量
- * @author: lan
- * @create: 2018/11/19
- **/
+ * @author lan
+ * @program nuls2
+ * @description 交易类型常量,  Constant of transaction type
+ * @date 2018/11/19
+ */
 public interface ChainTxConstants {
-
-
     int TX_TYPE_REGISTER_CHAIN = 5001;
     int TX_TYPE_DESTROY_CHAIN = 5002;
     int TX_TYPE_ADD_CHAIN_ASSET = 5011;
     int TX_TYPE_DISABLE_CHAIN_ASSET = 5012;
-    int TX_TYPE_CROSS_CHAIN_ASSET = 5021;
-
 }

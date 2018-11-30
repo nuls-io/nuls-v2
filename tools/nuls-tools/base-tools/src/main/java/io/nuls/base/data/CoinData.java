@@ -42,7 +42,6 @@ import java.util.*;
 
 /**
  * @author
- *
  */
 public class CoinData extends BaseNulsData {
 
@@ -142,20 +141,20 @@ public class CoinData extends BaseNulsData {
     public String getFee() {
         String toAmount = BigIntegerUtils.ZERO;
         for (CoinTo coinTo : to) {
-            toAmount = BigIntegerUtils.addToString(toAmount,coinTo.getAmount());
+            toAmount = BigIntegerUtils.addToString(toAmount, coinTo.getAmount());
         }
         String fromAmount = BigIntegerUtils.ZERO;
         for (CoinFrom coinFrom : from) {
-            fromAmount =  BigIntegerUtils.addToString(fromAmount,coinFrom.getAmount());
+            fromAmount = BigIntegerUtils.addToString(fromAmount, coinFrom.getAmount());
         }
-        return BigIntegerUtils.subToString(toAmount,fromAmount);
+        return BigIntegerUtils.subToString(toAmount, fromAmount);
     }
 
     public void addTo(CoinTo coinTo) {
         if (null == to) {
             to = new ArrayList<>();
         }
-        if(coinTo.getAddress().length == 23 && coinTo.getAddress()[0] == BaseConstant.P2SH_ADDRESS_TYPE){
+        if (coinTo.getAddress().length == 23 && coinTo.getAddress()[0] == BaseConstant.P2SH_ADDRESS_TYPE) {
             Script scriptPubkey = SignatureUtil.createOutputScript(coinTo.getAddress());
             coinTo.setAddress(scriptPubkey.getProgram());
         }
@@ -171,6 +170,7 @@ public class CoinData extends BaseNulsData {
 
     /**
      * 从CoinData中获取和交易相关的地址(缺少txData中相关地址，需要对应的交易单独获取)
+     *
      * @return
      */
     @JsonIgnore
@@ -193,7 +193,7 @@ public class CoinData extends BaseNulsData {
         }
         Set<byte[]> addressSet = new HashSet<>();
         Iterator<ByteArrayWrapper> it = addressSetWrapper.iterator();
-        while (it.hasNext()){
+        while (it.hasNext()) {
             addressSet.add(it.next().getBytes());
         }
         return addressSet;

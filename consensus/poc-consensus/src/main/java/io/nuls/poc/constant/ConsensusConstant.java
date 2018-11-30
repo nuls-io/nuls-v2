@@ -16,6 +16,7 @@ public interface ConsensusConstant {
     int TX_TYPE_RED_PUNISH = 8;
     int TX_TYPE_STOP_AGENT = 9;
     int TX_TYPE_COINBASE = 1;
+    int TX_TYPE_CROSS_CHAIN = 10;
 
     /**
      * Consensus module related table name/共识模块相关表名
@@ -150,4 +151,20 @@ public interface ConsensusConstant {
      * lock of lockTime,(max of int48)(281474976710655L)
      */
     long LOCK_OF_LOCK_TIME = -1L ;
+
+    /**
+     * 主链ID（卫星链ID）
+     * */
+    int MAIN_CHAIN_ID = 1;
+
+    /**
+     * 主链资产ID卫星链资产ID）
+     * */
+    int MAIN_ASSETS_ID =1;
+
+    /**
+     * 跨链交易手续费主链收取比例
+     * */
+    int MAIN_COMMISSION_RATIO = 60;
+    int TOTLA_COMMISSION_RATIO = 100;
 }

@@ -25,10 +25,15 @@
 package io.nuls.chain.service;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.Chain;
+import io.nuls.rpc.model.message.Response;
+
+import java.util.Map;
 
 /**
  * 调用外部接口
+ * @author lan
  */
 public interface RpcService {
     /**
@@ -50,5 +55,13 @@ public interface RpcService {
     boolean destroyCrossGroup(Chain chain);
 
 
+    /**
+     *获取账户余额
+     * @param chainId
+     * @param assetId
+     * @param address
+     * @return
+     */
+    AccountBalance getCoinData(int chainId,int assetId,String address);
 }
 

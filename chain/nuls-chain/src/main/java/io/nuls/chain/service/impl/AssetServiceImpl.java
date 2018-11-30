@@ -1,7 +1,5 @@
 package io.nuls.chain.service.impl;
 
-import io.nuls.chain.info.CmConstants;
-import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.ChainAsset;
@@ -9,6 +7,7 @@ import io.nuls.chain.service.AssetService;
 import io.nuls.chain.storage.AssetStorage;
 import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.storage.ChainStorage;
+import io.nuls.chain.storage.SeqStorage;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.thread.TimeService;
@@ -34,6 +33,9 @@ public class AssetServiceImpl implements AssetService {
     @Autowired
     private ChainStorage chainStorage;
 
+    @Autowired
+    private SeqStorage seqStorage;
+
     /**
      * delete asset
      *
@@ -43,12 +45,13 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public boolean deleteAsset(Asset asset) {
-        String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId());
+        String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
         String key = CmRuntimeInfo.getChainAssetKey(asset.getChainId(), assetKey);
         assetStorage.delete(assetKey);
         chainAssetStorage.delete(key);
         return true;
     }
+
     /**
      * Save asset
      *
@@ -57,7 +60,7 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public boolean createAsset(Asset asset) {
-        String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId());
+        String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
         String key = CmRuntimeInfo.getChainAssetKey(asset.getChainId(), assetKey);
         asset.addChainId(asset.getChainId());
         boolean s1 = assetStorage.save(key, asset);
@@ -67,6 +70,7 @@ public class AssetServiceImpl implements AssetService {
         chainAsset.setInitNumber(asset.getInitNumber());
         boolean s2 = chainAssetStorage.save(key, chainAsset);
         if (s1 && s2) {
+            seqStorage.setSeq(asset.getChainId(), asset.getAssetId());
             return true;
         } else {
             assetStorage.delete(key);
@@ -74,18 +78,19 @@ public class AssetServiceImpl implements AssetService {
             return false;
         }
     }
+
     /**
      * saveOrUpdate chainAsset
      *
-     *@param    chainAsset
-     * @param    chainId
+     * @param chainAsset
+     * @param chainId
      * @return true/false
      */
     @Override
-    public boolean saveOrUpdateChainAsset(int chainId,ChainAsset chainAsset) {
-        String assetKey = CmRuntimeInfo.getAssetKey(chainAsset.getChainId(),chainAsset.getAssetId());
+    public boolean saveOrUpdateChainAsset(int chainId, ChainAsset chainAsset) {
+        String assetKey = CmRuntimeInfo.getAssetKey(chainAsset.getChainId(), chainAsset.getAssetId());
         String key = CmRuntimeInfo.getChainAssetKey(chainId, assetKey);
-       return chainAssetStorage.save(key, chainAsset);
+        return chainAssetStorage.save(key, chainAsset);
     }
 
     /**
@@ -96,8 +101,8 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public boolean updateAsset(Asset asset) {
-        String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId());
-        assetStorage.save(assetKey,asset);
+        String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
+        assetStorage.save(assetKey, asset);
         return true;
     }
 
@@ -116,7 +121,7 @@ public class AssetServiceImpl implements AssetService {
     /**
      * Set the status of asset
      *
-     * @param assetKey   The asset key
+     * @param assetKey  The asset key
      * @param available The status of asset
      * @return true/false
      */
@@ -132,7 +137,6 @@ public class AssetServiceImpl implements AssetService {
     }
 
 
-
     /**
      * Get all the assets of the chain
      *
@@ -146,13 +150,12 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public boolean assetExist(Asset asset) {
-       Asset dbAsset =  assetStorage.load(CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId()));
-        if(null !=dbAsset){
+        Asset dbAsset = assetStorage.load(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+        if (null != dbAsset) {
             return true;
         }
         return false;
     }
-
 
 
     /**
@@ -198,13 +201,20 @@ public class AssetServiceImpl implements AssetService {
 
     /**
      * getChainAsset
+     *
      * @param asset Asset object
      * @return Error map
      */
     @Override
-    public ChainAsset getChainAsset(int chainId,Asset asset) {
-        ChainAsset chainAsset =chainAssetStorage.load(CmRuntimeInfo.getChainAssetKey(chainId,CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId())));
+    public ChainAsset getChainAsset(int chainId, Asset asset) {
+        ChainAsset chainAsset = chainAssetStorage.load(CmRuntimeInfo.getChainAssetKey(chainId, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId())));
         return chainAsset;
 
+    }
+
+    @Override
+    public ChainAsset getChainAsset(int chainId, String assetKey) {
+        ChainAsset chainAsset = chainAssetStorage.load(CmRuntimeInfo.getChainAssetKey(chainId, assetKey));
+        return chainAsset;
     }
 }

@@ -36,93 +36,107 @@ public interface RpcConstant {
      * --------[call EventBus module RPC constants] -------
      */
     /**
-     * EVENT_SEND_CMD
+     * 事件发送接口
      */
     String EVENT_SEND_CMD = "send";
     /**
-     * EVENT_SEND_VERSION
+     * 事件发送接口版本号
      */
     String EVENT_SEND_VERSION = "1.0";
     /**
-     * EVENT_SEND_TOPIC
+     * 事件发送主题
      */
     String EVENT_SEND_TOPIC = "topic";
     /**
-     * EVENT_SEND_DATA
+     * 事件发送数据
      */
     String EVENT_SEND_DATA = "data";
     /**
      * --------[call Transaction module RPC constants] -------
      */
     /**
-     * TX_REGISTER_VERSION
+     * tx_register注册交易接口版本号
      */
     String TX_REGISTER_VERSION = "1.0";
     /**
-     * TX_REGISTER_CMD
+     * 注册交易接口
      */
     String TX_REGISTER_CMD = "tx_register";
     /**
-     * TX_MODULE_CODE
+     * 注册交易的模块编码
      */
     String TX_MODULE_CODE = "moduleCode";
     /**
-     * TX_MODULE_VALIDATE_CMD
+     * 模块统一交易验证器接口
      */
     String TX_MODULE_VALIDATE_CMD = "moduleValidateCmd";
     /**
-     * TX_TYPE
+     * 交易类型
      */
     String TX_TYPE = "txType";
     /**
-     * TX_VALIDATE_CMD
+     * 单个交易验证器接口
      */
     String TX_VALIDATE_CMD = "validateCmd";
     /**
-     * TX_COMMIT_CMD
+     * 交易提交接口
      */
     String TX_COMMIT_CMD = "commitCmd";
     /**
-     * TX_ROLLBACK_CMD
+     * 交易回滚接口
      */
     String TX_ROLLBACK_CMD = "rollbackCmd";
+
     /**
-     * TX_NEW_VERSION
+     * 是否是系统产生的交易（打包节点产生，用于出块奖励结算、红黄牌惩罚）
+     */
+    String TX_IS_SYSTEM_CMD = "systemTx";
+    /**
+     * 是否是解锁交易
+     */
+    String TX_UNLOCK_CMD = "unlockTx";
+    /**
+     * 该交易是否需要在账本中验证签名
+     */
+    String TX_VERIFY_SIGNATURE_CMD = "verifySignature";
+
+    /**
+     * newTx发起新交易接口版本号
      */
     String TX_NEW_VERSION = "1.0";
     /**
-     * TX_NEW_CMD
+     * 发起新交易接口
      */
     String TX_NEW_CMD = "newTx";
     /**
-     * TX_DATA_HEX
+     * 交易数据HEX编码
      */
     String TX_DATA_HEX = "txHex";
     /**
-     * TX_CHAIN_ID
+     * 交易所属链ID
      */
     String TX_CHAIN_ID = "chainId";
     /**
      * --------[RPC response constants] -------
      */
     /**
-     * value
+     * 单个返回值默认键key
      */
     String VALUE = "value";
     /**
-     * address
+     * 账户地址
      */
     String ADDRESS = "address";
     /**
-     * encryptedPriKey
+     * 加密私钥
      */
     String ENCRYPTED_PRIKEY = "encryptedPriKey";
     /**
-     * path
+     * keystore备份地址
      */
     String PATH = "path";
     /**
-     * signatureHex
+     * 签名数据HEX编码
      */
     String SIGNATURE_HEX = "signatureHex";
 

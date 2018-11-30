@@ -24,7 +24,6 @@
  */
 package io.nuls.chain.storage.impl;
 
-import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.storage.SeqStorage;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
@@ -33,27 +32,53 @@ import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
- * @program: nuls2.0
- * @description:
- * @author: lan
- * @create: 2018/11/26
+ * @author lan
+ * @program nuls2.0
+ * @description
+ * @date 2018/11/26
  **/
 @Component
-public class SeqStorageImpl implements SeqStorage, InitializingBean{
+public class SeqStorageImpl implements SeqStorage, InitializingBean {
     private static final String TBL = "seq";
     /**
-     * 创建assetId
-     * create asset id
-     * @return
+     * key :chainId  value:current seq
+     */
+    private static final Map<Integer, Integer> SEQ_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * 得到链的下一个序列号
      */
     @Override
-    public int createSeqAsset(int chainId) {
+    public int nextSeq(int chainId) {
         try {
-            int assetId = getSeqAsset(chainId);
-            assetId = assetId+1;
-            RocksDBService.put(TBL, ByteUtils.intToBytes(chainId), ByteUtils.intToBytes(assetId));
-            return assetId;
+            /*
+            空，则从1开始
+             */
+            if (SEQ_MAP.get(chainId) == null) {
+                setSeq(chainId, 1);
+                return 1;
+            }
+
+            /*
+            非空，则尝试返回当前值+1
+             */
+            int nextSeq = SEQ_MAP.get(chainId) + 1;
+            if (setSeq(chainId, nextSeq)) {
+                /*
+                符合规范
+                 */
+                return nextSeq;
+            } else {
+                /*
+                不符合规范，递归调用
+                 */
+                return nextSeq(chainId);
+            }
         } catch (Exception e) {
             Log.error(e);
         }
@@ -61,23 +86,29 @@ public class SeqStorageImpl implements SeqStorage, InitializingBean{
     }
 
     /**
-     * 获取 assetId
-     * get asset id
-     * @return
+     * 设置链的序列号
      */
     @Override
-    public int getSeqAsset(int chainId) {
-        try {
-            byte[] assetSeq =  RocksDBService.get(TBL, ByteUtils.intToBytes(chainId));
-            if(null == assetSeq){
-                return 0;
+    public boolean setSeq(int chainId, int tarSeq) {
+        synchronized (SEQ_MAP) {
+            /*
+            空：第一次添加链的序列号信息，直接保存
+            非空：待添加序列号大于当前序列号，保存；否则丢弃
+             */
+            if (SEQ_MAP.get(chainId) == null || tarSeq > SEQ_MAP.get(chainId)) {
+                SEQ_MAP.put(chainId, tarSeq);
+                try {
+                    return RocksDBService.put(TBL, ByteUtils.intToBytes(chainId), ByteUtils.intToBytes(tarSeq));
+                } catch (Exception e) {
+                    Log.error(e);
+                    return false;
+                }
+            } else {
+                return false;
             }
-            return ByteUtils.bytesToInt(assetSeq);
-        } catch (Exception e) {
-            Log.error(e);
         }
-        return 0;
     }
+
     /**
      * 该方法在所有属性被设置之后调用，用于辅助对象初始化
      * This method is invoked after all properties are set, and is used to assist object initialization.
@@ -87,6 +118,15 @@ public class SeqStorageImpl implements SeqStorage, InitializingBean{
         try {
             if (!RocksDBService.existTable(TBL)) {
                 RocksDBService.createTable(TBL);
+            }
+
+            List<byte[]> keyList = RocksDBService.keyList(TBL);
+            for (byte[] key : keyList) {
+                byte[] value = RocksDBService.get(TBL, key);
+                try {
+                    SEQ_MAP.put(ByteUtils.bytesToInt(key), ByteUtils.bytesToInt(value));
+                } catch (Exception ignored) {
+                }
             }
         } catch (Exception e) {
             Log.error(e);

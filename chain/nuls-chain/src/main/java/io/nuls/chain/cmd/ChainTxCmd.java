@@ -33,7 +33,7 @@ import java.util.Map;
  * @description
  */
 @Component
-public class ChainTxCmd extends BaseCmd {
+public class ChainTxCmd extends BaseChainCmd {
 
     @Autowired
     private ChainService chainService;
@@ -173,7 +173,7 @@ public class ChainTxCmd extends BaseCmd {
             String secondaryData = String.valueOf(params.get("secondaryData"));
             Chain chain = buildChainTxData(txHex,new CrossChainDestroyTransaction(),true);
             Response cmdResponse =  destroyValidator(chain);
-            if(cmdResponse.getResponseStatus() != (Constants.SUCCESS_CODE)){
+            if(isSuccess(cmdResponse)){
                 return cmdResponse;
             }
             //更新资产
@@ -203,7 +203,7 @@ public class ChainTxCmd extends BaseCmd {
             String secondaryData = String.valueOf(params.get("secondaryData"));
             Chain chain = buildChainTxData(txHex,new CrossChainDestroyTransaction(),true);
             Response cmdResponse =  destroyValidator(chain);
-            if(cmdResponse.getResponseStatus() != (Constants.SUCCESS_CODE)){
+            if(isSuccess(cmdResponse)){
                 return cmdResponse;
             }
             Chain dbChain = chainService.getChain(chain.getChainId());

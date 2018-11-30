@@ -7,6 +7,7 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.BlockData;
+import io.nuls.poc.model.bo.ChargeResultData;
 import io.nuls.poc.model.bo.consensus.PunishReasonEnum;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
@@ -40,7 +41,7 @@ public class ConsensusUtil {
      * @param address  节点地址
      * @param lockTime 锁定的结束时间点(锁定开始时间点+锁定时长)，之前为锁定的时长
      */
-    public static CoinData getStopAgentCoinData(int chain_id , int assetsId, byte[] address, long lockTime) throws IOException,NulsException {
+    public static CoinData getStopAgentCoinData(int chain_id, int assetsId, byte[] address, long lockTime) throws IOException,NulsException {
         List<Agent> agentList = ConsensusManager.getInstance().getAllAgentMap().get(chain_id);
         for (Agent agent : agentList) {
             if (agent.getDelHeight() > 0) {
@@ -200,23 +201,37 @@ public class ConsensusUtil {
      * 计算共识奖励
      */
     private static List<CoinTo> calcReward(int chain_id,int assetsId,List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) throws NulsException, IOException {
-        List<CoinTo> rewardList = new ArrayList<>();
-        //交易手续费
+        //链内交易手续费(资产为链内主资产)
         String totalFee = BigIntegerUtils.ZERO;
+        //跨链交易手续费(资产为主链主资产)
+        String crossFee = BigIntegerUtils.ZERO;
         //计算手续费
         for (Transaction tx : txList) {
             CoinData coinData = new CoinData();
             coinData.parse(tx.getCoinData(), 0);
-            totalFee += coinData.getFee();
+            ChargeResultData resultData = getFee(tx,chain_id);
+            if(resultData.getChainId() == chain_id){
+                totalFee = BigIntegerUtils.addToString(totalFee,resultData.getFee());
+            }else{
+                crossFee = BigIntegerUtils.addToString(crossFee,resultData.getFee());
+            }
         }
+        //链类奖励列表
+        List<CoinTo> inRewardList = new ArrayList<>();
+        //跨链交易奖励
+        List<CoinTo> outRewardList = new ArrayList<>();
         //如果为种子节点，只领取交易手续费不计算共识奖励（种子节点保证金为0）
         if (BigIntegerUtils.isEqual(self.getAgent().getDeposit(),BigIntegerUtils.ZERO)) {
-            if (BigIntegerUtils.isEqual(totalFee,BigIntegerUtils.ZERO)) {
-                return rewardList;
+            if (!BigIntegerUtils.isEqual(totalFee,BigIntegerUtils.ZERO)) {
+                CoinTo agentReword = new CoinTo(self.getAgent().getRewardAddress(),chain_id,assetsId,totalFee,unlockHeight);
+                inRewardList.add(agentReword);
             }
-            CoinTo agentReword = new CoinTo(self.getAgent().getRewardAddress(),chain_id,assetsId,totalFee,unlockHeight);
-            rewardList.add(agentReword);
-            return rewardList;
+            if(!BigIntegerUtils.isEqual(crossFee,BigIntegerUtils.ZERO)){
+                CoinTo agentReword = new CoinTo(self.getAgent().getRewardAddress(),ConsensusConstant.MAIN_CHAIN_ID,ConsensusConstant.MAIN_ASSETS_ID,crossFee,unlockHeight);
+                outRewardList.add(agentReword);
+            }
+            inRewardList.addAll(outRewardList);
+            return inRewardList;
         }
         BigDecimal totalAll = DoubleUtils.mul(new BigDecimal(localRound.getMemberCount()), new BigDecimal(ConsensusConstant.BLOCK_REWARD));
         //佣金比例
@@ -225,57 +240,91 @@ public class ConsensusUtil {
         String selfAllDeposit = BigIntegerUtils.addToString(self.getAgent().getDeposit(), self.getAgent().getTotalDeposit());
         BigDecimal agentWeight = DoubleUtils.mul(new BigDecimal(selfAllDeposit), self.getAgent().getCreditVal());
         //节点总的奖励金额（交易手续费+共识奖励）
-        double blockReword = Double.valueOf(totalFee);
+        double inBlockReword = Double.valueOf(totalFee);
+        double outBlockReword = Double.valueOf(crossFee);
         if (localRound.getTotalWeight() > 0d && agentWeight.doubleValue() > 0d) {
             //本节点共识奖励 = 节点权重/本轮次权重*共识基础奖励
-            blockReword = DoubleUtils.sum(blockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())).doubleValue());
+            inBlockReword = DoubleUtils.sum(inBlockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())).doubleValue());
+            outBlockReword = DoubleUtils.sum(outBlockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())).doubleValue());
         }
-        if (blockReword == 0d) {
-            return rewardList;
+        if (inBlockReword == 0d && outBlockReword == 0d) {
+            return inRewardList;
         }
         //创建节点账户所得奖励金，总的奖励金*（保证金/（保证金+委托金额））+ 佣金
-        double caReward = DoubleUtils.mul(blockReword, new BigDecimal(BigIntegerUtils.divToString(self.getAgent().getDeposit(), selfAllDeposit)).doubleValue());
+        double agentOwnWeight = new BigDecimal(BigIntegerUtils.divToString(self.getAgent().getDeposit(), selfAllDeposit)).doubleValue();
+        double inCaReward = DoubleUtils.mul(inBlockReword, agentOwnWeight);
+        double outCaReward = DoubleUtils.mul(outBlockReword, agentOwnWeight);
         //计算各委托账户获得的奖励金
         for (Deposit deposit : self.getDepositList()) {
             //计算各委托账户权重（委托金额/总的委托金）
             double weight = new BigDecimal(BigIntegerUtils.divToString(deposit.getDeposit(), selfAllDeposit)).doubleValue();
             if (Arrays.equals(deposit.getAddress(), self.getAgent().getAgentAddress())) {
-                caReward = caReward + DoubleUtils.mul(blockReword, weight);
+                inCaReward = inCaReward + DoubleUtils.mul(inBlockReword, weight);
+                outCaReward = outCaReward + DoubleUtils.mul(outBlockReword, weight);
             } else {
                 //委托账户获得的奖励金
-                double reward = DoubleUtils.mul(blockReword, weight);
-                double fee = DoubleUtils.mul(reward, commissionRate);
-                caReward = caReward + fee;
+                double inReward = DoubleUtils.mul(inBlockReword, weight);
+                double outReward = DoubleUtils.mul(outBlockReword, weight);
+                double inFee = DoubleUtils.mul(inReward, commissionRate);
+                double outFee = DoubleUtils.mul(outReward, commissionRate);
+                inCaReward = inCaReward + inFee;
+                outCaReward = outCaReward + outFee;
                 //委托账户实际获得的奖励金 = 奖励金 - 佣金
-                double hisReward = DoubleUtils.sub(reward, fee);
-                if (hisReward == 0D) {
+                double inHisReward = DoubleUtils.sub(inReward, inFee);
+                double outHisReward = DoubleUtils.sub(outReward, outFee);
+                if (inHisReward == 0D && outHisReward == 0D) {
                     continue;
                 }
-                long depositReward = DoubleUtils.longValue(hisReward);
-                CoinTo rewardCoin = null;
-                for (CoinTo coin : rewardList) {
-                    if (Arrays.equals(coin.getAddress(), deposit.getAddress())) {
-                        rewardCoin = coin;
-                        break;
+                long inDepositReward = DoubleUtils.longValue(inHisReward);
+                long outDepositReward = DoubleUtils.longValue(outHisReward);
+                if(inDepositReward != 0){
+                    CoinTo inRewardCoin = null;
+                    for (CoinTo coin : inRewardList) {
+                        if (Arrays.equals(coin.getAddress(), deposit.getAddress())) {
+                            inRewardCoin = coin;
+                            break;
+                        }
+                    }
+                    if(inRewardCoin == null){
+                        inRewardCoin = new CoinTo(deposit.getAddress(),chain_id,assetsId, String.valueOf(inDepositReward), unlockHeight);
+                        inRewardList.add(inRewardCoin);
+                    }else{
+                        inRewardCoin.setAmount(BigIntegerUtils.addToString(inRewardCoin.getAmount(),String.valueOf(inDepositReward)));
                     }
                 }
-                if (rewardCoin == null) {
-                    rewardCoin = new CoinTo(deposit.getAddress(),chain_id,assetsId, String.valueOf(depositReward), unlockHeight);
-                    rewardList.add(rewardCoin);
-                } else {
-                    rewardCoin.setAmount(BigIntegerUtils.addToString(rewardCoin.getAmount(),String.valueOf(depositReward)));
+                if(outDepositReward != 0){
+                    CoinTo outRewardCoin = null;
+                    for (CoinTo coin : outRewardList) {
+                        if (Arrays.equals(coin.getAddress(), deposit.getAddress())) {
+                            outRewardCoin = coin;
+                            break;
+                        }
+                    }
+                    if(outRewardCoin == null){
+                        outRewardCoin = new CoinTo(deposit.getAddress(),ConsensusConstant.MAIN_CHAIN_ID,ConsensusConstant.MAIN_ASSETS_ID, String.valueOf(outDepositReward), unlockHeight);
+                        outRewardList.add(outRewardCoin);
+                    }else{
+                        outRewardCoin.setAmount(BigIntegerUtils.addToString(outRewardCoin.getAmount(),String.valueOf(outDepositReward)));
+                    }
                 }
             }
         }
-        rewardList.sort(new Comparator<CoinTo>() {
+        inRewardList.addAll(outRewardList);
+        inRewardList.sort(new Comparator<CoinTo>() {
             @Override
             public int compare(CoinTo o1, CoinTo o2) {
                 return Arrays.hashCode(o1.getAddress()) > Arrays.hashCode(o2.getAddress()) ? 1 : -1;
             }
         });
-        CoinTo agentReward = new CoinTo(self.getAgent().getRewardAddress(),chain_id,assetsId, String.valueOf(DoubleUtils.longValue(caReward)), unlockHeight);
-        rewardList.add(0, agentReward);
-        return rewardList;
+        if(DoubleUtils.compare(inCaReward,BigDecimal.ZERO.doubleValue())>0){
+            CoinTo inAgentReward = new CoinTo(self.getAgent().getRewardAddress(),chain_id,assetsId, String.valueOf(DoubleUtils.longValue(inCaReward)), unlockHeight);
+            inRewardList.add(0,inAgentReward);
+        }
+        if(DoubleUtils.compare(outCaReward,BigDecimal.ZERO.doubleValue())>0){
+            CoinTo outAgentReward = new CoinTo(self.getAgent().getRewardAddress(),ConsensusConstant.MAIN_CHAIN_ID,ConsensusConstant.MAIN_ASSETS_ID, String.valueOf(DoubleUtils.longValue(outCaReward)), unlockHeight);
+            inRewardList.add(0,outAgentReward);
+        }
+        return inRewardList;
     }
 
     /**
@@ -388,6 +437,8 @@ public class ConsensusUtil {
 
     /**
      * 创建区块
+     * @param blockData       区块数据
+     * @param packingAddress  打包地址
      */
     public static Block createBlock(BlockData blockData, byte[] packingAddress) throws NulsException {
         //todo
@@ -424,5 +475,58 @@ public class ConsensusUtil {
         scriptSig.setPublicKey(eckey.getPubKey());
         header.setBlockSignature(scriptSig);
         return block;
+    }
+
+    /**
+     * 计算交易手续费
+     * @param tx       交易
+     * @param chainId  链ID
+     * */
+    public static ChargeResultData getFee(Transaction tx,int chainId)throws NulsException{
+        CoinData coinData = new CoinData();
+        coinData.parse(tx.getCoinData(),0);
+        //如果为跨链交易
+        if(tx.getType() == ConsensusConstant.TX_TYPE_CROSS_CHAIN){
+            String fromAmount = BigIntegerUtils.ZERO;
+            String toAmount = BigIntegerUtils.ZERO;
+            //计算链内手续费，from中链内主资产 - to中链内主资产的和
+            if(AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) == chainId){
+                for (CoinFrom from:coinData.getFrom()) {
+                    if(from.getAssetsChainId() == chainId && from.getAssetsId() == ConfigManager.config_map.get(chainId).getAssetsId()){
+                        fromAmount = BigIntegerUtils.addToString(fromAmount,from.getAmount());
+                    }
+                }
+                for (CoinTo to:coinData.getTo()) {
+                    if(to.getAssetsChainId() == chainId && to.getAssetsId() == ConfigManager.config_map.get(chainId).getAssetsId()){
+                        toAmount = BigIntegerUtils.addToString(toAmount,to.getAmount());
+                    }
+                }
+                return new ChargeResultData(BigIntegerUtils.subToString(fromAmount ,toAmount),chainId);
+            }
+            //计算主链和跨链手续费,首先找到CoinData中总的跨链手续费
+            for (CoinFrom from:coinData.getFrom()) {
+                if(from.getAssetsChainId() == ConsensusConstant.MAIN_CHAIN_ID && from.getAssetsId() == ConsensusConstant.MAIN_ASSETS_ID){
+                    fromAmount = BigIntegerUtils.addToString(fromAmount,from.getAmount());
+                }
+            }
+            for (CoinTo to:coinData.getTo()) {
+                if(to.getAssetsChainId() == ConsensusConstant.MAIN_CHAIN_ID  && to.getAssetsId() == ConsensusConstant.MAIN_ASSETS_ID){
+                    toAmount = BigIntegerUtils.addToString(toAmount,to.getAmount());
+                }
+            }
+            //跨链手续费
+            String fee = BigIntegerUtils.subToString(fromAmount,toAmount);
+            //如果当前链为主链,且跨链交易目标连为主链则主链收取全部跨链手续费，如果目标连为其他链则主链收取一定比例的跨链手续费
+            if(chainId == ConsensusConstant.MAIN_CHAIN_ID){
+                int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
+                if(toChainId == ConsensusConstant.MAIN_CHAIN_ID){
+                    return new ChargeResultData(fee,ConsensusConstant.MAIN_CHAIN_ID);
+                }
+                return new ChargeResultData(BigIntegerUtils.divToString(BigIntegerUtils.mulToString(fee,String.valueOf(ConsensusConstant.MAIN_COMMISSION_RATIO)),String.valueOf(ConsensusConstant.TOTLA_COMMISSION_RATIO)),ConsensusConstant.MAIN_CHAIN_ID);
+            }
+            return new ChargeResultData(BigIntegerUtils.divToString(BigIntegerUtils.mulToString(fee,String.valueOf(ConsensusConstant.TOTLA_COMMISSION_RATIO-ConsensusConstant.MAIN_COMMISSION_RATIO)),String.valueOf(ConsensusConstant.TOTLA_COMMISSION_RATIO)),ConsensusConstant.MAIN_CHAIN_ID);
+
+        }
+        return new ChargeResultData(coinData.getFee(),chainId);
     }
 }

@@ -738,15 +738,14 @@ public class AccountCmdTest {
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
 
-            String digestHex = HexUtil.encode(tx.getHash().getDigestBytes());
-            System.out.println(digestHex);
+            String dataHex = HexUtil.encode(tx.getHash().getDigestBytes());
             //测试密码正确
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
             params.put("chainId", chainId);
             params.put("address", address);
             params.put("password", password);
-            params.put("digestHex", digestHex);
+            params.put("dataHex", dataHex);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
             HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_signDigest"));
             String signatureHex = (String) result.get(RpcConstant.SIGNATURE_HEX);

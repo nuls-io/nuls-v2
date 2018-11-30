@@ -6,6 +6,8 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
@@ -18,6 +20,7 @@ import java.io.IOException;
  * @author: Charlie
  * @date: 2018/11/13
  */
+@Service
 public class TransactionStorageServiceImpl implements TransactionStorageService, InitializingBean {
 
     private static final String TRANSACTION_CONFIRMED = "transaction_confirmed";

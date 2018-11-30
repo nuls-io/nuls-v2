@@ -30,6 +30,9 @@ public class TransactionCmdCall {
             params.put(RpcConstant.TX_VALIDATE_CMD, "ac_aliasTxValidate");
             params.put(RpcConstant.TX_COMMIT_CMD, "ac_aliasTxCommit");
             params.put(RpcConstant.TX_ROLLBACK_CMD, "ac_rollbackAlias");
+            params.put(RpcConstant.TX_IS_SYSTEM_CMD, false);
+            params.put(RpcConstant.TX_UNLOCK_CMD, false);
+            params.put(RpcConstant.TX_VERIFY_SIGNATURE_CMD, true);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, RpcConstant.TX_REGISTER_CMD, params);
         } catch (Exception e) {
             e.printStackTrace();

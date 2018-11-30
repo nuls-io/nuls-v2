@@ -28,6 +28,8 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 
 import java.util.Map;
 
@@ -37,19 +39,26 @@ import java.util.Map;
  * @author: lan
  * @create: 2018/11/22
  **/
+@Component
 public class AllTxValidateCmd extends BaseCmd {
+    @Autowired
+    private AssetTxCmd assetTxCmd;
+    @Autowired
+    private ChainTxCmd chainTxCmd;
     /**
      * chainModuleTxValidate
-     * 重连网络
+     *  批量校验
      */
     @CmdAnnotation(cmd = "cm_chainModuleTxValidate", version = 1.0,
             description = "chainModuleTxValidate")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
     @Parameter(parameterName = "txHexs", parameterType = "array")
     public Response chainModuleTxValidate(Map params){
+         //TODO:
         //1获取交易类型
         //2进入不同验证器里处理
         //3封装失败交易返回
-        return null;
+        int chainId =  Integer.valueOf(params.get("chainId").toString());
+        return success();
     }
 }
