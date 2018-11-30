@@ -2,7 +2,6 @@ package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.cmd.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
