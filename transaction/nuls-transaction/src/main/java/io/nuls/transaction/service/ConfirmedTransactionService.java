@@ -2,17 +2,12 @@ package io.nuls.transaction.service;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.transaction.model.bo.TxRegister;
 
 /**
  * @author: Charlie
- * @date: 2018/11/22
+ * @date: 2018/11/30
  */
-public interface TransactionService {
-
-    boolean register(TxRegister txRegister);
-
-    void newTx(Transaction transaction);
+public interface ConfirmedTransactionService {
 
     /**
      * get a transaction

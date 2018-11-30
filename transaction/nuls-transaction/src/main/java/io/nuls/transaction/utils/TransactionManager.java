@@ -1,5 +1,7 @@
 package io.nuls.transaction.utils;
 
+import io.nuls.base.data.Transaction;
+import io.nuls.tools.basic.Result;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.TxRegister;
 
@@ -12,12 +14,15 @@ import java.util.*;
  */
 public class TransactionManager {
 
-    public static final TransactionManager INSTANCE = new TransactionManager();
+    private static final TransactionManager INSTANCE = new TransactionManager();
+
+    public static TransactionManager getInstance(){
+        return INSTANCE;
+    }
     /**
      * 交易注册信息
      */
     private static final Map<Integer, TxRegister> TX_REGISTER_MAP = new HashMap<>();
-
 
 
     private TransactionManager() {
@@ -33,9 +38,17 @@ public class TransactionManager {
         txRegister.setUnlockTx(false);
         txRegister.setVerifySignature(true);
         register(txRegister);
-
     }
 
+    /**
+     * 验证交易
+     * @param transaction
+     * @return
+     */
+    public Result verify(Transaction transaction){
+        //todo
+        return null;
+    }
 
     //注册交易
     public boolean register(TxRegister txRegister){
@@ -77,6 +90,8 @@ public class TransactionManager {
         }
         return list;
     }
+
+
 
 
 }
