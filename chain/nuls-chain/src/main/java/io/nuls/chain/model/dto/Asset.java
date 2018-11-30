@@ -3,8 +3,7 @@ package io.nuls.chain.model.dto;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.chain.model.tx.txdata.AssetTx;
-import io.nuls.chain.model.tx.txdata.ChainTx;
+import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -218,21 +217,21 @@ public class Asset extends BaseNulsData {
         return size;
     }
     public byte [] parseToTransaction() throws IOException {
-        AssetTx assetTx = new AssetTx();
-        assetTx.setAddress(this.getAddress());
-        assetTx.setAssetId(this.getAssetId());
-        assetTx.setChainId(this.getChainId());
-        assetTx.setDecimalPlaces(this.getDecimalPlaces());
-        assetTx.setDepositNuls(this.getDepositNuls());
-        assetTx.setInitNumber(this.getInitNumber());
-        assetTx.setName(this.getName());
-        assetTx.setSymbol(this.getSymbol());
-        return assetTx.serialize();
+        TxChain txChain = new TxChain();
+        txChain.setAddress(this.getAddress());
+        txChain.setAssetId(this.getAssetId());
+        txChain.setChainId(this.getChainId());
+        txChain.setDecimalPlaces(this.getDecimalPlaces());
+        txChain.setDepositNuls(this.getDepositNuls());
+        txChain.setInitNumber(this.getInitNumber());
+        txChain.setName(this.getName());
+        txChain.setSymbol(this.getSymbol());
+        return txChain.serialize();
     }
     public Asset(int assetId){
         this.assetId = assetId;
     }
-    public Asset(AssetTx tx){
+    public Asset(TxChain tx){
         this.address = tx.getAddress();
         this.assetId = tx.getAssetId();
         this.chainId = tx.getChainId();
@@ -242,16 +241,7 @@ public class Asset extends BaseNulsData {
         this.symbol = tx.getSymbol();
         this.name = tx.getName();
     }
-    public Asset(ChainTx tx){
-        this.address = tx.getAddress();
-        this.assetId = tx.getAssetId();
-        this.chainId = tx.getChainId();
-        this.decimalPlaces = tx.getDecimalPlaces();
-        this.depositNuls = tx.getDepositNuls();
-        this.initNumber = tx.getInitNumber();
-        this.symbol = tx.getSymbol();
-        this.name = tx.getName();
-    }
+
     public Asset(){
         super();
     }

@@ -9,14 +9,13 @@ import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.Chain;
-import io.nuls.chain.model.tx.AssetDisableTransaction;
-import io.nuls.chain.model.tx.AssetRegTransaction;
-import io.nuls.chain.model.tx.CrossChainDestroyTransaction;
+import io.nuls.chain.model.tx.AddAssetToChainTransaction;
+import io.nuls.chain.model.tx.DestroyAssetAndChainTransaction;
+import io.nuls.chain.model.tx.RemoveAssetFromChainTransaction;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
 import io.nuls.chain.service.SeqService;
-import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -26,7 +25,6 @@ import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -89,7 +87,7 @@ public class AssetCmd extends BaseChainCmd {
             return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
         }
         // 组装交易发送
-        AssetRegTransaction assetRegTransaction = new AssetRegTransaction();
+        AddAssetToChainTransaction assetRegTransaction = new AddAssetToChainTransaction();
         try {
             assetRegTransaction.setTxData(asset.parseToTransaction());
             AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(),asset.getAssetId(),String.valueOf(params.get("address")));
@@ -133,7 +131,7 @@ public class AssetCmd extends BaseChainCmd {
         Transaction transaction = null;
         if(dbChain.getAssetIds().size() == 1 && dbChain.getAssetIds().get(0) == assetId){
             //带链注销
-            transaction = new CrossChainDestroyTransaction();
+            transaction = new DestroyAssetAndChainTransaction();
             try {
                 transaction.setTxData(dbChain.parseToTransaction(asset,true));
 
@@ -143,7 +141,7 @@ public class AssetCmd extends BaseChainCmd {
             }
         }else{
               //只走资产注销
-              transaction = new AssetDisableTransaction();
+              transaction = new RemoveAssetFromChainTransaction();
             try {
                 transaction.setTxData(asset.parseToTransaction());
             } catch (IOException e) {

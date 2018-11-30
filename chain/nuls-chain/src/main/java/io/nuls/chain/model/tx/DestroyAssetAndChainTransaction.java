@@ -33,9 +33,9 @@ import io.nuls.chain.info.ChainTxConstants;
  * @author: lan
  * @create: 2018/11/19
  **/
-public class CrossChainDestroyTransaction extends Transaction {
+public class DestroyAssetAndChainTransaction extends Transaction {
 
-    public CrossChainDestroyTransaction() {
+    public DestroyAssetAndChainTransaction() {
         super(ChainTxConstants.TX_TYPE_DESTROY_ASSET_AND_CHAIN);
     }
 

@@ -12,8 +12,8 @@ import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.model.dto.ChainAsset;
 import io.nuls.chain.model.dto.CoinDataAssets;
-import io.nuls.chain.model.tx.AssetRegTransaction;
-import io.nuls.chain.model.tx.txdata.AssetTx;
+import io.nuls.chain.model.tx.AddAssetToChainTransaction;
+import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -47,9 +47,9 @@ public class TxAssetCmd extends BaseChainCmd {
         try {
             byte []txBytes = HexUtil.hexToByte(txHex);
             tx.parse(txBytes,0);
-            AssetTx assetTx = new AssetTx();
-            assetTx.parse(tx.getTxData(),0);
-            Asset asset = new Asset(assetTx);
+            TxChain txChain = new TxChain();
+            txChain.parse(tx.getTxData(),0);
+            Asset asset = new Asset(txChain);
             asset.setTxHash(tx.getHash().toString());
             return asset;
         } catch (Exception e) {
@@ -66,7 +66,7 @@ public class TxAssetCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
+            Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
 
             if(assetService.assetExist(asset))
             {
@@ -101,7 +101,7 @@ public class TxAssetCmd extends BaseChainCmd {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
+            Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
             //获取链信息
             Chain dbChain = chainService.getChain(chainId);
             dbChain.addCreateAssetId(asset.getAssetId());
@@ -132,7 +132,7 @@ public class TxAssetCmd extends BaseChainCmd {
     public Response assetRegRollback(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
+        Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
         //判断库中的asset是否存在，数据正确，则删除
         Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId()));
         if(!ByteUtils.arrayEquals(asset.getAddress(),dbAsset.getAddress())){
@@ -164,7 +164,7 @@ public class TxAssetCmd extends BaseChainCmd {
     public Response assetDisableValidator(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
+        Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
         return assetDisableValidator(asset);
     }
     private Response assetDisableValidator(Asset asset) {
@@ -209,7 +209,7 @@ public class TxAssetCmd extends BaseChainCmd {
     public Response assetDisableCommit(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
+        Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
         Response cmdResponse = assetDisableValidator(asset);
         if(isSuccess(cmdResponse)){
             return cmdResponse;
@@ -233,7 +233,7 @@ public class TxAssetCmd extends BaseChainCmd {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
+        Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
         /*判断资产是否可用*/
         Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId()));
         if(null == dbAsset || dbAsset.isAvailable()){

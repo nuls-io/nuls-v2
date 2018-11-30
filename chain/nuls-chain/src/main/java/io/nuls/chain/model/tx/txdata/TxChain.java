@@ -14,7 +14,7 @@ import java.util.Set;
  * @date 2018/11/7
  * @description
  */
-public class ChainTx extends TransactionLogicData {
+public class TxChain extends TransactionLogicData {
     private int chainId;
     private String name;
     private String addressType;
