@@ -6,6 +6,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
+ * 通知
+ * Notification
+ *
  * @author tangyi
  * @date 2018/11/15
  * @description

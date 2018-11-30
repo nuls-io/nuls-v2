@@ -6,6 +6,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
+ * 握手请求
+ * Handshake request
+ *
  * @author tangyi
  * @date 2018/11/15
  * @description

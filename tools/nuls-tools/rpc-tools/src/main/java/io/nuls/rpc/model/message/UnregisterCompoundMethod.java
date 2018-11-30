@@ -6,6 +6,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
+ * 取消订阅多个远程方法
+ * Unsubscribe to multiple remote methods
+ *
  * @author tangyi
  * @date 2018/11/15
  * @description

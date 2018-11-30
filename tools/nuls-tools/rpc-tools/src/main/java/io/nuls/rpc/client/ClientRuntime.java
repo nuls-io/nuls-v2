@@ -14,6 +14,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 
 /**
+ * 客户端运行时所需要的变量和静态方法
+ * Variables and static methods required by client runtime
+ *
  * @author tangyi
  * @date 2018/11/23
  * @description

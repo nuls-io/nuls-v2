@@ -32,6 +32,9 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;
 
 /**
+ * 所有对外提供的接口的父类，必须继承BaseCmd才能被反射调用到
+ * The parent class of all externally provided interfaces, must inherit BaseCmd to be invoked by reflection
+ *
  * @author tangyi
  * @date 2018/10/15
  * @description

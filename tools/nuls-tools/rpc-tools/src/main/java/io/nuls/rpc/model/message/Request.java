@@ -8,6 +8,9 @@ import lombok.ToString;
 import java.util.Map;
 
 /**
+ * 请求调用远程方法
+ * Request to invoke remote methods
+ *
  * @author tangyi
  * @date 2018/11/15
  * @description

@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * Command dispatcher
- * All commands should be invoked through this class
+ * 用于调用远程方法的类，提供多种调用方式，也只应该使用这个类来调用
+ * Classes used to call remote methods, provide multiple ways of invoking, and only this class should be used to invoke
  *
  * @author tangyi
  * @date 2018/11/5

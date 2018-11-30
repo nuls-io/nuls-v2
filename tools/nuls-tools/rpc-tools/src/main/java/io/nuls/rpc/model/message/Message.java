@@ -6,6 +6,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
+ * 所有消息都应该用该对象进行传输
+ * All messages should be transmitted with this object
+ *
  * @author tangyi
  * @date 2018/11/15
  * @description

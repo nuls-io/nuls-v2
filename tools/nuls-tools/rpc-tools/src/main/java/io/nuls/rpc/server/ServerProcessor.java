@@ -11,6 +11,9 @@ import org.java_websocket.WebSocket;
 import java.util.Map;
 
 /**
+ * 处理客户端消息的线程
+ * Threads handling client messages
+ *
  * @author tangyi
  * @date 2018/11/7
  * @description

@@ -6,6 +6,9 @@ import lombok.Setter;
 import lombok.ToString;
 
 /**
+ * 远程调用的方法的结果
+ * Result of a remotely invoked method
+ *
  * @author tangyi
  * @date 2018/11/15
  * @description
