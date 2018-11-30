@@ -35,6 +35,7 @@ import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigInteger;
 
 /**
  * @author Niels
@@ -90,8 +91,11 @@ public class NulsOutputStreamBuffer {
     }
 
     public void writeUint48(long time) throws IOException {
-        byte[] bytes = SerializeUtils.uint48ToBytes(time);
-        this.write(bytes);
+        this.write(SerializeUtils.uint48ToBytes(time));
+    }
+
+    public void writeBigInteger(BigInteger val) throws IOException{
+        this.write(SerializeUtils.bigInteger2Bytes(val));
     }
 
     public void writeInt64(long val) throws IOException {

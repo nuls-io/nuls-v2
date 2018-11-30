@@ -4,6 +4,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 
 /**
+ * 已确认交易的服务接口
  * @author: Charlie
  * @date: 2018/11/30
  */

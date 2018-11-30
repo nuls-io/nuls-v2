@@ -1,18 +1,21 @@
 package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.cache.TxVerifiedPool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
+import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.utils.TransactionManager;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author: Charlie
@@ -25,6 +28,7 @@ public class TxUnverifiedProcessTask implements Runnable {
 
     private TxUnverifiedStorageService txUnverifiedStorageService = SpringLiteContext.getBean(TxUnverifiedStorageService.class);
     private ConfirmedTransactionService confirmedTransactionService = SpringLiteContext.getBean(ConfirmedTransactionService.class);
+    private TxVerifiedStorageService txVerifiedStorageService = SpringLiteContext.getBean(TxVerifiedStorageService.class);
 
     private List<Transaction> orphanTxList = new ArrayList<>();
 
@@ -71,7 +75,19 @@ public class TxUnverifiedProcessTask implements Runnable {
             if(null != transaction){
                 return isOrphanTx;
             }
-            //验证coinData
+            //todo 验证coinData
+            Map<String, String> params = new HashMap<>();
+            params.put("tx", tx.hex());
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "verifyCoinData",params);
+            if(response.isSuccess()){
+                txVerifiedPool.add(tx,false);
+                //保存到rocksdb
+                txVerifiedStorageService.putTx(tx);
+                //todo 保存到h2数据库
+                //todo 调账本记录未确认交易
+                //todo 转发
+            }
+
 
 
         } catch (Exception e) {

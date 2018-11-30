@@ -591,6 +591,15 @@ public class SerializeUtils {
     }
 
     /**
+     * 获取BigInteger数据占的字节数
+     *
+     * @return int
+     */
+    public static int sizeOfBigInteger() {
+        return 16;
+    }
+
+    /**
      * 获取Uint16数据占的字节数
      *
      * @return int
@@ -676,5 +685,50 @@ public class SerializeUtils {
         }
         int size = val.size();
         return size == 0 ? 1 : size;
+    }
+
+
+    /**
+     * 根据字节数组生成对应的大整数
+     * Generate corresponding large integers from byte arrays
+     *
+     * @param array 小端序的字节数组/Small-endian byte array
+     * @return 大整数
+     */
+    public static BigInteger bigIntegerFromBytes(byte[] array) {
+        array = arrayReverse(array);
+        return new BigInteger(array);
+    }
+
+    /**
+     * 将大整数转为字节数组，结果是小端序字节数组
+     * Converting large integers to byte arrays results in small endian byte arrays
+     *
+     * @param value 大整数、BigInteger
+     * @return 字节数组
+     */
+    public static byte[] bigInteger2Bytes(BigInteger value) {
+        byte[] bytes = new byte[16];
+        byte[] oBytes = value.toByteArray();
+        oBytes = arrayReverse(oBytes);
+        System.arraycopy(oBytes, 0, bytes, 0, oBytes.length);
+        return bytes;
+    }
+
+
+    /**
+     * 数组反转工具方法，会返回一个顺序颠倒的新的字节数组
+     * The array inversion tool method returns a new byte array in reverse order
+     *
+     * @param bytes 需要反转的字节数组
+     * @return a new byte array in reverse order
+     */
+    private static byte[] arrayReverse(byte[] bytes) {
+        int length = bytes.length;
+        byte[] array = new byte[length];
+        for (int x = 0; x < length; x++) {
+            array[x] = bytes[length - 1 - x];
+        }
+        return array;
     }
 }

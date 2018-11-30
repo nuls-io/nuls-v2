@@ -36,6 +36,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.util.Arrays;
 
 
@@ -118,6 +119,16 @@ public class NulsByteBuffer {
             throw new NulsException(e);
         }
     }
+    public BigInteger readBigInteger() throws NulsException {
+        try {
+            BigInteger u = SerializeUtils.bigIntegerFromBytes(payload);
+            cursor += 16;
+            return u;
+        } catch (ArrayIndexOutOfBoundsException e) {
+            throw new NulsException(e);
+        }
+    }
+
 
 
     public long readVarInt() throws NulsException {
