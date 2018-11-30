@@ -1,25 +1,18 @@
-package io.nuls.ledger.test.db;
+package io.nuls.ledger.test;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.config.AppConfig;
 import io.nuls.ledger.db.DataBaseArea;
-import io.nuls.ledger.db.Repository;
-import io.nuls.ledger.db.RepositoryImpl;
-import io.nuls.ledger.model.AccountState;
+import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.thread.TimeService;
 import org.junit.Before;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Created by wangkun23 on 2018/11/21.
+ * Created by wangkun23 on 2018/11/29.
  */
-public class RepositoryTest {
-
-    final Logger logger = LoggerFactory.getLogger(getClass());
-
-    private Repository repository;
+public class BaseTest {
 
     @Before
     public void before() {
@@ -29,9 +22,10 @@ public class RepositoryTest {
             if (!RocksDBService.existTable(DataBaseArea.TB_LEDGER_ACCOUNT)) {
                 RocksDBService.createTable(DataBaseArea.TB_LEDGER_ACCOUNT);
             }
+            SpringLiteContext.init("io.nuls.ledger", new ModularServiceMethodInterceptor());
+            TimeService.getInstance().start();
         } catch (Exception e) {
             Log.error(e);
         }
-        repository = new RepositoryImpl();
     }
 }

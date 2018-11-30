@@ -126,6 +126,7 @@ public class ChainCmd extends BaseChainCmd {
             if(rpcReslt) {
                 return success(chain);
             }else{
+                Log.error("RPC fail");
                 return failed(new ErrorCode());
             }
         } catch (Exception e) {

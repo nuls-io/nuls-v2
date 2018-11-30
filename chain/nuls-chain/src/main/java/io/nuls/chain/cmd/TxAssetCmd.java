@@ -16,8 +16,6 @@ import io.nuls.chain.model.tx.AssetRegTransaction;
 import io.nuls.chain.model.tx.txdata.AssetTx;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
-import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -38,7 +36,7 @@ import java.util.*;
  * @description
  */
 @Component
-public class AssetTxCmd extends BaseChainCmd {
+public class TxAssetCmd extends BaseChainCmd {
 
     @Autowired
     private AssetService assetService;

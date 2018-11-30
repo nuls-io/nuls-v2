@@ -45,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @program: nuls2.0
  * @description: 远程调用接口
  * @author: lan
  * @create: 2018/11/07
@@ -216,7 +215,6 @@ DbService dbService=StorageManager.getInstance().getDbService();
      * nw_reconnect
      * 重连网络
      */
-//    @CmdAnnotation(cmd = "nw_reconnect", version = 1.0, preCompatible = true)
     @CmdAnnotation(cmd = "nw_reconnect", version = 1.0,
             description = "reconnect")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
@@ -230,7 +228,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
 
     /**
      * nw_getGroups
-     * 重连网络
+     * 获取链组信息
      */
     @CmdAnnotation(cmd = "nw_getGroups", version = 1.0,
             description = "getGroups")

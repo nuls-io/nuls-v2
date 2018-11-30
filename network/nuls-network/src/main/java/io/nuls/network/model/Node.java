@@ -92,7 +92,8 @@ public class Node extends BaseNulsData  implements Dto {
 
 
     /**
-     * 一条peer连接可以同时属于多个group
+     *
+     * 1:N 连接器,一条peer连接可以同时属于多个group
      */
     private Map<String,NodeGroupConnector> nodeGroupConnectors=new ConcurrentHashMap<>();
 

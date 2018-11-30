@@ -120,11 +120,17 @@ public class MessageManager extends BaseManager{
             byte[] bytes = new byte[buffer.readableBytes()];
             buffer.readBytes(bytes);
             NulsByteBuffer byteBuffer = new NulsByteBuffer(bytes);
+            MessageHeader header = new MessageHeader();
+            int headerSize = header.size();
             byte []payLoad = byteBuffer.getPayload();
-            byte []payLoadBody = byteBuffer.readBytes(payLoad.length-24);
+            byte []payLoadBody = ByteUtils.subBytes(payLoad,headerSize,payLoad.length-headerSize);
+            byte []headerByte = ByteUtils.copyOf(payLoad,headerSize);
             Log.info("=================payLoad length"+payLoadBody.length);
-            MessageHeader header = byteBuffer.readNulsData(new MessageHeader());
+
+            header.parse(headerByte,0);
+            Log.info("================CMD="+header.getCommandStr());
             if (!validate(payLoadBody,header.getChecksum())) {
+                Log.error("validate  false ======================");
                 return;
             }
             byteBuffer.setCursor(0);
