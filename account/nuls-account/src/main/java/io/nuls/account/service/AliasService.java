@@ -27,8 +27,6 @@ package io.nuls.account.service;
 
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.model.dto.AliasDto;
-import io.nuls.account.model.dto.TransactionDto;
 import io.nuls.account.model.po.AliasPo;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.Result;
@@ -53,10 +51,9 @@ public interface AliasService {
      * @param address   Address of account
      * @param password  password of account
      * @param aliasName the alias to set
-     * @return set alias result,true is success,false is failed
      * @return txhash
      */
-     boolean setAlias(int chainId, String address, String password, String aliasName);
+    boolean setAlias(int chainId, String address, String password, String aliasName);
 
     /**
      * 获取设置别名交易手续费
@@ -67,7 +64,7 @@ public interface AliasService {
      * @param aliasName
      * @return
      */
-     Result<String> getAliasFee(short chaindId, String address, String aliasName);
+    Result<String> getAliasFee(short chaindId, String address, String aliasName);
 
     /**
      * get the alias by address
@@ -89,7 +86,7 @@ public interface AliasService {
      * @return true is usable,false is unusable
      *
      */
-     boolean isAliasUsable(int chainId, String alias);
+    boolean isAliasUsable(int chainId, String alias);
 
 
     /**
@@ -102,7 +99,7 @@ public interface AliasService {
      * @param alias
      * @return the hash of tx
      **/
-     String setMultiSigAlias(int chainId, String address, String signAddress, String password, String alias);
+    String setMultiSigAlias(int chainId, String address, String signAddress, String password, String alias);
 
     /**
      * accountTxValidate
@@ -117,7 +114,7 @@ public interface AliasService {
      *
      * @return
      */
-     List<TransactionDto<AliasDto>> accountTxValidate(int chainId, List<TransactionDto<AliasDto>> txList);
+    List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) throws Exception;
 
     /**
      * validate the tx of alias
@@ -129,7 +126,7 @@ public interface AliasService {
      * @return the result of validate
      *
      * */
-     boolean aliasTxValidate(int chainId, TransactionDto<AliasDto> transaction);
+    boolean aliasTxValidate(int chainId, Transaction transaction) throws Exception;
 
     /**
      * 别名交易提交
