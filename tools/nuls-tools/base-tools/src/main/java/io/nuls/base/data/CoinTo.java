@@ -45,7 +45,7 @@ public class CoinTo extends BaseNulsData {
      */
     private long lockTime;
 
-    public  CoinTo (){ }
+    public CoinTo(){}
 
     public CoinTo(byte[] address,int assetsChainId,int assetsId,BigInteger amount){
         this.address = address;
@@ -65,7 +65,7 @@ public class CoinTo extends BaseNulsData {
         stream.writeUint16(assetsChainId);
         stream.writeUint16(assetsId);
         stream.writeBigInteger(amount);
-        stream.writeUint48(lockTime);
+        stream.writeUint32(lockTime);
     }
 
     @Override
