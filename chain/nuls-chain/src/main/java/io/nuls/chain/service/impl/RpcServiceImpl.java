@@ -25,13 +25,16 @@
 package io.nuls.chain.service.impl;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.chain.info.ChainTxConstants;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.service.RpcService;
+import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Service;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -89,15 +92,21 @@ public class RpcServiceImpl  implements RpcService {
     @Override
     public boolean createCrossGroup(Chain chain) {
         try {
-            //TODO:远程接口待完善
-//            CmdDispatcher.call(CmConstants.CMD_NW_CREATE_NODEGROUP, new Object[]{},1.0 );
-
+            Map<String,Object> map = new HashMap<>();
+            map.put("chainId",chain.getChainId());
+            map.put("magicNumber",chain.getMagicNumber());
+            map.put("maxOut","");
+            map.put("maxIn","");
+            map.put("minAvailableCount",chain.getMinAvailableNodeNum());
+            map.put("seedIps","");
+            map.put("isMoonNode","1");
+           Response response =  CmdDispatcher.requestAndResponse(CmConstants.MODULE_ROLE, CmConstants.CMD_NW_CREATE_NODEGROUP,map );
+           return response.isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
 
-        return true;
     }
 
     @Override

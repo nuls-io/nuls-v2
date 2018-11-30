@@ -52,6 +52,11 @@ public interface ConsensusConstant {
     String CONTEXT_PATH = "io.nuls.poc";
 
     /**
+     * rpc file path
+     * */
+    String RPC_PATH = "io.nuls.poc.rpc";
+
+    /**
      * config file path
      * */
     String CONFIG_FILE_PATH = "consensus-config.json";

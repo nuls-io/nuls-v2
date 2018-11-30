@@ -3,7 +3,7 @@ package io.nuls.poc.utils.manager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.poc.constant.ConsensusConstant;
-import io.nuls.poc.model.bo.Evidence;
+import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.consensus.PunishReasonEnum;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;

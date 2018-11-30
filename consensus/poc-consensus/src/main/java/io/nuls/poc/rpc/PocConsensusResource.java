@@ -1,6 +1,9 @@
 package io.nuls.poc.rpc;
 
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.service.impl.ConsensusServiceImpl;
+import io.nuls.poc.utils.annotation.ResisterTx;
+import io.nuls.poc.utils.enumeration.TxMethodType;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
@@ -36,6 +39,7 @@ public class PocConsensusResource extends BaseCmd{
      * 节点验证
      * */
     @CmdAnnotation(cmd = "cs_createAgentValid", version = 1.0, description = "test getHeight 1.0")
+    @ResisterTx(txType = ConsensusConstant.TX_TYPE_REGISTER_AGENT,methodType = TxMethodType.VALID,methodName = "cs_createAgentValid")
     public Response createAgentValid(Map<String,Object> params){
         Result result = service.createAgentValid(params);
         if(result.isFailed()){
@@ -48,6 +52,7 @@ public class PocConsensusResource extends BaseCmd{
      * 创建节点交易提交
      * */
     @CmdAnnotation(cmd = "cs_createAgentCommit", version = 1.0, description = "test getHeight 1.0")
+    @ResisterTx(txType = ConsensusConstant.TX_TYPE_REGISTER_AGENT,methodType = TxMethodType.COMMIT,methodName = "cs_createAgentCommit")
     public Response createAgentCommit(Map<String,Object> params){
         Result result = service.createAgentCommit(params);
         if(result.isFailed()){
@@ -60,6 +65,7 @@ public class PocConsensusResource extends BaseCmd{
      * 创建节点交易回滚
      * */
     @CmdAnnotation(cmd = "cs_createAgentRollBack", version = 1.0, description = "test getHeight 1.0")
+    @ResisterTx(txType = ConsensusConstant.TX_TYPE_REGISTER_AGENT,methodType = TxMethodType.ROLLBACK,methodName = "cs_createAgentRollBack")
     public Response createAgentRollBack(Map<String,Object> params){
         Result result = service.createAgentRollBack(params);
         if(result.isFailed()){
@@ -84,6 +90,7 @@ public class PocConsensusResource extends BaseCmd{
      * 注销节点交易验证
      * */
     @CmdAnnotation(cmd = "cs_stopAgentValid", version = 1.0, description = "test getHeight 1.0")
+    @ResisterTx(txType = ConsensusConstant.TX_TYPE_STOP_AGENT,methodType = TxMethodType.VALID,methodName = "cs_stopAgentValid")
     public Response stopAgentValid(Map<String,Object> params){
         Result result = service.stopAgentValid(params);
         if(result.isFailed()){
@@ -96,6 +103,7 @@ public class PocConsensusResource extends BaseCmd{
      * 注销节点交易提交
      * */
     @CmdAnnotation(cmd = "cs_stopAgentCommit", version = 1.0, description = "test getHeight 1.0")
+    @ResisterTx(txType = ConsensusConstant.TX_TYPE_STOP_AGENT,methodType = TxMethodType.COMMIT,methodName = "cs_stopAgentCommit")
     public Response stopAgentCommit(Map<String,Object> params){
         Result result = service.stopAgentCommit(params);
         if(result.isFailed()){
@@ -108,6 +116,7 @@ public class PocConsensusResource extends BaseCmd{
      * 注销节点交易回滚
      * */
     @CmdAnnotation(cmd = "cs_stopAgentRollBack", version = 1.0, description = "test getHeight 1.0")
+    @ResisterTx(txType = ConsensusConstant.TX_TYPE_STOP_AGENT,methodType = TxMethodType.ROLLBACK,methodName = "cs_stopAgentRollBack")
     public Response stopAgentRollBack(Map<String,Object> params){
         Result result = service.stopAgentRollBack(params);
         if(result.isFailed()){
@@ -132,6 +141,7 @@ public class PocConsensusResource extends BaseCmd{
      * 委托共识交易验证
      * */
     @CmdAnnotation(cmd = "cs_depositValid", version = 1.0, description = "test getHeight 1.0")
+    @ResisterTx(txType = ConsensusConstant.TX_TYPE_JOIN_CONSENSUS,methodType = TxMethodType.VALID,methodName = "cs_depositValid")
     public Response depositValid(Map<String,Object> params){
         Result result = service.depositValid(params);
         if(result.isFailed()){
@@ -144,6 +154,7 @@ public class PocConsensusResource extends BaseCmd{
      * 委托共识交易提交
      * */
     @CmdAnnotation(cmd = "cs_depositCommit", version = 1.0, description = "test getHeight 1.0")
+    @ResisterTx(txType = ConsensusConstant.TX_TYPE_JOIN_CONSENSUS,methodType = TxMethodType.COMMIT,methodName = "cs_depositCommit")
     public Response depositCommit(Map<String,Object> params){
         Result result = service.depositCommit(params);
         if(result.isFailed()){
@@ -156,6 +167,7 @@ public class PocConsensusResource extends BaseCmd{
      * 委托共识交易回滚
      * */
     @CmdAnnotation(cmd = "cs_depositRollBack", version = 1.0, description = "test getHeight 1.0")
+    @ResisterTx(txType = ConsensusConstant.TX_TYPE_JOIN_CONSENSUS,methodType = TxMethodType.ROLLBACK,methodName = "cs_depositRollBack")
     public Response depositRollBack(Map<String,Object> params){
         Result result = service.depositRollBack(params);
         if(result.isFailed()){
@@ -180,6 +192,7 @@ public class PocConsensusResource extends BaseCmd{
      * 退出共识交易验证
      * */
     @CmdAnnotation(cmd = "cs_withdrawValid", version = 1.0, description = "test getHeight 1.0")
+    @ResisterTx(txType = ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT,methodType = TxMethodType.VALID,methodName = "cs_withdrawValid")
     public Response withdrawValid(Map<String,Object> params){
         Result result = service.withdrawValid(params);
         if(result.isFailed()){
@@ -192,6 +205,7 @@ public class PocConsensusResource extends BaseCmd{
      * 退出共识交易提交
      * */
     @CmdAnnotation(cmd = "cs_withdrawCommit", version = 1.0, description = "test getHeight 1.0")
+    @ResisterTx(txType = ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT,methodType = TxMethodType.COMMIT,methodName = "cs_withdrawCommit")
     public Response withdrawCommit(Map<String,Object> params){
         Result result = service.withdrawCommit(params);
         if(result.isFailed()){
@@ -204,6 +218,7 @@ public class PocConsensusResource extends BaseCmd{
      * 退出共识交易回滚
      * */
     @CmdAnnotation(cmd = "cs_withdrawRollBack", version = 1.0, description = "test getHeight 1.0")
+    @ResisterTx(txType = ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT,methodType = TxMethodType.ROLLBACK,methodName = "cs_withdrawRollBack")
     public Response withdrawRollBack(Map<String,Object> params){
         Result result = service.withdrawRollBack(params);
         if(result.isFailed()){

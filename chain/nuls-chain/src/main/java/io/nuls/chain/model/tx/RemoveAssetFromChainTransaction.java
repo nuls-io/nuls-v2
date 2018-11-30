@@ -22,52 +22,21 @@
  * SOFTWARE.
  *
  */
-package io.nuls.poc.model.bo;
+package io.nuls.chain.model.tx;
 
-
-import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.Transaction;
+import io.nuls.chain.info.ChainTxConstants;
 
 /**
- * @author: tag
- * @date: 2018/11/19
- */
-public class Evidence {
+ * @program: nuls2.0
+ * @description: 跨链注册交易
+ * @author: lan
+ * @create: 2018/11/19
+ **/
+public class RemoveAssetFromChainTransaction extends Transaction{
 
-    private long roundIndex;
-    private BlockHeader blockHeader1;
-    private BlockHeader blockHeader2;
-
-    public Evidence(){
-
+    public RemoveAssetFromChainTransaction() {
+        super(ChainTxConstants.TX_TYPE_REMOVE_ASSET_FROM_CHAIN);
     }
 
-    public Evidence(long roundIndex, BlockHeader blockHeader1, BlockHeader blockHeader2){
-        this.roundIndex = roundIndex;
-        this.blockHeader1 = blockHeader1;
-        this.blockHeader2 = blockHeader2;
-    }
-
-    public long getRoundIndex() {
-        return roundIndex;
-    }
-
-    public void setRoundIndex(long roundIndex) {
-        this.roundIndex = roundIndex;
-    }
-
-    public BlockHeader getBlockHeader1() {
-        return blockHeader1;
-    }
-
-    public void setBlockHeader1(BlockHeader blockHeader1) {
-        this.blockHeader1 = blockHeader1;
-    }
-
-    public BlockHeader getBlockHeader2() {
-        return blockHeader2;
-    }
-
-    public void setBlockHeader2(BlockHeader blockHeader2) {
-        this.blockHeader2 = blockHeader2;
-    }
 }
