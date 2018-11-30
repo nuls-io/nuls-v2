@@ -36,7 +36,7 @@ public class Response {
     @Setter
     private Object responseData;
 
-    public boolean isSuccess(){
-        return responseStatus.equals(Constants.booleanString(true));
+    public boolean isSuccess() {
+        return Constants.booleanString(true).equals(responseStatus);
     }
 }
