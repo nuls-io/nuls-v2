@@ -23,6 +23,10 @@ public class ChainTx extends TransactionLogicData {
     private int minAvailableNodeNum;
     private int singleNodeMinConnectionNum;
     private byte[] address;
+
+    /**
+     * 下面这些是创建链的时候，必须携带的资产信息
+     */
     private int assetId;
     private String symbol;
     private String assetName;
