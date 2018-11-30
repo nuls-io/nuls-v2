@@ -69,7 +69,7 @@ public interface RpcConstant {
     /**
      * 模块统一交易验证器接口
      */
-    String TX_MODULE_VALIDATE_CMD = "moduleValidateCmd";
+    String TX_MODULE_VALIDATE_CMD = "moduleValidator";
     /**
      * 交易类型
      */
@@ -77,15 +77,15 @@ public interface RpcConstant {
     /**
      * 单个交易验证器接口
      */
-    String TX_VALIDATE_CMD = "validateCmd";
+    String TX_VALIDATE_CMD = "validator";
     /**
      * 交易提交接口
      */
-    String TX_COMMIT_CMD = "commitCmd";
+    String TX_COMMIT_CMD = "commit";
     /**
      * 交易回滚接口
      */
-    String TX_ROLLBACK_CMD = "rollbackCmd";
+    String TX_ROLLBACK_CMD = "rollback";
 
     /**
      * 是否是系统产生的交易（打包节点产生，用于出块奖励结算、红黄牌惩罚）
