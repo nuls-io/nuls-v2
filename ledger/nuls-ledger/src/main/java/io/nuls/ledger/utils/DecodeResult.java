@@ -4,6 +4,9 @@ import org.spongycastle.util.encoders.Hex;
 
 import java.io.Serializable;
 
+/**
+ * Created by wangkun23 on 2018/11/30.
+ */
 @SuppressWarnings("serial")
 public class DecodeResult implements Serializable {
 
@@ -23,6 +26,7 @@ public class DecodeResult implements Serializable {
         return decoded;
     }
 
+    @Override
     public String toString() {
         return asString(this.decoded);
     }

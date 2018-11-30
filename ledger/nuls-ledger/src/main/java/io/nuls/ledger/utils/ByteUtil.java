@@ -12,7 +12,9 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
+/**
+ * Created by wangkun23 on 2018/11/30.
+ */
 public class ByteUtil {
 
     public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];

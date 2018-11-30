@@ -10,6 +10,7 @@ import static java.util.Arrays.copyOfRange;
 import static org.spongycastle.util.Arrays.concatenate;
 import static org.spongycastle.util.encoders.Hex.encode;
 
+
 /**
  * Compact encoding of hex sequence with optional terminator
  *
@@ -42,6 +43,9 @@ import static org.spongycastle.util.encoders.Hex.encode;
  * '\x20\x0f\x1c\xb8'
  * &gt; [ 15, 1, 12, 11, 8, T ]
  * '\x3f\x1c\xb8'
+ */
+/**
+ * Created by wangkun23 on 2018/11/30.
  */
 public class CompactEncoder {
 

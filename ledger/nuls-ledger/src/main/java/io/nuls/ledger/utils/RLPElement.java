@@ -4,9 +4,8 @@ import java.io.Serializable;
 
 /**
  * Wrapper class for decoded elements from an RLP encoded byte array.
- *
- * @author Roman Mandeleil
- * @since 01.04.2014
+ * <p>
+ * Created by wangkun23 on 2018/11/30.
  */
 public interface RLPElement extends Serializable {
 

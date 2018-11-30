@@ -1,8 +1,7 @@
 package io.nuls.ledger.utils;
 
 /**
- * @author Roman Mandeleil
- * @since 21.04.14
+ * Created by wangkun23 on 2018/11/30.
  */
 public class RLPItem implements RLPElement {
 
@@ -12,9 +11,11 @@ public class RLPItem implements RLPElement {
         this.rlpData = rlpData;
     }
 
+    @Override
     public byte[] getRLPData() {
-        if (rlpData.length == 0)
+        if (rlpData.length == 0) {
             return null;
+        }
         return rlpData;
     }
 }

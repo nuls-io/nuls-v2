@@ -3,8 +3,7 @@ package io.nuls.ledger.utils;
 import java.util.ArrayList;
 
 /**
- * @author Roman Mandeleil
- * @since 21.04.14
+ * Created by wangkun23 on 2018/11/30.
  */
 public class RLPList extends ArrayList<RLPElement> implements RLPElement {
 
@@ -14,20 +13,23 @@ public class RLPList extends ArrayList<RLPElement> implements RLPElement {
         this.rlpData = rlpData;
     }
 
+    @Override
     public byte[] getRLPData() {
         return rlpData;
     }
 
     public static void recursivePrint(RLPElement element) {
 
-        if (element == null)
+        if (element == null) {
             throw new RuntimeException("RLPElement object can't be null");
+        }
         if (element instanceof RLPList) {
 
             RLPList rlpList = (RLPList) element;
             System.out.print("[");
-            for (RLPElement singleElement : rlpList)
+            for (RLPElement singleElement : rlpList){
                 recursivePrint(singleElement);
+            }
             System.out.print("]");
         } else {
             String hex = ByteUtil.toHexString(element.getRLPData());
