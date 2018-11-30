@@ -43,38 +43,6 @@ public class FreezeState {
     private List<FreezeLockTimeState> freezeLockTimeStates = new CopyOnWriteArrayList<>();
 
 
-    @Setter
-    @Getter
-    private byte[] rlpEncoded;
-
-
-    public FreezeState(byte[] rawData) {
-        this.rlpEncoded = rawData;
-        try {
-            RLPList decodedList = RLP.decode2(rlpEncoded);
-            RLPList freezeState = (RLPList) decodedList.get(0);
-
-            byte[] amountBytes = freezeState.get(0).getRLPData();
-            RLPList freezeHeightStatesList = (RLPList) freezeState.get(1);
-            RLPList freezeLockTimeStatesList = (RLPList) freezeState.get(2);
-
-            this.amount = ByteUtil.byteArrayToLong(amountBytes);
-            for (RLPElement rawState : freezeHeightStatesList) {
-                FreezeHeightState heightState = new FreezeHeightState(rawState.getRLPData());
-
-                this.freezeHeightStates.add(heightState);
-            }
-
-            for (RLPElement rawState : freezeLockTimeStatesList) {
-                FreezeLockTimeState lockTimeState = new FreezeLockTimeState(rawState.getRLPData());
-                this.freezeLockTimeStates.add(lockTimeState);
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error on parsing RLP", e);
-        }
-    }
-
     /**
      * 查询用户所有可用金额
      *
@@ -91,35 +59,5 @@ public class FreezeState {
         }
         long total = LongUtils.add(amount, freeze);
         return total;
-    }
-
-    private byte[] getFreezeHeightStatesEncoded() {
-        byte[][] encoded = new byte[freezeHeightStates.size()][];
-        int i = 0;
-        for (FreezeHeightState state : freezeHeightStates) {
-            encoded[i] = state.getEncoded();
-            ++i;
-        }
-        return RLP.encodeList(encoded);
-    }
-
-    private byte[] getFreezeLockTimeStatesEncoded() {
-        byte[][] encoded = new byte[freezeLockTimeStates.size()][];
-        int i = 0;
-        for (FreezeLockTimeState state : freezeLockTimeStates) {
-            encoded[i] = state.getEncoded();
-            ++i;
-        }
-        return RLP.encodeList(encoded);
-    }
-
-    public byte[] getEncoded() {
-        if (rlpEncoded == null) {
-            byte[] amount = RLP.encodeBigInteger(BigInteger.valueOf(this.amount));
-            byte[] freezeHeightStates = getFreezeHeightStatesEncoded();
-            byte[] freezeLockTimeStates = getFreezeLockTimeStatesEncoded();
-            this.rlpEncoded = RLP.encodeList(amount, freezeHeightStates, freezeLockTimeStates);
-        }
-        return rlpEncoded;
     }
 }

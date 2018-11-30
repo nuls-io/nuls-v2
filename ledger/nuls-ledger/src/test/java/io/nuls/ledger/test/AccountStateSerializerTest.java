@@ -4,60 +4,25 @@ import io.nuls.ledger.model.AccountState;
 import io.nuls.ledger.model.FreezeHeightState;
 import io.nuls.ledger.model.FreezeLockTimeState;
 import io.nuls.ledger.model.FreezeState;
+import io.nuls.ledger.serializers.AccountStateSerializer;
+import io.nuls.ledger.service.AccountStateService;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by wangkun23 on 2018/11/29.
+ * Created by wangkun23 on 2018/11/30.
  */
-public class RLPTest {
 
-    final Logger logger = LoggerFactory.getLogger(RLPTest.class);
+public class AccountStateSerializerTest extends BaseTest {
 
-    @Test
-    public void rlp() {
-        FreezeHeightState state = new FreezeHeightState();
-        state.setTxHash("dfdf");
-        state.setHeight(100L);
-        state.setAmount(100L);
-        state.setCreateTime(System.currentTimeMillis());
-
-        logger.info("state rlp {}", state);
-
-        FreezeHeightState state2 = new FreezeHeightState(state.getEncoded());
-
-        logger.info("state rlp {}", state2);
-    }
+    final Logger logger = LoggerFactory.getLogger(AccountStateSerializerTest.class);
 
     @Test
-    public void rlp2() {
-        Integer chainId = 1;
-        String address = "NsdzTe4czMVA5Ccc1p9tgiGrKWx7WLNV";
-        Integer assetId = 1;
-        AccountState accountState = new AccountState(chainId, assetId, 0, 0);
+    public void test() {
+        AccountStateSerializer accountStateSerializer = SpringLiteContext.getBean(AccountStateSerializer.class);
 
-//        accountState.getFreezeState().getFreezeHeightStates().add(state);
-        logger.info("rlp {}", accountState.getEncoded().length);
-    }
-
-    @Test
-    public void rlp3() {
-        FreezeLockTimeState state = new FreezeLockTimeState();
-        state.setTxHash("dfdf");
-        state.setLockTime(System.currentTimeMillis());
-        state.setAmount(100L);
-        state.setCreateTime(System.currentTimeMillis());
-
-        logger.info("state rlp {}", state);
-
-        FreezeLockTimeState state2 = new FreezeLockTimeState(state.getEncoded());
-
-        logger.info("state rlp {}", state2);
-    }
-
-    @Test
-    public void rlp4() {
         Integer chainId = 1;
         String address = "NsdzTe4czMVA5Ccc1p9tgiGrKWx7WLNV";
         Integer assetId = 1;
@@ -86,19 +51,18 @@ public class RLPTest {
         FreezeHeightState heightState = new FreezeHeightState();
         heightState.setTxHash("dfdf");
         heightState.setHeight(100L);
-        heightState.setAmount(100L);
+        heightState.setAmount(900L);
         heightState.setCreateTime(System.currentTimeMillis());
         freezeState.getFreezeHeightStates().add(heightState);
-
-        FreezeState freezeState2 = new FreezeState(freezeState.getEncoded());
-        logger.info("freezeState2 {}", freezeState2);
 
 
         AccountState accountState = new AccountState(chainId, assetId, 50, 70);
         accountState.setFreezeState(freezeState);
 
+
+        byte[] source = accountStateSerializer.serialize(accountState);
         logger.info("accountState {}", accountState);
-        AccountState accountState2 =new AccountState(accountState.getEncoded());
+        AccountState accountState2 = accountStateSerializer.deserialize(source);
         logger.info("accountState2 {}", accountState2);
     }
 }
