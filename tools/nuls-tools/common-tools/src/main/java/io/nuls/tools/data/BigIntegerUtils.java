@@ -1,10 +1,6 @@
 package io.nuls.tools.data;
 
-import io.nuls.tools.crypto.HexUtil;
-import org.spongycastle.util.encoders.Hex;
-
 import java.math.BigInteger;
-import java.util.Collections;
 
 /**
  * @author tag
