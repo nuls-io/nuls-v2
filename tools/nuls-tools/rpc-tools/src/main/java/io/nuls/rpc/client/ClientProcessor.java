@@ -12,6 +12,9 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
+ * 处理客户端收到的消息
+ * Processing messages received by clients
+ *
  * @author tangyi
  * @date 2018/11/26
  * @description

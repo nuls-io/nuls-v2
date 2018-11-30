@@ -48,7 +48,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Call the correct method based on request information
+ * 解析从客户端收到的消息，调用正确的方法
+ * Resolve the message received from the client and invoke the correct method
  *
  * @author tangyi
  * @date 2018/10/30
@@ -101,12 +102,6 @@ public class CmdHandler {
      * True: keep, False: remove
      */
     public static boolean response(WebSocket webSocket, String messageId, Request request) {
-//        /*
-//        从Message对象中获得Request
-//        Get Request from message
-//         */
-//        String messageId = message.getMessageId();
-//        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
 
         String key = webSocket.toString() + messageId;
 

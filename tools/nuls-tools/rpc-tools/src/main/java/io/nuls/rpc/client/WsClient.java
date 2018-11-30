@@ -38,6 +38,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 /**
+ * WebSocketClient的实现类
+ * Implementation Class of WebSocketClient
+ *
  * @author tangyi
  * @date 2018/10/30
  * @description

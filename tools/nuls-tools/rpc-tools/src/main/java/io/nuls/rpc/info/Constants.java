@@ -36,6 +36,9 @@ import io.nuls.tools.thread.TimeService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
+ * WebsocketTool的常量
+ * Constant of WebsocketTool
+ *
  * @author tangyi
  * @date 2018/10/19
  * @description

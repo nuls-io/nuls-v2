@@ -44,6 +44,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * WebSocketServer的实现类，同时拥有业务属性
+ * WebSocketServer implementation class with business attributes
+ *
  * @author tangyi
  * @date 2018/10/30
  * @description
@@ -134,7 +137,7 @@ public class WsServer extends WebSocketServer {
         registerApi.setModuleName(name);
         registerApi.setModuleDomain(domain);
         Map<String, String> connectionInformation = new HashMap<>(2);
-        connectionInformation.put(Constants.KEY_IP, HostInfo.getIpAdd());
+        connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
         connectionInformation.put(Constants.KEY_PORT, wsServer.getPort() + "");
         registerApi.setConnectionInformation(connectionInformation);
         registerApi.setApiMethods(new ArrayList<>());
@@ -204,7 +207,7 @@ public class WsServer extends WebSocketServer {
         registerApi.setModuleName(ModuleE.KE.name);
         registerApi.setModuleDomain(ModuleE.KE.domain);
         Map<String, String> connectionInformation = new HashMap<>(2);
-        connectionInformation.put(Constants.KEY_IP, HostInfo.getIpAdd());
+        connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
         connectionInformation.put(Constants.KEY_PORT, wsServer.getPort() + "");
         registerApi.setConnectionInformation(connectionInformation);
 

@@ -15,6 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 /**
+ * 服务端运行时所需要的变量和静态方法
+ * Variables and static methods required for server-side runtime
+ *
  * @author tangyi
  * @date 2018/11/23
  * @description

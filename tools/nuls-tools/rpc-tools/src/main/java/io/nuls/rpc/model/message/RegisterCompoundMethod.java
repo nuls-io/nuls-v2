@@ -8,6 +8,9 @@ import lombok.ToString;
 import java.util.List;
 
 /**
+ * 订阅多个远程方法
+ * Subscribe to multiple remote methods
+ *
  * @author tangyi
  * @date 2018/11/15
  * @description
