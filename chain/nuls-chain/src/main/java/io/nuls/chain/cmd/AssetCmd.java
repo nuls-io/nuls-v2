@@ -74,7 +74,7 @@ public class AssetCmd extends BaseChainCmd {
     public Response assetReg(Map params) {
         int chainId = Integer.valueOf(params.get("chainId").toString());
         int assetId =  seqService.createAssetId(chainId);
-        Asset asset = new Asset(chainId);
+        Asset asset = new Asset(assetId);
         asset.setChainId(chainId);
         asset.setSymbol((String) params.get("symbol"));
         asset.setName((String) params.get("name"));
