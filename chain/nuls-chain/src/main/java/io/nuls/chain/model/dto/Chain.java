@@ -3,7 +3,7 @@ package io.nuls.chain.model.dto;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.chain.model.tx.txdata.ChainTx;
+import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -353,42 +353,42 @@ public class Chain extends BaseNulsData {
     public Chain(){
         super();
     }
-    public Chain(ChainTx chainTx,boolean isDelete){
+    public Chain(TxChain txChain, boolean isDelete){
         if(isDelete){
-            this.regAddress = chainTx.getAddress();
-            this.regAssetId = chainTx.getAssetId();
+            this.regAddress = txChain.getAddress();
+            this.regAssetId = txChain.getAssetId();
         }else{
-            this.delAddress = chainTx.getAddress();
-            this.delAssetId = chainTx.getAssetId();
+            this.delAddress = txChain.getAddress();
+            this.delAssetId = txChain.getAssetId();
         }
-        this.addressType = chainTx.getAddressType();
-        this.chainId = chainTx.getChainId();
-        this.magicNumber = chainTx.getMagicNumber();
-        this.minAvailableNodeNum = chainTx.getMinAvailableNodeNum();
-        this.name =  chainTx.getName();
-        this.singleNodeMinConnectionNum = chainTx.getSingleNodeMinConnectionNum();
-        this.supportInflowAsset = chainTx.isSupportInflowAsset();
+        this.addressType = txChain.getAddressType();
+        this.chainId = txChain.getChainId();
+        this.magicNumber = txChain.getMagicNumber();
+        this.minAvailableNodeNum = txChain.getMinAvailableNodeNum();
+        this.name =  txChain.getName();
+        this.singleNodeMinConnectionNum = txChain.getSingleNodeMinConnectionNum();
+        this.supportInflowAsset = txChain.isSupportInflowAsset();
 
     }
     public byte [] parseToTransaction(Asset asset,boolean isDelete) throws IOException {
-        ChainTx chainTx = new ChainTx();
+        TxChain txChain = new TxChain();
 
-        chainTx.setAddressType(this.addressType);
-        chainTx.setChainId(this.chainId);
-        chainTx.setMagicNumber(this.magicNumber);
-        chainTx.setMinAvailableNodeNum(this.minAvailableNodeNum);
-        chainTx.setName(this.name);
-        chainTx.setSingleNodeMinConnectionNum(this.singleNodeMinConnectionNum);
-        chainTx.setSupportInflowAsset(this.supportInflowAsset);
-        chainTx.setAddress(asset.getAddress());
+        txChain.setAddressType(this.addressType);
+        txChain.setChainId(this.chainId);
+        txChain.setMagicNumber(this.magicNumber);
+        txChain.setMinAvailableNodeNum(this.minAvailableNodeNum);
+        txChain.setName(this.name);
+        txChain.setSingleNodeMinConnectionNum(this.singleNodeMinConnectionNum);
+        txChain.setSupportInflowAsset(this.supportInflowAsset);
+        txChain.setAddress(asset.getAddress());
 
-        chainTx.setAssetId(asset.getAssetId());
-        chainTx.setSymbol(asset.getSymbol());
-        chainTx.setAssetName(asset.getName());
-        chainTx.setDepositNuls(asset.getDepositNuls());
-        chainTx.setInitNumber(asset.getInitNumber());
-        chainTx.setDecimalPlaces(asset.getDecimalPlaces());
-        return chainTx.serialize();
+        txChain.setAssetId(asset.getAssetId());
+        txChain.setSymbol(asset.getSymbol());
+        txChain.setAssetName(asset.getName());
+        txChain.setDepositNuls(asset.getDepositNuls());
+        txChain.setInitNumber(asset.getInitNumber());
+        txChain.setDecimalPlaces(asset.getDecimalPlaces());
+        return txChain.serialize();
     }
 
 }

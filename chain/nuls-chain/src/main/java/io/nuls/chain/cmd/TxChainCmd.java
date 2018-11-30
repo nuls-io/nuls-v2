@@ -6,9 +6,9 @@ import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.Chain;
-import io.nuls.chain.model.tx.CrossChainDestroyTransaction;
-import io.nuls.chain.model.tx.CrossChainRegTransaction;
-import io.nuls.chain.model.tx.txdata.ChainTx;
+import io.nuls.chain.model.tx.DestroyAssetAndChainTransaction;
+import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
+import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
@@ -48,7 +48,7 @@ public class TxChainCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Chain  chain = buildChainTxData(txHex,new CrossChainRegTransaction(),false);
+            Chain  chain = buildChainTxData(txHex,new RegisterChainAndAssetTransaction(),false);
             int chainId = chain.getChainId();
             if (chainId < 0) {
                 return failed(CmErrorCode.C10002);
@@ -71,13 +71,13 @@ public class TxChainCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Chain  chain = buildChainTxData(txHex,new CrossChainRegTransaction(),false);
+            Chain  chain = buildChainTxData(txHex,new RegisterChainAndAssetTransaction(),false);
             Chain dbChain = chainService.getChain(chain.getChainId());
             if (dbChain != null ) {
                 return failed(CmErrorCode.C10001);
             }
             //进行资产存储,资产流通表存储
-            Asset asset = buildAssetTxData(txHex,new CrossChainRegTransaction());
+            Asset asset = buildAssetTxData(txHex,new RegisterChainAndAssetTransaction());
             asset.addChainId(asset.getChainId());
             assetService.createAsset(asset);
 
@@ -109,7 +109,7 @@ public class TxChainCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Chain  chain = buildChainTxData(txHex,new CrossChainRegTransaction(),false);
+            Chain  chain = buildChainTxData(txHex,new RegisterChainAndAssetTransaction(),false);
             Chain dbChain = chainService.getChain(chain.getChainId());
             if ( null == chain || null == dbChain || !chain.getRegTxHash().equalsIgnoreCase(dbChain.getRegTxHash())) {
                 return failed(CmErrorCode.C10001);
@@ -132,7 +132,7 @@ public class TxChainCmd extends BaseChainCmd {
     public Response chainDestroyValidator(Map params) {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Chain chain = buildChainTxData(txHex,new CrossChainDestroyTransaction(),true);
+            Chain chain = buildChainTxData(txHex,new DestroyAssetAndChainTransaction(),true);
             return destroyValidator(chain);
     }
     private Response destroyValidator(Chain chain){
@@ -168,7 +168,7 @@ public class TxChainCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Chain chain = buildChainTxData(txHex,new CrossChainDestroyTransaction(),true);
+            Chain chain = buildChainTxData(txHex,new DestroyAssetAndChainTransaction(),true);
             Response cmdResponse =  destroyValidator(chain);
             if(isSuccess(cmdResponse)){
                 return cmdResponse;
@@ -198,7 +198,7 @@ public class TxChainCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Chain chain = buildChainTxData(txHex,new CrossChainDestroyTransaction(),true);
+            Chain chain = buildChainTxData(txHex,new DestroyAssetAndChainTransaction(),true);
             Response cmdResponse =  destroyValidator(chain);
             if(isSuccess(cmdResponse)){
                 return cmdResponse;
@@ -225,9 +225,9 @@ public class TxChainCmd extends BaseChainCmd {
         try {
             byte []txBytes = HexUtil.hexToByte(txHex);
             tx.parse(txBytes,0);
-            ChainTx chainTx =  new ChainTx();
-            chainTx.parse(tx.getTxData(),0);
-            Chain chain = new Chain(chainTx,isDelete);
+            TxChain txChain =  new TxChain();
+            txChain.parse(tx.getTxData(),0);
+            Chain chain = new Chain(txChain,isDelete);
             if(isDelete){
                 chain.setDelTxHash(tx.getHash().toString());
             }else {
@@ -243,9 +243,9 @@ public class TxChainCmd extends BaseChainCmd {
         try {
             byte []txBytes = HexUtil.hexToByte(txHex);
             tx.parse(txBytes,0);
-            ChainTx chainTx =  new ChainTx();
-            chainTx.parse(tx.getTxData(),0);
-            Asset asset = new Asset(chainTx);
+            TxChain txChain =  new TxChain();
+            txChain.parse(tx.getTxData(),0);
+            Asset asset = new Asset(txChain);
             asset.setTxHash(tx.getHash().toString());
             return asset;
         } catch (Exception e) {

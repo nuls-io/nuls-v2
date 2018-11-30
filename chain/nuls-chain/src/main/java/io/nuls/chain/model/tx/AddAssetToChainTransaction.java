@@ -33,10 +33,10 @@ import io.nuls.chain.info.ChainTxConstants;
  * @author: lan
  * @create: 2018/11/19
  **/
-public class CrossChainRegTransaction extends Transaction {
+public class AddAssetToChainTransaction extends Transaction{
 
-    public CrossChainRegTransaction() {
-        super(ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET);
+    public AddAssetToChainTransaction() {
+        super(ChainTxConstants.TX_TYPE_ADD_ASSET_TO_CHAIN);
     }
 
 }
