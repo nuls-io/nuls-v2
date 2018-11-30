@@ -3,10 +3,16 @@ package io.nuls.chain.model.tx.txdata;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
+import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Set;
 
 /**
@@ -14,137 +20,56 @@ import java.util.Set;
  * @date 2018/11/7
  * @description
  */
+@ToString
+@NoArgsConstructor
 public class TxChain extends TransactionLogicData {
+    @Getter
+    @Setter
     private int chainId;
+    @Getter
+    @Setter
     private String name;
+    @Getter
+    @Setter
     private String addressType;
-    private long  magicNumber;
+    @Getter
+    @Setter
+    private long magicNumber;
+    @Getter
+    @Setter
     private boolean supportInflowAsset;
+    @Getter
+    @Setter
     private int minAvailableNodeNum;
+    @Getter
+    @Setter
     private int singleNodeMinConnectionNum;
+    @Getter
+    @Setter
     private byte[] address;
 
     /**
      * 下面这些是创建链的时候，必须携带的资产信息
      */
+    @Getter
+    @Setter
     private int assetId;
+    @Getter
+    @Setter
     private String symbol;
+    @Getter
+    @Setter
     private String assetName;
+    @Getter
+    @Setter
     private int depositNuls;
-    private String initNumber;
+    @Getter
+    @Setter
+    private BigInteger initNumber;
+    @Getter
+    @Setter
     private short decimalPlaces;
 
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAddressType() {
-        return addressType;
-    }
-
-    public void setAddressType(String addressType) {
-        this.addressType = addressType;
-    }
-
-    public long getMagicNumber() {
-        return magicNumber;
-    }
-
-    public void setMagicNumber(long magicNumber) {
-        this.magicNumber = magicNumber;
-    }
-
-    public boolean isSupportInflowAsset() {
-        return supportInflowAsset;
-    }
-
-    public void setSupportInflowAsset(boolean supportInflowAsset) {
-        this.supportInflowAsset = supportInflowAsset;
-    }
-
-    public int getMinAvailableNodeNum() {
-        return minAvailableNodeNum;
-    }
-
-    public void setMinAvailableNodeNum(int minAvailableNodeNum) {
-        this.minAvailableNodeNum = minAvailableNodeNum;
-    }
-
-    public int getSingleNodeMinConnectionNum() {
-        return singleNodeMinConnectionNum;
-    }
-
-    public void setSingleNodeMinConnectionNum(int singleNodeMinConnectionNum) {
-        this.singleNodeMinConnectionNum = singleNodeMinConnectionNum;
-    }
-
-    public byte[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(byte[] address) {
-        this.address = address;
-    }
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public String getAssetName() {
-        return assetName;
-    }
-
-    public void setAssetName(String assetName) {
-        this.assetName = assetName;
-    }
-
-    public int getDepositNuls() {
-        return depositNuls;
-    }
-
-    public void setDepositNuls(int depositNuls) {
-        this.depositNuls = depositNuls;
-    }
-
-    public String getInitNumber() {
-        return initNumber;
-    }
-
-    public void setInitNumber(String initNumber) {
-        this.initNumber = initNumber;
-    }
-
-    public short getDecimalPlaces() {
-        return decimalPlaces;
-    }
-
-    public void setDecimalPlaces(short decimalPlaces) {
-        this.decimalPlaces = decimalPlaces;
-    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -160,7 +85,7 @@ public class TxChain extends TransactionLogicData {
         stream.writeString(symbol);
         stream.writeString(assetName);
         stream.writeUint16(depositNuls);
-        stream.writeString(initNumber);
+        stream.write(BigIntegerUtils.toBytes(initNumber));
         stream.writeShort(decimalPlaces);
     }
 
@@ -178,7 +103,7 @@ public class TxChain extends TransactionLogicData {
         this.symbol = byteBuffer.readString();
         this.assetName = byteBuffer.readString();
         this.depositNuls = byteBuffer.readUint16();
-        this.initNumber = byteBuffer.readString();
+        this.initNumber = BigIntegerUtils.fromBytes(byteBuffer.readBytes(BigIntegerUtils.BIG_INTEGER_LENGTH));
         this.decimalPlaces = byteBuffer.readShort();
     }
 
@@ -197,15 +122,15 @@ public class TxChain extends TransactionLogicData {
         size += SerializeUtils.sizeOfInt32();
         // singleNodeMinConnectionNum;
         size += SerializeUtils.sizeOfInt32();
-        size+= SerializeUtils.sizeOfBytes(address);
+        size += SerializeUtils.sizeOfBytes(address);
         //assetId
-        size+=SerializeUtils.sizeOfUint16();
-        size+=SerializeUtils.sizeOfString(symbol);
-        size+=SerializeUtils.sizeOfString(assetName);
+        size += SerializeUtils.sizeOfUint16();
+        size += SerializeUtils.sizeOfString(symbol);
+        size += SerializeUtils.sizeOfString(assetName);
         //depositNuls
         size += SerializeUtils.sizeOfUint16();
         //initNumber
-        size += SerializeUtils.sizeOfString(initNumber);
+        size += BigIntegerUtils.BIG_INTEGER_LENGTH;
         //decimalPlaces
         size += SerializeUtils.sizeOfInt16();
         return size;

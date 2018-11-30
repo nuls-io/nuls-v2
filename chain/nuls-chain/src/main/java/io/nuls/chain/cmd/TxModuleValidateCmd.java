@@ -26,6 +26,7 @@ package io.nuls.chain.cmd;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.ChainTxConstants;
+import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -114,7 +115,7 @@ public class TxModuleValidateCmd extends BaseCmd {
         List<Integer> chainIdList = new ArrayList<>();
         List<Integer> assetIdList = new ArrayList<>();
         for (Transaction tx : registerChainAndAssetList) {
-//            ChainTx chainTx=(ChainTx)tx;
+            RegisterChainAndAssetTransaction registerChainAndAssetTransaction=(RegisterChainAndAssetTransaction)tx;
         }
         return error;
     }

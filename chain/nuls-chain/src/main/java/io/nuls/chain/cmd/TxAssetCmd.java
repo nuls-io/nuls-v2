@@ -22,6 +22,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -390,7 +391,7 @@ public class TxAssetCmd extends BaseChainCmd {
                 String assetKey =  assetKeysIt.next();
                 ChainAsset fromChainAsset = assetService.getChainAsset(fromChainId, assetKey);
                 BigDecimal currentAsset = new BigDecimal(fromChainAsset.getOutNumber()).add(new BigDecimal(fromAssetMap.get(assetKey)));
-                fromChainAsset.setOutNumber(currentAsset.toString());
+                fromChainAsset.setOutNumber(BigIntegerUtils.stringToBigInteger(currentAsset.toString()));
                 assetService.saveOrUpdateChainAsset(fromChainId,fromChainAsset);
             }
             if(isMainChain(toChainId)){
@@ -424,11 +425,11 @@ public class TxAssetCmd extends BaseChainCmd {
                     toChainAsset = new ChainAsset();
                     toChainAsset.setChainId(asset.getChainId());
                     toChainAsset.setAssetId(asset.getAssetId());
-                    toChainAsset.setInNumber(toAssetMap.get(toAssetKey));
+                    toChainAsset.setInNumber(BigIntegerUtils.stringToBigInteger(toAssetMap.get(toAssetKey)));
                 }else{
                     BigDecimal inAsset = new BigDecimal(toChainAsset.getInNumber());
                     BigDecimal inNumberBigDec =  new BigDecimal(toAssetMap.get(toAssetKey)).add(inAsset);
-                    toChainAsset.setInNumber(inNumberBigDec.toString());
+                    toChainAsset.setInNumber(BigIntegerUtils.stringToBigInteger(inNumberBigDec.toString()));
                 }
                 assetService.saveOrUpdateChainAsset(toChainId,toChainAsset);
             }
