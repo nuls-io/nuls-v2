@@ -1,5 +1,6 @@
 package io.nuls.rpc.model.message;
 
+import io.nuls.rpc.info.Constants;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -34,4 +35,8 @@ public class Response {
     @Getter
     @Setter
     private Object responseData;
+
+    public boolean isSuccess() {
+        return Constants.booleanString(true).equals(responseStatus);
+    }
 }

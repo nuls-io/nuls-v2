@@ -36,7 +36,7 @@ import io.nuls.chain.info.ChainTxConstants;
 public class AssetDisableTransaction extends Transaction{
 
     public AssetDisableTransaction() {
-        super(ChainTxConstants.TX_TYPE_DISABLE_CHAIN_ASSET);
+        super(ChainTxConstants.TX_TYPE_REMOVE_ASSET_FROM_CHAIN);
     }
 
 }
