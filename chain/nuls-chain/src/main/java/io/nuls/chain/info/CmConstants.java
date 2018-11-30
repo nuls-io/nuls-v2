@@ -15,7 +15,7 @@ public class CmConstants {
 
     private CmConstants() {
     }
-
+    public static final String MODULE_ROLE = "CM";
     public static final String ADDRESS_TYPE_NULS = "nuls";
     public static final String ADDRESS_TYPE_OTHER = "other";
 
