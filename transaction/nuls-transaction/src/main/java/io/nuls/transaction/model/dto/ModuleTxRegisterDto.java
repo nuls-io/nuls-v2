@@ -23,55 +23,54 @@
  *
  */
 
-package io.nuls.account.model.dto;
+package io.nuls.transaction.model.dto;
 
-import io.nuls.account.model.bo.Account;
-import io.nuls.tools.crypto.HexUtil;
+import java.util.List;
 
 /**
- *
- * The dto represent the source coin of the transaction
- *
- * @author: EdwardChan
+ * 各个模块需要向交易管理模块注册自己的每个交易的验证器，整个模块的验证器
+ * @author: qinyifeng
+ * @date: 2018/11/30
  */
-
-public class CoinFromDto {
+public class ModuleTxRegisterDto {
     /**
-     * address
+     * 模块编码
      */
-    private String address;
-
+    private String moduleCode;
     /**
-     * amount
+     * 模块统一验证器
      */
-    private String amount;
-
+    private String moduleValidator;
     /**
-     * nonce
+     * 交易验证器
      */
-    private String nonce;
+    private List<TxRegisterDto> list;
 
-    public String getAddress() {
-        return address;
+    public ModuleTxRegisterDto() {
+
     }
 
-    public void setAddress(String address) {
-        this.address = address;
+    public String getModuleCode() {
+        return moduleCode;
     }
 
-    public String getAmount() {
-        return amount;
+    public void setModuleCode(String moduleCode) {
+        this.moduleCode = moduleCode;
     }
 
-    public void setAmount(String amount) {
-        this.amount = amount;
+    public String getModuleValidator() {
+        return moduleValidator;
     }
 
-    public String getNonce() {
-        return nonce;
+    public void setModuleValidator(String moduleValidator) {
+        this.moduleValidator = moduleValidator;
     }
 
-    public void setNonce(String nonce) {
-        this.nonce = nonce;
+    public List<TxRegisterDto> getList() {
+        return list;
+    }
+
+    public void setList(List<TxRegisterDto> list) {
+        this.list = list;
     }
 }
