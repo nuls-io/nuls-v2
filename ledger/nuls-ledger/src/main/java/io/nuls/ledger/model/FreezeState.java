@@ -50,27 +50,6 @@ public class FreezeState {
 
     public FreezeState(byte[] rawData) {
         this.rlpEncoded = rawData;
-    }
-
-    /**
-     * 查询用户所有可用金额
-     *
-     * @return
-     */
-    public long getTotal() {
-        long freeze = 0L;
-        for (FreezeHeightState heightState : freezeHeightStates) {
-            freeze = LongUtils.add(freeze, heightState.getAmount());
-        }
-
-        for (FreezeLockTimeState lockTimeState : freezeLockTimeStates) {
-            freeze = LongUtils.add(freeze, lockTimeState.getAmount());
-        }
-        long total = LongUtils.add(amount, freeze);
-        return total;
-    }
-
-    public synchronized void rlpParse() {
         try {
             RLPList decodedList = RLP.decode2(rlpEncoded);
             RLPList freezeState = (RLPList) decodedList.get(0);
@@ -94,6 +73,24 @@ public class FreezeState {
         } catch (Exception e) {
             throw new RuntimeException("Error on parsing RLP", e);
         }
+    }
+
+    /**
+     * 查询用户所有可用金额
+     *
+     * @return
+     */
+    public long getTotal() {
+        long freeze = 0L;
+        for (FreezeHeightState heightState : freezeHeightStates) {
+            freeze = LongUtils.add(freeze, heightState.getAmount());
+        }
+
+        for (FreezeLockTimeState lockTimeState : freezeLockTimeStates) {
+            freeze = LongUtils.add(freeze, lockTimeState.getAmount());
+        }
+        long total = LongUtils.add(amount, freeze);
+        return total;
     }
 
     private byte[] getFreezeHeightStatesEncoded() {

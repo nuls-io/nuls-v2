@@ -83,7 +83,6 @@ public class RLPTest {
         logger.info("rlp {}", freezeState);
 
 
-
         FreezeHeightState heightState = new FreezeHeightState();
         heightState.setTxHash("dfdf");
         heightState.setHeight(100L);
@@ -92,8 +91,14 @@ public class RLPTest {
         freezeState.getFreezeHeightStates().add(heightState);
 
         FreezeState freezeState2 = new FreezeState(freezeState.getEncoded());
-        freezeState2.rlpParse();
         logger.info("freezeState2 {}", freezeState2);
 
+
+        AccountState accountState = new AccountState(chainId, assetId, 50, 70);
+        accountState.setFreezeState(freezeState);
+
+        logger.info("accountState {}", accountState);
+        AccountState accountState2 =new AccountState(accountState.getEncoded());
+        logger.info("accountState2 {}", accountState2);
     }
 }

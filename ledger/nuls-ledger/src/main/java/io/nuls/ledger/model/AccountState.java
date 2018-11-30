@@ -3,7 +3,9 @@ package io.nuls.ledger.model;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.ledger.utils.ByteUtil;
 import io.nuls.ledger.utils.RLP;
+import io.nuls.ledger.utils.RLPList;
 import io.nuls.tools.data.LongUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
@@ -62,11 +64,13 @@ public class AccountState extends BaseNulsData {
 
     public AccountState(byte[] rlpData) {
         this.rlpEncoded = rlpData;
-//        RLPList items = (RLPList) RLP.decode2(rlpEncoded).get(0);
-//        this.nonce = ByteUtil.bytesToBigInteger(items.get(0).getRLPData());
-//        this.balance = ByteUtil.bytesToBigInteger(items.get(1).getRLPData());
-//        this.stateRoot = items.get(2).getRLPData();
-//        this.codeHash = items.get(3).getRLPData();
+        RLPList items = (RLPList) RLP.decode2(rlpEncoded).get(0);
+
+        this.chainId = ByteUtil.byteArrayToInt(items.get(0).getRLPData());
+        this.assetId = ByteUtil.byteArrayToInt(items.get(1).getRLPData());
+        this.nonce = ByteUtil.byteArrayToLong(items.get(2).getRLPData());
+        this.balance = ByteUtil.byteArrayToLong(items.get(3).getRLPData());
+        this.freezeState = new FreezeState(items.get(4).getRLPData());
     }
 
     public byte[] getEncoded() {
