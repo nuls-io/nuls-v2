@@ -39,6 +39,7 @@ public class TransactionBootStrap {
             initDB();
             //初始化上下文
             SpringLiteContext.init(TxConstant.CONTEXT_PATH);
+
             //初始化国际资源文件语言
             initLanguage();
             //加载本地配置参数,并启动本地服务
