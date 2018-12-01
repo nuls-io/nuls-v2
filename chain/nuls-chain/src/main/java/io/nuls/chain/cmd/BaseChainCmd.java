@@ -24,10 +24,22 @@
  */
 package io.nuls.chain.cmd;
 
+import io.nuls.base.basic.TransactionFeeCalculator;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
+import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.data.BigIntegerUtils;
+import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.exception.NulsRuntimeException;
+
+import java.math.BigDecimal;
 
 /**
  * @program: nuls2.0
@@ -52,4 +64,33 @@ public class BaseChainCmd extends BaseCmd {
         String assetId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID);
         return CmRuntimeInfo.getAssetKey(Integer.valueOf(chainId),Integer.valueOf(assetId)).equals(assetKey);
     }
+
+    public CoinData getRegCoinData(byte[] address, int chainId, int assetsId, String amount,
+                                   int txSize, AccountBalance accountBalance)throws NulsRuntimeException {
+        txSize =txSize+ P2PHKSignature.SERIALIZE_LENGTH;
+        CoinData coinData = new CoinData();
+        String lockRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS_lOCK);
+        String destroyRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS_DESTROY);
+        String backAmount = new BigDecimal(amount).multiply(new BigDecimal(lockRate)).toString();
+        String destroyAmount = new BigDecimal(amount).multiply(new BigDecimal(destroyRate)).toString();
+        CoinTo to1 = new CoinTo(address,chainId,assetsId,backAmount, -1);
+
+        CoinTo to2 = new CoinTo(CmConstants.BLACK_HOLE_ADDRESS,chainId,assetsId,destroyAmount, 0);
+        coinData.addTo(to1);
+        txSize += to1.size();
+        coinData.addTo(to2);
+        txSize += to2.size();
+        //手续费
+        CoinFrom from = new CoinFrom(address,chainId,assetsId,amount,ByteUtils.copyOf(accountBalance.getNonce().getBytes(),8), 0);
+        txSize += from.size();
+        String fee = TransactionFeeCalculator.getMaxFee(txSize);
+        String fromAmount = BigIntegerUtils.addToString(amount ,fee);
+        if(BigIntegerUtils.isLessThan(accountBalance.getAvailable(),fromAmount)){
+            throw new NulsRuntimeException(CmErrorCode.BALANCE_NOT_ENOUGH);
+        }
+        from.setAmount(fromAmount);
+        coinData.addFrom(from);
+        return  coinData;
+    }
+
 }

@@ -16,8 +16,6 @@ import io.nuls.chain.model.tx.AssetRegTransaction;
 import io.nuls.chain.model.tx.txdata.AssetTx;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
-import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -38,7 +36,7 @@ import java.util.*;
  * @description
  */
 @Component
-public class AssetTxCmd extends BaseChainCmd {
+public class TxAssetCmd extends BaseChainCmd {
 
     @Autowired
     private AssetService assetService;
@@ -369,7 +367,6 @@ public class AssetTxCmd extends BaseChainCmd {
      * @param params
      * @return
      */
-
     @CmdAnnotation(cmd = "cm_assetCirculateCommit", version = 1.0,description = "assetCirculateCommit")
     @Parameter(parameterName = "coinDatas", parameterType = "String")
     public Response assetCirculateCommit(Map params) {
@@ -401,42 +398,43 @@ public class AssetTxCmd extends BaseChainCmd {
             }else{
                //提取toChainId的 手续费资产，如果存将手续费放入外链给的回执，也取消 外链手续费增加。
                String mainAssetKey =CmRuntimeInfo.getMainAsset();
-                String feeAmount = fromAssetMap.get(CmRuntimeInfo.getMainAsset());
+                String allFromMainAmount = fromAssetMap.get(mainAssetKey);
+                String allToMainAmount = toAssetMap.get(mainAssetKey);
+                BigDecimal feeAmount = new BigDecimal(allFromMainAmount).subtract(new BigDecimal(allToMainAmount)).multiply(BigDecimal.valueOf(0.4));
                 if(null!= toAssetMap.get(mainAssetKey)){
-                    BigDecimal mainAssetAmount = new BigDecimal(feeAmount).add(new BigDecimal(toAssetMap.get(mainAssetKey)));
-                    feeAmount =mainAssetAmount.toString();
+                    feeAmount = feeAmount.add(new BigDecimal(toAssetMap.get(mainAssetKey)));
                 }
-                toAssetMap.put(mainAssetKey,feeAmount);
+                toAssetMap.put(mainAssetKey,feeAmount.toString());
             }
             //to 的处理
-
-//            Set<String> assetToKeys = AssetMap.keySet();
-//            Iterator<String> assetKeysIt = assetKeys.iterator();
-//            String feeAmount = fromAssetMap.get(CmRuntimeInfo.getMainAsset());
-//            ChainAsset  toChainAsset =  assetService.getChainAsset(toChainId, CmRuntimeInfo.getMainAsset());
-//            if(null == toChainAsset){
+            Set<String> toAssetKeys = toAssetMap.keySet();
+            Iterator<String> toAssetKeysIt = toAssetKeys.iterator();
+            while(toAssetKeysIt.hasNext()){
+               String toAssetKey =  toAssetKeysIt.next();
+               ChainAsset  toChainAsset =  assetService.getChainAsset(toChainId,toAssetKey);
+                if(null == toChainAsset){
 //                //链下加资产，资产下增加链
-//                Chain toChain = chainService.getChain(toChainId);
-//                Asset asset = assetService.getAsset(CmRuntimeInfo.getMainAsset());
-//                toChain.addCirculateAssetId(CmRuntimeInfo.getMainAsset());
-//                asset.addChainId(toChainId);
-//                chainService.updateChain(toChain);
-//                assetService.updateAsset(asset);
-//                //更新资产
-//                toChainAsset = new ChainAsset();
-//                toChainAsset.setChainId(asset.getChainId());
-//                toChainAsset.setAssetId(asset.getAssetId());
-//                toChainAsset.setInNumber(String.valueOf(amount.doubleValue()));
-//            }else{
-//                BigDecimal inAsset = new BigDecimal(toChainAsset.getInNumber());
-//                String inNumberStr = String.valueOf(inAsset.add(amount).doubleValue());
-//                toChainAsset.setInNumber(inNumberStr);
-//            }
+                    Chain toChain = chainService.getChain(toChainId);
+                    Asset asset = assetService.getAsset(CmRuntimeInfo.getMainAsset());
+                    toChain.addCirculateAssetId(CmRuntimeInfo.getMainAsset());
+                    asset.addChainId(toChainId);
+                    chainService.updateChain(toChain);
+                    assetService.updateAsset(asset);
+                    //更新资产
+                    toChainAsset = new ChainAsset();
+                    toChainAsset.setChainId(asset.getChainId());
+                    toChainAsset.setAssetId(asset.getAssetId());
+                    toChainAsset.setInNumber(toAssetMap.get(toAssetKey));
+                }else{
+                    BigDecimal inAsset = new BigDecimal(toChainAsset.getInNumber());
+                    BigDecimal inNumberBigDec =  new BigDecimal(toAssetMap.get(toAssetKey)).add(inAsset);
+                    toChainAsset.setInNumber(inNumberBigDec.toString());
+                }
+                assetService.saveOrUpdateChainAsset(toChainId,toChainAsset);
+            }
         } catch (NulsException e) {
             e.printStackTrace();
         }
-
-
         return failed(CmErrorCode.Err10002);
     }
 
@@ -446,41 +444,10 @@ public class AssetTxCmd extends BaseChainCmd {
      * @return
      */
     @CmdAnnotation(cmd = "cm_assetCirculateRollBack", version = 1.0,description = "assetCirculateRollBack")
-    @Parameter(parameterName = "fromChainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "toChainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "amount", parameterType = "String")
+    @Parameter(parameterName = "coinDatas", parameterType = "String")
     public Response assetCirculateRollBack(Map params) {
         //交易回滚，from的加，to的减
-        int fromChainId = Integer.valueOf(params.get("fromChainId").toString());
-        int toChainId = Integer.valueOf(params.get("toChainId").toString());
-        int assetId = Integer.valueOf(params.get("assetId").toString());
-        int chainId = Integer.valueOf(params.get("chainId").toString());
-        Chain fromChain = chainService.getChain(fromChainId);
-        Chain toChain = chainService.getChain(toChainId);
-        if(null == fromChain){
-            Log.info("fromChain is delete,chainId="+fromChain.getChainId());
-            return failed("fromChain is delete");
-        }
-        if(null == toChain){
-            Log.info("toChain is delete,chainId="+fromChain.getChainId());
-            return failed("toChain is delete");
-        }
-        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId,assetId));
-        if(null == asset){
-            return failed("asset is not exsit");
-        }
-        ChainAsset fromChainAsset =  assetService.getChainAsset(fromChainId,asset);
-        ChainAsset toChainAsset =  assetService.getChainAsset(toChainId,asset);
-        BigDecimal amount = new BigDecimal(params.get("amount").toString());
-            BigDecimal out =  new BigDecimal(fromChainAsset.getOutNumber()).subtract(amount);
-            fromChainAsset.setOutNumber(String.valueOf(out.doubleValue()));
-            BigDecimal inAsset = new BigDecimal(toChainAsset.getInNumber());
-            String inNumberStr = String.valueOf(inAsset.subtract(amount).doubleValue());
-            toChainAsset.setInNumber(inNumberStr);
-            assetService.saveOrUpdateChainAsset(fromChainId,fromChainAsset);
-            assetService.saveOrUpdateChainAsset(toChainId,toChainAsset);
-            return success();
+        //TODO:
+       return success();
     }
 }

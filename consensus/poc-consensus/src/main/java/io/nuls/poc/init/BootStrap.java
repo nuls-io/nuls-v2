@@ -117,7 +117,7 @@ public class BootStrap {
                 //初始化本地缓存数据（共识节点，委托信息，惩罚信息等）
                 ConsensusManager.getInstance().initData(chain_id);
                 //启动内部服务
-                SchedulerManager.createChainScheduler(chain_id,ConfigManager.config_map.get(chain_id));
+                SchedulerManager.createChainScheduler(chain_id);
             }else{
                 //初始化配置管理类
                 ConfigManager.config_map.putAll(configMap);

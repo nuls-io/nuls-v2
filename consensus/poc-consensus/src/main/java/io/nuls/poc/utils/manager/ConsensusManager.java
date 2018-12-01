@@ -84,6 +84,9 @@ public class ConsensusManager {
      * */
     public void initData(int chain_id){
         try {
+            //初始化节点状态
+            packing_status.put(chain_id,false);
+            agent_status.put(chain_id, ConsensusStatus.RUNNING);
             //从数据库中读取节点信息，共识信息，红黄牌信息存放到对应的map中
             loadAgents(chain_id);
             loadDeposits(chain_id);

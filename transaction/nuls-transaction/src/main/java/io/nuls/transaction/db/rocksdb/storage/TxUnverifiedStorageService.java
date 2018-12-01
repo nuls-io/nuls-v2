@@ -22,54 +22,19 @@
  * SOFTWARE.
  *
  */
+package io.nuls.transaction.db.rocksdb.storage;
 
-package io.nuls.transaction.db.rocksdb.storage.impl;
-
-
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.TransactionManager;
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
-import io.nuls.transaction.db.rocksdb.storage.TransactionQueueStorageService;
-import io.nuls.transaction.utils.queue.entity.PersistentQueue;
-
-import java.io.IOException;
 
 /**
+ * 本链内发起的所有未验证的交易，包括普通交易和跨链交易
+ *
  * @author: qinyifeng
  * @date: 2018/11/29
  */
-@Component
-public class TransactionQueueStorageServiceImpl implements TransactionQueueStorageService {
+public interface TxUnverifiedStorageService {
 
-    private PersistentQueue queue = new PersistentQueue("tx-cache-queue", 10000000L);
+    boolean putTx(Transaction tx);
 
-    public TransactionQueueStorageServiceImpl() throws Exception {
-    }
-
-    @Override
-    public boolean putTx(Transaction tx) {
-        try {
-            queue.offer(tx.serialize());
-            return true;
-        } catch (IOException e) {
-            Log.error(e);
-        }
-        return false;
-    }
-
-    @Override
-    public Transaction pollTx() {
-        byte[] bytes = queue.poll();
-        if (null == bytes) {
-            return null;
-        }
-        try {
-            return TransactionManager.getInstance(new NulsByteBuffer(bytes));
-        } catch (Exception e) {
-            Log.error(e);
-        }
-        return null;
-    }
+    Transaction pollTx();
 }

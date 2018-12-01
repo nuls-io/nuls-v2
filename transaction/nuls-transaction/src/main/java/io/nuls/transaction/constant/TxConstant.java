@@ -19,7 +19,7 @@ public interface TxConstant {
      * webSocket config
      */
     String TX_MODULE_NAME = "transaction";
-    String TX_CMD_PATH = "io.nuls.transaction.cmd";
+    String TX_CMD_PATH = "io.nuls.transaction.rpc.cmd";
     int TX_CMD_PORT = 8823;
     String KERNEL_URL = "ws://127.0.0.1:8887";
 
@@ -34,6 +34,10 @@ public interface TxConstant {
      */
     String DB_CONFIG_NAME = "db_config.properties";
     String DB_DATA_PATH = "rocksdb.datapath";
+    String TX_UNVERIFIED_QUEUE = "tx_unverified_queue";
+    long TX_UNVERIFIED_QUEUE_MAXSIZE = 10000000L;
+
+
 
     /**
      * H2

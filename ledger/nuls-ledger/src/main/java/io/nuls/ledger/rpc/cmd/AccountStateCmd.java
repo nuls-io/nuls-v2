@@ -1,7 +1,7 @@
 package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.ledger.db.Repository;
-import io.nuls.ledger.model.AccountState;
+import io.nuls.ledger.service.AccountStateService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
@@ -22,27 +22,7 @@ public class AccountStateCmd extends BaseCmd {
     final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private Repository repository;
-
-    /**
-     * when account module create new account,then create accountState
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "lg_createAccount",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "test getHeight 1.0")
-    public Response createAccount(List params) {
-        for (Object param : params) {
-            logger.info("param {}", param);
-        }
-        //TODO.. 验证参数个数和格式
-        Integer chainId = (Integer) params.get(0);
-        String address = (String) params.get(1);
-        AccountState state = repository.createAccount(chainId.shortValue(), address.getBytes());
-        return success(state);
-    }
+    private AccountStateService accountStateService;
 
     /**
      * get user account balance
@@ -57,11 +37,11 @@ public class AccountStateCmd extends BaseCmd {
         //TODO.. 验证参数个数和格式
         Integer chainId = (Integer) params.get("chainId");
         String address = (String) params.get("address");
-
+        Integer assetId = (Integer) params.get("assetId");
         logger.info("chainId {}", chainId);
         logger.info("address {}", address);
 
-        long balance = repository.getBalance(address.getBytes());
+        long balance = accountStateService.getBalance(address, assetId);
         return success(balance);
     }
 
@@ -74,13 +54,12 @@ public class AccountStateCmd extends BaseCmd {
     @CmdAnnotation(cmd = "lg_getNonce",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "test getHeight 1.0")
-    public Response getNonce(List params) {
-        for (Object param : params) {
-            logger.info("param {}", param);
-        }
+    public Response getNonce(Map params) {
         //TODO.. 验证参数个数和格式
-        String address = (String) params.get(1);
-        long nonce = repository.getNonce(address.getBytes());
+        Integer chainId = (Integer) params.get("chainId");
+        String address = (String) params.get("address");
+        Integer assetId = (Integer) params.get("assetId");
+        long nonce = accountStateService.getNonce(address, assetId);
         return success(nonce);
     }
 }

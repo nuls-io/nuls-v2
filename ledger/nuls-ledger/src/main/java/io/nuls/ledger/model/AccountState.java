@@ -9,8 +9,6 @@ import io.nuls.tools.parse.SerializeUtils;
 import lombok.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by wangkun23 on 2018/11/19.
@@ -22,7 +20,11 @@ public class AccountState extends BaseNulsData {
 
     @Setter
     @Getter
-    private short chaiId;
+    private int chainId;
+
+    @Setter
+    @Getter
+    private int assetId;
 
     @Setter
     @Getter
@@ -33,55 +35,58 @@ public class AccountState extends BaseNulsData {
     private long balance;
 
     /**
+     * 账户总金额
+     */
+    private long totalAmount;
+
+    /**
      * 账户冻结的资产
      */
     @Setter
     @Getter
-    private List<FreezeState> freezeStates = new ArrayList<>();
+    private FreezeState freezeState;
 
-
-    public AccountState(short chaiId, long nonce, long balance) {
-        this.chaiId = chaiId;
+    public AccountState(int chainId, int assetId, long nonce, long balance) {
+        this.chainId = chainId;
+        this.assetId = assetId;
         this.nonce = nonce;
         this.balance = balance;
+        this.freezeState = new FreezeState();
     }
 
     /**
-     * 查询用户所有可用金额
+     * 获取账户总金额
      *
      * @return
      */
-    public long getTotal() {
-        long freeze = 0L;
-        for (FreezeState freezeState : freezeStates) {
-            freeze = LongUtils.add(freeze, freezeState.getAmount());
-        }
-        long total = LongUtils.add(balance, freeze);
-        return total;
+    public long getTotalAmount() {
+        return LongUtils.add(balance, freezeState.getTotal());
     }
 
     public AccountState withNonce(long nonce) {
-        return new AccountState(chaiId, nonce, balance);
+        return new AccountState(chainId, assetId, nonce, balance);
     }
 
     public AccountState withIncrementedNonce() {
-        return new AccountState(chaiId, nonce + 1, balance);
+        return new AccountState(chainId, assetId, nonce + 1, balance);
     }
 
     public AccountState withBalanceIncrement(long value) {
-        return new AccountState(chaiId, nonce, balance + value);
+        return new AccountState(chainId, assetId, nonce, balance + value);
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeShort(chaiId);
+        stream.writeUint16(chainId);
+        stream.writeUint16(assetId);
         stream.writeUint32(nonce);
         stream.writeUint32(balance);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chaiId = byteBuffer.readShort();
+        this.chainId = byteBuffer.readUint16();
+        this.assetId = byteBuffer.readUint16();
         this.nonce = byteBuffer.readUint32();
         this.balance = byteBuffer.readUint32();
     }
@@ -90,7 +95,9 @@ public class AccountState extends BaseNulsData {
     public int size() {
         int size = 0;
         //chainId
-        size += 2;
+        size += SerializeUtils.sizeOfInt16();
+        //assetId
+        size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfInt32();
         size += SerializeUtils.sizeOfInt32();
         return size;

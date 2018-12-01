@@ -12,12 +12,9 @@ import io.nuls.chain.model.tx.txdata.ChainTx;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
-import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -33,7 +30,7 @@ import java.util.Map;
  * @description
  */
 @Component
-public class ChainTxCmd extends BaseChainCmd {
+public class TxChainCmd extends BaseChainCmd {
 
     @Autowired
     private ChainService chainService;

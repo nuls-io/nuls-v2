@@ -25,9 +25,14 @@
 package io.nuls.chain.service.impl;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.service.RpcService;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Service;
+
+import java.util.Map;
 
 /**
  * @program: nuls2.0
@@ -107,6 +112,20 @@ public class RpcServiceImpl  implements RpcService {
         }
 
         return true;
+    }
+
+    @Override
+    public AccountBalance getCoinData(int chainId,int assetId,String address) {
+        try {
+            //TODO:远程接口待完善
+//            CmdDispatcher.call(CmConstants.CMD_LG_GET_COINDATA, new Object[]{},1.0 );
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+        return null;
     }
 
 }

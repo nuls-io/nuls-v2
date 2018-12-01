@@ -106,7 +106,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             //todo 4.交易签名
 
             //todo 5.将交易发送给交易管理模块
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+
+            Map<String,Object> result = new HashMap<>();
+            result.put("txHex",HexUtil.encode(tx.serialize()));
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         }catch (IOException io){
             Log.error(io);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
@@ -1180,21 +1183,26 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (null == depositList || depositList.isEmpty()) {
             depositList = ConsensusManager.getInstance().getAllDepositMap().get(chain_id);
         }
-        Set<String> memberSet = new HashSet<>();
-        String total = BigIntegerUtils.ZERO;
-        for (int i = 0; i < depositList.size(); i++) {
-            Deposit deposit = depositList.get(i);
-            if (!agent.getTxHash().equals(deposit.getAgentHash())) {
-                continue;
+        if(depositList == null || depositList.isEmpty()){
+            agent.setMemberCount(0);
+            agent.setTotalDeposit(BigIntegerUtils.ZERO);
+        }else {
+            Set<String> memberSet = new HashSet<>();
+            String total = BigIntegerUtils.ZERO;
+            for (int i = 0; i < depositList.size(); i++) {
+                Deposit deposit = depositList.get(i);
+                if (!agent.getTxHash().equals(deposit.getAgentHash())) {
+                    continue;
+                }
+                if (deposit.getDelHeight() >= 0) {
+                    continue;
+                }
+                total = BigIntegerUtils.addToString(total,deposit.getDeposit());
+                memberSet.add(AddressTool.getStringAddressByBytes(deposit.getAddress()));
             }
-            if (deposit.getDelHeight() >= 0) {
-                continue;
-            }
-            total = BigIntegerUtils.addToString(total,deposit.getDeposit());
-            memberSet.add(AddressTool.getStringAddressByBytes(deposit.getAddress()));
+            agent.setMemberCount(memberSet.size());
+            agent.setTotalDeposit(total);
         }
-        agent.setMemberCount(memberSet.size());
-        agent.setTotalDeposit(total);
         if (round == null) {
             return;
         }

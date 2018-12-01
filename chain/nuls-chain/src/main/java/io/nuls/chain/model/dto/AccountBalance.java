@@ -22,19 +22,31 @@
  * SOFTWARE.
  *
  */
-package io.nuls.transaction.db.rocksdb.storage;
-
-import io.nuls.base.data.Transaction;
+package io.nuls.chain.model.dto;
 
 /**
- * 本链内发起的所有未验证的交易，包括普通交易和跨链交易
- *
- * @author: qinyifeng
- * @date: 2018/11/29
- */
-public interface TransactionQueueStorageService {
+ * @program
+ * @description
+ * @author lan
+ * @create 2018/11/29
+ **/
+public class AccountBalance {
+    private String available;
+    private String nonce;
 
-    boolean putTx(Transaction tx);
+    public String getAvailable() {
+        return available;
+    }
 
-    Transaction pollTx();
+    public void setAvailable(String available) {
+        this.available = available;
+    }
+
+    public String getNonce() {
+        return nonce;
+    }
+
+    public void setNonce(String nonce) {
+        this.nonce = nonce;
+    }
 }

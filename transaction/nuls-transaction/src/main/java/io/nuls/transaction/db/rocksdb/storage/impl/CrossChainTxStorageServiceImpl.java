@@ -3,11 +3,12 @@ package io.nuls.transaction.db.rocksdb.storage.impl;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
-import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
+import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.utils.DBUtil;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018/11/13
  */
+@Service
 public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageService, InitializingBean {
 
     private static final String TRANSACTION_CROSSCHAIN = "transaction_crosschain";
