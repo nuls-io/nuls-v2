@@ -58,19 +58,19 @@ public class Constants {
      * 循环暂停时间
      * Loop pause time
      */
-    public static final long INTERVAL_TIMEMILLIS = 100;
+    public static final long INTERVAL_TIMEMILLIS = 10L;
 
     /**
      * 超时毫秒数
      * Timeout millisecond
      */
-    public static final long TIMEOUT_TIMEMILLIS = 60 * 1000;
+    public static final long TIMEOUT_TIMEMILLIS = 60 * 1000L;
 
     /**
      * 取消订阅的常量，为什么是它？仅仅是一个彩蛋
      * Constants for unsubscribed, why is it? Just a colored egg
      */
-    public static final long UNSUBSCRIBE_TIMEMILLIS = -20140217;
+    public static final long UNSUBSCRIBE_TIMEMILLIS = -20140217L;
 
     /**
      * 调用远程方法时，用以传输版本号的参数名
@@ -156,8 +156,8 @@ public class Constants {
      * NULS2.0中的标准，用1代表true，0代表false
      * Standard in NULS 2.0, 1 for true and 0 for false
      */
-    private static final String BOOLEAN_TRUE = "1";
-    private static final String BOOLEAN_FALSE = "0";
+    public static final String BOOLEAN_TRUE = "1";
+    public static final String BOOLEAN_FALSE = "0";
 
     /**
      * 根据bool类型生成对应字符串

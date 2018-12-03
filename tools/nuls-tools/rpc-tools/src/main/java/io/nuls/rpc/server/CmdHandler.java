@@ -229,7 +229,9 @@ public class CmdHandler {
              */
             ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
             return Constants.INVOKE_EXECUTE_KEEP;
-        } else if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
+        }
+
+        if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
             /*
             得到取消订阅命令，返回INVOKE_SKIP_REMOVE（不执行，然后丢弃）
             Get the unsubscribe command, return INVOKE_SKIP_REMOVE (not executed, then discarded)

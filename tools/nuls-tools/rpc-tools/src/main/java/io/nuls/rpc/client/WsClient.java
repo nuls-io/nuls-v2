@@ -64,7 +64,9 @@ public class WsClient extends WebSocketClient {
             All messages received are queued, waiting for other threads to process
              */
             ClientRuntime.SERVER_MESSAGE_QUEUE.add(JSONUtils.json2pojo(paramString, Message.class));
-            Log.info("ClientMsgFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + "><QueueSize="+ClientRuntime.SERVER_MESSAGE_QUEUE.size()+">: " + paramString);
+            Log.info("ClientMsgFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + "><QueueSize=" + ClientRuntime.SERVER_MESSAGE_QUEUE.size() + ">: " + paramString);
+
+            // TODO 应该是一个单独线程不停消费，而不是每次收到消息启动线程。单线程，有序处理
             ClientRuntime.clientThreadPool.execute(new ClientProcessor());
         } catch (IOException e) {
             Log.error(e);
@@ -81,4 +83,5 @@ public class WsClient extends WebSocketClient {
     }
 
 
+    // TODO 增加一个重连机制
 }

@@ -45,7 +45,7 @@ import java.util.Map;
  */
 public class ExampleCmd extends BaseCmd {
 
-    @CmdAnnotation(cmd = "getHeight", version = 1.1,
+    @CmdAnnotation(cmd = "getBalance", version = 1.1,
             description = "test getHeight 1.1")
     public Response getHeight1(Map map) {
         Log.info("getHeight version 1.1");
