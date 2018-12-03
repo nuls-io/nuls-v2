@@ -39,6 +39,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -78,7 +79,7 @@ public class TxModuleValidateCmd extends BaseCmd {
                 byte[] txBytes = HexUtil.hexToByte(txHex);
                 byte[] typeByte = ByteUtils.copyOf(txBytes, 2);
                 int type = ByteUtils.bytesToBigInteger(typeByte).intValue();
-                Transaction tx = new Transaction(type);
+                Transaction tx = new Transaction();
                 tx.parse(txBytes, 0);
 
                 switch (type) {
@@ -99,6 +100,11 @@ public class TxModuleValidateCmd extends BaseCmd {
                 }
             }
 
+            registerChainAndAssetList.sort(Comparator.comparingDouble(Transaction::getTime));
+            destroyAssetAndChainList.sort(Comparator.comparingDouble(Transaction::getTime));
+            addAssetToChainList.sort(Comparator.comparingDouble(Transaction::getTime));
+            removeAssetFromChainList.sort(Comparator.comparingDouble(Transaction::getTime));
+
             /*
             验证注册链
              */
@@ -116,6 +122,7 @@ public class TxModuleValidateCmd extends BaseCmd {
         List<Integer> assetIdList = new ArrayList<>();
         for (Transaction tx : registerChainAndAssetList) {
             RegisterChainAndAssetTransaction registerChainAndAssetTransaction=(RegisterChainAndAssetTransaction)tx;
+//            chainIdList.add()
         }
         return error;
     }

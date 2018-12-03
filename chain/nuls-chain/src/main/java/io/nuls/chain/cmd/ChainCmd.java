@@ -21,6 +21,7 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -99,7 +100,7 @@ public class ChainCmd extends BaseChainCmd {
             asset.setSymbol((String) params.get("symbol"));
             asset.setName((String) params.get("name"));
             asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS)));
-            asset.setInitNumber(params.get("initNumber").toString());
+            asset.setInitNumber(new BigInteger(params.get("initNumber").toString()));
             asset.setDecimalPlaces(Short.valueOf(params.get("decimalPlaces").toString()));
             asset.setAvailable(true);
             asset.setCreateTime(TimeService.currentTimeMillis());
