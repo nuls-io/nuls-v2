@@ -28,7 +28,7 @@ public class FreezeStateSerializer implements Serializer<FreezeState, byte[]> {
 
     @Override
     public byte[] serialize(FreezeState freezeState) {
-        byte[] amount = RLP.encodeBigInteger(BigInteger.valueOf(freezeState.getAmount()));
+        byte[] amount = RLP.encodeBigInteger(freezeState.getAmount());
         byte[] freezeHeightStates = getFreezeHeightStatesEncoded(freezeState.getFreezeHeightStates());
         byte[] freezeLockTimeStates = getFreezeLockTimeStatesEncoded(freezeState.getFreezeLockTimeStates());
         return RLP.encodeList(amount, freezeHeightStates, freezeLockTimeStates);
@@ -45,7 +45,7 @@ public class FreezeStateSerializer implements Serializer<FreezeState, byte[]> {
             RLPList freezeHeightStatesList = (RLPList) items.get(1);
             RLPList freezeLockTimeStatesList = (RLPList) items.get(2);
 
-            freezeState.setAmount(ByteUtil.byteArrayToLong(amountBytes));
+            freezeState.setAmount(ByteUtil.bytesToBigInteger(amountBytes));
 
             for (RLPElement rawState : freezeHeightStatesList) {
                 FreezeHeightState heightState = freezeHeightStateSerializer.deserialize(rawState.getRLPData());

@@ -2,6 +2,8 @@ package io.nuls.ledger.service;
 
 import io.nuls.ledger.model.AccountState;
 
+import java.math.BigInteger;
+
 /**
  * Created by wangkun23 on 2018/11/29.
  */
@@ -19,9 +21,9 @@ public interface AccountStateService {
 
     long getNonce(String addr, int assetId);
 
-    long getBalance(String addr, int assetId);
+    BigInteger getBalance(String addr, int assetId);
 
-    long addBalance(String addr, int assetId, long value);
+    BigInteger addBalance(String addr, int assetId, BigInteger value);
 
     /**
      * 根据高度冻结用户的余额
@@ -32,9 +34,9 @@ public interface AccountStateService {
      * @param height
      * @return
      */
-    long freezeByHeight(String addr, int assetId, String txHash, long amount, long height);
+    BigInteger freezeByHeight(String addr, int assetId, String txHash, BigInteger amount, long height);
 
-    long unfreezeByHeight(String address, int assetId, long latestHeight);
+    BigInteger unfreezeByHeight(String address, int assetId, long latestHeight);
 
     /**
      * 根据时间冻结用户的余额
@@ -45,7 +47,7 @@ public interface AccountStateService {
      * @param lockTime
      * @return
      */
-    long freezeByLockTime(String addr, int assetId, String txHash, long amount, long lockTime);
+    BigInteger freezeByLockTime(String addr, int assetId, String txHash, BigInteger amount, long lockTime);
 
-    long unfreezeLockTime(String address, int assetId, long latestBlockTime);
+    BigInteger unfreezeLockTime(String address, int assetId, long latestBlockTime);
 }

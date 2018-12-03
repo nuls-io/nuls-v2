@@ -7,6 +7,8 @@ import io.nuls.tools.core.annotation.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigInteger;
+
 /**
  * validate Coin Data
  * Created by wangkun23 on 2018/11/22.
@@ -27,12 +29,12 @@ public class CoinDataValidator {
      * @param nonce
      * @return
      */
-    public boolean validate(String address, long amount, long nonce) {
+    public boolean validate(String address, BigInteger amount, long nonce) {
         AccountState accountState = repository.getAccountState(address.getBytes());
         if (accountState == null) {
             return false;
         }
-        if (accountState.getBalance() <= amount) {
+        if (accountState.getBalance().compareTo(amount) == -1) {
             logger.info("account {} balance lacked {}", address, amount);
             return false;
         }

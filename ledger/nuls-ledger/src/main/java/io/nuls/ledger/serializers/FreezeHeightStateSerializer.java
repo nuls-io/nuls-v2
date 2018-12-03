@@ -17,7 +17,7 @@ public class FreezeHeightStateSerializer implements Serializer<FreezeHeightState
     @Override
     public byte[] serialize(FreezeHeightState state) {
         byte[] txHash = RLP.encodeString(state.getTxHash());
-        byte[] amount = RLP.encodeBigInteger(BigInteger.valueOf(state.getAmount()));
+        byte[] amount = RLP.encodeBigInteger(state.getAmount());
         byte[] height = RLP.encodeBigInteger(BigInteger.valueOf(state.getHeight()));
         byte[] createTime = RLP.encodeBigInteger(BigInteger.valueOf(state.getCreateTime()));
         return RLP.encodeList(txHash, amount, height, createTime);
@@ -39,7 +39,7 @@ public class FreezeHeightStateSerializer implements Serializer<FreezeHeightState
             byte[] createTimeBytes = items.get(3).getRLPData();
 
             state.setTxHash(new String(txHashBytes));
-            state.setAmount(ByteUtil.byteArrayToLong(amountBytes));
+            state.setAmount(ByteUtil.bytesToBigInteger(amountBytes));
             state.setHeight(ByteUtil.byteArrayToLong(heightBytes));
             state.setCreateTime(ByteUtil.byteArrayToLong(createTimeBytes));
         } catch (Exception e) {

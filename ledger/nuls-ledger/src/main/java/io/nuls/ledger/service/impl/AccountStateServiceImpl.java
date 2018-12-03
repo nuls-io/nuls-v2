@@ -32,7 +32,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             return getAccountState(address, assetId);
         }
         Long initialNonce = BigInteger.ZERO.longValue();
-        AccountState state = new AccountState(chainId, assetId, initialNonce, BigInteger.ZERO.longValue());
+        AccountState state = new AccountState(chainId, assetId, initialNonce, BigInteger.ZERO);
         byte[] key = this.getKey(address, assetId);
         repository.putAccountState(key, state);
         return state;
@@ -74,13 +74,13 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     @Override
-    public synchronized long getBalance(String address, int assetId) {
+    public synchronized BigInteger getBalance(String address, int assetId) {
         AccountState accountState = getAccountState(address, assetId);
         return accountState.getBalance();
     }
 
     @Override
-    public synchronized long addBalance(String address, int assetId, long value) {
+    public synchronized BigInteger addBalance(String address, int assetId, BigInteger value) {
         AccountState accountState = getAccountState(address, assetId);
         accountState = accountState.withBalanceIncrement(value);
         byte[] key = this.getKey(address, assetId);
@@ -89,7 +89,7 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     @Override
-    public long freezeByHeight(String address, int assetId, String txHash, long amount, long height) {
+    public BigInteger freezeByHeight(String address, int assetId, String txHash, BigInteger amount, long height) {
         AccountState accountState = getAccountState(address, assetId);
         FreezeHeightState state = new FreezeHeightState();
 
@@ -99,7 +99,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         state.setCreateTime(TimeService.currentTimeMillis());
         accountState.getFreezeState().getFreezeHeightStates().add(state);
         //减去锁定金额
-        LongUtils.sub(accountState.getBalance(), amount);
+        accountState.getBalance().subtract(amount);
         byte[] key = this.getKey(address, assetId);
         repository.putAccountState(key, accountState);
         return accountState.getBalance();
@@ -114,7 +114,7 @@ public class AccountStateServiceImpl implements AccountStateService {
      * @return
      */
     @Override
-    public long unfreezeByHeight(String address, int assetId, long latestHeight) {
+    public BigInteger unfreezeByHeight(String address, int assetId, long latestHeight) {
         AccountState accountState = getAccountState(address, assetId);
         // 判断高度是否大于区块的最新高度
         List<FreezeHeightState> freezeStates = accountState.getFreezeState().getFreezeHeightStates();
@@ -132,7 +132,7 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     @Override
-    public long freezeByLockTime(String address, int assetId, String txHash, long amount, long lockTime) {
+    public BigInteger freezeByLockTime(String address, int assetId, String txHash, BigInteger amount, long lockTime) {
         AccountState accountState = getAccountState(address, assetId);
         FreezeLockTimeState state = new FreezeLockTimeState();
 
@@ -142,14 +142,15 @@ public class AccountStateServiceImpl implements AccountStateService {
         state.setCreateTime(TimeService.currentTimeMillis());
         accountState.getFreezeState().getFreezeLockTimeStates().add(state);
         //减去锁定金额
-        LongUtils.sub(accountState.getBalance(), amount);
+        accountState.getBalance().subtract(amount);
+
         byte[] key = this.getKey(address, assetId);
         repository.putAccountState(key, accountState);
         return accountState.getBalance();
     }
 
     @Override
-    public long unfreezeLockTime(String address, int assetId, long latestBlockTime) {
+    public BigInteger unfreezeLockTime(String address, int assetId, long latestBlockTime) {
         AccountState accountState = getAccountState(address, assetId);
         // 判断冻结时间是否大于最新区块时间
         List<FreezeLockTimeState> freezeStates = accountState.getFreezeState().getFreezeLockTimeStates();

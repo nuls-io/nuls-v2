@@ -26,7 +26,7 @@ public class FreezeState {
      */
     @Setter
     @Getter
-    private long amount = 0L;
+    private BigInteger amount = BigInteger.ZERO;
 
     /**
      * 账户冻结的资产(高度冻结)
@@ -48,16 +48,15 @@ public class FreezeState {
      *
      * @return
      */
-    public long getTotal() {
-        long freeze = 0L;
+    public BigInteger getTotal() {
+        BigInteger freeze = BigInteger.ZERO;
         for (FreezeHeightState heightState : freezeHeightStates) {
-            freeze = LongUtils.add(freeze, heightState.getAmount());
+            freeze.add(heightState.getAmount());
         }
 
         for (FreezeLockTimeState lockTimeState : freezeLockTimeStates) {
-            freeze = LongUtils.add(freeze, lockTimeState.getAmount());
+            freeze.add(lockTimeState.getAmount());
         }
-        long total = LongUtils.add(amount, freeze);
-        return total;
+        return amount.add(freeze);
     }
 }
