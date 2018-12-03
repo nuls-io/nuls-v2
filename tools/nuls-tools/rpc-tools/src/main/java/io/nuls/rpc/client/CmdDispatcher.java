@@ -23,12 +23,16 @@ public class CmdDispatcher {
     /**
      * 与核心模块（Manager）握手
      * Shake hands with the core module (Manager)
+     *
+     * @return boolean
+     * @throws Exception
      */
     public static boolean handshakeKernel() throws Exception {
         Message message = Constants.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnection);
         message.setMessageData(Constants.defaultNegotiateConnection());
 
         WsClient wsClient = ClientRuntime.getWsClient(Constants.kernelUrl);
+
         if (wsClient == null) {
             throw new Exception("Kernel not available");
         }
@@ -49,6 +53,7 @@ public class CmdDispatcher {
      * Synchronize Local Module and Core Module (Manager)
      * 1. Send local information to Manager
      * 2. Get connection information for locally dependent roles
+     * role - connection
      */
     public static void syncKernel() throws Exception {
         String messageId = Constants.nextSequence();
@@ -227,6 +232,7 @@ public class CmdDispatcher {
      * Get response by messageId
      */
     private static Response getResponse(String messageId) throws InterruptedException, IOException {
+        // TODO messageId 不应该限定整形，应该是string
         if (Integer.parseInt(messageId) < 0) {
             return ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.CMD_NOT_FOUND);
         }
@@ -321,6 +327,7 @@ public class CmdDispatcher {
                 ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
             }
 
+            // TODO 100MS太长
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
 

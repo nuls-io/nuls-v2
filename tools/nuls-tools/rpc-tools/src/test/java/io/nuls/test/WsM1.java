@@ -38,6 +38,9 @@ import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,11 +52,16 @@ import java.util.Map;
 public class WsM1 {
     @Test
     public void test() {
-        String range = "[11,100.2]";
+        String range = "[11,102]";
 //        System.out.println(range.substring(range.indexOf("(")+1,range.indexOf(",")));
 //        System.out.println(range.substring(range.indexOf(",")+1,range.indexOf("]")));
         String regex = "[(\\[]\\d+,\\d+[)\\]]";
         System.out.println(range.matches(regex));
+
+        BigDecimal bigDecimal=new BigDecimal("1000").divide(new BigDecimal("3"),5, RoundingMode.HALF_DOWN);
+        System.out.println(bigDecimal.toString());
+        System.out.println(bigDecimal.toBigInteger().intValue());
+        System.out.println(new BigInteger("10").divide(new BigInteger("4")));
     }
 
     @Test
@@ -103,7 +111,8 @@ public class WsM1 {
         Object object = CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "getHeight", params);
         System.out.println("requestAndResponse:" + JSONUtils.obj2json(object));
 
-        String messageId1 = CmdDispatcher.requestAndInvokeWithAck(ModuleE.CM.abbr, "getBalance", params, "2", InvokeMethod.class, "invokeGetHeight");
+        String messageId1 = CmdDispatcher.requestAndInvokeWithAck
+                (ModuleE.CM.abbr, "getBalance", params, "2", InvokeMethod.class, "invokeGetHeight");
         Thread.sleep(5000);
 
         // Call cmd, auto invoke local method after response

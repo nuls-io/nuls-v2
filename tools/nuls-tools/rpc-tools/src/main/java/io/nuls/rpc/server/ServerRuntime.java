@@ -52,6 +52,12 @@ public class ServerRuntime {
     static final List<Object[]> CLIENT_MESSAGE_QUEUE = Collections.synchronizedList(new ArrayList<>());
 
     /**
+     * 处理待处理消息的线程池
+     * Thread pool for processing messages to be processed
+     */
+    static ExecutorService serverThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
+
+    /**
      * 获取队列中的第一个元素，然后移除队列
      * Get the first item and remove
      *
@@ -65,13 +71,6 @@ public class ServerRuntime {
         }
         return objects;
     }
-
-
-    /**
-     * 处理待处理消息的线程池
-     * Thread pool for processing messages to be processed
-     */
-    static ExecutorService serverThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
 
 
     /**
