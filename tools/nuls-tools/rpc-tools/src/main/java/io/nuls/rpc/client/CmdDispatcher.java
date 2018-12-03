@@ -55,7 +55,7 @@ public class CmdDispatcher {
      * 2. Get connection information for locally dependent roles
      * role - connection
      */
-    public static void syncKernel() throws Exception {
+    public static void syncManager() throws Exception {
         String messageId = Constants.nextSequence();
         Message message = Constants.basicMessage(messageId, MessageType.Request);
         Request request = ClientRuntime.defaultRequest();
@@ -69,13 +69,13 @@ public class CmdDispatcher {
         wsClient.send(JSONUtils.obj2json(message));
 
         Response response = getResponse(messageId);
-        Log.info("APIMethods from kernel:" + JSONUtils.obj2json(response));
         Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
         for (Object key : dependMap.keySet()) {
             ClientRuntime.roleMap.put(key.toString(), (Map) dependMap.get(key));
         }
+        Log.info("Sync manager success. "+JSONUtils.obj2json(ClientRuntime.roleMap));
     }
 
 

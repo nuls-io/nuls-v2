@@ -34,7 +34,6 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Request;
-import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
@@ -88,9 +87,7 @@ public class WsM1 {
                 .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
-        CmdDispatcher.syncKernel();
-
-        System.out.println("Local:" + JSONUtils.obj2json(ServerRuntime.local));
+        CmdDispatcher.syncManager();
 
         Thread.sleep(Integer.MAX_VALUE);
     }
@@ -145,5 +142,9 @@ public class WsM1 {
         System.out.println("我已经取消了订阅:" + messageId3);
 
         Thread.sleep(5000);
+        System.out.println("最后队列的数量：");
+        System.out.println("RESPONSE_MANUAL_QUEUE："+ClientRuntime.RESPONSE_MANUAL_QUEUE.size());
+        System.out.println("RESPONSE_AUTO_QUEUE："+ClientRuntime.RESPONSE_AUTO_QUEUE.size());
+        System.out.println("NEGOTIATE_RESPONSE_QUEUE："+ClientRuntime.NEGOTIATE_RESPONSE_QUEUE.size());
     }
 }

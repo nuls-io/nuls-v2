@@ -35,10 +35,10 @@ public class ClientRuntime {
      * 从服务端获取的Message，根据类型放入不同队列中
      * Message received from server, and placed in different queues according to type
      */
-    public static final ConcurrentLinkedQueue<Message> NEGOTIATE_RESPONSE_QUEUE = new ConcurrentLinkedQueue<>();
-    public static final ConcurrentLinkedQueue<Message> ACK_QUEUE = new ConcurrentLinkedQueue<>();
-    public static final ConcurrentLinkedQueue<Message> RESPONSE_MANUAL_QUEUE = new ConcurrentLinkedQueue<>();
-    public static final ConcurrentLinkedQueue<Message> RESPONSE_AUTO_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Message> NEGOTIATE_RESPONSE_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Message> ACK_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Message> RESPONSE_MANUAL_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Message> RESPONSE_AUTO_QUEUE = new ConcurrentLinkedQueue<>();
 
     /**
      * 调用远程方法时，可以设置自动回调的本地方法

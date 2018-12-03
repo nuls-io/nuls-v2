@@ -44,35 +44,33 @@ public class ServerRuntime {
 
 
     /**
-     * 等待处理的消息队列
-     * Message queues waiting to be processed
-     */
-    static final List<Object[]> CLIENT_MESSAGE_QUEUE = Collections.synchronizedList(new ArrayList<>());
-
-    /**
      * 从客户端获取的Message，根据类型放入不同队列中
      * 数组的第一个元素是Websocket对象，数组的第二个元素是Message
      * Message received from client, and placed in different queues according to type
      * The first element of the array is the websocket object, and the second element of the array is Message.
      */
-    public static final ConcurrentLinkedQueue<Object[]> NEGOTIATE_QUEUE = new ConcurrentLinkedQueue<>();
-    public static final ConcurrentLinkedQueue<Object[]> UNSUBSCRIBE_QUEUE = new ConcurrentLinkedQueue<>();
-    public static final ConcurrentLinkedQueue<Object[]> REQUEST_QUEUE_SINGLE = new ConcurrentLinkedQueue<>();
-    public static final ConcurrentLinkedQueue<Object[]> REQUEST_QUEUE_LOOP = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> NEGOTIATE_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> UNSUBSCRIBE_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> REQUEST_SINGLE_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> REQUEST_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
 
+    public static Object[] firstObjArrInRequestSingleQueue() {
+        return firstObjArrInQueue(REQUEST_SINGLE_QUEUE);
+    }
+
+    public static Object[] firstObjArrInRequestLoopQueue() {
+        return firstObjArrInQueue(REQUEST_LOOP_QUEUE);
+    }
 
     /**
      * 获取队列中的第一个元素，然后移除队列
      * Get the first item and remove
      *
-     * @return 队列的第一个元素. The first item in CLIENT_MESSAGE_QUEUE.
+     * @return 队列的第一个元素. The first item in SERVER_RESPONSE_QUEUE.
      */
-    static synchronized Object[] firstItemInClientMessageQueue() {
-        Object[] objects = null;
-        if (ServerRuntime.CLIENT_MESSAGE_QUEUE.size() > 0) {
-            objects = ServerRuntime.CLIENT_MESSAGE_QUEUE.get(0);
-            ServerRuntime.CLIENT_MESSAGE_QUEUE.remove(0);
-        }
+    private static synchronized Object[] firstObjArrInQueue(Queue<Object[]> objectsQueue) {
+        Object[] objects = objectsQueue.peek();
+        objectsQueue.poll();
         return objects;
     }
 

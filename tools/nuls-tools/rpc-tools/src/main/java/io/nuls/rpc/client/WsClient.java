@@ -29,6 +29,7 @@ package io.nuls.rpc.client;
 
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
@@ -37,6 +38,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 /**
  * WebSocketClient的实现类
@@ -72,7 +74,8 @@ public class WsClient extends WebSocketClient {
                     ClientRuntime.ACK_QUEUE.offer(message);
                     break;
                 case Response:
-                    if (ClientRuntime.INVOKE_MAP.containsKey(message.getMessageId())) {
+                    Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
+                    if (ClientRuntime.INVOKE_MAP.containsKey(response.getRequestId())) {
                         ClientRuntime.RESPONSE_AUTO_QUEUE.offer(message);
                     } else {
                         ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);

@@ -18,7 +18,7 @@ import java.util.Map;
  * @date 2018/11/26
  * @description
  */
-public class AutoProcessor implements Runnable {
+public class ResponseAutoProcessor implements Runnable {
     /**
      * 消费从服务端获取的消息
      * Consume the messages from servers
@@ -26,7 +26,7 @@ public class AutoProcessor implements Runnable {
     @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {
-        do {
+        while (true) {
             try {
 
                 /*
@@ -62,6 +62,6 @@ public class AutoProcessor implements Runnable {
             } catch (Exception e) {
                 Log.error(e);
             }
-        } while (true);
+        }
     }
 }

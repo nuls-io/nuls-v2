@@ -5,7 +5,6 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.rpc.server.WsServer;
-import io.nuls.tools.parse.JSONUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,9 +39,8 @@ public class NoUse {
         wsServer.scanPackage("io.nuls.rpc.cmd.kernel").connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
-        CmdDispatcher.syncKernel();
+        CmdDispatcher.syncManager();
 
-        System.out.println("Local:" + JSONUtils.obj2json(ServerRuntime.local));
         Thread.sleep(Integer.MAX_VALUE);
     }
 
@@ -58,6 +56,6 @@ public class NoUse {
                 .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
-        CmdDispatcher.syncKernel();
+        CmdDispatcher.syncManager();
     }
 }
