@@ -28,7 +28,6 @@ package io.nuls.poc.utils.compare;
 
 
 import io.nuls.poc.model.bo.tx.txdata.Agent;
-import io.nuls.tools.data.BigIntegerUtils;
 
 import java.util.Comparator;
 
@@ -77,7 +76,7 @@ public class AgentComparatorRpc implements Comparator<Agent> {
     public int compare(Agent o1, Agent o2) {
         switch (sortType) {
             case DEPOSIT: {
-                return BigIntegerUtils.compare(o2.getDeposit(),o1.getDeposit());
+                return  o2.getDeposit().compareTo(o1.getDeposit());
             }
             case COMMISSION_RATE: {
                 if (o1.getCommissionRate() < o2.getCommissionRate()) {
@@ -96,7 +95,7 @@ public class AgentComparatorRpc implements Comparator<Agent> {
                 return 1;
             }
             case DEPOSITABLE: {
-                return BigIntegerUtils.compare(o2.getTotalDeposit(),o1.getTotalDeposit());
+                return  o2.getTotalDeposit().compareTo(o1.getTotalDeposit());
             }
             default: {
                 if (o2.getCreditVal() < o1.getCreditVal()) {

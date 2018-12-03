@@ -33,6 +33,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -191,8 +192,8 @@ public class TxValidator {
         if (commissionRate < ConfigManager.config_map.get(chain_id).getCommissionRate_min() || commissionRate > ConfigManager.config_map.get(chain_id).getCommissionRate_max()) {
             throw new NulsException(ConsensusErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
         }
-        String deposit = agent.getDeposit();
-        if(BigIntegerUtils.compare(deposit,ConfigManager.config_map.get(chain_id).getDeposit_min())<0 && BigIntegerUtils.compare(deposit,ConfigManager.config_map.get(chain_id).getDeposit_max())>0){
+        BigInteger deposit = agent.getDeposit();
+        if(deposit.compareTo(ConfigManager.config_map.get(chain_id).getDeposit_min())<0 && deposit.compareTo(ConfigManager.config_map.get(chain_id).getDeposit_max())>0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OUT_OF_RANGE);
         }
         CoinData coinData = new CoinData();
@@ -277,8 +278,8 @@ public class TxValidator {
     private boolean stopAgentCoinDataValid(int chainId,Transaction tx,AgentPo agentPo,StopAgent stopAgent,CoinData coinData)throws NulsException,IOException {
         Agent agent = PoConvertUtil.poToAgent(agentPo);
         CoinData localCoinData = ConsensusUtil.getStopAgentCoinData(chainId, ConfigManager.config_map.get(chainId).getAssetsId(), agent, TimeService.currentTimeMillis() + ConfigManager.config_map.get(chainId).getStopAgent_lockTime());
-        String fee = TransactionFeeCalculator.getMaxFee(tx.size());
-        localCoinData.getTo().get(0).setAmount(BigIntegerUtils.subToString(coinData.getTo().get(0).getAmount(),fee));
+        BigInteger fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        localCoinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
         if(!Arrays.equals(coinData.serialize(),localCoinData.serialize())){
             return false;
         }
@@ -300,14 +301,14 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_COUNT);
         }
         //节点当前委托总金额
-        String total = deposit.getDeposit();
+        BigInteger total = deposit.getDeposit();
         for (DepositPo cd : poList) {
-            total = BigIntegerUtils.addToString(total,cd.getDeposit());
+            total = total.add(cd.getDeposit());
         }
-        if(BigIntegerUtils.compare(total,ConfigManager.config_map.get(chain_id).getDeposit_max())>0){
+        if(total.compareTo(ConfigManager.config_map.get(chain_id).getDeposit_max())>0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
         }
-        if(BigIntegerUtils.compare(total,ConfigManager.config_map.get(chain_id).getDeposit_min())<0){
+        if(total.compareTo(ConfigManager.config_map.get(chain_id).getDeposit_min())<0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_NOT_ENOUGH);
         }
         return true;
@@ -338,7 +339,7 @@ public class TxValidator {
      * @param deposit    委托信息
      * @param coinData   交易的CoinData
      * */
-    private boolean isDepositOk(String deposit, CoinData coinData) {
+    private boolean isDepositOk(BigInteger deposit, CoinData coinData) {
         if(coinData == null || coinData.getTo().size() == 0) {
             return false;
         }
@@ -399,13 +400,5 @@ public class TxValidator {
             }
         }
         return resultList;
-    }
-
-    public static boolean switchTest(int chain_id){
-        switch (chain_id){
-            case (0): return true;
-            case (1): return true;
-        }
-        return false;
     }
 }

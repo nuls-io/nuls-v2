@@ -10,7 +10,6 @@ import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
-import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
@@ -411,11 +410,12 @@ public class RoundManager {
             //获取节点委托信息，用于计算节点总的委托金额
             List<Deposit> cdlist = getDepositListByAgentId(chain_id,agent.getTxHash(), startBlockHeader.getHeight());
             for (Deposit dtx : cdlist) {
-                agent.setTotalDeposit(BigIntegerUtils.addToString(agent.getTotalDeposit(),dtx.getDeposit()));
+                agent.setTotalDeposit(agent.getTotalDeposit().add(dtx.getDeposit()));
             }
             member.setDepositList(cdlist);
             member.setRoundIndex(round.getIndex());
-            boolean isItIn = !BigIntegerUtils.isLessThan(agent.getTotalDeposit(),ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT);
+
+            boolean isItIn = agent.getTotalDeposit().compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT) >= 0 ? true : false;
             if (isItIn) {
                 agent.setCreditVal(calcCreditVal(chain_id,member, startBlockHeader));
                 member.setAgent(agent);

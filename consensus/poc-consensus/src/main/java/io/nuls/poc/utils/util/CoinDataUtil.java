@@ -7,6 +7,9 @@ import io.nuls.base.data.CoinTo;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
+
+import java.math.BigInteger;
+
 /**
  * @author tag
  * 2018//11/28
@@ -22,19 +25,19 @@ public class CoinDataUtil {
      * @param txSize   交易大小
      * @return         组装的CoinData
      * */
-    public static CoinData getCoinData(byte[] address,int chainId,int assetsId, String amount, long lockTime, int txSize)throws NulsRuntimeException{
+    public static CoinData getCoinData(byte[] address,int chainId,int assetsId, BigInteger amount, long lockTime, int txSize)throws NulsRuntimeException{
         CoinData coinData = new CoinData();
         CoinTo to = new CoinTo(address,chainId,assetsId,amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
         //todo 账本模块获取nonce 可用余额
         byte[] nonce = null;
-        String available = "50000000000";
+        BigInteger available = new BigInteger("50000000000");
         //手续费
-        CoinFrom from = new CoinFrom(address,chainId,assetsId,amount,nonce, 0);
+        CoinFrom from = new CoinFrom(address,chainId,assetsId,amount,nonce, (byte)0);
         txSize += from.size();
-        String fee = TransactionFeeCalculator.getMaxFee(txSize);
-        String fromAmount = BigIntegerUtils.addToString(amount ,fee);
+        BigInteger fee = TransactionFeeCalculator.getMaxFee(txSize);
+        BigInteger fromAmount = amount.add(fee);
         if(BigIntegerUtils.isLessThan(available,fromAmount)){
             throw new NulsRuntimeException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
         }
@@ -53,18 +56,18 @@ public class CoinDataUtil {
      * @param txSize   交易大小
      * @return         组装的CoinData
      * */
-    public static CoinData getUnlockCoinData(byte[] address,int chainId,int assetsId, String amount, long lockTime, int txSize)throws NulsRuntimeException{
+    public static CoinData getUnlockCoinData(byte[] address, int chainId, int assetsId, BigInteger amount, long lockTime, int txSize)throws NulsRuntimeException{
         CoinData coinData = new CoinData();
         CoinTo to = new CoinTo(address,chainId,assetsId,amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
         //todo 账本模块获取该账户锁定金额
-        String available = "10000";
+        BigInteger available = new BigInteger("10000");
         //手续费
-        CoinFrom from = new CoinFrom(address,chainId,assetsId,amount,-1);
+        CoinFrom from = new CoinFrom(address,chainId,assetsId,amount,(byte)-1);
         txSize += from.size();
-        String fee = TransactionFeeCalculator.getMaxFee(txSize);
-        String fromAmount = BigIntegerUtils.addToString(amount ,fee);
+        BigInteger fee = TransactionFeeCalculator.getMaxFee(txSize);
+        BigInteger fromAmount = amount.add(fee);
         if(BigIntegerUtils.isLessThan(available,fromAmount)){
             throw new NulsRuntimeException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
         }
