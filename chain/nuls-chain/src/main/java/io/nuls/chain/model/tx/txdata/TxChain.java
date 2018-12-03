@@ -3,7 +3,6 @@ package io.nuls.chain.model.tx.txdata;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
-import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Getter;
@@ -85,7 +84,7 @@ public class TxChain extends TransactionLogicData {
         stream.writeString(symbol);
         stream.writeString(assetName);
         stream.writeUint16(depositNuls);
-        stream.write(BigIntegerUtils.toBytes(initNumber));
+        stream.writeBigInteger(initNumber);
         stream.writeShort(decimalPlaces);
     }
 
@@ -103,7 +102,7 @@ public class TxChain extends TransactionLogicData {
         this.symbol = byteBuffer.readString();
         this.assetName = byteBuffer.readString();
         this.depositNuls = byteBuffer.readUint16();
-        this.initNumber = BigIntegerUtils.fromBytes(byteBuffer.readBytes(BigIntegerUtils.BIG_INTEGER_LENGTH));
+        this.initNumber = byteBuffer.readBigInteger();
         this.decimalPlaces = byteBuffer.readShort();
     }
 
@@ -130,7 +129,7 @@ public class TxChain extends TransactionLogicData {
         //depositNuls
         size += SerializeUtils.sizeOfUint16();
         //initNumber
-        size += BigIntegerUtils.BIG_INTEGER_LENGTH;
+        size += SerializeUtils.sizeOfBigInteger();
         //decimalPlaces
         size += SerializeUtils.sizeOfInt16();
         return size;

@@ -3,7 +3,6 @@ package io.nuls.chain.model.dto;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Getter;
@@ -64,9 +63,9 @@ public class ChainAsset extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
-        size += BigIntegerUtils.BIG_INTEGER_LENGTH;
-        size += BigIntegerUtils.BIG_INTEGER_LENGTH;
-        size += BigIntegerUtils.BIG_INTEGER_LENGTH;
+        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfBigInteger();
 
         return size;
     }

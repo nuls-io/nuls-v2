@@ -25,7 +25,6 @@
 package io.nuls.chain.model.tx;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.chain.info.ChainTxConstants;
 
 /**
  * @program: nuls2.0
@@ -33,10 +32,10 @@ import io.nuls.chain.info.ChainTxConstants;
  * @author: lan
  * @create: 2018/11/19
  **/
-public class AddAssetToChainTransaction extends Transaction{
+public class AddAssetToChainTransaction extends Transaction {
 
     public AddAssetToChainTransaction() {
-        super(ChainTxConstants.TX_TYPE_ADD_ASSET_TO_CHAIN);
+        super();
     }
 
 }
