@@ -198,6 +198,16 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return coinData;
     }
 
+    public CoinData getCoinDataInstance(){
+        CoinData coinData = new CoinData();
+        try {
+            coinData.parse(new NulsByteBuffer(this.coinData));
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+        return coinData;
+    }
+
     public void setCoinData(byte[] coinData) {
         this.coinData = coinData;
     }

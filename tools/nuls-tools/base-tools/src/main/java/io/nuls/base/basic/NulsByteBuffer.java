@@ -119,17 +119,16 @@ public class NulsByteBuffer {
             throw new NulsException(e);
         }
     }
+
     public BigInteger readBigInteger() throws NulsException {
         try {
-            BigInteger u = SerializeUtils.bigIntegerFromBytes(payload);
-            cursor += 16;
+            byte[] bytes = Arrays.copyOfRange(payload, cursor, cursor += 16);
+            BigInteger u = SerializeUtils.bigIntegerFromBytes(bytes);
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new NulsException(e);
         }
     }
-
-
 
     public long readVarInt() throws NulsException {
         return readVarInt(0);

@@ -145,6 +145,7 @@ public class CoinFrom extends BaseNulsData {
     }
 
     public void setNonce(byte[] nonce) {
+
         this.nonce = nonce;
     }
 
