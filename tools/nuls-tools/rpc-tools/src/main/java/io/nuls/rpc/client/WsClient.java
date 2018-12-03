@@ -28,6 +28,8 @@
 package io.nuls.rpc.client;
 
 import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
@@ -36,6 +38,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 /**
  * WebSocketClient的实现类
@@ -43,7 +46,6 @@ import java.net.URISyntaxException;
  *
  * @author tangyi
  * @date 2018/10/30
- * @description
  */
 public class WsClient extends WebSocketClient {
 
@@ -57,17 +59,32 @@ public class WsClient extends WebSocketClient {
     }
 
     @Override
-    public void onMessage(String paramString) {
+    public void onMessage(String msg) {
         try {
             /*
             收到的所有消息都放入队列，等待其他线程处理
             All messages received are queued, waiting for other threads to process
              */
-            ClientRuntime.SERVER_MESSAGE_QUEUE.add(JSONUtils.json2pojo(paramString, Message.class));
-            Log.info("ClientMsgFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + "><QueueSize=" + ClientRuntime.SERVER_MESSAGE_QUEUE.size() + ">: " + paramString);
-
-            // TODO 应该是一个单独线程不停消费，而不是每次收到消息启动线程。单线程，有序处理
-            ClientRuntime.clientThreadPool.execute(new ClientProcessor());
+            Message message = JSONUtils.json2pojo(msg, Message.class);
+            switch (MessageType.valueOf(message.getMessageType())) {
+                case NegotiateConnectionResponse:
+                    ClientRuntime.NEGOTIATE_RESPONSE_QUEUE.offer(message);
+                    break;
+                case Ack:
+                    ClientRuntime.ACK_QUEUE.offer(message);
+                    break;
+                case Response:
+                    Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
+                    if (ClientRuntime.INVOKE_MAP.containsKey(response.getRequestId())) {
+                        ClientRuntime.RESPONSE_AUTO_QUEUE.offer(message);
+                    } else {
+                        ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);
+                    }
+                    break;
+                default:
+                    break;
+            }
+            Log.info("ClientMsgFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
         } catch (IOException e) {
             Log.error(e);
         }

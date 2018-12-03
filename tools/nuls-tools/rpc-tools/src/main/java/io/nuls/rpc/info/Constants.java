@@ -31,8 +31,11 @@ import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.NegotiateConnection;
 import io.nuls.tools.data.DateUtils;
+import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
+import io.nuls.tools.thread.commom.NulsThreadFactory;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -105,7 +108,6 @@ public class Constants {
     public static final String ADMIN = "admin";
 
 
-
     /**
      * 收到Request请求后，根据属性判断如何执行
      * 1：执行Request，并保留等待下次执行
@@ -158,6 +160,12 @@ public class Constants {
      */
     public static final String BOOLEAN_TRUE = "1";
     public static final String BOOLEAN_FALSE = "0";
+
+    /**
+     * 处理待处理消息的线程池
+     * Thread pool for processing messages to be processed
+     */
+    public static final ExecutorService THREAD_POOL = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("Processor"));
 
     /**
      * 根据bool类型生成对应字符串

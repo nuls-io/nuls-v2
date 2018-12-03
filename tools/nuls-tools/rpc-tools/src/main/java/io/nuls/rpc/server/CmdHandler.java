@@ -144,7 +144,7 @@ public class CmdHandler {
      * 处理Request，自动调用正确的方法，返回结果
      * Processing Request, automatically calling the correct method, returning the result
      */
-    private static void execute(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
+    public static void execute(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
         for (Object method : requestMethods.keySet()) {
 
             long startTimemillis = TimeService.currentTimeMillis();

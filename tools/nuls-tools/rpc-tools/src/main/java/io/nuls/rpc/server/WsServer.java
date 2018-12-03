@@ -28,11 +28,16 @@
 package io.nuls.rpc.server;
 
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.client.ResponseAutoProcessor;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.RegisterApi;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.Request;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -48,7 +53,6 @@ import java.util.Map;
  *
  * @author tangyi
  * @date 2018/10/30
- * @description
  */
 public class WsServer extends WebSocketServer {
     public WsServer(int port) {
@@ -79,7 +83,7 @@ public class WsServer extends WebSocketServer {
         if (!CmdDispatcher.handshakeKernel()) {
             throw new Exception("Handshake kernel failed");
         } else {
-            Log.info("Handshake success." + ServerRuntime.local.getModuleName() + " ready!");
+            Log.info("Connect manager success." + ServerRuntime.local.getModuleName() + " ready!");
         }
     }
 
@@ -94,15 +98,40 @@ public class WsServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket webSocket, String msg) {
         try {
-            /*
-            收到的所有消息都放入队列，等待其他线程处理
-            All messages received are queued, waiting for other threads to process
-             */
+
+            Message message = JSONUtils.json2pojo(msg, Message.class);
+            switch (MessageType.valueOf(message.getMessageType())) {
+                case NegotiateConnection:
+                    /*
+                    握手，直接响应
+                     */
+                    CmdHandler.negotiateConnectionResponse(webSocket);
+                    break;
+                case Unsubscribe:
+                    /*
+                    取消订阅，直接响应
+                     */
+                    CmdHandler.unsubscribe(webSocket, message);
+                    break;
+                case Request:
+                    /*
+                    Request，根据是否需要定时推送放入不同队列，等待处理
+                    Request, put in different queues according to the response mode. Wait for processing
+                     */
+                    Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+                    if (Integer.parseInt(request.getSubscriptionEventCounter()) > 0
+                            || Integer.parseInt(request.getSubscriptionPeriod()) > 0) {
+                        ServerRuntime.REQUEST_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
+                    } else {
+                        ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, msg});
+                    }
+                    break;
+                default:
+                    break;
+            }
             Log.info("ServerMsgFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
-            ServerRuntime.CLIENT_MESSAGE_QUEUE.add(new Object[]{webSocket, msg});
-            ServerRuntime.serverThreadPool.execute(new ServerProcessor());
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
     }
 
@@ -111,8 +140,12 @@ public class WsServer extends WebSocketServer {
         Log.error(ex);
     }
 
+
     @Override
     public void onStart() {
+        Constants.THREAD_POOL.execute(new ResponseAutoProcessor());
+        Constants.THREAD_POOL.execute(new RequestSingleProcessor());
+        Constants.THREAD_POOL.execute(new RequestLoopProcessor());
         Log.info("Server<" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
     }
 
