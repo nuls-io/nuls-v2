@@ -1,13 +1,13 @@
 package io.nuls.ledger.service.processor;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Service;
 
 /**
  * 转账交易处理
  * Created by wangkun23 on 2018/11/29.
  */
-@Component
+@Service
 public class TransferProcessor implements TxProcessor {
 
     @Override
