@@ -224,6 +224,10 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return HexUtil.encode(this.serialize());
     }
 
+    public Transaction(){
+
+    }
+
     public Transaction(int type) {
         this.time = TimeService.currentTimeMillis();
         this.type = type;
