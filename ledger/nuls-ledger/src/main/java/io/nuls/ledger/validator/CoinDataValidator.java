@@ -2,6 +2,7 @@ package io.nuls.ledger.validator;
 
 import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.AccountState;
+import io.nuls.ledger.service.AccountStateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import org.slf4j.Logger;
@@ -19,7 +20,7 @@ public class CoinDataValidator {
     final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    private Repository repository;
+    private AccountStateService accountStateService;
 
     /**
      * 验证coin data
@@ -29,8 +30,8 @@ public class CoinDataValidator {
      * @param nonce
      * @return
      */
-    public boolean validate(String address, BigInteger amount, long nonce) {
-        AccountState accountState = repository.getAccountState(address.getBytes());
+    public boolean validate(String address, int chainId, int assetId, BigInteger amount, long nonce) {
+        AccountState accountState = accountStateService.getAccountState(address, chainId, assetId);
         if (accountState == null) {
             return false;
         }
@@ -38,7 +39,7 @@ public class CoinDataValidator {
             logger.info("account {} balance lacked {}", address, amount);
             return false;
         }
-
+        //TODO nonce String hash
         long targetNonce = accountState.getNonce() + 1;
         if (nonce != targetNonce) {
             logger.info("account {} nonce {} incorrect", address, nonce);

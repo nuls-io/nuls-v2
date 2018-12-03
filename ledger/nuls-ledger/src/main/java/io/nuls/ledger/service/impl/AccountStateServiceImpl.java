@@ -27,7 +27,7 @@ public class AccountStateServiceImpl implements AccountStateService {
     private Repository repository;
 
     @Override
-    public AccountState createAccount(int chainId, String address, int assetId) {
+    public AccountState createAccount(String address,int chainId,  int assetId) {
         if (isExist(address, chainId, assetId)) {
             return getAccountState(address, chainId, assetId);
         }
@@ -46,7 +46,11 @@ public class AccountStateServiceImpl implements AccountStateService {
     @Override
     public AccountState getAccountState(String address, int chainId, int assetId) {
         byte[] key = this.getKey(address, chainId, assetId);
-        return repository.getAccountState(key);
+        AccountState accountState = repository.getAccountState(key);
+        if (accountState == null) {
+            accountState = createAccount(address, chainId, assetId);
+        }
+        return accountState;
     }
 
     @Override
