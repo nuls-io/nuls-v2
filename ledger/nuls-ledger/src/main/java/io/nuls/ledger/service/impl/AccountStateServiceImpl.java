@@ -28,69 +28,69 @@ public class AccountStateServiceImpl implements AccountStateService {
 
     @Override
     public AccountState createAccount(int chainId, String address, int assetId) {
-        if (isExist(address, assetId)) {
-            return getAccountState(address, assetId);
+        if (isExist(address, chainId, assetId)) {
+            return getAccountState(address, chainId, assetId);
         }
         Long initialNonce = BigInteger.ZERO.longValue();
         AccountState state = new AccountState(chainId, assetId, initialNonce, BigInteger.ZERO);
-        byte[] key = this.getKey(address, assetId);
+        byte[] key = this.getKey(address, chainId, assetId);
         repository.putAccountState(key, state);
         return state;
     }
 
     @Override
-    public boolean isExist(String address, int assetId) {
-        return getAccountState(address, assetId) != null;
+    public boolean isExist(String address, int chainId, int assetId) {
+        return getAccountState(address, chainId, assetId) != null;
     }
 
     @Override
-    public AccountState getAccountState(String address, int assetId) {
-        byte[] key = this.getKey(address, assetId);
+    public AccountState getAccountState(String address, int chainId, int assetId) {
+        byte[] key = this.getKey(address, chainId, assetId);
         return repository.getAccountState(key);
     }
 
     @Override
-    public synchronized long increaseNonce(String address, int assetId) {
-        AccountState accountState = getAccountState(address, assetId);
+    public synchronized long increaseNonce(String address, int chainId, int assetId) {
+        AccountState accountState = getAccountState(address, chainId, assetId);
         accountState = accountState.withIncrementedNonce();
-        byte[] key = this.getKey(address, assetId);
+        byte[] key = this.getKey(address, chainId, assetId);
         repository.putAccountState(key, accountState);
         return accountState.getNonce();
     }
 
     @Override
-    public synchronized long setNonce(String address, int assetId, long nonce) {
-        AccountState accountState = getAccountState(address, assetId);
+    public synchronized long setNonce(String address, int chainId, int assetId, long nonce) {
+        AccountState accountState = getAccountState(address, chainId, assetId);
         accountState = accountState.withNonce(nonce);
-        byte[] key = this.getKey(address, assetId);
+        byte[] key = this.getKey(address, chainId, assetId);
         repository.putAccountState(key, accountState);
         return accountState.getNonce();
     }
 
     @Override
-    public synchronized long getNonce(String address, int assetId) {
-        AccountState accountState = getAccountState(address, assetId);
+    public synchronized long getNonce(String address, int chainId, int assetId) {
+        AccountState accountState = getAccountState(address, chainId, assetId);
         return accountState.getNonce();
     }
 
     @Override
-    public synchronized BigInteger getBalance(String address, int assetId) {
-        AccountState accountState = getAccountState(address, assetId);
+    public synchronized BigInteger getBalance(String address, int chainId, int assetId) {
+        AccountState accountState = getAccountState(address, chainId, assetId);
         return accountState.getBalance();
     }
 
     @Override
-    public synchronized BigInteger addBalance(String address, int assetId, BigInteger value) {
-        AccountState accountState = getAccountState(address, assetId);
+    public synchronized BigInteger addBalance(String address, int chainId, int assetId, BigInteger value) {
+        AccountState accountState = getAccountState(address, chainId, assetId);
         accountState = accountState.withBalanceIncrement(value);
-        byte[] key = this.getKey(address, assetId);
+        byte[] key = this.getKey(address, chainId, assetId);
         repository.putAccountState(key, accountState);
         return accountState.getBalance();
     }
 
     @Override
-    public BigInteger freezeByHeight(String address, int assetId, String txHash, BigInteger amount, long height) {
-        AccountState accountState = getAccountState(address, assetId);
+    public BigInteger freezeByHeight(String address, int chainId, int assetId, String txHash, BigInteger amount, long height) {
+        AccountState accountState = getAccountState(address, chainId, assetId);
         FreezeHeightState state = new FreezeHeightState();
 
         state.setTxHash(txHash);
@@ -100,7 +100,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         accountState.getFreezeState().getFreezeHeightStates().add(state);
         //减去锁定金额
         accountState.getBalance().subtract(amount);
-        byte[] key = this.getKey(address, assetId);
+        byte[] key = this.getKey(address, chainId, assetId);
         repository.putAccountState(key, accountState);
         return accountState.getBalance();
     }
@@ -114,15 +114,15 @@ public class AccountStateServiceImpl implements AccountStateService {
      * @return
      */
     @Override
-    public BigInteger unfreezeByHeight(String address, int assetId, long latestHeight) {
-        AccountState accountState = getAccountState(address, assetId);
+    public BigInteger unfreezeByHeight(String address, int chainId, int assetId, long latestHeight) {
+        AccountState accountState = getAccountState(address, chainId, assetId);
         // 判断高度是否大于区块的最新高度
         List<FreezeHeightState> freezeStates = accountState.getFreezeState().getFreezeHeightStates();
         for (FreezeHeightState state : freezeStates) {
             if (state.getHeight() < latestHeight) {
                 // 增加用户可用余额
                 accountState = accountState.withBalanceIncrement(state.getAmount());
-                byte[] key = this.getKey(address, assetId);
+                byte[] key = this.getKey(address, chainId, assetId);
                 // 然后删除该条锁定记录
                 freezeStates.remove(state);
                 repository.putAccountState(key, accountState);
@@ -132,8 +132,8 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     @Override
-    public BigInteger freezeByLockTime(String address, int assetId, String txHash, BigInteger amount, long lockTime) {
-        AccountState accountState = getAccountState(address, assetId);
+    public BigInteger freezeByLockTime(String address, int chainId, int assetId, String txHash, BigInteger amount, long lockTime) {
+        AccountState accountState = getAccountState(address, chainId, assetId);
         FreezeLockTimeState state = new FreezeLockTimeState();
 
         state.setTxHash(txHash);
@@ -144,21 +144,21 @@ public class AccountStateServiceImpl implements AccountStateService {
         //减去锁定金额
         accountState.getBalance().subtract(amount);
 
-        byte[] key = this.getKey(address, assetId);
+        byte[] key = this.getKey(address, chainId, assetId);
         repository.putAccountState(key, accountState);
         return accountState.getBalance();
     }
 
     @Override
-    public BigInteger unfreezeLockTime(String address, int assetId, long latestBlockTime) {
-        AccountState accountState = getAccountState(address, assetId);
+    public BigInteger unfreezeLockTime(String address, int chainId, int assetId, long latestBlockTime) {
+        AccountState accountState = getAccountState(address, chainId, assetId);
         // 判断冻结时间是否大于最新区块时间
         List<FreezeLockTimeState> freezeStates = accountState.getFreezeState().getFreezeLockTimeStates();
         for (FreezeLockTimeState state : freezeStates) {
             if (state.getLockTime() < latestBlockTime) {
                 // 增加用户可用余额
                 accountState = accountState.withBalanceIncrement(state.getAmount());
-                byte[] key = this.getKey(address, assetId);
+                byte[] key = this.getKey(address, chainId, assetId);
                 // 然后删除该条锁定记录
                 freezeStates.remove(state);
                 repository.putAccountState(key, accountState);
@@ -174,8 +174,8 @@ public class AccountStateServiceImpl implements AccountStateService {
      * @param assetId
      * @return
      */
-    private byte[] getKey(String address, int assetId) {
-        String key = address + assetId;
+    private byte[] getKey(String address, int chainId, int assetId) {
+        String key = address + "-" + chainId + "-" + assetId;
         return key.getBytes();
     }
 }

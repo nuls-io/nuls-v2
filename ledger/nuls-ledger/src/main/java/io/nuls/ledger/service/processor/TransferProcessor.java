@@ -57,8 +57,7 @@ public class TransferProcessor implements TxProcessor {
             int chainId = to.getAssetsChainId();
             int assetId = to.getAssetsId();
             BigInteger amount = to.getAmount();
-
-            accountStateService.addBalance(address, assetId, amount);
+            accountStateService.addBalance(address, chainId, assetId, amount);
         }
     }
 }

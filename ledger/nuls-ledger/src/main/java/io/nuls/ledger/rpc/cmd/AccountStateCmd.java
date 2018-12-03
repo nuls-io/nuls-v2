@@ -42,7 +42,7 @@ public class AccountStateCmd extends BaseCmd {
         logger.info("chainId {}", chainId);
         logger.info("address {}", address);
 
-        BigInteger balance = accountStateService.getBalance(address, assetId);
+        BigInteger balance = accountStateService.getBalance(address, chainId, assetId);
         return success(balance);
     }
 
@@ -60,7 +60,7 @@ public class AccountStateCmd extends BaseCmd {
         Integer chainId = (Integer) params.get("chainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        long nonce = accountStateService.getNonce(address, assetId);
+        long nonce = accountStateService.getNonce(address, chainId, assetId);
         return success(nonce);
     }
 }

@@ -24,6 +24,6 @@ public class AccountStateServiceTest extends BaseTest {
         AccountState accountState = accountStateService.createAccount(chainId, address, assetId);
 
         logger.info("accountState {}",accountState);
-        logger.info("test {}", accountStateService.isExist(address, assetId));
+        logger.info("test {}", accountStateService.isExist(address,chainId, assetId));
     }
 }
