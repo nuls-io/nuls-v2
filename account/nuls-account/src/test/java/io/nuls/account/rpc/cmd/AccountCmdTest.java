@@ -26,6 +26,7 @@ import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -730,7 +731,7 @@ public class AccountCmdTest {
             //coinData.setFrom(coinDataResult.getCoinList());
             CoinTo coin = new CoinTo();
             coin.setAddress(AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs" + HexUtil.encode(ByteUtils.shortToBytes((short) chainId))));
-            coin.setAmount("1");
+            coin.setAmount(new BigInteger("1"));
             coin.setAssetsChainId(chainId);
             coin.setAssetsId(1);
             coinData.addTo(coin);

@@ -25,7 +25,6 @@
 package io.nuls.chain.model.tx;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.chain.info.ChainTxConstants;
 
 /**
  * @program: nuls2.0
@@ -36,7 +35,7 @@ import io.nuls.chain.info.ChainTxConstants;
 public class RegisterChainAndAssetTransaction extends Transaction {
 
     public RegisterChainAndAssetTransaction() {
-        super(ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET);
+        super();
     }
 
 }

@@ -96,7 +96,7 @@ public class TxAssetCmd extends BaseChainCmd {
     public Response assetRegCommit(Map params) {
         try {
             Response cmdResponse = assetRegValidator(params);
-            if(isSuccess(cmdResponse)){
+            if(cmdResponse.isSuccess()){
                 return cmdResponse;
             }
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
@@ -212,7 +212,7 @@ public class TxAssetCmd extends BaseChainCmd {
         String secondaryData = String.valueOf(params.get("secondaryData"));
         Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
         Response cmdResponse = assetDisableValidator(asset);
-        if(isSuccess(cmdResponse)){
+        if(cmdResponse.isSuccess()){
             return cmdResponse;
         }
         assetService.setStatus(CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId()), false);
@@ -381,7 +381,7 @@ public class TxAssetCmd extends BaseChainCmd {
             Map<String,String> fromAssetMap = fromCoinDataAssets.getAssetsMap();
             Map<String,String> toAssetMap = toCoinDataAssets.getAssetsMap();
             Response response =  assetCirculateValidator(fromChainId,toChainId,fromAssetMap,toAssetMap);
-            if(!isSuccess(response)){
+            if(!response.isSuccess()){
                 return response;
             }
             //from 的处理

@@ -1,23 +1,25 @@
 package io.nuls.poc.model.bo;
 
+import java.math.BigInteger;
+
 /**
  * 交易手续费返回结果类
  * @author tag
  * */
 public class ChargeResultData {
-    private String fee;
+    private BigInteger fee;
     private int chainId;
 
-    public ChargeResultData(String fee, int chainId) {
+    public ChargeResultData(BigInteger fee, int chainId) {
         this.fee = fee;
         this.chainId = chainId;
     }
 
-    public String getFee() {
+    public BigInteger getFee() {
         return fee;
     }
 
-    public void setFee(String fee) {
+    public void setFee(BigInteger fee) {
         this.fee = fee;
     }
 

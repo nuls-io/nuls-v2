@@ -17,6 +17,51 @@ import java.util.Arrays;
  */
 public class TransactionTest {
 
+
+    private CoinFrom getCoinFrom() throws Exception{
+        CoinFrom coinFrom =  new CoinFrom();
+
+        coinFrom.setAddress(AddressTool.getAddress("WSqyJxB1B83MJaAGYoJDnfqZxNc7o3930"));
+        coinFrom.setAmount(new BigInteger("12345678"));
+        coinFrom.setAssetsChainId(1);
+        coinFrom.setAssetsId(2);
+        coinFrom.setLocked((byte)0);
+        coinFrom.setNonce("abcdefg".getBytes());
+        System.out.println(JSONUtils.obj2json(coinFrom));
+        return coinFrom;
+    }
+
+    @Test
+    public void validCoinFrom() throws Exception{
+        CoinFrom coinFrom = getCoinFrom();
+        CoinFrom testCF = new CoinFrom();
+        testCF.parse(new NulsByteBuffer(coinFrom.serialize()));
+        Assert.assertTrue(Arrays.equals(coinFrom.getAddress(), testCF.getAddress()));
+        Assert.assertTrue(Arrays.equals(coinFrom.getNonce(), testCF.getNonce()));
+        Assert.assertEquals(coinFrom.getAmount().longValue(), testCF.getAmount().longValue());
+        System.out.println(JSONUtils.obj2json(testCF));
+
+    }
+
+    private CoinTo getCoinTo() throws Exception{
+        CoinTo coinTo = new CoinTo();
+        coinTo.setAddress(AddressTool.getAddress("WSqyJxB1B83MJaAGYoJDnfqZxNc7o3930"));
+        coinTo.setAmount(new BigInteger("999"));
+        coinTo.setAssetsChainId(1);
+        coinTo.setAssetsId(2);
+        coinTo.setLockTime(TimeService.currentTimeMillis());
+        return coinTo;
+    }
+
+    private CoinData getCoinData() throws Exception{
+        CoinData coinData = new CoinData();
+        CoinFrom coinFrom = getCoinFrom();
+        coinData.addFrom(coinFrom);
+        CoinTo coinTo = getCoinTo();
+        coinData.addTo(coinTo);
+        return coinData;
+    }
+
     @Test
     public void serialization() throws Exception{
         Transaction tx = new Transaction();
@@ -25,31 +70,7 @@ public class TransactionTest {
         tx.setBlockHeight(100);
         String remark = "试一试";
         tx.setRemark(StringUtils.bytes(remark));
-        CoinData coinData = new CoinData();
-        CoinFrom coinFrom = new CoinFrom();
-
-        coinFrom.setAddress(AddressTool.getAddress("WSqyJxB1B83MJaAGYoJDnfqZxNc7o3930"));
-        coinFrom.setAmount(new BigInteger("999"));
-        coinFrom.setAssetsChainId(1);
-        coinFrom.setAssetsId(2);
-        coinFrom.setLocked((byte)0);
-        coinFrom.setNonce("ABCDEFG".getBytes());
-
-        System.out.println(JSONUtils.obj2json(coinFrom));
-
-        CoinFrom cf1 = new CoinFrom();
-        cf1.parse(new NulsByteBuffer(coinFrom.serialize()));
-        System.out.println(JSONUtils.obj2json(cf1));
-
-        coinData.addFrom(coinFrom);
-
-        CoinTo coinTo = new CoinTo();
-        coinTo.setAddress(AddressTool.getAddress("WSqyJxB1B83MJaAGYoJDnfqZxNc7o3930"));
-        coinTo.setAmount(new BigInteger("999"));
-        coinTo.setAssetsChainId(1);
-        coinTo.setAssetsId(2);
-        coinTo.setLockTime(TimeService.currentTimeMillis());
-        coinData.addTo(coinTo);
+        CoinData coinData = getCoinData();
 
         try {
             tx.setCoinData(coinData.serialize());
