@@ -7,6 +7,7 @@ import io.nuls.tools.thread.TimeService;
 import org.junit.Test;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 
 /**
  * @author tangyi
@@ -21,8 +22,8 @@ public class AssetCmdTest {
         if (!RocksDBService.existTable("seq")) {
             RocksDBService.createTable("seq");
         }
-        long start=System.currentTimeMillis();
-        while(System.currentTimeMillis()-start<1000){
+        long start = System.currentTimeMillis();
+        while (System.currentTimeMillis() - start < 1000) {
             new SeqStorageImpl().nextSeq(1);
         }
         System.out.println(new SeqStorageImpl().nextSeq(1));
@@ -93,7 +94,7 @@ public class AssetCmdTest {
         asset.setSymbol("HH");
         asset.setName("HHHHHH");
         asset.setDepositNuls(200000);
-        asset.setInitNumber("95565");
+        asset.setInitNumber(BigInteger.valueOf(95565));
         asset.setDecimalPlaces((short) 8);
         asset.setAvailable(true);
         asset.setCreateTime(TimeService.currentTimeMillis());
@@ -108,7 +109,7 @@ public class AssetCmdTest {
         asset.setSymbol("B");
         asset.setName("bts");
         asset.setDepositNuls(200000);
-        asset.setInitNumber("32232");
+        asset.setInitNumber(BigInteger.valueOf(32232));
         asset.setDecimalPlaces((short) 8);
         asset.setAvailable(true);
         asset.setCreateTime(TimeService.currentTimeMillis());
@@ -137,8 +138,9 @@ public class AssetCmdTest {
 //        System.out.println(CmdDispatcher.call("assetDisableValidator", new Object[]{1, 1542092573248L}));
 //        System.out.println(CmdDispatcher.call("assetDisableValidator", new Object[]{867, 1542092573248L}));
     }
+
     @Test
-    public void assetStringTest(){
+    public void assetStringTest() {
         BigDecimal b = new BigDecimal("999999999999999999999999999999999999999999");
         System.out.println(b.toString());
     }

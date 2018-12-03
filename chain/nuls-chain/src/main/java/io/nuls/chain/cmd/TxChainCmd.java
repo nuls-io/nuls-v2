@@ -170,7 +170,7 @@ public class TxChainCmd extends BaseChainCmd {
             String secondaryData = String.valueOf(params.get("secondaryData"));
             Chain chain = buildChainTxData(txHex,new DestroyAssetAndChainTransaction(),true);
             Response cmdResponse =  destroyValidator(chain);
-            if(isSuccess(cmdResponse)){
+            if(cmdResponse.isSuccess()){
                 return cmdResponse;
             }
             //更新资产
@@ -200,7 +200,7 @@ public class TxChainCmd extends BaseChainCmd {
             String secondaryData = String.valueOf(params.get("secondaryData"));
             Chain chain = buildChainTxData(txHex,new DestroyAssetAndChainTransaction(),true);
             Response cmdResponse =  destroyValidator(chain);
-            if(isSuccess(cmdResponse)){
+            if(cmdResponse.isSuccess()){
                 return cmdResponse;
             }
             Chain dbChain = chainService.getChain(chain.getChainId());

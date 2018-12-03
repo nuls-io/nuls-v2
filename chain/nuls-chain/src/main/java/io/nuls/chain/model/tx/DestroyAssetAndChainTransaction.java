@@ -25,7 +25,6 @@
 package io.nuls.chain.model.tx;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.chain.info.ChainTxConstants;
 
 /**
  * @program: nuls2.0
@@ -36,7 +35,7 @@ import io.nuls.chain.info.ChainTxConstants;
 public class DestroyAssetAndChainTransaction extends Transaction {
 
     public DestroyAssetAndChainTransaction() {
-        super(ChainTxConstants.TX_TYPE_DESTROY_ASSET_AND_CHAIN);
+        super();
     }
 
 }
