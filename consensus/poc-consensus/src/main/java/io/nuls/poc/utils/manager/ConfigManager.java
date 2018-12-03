@@ -6,6 +6,7 @@ import io.nuls.poc.storage.ConfigeService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +30,17 @@ public class ConfigManager {
     public static void initManager(List<ConfigItem> items, int chain_id) throws Exception{
         ConfigBean bean = new ConfigBean();
         Class beanClass = bean.getClass();
-        Field field = null;
+        Field field;
         //通过反射设置bean属性值
         for (ConfigItem item : items) {
             param_modify.put(item.getKey(),item.isReadOnly());
             field = beanClass.getDeclaredField(item.getKey());
             field.setAccessible(true);
-            field.set(bean,item.getValue());
+            if(field.getType().getName().equals("java.math.BigInteger")){
+                field.set(bean, new BigInteger(String.valueOf(item.getValue())));
+            }else{
+                field.set(bean,item.getValue());
+            }
         }
         config_map.put(chain_id,bean);
         //保存配置信息到数据库
