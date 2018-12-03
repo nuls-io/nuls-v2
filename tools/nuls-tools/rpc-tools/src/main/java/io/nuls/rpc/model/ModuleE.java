@@ -10,13 +10,14 @@ public enum ModuleE {
      * prefix + name
      */
     KE("ke", "Kernel", "nuls.io"),
-    CM("cm", "Chain Manager", "nuls.io"),
-    AC("ac", "Account Manager", "nuls.io"),
+    CM("cm", "Chain", "nuls.io"),
+    AC("ac", "Account", "nuls.io"),
     NW("nw", "Network", "nuls.io"),
     CS("cs", "Consensus", "nuls.io"),
     BL("bl", "Block", "nuls.io"),
     LG("lg", "Ledger", "nuls.io"),
     TX("tx", "Transaction", "nuls.io"),
+    EB("eb", "EventBus", "nuls.io"),
     TEST("test", "I am test", "nuls.io");
 
     public final String abbr;

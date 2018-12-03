@@ -1,5 +1,6 @@
 package io.nuls.rpc.model.message;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.rpc.info.Constants;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,6 +37,7 @@ public class Response {
     @Setter
     private Object responseData;
 
+    @JsonIgnore
     public boolean isSuccess() {
         return Constants.booleanString(true).equals(responseStatus);
     }
