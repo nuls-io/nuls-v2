@@ -199,23 +199,12 @@ public class CmdDispatcher {
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
             /*
-            获取队列中的第一个对象，如果是空，舍弃
-            Get the first item of the queue, If it is an empty object, discard
+            获取队列中的第一个对象，如果非空，则说明握手成功
+            Get the first item of the queue, If not empty, the handshake is successful.
              */
-            Message message = ClientRuntime.firstItemInServerMessageQueue();
-            if (message == null) {
-                continue;
-            }
-
-            /*
-            消息类型应该是NegotiateConnectionResponse，如果不是，放回队列等待其他线程处理
-            Message type should be "NegotiateConnectionResponse". If not, add back to the queue and wait for other threads to process
-             */
-            if (MessageType.NegotiateConnectionResponse.name().equals(message.getMessageType())) {
-                Log.info("NegotiateConnectionResponse:" + JSONUtils.obj2json(message));
+            Message message = ClientRuntime.firstMessageInNegotiateResponseQueue();
+            if (message != null) {
                 return true;
-            } else {
-                ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
             }
 
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
@@ -232,10 +221,6 @@ public class CmdDispatcher {
      * Get response by messageId
      */
     private static Response getResponse(String messageId) throws InterruptedException, IOException {
-        // TODO messageId 不应该限定整形，应该是string
-        if (Integer.parseInt(messageId) < 0) {
-            return ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.CMD_NOT_FOUND);
-        }
 
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
@@ -243,17 +228,9 @@ public class CmdDispatcher {
             获取队列中的第一个对象，如果是空，舍弃
             Get the first item of the queue, If it is an empty object, discard
              */
-            Message message = ClientRuntime.firstItemInServerMessageQueue();
+            Message message = ClientRuntime.firstMessageInResponseManualQueue();
             if (message == null) {
-                continue;
-            }
-
-            /*
-            消息类型应该是Response，如果不是，放回队列等待其他线程处理
-            Message type should be "Response". If not, add back to the queue and wait for other threads to process
-             */
-            if (!MessageType.Response.name().equals(message.getMessageType())) {
-                ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
+                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                 continue;
             }
 
@@ -265,13 +242,13 @@ public class CmdDispatcher {
                  */
                 Log.info("Response:" + JSONUtils.obj2json(message));
                 return response;
-            } else {
-                /*
-                messageId不匹配，放回队列等待其他线程处理
-                Add back to the queue and wait for other threads to process
-                 */
-                ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
             }
+
+            /*
+            messageId不匹配，放回队列
+            Add back to the queue
+             */
+            ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);
 
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
@@ -287,9 +264,6 @@ public class CmdDispatcher {
      * Get confirmation of receipt(Ack) of Request
      */
     private static boolean getAck(String messageId) throws InterruptedException, IOException {
-        if (Integer.parseInt(messageId) < 0) {
-            return false;
-        }
 
         long timeMillis = TimeService.currentTimeMillis();
         while (TimeService.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
@@ -297,17 +271,9 @@ public class CmdDispatcher {
             获取队列中的第一个对象，如果是空，舍弃
             Get the first item of the queue, If it is an empty object, discard
              */
-            Message message = ClientRuntime.firstItemInServerMessageQueue();
+            Message message = ClientRuntime.firstMessageInAckQueue();
             if (message == null) {
-                continue;
-            }
-
-            /*
-            消息类型应该是Ack，如果不是，放回队列等待其他线程处理
-            Message type should be "Ack". If not, add back to the queue and wait for other threads to process
-             */
-            if (!MessageType.Ack.name().equals(message.getMessageType())) {
-                ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
+                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                 continue;
             }
 
@@ -319,15 +285,14 @@ public class CmdDispatcher {
                  */
                 Log.info("Ack:" + JSONUtils.obj2json(ack));
                 return true;
-            } else {
-                /*
-                messageId不匹配，放回队列等待其他线程处理
-                Add back to the queue and wait for other threads to process
-                 */
-                ClientRuntime.SERVER_MESSAGE_QUEUE.add(message);
             }
 
-            // TODO 100MS太长
+            /*
+            messageId不匹配，放回队列
+            Add back to the queue
+             */
+            ClientRuntime.ACK_QUEUE.offer(message);
+
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
 

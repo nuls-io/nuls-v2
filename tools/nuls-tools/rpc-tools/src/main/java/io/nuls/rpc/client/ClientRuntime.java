@@ -10,6 +10,7 @@ import org.java_websocket.WebSocket;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 
@@ -31,10 +32,13 @@ public class ClientRuntime {
     public static ConcurrentMap<String, Map> roleMap = new ConcurrentHashMap<>();
 
     /**
-     * 从服务端获取的消息集合
-     * Message set received from the server
+     * 从服务端获取的Message，根据类型放入不同队列中
+     * Message received from server, and placed in different queues according to type
      */
-    public static final List<Message> SERVER_MESSAGE_QUEUE = Collections.synchronizedList(new ArrayList<>());
+    public static final ConcurrentLinkedQueue<Message> NEGOTIATE_RESPONSE_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final ConcurrentLinkedQueue<Message> ACK_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final ConcurrentLinkedQueue<Message> RESPONSE_MANUAL_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final ConcurrentLinkedQueue<Message> RESPONSE_AUTO_QUEUE = new ConcurrentLinkedQueue<>();
 
     /**
      * 调用远程方法时，可以设置自动回调的本地方法
@@ -84,6 +88,21 @@ public class ClientRuntime {
                 : null;
     }
 
+    public static Message firstMessageInNegotiateResponseQueue() {
+        return firstMessageInQueue(NEGOTIATE_RESPONSE_QUEUE);
+    }
+
+    public static Message firstMessageInAckQueue() {
+        return firstMessageInQueue(ACK_QUEUE);
+    }
+
+    public static Message firstMessageInResponseManualQueue() {
+        return firstMessageInQueue(RESPONSE_MANUAL_QUEUE);
+    }
+
+    public static Message firstMessageInResponseAutoQueue() {
+        return firstMessageInQueue(RESPONSE_AUTO_QUEUE);
+    }
 
     /**
      * 获取队列中的第一个元素，然后移除队列
@@ -91,12 +110,9 @@ public class ClientRuntime {
      *
      * @return 队列的第一个元素. The first item in SERVER_RESPONSE_QUEUE.
      */
-    static synchronized Message firstItemInServerMessageQueue() {
-        Message message = null;
-        if (ClientRuntime.SERVER_MESSAGE_QUEUE.size() > 0) {
-            message = ClientRuntime.SERVER_MESSAGE_QUEUE.get(0);
-            ClientRuntime.SERVER_MESSAGE_QUEUE.remove(0);
-        }
+    private static synchronized Message firstMessageInQueue(Queue<Message> messageQueue) {
+        Message message = messageQueue.peek();
+        messageQueue.poll();
         return message;
     }
 

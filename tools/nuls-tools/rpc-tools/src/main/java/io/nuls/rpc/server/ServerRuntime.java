@@ -5,14 +5,12 @@ import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.commom.NulsThreadFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 服务端运行时所需要的变量和方法
@@ -52,10 +50,16 @@ public class ServerRuntime {
     static final List<Object[]> CLIENT_MESSAGE_QUEUE = Collections.synchronizedList(new ArrayList<>());
 
     /**
-     * 处理待处理消息的线程池
-     * Thread pool for processing messages to be processed
+     * 从客户端获取的Message，根据类型放入不同队列中
+     * 数组的第一个元素是Websocket对象，数组的第二个元素是Message
+     * Message received from client, and placed in different queues according to type
+     * The first element of the array is the websocket object, and the second element of the array is Message.
      */
-    static ExecutorService serverThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
+    public static final ConcurrentLinkedQueue<Object[]> NEGOTIATE_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final ConcurrentLinkedQueue<Object[]> UNSUBSCRIBE_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final ConcurrentLinkedQueue<Object[]> REQUEST_QUEUE_SINGLE = new ConcurrentLinkedQueue<>();
+    public static final ConcurrentLinkedQueue<Object[]> REQUEST_QUEUE_LOOP = new ConcurrentLinkedQueue<>();
+
 
     /**
      * 获取队列中的第一个元素，然后移除队列

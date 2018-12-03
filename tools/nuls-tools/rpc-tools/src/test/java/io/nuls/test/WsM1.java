@@ -31,6 +31,7 @@ import io.nuls.rpc.client.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.client.InvokeMethod;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.server.ServerRuntime;
@@ -41,7 +42,9 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -62,6 +65,9 @@ public class WsM1 {
         System.out.println(bigDecimal.toString());
         System.out.println(bigDecimal.toBigInteger().intValue());
         System.out.println(new BigInteger("10").divide(new BigInteger("4")));
+
+        List a=new ArrayList();
+        a.remove(0);
     }
 
     @Test
@@ -95,7 +101,7 @@ public class WsM1 {
         单元测试专用：单元测试时需要告知内核地址，以及同步接口列表
         如果不是单元测试，在模块中进行连调测试，下面两句话是不需要的
          */
-        WsServer.mockModule();
+        NoUse.mockModule();
         /*
         单元测试专用结束
          */
@@ -139,6 +145,5 @@ public class WsM1 {
         System.out.println("我已经取消了订阅:" + messageId3);
 
         Thread.sleep(5000);
-        System.out.println("当前消息队列：" + ClientRuntime.SERVER_MESSAGE_QUEUE.size());
     }
 }
