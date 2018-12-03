@@ -133,7 +133,11 @@ public class DoubleUtils {
      * @return    和
      * */
     public static double sum(double d1, double d2) {
-        return round(sum(createBigDecimal(d1), createBigDecimal(d2)).doubleValue());
+        return round(createBigDecimal(d1).add(createBigDecimal(d2)).doubleValue());
+    }
+
+    public static double sum(double d1, BigDecimal d2) {
+        return round(createBigDecimal(d1).add(d2).doubleValue());
     }
 
     /**
@@ -146,6 +150,10 @@ public class DoubleUtils {
         return round(sub(createBigDecimal(d1), createBigDecimal(d2)).doubleValue());
     }
 
+    public static double sub(double d1, BigDecimal d2) {
+        return round(createBigDecimal(d1).subtract(d2).doubleValue());
+    }
+
     /**
      * 两个double数据相乘
      * @param d1  被乘数
@@ -154,6 +162,10 @@ public class DoubleUtils {
      * */
     public static double mul(double d1, double d2) {
         return mul(createBigDecimal(d1), createBigDecimal(d2)).doubleValue();
+    }
+
+    public static double mul(double d1, BigDecimal d2) {
+        return createBigDecimal(d1).multiply(d2).doubleValue();
     }
 
 
@@ -180,6 +192,10 @@ public class DoubleUtils {
         return round(div(createBigDecimal(d1), createBigDecimal(d2)).doubleValue(), scale);
     }
 
+    public static double div(double d1, BigDecimal d2, int scale) {
+        return round(createBigDecimal(d1).divide(d2).doubleValue(), scale);
+    }
+
 
     /**
      * 两个double数据相除
@@ -189,6 +205,10 @@ public class DoubleUtils {
      * */
     public static double div(double d1, double d2) {
         return div(d1, d2, DEFAULT_SCALE);
+    }
+
+    public static double div(double d1, BigDecimal d2) {
+        return div(d1,d2,DEFAULT_SCALE);
     }
 
     /**

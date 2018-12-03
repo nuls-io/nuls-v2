@@ -28,7 +28,6 @@ package io.nuls.poc.model.bo.round;
 import io.nuls.base.data.Address;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.utils.manager.ConfigManager;
-import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.thread.TimeService;
@@ -101,8 +100,7 @@ public class MeetingRound {
             member.setPackingIndexOfRound(i + 1);
             member.setPackStartTime(startTime + i * ConfigManager.config_map.get(chain_id).getPacking_interval());
             member.setPackEndTime(member.getPackStartTime() + ConfigManager.config_map.get(chain_id).getPacking_interval());
-            String allDeposit = BigIntegerUtils.addToString(member.getAgent().getTotalDeposit(),member.getAgent().getDeposit());
-            totalWeight += DoubleUtils.round(DoubleUtils.mul( new BigDecimal(allDeposit),member.getAgent().getCreditVal()).doubleValue());
+            totalWeight += DoubleUtils.mul(member.getAgent().getCreditVal(),new BigDecimal(member.getAgent().getTotalDeposit().add(member.getAgent().getDeposit())).doubleValue());
         }
         endTime = startTime + memberCount * ConfigManager.config_map.get(chain_id).getPacking_interval();
     }

@@ -1,6 +1,7 @@
 package io.nuls.poc.model.bo.config;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 
 /**
  * 共识模块配置类
@@ -19,7 +20,7 @@ public class ConfigBean implements Serializable {
     /**
      * 出块最小金额
      * */
-    private String packing_amount;
+    private BigInteger packing_amount;
     /**
      * 奖励金锁定块数
      * */
@@ -43,22 +44,22 @@ public class ConfigBean implements Serializable {
     /**
      * 创建节点的保证金最小值
      * */
-    private String deposit_min;
+    private BigInteger deposit_min;
     /**
      * 创建节点的保证金最大值
      * */
-    private String deposit_max;
+    private BigInteger deposit_max;
     /**
      * 节点出块委托金额最小值
      * */
-    private String commission_min;
+    private BigInteger commission_min;
     /**
      * 节点委托金额最大值
      * */
-    private String commission_max;
+    private BigInteger commission_max;
 
     //委托最小金额
-    private String entruster_deposit_min;
+    private BigInteger entruster_deposit_min;
 
     //节点最多能被多少人委托
     private int deposit_number_max;
@@ -144,51 +145,51 @@ public class ConfigBean implements Serializable {
         this.deposit_number_max = deposit_number_max;
     }
 
-    public String getPacking_amount() {
+    public BigInteger getPacking_amount() {
         return packing_amount;
     }
 
-    public void setPacking_amount(String packing_amount) {
+    public void setPacking_amount(BigInteger packing_amount) {
         this.packing_amount = packing_amount;
     }
 
-    public String getDeposit_min() {
+    public BigInteger getDeposit_min() {
         return deposit_min;
     }
 
-    public void setDeposit_min(String deposit_min) {
+    public void setDeposit_min(BigInteger deposit_min) {
         this.deposit_min = deposit_min;
     }
 
-    public String getDeposit_max() {
+    public BigInteger getDeposit_max() {
         return deposit_max;
     }
 
-    public void setDeposit_max(String deposit_max) {
+    public void setDeposit_max(BigInteger deposit_max) {
         this.deposit_max = deposit_max;
     }
 
-    public String getCommission_min() {
+    public BigInteger getCommission_min() {
         return commission_min;
     }
 
-    public void setCommission_min(String commission_min) {
+    public void setCommission_min(BigInteger commission_min) {
         this.commission_min = commission_min;
     }
 
-    public String getCommission_max() {
+    public BigInteger getCommission_max() {
         return commission_max;
     }
 
-    public void setCommission_max(String commission_max) {
+    public void setCommission_max(BigInteger commission_max) {
         this.commission_max = commission_max;
     }
 
-    public String getEntruster_deposit_min() {
+    public BigInteger getEntruster_deposit_min() {
         return entruster_deposit_min;
     }
 
-    public void setEntruster_deposit_min(String entruster_deposit_min) {
+    public void setEntruster_deposit_min(BigInteger entruster_deposit_min) {
         this.entruster_deposit_min = entruster_deposit_min;
     }
 
