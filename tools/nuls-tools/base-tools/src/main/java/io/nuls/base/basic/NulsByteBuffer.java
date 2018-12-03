@@ -124,6 +124,9 @@ public class NulsByteBuffer {
         try {
             byte[] bytes = Arrays.copyOfRange(payload, cursor, cursor += 16);
             BigInteger u = SerializeUtils.bigIntegerFromBytes(bytes);
+            if(u.compareTo(BigInteger.ZERO) < 0){
+                throw new UnsupportedOperationException();
+            }
             return u;
         } catch (ArrayIndexOutOfBoundsException e) {
             throw new NulsException(e);

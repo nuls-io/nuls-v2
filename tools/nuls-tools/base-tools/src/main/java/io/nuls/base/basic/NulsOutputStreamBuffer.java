@@ -29,6 +29,7 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
@@ -95,6 +96,9 @@ public class NulsOutputStreamBuffer {
     }
 
     public void writeBigInteger(BigInteger val) throws IOException{
+        if(val.compareTo(BigInteger.ZERO) < 0){
+            throw new UnsupportedOperationException();
+        }
         this.write(SerializeUtils.bigInteger2Bytes(val));
     }
 
