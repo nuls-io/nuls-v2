@@ -156,11 +156,25 @@ public class BigIntegerUtils {
         return false;
     }
 
+    public static boolean isEqual(BigInteger b1, BigInteger b2) {
+        if (b1.compareTo(b2) == 0) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 第一个是小于第二个数
      */
     public static boolean isLessThan(String str1, String str2) {
         if (compare(str1, str2) >= 0) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean isLessThan(BigInteger b1, BigInteger b2) {
+        if (b1.compareTo(b2) >= 0) {
             return false;
         }
         return true;
@@ -176,5 +190,10 @@ public class BigIntegerUtils {
         return true;
     }
 
-
+    public static boolean isGreaterThan(BigInteger b1, BigInteger b2) {
+        if (b1.compareTo(b2) <= 0) {
+            return false;
+        }
+        return true;
+    }
 }

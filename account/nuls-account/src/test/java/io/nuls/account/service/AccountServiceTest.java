@@ -1,9 +1,7 @@
 package io.nuls.account.service;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountParam;
-import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.init.AccountBootstrap;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.AliasTransaction;
@@ -13,10 +11,6 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
@@ -27,16 +21,10 @@ import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.HashMap;
+import java.math.BigInteger;
 import java.util.List;
-import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * @author: qinyifeng
@@ -257,7 +245,7 @@ public class AccountServiceTest {
             //coinData.setFrom(coinDataResult.getCoinList());
             CoinTo coin = new CoinTo();
             coin.setAddress(AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs" + HexUtil.encode(ByteUtils.shortToBytes((short) chainId))));
-            coin.setAmount("1");
+            coin.setAmount(new BigInteger("1"));
             coin.setAssetsChainId(chainId);
             coin.setAssetsId(1);
             coinData.addTo(coin);

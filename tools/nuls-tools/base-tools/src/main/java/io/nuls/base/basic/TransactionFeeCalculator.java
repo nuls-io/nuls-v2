@@ -26,8 +26,10 @@
 package io.nuls.base.basic;
 
 
-import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
+
+import java.math.BigInteger;
+
 
 /**
  * @author tag
@@ -35,8 +37,8 @@ import io.nuls.tools.exception.NulsRuntimeException;
  */
 public class TransactionFeeCalculator {
 
-    public static final String MIN_PRECE_PRE_1024_BYTES = String.valueOf(100000);
-    public static final String OTHER_PRECE_PRE_1024_BYTES = String.valueOf(1000000);
+    public static final BigInteger MIN_PRICE_PRE_1024_BYTES = BigInteger.valueOf(100000);
+    public static final BigInteger OTHER_PRICE_PRE_1024_BYTES = BigInteger.valueOf(1000000);
 
     public static final int KB = 1024;
 
@@ -45,10 +47,10 @@ public class TransactionFeeCalculator {
      * According to the transaction size calculate the handling fee.
      * @param size 交易大小/size of the transaction
      */
-    public static final String getTransferFee(int size) {
-        String fee = BigIntegerUtils.mulToString(MIN_PRECE_PRE_1024_BYTES,String.valueOf(size/KB));
+    public static final BigInteger getTransferFee(int size) {
+        BigInteger fee = MIN_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
         if (size % KB > 0) {
-            fee = BigIntegerUtils.addToString(fee,MIN_PRECE_PRE_1024_BYTES);
+            fee = fee.add(MIN_PRICE_PRE_1024_BYTES);
         }
         return fee;
     }
@@ -58,10 +60,10 @@ public class TransactionFeeCalculator {
      * According to the transaction size calculate the handling fee.
      * @param size 交易大小/size of the transaction
      */
-    public static final String getMaxFee(int size) {
-        String fee = BigIntegerUtils.mulToString(OTHER_PRECE_PRE_1024_BYTES,String.valueOf(size/KB));
+    public static final BigInteger getMaxFee(int size) {
+        BigInteger fee = OTHER_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
         if (size % KB > 0) {
-            fee = BigIntegerUtils.addToString(fee,OTHER_PRECE_PRE_1024_BYTES);
+            fee = fee.add(OTHER_PRICE_PRE_1024_BYTES);
         }
         return fee;
     }
@@ -71,16 +73,16 @@ public class TransactionFeeCalculator {
      * According to the transaction size calculate the handling fee.
      * @param size 交易大小/size of the transaction
      */
-    public static final String getFee(int size, String price) {
-        if (BigIntegerUtils.compare(price,MIN_PRECE_PRE_1024_BYTES)<0) {
+    public static final BigInteger getFee(int size, BigInteger price) {
+        if(price.compareTo(MIN_PRICE_PRE_1024_BYTES)<0){
             throw new NulsRuntimeException(new Exception("data is error"));
         }
-        if (BigIntegerUtils.compare(price,OTHER_PRECE_PRE_1024_BYTES)>0) {
+        if(price.compareTo(OTHER_PRICE_PRE_1024_BYTES)>0) {
             throw new NulsRuntimeException(new Exception("data is error"));
         }
-        String fee =  BigIntegerUtils.mulToString(price,String.valueOf(size/KB));
+        BigInteger fee = price.multiply(new BigInteger(String.valueOf(size/KB)));
         if (size % KB > 0) {
-            fee = BigIntegerUtils.addToString(fee,price);
+            fee = fee.add(price);
         }
         return fee;
     }
