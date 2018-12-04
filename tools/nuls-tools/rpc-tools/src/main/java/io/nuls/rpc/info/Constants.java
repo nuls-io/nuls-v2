@@ -113,10 +113,10 @@ public class Constants {
      * 3: Do not execute Request, but keep waiting for the next execution
      * 4: Do not execute Request, and discard it
      */
-    public static final int INVOKE_EXECUTE_KEEP = 1;
-    public static final int INVOKE_EXECUTE_REMOVE = 2;
-    public static final int INVOKE_SKIP_KEEP = 3;
-    public static final int INVOKE_SKIP_REMOVE = 4;
+    public static final int EXECUTE_AND_KEEP = 1;
+    public static final int EXECUTE_AND_REMOVE = 2;
+    public static final int SKIP_AND_KEEP = 3;
+    public static final int SKIP_AND_REMOVE = 4;
 
 
     /**
@@ -164,14 +164,6 @@ public class Constants {
      * Thread pool for processing messages to be processed
      */
     public static final ExecutorService THREAD_POOL = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("Processor"));
-
-    /**
-     * 根据bool类型生成对应字符串
-     * Generate corresponding strings according to bool type
-     */
-    public static String booleanString(boolean bool) {
-        return bool ? BOOLEAN_TRUE : BOOLEAN_FALSE;
-    }
 
     /**
      * 核心模块（Manager）的连接地址

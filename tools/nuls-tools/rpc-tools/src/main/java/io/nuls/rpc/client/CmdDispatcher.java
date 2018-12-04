@@ -143,9 +143,14 @@ public class CmdDispatcher {
      * Send Request, need to wrap the Request object manually(for calling multiple methods at a time)
      */
     public static String requestAndInvoke(String role, Request request, BaseInvoke baseInvoke) throws Exception {
+        if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())
+                || ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
+            throw new Exception("Wrong value: [SubscriptionPeriod][SubscriptionEventCounter]");
+        }
+
         String messageId = sendRequest(role, request);
         ClientRuntime.INVOKE_MAP.put(messageId, baseInvoke);
-        if (Constants.booleanString(false).equals(request.getRequestAck())) {
+        if (Constants.BOOLEAN_FALSE.equals(request.getRequestAck())) {
             return messageId;
         } else {
             return receiveAck(messageId) ? messageId : null;
@@ -273,7 +278,7 @@ public class CmdDispatcher {
         /*
         Timeout Error
          */
-        return MessageUtil.newResponse(messageId, Constants.booleanString(false), Constants.RESPONSE_TIMEOUT);
+        return MessageUtil.newResponse(messageId, Constants.BOOLEAN_FALSE, Constants.RESPONSE_TIMEOUT);
     }
 
     /**
