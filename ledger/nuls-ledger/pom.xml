@@ -15,12 +15,6 @@
         <java.version>11</java.version>
     </properties>
 
-    <inceptionYear>2017</inceptionYear>
-
-    <organization>
-        <name>nuls.io</name>
-    </organization>
-
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -89,11 +83,13 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <version>1.16</version>
+                <groupId>org.nuiton</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>3.0</version>
                 <configuration>
                     <licenseName>mit</licenseName>
+                    <organizationName>nuls.io</organizationName>
+                    <inceptionYear>2017</inceptionYear>
                     <roots>
                         <root>src/main/java</root>
                         <root>src/main/resources</root>
