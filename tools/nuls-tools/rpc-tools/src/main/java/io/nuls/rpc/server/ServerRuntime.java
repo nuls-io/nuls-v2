@@ -5,14 +5,12 @@ import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.commom.NulsThreadFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * 服务端运行时所需要的变量和方法
@@ -46,32 +44,35 @@ public class ServerRuntime {
 
 
     /**
-     * 等待处理的消息队列
-     * Message queues waiting to be processed
+     * 从客户端获取的Message，根据类型放入不同队列中
+     * 数组的第一个元素是Websocket对象，数组的第二个元素是Message
+     * Message received from client, and placed in different queues according to type
+     * The first element of the array is the websocket object, and the second element of the array is Message.
      */
-    static final List<Object[]> CLIENT_MESSAGE_QUEUE = Collections.synchronizedList(new ArrayList<>());
+    public static final Queue<Object[]> NEGOTIATE_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> UNSUBSCRIBE_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> REQUEST_SINGLE_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> REQUEST_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
+
+    public static Object[] firstObjArrInRequestSingleQueue() {
+        return firstObjArrInQueue(REQUEST_SINGLE_QUEUE);
+    }
+
+    public static Object[] firstObjArrInRequestLoopQueue() {
+        return firstObjArrInQueue(REQUEST_LOOP_QUEUE);
+    }
 
     /**
      * 获取队列中的第一个元素，然后移除队列
      * Get the first item and remove
      *
-     * @return 队列的第一个元素. The first item in CLIENT_MESSAGE_QUEUE.
+     * @return 队列的第一个元素. The first item in SERVER_RESPONSE_QUEUE.
      */
-    static synchronized Object[] firstItemInClientMessageQueue() {
-        Object[] objects = null;
-        if (ServerRuntime.CLIENT_MESSAGE_QUEUE.size() > 0) {
-            objects = ServerRuntime.CLIENT_MESSAGE_QUEUE.get(0);
-            ServerRuntime.CLIENT_MESSAGE_QUEUE.remove(0);
-        }
+    private static synchronized Object[] firstObjArrInQueue(Queue<Object[]> objectsQueue) {
+        Object[] objects = objectsQueue.peek();
+        objectsQueue.poll();
         return objects;
     }
-
-
-    /**
-     * 处理待处理消息的线程池
-     * Thread pool for processing messages to be processed
-     */
-    static ExecutorService serverThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleRequest"));
 
 
     /**
@@ -250,16 +251,5 @@ public class ServerRuntime {
         return exist;
     }
 
-    /**
-     * 构造一个Response对象
-     * Constructing a new Response object
-     */
-    public static Response newResponse(String requestId, String status, String comment) {
-        Response response = new Response();
-        response.setRequestId(requestId);
-        response.setResponseStatus(status);
-        response.setResponseComment(comment);
-        response.setResponseMaxSize("0");
-        return response;
-    }
+
 }

@@ -66,7 +66,7 @@ public class CmdHandler {
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
 
-        Message rspMsg = Constants.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnectionResponse);
+        Message rspMsg = MessageUtil.basicMessage(MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
@@ -79,7 +79,7 @@ public class CmdHandler {
         Ack ack = new Ack();
         ack.setRequestId(messageId);
 
-        Message rspMsg = Constants.basicMessage(Constants.nextSequence(), MessageType.Ack);
+        Message rspMsg = MessageUtil.basicMessage(MessageType.Ack);
         rspMsg.setMessageData(ack);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
@@ -144,7 +144,7 @@ public class CmdHandler {
      * 处理Request，自动调用正确的方法，返回结果
      * Processing Request, automatically calling the correct method, returning the result
      */
-    private static void execute(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
+    public static void execute(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
         for (Object method : requestMethods.keySet()) {
 
             long startTimemillis = TimeService.currentTimeMillis();
@@ -154,8 +154,8 @@ public class CmdHandler {
             构造返回的消息对象
             Construct the returned message object
              */
-            Message rspMessage = Constants.basicMessage(Constants.nextSequence(), MessageType.Response);
-            Response response = ServerRuntime.newResponse(messageId, "", "");
+            Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
+            Response response = MessageUtil.newResponse(messageId, "", "");
             response.setRequestId(messageId);
             response.setResponseStatus(Constants.booleanString(false));
 
@@ -229,7 +229,9 @@ public class CmdHandler {
              */
             ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
             return Constants.INVOKE_EXECUTE_KEEP;
-        } else if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
+        }
+
+        if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
             /*
             得到取消订阅命令，返回INVOKE_SKIP_REMOVE（不执行，然后丢弃）
             Get the unsubscribe command, return INVOKE_SKIP_REMOVE (not executed, then discarded)

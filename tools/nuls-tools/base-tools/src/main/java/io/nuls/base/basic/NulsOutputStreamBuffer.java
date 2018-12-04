@@ -95,6 +95,9 @@ public class NulsOutputStreamBuffer {
     }
 
     public void writeBigInteger(BigInteger val) throws IOException{
+        if(val.compareTo(BigInteger.ZERO) < 0){
+            throw new UnsupportedOperationException();
+        }
         this.write(SerializeUtils.bigInteger2Bytes(val));
     }
 

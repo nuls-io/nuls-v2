@@ -93,7 +93,7 @@ public class BootStrap {
     public static void initLanguage(){
         try {
             LanguageService languageService = SpringLiteContext.getBean(LanguageService.class);
-            String languageDB = (String) languageService.getLanguage();
+            String languageDB = languageService.getLanguage();
             I18nUtils.loadLanguage("","");
             String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
             I18nUtils.setLanguage(language);
@@ -140,29 +140,6 @@ public class BootStrap {
             }
         }catch (Exception e){
             Log.error(e);
-        }
-    }
-
-    /**
-     * 共识模块启动WebSocket服务，用于其他模块连接共识模块与共识模块交互
-     * */
-    public static void initServer(){
-        try {
-            try {
-                WsServer.getInstance(ModuleE.CS)
-                        .moduleRoles(new String[]{"1.0"})
-                        .moduleVersion("1.0")
-                        .dependencies(ModuleE.LG.abbr, "1.0")
-                        .scanPackage("io.nuls.poc.rpc")
-                        .connect("ws://127.0.0.1:8887");
-                // Get information from kernel
-                CmdDispatcher.syncKernel();
-            } catch (Exception e) {
-                Log.error("Account initServer failed", e);
-            }
-        }catch (Exception e){
-            Log.error("Consensus startup webSocket server error!");
-            e.printStackTrace();
         }
     }
 
@@ -227,6 +204,29 @@ public class BootStrap {
             }
         }
         //todo 向交易管理模块注册交易
+    }
+
+    /**
+     * 共识模块启动WebSocket服务，用于其他模块连接共识模块与共识模块交互
+     * */
+    public static void initServer(){
+        try {
+            try {
+                WsServer.getInstance(ModuleE.CS)
+                        .moduleRoles(new String[]{"1.0"})
+                        .moduleVersion("1.0")
+                        .dependencies(ModuleE.LG.abbr, "1.0")
+                        .scanPackage("io.nuls.poc.rpc")
+                        .connect("ws://127.0.0.1:8887");
+                // Get information from kernel
+                CmdDispatcher.syncKernel();
+            } catch (Exception e) {
+                Log.error("Account initServer failed", e);
+            }
+        }catch (Exception e){
+            Log.error("Consensus startup webSocket server error!");
+            e.printStackTrace();
+        }
     }
 
     public static ResisterTx getRegisterAnnotation(Method method){

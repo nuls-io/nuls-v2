@@ -27,12 +27,10 @@
 
 package io.nuls.rpc.info;
 
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.MessageType;
-import io.nuls.rpc.model.message.NegotiateConnection;
-import io.nuls.tools.data.DateUtils;
-import io.nuls.tools.thread.TimeService;
+import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.tools.thread.commom.NulsThreadFactory;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -58,19 +56,19 @@ public class Constants {
      * 循环暂停时间
      * Loop pause time
      */
-    public static final long INTERVAL_TIMEMILLIS = 100;
+    public static final long INTERVAL_TIMEMILLIS = 10L;
 
     /**
      * 超时毫秒数
      * Timeout millisecond
      */
-    public static final long TIMEOUT_TIMEMILLIS = 60 * 1000;
+    public static final long TIMEOUT_TIMEMILLIS = 60 * 1000L;
 
     /**
      * 取消订阅的常量，为什么是它？仅仅是一个彩蛋
      * Constants for unsubscribed, why is it? Just a colored egg
      */
-    public static final long UNSUBSCRIBE_TIMEMILLIS = -20140217;
+    public static final long UNSUBSCRIBE_TIMEMILLIS = -20140217L;
 
     /**
      * 调用远程方法时，用以传输版本号的参数名
@@ -103,7 +101,6 @@ public class Constants {
     public static final String PUBLIC = "public";
     public static final String PRIVATE = "private";
     public static final String ADMIN = "admin";
-
 
 
     /**
@@ -156,8 +153,19 @@ public class Constants {
      * NULS2.0中的标准，用1代表true，0代表false
      * Standard in NULS 2.0, 1 for true and 0 for false
      */
-    private static final String BOOLEAN_TRUE = "1";
-    private static final String BOOLEAN_FALSE = "0";
+    public static final String BOOLEAN_TRUE = "1";
+    public static final String BOOLEAN_FALSE = "0";
+
+    /**
+     *
+     */
+    public static final String ZERO = "0";
+
+    /**
+     * 处理待处理消息的线程池
+     * Thread pool for processing messages to be processed
+     */
+    public static final ExecutorService THREAD_POOL = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("Processor"));
 
     /**
      * 根据bool类型生成对应字符串
@@ -177,31 +185,6 @@ public class Constants {
       我是华丽的分隔符
       I am a gorgeous separator
      */
-
-    /**
-     * 默认Message对象
-     * Default Message object
-     */
-    public static Message basicMessage(String messageId, MessageType messageType) {
-        Message message = new Message();
-        message.setMessageId(messageId);
-        message.setMessageType(messageType.name());
-        message.setTimestamp(TimeService.currentTimeMillis() + "");
-        message.setTimezone(DateUtils.getTimeZone() + "");
-        return message;
-    }
-
-    /**
-     * 默认握手对象
-     * Default NegotiateConnection object
-     */
-    public static NegotiateConnection defaultNegotiateConnection() {
-        NegotiateConnection negotiateConnection = new NegotiateConnection();
-        negotiateConnection.setProtocolVersion("1.0");
-        negotiateConnection.setCompressionAlgorithm("zlib");
-        negotiateConnection.setCompressionRate("0");
-        return negotiateConnection;
-    }
 
 
 }

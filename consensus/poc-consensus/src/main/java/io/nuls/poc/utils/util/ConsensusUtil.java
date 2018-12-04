@@ -174,7 +174,8 @@ public class ConsensusUtil {
 
     /**
      * 组装CoinBase交易
-     *
+     * @param chain_id
+     * @param assetsId
      * @param member
      * @param txList
      * @param localRound
@@ -486,7 +487,7 @@ public class ConsensusUtil {
     public static ChargeResultData getFee(Transaction tx,int chainId)throws NulsException{
         CoinData coinData = new CoinData();
         coinData.parse(tx.getCoinData(),0);
-        //如果为跨链交易
+        //跨链交易计算手续费
         if(tx.getType() == ConsensusConstant.TX_TYPE_CROSS_CHAIN){
             BigInteger fromAmount = BigInteger.ZERO;
             BigInteger toAmount = BigInteger.ZERO;
