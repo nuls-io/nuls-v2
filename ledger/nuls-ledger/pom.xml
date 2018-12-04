@@ -90,6 +90,7 @@
                     <licenseName>mit</licenseName>
                     <organizationName>nuls.io</organizationName>
                     <inceptionYear>2017</inceptionYear>
+                    <ignoreTag>true</ignoreTag>
                     <roots>
                         <root>src/main/java</root>
                         <root>src/main/resources</root>
