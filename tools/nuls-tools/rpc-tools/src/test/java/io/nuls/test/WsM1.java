@@ -29,9 +29,9 @@ package io.nuls.test;
 
 import io.nuls.rpc.client.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.client.InvokeMethod;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
+import io.nuls.rpc.invoke.test.MyInvoke;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.server.WsServer;
@@ -115,11 +115,11 @@ public class WsM1 {
         System.out.println("requestAndResponse:" + JSONUtils.obj2json(object));
 
         String messageId1 = CmdDispatcher.requestAndInvokeWithAck
-                (ModuleE.CM.abbr, "getBalance", params, "2", InvokeMethod.class, "invokeGetHeight");
+                (ModuleE.CM.abbr, "getBalance", params, "2", new MyInvoke());
         Thread.sleep(5000);
 
         // Call cmd, auto invoke local method after response
-        String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getHeight", params, "1", InvokeMethod.class, "invokeGetHeight2");
+        String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getHeight", params, "1", new MyInvoke());
         Thread.sleep(5000);
 
         // Unsubscribe
@@ -136,7 +136,7 @@ public class WsM1 {
         request.setSubscriptionPeriod("3");
         request.getRequestMethods().put("getHeight", params);
         request.getRequestMethods().put("getBalance", params);
-        String messageId3 = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, request, InvokeMethod.class, "invokeGetHeight");
+        String messageId3 = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, request, new MyInvoke());
         Thread.sleep(10000);
         CmdDispatcher.unsubscribe(messageId3);
         System.out.println("我已经取消了订阅:" + messageId3);

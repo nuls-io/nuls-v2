@@ -1,13 +1,12 @@
 package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
@@ -50,13 +49,8 @@ public class ResponseAutoProcessor implements Runnable {
                 如果需要自动调用，则自动调用本地方法
                 If need to invoke local method automatically, do it
                  */
-                Object[] objects = ClientRuntime.INVOKE_MAP.get(messageId);
-                Class clazz = (Class) objects[0];
-                String invokeMethod = (String) objects[1];
-
-                @SuppressWarnings("unchecked") Constructor constructor = clazz.getConstructor();
-                @SuppressWarnings("unchecked") Method method = clazz.getDeclaredMethod(invokeMethod, Object.class);
-                method.invoke(constructor.newInstance(), response);
+                BaseInvoke baseInvoke = ClientRuntime.INVOKE_MAP.get(messageId);
+                baseInvoke.callBack(response);
 
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
