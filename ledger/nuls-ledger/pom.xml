@@ -15,7 +15,8 @@
         <java.version>11</java.version>
     </properties>
 
-    <inceptionYear>2018</inceptionYear>
+    <inceptionYear>2017</inceptionYear>
+
     <organization>
         <name>nuls.io</name>
     </organization>
@@ -92,8 +93,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <version>1.16</version>
                 <configuration>
-                    <licenseName>my_license</licenseName>
-                    <licenseResolver>${project.baseUri}/src/license</licenseResolver>
+                    <licenseName>mit</licenseName>
                     <roots>
                         <root>src/main/java</root>
                         <root>src/main/resources</root>
