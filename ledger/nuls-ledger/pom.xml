@@ -20,6 +20,14 @@
         <name>nuls.io</name>
     </organization>
 
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <dependencies>
 
         <!-- common-tools -->
@@ -86,6 +94,11 @@
                 <configuration>
                     <licenseName>my_license</licenseName>
                     <licenseResolver>${project.baseUri}/src/license</licenseResolver>
+                    <roots>
+                        <root>src/main/java</root>
+                        <root>src/main/resources</root>
+                        <root>src/test</root>
+                    </roots>
                 </configuration>
             </plugin>
         </plugins>
