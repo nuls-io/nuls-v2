@@ -72,7 +72,7 @@ public class AccountState extends BaseNulsData {
     }
 
     public AccountState withBalanceIncrement(BigInteger value) {
-        return new AccountState(chainId, assetId, nonce, balance);
+        return new AccountState(chainId, assetId, nonce, balance.add(value));
     }
 
     @Override

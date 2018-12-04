@@ -7,7 +7,6 @@ import io.nuls.ledger.model.FreezeLockTimeState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.LongUtils;
 import io.nuls.tools.thread.TimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +26,7 @@ public class AccountStateServiceImpl implements AccountStateService {
     private Repository repository;
 
     @Override
-    public AccountState createAccount(String address,int chainId,  int assetId) {
+    public AccountState createAccount(String address, int chainId, int assetId) {
         if (isExist(address, chainId, assetId)) {
             return getAccountState(address, chainId, assetId);
         }
@@ -44,7 +43,21 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     @Override
-    public AccountState getAccountState(String address, int chainId, int assetId) {
+    public synchronized AccountState getAccountState(String address, int chainId, int assetId) {
+        byte[] key = this.getKey(address, chainId, assetId);
+        AccountState accountState = repository.getAccountState(key);
+        return accountState;
+    }
+
+    /**
+     * getOrCreateAccountState
+     *
+     * @param address
+     * @param chainId
+     * @param assetId
+     * @return
+     */
+    synchronized AccountState getOrCreateAccountState(String address, int chainId, int assetId) {
         byte[] key = this.getKey(address, chainId, assetId);
         AccountState accountState = repository.getAccountState(key);
         if (accountState == null) {
@@ -85,11 +98,31 @@ public class AccountStateServiceImpl implements AccountStateService {
 
     @Override
     public synchronized BigInteger addBalance(String address, int chainId, int assetId, BigInteger value) {
-        AccountState accountState = getAccountState(address, chainId, assetId);
+        AccountState accountState = getOrCreateAccountState(address, chainId, assetId);
         accountState = accountState.withBalanceIncrement(value);
         byte[] key = this.getKey(address, chainId, assetId);
         repository.putAccountState(key, accountState);
         return accountState.getBalance();
+    }
+
+
+    /**
+     * 从from转账到to
+     *
+     * @param fromAddress
+     * @param toAddress
+     * @param chainId
+     * @param assetId
+     * @param value
+     */
+    @Override
+    public void transfer(String fromAddress,
+                         String toAddress,
+                         int chainId,
+                         int assetId,
+                         BigInteger value) {
+        this.addBalance(fromAddress, chainId, assetId, value.negate());
+        this.addBalance(toAddress, chainId, assetId, value);
     }
 
     @Override

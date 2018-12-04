@@ -35,7 +35,6 @@ public class TransferProcessor implements TxProcessor {
             logger.error("transaction type:{} is not transfer type.", transaction.getType());
             return;
         }
-        //TODO..
         //2 获取coinDaData的数据
         byte[] coinDateBytes = transaction.getCoinData();
 
@@ -46,9 +45,17 @@ public class TransferProcessor implements TxProcessor {
             logger.error("coinData parse error", e);
         }
         //3 增减用户账户的余额
+        //TODO.. 收手续费
+        //BigInteger txCost;
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
+            String address = new String(from.getAddress());
+            int chainId = from.getAssetsChainId();
+            int assetId = from.getAssetsId();
+            BigInteger amount = from.getAmount();
 
+            accountStateService.increaseNonce(address, chainId, assetId);
+            accountStateService.addBalance(address, chainId, assetId, amount.negate());
         }
 
         List<CoinTo> tos = coinData.getTo();

@@ -26,6 +26,21 @@ public interface AccountStateService {
     BigInteger addBalance(String address, int chainId, int assetId, BigInteger value);
 
     /**
+     * 从from转账到to
+     *
+     * @param fromAddress
+     * @param toAddress
+     * @param chainId
+     * @param assetId
+     * @param value
+     */
+    void transfer(String fromAddress,
+                  String toAddress,
+                  int chainId,
+                  int assetId,
+                  BigInteger value);
+
+    /**
      * 根据高度冻结用户的余额
      *
      * @param address
