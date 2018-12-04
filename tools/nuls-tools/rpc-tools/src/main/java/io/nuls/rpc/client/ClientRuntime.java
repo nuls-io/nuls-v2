@@ -3,16 +3,15 @@ package io.nuls.rpc.client;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
-import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
-import io.nuls.tools.thread.commom.NulsThreadFactory;
 import org.java_websocket.WebSocket;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 
 /**
  * 客户端运行时所需要的变量和方法
@@ -51,12 +50,6 @@ public class ClientRuntime {
     static final Map<String, Object[]> INVOKE_MAP = new ConcurrentHashMap<>();
 
     /**
-     * 自动调用本地方法的线程池
-     * Thread pool that automatically calls local methods
-     */
-    static ExecutorService clientThreadPool = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("handleResponse"));
-
-    /**
      * 连接其他模块的客户端集合
      * Key: 连接地址(如: ws://127.0.0.1:8887)
      * Value：WsClient对象
@@ -64,7 +57,7 @@ public class ClientRuntime {
      * Key: url(ex: ws://127.0.0.1:8887)
      * Value: WsClient object
      */
-    private static ConcurrentMap<String, WsClient> wsClientMap = new ConcurrentHashMap<>();
+    static Map<String, WsClient> wsClientMap = new ConcurrentHashMap<>();
 
     /**
      * messageId对应的客户端对象，用于取消订阅的Request
@@ -88,27 +81,39 @@ public class ClientRuntime {
                 : null;
     }
 
-    public static Message firstMessageInNegotiateResponseQueue() {
+    /**
+     * @return 第一条握手确认消息，The first handshake confirmed message
+     */
+    static Message firstMessageInNegotiateResponseQueue() {
         return firstMessageInQueue(NEGOTIATE_RESPONSE_QUEUE);
     }
 
-    public static Message firstMessageInAckQueue() {
+    /**
+     * @return 第一条确认消息，The first ack message
+     */
+    static Message firstMessageInAckQueue() {
         return firstMessageInQueue(ACK_QUEUE);
     }
 
-    public static Message firstMessageInResponseManualQueue() {
+    /**
+     * @return 第一条需要手动处理的Response消息，The first Response message that needs to be handled manually
+     */
+    static Message firstMessageInResponseManualQueue() {
         return firstMessageInQueue(RESPONSE_MANUAL_QUEUE);
     }
 
-    public static Message firstMessageInResponseAutoQueue() {
+    /**
+     * @return 第一条需要自动处理的Response消息，The first Response message that needs to be handled automatically
+     */
+    static Message firstMessageInResponseAutoQueue() {
         return firstMessageInQueue(RESPONSE_AUTO_QUEUE);
     }
 
     /**
-     * 获取队列中的第一个元素，然后移除队列
+     * 获取队列中的第一个元素，然后从队列中移除
      * Get the first item and remove
      *
-     * @return 队列的第一个元素. The first item in SERVER_RESPONSE_QUEUE.
+     * @return 队列的第一个元素. The first item in queue.
      */
     private static synchronized Message firstMessageInQueue(Queue<Message> messageQueue) {
         Message message = messageQueue.peek();

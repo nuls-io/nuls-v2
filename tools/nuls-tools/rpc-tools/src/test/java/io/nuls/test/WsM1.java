@@ -72,7 +72,7 @@ public class WsM1 {
     @Test
     public void handshake() throws Exception {
         Constants.kernelUrl = "ws://127.0.0.1:8887";
-        System.out.println("handshake:" + CmdDispatcher.handshakeKernel());
+        System.out.println("handshake:" + CmdDispatcher.handshakeManager());
     }
 
     @Test
@@ -146,5 +146,6 @@ public class WsM1 {
         System.out.println("RESPONSE_MANUAL_QUEUE："+ClientRuntime.RESPONSE_MANUAL_QUEUE.size());
         System.out.println("RESPONSE_AUTO_QUEUE："+ClientRuntime.RESPONSE_AUTO_QUEUE.size());
         System.out.println("NEGOTIATE_RESPONSE_QUEUE："+ClientRuntime.NEGOTIATE_RESPONSE_QUEUE.size());
+        System.out.println("ACK_QUEUE："+ClientRuntime.ACK_QUEUE.size());
     }
 }
