@@ -16,7 +16,6 @@ import java.util.Map;
  *
  * @author tangyi
  * @date 2018/11/5
- * @description
  */
 public class CmdDispatcher {
 
@@ -25,9 +24,9 @@ public class CmdDispatcher {
      * Shake hands with the core module (Manager)
      *
      * @return boolean
-     * @throws Exception
+     * @throws Exception 握手失败, handshake failed
      */
-    public static boolean handshakeKernel() throws Exception {
+    public static boolean handshakeManager() throws Exception {
         Message message = Constants.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnection);
         message.setMessageData(Constants.defaultNegotiateConnection());
 
@@ -53,7 +52,8 @@ public class CmdDispatcher {
      * Synchronize Local Module and Core Module (Manager)
      * 1. Send local information to Manager
      * 2. Get connection information for locally dependent roles
-     * role - connection
+     *
+     * @throws Exception 核心模块（Manager）不可用，Core Module (Manager) Not Available
      */
     public static void syncManager() throws Exception {
         String messageId = Constants.nextSequence();
@@ -75,7 +75,7 @@ public class CmdDispatcher {
         for (Object key : dependMap.keySet()) {
             ClientRuntime.roleMap.put(key.toString(), (Map) dependMap.get(key));
         }
-        Log.info("Sync manager success. "+JSONUtils.obj2json(ClientRuntime.roleMap));
+        Log.info("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.roleMap));
     }
 
 
@@ -194,7 +194,7 @@ public class CmdDispatcher {
      * 是否握手成功
      * Whether shake hands successfully?
      */
-    private static boolean getNegotiateConnectionResponse() throws InterruptedException, IOException {
+    static boolean getNegotiateConnectionResponse() throws InterruptedException {
 
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
