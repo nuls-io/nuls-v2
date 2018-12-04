@@ -251,16 +251,5 @@ public class ServerRuntime {
         return exist;
     }
 
-    /**
-     * 构造一个Response对象
-     * Constructing a new Response object
-     */
-    public static Response newResponse(String requestId, String status, String comment) {
-        Response response = new Response();
-        response.setRequestId(requestId);
-        response.setResponseStatus(status);
-        response.setResponseComment(comment);
-        response.setResponseMaxSize("0");
-        return response;
-    }
+
 }

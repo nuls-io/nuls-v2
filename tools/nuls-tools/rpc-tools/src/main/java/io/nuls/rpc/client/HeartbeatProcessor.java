@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -25,8 +26,8 @@ public class HeartbeatProcessor implements Runnable {
     public void run() {
         while (true) {
             for (String url : ClientRuntime.wsClientMap.keySet()) {
-                Message message = Constants.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnection);
-                message.setMessageData(Constants.defaultNegotiateConnection());
+                Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
+                message.setMessageData(MessageUtil.defaultNegotiateConnection());
                 String jsonMessage;
                 try {
                     jsonMessage = JSONUtils.obj2json(message);
@@ -39,7 +40,7 @@ public class HeartbeatProcessor implements Runnable {
                     WsClient wsClient = ClientRuntime.wsClientMap.get(url);
                     wsClient.send(jsonMessage);
                     Log.info("Heartbeat NegotiateConnection:" + jsonMessage);
-                    if (!CmdDispatcher.getNegotiateConnectionResponse()) {
+                    if (!CmdDispatcher.receiveNegotiateConnectionResponse()) {
                         ClientRuntime.wsClientMap.remove(url);
                         ClientRuntime.getWsClient(url);
                     }
