@@ -63,6 +63,6 @@ public class Response {
 
     @JsonIgnore
     public boolean isSuccess() {
-        return Constants.booleanString(true).equals(responseStatus);
+        return Constants.BOOLEAN_TRUE.equals(responseStatus);
     }
 }

@@ -58,6 +58,12 @@ public class ServerRuntime {
      */
     static Map<String, Long> cmdInvokeTime = new HashMap<>();
 
+    /**
+     * 接口返回值改变次数
+     * Number of return value changes
+     */
+    public static Map<String, Integer> cmdChangeCount = new HashMap<>();
+    public static Map<String, Object> cmdLastValue = new HashMap<>();
 
     /**
      * 本模块配置信息
@@ -75,14 +81,19 @@ public class ServerRuntime {
     public static final Queue<Object[]> NEGOTIATE_QUEUE = new ConcurrentLinkedQueue<>();
     public static final Queue<Object[]> UNSUBSCRIBE_QUEUE = new ConcurrentLinkedQueue<>();
     public static final Queue<Object[]> REQUEST_SINGLE_QUEUE = new ConcurrentLinkedQueue<>();
-    public static final Queue<Object[]> REQUEST_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> REQUEST_PERIOD_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> REQUEST_EVENT_COUNT_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
 
     public static Object[] firstObjArrInRequestSingleQueue() {
         return firstObjArrInQueue(REQUEST_SINGLE_QUEUE);
     }
 
-    public static Object[] firstObjArrInRequestLoopQueue() {
-        return firstObjArrInQueue(REQUEST_LOOP_QUEUE);
+    public static Object[] firstObjArrInRequestPeriodLoopQueue() {
+        return firstObjArrInQueue(REQUEST_PERIOD_LOOP_QUEUE);
+    }
+
+    public static Object[] firstObjArrInRequestEventCountLoopQueue() {
+        return firstObjArrInQueue(REQUEST_EVENT_COUNT_LOOP_QUEUE);
     }
 
     /**
@@ -274,5 +285,29 @@ public class ServerRuntime {
         return exist;
     }
 
+    public static void eventCount(String cmd, Object value) {
+        setCmdChangeCount(cmd);
+        setCmdLastValue(cmd, value);
+    }
 
+    private static void setCmdChangeCount(String cmd) {
+        if (!cmdChangeCount.containsKey(cmd)) {
+            cmdChangeCount.put(cmd, 1);
+        } else {
+            int count = cmdChangeCount.get(cmd);
+            cmdChangeCount.put(cmd, count + 1);
+        }
+    }
+
+    public static int getCmdChangeCount(String cmd) {
+        return cmdChangeCount.get(cmd);
+    }
+
+    private static void setCmdLastValue(String cmd, Object value) {
+        cmdLastValue.put(cmd, value);
+    }
+
+    public static Object getCmdLastValue(String cmd) {
+        return cmdLastValue.get(cmd);
+    }
 }

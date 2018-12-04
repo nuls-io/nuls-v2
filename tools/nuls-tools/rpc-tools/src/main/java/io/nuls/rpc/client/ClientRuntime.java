@@ -174,5 +174,11 @@ public class ClientRuntime {
         return wsClientMap.get(url);
     }
 
-
+    public static boolean isPureDigital(String string) {
+        try {
+            return Integer.valueOf(string) > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }
