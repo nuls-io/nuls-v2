@@ -28,6 +28,7 @@
 package io.nuls.rpc.server;
 
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.client.HeartbeatProcessor;
 import io.nuls.rpc.client.ResponseAutoProcessor;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
@@ -80,7 +81,7 @@ public class WsServer extends WebSocketServer {
         与核心模块（Manager）握手
         Shake hands with the core module (Manager)
          */
-        if (!CmdDispatcher.handshakeKernel()) {
+        if (!CmdDispatcher.handshakeManager()) {
             throw new Exception("Handshake kernel failed");
         } else {
             Log.info("Connect manager success." + ServerRuntime.local.getModuleName() + " ready!");
@@ -146,6 +147,7 @@ public class WsServer extends WebSocketServer {
         Constants.THREAD_POOL.execute(new ResponseAutoProcessor());
         Constants.THREAD_POOL.execute(new RequestSingleProcessor());
         Constants.THREAD_POOL.execute(new RequestLoopProcessor());
+        Constants.THREAD_POOL.execute(new HeartbeatProcessor());
         Log.info("Server<" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
     }
 
