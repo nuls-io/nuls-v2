@@ -74,6 +74,15 @@
                     <target>11</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>1.16</version>
+                <configuration>
+                    <licenseName>my_license</licenseName>
+                    <licenseResolver>${project.baseUri}/src/license</licenseResolver>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 </project>
