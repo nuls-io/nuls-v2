@@ -29,8 +29,7 @@ public class ValidatorCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "lg_validateCoinData",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "test getHeight 1.0")
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "test getHeight 1.0")
     public Response validateCoinData(Map params) {
         //TODO.. 验证参数个数和格式
         String address = (String) params.get("address");
