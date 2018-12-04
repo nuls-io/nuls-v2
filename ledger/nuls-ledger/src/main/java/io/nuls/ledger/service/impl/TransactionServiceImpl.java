@@ -1,7 +1,9 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.ledger.constant.TransactionType;
 import io.nuls.ledger.service.TransactionService;
+import io.nuls.ledger.service.processor.AccountAliasProcessor;
 import io.nuls.ledger.service.processor.CoinBaseProcessor;
 import io.nuls.ledger.service.processor.TransferProcessor;
 import io.nuls.tools.core.annotation.Autowired;
@@ -20,9 +22,11 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     CoinBaseProcessor coinBaseProcessor;
 
-
     @Autowired
     TransferProcessor transferProcessor;
+
+    @Autowired
+    AccountAliasProcessor accountAliasProcessor;
 
     /**
      * 已确认交易数据处理
@@ -34,15 +38,19 @@ public class TransactionServiceImpl implements TransactionService {
         if (transaction == null) {
             return;
         }
+        TransactionType txType = TransactionType.valueOf(transaction.getType());
         //先判断对应的交易类型
-        switch (transaction.getType()) {
-            case 1:
+        switch (txType) {
+            case TX_TYPE_COINBASE:
                 //TX_TYPE_COIN_BASE 直接累加账户余额
                 coinBaseProcessor.process(transaction);
                 break;
-            case 2:
+            case TX_TYPE_TRANSFER:
                 //TX_TYPE_TRANSFER 减去发送者账户余额，增加to方的余额
                 transferProcessor.process(transaction);
+                break;
+            case TX_TYPE_ACCOUNT_ALIAS:
+                accountAliasProcessor.process(transaction);
                 break;
             default:
                 logger.info("tx type incorrect: {}", transaction.getType());

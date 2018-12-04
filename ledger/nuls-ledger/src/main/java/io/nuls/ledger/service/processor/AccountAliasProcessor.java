@@ -31,7 +31,7 @@ public class AccountAliasProcessor implements TxProcessor {
 
     @Override
     public void process(Transaction transaction) {
-        if (transaction.getType() != TransactionType.TX_TYPE_ACCOUNT_ALIAS) {
+        if (transaction.getType() != TransactionType.TX_TYPE_ACCOUNT_ALIAS.getValue()) {
             logger.error("transaction type:{} is not account alias type.", transaction.getType());
             return;
         }

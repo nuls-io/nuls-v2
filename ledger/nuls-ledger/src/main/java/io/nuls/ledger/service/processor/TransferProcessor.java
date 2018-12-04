@@ -31,7 +31,7 @@ public class TransferProcessor implements TxProcessor {
     @Override
     public void process(Transaction transaction) {
         //1 判断是否是转账交易，不是直接不处理
-        if (transaction.getType() != TransactionType.TX_TYPE_TRANSFER) {
+        if (transaction.getType() != TransactionType.TX_TYPE_TRANSFER.getValue()) {
             logger.error("transaction type:{} is not transfer type.", transaction.getType());
             return;
         }

@@ -28,7 +28,7 @@ public class CoinBaseProcessor implements TxProcessor {
 
     @Override
     public void process(Transaction transaction) {
-        if (transaction.getType() != TransactionType.TX_TYPE_COINBASE) {
+        if (transaction.getType() != TransactionType.TX_TYPE_COINBASE.getValue()) {
             logger.error("transaction type:{} is not coinbase type.", transaction.getType());
             return;
         }
