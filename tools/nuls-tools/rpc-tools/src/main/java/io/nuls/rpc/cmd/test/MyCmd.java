@@ -43,7 +43,7 @@ import java.util.Map;
  * @date 2018/10/17
  * @description
  */
-public class ExampleCmd extends BaseCmd {
+public class MyCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "getBalance", version = 1.1,
             description = "test getHeight 1.1")

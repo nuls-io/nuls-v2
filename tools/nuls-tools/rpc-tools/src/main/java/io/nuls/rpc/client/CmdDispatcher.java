@@ -1,6 +1,7 @@
 package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.tools.log.Log;
@@ -94,9 +95,9 @@ public class CmdDispatcher {
      * Send the Request and automatically call the local method based on the return result
      * The return value is messageId, used to unsubscribe
      */
-    public static String requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
+    public static String requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, BaseInvoke baseInvoke) throws Exception {
         String messageId = request(role, cmd, params, Constants.booleanString(false), subscriptionPeriod);
-        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
+        ClientRuntime.INVOKE_MAP.put(messageId, baseInvoke);
         return messageId;
     }
 
@@ -104,9 +105,9 @@ public class CmdDispatcher {
      * 与requestAndInvoke类似，但是发送之后必须接收到一个Ack作为确认
      * Similar to requestAndInvoke, but after sending, an Ack must be received as an acknowledgement
      */
-    public static String requestAndInvokeWithAck(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
+    public static String requestAndInvokeWithAck(String role, String cmd, Map params, String subscriptionPeriod, BaseInvoke baseInvoke) throws Exception {
         String messageId = request(role, cmd, params, Constants.booleanString(true), subscriptionPeriod);
-        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
+        ClientRuntime.INVOKE_MAP.put(messageId, baseInvoke);
         return getAck(messageId) ? messageId : null;
     }
 
@@ -114,9 +115,9 @@ public class CmdDispatcher {
      * 发送Request，用于一次调用多个方法（需要自己封装Request对象）
      * Send Request for calling multiple methods at a time (need to wrap the Request object manually)
      */
-    public static String requestAndInvoke(String role, Request request, Class clazz, String invokeMethod) throws Exception {
+    public static String requestAndInvoke(String role, Request request, BaseInvoke baseInvoke) throws Exception {
         String messageId = request(role, request);
-        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
+        ClientRuntime.INVOKE_MAP.put(messageId, baseInvoke);
         if (Constants.booleanString(false).equals(request.getRequestAck())) {
             return messageId;
         } else {

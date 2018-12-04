@@ -1,6 +1,7 @@
 package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.tools.thread.TimeService;
@@ -47,7 +48,7 @@ public class ClientRuntime {
      * Key: MessageId that calls remote methods
      * Value: Local method of automatic callback
      */
-    static final Map<String, Object[]> INVOKE_MAP = new ConcurrentHashMap<>();
+    static final Map<String, BaseInvoke> INVOKE_MAP = new ConcurrentHashMap<>();
 
     /**
      * 连接其他模块的客户端集合

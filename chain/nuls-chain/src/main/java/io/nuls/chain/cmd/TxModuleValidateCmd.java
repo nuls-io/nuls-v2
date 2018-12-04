@@ -34,7 +34,6 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
@@ -44,10 +43,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @program: nuls2.0
- * @description: moduleValidateCmd
- * @author: lan
- * @create: 2018/11/22
+ * @author lan
+ * @program nuls2.0
+ * @description moduleValidateCmd
+ * @date 2018/11/22
  **/
 @Component
 public class TxModuleValidateCmd extends BaseCmd {
@@ -75,14 +74,13 @@ public class TxModuleValidateCmd extends BaseCmd {
             List<Transaction> destroyAssetAndChainList = new ArrayList<>();
             List<Transaction> addAssetToChainList = new ArrayList<>();
             List<Transaction> removeAssetFromChainList = new ArrayList<>();
-            for (String txHex : (String[]) params.get("txHexs")) {
-                byte[] txBytes = HexUtil.hexToByte(txHex);
-                byte[] typeByte = ByteUtils.copyOf(txBytes, 2);
-                int type = ByteUtils.bytesToBigInteger(typeByte).intValue();
-                Transaction tx = new Transaction();
-                tx.parse(txBytes, 0);
 
-                switch (type) {
+            for (String txHex : (String[]) params.get("txHexs")) {
+
+                Transaction tx = new Transaction();
+                tx.parse(HexUtil.hexToByte(txHex), 0);
+
+                switch (tx.getType()) {
                     case ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET:
                         registerChainAndAssetList.add(tx);
                         break;
@@ -121,8 +119,9 @@ public class TxModuleValidateCmd extends BaseCmd {
         List<Integer> chainIdList = new ArrayList<>();
         List<Integer> assetIdList = new ArrayList<>();
         for (Transaction tx : registerChainAndAssetList) {
-            RegisterChainAndAssetTransaction registerChainAndAssetTransaction=(RegisterChainAndAssetTransaction)tx;
-//            chainIdList.add()
+            RegisterChainAndAssetTransaction registerChainAndAssetTransaction = (RegisterChainAndAssetTransaction) tx;
+//            if (!chainIdList.contains(registerChainAndAssetTransaction.get))
+//                chainIdList.add()
         }
         return error;
     }
