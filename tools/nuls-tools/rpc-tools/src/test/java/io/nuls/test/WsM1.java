@@ -31,8 +31,10 @@ import io.nuls.rpc.client.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
+import io.nuls.rpc.invoke.test.EventCounterInvoke;
 import io.nuls.rpc.invoke.test.MyInvoke;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.parse.JSONUtils;
@@ -41,9 +43,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -65,8 +65,6 @@ public class WsM1 {
         System.out.println(bigDecimal.toBigInteger().intValue());
         System.out.println(new BigInteger("10").divide(new BigInteger("4")));
 
-        List a=new ArrayList();
-        a.remove(0);
     }
 
     @Test
@@ -115,30 +113,30 @@ public class WsM1 {
         System.out.println("requestAndResponse:" + JSONUtils.obj2json(object));
 
         String messageId1 = CmdDispatcher.requestAndInvokeWithAck
-                (ModuleE.CM.abbr, "getBalance", params, "2", new MyInvoke());
+                (ModuleE.CM.abbr, "getBalance", params, "2","0", new MyInvoke());
         Thread.sleep(5000);
 
         // Call cmd, auto invoke local method after response
-        String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getHeight", params, "1", new MyInvoke());
+        String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getHeight", params, "0","5", new EventCounterInvoke());
         Thread.sleep(5000);
 
         // Unsubscribe
-        CmdDispatcher.unsubscribe(messageId);
+        CmdDispatcher.sendUnsubscribe(messageId);
         System.out.println("我已经取消了订阅:" + messageId);
 
         Thread.sleep(5000);
-        CmdDispatcher.unsubscribe(messageId1);
+        CmdDispatcher.sendUnsubscribe(messageId1);
         System.out.println("我已经取消了订阅:" + messageId1);
 
         System.out.println("我开始一次调用多个方法");
-        Request request = ClientRuntime.defaultRequest();
+        Request request = MessageUtil.defaultRequest();
         request.setRequestAck("1");
         request.setSubscriptionPeriod("3");
         request.getRequestMethods().put("getHeight", params);
         request.getRequestMethods().put("getBalance", params);
         String messageId3 = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, request, new MyInvoke());
-        Thread.sleep(10000);
-        CmdDispatcher.unsubscribe(messageId3);
+        Thread.sleep(7000);
+        CmdDispatcher.sendUnsubscribe(messageId3);
         System.out.println("我已经取消了订阅:" + messageId3);
 
         Thread.sleep(5000);

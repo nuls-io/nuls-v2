@@ -27,12 +27,7 @@
 
 package io.nuls.rpc.info;
 
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.MessageType;
-import io.nuls.rpc.model.message.NegotiateConnection;
-import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.TimeService;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
 import java.util.concurrent.ExecutorService;
@@ -162,6 +157,11 @@ public class Constants {
     public static final String BOOLEAN_FALSE = "0";
 
     /**
+     *
+     */
+    public static final String ZERO = "0";
+
+    /**
      * 处理待处理消息的线程池
      * Thread pool for processing messages to be processed
      */
@@ -185,31 +185,6 @@ public class Constants {
       我是华丽的分隔符
       I am a gorgeous separator
      */
-
-    /**
-     * 默认Message对象
-     * Default Message object
-     */
-    public static Message basicMessage(String messageId, MessageType messageType) {
-        Message message = new Message();
-        message.setMessageId(messageId);
-        message.setMessageType(messageType.name());
-        message.setTimestamp(TimeService.currentTimeMillis() + "");
-        message.setTimezone(DateUtils.getTimeZone() + "");
-        return message;
-    }
-
-    /**
-     * 默认握手对象
-     * Default NegotiateConnection object
-     */
-    public static NegotiateConnection defaultNegotiateConnection() {
-        NegotiateConnection negotiateConnection = new NegotiateConnection();
-        negotiateConnection.setProtocolVersion("1.0");
-        negotiateConnection.setCompressionAlgorithm("zlib");
-        negotiateConnection.setCompressionRate("0");
-        return negotiateConnection;
-    }
 
 
 }

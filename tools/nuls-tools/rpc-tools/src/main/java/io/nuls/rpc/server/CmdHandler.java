@@ -66,7 +66,7 @@ public class CmdHandler {
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
 
-        Message rspMsg = Constants.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnectionResponse);
+        Message rspMsg = MessageUtil.basicMessage(MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
@@ -79,7 +79,7 @@ public class CmdHandler {
         Ack ack = new Ack();
         ack.setRequestId(messageId);
 
-        Message rspMsg = Constants.basicMessage(Constants.nextSequence(), MessageType.Ack);
+        Message rspMsg = MessageUtil.basicMessage(MessageType.Ack);
         rspMsg.setMessageData(ack);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
@@ -154,8 +154,8 @@ public class CmdHandler {
             构造返回的消息对象
             Construct the returned message object
              */
-            Message rspMessage = Constants.basicMessage(Constants.nextSequence(), MessageType.Response);
-            Response response = ServerRuntime.newResponse(messageId, "", "");
+            Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
+            Response response = MessageUtil.newResponse(messageId, "", "");
             response.setRequestId(messageId);
             response.setResponseStatus(Constants.booleanString(false));
 
