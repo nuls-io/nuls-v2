@@ -15,6 +15,11 @@
         <java.version>11</java.version>
     </properties>
 
+    <inceptionYear>2018</inceptionYear>
+    <organization>
+        <name>nuls.io</name>
+    </organization>
+
     <dependencies>
 
         <!-- common-tools -->
