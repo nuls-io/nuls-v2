@@ -21,9 +21,9 @@ public class AccountStateServiceTest extends BaseTest {
         String address = "NsdzTe4czMVA5Ccc1p9tgiGrKWx7WLNV";
         Integer assetId = 1;
         AccountStateService accountStateService = SpringLiteContext.getBean(AccountStateService.class);
-        AccountState accountState = accountStateService.createAccount(chainId, address, assetId);
+        AccountState accountState = accountStateService.createAccount(address, chainId, assetId);
 
-        logger.info("accountState {}",accountState);
-        logger.info("test {}", accountStateService.isExist(address, assetId));
+        logger.info("accountState {}", accountState);
+        logger.info("test {}", accountStateService.isExist(address, chainId, assetId));
     }
 }

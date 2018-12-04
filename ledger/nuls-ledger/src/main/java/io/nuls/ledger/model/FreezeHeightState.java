@@ -1,8 +1,5 @@
 package io.nuls.ledger.model;
 
-import io.nuls.ledger.utils.ByteUtil;
-import io.nuls.ledger.utils.RLP;
-import io.nuls.ledger.utils.RLPList;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -31,7 +28,7 @@ public class FreezeHeightState implements Serializable {
      */
     @Setter
     @Getter
-    private long amount;
+    private BigInteger amount;
 
     /**
      * 锁定时间

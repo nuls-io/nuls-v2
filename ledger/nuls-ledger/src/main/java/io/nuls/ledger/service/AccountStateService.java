@@ -2,50 +2,67 @@ package io.nuls.ledger.service;
 
 import io.nuls.ledger.model.AccountState;
 
+import java.math.BigInteger;
+
 /**
  * Created by wangkun23 on 2018/11/29.
  */
 public interface AccountStateService {
 
-    AccountState createAccount(int chainId, String addr, int assetId);
+    AccountState createAccount(String address, int chainId, int assetId);
 
-    boolean isExist(String addr, int assetId);
+    boolean isExist(String address, int chainId, int assetId);
 
-    AccountState getAccountState(String addr, int assetId);
+    AccountState getAccountState(String address, int chainId, int assetId);
 
-    long increaseNonce(String addr, int assetId);
+    long increaseNonce(String address, int chainId, int assetId);
 
-    long setNonce(String addr, int assetId, long nonce);
+    long setNonce(String address, int chainId, int assetId, long nonce);
 
-    long getNonce(String addr, int assetId);
+    long getNonce(String address, int chainId, int assetId);
 
-    long getBalance(String addr, int assetId);
+    BigInteger getBalance(String address, int chainId, int assetId);
 
-    long addBalance(String addr, int assetId, long value);
+    BigInteger addBalance(String address, int chainId, int assetId, BigInteger value);
+
+    /**
+     * 从from转账到to
+     *
+     * @param fromAddress
+     * @param toAddress
+     * @param chainId
+     * @param assetId
+     * @param value
+     */
+    void transfer(String fromAddress,
+                  String toAddress,
+                  int chainId,
+                  int assetId,
+                  BigInteger value);
 
     /**
      * 根据高度冻结用户的余额
      *
-     * @param addr
+     * @param address
      * @param txHash
      * @param amount
      * @param height
      * @return
      */
-    long freezeByHeight(String addr, int assetId, String txHash, long amount, long height);
+    BigInteger freezeByHeight(String address, int chainId, int assetId, String txHash, BigInteger amount, long height);
 
-    long unfreezeByHeight(String address, int assetId, long latestHeight);
+    BigInteger unfreezeByHeight(String addressess, int chainId, int assetId, long latestHeight);
 
     /**
      * 根据时间冻结用户的余额
      *
-     * @param addr
+     * @param address
      * @param txHash
      * @param amount
      * @param lockTime
      * @return
      */
-    long freezeByLockTime(String addr, int assetId, String txHash, long amount, long lockTime);
+    BigInteger freezeByLockTime(String address, int chainId, int assetId, String txHash, BigInteger amount, long lockTime);
 
-    long unfreezeLockTime(String address, int assetId, long latestBlockTime);
+    BigInteger unfreezeLockTime(String addressess, int chainId, int assetId, long latestBlockTime);
 }

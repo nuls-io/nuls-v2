@@ -1,7 +1,6 @@
 package io.nuls.ledger.serializers;
 
 import io.nuls.ledger.model.AccountState;
-import io.nuls.ledger.model.FreezeState;
 import io.nuls.ledger.utils.ByteUtil;
 import io.nuls.ledger.utils.RLP;
 import io.nuls.ledger.utils.RLPList;
@@ -25,7 +24,7 @@ public class AccountStateSerializer implements Serializer<AccountState, byte[]> 
         byte[] chainId = RLP.encodeInt(accountState.getChainId());
         byte[] assetId = RLP.encodeInt(accountState.getAssetId());
         byte[] nonce = RLP.encodeBigInteger(BigInteger.valueOf(accountState.getNonce()));
-        byte[] balance = RLP.encodeBigInteger(BigInteger.valueOf(accountState.getBalance()));
+        byte[] balance = RLP.encodeBigInteger(accountState.getBalance());
         byte[] freezeState = freezeStateSerializer.serialize(accountState.getFreezeState());
         return RLP.encodeList(chainId, assetId, nonce, balance, freezeState);
     }
@@ -42,7 +41,7 @@ public class AccountStateSerializer implements Serializer<AccountState, byte[]> 
         accountState.setChainId(ByteUtil.byteArrayToInt(items.get(0).getRLPData()));
         accountState.setAssetId(ByteUtil.byteArrayToInt(items.get(1).getRLPData()));
         accountState.setNonce(ByteUtil.byteArrayToLong(items.get(2).getRLPData()));
-        accountState.setBalance(ByteUtil.byteArrayToLong(items.get(3).getRLPData()));
+        accountState.setBalance(ByteUtil.bytesToBigInteger(items.get(3).getRLPData()));
         accountState.setFreezeState(freezeStateSerializer.deserialize(items.get(4).getRLPData()));
 
         return accountState;
