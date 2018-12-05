@@ -31,6 +31,7 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.constant.TransactionType;
 import io.nuls.ledger.service.AccountStateService;
+import io.nuls.ledger.utils.CoinDataUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
@@ -60,14 +61,7 @@ public class AccountAliasProcessor implements TxProcessor {
             logger.error("transaction type:{} is not account alias type.", transaction.getType());
             return;
         }
-        byte[] coinDateBytes = transaction.getCoinData();
-
-        CoinData coinData = new CoinData();
-        try {
-            coinData.parse(new NulsByteBuffer(coinDateBytes));
-        } catch (NulsException e) {
-            logger.error("coinData parse error", e);
-        }
+        CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
             String address = new String(from.getAddress());

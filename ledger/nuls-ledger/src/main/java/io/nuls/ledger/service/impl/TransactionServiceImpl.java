@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.constant.TransactionType;
 import io.nuls.ledger.service.TransactionService;
@@ -63,6 +64,23 @@ public class TransactionServiceImpl implements TransactionService {
         if (transaction == null) {
             return;
         }
+        logger.info("tx status is {}", transaction.getStatus());
+        if (transaction.getStatus().equals(TxStatusEnum.CONFIRMED)) {
+            //transaction CONFIRMED
+            confirmTxProcess(transaction);
+        } else {
+            // transaction pendingState
+            unConfirmTxProcess(transaction);
+        }
+
+    }
+
+    /**
+     * process confirmed Tx
+     *
+     * @param transaction
+     */
+    private void confirmTxProcess(Transaction transaction) {
         TransactionType txType = TransactionType.valueOf(transaction.getType());
         //先判断对应的交易类型
         switch (txType) {
@@ -77,17 +95,20 @@ public class TransactionServiceImpl implements TransactionService {
             case TX_TYPE_ACCOUNT_ALIAS:
                 accountAliasProcessor.process(transaction);
                 break;
+            case TX_TYPE_REGISTER_AGENT:
+
+                break;
             default:
                 logger.info("tx type incorrect: {}", transaction.getType());
         }
+    }
 
-        //TX_TYPE_ACCOUNT_ALIAS  //减去发送者账户余额 Burned
-        //TX_TYPE_REGISTER_AGENT
-        //TX_TYPE_STOP_AGENT
-        //TX_TYPE_JOIN_CONSENSUS
-        //TX_TYPE_CANCEL_DEPOSIT
+    /**
+     * process unConfirmed Tx
+     *
+     * @param transaction
+     */
+    private void unConfirmTxProcess(Transaction transaction) {
 
-        //TX_TYPE_YELLOW_PUNISH
-        //TX_TYPE_RED_PUNISH
     }
 }
