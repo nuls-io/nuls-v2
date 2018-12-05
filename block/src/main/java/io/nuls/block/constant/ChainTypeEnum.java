@@ -18,31 +18,73 @@
  * SOFTWARE.
  */
 
-package io.nuls.block;
+package io.nuls.block.constant;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+/**
+ * 孤儿链经过处理线程处理后的状态标记
+ * @author captain
+ * @date 18-11-28 下午12:01
+ * @version 1.0
+ */
+public enum ChainTypeEnum {
 
-public class BootstrapTest {
+    /**
+     * 与主链相连
+     * waiting
+     */
+    MASTER_APPEND,
 
-    @Before
-    public void setUp() throws Exception {
+    /**
+     * 与主链分叉
+     * running
+     */
+    MASTER_FORK,
 
+    /**
+     * 与分叉链相连
+     * Running exception
+     */
+    FORK_APPEND,
+
+    /**
+     * 与分叉链分叉
+     * Running exception
+     */
+    FORK_FORK,
+
+    /**
+     * 与孤儿链相连
+     * Running exception
+     */
+    ORPHAN_APPEND,
+
+    /**
+     * 与孤儿链分叉
+     * Running exception
+     */
+    ORPHAN_FORK,
+
+    /**
+     * 孤儿链
+     * Running exception
+     */
+    ORPHAN,
+
+    /**
+     * 分叉链
+     * Running exception
+     */
+    FORK,
+
+    /**
+     * 主链
+     * Running exception
+     */
+    MASTER
+    ;
+
+    @Override
+    public String toString() {
+        return name();
     }
-
-    @After
-    public void tearDown() throws Exception {
-    }
-
-    @Test
-    public void main() throws Exception {
-
-    }
-
-    @Test
-    public void kernel() throws Exception {
-
-    }
-
 }

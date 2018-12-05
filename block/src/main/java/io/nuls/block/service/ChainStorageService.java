@@ -24,7 +24,6 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.tools.exception.NulsException;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -46,7 +45,7 @@ public interface ChainStorageService {
      * @param chainId
      * @param blocks
      * @return
-     * @throws IOException
+     * @throws Exception
      */
     boolean save(int chainId, List<Block> blocks) throws Exception;
 
@@ -55,7 +54,7 @@ public interface ChainStorageService {
      * @param chainId
      * @param block
      * @return
-     * @throws IOException
+     * @throws Exception
      */
     boolean save(int chainId, Block block) throws Exception;
 

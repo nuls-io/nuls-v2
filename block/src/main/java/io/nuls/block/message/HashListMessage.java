@@ -23,51 +23,60 @@ package io.nuls.block.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Data;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * 异步请求处理完成响应消息
+ * 批量请求交易消息
  * @author captain
  * @date 18-11-9 下午2:37
  * @version 1.0
  */
 @Data
-public class CompleteMessage extends BaseMessage {
+public class HashListMessage extends BaseMessage {
 
-    private NulsDigestData requestHash;
-    private boolean success;
+    private List<NulsDigestData> txHashList = new ArrayList<>();
 
-    public CompleteMessage(NulsDigestData requestHash, boolean success) {
-        this.requestHash = requestHash;
-        this.success = success;
-    }
-
-    public CompleteMessage() {
-
+    public HashListMessage() {
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(requestHash);
-        size += SerializeUtils.sizeOfBoolean();
+        size += VarInt.sizeOf(txHashList.size());
+        size += this.getTxHashBytesLength();
+        return size;
+    }
+
+    private int getTxHashBytesLength() {
+        int size = 0;
+        for (NulsDigestData hash : txHashList) {
+            size += SerializeUtils.sizeOfNulsData(hash);
+        }
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestHash);
-        stream.writeBoolean(success);
+        stream.writeVarInt(txHashList.size());
+        for (NulsDigestData data : txHashList) {
+            stream.writeNulsData(data);
+        }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.requestHash = byteBuffer.readHash();
-        this.success = byteBuffer.readBoolean();
+        long txCount = byteBuffer.readVarInt();
+        this.txHashList = new ArrayList<>();
+        for (int i = 0; i < txCount; i++) {
+            this.txHashList.add(byteBuffer.readHash());
+        }
     }
 
 }

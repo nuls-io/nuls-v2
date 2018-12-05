@@ -6,6 +6,12 @@
     "value": "xxx"
   },
   {
+    "name": "chainSwtichThreshold",
+    "remark": "分叉链切换为主链的高度差阈值",
+    "readOnly": "true",
+    "value": "5"
+  },
+  {
     "name": "chainName",
     "remark": "链名称",
     "readOnly": "true",
@@ -45,7 +51,7 @@
     "name": "cacheSize",
     "remark": "分叉链缓存大小",
     "readOnly": "true",
-    "value": "52428800"
+    "value": "524288000"
   },
   {
     "name": "heightRange",
@@ -76,6 +82,12 @@
     "remark": "同步时，每次从一个节点下载多少区块",
     "readOnly": "true",
     "value": "20"
+  },
+  {
+    "name": "orphanChainMaxAge",
+    "remark": "孤儿链最大年龄",
+    "readOnly": "true",
+    "value": "10"
   },
   {
     "name": "extendMaxSize",

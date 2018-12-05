@@ -17,30 +17,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.model;
 
 import io.nuls.base.data.NulsDigestData;
 import lombok.Data;
 
 /**
- * 代表网络上的一个节点
+ * 节点
  * @author captain
- * @date 18-11-20 上午10:43
+ * @date 18-11-30 下午2:48
  * @version 1.0
  */
 @Data
 public class Node {
-
     private String id;
-
-    private String ip;
-
-    private Integer port;
-
-    private long magicNumber;
-
-    private Long height;
-
+    private long height;
     private NulsDigestData hash;
-
 }

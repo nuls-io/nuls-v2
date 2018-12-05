@@ -22,52 +22,65 @@ package io.nuls.block.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
+import io.nuls.tools.log.Log;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 
+import static io.nuls.block.constant.CommandConstant.EMPTY_MESSAGE;
+
 /**
- * 异步请求处理完成响应消息
+ * 通用消息体
+ *
  * @author captain
- * @date 18-11-9 下午2:37
  * @version 1.0
+ * @date 18-11-20 上午10:44
  */
-@Data
-public class CompleteMessage extends BaseMessage {
+public abstract class BaseMessage extends BaseNulsData {
 
-    private NulsDigestData requestHash;
-    private boolean success;
+    private transient NulsDigestData hash;
 
-    public CompleteMessage(NulsDigestData requestHash, boolean success) {
-        this.requestHash = requestHash;
-        this.success = success;
+    @Getter @Setter
+    protected String command = EMPTY_MESSAGE;
+
+    public BaseMessage() {
+
     }
 
-    public CompleteMessage() {
-
+    public BaseMessage(String command) {
+        this.command = command;
     }
 
     @Override
     public int size() {
-        int size = 0;
-        size += SerializeUtils.sizeOfNulsData(requestHash);
-        size += SerializeUtils.sizeOfBoolean();
-        return size;
+        return 4;
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestHash);
-        stream.writeBoolean(success);
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write(ToolsConstant.PLACE_HOLDER);
+
     }
 
     @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.requestHash = byteBuffer.readHash();
-        this.success = byteBuffer.readBoolean();
+    public void parse(NulsByteBuffer buffer) throws NulsException {
+        buffer.readBytes(4);
+    }
+
+    public NulsDigestData getHash() {
+        if (hash == null) {
+            try {
+                this.hash = NulsDigestData.calcDigestData(this.serialize());
+            } catch (IOException e) {
+                Log.error(e);
+            }
+        }
+        return hash;
     }
 
 }

@@ -20,15 +20,15 @@
 
 package io.nuls.block.thread.monitor;
 
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.manager.ContextManager;
 import io.nuls.block.manager.ChainManager;
+import io.nuls.block.manager.ConfigManager;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.tools.log.Log;
 
-import java.util.List;
+import java.util.SortedSet;
 
 /**
  * 分叉链的形成原因分析：
@@ -63,12 +63,11 @@ public class ForkChainsMonitor implements Runnable {
                 int chainSwtichThreshold = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.CHAIN_SWTICH_THRESHOLD));
                 //1.获取某链ID的主链、分叉链集合
                 Chain masterChain = ChainManager.getMasterChain(chainId);
-                List<Chain> forkChains = ChainManager.getForkChains(chainId);
+                SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                 //2.遍历当前分叉链，与主链进行比对，找出最大高度差，与默认参数chainSwtichThreshold对比，确定要切换的分叉链
                 Chain switchChain = new Chain();
                 int maxHeightDifference = 0;
-                for (int i = 0, forkChainsSize = forkChains.size(); i < forkChainsSize; i++) {
-                    Chain forkChain = forkChains.get(i);
+                for (Chain forkChain : forkChains) {
                     int temp = (int) (forkChain.getEndHeight() - masterChain.getEndHeight());
                     if (temp > maxHeightDifference) {
                         maxHeightDifference = temp;

@@ -17,16 +17,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.ContextManager;
 import lombok.Data;
 
-import java.util.LinkedList;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * 链对象
@@ -62,7 +62,9 @@ import java.util.TreeSet;
  * @date 18-11-15 下午1:54
  */
 @Data
-public class Chain implements Cloneable, Comparable {
+public class Chain {
+
+    public static final Comparator<Chain> COMPARATOR = Comparator.comparingLong(Chain::getStartHeight).thenComparingInt(Chain::getStartHashCode);
 
     /**
      * 标记这个链是从哪个链分叉来的，一个链的parent不一定是主链
@@ -70,9 +72,9 @@ public class Chain implements Cloneable, Comparable {
     private Chain parent;
 
     /**
-     * 标记所有从本链直接分叉出去的链集合，默认按起始高度从高到低排序，在移除链时有用
+     * 标记所有从本链直接分叉出去的链集合，默认按起始高度从低到高排序，起始高度相同时，按照起始区块hash转换成int从低到高排序，在移除链时有用
      */
-    private SortedSet<Chain> sons = new TreeSet<>((a, b) -> (int) (a.getStartHeight() - b.getStartHeight()));
+    private SortedSet<Chain> sons = new TreeSet<>(COMPARATOR);
 
     /**
      * 链ID
@@ -80,14 +82,10 @@ public class Chain implements Cloneable, Comparable {
     private int chainId;
 
     /**
-     * 孤儿链的年龄，每经过一次OrphanChainsMonitor处理并且链上没有加入新区块，年龄加一，达到一定年龄从内存中清除
-     */
-    private int age;
-
-    /**
      * 链上起始区块的previousHash
      */
     private NulsDigestData previousHash;
+
     /**
      * 链的起始高度
      */
@@ -103,23 +101,31 @@ public class Chain implements Cloneable, Comparable {
     private LinkedList<NulsDigestData> hashList;
 
     /**
-     * 是否是主链
+     * 标记该链的类型
      */
-    private boolean master;
+    private ChainTypeEnum type;
 
     /**
      * 把subChain连接到本链this上
      * 所有subChain的son都要重新链接到this
      * this.sons新增subChain的son
+     *
      * @param subChain
      * @return
      */
     public void append(Chain subChain) {
-        this.getHashList().addAll(subChain.getHashList());
+        if (!this.isMaster()) {
+            this.getHashList().addAll(subChain.getHashList());
+        }
         this.setEndHeight(subChain.getEndHeight());
-        this.setAge(0);
-        this.setSons(subChain.getSons());
+        this.getSons().addAll(subChain.getSons());
         subChain.getSons().forEach(e -> e.setParent(this));
+        subChain.setParent(this);
+    }
+
+    public boolean fork(Chain forkChain) {
+        forkChain.setParent(this);
+        return this.getSons().add(forkChain);
     }
 
     /**
@@ -138,7 +144,7 @@ public class Chain implements Cloneable, Comparable {
      * @return
      */
     public NulsDigestData getEndHash() {
-        if (master) {
+        if (isMaster()) {
             return ContextManager.getContext(chainId).getLatestBlock().getHeader().getHash();
         }
         return hashList.getLast();
@@ -150,15 +156,32 @@ public class Chain implements Cloneable, Comparable {
      * @return
      */
     public NulsDigestData getStartHash() {
-        if (master) {
+        if (isMaster()) {
             return ContextManager.getContext(chainId).getGenesisBlock().getHeader().getHash();
         }
         return hashList.getFirst();
     }
 
+    /**
+     * 获取链的起始hash
+     *
+     * @return
+     */
+    public int getStartHashCode() {
+        return getStartHash().hashCode();
+    }
+
+    /**
+     * 判断本链是否为主链
+     * @return
+     */
+    public boolean isMaster(){
+        return this.type.equals(ChainTypeEnum.MASTER);
+    }
 
     /**
      * 在链头插入一个区块，只有孤儿链会用到这个方法
+     *
      * @param block
      */
     public void addFirst(Block block) {
@@ -169,6 +192,7 @@ public class Chain implements Cloneable, Comparable {
 
     /**
      * 在链尾插入一个区块
+     *
      * @param block
      */
     public void addLast(Block block) {
@@ -178,12 +202,13 @@ public class Chain implements Cloneable, Comparable {
 
     /**
      * 使用一个区块生成一条链
+     *
      * @param chainId
      * @param block
-     * @param parent    生成分叉链时传父链，生成孤儿链时传null
+     * @param parent  生成分叉链时传父链，生成孤儿链时传null
      * @return
      */
-    public static Chain generate(int chainId, Block block, Chain parent) {
+    public static Chain generate(int chainId, Block block, Chain parent, ChainTypeEnum type) {
         long height = block.getHeader().getHeight();
         NulsDigestData hash = block.getHeader().getHash();
         NulsDigestData preHash = block.getHeader().getPreHash();
@@ -194,9 +219,9 @@ public class Chain implements Cloneable, Comparable {
         chain.setStartHeight(height);
         chain.setEndHeight(height);
         chain.setHashList(hashs);
-        chain.setMaster(false);
         chain.setPreviousHash(preHash);
         chain.setParent(parent);
+        chain.setType(type);
         if (parent != null) {
             parent.getSons().add(chain);
         }
@@ -205,6 +230,7 @@ public class Chain implements Cloneable, Comparable {
 
     /**
      * 系统初始化时，由本地的最新区块生成主链
+     *
      * @param chainId
      * @param block
      * @return
@@ -215,27 +241,18 @@ public class Chain implements Cloneable, Comparable {
         chain.setChainId(chainId);
         chain.setStartHeight(0L);
         chain.setEndHeight(height);
-        chain.setMaster(true);
+        chain.setType(ChainTypeEnum.MASTER);
         chain.setParent(null);
+        chain.setPreviousHash(block.getHeader().getPreHash());
         return chain;
     }
 
     @Override
-    public Chain clone() throws CloneNotSupportedException {
-        Chain chain = new Chain();
-        chain.setChainId(this.chainId);
-        chain.setStartHeight(this.startHeight);
-        chain.setEndHeight(this.endHeight);
-        chain.setPreviousHash(this.previousHash);
-        chain.setParent(this.parent);
-        chain.setSons(this.sons);
-        chain.setMaster(this.master);
-        chain.setHashList(this.hashList);
-        return chain;
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        return 0;
+    public String toString() {
+        return new StringJoiner(", ", Chain.class.getSimpleName() + "[", "]")
+                .add("startHeight=" + startHeight)
+                .add("endHeight=" + endHeight)
+                .add("type=" + type)
+                .toString();
     }
 }

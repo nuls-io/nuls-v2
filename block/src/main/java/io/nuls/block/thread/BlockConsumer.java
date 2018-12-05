@@ -29,7 +29,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 
 /**
- * 消费同步的区块
+ * 消费同步到的区块
  * @author captain
  * @date 18-11-8 下午5:45
  * @version 1.0
@@ -37,25 +37,24 @@ import java.util.concurrent.Callable;
 public class BlockConsumer implements Callable<Boolean> {
 
     private BlockingQueue<Block> blockQueue;
-    private String queueName;
     private int chainId;
 
     private BlockService blockService = ContextManager.getServiceBean(BlockService.class);
 
     public BlockConsumer(int chainId, BlockingQueue<Block> blockQueue) {
         this.blockQueue = blockQueue;
-        this.queueName = queueName;
+        this.chainId = chainId;
     }
 
     @Override
-    public Boolean call() throws Exception {
+    public Boolean call() {
         try {
             Block block;
             while ((block = blockQueue.take()) != null) {
-                if (block.getHeader() == null) {
-                    break;
+                boolean saveBlock = blockService.saveBlock(chainId, block);
+                if (!saveBlock) {
+                   return false;
                 }
-                blockService.saveBlock(chainId, block);
             }
             return true;
         } catch (InterruptedException e) {

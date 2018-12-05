@@ -21,40 +21,50 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.Node;
 import lombok.Data;
 
-import java.util.List;
+import java.util.SortedSet;
 
 /**
  * 一个区块下载线程的下载结果
+ *
  * @author captain
- * @date 18-11-9 下午4:17
  * @version 1.0
+ * @date 18-11-9 下午4:17
  */
 @Data
 public class BlockDownLoadResult {
-    private NulsDigestData startHash;
-    private NulsDigestData endHash;
+    /**
+     * 下载区块起始高度
+     */
     private long startHeight;
+    /**
+     * 下载区块个数
+     */
     private int size;
+    /**
+     * 区块来源节点在所有可用节点列表中的下标
+     */
+    private int index;
+    /**
+     * 区块来源节点
+     */
     private Node node;
     /**
      * 标志从node节点批量下载区块是否成功，要全部下载完成才算成功
      */
     private boolean success = false;
 
-    private List<Block> blockList;
+    private SortedSet<Block> blockSet;
 
-    public BlockDownLoadResult(NulsDigestData startHash, NulsDigestData endHash, long startHeight, int size, Node node, List<Block> blockList) {
-        this.startHash = startHash;
-        this.endHash = endHash;
+    public BlockDownLoadResult(long startHeight, int size, Node node, SortedSet<Block> blockSet, int index) {
         this.startHeight = startHeight;
         this.size = size;
+        this.index = index;
         this.node = node;
-        this.blockList = blockList;
-        this.setSuccess(blockList.size() == size ? true : false);
+        this.blockSet = blockSet;
+        this.setSuccess(blockSet.size() == size);
     }
 
 }

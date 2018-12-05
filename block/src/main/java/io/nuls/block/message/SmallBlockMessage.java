@@ -21,10 +21,13 @@
 package io.nuls.block.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.message.BaseMessage;
-import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.message.body.SmallBlockMessageBody;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.SmallBlock;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
+import lombok.Data;
+
+import java.io.IOException;
 
 /**
  * 广播区块消息
@@ -33,24 +36,33 @@ import io.nuls.tools.exception.NulsException;
  * @date 18-11-9 下午2:37
  * @version 1.0
  */
-public class SmallBlockMessage extends BaseMessage<SmallBlockMessageBody> {
+@Data
+public class SmallBlockMessage extends BaseMessage {
 
-    @Override
-    public SmallBlockMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        try {
-            return byteBuffer.readNulsData(new SmallBlockMessageBody());
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
+    private SmallBlock smallBlock;
 
     public SmallBlockMessage() {
-        super(CommandConstant.BLOCK_MESSAGE);
     }
 
-    public SmallBlockMessage(long magicNumber, String cmd, SmallBlockMessageBody body) {
-        super(cmd, magicNumber);
-        this.setMsgBody(body);
+    public SmallBlockMessage(SmallBlock smallBlock) {
+        this.smallBlock = smallBlock;
+    }
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfNulsData(smallBlock);
+        return size;
+    }
+
+    @Override
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(smallBlock);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.smallBlock = byteBuffer.readNulsData(new SmallBlock());
     }
 
 }

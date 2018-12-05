@@ -17,6 +17,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.utils;
 
 import io.nuls.base.data.NulsDigestData;
@@ -64,7 +65,12 @@ public class TransactionUtil {
         return BlockGenerator.getTransactions();
     }
 
-    public static Transaction getTransaction(int chainId, NulsDigestData hash) throws IOException {
-        return BlockGenerator.getTransactions().get(0);
+    public static Transaction getTransaction(int chainId, NulsDigestData hash) {
+        try {
+            return BlockGenerator.getTransactions().get(0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
