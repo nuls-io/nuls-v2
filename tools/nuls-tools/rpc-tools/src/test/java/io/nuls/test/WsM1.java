@@ -124,11 +124,9 @@ public class WsM1 {
 
         // Unsubscribe
         CmdDispatcher.sendUnsubscribe(messageId);
-        System.out.println("我已经取消了订阅:" + messageId);
 
         Thread.sleep(5000);
         CmdDispatcher.sendUnsubscribe(messageId1);
-        System.out.println("我已经取消了订阅:" + messageId1);
 
         System.out.println("我开始一次调用多个方法");
         Request request = MessageUtil.defaultRequest();

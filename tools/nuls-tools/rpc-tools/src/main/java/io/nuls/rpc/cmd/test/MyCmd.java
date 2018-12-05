@@ -72,7 +72,6 @@ public class MyCmd extends BaseCmd {
     @CmdAnnotation(cmd = "getBalance", version = 1.0, scope = Constants.ADMIN,
             description = "test getBalance")
     public Response getBalance(Map map) {
-        Log.info("getBalance invoked");
         ServerRuntime.eventCount("getBalance", success("getBalance->ha-ha-ha"));
         return success("getBalance->ha-ha-ha");
     }
