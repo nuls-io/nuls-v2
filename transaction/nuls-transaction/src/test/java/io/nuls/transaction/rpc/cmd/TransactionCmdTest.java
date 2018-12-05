@@ -2,6 +2,7 @@ package io.nuls.transaction.rpc.cmd;
 
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.WsServer;
@@ -30,7 +31,7 @@ public class TransactionCmdTest {
 
     @BeforeClass
     public static void start() throws Exception {
-        WsServer.mockModule();
+        NoUse.mockModule();
     }
 
     @Test
