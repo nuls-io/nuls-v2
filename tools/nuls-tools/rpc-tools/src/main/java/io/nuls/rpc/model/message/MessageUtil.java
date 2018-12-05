@@ -32,15 +32,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 消息工具类，用于构造常用的基本消息体
+ * Message Tool Class for Constructing Commonly Used Basic Message Body
+ *
  * @author tangyi
  * @date 2018/12/4
- * @description
  */
 public class MessageUtil {
 
     /**
      * 默认Message对象
      * Default Message object
+     *
+     * @param messageType Message type
+     * @return Message
      */
     public static Message basicMessage(MessageType messageType) {
         Message message = new Message();
@@ -51,9 +56,12 @@ public class MessageUtil {
         return message;
     }
 
+
     /**
      * 默认握手对象
      * Default NegotiateConnection object
+     *
+     * @return NegotiateConnection
      */
     public static NegotiateConnection defaultNegotiateConnection() {
         NegotiateConnection negotiateConnection = new NegotiateConnection();
@@ -66,6 +74,8 @@ public class MessageUtil {
     /**
      * 构造默认Request对象
      * Constructing a default Request object
+     *
+     * @return Request
      */
     public static Request defaultRequest() {
         Request request = new Request();
@@ -78,9 +88,17 @@ public class MessageUtil {
         return request;
     }
 
+
     /**
      * 根据参数构造Request对象，然后发送Request
      * Construct the Request object according to the parameters, and then send the Request
+     *
+     * @param cmd                      Cmd of remote method
+     * @param params                   Parameters of remote method
+     * @param ack                      Need an Ack?
+     * @param subscriptionPeriod       远程方法调用频率（秒），Frequency of remote method (Second)
+     * @param subscriptionEventCounter 远程方法调用频率（改变次数），Frequency of remote method (Change count)
+     * @return Request
      */
     public static Request newRequest(String cmd, Map params, String ack, String subscriptionPeriod, String subscriptionEventCounter) {
         Request request = defaultRequest();
@@ -91,16 +109,22 @@ public class MessageUtil {
         return request;
     }
 
+
     /**
      * 构造一个Response对象
      * Constructing a new Response object
+     *
+     * @param requestId Message ID of request
+     * @param status    1 = success, 0 = failed
+     * @param comment   User defined string
+     * @return Response
      */
     public static Response newResponse(String requestId, String status, String comment) {
         Response response = new Response();
         response.setRequestId(requestId);
         response.setResponseStatus(status);
         response.setResponseComment(comment);
-        response.setResponseMaxSize("0");
+        response.setResponseMaxSize(Constants.ZERO);
         return response;
     }
 }

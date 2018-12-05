@@ -25,21 +25,55 @@
 package io.nuls.rpc.model.message;
 
 /**
+ * 消息类型
+ * Message types
+ *
  * @author tangyi
  */
 public enum MessageType {
     /**
-     * 消息类型
-     * Message type
+     * 握手 / Handshake
      */
     NegotiateConnection,
+
+    /**
+     * 握手确认 / Handshake confirm
+     */
     NegotiateConnectionResponse,
+
+    /**
+     * 请求 / Request
+     */
     Request,
+
+    /**
+     * 回复 / Response
+     */
     Response,
+
+    /**
+     * 取消订阅 / Unsubscribe
+     */
     Unsubscribe,
+
+    /**
+     * 确认收到消息 / Confirm receipt of message
+     */
     Ack,
+
+    /**
+     * 通知 / Notification
+     */
     Notification,
+
+    /**
+     * 批量订阅 / Batch request
+     */
     RegisterCompoundMethod,
+
+    /**
+     * 取消批量订阅 / Batch unsubscribe
+     */
     UnregisterCompoundMethod,
 
 }
