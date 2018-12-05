@@ -20,35 +20,184 @@
 
 package io.nuls.block.rpc;
 
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.service.BlockService;
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.log.Log;
+
+import java.io.IOException;
+import java.util.Map;
+
+import static io.nuls.block.constant.CommandConstant.*;
 
 /**
  * 区块管理模块的对外接口类
+ *
  * @author captain
- * @date 18-11-9 下午2:04
  * @version 1.0
+ * @date 18-11-9 下午2:04
  */
 @Component
-public class BlockResource extends BaseCmd{
+public class BlockResource extends BaseCmd {
     @Autowired
     private BlockService service;
-//    /**
-//     * 创建节点
-//     * */
-//    @CmdAnnotation(cmd = "cs_createAgent", version = 1.0)
-//    public CmdResponse createAgent(List<Object> params){
-//        return service.createAgent(params);
-//    }
-//
-//    /**
-//     * 节点验证
-//     * */
-//    @CmdAnnotation(cmd = "cs_createAgentValid", version = 1.0)
-//    public CmdResponse createAgentValid(List<Object> params){
-//        return null;
-//    }
 
+    /**
+     * 获取最新区块头
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = BEST_BLOCK_HEADER, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Object bestBlockHeader(Map map) {
+        try {
+            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            BlockHeader blockHeader = service.getLatestBlockHeader(chainId);
+            return success(HexUtil.byteToHex(blockHeader.serialize()));
+        } catch (IOException e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取最新区块
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = BEST_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Object bestBlock(Map map) {
+        try {
+            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            Block block = service.getLatestBlock(chainId);
+            return success(HexUtil.byteToHex(block.serialize()));
+        } catch (IOException e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 根据高度获取区块头
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_BLOCK_HEADER_BY_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "height", parameterType = "long")
+    public Object getBlockHeaderByHeight(Map map) {
+        try {
+            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            Long height = Long.parseLong(map.get("height").toString());
+            BlockHeader blockHeader = service.getBlockHeader(chainId, height);
+            return success(HexUtil.byteToHex(blockHeader.serialize()));
+        } catch (IOException e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 根据高度获取区块
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_BLOCK_BY_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "height", parameterType = "long")
+    public Object getBlockByHeight(Map map) {
+        try {
+            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            Long height = Long.parseLong(map.get("height").toString());
+            Block block = service.getBlock(chainId, height);
+            return success(HexUtil.byteToHex(block.serialize()));
+        } catch (IOException e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 根据hash获取区块头
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_BLOCK_HEADER_BY_HASH, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "hash", parameterType = "string")
+    public Object getBlockHeaderByHash(Map map) {
+        try {
+            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
+            BlockHeader blockHeader = service.getBlockHeader(chainId, hash);
+            return success(HexUtil.byteToHex(blockHeader.serialize()));
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 根据hash获取区块
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_BLOCK_BY_HASH, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "hash", parameterType = "string")
+    public Object getBlockByHash(Map map) {
+        try {
+            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
+            Block block = service.getBlock(chainId, hash);
+            return success(HexUtil.byteToHex(block.serialize()));
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 接收新打包区块
+     * 1.保存区块
+     * 2.广播区块
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_BLOCK_BY_HASH, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "block", parameterType = "string")
+    public Object receivePackingBlock(Map map) {
+        try {
+            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            Block block = new Block();
+            block.parse(new NulsByteBuffer((NulsDigestData.fromDigestHex(map.get("hash").toString()).getDigestBytes())));
+            if (service.saveBlock(chainId, block) && service.broadcastBlock(chainId, block)) {
+                return success();
+            } else {
+                return failed(BlockErrorCode.PARAMETER_ERROR);
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
 }

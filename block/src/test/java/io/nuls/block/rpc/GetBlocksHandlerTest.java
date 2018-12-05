@@ -39,7 +39,6 @@ public class GetBlocksHandlerTest {
 
     @Test
     public void process() throws Exception {
-        WsServer.mockModule();
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", CHAIN_ID);

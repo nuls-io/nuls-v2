@@ -31,11 +31,12 @@ import io.nuls.tools.log.Log;
 import java.util.SortedSet;
 
 /**
- * 分叉链的形成原因分析：
+ * 分叉链的形成原因分析:同时收到两个合法的区块
  * 分叉链定时处理器，如果发现某分叉链比主链更长，需要切换该分叉链为主链
+ *
  * @author captain
- * @date 18-11-14 下午3:54
  * @version 1.0
+ * @date 18-11-14 下午3:54
  */
 public class ForkChainsMonitor implements Runnable {
 
@@ -55,7 +56,7 @@ public class ForkChainsMonitor implements Runnable {
             for (Integer chainId : ContextManager.chainIds) {
                 //判断该链的运行状态，只有正常运行时才会有分叉链的处理
                 RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
-                if (!status.equals(RunningStatusEnum.RUNNING)){
+                if (!status.equals(RunningStatusEnum.RUNNING)) {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
                     return;
                 }
@@ -75,6 +76,7 @@ public class ForkChainsMonitor implements Runnable {
                     }
                 }
 
+                Log.debug("chainId-{}, maxHeightDifference:{}, chainSwtichThreshold:{}", chainId, maxHeightDifference, chainSwtichThreshold);
                 //高度差不够
                 if (maxHeightDifference < chainSwtichThreshold) {
                     return;
@@ -83,9 +85,11 @@ public class ForkChainsMonitor implements Runnable {
                 //3.进行切换，切换前变更模块运行状态
                 ContextManager.getContext(chainId).setStatus(RunningStatusEnum.SWITCHING);
                 if (ChainManager.switchChain(chainId, masterChain, switchChain)) {
+                    Log.info("chainId-{}, switchChain success", chainId);
                     ContextManager.getContext(chainId).setStatus(RunningStatusEnum.RUNNING);
                 } else {
                     //todo 链切换失败的处理逻辑，暂时认为链切换失败会导致系统异常，运行停止
+                    Log.info("chainId-{}, switchChain fail", chainId);
                     ContextManager.getContext(chainId).setStatus(RunningStatusEnum.EXCEPTION);
                 }
             }
