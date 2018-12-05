@@ -1,6 +1,6 @@
 package io.nuls.poc.utils.compare;
 
-import io.nuls.poc.model.bo.Evidence;
+import io.nuls.poc.model.bo.consensus.Evidence;
 
 import java.util.Comparator;
 

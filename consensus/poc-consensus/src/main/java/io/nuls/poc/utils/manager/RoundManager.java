@@ -10,8 +10,8 @@ import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
-import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.DoubleUtils;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
@@ -390,32 +390,36 @@ public class RoundManager {
     private void setMemberList(int chain_id,MeetingRound round, BlockHeader startBlockHeader) {
         List<MeetingMember> memberList = new ArrayList<>();
         String seedNodesStr = ConfigManager.config_map.get(chain_id).getSeedNodes();
-        String[] seedNodes = seedNodesStr.split(",");
-        for (String address : seedNodes) {
-            byte[] address_byte = address.getBytes();
-            MeetingMember member = new MeetingMember();
-            Agent agent = new Agent();
-            agent.setAgentAddress(address_byte);
-            agent.setPackingAddress(address_byte);
-            agent.setRewardAddress(address_byte);
-            agent.setCreditVal(0);
-            member.setRoundStartTime(round.getStartTime());
-            member.setAgent(agent);
-            member.setRoundIndex(round.getIndex());
-            memberList.add(member);
+        String[] seedNodes;
+        if(StringUtils.isNotBlank(seedNodesStr)){
+            seedNodes = seedNodesStr.split(",");
+            for (String address : seedNodes) {
+                byte[] address_byte = address.getBytes();
+                MeetingMember member = new MeetingMember();
+                Agent agent = new Agent();
+                agent.setAgentAddress(address_byte);
+                agent.setPackingAddress(address_byte);
+                agent.setRewardAddress(address_byte);
+                agent.setCreditVal(0);
+                member.setRoundStartTime(round.getStartTime());
+                member.setAgent(agent);
+                member.setRoundIndex(round.getIndex());
+                memberList.add(member);
+            }
         }
         List<Agent> agentList = getAliveAgentList(chain_id,startBlockHeader.getHeight());
         for (Agent agent : agentList) {
             MeetingMember member = new MeetingMember();
             member.setRoundStartTime(round.getStartTime());
             //获取节点委托信息，用于计算节点总的委托金额
-            List<Deposit> cdlist = getDepositListByAgentId(chain_id,agent.getTxHash(), startBlockHeader.getHeight());
-            for (Deposit dtx : cdlist) {
-                agent.setTotalDeposit(BigIntegerUtils.addToString(agent.getTotalDeposit(),dtx.getDeposit()));
+            List<Deposit> cdList = getDepositListByAgentId(chain_id,agent.getTxHash(), startBlockHeader.getHeight());
+            for (Deposit dtx : cdList) {
+                agent.setTotalDeposit(agent.getTotalDeposit().add(dtx.getDeposit()));
             }
-            member.setDepositList(cdlist);
+            member.setDepositList(cdList);
             member.setRoundIndex(round.getIndex());
-            boolean isItIn = !BigIntegerUtils.isLessThan(agent.getTotalDeposit(),ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT);
+
+            boolean isItIn = agent.getTotalDeposit().compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT) >= 0 ? true : false;
             if (isItIn) {
                 agent.setCreditVal(calcCreditVal(chain_id,member, startBlockHeader));
                 member.setAgent(agent);

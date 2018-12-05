@@ -26,6 +26,7 @@ package io.nuls.chain.cmd;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.ChainTxConstants;
+import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -33,26 +34,26 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * @program: nuls2.0
- * @description: moduleValidateCmd
- * @author: lan
- * @create: 2018/11/22
+ * @author lan
+ * @program nuls2.0
+ * @description moduleValidateCmd
+ * @date 2018/11/22
  **/
 @Component
 public class TxModuleValidateCmd extends BaseCmd {
     @Autowired
-    private AssetTxCmd assetTxCmd;
+    private TxAssetCmd txAssetCmd;
     @Autowired
-    private ChainTxCmd chainTxCmd;
+    private TxChainCmd txChainCmd;
 
     /**
      * chainModuleTxValidate
@@ -69,37 +70,59 @@ public class TxModuleValidateCmd extends BaseCmd {
             //2进入不同验证器里处理
             //3封装失败交易返回
             int chainId = Integer.valueOf(params.get("chainId").toString());
-            List<Transaction> chainRegisterTxList = new ArrayList<>();
-            List<Transaction> chainDestroyTxList = new ArrayList<>();
-            List<Transaction> assetRegisterTxList = new ArrayList<>();
-            List<Transaction> assetDestroyTxList = new ArrayList<>();
-            for (String txHex : (String[]) params.get("txHexs")) {
-                byte[] txBytes = HexUtil.hexToByte(txHex);
-                byte[] typeByte = ByteUtils.copyOf(txBytes, 2);
-                int type = ByteUtils.bytesToBigInteger(typeByte).intValue();
-                Transaction tx = new Transaction(type);
-                tx.parse(txBytes, 0);
+            List<Transaction> registerChainAndAssetList = new ArrayList<>();
+            List<Transaction> destroyAssetAndChainList = new ArrayList<>();
+            List<Transaction> addAssetToChainList = new ArrayList<>();
+            List<Transaction> removeAssetFromChainList = new ArrayList<>();
 
-                switch (type) {
+            for (String txHex : (String[]) params.get("txHexs")) {
+
+                Transaction tx = new Transaction();
+                tx.parse(HexUtil.hexToByte(txHex), 0);
+
+                switch (tx.getType()) {
                     case ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET:
-                        chainRegisterTxList.add(tx);
+                        registerChainAndAssetList.add(tx);
                         break;
                     case ChainTxConstants.TX_TYPE_DESTROY_ASSET_AND_CHAIN:
+                        destroyAssetAndChainList.add(tx);
                         break;
                     case ChainTxConstants.TX_TYPE_ADD_ASSET_TO_CHAIN:
+                        addAssetToChainList.add(tx);
                         break;
                     case ChainTxConstants.TX_TYPE_REMOVE_ASSET_FROM_CHAIN:
+                        removeAssetFromChainList.add(tx);
                         break;
                     default:
                         break;
                 }
             }
 
+            registerChainAndAssetList.sort(Comparator.comparingDouble(Transaction::getTime));
+            destroyAssetAndChainList.sort(Comparator.comparingDouble(Transaction::getTime));
+            addAssetToChainList.sort(Comparator.comparingDouble(Transaction::getTime));
+            removeAssetFromChainList.sort(Comparator.comparingDouble(Transaction::getTime));
+
+            /*
+            验证注册链
+             */
 
             return success();
         } catch (NulsException e) {
             Log.error(e);
             return failed(e.getMessage());
         }
+    }
+
+    private List<Transaction> errorInRegisterChainAndAssetList(List<Transaction> registerChainAndAssetList) {
+        List<Transaction> error = new ArrayList<>();
+        List<Integer> chainIdList = new ArrayList<>();
+        List<Integer> assetIdList = new ArrayList<>();
+        for (Transaction tx : registerChainAndAssetList) {
+            RegisterChainAndAssetTransaction registerChainAndAssetTransaction = (RegisterChainAndAssetTransaction) tx;
+//            if (!chainIdList.contains(registerChainAndAssetTransaction.get))
+//                chainIdList.add()
+        }
+        return error;
     }
 }

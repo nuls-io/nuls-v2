@@ -1,6 +1,7 @@
 package io.nuls.ledger.service;
 
-import io.nuls.ledger.model.Transaction;
+
+import io.nuls.base.data.Transaction;
 
 /**
  * Created by wangkun23 on 2018/11/28.

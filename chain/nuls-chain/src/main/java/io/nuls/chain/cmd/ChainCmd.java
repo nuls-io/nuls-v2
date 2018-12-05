@@ -3,34 +3,26 @@ package io.nuls.chain.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.Chain;
-import io.nuls.chain.model.tx.CrossChainDestroyTransaction;
-import io.nuls.chain.model.tx.CrossChainRegTransaction;
+import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
 import io.nuls.chain.service.SeqService;
-import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -108,13 +100,13 @@ public class ChainCmd extends BaseChainCmd {
             asset.setSymbol((String) params.get("symbol"));
             asset.setName((String) params.get("name"));
             asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS)));
-            asset.setInitNumber(params.get("initNumber").toString());
+            asset.setInitNumber(new BigInteger(params.get("initNumber").toString()));
             asset.setDecimalPlaces(Short.valueOf(params.get("decimalPlaces").toString()));
             asset.setAvailable(true);
             asset.setCreateTime(TimeService.currentTimeMillis());
             asset.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
             // 组装交易发送
-            CrossChainRegTransaction crossChainRegTransaction = new CrossChainRegTransaction();
+            RegisterChainAndAssetTransaction crossChainRegTransaction = new RegisterChainAndAssetTransaction();
             crossChainRegTransaction.setTxData(chain.parseToTransaction(asset,false));
             crossChainRegTransaction.setTime(TimeService.currentTimeMillis());
             AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(),asset.getAssetId(),String.valueOf(params.get("address")));

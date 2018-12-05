@@ -3,12 +3,12 @@ package io.nuls.ledger.model;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.tools.data.LongUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.*;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
  * Created by wangkun23 on 2018/11/19.
@@ -32,12 +32,12 @@ public class AccountState extends BaseNulsData {
 
     @Setter
     @Getter
-    private long balance;
+    private BigInteger balance = BigInteger.ZERO;
 
     /**
      * 账户总金额
      */
-    private long totalAmount;
+    private BigInteger totalAmount = BigInteger.ZERO;
 
     /**
      * 账户冻结的资产
@@ -46,7 +46,7 @@ public class AccountState extends BaseNulsData {
     @Getter
     private FreezeState freezeState;
 
-    public AccountState(int chainId, int assetId, long nonce, long balance) {
+    public AccountState(int chainId, int assetId, long nonce, BigInteger balance) {
         this.chainId = chainId;
         this.assetId = assetId;
         this.nonce = nonce;
@@ -59,8 +59,8 @@ public class AccountState extends BaseNulsData {
      *
      * @return
      */
-    public long getTotalAmount() {
-        return LongUtils.add(balance, freezeState.getTotal());
+    public BigInteger getTotalAmount() {
+        return balance.add(freezeState.getTotal());
     }
 
     public AccountState withNonce(long nonce) {
@@ -71,8 +71,8 @@ public class AccountState extends BaseNulsData {
         return new AccountState(chainId, assetId, nonce + 1, balance);
     }
 
-    public AccountState withBalanceIncrement(long value) {
-        return new AccountState(chainId, assetId, nonce, balance + value);
+    public AccountState withBalanceIncrement(BigInteger value) {
+        return new AccountState(chainId, assetId, nonce, balance.add(value));
     }
 
     @Override
@@ -80,7 +80,7 @@ public class AccountState extends BaseNulsData {
         stream.writeUint16(chainId);
         stream.writeUint16(assetId);
         stream.writeUint32(nonce);
-        stream.writeUint32(balance);
+        stream.writeBigInteger(balance);
     }
 
     @Override
@@ -88,7 +88,7 @@ public class AccountState extends BaseNulsData {
         this.chainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
         this.nonce = byteBuffer.readUint32();
-        this.balance = byteBuffer.readUint32();
+        this.balance = byteBuffer.readBigInteger();
     }
 
     @Override

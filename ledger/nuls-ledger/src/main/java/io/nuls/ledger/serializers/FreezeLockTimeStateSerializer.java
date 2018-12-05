@@ -16,7 +16,7 @@ public class FreezeLockTimeStateSerializer implements Serializer<FreezeLockTimeS
     @Override
     public byte[] serialize(FreezeLockTimeState accountState) {
         byte[] txHash = RLP.encodeString(accountState.getTxHash());
-        byte[] amount = RLP.encodeBigInteger(BigInteger.valueOf(accountState.getAmount()));
+        byte[] amount = RLP.encodeBigInteger(accountState.getAmount());
         byte[] lockTime = RLP.encodeBigInteger(BigInteger.valueOf(accountState.getLockTime()));
         byte[] createTime = RLP.encodeBigInteger(BigInteger.valueOf(accountState.getCreateTime()));
         return RLP.encodeList(txHash, amount, lockTime, createTime);
@@ -38,7 +38,7 @@ public class FreezeLockTimeStateSerializer implements Serializer<FreezeLockTimeS
             byte[] createTimeBytes = items.get(3).getRLPData();
 
             state.setTxHash(new String(txHashBytes));
-            state.setAmount(ByteUtil.byteArrayToLong(amountBytes));
+            state.setAmount(ByteUtil.bytesToBigInteger(amountBytes));
             state.setLockTime(ByteUtil.byteArrayToLong(lockTimeBytes));
             state.setCreateTime(ByteUtil.byteArrayToLong(createTimeBytes));
         } catch (Exception e) {

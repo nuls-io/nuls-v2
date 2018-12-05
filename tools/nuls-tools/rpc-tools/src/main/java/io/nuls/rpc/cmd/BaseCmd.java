@@ -26,12 +26,16 @@
 package io.nuls.rpc.cmd;
 
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.rpc.model.ConfigItem;
+import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.tools.constant.ErrorCode;
 
 /**
+ * 所有对外提供的接口的父类，必须继承BaseCmd才能被反射调用到
+ * The parent class of all externally provided interfaces, must inherit BaseCmd to be invoked by reflection
+ *
  * @author tangyi
  * @date 2018/10/15
  * @description
@@ -59,7 +63,7 @@ public abstract class BaseCmd {
      * Returns a success object with specific content
      */
     protected Response success(Object responseData) {
-        Response response = ServerRuntime.newResponse("", Constants.booleanString(true), "Congratulations! Processing completed！");
+        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "Congratulations! Processing completed！");
         response.setResponseData(responseData);
         return response;
     }
@@ -69,7 +73,7 @@ public abstract class BaseCmd {
      * Returns the predefined failed object
      */
     protected Response failed(ErrorCode errorCode) {
-        Response response = ServerRuntime.newResponse("", Constants.booleanString(false), "");
+        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, "");
         response.setResponseData(errorCode);
         return response;
     }
@@ -79,7 +83,7 @@ public abstract class BaseCmd {
      * Returns the failed object of the custom error message
      */
     protected Response failed(String errMsg) {
-        return ServerRuntime.newResponse("", Constants.booleanString(false), errMsg);
+        return MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, errMsg);
     }
 
     /**
@@ -87,7 +91,7 @@ public abstract class BaseCmd {
      * Predefined failed object with a custom error message
      */
     protected Response failed(ErrorCode errorCode, String errMsg) {
-        Response response = ServerRuntime.newResponse("", Constants.booleanString(false), errMsg);
+        Response response = MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, errMsg);
         response.setResponseData(errorCode);
         return response;
     }

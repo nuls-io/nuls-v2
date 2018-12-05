@@ -10,6 +10,7 @@ import io.nuls.tools.core.annotation.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +42,7 @@ public class AccountStateCmd extends BaseCmd {
         logger.info("chainId {}", chainId);
         logger.info("address {}", address);
 
-        long balance = accountStateService.getBalance(address, assetId);
+        BigInteger balance = accountStateService.getBalance(address, chainId, assetId);
         return success(balance);
     }
 
@@ -59,7 +60,7 @@ public class AccountStateCmd extends BaseCmd {
         Integer chainId = (Integer) params.get("chainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        long nonce = accountStateService.getNonce(address, assetId);
+        long nonce = accountStateService.getNonce(address, chainId, assetId);
         return success(nonce);
     }
 }

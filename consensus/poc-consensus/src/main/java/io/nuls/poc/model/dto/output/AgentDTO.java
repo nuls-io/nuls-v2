@@ -29,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.utils.util.PoConvertUtil;
+import io.nuls.tools.data.BigIntegerUtils;
 
 
 /**
@@ -60,7 +61,7 @@ public class AgentDTO {
         this.agentAddress = AddressTool.getStringAddressByBytes(agent.getAgentAddress());
         this.packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress());
         this.rewardAddress = AddressTool.getStringAddressByBytes(agent.getRewardAddress());
-        this.deposit = agent.getDeposit();
+        this.deposit = BigIntegerUtils.bigIntegerToString(agent.getDeposit());
         this.commissionRate = agent.getCommissionRate();
         this.agentName = agent.getAlais();
         this.agentId = PoConvertUtil.getAgentId(agent.getTxHash());
@@ -69,7 +70,7 @@ public class AgentDTO {
         this.delHeight = agent.getDelHeight();
         this.status = agent.getStatus();
         this.creditVal = agent.getCreditVal();
-        this.totalDeposit = agent.getTotalDeposit();
+        this.totalDeposit = String.valueOf(agent.getTotalDeposit());
         this.txHash = agent.getTxHash().getDigestHex();
         this.memberCount = agent.getMemberCount();
     }

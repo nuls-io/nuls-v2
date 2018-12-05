@@ -38,6 +38,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -138,16 +139,17 @@ public class CoinData extends BaseNulsData {
      * @return tx fee
      */
     @JsonIgnore
-    public String getFee() {
-        String toAmount = BigIntegerUtils.ZERO;
+    public BigInteger getFee() {
+        BigInteger toAmount = BigInteger.ZERO;
+
         for (CoinTo coinTo : to) {
-            toAmount = BigIntegerUtils.addToString(toAmount, coinTo.getAmount());
+            toAmount = toAmount.add(coinTo.getAmount());
         }
-        String fromAmount = BigIntegerUtils.ZERO;
+        BigInteger fromAmount = BigInteger.ZERO;
         for (CoinFrom coinFrom : from) {
-            fromAmount = BigIntegerUtils.addToString(fromAmount, coinFrom.getAmount());
+            fromAmount = fromAmount.add(coinFrom.getAmount());
         }
-        return BigIntegerUtils.subToString(toAmount, fromAmount);
+        return fromAmount.subtract(toAmount);
     }
 
     public void addTo(CoinTo coinTo) {

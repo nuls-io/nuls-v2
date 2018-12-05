@@ -35,6 +35,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -44,7 +45,7 @@ import java.util.Set;
 public class Deposit extends TransactionLogicData {
 
 
-    private String deposit;
+    private BigInteger deposit;
 
     private NulsDigestData agentHash;
 
@@ -61,7 +62,7 @@ public class Deposit extends TransactionLogicData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(deposit);
+        stream.writeBigInteger(deposit);
         stream.write(address);
         stream.writeNulsData(agentHash);
 
@@ -69,24 +70,24 @@ public class Deposit extends TransactionLogicData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.deposit = byteBuffer.readString();
+        this.deposit = byteBuffer.readBigInteger();
         this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.agentHash = byteBuffer.readHash();
     }
 
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfString(deposit); // deposit.getValue()
+        size += SerializeUtils.sizeOfBigInteger(); // deposit.getValue()
         size += Address.ADDRESS_LENGTH;
         size += this.agentHash.size();
         return size;
     }
 
-    public String getDeposit() {
+    public BigInteger getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(String deposit) {
+    public void setDeposit(BigInteger deposit) {
         this.deposit = deposit;
     }
 
