@@ -37,7 +37,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author: Niels Wang
+ * 退出委托信息类（交易中的txData）
+ * Withdrawal from the delegated information class
+ *
+ * @author: tag
+ * 2018/11/28
  */
 public class CancelDeposit extends TransactionLogicData {
 
@@ -45,6 +49,7 @@ public class CancelDeposit extends TransactionLogicData {
 
     private NulsDigestData joinTxHash;
 
+    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         if (null != address) {

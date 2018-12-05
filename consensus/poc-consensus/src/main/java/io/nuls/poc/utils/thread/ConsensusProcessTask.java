@@ -30,6 +30,8 @@ import io.nuls.tools.log.Log;
 
 /**
  * 共识任务
+ * Consensus task
+ *
  * @author tag
  * 2018/11/15
  */

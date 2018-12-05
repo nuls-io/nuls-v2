@@ -25,18 +25,29 @@
 package io.nuls.poc.storage;
 
 /**
- * 系统语言设置数据存储服务接口
- * @author: Charlie
+ * 系统语言信息存储管理
+ * System Language Information Storage Management
+ *
+ * @author tag
+ * 2018/11/6
  */
 public interface LanguageService {
 
     /**
      * 保存当前系统语言环境
+     * Save the current system language environment
+     *
+     * @param language 语言/language
+     * @return boolean
+     * @exception
      * */
     boolean saveLanguage(String language)throws  Exception;
 
     /**
      * 获取当前系统语言环境
+     * Getting the current system language environment
+     *
+     * @return String
      * */
     String getLanguage();
 }

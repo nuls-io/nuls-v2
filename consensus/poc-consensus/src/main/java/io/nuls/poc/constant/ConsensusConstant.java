@@ -174,4 +174,9 @@ public interface ConsensusConstant {
      * */
     int MAIN_COMMISSION_RATIO = 60;
     int TOTLA_COMMISSION_RATIO = 100;
-}
+
+    /**
+     * Map初始值
+     * */
+    int  INIT_CAPACITY =16;
+ }

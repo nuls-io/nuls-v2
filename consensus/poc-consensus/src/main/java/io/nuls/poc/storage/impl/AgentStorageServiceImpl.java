@@ -16,6 +16,8 @@ import java.util.List;
 
 /**
  * 节点信息管理实现类
+ * Node Information Management Implementation Class
+ *
  * @author tag
  * 2018/11/06
  * */
@@ -23,10 +25,6 @@ import java.util.List;
 public class AgentStorageServiceImpl implements AgentStorageService{
 
     @Override
-    /**
-     * 保存节点
-     * @param  agentPo   节点对象
-     * */
     public boolean save(AgentPo agentPo,int chainID) {
         if(agentPo == null || agentPo.getHash() == null){
             return false;
@@ -38,7 +36,7 @@ public class AgentStorageServiceImpl implements AgentStorageService{
             if(!dbSuccess){
                 return false;
             }
-            //更新缓存
+            //todo 更新缓存
             ConsensusManager.getInstance().addAgent(chainID,PoConvertUtil.poToAgent(agentPo));
             return true;
         }catch (Exception e){
@@ -48,10 +46,6 @@ public class AgentStorageServiceImpl implements AgentStorageService{
     }
 
     @Override
-    /**
-     * 根据节点HASH查询节点
-     * @param  hash   节点hash
-     * */
     public AgentPo get(NulsDigestData hash,int chainID) {
         if(hash == null){
             return  null;
@@ -73,10 +67,6 @@ public class AgentStorageServiceImpl implements AgentStorageService{
     }
 
     @Override
-    /**
-     * 根据节点hash删除节点
-     * @param hash  节点hash
-     * */
     public boolean delete(NulsDigestData hash,int chainID) {
         if(hash == null){
             return  false;
@@ -97,9 +87,6 @@ public class AgentStorageServiceImpl implements AgentStorageService{
     }
 
     @Override
-    /**
-     * 获取所有节点信息
-     * */
     public List<AgentPo> getList(int chainID) throws  Exception{
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID);
@@ -120,9 +107,6 @@ public class AgentStorageServiceImpl implements AgentStorageService{
     }
 
     @Override
-    /**
-     * 获取当前网络节点数量
-     * */
     public int size(int chainID) {
         List<byte[]> keyList = RocksDBService.keyList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID);
         if(keyList != null){
@@ -130,14 +114,4 @@ public class AgentStorageServiceImpl implements AgentStorageService{
         }
         return 0;
     }
-
-    /*@Override
-    public void afterPropertiesSet() throws NulsException {
-        try {
-            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_AGENT);
-        }catch (Exception e){
-            Log.error(e);
-            throw new NulsException(e);
-        }
-    }*/
 }

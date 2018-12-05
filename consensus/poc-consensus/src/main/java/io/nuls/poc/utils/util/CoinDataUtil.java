@@ -11,19 +11,23 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import java.math.BigInteger;
 
 /**
+ * CoinData操作工具类
+ * CoinData operation tool class
  * @author tag
  * 2018//11/28
  * */
 public class CoinDataUtil {
     /**
      * 组装CoinData
-     * @param address  商户地址
-     * @param chainId  链ID
-     * @param assetsId 资产ID
-     * @param amount   金额
-     * @param lockTime 锁定时间
-     * @param txSize   交易大小
-     * @return         组装的CoinData
+     * Assemble CoinData
+     *
+     * @param address  账户地址/Account address
+     * @param chainId  链ID/chain id
+     * @param assetsId 资产ID/assets id
+     * @param amount   金额/amount
+     * @param lockTime 锁定时间/lock time
+     * @param txSize   交易大小/transaction size
+     * @return         组装的CoinData/Assembled CoinData
      * */
     public static CoinData getCoinData(byte[] address,int chainId,int assetsId, BigInteger amount, long lockTime, int txSize)throws NulsRuntimeException{
         CoinData coinData = new CoinData();
@@ -48,13 +52,15 @@ public class CoinDataUtil {
 
     /**
      * 组装解锁金额的CoinData（from中nonce为空）
-     * @param address  商户地址
-     * @param chainId  链ID
-     * @param assetsId 资产ID
-     * @param amount   金额
-     * @param lockTime 锁定时间
-     * @param txSize   交易大小
-     * @return         组装的CoinData
+     * Assemble Coin Data for the amount of unlock (from non CE is empty)
+     *
+     * @param address  账户地址/Account address
+     * @param chainId  链ID/chain id
+     * @param assetsId 资产ID/assets id
+     * @param amount   金额/amount
+     * @param lockTime 锁定时间/lock time
+     * @param txSize   交易大小/transaction size
+     * @return         组装的CoinData/Assembled CoinData
      * */
     public static CoinData getUnlockCoinData(byte[] address, int chainId, int assetsId, BigInteger amount, long lockTime, int txSize)throws NulsRuntimeException{
         CoinData coinData = new CoinData();

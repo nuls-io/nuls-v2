@@ -31,6 +31,9 @@ import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import java.util.Comparator;
 
 /**
+ * 委托信息比较器
+ * Delegation Information Comparator
+ *
  * @author tag
  * 2018/11/14
  */

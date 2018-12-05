@@ -28,11 +28,13 @@ package io.nuls.poc.model.bo.consensus;
 import io.nuls.base.data.BlockHeader;
 
 /**
+ * 分叉证据信息类
+ * Bifurcated Evidence Information Class
+ *
  * @author: tag
  * @date: 2018/11/19
  */
 public class Evidence {
-
     private long roundIndex;
     private BlockHeader blockHeader1;
     private BlockHeader blockHeader2;

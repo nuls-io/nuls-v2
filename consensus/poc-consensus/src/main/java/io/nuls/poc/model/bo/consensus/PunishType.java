@@ -27,11 +27,25 @@
 package io.nuls.poc.model.bo.consensus;
 
 /**
- * @author Niels
+ * 惩罚类型枚举类
+ * Punishment Type Enumeration Class
+ *
+ * @author tag
+ * 2018/11/28
  */
 public enum PunishType {
 
-    YELLOW(0), RED(1);
+    /**
+     * 黄牌惩罚
+     * yellow punish
+     * */
+    YELLOW(0),
+
+    /**
+     * 红牌惩罚
+     * red punish
+     * */
+    RED(1);
 
     private final byte code;
 
