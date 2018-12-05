@@ -91,6 +91,7 @@ public class CmdHandler {
         for (String str : unsubscribe.getUnsubscribeMethods()) {
             String key = webSocket.toString() + str;
             ServerRuntime.cmdInvokeTime.put(key, Constants.UNSUBSCRIBE_TIMEMILLIS);
+            ServerRuntime.cmdChangeCount.put(str, Constants.UNSUBSCRIBE_TIMEMILLIS);
         }
     }
 
@@ -192,9 +193,48 @@ public class CmdHandler {
             }
 
             Message rspMessage = execute(cmdDetail, params, messageId, startTimemillis);
-            Log.info("webSocket.send: " + JSONUtils.obj2json(rspMessage));
+            Log.info("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
             webSocket.send(JSONUtils.obj2json(rspMessage));
         }
+    }
+
+    /**
+     * 处理Request，返回bool类型表示处理完之后是保留还是丢弃
+     * After current processing, do need to keep the Request information and wait for the next processing?
+     * True: keep, False: remove
+     */
+    public static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request) throws Exception {
+
+        for (Object method : request.getRequestMethods().keySet()) {
+            long changeCount = ServerRuntime.getCmdChangeCount((String) method);
+            long eventCount = Long.valueOf(request.getSubscriptionEventCounter());
+            if (changeCount == 0) {
+                continue;
+            }
+            if (changeCount == Constants.UNSUBSCRIBE_TIMEMILLIS) {
+                return false;
+            }
+            if (changeCount % eventCount == 0) {
+                Object[] objects = ServerRuntime.getCmdLastValue((String) method);
+                Response response = (Response) objects[0];
+                boolean hasSent = (boolean) objects[1];
+                if (hasSent) {
+                    continue;
+                }
+
+                Map<String, Object> responseData = new HashMap<>(1);
+                responseData.put((String) method, response.getResponseData());
+                response.setResponseData(responseData);
+                response.setRequestId(messageId);
+                Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
+                rspMessage.setMessageData(response);
+                Log.info("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
+                webSocket.send(JSONUtils.obj2json(rspMessage));
+
+                ServerRuntime.cmdLastResponse.put((String) method, new Object[]{response, true});
+            }
+        }
+        return true;
     }
 
     public static Message execute(CmdDetail cmdDetail, Map params, String messageId, long startTimemillis) throws Exception {

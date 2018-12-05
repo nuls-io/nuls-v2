@@ -63,7 +63,6 @@ public class HeartbeatProcessor implements Runnable {
                 try {
                     WsClient wsClient = ClientRuntime.wsClientMap.get(url);
                     wsClient.send(jsonMessage);
-                    Log.info("Heartbeat NegotiateConnection:" + jsonMessage);
                     if (!CmdDispatcher.receiveNegotiateConnectionResponse()) {
                         ClientRuntime.wsClientMap.remove(url);
                         ClientRuntime.getWsClient(url);

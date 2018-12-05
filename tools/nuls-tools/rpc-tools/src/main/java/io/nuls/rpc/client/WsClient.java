@@ -78,11 +78,12 @@ public class WsClient extends WebSocketClient {
                     } else {
                         ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);
                     }
+                    Log.info("ResponseFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
                     break;
                 default:
                     break;
             }
-            Log.info("ClientMsgFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
+
         } catch (IOException e) {
             Log.error(e);
         }
