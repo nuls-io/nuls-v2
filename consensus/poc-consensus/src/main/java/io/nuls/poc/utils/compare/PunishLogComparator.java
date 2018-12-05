@@ -30,6 +30,9 @@ import io.nuls.poc.model.po.PunishLogPo;
 import java.util.Comparator;
 
 /**
+ * 惩罚信息比较器
+ * Punishment Information Comparator
+ *
  * @author tag
  * 2018/11/14
  */

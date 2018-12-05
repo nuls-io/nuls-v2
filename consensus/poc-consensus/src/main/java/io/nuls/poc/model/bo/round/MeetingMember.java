@@ -32,27 +32,58 @@ import io.nuls.tools.parse.SerializeUtils;
 import java.util.ArrayList;
 import java.util.List;
 /**
+ * 轮次成员信息类
+ * Round Membership Information Class
+ *
  * @author tag
  * 2018/11/12
  */
 public class MeetingMember implements Comparable<MeetingMember> {
-    //所属轮次下标
+    /*
+    轮次下标
+    Subscript in order
+    */
     private long roundIndex;
-    //轮次开始打包时间
+    /*
+    轮次开始打包时间
+    Round start packing time
+    */
     private long roundStartTime;
-    //节点在轮次中的下标（第几个出块）
+    /*
+    节点在轮次中的下标（第几个出块）
+    Subscription of Nodes in Rounds (Number of Blocks)
+    */
     private int packingIndexOfRound;
-    //共识节点对象
+    /*
+    共识节点对象
+    Consensus node object
+    */
     private Agent agent;
-    //共识节--委托信息列表
+    /*
+    共识节--委托信息列表
+    Consensus Festival - Delegation Information List
+    */
     private List<Deposit> depositList = new ArrayList<>();
-    //排序值
+    /*
+    排序值
+    Ranking value
+    */
     private String sortValue;
-    //开始打包时间
+    /*
+    开始打包时间
+    Start packing time
+    */
     private long packStartTime;
-    //打包结束时间
+    /*
+    打包结束时间
+    end packing time
+    */
     private long packEndTime;
 
+    /**
+     * 计算节点打包排序值
+     * Computing Packing Sort Value of Nodes
+     * */
     public String getSortValue() {
         if (this.sortValue == null) {
             byte[] hash = ByteUtils.concatenate(agent.getPackingAddress(), SerializeUtils.uint64ToByteArray(roundStartTime));

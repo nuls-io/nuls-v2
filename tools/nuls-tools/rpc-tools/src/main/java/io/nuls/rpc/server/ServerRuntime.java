@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package io.nuls.rpc.server;
 
 import io.nuls.rpc.info.Constants;
@@ -35,6 +59,12 @@ public class ServerRuntime {
      */
     static Map<String, Long> cmdInvokeTime = new HashMap<>();
 
+    /**
+     * 接口返回值改变次数
+     * Number of return value changes
+     */
+    public static Map<String, Long> cmdChangeCount = new HashMap<>();
+    public static Map<String, Object[]> cmdLastResponse = new HashMap<>();
 
     /**
      * 本模块配置信息
@@ -52,14 +82,19 @@ public class ServerRuntime {
     public static final Queue<Object[]> NEGOTIATE_QUEUE = new ConcurrentLinkedQueue<>();
     public static final Queue<Object[]> UNSUBSCRIBE_QUEUE = new ConcurrentLinkedQueue<>();
     public static final Queue<Object[]> REQUEST_SINGLE_QUEUE = new ConcurrentLinkedQueue<>();
-    public static final Queue<Object[]> REQUEST_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> REQUEST_PERIOD_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> REQUEST_EVENT_COUNT_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
 
     public static Object[] firstObjArrInRequestSingleQueue() {
         return firstObjArrInQueue(REQUEST_SINGLE_QUEUE);
     }
 
-    public static Object[] firstObjArrInRequestLoopQueue() {
-        return firstObjArrInQueue(REQUEST_LOOP_QUEUE);
+    public static Object[] firstObjArrInRequestPeriodLoopQueue() {
+        return firstObjArrInQueue(REQUEST_PERIOD_LOOP_QUEUE);
+    }
+
+    public static Object[] firstObjArrInRequestEventCountLoopQueue() {
+        return firstObjArrInQueue(REQUEST_EVENT_COUNT_LOOP_QUEUE);
     }
 
     /**
@@ -251,16 +286,33 @@ public class ServerRuntime {
         return exist;
     }
 
-    /**
-     * 构造一个Response对象
-     * Constructing a new Response object
-     */
-    public static Response newResponse(String requestId, String status, String comment) {
-        Response response = new Response();
-        response.setRequestId(requestId);
-        response.setResponseStatus(status);
-        response.setResponseComment(comment);
-        response.setResponseMaxSize("0");
-        return response;
+    public static void eventCount(String cmd, Response value) {
+        setCmdChangeCount(cmd);
+        setCmdLastValue(cmd, value);
+    }
+
+    private static void setCmdChangeCount(String cmd) {
+        if (!cmdChangeCount.containsKey(cmd)) {
+            cmdChangeCount.put(cmd, 1L);
+        } else {
+            long count = cmdChangeCount.get(cmd);
+            cmdChangeCount.put(cmd, count + 1);
+        }
+    }
+
+    public static long getCmdChangeCount(String cmd) {
+        try {
+            return cmdChangeCount.get(cmd);
+        } catch (Exception e) {
+            return 0L;
+        }
+    }
+
+    private static void setCmdLastValue(String cmd, Response value) {
+        cmdLastResponse.put(cmd, new Object[]{value, false});
+    }
+
+    public static Object[] getCmdLastValue(String cmd) {
+        return cmdLastResponse.get(cmd);
     }
 }

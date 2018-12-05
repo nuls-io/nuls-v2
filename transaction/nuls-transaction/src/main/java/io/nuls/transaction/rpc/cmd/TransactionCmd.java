@@ -7,8 +7,8 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.model.dto.ModuleTxRegisterDto;
-import io.nuls.transaction.model.dto.TxRegisterDto;
+import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
+import io.nuls.transaction.model.dto.TxRegisterDTO;
 
 import java.io.IOException;
 import java.util.List;
@@ -33,11 +33,11 @@ public class TransactionCmd extends BaseCmd {
             throw new NulsRuntimeException(TxErrorCode.NULL_PARAMETER);
         }
         try {
-            //ModuleTxRegisterDto moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDto.class, TxRegisterDto.class);
+            //ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDTO.class, TxRegisterDTO.class);
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            ModuleTxRegisterDto moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDto.class);
-            List<TxRegisterDto> txRegisterList = moduleTxRegisterDto.getList();
-            //List<TxRegisterDto> txRegisterList = JSONUtils.json2list(JSONUtils.obj2json(params.get("list")), TxRegisterDto.class);
+            ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDTO.class);
+            List<TxRegisterDTO> txRegisterList = moduleTxRegisterDto.getList();
+            //List<TxRegisterDTO> txRegisterList = JSONUtils.json2list(JSONUtils.obj2json(params.get("list")), TxRegisterDTO.class);
 
         } catch (IOException e) {
             e.printStackTrace();

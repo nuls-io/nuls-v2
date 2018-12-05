@@ -45,6 +45,7 @@ public class CoinFrom extends BaseNulsData {
      */
     private byte locked;
 
+
     public  CoinFrom(){}
 
     public CoinFrom(byte[] address,int assetsChainId,int assetsId){
@@ -87,11 +88,11 @@ public class CoinFrom extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfBytes(address);
+        size += Address.ADDRESS_LENGTH;
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfBigInteger();
-        size += SerializeUtils.sizeOfBytes(nonce);
+        size += SerializeUtils.sizeOfNonce();
         size += 1;
         return size;
     }
@@ -156,4 +157,5 @@ public class CoinFrom extends BaseNulsData {
     public void setLocked(byte locked) {
         this.locked = locked;
     }
+
 }

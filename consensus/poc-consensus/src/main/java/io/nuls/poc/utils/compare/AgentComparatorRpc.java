@@ -51,7 +51,7 @@ public class AgentComparatorRpc implements Comparator<Agent> {
     };
     private final int sortType;
 
-    public static AgentComparatorRpc getInstance(int sortType,int chain_id) {
+    public static AgentComparatorRpc getInstance(int sortType) {
         switch (sortType) {
             case DEPOSIT:
                 return INSTANCE_ARRAY[DEPOSIT];

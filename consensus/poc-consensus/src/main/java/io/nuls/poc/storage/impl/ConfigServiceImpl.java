@@ -3,7 +3,7 @@ package io.nuls.poc.storage.impl;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.poc.storage.ConfigeService;
+import io.nuls.poc.storage.ConfigService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.tools.basic.InitializingBean;
@@ -18,11 +18,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * 配置信息存储管理类
+ * Configuration Information Storage Management Class
+ *
  * @author tag
  * 2018/11/8
  * */
 @Service
-public class ConfigServiceImpl implements ConfigeService , InitializingBean {
+public class ConfigServiceImpl implements ConfigService, InitializingBean {
     @Override
     public boolean save(ConfigBean bean, int chainID) throws Exception{
         if(bean == null){

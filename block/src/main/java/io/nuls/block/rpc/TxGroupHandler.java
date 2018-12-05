@@ -17,27 +17,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.*;
+import io.nuls.block.cache.TemporaryCacheManager;
 import io.nuls.block.constant.BlockErrorCode;
-import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.TxGroupMessage;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.utils.NetworkUtil;
+import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
 
@@ -51,12 +53,12 @@ import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
 @Component
 public class TxGroupHandler extends BaseCmd {
 
-    private static final int MAX_SIZE = 1000;
     @Autowired
-    private BlockService service;
+    private BlockService blockService;
+    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
 
     @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public CmdResponse process(List<Object> params) {
+    public Response process(List<Object> params) {
         Integer chainId = Integer.parseInt(params.get(0).toString());
         String nodeId = params.get(1).toString();
         TxGroupMessage message = new TxGroupMessage();
@@ -66,43 +68,41 @@ public class TxGroupHandler extends BaseCmd {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
             Log.warn(e.getMessage());
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         if (message == null || nodeId == null) {
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        NulsDigestData requestHash = null;
-        try {
-            requestHash = NulsDigestData.calcDigestData(message.serialize());
-            // react request
-//            NetworkUtil.sendToNode(chainId, new ReactMessage(chainId, requestHash), nodeId);
-
-            Block block = null;
-//            do {
-//                block = service.getBlock(chainId, endHeight--);
-//                if(block == null) {
-//                    NetworkUtil.sendFail(chainId, requestHash, nodeId);
-//                    return failed(BlockErrorCode.PARAMETER_ERROR, "");
-//                }
-//                sendBlock(chainId, block, nodeId);
-//            } while (endHeight > startHeight);
-
-//            CompleteMessage completeMessage = new CompleteMessage(chainId, requestHash, true);
-//            NetworkUtil.sendSuccess(chainId, requestHash, nodeId);
-        } catch (Exception e) {
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+        List<Transaction> transactions = message.getTransactions();
+        if (null == transactions || transactions.size() == 0) {
+            Log.warn("recieved a null txGroup form " + nodeId);
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
+
+        SmallBlock smallBlock = temporaryCacheManager.getSmallBlockByRequest(message.getRequestHash());
+        if (null == smallBlock) {
+            return failed(BlockErrorCode.PARAMETER_ERROR);
+        }
+        BlockHeader header = smallBlock.getHeader();
+        Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());
+        for (Transaction tx : smallBlock.getSubTxList()) {
+            txMap.put(tx.getHash(), tx);
+        }
+        for (Transaction tx : transactions) {
+            txMap.put(tx.getHash(), tx);
+        }
+        for (NulsDigestData hash : smallBlock.getTxHashList()) {
+            Transaction tx = txMap.get(hash);
+            if (tx != null) {
+                smallBlock.getSubTxList().add(tx);
+                txMap.put(hash, tx);
+            }
+        }
+        Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
+        blockService.saveBlock(chainId, block);
         return success();
-    }
-
-    private void sendBlock(int chainId, Block block, String nodeId) {
-        BlockMessage blockMessage = new BlockMessage();
-        boolean result = NetworkUtil.sendToNode(chainId, blockMessage, nodeId);
-        if (!result) {
-            Log.warn("send block failed:{},height:{}", nodeId, block.getHeader().getHeight());
-        }
     }
 
 }

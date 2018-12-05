@@ -1,6 +1,9 @@
 package io.nuls.poc.model.bo.config;
 
 /**
+ * 配置信息类
+ * Configuration information class
+ *
  * @author tag
  * 2018/11/8
  * */

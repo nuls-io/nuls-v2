@@ -11,7 +11,7 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.h2.dao.impl.BaseService;
 import io.nuls.transaction.db.h2.dao.impl.TransactionH2ServiceImpl;
-import io.nuls.transaction.model.po.TransactionPo;
+import io.nuls.transaction.model.po.TransactionPO;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.h2.util.StringUtils;
@@ -87,7 +87,7 @@ public class H2Test {
         //saveTxsTables
         TransactionH2Service ts = new TransactionH2ServiceImpl();
         for (int i=0;i<1;i++) {
-            List<TransactionPo> listPo = new ArrayList<>();
+            List<TransactionPO> listPo = new ArrayList<>();
             for (int j=0;j<200000;j++) {
                 listPo.add(createTxPo());
             }
@@ -99,8 +99,8 @@ public class H2Test {
     private static void select(String address){
         TransactionH2Service ts = new TransactionH2ServiceImpl();
         String addr = StringUtils.isNullOrEmpty(address) ? ranAddress() : address;
-//        Page<TransactionPo> page =  ts.getTxs(addr, null, null, 1540138501L, System.currentTimeMillis(), 1,15);
-        Page<TransactionPo> page =  ts.getTxs(addr, 1, null, null, null, 1,15);
+//        Page<TransactionPO> page =  ts.getTxs(addr, null, null, 1540138501L, System.currentTimeMillis(), 1,15);
+        Page<TransactionPO> page =  ts.getTxs(addr, 1, null, null, null, 1,15);
         try {
             System.out.println(JSONUtils.obj2json(page));
         } catch (JsonProcessingException e) {
@@ -117,7 +117,7 @@ public class H2Test {
     public static void initTestData(){
         TransactionH2Service ts = new TransactionH2ServiceImpl();
         for (int i=0;i<1;i++) {
-            List<TransactionPo> listPo = new ArrayList<>();
+            List<TransactionPO> listPo = new ArrayList<>();
             for (int j=0;j<100;j++) {
                listPo.add(createTxPo());
             }
@@ -126,13 +126,13 @@ public class H2Test {
     }
 
     //模拟TransactionPo的数据
-    private static TransactionPo createTxPo(){
+    private static TransactionPO createTxPo(){
         Random rand = new Random();
         int amount = rand.nextInt(5050 - 50 + 1) + 50;
         int time = rand.nextInt(1542514842 - 1541001600 + 1) + 1541001600;
         int stateAndType = rand.nextInt(3);
         int type = rand.nextInt(10) + 1;
-        TransactionPo txPo = new TransactionPo();
+        TransactionPO txPo = new TransactionPO();
 
         txPo.setAddress(ranAddress()); //随机表随机地址
 //        txPo.setAddress(ranSingleAddress());//表_0中随机地址

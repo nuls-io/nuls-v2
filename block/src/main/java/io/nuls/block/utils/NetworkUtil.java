@@ -20,14 +20,20 @@
 package io.nuls.block.utils;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.message.BaseMessage;
+import io.nuls.block.message.BaseMessage;
 import io.nuls.block.message.CompleteMessage;
-import io.nuls.block.message.body.CompleteMessageBody;
 import io.nuls.block.model.Node;
-import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 调用网络模块接口的工具
@@ -42,30 +48,46 @@ public class NetworkUtil {
          * 从kernel获取所有接口列表（实际使用中不需要每次都调用这句话，同步一次即可）
          */
         try {
-            CmdDispatcher.syncKernel();
+            CmdDispatcher.syncManager();
         } catch (Exception e) {
             Log.error(e);
         }
     }
 
     /**
+     * todo 待完善
      * 获取可用节点
      * @date 18-11-9 下午3:49
      * @param
      * @return
      */
-    public static List<Node> getAvailableNodes(int chainId) throws Exception {
-        /*
-         * 参数说明：
-         * 1. 调用的命令
-         * 2. 调用的命令的最低版本号
-         * 3. 调用的命令所需要的参数
-         * 返回值为json格式
-         */
-        String response = CmdDispatcher.request("nw_getNodes", null);
-//        List<Node> nodeList = JSONUtils.json2list(response, Node.class);
-//        return nodeList;
-        return null;
+    public static List<Node> getAvailableNodes(int chainId) {
+        try {
+            Map<String, Object> params = new HashMap<>(6);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("state", 1);
+            params.put("isCross", 0);
+            params.put("startPage", 0);
+            params.put("pageSize", 0);
+
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
+            Map responseData = (Map) response.getResponseData();
+            List list = (List) responseData.get("nw_getNodes");
+            List nodes = new ArrayList();
+            for (Object o : list) {
+                Map map = (Map) o;
+                Node node = new Node();
+                node.setId((String) map.get("nodeId"));
+                node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
+//            node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
+                nodes.add(node);
+            }
+            return nodes;
+        } catch (Exception e) {
+            Log.error(e);
+            return List.of();
+        }
     }
 
     /**
@@ -75,7 +97,38 @@ public class NetworkUtil {
      * @return
      */
     public static void resetNetwork(int chainId){
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
 
+            CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_reconnect", params);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
+
+    /**
+     * 给网络上节点广播消息
+     * @param chainId
+     * @param message
+     * @param excludeNodes      排除的节点
+     * @return
+     */
+    public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes){
+        try {
+            Map<String, Object> params = new HashMap<>(5);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("excludeNodes", excludeNodes);
+            params.put("messageBody", HexUtil.byteToHex(message.serialize()));
+            params.put("command", message.getCommand());
+
+            return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
     }
 
     /**
@@ -87,35 +140,34 @@ public class NetworkUtil {
      */
     public static boolean sendToNode(int chainId, BaseMessage message, String nodeId){
         try {
-            CmdDispatcher.request("nw_sendPeersMsg", null);
-//            CmdDispatcher.request("", new Object[]{chainId, nodeId, HexUtil.byteToHex(message.serialize())}, 1.0);
+            Map<String, Object> params = new HashMap<>(5);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("nodes", nodeId);
+            params.put("messageBody", HexUtil.byteToHex(message.serialize()));
+            params.put("command", message.getCommand());
+
+            return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
+            return false;
         }
-        return true;
     }
 
     /**
      * 给网络上节点广播消息
      * @param chainId
      * @param message
-     * @param nodeId
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message, String nodeId){
-        try {
-            CmdDispatcher.request("nw_broadcast", null);
-//            CmdDispatcher.request("nw_broadcast", new Object[]{chainId, nodeId, HexUtil.byteToHex(message.serialize())}, 1.0);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return true;
+    public static boolean broadcast(int chainId, BaseMessage message){
+        return broadcast(chainId, message, null);
     }
 
     public static void sendFail(int chainId, NulsDigestData hash, String nodeId) {
         CompleteMessage message = new CompleteMessage();
-        CompleteMessageBody body = new CompleteMessageBody(chainId, hash, false);
-        message.setMsgBody(body);
+        message.setRequestHash(hash);
+        message.setSuccess(false);
         boolean result = sendToNode(chainId, message, nodeId);
         if (!result) {
             Log.warn("send fail message failed:{}, hash:{}", nodeId, hash);
@@ -124,8 +176,8 @@ public class NetworkUtil {
 
     public static void sendSuccess(int chainId, NulsDigestData hash, String nodeId) {
         CompleteMessage message = new CompleteMessage();
-        CompleteMessageBody body = new CompleteMessageBody(chainId, hash, true);
-        message.setMsgBody(body);
+        message.setRequestHash(hash);
+        message.setSuccess(true);
         boolean result = sendToNode(chainId, message, nodeId);
         if (!result) {
             Log.warn("send success message failed:{}, hash:{}", nodeId, hash);

@@ -17,13 +17,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.config;
 
 import io.nuls.base.data.*;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.block.constant.BlockErrorCode;
-import io.nuls.block.model.CoinBaseTransaction;
+import io.nuls.block.constant.Constant;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
@@ -39,17 +40,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.block.constant.Constant.CHAIN_ID;
+
 /**
+ * todo 链工厂的链创世块
  * 创世块
+ *
  * @author captain
- * @date 18-11-13 下午5:11
  * @version 1.0
+ * @date 18-11-13 下午5:11
  */
 public final class GenesisBlock extends Block {
 
     private final static String GENESIS_BLOCK_FILE = "genesis-block.json";
     private static final String CONFIG_FILED_TIME = "time";
     private static final String CONFIG_FILED_HEIGHT = "height";
+    private static final String CONFIG_FILED_EXTEND = "extend";
     private static final String CONFIG_FILED_TXS = "txs";
     private static final String CONFIG_FILED_ADDRESS = "address";
     private static final String CONFIG_FILED_AMOUNT = "amount";
@@ -110,20 +116,27 @@ public final class GenesisBlock extends Block {
             String address = (String) map.get(CONFIG_FILED_ADDRESS);
             Asserts.notEmpty(address, BlockErrorCode.DATA_ERROR.getMsg());
 
-            Double amount = Double.valueOf("" + map.get(CONFIG_FILED_AMOUNT));
+            String amount = map.get(CONFIG_FILED_AMOUNT).toString();
             Long lockTime = Long.valueOf("" + map.get(CONFIG_FILED_LOCK_TIME));
 
             Address ads = Address.fromHashs(address);
 
-            Coin coin = new Coin(ads.getAddressBytes(), Na.parseNuls(amount), lockTime == null ? 0 : lockTime.longValue());
+            CoinTo coin = new CoinTo();
+            coin.setAddress(ads.getAddressBytes());
+            coin.setAmount(new BigInteger(amount));
+            coin.setAssetsChainId(CHAIN_ID);
+            coin.setAssetsId(1);
+            coin.setLockTime(lockTime == null ? 0 : lockTime.longValue());
+
             coinData.addTo(coin);
         }
 
-        CoinBaseTransaction tx = new CoinBaseTransaction();
+        Transaction tx = new Transaction();
+        tx.setType(Constant.TX_TYPE_COINBASE);
         tx.setTime(this.blockTime);
-        tx.setCoinData(coinData);
+        tx.setCoinData(coinData.serialize());
         String remark = (String) jsonMap.get(CONFIG_FILED_REMARK);
-        if(StringUtils.isNotBlank(remark)) {
+        if (StringUtils.isNotBlank(remark)) {
             tx.setRemark(HexUtil.decode(remark));
         }
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
@@ -135,6 +148,7 @@ public final class GenesisBlock extends Block {
 
     private void fillHeader(Map<String, Object> jsonMap) throws NulsException {
         Integer height = (Integer) jsonMap.get(CONFIG_FILED_HEIGHT);
+        String extend = (String) jsonMap.get(CONFIG_FILED_EXTEND);
         BlockHeader header = new BlockHeader();
         this.setHeader(header);
         header.setHeight(height);
@@ -146,18 +160,8 @@ public final class GenesisBlock extends Block {
             txHashList.add(tx.getHash());
         }
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
+        header.setExtend(NulsDigestData.fromDigestHex(extend).getDigestBytes());
 
-//        BlockExtendsData data = new BlockExtendsData();
-//        data.setRoundIndex(1);
-//        data.setRoundStartTime(header.getTime() - CommandConstant.BLOCK_TIME_INTERVAL_SECOND * 1000);
-//        data.setConsensusMemberCount(1);
-//        data.setPackingIndexOfRound(1);
-//        try {
-//            header.setExtend(data.serialize());
-//        } catch (IOException e) {
-//            throw new NulsRuntimeException(e);
-//
-//        }
         header.setHash(NulsDigestData.calcDigestData(header));
 
         BlockSignature p2PKHScriptSig = new BlockSignature();
@@ -167,7 +171,7 @@ public final class GenesisBlock extends Block {
         header.setBlockSignature(p2PKHScriptSig);
     }
 
-    private NulsSignData signature(byte[] bytes) throws NulsException {
+    private NulsSignData signature(byte[] bytes) {
         return SignatureUtil.signDigest(bytes, ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(PRIVATE_KEY))));
     }
 

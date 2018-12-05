@@ -22,6 +22,7 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 系统启动时加载缓存的处理器
@@ -36,36 +37,44 @@ public class ConsensusManager {
 
     /**
      * 节点各条链的状态
+     * The state of each chain of nodes
      * */
-    private Map<Integer, ConsensusStatus> agent_status = new HashMap<>();
+    private Map<Integer, ConsensusStatus> agentStatus = new ConcurrentHashMap<>();
 
+    //TODO 信息每条链单独村
     /**
      * 节点各条链打包状态
+     * Packing status of each chain of nodes
      * */
-    private Map<Integer,Boolean> packing_status = new HashMap<>();
+    private Map<Integer,Boolean> packingStatus = new ConcurrentHashMap<>();
 
     /**
      * 存放各条链所有节点信息列表
+     * Store a list of all nodes in each chain
      * */
-    private Map<Integer,List<Agent>> allAgentMap = new HashMap<>();
+    private Map<Integer,List<Agent>> allAgentMap = new ConcurrentHashMap<>();
 
     /**
      * 存放各条链所有的共识信息列表
+     * Store a list of all consensus information for each chain
      * */
-     private Map<Integer,List<Deposit>> allDepositMap = new HashMap<>();
+     private Map<Integer,List<Deposit>> allDepositMap = new ConcurrentHashMap<>();
 
     /**
      * 存放各条链黄牌交易列表
+     * Store a list of yellow-card transactions in each chain
      * */
-    private Map<Integer,List<PunishLogPo>> yellowPunishMap = new HashMap<>();
+    private Map<Integer,List<PunishLogPo>> yellowPunishMap = new ConcurrentHashMap<>();
 
     /**
      * 存放各条链红牌交易列表
+     * Store the list of red card transactions in each chain
      * */
-    private Map<Integer,List<PunishLogPo>> redPunishMap = new HashMap<>();
+    private Map<Integer,List<PunishLogPo>> redPunishMap = new ConcurrentHashMap<>();
 
     /**
      * 控制该类为单例模式
+     * Control this class as a singleton pattern
      * */
     public static ConsensusManager instance = null;
     private ConsensusManager() { }
@@ -81,17 +90,20 @@ public class ConsensusManager {
 
     /**
      * 初始化数据
+     * Initialization data
+     *
+     * @param chainId 链ID
      * */
-    public void initData(int chain_id){
+    public void initData(int chainId){
         try {
             //初始化节点状态
-            packing_status.put(chain_id,false);
-            agent_status.put(chain_id, ConsensusStatus.RUNNING);
+            packingStatus.put(chainId,false);
+            agentStatus.put(chainId, ConsensusStatus.INITING);
             //从数据库中读取节点信息，共识信息，红黄牌信息存放到对应的map中
-            loadAgents(chain_id);
-            loadDeposits(chain_id);
-            loadPunishes(chain_id);
-            RoundManager.getInstance().initRound(chain_id);
+            loadAgents(chainId);
+            loadDeposits(chainId);
+            loadPunishes(chainId);
+            RoundManager.getInstance().initRound(chainId);
         }catch (Exception e){
             Log.error(e);
         }
@@ -99,16 +111,18 @@ public class ConsensusManager {
 
     /**
      * 数据黄牌数据
+     * Data yellow card data
+     *
+     * @param chainId 链ID
      * */
-    public void clear(int chain_id){
-        /**
-         * todo
-         * 从区块管理模块获取最后一个区块的高度,清除200轮之前的红黄牌数据
-         * */
-        //BlockHeader bestBlockHeader = chain.getEndBlockHeader();
+    public void clear(int chainId){
+        /*todo
+          从区块管理模块获取最后一个区块的高度,清除200轮之前的红黄牌数据
+          Get the height of the last block from the module management module and clear the red and yellow card data before 200 rounds.
+         */
         BlockHeader blockHeader = new BlockHeader();
         BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
-        Iterator<PunishLogPo> yellowIterator = yellowPunishMap.get(chain_id).iterator();
+        Iterator<PunishLogPo> yellowIterator = yellowPunishMap.get(chainId).iterator();
         while (yellowIterator.hasNext()){
             PunishLogPo po = yellowIterator.next();
             if (po.getRoundIndex() < roundData.getRoundIndex() - ConsensusConstant.INIT_PUNISH_OF_ROUND_COUNT) {
@@ -119,38 +133,46 @@ public class ConsensusManager {
 
     /**
      * 初始化节点信息
+     * Initialize node information
+     *
+     * @param chainId  链ID
      * */
-    public void loadAgents(int chain_id) throws Exception{
+    public void loadAgents(int chainId) throws Exception{
         List<Agent> allAgentList = new ArrayList<>();
-        List<AgentPo> poList = this.agentStorageService.getList(chain_id);
+        List<AgentPo> poList = this.agentStorageService.getList(chainId);
         for (AgentPo po : poList) {
             Agent agent = PoConvertUtil.poToAgent(po);
             allAgentList.add(agent);
         }
         Collections.sort(allAgentList, new AgentComparator());
-        allAgentMap.put(chain_id,allAgentList);
+        allAgentMap.put(chainId,allAgentList);
     }
 
     /**
      * 初始化委托信息
+     * Initialize delegation information
+     *
+     * @param chainId  链ID
      * */
-    public void loadDeposits(int chain_id) throws Exception{
+    public void loadDeposits(int chainId) throws Exception{
         List<Deposit> allDepositList = new ArrayList<>();
-        List<DepositPo> poList = depositStorageService.getList(chain_id);
+        List<DepositPo> poList = depositStorageService.getList(chainId);
         for (DepositPo po : poList) {
             Deposit deposit = PoConvertUtil.poToDeposit(po);
             allDepositList.add(deposit);
         }
         Collections.sort(allDepositList, new DepositComparator());
-        allDepositMap.put(chain_id,allDepositList);
+        allDepositMap.put(chainId,allDepositList);
     }
 
     /**
-     * 加载所有的红牌信息
-     * 加载指定轮次的黄牌信息
+     * 加载所有的红牌信息和指定轮次的黄牌信息
+     * Load all red card information and yellow card information for specified rounds
+     *
+     * @param chainId  链ID
      * */
-    public void loadPunishes(int chain_id) throws Exception{
-        List<PunishLogPo> punishLogList= punishStorageService.getPunishList(chain_id);
+    public void loadPunishes(int chainId) throws Exception{
+        List<PunishLogPo> punishLogList= punishStorageService.getPunishList(chainId);
         List<PunishLogPo> yellowPunishList = new ArrayList<>();
         List<PunishLogPo> redPunishList = new ArrayList<>();
         /**
@@ -175,22 +197,36 @@ public class ConsensusManager {
         }
         Collections.sort(yellowPunishList, new PunishLogComparator());
         Collections.sort(redPunishList, new PunishLogComparator());
-        yellowPunishMap.put(chain_id,yellowPunishList);
-        redPunishMap.put(chain_id,redPunishList);
+        yellowPunishMap.put(chainId,yellowPunishList);
+        redPunishMap.put(chainId,redPunishList);
     }
 
-    public void addAgent(int chain_id,Agent agent) throws Exception{
-        removeAgent(chain_id,agent.getTxHash());
-        allAgentMap.get(chain_id).add(agent);
+    /**
+     * 添加或修改指定链节点
+     * Adding or modifying specified chain nodes
+     *
+     * @param chainId 链ID
+     * @param agent    节点信息
+     * */
+    public void addAgent(int chainId,Agent agent) throws Exception{
+        removeAgent(chainId,agent.getTxHash());
+        allAgentMap.get(chainId).add(agent);
     }
 
-    public void removeAgent(int chain_id, NulsDigestData txHash)throws Exception {
-        List<Agent> agentList = allAgentMap.get(chain_id);
+    /**
+     * 删除指定链节点
+     * Delete the specified link node
+     *
+     * @param chainId 链ID
+     * @param txHash   创建该节点交易的ID
+     * */
+    public void removeAgent(int chainId, NulsDigestData txHash)throws Exception {
+        List<Agent> agentList = allAgentMap.get(chainId);
         if(agentList == null || agentList.size() == 0){
-            loadAgents(chain_id);
             return;
         }
         for (Agent agent:agentList) {
+            //todo
             if(Arrays.equals(txHash.serialize(),agent.getTxHash().serialize())){
                 agentList.remove(agent);
                 return;
@@ -198,15 +234,22 @@ public class ConsensusManager {
         }
     }
 
-    public void addDeposit(int chain_id,Deposit deposit) throws  Exception{
-        removeAgent(chain_id,deposit.getTxHash());
-        allDepositMap.get(chain_id).add(deposit);
+    public void addDeposit(int chainId,Deposit deposit) throws  Exception{
+        removeAgent(chainId,deposit.getTxHash());
+        allDepositMap.get(chainId).add(deposit);
     }
 
-    public void removeDeposit(int chain_id,NulsDigestData txHash) throws Exception{
-        List<Deposit> depositList = allDepositMap.get(chain_id);
+    /**
+     * 删除指定链的委托信息
+     * Delete delegate information for a specified chain
+     *
+     * @param chainId 链ID
+     * @param txHash   创建该委托交易的ID
+     * */
+    public void removeDeposit(int chainId,NulsDigestData txHash) throws Exception{
+        List<Deposit> depositList = allDepositMap.get(chainId);
         if(depositList == null || depositList.size() == 0){
-            loadDeposits(chain_id);
+            loadDeposits(chainId);
             return;
         }
         for (Deposit deposit:depositList) {
@@ -217,12 +260,12 @@ public class ConsensusManager {
         }
     }
 
-    public Map<Integer, Boolean> getPacking_status() {
-        return packing_status;
+    public Map<Integer, Boolean> getPackingStatus() {
+        return packingStatus;
     }
 
-    public void setPacking_status(Map<Integer, Boolean> packing_status) {
-        this.packing_status = packing_status;
+    public void setPackingStatus(Map<Integer, Boolean> packingStatus) {
+        this.packingStatus = packingStatus;
     }
 
     public Map<Integer, List<Agent>> getAllAgentMap() {
@@ -257,11 +300,11 @@ public class ConsensusManager {
         this.redPunishMap = redPunishMap;
     }
 
-    public Map<Integer, ConsensusStatus> getAgent_status() {
-        return agent_status;
+    public Map<Integer, ConsensusStatus> getAgentStatus() {
+        return agentStatus;
     }
 
-    public void setAgent_status(Map<Integer, ConsensusStatus> agent_status) {
-        this.agent_status = agent_status;
+    public void setAgentStatus(Map<Integer, ConsensusStatus> agentStatus) {
+        this.agentStatus = agentStatus;
     }
 }

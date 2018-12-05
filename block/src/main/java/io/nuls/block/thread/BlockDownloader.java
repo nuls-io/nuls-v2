@@ -21,43 +21,39 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.Node;
+import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.tools.log.Log;
+import lombok.AllArgsConstructor;
 
-import java.util.List;
+import java.util.SortedSet;
 import java.util.concurrent.Callable;
 
 /**
- * @author: Niels Wang
+ * 区块下载器
+ *
+ * @author captain
+ * @version 1.0
+ * @date 18-12-4 下午8:29
  */
+@AllArgsConstructor()
 public class BlockDownloader implements Callable<BlockDownLoadResult> {
 
-    private NulsDigestData startHash;
-    private NulsDigestData endHash;
     private long startHeight;
     private int size;
     private int chainId;
+    private int index;
     private Node node;
-
-    public BlockDownloader(int chainId, NulsDigestData startHash, NulsDigestData endHash, long startHeight, int size, Node node) {
-        this.chainId = chainId;
-        this.startHash = startHash;
-        this.endHash = endHash;
-        this.startHeight = startHeight;
-        this.size = size;
-        this.node = node;
-    }
 
     @Override
     public BlockDownLoadResult call() {
-        List<Block> blockList = null;
+        SortedSet<Block> blockSet = null;
         try {
-            blockList = BlockDownloadUtils.getBlocks(chainId, node, startHeight, startHeight + size - 1);
+            blockSet = BlockDownloadUtils.getBlocks(chainId, node, startHeight, startHeight + size - 1);
         } catch (Exception e) {
             Log.error(e.getMessage());
         }
-        return new BlockDownLoadResult(startHash, endHash, startHeight, size, node, blockList);
+        return new BlockDownLoadResult(startHeight, size, node, blockSet, index);
     }
 
 }

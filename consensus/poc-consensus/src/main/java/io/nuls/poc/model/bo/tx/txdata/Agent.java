@@ -41,84 +41,100 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
+ * 节点信息类
+ * Node information class
+ *
  * @author tag
  * 2018/11/6
  */
 public class Agent extends TransactionLogicData {
 
     /**
-     * 节点地址
-     * */
+    * 节点地址
+    * agent address
+    **/
     private byte[] agentAddress;
 
     /**
-     * 打包地址
-     * */
+    * 打包地址
+    * packing address
+    **/
     private byte[] packingAddress;
 
     /**
-     * 奖励地址
-     * */
+    * 奖励地址
+    * reward address
+    * */
     private byte[] rewardAddress;
 
     /**
-     * 保证金
-     * */
+    * 保证金
+    * deposit
+    * */
     private BigInteger deposit;
 
     /**
-     * 佣金比例
-     * */
+    * 佣金比例
+    * commission rate
+    * */
     private double commissionRate;
 
     /**
-     * 创建时间
-     * */
+    * 创建时间
+    * create time
+    **/
     private transient long time;
 
     /**
-     * 所在区块高度
-     * */
+    * 所在区块高度
+    * block height
+    * */
     private transient long blockHeight = -1L;
 
     /**
-     * 该节点注销所在区块高度
-     * */
+    * 该节点注销所在区块高度
+    * Block height where the node logs out
+    * */
     private transient long delHeight = -1L;
 
     /**
-     * 0:待共识 unconsensus, 1:共识中 consensus
-     */
+    *0:待共识 unConsensus, 1:共识中 consensus
+    * */
     private transient int status;
 
     /**
-     * 信誉值
-     * */
+    * 信誉值
+    * credit value
+    * */
     private transient double creditVal;
 
     /**
-     * 总委托金额
+     *  总委托金额
+     *Total amount entrusted
      * */
     private transient BigInteger totalDeposit;
 
     /**
      * 交易HASH
+     * transaction hash
      * */
     private transient NulsDigestData txHash;
 
     /**
-     * 参与共识人数
-     * */
+    * 参与共识人数
+    * Participation in consensus
+    * */
     private transient int memberCount;
 
     /**
-     * 别名不序列化
-     * */
+    *别名不序列化
+    * Aliases not serialized
+    * */
     private transient String alais;
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfBigInteger();  // deposit.getValue()
+        size += SerializeUtils.sizeOfBigInteger();
         size += this.agentAddress.length;
         size += this.rewardAddress.length;
         size += this.packingAddress.length;
@@ -233,8 +249,24 @@ public class Agent extends TransactionLogicData {
         this.memberCount = memberCount;
     }
 
-    public BigInteger getAvailableDepositAmount(int chain_id) {
-        return ConfigManager.config_map.get(chain_id).getCommission_max().subtract(this.getTotalDeposit());
+    /**
+    * 就算节点剩余可委托金额
+    * Even if the remaining amount of the node can be delegated
+    **/
+    public BigInteger getAvailableDepositAmount(int chainId) {
+        return ConfigManager.config_map.get(chainId).getCommissionMax().subtract(this.getTotalDeposit());
+    }
+
+    /**
+    * 判断该节点是否可委托
+    * Determine whether the node can be delegated
+    * */
+    public boolean canDeposit(int chainId) {
+        int flag = getAvailableDepositAmount(chainId).compareTo(ConfigManager.config_map.get(chainId).getCommissionMin());
+        if(flag >= 1){
+            return true;
+        }
+        return false;
     }
 
     public BigInteger getDeposit() {
@@ -253,19 +285,12 @@ public class Agent extends TransactionLogicData {
         this.totalDeposit = totalDeposit;
     }
 
-    public boolean canDeposit(int chain_id) {
-        int flag = getAvailableDepositAmount(chain_id).compareTo(ConfigManager.config_map.get(chain_id).getCommission_min());
-        if(flag >= 1){
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public Agent clone() throws CloneNotSupportedException {
         return (Agent) super.clone();
     }
 
+    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(this.agentAddress);

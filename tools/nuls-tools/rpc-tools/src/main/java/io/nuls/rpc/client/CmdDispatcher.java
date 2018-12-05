@@ -1,6 +1,31 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.tools.log.Log;
@@ -27,8 +52,8 @@ public class CmdDispatcher {
      * @throws Exception 握手失败, handshake failed
      */
     public static boolean handshakeManager() throws Exception {
-        Message message = Constants.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnection);
-        message.setMessageData(Constants.defaultNegotiateConnection());
+        Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
+        message.setMessageData(MessageUtil.defaultNegotiateConnection());
 
         WsClient wsClient = ClientRuntime.getWsClient(Constants.kernelUrl);
 
@@ -42,7 +67,7 @@ public class CmdDispatcher {
         是否收到正确的握手确认
         Whether received the correct handshake confirmation?
          */
-        return getNegotiateConnectionResponse();
+        return receiveNegotiateConnectionResponse();
     }
 
     /**
@@ -56,9 +81,9 @@ public class CmdDispatcher {
      * @throws Exception 核心模块（Manager）不可用，Core Module (Manager) Not Available
      */
     public static void syncManager() throws Exception {
-        String messageId = Constants.nextSequence();
-        Message message = Constants.basicMessage(messageId, MessageType.Request);
-        Request request = ClientRuntime.defaultRequest();
+
+        Message message = MessageUtil.basicMessage(MessageType.Request);
+        Request request = MessageUtil.defaultRequest();
         request.getRequestMethods().put("registerAPI", ServerRuntime.local);
         message.setMessageData(request);
 
@@ -68,7 +93,7 @@ public class CmdDispatcher {
         }
         wsClient.send(JSONUtils.obj2json(message));
 
-        Response response = getResponse(messageId);
+        Response response = receiveResponse(message.getMessageId());
         Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
@@ -84,8 +109,9 @@ public class CmdDispatcher {
      * Send Request and wait for Response, and throw a timeout exception if the waiting time more than one minute
      */
     public static Response requestAndResponse(String role, String cmd, Map params) throws Exception {
-        String messageId = request(role, cmd, params, Constants.booleanString(false), "0");
-        return getResponse(messageId);
+        Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
+        String messageId = sendRequest(role, request);
+        return receiveResponse(messageId);
     }
 
     /**
@@ -94,9 +120,10 @@ public class CmdDispatcher {
      * Send the Request and automatically call the local method based on the return result
      * The return value is messageId, used to unsubscribe
      */
-    public static String requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
-        String messageId = request(role, cmd, params, Constants.booleanString(false), subscriptionPeriod);
-        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
+    public static String requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, String subscriptionEventCounter, BaseInvoke baseInvoke) throws Exception {
+        Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_FALSE, subscriptionPeriod, subscriptionEventCounter);
+        String messageId = sendRequest(role, request);
+        ClientRuntime.INVOKE_MAP.put(messageId, baseInvoke);
         return messageId;
     }
 
@@ -104,45 +131,40 @@ public class CmdDispatcher {
      * 与requestAndInvoke类似，但是发送之后必须接收到一个Ack作为确认
      * Similar to requestAndInvoke, but after sending, an Ack must be received as an acknowledgement
      */
-    public static String requestAndInvokeWithAck(String role, String cmd, Map params, String subscriptionPeriod, Class clazz, String invokeMethod) throws Exception {
-        String messageId = request(role, cmd, params, Constants.booleanString(true), subscriptionPeriod);
-        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
-        return getAck(messageId) ? messageId : null;
+    public static String requestAndInvokeWithAck(String role, String cmd, Map params, String subscriptionPeriod, String subscriptionEventCounter, BaseInvoke baseInvoke) throws Exception {
+        Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_TRUE, subscriptionPeriod, subscriptionEventCounter);
+        String messageId = sendRequest(role, request);
+        ClientRuntime.INVOKE_MAP.put(messageId, baseInvoke);
+        return receiveAck(messageId) ? messageId : null;
     }
 
     /**
-     * 发送Request，用于一次调用多个方法（需要自己封装Request对象）
-     * Send Request for calling multiple methods at a time (need to wrap the Request object manually)
+     * 发送Request，自己封装Request对象(可以一次调用多个cmd)
+     * Send Request, need to wrap the Request object manually(for calling multiple methods at a time)
      */
-    public static String requestAndInvoke(String role, Request request, Class clazz, String invokeMethod) throws Exception {
-        String messageId = request(role, request);
-        ClientRuntime.INVOKE_MAP.put(messageId, new Object[]{clazz, invokeMethod});
-        if (Constants.booleanString(false).equals(request.getRequestAck())) {
+    public static String requestAndInvoke(String role, Request request, BaseInvoke baseInvoke) throws Exception {
+        if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())
+                || ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
+            throw new Exception("Wrong value: [SubscriptionPeriod][SubscriptionEventCounter]");
+        }
+
+        String messageId = sendRequest(role, request);
+        ClientRuntime.INVOKE_MAP.put(messageId, baseInvoke);
+        if (Constants.BOOLEAN_FALSE.equals(request.getRequestAck())) {
             return messageId;
         } else {
-            return getAck(messageId) ? messageId : null;
+            return receiveAck(messageId) ? messageId : null;
         }
     }
 
-    /**
-     * 根据参数构造Request对象，然后发送Request
-     * Construct the Request object according to the parameters, and then send the Request
-     */
-    private static String request(String role, String cmd, Map params, String ack, String subscriptionPeriod) throws Exception {
-        Request request = ClientRuntime.defaultRequest();
-        request.setRequestAck(ack);
-        request.setSubscriptionPeriod(subscriptionPeriod);
-        request.getRequestMethods().put(cmd, params);
-        return request(role, request);
-    }
 
     /**
      * 发送Request，返回该Request的messageId
      * Send Request, return the messageId of the Request
      */
-    private static String request(String role, Request request) throws Exception {
-        String messageId = Constants.nextSequence();
-        Message message = Constants.basicMessage(messageId, MessageType.Request);
+    private static String sendRequest(String role, Request request) throws Exception {
+
+        Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
 
         /*
@@ -162,10 +184,10 @@ public class CmdDispatcher {
             如果是需要重复发送的消息（订阅消息），记录messageId与客户端的对应关系，用于取消订阅
             If it is a message (subscription message) that needs to be sent repeatedly, record the relationship between the messageId and the WsClient
              */
-            ClientRuntime.msgIdKeyWsClientMap.put(messageId, wsClient);
+            ClientRuntime.msgIdKeyWsClientMap.put(message.getMessageId(), wsClient);
         }
 
-        return messageId;
+        return message.getMessageId();
     }
 
 
@@ -173,8 +195,8 @@ public class CmdDispatcher {
      * 取消订阅
      * Unsubscribe
      */
-    public static void unsubscribe(String messageId) throws Exception {
-        Message message = Constants.basicMessage(Constants.nextSequence(), MessageType.Unsubscribe);
+    public static void sendUnsubscribe(String messageId) throws Exception {
+        Message message = MessageUtil.basicMessage(MessageType.Unsubscribe);
         Unsubscribe unsubscribe = new Unsubscribe();
         unsubscribe.setUnsubscribeMethods(new String[]{messageId});
         message.setMessageData(unsubscribe);
@@ -194,7 +216,7 @@ public class CmdDispatcher {
      * 是否握手成功
      * Whether shake hands successfully?
      */
-    static boolean getNegotiateConnectionResponse() throws InterruptedException {
+    static boolean receiveNegotiateConnectionResponse() throws InterruptedException {
 
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
@@ -220,7 +242,7 @@ public class CmdDispatcher {
      * 根据messageId获取Response
      * Get response by messageId
      */
-    private static Response getResponse(String messageId) throws InterruptedException, IOException {
+    private static Response receiveResponse(String messageId) throws InterruptedException, IOException {
 
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
@@ -256,14 +278,14 @@ public class CmdDispatcher {
         /*
         Timeout Error
          */
-        return ServerRuntime.newResponse(messageId, Constants.booleanString(false), Constants.RESPONSE_TIMEOUT);
+        return MessageUtil.newResponse(messageId, Constants.BOOLEAN_FALSE, Constants.RESPONSE_TIMEOUT);
     }
 
     /**
      * 获取收到Request的确认
      * Get confirmation of receipt(Ack) of Request
      */
-    private static boolean getAck(String messageId) throws InterruptedException, IOException {
+    private static boolean receiveAck(String messageId) throws InterruptedException, IOException {
 
         long timeMillis = TimeService.currentTimeMillis();
         while (TimeService.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
