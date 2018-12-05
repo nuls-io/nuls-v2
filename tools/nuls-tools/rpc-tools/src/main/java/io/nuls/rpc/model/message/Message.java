@@ -41,18 +41,37 @@ import lombok.ToString;
 @NoArgsConstructor
 public class Message {
 
+    /**
+     * 消息号 / Message ID
+     */
     @Getter
     @Setter
     private String messageId;
+
+    /**
+     * 消息发送时间 / Message sending time
+     */
     @Getter
     @Setter
     private String timestamp;
+
+    /**
+     * 消息发送时区 / Message sending timezone
+     */
     @Getter
     @Setter
     private String timezone;
+
+    /**
+     * 消息类型，共9种 / Message type, 9 types
+     */
     @Getter
     @Setter
     private String messageType;
+
+    /**
+     * 消息体，根据messageType有不同的结构
+     */
     @Getter
     @Setter
     private Object messageData;

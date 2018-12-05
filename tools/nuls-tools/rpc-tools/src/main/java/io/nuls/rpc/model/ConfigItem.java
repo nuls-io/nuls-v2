@@ -28,9 +28,11 @@ package io.nuls.rpc.model;
 import lombok.*;
 
 /**
+ * 模块的自定义参数
+ * User defined parameters of module
+ *
  * @author tangyi
  * @date 2018/10/29
- * @description
  */
 @ToString
 @NoArgsConstructor
