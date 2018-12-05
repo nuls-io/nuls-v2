@@ -1,14 +1,18 @@
-/*
+/**
  * MIT License
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,50 +22,53 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.message.body;
+package io.nuls.transaction.model.dto;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
 
-import java.io.IOException;
+import java.util.Arrays;
 
 /**
- * 请求获取小区块消息
- * @author captain
- * @date 18-11-9 下午2:37
- * @version 1.0
+ * @author: Charlie
+ * @date: 2018-12-05
  */
-@Data
-public class GetSmallBlockMessageBody extends MessageBody {
+public class BlockHeaderDigestDTO {
 
-    private int chainID;
-    private NulsDigestData requestHash;
+    private byte[] blockHeaderHash;
 
-    public GetSmallBlockMessageBody() {
+    private long height;
+
+    private long time;
+
+    public byte[] getBlockHeaderHash() {
+        return blockHeaderHash;
+    }
+
+    public void setBlockHeaderHash(byte[] blockHeaderHash) {
+        this.blockHeaderHash = blockHeaderHash;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 
     @Override
-    public int size() {
-        int size = 0;
-        size += SerializeUtils.sizeOfInt32();
-        size += SerializeUtils.sizeOfNulsData(requestHash);
-        return size;
+    public String toString() {
+        return "BlockHeaderDigestDTO{" +
+                "blockHeaderHash=" + Arrays.toString(blockHeaderHash) +
+                ", height=" + height +
+                ", time=" + time +
+                '}';
     }
-
-    @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint32(chainID);
-        stream.writeNulsData(requestHash);
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainID = byteBuffer.readInt32();
-        this.requestHash = byteBuffer.readHash();
-    }
-
 }

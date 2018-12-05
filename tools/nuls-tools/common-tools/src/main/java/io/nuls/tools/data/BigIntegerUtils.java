@@ -206,4 +206,14 @@ public class BigIntegerUtils {
         }
         return true;
     }
+
+    /**
+     * 第一个小于等于第二个数
+     */
+    public static boolean isEqualOrLessThan(BigInteger b1, BigInteger b2) {
+        if (b1.compareTo(b2) > 0) {
+            return false;
+        }
+        return true;
+    }
 }

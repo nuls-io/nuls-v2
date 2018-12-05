@@ -49,7 +49,7 @@ public class TxGroupMessage extends BaseMessage {
     public TxGroupMessage() {
     }
 
-    public TxGroupMessage(int chainID, NulsDigestData requestHash, boolean success, List<Transaction> transactions) {
+    public TxGroupMessage(NulsDigestData requestHash, List<Transaction> transactions) {
         this.requestHash = requestHash;
         this.transactions = transactions;
     }

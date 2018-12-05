@@ -61,6 +61,7 @@ public class NetworkResetMonitor implements Runnable {
                 long time = ContextManager.getContext(chainId).getLatestBlock().getHeader().getTime();
                 //如果(当前时间戳-最新区块时间戳)>重置网络阈值，通知网络模块重置可用节点
                 if (TimeService.currentTimeMillis() - time > reset) {
+                    Log.info("chainId-{},NetworkReset!", chainId);
                     NetworkUtil.resetNetwork(chainId);
                 }
             } catch (Exception e) {
