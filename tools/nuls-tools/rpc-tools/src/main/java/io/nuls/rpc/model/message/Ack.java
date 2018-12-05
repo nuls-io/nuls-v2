@@ -37,7 +37,8 @@ import lombok.*;
 @NoArgsConstructor
 public class Ack {
     /**
-     * 请求的消息号 / The messageId of request
+     * 请求的消息号
+     * This is the original request ID referred by a Request message
      */
     @Getter
     @Setter

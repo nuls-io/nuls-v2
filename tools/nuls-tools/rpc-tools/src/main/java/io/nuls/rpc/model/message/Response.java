@@ -41,25 +41,52 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 public class Response {
+    /**
+     * This is the original request ID referred by a Request message
+     */
     @Getter
     @Setter
     private String requestId;
+
+    /**
+     * The time that the target service took to process the request in milliseconds.
+     */
     @Getter
     @Setter
     private String responseProcessingTime;
+
+    /**
+     * The response status, 1 if successful, 0 otherwise.
+     */
     @Getter
     @Setter
     private String responseStatus;
+
+    /**
+     * A string that could offer more clarification about the result of the process.
+     */
     @Getter
     @Setter
     private String responseComment;
+
+    /**
+     * The maximum number of objects that the response contains per request.
+     */
     @Getter
     @Setter
     private String responseMaxSize;
+
+    /**
+     * An object array that contains the result of the method processed, one object per request
+     */
     @Getter
     @Setter
     private Object responseData;
 
+    /**
+     * 回复是否正确 / Whether the response is correct
+     * @return boolean
+     */
     @JsonIgnore
     public boolean isSuccess() {
         return Constants.BOOLEAN_TRUE.equals(responseStatus);

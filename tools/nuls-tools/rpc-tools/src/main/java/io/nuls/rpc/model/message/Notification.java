@@ -39,15 +39,32 @@ import lombok.ToString;
 @ToString
 @NoArgsConstructor
 public class Notification {
+    /**
+     * (Default: 0): This is a boolean value.
+     * 0: The Micro server that made the notification does not expect any kind of message in return.
+     * 1: The Micro server that made the notification expects exactly one Ack message.
+     */
     @Getter
     @Setter
     private String notificationAck;
+
+    /**
+     * The category of the notification, each service may define its own types so it is not required that the target service processes this field.
+     */
     @Getter
     @Setter
     private String notificationType;
+
+    /**
+     * A string comment that provides more information about the reason of the notification
+     */
     @Getter
     @Setter
     private String notificationComment;
+
+    /**
+     * Data relevant to the notification, it is not required the target service to process this field
+     */
     @Getter
     @Setter
     private String notificationData;
