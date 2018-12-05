@@ -6,14 +6,13 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.config.ConfigItem;
 import io.nuls.poc.model.bo.tx.TxRegisterDetail;
-import io.nuls.poc.storage.ConfigeService;
+import io.nuls.poc.storage.ConfigService;
 import io.nuls.poc.storage.LanguageService;
 import io.nuls.poc.utils.annotation.ResisterTx;
 import io.nuls.poc.utils.enumeration.TxMethodType;
 import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.SchedulerManager;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.ScanUtil;
@@ -23,7 +22,6 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -37,47 +35,37 @@ import java.util.Properties;
 import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * 共识模块启动及初始化管理
+ * Consensus Module Startup and Initialization Management
+ *
  * @author tag
  * 2018/11/7
  * */
 public class BootStrap {
+    /**
+     * 共识模块启动方法
+     * Consensus module startup method
+     * */
     public static void main(String[] args){
         try {
-            init(1);
-            TimeService.getInstance().start();
+            initSys();
+            initDB();
+            SpringLiteContext.init(ConsensusConstant.CONTEXT_PATH);
+            initLanguage();
+            sysStart();
+            registerTx();
+            initServer();
         }catch (Exception e){
             Log.error("consensus startup error！");
             Log.error(e);
         }
     }
 
-    public static void init(int chain_id){
-        try{
-            //初始化系统参数
-            initSys();
-            //初始化数据库配置文件
-            initDB();
-            //初始化上下文
-            SpringLiteContext.init(ConsensusConstant.CONTEXT_PATH);
-            //初始化国际资源文件语言
-            initLanguage();
-            //加载本地配置参数,并启动本地服务
-            sysStart(chain_id);
-            //向交易管理模块注册本地交易验证器，处理器等信息
-            registerTx();
-            //启动WebSocket服务,向外提供RPC接口
-            initServer();
-        }catch (Exception e){
-            Log.error(e);
-        }
-    }
-
     /**
      * 初始化系统编码
+     * Initialization System Coding
      * */
-    public static void initSys(){
+    private static void initSys(){
         try {
-            System.setProperty(ConsensusConstant.SYS_ALLOW_NULL_ARRAY_ELEMENT, "true");
             System.setProperty(ConsensusConstant.SYS_FILE_ENCODING, UTF_8.name());
             Field charset = Charset.class.getDeclaredField("defaultCharset");
             charset.setAccessible(true);
@@ -88,12 +76,27 @@ public class BootStrap {
     }
 
     /**
-     * 初始化国际化资源文件语言
+     * 初始化数据库
+     * Initialization database
      * */
-    public static void initLanguage(){
+    private static void initDB(){
+        try {
+            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.DB_CONFIG_NAME);
+            String path = properties.getProperty(ConsensusConstant.DB_DATA_PATH, ConsensusConstant.DB_DATA_DEFAULT_PATH);
+            RocksDBService.init(path);
+        }catch (Exception e){
+            Log.error(e);
+        }
+    }
+
+    /**
+     * 初始化国际化资源文件语言
+     * Initialization of International Resource File Language
+     * */
+    private static void initLanguage(){
         try {
             LanguageService languageService = SpringLiteContext.getBean(LanguageService.class);
-            String languageDB = (String) languageService.getLanguage();
+            String languageDB = languageService.getLanguage();
             I18nUtils.loadLanguage("","");
             String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
             I18nUtils.setLanguage(language);
@@ -105,75 +108,46 @@ public class BootStrap {
         }
     }
 
+
     /**
      * 配置信息读取，内部服务启动
+     * Configuration information read, internal service start
      * */
-    public static void sysStart(int chain_id){
+    private static void sysStart(){
         try {
             //读取数据库链信息配置
-            ConfigeService configeService = SpringLiteContext.getBean(ConfigeService.class);
-            Map<Integer, ConfigBean> configMap = configeService.getList();
-            //如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
+            ConfigService configService = SpringLiteContext.getBean(ConfigService.class);
+            Map<Integer, ConfigBean> configMap = configService.getList();
+            /*
+            如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
+            If the system is running for the first time, the local database does not have chain information,
+            and the main chain configuration information needs to be read from the configuration file at this time.
+            */
             if(configMap == null || configMap.size() == 0){
+                int chainId  = ConsensusConstant.MAIN_CHAIN_ID;
                 //读取配置文件信息
                 String configJson = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
                 List<ConfigItem> configItemList = JSONUtils.json2list(configJson,ConfigItem.class);
                 //初始化配置管理类
-                ConfigManager.initManager(configItemList,chain_id);
+                ConfigManager.initManager(configItemList,chainId);
                 //初始化链相关表
-                initTabel(chain_id);
+                initTable(chainId);
                 //初始化本地缓存数据（共识节点，委托信息，惩罚信息等）
-                ConsensusManager.getInstance().initData(chain_id);
+                ConsensusManager.getInstance().initData(chainId);
                 //启动内部服务
-                SchedulerManager.createChainScheduler(chain_id);
+                SchedulerManager.createChainScheduler(chainId);
             }else{
                 //初始化配置管理类
                 ConfigManager.config_map.putAll(configMap);
                 //初始化各条链相关表
                 for (int id : configMap.keySet()) {
-                    initTabel(id);
+                    initTable(id);
                     //初始化本地缓存数据（共识节点，委托信息，惩罚信息等）
                     ConsensusManager.getInstance().initData(id);
                 }
                 //启动内部服务,先启动主链，在启动子链
-                SchedulerManager.createChainSchefuler(ConfigManager.config_map);
+                SchedulerManager.createChainScheduler(ConfigManager.config_map);
             }
-        }catch (Exception e){
-            Log.error(e);
-        }
-    }
-
-    /**
-     * 共识模块启动WebSocket服务，用于其他模块连接共识模块与共识模块交互
-     * */
-    public static void initServer(){
-        try {
-            try {
-                WsServer.getInstance(ModuleE.CS)
-                        .moduleRoles(new String[]{"1.0"})
-                        .moduleVersion("1.0")
-                        .dependencies(ModuleE.LG.abbr, "1.0")
-                        .scanPackage("io.nuls.poc.rpc")
-                        .connect("ws://127.0.0.1:8887");
-                // Get information from kernel
-                CmdDispatcher.syncKernel();
-            } catch (Exception e) {
-                Log.error("Account initServer failed", e);
-            }
-        }catch (Exception e){
-            Log.error("Consensus startup webSocket server error!");
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * 初始化数据库
-     * */
-    public static void initDB(){
-        try {
-            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.DB_CONFIG_NAME);
-            String path = properties.getProperty(ConsensusConstant.DB_DATA_PATH, ConsensusConstant.DB_DATA_DEFAULT_PATH);
-            RocksDBService.init(path);
         }catch (Exception e){
             Log.error(e);
         }
@@ -181,15 +155,28 @@ public class BootStrap {
 
     /**
      * 初始化链相关表
+     * Initialization chain correlation table
      * */
-    public static void initTabel(int chain_id){
+    private static void initTable(int chainId){
         try {
-            //创建共识节点表
-            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chain_id);
-            //创建共识信息表
-            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chain_id);
-            //创建红黄牌信息表
-            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH+chain_id);
+            /*
+            创建共识节点表
+            Create consensus node tables
+
+            */
+            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainId);
+
+            /*
+            创建共识信息表
+            Create consensus information tables
+            */
+            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainId);
+
+            /*
+            创建红黄牌信息表
+            Creating Red and Yellow Card Information Table
+            */
+            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH+chainId);
         }catch (Exception e){
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 Log.info(e.getMessage());
@@ -201,13 +188,14 @@ public class BootStrap {
 
     /**
      * 向交易模块注册交易
+     * Register transactions with the transaction module
      * */
-    public static void registerTx() throws Exception{
+    private static void registerTx(){
         List<Class> classList = ScanUtil.scan(ConsensusConstant.RPC_PATH);
         if(classList == null || classList.size() == 0){
             return;
         }
-        Map<Integer, TxRegisterDetail> registerDetailMap= new HashMap<>();
+        Map<Integer, TxRegisterDetail> registerDetailMap= new HashMap<>(16);
         for (Class clz:classList){
             Method[] methods = clz.getMethods();
             for (Method method:methods) {
@@ -229,7 +217,7 @@ public class BootStrap {
         //todo 向交易管理模块注册交易
     }
 
-    public static ResisterTx getRegisterAnnotation(Method method){
+    private static ResisterTx getRegisterAnnotation(Method method){
         Annotation[] annotations = method.getDeclaredAnnotations();
         for (Annotation annotation:annotations) {
             if(ResisterTx.class.equals(annotation.annotationType())){
@@ -237,5 +225,26 @@ public class BootStrap {
             }
         }
         return null;
+    }
+
+    /**
+     * 共识模块启动WebSocket服务，用于其他模块连接共识模块与共识模块交互
+     * */
+    private static void initServer(){
+        try {
+            try {
+                WsServer.getInstance(ModuleE.CS)
+                        .moduleRoles(new String[]{"1.0"})
+                        .moduleVersion("1.0")
+                        .dependencies(ModuleE.LG.abbr, "1.0")
+                        .scanPackage("io.nuls.poc.rpc")
+                        .connect("ws://127.0.0.1:8887");
+            } catch (Exception e) {
+                Log.error("Account initServer failed", e);
+            }
+        }catch (Exception e){
+            Log.error("Consensus startup webSocket server error!");
+            e.printStackTrace();
+        }
     }
 }

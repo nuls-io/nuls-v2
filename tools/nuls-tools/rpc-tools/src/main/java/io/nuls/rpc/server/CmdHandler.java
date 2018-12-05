@@ -1,27 +1,25 @@
 /*
+ * MIT License
  *
- *  * MIT License
- *  *
- *  * Copyright (c) 2017-2018 nuls.io
- *  *
- *  * Permission is hereby granted, free of charge, to any person obtaining a copy
- *  * of this software and associated documentation files (the "Software"), to deal
- *  * in the Software without restriction, including without limitation the rights
- *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  * copies of the Software, and to permit persons to whom the Software is
- *  * furnished to do so, subject to the following conditions:
- *  *
- *  * The above copyright notice and this permission notice shall be included in all
- *  * copies or substantial portions of the Software.
- *  *
- *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  * SOFTWARE.
- *  *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
  */
 
@@ -66,7 +64,7 @@ public class CmdHandler {
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
 
-        Message rspMsg = Constants.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnectionResponse);
+        Message rspMsg = MessageUtil.basicMessage(MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
@@ -79,7 +77,7 @@ public class CmdHandler {
         Ack ack = new Ack();
         ack.setRequestId(messageId);
 
-        Message rspMsg = Constants.basicMessage(Constants.nextSequence(), MessageType.Ack);
+        Message rspMsg = MessageUtil.basicMessage(MessageType.Ack);
         rspMsg.setMessageData(ack);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
@@ -101,7 +99,7 @@ public class CmdHandler {
      * After current processing, do need to keep the Request information and wait for the next processing?
      * True: keep, False: remove
      */
-    public static boolean response(WebSocket webSocket, String messageId, Request request) {
+    public static boolean responseWithPeriod(WebSocket webSocket, String messageId, Request request) {
 
         String key = webSocket.toString() + messageId;
 
@@ -116,17 +114,17 @@ public class CmdHandler {
             The specific meaning of nextProcess refers to the annotation of "Constants.INVOKE_EXECUTE_KEEP"
              */
             switch (nextProcess) {
-                case Constants.INVOKE_EXECUTE_KEEP:
-                    execute(webSocket, request.getRequestMethods(), messageId);
+                case Constants.EXECUTE_AND_KEEP:
+                    callCommandsWithPeriod(webSocket, request.getRequestMethods(), messageId);
                     ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
                     return true;
-                case Constants.INVOKE_EXECUTE_REMOVE:
-                    execute(webSocket, request.getRequestMethods(), messageId);
+                case Constants.EXECUTE_AND_REMOVE:
+                    callCommandsWithPeriod(webSocket, request.getRequestMethods(), messageId);
                     ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
                     return false;
-                case Constants.INVOKE_SKIP_KEEP:
+                case Constants.SKIP_AND_KEEP:
                     return true;
-                case Constants.INVOKE_SKIP_REMOVE:
+                case Constants.SKIP_AND_REMOVE:
                     return false;
                 default:
                     return false;
@@ -144,7 +142,7 @@ public class CmdHandler {
      * 处理Request，自动调用正确的方法，返回结果
      * Processing Request, automatically calling the correct method, returning the result
      */
-    private static void execute(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
+    public static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
         for (Object method : requestMethods.keySet()) {
 
             long startTimemillis = TimeService.currentTimeMillis();
@@ -154,10 +152,9 @@ public class CmdHandler {
             构造返回的消息对象
             Construct the returned message object
              */
-            Message rspMessage = Constants.basicMessage(Constants.nextSequence(), MessageType.Response);
-            Response response = ServerRuntime.newResponse(messageId, "", "");
+            Response response = MessageUtil.newResponse(messageId, "", "");
             response.setRequestId(messageId);
-            response.setResponseStatus(Constants.booleanString(false));
+            response.setResponseStatus(Constants.BOOLEAN_FALSE);
 
             /*
             从本地注册的cmd中得到对应的方法
@@ -174,6 +171,7 @@ public class CmdHandler {
             if (cmdDetail == null) {
                 response.setResponseComment(Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""));
                 response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+                Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 webSocket.send(JSONUtils.obj2json(rspMessage));
                 return;
@@ -187,26 +185,32 @@ public class CmdHandler {
             if (validationString != null) {
                 response.setResponseComment(validationString);
                 response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+                Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 webSocket.send(JSONUtils.obj2json(rspMessage));
                 return;
             }
 
-            /*
+            Message rspMessage = execute(cmdDetail, params, messageId, startTimemillis);
+            Log.info("webSocket.send: " + JSONUtils.obj2json(rspMessage));
+            webSocket.send(JSONUtils.obj2json(rspMessage));
+        }
+    }
+
+    public static Message execute(CmdDetail cmdDetail, Map params, String messageId, long startTimemillis) throws Exception {
+        /*
             调用本地方法，把结果封装为Message对象，通过Websocket返回
             Call the local method, encapsulate the result as a Message object, and return it through Websocket
              */
-            response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
-            response.setRequestId(messageId);
-            Map<String, Object> responseData = new HashMap<>(1);
-            responseData.put(method.toString(), response.getResponseData());
-            response.setResponseData(responseData);
-            response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-            rspMessage.setMessageData(response);
-            Log.info("webSocket.send: " + JSONUtils.obj2json(rspMessage));
-
-            webSocket.send(JSONUtils.obj2json(rspMessage));
-        }
+        Response response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
+        response.setRequestId(messageId);
+        Map<String, Object> responseData = new HashMap<>(1);
+        responseData.put(cmdDetail.getMethodName(), response.getResponseData());
+        response.setResponseData(responseData);
+        response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+        Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
+        rspMessage.setMessageData(response);
+        return rspMessage;
     }
 
     /**
@@ -214,42 +218,47 @@ public class CmdHandler {
      * Calculate how to handle the Request
      */
     private static int nextProcess(String key, int subscriptionPeriod) {
-        if (subscriptionPeriod <= 0) {
+        if (subscriptionPeriod == 0) {
             /*
-            不需要重复执行，返回INVOKE_EXECUTE_REMOVE（执行，然后丢弃）
-            No duplication of execution is required, return INVOKE_EXECUTE_REMOVE (execute, then discard)
+            不需要重复执行，返回EXECUTE_AND_REMOVE（执行，然后丢弃）
+            No duplication of execution is required, return EXECUTE_AND_REMOVE (execute, then discard)
              */
-            return Constants.INVOKE_EXECUTE_REMOVE;
+            return Constants.EXECUTE_AND_REMOVE;
         }
 
         if (!ServerRuntime.cmdInvokeTime.containsKey(key)) {
             /*
-            第一次执行，设置当前时间为执行时间，返回INVOKE_EXECUTE_KEEP（执行，然后保留）
-            First execution, set the current time as execution time, return INVOKE_EXECUTE_KEEP (execution, then keep)
+            第一次执行，设置当前时间为执行时间，返回EXECUTE_AND_KEEP（执行，然后保留）
+            First execution, set the current time as execution time, return EXECUTE_AND_KEEP (execution, then keep)
              */
             ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
-            return Constants.INVOKE_EXECUTE_KEEP;
-        } else if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
+            return Constants.EXECUTE_AND_KEEP;
+        }
+
+        if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
             /*
-            得到取消订阅命令，返回INVOKE_SKIP_REMOVE（不执行，然后丢弃）
-            Get the unsubscribe command, return INVOKE_SKIP_REMOVE (not executed, then discarded)
+            得到取消订阅命令，返回SKIP_AND_REMOVE（不执行，然后丢弃）
+            Get the unsubscribe command, return SKIP_AND_REMOVE (not executed, then discarded)
              */
             ServerRuntime.cmdInvokeTime.remove(key);
             Log.info("Remove: " + key);
-            return Constants.INVOKE_SKIP_REMOVE;
-        } else if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
-            /*
-            没有达到执行条件，返回INVOKE_SKIP_KEEP（不执行，然后保留）
-            If the execution condition is not met, return INVOKE_SKIP_KEEP (not executed, then keep)
-             */
-            return Constants.INVOKE_SKIP_KEEP;
-        } else {
-            /*
-            以上都不是，返回INVOKE_EXECUTE_KEEP（执行，然后保留）
-            None of the above, return INVOKE_EXECUTE_KEEP (execute, then keep)
-             */
-            return Constants.INVOKE_EXECUTE_KEEP;
+            return Constants.SKIP_AND_REMOVE;
         }
+
+        if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
+            /*
+            没有达到执行条件，返回SKIP_AND_KEEP（不执行，然后保留）
+            If the execution condition is not met, return SKIP_AND_KEEP (not executed, then keep)
+             */
+            return Constants.SKIP_AND_KEEP;
+        }
+
+        /*
+        以上都不是，返回EXECUTE_AND_KEEP（执行，然后保留）
+        None of the above, return EXECUTE_AND_KEEP (execute, then keep)
+         */
+        return Constants.EXECUTE_AND_KEEP;
+
     }
 
     /**

@@ -36,11 +36,13 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 /**
- * @author: Niels Wang
+ * 存入数据库的委托信息类
+ * Delegation information class stored in database
+ *
+ * @author tag
+ * 2018/11/14
  */
 public class DepositPo extends BaseNulsData {
-
-
     private NulsDigestData txHash;
     private BigInteger deposit;
     private NulsDigestData agentHash;

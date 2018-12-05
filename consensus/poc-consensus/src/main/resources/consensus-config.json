@@ -51,7 +51,7 @@
   },
   {
     "key":"commission_min",
-    "value":"200000",
+    "value":200000,
     "readOnly":true
   },
   {

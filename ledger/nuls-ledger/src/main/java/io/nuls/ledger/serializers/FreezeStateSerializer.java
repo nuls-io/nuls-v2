@@ -1,3 +1,28 @@
+/*-
+ * ⁣⁣
+ * MIT License
+ * ⁣⁣
+ * Copyright (C) 2017 - 2018 nuls.io
+ * ⁣⁣
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ * ⁣⁣
+ */
 package io.nuls.ledger.serializers;
 
 import io.nuls.ledger.model.FreezeHeightState;
@@ -28,7 +53,7 @@ public class FreezeStateSerializer implements Serializer<FreezeState, byte[]> {
 
     @Override
     public byte[] serialize(FreezeState freezeState) {
-        byte[] amount = RLP.encodeBigInteger(BigInteger.valueOf(freezeState.getAmount()));
+        byte[] amount = RLP.encodeBigInteger(freezeState.getAmount());
         byte[] freezeHeightStates = getFreezeHeightStatesEncoded(freezeState.getFreezeHeightStates());
         byte[] freezeLockTimeStates = getFreezeLockTimeStatesEncoded(freezeState.getFreezeLockTimeStates());
         return RLP.encodeList(amount, freezeHeightStates, freezeLockTimeStates);
@@ -45,7 +70,7 @@ public class FreezeStateSerializer implements Serializer<FreezeState, byte[]> {
             RLPList freezeHeightStatesList = (RLPList) items.get(1);
             RLPList freezeLockTimeStatesList = (RLPList) items.get(2);
 
-            freezeState.setAmount(ByteUtil.byteArrayToLong(amountBytes));
+            freezeState.setAmount(ByteUtil.bytesToBigInteger(amountBytes));
 
             for (RLPElement rawState : freezeHeightStatesList) {
                 FreezeHeightState heightState = freezeHeightStateSerializer.deserialize(rawState.getRLPData());

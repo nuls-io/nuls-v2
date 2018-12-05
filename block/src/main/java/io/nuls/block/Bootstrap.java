@@ -17,19 +17,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block;
 
 import io.nuls.base.basic.TransactionManager;
-import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.Transaction;
 import io.nuls.block.config.ConfigLoader;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.block.model.CoinBaseTransaction;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.ShutdownHook;
+import io.nuls.block.thread.monitor.ChainsDbSizeMonitor;
 import io.nuls.block.thread.monitor.ForkChainsMonitor;
 import io.nuls.block.thread.monitor.NetworkResetMonitor;
+import io.nuls.block.thread.monitor.OrphanChainsMonitor;
+import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
@@ -38,9 +42,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
-import org.apache.commons.httpclient.util.DateUtil;
 
-import java.util.Date;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -50,14 +52,15 @@ import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
 /**
  * 区块管理模块启动类
  * Block module startup class
+ *
  * @author captain
- * @date 18-11-8 上午10:20
  * @version 1.0
+ * @date 18-11-8 上午10:20
  */
 public class Bootstrap {
 
     public static void main(String[] args) {
-        Thread.currentThread().setName("block-bootstrap");
+        Thread.currentThread().setName("block-main");
         try {
             init();
 
@@ -68,20 +71,19 @@ public class Bootstrap {
             ConfigLoader.load(MODULES_CONFIG_FILE);
             //2.加载Context
             ContextManager.init(CHAIN_ID);
-            int chainId = CHAIN_ID;
 
             //3.扫描包路径io.nuls.block，初始化bean
             SpringLiteContext.init("io.nuls.block", new ModularServiceMethodInterceptor());
 
             //4.服务初始化
             BlockService service = ContextManager.getServiceBean(BlockService.class);
-            service.init(chainId);
+            service.init(CHAIN_ID);
 
             //交易注册，用于创世块
-            TransactionManager.putTx(CoinBaseTransaction.class, null);
+            TransactionManager.putTx(Transaction.class, null);
 
             //5.rpc服务初始化
-            rpcInit();
+//            rpcInit();
 
             onlyRunWhenTest();
 
@@ -89,17 +91,18 @@ public class Bootstrap {
             startDaemonThreads();
 
             while (true) {
-                if (RunningStatusEnum.STOPPING.equals(ContextManager.getContext(chainId).getStatus())) {
-                    Runtime.getRuntime().addShutdownHook(new ShutdownHook());
-                    System.exit(0);
-                }
-                Log.info("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-  netTime : " + (DateUtil.formatDate(new Date(TimeService.currentTimeMillis()))));
-                Block bestBlock = ContextManager.getContext(chainId).getLatestBlock();
-                Log.info("latestHeight:{} , txCount:{} , hash : {}", bestBlock.getHeader().getHeight(), bestBlock.getHeader().getTxCount(), bestBlock.getHeader().getHash());
-                try {
-                    Thread.sleep(10000L);
-                } catch (InterruptedException e) {
-                    Log.error(e);
+                for (Integer chainId : ContextManager.chainIds) {
+                    if (RunningStatusEnum.STOPPING.equals(ContextManager.getContext(chainId).getStatus())) {
+                        Runtime.getRuntime().addShutdownHook(new ShutdownHook());
+                        System.exit(0);
+                    }
+                    BlockHeader header = ContextManager.getContext(chainId).getLatestBlock().getHeader();
+                    Log.info("chainId:{}, latestHeight:{}, txCount:{}, hash:{}", chainId, header.getHeight(), header.getTxCount(), header.getHash());
+                    try {
+                        Thread.sleep(10000L);
+                    } catch (InterruptedException e) {
+                        Log.error(e);
+                    }
                 }
             }
 
@@ -114,13 +117,26 @@ public class Bootstrap {
     private static void init() {
     }
 
+    /**
+     * todo 正式版本删除
+     */
     private static void onlyRunWhenTest() {
+        ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
         new BlockGenerator().start();
     }
 
     private static void rpcInit() throws Exception {
         // 启动Server
-        WsServer.getInstance(ModuleE.BL).setScanPackage("io.nuls.block.rpc").connect("ws://127.0.0.1:8887");
+        WsServer.getInstance(ModuleE.BL)
+                .moduleRoles(new String[]{"1.0"})
+                .moduleVersion("1.0")
+                .dependencies(ModuleE.KE.abbr, "1.0")
+                .dependencies(ModuleE.NW.abbr, "1.0")
+                .scanPackage("io.nuls.block.rpc")
+                .connect("ws://127.0.0.1:8887");
+
+        // Get information from kernel
+        CmdDispatcher.syncManager();
     }
 
     private static void startDaemonThreads() {
@@ -133,6 +149,12 @@ public class Bootstrap {
         //开启分叉链处理线程
         ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
         forkExecutor.scheduleAtFixedRate(ForkChainsMonitor.getInstance(), 0, 1, TimeUnit.MINUTES);
+        //开启孤儿链处理线程
+        ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
+        orphanExecutor.scheduleAtFixedRate(OrphanChainsMonitor.getInstance(), 0, 1, TimeUnit.MINUTES);
+        //开启数据库大小监控线程
+        ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("DBSize-monitor"));
+        dbSizeExecutor.scheduleAtFixedRate(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
     }
 
 }

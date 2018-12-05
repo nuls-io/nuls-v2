@@ -34,6 +34,9 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 /**
+ * 语言存储管理实现类
+ * Language Storage Management Implementation Class
+ *
  * @author tag
  * 2018/11/8
  */

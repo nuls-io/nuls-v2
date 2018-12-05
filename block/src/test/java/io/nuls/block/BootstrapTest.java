@@ -20,7 +20,6 @@
 
 package io.nuls.block;
 
-import io.nuls.rpc.server.WsServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -29,7 +28,6 @@ public class BootstrapTest {
 
     @Before
     public void setUp() throws Exception {
-//        kernel();
 
     }
 
@@ -44,8 +42,7 @@ public class BootstrapTest {
 
     @Test
     public void kernel() throws Exception {
-        // 模拟Kernel(url: "ws://127.0.0.1:8887")
-        WsServer.mockKernel();
+
     }
 
 }

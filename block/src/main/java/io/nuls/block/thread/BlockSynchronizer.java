@@ -22,9 +22,10 @@ package io.nuls.block.thread;
 
 import com.google.common.collect.Lists;
 import io.nuls.base.data.Block;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.constant.BlockSynStatusEnum;
 import io.nuls.block.constant.ConfigConstant;
+import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
@@ -34,14 +35,13 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
+import lombok.NoArgsConstructor;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.FutureTask;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 
 /**
  * 区块同步主线程，管理多条链的区块同步
@@ -50,18 +50,18 @@ import java.util.concurrent.LinkedBlockingQueue;
  * @version 1.0
  */
 @Component
+@NoArgsConstructor
 public class BlockSynchronizer implements Runnable {
 
-    private Map<Integer, BlockSynStatusEnum> statusEnumMap = new HashMap<>();
+    /**
+     * 保存多条链的区块同步状态
+     */
+    private Map<Integer, BlockSynStatusEnum> statusEnumMap = new ConcurrentHashMap<>();
 
     private static final BlockSynchronizer INSTANCE = new BlockSynchronizer();
 
     @Autowired
     private BlockService blockService;
-
-    public BlockSynchronizer() {
-
-    }
 
     public static BlockSynchronizer getInstance() {
         return INSTANCE;
@@ -69,35 +69,39 @@ public class BlockSynchronizer implements Runnable {
 
     @Override
     public void run() {
-        ContextManager.chainIds.forEach(e -> {
+        for (Integer chainId : ContextManager.chainIds) {
             try {
-                if (statusEnumMap.get(e) == null) {
-                    statusEnumMap.put(e, BlockSynStatusEnum.WAITING);
+                BlockSynStatusEnum synStatus = statusEnumMap.get(chainId);
+                if (synStatus == null) {
+                    statusEnumMap.put(chainId, synStatus = BlockSynStatusEnum.WAITING);
                 }
-                if (!statusEnumMap.get(e).equals(BlockSynStatusEnum.RUNNING)){
-                    synchronize(e);
+                RunningStatusEnum runningStatus = ContextManager.getContext(chainId).getStatus();
+                if (synStatus.equals(BlockSynStatusEnum.WAITING) && runningStatus.equals(RunningStatusEnum.RUNNING)) {
+                    synchronize(chainId);
+                } else {
+                    Log.info("skip Block Synchronize, SynStatus:{}, RunningStatus:{}", synStatus, runningStatus);
                 }
             } catch (Exception error) {
                 Log.error(error);
             }
-        });
+        }
     }
 
-    private void synchronize(int chainId) throws Exception {
+    private void synchronize(int chainId) {
         //1.调用网络模块接口获取当前chainID网络的可用节点
         List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
 
         //2.判断可用节点数是否满足最小配置
         String config = ConfigManager.getValue(chainId, ConfigConstant.MIN_NODE_AMOUNT);
-        if (availableNodes != null && availableNodes.size() >= Byte.parseByte(config)) {
+        if (availableNodes.size() >= Integer.parseInt(config)) {
             //3.统计网络中可用节点的一致区块高度、区块hash
             BlockDownloaderParams params = statistics(availableNodes, chainId);
             if (params.getNodes().size() == 0) {
+                statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
                 return;
             }
             //4.更新下载状态为“下载中”
             statusEnumMap.put(chainId, BlockSynStatusEnum.RUNNING);
-            ContextManager.getContext(chainId).setNetBlockHeight(params.getNetLatestHeight());
             BlockingQueue<Block> blockQueue = new LinkedBlockingQueue<>();
 
             //5.开启区块下载管理器BlockDownloaderManager
@@ -112,12 +116,9 @@ public class BlockSynchronizer implements Runnable {
 
             try {
                 Boolean downResult = threadManagerFuture.get();
-
                 blockQueue.offer(new Block());
-
                 Boolean storageResult = dataStorageFuture.get();
-
-                boolean success = downResult != null && downResult.booleanValue() && storageResult != null && storageResult.booleanValue();
+                boolean success = downResult != null && downResult && storageResult != null && storageResult;
 
                 if (success && checkIsNewest(chainId, params)) {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
@@ -133,10 +134,11 @@ public class BlockSynchronizer implements Runnable {
     }
 
     /**
-     * 检查本地区块是否同步到最新高度
-     * @date 18-11-9 下午4:37
-     * @param
+     * 检查本地区块是否同步到最新高度，如果不是最新高度，变更同步状态为BlockSynStatusEnum.WAITING，等待下次同步
+     * @param chainId
+     * @param params
      * @return
+     * @throws Exception
      */
     private boolean checkIsNewest(int chainId, BlockDownloaderParams params) throws Exception {
 
@@ -168,12 +170,12 @@ public class BlockSynchronizer implements Runnable {
         return true;
     }
 
-    public BlockDownloaderParams statistics(int chainId) throws Exception {
+    public BlockDownloaderParams statistics(int chainId) {
         return statistics(NetworkUtil.getAvailableNodes(chainId), chainId);
     }
 
     /**
-     * 统计网络中可用节点的一致区块高度、区块hash
+     * 统计网络中可用节点的一致区块高度、区块hash，构造下载参数
      * @date 18-11-8 下午4:55
      * @param
      * @return
@@ -182,15 +184,15 @@ public class BlockSynchronizer implements Runnable {
         BlockDownloaderParams params = new BlockDownloaderParams();
         params.setChainId(chainId);
         params.setAvailableNodesCount(availableNodes.size());
-        params.setNodes(Lists.newArrayList());
-        List<Node> nodeList = Collections.EMPTY_LIST;
+        List<Node> nodeList = new ArrayList<>();
+        params.setNodes(nodeList);
         //每个节点的(最新HASH+最新高度)是key
         String key = "";
         int count = 0;
         //一个以key为主键记录持有该key的节点列表
-        Map<String, List<Node>> nodeMap = new HashMap<>(nodeList.size());
+        Map<String, List<Node>> nodeMap = new HashMap<>(availableNodes.size());
         //一个以key为主键统计次数
-        Map<String, Integer> countMap = new HashMap<>(nodeList.size());
+        Map<String, Integer> countMap = new HashMap<>(availableNodes.size());
         for (Node node: availableNodes){
             String tempKey = node.getHash().getDigestHex() + node.getHeight();
             if (countMap.containsKey(tempKey)) {
@@ -223,7 +225,6 @@ public class BlockSynchronizer implements Runnable {
         int config = availableNodes.size() * Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.CONSISTENCY_NODE_PERCENT)) / 100;
         if (count >= config) {
             nodeList = nodeMap.get(key);
-            params.setNodes(nodeList);
             params.setNetLatestHash(nodeList.get(0).getHash());
             params.setNetLatestHeight(nodeList.get(0).getHeight());
         }

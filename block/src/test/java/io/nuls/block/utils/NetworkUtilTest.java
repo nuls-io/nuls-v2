@@ -20,16 +20,26 @@
 
 package io.nuls.block.utils;
 
-import io.nuls.rpc.cmd.CmdDispatcher;
+import io.nuls.block.model.Node;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.server.WsServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class NetworkUtilTest {
 
     @Before
     public void setUp() throws Exception {
-
+        WsServer.mockModule();
     }
 
     @After
@@ -39,9 +49,27 @@ public class NetworkUtilTest {
 
     @Test
     public void getAvailableNodes() throws Exception {
-        CmdDispatcher.syncKernel();
-        String response = CmdDispatcher.request("bl_GetBlocks", null);
-        System.out.println(response);
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("chainId", 9861);
+        params.put("state", 1);
+        params.put("isCross", 0);
+        params.put("startPage", 0);
+        params.put("pageSize", 0);
+
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
+        Map responseData = (Map) response.getResponseData();
+        List nw_getNodes = (List) responseData.get("nw_getNodes");
+        List nodes = new ArrayList();
+        for (Object nw_getNode : nw_getNodes) {
+            Map map = (Map) nw_getNode;
+            Node node = new Node();
+            node.setId((String) map.get("nodeId"));
+            node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
+//            node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
+            nodes.add(node);
+        }
+        nodes.forEach(e -> System.out.println(e));
     }
 
     @Test

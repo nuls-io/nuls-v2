@@ -1,37 +1,41 @@
 /*
+ * MIT License
  *
- *  * MIT License
- *  *
- *  * Copyright (c) 2017-2018 nuls.io
- *  *
- *  * Permission is hereby granted, free of charge, to any person obtaining a copy
- *  * of this software and associated documentation files (the "Software"), to deal
- *  * in the Software without restriction, including without limitation the rights
- *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  * copies of the Software, and to permit persons to whom the Software is
- *  * furnished to do so, subject to the following conditions:
- *  *
- *  * The above copyright notice and this permission notice shall be included in all
- *  * copies or substantial portions of the Software.
- *  *
- *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  * SOFTWARE.
- *  *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
  */
 
 package io.nuls.rpc.server;
 
+import io.nuls.rpc.client.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.client.HeartbeatProcessor;
+import io.nuls.rpc.client.ResponseAutoProcessor;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.RegisterApi;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.MessageType;
+import io.nuls.rpc.model.message.Request;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
@@ -49,7 +53,6 @@ import java.util.Map;
  *
  * @author tangyi
  * @date 2018/10/30
- * @description
  */
 public class WsServer extends WebSocketServer {
     public WsServer(int port) {
@@ -62,11 +65,10 @@ public class WsServer extends WebSocketServer {
      */
     public void connect(String kernelUrl) throws Exception {
         /*
-        启动自身服务，等待一秒是为了确保启动成功
-        Start self service, Waiting for a second is to ensure that the startup is successful
+        启动自身服务
+        Start service
          */
         this.start();
-        Thread.sleep(1000);
 
         /*
         设置核心模块（Manager）连接地址
@@ -78,10 +80,10 @@ public class WsServer extends WebSocketServer {
         与核心模块（Manager）握手
         Shake hands with the core module (Manager)
          */
-        if (!CmdDispatcher.handshakeKernel()) {
+        if (!CmdDispatcher.handshakeManager()) {
             throw new Exception("Handshake kernel failed");
         } else {
-            Log.info("Handshake success." + ServerRuntime.local.getModuleName() + " ready!");
+            Log.info("Connect manager success." + ServerRuntime.local.getModuleName() + " ready!");
         }
     }
 
@@ -96,15 +98,53 @@ public class WsServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket webSocket, String msg) {
         try {
-            /*
-            收到的所有消息都放入队列，等待其他线程处理
-            All messages received are queued, waiting for other threads to process
-             */
+
+            Message message = JSONUtils.json2pojo(msg, Message.class);
+            switch (MessageType.valueOf(message.getMessageType())) {
+                case NegotiateConnection:
+                    /*
+                    握手，直接响应
+                     */
+                    CmdHandler.negotiateConnectionResponse(webSocket);
+                    break;
+                case Unsubscribe:
+                    /*
+                    取消订阅，直接响应
+                     */
+                    CmdHandler.unsubscribe(webSocket, message);
+                    break;
+                case Request:
+                    /*
+                    Request，根据是否需要定时推送放入不同队列，等待处理
+                    Request, put in different queues according to the response mode. Wait for processing
+                     */
+                    Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+                    if (ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
+                        ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
+                    }
+                    if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
+                        ServerRuntime.REQUEST_EVENT_COUNT_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
+                    }
+
+                    if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
+                            && !ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
+                        ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, msg});
+                    }
+
+                    /*
+                    如果需要一个Ack，则发送
+                    Send Ack if needed
+                     */
+                    if (Constants.BOOLEAN_TRUE.equals(request.getRequestAck())) {
+                        CmdHandler.ack(webSocket, message.getMessageId());
+                    }
+                    break;
+                default:
+                    break;
+            }
             Log.info("ServerMsgFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
-            ServerRuntime.CLIENT_MESSAGE_QUEUE.add(new Object[]{webSocket, msg});
-            ServerRuntime.serverThreadPool.execute(new ServerProcessor());
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
     }
 
@@ -113,8 +153,13 @@ public class WsServer extends WebSocketServer {
         Log.error(ex);
     }
 
+
     @Override
     public void onStart() {
+        Constants.THREAD_POOL.execute(new ResponseAutoProcessor());
+        Constants.THREAD_POOL.execute(new RequestSingleProcessor());
+        Constants.THREAD_POOL.execute(new RequestLoopProcessor());
+        Constants.THREAD_POOL.execute(new HeartbeatProcessor());
         Log.info("Server<" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
     }
 
@@ -191,49 +236,5 @@ public class WsServer extends WebSocketServer {
     public WsServer scanPackage(String scanPackage) throws Exception {
         ServerRuntime.scanPackage(scanPackage);
         return this;
-    }
-
-    /**
-     * 模拟核心模块（Manager），测试专用
-     * For internal debugging only
-     * Simulate a kernel module
-     */
-    public static void mockKernel() throws Exception {
-        WsServer wsServer = new WsServer(8887);
-        // Start server instance
-        RegisterApi registerApi = new RegisterApi();
-        registerApi.setApiMethods(new ArrayList<>());
-        registerApi.setModuleAbbreviation(ModuleE.KE.abbr);
-        registerApi.setModuleName(ModuleE.KE.name);
-        registerApi.setModuleDomain(ModuleE.KE.domain);
-        Map<String, String> connectionInformation = new HashMap<>(2);
-        connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
-        connectionInformation.put(Constants.KEY_PORT, wsServer.getPort() + "");
-        registerApi.setConnectionInformation(connectionInformation);
-
-        ServerRuntime.local = registerApi;
-
-        wsServer.scanPackage("io.nuls.rpc.cmd.kernel").connect("ws://127.0.0.1:8887");
-
-        // Get information from kernel
-        CmdDispatcher.syncKernel();
-
-        System.out.println("Local:" + JSONUtils.obj2json(ServerRuntime.local));
-        Thread.sleep(Integer.MAX_VALUE);
-    }
-
-    /**
-     * 模拟启动模块，单元测试专用
-     * Analog Startup Module, Unit Test Specific
-     */
-    public static void mockModule() throws Exception {
-        WsServer.getInstance(ModuleE.TEST)
-                .moduleRoles(new String[]{"1.0"})
-                .moduleVersion("1.0")
-                .dependencies(ModuleE.CM.abbr, "1.1")
-                .connect("ws://127.0.0.1:8887");
-
-        // Get information from kernel
-        CmdDispatcher.syncKernel();
     }
 }

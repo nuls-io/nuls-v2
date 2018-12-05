@@ -25,13 +25,10 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionManager;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.SmallBlock;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.BlockGenerator;
 import io.nuls.block.config.GenesisBlock;
-import io.nuls.block.constant.Constant;
-import io.nuls.block.message.body.*;
-import io.nuls.block.model.CoinBaseTransaction;
-import io.nuls.block.model.SmallBlock;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.After;
 import org.junit.Before;
@@ -49,26 +46,16 @@ public class MessageTest {
 
     @Test
     public void testEquals() throws Exception {
-        GetBlockMessage m1 = new GetBlockMessage();
+        HashMessage m1 = new HashMessage();
         {
-            GetBlockMessageBody body = new GetBlockMessageBody();
-            body.setChainID(Constant.CHAIN_ID);
-            body.setBlockHash(NulsDigestData.fromDigestHex("00202385c6ea81795592278265e3d42d4c454dcf05fe368e8ba9d6799dc43695f3e6"));
-            m1.getHeader().setMagicNumber(68866996);
-            m1.getHeader().setPayloadLength(body.size());
-            m1.setMsgBody(body);
+            m1.setRequestHash(NulsDigestData.fromDigestHex("00202385c6ea81795592278265e3d42d4c454dcf05fe368e8ba9d6799dc43695f3e6"));
             String hex = HexUtil.byteToHex(m1.serialize());
             System.out.println(hex);
         }
 
-        GetBlockMessage m2 = new GetBlockMessage();
+        HashMessage m2 = new HashMessage();
         {
-            GetBlockMessageBody body = new GetBlockMessageBody();
-            body.setChainID(Constant.CHAIN_ID);
-            body.setBlockHash(NulsDigestData.fromDigestHex("00202385c6ea81795592278265e3d42d4c454dcf05fe368e8ba9d6799dc43695f3e6"));
-            m2.getHeader().setMagicNumber(688669963);
-            m2.getHeader().setPayloadLength(body.size());
-            m2.setMsgBody(body);
+            m2.setRequestHash(NulsDigestData.fromDigestHex("00202385c6ea81795592278265e3d42d4c454dcf05fe368e8ba9d6799dc43695f3e6"));
             String hex = HexUtil.byteToHex(m2.serialize());
             System.out.println(hex);
         }
@@ -79,10 +66,9 @@ public class MessageTest {
     @Test
     public void testBlockMessage() throws Exception {
         BlockMessage message = new BlockMessage();
-        BlockMessageBody body = new BlockMessageBody();
-        body.setChainID(Constant.CHAIN_ID);
+        BlockMessage body = new BlockMessage();
+        
         body.setBlock(GenesisBlock.getInstance());
-        message.setMsgBody(body);
         String hex = HexUtil.byteToHex(message.serialize());
         System.out.println(hex);
 
@@ -94,17 +80,15 @@ public class MessageTest {
     }
 
     @Test
-    public void testGetBlockMessage() throws Exception {
-        GetBlockMessage message = new GetBlockMessage();
-        GetBlockMessageBody body = new GetBlockMessageBody();
-        body.setChainID(Constant.CHAIN_ID);
-        body.setBlockHash(NulsDigestData.fromDigestHex("0020e643ab908b37ce52b4cdaeb3219846162235b466cb78491832d766ba0a3a5e98"));
-        message.setMsgBody(body);
+    public void testHashMessage() throws Exception {
+        HashMessage message = new HashMessage();
+        message.setRequestHash(NulsDigestData.fromDigestHex("0020e643ab908b37ce52b4cdaeb3219846162235b466cb78491832d766ba0a3a5e98"));
+        
         String hex = HexUtil.byteToHex(message.serialize());
         System.out.println(hex);
 
         byte[] bytes = HexUtil.decode(hex);
-        GetBlockMessage message1 = new GetBlockMessage();
+        HashMessage message1 = new HashMessage();
         message1.parse(new NulsByteBuffer(bytes));
 
         assertEquals(message1.getHash(), message.getHash());
@@ -113,11 +97,10 @@ public class MessageTest {
     @Test
     public void testCompleteMessage() throws Exception {
         CompleteMessage message = new CompleteMessage();
-        CompleteMessageBody body = new CompleteMessageBody();
-        body.setChainID(Constant.CHAIN_ID);
+        CompleteMessage body = new CompleteMessage();
+        
         body.setRequestHash(NulsDigestData.calcDigestData("hello".getBytes()));
         body.setSuccess(true);
-        message.setMsgBody(body);
         String hex = HexUtil.byteToHex(message.serialize());
         System.out.println(hex);
 
@@ -129,30 +112,11 @@ public class MessageTest {
     }
 
     @Test
-    public void testForwardSmallBlockMessage() throws Exception {
-        ForwardSmallBlockMessage message = new ForwardSmallBlockMessage();
-        ForwardSmallBlockMessageBody body = new ForwardSmallBlockMessageBody();
-        body.setChainID(Constant.CHAIN_ID);
-        body.setBlockHash(NulsDigestData.calcDigestData("hello".getBytes()));
-        message.setMsgBody(body);
-        String hex = HexUtil.byteToHex(message.serialize());
-        System.out.println(hex);
-
-        byte[] bytes = HexUtil.decode(hex);
-        ForwardSmallBlockMessage message1 = new ForwardSmallBlockMessage();
-        message1.parse(new NulsByteBuffer(bytes));
-
-        assertEquals(message1.getHash(), message.getHash());
-    }
-
-    @Test
     public void testGetBlocksByHeightMessage() throws Exception {
         GetBlocksByHeightMessage message = new GetBlocksByHeightMessage();
-        GetBlocksByHeightMessageBody body = new GetBlocksByHeightMessageBody();
-        body.setChainID(Constant.CHAIN_ID);
-        body.setStartHeight(111);
-        body.setEndHeight(222);
-        message.setMsgBody(body);
+
+        message.setStartHeight(111);
+        message.setEndHeight(222);
         String hex = HexUtil.byteToHex(message.serialize());
         System.out.println(hex);
 
@@ -164,34 +128,16 @@ public class MessageTest {
     }
 
     @Test
-    public void testGetSmallBlockMessage() throws Exception {
-        GetSmallBlockMessage message = new GetSmallBlockMessage();
-        GetSmallBlockMessageBody body = new GetSmallBlockMessageBody();
-        body.setChainID(Constant.CHAIN_ID);
-        body.setRequestHash(NulsDigestData.calcDigestData("hello".getBytes()));
-        message.setMsgBody(body);
-        String hex = HexUtil.byteToHex(message.serialize());
-        System.out.println(hex);
-
-        byte[] bytes = HexUtil.decode(hex);
-        GetSmallBlockMessage message1 = new GetSmallBlockMessage();
-        message1.parse(new NulsByteBuffer(bytes));
-
-        assertEquals(message1.getHash(), message.getHash());
-    }
-
-    @Test
-    public void testGetTxGroupMessage() throws Exception {
-        GetTxGroupMessage message = new GetTxGroupMessage();
-        GetTxGroupMessageBody body = new GetTxGroupMessageBody();
-        body.setChainID(Constant.CHAIN_ID);
+    public void testHashListMessage() throws Exception {
+        HashListMessage message = new HashListMessage();
+        HashListMessage body = new HashListMessage();
+        
         body.setTxHashList(Lists.newArrayList(NulsDigestData.calcDigestData("hello".getBytes())));
-        message.setMsgBody(body);
         String hex = HexUtil.byteToHex(message.serialize());
         System.out.println(hex);
 
         byte[] bytes = HexUtil.decode(hex);
-        GetTxGroupMessage message1 = new GetTxGroupMessage();
+        HashListMessage message1 = new HashListMessage();
         message1.parse(new NulsByteBuffer(bytes));
 
         assertEquals(message1.getHash(), message.getHash());
@@ -200,16 +146,13 @@ public class MessageTest {
     @Test
     public void testSmallBlockMessage() throws Exception {
         SmallBlockMessage message = new SmallBlockMessage();
-        SmallBlockMessageBody body = new SmallBlockMessageBody();
-        body.setChainID(Constant.CHAIN_ID);
         Block block = BlockGenerator.generate(null);
         Transaction transaction = BlockGenerator.getTransaction();
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
         smallBlock.addBaseTx(transaction);
         smallBlock.setTxHashList(Lists.newArrayList(transaction.getHash()));
-        body.setSmallBlock(smallBlock);
-        message.setMsgBody(body);
+        message.setSmallBlock(smallBlock);
         String hex = HexUtil.byteToHex(message.serialize());
         System.out.println(hex);
 
@@ -223,11 +166,8 @@ public class MessageTest {
     @Test
     public void testTxGroupMessage() throws Exception {
         TxGroupMessage message = new TxGroupMessage();
-        TxGroupMessageBody body = new TxGroupMessageBody();
-        body.setChainID(Constant.CHAIN_ID);
-        body.setRequestHash(NulsDigestData.calcDigestData("hello".getBytes()));
-        body.setTransactions(BlockGenerator.getTransactions());
-        message.setMsgBody(body);
+        message.setRequestHash(NulsDigestData.calcDigestData("hello".getBytes()));
+        message.setTransactions(BlockGenerator.getTransactions());
         String hex = HexUtil.byteToHex(message.serialize());
         System.out.println(hex);
 
@@ -239,11 +179,11 @@ public class MessageTest {
     }
 
     @Before
-    public void setUp() throws Exception {
-        TransactionManager.putTx(CoinBaseTransaction.class, null);
+    public void setUp() {
+        TransactionManager.putTx(Transaction.class, null);
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
     }
 }

@@ -31,6 +31,9 @@ import io.nuls.poc.model.bo.tx.txdata.Agent;
 import java.util.Comparator;
 
 /**
+ * 节点对比工具类
+ * Node Contrast Tool Class
+ *
  * @author tag
  * 2018/11/14
  */

@@ -15,7 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 共识管理实现类
+ * 委托信息存储管理实现类
+ * Delegated Information Storage Management Implementation Class
+ *
  * @author tag
  * 2018/11/6
  * */

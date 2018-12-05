@@ -4,6 +4,8 @@ import java.math.BigInteger;
 
 /**
  * 交易手续费返回结果类
+ * Transaction Fee Return Result Class
+ *
  * @author tag
  * */
 public class ChargeResultData {

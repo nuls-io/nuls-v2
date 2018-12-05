@@ -17,6 +17,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
@@ -26,13 +27,12 @@ import io.nuls.block.message.CompleteMessage;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
-import java.util.List;
+import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
 
@@ -46,22 +46,21 @@ import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
 public class CompleteHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = COMPLETE_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public CmdResponse process(List<Object> params){
-
-        Integer chainId = Integer.parseInt(params.get(0).toString());
-        String nodeId = params.get(1).toString();
+    public Object process(Map map){
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        String nodeId = map.get("nodes").toString();
         CompleteMessage message = new CompleteMessage();
 
-        byte[] decode = HexUtil.decode(params.get(2).toString());
+        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
             Log.warn(e.getMessage());
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         if(message == null) {
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         CacheHandler.requestComplete(message);
         return success();

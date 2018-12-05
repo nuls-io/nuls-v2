@@ -21,11 +21,12 @@
 package io.nuls.block.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.message.BaseMessage;
-import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.message.body.GetBlocksByHeightMessageBody;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.SerializeUtils;
 import lombok.Data;
+
+import java.io.IOException;
 
 /**
  * 异步请求处理完成响应消息
@@ -34,23 +35,41 @@ import lombok.Data;
  * @version 1.0
  */
 @Data
-public class GetBlocksByHeightMessage extends BaseMessage<GetBlocksByHeightMessageBody> {
+public class GetBlocksByHeightMessage extends BaseMessage {
+
+    private long startHeight;
+    private long endHeight;
+
+    public GetBlocksByHeightMessage() {
+    }
+
+    public GetBlocksByHeightMessage(long startHeight, long endHeight) {
+        this.startHeight = startHeight;
+        this.endHeight = endHeight;
+    }
 
     @Override
-    public GetBlocksByHeightMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfInt64();
+        size += SerializeUtils.sizeOfInt64();
+        return size;
+    }
+
+    @Override
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeInt64(startHeight);
+        stream.writeInt64(endHeight);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) {
         try {
-            return byteBuffer.readNulsData(new GetBlocksByHeightMessageBody());
+            this.startHeight = byteBuffer.readInt64();
+            this.endHeight = byteBuffer.readInt64();
         } catch (Exception e) {
-            throw new NulsException(e);
+            Log.error(e);
         }
     }
 
-    public GetBlocksByHeightMessage() {
-        super(CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE);
-    }
-
-    public GetBlocksByHeightMessage(long magicNumber, String cmd, GetBlocksByHeightMessageBody body) {
-        super(cmd, magicNumber);
-        this.setMsgBody(body);
-    }
 }

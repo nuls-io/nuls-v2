@@ -8,6 +8,9 @@ import io.nuls.tools.data.DateUtils;
 import java.util.Date;
 
 /**
+ * 惩罚信息类
+ * Punishment information category
+ *
  * @author  tag
  * @date: 2018/11/20
  */

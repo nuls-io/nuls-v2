@@ -21,38 +21,45 @@
 package io.nuls.block.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.message.BaseMessage;
-import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.message.body.BlockMessageBody;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.Block;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
 import lombok.Data;
+
+import java.io.IOException;
 
 /**
  * 完整的区块消息
- * 用于孤儿链处理中主动从某个节点获取区块信息
- *
  * @author captain
+ * @date 18-11-20 上午11:08
  * @version 1.0
- * @date 18-11-9 下午2:37
  */
 @Data
-public class BlockMessage extends BaseMessage<BlockMessageBody> {
+public class BlockMessage extends BaseMessage {
 
-    @Override
-    public BlockMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        try {
-            return byteBuffer.readNulsData(new BlockMessageBody());
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
+    private Block block;
 
     public BlockMessage() {
-        super(CommandConstant.BLOCK_MESSAGE);
     }
 
-    public BlockMessage(long magicNumber, String cmd, BlockMessageBody body) {
-        super(cmd, magicNumber);
-        this.setMsgBody(body);
+    public BlockMessage(Block block) {
+        this.block = block;
     }
+
+    @Override
+    public void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
+        buffer.writeNulsData(block);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer nulsByteBuffer) throws NulsException {
+        this.block = nulsByteBuffer.readNulsData(new Block());
+    }
+
+    @Override
+    public int size() {
+        return SerializeUtils.sizeOfNulsData(block);
+    }
+
 }
