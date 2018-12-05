@@ -38,10 +38,10 @@ import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.*;
 import io.nuls.tools.basic.InitializingBean;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.FormatValidUtils;
@@ -84,60 +84,50 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public boolean setAlias(int chainId, String address, String password, String aliasName) {
-        //First:check parameter
-        if (!AddressTool.validAddress(chainId, address)) {
-            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-        }
-        Account account = accountService.getAccount(chainId, address);
-        if (null == account) {
-            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-        }
-        if (account.isEncrypted() && account.isLocked()) {
-            if (!account.validatePassword(password)) {
-                throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
-            }
-        }
-        if (StringUtils.isNotBlank(account.getAlias())) {
-            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
-        }
-        if (!FormatValidUtils.validAlias(aliasName)) {
-            throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
-        }
-        if (!isAliasUsable(chainId, aliasName)) {
-            throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
-        }
-        byte[] addressBytes = account.getAddress().getAddressBytes();
+    public Transaction setAlias(int chainId, String address, String password, String aliasName) {
+        Transaction tx = null;
         try {
-            //Second:build the transaction
-            Transaction tx = new Transaction(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
-            tx.setTime(TimeService.currentTimeMillis());
-            Alias alias = new Alias();
-            alias.setAlias(aliasName);
-            alias.setAddress(AddressTool.getAddress(address));
+            Account account = accountService.getAccount(chainId, address);
+            if (null == account) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            if (account.isEncrypted() && account.isLocked()) {
+                if (!account.validatePassword(password)) {
+                    throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            }
+            if (StringUtils.isNotBlank(account.getAlias())) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
+            }
+            if (!isAliasUsable(chainId, aliasName)) {
+                throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
+            }
+
+            tx = createAliasTrasaction(chainId, address, aliasName);
             //TODO how to save the chainId?EdwardChan
-            tx.setTxData(alias.serialize());
-            //Third:build the coinData
-            CoinData coinData = new CoinData();
-            //List<Coin> toList = new ArrayList<>();
-            //toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), ConsensusConstant.CONSENSUS_LOCK_TIME));
-            //coinData.setTo(toList);
-            tx.setCoinData(coinData.serialize());
-            //todo Fourth.sign the transaction
-            //todo Fifth.send the transaction to transaction manage module
-            return true;
-        } catch (NulsRuntimeException e) {
+            //todo sign the transaction
+            //todo send the transaction to transaction manage module
+        } catch (Exception e) {
             Log.error("", e);
-            return false;
-        } catch (IOException e) {
-            Log.error("", e);
-            return false;
+            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION,e);
         }
+        return tx;
     }
 
     @Override
-    public Result<String> getAliasFee(short chaindId, String address, String aliasName) {
-        return null;
+    public String getAliasFee(int chaindId, String address, String aliasName) {
+        Transaction tx = null;
+        String fee = null;
+        try {
+            //create a set alias transaction
+            tx = createAliasTrasaction(chaindId, address, aliasName);
+            fee = TransactionFeeCalculator.getMaxFee(tx.size());
+            //todo whether need to other operation if the fee is too big
+        } catch (Exception e) {
+            Log.error("", e);
+            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION,e);
+        }
+        return fee;
     }
 
     @Override
@@ -145,7 +135,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         //check if the account is legal
         if (!AddressTool.validAddress(chainId, address)) {
             Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
-            return null;
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         //get aliasPO
         AliasPo result = aliasStorageService.getAliasByAddress(chainId, address);
@@ -166,37 +156,42 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) throws Exception {
+    public List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) {
         Set<Transaction> result = new HashSet<>();
         if (null == txList || txList.isEmpty()) {
             return new ArrayList<>(result);
         }
         Map<String, Transaction> aliasNamesMap = new HashMap<>();
         Map<String, Transaction> accountAddressMap = new HashMap<>();
-        for (Transaction transaction : txList) {
-            if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS) {
-                Alias alias = new Alias();
-                alias.parse(new NulsByteBuffer(transaction.getTxData()));
-                String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-                //check alias
-                Transaction tmp = aliasNamesMap.get(alias.getAlias());
-                if (tmp != null) { // the alias is already exist
-                    result.add(transaction);
-                    result.add(tmp);
-                    continue;
-                } else {
-                    aliasNamesMap.put(alias.getAlias(), transaction);
-                }
-                //check address
-                tmp = accountAddressMap.get(address);
-                if (tmp != null) { // the address is already exist
-                    result.add(transaction);
-                    result.add(tmp);
-                    continue;
-                } else {
-                    accountAddressMap.put(address, transaction);
+        try {
+            for (Transaction transaction : txList) {
+                if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS) {
+                    Alias alias = new Alias();
+                    alias.parse(new NulsByteBuffer(transaction.getTxData()));
+                    String address = AddressTool.getStringAddressByBytes(alias.getAddress());
+                    //check alias
+                    Transaction tmp = aliasNamesMap.get(alias.getAlias());
+                    if (tmp != null) { // the alias is already exist
+                        result.add(transaction);
+                        result.add(tmp);
+                        continue;
+                    } else {
+                        aliasNamesMap.put(alias.getAlias(), transaction);
+                    }
+                    //check address
+                    tmp = accountAddressMap.get(address);
+                    if (tmp != null) { // the address is already exist
+                        result.add(transaction);
+                        result.add(tmp);
+                        continue;
+                    } else {
+                        accountAddressMap.put(address, transaction);
+                    }
                 }
             }
+        } catch (Exception e) {
+            Log.error("", e);
+            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION,e);
         }
         return new ArrayList<>(result);
     }
@@ -305,11 +300,37 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 }
             }
         } catch (Exception e) {
-            Log.error(e);
-            throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
+            Log.error("",e);
+            throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR,e);
         }
         return result;
     }
 
+    private Transaction createAliasTrasaction(int chainId, String address, String aliasName) throws IOException {
+        Transaction tx = null;
+        //First:check parameter
+        if (!AddressTool.validAddress(chainId, address)) {
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+        }
+        if (!FormatValidUtils.validAlias(aliasName)) {
+            throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
+        }
+        //Second:build the transaction
+        tx = new Transaction(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
+        tx.setTime(TimeService.currentTimeMillis());
+        Alias alias = new Alias();
+        alias.setAlias(aliasName);
+        alias.setAddress(AddressTool.getAddress(address));
+        tx.setTxData(alias.serialize());
+        //Third:build the coinData
+        CoinData coinData = new CoinData();
+        //TODO how to get the transaction coin data
+        //List<Coin> toList = new ArrayList<>();
+        //toList.add(new Coin(agent.getAgentAddress(), agent.getDeposit(), ConsensusConstant.CONSENSUS_LOCK_TIME));
+        //coinData.setTo(toList);
+        tx.setCoinData(coinData.serialize());
+        return tx;
+
+    }
 
 }

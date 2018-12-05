@@ -40,6 +40,7 @@ public interface AliasStorageService {
      * @auther EdwardChan
      * @date Nov.9th 2018
      */
+    @Deprecated
     List<AliasPo> getAliasList(int chainId);
 
 
@@ -55,6 +56,8 @@ public interface AliasStorageService {
 
     /**
      * get alias by address
+     *
+     * if the alias isn't exist,return null
      *
      * @param chainId
      * @param address
