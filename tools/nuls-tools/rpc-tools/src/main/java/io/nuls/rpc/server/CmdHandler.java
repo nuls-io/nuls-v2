@@ -41,6 +41,7 @@ import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -86,12 +87,42 @@ public class CmdHandler {
      * 取消订阅
      * For Unsubscribe
      */
-    static void unsubscribe(WebSocket webSocket, Message message) {
+    static synchronized void unsubscribe(WebSocket webSocket, Message message) {
         Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
-        for (String str : unsubscribe.getUnsubscribeMethods()) {
-            String key = webSocket.toString() + str;
-            ServerRuntime.cmdInvokeTime.put(key, Constants.UNSUBSCRIBE_TIMEMILLIS);
-        }
+        Collections.addAll(ServerRuntime.UNSUBSCRIBE_LIST, unsubscribe.getUnsubscribeMethods());
+//        for (String requestId : unsubscribe.getUnsubscribeMethods()) {
+//            ServerRuntime.UNSUBSCRIBE_LIST.add(requestId);
+//            String key = webSocket.toString() + "_" + str;
+//            Iterator<Object[]> eventCountIterator = ServerRuntime.REQUEST_EVENT_COUNT_LOOP_QUEUE.iterator();
+//            ServerRuntime.REQUEST_EVENT_COUNT_LOOP_QUEUE.clear();
+//            while (eventCountIterator.hasNext()) {
+//                Object[] objects = eventCountIterator.next();
+//                try {
+//                    Message message1 = JSONUtils.json2pojo((String) objects[1], Message.class);
+//                    if (!message1.getMessageId().equals(str)) {
+//                        ServerRuntime.REQUEST_EVENT_COUNT_LOOP_QUEUE.offer(objects);
+//                    } else {
+//                        ServerRuntime.cmdInvokeTime.remove(key);
+//                    }
+//                } catch (IOException e) {
+//                    Log.error(e);
+//                }
+//            }
+//
+//            Iterator<Object[]> periodIterator = ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.iterator();
+//            ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.clear();
+//            while (periodIterator.hasNext()) {
+//                Object[] objects = periodIterator.next();
+//                try {
+//                    Message message1 = JSONUtils.json2pojo((String) objects[1], Message.class);
+//                    if (!message1.getMessageId().equals(str)) {
+//                        ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(objects);
+//                    }
+//                } catch (IOException e) {
+//                    Log.error(e);
+//                }
+//            }
+//        }
     }
 
     /**
@@ -101,7 +132,12 @@ public class CmdHandler {
      */
     public static boolean responseWithPeriod(WebSocket webSocket, String messageId, Request request) {
 
-        String key = webSocket.toString() + messageId;
+        if (ServerRuntime.UNSUBSCRIBE_LIST.contains(messageId)) {
+            Log.info("取消订阅responseWithPeriod：" + messageId);
+            return false;
+        }
+
+        String key = webSocket.toString() + "_" + messageId;
 
         /*
         计算如何处理该Request
@@ -192,10 +228,11 @@ public class CmdHandler {
             }
 
             Message rspMessage = execute(cmdDetail, params, messageId, startTimemillis);
-            Log.info("webSocket.send: " + JSONUtils.obj2json(rspMessage));
+            Log.info("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
             webSocket.send(JSONUtils.obj2json(rspMessage));
         }
     }
+
 
     public static Message execute(CmdDetail cmdDetail, Map params, String messageId, long startTimemillis) throws Exception {
         /*
@@ -211,6 +248,53 @@ public class CmdHandler {
         Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
         rspMessage.setMessageData(response);
         return rspMessage;
+    }
+
+    /**
+     * 处理Request，返回bool类型表示处理完之后是保留还是丢弃
+     * After current processing, do need to keep the Request information and wait for the next processing?
+     * True: keep, False: remove
+     */
+    public static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request) throws Exception {
+
+        if (ServerRuntime.UNSUBSCRIBE_LIST.contains(messageId)) {
+            Log.info("取消订阅responseWithEventCount：" + messageId);
+            return false;
+        }
+
+        for (Object method : request.getRequestMethods().keySet()) {
+            long changeCount = ServerRuntime.getCmdChangeCount((String) method);
+            long eventCount = Long.valueOf(request.getSubscriptionEventCounter());
+            if (changeCount == 0) {
+                continue;
+            }
+
+            if (changeCount % eventCount == 0) {
+                Object[] objects = ServerRuntime.getCmdLastValue((String) method);
+                Response response = (Response) objects[0];
+                boolean hasSent = (boolean) objects[1];
+                if (hasSent) {
+                    continue;
+                }
+
+                Map<String, Object> responseData = new HashMap<>(1);
+                responseData.put((String) method, response.getResponseData());
+                response.setResponseData(responseData);
+                response.setRequestId(messageId);
+                Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
+                rspMessage.setMessageData(response);
+                Log.info("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
+                try {
+                    webSocket.send(JSONUtils.obj2json(rspMessage));
+                } catch (WebsocketNotConnectedException e) {
+                    Log.error("Socket disconnected, remove");
+                    return false;
+                }
+
+                ServerRuntime.cmdLastResponse.put((String) method, new Object[]{response, true});
+            }
+        }
+        return true;
     }
 
     /**
@@ -233,16 +317,6 @@ public class CmdHandler {
              */
             ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
             return Constants.EXECUTE_AND_KEEP;
-        }
-
-        if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
-            /*
-            得到取消订阅命令，返回SKIP_AND_REMOVE（不执行，然后丢弃）
-            Get the unsubscribe command, return SKIP_AND_REMOVE (not executed, then discarded)
-             */
-            ServerRuntime.cmdInvokeTime.remove(key);
-            Log.info("Remove: " + key);
-            return Constants.SKIP_AND_REMOVE;
         }
 
         if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {

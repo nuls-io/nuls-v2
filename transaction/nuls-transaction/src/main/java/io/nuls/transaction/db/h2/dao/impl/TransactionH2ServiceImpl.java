@@ -8,7 +8,7 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.h2.dao.impl.mapper.TransactionMapper;
-import io.nuls.transaction.model.po.TransactionPo;
+import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.model.split.TxTable;
 import org.apache.ibatis.session.SqlSession;
 import org.h2.util.StringUtils;
@@ -28,9 +28,9 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
 
 
     @Override
-    public Page<TransactionPo> getTxs(String address, Integer type, Integer state, Long startTime, Long endTime, int pageNumber, int pageSize) {
+    public Page<TransactionPO> getTxs(String address, Integer type, Integer state, Long startTime, Long endTime, int pageNumber, int pageSize) {
         //数据库交易查询结果集
-        List<TransactionPo> transactionList = new ArrayList<>();
+        List<TransactionPO> transactionList = new ArrayList<>();
         Searchable searchable = new Searchable();
         if(!StringUtils.isNullOrEmpty(address)){
             searchable.addCondition("address", SearchOperator.eq, address);
@@ -57,10 +57,10 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
         //开启分页
         PageHelper.startPage(pageNumber, pageSize);
         PageHelper.orderBy(" address asc, time desc, type asc ");
-        List<TransactionPo> list = mapper.getTxs(searchable, tableName);
+        List<TransactionPO> list = mapper.getTxs(searchable, tableName);
         //sqlSession.commit();
         sqlSession.close();
-        Page<TransactionPo> page = new Page<>();
+        Page<TransactionPO> page = new Page<>();
         if (pageSize > 0) {
             page.setPageNumber(pageNumber);
             page.setPageSize(pageSize);
@@ -86,7 +86,7 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
 
 
     @Override
-    public int saveTx(TransactionPo txPo) {
+    public int saveTx(TransactionPO txPo) {
         SqlSession sqlSession = sqlSessionFactory.openSession();
         String tableName = TxConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
         int rs = sqlSession.getMapper(TransactionMapper.class).insert(txPo, tableName);
@@ -96,12 +96,12 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
     }
 
 
-    private Map<String, List<TransactionPo>> assembleMap(List<TransactionPo> txPoList){
-        Map<String, List<TransactionPo>> map = new HashMap<>();
-        for (TransactionPo txPo : txPoList) {
+    private Map<String, List<TransactionPO>> assembleMap(List<TransactionPO> txPoList){
+        Map<String, List<TransactionPO>> map = new HashMap<>();
+        for (TransactionPO txPo : txPoList) {
             String tableName = TxConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
             if(!map.containsKey(tableName)){
-                List<TransactionPo> list = new ArrayList<>();
+                List<TransactionPO> list = new ArrayList<>();
                 list.add(txPo);
                 map.put(tableName,list);
             }else{
@@ -112,11 +112,11 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
     }
 
     @Override
-    public int saveTxsTables(List<TransactionPo> txPoList) {
+    public int saveTxsTables(List<TransactionPO> txPoList) {
         SqlSession sqlSession = sqlSessionFactory.openSession();
-        Map<String, List<TransactionPo>> map = assembleMap(txPoList);
+        Map<String, List<TransactionPO>> map = assembleMap(txPoList);
         int rs = 0;
-        for (Map.Entry<String, List<TransactionPo>> entry : map.entrySet()){
+        for (Map.Entry<String, List<TransactionPO>> entry : map.entrySet()){
             if(sqlSession.getMapper(TransactionMapper.class).batchInsert(entry.getValue(), entry.getKey()) == 1){
                 rs+=entry.getValue().size();
             }
@@ -127,10 +127,10 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
     }
 
     @Override
-    public int saveTxs(List<TransactionPo> txPoList) {
+    public int saveTxs(List<TransactionPO> txPoList) {
         SqlSession sqlSession = sqlSessionFactory.openSession();
         int rs = 0;
-        for (TransactionPo txPo : txPoList){
+        for (TransactionPO txPo : txPoList){
             String tableName = TxConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
             if(sqlSession.getMapper(TransactionMapper.class).insert(txPo,tableName) == 1){
                 rs++;

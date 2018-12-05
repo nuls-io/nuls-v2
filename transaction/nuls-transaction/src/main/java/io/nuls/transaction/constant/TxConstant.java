@@ -10,6 +10,11 @@ public interface TxConstant {
 
     String MODULE_CODE = "tx";
 
+    int NUlS_CHAINID = 1;
+    int NUlS_CHAIN_ASSETID = 1;
+    int CURRENT_CHAINID = 1;
+    int CURRENT_CHAIN_ASSETID = 1;
+
     /**
      * context path
      */
@@ -53,7 +58,7 @@ public interface TxConstant {
     /**
      * 跨链交易
      */
-    int CROSS_TRANSFER_TYPE = 23;
+    int TX_TYPE_CROSS_CHAIN_TRANSFER = 10;
     String TX_MODULE_VALIDATOR = "txValidator";
     String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
     String CROSS_TRANSFER_COMMIT = "crossTxCommit";

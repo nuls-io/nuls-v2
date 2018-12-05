@@ -33,8 +33,8 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 /**
- * 心跳检测线程
- * Heartbeat detection thread
+ * 心跳检测线程。如果握手不成功，则重新连接
+ * Heartbeat detection threads. If the handshake is unsuccessful, reconnect
  *
  * @author tangyi
  * @date 2018/12/4
@@ -50,6 +50,10 @@ public class HeartbeatProcessor implements Runnable {
     public void run() {
         while (true) {
             for (String url : ClientRuntime.wsClientMap.keySet()) {
+                /*
+                打造握手消息
+                Create handshake messages
+                 */
                 Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
                 message.setMessageData(MessageUtil.defaultNegotiateConnection());
                 String jsonMessage;
@@ -61,9 +65,17 @@ public class HeartbeatProcessor implements Runnable {
                 }
 
                 try {
+                    /*
+                    发送握手消息
+                    Send handshake messages
+                     */
                     WsClient wsClient = ClientRuntime.wsClientMap.get(url);
                     wsClient.send(jsonMessage);
-                    Log.info("Heartbeat NegotiateConnection:" + jsonMessage);
+
+                    /*
+                    如果握手失败，则重新连接
+                    If the handshake fails, reconnect
+                     */
                     if (!CmdDispatcher.receiveNegotiateConnectionResponse()) {
                         ClientRuntime.wsClientMap.remove(url);
                         ClientRuntime.getWsClient(url);
@@ -74,6 +86,10 @@ public class HeartbeatProcessor implements Runnable {
             }
 
             try {
+                /*
+                检测间隔为1秒钟
+                Detection interval is 1 second
+                 */
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS * 100);
             } catch (InterruptedException e) {
                 Log.error(e);

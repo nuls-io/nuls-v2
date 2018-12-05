@@ -65,6 +65,9 @@ public class WsM1 {
         System.out.println(bigDecimal.toBigInteger().intValue());
         System.out.println(new BigInteger("10").divide(new BigInteger("4")));
 
+        int a=11;
+        long b=11L;
+        System.out.println(a==b);
     }
 
     @Test
@@ -113,25 +116,23 @@ public class WsM1 {
         System.out.println("requestAndResponse:" + JSONUtils.obj2json(object));
 
         String messageId1 = CmdDispatcher.requestAndInvokeWithAck
-                (ModuleE.CM.abbr, "getBalance", params, "2","0", new MyInvoke());
-        Thread.sleep(5000);
+                (ModuleE.CM.abbr, "getBalance", params, "1","0", new MyInvoke());
 
         // Call cmd, auto invoke local method after response
-        String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getHeight", params, "0","5", new EventCounterInvoke());
-        Thread.sleep(5000);
+        String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getBalance", params, "0","3", new EventCounterInvoke());
+        Thread.sleep(10000);
 
         // Unsubscribe
         CmdDispatcher.sendUnsubscribe(messageId);
-        System.out.println("我已经取消了订阅:" + messageId);
 
         Thread.sleep(5000);
         CmdDispatcher.sendUnsubscribe(messageId1);
-        System.out.println("我已经取消了订阅:" + messageId1);
 
         System.out.println("我开始一次调用多个方法");
         Request request = MessageUtil.defaultRequest();
         request.setRequestAck("1");
         request.setSubscriptionPeriod("3");
+        request.setSubscriptionEventCounter("0");
         request.getRequestMethods().put("getHeight", params);
         request.getRequestMethods().put("getBalance", params);
         String messageId3 = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, request, new MyInvoke());

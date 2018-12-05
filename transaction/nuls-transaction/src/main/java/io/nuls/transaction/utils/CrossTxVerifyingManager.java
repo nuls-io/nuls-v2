@@ -3,7 +3,6 @@ package io.nuls.transaction.utils;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.transaction.model.bo.CrossChainTx;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**

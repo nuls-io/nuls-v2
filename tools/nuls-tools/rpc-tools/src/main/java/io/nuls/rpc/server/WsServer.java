@@ -111,6 +111,7 @@ public class WsServer extends WebSocketServer {
                     /*
                     取消订阅，直接响应
                      */
+                    Log.info("UnsubscribeFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
                     CmdHandler.unsubscribe(webSocket, message);
                     break;
                 case Request:
@@ -118,11 +119,12 @@ public class WsServer extends WebSocketServer {
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing
                      */
+                    Log.info("RequestFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
                     Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-                    if (ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
+                    if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
                         ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
                     }
-                    if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
+                    if (ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
                         ServerRuntime.REQUEST_EVENT_COUNT_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
                     }
 
@@ -142,7 +144,7 @@ public class WsServer extends WebSocketServer {
                 default:
                     break;
             }
-            Log.info("ServerMsgFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
+
         } catch (Exception e) {
             Log.error(e);
         }

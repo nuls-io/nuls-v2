@@ -34,12 +34,11 @@ import io.nuls.tools.parse.JSONUtils;
 import java.util.Map;
 
 /**
- * 处理客户端收到的消息
- * Processing messages received by clients
+ * 消费从服务端获取的消息
+ * Consume the messages from servers
  *
  * @author tangyi
  * @date 2018/11/26
- * @description
  */
 public class ResponseAutoProcessor implements Runnable {
     /**
@@ -51,7 +50,6 @@ public class ResponseAutoProcessor implements Runnable {
     public void run() {
         while (true) {
             try {
-
                 /*
                 获取队列中的第一个对象，如果是空，舍弃
                 Get the first item of the queue, If it is an empty object, discard
@@ -70,8 +68,8 @@ public class ResponseAutoProcessor implements Runnable {
                 String messageId = response.getRequestId();
 
                 /*
-                如果需要自动调用，则自动调用本地方法
-                If need to invoke local method automatically, do it
+                自动调用本地方法
+                Invoke local method automatically
                  */
                 BaseInvoke baseInvoke = ClientRuntime.INVOKE_MAP.get(messageId);
                 baseInvoke.callBack(response);
