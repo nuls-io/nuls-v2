@@ -44,7 +44,7 @@ public interface BlockService {
      * @return
      * @throws Exception
      */
-    Block getGenesisBlock(int chainId) throws Exception;
+    Block getGenesisBlock(int chainId);
 
     /**
      * 获取最新的区块头
@@ -65,8 +65,10 @@ public interface BlockService {
      * @param chainId       链ID
      * @param height        区块高度
      * @return
+     * @throws UnsupportedEncodingException
+     * @throws NulsException
      */
-    BlockHeader getBlockHeader(int chainId, long height) throws UnsupportedEncodingException, NulsException;
+    BlockHeader getBlockHeader(int chainId, long height);
 
     /**
      * 根据区块高度获取区块
@@ -83,16 +85,19 @@ public interface BlockService {
      * @param startHeight   起始高度
      * @param endHeight     结束高度
      * @return
+     * @throws UnsupportedEncodingException
+     * @throws NulsException
      */
-    List<BlockHeader> getBlockHeader(int chainId, long startHeight, long endHeight) throws UnsupportedEncodingException, NulsException;
+    List<BlockHeader> getBlockHeader(int chainId, long startHeight, long endHeight);
 
     /**
      * 根据区块hash获取区块头
      * @param chainId       链ID
      * @param hash          区块hash
      * @return
+     * @throws NulsException
      */
-    BlockHeader getBlockHeader(int chainId, NulsDigestData hash) throws NulsException;
+    BlockHeader getBlockHeader(int chainId, NulsDigestData hash);
 
     /**
      * 根据区块hash获取区块
@@ -102,7 +107,7 @@ public interface BlockService {
      * @throws NulsException
      * @throws IOException
      */
-    Block getBlock(int chainId, NulsDigestData hash) throws NulsException, IOException;
+    Block getBlock(int chainId, NulsDigestData hash);
 
     /**
      * 根据区块高度区间获取区块
@@ -110,8 +115,10 @@ public interface BlockService {
      * @param startHeight   起始高度
      * @param endHeight     结束高度
      * @return
+     * @throws IOException
+     * @throws NulsException
      */
-    List<Block> getBlock(int chainId, long startHeight, long endHeight) throws IOException, NulsException;
+    List<Block> getBlock(int chainId, long startHeight, long endHeight);
 
     /**
      * 保存区块
@@ -120,7 +127,7 @@ public interface BlockService {
      * @return
      * @throws Exception
      */
-    boolean saveBlock(int chainId, Block block) throws Exception;
+    boolean saveBlock(int chainId, Block block);
 
     /**
      * 回滚区块
@@ -129,7 +136,7 @@ public interface BlockService {
      * @return
      * @throws Exception
      */
-    boolean rollbackBlock(int chainId, Block block) throws Exception;
+    boolean rollbackBlock(int chainId, Block block);
 
     /**
      * 回滚区块
@@ -142,8 +149,9 @@ public interface BlockService {
 
     /**
      * 转发区块给连接的其他对等节点，允许一个例外（不转发给它）
-     * @param hash              区块hash
-     * @param excludeNode       需要排除的节点，一般是因为从该节点处接收的本区块
+     * @param chainId
+     * @param hash                  区块hash
+     * @param excludeNode           需要排除的节点，因为从该节点处接收的本区块
      * @return
      */
     boolean forwardBlock(int chainId, NulsDigestData hash, Node excludeNode);
@@ -153,8 +161,10 @@ public interface BlockService {
      * @param chainId
      * @param hash
      * @return
+     * @throws IOException
+     * @throws NulsException
      */
-    boolean broadcastBlock(int chainId, NulsDigestData hash) throws IOException, NulsException;
+    boolean broadcastBlock(int chainId, NulsDigestData hash);
 
     /**
      * todo 待实现
@@ -180,7 +190,7 @@ public interface BlockService {
      * @return
      * @throws Exception
      */
-    boolean verifyBlock(int chainId, Block block) throws Exception;
+    boolean verifyBlock(int chainId, Block block);
 
     /**
      * 初始化方法

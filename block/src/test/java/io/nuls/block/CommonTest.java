@@ -20,13 +20,19 @@
 
 package io.nuls.block;
 
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.service.BlockService;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.SortedSet;
-import java.util.TreeSet;
-
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(BlockService.class)
+@PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "org.w3c.*", "javax.management.*"})
 public class CommonTest {
 
     @Before
@@ -39,19 +45,9 @@ public class CommonTest {
 
     @Test
     public void test() throws Exception {
-        TreeSet<Integer> set = new TreeSet<>();
-        set.add(1);
-        set.add(6);
-        set.add(7);
-        set.add(8);
-        set.add(9);
-        set.add(2);
-        set.add(3);
-        set.add(4);
-        set.add(5);
-
-        SortedSet<Integer> tailSet = set.tailSet(5);
-        System.out.println(tailSet);
+        NulsDigestData hash = NulsDigestData.fromDigestHex("0020bd4d1c550a84dff195b2123d04d998ff160acc029d449f7a096f4dc09fd58c70");
+        byte[] digestBytes = hash.getDigestBytes();
+        System.out.println(digestBytes);
     }
 
 }

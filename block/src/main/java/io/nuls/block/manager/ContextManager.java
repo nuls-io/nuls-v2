@@ -17,6 +17,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.manager;
 
 import io.nuls.block.constant.RunningStatusEnum;
@@ -25,10 +26,10 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Context管理器
@@ -39,7 +40,7 @@ import java.util.Map;
 @Data
 public class ContextManager {
 
-    public static List<Integer> chainIds = new ArrayList<>();
+    public static List<Integer> chainIds = new CopyOnWriteArrayList<>();
 
     private static Map<Integer, Context> contextMap = new HashMap<>();
 

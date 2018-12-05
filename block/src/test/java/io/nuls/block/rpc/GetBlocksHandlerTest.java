@@ -18,66 +18,39 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.utils;
+package io.nuls.block.rpc;
 
-import io.nuls.block.model.Node;
+import io.nuls.block.message.GetBlocksByHeightMessage;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.WsServer;
-import org.junit.After;
-import org.junit.Before;
+import io.nuls.tools.crypto.HexUtil;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-public class NetworkUtilTest {
+import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
+import static io.nuls.block.constant.Constant.CHAIN_ID;
 
-    @Before
-    public void setUp() throws Exception {
-        WsServer.mockModule();
-    }
-
-    @After
-    public void tearDown() throws Exception {
-
-    }
+public class GetBlocksHandlerTest {
 
     @Test
-    public void getAvailableNodes() throws Exception {
+    public void process() throws Exception {
+        WsServer.mockModule();
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", 9861);
-        params.put("state", 1);
-        params.put("isCross", 0);
-        params.put("startPage", 0);
-        params.put("pageSize", 0);
-
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
-        Map responseData = (Map) response.getResponseData();
-        List nw_getNodes = (List) responseData.get("nw_getNodes");
-        List nodes = new ArrayList();
-        for (Object nw_getNode : nw_getNodes) {
-            Map map = (Map) nw_getNode;
-            Node node = new Node();
-            node.setId((String) map.get("nodeId"));
-            node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
-//            node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
-            nodes.add(node);
-        }
-        nodes.forEach(e -> System.out.println(e));
+        params.put("chainId", CHAIN_ID);
+        params.put("nodes", "192.168.1.191:8003");
+        GetBlocksByHeightMessage message = new GetBlocksByHeightMessage();
+        message.setStartHeight(1000);
+        message.setEndHeight(1010);
+        message.setCommand(GET_BLOCKS_BY_HEIGHT_MESSAGE);
+        params.put("messageBody", HexUtil.byteToHex(message.serialize()));
+        params.put("command", GET_BLOCKS_BY_HEIGHT_MESSAGE);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_BLOCKS_BY_HEIGHT_MESSAGE, params);
+        System.out.println(response);
     }
-
-    @Test
-    public void resetNetwork() {
-    }
-
-    @Test
-    public void sendToNode() {
-    }
-
 }

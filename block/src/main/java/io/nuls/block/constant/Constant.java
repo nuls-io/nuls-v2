@@ -77,6 +77,14 @@ public interface Constant {
      * 存储区块头高度与hash的键值对
      */
     String BLOCK_HEADER_INDEX = "BlockHeaderIndex-";
+    /**
+     * 分叉链、孤儿链区块数据库前缀
+     */
     String FORK_CHAINS = "ForkChains-";
+
+    /**
+     * 每次清理几分之一
+     */
+    int CLEAN_PARAM = 2;
 
 }

@@ -18,31 +18,50 @@
  * SOFTWARE.
  */
 
-package io.nuls.block;
+package io.nuls.block.message;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
+import lombok.Data;
 
-public class BootstrapTest {
+import java.io.IOException;
 
-    @Before
-    public void setUp() throws Exception {
+/**
+ * 发送一个hash
+ * @author captain
+ * @date 18-11-9 下午2:37
+ * @version 1.0
+ */
+@Data
+public class HashMessage extends BaseMessage {
 
+    private NulsDigestData requestHash;
+
+    public HashMessage() {
     }
 
-    @After
-    public void tearDown() throws Exception {
+    public HashMessage(NulsDigestData hash) {
+        this.requestHash = hash;
     }
 
-    @Test
-    public void main() throws Exception {
-
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfNulsData(requestHash);
+        return size;
     }
 
-    @Test
-    public void kernel() throws Exception {
+    @Override
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(requestHash);
+    }
 
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.requestHash = byteBuffer.readHash();
     }
 
 }
