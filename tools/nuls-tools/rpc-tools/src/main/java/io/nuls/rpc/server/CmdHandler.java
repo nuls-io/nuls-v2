@@ -41,6 +41,7 @@ import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,13 +52,16 @@ import java.util.Map;
  *
  * @author tangyi
  * @date 2018/10/30
- * @description
  */
 public class CmdHandler {
+
 
     /**
      * 确认握手成功
      * Confirm successful handshake
+     *
+     * @param webSocket 用于发送消息 / Used to send message
+     * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
     static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
@@ -69,9 +73,14 @@ public class CmdHandler {
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 
+
     /**
      * 确认收到Request
      * Confirm receipt of Request
+     *
+     * @param webSocket 用于发送消息 / Used to send message
+     * @param messageId 原始消息ID / The origin message ID
+     * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
     static void ack(WebSocket webSocket, String messageId) throws JsonProcessingException {
         Ack ack = new Ack();
@@ -82,27 +91,40 @@ public class CmdHandler {
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 
+
     /**
      * 取消订阅
      * For Unsubscribe
+     *
+     * @param message 取消订阅的消息体 / Unsubscribe message
      */
-    static void unsubscribe(WebSocket webSocket, Message message) {
+    static synchronized void unsubscribe(WebSocket webSocket, Message message) {
         Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
-        for (String str : unsubscribe.getUnsubscribeMethods()) {
-            String key = webSocket.toString() + str;
-            ServerRuntime.cmdInvokeTime.put(key, Constants.UNSUBSCRIBE_TIMEMILLIS);
-            ServerRuntime.cmdChangeCount.put(str, Constants.UNSUBSCRIBE_TIMEMILLIS);
+        for (String requestId : unsubscribe.getUnsubscribeMethods()) {
+            ServerRuntime.UNSUBSCRIBE_LIST.add(webSocket.toString() + "_" + requestId);
         }
+        Collections.addAll(ServerRuntime.UNSUBSCRIBE_LIST, unsubscribe.getUnsubscribeMethods());
     }
 
     /**
      * 处理Request，返回bool类型表示处理完之后是保留还是丢弃
      * After current processing, do need to keep the Request information and wait for the next processing?
      * True: keep, False: remove
+     *
+     * @param webSocket 用于发送消息 / Used to send message
+     * @param messageId 原始消息ID / The origin message ID
+     * @param request   请求 / The request
+     * @return boolean
      */
-    public static boolean responseWithPeriod(WebSocket webSocket, String messageId, Request request) {
+    static boolean responseWithPeriod(WebSocket webSocket, String messageId, Request request) {
 
-        String key = webSocket.toString() + messageId;
+        String key = webSocket.toString() + "_" + messageId;
+        if (ServerRuntime.UNSUBSCRIBE_LIST.contains(key)) {
+            Log.info("取消订阅responseWithPeriod：" + key);
+            return false;
+        }
+
+
 
         /*
         计算如何处理该Request
@@ -139,14 +161,20 @@ public class CmdHandler {
         }
     }
 
+
     /**
      * 处理Request，自动调用正确的方法，返回结果
      * Processing Request, automatically calling the correct method, returning the result
+     *
+     * @param webSocket      用于发送消息 / Used to send message
+     * @param requestMethods 请求的方法集合 / The collections of request method
+     * @param messageId      原始消息ID / The origin message ID
+     * @throws Exception 连接失败 / Connected failed
      */
-    public static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
+    static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
         for (Object method : requestMethods.keySet()) {
 
-            long startTimemillis = TimeService.currentTimeMillis();
+
             Map params = (Map) requestMethods.get(method);
 
             /*
@@ -171,7 +199,6 @@ public class CmdHandler {
              */
             if (cmdDetail == null) {
                 response.setResponseComment(Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""));
-                response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 webSocket.send(JSONUtils.obj2json(rspMessage));
@@ -185,25 +212,58 @@ public class CmdHandler {
             String validationString = paramsValidation(cmdDetail, params);
             if (validationString != null) {
                 response.setResponseComment(validationString);
-                response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 webSocket.send(JSONUtils.obj2json(rspMessage));
                 return;
             }
 
-            Message rspMessage = execute(cmdDetail, params, messageId, startTimemillis);
+            Message rspMessage = execute(cmdDetail, params, messageId);
             Log.info("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
             webSocket.send(JSONUtils.obj2json(rspMessage));
         }
     }
 
     /**
+     * 调用本地方法，把结果封装为Message对象，通过Websocket返回
+     * Call the local method, encapsulate the result as a Message object, and return it through Websocket
+     *
+     * @param cmdDetail CmdDetail
+     * @param params    Map, {key, value}
+     * @param messageId 原始消息ID / The origin message ID
+     * @return Message
+     * @throws Exception 调用的方法返回的任何异常 / Any exception returned by the invoked method
+     */
+    private static Message execute(CmdDetail cmdDetail, Map params, String messageId) throws Exception {
+        long startTimemillis = TimeService.currentTimeMillis();
+        Response response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
+        response.setRequestId(messageId);
+        Map<String, Object> responseData = new HashMap<>(1);
+        responseData.put(cmdDetail.getMethodName(), response.getResponseData());
+        response.setResponseData(responseData);
+        response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+        Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
+        rspMessage.setMessageData(response);
+        return rspMessage;
+    }
+
+
+    /**
      * 处理Request，返回bool类型表示处理完之后是保留还是丢弃
      * After current processing, do need to keep the Request information and wait for the next processing?
      * True: keep, False: remove
+     *
+     * @param webSocket 用于发送消息 / Used to send message
+     * @param messageId 原始消息ID / The origin message ID
+     * @param request   请求 / The request
+     * @return boolean
      */
-    public static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request) throws Exception {
+    static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request) {
+        String key = webSocket.toString() + "_" + messageId;
+        if (ServerRuntime.UNSUBSCRIBE_LIST.contains(key)) {
+            Log.info("取消订阅responseWithEventCount：" + key);
+            return false;
+        }
 
         for (Object method : request.getRequestMethods().keySet()) {
             long changeCount = ServerRuntime.getCmdChangeCount((String) method);
@@ -211,9 +271,7 @@ public class CmdHandler {
             if (changeCount == 0) {
                 continue;
             }
-            if (changeCount == Constants.UNSUBSCRIBE_TIMEMILLIS) {
-                return false;
-            }
+
             if (changeCount % eventCount == 0) {
                 Object[] objects = ServerRuntime.getCmdLastValue((String) method);
                 Response response = (Response) objects[0];
@@ -228,8 +286,15 @@ public class CmdHandler {
                 response.setRequestId(messageId);
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
-                Log.info("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
-                webSocket.send(JSONUtils.obj2json(rspMessage));
+                try {
+                    Log.info("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
+                    webSocket.send(JSONUtils.obj2json(rspMessage));
+                } catch (WebsocketNotConnectedException e) {
+                    Log.error("Socket disconnected, remove");
+                    return false;
+                } catch (JsonProcessingException e) {
+                    Log.error(e);
+                }
 
                 ServerRuntime.cmdLastResponse.put((String) method, new Object[]{response, true});
             }
@@ -237,25 +302,14 @@ public class CmdHandler {
         return true;
     }
 
-    public static Message execute(CmdDetail cmdDetail, Map params, String messageId, long startTimemillis) throws Exception {
-        /*
-            调用本地方法，把结果封装为Message对象，通过Websocket返回
-            Call the local method, encapsulate the result as a Message object, and return it through Websocket
-             */
-        Response response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
-        response.setRequestId(messageId);
-        Map<String, Object> responseData = new HashMap<>(1);
-        responseData.put(cmdDetail.getMethodName(), response.getResponseData());
-        response.setResponseData(responseData);
-        response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-        Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
-        rspMessage.setMessageData(response);
-        return rspMessage;
-    }
 
     /**
      * 计算如何处理该Request
      * Calculate how to handle the Request
+     *
+     * @param key                Key
+     * @param subscriptionPeriod Unit: second
+     * @return int
      */
     private static int nextProcess(String key, int subscriptionPeriod) {
         if (subscriptionPeriod == 0) {
@@ -275,16 +329,6 @@ public class CmdHandler {
             return Constants.EXECUTE_AND_KEEP;
         }
 
-        if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
-            /*
-            得到取消订阅命令，返回SKIP_AND_REMOVE（不执行，然后丢弃）
-            Get the unsubscribe command, return SKIP_AND_REMOVE (not executed, then discarded)
-             */
-            ServerRuntime.cmdInvokeTime.remove(key);
-            Log.info("Remove: " + key);
-            return Constants.SKIP_AND_REMOVE;
-        }
-
         if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
             /*
             没有达到执行条件，返回SKIP_AND_KEEP（不执行，然后保留）
@@ -301,9 +345,14 @@ public class CmdHandler {
 
     }
 
+
     /**
      * 验证参数的有效性
      * Verify the validity of the parameters
+     *
+     * @param cmdDetail CmdDetail
+     * @param params    Parameters of remote method
+     * @return String: null means no error
      */
     private static String paramsValidation(CmdDetail cmdDetail, Map params) {
 
@@ -339,9 +388,14 @@ public class CmdHandler {
         return null;
     }
 
+
     /**
      * 验证参数是否在定义的范围内
      * Verify that the range is correct
+     *
+     * @param cmdParameter Parameter format
+     * @param params       Parameters of remote method
+     * @return boolean
      */
     private static boolean paramsRangeValidation(CmdParameter cmdParameter, Map params) {
         /*
@@ -391,6 +445,10 @@ public class CmdHandler {
     /**
      * 验证参数是否匹配定义的正则
      * Verify that parameters match defined regular expressions
+     *
+     * @param cmdParameter Parameter format
+     * @param params       Parameters of remote method
+     * @return boolean
      */
     private static boolean paramsRegexValidation(CmdParameter cmdParameter, Map params) {
         /*
@@ -422,15 +480,22 @@ public class CmdHandler {
      * Call local cmd.
      * 1. If the interface is injected via @Autowired, the injected object is used
      * 2. If the interface has no special annotations, construct a new object by reflection
+     *
+     * @param invokeClass  Class
+     * @param invokeMethod Method
+     * @param params       Parameters of remote method
+     * @return Response
+     * @throws Exception Any exceptions
      */
+    @SuppressWarnings("unchecked")
     private static Response invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
 
         Class clz = Class.forName(invokeClass);
-        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
+        Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
 
         BaseCmd cmd;
         if (SpringLiteContext.getBeanByClass(invokeClass) == null) {
-            @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
+            Constructor constructor = clz.getConstructor();
             cmd = (BaseCmd) constructor.newInstance();
         } else {
             cmd = (BaseCmd) SpringLiteContext.getBeanByClass(invokeClass);
