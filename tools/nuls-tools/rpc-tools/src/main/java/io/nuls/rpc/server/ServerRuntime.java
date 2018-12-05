@@ -80,10 +80,10 @@ public class ServerRuntime {
      * The first element of the array is the websocket object, and the second element of the array is Message.
      */
     public static final Queue<Object[]> NEGOTIATE_QUEUE = new ConcurrentLinkedQueue<>();
-    public static final Queue<Object[]> UNSUBSCRIBE_QUEUE = new ConcurrentLinkedQueue<>();
     public static final Queue<Object[]> REQUEST_SINGLE_QUEUE = new ConcurrentLinkedQueue<>();
     public static final Queue<Object[]> REQUEST_PERIOD_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
     public static final Queue<Object[]> REQUEST_EVENT_COUNT_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final List<String> UNSUBSCRIBE_LIST =  Collections.synchronizedList(new ArrayList<>());
 
     public static Object[] firstObjArrInRequestSingleQueue() {
         return firstObjArrInQueue(REQUEST_SINGLE_QUEUE);

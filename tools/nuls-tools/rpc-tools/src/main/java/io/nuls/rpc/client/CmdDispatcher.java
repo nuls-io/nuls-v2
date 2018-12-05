@@ -179,7 +179,8 @@ public class CmdDispatcher {
         Log.info("SendRequest to " + wsClient.getRemoteSocketAddress().getHostString() + ":" + wsClient.getRemoteSocketAddress().getPort() + "->" + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
-        if (Integer.parseInt(request.getSubscriptionPeriod()) > 0) {
+        if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())
+                || ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
             /*
             如果是需要重复发送的消息（订阅消息），记录messageId与客户端的对应关系，用于取消订阅
             If it is a message (subscription message) that needs to be sent repeatedly, record the relationship between the messageId and the WsClient
@@ -208,6 +209,7 @@ public class CmdDispatcher {
         WsClient wsClient = ClientRuntime.msgIdKeyWsClientMap.get(messageId);
         if (wsClient != null) {
             wsClient.send(JSONUtils.obj2json(message));
+            Log.info("取消订阅：" + JSONUtils.obj2json(message));
             ClientRuntime.INVOKE_MAP.remove(messageId);
         }
     }
