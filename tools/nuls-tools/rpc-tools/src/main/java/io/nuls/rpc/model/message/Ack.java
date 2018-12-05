@@ -27,13 +27,18 @@ package io.nuls.rpc.model.message;
 import lombok.*;
 
 /**
+ * 消息确认对象，表示已经收到
+ * Message confirmation object, indicating that it has been received
+ *
  * @author tangyi
  * @date 2018/11/15
- * @description
  */
 @ToString
 @NoArgsConstructor
 public class Ack {
+    /**
+     * 请求的消息号 / The messageId of request
+     */
     @Getter
     @Setter
     private String requestId;
