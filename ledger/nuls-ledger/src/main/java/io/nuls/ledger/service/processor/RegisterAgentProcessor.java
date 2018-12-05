@@ -25,19 +25,23 @@
  */
 package io.nuls.ledger.service.processor;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.constant.TransactionType;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.utils.CoinDataUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.exception.NulsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 /**
+ * 创建共识节点时账户状态处理
+ * <p>
  * Created by wangkun23 on 2018/11/29.
  */
 @Service
@@ -56,7 +60,26 @@ public class RegisterAgentProcessor implements TxProcessor {
         }
         CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
 
-        //accountStateService.freezeByLockTime()
+        //1 减去用户的可用余额
+        List<CoinFrom> froms = coinData.getFrom();
+        for (CoinFrom from : froms) {
+            String address = new String(from.getAddress());
 
+            accountStateService.increaseNonce(address, from.getAssetsChainId(), from.getAssetsId());
+            accountStateService.addBalance(address,
+                    from.getAssetsChainId(),
+                    from.getAssetsId(),
+                    from.getAmount().negate());
+        }
+        //2 增加冻结金额,永久锁定,只有在注销节点时,才会退还
+        List<CoinTo> tos = coinData.getTo();
+        for (CoinTo to : tos) {
+            String address = new String(to.getAddress());
+            accountStateService.freezeByLockTime(address,
+                    to.getAssetsId(),
+                    to.getAssetsId(),
+                    transaction.getHash().getDigestHex(),
+                    to.getAmount(), to.getLockTime());
+        }
     }
 }
