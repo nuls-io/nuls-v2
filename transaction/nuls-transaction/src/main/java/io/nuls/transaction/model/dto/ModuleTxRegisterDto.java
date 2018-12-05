@@ -32,7 +32,7 @@ import java.util.List;
  * @author: qinyifeng
  * @date: 2018/11/30
  */
-public class ModuleTxRegisterDto {
+public class ModuleTxRegisterDTO {
     /**
      * 模块编码
      */
@@ -44,9 +44,9 @@ public class ModuleTxRegisterDto {
     /**
      * 交易验证器
      */
-    private List<TxRegisterDto> list;
+    private List<TxRegisterDTO> list;
 
-    public ModuleTxRegisterDto() {
+    public ModuleTxRegisterDTO() {
 
     }
 
@@ -66,11 +66,20 @@ public class ModuleTxRegisterDto {
         this.moduleValidator = moduleValidator;
     }
 
-    public List<TxRegisterDto> getList() {
+    public List<TxRegisterDTO> getList() {
         return list;
     }
 
-    public void setList(List<TxRegisterDto> list) {
+    public void setList(List<TxRegisterDTO> list) {
         this.list = list;
+    }
+
+    @Override
+    public String toString() {
+        return "ModuleTxRegisterDTO{" +
+                "moduleCode='" + moduleCode + '\'' +
+                ", moduleValidator='" + moduleValidator + '\'' +
+                ", list=" + list +
+                '}';
     }
 }

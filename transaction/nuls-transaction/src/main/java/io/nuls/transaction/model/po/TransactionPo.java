@@ -6,7 +6,7 @@ import io.nuls.transaction.constant.TxConstant;
  * @author: Charlie
  * @date: 2018/11/14
  */
-public class TransactionPo {
+public class TransactionPO {
 
     private Integer id;
 
