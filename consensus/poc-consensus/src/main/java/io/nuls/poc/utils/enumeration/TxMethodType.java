@@ -6,7 +6,19 @@ package io.nuls.poc.utils.enumeration;
  * 2018/11/30
  * */
 public enum TxMethodType {
-    VALID,     //验证
-    COMMIT,    //提交
-    ROLLBACK   //回滚
+    /**
+     * 验证
+     * validate
+     * */
+    VALID,
+    /**
+     * 提交
+     * commit
+     * */
+    COMMIT,
+    /**
+     * 回滚
+     * rollback
+     * */
+    ROLLBACK
 }

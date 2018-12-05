@@ -1,32 +1,31 @@
 /*
+ * MIT License
  *
- *  * MIT License
- *  *
- *  * Copyright (c) 2017-2018 nuls.io
- *  *
- *  * Permission is hereby granted, free of charge, to any person obtaining a copy
- *  * of this software and associated documentation files (the "Software"), to deal
- *  * in the Software without restriction, including without limitation the rights
- *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  * copies of the Software, and to permit persons to whom the Software is
- *  * furnished to do so, subject to the following conditions:
- *  *
- *  * The above copyright notice and this permission notice shall be included in all
- *  * copies or substantial portions of the Software.
- *  *
- *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  * SOFTWARE.
- *  *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
  */
 
 package io.nuls.rpc.server;
 
+import io.nuls.rpc.client.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.client.HeartbeatProcessor;
 import io.nuls.rpc.client.ResponseAutoProcessor;
@@ -120,11 +119,24 @@ public class WsServer extends WebSocketServer {
                     Request, put in different queues according to the response mode. Wait for processing
                      */
                     Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-                    if (Integer.parseInt(request.getSubscriptionEventCounter()) > 0
-                            || Integer.parseInt(request.getSubscriptionPeriod()) > 0) {
-                        ServerRuntime.REQUEST_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
-                    } else {
+                    if (ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
+                        ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
+                    }
+                    if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
+                        ServerRuntime.REQUEST_EVENT_COUNT_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
+                    }
+
+                    if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
+                            && !ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
                         ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, msg});
+                    }
+
+                    /*
+                    如果需要一个Ack，则发送
+                    Send Ack if needed
+                     */
+                    if (Constants.BOOLEAN_TRUE.equals(request.getRequestAck())) {
+                        CmdHandler.ack(webSocket, message.getMessageId());
                     }
                     break;
                 default:

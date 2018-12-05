@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package io.nuls.rpc.client;
 
 import io.nuls.rpc.info.Constants;
@@ -119,9 +143,14 @@ public class CmdDispatcher {
      * Send Request, need to wrap the Request object manually(for calling multiple methods at a time)
      */
     public static String requestAndInvoke(String role, Request request, BaseInvoke baseInvoke) throws Exception {
+        if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())
+                || ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
+            throw new Exception("Wrong value: [SubscriptionPeriod][SubscriptionEventCounter]");
+        }
+
         String messageId = sendRequest(role, request);
         ClientRuntime.INVOKE_MAP.put(messageId, baseInvoke);
-        if (Constants.booleanString(false).equals(request.getRequestAck())) {
+        if (Constants.BOOLEAN_FALSE.equals(request.getRequestAck())) {
             return messageId;
         } else {
             return receiveAck(messageId) ? messageId : null;
@@ -249,7 +278,7 @@ public class CmdDispatcher {
         /*
         Timeout Error
          */
-        return MessageUtil.newResponse(messageId, Constants.booleanString(false), Constants.RESPONSE_TIMEOUT);
+        return MessageUtil.newResponse(messageId, Constants.BOOLEAN_FALSE, Constants.RESPONSE_TIMEOUT);
     }
 
     /**

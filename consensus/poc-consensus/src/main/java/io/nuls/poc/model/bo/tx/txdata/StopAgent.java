@@ -37,7 +37,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author: Niels Wang
+ * 停止节点信息类
+ * Stop Node Information Class
+ *
+ * @author tag
+ * 2018/11/20
  */
 public class StopAgent extends TransactionLogicData {
 
@@ -63,6 +67,7 @@ public class StopAgent extends TransactionLogicData {
         return this.createTxHash.size();
     }
 
+    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         if(null!=address){

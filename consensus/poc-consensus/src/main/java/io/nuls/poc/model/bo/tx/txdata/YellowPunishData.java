@@ -39,7 +39,11 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author Niels
+ * 黄牌惩罚信息类
+ * Yellow Card Punishment Information Category
+ *
+ * @author tag
+ * 2018/11/20
  */
 public class YellowPunishData extends TransactionLogicData {
     private List<byte[]> addressList = new ArrayList<>();
@@ -55,6 +59,7 @@ public class YellowPunishData extends TransactionLogicData {
         this.addressList = addressList;
     }
 
+    @Override
     public Set<byte[]> getAddresses() {
         return new HashSet<>(addressList);
     }

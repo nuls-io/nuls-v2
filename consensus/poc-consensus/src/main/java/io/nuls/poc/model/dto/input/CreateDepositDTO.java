@@ -1,5 +1,8 @@
 package io.nuls.poc.model.dto.input;
 /**
+ * 创建委托交易参数类
+ * Create delegate transaction parameter class
+ *
  * @author tag
  * 2018/11/12
  * */

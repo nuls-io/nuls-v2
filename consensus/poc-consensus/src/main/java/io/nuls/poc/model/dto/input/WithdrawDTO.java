@@ -29,6 +29,9 @@ package io.nuls.poc.model.dto.input;
 import io.nuls.tools.data.StringUtils;
 
 /**
+ * 退出委托交易参数类
+ * Exit Delegation Trading Parameter Class
+ *
  * @author tag
  * 2018/11/21
  */

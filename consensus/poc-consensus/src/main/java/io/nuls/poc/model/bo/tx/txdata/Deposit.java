@@ -40,17 +40,16 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author Niels
+ * 委托信息类
+ * Delegated information class
+ *
+ * @author tag
+ * 2018/11/28
  */
 public class Deposit extends TransactionLogicData {
-
-
     private BigInteger deposit;
-
     private NulsDigestData agentHash;
-
     private byte[] address;
-
     private transient long time;
     private transient int status;
     private transient NulsDigestData txHash;
@@ -75,6 +74,7 @@ public class Deposit extends TransactionLogicData {
         this.agentHash = byteBuffer.readHash();
     }
 
+    @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfBigInteger(); // deposit.getValue()
@@ -147,6 +147,7 @@ public class Deposit extends TransactionLogicData {
         this.address = address;
     }
 
+    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(this.address);

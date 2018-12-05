@@ -26,23 +26,29 @@ package io.nuls.poc.model.bo.consensus;
 import io.nuls.tools.parse.I18nUtils;
 
 /**
- * @author Niels
+ * 红牌惩罚原因枚举类
+ * Enumeration of Reasons for Red Card Punishment
+ *
+ * @author tag
+ * 2018/11/28
  */
 public enum PunishReasonEnum {
-    /**
-     * Bifurcate block chain
-     */
+    /*
+    连续分叉
+    Bifurcate block chain
+    */
     BIFURCATION((byte) 1, "69980"),
 
-    /**
-     * double spend
-     */
+    /*
+    双花
+    double spend
+    */
     DOUBLE_SPEND((byte) 2, "69981"),
 
-    /**
-     * 连续x轮黄牌
-     * Continuous x round yellow card.
-     */
+    /*
+    连续x轮黄牌
+    Continuous x round yellow card.
+    */
     TOO_MUCH_YELLOW_PUNISH((byte) 3, "69982"),;
     private final byte code;
     private final String msgCode;

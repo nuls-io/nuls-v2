@@ -1,27 +1,25 @@
 /*
+ * MIT License
  *
- *  * MIT License
- *  *
- *  * Copyright (c) 2017-2018 nuls.io
- *  *
- *  * Permission is hereby granted, free of charge, to any person obtaining a copy
- *  * of this software and associated documentation files (the "Software"), to deal
- *  * in the Software without restriction, including without limitation the rights
- *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  * copies of the Software, and to permit persons to whom the Software is
- *  * furnished to do so, subject to the following conditions:
- *  *
- *  * The above copyright notice and this permission notice shall be included in all
- *  * copies or substantial portions of the Software.
- *  *
- *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  * SOFTWARE.
- *  *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
  */
 
@@ -115,10 +113,10 @@ public class Constants {
      * 3: Do not execute Request, but keep waiting for the next execution
      * 4: Do not execute Request, and discard it
      */
-    public static final int INVOKE_EXECUTE_KEEP = 1;
-    public static final int INVOKE_EXECUTE_REMOVE = 2;
-    public static final int INVOKE_SKIP_KEEP = 3;
-    public static final int INVOKE_SKIP_REMOVE = 4;
+    public static final int EXECUTE_AND_KEEP = 1;
+    public static final int EXECUTE_AND_REMOVE = 2;
+    public static final int SKIP_AND_KEEP = 3;
+    public static final int SKIP_AND_REMOVE = 4;
 
 
     /**
@@ -166,14 +164,6 @@ public class Constants {
      * Thread pool for processing messages to be processed
      */
     public static final ExecutorService THREAD_POOL = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("Processor"));
-
-    /**
-     * 根据bool类型生成对应字符串
-     * Generate corresponding strings according to bool type
-     */
-    public static String booleanString(boolean bool) {
-        return bool ? BOOLEAN_TRUE : BOOLEAN_FALSE;
-    }
 
     /**
      * 核心模块（Manager）的连接地址

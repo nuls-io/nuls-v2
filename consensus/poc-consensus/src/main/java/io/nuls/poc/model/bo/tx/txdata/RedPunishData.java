@@ -37,7 +37,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author Niels
+ * 红牌惩罚信息类
+ * Red Card Punishment Information Category
+ *
+ * @author tag
+ * 2018/11/20
  */
 public class RedPunishData extends TransactionLogicData {
     private byte[] address;
@@ -95,6 +99,7 @@ public class RedPunishData extends TransactionLogicData {
         this.evidence = evidence;
     }
 
+    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> set = new HashSet<>();
         set.add(address);

@@ -32,6 +32,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.server.ServerRuntime;
 import io.nuls.tools.log.Log;
 
 import java.util.Map;
@@ -49,6 +50,7 @@ public class MyCmd extends BaseCmd {
             description = "test getHeight 1.1")
     public Response getHeight1(Map map) {
         Log.info("getHeight version 1.1");
+        ServerRuntime.eventCount("getBalance", new Object());
         return success("Here is your real return value");
     }
 
@@ -61,7 +63,7 @@ public class MyCmd extends BaseCmd {
     }
 
     @CmdAnnotation(cmd = "getHeight", version = 2.0, scope = Constants.ADMIN,
-            description= "test getHeight 2.0")
+            description = "test getHeight 2.0")
     @Parameter(parameterName = "bbb", parameterType = "string", parameterValidRegExp = "^[A-Za-z0-9\\-]+$")
     public Response getHeight3(Map map) {
         Log.info("getHeight version 2.0");
@@ -69,7 +71,7 @@ public class MyCmd extends BaseCmd {
     }
 
     @CmdAnnotation(cmd = "getBalance", version = 1.0, scope = Constants.ADMIN,
-            description= "test getBalance")
+            description = "test getBalance")
     public Response getBalance(Map map) {
         Log.info("getBalance invoked");
         return success("getBalance->ha-ha-ha");
