@@ -276,9 +276,9 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public boolean broadcastBlock(int chainId, NulsDigestData hash) {
+    public boolean broadcastBlock(int chainId, Block block) {
         SmallBlockMessage message = new SmallBlockMessage();
-        message.setSmallBlock(BlockUtil.getSmallBlock(chainId, getBlock(chainId, hash)));
+        message.setSmallBlock(BlockUtil.getSmallBlock(chainId, block));
         message.setCommand(CommandConstant.SMALL_BLOCK_MESSAGE);
         return NetworkUtil.broadcast(chainId, message, "");
     }

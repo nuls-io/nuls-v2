@@ -147,7 +147,7 @@ public class MessageTest {
     public void testSmallBlockMessage() throws Exception {
         SmallBlockMessage message = new SmallBlockMessage();
         Block block = BlockGenerator.generate(null);
-        Transaction transaction = BlockGenerator.getTransaction();
+        Transaction transaction = BlockGenerator.getTransactions().get(0);
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
         smallBlock.addBaseTx(transaction);

@@ -35,11 +35,14 @@ import lombok.ToString;
  *
  * @author tangyi
  * @date 2018/11/15
- * @description
  */
 @ToString
 @NoArgsConstructor
 public class UnregisterCompoundMethod {
+    /**
+     * This is the string that identifies the virtual method.
+     * If it is empty then all virtual methods registered by the caller should be unregistered.
+     */
     @Getter
     @Setter
     private String unregisterCompoundMethodName;

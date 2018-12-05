@@ -39,10 +39,13 @@ import java.util.Map;
  *
  * @author tangyi
  * @date 2018/11/7
- * @description
  */
 public class RequestSingleProcessor implements Runnable {
 
+    /**
+     * 发送只响应一次的消息
+     * Send a message that responds only once
+     */
     @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {

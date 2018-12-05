@@ -25,6 +25,7 @@ import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.block.config.GenesisBlock;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.constant.Constant;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
@@ -144,38 +145,10 @@ public final class BlockGenerator extends Thread {
         if (StringUtils.isNotBlank(remark)) {
             tx.setRemark(HexUtil.decode(remark));
         }
+        tx.setType(Constant.TX_TYPE_COINBASE);
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         txlist.add(tx);
         return txlist;
-    }
-
-    public static Transaction getTransaction() throws IOException {
-        CoinData coinData = new CoinData();
-
-        String address = ADDRESS;
-        Asserts.notEmpty(address, BlockErrorCode.DATA_ERROR.getMsg());
-
-        String amount = "10000000";
-
-        Address ads = Address.fromHashs(address);
-
-        CoinTo coin = new CoinTo();
-        coin.setAddress(ads.getAddressBytes());
-        coin.setAmount(new BigInteger(amount));
-        coin.setAssetsChainId(CHAIN_ID);
-        coin.setAssetsId(1);
-        coin.setLockTime(0);
-        coinData.addTo(coin);
-
-        Transaction tx = new Transaction();
-        tx.setTime(BLOCK_TIME);
-        tx.setCoinData(coinData.serialize());
-        String remark = REMARK;
-        if (StringUtils.isNotBlank(remark)) {
-            tx.setRemark(HexUtil.decode(remark));
-        }
-        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        return tx;
     }
 
     @Override
@@ -190,7 +163,7 @@ public final class BlockGenerator extends Thread {
                 }
                 i++;
                 Block latestBlock = blockService.getLatestBlock(CHAIN_ID);
-                for (int j = 0; j < 2; j++) {
+                for (int j = 0; j < 5; j++) {
                     Block block = generate(latestBlock, j);
                     blockService.saveBlock(CHAIN_ID, block);
                 }

@@ -20,6 +20,9 @@
 
 package io.nuls.block;
 
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.client.WsClient;
+import io.nuls.rpc.server.WsServer;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
