@@ -22,31 +22,72 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.model.message;
+
+package io.nuls.network.model.message.body;
+
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.model.message.body.MessageBody;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
+
+import java.io.IOException;
+
 
 /**
- *
- * @description  peer连接主动断开，拒绝业务消息连接
+ *时间应答消息
+ * time response protocol message body
  * @author lan
- * @date 2018/11/13
- **/
-public class ByeMessage extends BaseMessage {
+ * @date 2018/11/01
+ *
+ */
+public class TimeMessageBody extends BaseNulsData {
+    private long messageId = 0;
+    private long time = 0;
+
+
+    public TimeMessageBody() {
+
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public long getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(long messageId) {
+        this.messageId = messageId;
+    }
+
     @Override
-    protected BaseNulsData parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return null;
+    public int size() {
+        int s = 0;
+        s += SerializeUtils.sizeOfUint32();
+        s += SerializeUtils.sizeOfUint32();
+        return s;
     }
-    public ByeMessage(){
-        super(NetworkConstant.CMD_MESSAGE_BYE);
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint32(messageId);
+        stream.writeUint32(time);
     }
-    public ByeMessage(long magicNumber, String cmd, MessageBody body) {
-        super(cmd,magicNumber);
-        this.setMsgBody(body);
+
+    @Override
+    public void parse(NulsByteBuffer buffer) throws NulsException {
+        messageId = buffer.readUint32();
+        time = buffer.readUint32();
     }
+
 }

@@ -25,27 +25,33 @@
 package io.nuls.network.model.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.BaseNulsData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.model.message.body.MessageBody;
+import io.nuls.network.model.message.body.TimeMessageBody;
 import io.nuls.tools.exception.NulsException;
 
 /**
- *
- * @description  peer连接主动断开，拒绝业务消息连接
+ * 时间应答协议消息
+ * time response message
  * @author lan
- * @date 2018/11/13
- **/
-public class ByeMessage extends BaseMessage {
+ * @date 2018/11/01
+ *
+ */
+public class TimeMessage extends BaseMessage<TimeMessageBody> {
+
     @Override
-    protected BaseNulsData parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return null;
+    protected TimeMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+        try {
+            return byteBuffer.readNulsData(new TimeMessageBody());
+        } catch (Exception e) {
+           throw new NulsException(e);
+        }
     }
-    public ByeMessage(){
-        super(NetworkConstant.CMD_MESSAGE_BYE);
+    public TimeMessage() {
+       super(NetworkConstant.CMD_MESSAGE_RESPONSE_TIME,0);
     }
-    public ByeMessage(long magicNumber, String cmd, MessageBody body) {
+
+    public TimeMessage(long magicNumber, String cmd, TimeMessageBody body) {
         super(cmd,magicNumber);
         this.setMsgBody(body);
     }

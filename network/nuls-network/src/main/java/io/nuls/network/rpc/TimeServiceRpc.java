@@ -22,31 +22,24 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.model.message;
+package io.nuls.network.rpc;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.model.message.body.MessageBody;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.message.Response;
+
+import java.util.Map;
 
 /**
- *
- * @description  peer连接主动断开，拒绝业务消息连接
- * @author lan
- * @date 2018/11/13
+ * @description
+ * @author  lan
+ * @date 2018/12/05
  **/
-public class ByeMessage extends BaseMessage {
-    @Override
-    protected BaseNulsData parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return null;
-    }
-    public ByeMessage(){
-        super(NetworkConstant.CMD_MESSAGE_BYE);
-    }
-    public ByeMessage(long magicNumber, String cmd, MessageBody body) {
-        super(cmd,magicNumber);
-        this.setMsgBody(body);
+public class TimeServiceRpc  extends BaseCmd {
+    @CmdAnnotation(cmd = "nw_currentTimeMillis", version = 1.0,
+            description = "currentTimeMillis")
+    public Response currentTimeMillis(Map params) {
+        return success();
     }
 }
+

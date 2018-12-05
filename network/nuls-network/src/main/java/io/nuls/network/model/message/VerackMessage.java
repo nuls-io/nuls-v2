@@ -31,7 +31,7 @@ import io.nuls.network.model.message.body.VerackMessageBody;
 import io.nuls.tools.exception.NulsException;
 
 /**
- * VerackMessage
+ * @description  握手应答消息 verackMessage
  * @author lan
  * @date 2018/11/01
  *

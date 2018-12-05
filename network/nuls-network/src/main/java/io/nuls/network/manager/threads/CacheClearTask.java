@@ -22,31 +22,27 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.model.message;
+package io.nuls.network.manager.threads;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.BaseNulsData;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.model.message.body.MessageBody;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.model.NodeGroup;
+import io.nuls.tools.log.Log;
+
+import java.util.List;
 
 /**
  *
- * @description  peer连接主动断开，拒绝业务消息连接
- * @author lan
- * @date 2018/11/13
+ * @description: 定时清理缓存中过期数据信息
+ *Timed cleaning of expired data information in the cache
+ *
+ * @author: lan
+ * @create: 2018/11/14
  **/
-public class ByeMessage extends BaseMessage {
+public class CacheClearTask implements Runnable  {
     @Override
-    protected BaseNulsData parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        return null;
+    public void run() {
+
     }
-    public ByeMessage(){
-        super(NetworkConstant.CMD_MESSAGE_BYE);
-    }
-    public ByeMessage(long magicNumber, String cmd, MessageBody body) {
-        super(cmd,magicNumber);
-        this.setMsgBody(body);
-    }
+
 }

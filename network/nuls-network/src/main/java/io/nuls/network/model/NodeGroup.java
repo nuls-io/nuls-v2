@@ -612,12 +612,12 @@ public class NodeGroup  implements Dto {
     public void  addFailConnect(String nodeId,int addMinute){
         failConnectMap.put(nodeId,System.currentTimeMillis()+addMinute*60*1000);
     }
-    public boolean isFreedFailLockTime(String nodeId){
+    public boolean isInLockTime(String nodeId){
         if(null != failConnectMap.get(nodeId)){
            if(failConnectMap.get(nodeId)> System.currentTimeMillis()){
-                return false;
+                return true;
            }
         }
-        return true;
+        return false;
     }
 }
