@@ -26,6 +26,7 @@ package io.nuls.rpc.server;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.*;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.data.StringUtils;
 
@@ -62,8 +63,8 @@ public class ServerRuntime {
      * 接口返回值改变次数
      * Number of return value changes
      */
-    public static Map<String, Integer> cmdChangeCount = new HashMap<>();
-    public static Map<String, Object> cmdLastValue = new HashMap<>();
+    public static Map<String, Long> cmdChangeCount = new HashMap<>();
+    public static Map<String, Object[]> cmdLastResponse = new HashMap<>();
 
     /**
      * 本模块配置信息
@@ -285,29 +286,33 @@ public class ServerRuntime {
         return exist;
     }
 
-    public static void eventCount(String cmd, Object value) {
+    public static void eventCount(String cmd, Response value) {
         setCmdChangeCount(cmd);
         setCmdLastValue(cmd, value);
     }
 
     private static void setCmdChangeCount(String cmd) {
         if (!cmdChangeCount.containsKey(cmd)) {
-            cmdChangeCount.put(cmd, 1);
+            cmdChangeCount.put(cmd, 1L);
         } else {
-            int count = cmdChangeCount.get(cmd);
+            long count = cmdChangeCount.get(cmd);
             cmdChangeCount.put(cmd, count + 1);
         }
     }
 
-    public static int getCmdChangeCount(String cmd) {
-        return cmdChangeCount.get(cmd);
+    public static long getCmdChangeCount(String cmd) {
+        try {
+            return cmdChangeCount.get(cmd);
+        } catch (Exception e) {
+            return 0L;
+        }
     }
 
-    private static void setCmdLastValue(String cmd, Object value) {
-        cmdLastValue.put(cmd, value);
+    private static void setCmdLastValue(String cmd, Response value) {
+        cmdLastResponse.put(cmd, new Object[]{value, false});
     }
 
-    public static Object getCmdLastValue(String cmd) {
-        return cmdLastValue.get(cmd);
+    public static Object[] getCmdLastValue(String cmd) {
+        return cmdLastResponse.get(cmd);
     }
 }

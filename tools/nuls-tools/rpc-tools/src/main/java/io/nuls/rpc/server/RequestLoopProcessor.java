@@ -62,7 +62,7 @@ public class RequestLoopProcessor implements Runnable {
         }
     }
 
-    private void sendPeriodQueue() throws InterruptedException, IOException {
+    private void sendPeriodQueue() throws  IOException {
         /*
         获取队列中的第一个对象，如果是空，舍弃
         Get the first item of the queue, If it is an empty object, discard
@@ -78,22 +78,17 @@ public class RequestLoopProcessor implements Runnable {
         Message message = JSONUtils.json2pojo(msg, Message.class);
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
 
-                /*
-                如果设置了SubscriptionPeriod
-                If SubscriptionPeriod is set
-                 */
+        /*
+        需要继续发送，添加回队列
+        Need to continue sending, add back to queue
+         */
         boolean isContinue = CmdHandler.responseWithPeriod(webSocket, message.getMessageId(), request);
-                /*
-                需要继续发送，添加回队列
-                Need to continue sending, add back to queue
-                 */
         if (isContinue) {
             ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, JSONUtils.obj2json(message)});
         }
     }
 
-    private void sendEventCountQueue() throws InterruptedException, IOException {
-        // TODO 继续做EventCount
+    private void sendEventCountQueue() throws Exception {
         /*
         获取队列中的第一个对象，如果是空，舍弃
         Get the first item of the queue, If it is an empty object, discard
@@ -109,18 +104,13 @@ public class RequestLoopProcessor implements Runnable {
         Message message = JSONUtils.json2pojo(msg, Message.class);
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
 
-
-                /*
-                如果设置了SubscriptionPeriod
-                If SubscriptionPeriod is set
-                 */
-        boolean isContinue = CmdHandler.responseWithPeriod(webSocket, message.getMessageId(), request);
-                /*
-                需要继续发送，添加回队列
-                Need to continue sending, add back to queue
-                 */
+        /*
+        需要继续发送，添加回队列
+        Need to continue sending, add back to queue
+         */
+        boolean isContinue = CmdHandler.responseWithEventCount(webSocket, message.getMessageId(), request);
         if (isContinue) {
-            ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, JSONUtils.obj2json(message)});
+            ServerRuntime.REQUEST_EVENT_COUNT_LOOP_QUEUE.offer(new Object[]{webSocket, JSONUtils.obj2json(message)});
         }
     }
 }
