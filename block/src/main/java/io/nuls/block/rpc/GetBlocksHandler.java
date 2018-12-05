@@ -17,6 +17,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
@@ -30,14 +31,12 @@ import io.nuls.block.utils.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
-import java.util.List;
+import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 
@@ -55,28 +54,22 @@ public class GetBlocksHandler extends BaseCmd {
     private BlockService service;
 
     @CmdAnnotation(cmd = GET_BLOCKS_BY_HEIGHT_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public CmdResponse process(List<Object> params){
-
-        Integer chainId = Integer.parseInt(params.get(0).toString());
-        String nodeId = params.get(1).toString();
+    public Object process(Map map){
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        String nodeId = map.get("nodes").toString();
         GetBlocksByHeightMessage message = new GetBlocksByHeightMessage();
 
-        byte[] decode = HexUtil.decode(params.get(2).toString());
-        try {
-            message.parse(new NulsByteBuffer(decode));
-        } catch (NulsException e) {
-            Log.warn(e.getMessage());
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
-        }
+        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
+        message.parse(new NulsByteBuffer(decode));
 
         if(message == null || nodeId == null) {
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        long startHeight = message.getMsgBody().getStartHeight();
-        long endHeight = message.getMsgBody().getEndHeight();
+        long startHeight = message.getStartHeight();
+        long endHeight = message.getEndHeight();
         if(startHeight < 0L || startHeight > endHeight || endHeight - startHeight > MAX_SIZE) {
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         NulsDigestData requestHash = null;
@@ -87,13 +80,13 @@ public class GetBlocksHandler extends BaseCmd {
                 block = service.getBlock(chainId, endHeight--);
                 if(block == null) {
                     NetworkUtil.sendFail(chainId, requestHash, nodeId);
-                    return failed(BlockErrorCode.PARAMETER_ERROR, "");
+                    return failed(BlockErrorCode.PARAMETER_ERROR);
                 }
                 sendBlock(chainId, block, nodeId);
-            } while (endHeight > startHeight);
+            } while (endHeight >= startHeight);
             NetworkUtil.sendSuccess(chainId, requestHash, nodeId);
         } catch (Exception e) {
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         return success();
     }

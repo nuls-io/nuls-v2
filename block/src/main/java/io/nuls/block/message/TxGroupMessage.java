@@ -21,11 +21,17 @@
 package io.nuls.block.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.message.BaseMessage;
-import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.message.body.TxGroupMessageBody;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
+import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
 import lombok.Data;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 获取交易组消息
@@ -35,24 +41,57 @@ import lombok.Data;
  * @version 1.0
  */
 @Data
-public class TxGroupMessage extends BaseMessage<TxGroupMessageBody> {
+public class TxGroupMessage extends BaseMessage {
+
+    private NulsDigestData requestHash;
+    private List<Transaction> transactions;
+
+    public TxGroupMessage() {
+    }
+
+    public TxGroupMessage(int chainID, NulsDigestData requestHash, boolean success, List<Transaction> transactions) {
+        this.requestHash = requestHash;
+        this.transactions = transactions;
+    }
 
     @Override
-    public TxGroupMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        try {
-            return byteBuffer.readNulsData(new TxGroupMessageBody());
-        } catch (Exception e) {
-            throw new NulsException(e);
+    public int size() {
+        int size = 0;
+        size += requestHash.size();
+        size += VarInt.sizeOf(transactions.size());
+        size += this.getTxListLength();
+        return size;
+    }
+
+    @Override
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(requestHash);
+        stream.writeVarInt(transactions.size());
+        for (Transaction data : transactions) {
+            stream.writeNulsData(data);
         }
     }
 
-    public TxGroupMessage() {
-        super(CommandConstant.BLOCK_MESSAGE);
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        requestHash = byteBuffer.readHash();
+        long txCount = byteBuffer.readVarInt();
+        this.transactions = new ArrayList<>();
+        for (int i = 0; i < txCount; i++) {
+            try {
+                this.transactions.add(byteBuffer.readTransaction());
+            } catch (Exception e) {
+                throw new NulsException(e);
+            }
+        }
     }
 
-    public TxGroupMessage(long magicNumber, String cmd, TxGroupMessageBody body) {
-        super(cmd, magicNumber);
-        this.setMsgBody(body);
+    private int getTxListLength() {
+        int size = 0;
+        for (Transaction tx : transactions) {
+            size += SerializeUtils.sizeOfNulsData(tx);
+        }
+        return size;
     }
 
 }

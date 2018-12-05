@@ -31,6 +31,10 @@ import java.util.List;
 
 public class BlockGeneratorTest {
 
+    /**
+     * 测试区块生成器生成区块的连续性
+     * @throws Exception
+     */
     @Test
     public void generate() throws Exception {
         int start = 1;
@@ -55,16 +59,17 @@ public class BlockGeneratorTest {
         }
     }
 
+    /**
+     * 测试区块生成器生成区块的分叉
+     * @throws Exception
+     */
     @Test
-    public void hash() throws Exception {
-        GenesisBlock genesisBlock = GenesisBlock.getInstance();
-        Block block1 = BlockGenerator.generate(genesisBlock);
-        Block block2 = BlockGenerator.generate(block1);
-        Block block3 = BlockGenerator.generate(block2);
-
-        Assert.assertEquals(genesisBlock.getHeader().getMerkleHash(), block1.getHeader().getMerkleHash());
-        Assert.assertEquals(block1.getHeader().getMerkleHash(), block2.getHeader().getMerkleHash());
-        Assert.assertEquals(block2.getHeader().getMerkleHash(), block3.getHeader().getMerkleHash());
-
+    public void fork() throws Exception {
+        Block root = BlockGenerator.generate(null);
+        Block block1 = BlockGenerator.generate(root, 1);
+        Block block2 = BlockGenerator.generate(root, 2);
+        Assert.assertEquals(root.getHeader().getHash(), block1.getHeader().getPreHash());
+        Assert.assertEquals(block1.getHeader().getPreHash(), block2.getHeader().getPreHash());
+        Assert.assertNotEquals(block1.getHeader().getHash(), block2.getHeader().getHash());
     }
 }

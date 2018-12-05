@@ -86,9 +86,6 @@ public class TxUnverifiedProcessTask implements Runnable {
                 //todo 调账本记录未确认交易
                 //todo 转发
             }
-
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }

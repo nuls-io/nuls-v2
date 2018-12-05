@@ -70,7 +70,7 @@ public class RequestSingleProcessor implements Runnable {
                 Request，调用本地方法
                 If it is Request, call the local method
                  */
-                CmdHandler.execute(webSocket, request.getRequestMethods(), message.getMessageId());
+                CmdHandler.callCommandsWithPeriod(webSocket, request.getRequestMethods(), message.getMessageId());
 
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {

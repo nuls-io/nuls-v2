@@ -33,6 +33,9 @@ import io.nuls.poc.utils.util.PoConvertUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 
 /**
+ * 共识信息类
+ * Consensus information class
+ *
  * @author tag
  * 2018/11/20
  */

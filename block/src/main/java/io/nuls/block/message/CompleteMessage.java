@@ -21,11 +21,13 @@
 package io.nuls.block.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.message.BaseMessage;
-import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.message.body.CompleteMessageBody;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
 import lombok.Data;
+
+import java.io.IOException;
 
 /**
  * 异步请求处理完成响应消息
@@ -34,24 +36,38 @@ import lombok.Data;
  * @version 1.0
  */
 @Data
-public class CompleteMessage extends BaseMessage<CompleteMessageBody> {
+public class CompleteMessage extends BaseMessage {
 
-    @Override
-    public CompleteMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        try {
-            return byteBuffer.readNulsData(new CompleteMessageBody());
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
+    private NulsDigestData requestHash;
+    private boolean success;
+
+    public CompleteMessage(NulsDigestData requestHash, boolean success) {
+        this.requestHash = requestHash;
+        this.success = success;
     }
 
     public CompleteMessage() {
-        super(CommandConstant.COMPLETE_MESSAGE);
+
     }
 
-    public CompleteMessage(long magicNumber, String cmd, CompleteMessageBody body) {
-        super(cmd, magicNumber);
-        this.setMsgBody(body);
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += SerializeUtils.sizeOfBoolean();
+        return size;
+    }
+
+    @Override
+    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(requestHash);
+        stream.writeBoolean(success);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.requestHash = byteBuffer.readHash();
+        this.success = byteBuffer.readBoolean();
     }
 
 }

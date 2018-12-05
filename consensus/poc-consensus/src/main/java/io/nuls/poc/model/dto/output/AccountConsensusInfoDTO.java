@@ -26,6 +26,9 @@
 package io.nuls.poc.model.dto.output;
 
 /**
+ * 账户共识信息类
+ * Account Consensus Information Class
+ *
  * @author tag
  * 2018/11/20
  */

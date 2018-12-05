@@ -29,6 +29,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 
 /**
+ * 全网共识信息类
+ * Network-wide Consensus Information Class
+ *
  * @author tag
  * 2018/11/20
  * */

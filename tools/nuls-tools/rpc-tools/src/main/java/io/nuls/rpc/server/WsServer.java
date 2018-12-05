@@ -119,10 +119,10 @@ public class WsServer extends WebSocketServer {
                     Request, put in different queues according to the response mode. Wait for processing
                      */
                     Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-                    if (ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
+                    if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
                         ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
                     }
-                    if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
+                    if (ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
                         ServerRuntime.REQUEST_EVENT_COUNT_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
                     }
 
@@ -130,6 +130,8 @@ public class WsServer extends WebSocketServer {
                             && !ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
                         ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, msg});
                     }
+
+                    Log.info("RequestFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
 
                     /*
                     如果需要一个Ack，则发送
@@ -142,7 +144,7 @@ public class WsServer extends WebSocketServer {
                 default:
                     break;
             }
-            Log.info("ServerMsgFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
+
         } catch (Exception e) {
             Log.error(e);
         }

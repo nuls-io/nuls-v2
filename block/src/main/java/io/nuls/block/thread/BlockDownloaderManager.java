@@ -22,32 +22,41 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.constant.ConfigConstant;
-import io.nuls.block.manager.ContextManager;
+import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
+import io.nuls.block.utils.BlockDownloadUtils;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.DoubleUtils;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
+import java.util.SortedSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 区块下载管理器
+ *
  * @author captain
- * @date 18-11-9 下午4:25
  * @version 1.0
+ * @date 18-11-9 下午4:25
  */
+@Component
+@NoArgsConstructor
 public class BlockDownloaderManager implements Callable<Boolean> {
 
+    /**
+     * 区块下载参数
+     */
     private BlockDownloaderParams params;
     /**
      * 用来保存下载到的区块
@@ -55,8 +64,9 @@ public class BlockDownloaderManager implements Callable<Boolean> {
     private Queue<Block> blockQueue;
     private int chainId;
     private int maxDowncount;
-    private BlockService blockService = ContextManager.getServiceBean(BlockService.class);
-    private NulsThreadFactory factory = new NulsThreadFactory("download" + chainId);
+    @Autowired
+    private BlockService blockService;
+    private NulsThreadFactory factory = new NulsThreadFactory("download-" + chainId);
 
     public BlockDownloaderManager(int chainId, BlockDownloaderParams params, Queue<Block> blockQueue) {
         this.chainId = chainId;
@@ -66,21 +76,14 @@ public class BlockDownloaderManager implements Callable<Boolean> {
     }
 
     @Override
-    public Boolean call() throws Exception {
-        try {
-            boolean ready = checkLocalBlock();
-            if (!ready) {
-                return false;
-            }
-        } catch (NulsRuntimeException e) {
+    public Boolean call() {
+        if (!checkLocalBlock()) {
             return false;
         }
 
         List<Node> nodes = params.getNodes();
-        NulsDigestData netLatestHash = params.getNetLatestHash();
         long netLatestHeight = params.getNetLatestHeight();
         Block latestBlock = blockService.getLatestBlock(chainId);
-        NulsDigestData latestHash = latestBlock.getHeader().getHash();
         long latestHeight = latestBlock.getHeader().getHeight();
 
         int nodeCount = nodes.size();
@@ -90,34 +93,35 @@ public class BlockDownloaderManager implements Callable<Boolean> {
 
         //总共需要下载多少区块
         long totalCount = netLatestHeight - latestHeight;
-
-        //需要下载多少轮
         int roundDownloads = maxDowncount * nodeCount;
+        //需要下载多少轮
         long round = (long) Math.ceil((double) totalCount / (roundDownloads));
-
         for (long i = 0; i < round; i++) {
-
             long startHeight = (latestHeight + 1) + i * roundDownloads;
-
             for (int j = 0; j < nodeCount; j++) {
                 long start = startHeight + j * maxDowncount;
                 int size = maxDowncount;
 
                 //最后一个节点的下载区块数，特殊计算
                 boolean isEnd = false;
-                if (start + size >= netLatestHeight) {
+                if (start + size > netLatestHeight) {
                     size = (int) (netLatestHeight - start) + 1;
                     isEnd = true;
                 }
 
-                BlockDownloader downloadThread = new BlockDownloader(chainId, latestHash, netLatestHash, start, size, nodes.get(j));
+                int blockCache = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.BLOCK_CACHE));
+                while (blockQueue.size() >= blockCache) {
+                    try {
+                        Thread.sleep(500L);
+                    } catch (InterruptedException e) {
+                        Log.error(e);
+                    }
+                }
 
+                BlockDownloader downloadThread = new BlockDownloader(start, size, chainId, j, nodes.get(j));
                 FutureTask<BlockDownLoadResult> downloadThreadFuture = new FutureTask<>(downloadThread);
-
                 executor.execute(factory.newThread(downloadThreadFuture));
-
                 futures.add(downloadThreadFuture);
-
                 if (isEnd) {
                     break;
                 }
@@ -135,13 +139,13 @@ public class BlockDownloaderManager implements Callable<Boolean> {
                     retryDownload(executor, result);
                 }
 
-                List<Block> blockList = result.getBlockList();
-                if (blockList == null) {
+                SortedSet<Block> set = result.getBlockSet();
+                if (set == null) {
                     executor.shutdown();
                     return true;
                 }
 
-                for (Block block : blockList) {
+                for (Block block : set) {
                     blockQueue.offer(block);
                 }
             }
@@ -152,49 +156,44 @@ public class BlockDownloaderManager implements Callable<Boolean> {
     }
 
     /**
-     * 下载失败重试
+     * 下载失败重试，直到成功为止
+     *
      * @param executor
      * @param result
      * @return
      */
     private BlockDownLoadResult retryDownload(ThreadPoolExecutor executor, BlockDownLoadResult result) {
-        Node defultNode = result.getNode();
+        Log.info("retry download blocks, fail node:{}, start:{}", result.getNode(), result.getStartHeight());
+        List<Node> nodes = params.getNodes();
+        int index = result.getIndex() + 1 % nodes.size();
 
-        for (Node node : params.getNodes()) {
-            if (node.getId().equals(defultNode.getId())) {
-                continue;
-            }
-            result.setNode(node);
-            List<Block> blockList = downloadBlockFromNode(executor, result);
-            if (blockList != null && blockList.size() > 0) {
-                result.setBlockList(blockList);
-            }
+        result.setNode(nodes.get(index));
+        SortedSet<Block> blockSet = downloadBlockFromNode(executor, result, index);
+        if (blockSet != null && blockSet.size() > 0) {
+            result.setBlockSet(blockSet);
         }
         return result.isSuccess() ? result : retryDownload(executor, result);
     }
 
-    private List<Block> downloadBlockFromNode(ThreadPoolExecutor executor, BlockDownLoadResult result) {
-        BlockDownloader downloadThread = new BlockDownloader(chainId, result.getStartHash(), result.getEndHash(), result.getStartHeight(), result.getSize(), result.getNode());
-
+    private SortedSet<Block> downloadBlockFromNode(ThreadPoolExecutor executor, BlockDownLoadResult result, int index) {
+        BlockDownloader downloadThread = new BlockDownloader(result.getStartHeight(), result.getSize(), chainId, index, result.getNode());
         FutureTask<BlockDownLoadResult> downloadThreadFuture = new FutureTask<>(downloadThread);
         executor.execute(downloadThreadFuture);
-
-        List<Block> blockList = null;
+        SortedSet<Block> blockSet = null;
         try {
-            blockList = downloadThreadFuture.get().getBlockList();
+            blockSet = downloadThreadFuture.get().getBlockSet();
         } catch (Exception e) {
             Log.error(e);
         }
-        return blockList;
+        return blockSet;
     }
 
     /**
-     * 与网络区块作对比，检查本地区块是否需要回滚
-     * @date 18-11-9 下午4:38
-     * @param
+     * 区块同步前，与网络区块作对比，检查本地区块是否需要回滚
+     *
      * @return
      */
-    private boolean checkLocalBlock() throws Exception {
+    private boolean checkLocalBlock() {
         Block localBlock = blockService.getLatestBlock(chainId);
         long localHeight = localBlock.getHeader().getHeight();
         long netHeight = params.getNetLatestHeight();
@@ -216,7 +215,7 @@ public class BlockDownloaderManager implements Callable<Boolean> {
         return false;
     }
 
-    private boolean checkRollback(Block localBestBlock, int rollbackCount) throws Exception {
+    private boolean checkRollback(Block localBestBlock, int rollbackCount) {
         //每次最多回滚10个区块，等待下次同步，这样可以避免被恶意节点攻击，大量回滚正常区块。
         if (rollbackCount >= Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.MAX_ROLLBACK))) {
             return false;
@@ -224,7 +223,7 @@ public class BlockDownloaderManager implements Callable<Boolean> {
 
         blockService.rollbackBlock(chainId, localBestBlock);
         localBestBlock = blockService.getLatestBlock(chainId);
-        if(checkHashEquality(localBestBlock)) {
+        if (checkHashEquality(localBestBlock)) {
             return true;
         }
 
@@ -232,12 +231,13 @@ public class BlockDownloaderManager implements Callable<Boolean> {
     }
 
     /**
-     * 根据传入的区块localBlock判断localBlock.hash与网络上通高度的区块hash是否一致
+     * 根据传入的区块localBlock判断localBlock.hash与网络上同高度的区块hash是否一致
+     *
      * @author captain
      * @date 18-11-9 下午6:13
      * @version 1.0
      */
-    private boolean checkHashEquality(Block localBlock){
+    private boolean checkHashEquality(Block localBlock) {
         NulsDigestData localHash = localBlock.getHeader().getHash();
         long localHeight = localBlock.getHeader().getHeight();
         long netHeight = params.getNetLatestHeight();

@@ -17,6 +17,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.service.impl;
 
 import io.nuls.base.data.Block;
@@ -24,12 +25,11 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.config.GenesisBlock;
-import io.nuls.block.manager.ContextManager;
+import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.manager.ChainManager;
-import io.nuls.block.message.ForwardSmallBlockMessage;
+import io.nuls.block.manager.ContextManager;
+import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
-import io.nuls.block.message.body.ForwardSmallBlockMessageBody;
-import io.nuls.block.message.body.SmallBlockMessageBody;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
@@ -45,8 +45,6 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,7 +64,7 @@ public class BlockServiceImpl implements BlockService {
     private ChainStorageService chainStorageService;
 
     @Override
-    public Block getGenesisBlock(int chainId) throws Exception {
+    public Block getGenesisBlock(int chainId) {
         return getBlock(chainId, 0);
     }
 
@@ -81,71 +79,111 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public BlockHeader getBlockHeader(int chainId, long height) throws UnsupportedEncodingException, NulsException {
-        BlockHeader blockHeader = blockStorageService.query(chainId, height);
-        if (blockHeader == null) {
+    public BlockHeader getBlockHeader(int chainId, long height) {
+        try {
+            return blockStorageService.query(chainId, height);
+        } catch (Exception e) {
+            Log.error(e);
             return null;
         }
-        return blockHeader;
     }
 
     @Override
-    public List<BlockHeader> getBlockHeader(int chainId, long startHeight, long endHeight) throws UnsupportedEncodingException, NulsException {
-        List<BlockHeader> list = new ArrayList<>();
-        for (long i = startHeight; i <= endHeight; i++) {
-            BlockHeader blockHeader = blockStorageService.query(chainId, i);
-            if (blockHeader == null) {
-                return list;
+    public List<BlockHeader> getBlockHeader(int chainId, long startHeight, long endHeight) {
+        try {
+            int size = (int) (endHeight - startHeight + 1);
+            List<BlockHeader> list = new ArrayList<>(size);
+            for (long i = startHeight; i <= endHeight; i++) {
+                BlockHeader blockHeader = blockStorageService.query(chainId, i);
+                if (blockHeader == null) {
+                    return null;
+                }
+                list.add(blockHeader);
             }
-            list.add(blockHeader);
-        }
-        return list;
-    }
-
-    @Override
-    public BlockHeader getBlockHeader(int chainId, NulsDigestData hash) throws NulsException {
-        return blockStorageService.query(chainId, hash);
-    }
-
-    @Override
-    public Block getBlock(int chainId, NulsDigestData hash) throws NulsException, IOException {
-        BlockHeader blockHeader = blockStorageService.query(chainId, hash);
-        Block block = new Block();
-        block.setHeader(blockHeader);
-        block.setTxs(TransactionUtil.getTransactions(chainId, blockHeader.getHeight()));
-        return block;
-    }
-
-    @Override
-    public Block getBlock(int chainId, long height) throws Exception {
-        BlockHeader blockHeader = blockStorageService.query(chainId, height);
-        if (blockHeader == null) {
+            return list;
+        } catch (Exception e) {
+            Log.error(e);
             return null;
         }
-        Block block = new Block();
-        block.setHeader(blockHeader);
-        block.setTxs(TransactionUtil.getTransactions(chainId, height));
-        return block;
     }
 
     @Override
-    public List<Block> getBlock(int chainId, long startHeight, long endHeight) throws IOException, NulsException {
-        List<Block> list = new ArrayList<>();
-        for (long i = startHeight; i <= endHeight; i++) {
-            BlockHeader blockHeader = blockStorageService.query(chainId, i);
-            if (blockHeader == null) {
-                return list;
-            }
+    public BlockHeader getBlockHeader(int chainId, NulsDigestData hash) {
+        try {
+            return blockStorageService.query(chainId, hash);
+        } catch (NulsException e) {
+            Log.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public Block getBlock(int chainId, NulsDigestData hash) {
+        try {
             Block block = new Block();
+            BlockHeader blockHeader = blockStorageService.query(chainId, hash);
+            if (blockHeader == null) {
+                return null;
+            }
             block.setHeader(blockHeader);
-            block.setTxs(TransactionUtil.getTransactions(chainId, i));
-            list.add(block);
+            List<Transaction> transactions = TransactionUtil.getTransactions(chainId, blockHeader.getHeight());
+            block.setTxs(transactions);
+            return block;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
         }
-        return list;
     }
 
     @Override
-    public boolean saveBlock(int chainId, Block block) throws Exception {
+    public Block getBlock(int chainId, long height) {
+        try {
+            Block block = new Block();
+            BlockHeader blockHeader = blockStorageService.query(chainId, height);
+            if (blockHeader == null) {
+                return null;
+            }
+            block.setHeader(blockHeader);
+            block.setTxs(TransactionUtil.getTransactions(chainId, height));
+            return block;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public List<Block> getBlock(int chainId, long startHeight, long endHeight) {
+        try {
+            List<Block> list = new ArrayList<>();
+            for (long i = startHeight; i <= endHeight; i++) {
+                BlockHeader blockHeader = blockStorageService.query(chainId, i);
+                if (blockHeader == null) {
+                    return null;
+                }
+                Block block = new Block();
+                block.setHeader(blockHeader);
+                block.setTxs(TransactionUtil.getTransactions(chainId, i));
+                list.add(block);
+            }
+            return list;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean saveBlock(int chainId, Block block) {
+        try {
+            return saveBlock(chainId, block, false);
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+    }
+
+    private boolean saveBlock(int chainId, Block block, boolean localInit) {
 
         if (!verifyBlock(chainId, block, block.getHeader().getHeight() == 0)) {
             Log.info("[save block]:verify block fail!chainId-{},height-{}", chainId, block.getHeader().getHeight());
@@ -157,26 +195,57 @@ public class BlockServiceImpl implements BlockService {
             return false;
         }
 
-        if (!blockStorageService.save(chainId, block.getHeader())) {
-            Log.info("[save block]:save blockheader fail!chainId-{},height-{}", chainId, block.getHeader().getHeight());
-            return false;
+        try {
+            if (!blockStorageService.save(chainId, block.getHeader())) {
+                Log.info("[save block]:save blockheader fail!chainId-{},height-{}", chainId, block.getHeader().getHeight());
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         if (!TransactionUtil.save(chainId, block.getTxs())) {
             Log.info("[save block]:save transactions fail!chainId-{},height-{}", chainId, block.getHeader().getHeight());
             return false;
         }
-        ContextManager.getContext(chainId).setLatestBlock(block);
+        if (!localInit) {
+            ContextManager.getContext(chainId).setLatestBlock(block);
+            Chain masterChain = ChainManager.getMasterChain(chainId);
+            masterChain.setEndHeight(masterChain.getEndHeight() + 1);
+        }
+        Log.info("save block success, height-{}, hash-{}, preHash-{}", block.getHeader().getHeight(), block.getHeader().getHash(), block.getHeader().getPreHash());
         return true;
     }
 
     @Override
-    public boolean rollbackBlock(int chainId, Block block) throws Exception {
-        return false;
+    public boolean rollbackBlock(int chainId, Block block) {
+        return rollbackBlock(chainId, block, false);
+    }
+
+    private boolean rollbackBlock(int chainId, Block block, boolean localInit) {
+        long height = block.getHeader().getHeight();
+        try {
+            TransactionUtil.rollback(chainId, block.getTxs());
+            blockStorageService.remove(chainId, height);
+            if (!localInit) {
+                ContextManager.getContext(chainId).setLatestBlock(getBlock(chainId, height - 1));
+                Chain masterChain = ChainManager.getMasterChain(chainId);
+                masterChain.setEndHeight(height - 1);
+                masterChain.getHashList().pollLast();
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+        return true;
     }
 
     @Override
     public Block rollbackBlock(int chainId, long height) {
+        return rollbackBlock(chainId, height, false);
+    }
+
+    private Block rollbackBlock(int chainId, long height, boolean localInit) {
         BlockHeader header = null;
         Block block = new Block();
         try {
@@ -186,6 +255,12 @@ public class BlockServiceImpl implements BlockService {
             block.setHeader(header);
             block.setTxs(transactions);
             blockStorageService.remove(chainId, height);
+            if (!localInit) {
+                ContextManager.getContext(chainId).setLatestBlock(getBlock(chainId, height - 1));
+                Chain masterChain = ChainManager.getMasterChain(chainId);
+                masterChain.setEndHeight(height - 1);
+                masterChain.getHashList().pollLast();
+            }
         } catch (Exception e) {
             Log.error(e);
             return null;
@@ -195,21 +270,16 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public boolean forwardBlock(int chainId, NulsDigestData hash, Node excludeNode) {
-        ForwardSmallBlockMessage message = new ForwardSmallBlockMessage();
-        ForwardSmallBlockMessageBody body = new ForwardSmallBlockMessageBody();
-        body.setChainID(chainId);
-        body.setBlockHash(hash);
-        message.setMsgBody(body);
+        HashMessage message = new HashMessage(hash);
+        message.setCommand(CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE);
         return NetworkUtil.broadcast(chainId, message, excludeNode.getId());
     }
 
     @Override
-    public boolean broadcastBlock(int chainId, NulsDigestData hash) throws IOException, NulsException {
+    public boolean broadcastBlock(int chainId, NulsDigestData hash) {
         SmallBlockMessage message = new SmallBlockMessage();
-        SmallBlockMessageBody body = new SmallBlockMessageBody();
-        body.setChainID(chainId);
-        body.setSmallBlock(BlockUtil.getSmallBlock(getBlock(chainId, hash)));
-        message.setMsgBody(body);
+        message.setSmallBlock(BlockUtil.getSmallBlock(chainId, getBlock(chainId, hash)));
+        message.setCommand(CommandConstant.SMALL_BLOCK_MESSAGE);
         return NetworkUtil.broadcast(chainId, message, "");
     }
 
@@ -224,11 +294,11 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public boolean verifyBlock(int chainId, Block block) throws Exception {
+    public boolean verifyBlock(int chainId, Block block) {
         return verifyBlock(chainId, block, false);
     }
 
-    public boolean verifyBlock(int chainId, Block block, boolean localInit) throws Exception {
+    public boolean verifyBlock(int chainId, Block block, boolean localInit) {
         //1.验证一些基本信息如区块大小限制、字段非空验证
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (!basicVerify) {
@@ -263,7 +333,7 @@ public class BlockServiceImpl implements BlockService {
             //1.判断有没有创世块，如果没有就初始化创世块并保存
             if (null == genesisBlock) {
                 genesisBlock = GenesisBlock.getInstance();
-                saveBlock(chainId, genesisBlock);
+                saveBlock(chainId, genesisBlock, true);
             }
 
             //2.获取缓存的最新区块高度（缓存的最新高度与实际的最新高度最多相差1，理论上不会有相差多个高度的情况，所以异常场景也只考虑了高度相差1）
@@ -300,7 +370,7 @@ public class BlockServiceImpl implements BlockService {
             block = getBlock(chainId, latestHeight);
             //系统初始化时，区块的验证跳过分叉链验证，因为此时主链还没有加载完成，无法进行分叉链判断
             while (null != block && !verifyBlock(chainId, block, true)) {
-                rollbackBlock(chainId, block);
+                rollbackBlock(chainId, block, true);
                 block = getBlock(chainId, block.getHeader().getPreHash());
             }
             //5.本地区块维护成功

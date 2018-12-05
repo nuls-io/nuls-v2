@@ -46,12 +46,11 @@ import java.util.Map;
  */
 public class MyCmd extends BaseCmd {
 
-    @CmdAnnotation(cmd = "getBalance", version = 1.1,
+    @CmdAnnotation(cmd = "getHeight", version = 1.1,
             description = "test getHeight 1.1")
     public Response getHeight1(Map map) {
-        Log.info("getHeight version 1.1");
-        ServerRuntime.eventCount("getBalance", new Object());
-        return success("Here is your real return value");
+        ServerRuntime.eventCount("getHeight", new Response());
+        return success("getHeight 1.1");
     }
 
     @CmdAnnotation(cmd = "getHeight", version = 1.3, scope = Constants.PUBLIC, minEvent = 1, minPeriod = 10,
@@ -74,6 +73,7 @@ public class MyCmd extends BaseCmd {
             description = "test getBalance")
     public Response getBalance(Map map) {
         Log.info("getBalance invoked");
+        ServerRuntime.eventCount("getBalance", success("getBalance->ha-ha-ha"));
         return success("getBalance->ha-ha-ha");
     }
 }

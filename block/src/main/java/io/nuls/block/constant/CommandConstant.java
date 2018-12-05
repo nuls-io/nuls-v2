@@ -28,13 +28,14 @@ package io.nuls.block.constant;
  */
 public interface CommandConstant {
 
-    String COMPLETE_MESSAGE = "bl_Complete";
-    String BLOCK_MESSAGE = "bl_Block";
-    String GET_BLOCK_MESSAGE = "bl_GetBlock";
-    String FORWARD_SMALL_BLOCK_MESSAGE = "bl_Forward";
-    String GET_BLOCKS_BY_HEIGHT_MESSAGE = "bl_GetBlocks";
-    String GET_TXGROUP_MESSAGE = "bl_GetTxs";
-    String SMALL_BLOCK_MESSAGE = "bl_sBlock";
-    String GET_SMALL_BLOCK_MESSAGE = "bl_GetsBlock";
-    String TXGROUP_MESSAGE = "bl_Txs";
+    String EMPTY_MESSAGE = "empty";
+    String COMPLETE_MESSAGE = "complete";
+    String BLOCK_MESSAGE = "block";
+    String GET_BLOCK_MESSAGE = "getBlock";
+    String FORWARD_SMALL_BLOCK_MESSAGE = "forward";
+    String GET_BLOCKS_BY_HEIGHT_MESSAGE = "getBlocks";
+    String GET_TXGROUP_MESSAGE = "getTxs";
+    String SMALL_BLOCK_MESSAGE = "sBlock";
+    String GET_SMALL_BLOCK_MESSAGE = "getsBlock";
+    String TXGROUP_MESSAGE = "txs";
 }

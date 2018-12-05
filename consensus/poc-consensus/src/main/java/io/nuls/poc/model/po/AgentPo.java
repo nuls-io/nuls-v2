@@ -38,7 +38,11 @@ import java.io.IOException;
 import java.math.BigInteger;
 
 /**
- * @author ln
+ * 存入数据库的节点信息类
+ * Node information class stored in database
+ *
+ * @author tag
+ * 2018/11/14
  */
 public class AgentPo extends BaseNulsData {
 

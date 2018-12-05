@@ -17,22 +17,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.service.BlockService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 
-import java.util.List;
+import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 
@@ -50,27 +51,23 @@ public class BlockHandler extends BaseCmd {
     private BlockService service;
 
     @CmdAnnotation(cmd = BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public CmdResponse process(List<Object> params) {
-        Integer chainId = Integer.parseInt(params.get(0).toString());
-        String nodeId = params.get(1).toString();
+    public Object process(Map map){
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        String nodeId = map.get("nodes").toString();
 
-        byte[] bytes = HexUtil.decode(params.get(2).toString());
+        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         BlockMessage message = new BlockMessage();
         try {
-            message.parse(new NulsByteBuffer(bytes));
+            message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         if (message == null || nodeId == null) {
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        try {
-            service.saveBlock(chainId, message.getMsgBody().getBlock());
-        } catch (Exception e) {
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
-        }
+        CacheHandler.receiveBlock(message.getBlock());
         return success();
     }
 

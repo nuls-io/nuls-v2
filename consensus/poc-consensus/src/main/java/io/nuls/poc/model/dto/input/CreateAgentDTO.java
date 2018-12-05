@@ -1,10 +1,12 @@
 package io.nuls.poc.model.dto.input;
 /**
+ * 创建节点参数类
+ * Creating Node Parameter Classes
+ *
  * @author tag
  * 2018/11/12
  * */
 public class CreateAgentDTO {
-    //资产ID
     private int assetId;
     private int chainId;
     private String agentAddress;

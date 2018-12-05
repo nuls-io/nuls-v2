@@ -33,6 +33,9 @@ import io.nuls.tools.data.BigIntegerUtils;
 
 
 /**
+ * 节点信息类
+ * Node information class
+ *
  * @author tag
  * 2018/11/20
  */

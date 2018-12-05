@@ -1,7 +1,7 @@
 package io.nuls.poc.rpc;
 
 import io.nuls.poc.constant.ConsensusConstant;
-import io.nuls.poc.service.impl.ConsensusServiceImpl;
+import io.nuls.poc.service.ConsensusService;
 import io.nuls.poc.utils.annotation.ResisterTx;
 import io.nuls.poc.utils.enumeration.TxMethodType;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -14,14 +14,14 @@ import io.nuls.tools.core.annotation.Component;
 import java.util.Map;
 
 /**
- * 共识接口
+ * 共识
  * @author tag
  * 2018/11/7
  * */
 @Component
 public class PocConsensusResource extends BaseCmd{
     @Autowired
-    private ConsensusServiceImpl service;
+    private ConsensusService service;
 
     /**
      * 创建节点
