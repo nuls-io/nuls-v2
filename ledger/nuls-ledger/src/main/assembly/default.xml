@@ -13,7 +13,7 @@
 
     <dependencySets>
         <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
+            <useProjectArtifact>true</useProjectArtifact>
             <outputDirectory>libs</outputDirectory>
             <unpack>false</unpack>
         </dependencySet>

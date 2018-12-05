@@ -36,6 +36,7 @@ done
 
 # add libs to CLASSPATH
 for file in ${SERVER_HOME}/libs/*.jar; do
+  echo ${file};
   CLASSPATH=${CLASSPATH}:${file};
 done
 
