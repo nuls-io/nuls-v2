@@ -30,7 +30,7 @@ public class TransactionCmdTest {
 
     @BeforeClass
     public static void start() throws Exception {
-        WsServer.mockModule();
+        //WsServer.mockModule();
     }
 
     @Test

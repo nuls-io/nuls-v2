@@ -1,7 +1,5 @@
 package io.nuls.transaction.constant;
 
-import java.io.File;
-
 /**
  * @author: Charlie
  * @date: 2018/11/12
@@ -63,6 +61,10 @@ public interface TxConstant {
     String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
     String CROSS_TRANSFER_COMMIT = "crossTxCommit";
     String CROSS_TRANSFER_ROLLBACK = "crossTxCommit";
+    /**
+     * 跨链交易固定为非解锁交易
+     */
+    byte CORSS_TX_LOCKED = 0;
 
 
 }

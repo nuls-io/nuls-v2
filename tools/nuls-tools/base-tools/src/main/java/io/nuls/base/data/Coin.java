@@ -22,10 +22,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.transaction.utils;
-
-import io.nuls.base.data.Coin;
-import io.nuls.transaction.constant.TxConstant;
+package io.nuls.base.data;
 
 import java.math.BigInteger;
 
@@ -33,44 +30,57 @@ import java.math.BigInteger;
  * @author: Charlie
  * @date: 2018-12-05
  */
-public class TxUtil {
+public abstract class Coin extends BaseNulsData {
 
-    public static boolean isCurrentChainMainAsset(Coin coin){
-        return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
+    /**
+     * byte[24] 账户地址
+     */
+    protected byte[] address;
+
+    /**
+     * uint16 资产发行链的id
+     */
+    protected int assetsChainId;
+
+    /**
+     * uint16 资产id
+     */
+    protected int assetsId;
+
+    /**
+     * uint128 数量
+     */
+    protected BigInteger amount;
+
+    public byte[] getAddress() {
+        return address;
     }
 
-    public static boolean isCurrentChainMainAsset(int chainId, int assetId){
-        if(chainId == TxConstant.CURRENT_CHAINID
-                && assetId ==TxConstant.CURRENT_CHAIN_ASSETID) {
-            return true;
-        }
-        return false;
+    public void setAddress(byte[] address) {
+        this.address = address;
     }
 
-    public static boolean isNulsAsset(Coin coin){
-        return isNulsAsset(coin.getAssetsChainId(), coin.getAssetsId());
+    public int getAssetsChainId() {
+        return assetsChainId;
     }
 
-    public static boolean isNulsAsset(int chainId, int assetId){
-        if(chainId == TxConstant.NUlS_CHAINID
-                && assetId ==TxConstant.NUlS_CHAIN_ASSETID) {
-            return true;
-        }
-        return false;
+    public void setAssetsChainId(int assetsChainId) {
+        this.assetsChainId = assetsChainId;
     }
 
-    public static boolean assetExist(int chainId, int assetId){
-        //todo 查资产是否存在
-        return false;
+    public int getAssetsId() {
+        return assetsId;
     }
 
-    public static byte[] getNonce(byte[] address, int chainId, int assetId){
-        //todo 查nonce
-        return new byte[8];
+    public void setAssetsId(int assetsId) {
+        this.assetsId = assetsId;
     }
 
-    public static BigInteger getBalance(byte[] address, int chainId, int assetId){
-        //todo 查余额;
-        return BigInteger.TEN;
+    public BigInteger getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigInteger amount) {
+        this.amount = amount;
     }
 }
