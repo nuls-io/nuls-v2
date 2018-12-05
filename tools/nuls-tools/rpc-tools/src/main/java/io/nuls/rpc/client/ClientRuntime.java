@@ -46,49 +46,59 @@ import java.util.concurrent.ConcurrentMap;
 public class ClientRuntime {
 
     /**
-     * Key: 角色
-     * Value：角色的连接信息
-     * Key: role
-     * Value: Connection information of the role
+     * Key: 角色，Value：角色的连接信息
+     * Key: role, Value: Connection information of the role
      */
     public static ConcurrentMap<String, Map> roleMap = new ConcurrentHashMap<>();
 
     /**
-     * 从服务端获取的Message，根据类型放入不同队列中
-     * Message received from server, and placed in different queues according to type
+     * 从服务端得到的握手确认
+     * Handshake confirmation(NegotiateConnectionResponse) from the server
      */
     public static final Queue<Message> NEGOTIATE_RESPONSE_QUEUE = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 从服务端得到的请求确认
+     * Request confirmation(Ack) from the server
+     */
     public static final Queue<Message> ACK_QUEUE = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 从服务端得到的需要手动处理的应答消息
+     * Response that need to be handled manually from the server
+     */
     public static final Queue<Message> RESPONSE_MANUAL_QUEUE = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 从服务端得到的自动处理的应答消息
+     * Response that need to be handled Automatically from the server
+     */
     public static final Queue<Message> RESPONSE_AUTO_QUEUE = new ConcurrentLinkedQueue<>();
 
     /**
-     * 调用远程方法时，可以设置自动回调的本地方法
-     * Key：调用远程方法的messageId
-     * Value：自动回调的本地方法
+     * 调用远程方法时，可以设置自动回调的本地方法。
+     * Key：调用远程方法的messageId，Value：自动回调的本地方法
+     * <p>
      * When calling a remote method, you can set the local method for automatic callback
-     * Key: MessageId that calls remote methods
-     * Value: Local method of automatic callback
+     * Key: MessageId that calls remote methods, Value: Local method of automatic callback
      */
     static final Map<String, BaseInvoke> INVOKE_MAP = new ConcurrentHashMap<>();
 
     /**
      * 连接其他模块的客户端集合
-     * Key: 连接地址(如: ws://127.0.0.1:8887)
-     * Value：WsClient对象
+     * Key: 连接地址(如: ws://127.0.0.1:8887), Value：WsClient对象
+     * <p>
      * Client Set Connecting Other Modules
-     * Key: url(ex: ws://127.0.0.1:8887)
-     * Value: WsClient object
+     * Key: url(ex: ws://127.0.0.1:8887), Value: WsClient object
      */
     static Map<String, WsClient> wsClientMap = new ConcurrentHashMap<>();
 
     /**
      * messageId对应的客户端对象，用于取消订阅的Request
-     * Key：messageId
-     * Value：客户端对象
+     * Key：messageId, Value：客户端对象
+     * <p>
      * WsClient object corresponding to messageId, used to unsubscribe the Request
-     * key: messageId
-     * value: WsClient
+     * key: messageId, value: WsClient
      */
     static ConcurrentMap<String, WsClient> msgIdKeyWsClientMap = new ConcurrentHashMap<>();
 
@@ -99,9 +109,9 @@ public class ClientRuntime {
      */
     static String getRemoteUri(String role) {
         Map map = roleMap.get(role);
-        return map != null
-                ? "ws://" + map.get(Constants.KEY_IP) + ":" + map.get(Constants.KEY_PORT)
-                : null;
+        return map == null
+                ? null
+                : "ws://" + map.get(Constants.KEY_IP) + ":" + map.get(Constants.KEY_PORT);
     }
 
     /**
@@ -146,8 +156,9 @@ public class ClientRuntime {
 
 
     /**
-     * 根据url获取客户端对象
-     * Get the WsClient object through the url
+     * @param url 连接字符串，Connection Url
+     * @return 与url对应的客户端对象，WsClient object corresponding to URL
+     * @throws Exception 连接失败，Connect failed
      */
     static WsClient getWsClient(String url) throws Exception {
         if (!wsClientMap.containsKey(url)) {
@@ -174,6 +185,13 @@ public class ClientRuntime {
         return wsClientMap.get(url);
     }
 
+    /**
+     * 判断是否为正整数
+     * Determine whether it is a positive integer
+     *
+     * @param string 待验证的值，Value to be verified
+     * @return boolean
+     */
     public static boolean isPureDigital(String string) {
         try {
             return Integer.valueOf(string) > 0;
