@@ -17,20 +17,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.BlockErrorCode;
-import io.nuls.block.message.GetTxGroupMessage;
+import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.TxGroupMessage;
-import io.nuls.block.message.body.TxGroupMessageBody;
 import io.nuls.block.utils.TransactionUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
@@ -38,11 +37,12 @@ import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 
 /**
- * 处理收到的{@link GetTxGroupMessage}
+ * 处理收到的{@link HashListMessage}
  * @author captain
  * @date 18-11-14 下午4:23
  * @version 1.0
@@ -51,22 +51,21 @@ import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 public class GetTxGroupHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = GET_TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public CmdResponse process(List<Object> params){
+    public Object process(Map map){
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        String nodeId = map.get("nodes").toString();
+        HashListMessage  message = new HashListMessage ();
 
-        Integer chainId = Integer.parseInt(params.get(0).toString());
-        String nodeId = params.get(1).toString();
-        GetTxGroupMessage message = new GetTxGroupMessage();
-
-        byte[] decode = HexUtil.decode(params.get(2).toString());
+        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
             Log.warn(e.getMessage());
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         if(message == null || nodeId == null) {
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         NulsDigestData requestHash = null;
@@ -78,13 +77,10 @@ public class GetTxGroupHandler extends BaseCmd {
         }
 
         TxGroupMessage response = new TxGroupMessage();
-        TxGroupMessageBody body = new TxGroupMessageBody();
-        response.setMsgBody(body);
         try {
-            List<Transaction> transactions = TransactionUtil.getTransactions(chainId, message.getMsgBody().getTxHashList());
-            body.setChainID(chainId);
-            body.setRequestHash(requestHash);
-            body.setTransactions(transactions);
+            List<Transaction> transactions = TransactionUtil.getTransactions(chainId, message.getTxHashList());
+            response.setRequestHash(requestHash);
+            response.setTransactions(transactions);
         } catch (IOException e) {
             Log.error(e);
         }

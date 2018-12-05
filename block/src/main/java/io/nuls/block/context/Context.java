@@ -17,12 +17,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.context;
 
 import io.nuls.base.data.Block;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.model.Chain;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -33,17 +35,24 @@ import java.util.List;
  * @version 1.0
  */
 @Data
+@NoArgsConstructor
 public class Context {
 
+    /**
+     * 代表该链的运行状态
+     */
     private RunningStatusEnum status;
 
     private int chainId;
 
+    /**
+     * 该链的系统交易类型
+     */
+    private List<Integer> systemTransactionType;
+
     private Block latestBlock;
 
     private Block genesisBlock;
-
-    private Long netBlockHeight = 0L;
 
     private Chain masterChain;
 
@@ -63,17 +72,11 @@ public class Context {
         this.genesisBlock = block;
     }
 
-    public Context() {
+    public synchronized void setStatus(RunningStatusEnum status) {
+        this.status = status;
     }
 
-    public Long getNetBestBlockHeight() {
-        if (null != latestBlock && netBlockHeight < latestBlock.getHeader().getHeight()) {
-            return latestBlock.getHeader().getHeight();
-        }
-        if (null == netBlockHeight) {
-            return 0L;
-        }
-        return netBlockHeight;
+    public long getLatestHeight(){
+        return latestBlock.getHeader().getHeight();
     }
-
 }

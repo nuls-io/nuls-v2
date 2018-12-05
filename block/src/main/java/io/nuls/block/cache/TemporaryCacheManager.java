@@ -17,10 +17,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.cache;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.model.SmallBlock;
+import io.nuls.base.data.SmallBlock;
 import io.nuls.tools.cache.LimitHashMap;
 
 /**

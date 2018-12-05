@@ -61,10 +61,10 @@ public class CacheHandler {
     }
 
     public static void requestComplete(CompleteMessage message) {
-        if (message.getMsgBody().isSuccess()) {
-            taskCacher.success(message.getMsgBody().getRequestHash(), message);
+        if (message.isSuccess()) {
+            taskCacher.success(message.getRequestHash(), message);
         } else {
-            taskCacher.fail(message.getMsgBody().getRequestHash());
+            taskCacher.fail(message.getRequestHash());
         }
     }
 

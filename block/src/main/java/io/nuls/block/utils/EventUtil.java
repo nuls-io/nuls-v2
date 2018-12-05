@@ -17,9 +17,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package io.nuls.block.utils;
 
-import io.nuls.rpc.cmd.CmdDispatcher;
+package io.nuls.block.utils;
 
 /**
  * 与事件总线模块交互的工具类
@@ -37,7 +36,7 @@ public class EventUtil {
      * @throws Exception
      */
     public static boolean subscribe(String moduleId, String topic) throws Exception {
-        String response = CmdDispatcher.request("subscribe", null);
+//        String response = CmdDispatcher.request("subscribe", null);
         return true;
     }
 
@@ -49,7 +48,7 @@ public class EventUtil {
      * @throws Exception
      */
     public static boolean send(String moduleId, String topic, String eventJson) throws Exception {
-        String response = CmdDispatcher.request("send", null);
+//        String response = CmdDispatcher.request("send", null);
         return true;
     }
 
