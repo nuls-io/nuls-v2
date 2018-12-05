@@ -132,7 +132,7 @@ public class WsM1 {
         Request request = MessageUtil.defaultRequest();
         request.setRequestAck("1");
         request.setSubscriptionPeriod("3");
-        request.setSubscriptionEventCounter("0");
+        request.setSubscriptionEventCounter("2");
         request.getRequestMethods().put("getHeight", params);
         request.getRequestMethods().put("getBalance", params);
         String messageId3 = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, request, new MyInvoke());

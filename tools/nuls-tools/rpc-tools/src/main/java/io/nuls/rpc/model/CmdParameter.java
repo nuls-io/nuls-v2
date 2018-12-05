@@ -32,21 +32,39 @@ import lombok.*;
  *
  * @author tangyi
  * @date 2018/11/19
- * @description
  */
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class CmdParameter {
+    /**
+     * 参数名称
+     * Parameter name
+     */
     @Getter
     @Setter
     private String parameterName;
+
+    /**
+     * 参数类型（可以是任何类型，包括基础类型或者自定义类型）
+     * Parameter type(can be any type, including base type or custom type)
+     */
     @Getter
     @Setter
     private String parameterType;
+
+    /**
+     * 数值类型参数的范围，格式为：[(\[]\d+,\d+[)\]] 。例如：(1,100]表示1< x <=100
+     * The range of numerical type parameters, format: [(\[] d+, \ d+ [)]]. For example, (1,100] means 1 < x <=100
+     */
     @Getter
     @Setter
     private String parameterValidRange;
+
+    /**
+     * 字符类型参数的格式，值为正则表达式
+     * Format of character type parameters with regular expression
+     */
     @Getter
     @Setter
     private String parameterValidRegExp;

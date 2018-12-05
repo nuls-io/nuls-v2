@@ -174,7 +174,7 @@ public class CmdDispatcher {
      */
     public static String requestAndInvoke(String role, Request request, BaseInvoke baseInvoke) throws Exception {
         if (!ClientRuntime.isPureDigital(request.getSubscriptionPeriod())
-                || !ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
+                && !ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
             throw new Exception("Wrong value: [SubscriptionPeriod][SubscriptionEventCounter]");
         }
 

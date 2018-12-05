@@ -42,7 +42,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  *
  * @author tangyi
  * @date 2018/11/23
- * @description
  */
 public class ServerRuntime {
 
@@ -63,8 +62,8 @@ public class ServerRuntime {
      * 接口返回值改变次数
      * Number of return value changes
      */
-    public static Map<String, Long> cmdChangeCount = new HashMap<>();
-    public static Map<String, Object[]> cmdLastResponse = new HashMap<>();
+    private static Map<String, Long> cmdChangeCount = new HashMap<>();
+    static Map<String, Object[]> cmdLastResponse = new HashMap<>();
 
     /**
      * 本模块配置信息
@@ -74,26 +73,53 @@ public class ServerRuntime {
 
 
     /**
-     * 从客户端获取的Message，根据类型放入不同队列中
-     * 数组的第一个元素是Websocket对象，数组的第二个元素是Message
-     * Message received from client, and placed in different queues according to type
-     * The first element of the array is the websocket object, and the second element of the array is Message.
+     * 单次响应队列，数组的第一个元素是Websocket对象，数组的第二个元素是Message
+     * Single called queue. The first element of the array is the websocket object, and the second element of the array is Message.
      */
-    public static final Queue<Object[]> NEGOTIATE_QUEUE = new ConcurrentLinkedQueue<>();
-    public static final Queue<Object[]> REQUEST_SINGLE_QUEUE = new ConcurrentLinkedQueue<>();
-    public static final Queue<Object[]> REQUEST_PERIOD_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
-    public static final Queue<Object[]> REQUEST_EVENT_COUNT_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
-    public static final List<String> UNSUBSCRIBE_LIST =  Collections.synchronizedList(new ArrayList<>());
+    static final Queue<Object[]> REQUEST_SINGLE_QUEUE = new ConcurrentLinkedQueue<>();
 
-    public static Object[] firstObjArrInRequestSingleQueue() {
+    /**
+     * 多次响应队列（根据Period），数组的第一个元素是Websocket对象，数组的第二个元素是Message
+     * Multiply called queue (Period). The first element of the array is the websocket object, and the second element of the array is Message.
+     */
+    static final Queue<Object[]> REQUEST_PERIOD_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 多次响应队列（根据Event count），数组的第一个元素是Websocket对象，数组的第二个元素是Message
+     * Multiply called queue (Event count). The first element of the array is the websocket object, and the second element of the array is Message.
+     */
+    static final Queue<Object[]> REQUEST_EVENT_COUNT_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 取消订阅列表
+     * Unsubscribe list
+     */
+    static final List<String> UNSUBSCRIBE_LIST = Collections.synchronizedList(new ArrayList<>());
+
+    /**
+     * Return the first item of REQUEST_SINGLE_QUEUE
+     *
+     * @return Object[]
+     */
+    static Object[] firstObjArrInRequestSingleQueue() {
         return firstObjArrInQueue(REQUEST_SINGLE_QUEUE);
     }
 
-    public static Object[] firstObjArrInRequestPeriodLoopQueue() {
+    /**
+     * Return the first item of REQUEST_PERIOD_LOOP_QUEUE
+     *
+     * @return Object[]
+     */
+    static Object[] firstObjArrInRequestPeriodLoopQueue() {
         return firstObjArrInQueue(REQUEST_PERIOD_LOOP_QUEUE);
     }
 
-    public static Object[] firstObjArrInRequestEventCountLoopQueue() {
+    /**
+     * Return the first item of REQUEST_EVENT_COUNT_LOOP_QUEUE
+     *
+     * @return Object[]
+     */
+    static Object[] firstObjArrInRequestEventCountLoopQueue() {
         return firstObjArrInQueue(REQUEST_EVENT_COUNT_LOOP_QUEUE);
     }
 
@@ -113,6 +139,10 @@ public class ServerRuntime {
     /**
      * 根据cmd命令和版本号获取本地方法
      * Getting local methods from CMD commands and version
+     *
+     * @param cmd        Command of remote method
+     * @param minVersion Version of remote method
+     * @return CmdDetail
      */
     static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
@@ -165,6 +195,8 @@ public class ServerRuntime {
     /**
      * 根据cmd命令获取最高版本的方法，逻辑同上
      * Getting the highest version of local methods from CMD commands
+     * @param cmd Command of remote method
+     * @return CmdDetail
      */
     static CmdDetail getLocalInvokeCmd(String cmd) {
 
@@ -189,9 +221,12 @@ public class ServerRuntime {
     }
 
 
+
     /**
      * 扫描指定路径，得到所有接口的详细信息
      * Scan the specified path for details of all interfaces
+     * @param packageName Package full path
+     * @throws Exception Duplicate commands found
      */
     static void scanPackage(String packageName) throws Exception {
         /*
@@ -224,9 +259,12 @@ public class ServerRuntime {
         }
     }
 
+
     /**
      * 保存所有拥有CmdAnnotation注解的方法
      * Save all methods that have CmdAnnotation annotations
+     * @param method Method
+     * @return CmdDetail
      */
     private static CmdDetail annotation2CmdDetail(Method method) {
         CmdDetail cmdDetail = null;
@@ -268,11 +306,14 @@ public class ServerRuntime {
         return cmdDetail;
     }
 
+
     /**
      * 判断是否已经注册过，判断方法为：cmd+version唯一
      * Determine if the cmd has been registered
      * 1. The same cmd
      * 2. The same version
+     * @param sourceCmdDetail CmdDetail
+     * @return boolean
      */
     private static boolean isRegister(CmdDetail sourceCmdDetail) {
         boolean exist = false;
@@ -286,12 +327,22 @@ public class ServerRuntime {
         return exist;
     }
 
+    /**
+     * Set event count
+     * @param cmd Command of remote method
+     * @param value Response
+     */
     public static void eventCount(String cmd, Response value) {
-        setCmdChangeCount(cmd);
+        addCmdChangeCount(cmd);
         setCmdLastValue(cmd, value);
     }
 
-    private static void setCmdChangeCount(String cmd) {
+    /**
+     * 返回值改变次数增加1
+     * Increase the changes number of return value by 1
+     * @param cmd Command of remote method
+     */
+    private static void addCmdChangeCount(String cmd) {
         if (!cmdChangeCount.containsKey(cmd)) {
             cmdChangeCount.put(cmd, 1L);
         } else {
@@ -300,7 +351,13 @@ public class ServerRuntime {
         }
     }
 
-    public static long getCmdChangeCount(String cmd) {
+    /**
+     * 得到返回值的改变数量
+     * Get current changes number of return value
+     * @param cmd Command of remote method
+     * @return long
+     */
+    static long getCmdChangeCount(String cmd) {
         try {
             return cmdChangeCount.get(cmd);
         } catch (Exception e) {
@@ -308,11 +365,22 @@ public class ServerRuntime {
         }
     }
 
+    /**
+     * 设置最近改变的值
+     * Set the recently changed value
+     * @param cmd Command of remote method
+     * @param value Response
+     */
     private static void setCmdLastValue(String cmd, Response value) {
         cmdLastResponse.put(cmd, new Object[]{value, false});
     }
 
-    public static Object[] getCmdLastValue(String cmd) {
+    /**
+     *
+     * @param cmd
+     * @return
+     */
+    static Object[] getCmdLastValue(String cmd) {
         return cmdLastResponse.get(cmd);
     }
 }

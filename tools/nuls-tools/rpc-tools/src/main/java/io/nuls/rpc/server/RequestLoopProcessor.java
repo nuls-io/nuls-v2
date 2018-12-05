@@ -40,10 +40,13 @@ import java.util.Map;
  *
  * @author tangyi
  * @date 2018/11/7
- * @description
  */
 public class RequestLoopProcessor implements Runnable {
 
+    /**
+     * 轮流根据Period和EventCount定时推送消息
+     * Push messages on a periodic and EventCount basis in turn
+     */
     @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {
@@ -62,7 +65,13 @@ public class RequestLoopProcessor implements Runnable {
         }
     }
 
-    private void sendPeriodQueue() throws  IOException {
+    /**
+     * 发送队列的第一个对象，然后放入队列尾
+     * Send the first object of the queue and put it at the end of the queue
+     *
+     * @throws IOException JSON解析错误 / JSON parsing error
+     */
+    private void sendPeriodQueue() throws IOException {
         /*
         获取队列中的第一个对象，如果是空，舍弃
         Get the first item of the queue, If it is an empty object, discard
@@ -88,7 +97,13 @@ public class RequestLoopProcessor implements Runnable {
         }
     }
 
-    private void sendEventCountQueue() throws Exception {
+    /**
+     * 发送队列的第一个对象，然后放入队列尾
+     * Send the first object of the queue and put it at the end of the queue
+     *
+     * @throws IOException JSON解析错误 / JSON parsing error
+     */
+    private void sendEventCountQueue() throws IOException {
         /*
         获取队列中的第一个对象，如果是空，舍弃
         Get the first item of the queue, If it is an empty object, discard

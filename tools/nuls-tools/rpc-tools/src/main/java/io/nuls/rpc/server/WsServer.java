@@ -112,7 +112,7 @@ public class WsServer extends WebSocketServer {
                     取消订阅，直接响应
                      */
                     Log.info("UnsubscribeFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
-                    CmdHandler.unsubscribe(webSocket, message);
+                    CmdHandler.unsubscribe(webSocket,message);
                     break;
                 case Request:
                     /*
