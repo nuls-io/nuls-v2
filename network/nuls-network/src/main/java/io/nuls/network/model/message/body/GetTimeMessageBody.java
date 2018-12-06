@@ -1,14 +1,18 @@
 /*
  * MIT License
+ *
  * Copyright (c) 2017-2018 nuls.io
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -16,52 +20,63 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package io.nuls.block.message.body;
+package io.nuls.network.model.message.body;
+
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
 
 import java.io.IOException;
 
+
 /**
- * 请求获取小区块消息
- * @author captain
- * @date 18-11-9 下午2:37
- * @version 1.0
+ *时间请求消息
+ * time request protocol message body
+ * @author lan
+ * @date 2018/11/01
+ *
  */
-@Data
-public class GetSmallBlockMessageBody extends MessageBody {
+public class GetTimeMessageBody extends BaseNulsData {
 
-    private int chainID;
-    private NulsDigestData requestHash;
+    private long messageId = 0;
 
-    public GetSmallBlockMessageBody() {
+
+    public GetTimeMessageBody() {
+
+    }
+
+    public long getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(long messageId) {
+        this.messageId = messageId;
     }
 
     @Override
     public int size() {
-        int size = 0;
-        size += SerializeUtils.sizeOfInt32();
-        size += SerializeUtils.sizeOfNulsData(requestHash);
-        return size;
+        int s = 0;
+        s += SerializeUtils.sizeOfUint32();
+        return s;
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint32(messageId);
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint32(chainID);
-        stream.writeNulsData(requestHash);
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainID = byteBuffer.readInt32();
-        this.requestHash = byteBuffer.readHash();
+    public void parse(NulsByteBuffer buffer) throws NulsException {
+        messageId = buffer.readUint32();
     }
 
 }

@@ -118,7 +118,7 @@ public class TransactionBootStrap {
                     .connect("ws://127.0.0.1:8887");
 
             // Get information from kernel
-            CmdDispatcher.syncManager();
+           // CmdDispatcher.syncKernel();
         }catch (Exception e){
             Log.error("Transaction startup webSocket server error!");
             e.printStackTrace();

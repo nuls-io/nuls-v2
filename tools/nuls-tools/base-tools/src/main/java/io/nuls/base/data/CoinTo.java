@@ -18,27 +18,7 @@ import java.math.BigInteger;
  * @author: Charlie
  * @date: 2018/11/23
  */
-public class CoinTo extends BaseNulsData {
-
-    /**
-     * byte[24],目标地址
-     */
-    private byte[] address;
-
-    /**
-     * uint16 资产发行链的id
-     */
-    private int assetsChainId;
-
-    /**
-     * uint16 资产id
-     */
-    private int assetsId;
-
-    /**
-     * uint128 转账金额
-     */
-    private BigInteger amount;
+public class CoinTo extends Coin {
 
     /**
      * uint32,解锁高度或解锁时间，-1为永久锁定
@@ -148,35 +128,42 @@ public class CoinTo extends BaseNulsData {
     }
 
 
-
+    @Override
     public byte[] getAddress() {
         return address;
     }
 
+    @Override
     public void setAddress(byte[] address) {
         this.address = address;
     }
 
+    @Override
     public int getAssetsChainId() {
         return assetsChainId;
     }
 
+    @Override
     public void setAssetsChainId(int assetsChainId) {
         this.assetsChainId = assetsChainId;
     }
 
+    @Override
     public int getAssetsId() {
         return assetsId;
     }
 
+    @Override
     public void setAssetsId(int assetsId) {
         this.assetsId = assetsId;
     }
 
+    @Override
     public BigInteger getAmount() {
         return amount;
     }
 
+    @Override
     public void setAmount(BigInteger amount) {
         this.amount = amount;
     }

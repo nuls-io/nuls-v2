@@ -1,14 +1,18 @@
 /*
  * MIT License
+ *
  * Copyright (c) 2017-2018 nuls.io
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -16,58 +20,74 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package io.nuls.block.message.body;
+package io.nuls.network.model.message.body;
+
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.block.model.SmallBlock;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
 
 import java.io.IOException;
 
+
 /**
- * 广播区块消息
- * 从共识模块接收到新打包区块后，先进行验证，验证通过后保存到数据库并广播到网络上
- * @author captain
- * @date 18-11-9 下午2:37
- * @version 1.0
+ *时间应答消息
+ * time response protocol message body
+ * @author lan
+ * @date 2018/11/01
+ *
  */
-@Data
-public class SmallBlockMessageBody extends MessageBody {
+public class TimeMessageBody extends BaseNulsData {
+    private long messageId = 0;
+    private long time = 0;
 
-    private int chainID;
-    private SmallBlock smallBlock;
 
-    public SmallBlockMessageBody() {
+    public TimeMessageBody() {
+
     }
 
-    public SmallBlockMessageBody(int chainID, SmallBlock smallBlock) {
-        this.chainID = chainID;
-        this.smallBlock = smallBlock;
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public long getMessageId() {
+        return messageId;
+    }
+
+    public void setMessageId(long messageId) {
+        this.messageId = messageId;
     }
 
     @Override
     public int size() {
-        int size = 0;
-        size += SerializeUtils.sizeOfInt32();
-        size += SerializeUtils.sizeOfNulsData(smallBlock);
-        return size;
+        int s = 0;
+        s += SerializeUtils.sizeOfUint32();
+        s += SerializeUtils.sizeOfUint32();
+        return s;
+    }
+
+    /**
+     * serialize important field
+     */
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint32(messageId);
+        stream.writeUint32(time);
     }
 
     @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint32(chainID);
-        stream.writeNulsData(smallBlock);
-    }
-
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainID = byteBuffer.readInt32();
-        this.smallBlock = byteBuffer.readNulsData(new SmallBlock());
+    public void parse(NulsByteBuffer buffer) throws NulsException {
+        messageId = buffer.readUint32();
+        time = buffer.readUint32();
     }
 
 }

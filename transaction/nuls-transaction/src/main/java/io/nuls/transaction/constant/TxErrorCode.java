@@ -45,6 +45,7 @@ public interface TxErrorCode {
     ErrorCode COIN_OWNER_ERROR = ErrorCode.init("10034");
     ErrorCode NONEWVER = ErrorCode.init("10035");
     ErrorCode INSUFFICIENT_FEE = ErrorCode.init("10036");
+    ErrorCode ASSET_NOT_EXIST = ErrorCode.init("10037");
 
 
 

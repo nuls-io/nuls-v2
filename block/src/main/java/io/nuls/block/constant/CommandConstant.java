@@ -28,6 +28,7 @@ package io.nuls.block.constant;
  */
 public interface CommandConstant {
 
+    //网络消息对应的RPC命令
     String EMPTY_MESSAGE = "empty";
     String COMPLETE_MESSAGE = "complete";
     String BLOCK_MESSAGE = "block";
@@ -38,4 +39,13 @@ public interface CommandConstant {
     String SMALL_BLOCK_MESSAGE = "sBlock";
     String GET_SMALL_BLOCK_MESSAGE = "getsBlock";
     String TXGROUP_MESSAGE = "txs";
+
+    //普通服务对应的RPC命令
+    String BEST_BLOCK_HEADER = "bestBlockHeader";
+    String BEST_BLOCK = "bestBlock";
+    String GET_BLOCK_HEADER_BY_HEIGHT = "getBlockHeaderByHeight";
+    String GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
+    String GET_BLOCK_HEADER_BY_HASH = "getBlockHeaderByHash";
+    String GET_BLOCK_BY_HASH = "getBlockByHash";
+    String RECEIVE_PACKING_BLOCK = "receivePackingBlock";
 }

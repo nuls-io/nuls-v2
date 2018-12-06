@@ -36,20 +36,37 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>11</java.version>
-        <tool.version>1.0.0-SNAPSHOT</tool.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <lombok.version>1.18.4</lombok.version>
+        <tool.version>1.0.0-SNAPSHOT</tool.version>
     </properties>
 
     <dependencies>
 
-        <!-- nuls-tools -->
+        <!-- common-tools -->
         <dependency>
-            <groupId>io.nuls</groupId>
-            <artifactId>nuls-tools</artifactId>
+            <groupId>io.nuls.nuls-tools</groupId>
+            <artifactId>common-tools</artifactId>
             <version>${tool.version}</version>
-            <type>pom</type>
+        </dependency>
+        <!-- base-tools -->
+        <dependency>
+            <groupId>io.nuls.nuls-tools</groupId>
+            <artifactId>base-tools</artifactId>
+            <version>${tool.version}</version>
+        </dependency>
+        <!-- rpc-tools -->
+        <dependency>
+            <groupId>io.nuls.nuls-tools</groupId>
+            <artifactId>rpc-tools</artifactId>
+            <version>${tool.version}</version>
+        </dependency>
+        <!-- storage-tools -->
+        <dependency>
+            <groupId>io.nuls.nuls-tools</groupId>
+            <artifactId>storage-tools</artifactId>
+            <version>${tool.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
