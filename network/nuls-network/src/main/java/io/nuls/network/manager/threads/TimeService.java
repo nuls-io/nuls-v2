@@ -92,16 +92,16 @@ public class TimeService implements Runnable {
 
 
     private TimeService() {
-        urlList.add("a.sgp.ntp.org.cn");
-        urlList.add("a.cn.ntp.org.cn");
-        urlList.add("a.time1.apple.com");
-        urlList.add("a.ntp3.aliyun.com");
-        urlList.add("a.ntp5.aliyun.com");
-        urlList.add("a.us.ntp.org.cn");
-        urlList.add("a.kr.ntp.org.cn");
-        urlList.add("a.de.ntp.org.cn");
-        urlList.add("a.jp.ntp.org.cn");
-        urlList.add("a.ntp7.aliyun.com");
+        urlList.add("sgp.ntp.org.cn");
+        urlList.add("cn.ntp.org.cn");
+        urlList.add("time1.apple.com");
+        urlList.add("ntp3.aliyun.com");
+        urlList.add("ntp5.aliyun.com");
+        urlList.add("us.ntp.org.cn");
+        urlList.add("kr.ntp.org.cn");
+        urlList.add("de.ntp.org.cn");
+        urlList.add("jp.ntp.org.cn");
+        urlList.add("ntp7.aliyun.com");
     }
     public static void addPeerTime(String nodeId,long requestId,long time){
         if(currentRequestId == requestId){
