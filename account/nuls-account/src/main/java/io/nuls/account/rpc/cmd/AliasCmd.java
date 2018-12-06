@@ -18,6 +18,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +92,8 @@ public class AliasCmd extends BaseCmd {
     public Object getAliasFee(Map params) {
         Log.debug("ac_getAliasFee start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
-        String address,alias,fee;
+        String address,alias;
+        BigInteger fee;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
         Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
@@ -112,7 +114,8 @@ public class AliasCmd extends BaseCmd {
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, String> result = new HashMap<>();
-        result.put("fee", fee);
+        result.put("fee", fee == null ? "" : fee.toString());
+        //TODO is need to format?
         Log.debug("ac_getAliasFee end");
         return success(result);
     }
@@ -224,8 +227,7 @@ public class AliasCmd extends BaseCmd {
             chainId = (Integer) chainIdObj;
             txHex = (String) txHexObj;
             //TODO after the parameter format was determine,here will be modify
-            Transaction transaction = new Transaction(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
-            transaction.parse(new NulsByteBuffer(HexUtil.hexStringToBytes(txHex)));
+            Transaction transaction = Transaction.getInstance(txHex);
             lists.add(transaction);
             result = aliasService.accountTxValidate(chainId,lists);
         } catch (NulsRuntimeException e) {
@@ -262,8 +264,7 @@ public class AliasCmd extends BaseCmd {
             }
             chainId = (Integer) chainIdObj;
             txHex = (String) txHexObj;
-            Transaction transaction = new Transaction(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
-            transaction.parse(new NulsByteBuffer(HexUtil.hexStringToBytes(txHex)));
+            Transaction transaction = Transaction.getInstance(txHex);
             result = aliasService.aliasTxValidate(chainId,transaction);
         } catch (NulsRuntimeException e) {
             Log.info("", e);
@@ -300,8 +301,7 @@ public class AliasCmd extends BaseCmd {
             chainId = (Integer) chainIdObj;
             txHex = (String) txHexObj;
             secondaryDataHex = (String) secondaryDataHexObj;
-            Transaction transaction = new Transaction(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
-            transaction.parse(new NulsByteBuffer(HexUtil.hexStringToBytes(txHex)));
+            Transaction transaction = Transaction.getInstance(txHex);
             Alias alias = new Alias();
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
             result = aliasService.aliasTxCommit(chainId,alias);
@@ -343,8 +343,7 @@ public class AliasCmd extends BaseCmd {
             chainId = (Integer) chainIdObj;
             txHex = (String) txHexObj;
             secondaryDataHex = (String) secondaryDataHexObj;
-            Transaction transaction = new Transaction(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
-            transaction.parse(new NulsByteBuffer(HexUtil.hexStringToBytes(txHex)));
+            Transaction transaction = Transaction.getInstance(txHex);
             Alias alias = new Alias();
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
             result = aliasService.rollbackAlias(chainId,alias);
