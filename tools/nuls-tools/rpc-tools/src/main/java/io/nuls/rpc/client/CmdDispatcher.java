@@ -50,7 +50,7 @@ public class CmdDispatcher {
      * @return boolean
      * @throws Exception 握手失败, handshake failed
      */
-    public static boolean handshakeManager() throws Exception {
+    public static boolean handshakeKernel() throws Exception {
         WsClient wsClient = ClientRuntime.getWsClient(Constants.kernelUrl);
         if (wsClient == null) {
             throw new Exception("Kernel not available");
@@ -82,7 +82,7 @@ public class CmdDispatcher {
      *
      * @throws Exception 核心模块（Manager）不可用，Core Module (Manager) Not Available
      */
-    public static void syncManager() throws Exception {
+    public static void syncKernel() throws Exception {
 
         Message message = MessageUtil.basicMessage(MessageType.Request);
         Request request = MessageUtil.defaultRequest();
@@ -174,7 +174,7 @@ public class CmdDispatcher {
      */
     public static String requestAndInvoke(String role, Request request, BaseInvoke baseInvoke) throws Exception {
         if (!ClientRuntime.isPureDigital(request.getSubscriptionPeriod())
-                || !ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
+                && !ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
             throw new Exception("Wrong value: [SubscriptionPeriod][SubscriptionEventCounter]");
         }
 

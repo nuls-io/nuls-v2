@@ -80,7 +80,7 @@ public class AliasStorageServiceTest {
      *
      * @throws Exception
      */
-    @Test
+    //@Test
     public void getAliasListTest() throws Exception {
         Alias alias1 = createAlias();
         boolean result = aliasStorageService.saveAlias(chainId,alias1);

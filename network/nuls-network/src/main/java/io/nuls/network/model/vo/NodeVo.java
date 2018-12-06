@@ -25,7 +25,7 @@
 package io.nuls.network.model.vo;
 
 /**
- * @program: nuls2
+ * @program: nuls2.0
  * @description: node vo
  * @author: lan
  * @create: 2018/11/09

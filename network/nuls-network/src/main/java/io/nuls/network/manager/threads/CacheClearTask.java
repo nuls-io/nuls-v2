@@ -1,14 +1,18 @@
 /*
  * MIT License
+ *
  * Copyright (c) 2017-2018 nuls.io
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -16,48 +20,29 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
+package io.nuls.network.manager.threads;
 
-package io.nuls.block.message.body;
+import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.model.NodeGroup;
+import io.nuls.tools.log.Log;
 
-
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.tools.constant.ToolsConstant;
-import io.nuls.tools.exception.NulsException;
-
-import java.io.IOException;
+import java.util.List;
 
 /**
- * 通用消息体
- * @author captain
- * @date 18-11-20 上午10:44
- * @version 1.0
- */
-public class MessageBody extends BaseNulsData {
-   byte [] empty = ToolsConstant.PLACE_HOLDER;
-    public MessageBody() {
-
-    }
-
+ *
+ * @description: 定时清理缓存中过期数据信息
+ *Timed cleaning of expired data information in the cache
+ *
+ * @author: lan
+ * @create: 2018/11/14
+ **/
+public class CacheClearTask implements Runnable  {
     @Override
-    public int size() {
-        return 4;
-    }
+    public void run() {
 
-    /**
-     * serialize important field
-     */
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(ToolsConstant.PLACE_HOLDER);
-
-    }
-
-    @Override
-    public void parse(NulsByteBuffer buffer) throws NulsException {
-        buffer.readBytes(4);
     }
 
 }

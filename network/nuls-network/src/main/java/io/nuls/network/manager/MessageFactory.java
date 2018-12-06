@@ -156,4 +156,24 @@ public class MessageFactory {
         addrMessageBody.setIpAddressList(ipAddressList);
         return new AddrMessage(magicNumber,NetworkConstant.CMD_MESSAGE_ADDR,addrMessageBody);
     }
+
+    /**
+     * 构造时间请求消息
+     * @param magicNumber
+     * @return
+     */
+    public GetTimeMessage buildTimeRequestMessage(long magicNumber,long messageId){
+        GetTimeMessageBody messageBody=new GetTimeMessageBody();
+        return new GetTimeMessage(magicNumber,NetworkConstant.CMD_MESSAGE_GET_TIME,messageBody);
+    }
+    /**
+     * 构造时间应答消息
+     * @param magicNumber
+     * @return
+     */
+    public TimeMessage buildTimeResponseMessage(long magicNumber,long messageId){
+        TimeMessageBody messageBody=new TimeMessageBody();
+        messageBody.setTime(System.currentTimeMillis());
+        return new TimeMessage(magicNumber,NetworkConstant.CMD_MESSAGE_RESPONSE_TIME,messageBody);
+    }
 }

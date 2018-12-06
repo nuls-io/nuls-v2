@@ -33,6 +33,7 @@ import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.netty.NettyServer;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.thread.ThreadUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,11 +75,6 @@ public class ConnectionManager extends BaseManager{
      */
     private  Map<String, Integer> cacheConnectGroupIpInMap=new ConcurrentHashMap<>();
 
-    /**
-     * Client所有连接的IP,通过这个集合判断是否存在相互连接
-     * Key:ip  value: connectNumber
-     */
-    private  Map<String, Integer> cacheConnectIpMap=new ConcurrentHashMap<>();
 
     /**
      * 在物理连接断开时时候进行调用
@@ -90,8 +86,6 @@ public class ConnectionManager extends BaseManager{
         Lockers.NODE_ESTABLISH_CONNECT_LOCK.lock();
         try {
             Node node = null;
-            String ip = nodeKey.split(NetworkConstant.COLON)[0];
-            cacheConnectIpMap.remove(ip);
             if (Node.OUT == nodeType) {
                 node = cacheConnectNodeOutMap.get(nodeKey);
                 cacheConnectNodeOutMap.remove(nodeKey);
@@ -103,7 +97,9 @@ public class ConnectionManager extends BaseManager{
                     subGroupMaxInIp(node, nodeGroupConnector.getMagicNumber(), true);
                 }
             }
-            node.disConnectNodeChannel();
+            if(null != node) {
+                node.disConnectNodeChannel();
+            }
         }finally {
             Lockers.NODE_ESTABLISH_CONNECT_LOCK.unlock();
         }
@@ -148,16 +144,11 @@ public class ConnectionManager extends BaseManager{
         return nodesList;
     }
     /**
-     * 处理已经成功连接的节点
+     * 处理已经成功建立socket物理连接的节点
      */
     public boolean processConnectNode(Node node) {
         Lockers.NODE_ESTABLISH_CONNECT_LOCK.lock();
         try {
-            String ip = node.getId().split(NetworkConstant.COLON)[0];
-            if(null != cacheConnectIpMap.get(ip)){
-                return false;
-            }
-            cacheConnectIpMap.put(ip, 1);
             if (Node.IN == node.getType()) {
                 cacheConnectNodeInMap.put(node.getId(), node);
             } else {
@@ -202,17 +193,6 @@ public class ConnectionManager extends BaseManager{
     }
 
 
-
-    /**
-     * juge peer ip Exist
-     */
-    public boolean isPeerConnectExist(String peerIp){
-        if(null != cacheConnectIpMap.get(peerIp)){
-            //had connect
-            return true;
-        }
-            return false;
-    }
     public boolean isPeerConnectExceedMaxIn(String peerIp,long macgicNumber,int maxInSameIp){
         String key = peerIp+"_"+macgicNumber;
         if(null != cacheConnectGroupIpInMap.get(key)) {
@@ -238,7 +218,7 @@ public class ConnectionManager extends BaseManager{
         NettyServer serverCross=new NettyServer(NetworkParam.getInstance().getCrossPort());
         server.init();
         serverCross.init();
-        taskManager.createAndRunThread("node server start", new Runnable() {
+        ThreadUtils.createAndRunThread("node server start", new Runnable() {
             @Override
             public void run() {
                 try {
@@ -248,7 +228,7 @@ public class ConnectionManager extends BaseManager{
                 }
             }
         }, false);
-        taskManager.createAndRunThread("node crossServer start", new Runnable() {
+        ThreadUtils.createAndRunThread("node crossServer start", new Runnable() {
             @Override
             public void run() {
                 try {

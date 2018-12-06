@@ -39,7 +39,7 @@ public class NetworkUtilTest {
 
     @Before
     public void setUp() throws Exception {
-        WsServer.mockModule();
+
     }
 
     @After

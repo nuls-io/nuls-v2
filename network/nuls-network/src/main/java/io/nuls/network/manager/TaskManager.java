@@ -26,10 +26,11 @@ package io.nuls.network.manager;
 
 import io.nuls.network.manager.threads.DataShowMonitorTest;
 import io.nuls.network.manager.threads.GroupStatusMonitor;
-import io.nuls.network.manager.threads.NodesConnectThread;
+import io.nuls.network.manager.threads.NodesConnectTask;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.NettyClient;
 import io.nuls.tools.core.aop.AopUtils;
+import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 import io.nuls.tools.thread.commom.ThreadPoolInterceiptor;
 
@@ -64,14 +65,13 @@ public class TaskManager extends BaseManager{
      * @param node
      */
     public  void doConnect(Node node) {
-
-        executor.submit(new Runnable() {
+        ThreadUtils.createAndRunThread("doConnect",new Runnable() {
             @Override
             public void run() {
                 NettyClient client = new NettyClient(node);
                 client.start();
             }
-        });
+        });;
     }
 
     @Override
@@ -94,36 +94,21 @@ public class TaskManager extends BaseManager{
 //        } catch (InterruptedException e) {
 //            e.printStackTrace();
 //        }
-        ScheduledThreadPoolExecutor executor = taskManager.createScheduledThreadPool(1, new NulsThreadFactory("DataShowMonitorTest"));
+        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("DataShowMonitorTest"));
         executor.scheduleAtFixedRate(new DataShowMonitorTest(), 5, 10, TimeUnit.SECONDS);
         //测试调试专用 结束
     }
     public void scheduleGroupStatusMonitor(){
-        ScheduledThreadPoolExecutor executor = taskManager.createScheduledThreadPool(1, new NulsThreadFactory("GroupStatusMonitor"));
+        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("GroupStatusMonitor"));
         executor.scheduleAtFixedRate(new GroupStatusMonitor(), 5, 10, TimeUnit.SECONDS);
     }
     public synchronized  void clientConnectThreadStart() {
         if(clientThreadStart){
             return;
         }
-        ScheduledThreadPoolExecutor executor = taskManager.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
-        executor.scheduleAtFixedRate(new NodesConnectThread(), 5, 10, TimeUnit.SECONDS);
+        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
+        executor.scheduleAtFixedRate(new NodesConnectTask(), 5, 10, TimeUnit.SECONDS);
         clientThreadStart = true;
-    }
-
-    public  void createAndRunThread(String threadName, Runnable runnable, boolean deamon) {
-
-        NulsThreadFactory factory = new NulsThreadFactory(threadName);
-        Thread thread = new Thread(runnable);
-        thread.setDaemon(deamon);
-        thread.start();
-    }
-    public ScheduledThreadPoolExecutor createScheduledThreadPool(int threadCount, NulsThreadFactory factory) {
-        if (factory == null) {
-            throw new RuntimeException("thread factory cannot be null!");
-        }
-        ScheduledThreadPoolExecutor pool = AopUtils.createProxy(ScheduledThreadPoolExecutor.class, new Class[]{int.class, ThreadFactory.class}, new Object[]{threadCount, factory}, new ThreadPoolInterceiptor());
-        return pool;
     }
 
 }

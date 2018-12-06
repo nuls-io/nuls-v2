@@ -41,12 +41,23 @@ import java.util.List;
 @ToString
 @NoArgsConstructor
 public class RegisterCompoundMethod {
+    /**
+     * This is a string identifying the virtual method
+     */
     @Getter
     @Setter
     private String compoundMethodName;
+
+    /**
+     * A string describing the functionality of the method, the description will be available when querying the API for help
+     */
     @Getter
     @Setter
     private String compoundMethodDescription;
+
+    /**
+     * This is an array containing the methods with their respective parameter aliases that make up the virtual method
+     */
     @Getter
     @Setter
     private List<Object> compoundMethods;
