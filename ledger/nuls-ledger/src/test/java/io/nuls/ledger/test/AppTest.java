@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.test;
 
+import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.server.WsServer;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +40,7 @@ public class AppTest {
     @Test
     public void test() {
         try {
-            WsServer.mockKernel();
+            NoUse.mockKernel();
         } catch (Exception e) {
             e.printStackTrace();
         }
