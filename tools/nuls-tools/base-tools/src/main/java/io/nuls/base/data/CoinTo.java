@@ -18,27 +18,7 @@ import java.math.BigInteger;
  * @author: Charlie
  * @date: 2018/11/23
  */
-public class CoinTo extends BaseNulsData {
-
-    /**
-     * byte[24],目标地址
-     */
-    private byte[] address;
-
-    /**
-     * uint16 资产发行链的id
-     */
-    private int assetsChainId;
-
-    /**
-     * uint16 资产id
-     */
-    private int assetsId;
-
-    /**
-     * uint128 转账金额
-     */
-    private BigInteger amount;
+public class CoinTo extends Coin {
 
     /**
      * uint32,解锁高度或解锁时间，-1为永久锁定
@@ -90,20 +70,20 @@ public class CoinTo extends BaseNulsData {
 
     @JsonIgnore
     public byte[] getAddresses() {
-        byte[] address = new byte[23];
+        byte[] address = new byte[Address.ADDRESS_LENGTH];
         //如果owner不是存放的脚本则直接返回owner
-        if (address == null || address.length == 23) {
+        if (address == null || address.length == Address.ADDRESS_LENGTH) {
             return address;
         } else {
             Script scriptPubkey = new Script(address);
             //如果为P2PKH类型交易则从第四位开始返回23个字节
             if (scriptPubkey.isSentToAddress()) {
-                System.arraycopy(address, 3, address, 0, 23);
+                System.arraycopy(address, 3, address, 0, Address.ADDRESS_LENGTH);
             }
             //如果为P2SH或multi类型的UTXO则从第三位开始返回23个字节
             else if (scriptPubkey.isPayToScriptHash()) {
                 scriptPubkey.isSentToMultiSig();
-                System.arraycopy(address, 2, address, 0, 23);
+                System.arraycopy(address, 2, address, 0, Address.ADDRESS_LENGTH);
             }else{
                 throw new NulsRuntimeException(new Exception());
             }
@@ -148,35 +128,42 @@ public class CoinTo extends BaseNulsData {
     }
 
 
-
+    @Override
     public byte[] getAddress() {
         return address;
     }
 
+    @Override
     public void setAddress(byte[] address) {
         this.address = address;
     }
 
+    @Override
     public int getAssetsChainId() {
         return assetsChainId;
     }
 
+    @Override
     public void setAssetsChainId(int assetsChainId) {
         this.assetsChainId = assetsChainId;
     }
 
+    @Override
     public int getAssetsId() {
         return assetsId;
     }
 
+    @Override
     public void setAssetsId(int assetsId) {
         this.assetsId = assetsId;
     }
 
+    @Override
     public BigInteger getAmount() {
         return amount;
     }
 
+    @Override
     public void setAmount(BigInteger amount) {
         this.amount = amount;
     }

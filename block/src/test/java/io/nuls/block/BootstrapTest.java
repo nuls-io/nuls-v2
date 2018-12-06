@@ -20,6 +20,7 @@
 
 package io.nuls.block;
 
+import io.nuls.rpc.info.NoUse;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +43,7 @@ public class BootstrapTest {
 
     @Test
     public void kernel() throws Exception {
-
+        NoUse.mockKernel();
     }
 
 }

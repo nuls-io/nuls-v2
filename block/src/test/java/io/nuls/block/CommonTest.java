@@ -21,14 +21,20 @@
 package io.nuls.block;
 
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.SmallBlock;
+import io.nuls.base.data.Transaction;
 import io.nuls.block.service.BlockService;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(BlockService.class)
@@ -45,9 +51,19 @@ public class CommonTest {
 
     @Test
     public void test() throws Exception {
-        NulsDigestData hash = NulsDigestData.fromDigestHex("0020bd4d1c550a84dff195b2123d04d998ff160acc029d449f7a096f4dc09fd58c70");
-        byte[] digestBytes = hash.getDigestBytes();
-        System.out.println(digestBytes);
+        SmallBlock smallBlock = new SmallBlock();
+        smallBlock.addBaseTx(new Transaction(1));
+        smallBlock.addBaseTx(new Transaction(2));
+        smallBlock.addBaseTx(new Transaction(3));
+
+        List<Transaction> clone = new ArrayList<>();
+        smallBlock.getSubTxList().forEach(e -> clone.add(e));
+        smallBlock.addBaseTx(new Transaction(4));
+        smallBlock.addBaseTx(new Transaction(5));
+
+        List<Transaction> subTxList = smallBlock.getSubTxList();
+
+        Assert.assertNotEquals(clone.size(), subTxList.size());
     }
 
 }

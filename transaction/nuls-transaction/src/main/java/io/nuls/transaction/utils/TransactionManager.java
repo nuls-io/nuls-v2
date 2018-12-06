@@ -1,3 +1,27 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
 package io.nuls.transaction.utils;
 
 import io.nuls.base.data.Transaction;
@@ -5,7 +29,10 @@ import io.nuls.tools.basic.Result;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.TxRegister;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 交易管理类，存储管理交易注册的基本信息
@@ -13,16 +40,17 @@ import java.util.*;
  * @date: 2018/11/22
  */
 public class TransactionManager {
+    /**
+     * 交易注册信息
+     */
+    private static final Map<Integer, TxRegister> TX_REGISTER_MAP = new HashMap<>();
 
     private static final TransactionManager INSTANCE = new TransactionManager();
 
     public static TransactionManager getInstance(){
         return INSTANCE;
     }
-    /**
-     * 交易注册信息
-     */
-    private static final Map<Integer, TxRegister> TX_REGISTER_MAP = new HashMap<>();
+
 
 
     private TransactionManager() {
@@ -30,7 +58,7 @@ public class TransactionManager {
         TxRegister txRegister = new TxRegister();
         txRegister.setModuleCode(TxConstant.MODULE_CODE);
         txRegister.setModuleValidator(TxConstant.TX_MODULE_VALIDATOR);
-        txRegister.setTxType(TxConstant.CROSS_TRANSFER_TYPE);
+        txRegister.setTxType(TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER);
         txRegister.setValidator(TxConstant.CROSS_TRANSFER_VALIDATOR);
         txRegister.setCommit(TxConstant.CROSS_TRANSFER_COMMIT);
         txRegister.setRollback(TxConstant.CROSS_TRANSFER_ROLLBACK);
@@ -42,11 +70,14 @@ public class TransactionManager {
 
     /**
      * 验证交易
-     * @param transaction
+     * @param tx
      * @return
      */
-    public Result verify(Transaction transaction){
-        //todo
+    public Result verify(Transaction tx){
+        //todo 调验证器
+        TxRegister txRegister = this.getTxRegister(tx.getType());
+        txRegister.getValidator();
+
         return null;
     }
 

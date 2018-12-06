@@ -32,11 +32,13 @@ import lombok.*;
  *
  * @author tangyi
  * @date 2018/11/15
- * @description
  */
 @ToString
 @NoArgsConstructor
 public class Unsubscribe {
+    /**
+     * An array that holds all methods that the caller wants to unsubscribe
+     */
     @Getter
     @Setter
     private String[] unsubscribeMethods;

@@ -35,11 +35,11 @@ import java.util.Map;
  *
  * @author tangyi
  * @date 2018/11/19
- * @description
  */
 @ToString
 @NoArgsConstructor
 public class RegisterApi {
+
     @Getter
     @Setter
     private List<CmdDetail> apiMethods;

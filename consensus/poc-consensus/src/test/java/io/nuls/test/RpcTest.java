@@ -3,9 +3,9 @@ package io.nuls.test;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.parse.SerializeUtils;
 import org.junit.BeforeClass;
@@ -19,7 +19,7 @@ public class RpcTest {
     protected  String success = "1";
     @BeforeClass
     public static void start() throws Exception {
-        WsServer.mockModule();
+        NoUse.mockModule();
     }
 
     @Test

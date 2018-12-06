@@ -51,10 +51,9 @@ public class RpcManager extends BaseManager{
             WsServer.getInstance(ModuleE.NW)
                     .moduleRoles(ModuleE.NW.abbr, new String[]{"1.1", "1.2"})
                     .moduleVersion("1.2")
-                    .dependencies("Role_Ledger", "1.1")
+                    .dependencies(ModuleE.KE.abbr, "1.1")
                     .scanPackage("io.nuls.network.rpc")
                     .connect("ws://127.0.0.1:8887");
-            CmdDispatcher.syncKernel();
         } catch (Exception e) {
             e.printStackTrace();
         }

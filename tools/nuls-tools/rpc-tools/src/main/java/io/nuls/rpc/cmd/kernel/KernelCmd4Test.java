@@ -28,7 +28,7 @@
 package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.client.ClientRuntime;
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -50,7 +50,7 @@ import java.util.Map;
 public class KernelCmd4Test extends BaseCmd {
 
 
-    @CmdAnnotation(cmd = "registerAPI", version = 1.0, scope = "private", minEvent = 1, minPeriod = 0,
+    @CmdAnnotation(cmd = "registerAPI", version = 1.0, minEvent = 1,
             description = "Register API")
     public Response registerAPI(Map<String, Object> map) {
         try {
@@ -61,10 +61,8 @@ public class KernelCmd4Test extends BaseCmd {
                 role.put(Constants.KEY_PORT, registerApi.getConnectionInformation().get(Constants.KEY_PORT));
                 ClientRuntime.roleMap.put(registerApi.getModuleAbbreviation(), role);
             }
-//            Map<String, Object> methodMap = new HashMap<>(1);
             Map<String, Object> dependMap = new HashMap<>(1);
             dependMap.put("Dependencies", ClientRuntime.roleMap);
-//            methodMap.put("RegisterAPI", dependMap);
             return success(dependMap);
         } catch (Exception e) {
             Log.error(e);
@@ -72,7 +70,7 @@ public class KernelCmd4Test extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "method1", version = 1.0, scope = "private", minEvent = 1, minPeriod = 0,
+    @CmdAnnotation(cmd = "method1", version = 1.0,  minEvent = 1,
             description = "Test method1")
     @Parameter(parameterName = "param1", parameterType = "string")
     public Response method1(Map<String, Object> map) {

@@ -35,7 +35,6 @@ import java.lang.annotation.Target;
  *
  * @author tangyi
  * @date 2018/11/19
- * @description
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

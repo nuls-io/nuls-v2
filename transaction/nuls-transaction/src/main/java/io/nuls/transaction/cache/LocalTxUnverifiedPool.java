@@ -1,11 +1,12 @@
 package io.nuls.transaction.cache;
 
-import io.nuls.base.data.Transaction;
+import io.nuls.transaction.model.bo.TxWrapper;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
@@ -17,7 +18,7 @@ public class LocalTxUnverifiedPool {
 
     private static final LocalTxUnverifiedPool INSTANCE = new LocalTxUnverifiedPool();
 
-    private Queue<Transaction> localTxQueue;
+    private BlockingDeque<TxWrapper> localTxQueue;
 
     public LocalTxUnverifiedPool(){
         this.localTxQueue = new LinkedBlockingDeque<>();
@@ -27,23 +28,23 @@ public class LocalTxUnverifiedPool {
         return INSTANCE;
     }
 
-    public boolean addInFirst(Transaction tx) {
+    public boolean addInFirst(TxWrapper txWrapper) {
         try {
-            if (tx == null) {
+            if (txWrapper == null) {
                 return false;
             }
-            ((LinkedBlockingDeque)localTxQueue).addFirst(tx);
+            localTxQueue.addFirst(txWrapper);
             return true;
         } finally {
         }
     }
 
-    public boolean add(Transaction tx) {
+    public boolean add(TxWrapper txWrapper) {
         try {
-            if (tx == null) {
+            if (txWrapper == null) {
                 return false;
             }
-            localTxQueue.offer(tx);
+            localTxQueue.offer(txWrapper);
             return true;
         } finally {
         }
@@ -56,17 +57,17 @@ public class LocalTxUnverifiedPool {
      *
      * @return TxContainer
      */
-    public Transaction get() {
+    public TxWrapper get() {
         return localTxQueue.poll();
     }
 
-    public List<Transaction> getAll() {
-        List<Transaction> txs = new ArrayList<>();
-        Iterator<Transaction> it = localTxQueue.iterator();
+    public List<TxWrapper> getAll() {
+        List<TxWrapper> txWrappers = new ArrayList<>();
+        Iterator<TxWrapper> it = localTxQueue.iterator();
         while (it.hasNext()) {
-            txs.add(it.next());
+            txWrappers.add(it.next());
         }
-        return txs;
+        return txWrappers;
     }
 
     public void clear() {

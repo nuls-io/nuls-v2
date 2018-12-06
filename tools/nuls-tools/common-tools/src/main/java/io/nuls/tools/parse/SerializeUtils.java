@@ -663,6 +663,16 @@ public class SerializeUtils {
         return 1;
     }
 
+
+    /**
+     * 获取nonce数据占的字节数
+     *
+     * @return int
+     */
+    public static int sizeOfNonce(){
+        return 8;
+    }
+
     /**
      * 获取byte[]占用的最小字节数（byte[]长度占用的最小字节数+byte[]长度）
      */

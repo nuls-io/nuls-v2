@@ -2,6 +2,10 @@ package io.nuls.poc.constant;
 
 import io.nuls.tools.constant.ErrorCode;
 
+/**
+ * @author tag
+ * 2018/11/12
+ * */
 public interface ConsensusErrorCode {
     ErrorCode SUCCESS = ErrorCode.init("10000");
     ErrorCode FAILED = ErrorCode.init("10001");
@@ -39,4 +43,5 @@ public interface ConsensusErrorCode {
     ErrorCode MERKEL_HASH_ERROR= ErrorCode.init("70029");
     ErrorCode BLOCK_ROUND_VALIDATE_ERROR= ErrorCode.init("70030");
     ErrorCode BANANCE_NOT_ENNOUGH= ErrorCode.init("70031");
+    ErrorCode CHAIN_NOT_EXIST= ErrorCode.init("70032");
 }

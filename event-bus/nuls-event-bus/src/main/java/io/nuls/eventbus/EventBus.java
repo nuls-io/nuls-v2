@@ -74,7 +74,6 @@ public class EventBus {
                 topicMap.put(topicId,topic);
             }
         }
-
         return topic.getSubscribers();
     }
 
@@ -82,7 +81,6 @@ public class EventBus {
         String abbr = (String)params.get("abbr");
         String moduleName = (String)params.get("moduleName");
         String domain = (String)params.get("domain");
-        String url = (String)params.get("url");
-        return new Subscriber(url,abbr,moduleName,domain);
+        return new Subscriber(abbr,moduleName,domain);
     }
 }

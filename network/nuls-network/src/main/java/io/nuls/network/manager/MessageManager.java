@@ -110,8 +110,8 @@ public class MessageManager extends BaseManager{
         byte [] bodyHash=Sha256Hash.hashTwice(data);
         byte []get4Byte=ByteUtils.subBytes(bodyHash,0,4);
         long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
-        Log.info("==================checksum:"+checksum);
-        Log.info("==================pChecksum:"+pChecksum);
+        Log.debug("==================local checksum:"+checksum);
+        Log.debug("==================peer checksum:"+pChecksum);
         return checksum == pChecksum;
     }
     public void receiveMessage(ByteBuf buffer,String nodeKey,boolean isServer) throws NulsException {
@@ -299,6 +299,8 @@ public class MessageManager extends BaseManager{
         MessageFactory.putMessage(GetAddrMessage.class);
         MessageFactory.putMessage(AddrMessage.class);
         MessageFactory.putMessage(ByeMessage.class);
+        MessageFactory.putMessage(GetTimeMessage.class);
+        MessageFactory.putMessage(TimeMessage.class);
     }
 
     @Override

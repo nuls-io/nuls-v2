@@ -23,11 +23,9 @@ package io.nuls.block.service;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.SmallBlock;
 import io.nuls.block.model.Node;
-import io.nuls.tools.exception.NulsException;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -42,7 +40,6 @@ public interface BlockService {
      * 获取创世块
      * @param chainId       链ID
      * @return
-     * @throws Exception
      */
     Block getGenesisBlock(int chainId);
 
@@ -65,8 +62,6 @@ public interface BlockService {
      * @param chainId       链ID
      * @param height        区块高度
      * @return
-     * @throws UnsupportedEncodingException
-     * @throws NulsException
      */
     BlockHeader getBlockHeader(int chainId, long height);
 
@@ -75,9 +70,8 @@ public interface BlockService {
      * @param chainId       链ID
      * @param height        区块高度
      * @return
-     * @throws Exception
      */
-    Block getBlock(int chainId, long height) throws Exception;
+    Block getBlock(int chainId, long height);
 
     /**
      * 根据区块高度区间获取区块头
@@ -85,8 +79,6 @@ public interface BlockService {
      * @param startHeight   起始高度
      * @param endHeight     结束高度
      * @return
-     * @throws UnsupportedEncodingException
-     * @throws NulsException
      */
     List<BlockHeader> getBlockHeader(int chainId, long startHeight, long endHeight);
 
@@ -95,7 +87,6 @@ public interface BlockService {
      * @param chainId       链ID
      * @param hash          区块hash
      * @return
-     * @throws NulsException
      */
     BlockHeader getBlockHeader(int chainId, NulsDigestData hash);
 
@@ -104,8 +95,6 @@ public interface BlockService {
      * @param chainId       链ID
      * @param hash          区块hash
      * @return
-     * @throws NulsException
-     * @throws IOException
      */
     Block getBlock(int chainId, NulsDigestData hash);
 
@@ -115,8 +104,6 @@ public interface BlockService {
      * @param startHeight   起始高度
      * @param endHeight     结束高度
      * @return
-     * @throws IOException
-     * @throws NulsException
      */
     List<Block> getBlock(int chainId, long startHeight, long endHeight);
 
@@ -125,7 +112,6 @@ public interface BlockService {
      * @param chainId       链ID
      * @param block         待保存区块
      * @return
-     * @throws Exception
      */
     boolean saveBlock(int chainId, Block block);
 
@@ -134,7 +120,6 @@ public interface BlockService {
      * @param chainId       链ID
      * @param block         待回滚区块
      * @return
-     * @throws Exception
      */
     boolean rollbackBlock(int chainId, Block block);
 
@@ -143,28 +128,25 @@ public interface BlockService {
      * @param chainId       链ID
      * @param height        待回滚区块的高度
      * @return
-     * @throws Exception
      */
     Block rollbackBlock(int chainId, long height);
 
     /**
      * 转发区块给连接的其他对等节点，允许一个例外（不转发给它）
      * @param chainId
-     * @param hash                  区块hash
+     * @param hash                  区块
      * @param excludeNode           需要排除的节点，因为从该节点处接收的本区块
      * @return
      */
-    boolean forwardBlock(int chainId, NulsDigestData hash, Node excludeNode);
+    boolean forwardBlock(int chainId, NulsDigestData hash, String excludeNode);
 
     /**
      * 广播区块给连接的其他对等节点
      * @param chainId
-     * @param hash
+     * @param block
      * @return
-     * @throws IOException
-     * @throws NulsException
      */
-    boolean broadcastBlock(int chainId, NulsDigestData hash);
+    boolean broadcastBlock(int chainId, Block block);
 
     /**
      * todo 待实现
@@ -188,7 +170,6 @@ public interface BlockService {
      * @param chainId       链ID
      * @param block         待验证区块
      * @return
-     * @throws Exception
      */
     boolean verifyBlock(int chainId, Block block);
 
@@ -197,4 +178,12 @@ public interface BlockService {
      * @param chainId
      */
     void init(int chainId);
+
+    /**
+     * 根据hash验证区块是否存在
+     * @param chainId       链ID
+     * @param hash         待验证区块hash
+     * @return
+     */
+    boolean existBlock(int chainId, NulsDigestData hash);
 }

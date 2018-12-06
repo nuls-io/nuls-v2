@@ -28,6 +28,7 @@ package io.nuls.ledger.test.cmd;
 import io.nuls.rpc.client.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.WsServer;
@@ -48,7 +49,7 @@ public class CmdTest {
 
     @Before
     public void before() throws Exception {
-        WsServer.mockModule();
+        NoUse.mockModule();
         //CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
     }
 

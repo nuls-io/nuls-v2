@@ -25,6 +25,7 @@
 
 package io.nuls.rpc.client;
 
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Response;
@@ -47,8 +48,7 @@ import java.util.Map;
  */
 public class WsClient extends WebSocketClient {
 
-
-    WsClient(String url) throws URISyntaxException {
+    public WsClient(String url) throws URISyntaxException {
         super(new URI(url));
     }
 
@@ -56,6 +56,12 @@ public class WsClient extends WebSocketClient {
     public void onOpen(ServerHandshake shake) {
     }
 
+    /**
+     * 初步处理收到的消息，根据不同类型放入不同队列中
+     * Preliminary processing of received messages, push to different queues according to different types
+     *
+     * @param msg 收到的消息 / Received messages
+     */
     @Override
     public void onMessage(String msg) {
         try {
@@ -73,16 +79,21 @@ public class WsClient extends WebSocketClient {
                     break;
                 case Response:
                     Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
+                    /*
+                    Response：还要判断是否需要自动处理
+                    Response: Determines whether automatic processing is required
+                     */
                     if (ClientRuntime.INVOKE_MAP.containsKey(response.getRequestId())) {
                         ClientRuntime.RESPONSE_AUTO_QUEUE.offer(message);
                     } else {
                         ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);
                     }
+                    Log.info("ResponseFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
                     break;
                 default:
                     break;
             }
-            Log.info("ClientMsgFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
+
         } catch (IOException e) {
             Log.error(e);
         }
@@ -96,7 +107,4 @@ public class WsClient extends WebSocketClient {
     public void onError(Exception e) {
         Log.error(e);
     }
-
-
-    // TODO 增加一个重连机制
 }

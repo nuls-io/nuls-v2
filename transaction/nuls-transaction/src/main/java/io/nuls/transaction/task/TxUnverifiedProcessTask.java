@@ -79,16 +79,13 @@ public class TxUnverifiedProcessTask implements Runnable {
             params.put("tx", tx.hex());
             Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "verifyCoinData",params);
             if(response.isSuccess()){
-                txVerifiedPool.add(tx,false);
+                //txVerifiedPool.add(tx,false);
                 //保存到rocksdb
                 txVerifiedStorageService.putTx(tx);
                 //todo 保存到h2数据库
                 //todo 调账本记录未确认交易
                 //todo 转发
             }
-
-
-
         } catch (Exception e) {
             e.printStackTrace();
         }

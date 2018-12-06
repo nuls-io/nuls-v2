@@ -32,6 +32,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -51,9 +52,9 @@ public interface AliasService {
      * @param address   Address of account
      * @param password  password of account
      * @param aliasName the alias to set
-     * @return txhash
+     * @return Transaction
      */
-    boolean setAlias(int chainId, String address, String password, String aliasName);
+    Transaction setAlias(int chainId, String address, String password, String aliasName);
 
     /**
      * 获取设置别名交易手续费
@@ -64,7 +65,7 @@ public interface AliasService {
      * @param aliasName
      * @return
      */
-    Result<String> getAliasFee(short chaindId, String address, String aliasName);
+    BigInteger getAliasFee(int chaindId, String address, String aliasName);
 
     /**
      * get the alias by address

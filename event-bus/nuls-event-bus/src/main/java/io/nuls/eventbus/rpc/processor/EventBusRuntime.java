@@ -28,31 +28,4 @@ public class EventBusRuntime {
         objectsQueue.poll();
         return objects;
     }
-
-    static String getRemoteUri(String role) {
-        Map map = subscribedRoleInfoMap.get(role);
-        return map != null
-                ? "ws://" + map.get(Constants.KEY_IP) + ":" + map.get(Constants.KEY_PORT)
-                : null;
-    }
-
-    static WsClient getWsClient(String url) throws Exception {
-        if (!subscribedClientMap.containsKey(url)) {
-
-            /*TODO need to change WsClient constructor to public or
-            need to use ClientRuntime.getWsClient(url) but this method is package private
-            */
-            WsClient wsClient = new WsClient(url);
-            wsClient.connect();
-            long start = TimeService.currentTimeMillis();
-            while (!wsClient.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                if (TimeService.currentTimeMillis() - start > Constants.TIMEOUT_TIMEMILLIS) {
-                    throw new Exception("Failed to connect " + url);
-                }
-                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-            }
-            subscribedClientMap.put(url, wsClient);wsClient.close();
-        }
-        return subscribedClientMap.get(url);
-    }
 }

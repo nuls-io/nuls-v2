@@ -2,7 +2,10 @@ package io.nuls.eventbus.init;
 
 
 
+import io.nuls.eventbus.rpc.processor.ClientSyncProcessor;
+import io.nuls.eventbus.rpc.processor.EventDispatchProcessor;
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.log.Log;
@@ -38,10 +41,12 @@ public class Bootstrap {
                     .moduleVersion("1.0")
                     .scanPackage("io.nuls.eventbus.rpc.cmd")
                     .connect("ws://127.0.0.1:8887");
-            CmdDispatcher.syncManager();
+            CmdDispatcher.syncKernel();
             Constants.THREAD_POOL.execute(new ClientSyncProcessor());
+            Constants.THREAD_POOL.execute(new EventDispatchProcessor());
         }catch (Exception e){
             Log.error("Event Bus rpc start up failed");
+            Constants.THREAD_POOL.shutdownNow();
         }
     }
 }

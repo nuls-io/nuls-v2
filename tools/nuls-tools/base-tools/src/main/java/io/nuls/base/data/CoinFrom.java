@@ -13,27 +13,7 @@ import java.math.BigInteger;
  * @author: Charlie
  * @date: 2018/11/23
  */
-public class CoinFrom extends BaseNulsData {
-
-    /**
-     * byte[24] 账户地址
-     */
-    private byte[] address;
-
-    /**
-     * uint16 资产发行链的id
-     */
-    private int assetsChainId;
-
-    /**
-     * uint16 资产id
-     */
-    private int assetsId;
-
-    /**
-     * uint128 转出数量
-     */
-    private BigInteger amount;
+public class CoinFrom extends Coin {
 
     /**
      * byte[8]
@@ -45,21 +25,23 @@ public class CoinFrom extends BaseNulsData {
      */
     private byte locked;
 
-    public  CoinFrom(){}
 
-    public CoinFrom(byte[] address,int assetsChainId,int assetsId){
+    public CoinFrom(){}
+
+
+    public CoinFrom(byte[] address, int assetsChainId, int assetsId){
         this.address = address;
         this.assetsChainId = assetsChainId;
         this.assetsId = assetsId;
     }
 
-    public CoinFrom(byte[] address,int assetsChainId,int assetsId, BigInteger amount,byte locked){
-        this(address,assetsChainId,assetsId);
+    public CoinFrom(byte[] address, int assetsChainId, int assetsId, BigInteger amount, byte locked){
+        this(address, assetsChainId, assetsId);
         this.amount = amount;
         this.locked = locked;
     }
 
-    public CoinFrom(byte[] address,int assetsChainId,int assetsId, BigInteger amount,byte[] nonce,byte locked){
+    public CoinFrom(byte[] address, int assetsChainId, int assetsId, BigInteger amount, byte[] nonce, byte locked){
         this(address,assetsChainId,assetsId,amount,locked);
         this.nonce = nonce;
     }
@@ -108,34 +90,42 @@ public class CoinFrom extends BaseNulsData {
                 '}';
     }
 
+    @Override
     public byte[] getAddress() {
         return address;
     }
 
+    @Override
     public void setAddress(byte[] address) {
         this.address = address;
     }
 
+    @Override
     public int getAssetsChainId() {
         return assetsChainId;
     }
 
+    @Override
     public void setAssetsChainId(int assetsChainId) {
         this.assetsChainId = assetsChainId;
     }
 
+    @Override
     public int getAssetsId() {
         return assetsId;
     }
 
+    @Override
     public void setAssetsId(int assetsId) {
         this.assetsId = assetsId;
     }
 
+    @Override
     public BigInteger getAmount() {
         return amount;
     }
 
+    @Override
     public void setAmount(BigInteger amount) {
         this.amount = amount;
     }
@@ -156,4 +146,5 @@ public class CoinFrom extends BaseNulsData {
     public void setLocked(byte locked) {
         this.locked = locked;
     }
+
 }

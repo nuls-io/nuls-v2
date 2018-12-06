@@ -36,9 +36,10 @@ import java.util.*;
 
 /**
  * 分叉链管理器，维护主链、分叉链集合、孤儿链集合
+ *
  * @author captain
- * @date 18-11-16 下午2:29
  * @version 1.0
+ * @date 18-11-16 下午2:29
  */
 @Component
 public class ChainManager {
@@ -66,29 +67,29 @@ public class ChainManager {
     /**
      * forkChain比masterChain更长，切换主链
      * 切换分三步
-     *  1.计算出最长分叉链与主链的分叉点，并得到要切换成主链的分叉链集合B
-     *  2.回滚主链到分叉高度，回滚掉的区块组成新的分叉链，链接到主链
-     *  3.遍历集合B，把每个分叉链的部分区块连接到主链上，剩下的区块组成
+     * 1.计算出最长分叉链与主链的分叉点，并得到要切换成主链的分叉链集合B
+     * 2.回滚主链到分叉高度。
+     * 3.依次添加分叉链集合B中的区块到主链
+     *
      * @param chainId
      * @param masterChain
      * @param forkChain
      * @return
      */
-    public static boolean switchChain (int chainId, Chain masterChain, Chain forkChain){
+    public static boolean switchChain(int chainId, Chain masterChain, Chain forkChain) {
         try {
-            //记录从主链开始的最长分叉链路径
+            //1.获取主链与最长分叉链的分叉点，并记录从分叉点开始的最长分叉链路径
             Stack<Chain> switchChainPath = new Stack<>();
             while (forkChain.getParent() != null) {
                 switchChainPath.push(forkChain);
                 forkChain = forkChain.getParent();
             }
-            //1.获取主链与最长分叉链的分叉点
             Chain topForkChain = switchChainPath.peek();
             long forkHeight = topForkChain.getStartHeight();
             long masterChainEndHeight = masterChain.getEndHeight();
 
             //2.回滚主链
-            //主链回滚所生成的新分叉链
+            //2.1 主链回滚所生成的新分叉链
             Chain masterForkChain = new Chain();
             LinkedList<NulsDigestData> hashList = new LinkedList<>();
             List<Block> blockList = new ArrayList<>();
@@ -100,21 +101,21 @@ public class ChainManager {
             masterForkChain.setHashList(hashList);
             masterForkChain.setType(ChainTypeEnum.FORK);
 
+            //2.2 回滚主链到指定高度，回滚掉的区块收集起来放入分叉链数据库
             long rollbackHeight = masterChainEndHeight;
-            do{
-                //回滚主链到指定高度，回滚掉的区块收集起来放入分叉链数据库
+            do {
                 Block block = blockService.rollbackBlock(chainId, rollbackHeight--);
                 //block非空说明回滚成功
                 if (block != null) {
                     blockList.add(block);
                     hashList.addLast(block.getHeader().getHash());
                 } else {
-                    throw new NulsRuntimeException(BlockErrorCode.ROLLBACK_CHAIN_ERROR);
+                    return false;
                 }
             } while (rollbackHeight >= forkHeight);
 
-            //主链上低于topForkChain的链不用变动
-            //主链上高于topForkChain的链重新链接到新分叉链masterForkChain
+            //2.3 主链上低于topForkChain的链不用变动
+            //2.4 主链上高于topForkChain的链重新链接到新分叉链masterForkChain
             SortedSet<Chain> higherChains = masterChain.getSons().tailSet(topForkChain);
             if (higherChains.size() > 1) {
                 higherChains.remove(topForkChain);
@@ -138,7 +139,7 @@ public class ChainManager {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
             return false;
         }
         return true;
@@ -148,18 +149,19 @@ public class ChainManager {
      * 从分叉链forkChain上取区块添加到主链masterChain上
      * 取多少个区块由forkChain与subChain的起始高度差计算得出
      * subChain是forkChain的子链之一，位于最长分叉链的路径上
+     *
      * @param masterChain
      * @param forkChain
      * @param subChain
      * @return
      */
-    private static boolean switchChain0 (int chainId, Chain masterChain, Chain forkChain, Chain subChain) throws Exception {
+    private static boolean switchChain0(int chainId, Chain masterChain, Chain forkChain, Chain subChain) throws Exception {
         //1.计算要从forkChain上添加到主链上多少个区块
         int target = 0;
         if (subChain != null) {
             target = (int) (subChain.getStartHeight() - forkChain.getStartHeight());
         } else {
-            target = (int) (forkChain.getEndHeight() - forkChain.getStartHeight());
+            target = (int) (forkChain.getEndHeight() - forkChain.getStartHeight()) + 1;
         }
 
         //2.往主链上添加区块
@@ -204,34 +206,36 @@ public class ChainManager {
 
         //6.收尾工作
         deleteForkChain(chainId, forkChain);
-
         return true;
     }
 
     /**
      * 设置主链
+     *
      * @param chainId
      * @return
      */
-    public static void setMasterChain(int chainId, Chain chain){
+    public static void setMasterChain(int chainId, Chain chain) {
         masterChains.put(chainId, chain);
     }
 
     /**
      * 获取主链
+     *
      * @param chainId
      * @return
      */
-    public static Chain getMasterChain(int chainId){
+    public static Chain getMasterChain(int chainId) {
         return masterChains.get(chainId);
     }
 
     /**
      * 新增分叉链
+     *
      * @param chainId
      * @return
      */
-    public static boolean addForkChain(int chainId, Chain chain){
+    public static boolean addForkChain(int chainId, Chain chain) {
         SortedSet<Chain> chains = forkChains.get(chainId);
         if (chains != null) {
             return chains.add(chain);
@@ -244,15 +248,17 @@ public class ChainManager {
 
     /**
      * 直接从集合中删除分叉链，与removeForkChain的应用场景不一样
+     *
      * @param chainId
      * @return
      */
-    private static boolean deleteForkChain(int chainId, Chain chain){
+    private static boolean deleteForkChain(int chainId, Chain chain) {
         return forkChains.get(chainId).remove(chain);
     }
 
     /**
      * 移除分叉链，分叉链占用空间超出限制时，清理空间
+     *
      * @param chainId
      * @return
      */
@@ -266,7 +272,7 @@ public class ChainManager {
             boolean r2 = chainStorageService.remove(chainId, chain.getHashList());
             //移除内存中对象
             boolean r3 = forkChains.get(chainId).remove(chain);
-            result = r1&&r2&&r3;
+            result = r1 && r2 && r3;
         }
         //有子链
         if (chain.getSons().size() > 0) {
@@ -292,36 +298,39 @@ public class ChainManager {
             boolean r1 = chainStorageService.remove(chainId, removeHashList);
             //移除内存中对象
             boolean r2 = forkChains.get(chainId).remove(lastSon);
-            result = r1&&r2;
+            result = r1 && r2;
         }
         return result;
     }
 
     /**
      * 获取分叉链集合
+     *
      * @param chainId
      * @return
      */
-    public static SortedSet<Chain> getForkChains(int chainId){
+    public static SortedSet<Chain> getForkChains(int chainId) {
         SortedSet<Chain> chains = forkChains.get(chainId);
         return chains == null ? Collections.emptySortedSet() : chains;
     }
 
     /**
      * 更新分叉链集合
+     *
      * @param chainId
      * @return
      */
-    public static void setForkChains(int chainId, SortedSet<Chain> chains){
+    public static void setForkChains(int chainId, SortedSet<Chain> chains) {
         forkChains.put(chainId, chains);
     }
 
     /**
      * 新增孤儿链
+     *
      * @param chainId
      * @return
      */
-    public static boolean addOrphanChain(int chainId, Chain chain){
+    public static boolean addOrphanChain(int chainId, Chain chain) {
         SortedSet<Chain> chains = orphanChains.get(chainId);
         if (chains != null) {
             return chains.add(chain);
@@ -335,6 +344,7 @@ public class ChainManager {
     /**
      * 移除孤儿链
      * 孤儿链占用空间超出限制时，清理空间
+     *
      * @param chainId
      * @param chain
      * @throws Exception
@@ -352,7 +362,7 @@ public class ChainManager {
             boolean r2 = chainStorageService.remove(chainId, chain.getHashList());
             //移除内存中对象
             boolean r3 = orphanChains.get(chainId).remove(chain);
-            result = r2&&r3;
+            result = r2 && r3;
         }
         //有子链
         if (chain.getSons().size() > 0) {
@@ -378,27 +388,29 @@ public class ChainManager {
             boolean r1 = chainStorageService.remove(chainId, removeHashList);
             //移除内存中对象
             boolean r2 = orphanChains.get(chainId).remove(lastSon);
-            result = r1&&r2;
+            result = r1 && r2;
         }
         return result;
     }
 
     /**
      * 获取孤儿链集合
+     *
      * @param chainId
      * @return
      */
-    public static SortedSet<Chain> getOrphanChains(int chainId){
+    public static SortedSet<Chain> getOrphanChains(int chainId) {
         SortedSet<Chain> chains = orphanChains.get(chainId);
         return chains == null ? Collections.emptySortedSet() : chains;
     }
 
     /**
      * 更新孤儿链集合
+     *
      * @param chainId
      * @return
      */
-    public static void setOrphanChains(int chainId, SortedSet<Chain> chains){
+    public static void setOrphanChains(int chainId, SortedSet<Chain> chains) {
         orphanChains.put(chainId, chains);
     }
 
@@ -406,8 +418,9 @@ public class ChainManager {
      * 两个链相连，形成mainChain-subChain结构
      * 如果mainChain是主链，除更新内存中chain的属性外，还需要把subChain的区块提交到主链
      * 如果mainChain不是主链，只需要更新内存中chain的属性，不需要操作区块数据
+     *
      * @param mainChain
-     * @param subChain          能连到其他链的一定是孤儿链，因为分叉链是从一个分叉区块开始构建的，分叉链初始化时已经设置了parent属性
+     * @param subChain  能连到其他链的一定是孤儿链，因为分叉链是从一个分叉区块开始构建的，分叉链初始化时已经设置了parent属性
      * @return
      */
     public static boolean append(Chain mainChain, Chain subChain) throws Exception {
@@ -427,6 +440,7 @@ public class ChainManager {
     /**
      * 从mainChain分叉出subChain
      * 只需要更新内存中chain的属性，不需要操作区块数据
+     *
      * @param mainChain
      * @param forkChain
      * @return
@@ -437,6 +451,7 @@ public class ChainManager {
 
     /**
      * 清理孤儿链
+     *
      * @param chainId
      * @param orphanChain
      */

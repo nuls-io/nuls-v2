@@ -37,13 +37,15 @@ public interface TxErrorCode {
     ErrorCode HASH_ERROR = ErrorCode.init("10026");
     ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init("10027");
     ErrorCode ADDRESS_IS_BLOCK_HOLE = ErrorCode.init("10028");
-    ErrorCode ADDRESS_IS_NOT_BELONGS_TO_CHAIN = ErrorCode.init("10029");
+    ErrorCode ADDRESS_IS_NOT_THE_CURRENT_CHAIN = ErrorCode.init("10029");
     ErrorCode VALIDATORS_NOT_FULLY_EXECUTED = ErrorCode.init("10030");
     ErrorCode BLOCK_IS_NULL = ErrorCode.init("10031");
     ErrorCode VERSION_TOO_LOW = ErrorCode.init("10032");
     ErrorCode PUBKEY_REPEAT = ErrorCode.init("10033");
     ErrorCode COIN_OWNER_ERROR = ErrorCode.init("10034");
     ErrorCode NONEWVER = ErrorCode.init("10035");
+    ErrorCode INSUFFICIENT_FEE = ErrorCode.init("10036");
+    ErrorCode ASSET_NOT_EXIST = ErrorCode.init("10037");
 
 
 

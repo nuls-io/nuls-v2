@@ -27,7 +27,7 @@
 
 package io.nuls.test;
 
-import io.nuls.rpc.client.ClientRuntime;
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
@@ -70,7 +70,7 @@ public class WsM1 {
     @Test
     public void handshake() throws Exception {
         Constants.kernelUrl = "ws://127.0.0.1:8887";
-        System.out.println("handshake:" + CmdDispatcher.handshakeManager());
+        System.out.println("handshake:" + CmdDispatcher.handshakeKernel());
     }
 
     @Test
@@ -85,7 +85,7 @@ public class WsM1 {
                 .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
-        CmdDispatcher.syncManager();
+        CmdDispatcher.syncKernel();
 
         Thread.sleep(Integer.MAX_VALUE);
     }
@@ -113,25 +113,26 @@ public class WsM1 {
         System.out.println("requestAndResponse:" + JSONUtils.obj2json(object));
 
         String messageId1 = CmdDispatcher.requestAndInvokeWithAck
-                (ModuleE.CM.abbr, "getBalance", params, "2","0", new MyInvoke());
-        Thread.sleep(5000);
+                (ModuleE.CM.abbr, "getBalance", params, "1","0", new MyInvoke());
 
         // Call cmd, auto invoke local method after response
-        String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getHeight", params, "0","5", new EventCounterInvoke());
-        Thread.sleep(5000);
+        String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getBalance", params, "0","3", new EventCounterInvoke());
+        String messageId2 = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getBalance", params, "0","5", new EventCounterInvoke());
+        System.out.println("接下来会不停打印GetBalance，");
+        Thread.sleep(20000);
 
         // Unsubscribe
+        System.out.println("接下来会5秒进入一次EventCount");
         CmdDispatcher.sendUnsubscribe(messageId);
-        System.out.println("我已经取消了订阅:" + messageId);
 
-        Thread.sleep(5000);
-        CmdDispatcher.sendUnsubscribe(messageId1);
-        System.out.println("我已经取消了订阅:" + messageId1);
+        Thread.sleep(20000);
+        //CmdDispatcher.sendUnsubscribe(messageId1);
 
         System.out.println("我开始一次调用多个方法");
         Request request = MessageUtil.defaultRequest();
         request.setRequestAck("1");
         request.setSubscriptionPeriod("3");
+        request.setSubscriptionEventCounter("2");
         request.getRequestMethods().put("getHeight", params);
         request.getRequestMethods().put("getBalance", params);
         String messageId3 = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, request, new MyInvoke());
@@ -145,5 +146,6 @@ public class WsM1 {
         System.out.println("RESPONSE_AUTO_QUEUE："+ClientRuntime.RESPONSE_AUTO_QUEUE.size());
         System.out.println("NEGOTIATE_RESPONSE_QUEUE："+ClientRuntime.NEGOTIATE_RESPONSE_QUEUE.size());
         System.out.println("ACK_QUEUE："+ClientRuntime.ACK_QUEUE.size());
+
     }
 }

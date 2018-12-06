@@ -39,7 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author lan
  * @date 2018/11/01
  *
- */
+ **/
 public class NodeGroupManager extends BaseManager{
     public static NodeGroupManager getInstance(){
         return nodeGroupManager;

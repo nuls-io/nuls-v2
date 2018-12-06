@@ -47,23 +47,17 @@ import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 @Component
 public class BlockHandler extends BaseCmd {
 
-    @Autowired
-    private BlockService service;
-
     @CmdAnnotation(cmd = BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Object process(Map map){
-        Integer chainId = Integer.parseInt(map.get("chainId").toString());
-        String nodeId = map.get("nodes").toString();
-
-        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
+    public Object process(Map map) {
         BlockMessage message = new BlockMessage();
         try {
+            byte[] decode = HexUtil.decode(map.get("messageBody").toString());
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        if (message == null || nodeId == null) {
+        if (message == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 

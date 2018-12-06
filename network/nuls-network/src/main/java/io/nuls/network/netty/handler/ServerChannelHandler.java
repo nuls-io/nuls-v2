@@ -81,11 +81,12 @@ public class ServerChannelHandler extends BaseChannelHandler {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        super.channelInactive(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
         String remoteIP = channel.remoteAddress().getHostString();
+        String nodeId = this.getNodeIdByChannel( ctx.channel());
+        super.channelInactive(ctx);
         Log.info("Server Node is Inactive:" +remoteIP + ":" + channel.remoteAddress().getPort());
-        Node node=ConnectionManager.getInstance().getNodeByCache(this.getNodeIdByChannel( ctx.channel()),Node.IN);
+        Node node=ConnectionManager.getInstance().getNodeByCache(nodeId,Node.IN);
         if(null != node) {
             node.setIdle(true);
             ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),Node.IN);
@@ -129,8 +130,4 @@ public class ServerChannelHandler extends BaseChannelHandler {
         Log.info("-----------------server channelInactive  node is channelUnregistered -----------------");
     }
 
-    @Override
-    protected boolean validChannel(ChannelHandlerContext ctx) {
-        return true;
-    }
 }

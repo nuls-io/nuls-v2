@@ -252,7 +252,9 @@ public class NulsByteBuffer {
 
     public Transaction readTransaction() throws NulsException {
         try {
-            return TransactionManager.getInstance(this);
+            Transaction transaction = new Transaction();
+            transaction.parse(this);
+            return transaction;
         } catch (Exception e) {
             Log.error(e);
             throw new NulsException(e);

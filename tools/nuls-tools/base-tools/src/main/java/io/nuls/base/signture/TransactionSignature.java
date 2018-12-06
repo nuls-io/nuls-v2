@@ -40,7 +40,6 @@ import java.util.List;
 
 public class TransactionSignature extends BaseNulsData {
     private List<P2PHKSignature> p2PHKSignatures;
-    private List<Script> scripts;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -52,43 +51,20 @@ public class TransactionSignature extends BaseNulsData {
                 }
             }
         }
-        if (scripts != null && scripts.size() > 0) {
-            //写入标识位，用于标识是否存在脚本未读
-            stream.write(ToolsConstant.SIGN_HOLDER);
-            //写入脚本
-            for (Script script : scripts) {
-                if (script != null && script.getProgram() != null && script.getProgram().length > 0) {
-                    stream.writeBytesWithLength(script.getProgram());
-                }
-            }
-        }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         // 从流中读取签名,兼容新老版本
         int course = 0;
-        boolean isScript = false;
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
-        List<Script> scripts = new ArrayList<>();
         while (!byteBuffer.isFinished()) {
             course = byteBuffer.getCursor();
             //读取两个字节（脚本标识位），如果两个字节都为0x00则表示后面的数据流为脚本数据
-            if (!isScript && byteBuffer.getPayload().length < 2) {
-                break;
-            }
-            if (isScript || Arrays.equals(ToolsConstant.SIGN_HOLDER, byteBuffer.readBytes(2))) {
-                isScript = true;
-                if (!byteBuffer.isFinished()) {
-                    scripts.add(new Script(byteBuffer.readByLengthByte()));
-                }
-            } else {
-                byteBuffer.setCursor(course);
-                p2PHKSignatures.add(byteBuffer.readNulsData(new P2PHKSignature()));
-            }
+            byteBuffer.setCursor(course);
+            p2PHKSignatures.add(byteBuffer.readNulsData(new P2PHKSignature()));
         }
         this.p2PHKSignatures = p2PHKSignatures;
-        this.scripts = scripts;
     }
 
     @Override
@@ -99,16 +75,6 @@ public class TransactionSignature extends BaseNulsData {
             for (P2PHKSignature p2PHKSignature : p2PHKSignatures) {
                 if (p2PHKSignature != null) {
                     size += SerializeUtils.sizeOfNulsData(p2PHKSignature);
-                }
-            }
-        }
-        if (scripts != null && scripts.size() > 0) {
-            //写入标识位，用于标识是否存在脚本未读
-            size += ToolsConstant.SIGN_HOLDER.length;
-            //写入脚本
-            for (Script script : scripts) {
-                if (script != null && script.getProgram() != null && script.getProgram().length > 0) {
-                    size += SerializeUtils.sizeOfBytes(script.getProgram());
                 }
             }
         }
@@ -123,18 +89,8 @@ public class TransactionSignature extends BaseNulsData {
         this.p2PHKSignatures = p2PHKSignatures;
     }
 
-    public List<Script> getScripts() {
-        return scripts;
-    }
-
-    public void setScripts(List<Script> scripts) {
-        this.scripts = scripts;
-    }
-
     public int getSignersCount() {
-        int count = 0;
-
-        return count;
+        return p2PHKSignatures == null ? 0 : p2PHKSignatures.size();
     }
 
 }
