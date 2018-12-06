@@ -127,8 +127,9 @@ public class ClientChannelHandler extends BaseChannelHandler {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+       String nodeId =  this.getNodeIdByChannel( ctx.channel());
         super.channelInactive(ctx);
-        Node node=ConnectionManager.getInstance().getNodeByCache(this.getNodeIdByChannel( ctx.channel()),Node.OUT);
+        Node node=ConnectionManager.getInstance().getNodeByCache(nodeId,Node.OUT);
         if(null != node) {
             node.setIdle(true);
             //移除连接
