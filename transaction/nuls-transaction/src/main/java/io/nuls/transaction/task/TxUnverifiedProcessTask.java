@@ -11,6 +11,7 @@ import io.nuls.transaction.cache.TxVerifiedPool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
+import io.nuls.transaction.model.bo.TxWrapper;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.utils.TransactionManager;
 
@@ -29,7 +30,7 @@ public class TxUnverifiedProcessTask implements Runnable {
     private ConfirmedTransactionService confirmedTransactionService = SpringLiteContext.getBean(ConfirmedTransactionService.class);
     private TxVerifiedStorageService txVerifiedStorageService = SpringLiteContext.getBean(TxVerifiedStorageService.class);
 
-    private List<Transaction> orphanTxList = new ArrayList<>();
+    private List<TxWrapper> orphanTxList = new ArrayList<>();
 
     //private static final int MAX_ORPHAN_SIZE = 200000;
 
@@ -56,21 +57,23 @@ public class TxUnverifiedProcessTask implements Runnable {
             return;
         }
 
-        Transaction tx = null;
-        while ((tx = txUnverifiedStorageService.pollTx()) != null && orphanTxList.size() < TxConstant.ORPHAN_CONTAINER_MAX_SIZE) {
+        TxWrapper txWrapper = null;
+        while ((txWrapper = txUnverifiedStorageService.pollTx()) != null && orphanTxList.size() < TxConstant.ORPHAN_CONTAINER_MAX_SIZE) {
             size++;
-            processTx(tx, false);
+            processTx(txWrapper, false);
         }
     }
 
-    private boolean processTx(Transaction tx, boolean isOrphanTx){
+    private boolean processTx(TxWrapper txWrapper, boolean isOrphanTx){
         try {
+            Transaction tx = txWrapper.getTx();
+            int chainId = txWrapper.getChainId();
             Result result = transactionManager.verify(tx);
             if (result.isFailed()) {
                 return false;
             }
             //获取一笔交易(从已确认交易库中获取？)
-            Transaction transaction = confirmedTransactionService.getTransaction(tx.getHash());
+            Transaction transaction = confirmedTransactionService.getTransaction(chainId,tx.getHash());
             if(null != transaction){
                 return isOrphanTx;
             }
@@ -81,7 +84,7 @@ public class TxUnverifiedProcessTask implements Runnable {
             if(response.isSuccess()){
                 //txVerifiedPool.add(tx,false);
                 //保存到rocksdb
-                txVerifiedStorageService.putTx(tx);
+                txVerifiedStorageService.putTx(txWrapper);
                 //todo 保存到h2数据库
                 //todo 调账本记录未确认交易
                 //todo 转发
@@ -96,9 +99,9 @@ public class TxUnverifiedProcessTask implements Runnable {
     private void doOrphanTxTask(){
         //todo
         //时间排序TransactionTimeComparator
-        Iterator<Transaction> it = orphanTxList.iterator();
+        Iterator<TxWrapper> it = orphanTxList.iterator();
         while (it.hasNext()) {
-            Transaction tx = it.next();
+            TxWrapper tx = it.next();
             boolean success = processTx(tx, true);
             if (success) {
                 it.remove();
