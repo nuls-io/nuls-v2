@@ -3,6 +3,7 @@ package io.nuls.poc.utils.manager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
@@ -45,7 +46,7 @@ public class CoinDataManager {
         coinData.addTo(to);
         txSize += to.size();
         //todo 账本模块获取nonce 可用余额
-        byte[] nonce = null;
+        byte[] nonce = new byte[8];
         BigInteger available = new BigInteger("50000000000");
         //手续费
         CoinFrom from = new CoinFrom(address,chainId,assetsId,amount,nonce, (byte)0);
@@ -190,7 +191,7 @@ public class CoinDataManager {
             */
             List<Deposit> deposits = chain.getDepositList();
             List<String> addressList = new ArrayList<>();
-            Map<String, CoinTo> toMap = new HashMap<>();
+            Map<String, CoinTo> toMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             long blockHeight = null == height ? -1 : height;
             for (Deposit deposit : deposits) {
                 if (deposit.getDelHeight() > 0 && (blockHeight <= 0 || deposit.getDelHeight() < blockHeight)) {

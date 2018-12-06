@@ -79,13 +79,13 @@ public class DepositPo extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfBigInteger(); // deposit.getValue()
+        size += SerializeUtils.sizeOfBigInteger();
         size += SerializeUtils.sizeOfNulsData(agentHash);
         size += address.length;
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfNulsData(txHash);
-        size += SerializeUtils.sizeOfVarInt(blockHeight);  // blockHeight
-        size += SerializeUtils.sizeOfVarInt(delHeight);  // delHeight
+        size += SerializeUtils.sizeOfVarInt(blockHeight);
+        size += SerializeUtils.sizeOfVarInt(delHeight);
         return size;
     }
 
