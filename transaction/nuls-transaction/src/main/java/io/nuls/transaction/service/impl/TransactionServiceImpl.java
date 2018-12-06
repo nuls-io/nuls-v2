@@ -89,7 +89,8 @@ public class TransactionServiceImpl implements TransactionService {
             tx.setTxData(coinData.serialize());
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             //todo 签名
-
+            //获取私钥
+            //ECKey key = ECKey.fromPrivate(new BigInteger(1, Hex.decode(priKey)));
             this.newTx(currentChainId, tx);
             return Result.getSuccess(TxErrorCode.SUCCESS);
         }catch (IOException e) {

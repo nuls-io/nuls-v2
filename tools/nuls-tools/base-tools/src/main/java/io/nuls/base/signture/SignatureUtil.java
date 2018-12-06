@@ -50,30 +50,17 @@ public class SignatureUtil {
      */
     public static boolean validateTransactionSignture(Transaction tx) throws NulsException {
         try {
-           /* if (!tx.needVerifySignature()) {
-                return true;
-            }*/
             if (tx.getTransactionSignature() == null && tx.getTransactionSignature().length == 0) {
                 throw new NulsException(new Exception());
             }
             TransactionSignature transactionSignature = new TransactionSignature();
             transactionSignature.parse(tx.getTransactionSignature(), 0);
-            if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)
-                    && (transactionSignature.getScripts() == null || transactionSignature.getScripts().size() == 0)) {
+            if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
                 throw new NulsException(new Exception());
             }
-            if (transactionSignature.getP2PHKSignatures() != null && transactionSignature.getP2PHKSignatures().size() > 0) {
-                for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
-                    if (!ECKey.verify(tx.getHash().getDigestBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
-                        throw new NulsException(new Exception());
-                    }
-                }
-            }
-            if (transactionSignature.getScripts() != null && transactionSignature.getScripts().size() > 0) {
-                for (Script script : transactionSignature.getScripts()) {
-                    if (!validScriptSign(tx.getHash().getDigestBytes(), script.getChunks())) {
-                        throw new NulsException(new Exception());
-                    }
+            for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
+                if (!ECKey.verify(tx.getHash().getDigestBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                    throw new NulsException(new Exception());
                 }
             }
         } catch (NulsException e) {
@@ -112,20 +99,13 @@ public class SignatureUtil {
         try {
             TransactionSignature transactionSignature = new TransactionSignature();
             transactionSignature.parse(tx.getTransactionSignature(), 0);
-            if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0) && (transactionSignature.getScripts() == null || transactionSignature.getScripts().size() == 0)) {
+            if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
                 return null;
             }
             if (transactionSignature.getP2PHKSignatures() != null && transactionSignature.getP2PHKSignatures().size() > 0) {
                 for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
                     if (signature.getPublicKey() != null || signature.getPublicKey().length == 0) {
                         addressSet.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(),BaseConstant.DEFAULT_CHAIN_ID)));
-                    }
-                }
-            }
-            if (transactionSignature.getScripts() != null && transactionSignature.getScripts().size() > 0) {
-                for (Script script : transactionSignature.getScripts()) {
-                    if (script != null && script.getChunks() != null && script.getChunks().size() >= 2) {
-                        addressSet.add(getScriptAddress(script.getChunks()));
                     }
                 }
             }
@@ -140,32 +120,20 @@ public class SignatureUtil {
      * 生成交易TransactionSignture
      *
      * @param tx           交易
-     * @param scriptEckeys 需要生成脚本的秘钥
      * @param signEckeys   需要生成普通签名的秘钥
      */
-    public static void createTransactionSignture(Transaction tx, List<ECKey> scriptEckeys, List<ECKey> signEckeys) throws IOException {
+    public static void createTransactionSignture(Transaction tx, List<ECKey> signEckeys) throws IOException {
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = null;
-        List<Script> scripts = null;
         try {
-            if (scriptEckeys != null && scriptEckeys.size() > 0) {
-                List<byte[]> signtures = new ArrayList<>();
-                List<byte[]> pubkeys = new ArrayList<>();
-                for (ECKey ecKey : scriptEckeys) {
-                    signtures.add(signDigest(tx.getHash().getDigestBytes(), ecKey).getSignBytes());
-                    pubkeys.add(ecKey.getPubKey());
-                }
-                scripts = createInputScripts(signtures, pubkeys);
-            }
             if (signEckeys != null && signEckeys.size() > 0) {
                 p2PHKSignatures = createSignaturesByEckey(tx, signEckeys);
             }
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
-            transactionSignature.setScripts(scripts);
             tx.setTransactionSignature(transactionSignature.serialize());
-        } catch (IOException ie) {
+        } catch (IOException e) {
             log.error("TransactionSignature serialize error!");
-            throw ie;
+            throw e;
         }
     }
 
