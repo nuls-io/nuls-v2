@@ -4,6 +4,8 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.transaction.model.bo.TxWrapper;
 
+import java.util.List;
+
 /**
  * 已打包进区块确认的交易
  *
@@ -18,6 +20,14 @@ public interface TransactionStorageService {
      * @return
      */
     boolean saveTx(TxWrapper txWrapper);
+
+    /**
+     * 批量保存交易
+     * @param chainId
+     * @param txList
+     * @return
+     */
+    boolean saveTxList(int chainId, List<Transaction> txList);
 
     /**
      * 获取交易数据
