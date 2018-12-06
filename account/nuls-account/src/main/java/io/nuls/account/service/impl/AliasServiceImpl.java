@@ -52,6 +52,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -115,9 +116,9 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public String getAliasFee(int chaindId, String address, String aliasName) {
+    public BigInteger getAliasFee(int chaindId, String address, String aliasName) {
         Transaction tx = null;
-        String fee = null;
+        BigInteger fee = null;
         try {
             //create a set alias transaction
             tx = createAliasTrasaction(chaindId, address, aliasName);

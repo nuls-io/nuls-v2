@@ -32,6 +32,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -64,7 +65,7 @@ public interface AliasService {
      * @param aliasName
      * @return
      */
-    String getAliasFee(int chaindId, String address, String aliasName);
+    BigInteger getAliasFee(int chaindId, String address, String aliasName);
 
     /**
      * get the alias by address
