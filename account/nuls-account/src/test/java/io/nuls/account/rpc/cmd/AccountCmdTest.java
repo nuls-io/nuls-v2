@@ -15,6 +15,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Page;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.WsServer;
@@ -55,7 +56,7 @@ public class AccountCmdTest {
 
     @BeforeClass
     public static void start() throws Exception {
-        WsServer.mockModule();
+        NoUse.mockModule();
     }
 
     private List<String> createAccount(int chainId, int count, String password) {

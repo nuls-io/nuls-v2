@@ -27,6 +27,7 @@
 
 package io.nuls.account;
 
+import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.server.WsServer;
 import org.junit.Test;
 
@@ -40,7 +41,7 @@ public class WsKernel {
     @Test
     public  void test() throws Exception {
         //模拟启动内核模块
-        WsServer.mockKernel();
+        NoUse.mockKernel();
 //        int port = 8887;
 //        WsServer s = new WsServer(port);
 //        s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
