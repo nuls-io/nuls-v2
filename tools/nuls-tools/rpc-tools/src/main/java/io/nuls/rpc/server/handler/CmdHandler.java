@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.rpc.server;
+package io.nuls.rpc.server.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -63,7 +63,7 @@ public class CmdHandler {
      * @param webSocket 用于发送消息 / Used to send message
      * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
-    static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
+    public static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
@@ -82,7 +82,7 @@ public class CmdHandler {
      * @param messageId 原始消息ID / The origin message ID
      * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
-    static void ack(WebSocket webSocket, String messageId) throws JsonProcessingException {
+    public static void ack(WebSocket webSocket, String messageId) throws JsonProcessingException {
         Ack ack = new Ack();
         ack.setRequestId(messageId);
 
@@ -98,7 +98,7 @@ public class CmdHandler {
      *
      * @param message 取消订阅的消息体 / Unsubscribe message
      */
-    static synchronized void unsubscribe(WebSocket webSocket, Message message) {
+    public static synchronized void unsubscribe(WebSocket webSocket, Message message) {
         Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
         for (String requestId : unsubscribe.getUnsubscribeMethods()) {
             ServerRuntime.UNSUBSCRIBE_LIST.add(ServerRuntime.genUnsubscribeKey(webSocket, requestId));
