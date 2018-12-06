@@ -155,13 +155,7 @@ public class Constants {
     public static final int SKIP_AND_REMOVE = 4;
 
 
-    public static final String RESPONSE_TIMEOUT = "Response timeout";
-    public static final String CMD_NOT_FOUND = "Cmd not found";
-    public static final String CMD_DUPLICATE = "Duplicate cmd found";
-    public static final String RANGE_REGEX = "[(\\[]\\d+,\\d+[)\\]]";
-    public static final String PARAM_WRONG_RANGE = "Param wrong range";
-    public static final String PARAM_WRONG_FORMAT = "Param wrong format";
-    public static final String PARAM_NULL = "Param null";
+
 
 
     /**
@@ -189,6 +183,14 @@ public class Constants {
      * Thread pool for processing messages to be processed
      */
     public static final ExecutorService THREAD_POOL = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("Processor"));
+
+    public static final String RESPONSE_TIMEOUT = "Response timeout";
+    public static final String CMD_NOT_FOUND = "Cmd not found";
+    public static final String CMD_DUPLICATE = "Duplicate cmd found";
+    public static final String RANGE_REGEX = "[(\\[]\\d+,\\d+[)\\]]";
+    public static final String PARAM_WRONG_RANGE = "Param wrong range";
+    public static final String PARAM_WRONG_FORMAT = "Param wrong format";
+    public static final String PARAM_NULL = "Param null";
 
     /**
      * 核心模块（Manager）的连接地址

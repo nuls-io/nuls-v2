@@ -24,6 +24,7 @@ package io.nuls.block.constant;
 import io.nuls.tools.constant.ErrorCode;
 
 /**
+ * todo 错误码细化
  * 区块管理模块的错误信息表
  * @author captain
  * @date 18-11-20 上午11:01

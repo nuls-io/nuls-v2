@@ -25,22 +25,22 @@ import io.nuls.base.data.SmallBlock;
 import io.nuls.tools.cache.LimitHashMap;
 
 /**
- * Used for sharing temporary data between multiple hander.
- * 用于不同的handler之间共享交易数据，交易缓存池中的数据已经放入，直到自动销毁前，不做清理
+ * 缓存收到的SmallBlock
  *
- * @author Niels
+ * @author captain
+ * @version 1.0
+ * @date 18-12-6 上午10:49
  */
-public class TemporaryCacheManager {
-    private static final TemporaryCacheManager INSTANCE = new TemporaryCacheManager();
+public class SmallBlockCacheManager {
+    private static final SmallBlockCacheManager INSTANCE = new SmallBlockCacheManager();
 
     private LimitHashMap<NulsDigestData, SmallBlock> smallBlockCacheMap = new LimitHashMap<>(100);
-    private LimitHashMap<NulsDigestData, NulsDigestData> smallBlockHashCacheMap = new LimitHashMap<>(100);
 
-    private TemporaryCacheManager() {
+    private SmallBlockCacheManager() {
 
     }
 
-    public static TemporaryCacheManager getInstance() {
+    public static SmallBlockCacheManager getInstance() {
         return INSTANCE;
     }
 
@@ -54,27 +54,23 @@ public class TemporaryCacheManager {
         smallBlockCacheMap.put(smallBlock.getHeader().getHash(), smallBlock);
     }
 
-    public void cacheSmallBlockWithRequest(NulsDigestData requestHash, SmallBlock smallBlock) {
-        NulsDigestData blockHash = smallBlock.getHeader().getHash();
-        smallBlockHashCacheMap.put(requestHash, blockHash);
-        smallBlockCacheMap.put(blockHash, smallBlock);
+    public void cacheSmallBlockRequest(NulsDigestData blockHash) {
+        smallBlockCacheMap.put(blockHash, null);
     }
 
     /**
      * 根据区块hash获取完整的SmallBlock
      * get SmallBlock by block header digest data
      *
-     * @param requestHash getTxGroupRequestHash
-     * @return SmallBlock
+     * @param blockHash
+     * @return
      */
-    public SmallBlock getSmallBlockByRequest(NulsDigestData requestHash) {
-
-        return getSmallBlockByHash(smallBlockHashCacheMap.get(requestHash));
+    public SmallBlock getSmallBlockByHash(NulsDigestData blockHash) {
+        return smallBlockCacheMap.get(blockHash);
     }
 
-    public SmallBlock getSmallBlockByHash(NulsDigestData blockHash) {
-
-        return smallBlockCacheMap.get(blockHash);
+    public boolean containsSmallBlock(NulsDigestData blockHash){
+        return smallBlockCacheMap.get(blockHash) != null;
     }
 
     /**
@@ -88,27 +84,6 @@ public class TemporaryCacheManager {
             return;
         }
         smallBlockCacheMap.remove(hash);
-    }
-
-
-    /**
-     * 清空所有缓存的数据
-     * Empty all cached data.
-     */
-    public void clear() {
-        this.smallBlockCacheMap.clear();
-    }
-
-    /**
-     * 销毁缓存
-     * destroy cache
-     */
-    public void destroy() {
-        this.smallBlockCacheMap.clear();
-    }
-
-    public int getSmallBlockCount() {
-        return smallBlockCacheMap.size();
     }
 
 }

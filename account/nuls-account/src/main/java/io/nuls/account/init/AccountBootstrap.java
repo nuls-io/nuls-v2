@@ -94,7 +94,7 @@ public class AccountBootstrap {
                     .connect(NulsConfig.KERNEL_MODULE_URL);
 
             // Get information from kernel
-            CmdDispatcher.syncManager();
+            CmdDispatcher.syncKernel();
 
         } catch (Exception e) {
             Log.error("Account initServer failed", e);

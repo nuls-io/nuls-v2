@@ -27,8 +27,11 @@ package io.nuls.transaction.service.impl;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
+import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.crypto.ECKey;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
@@ -36,6 +39,7 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.CrossTxData;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.model.bo.TxWrapper;
 import io.nuls.transaction.model.dto.BlockHeaderDigestDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.service.TransactionService;
@@ -61,6 +65,9 @@ public class TransactionServiceImpl implements TransactionService {
          * 1.基础数据库校验
          * 2.放入队列
          */
+
+        TxWrapper txWrapper = new TxWrapper(chainId, transaction);
+
         return Result.getSuccess(TxErrorCode.SUCCESS);
     }
 
@@ -88,8 +95,13 @@ public class TransactionServiceImpl implements TransactionService {
             CoinData coinData = getCoinData(coinFromList, coinToList, tx.size());
             tx.setTxData(coinData.serialize());
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-            //todo 签名
-
+            List<ECKey> signEcKeys = new ArrayList<>();
+            for(CoinDTO coinDTO : listFrom) {
+                String priKey = TxUtil.getPrikey(coinDTO.getAddress(), coinDTO.getPassword());
+                ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
+                signEcKeys.add(ecKey);
+            }
+            SignatureUtil.createTransactionSignture(tx, signEcKeys);
             this.newTx(currentChainId, tx);
             return Result.getSuccess(TxErrorCode.SUCCESS);
         }catch (IOException e) {
@@ -266,6 +278,8 @@ public class TransactionServiceImpl implements TransactionService {
                     continue;
                 }
                 CoinFrom feeCoinFrom = new CoinFrom();
+                byte[] address = coinFrom.getAddress();
+                feeCoinFrom.setAddress(address);
                 txSize += feeCoinFrom.size();
                 //todo 新增coinfrom，重新计算本交易预计收取的手续费  跨链交易手续费单价？？
                 targetFee = TransactionFeeCalculator.getMaxFee(txSize);
@@ -273,9 +287,8 @@ public class TransactionServiceImpl implements TransactionService {
                 BigInteger current = targetFee.subtract(actualFee);
                 //此账户可以支付的手续费
                 BigInteger fee = BigIntegerUtils.isEqualOrGreaterThan(mainAsset, current) ? current : current.subtract(mainAsset);
-                byte[] address = coinFrom.getAddress();
+
                 feeCoinFrom.setLocked(TxConstant.CORSS_TX_LOCKED);
-                feeCoinFrom.setAddress(address);
                 feeCoinFrom.setAssetsChainId(TxConstant.NUlS_CHAINID);
                 feeCoinFrom.setAssetsId(TxConstant.NUlS_CHAIN_ASSETID);
                 feeCoinFrom.setAmount(fee);

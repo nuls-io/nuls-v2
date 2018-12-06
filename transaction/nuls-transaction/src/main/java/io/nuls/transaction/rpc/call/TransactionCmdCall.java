@@ -15,20 +15,21 @@ import java.util.Map;
 public class TransactionCmdCall {
 
     /**
-     * 交易确认提交
-     * Transaction processor commit
+     * 调用其他模块接口
+     * Call other module interfaces
      */
-    public static boolean txCommit(String cmd,String moduleCode,Map params) {
+    public static HashMap request(String cmd,String moduleCode,Map params) {
+        HashMap result = new HashMap();
         try {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             Response cmdResp = CmdDispatcher.requestAndResponse(moduleCode, cmd, params);
-            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get(cmd);
-            Boolean value = (Boolean) result.get("value");
-            return value;
+            if(cmdResp.isSuccess()) {
+                result = (HashMap) ((HashMap) cmdResp.getResponseData()).get(cmd);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return true;
+        return result;
     }
 
 }

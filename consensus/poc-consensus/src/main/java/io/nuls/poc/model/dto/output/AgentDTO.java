@@ -28,7 +28,8 @@ package io.nuls.poc.model.dto.output;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
-import io.nuls.poc.utils.util.PoConvertUtil;
+import io.nuls.poc.utils.manager.AgentManager;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.BigIntegerUtils;
 
 
@@ -67,7 +68,7 @@ public class AgentDTO {
         this.deposit = BigIntegerUtils.bigIntegerToString(agent.getDeposit());
         this.commissionRate = agent.getCommissionRate();
         this.agentName = agent.getAlais();
-        this.agentId = PoConvertUtil.getAgentId(agent.getTxHash());
+        this.agentId = SpringLiteContext.getBean(AgentManager.class).getAgentId(agent.getTxHash());
         this.time = agent.getTime();
         this.blockHeight = agent.getBlockHeight();
         this.delHeight = agent.getDelHeight();
