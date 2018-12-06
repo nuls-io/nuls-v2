@@ -44,7 +44,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
 
 /**
- * 处理收到的{@link TxGroupMessage}
+ * 处理收到的{@link TxGroupMessage}，用于区块的广播与转发
  *
  * @author captain
  * @version 1.0
@@ -98,7 +98,7 @@ public class TxGroupHandler extends BaseCmd {
 
         Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
         if (blockService.saveBlock(chainId, block)) {
-            smallBlockCacheManager.cacheSmallBlock(smallBlock);
+            smallBlockCacheManager.cacheSmallBlock(BlockUtil.getSmallBlock(chainId, block));
             blockService.forwardBlock(chainId, headerHash, nodeId);
         } else {
             Log.error("save fail! chainId:{}, height:{}, hash:{}", chainId, header.getHeight(), headerHash);

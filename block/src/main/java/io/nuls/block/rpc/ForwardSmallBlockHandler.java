@@ -22,17 +22,14 @@ package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.SmallBlock;
 import io.nuls.block.cache.SmallBlockCacheManager;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.HashMessage;
-import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
@@ -43,7 +40,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link HashMessage}
+ * 处理收到的{@link HashMessage}，用于区块的广播与转发
  *
  * @author captain
  * @version 1.0
@@ -52,8 +49,6 @@ import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE
 @Component
 public class ForwardSmallBlockHandler extends BaseCmd {
 
-    @Autowired
-    private BlockService service;
     private SmallBlockCacheManager smallBlockCacheManager = SmallBlockCacheManager.getInstance();
 
     @CmdAnnotation(cmd = FORWARD_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
@@ -83,7 +78,9 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         HashMessage request = new HashMessage();
         request.setRequestHash(blockHash);
         request.setCommand(CommandConstant.GET_SMALL_BLOCK_MESSAGE);
-        NetworkUtil.sendToNode(chainId, request, nodeId);
+        if (NetworkUtil.sendToNode(chainId, request, nodeId)) {
+            smallBlockCacheManager.cacheSmallBlockRequest(blockHash);
+        }
         return success();
     }
 

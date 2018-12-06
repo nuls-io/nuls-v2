@@ -25,15 +25,14 @@
  */
 package io.nuls.ledger.service.processor;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.constant.TransactionType;
 import io.nuls.ledger.service.AccountStateService;
+import io.nuls.ledger.utils.CoinDataUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.exception.NulsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,16 +56,8 @@ public class CoinBaseProcessor implements TxProcessor {
             logger.error("transaction type:{} is not coinbase type.", transaction.getType());
             return;
         }
-
         //2 获取coinDaData的数据
-        byte[] coinDateBytes = transaction.getCoinData();
-
-        CoinData coinData = new CoinData();
-        try {
-            coinData.parse(new NulsByteBuffer(coinDateBytes));
-        } catch (NulsException e) {
-            logger.error("coinData parse error", e);
-        }
+        CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
         //3 增加账户的余额
         List<CoinTo> tos = coinData.getTo();
         for (CoinTo to : tos) {

@@ -45,39 +45,39 @@ import java.util.Arrays;
  * 2018/11/14
  */
 public class PunishLogPo extends BaseNulsData {
-    /*
-    惩罚类型
-    Types of punishment
-    */
+    /**
+    * 惩罚类型
+    * Types of punishment
+    * */
     private byte type;
-    /*
-    出块地址
-    Block address
-    */
+    /**
+    * 出块地址
+    * Block address
+    * */
     private byte[] address;
-    /*
-    惩罚时间
-    Penalty time
-    */
+    /**
+    * 惩罚时间
+    * Penalty time
+    * */
     private long time;
-    /*
-    block height
-    */
+    /**
+    * block height
+    * */
     private long height;
-    /*
-    轮次下标
-    round index
-    */
+    /**
+    * 轮次下标
+    * round index
+    * */
     private long roundIndex;
-    /*
-    惩罚原因
-    reason
-    */
+    /**
+    * 惩罚原因
+    * reason
+    * */
     private short reasonCode;
-    /*
-    证据
-    evidence
-    */
+    /**
+    * 证据
+    * evidence
+    * */
     private byte[] evidence;
 
     private int index;

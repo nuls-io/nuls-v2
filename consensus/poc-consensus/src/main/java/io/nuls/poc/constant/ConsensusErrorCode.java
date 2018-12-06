@@ -2,6 +2,10 @@ package io.nuls.poc.constant;
 
 import io.nuls.tools.constant.ErrorCode;
 
+/**
+ * @author tag
+ * 2018/11/12
+ * */
 public interface ConsensusErrorCode {
     ErrorCode SUCCESS = ErrorCode.init("10000");
     ErrorCode FAILED = ErrorCode.init("10001");

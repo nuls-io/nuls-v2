@@ -41,7 +41,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 
 /**
- * 处理收到的{@link GetBlocksByHeightMessage}
+ * 处理收到的{@link GetBlocksByHeightMessage}，用于区块的同步
  * @author captain
  * @date 18-11-14 下午4:23
  * @version 1.0
@@ -72,10 +72,10 @@ public class GetBlocksHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        NulsDigestData requestHash = null;
+        NulsDigestData requestHash;
         try {
             requestHash = NulsDigestData.calcDigestData(message.serialize());
-            Block block = null;
+            Block block;
             do {
                 block = service.getBlock(chainId, endHeight--);
                 if(block == null) {

@@ -32,6 +32,7 @@ import io.nuls.tools.cache.LimitHashMap;
  * @date 18-12-6 上午10:49
  */
 public class SmallBlockCacheManager {
+
     private static final SmallBlockCacheManager INSTANCE = new SmallBlockCacheManager();
 
     private LimitHashMap<NulsDigestData, SmallBlock> smallBlockCacheMap = new LimitHashMap<>(100);
@@ -69,21 +70,8 @@ public class SmallBlockCacheManager {
         return smallBlockCacheMap.get(blockHash);
     }
 
-    public boolean containsSmallBlock(NulsDigestData blockHash){
+    public boolean containsSmallBlock(NulsDigestData blockHash) {
         return smallBlockCacheMap.get(blockHash) != null;
-    }
-
-    /**
-     * 根据区块摘要对象从缓存中移出一个SmallBlock，移除后再获取时将返回null
-     * A SmallBlock is removed from the cache based on the block summary object, and null is returned when it is removed.
-     *
-     * @param hash transaction digest data
-     */
-    public void removeSmallBlock(NulsDigestData hash) {
-        if (null == smallBlockCacheMap) {
-            return;
-        }
-        smallBlockCacheMap.remove(hash);
     }
 
 }
