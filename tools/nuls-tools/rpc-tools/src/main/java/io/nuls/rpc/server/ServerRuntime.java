@@ -29,6 +29,7 @@ import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.data.StringUtils;
+import org.java_websocket.WebSocket;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -55,19 +56,40 @@ public class ServerRuntime {
     /**
      * 接口最近调用时间
      * Recent call time of interface
+     * Key: Websocket+cmd
+     * Value: Time(long)
      */
     static Map<String, Long> cmdInvokeTime = new HashMap<>();
 
     /**
      * 接口返回值改变次数
      * Number of return value changes
+     * Key: Cmd
+     * Value: Change count
      */
-    private static Map<String, Long> cmdChangeCount = new HashMap<>();
-    static Map<String, Object[]> cmdLastResponse = new HashMap<>();
+    private static Map<String, Integer> cmdChangeCount = new HashMap<>();
+
+    /**
+     * 接口最近一次的返回值
+     * The last return value of the interface
+     * Key: Cmd
+     * Value: The Response object
+     */
+    private static Map<String, Response> cmdLastResponse = new HashMap<>();
+
+    /**
+     * 接口最近一次的返回值是否被使用过
+     * Has the last return value of the interface been used?
+     * Key: WebSocket+MessageId+cmd
+     * Value: Boolean
+     */
+    static Map<String, Boolean> cmdLastResponseBeUsed = new HashMap<>();
 
     /**
      * 本模块配置信息
      * Configuration information of this module
+     * Key: The key
+     * Value: Config detail
      */
     public static Map<String, ConfigItem> configItemMap = new ConcurrentHashMap<>();
 
@@ -195,6 +217,7 @@ public class ServerRuntime {
     /**
      * 根据cmd命令获取最高版本的方法，逻辑同上
      * Getting the highest version of local methods from CMD commands
+     *
      * @param cmd Command of remote method
      * @return CmdDetail
      */
@@ -221,10 +244,10 @@ public class ServerRuntime {
     }
 
 
-
     /**
      * 扫描指定路径，得到所有接口的详细信息
      * Scan the specified path for details of all interfaces
+     *
      * @param packageName Package full path
      * @throws Exception Duplicate commands found
      */
@@ -263,6 +286,7 @@ public class ServerRuntime {
     /**
      * 保存所有拥有CmdAnnotation注解的方法
      * Save all methods that have CmdAnnotation annotations
+     *
      * @param method Method
      * @return CmdDetail
      */
@@ -312,6 +336,7 @@ public class ServerRuntime {
      * Determine if the cmd has been registered
      * 1. The same cmd
      * 2. The same version
+     *
      * @param sourceCmdDetail CmdDetail
      * @return boolean
      */
@@ -329,24 +354,27 @@ public class ServerRuntime {
 
     /**
      * Set event count
-     * @param cmd Command of remote method
+     *
+     * @param cmd   Command of remote method
      * @param value Response
      */
     public static void eventCount(String cmd, Response value) {
         addCmdChangeCount(cmd);
         setCmdLastValue(cmd, value);
+        resetCmdLastResponseBeUsedMap(cmd);
     }
 
     /**
      * 返回值改变次数增加1
      * Increase the changes number of return value by 1
+     *
      * @param cmd Command of remote method
      */
     private static void addCmdChangeCount(String cmd) {
         if (!cmdChangeCount.containsKey(cmd)) {
-            cmdChangeCount.put(cmd, 1L);
+            cmdChangeCount.put(cmd, 1);
         } else {
-            long count = cmdChangeCount.get(cmd);
+            int count = cmdChangeCount.get(cmd);
             cmdChangeCount.put(cmd, count + 1);
         }
     }
@@ -354,33 +382,86 @@ public class ServerRuntime {
     /**
      * 得到返回值的改变数量
      * Get current changes number of return value
+     *
      * @param cmd Command of remote method
      * @return long
      */
-    static long getCmdChangeCount(String cmd) {
+    static int getCmdChangeCount(String cmd) {
         try {
             return cmdChangeCount.get(cmd);
         } catch (Exception e) {
-            return 0L;
+            return 0;
         }
     }
 
     /**
      * 设置最近改变的值
      * Set the recently changed value
-     * @param cmd Command of remote method
+     *
+     * @param cmd   Command of remote method
      * @param value Response
      */
     private static void setCmdLastValue(String cmd, Response value) {
-        cmdLastResponse.put(cmd, new Object[]{value, false});
+        cmdLastResponse.put(cmd, value);
     }
 
     /**
+     * 得到最近改变的值
+     * Get the recently changed value
      *
-     * @param cmd
-     * @return
+     * @param cmd Command of remote method
+     * @return Response
      */
-    static Object[] getCmdLastValue(String cmd) {
+    static Response getCmdLastValue(String cmd) {
         return cmdLastResponse.get(cmd);
+    }
+
+    /**
+     * EventCount被触发后，是否已经发送过
+     * After EventCount is triggered, whether be sent?
+     *
+     * @param key genKey
+     * @return boolean
+     */
+    static boolean hasSent(String key) {
+        return cmdLastResponseBeUsed.get(key) == null
+                ? false
+                : cmdLastResponseBeUsed.get(key);
+    }
+
+    /**
+     * Cmd返回结果更新之后，需要重置为未发送状态
+     * After Cmd returns the result update, it needs to be reset to the unsent state
+     *
+     * @param cmd Command of remote method
+     */
+    private static void resetCmdLastResponseBeUsedMap(String cmd) {
+        for (String key : cmdLastResponseBeUsed.keySet()) {
+            if (key.endsWith("_" + cmd)) {
+                cmdLastResponseBeUsed.put(key, false);
+            }
+        }
+    }
+
+    /**
+     * 根据接收的WebSocket和消息号，生成唯一标志符
+     * Generate unique identifiers (The key) based on the WebSocket and message ID
+     *
+     * @param webSocket WebSocket
+     * @param messageId Message ID
+     * @return The key
+     */
+    static String genUnsubscribeKey(WebSocket webSocket, String messageId) {
+        return webSocket.toString() + "_" + messageId;
+    }
+
+    /**
+     * @param webSocket WebSocket
+     * @param messageId Message ID
+     * @param cmd       Command of remote method
+     * @return The key
+     */
+    static String genEventCountKey(WebSocket webSocket, String messageId, String cmd) {
+        return webSocket.toString() + "_" + messageId + "_" + cmd;
     }
 }

@@ -112,7 +112,7 @@ public class WsServer extends WebSocketServer {
                     取消订阅，直接响应
                      */
                     Log.info("UnsubscribeFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
-                    CmdHandler.unsubscribe(webSocket,message);
+                    CmdHandler.unsubscribe(webSocket, message);
                     break;
                 case Request:
                     /*
@@ -121,6 +121,11 @@ public class WsServer extends WebSocketServer {
                      */
                     Log.info("RequestFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
                     Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+
+                    if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
+                            && !ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
+                        ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, msg});
+                    }
                     if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
                         ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
                     }
@@ -128,10 +133,6 @@ public class WsServer extends WebSocketServer {
                         ServerRuntime.REQUEST_EVENT_COUNT_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
                     }
 
-                    if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
-                            && !ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
-                        ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, msg});
-                    }
 
                     /*
                     如果需要一个Ack，则发送
