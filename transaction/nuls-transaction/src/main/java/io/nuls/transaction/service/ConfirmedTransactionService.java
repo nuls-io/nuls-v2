@@ -14,8 +14,9 @@ public interface ConfirmedTransactionService {
      * get a transaction
      *
      * 获取一笔交易
+     * @param chainId
      * @param hash
      * @return Transaction
      */
-    Transaction getTransaction(NulsDigestData hash);
+    Transaction getTransaction(int chainId, NulsDigestData hash);
 }
