@@ -43,21 +43,21 @@ import java.util.List;
 @Data
 public class TxGroupMessage extends BaseMessage {
 
-    private NulsDigestData requestHash;
+    private NulsDigestData blockHash;
     private List<Transaction> transactions;
 
     public TxGroupMessage() {
     }
 
-    public TxGroupMessage(NulsDigestData requestHash, List<Transaction> transactions) {
-        this.requestHash = requestHash;
+    public TxGroupMessage(NulsDigestData blockHash, List<Transaction> transactions) {
+        this.blockHash = blockHash;
         this.transactions = transactions;
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += requestHash.size();
+        size += blockHash.size();
         size += VarInt.sizeOf(transactions.size());
         size += this.getTxListLength();
         return size;
@@ -65,7 +65,7 @@ public class TxGroupMessage extends BaseMessage {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestHash);
+        stream.writeNulsData(blockHash);
         stream.writeVarInt(transactions.size());
         for (Transaction data : transactions) {
             stream.writeNulsData(data);
@@ -74,7 +74,7 @@ public class TxGroupMessage extends BaseMessage {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        requestHash = byteBuffer.readHash();
+        blockHash = byteBuffer.readHash();
         long txCount = byteBuffer.readVarInt();
         this.transactions = new ArrayList<>();
         for (int i = 0; i < txCount; i++) {

@@ -166,7 +166,7 @@ public class MessageTest {
     @Test
     public void testTxGroupMessage() throws Exception {
         TxGroupMessage message = new TxGroupMessage();
-        message.setRequestHash(NulsDigestData.calcDigestData("hello".getBytes()));
+        message.setBlockHash(NulsDigestData.calcDigestData("hello".getBytes()));
         message.setTransactions(BlockGenerator.getTransactions());
         String hex = HexUtil.byteToHex(message.serialize());
         System.out.println(hex);
