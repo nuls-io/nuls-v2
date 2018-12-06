@@ -22,11 +22,13 @@
  * SOFTWARE.
  *
  */
-package io.nuls.rpc.server;
+package io.nuls.rpc.server.thread;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
+import io.nuls.rpc.server.CmdHandler;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
