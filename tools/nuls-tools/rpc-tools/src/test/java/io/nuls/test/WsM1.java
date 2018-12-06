@@ -65,9 +65,6 @@ public class WsM1 {
         System.out.println(bigDecimal.toBigInteger().intValue());
         System.out.println(new BigInteger("10").divide(new BigInteger("4")));
 
-        int a=11;
-        long b=11L;
-        System.out.println(a==b);
     }
 
     @Test
@@ -149,5 +146,6 @@ public class WsM1 {
         System.out.println("RESPONSE_AUTO_QUEUE："+ClientRuntime.RESPONSE_AUTO_QUEUE.size());
         System.out.println("NEGOTIATE_RESPONSE_QUEUE："+ClientRuntime.NEGOTIATE_RESPONSE_QUEUE.size());
         System.out.println("ACK_QUEUE："+ClientRuntime.ACK_QUEUE.size());
+
     }
 }
