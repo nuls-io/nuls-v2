@@ -38,6 +38,7 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -69,10 +70,20 @@ DbService dbService=StorageManager.getInstance().getDbService();
         List<NodeGroupPo> nodeGroupPos=new ArrayList<>();
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         long magicNumber = Long.valueOf(String.valueOf(params.get("magicNumber")));
-        int maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
-        int maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
+        int maxOut = 0;
+        if(StringUtils.isNotBlank(String.valueOf(params.get("maxOut")))){
+            maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
+        }else {
+            maxOut = NetworkParam.getInstance().getMaxOutCount();
+        }
+
+        int maxIn = 0;
+        if(StringUtils.isNotBlank(String.valueOf(params.get("maxIn")))){
+            maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
+        }else {
+            maxIn = NetworkParam.getInstance().getMaxInCount();
+        }
         int minAvailableCount = Integer.valueOf(String.valueOf(params.get("minAvailableCount")));
-        String seedIps=String.valueOf(params.get("seedIps"));
         int isMoonNode=Integer.valueOf(String.valueOf(params.get("isMoonNode")));
         boolean isMoonNet = isMoonNode == 1 ? true : false;
         //友链创建的是链工厂，isSelf 为true
@@ -108,8 +119,19 @@ DbService dbService=StorageManager.getInstance().getDbService();
     public Response activeCross(Map  params) {
         List<NodeGroupPo> nodeGroupPos=new ArrayList<>();
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
-        int maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
-        int maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
+        int maxOut = 0;
+        if(StringUtils.isNotBlank(String.valueOf(params.get("maxOut")))){
+            maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
+        }else {
+            maxOut = NetworkParam.getInstance().getMaxOutCount();
+        }
+
+        int maxIn = 0;
+        if(StringUtils.isNotBlank(String.valueOf(params.get("maxIn")))){
+            maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
+        }else {
+            maxIn = NetworkParam.getInstance().getMaxInCount();
+        }
         String seedIps=String.valueOf(params.get("seedIps"));
         //友链的跨链协议调用
         NodeGroup nodeGroup= nodeGroupManager.getNodeGroupByChainId(chainId);
@@ -123,9 +145,11 @@ DbService dbService=StorageManager.getInstance().getDbService();
         nodeGroup.setMaxCrossIn(maxIn);
         nodeGroup.setMaxCrossOut(maxOut);
         List<String> ipList = new ArrayList<>();
-        String [] ips = seedIps.split(NetworkConstant.COMMA);
-        for (String ip : ips) {
-            ipList.add(ip);
+        if(StringUtils.isNotBlank(seedIps)) {
+            String[] ips = seedIps.split(NetworkConstant.COMMA);
+            for (String ip : ips) {
+                ipList.add(ip);
+            }
         }
         NetworkParam.getInstance().setMoonSeedIpList(ipList);
         nodeGroup.setCrossActive(true);

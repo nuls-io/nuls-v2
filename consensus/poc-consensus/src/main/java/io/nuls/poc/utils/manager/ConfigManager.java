@@ -2,14 +2,22 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.config.ConfigItem;
-import io.nuls.poc.storage.ConfigeService;
+import io.nuls.poc.storage.ConfigService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.lang.reflect.Field;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 共识模块配置文件管理类
+ * Consensus Module Profile Management Class
+ *
+ * @author tag
+ * 2018/11/20
+ * */
 public class ConfigManager {
     /**
      * 多链配置文件配置信息
@@ -26,20 +34,36 @@ public class ConfigManager {
      * */
     public static  Map<String,Boolean> param_modify = new HashMap<>();
 
-    public static void initManager(List<ConfigItem> items, int chain_id) throws Exception{
+    /**
+     * 初始化配置信息
+     * Initialize configuration information
+     *
+     * @param items       配置参数列表
+     * @param chainId    链ID
+     * */
+    public static void initManager(List<ConfigItem> items, int chainId) throws Exception{
         ConfigBean bean = new ConfigBean();
         Class beanClass = bean.getClass();
-        Field field = null;
-        //通过反射设置bean属性值
+        Field field;
+        /*
+        通过反射设置bean属性值
+        Setting bean attribute values by reflection
+         */
         for (ConfigItem item : items) {
             param_modify.put(item.getKey(),item.isReadOnly());
             field = beanClass.getDeclaredField(item.getKey());
             field.setAccessible(true);
-            field.set(bean,item.getValue());
+            if("java.math.BigInteger".equals(field.getType().getName())){
+                field.set(bean, new BigInteger((String) item.getValue()));
+            }else{
+                field.set(bean,item.getValue());
+            }
         }
-        config_map.put(chain_id,bean);
-        //保存配置信息到数据库
-        ConfigeService configeService = SpringLiteContext.getBean(ConfigeService.class);
-        configeService.save(bean,chain_id);
+        /*
+        保存配置信息到数据库
+        Save configuration information to database
+        */
+        ConfigService configService = SpringLiteContext.getBean(ConfigService.class);
+        configService.save(bean,chainId);
     }
 }

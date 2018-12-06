@@ -1,131 +1,215 @@
 package io.nuls.poc.model.bo.config;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 
 /**
  * 共识模块配置类
+ * Consensus Module Configuration Class
+ *
  * @author tag
  * 2018/11/7
  * */
 public class ConfigBean implements Serializable {
     /**
      * 打包间隔时间
+     * Packing interval time
      * */
-    private long packing_interval;
+    private long packingInterval;
     /**
      * 区块大小
+     * block size
      * */
-    private int block_size;
+    private int blockSize;
     /**
      * 出块最小金额
+     * Minimum amount of output
      * */
-    private String packing_amount;
+    private BigInteger packingAmount;
     /**
      * 奖励金锁定块数
+     * Number of Bonus Locking Blocks
      * */
-    private int coinbase_unlock_height;
+    private int coinbaseUnlockHeight;
     /**
      * 获得红牌保证金锁定时间
+     * Lock-in time to get a red card margin
      * */
-    private long redPublish_lockTime;
+    private long redPublishLockTime;
     /**
      * 注销节点保证金锁定时间
+     * Log-off node margin locking time
      * */
-    private long stopAgent_lockTime;
+    private long stopAgentLockTime;
     /**
      * 佣金比例的最小值
+     * Minimum commission ratio
      * */
-    private double commissionRate_min;
+    private double commissionRateMin;
     /**
      * 佣金比例的最大值
+     * Maximum commission ratio
      * */
-    private double commissionRate_max;
+    private double commissionRateMax;
     /**
      * 创建节点的保证金最小值
+     * Minimum margin for creating nodes
      * */
-    private String deposit_min;
+    private BigInteger depositMin;
     /**
      * 创建节点的保证金最大值
-     * */
-    private String deposit_max;
+     * Maximum margin for creating nodes
+     */
+    private BigInteger depositMax;
     /**
      * 节点出块委托金额最小值
-     * */
-    private String commission_min;
+     * Minimum Delegation Amount of Node Block
+     */
+    private BigInteger commissionMin;
     /**
      * 节点委托金额最大值
-     * */
-    private String commission_max;
+     * Maximum Node Delegation Amount
+     */
+    private BigInteger commissionMax;
 
-    //委托最小金额
-    private String entruster_deposit_min;
+    /**
+     * 委托最小金额
+     * Minimum amount entrusted
+     */
+    private BigInteger entrusterDepositMin;
 
-    //节点最多能被多少人委托
-    private int deposit_number_max;
+    /**
+     * 节点最多能被多少人委托
+     * How many people can a node be delegated at most
+     */
+    private int depositNumberMax;
     /**
      * 种子节点
-     **/
+     * Seed node
+     */
     private String seedNodes;
 
-    //资产ID
+    /**
+     * 资产ID
+     * assets id
+     */
     private int assetsId;
 
-    //链ID
+    /**
+     * chain id
+     */
     private int chainId;
 
-    public long getPacking_interval() {
-        return packing_interval;
+    public long getPackingInterval() {
+        return packingInterval;
     }
 
-    public void setPacking_interval(long packing_interval) {
-        this.packing_interval = packing_interval;
+    public void setPackingInterval(long packingInterval) {
+        this.packingInterval = packingInterval;
     }
 
-    public int getBlock_size() {
-        return block_size;
+    public int getBlockSize() {
+        return blockSize;
     }
 
-    public void setBlock_size(int block_size) {
-        this.block_size = block_size;
+    public void setBlockSize(int blockSize) {
+        this.blockSize = blockSize;
     }
 
-    public int getCoinbase_unlock_height() {
-        return coinbase_unlock_height;
+    public BigInteger getPackingAmount() {
+        return packingAmount;
     }
 
-    public void setCoinbase_unlock_height(int coinbase_unlock_height) {
-        this.coinbase_unlock_height = coinbase_unlock_height;
-    }
-    public long getRedPublish_lockTime() {
-        return redPublish_lockTime;
+    public void setPackingAmount(BigInteger packingAmount) {
+        this.packingAmount = packingAmount;
     }
 
-    public void setRedPublish_lockTime(long redPublish_lockTime) {
-        this.redPublish_lockTime = redPublish_lockTime;
+    public int getCoinbaseUnlockHeight() {
+        return coinbaseUnlockHeight;
     }
 
-    public long getStopAgent_lockTime() {
-        return stopAgent_lockTime;
+    public void setCoinbaseUnlockHeight(int coinbaseUnlockHeight) {
+        this.coinbaseUnlockHeight = coinbaseUnlockHeight;
     }
 
-    public void setStopAgent_lockTime(long stopAgent_lockTime) {
-        this.stopAgent_lockTime = stopAgent_lockTime;
+    public long getRedPublishLockTime() {
+        return redPublishLockTime;
     }
 
-    public double getCommissionRate_min() {
-        return commissionRate_min;
+    public void setRedPublishLockTime(long redPublishLockTime) {
+        this.redPublishLockTime = redPublishLockTime;
     }
 
-    public void setCommissionRate_min(double commissionRate_min) {
-        this.commissionRate_min = commissionRate_min;
+    public long getStopAgentLockTime() {
+        return stopAgentLockTime;
     }
 
-    public double getCommissionRate_max() {
-        return commissionRate_max;
+    public void setStopAgentLockTime(long stopAgentLockTime) {
+        this.stopAgentLockTime = stopAgentLockTime;
     }
 
-    public void setCommissionRate_max(double commissionRate_max) {
-        this.commissionRate_max = commissionRate_max;
+    public double getCommissionRateMin() {
+        return commissionRateMin;
+    }
+
+    public void setCommissionRateMin(double commissionRateMin) {
+        this.commissionRateMin = commissionRateMin;
+    }
+
+    public double getCommissionRateMax() {
+        return commissionRateMax;
+    }
+
+    public void setCommissionRateMax(double commissionRateMax) {
+        this.commissionRateMax = commissionRateMax;
+    }
+
+    public BigInteger getDepositMin() {
+        return depositMin;
+    }
+
+    public void setDepositMin(BigInteger depositMin) {
+        this.depositMin = depositMin;
+    }
+
+    public BigInteger getDepositMax() {
+        return depositMax;
+    }
+
+    public void setDepositMax(BigInteger depositMax) {
+        this.depositMax = depositMax;
+    }
+
+    public BigInteger getCommissionMin() {
+        return commissionMin;
+    }
+
+    public void setCommissionMin(BigInteger commissionMin) {
+        this.commissionMin = commissionMin;
+    }
+
+    public BigInteger getCommissionMax() {
+        return commissionMax;
+    }
+
+    public void setCommissionMax(BigInteger commissionMax) {
+        this.commissionMax = commissionMax;
+    }
+
+    public BigInteger getEntrusterDepositMin() {
+        return entrusterDepositMin;
+    }
+
+    public void setEntrusterDepositMin(BigInteger entrusterDepositMin) {
+        this.entrusterDepositMin = entrusterDepositMin;
+    }
+
+    public int getDepositNumberMax() {
+        return depositNumberMax;
+    }
+
+    public void setDepositNumberMax(int depositNumberMax) {
+        this.depositNumberMax = depositNumberMax;
     }
 
     public String getSeedNodes() {
@@ -134,62 +218,6 @@ public class ConfigBean implements Serializable {
 
     public void setSeedNodes(String seedNodes) {
         this.seedNodes = seedNodes;
-    }
-
-    public int getDeposit_number_max() {
-        return deposit_number_max;
-    }
-
-    public void setDeposit_number_max(int deposit_number_max) {
-        this.deposit_number_max = deposit_number_max;
-    }
-
-    public String getPacking_amount() {
-        return packing_amount;
-    }
-
-    public void setPacking_amount(String packing_amount) {
-        this.packing_amount = packing_amount;
-    }
-
-    public String getDeposit_min() {
-        return deposit_min;
-    }
-
-    public void setDeposit_min(String deposit_min) {
-        this.deposit_min = deposit_min;
-    }
-
-    public String getDeposit_max() {
-        return deposit_max;
-    }
-
-    public void setDeposit_max(String deposit_max) {
-        this.deposit_max = deposit_max;
-    }
-
-    public String getCommission_min() {
-        return commission_min;
-    }
-
-    public void setCommission_min(String commission_min) {
-        this.commission_min = commission_min;
-    }
-
-    public String getCommission_max() {
-        return commission_max;
-    }
-
-    public void setCommission_max(String commission_max) {
-        this.commission_max = commission_max;
-    }
-
-    public String getEntruster_deposit_min() {
-        return entruster_deposit_min;
-    }
-
-    public void setEntruster_deposit_min(String entruster_deposit_min) {
-        this.entruster_deposit_min = entruster_deposit_min;
     }
 
     public int getAssetsId() {

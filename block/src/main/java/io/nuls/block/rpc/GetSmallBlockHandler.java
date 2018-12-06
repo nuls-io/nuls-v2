@@ -17,31 +17,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.SmallBlock;
 import io.nuls.block.cache.TemporaryCacheManager;
 import io.nuls.block.constant.BlockErrorCode;
-import io.nuls.block.message.GetSmallBlockMessage;
+import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
-import io.nuls.block.model.SmallBlock;
 import io.nuls.block.utils.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.CmdResponse;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
-import java.util.List;
+import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link GetSmallBlockMessage}
+ * 处理收到的{@link HashMessage}
  * @author captain
  * @date 18-11-14 下午4:23
  * @version 1.0
@@ -52,24 +52,24 @@ public class GetSmallBlockHandler extends BaseCmd {
     private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
 
     @CmdAnnotation(cmd = GET_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public CmdResponse process(List<Object> params){
-        Integer chainId = Integer.parseInt(params.get(0).toString());
-        String nodeId = params.get(1).toString();
-        GetSmallBlockMessage message = new GetSmallBlockMessage();
+    public Object process(Map map){
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        String nodeId = map.get("nodes").toString();
+        HashMessage  message = new HashMessage ();
 
-        byte[] decode = HexUtil.decode(params.get(2).toString());
+        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
             Log.warn(e.getMessage());
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         if(message == null || nodeId == null) {
-            return failed(BlockErrorCode.PARAMETER_ERROR, "");
+            return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        NulsDigestData blockHash = message.getMsgBody().getRequestHash();
+        NulsDigestData blockHash = message.getRequestHash();
         SmallBlock smallBlock = cacheManager.getSmallBlockByHash(blockHash);
         if (smallBlock != null) {
             SmallBlockMessage smallBlockMessage = new SmallBlockMessage();

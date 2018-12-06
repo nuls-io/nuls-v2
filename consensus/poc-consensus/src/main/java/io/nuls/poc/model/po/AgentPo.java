@@ -35,9 +35,14 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
- * @author ln
+ * 存入数据库的节点信息类
+ * Node information class stored in database
+ *
+ * @author tag
+ * 2018/11/14
  */
 public class AgentPo extends BaseNulsData {
 
@@ -49,7 +54,7 @@ public class AgentPo extends BaseNulsData {
 
     private byte[] rewardAddress;
 
-    private String deposit;
+    private BigInteger deposit;
 
     private double commissionRate;
 
@@ -68,7 +73,7 @@ public class AgentPo extends BaseNulsData {
         stream.write(agentAddress);
         stream.write(packingAddress);
         stream.write(rewardAddress);
-        stream.writeString(deposit);
+        stream.writeBigInteger(deposit);
         stream.writeDouble(commissionRate);
         stream.writeUint48(time);
         stream.writeVarInt(blockHeight);
@@ -81,7 +86,7 @@ public class AgentPo extends BaseNulsData {
         this.agentAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.packingAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.rewardAddress = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
-        this.deposit = byteBuffer.readString();
+        this.deposit = byteBuffer.readBigInteger();
         this.commissionRate = byteBuffer.readDouble();
         this.time = byteBuffer.readUint48();
         this.blockHeight = byteBuffer.readVarInt();
@@ -92,7 +97,7 @@ public class AgentPo extends BaseNulsData {
     public int size() {
         int size = SerializeUtils.sizeOfNulsData(hash);
         size += Address.ADDRESS_LENGTH * 3;
-        size += SerializeUtils.sizeOfString(deposit);
+        size += SerializeUtils.sizeOfBigInteger();
         size += SerializeUtils.sizeOfDouble(commissionRate);
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfVarInt(blockHeight);
@@ -132,11 +137,11 @@ public class AgentPo extends BaseNulsData {
         this.rewardAddress = rewardAddress;
     }
 
-    public String getDeposit() {
+    public BigInteger getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(String  deposit) {
+    public void setDeposit(BigInteger deposit) {
         this.deposit = deposit;
     }
 

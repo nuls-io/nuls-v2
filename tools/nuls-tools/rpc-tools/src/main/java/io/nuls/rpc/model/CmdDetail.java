@@ -34,9 +34,11 @@ import lombok.ToString;
 import java.util.List;
 
 /**
+ * 对外提供的方法的具体信息
+ * Detail information on methods provided to the outside world
+ *
  * @author tangyi
  * @date 2018/10/15
- * @description
  */
 @ToString
 @NoArgsConstructor

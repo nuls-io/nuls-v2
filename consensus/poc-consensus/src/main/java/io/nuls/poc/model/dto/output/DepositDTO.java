@@ -30,8 +30,12 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.utils.util.PoConvertUtil;
+import io.nuls.tools.data.BigIntegerUtils;
 
 /**
+ * 共识信息类
+ * Consensus information class
+ *
  * @author tag
  * 2018/11/20
  */
@@ -61,7 +65,7 @@ public class DepositDTO {
     private String agentAddress;
 
     public DepositDTO(Deposit deposit) {
-        this.deposit = deposit.getDeposit();
+        this.deposit = BigIntegerUtils.bigIntegerToString(deposit.getDeposit());
         this.agentHash = deposit.getAgentHash().getDigestHex();
         this.address = AddressTool.getStringAddressByBytes(deposit.getAddress());
         this.time = deposit.getTime();

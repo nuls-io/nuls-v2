@@ -4,7 +4,6 @@ import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.Chain;
-import io.nuls.chain.model.dto.ChainAsset;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.ChainAssetStorage;
@@ -12,7 +11,7 @@ import io.nuls.chain.storage.ChainStorage;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
-import java.util.List;
+import java.math.BigInteger;
 
 /**
  * @author tangyi
@@ -57,7 +56,7 @@ public class ChainServiceImpl implements ChainService {
         }
         asset.setChainId(chainId);
         asset.setAssetId(assetId);
-        asset.setInitNumber(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_MAX));
+        asset.setInitNumber(new BigInteger(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_MAX)));
         asset.setSymbol(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_SYMBOL));
         asset.addChainId(chainId);
         assetService.createAsset(asset);

@@ -12,8 +12,8 @@ import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.model.dto.ChainAsset;
 import io.nuls.chain.model.dto.CoinDataAssets;
-import io.nuls.chain.model.tx.AssetRegTransaction;
-import io.nuls.chain.model.tx.txdata.AssetTx;
+import io.nuls.chain.model.tx.AddAssetToChainTransaction;
+import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -22,6 +22,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -47,9 +48,9 @@ public class TxAssetCmd extends BaseChainCmd {
         try {
             byte []txBytes = HexUtil.hexToByte(txHex);
             tx.parse(txBytes,0);
-            AssetTx assetTx = new AssetTx();
-            assetTx.parse(tx.getTxData(),0);
-            Asset asset = new Asset(assetTx);
+            TxChain txChain = new TxChain();
+            txChain.parse(tx.getTxData(),0);
+            Asset asset = new Asset(txChain);
             asset.setTxHash(tx.getHash().toString());
             return asset;
         } catch (Exception e) {
@@ -66,7 +67,7 @@ public class TxAssetCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
+            Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
 
             if(assetService.assetExist(asset))
             {
@@ -95,13 +96,13 @@ public class TxAssetCmd extends BaseChainCmd {
     public Response assetRegCommit(Map params) {
         try {
             Response cmdResponse = assetRegValidator(params);
-            if(isSuccess(cmdResponse)){
+            if(cmdResponse.isSuccess()){
                 return cmdResponse;
             }
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
+            Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
             //获取链信息
             Chain dbChain = chainService.getChain(chainId);
             dbChain.addCreateAssetId(asset.getAssetId());
@@ -132,7 +133,7 @@ public class TxAssetCmd extends BaseChainCmd {
     public Response assetRegRollback(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
+        Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
         //判断库中的asset是否存在，数据正确，则删除
         Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId()));
         if(!ByteUtils.arrayEquals(asset.getAddress(),dbAsset.getAddress())){
@@ -164,7 +165,7 @@ public class TxAssetCmd extends BaseChainCmd {
     public Response assetDisableValidator(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
+        Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
         return assetDisableValidator(asset);
     }
     private Response assetDisableValidator(Asset asset) {
@@ -209,9 +210,9 @@ public class TxAssetCmd extends BaseChainCmd {
     public Response assetDisableCommit(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
+        Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
         Response cmdResponse = assetDisableValidator(asset);
-        if(isSuccess(cmdResponse)){
+        if(cmdResponse.isSuccess()){
             return cmdResponse;
         }
         assetService.setStatus(CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId()), false);
@@ -233,7 +234,7 @@ public class TxAssetCmd extends BaseChainCmd {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset  asset = buildAssetTxData(txHex,new AssetRegTransaction());
+        Asset  asset = buildAssetTxData(txHex,new AddAssetToChainTransaction());
         /*判断资产是否可用*/
         Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(),asset.getAssetId()));
         if(null == dbAsset || dbAsset.isAvailable()){
@@ -380,7 +381,7 @@ public class TxAssetCmd extends BaseChainCmd {
             Map<String,String> fromAssetMap = fromCoinDataAssets.getAssetsMap();
             Map<String,String> toAssetMap = toCoinDataAssets.getAssetsMap();
             Response response =  assetCirculateValidator(fromChainId,toChainId,fromAssetMap,toAssetMap);
-            if(!isSuccess(response)){
+            if(!response.isSuccess()){
                 return response;
             }
             //from 的处理
@@ -390,7 +391,7 @@ public class TxAssetCmd extends BaseChainCmd {
                 String assetKey =  assetKeysIt.next();
                 ChainAsset fromChainAsset = assetService.getChainAsset(fromChainId, assetKey);
                 BigDecimal currentAsset = new BigDecimal(fromChainAsset.getOutNumber()).add(new BigDecimal(fromAssetMap.get(assetKey)));
-                fromChainAsset.setOutNumber(currentAsset.toString());
+                fromChainAsset.setOutNumber(BigIntegerUtils.stringToBigInteger(currentAsset.toString()));
                 assetService.saveOrUpdateChainAsset(fromChainId,fromChainAsset);
             }
             if(isMainChain(toChainId)){
@@ -424,11 +425,11 @@ public class TxAssetCmd extends BaseChainCmd {
                     toChainAsset = new ChainAsset();
                     toChainAsset.setChainId(asset.getChainId());
                     toChainAsset.setAssetId(asset.getAssetId());
-                    toChainAsset.setInNumber(toAssetMap.get(toAssetKey));
+                    toChainAsset.setInNumber(BigIntegerUtils.stringToBigInteger(toAssetMap.get(toAssetKey)));
                 }else{
                     BigDecimal inAsset = new BigDecimal(toChainAsset.getInNumber());
                     BigDecimal inNumberBigDec =  new BigDecimal(toAssetMap.get(toAssetKey)).add(inAsset);
-                    toChainAsset.setInNumber(inNumberBigDec.toString());
+                    toChainAsset.setInNumber(BigIntegerUtils.stringToBigInteger(inNumberBigDec.toString()));
                 }
                 assetService.saveOrUpdateChainAsset(toChainId,toChainAsset);
             }

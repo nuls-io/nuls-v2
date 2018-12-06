@@ -33,15 +33,18 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
- * @author: Niels Wang
+ * 存入数据库的委托信息类
+ * Delegation information class stored in database
+ *
+ * @author tag
+ * 2018/11/14
  */
 public class DepositPo extends BaseNulsData {
-
-
     private NulsDigestData txHash;
-    private String deposit;
+    private BigInteger deposit;
     private NulsDigestData agentHash;
     private byte[] address;
     private long time;
@@ -53,7 +56,7 @@ public class DepositPo extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(deposit);
+        stream.writeBigInteger(deposit);
         stream.writeNulsData(agentHash);
         stream.write(address);
         stream.writeUint48(time);
@@ -64,7 +67,7 @@ public class DepositPo extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.deposit = byteBuffer.readString();
+        this.deposit = byteBuffer.readBigInteger();
         this.agentHash = byteBuffer.readHash();
         this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.time = byteBuffer.readUint48();
@@ -76,7 +79,7 @@ public class DepositPo extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfString(deposit); // deposit.getValue()
+        size += SerializeUtils.sizeOfBigInteger(); // deposit.getValue()
         size += SerializeUtils.sizeOfNulsData(agentHash);
         size += address.length;
         size += SerializeUtils.sizeOfUint48();
@@ -86,11 +89,11 @@ public class DepositPo extends BaseNulsData {
         return size;
     }
 
-    public String getDeposit() {
+    public BigInteger getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(String deposit) {
+    public void setDeposit(BigInteger deposit) {
         this.deposit = deposit;
     }
 

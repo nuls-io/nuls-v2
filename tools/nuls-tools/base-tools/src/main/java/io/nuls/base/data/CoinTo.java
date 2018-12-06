@@ -12,6 +12,7 @@ import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
  * @author: Charlie
@@ -35,25 +36,25 @@ public class CoinTo extends BaseNulsData {
     private int assetsId;
 
     /**
-     * 转账金额
+     * uint128 转账金额
      */
-    private String amount;
+    private BigInteger amount;
 
     /**
-     * uint64,解锁高度或解锁时间，-1为永久锁定
+     * uint32,解锁高度或解锁时间，-1为永久锁定
      */
     private long lockTime;
 
-    public  CoinTo (){ }
+    public CoinTo(){}
 
-    public CoinTo(byte[] address,int assetsChainId,int assetsId,String amount){
+    public CoinTo(byte[] address,int assetsChainId,int assetsId,BigInteger amount){
         this.address = address;
         this.assetsChainId = assetsChainId;
         this.assetsId = assetsId;
         this.amount = amount;
     }
 
-    public CoinTo(byte[] address,int assetsChainId,int assetsId,String amount,long lockTime){
+    public CoinTo(byte[] address,int assetsChainId,int assetsId, BigInteger amount,long lockTime){
        this(address,assetsChainId,assetsId,amount);
        this.lockTime = lockTime;
     }
@@ -63,8 +64,8 @@ public class CoinTo extends BaseNulsData {
         stream.writeBytesWithLength(address);
         stream.writeUint16(assetsChainId);
         stream.writeUint16(assetsId);
-        stream.writeString(amount);
-        stream.writeUint48(lockTime);
+        stream.writeBigInteger(amount);
+        stream.writeUint32(lockTime);
     }
 
     @Override
@@ -72,8 +73,8 @@ public class CoinTo extends BaseNulsData {
         this.address = byteBuffer.readByLengthByte();
         this.assetsChainId = byteBuffer.readUint16();
         this.assetsId = byteBuffer.readUint16();
-        this.amount = byteBuffer.readString();
-        this.lockTime = byteBuffer.readUint48();
+        this.amount = byteBuffer.readBigInteger();
+        this.lockTime = byteBuffer.readUint32();
     }
 
     @Override
@@ -82,27 +83,27 @@ public class CoinTo extends BaseNulsData {
         size += SerializeUtils.sizeOfBytes(address);
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
-        size += SerializeUtils.sizeOfString(amount);
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfUint32();
         return size;
     }
 
     @JsonIgnore
     public byte[] getAddresses() {
-        byte[] address = new byte[23];
+        byte[] address = new byte[Address.ADDRESS_LENGTH];
         //如果owner不是存放的脚本则直接返回owner
-        if (address == null || address.length == 23) {
+        if (address == null || address.length == Address.ADDRESS_LENGTH) {
             return address;
         } else {
             Script scriptPubkey = new Script(address);
             //如果为P2PKH类型交易则从第四位开始返回23个字节
             if (scriptPubkey.isSentToAddress()) {
-                System.arraycopy(address, 3, address, 0, 23);
+                System.arraycopy(address, 3, address, 0, Address.ADDRESS_LENGTH);
             }
             //如果为P2SH或multi类型的UTXO则从第三位开始返回23个字节
             else if (scriptPubkey.isPayToScriptHash()) {
                 scriptPubkey.isSentToMultiSig();
-                System.arraycopy(address, 2, address, 0, 23);
+                System.arraycopy(address, 2, address, 0, Address.ADDRESS_LENGTH);
             }else{
                 throw new NulsRuntimeException(new Exception());
             }
@@ -172,11 +173,11 @@ public class CoinTo extends BaseNulsData {
         this.assetsId = assetsId;
     }
 
-    public String getAmount() {
+    public BigInteger getAmount() {
         return amount;
     }
 
-    public void setAmount(String amount) {
+    public void setAmount(BigInteger amount) {
         this.amount = amount;
     }
 

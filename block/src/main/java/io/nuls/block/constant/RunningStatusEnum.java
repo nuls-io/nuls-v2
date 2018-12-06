@@ -17,13 +17,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 package io.nuls.block.constant;
 
 /**
  * 模块运行状态枚举
  * The module runs state enumeration.
- *
- * @author: Lan
+ * @author captain
+ * @date 18-11-28 下午5:58
+ * @version 1.0
  */
 public enum RunningStatusEnum {
 
@@ -80,6 +82,12 @@ public enum RunningStatusEnum {
      * Running exception
      */
     EXCEPTION,
+
+    /**
+     * 清理数据库中
+     * Clean up the database
+     */
+    DATABASE_CLEANING,
     ;
 
     @Override

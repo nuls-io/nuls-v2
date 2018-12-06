@@ -5,88 +5,68 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
  * @author tangyi
  * @date 2018/11/12
  * @description
  */
+
+@ToString
+@NoArgsConstructor
 public class ChainAsset extends BaseNulsData {
 
+    @Getter
+    @Setter
     private int chainId;
+    @Getter
+    @Setter
     private int assetId;
-    private String initNumber="0";
-    private String inNumber="0";
-    private String outNumber="0";
+    @Getter
+    @Setter
+    private BigInteger initNumber = BigInteger.ZERO;
+    @Getter
+    @Setter
+    private BigInteger inNumber = BigInteger.ZERO;
+    @Getter
+    @Setter
+    private BigInteger outNumber = BigInteger.ZERO;
 
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
-    }
-
-    public String getInitNumber() {
-        return initNumber;
-    }
-
-    public void setInitNumber(String initNumber) {
-        this.initNumber = initNumber;
-    }
-
-    public String getInNumber() {
-        return inNumber;
-    }
-
-    public void setInNumber(String inNumber) {
-        this.inNumber = inNumber;
-    }
-
-    public String getOutNumber() {
-        return outNumber;
-    }
-
-    public void setOutNumber(String outNumber) {
-        this.outNumber = outNumber;
-    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
         stream.writeUint16(assetId);
-        stream.writeString(initNumber);
-        stream.writeString(inNumber);
-        stream.writeString(outNumber);
+        stream.writeBigInteger(initNumber);
+        stream.writeBigInteger(inNumber);
+        stream.writeBigInteger(outNumber);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
-        this.initNumber = byteBuffer.readString();
-        this.inNumber = byteBuffer.readString();
-        this.outNumber = byteBuffer.readString();
+        this.initNumber = byteBuffer.readBigInteger();
+        this.inNumber = byteBuffer.readBigInteger();
+        this.outNumber = byteBuffer.readBigInteger();
     }
 
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfUint16();
-        size += SerializeUtils.sizeOfUint48();
-        size += SerializeUtils.sizeOfUint32();
-        size += SerializeUtils.sizeOfString(inNumber);
-        size += SerializeUtils.sizeOfString(outNumber);
+        size += SerializeUtils.sizeOfUint16();
+        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfBigInteger();
+
         return size;
     }
 }

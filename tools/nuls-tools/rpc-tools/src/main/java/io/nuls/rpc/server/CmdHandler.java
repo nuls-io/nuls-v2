@@ -1,27 +1,25 @@
 /*
+ * MIT License
  *
- *  * MIT License
- *  *
- *  * Copyright (c) 2017-2018 nuls.io
- *  *
- *  * Permission is hereby granted, free of charge, to any person obtaining a copy
- *  * of this software and associated documentation files (the "Software"), to deal
- *  * in the Software without restriction, including without limitation the rights
- *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- *  * copies of the Software, and to permit persons to whom the Software is
- *  * furnished to do so, subject to the following conditions:
- *  *
- *  * The above copyright notice and this permission notice shall be included in all
- *  * copies or substantial portions of the Software.
- *  *
- *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- *  * SOFTWARE.
- *  *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
  */
 
@@ -43,72 +41,90 @@ import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Call the correct method based on request information
+ * 解析从客户端收到的消息，调用正确的方法
+ * Resolve the message received from the client and invoke the correct method
  *
  * @author tangyi
  * @date 2018/10/30
- * @description
  */
 public class CmdHandler {
+
 
     /**
      * 确认握手成功
      * Confirm successful handshake
+     *
+     * @param webSocket 用于发送消息 / Used to send message
+     * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
     static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
 
-        Message rspMsg = Constants.basicMessage(Constants.nextSequence(), MessageType.NegotiateConnectionResponse);
+        Message rspMsg = MessageUtil.basicMessage(MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 
+
     /**
      * 确认收到Request
      * Confirm receipt of Request
+     *
+     * @param webSocket 用于发送消息 / Used to send message
+     * @param messageId 原始消息ID / The origin message ID
+     * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
     static void ack(WebSocket webSocket, String messageId) throws JsonProcessingException {
         Ack ack = new Ack();
         ack.setRequestId(messageId);
 
-        Message rspMsg = Constants.basicMessage(Constants.nextSequence(), MessageType.Ack);
+        Message rspMsg = MessageUtil.basicMessage(MessageType.Ack);
         rspMsg.setMessageData(ack);
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 
+
     /**
      * 取消订阅
      * For Unsubscribe
+     *
+     * @param message 取消订阅的消息体 / Unsubscribe message
      */
-    static void unsubscribe(WebSocket webSocket, Message message) {
+    static synchronized void unsubscribe(WebSocket webSocket, Message message) {
         Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
-        for (String str : unsubscribe.getUnsubscribeMethods()) {
-            String key = webSocket.toString() + str;
-            ServerRuntime.cmdInvokeTime.put(key, Constants.UNSUBSCRIBE_TIMEMILLIS);
+        for (String requestId : unsubscribe.getUnsubscribeMethods()) {
+            ServerRuntime.UNSUBSCRIBE_LIST.add(webSocket.toString() + "_" + requestId);
         }
+        Collections.addAll(ServerRuntime.UNSUBSCRIBE_LIST, unsubscribe.getUnsubscribeMethods());
     }
 
     /**
      * 处理Request，返回bool类型表示处理完之后是保留还是丢弃
      * After current processing, do need to keep the Request information and wait for the next processing?
      * True: keep, False: remove
+     *
+     * @param webSocket 用于发送消息 / Used to send message
+     * @param messageId 原始消息ID / The origin message ID
+     * @param request   请求 / The request
+     * @return boolean
      */
-    public static boolean response(WebSocket webSocket, String messageId, Request request) {
-//        /*
-//        从Message对象中获得Request
-//        Get Request from message
-//         */
-//        String messageId = message.getMessageId();
-//        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+    static boolean responseWithPeriod(WebSocket webSocket, String messageId, Request request) {
 
-        String key = webSocket.toString() + messageId;
+        String key = webSocket.toString() + "_" + messageId;
+        if (ServerRuntime.UNSUBSCRIBE_LIST.contains(key)) {
+            Log.info("取消订阅responseWithPeriod：" + key);
+            return false;
+        }
+
+
 
         /*
         计算如何处理该Request
@@ -121,17 +137,17 @@ public class CmdHandler {
             The specific meaning of nextProcess refers to the annotation of "Constants.INVOKE_EXECUTE_KEEP"
              */
             switch (nextProcess) {
-                case Constants.INVOKE_EXECUTE_KEEP:
-                    execute(webSocket, request.getRequestMethods(), messageId);
+                case Constants.EXECUTE_AND_KEEP:
+                    callCommandsWithPeriod(webSocket, request.getRequestMethods(), messageId);
                     ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
                     return true;
-                case Constants.INVOKE_EXECUTE_REMOVE:
-                    execute(webSocket, request.getRequestMethods(), messageId);
+                case Constants.EXECUTE_AND_REMOVE:
+                    callCommandsWithPeriod(webSocket, request.getRequestMethods(), messageId);
                     ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
                     return false;
-                case Constants.INVOKE_SKIP_KEEP:
+                case Constants.SKIP_AND_KEEP:
                     return true;
-                case Constants.INVOKE_SKIP_REMOVE:
+                case Constants.SKIP_AND_REMOVE:
                     return false;
                 default:
                     return false;
@@ -145,24 +161,29 @@ public class CmdHandler {
         }
     }
 
+
     /**
      * 处理Request，自动调用正确的方法，返回结果
      * Processing Request, automatically calling the correct method, returning the result
+     *
+     * @param webSocket      用于发送消息 / Used to send message
+     * @param requestMethods 请求的方法集合 / The collections of request method
+     * @param messageId      原始消息ID / The origin message ID
+     * @throws Exception 连接失败 / Connected failed
      */
-    private static void execute(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
+    static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
         for (Object method : requestMethods.keySet()) {
 
-            long startTimemillis = TimeService.currentTimeMillis();
+
             Map params = (Map) requestMethods.get(method);
 
             /*
             构造返回的消息对象
             Construct the returned message object
              */
-            Message rspMessage = Constants.basicMessage(Constants.nextSequence(), MessageType.Response);
-            Response response = ServerRuntime.newResponse(messageId, "", "");
+            Response response = MessageUtil.newResponse(messageId, "", "");
             response.setRequestId(messageId);
-            response.setResponseStatus(Constants.booleanString(false));
+            response.setResponseStatus(Constants.BOOLEAN_FALSE);
 
             /*
             从本地注册的cmd中得到对应的方法
@@ -178,7 +199,7 @@ public class CmdHandler {
              */
             if (cmdDetail == null) {
                 response.setResponseComment(Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""));
-                response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+                Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 webSocket.send(JSONUtils.obj2json(rspMessage));
                 return;
@@ -191,75 +212,147 @@ public class CmdHandler {
             String validationString = paramsValidation(cmdDetail, params);
             if (validationString != null) {
                 response.setResponseComment(validationString);
-                response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+                Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 webSocket.send(JSONUtils.obj2json(rspMessage));
                 return;
             }
 
-            /*
-            调用本地方法，把结果封装为Message对象，通过Websocket返回
-            Call the local method, encapsulate the result as a Message object, and return it through Websocket
-             */
-            response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
-            response.setRequestId(messageId);
-            Map<String, Object> responseData = new HashMap<>(1);
-            responseData.put(method.toString(), response.getResponseData());
-            response.setResponseData(responseData);
-            response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
-            rspMessage.setMessageData(response);
-            Log.info("webSocket.send: " + JSONUtils.obj2json(rspMessage));
-
+            Message rspMessage = execute(cmdDetail, params, messageId);
+            Log.info("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
             webSocket.send(JSONUtils.obj2json(rspMessage));
         }
     }
 
     /**
+     * 调用本地方法，把结果封装为Message对象，通过Websocket返回
+     * Call the local method, encapsulate the result as a Message object, and return it through Websocket
+     *
+     * @param cmdDetail CmdDetail
+     * @param params    Map, {key, value}
+     * @param messageId 原始消息ID / The origin message ID
+     * @return Message
+     * @throws Exception 调用的方法返回的任何异常 / Any exception returned by the invoked method
+     */
+    private static Message execute(CmdDetail cmdDetail, Map params, String messageId) throws Exception {
+        long startTimemillis = TimeService.currentTimeMillis();
+        Response response = invoke(cmdDetail.getInvokeClass(), cmdDetail.getInvokeMethod(), params);
+        response.setRequestId(messageId);
+        Map<String, Object> responseData = new HashMap<>(1);
+        responseData.put(cmdDetail.getMethodName(), response.getResponseData());
+        response.setResponseData(responseData);
+        response.setResponseProcessingTime((TimeService.currentTimeMillis() - startTimemillis) + "");
+        Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
+        rspMessage.setMessageData(response);
+        return rspMessage;
+    }
+
+
+    /**
+     * 处理Request，返回bool类型表示处理完之后是保留还是丢弃
+     * After current processing, do need to keep the Request information and wait for the next processing?
+     * True: keep, False: remove
+     *
+     * @param webSocket 用于发送消息 / Used to send message
+     * @param messageId 原始消息ID / The origin message ID
+     * @param request   请求 / The request
+     * @return boolean
+     */
+    static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request) {
+        String key = webSocket.toString() + "_" + messageId;
+        if (ServerRuntime.UNSUBSCRIBE_LIST.contains(key)) {
+            Log.info("取消订阅responseWithEventCount：" + key);
+            return false;
+        }
+
+        for (Object method : request.getRequestMethods().keySet()) {
+            long changeCount = ServerRuntime.getCmdChangeCount((String) method);
+            long eventCount = Long.valueOf(request.getSubscriptionEventCounter());
+            if (changeCount == 0) {
+                continue;
+            }
+
+            if (changeCount % eventCount == 0) {
+                Object[] objects = ServerRuntime.getCmdLastValue((String) method);
+                Response response = (Response) objects[0];
+                boolean hasSent = (boolean) objects[1];
+                if (hasSent) {
+                    continue;
+                }
+
+                Map<String, Object> responseData = new HashMap<>(1);
+                responseData.put((String) method, response.getResponseData());
+                response.setResponseData(responseData);
+                response.setRequestId(messageId);
+                Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
+                rspMessage.setMessageData(response);
+                try {
+                    Log.info("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
+                    webSocket.send(JSONUtils.obj2json(rspMessage));
+                } catch (WebsocketNotConnectedException e) {
+                    Log.error("Socket disconnected, remove");
+                    return false;
+                } catch (JsonProcessingException e) {
+                    Log.error(e);
+                }
+
+                ServerRuntime.cmdLastResponse.put((String) method, new Object[]{response, true});
+            }
+        }
+        return true;
+    }
+
+
+    /**
      * 计算如何处理该Request
      * Calculate how to handle the Request
+     *
+     * @param key                Key
+     * @param subscriptionPeriod Unit: second
+     * @return int
      */
     private static int nextProcess(String key, int subscriptionPeriod) {
-        if (subscriptionPeriod <= 0) {
+        if (subscriptionPeriod == 0) {
             /*
-            不需要重复执行，返回INVOKE_EXECUTE_REMOVE（执行，然后丢弃）
-            No duplication of execution is required, return INVOKE_EXECUTE_REMOVE (execute, then discard)
+            不需要重复执行，返回EXECUTE_AND_REMOVE（执行，然后丢弃）
+            No duplication of execution is required, return EXECUTE_AND_REMOVE (execute, then discard)
              */
-            return Constants.INVOKE_EXECUTE_REMOVE;
+            return Constants.EXECUTE_AND_REMOVE;
         }
 
         if (!ServerRuntime.cmdInvokeTime.containsKey(key)) {
             /*
-            第一次执行，设置当前时间为执行时间，返回INVOKE_EXECUTE_KEEP（执行，然后保留）
-            First execution, set the current time as execution time, return INVOKE_EXECUTE_KEEP (execution, then keep)
+            第一次执行，设置当前时间为执行时间，返回EXECUTE_AND_KEEP（执行，然后保留）
+            First execution, set the current time as execution time, return EXECUTE_AND_KEEP (execution, then keep)
              */
             ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
-            return Constants.INVOKE_EXECUTE_KEEP;
-        } else if (ServerRuntime.cmdInvokeTime.get(key) == Constants.UNSUBSCRIBE_TIMEMILLIS) {
-            /*
-            得到取消订阅命令，返回INVOKE_SKIP_REMOVE（不执行，然后丢弃）
-            Get the unsubscribe command, return INVOKE_SKIP_REMOVE (not executed, then discarded)
-             */
-            ServerRuntime.cmdInvokeTime.remove(key);
-            Log.info("Remove: " + key);
-            return Constants.INVOKE_SKIP_REMOVE;
-        } else if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
-            /*
-            没有达到执行条件，返回INVOKE_SKIP_KEEP（不执行，然后保留）
-            If the execution condition is not met, return INVOKE_SKIP_KEEP (not executed, then keep)
-             */
-            return Constants.INVOKE_SKIP_KEEP;
-        } else {
-            /*
-            以上都不是，返回INVOKE_EXECUTE_KEEP（执行，然后保留）
-            None of the above, return INVOKE_EXECUTE_KEEP (execute, then keep)
-             */
-            return Constants.INVOKE_EXECUTE_KEEP;
+            return Constants.EXECUTE_AND_KEEP;
         }
+
+        if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
+            /*
+            没有达到执行条件，返回SKIP_AND_KEEP（不执行，然后保留）
+            If the execution condition is not met, return SKIP_AND_KEEP (not executed, then keep)
+             */
+            return Constants.SKIP_AND_KEEP;
+        }
+
+        /*
+        以上都不是，返回EXECUTE_AND_KEEP（执行，然后保留）
+        None of the above, return EXECUTE_AND_KEEP (execute, then keep)
+         */
+        return Constants.EXECUTE_AND_KEEP;
+
     }
+
 
     /**
      * 验证参数的有效性
      * Verify the validity of the parameters
+     *
+     * @param cmdDetail CmdDetail
+     * @param params    Parameters of remote method
+     * @return String: null means no error
      */
     private static String paramsValidation(CmdDetail cmdDetail, Map params) {
 
@@ -295,9 +388,14 @@ public class CmdHandler {
         return null;
     }
 
+
     /**
      * 验证参数是否在定义的范围内
      * Verify that the range is correct
+     *
+     * @param cmdParameter Parameter format
+     * @param params       Parameters of remote method
+     * @return boolean
      */
     private static boolean paramsRangeValidation(CmdParameter cmdParameter, Map params) {
         /*
@@ -347,6 +445,10 @@ public class CmdHandler {
     /**
      * 验证参数是否匹配定义的正则
      * Verify that parameters match defined regular expressions
+     *
+     * @param cmdParameter Parameter format
+     * @param params       Parameters of remote method
+     * @return boolean
      */
     private static boolean paramsRegexValidation(CmdParameter cmdParameter, Map params) {
         /*
@@ -378,15 +480,22 @@ public class CmdHandler {
      * Call local cmd.
      * 1. If the interface is injected via @Autowired, the injected object is used
      * 2. If the interface has no special annotations, construct a new object by reflection
+     *
+     * @param invokeClass  Class
+     * @param invokeMethod Method
+     * @param params       Parameters of remote method
+     * @return Response
+     * @throws Exception Any exceptions
      */
+    @SuppressWarnings("unchecked")
     private static Response invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
 
         Class clz = Class.forName(invokeClass);
-        @SuppressWarnings("unchecked") Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
+        Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
 
         BaseCmd cmd;
         if (SpringLiteContext.getBeanByClass(invokeClass) == null) {
-            @SuppressWarnings("unchecked") Constructor constructor = clz.getConstructor();
+            Constructor constructor = clz.getConstructor();
             cmd = (BaseCmd) constructor.newInstance();
         } else {
             cmd = (BaseCmd) SpringLiteContext.getBeanByClass(invokeClass);

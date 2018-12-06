@@ -33,7 +33,11 @@ import java.util.List;
 
 
 /**
- * @author Niels
+ * 区块基础信息类(创建区块是用)
+ * Block Foundation Information Class (Block Creation is used)
+ *
+ * @author tag
+ * 2018//11/24
  */
 public class BlockData {
     private long height;

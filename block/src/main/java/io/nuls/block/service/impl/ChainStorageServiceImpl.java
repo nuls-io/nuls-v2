@@ -50,7 +50,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     public void init(int chainId) {
         try {
             if (RocksDBService.existTable(FORK_CHAINS + chainId)) {
-                return;
+                RocksDBService.destroyTable(FORK_CHAINS + chainId);
             }
             RocksDBService.createTable(FORK_CHAINS + chainId);
         } catch (Exception e) {
@@ -70,7 +70,10 @@ public class ChainStorageServiceImpl implements ChainStorageService {
 
     @Override
     public boolean save(int chainId, Block block) throws Exception {
-        return RocksDBService.put(FORK_CHAINS + chainId, block.getHeader().getHash().getDigestBytes(), block.serialize());
+        NulsDigestData hash = block.getHeader().getHash();
+        byte[] key = hash.getDigestBytes();
+        Log.debug("save block, hash:{}", hash);
+        return RocksDBService.put(FORK_CHAINS + chainId, key, block.serialize());
     }
 
     @Override
@@ -97,6 +100,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     @Override
     public boolean remove(int chainId, List<NulsDigestData> hashList) throws Exception {
         List<byte[]> keys = hashList.stream().map(e -> e.getDigestBytes()).collect(Collectors.toList());
+        Log.debug("delete block, hash:{}", hashList.toString());
         return RocksDBService.deleteKeys(FORK_CHAINS + chainId, keys);
     }
 

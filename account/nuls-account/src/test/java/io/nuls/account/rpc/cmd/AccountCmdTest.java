@@ -15,6 +15,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Page;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.WsServer;
@@ -26,6 +27,7 @@ import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +56,7 @@ public class AccountCmdTest {
 
     @BeforeClass
     public static void start() throws Exception {
-        WsServer.mockModule();
+        NoUse.mockModule();
     }
 
     private List<String> createAccount(int chainId, int count, String password) {
@@ -730,7 +732,7 @@ public class AccountCmdTest {
             //coinData.setFrom(coinDataResult.getCoinList());
             CoinTo coin = new CoinTo();
             coin.setAddress(AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs" + HexUtil.encode(ByteUtils.shortToBytes((short) chainId))));
-            coin.setAmount("1");
+            coin.setAmount(new BigInteger("1"));
             coin.setAssetsChainId(chainId);
             coin.setAssetsId(1);
             coinData.addTo(coin);

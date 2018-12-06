@@ -3,12 +3,15 @@ package io.nuls.chain.model.dto;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.chain.model.tx.txdata.AssetTx;
-import io.nuls.chain.model.tx.txdata.ChainTx;
+import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,128 +20,57 @@ import java.util.List;
  * @date 2018/11/6
  * @description
  */
+@ToString
 public class Asset extends BaseNulsData {
+    @Getter
+    @Setter
     private int chainId;
+    @Getter
+    @Setter
     private int assetId;
+    @Getter
+    @Setter
     private String symbol;
+    @Getter
+    @Setter
     private String name;
+    @Getter
+    @Setter
     private int depositNuls;
-    private String initNumber;
+    @Getter
+    @Setter
+    private BigInteger initNumber;
+    @Getter
+    @Setter
     private short decimalPlaces;
+    @Getter
+    @Setter
     private boolean available;
+    @Getter
+    @Setter
     private long createTime;
+    @Getter
+    @Setter
     private long lastUpdateTime;
+    @Getter
+    @Setter
     private byte[] address;
+    @Getter
+    @Setter
     private String txHash;
-    /*资产流通的链集合*/
-    List<Integer> chainIds = new ArrayList();
 
-    public int getChainId() {
-        return chainId;
-    }
+    /**
+     * 资产流通的链集合
+     */
+    @Getter
+    @Setter
+    List<Integer> chainIds = new ArrayList<>();
 
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
 
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getDepositNuls() {
-        return depositNuls;
-    }
-
-    public void setDepositNuls(int depositNuls) {
-        this.depositNuls = depositNuls;
-    }
-
-    public String getInitNumber() {
-        return initNumber;
-    }
-
-    public void setInitNumber(String initNumber) {
-        this.initNumber = initNumber;
-    }
-
-    public short getDecimalPlaces() {
-        return decimalPlaces;
-    }
-
-    public void setDecimalPlaces(short decimalPlaces) {
-        this.decimalPlaces = decimalPlaces;
-    }
-
-    public boolean isAvailable() {
-        return available;
-    }
-
-    public void setAvailable(boolean available) {
-        this.available = available;
-    }
-
-    public long getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(long createTime) {
-        this.createTime = createTime;
-    }
-
-    public long getLastUpdateTime() {
-        return lastUpdateTime;
-    }
-
-    public void setLastUpdateTime(long lastUpdateTime) {
-        this.lastUpdateTime = lastUpdateTime;
-    }
-
-    public byte[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(byte[] address) {
-        this.address = address;
-    }
-
-    public String getTxHash() {
-        return txHash;
-    }
-
-    public void setTxHash(String txHash) {
-        this.txHash = txHash;
-    }
-
-    public List<Integer> getChainIds() {
-        return chainIds;
-    }
-
-    public void setChainIds(List<Integer> chainIds) {
-        this.chainIds = chainIds;
-    }
-    public void addChainId(int chainId){
+    public void addChainId(int chainId) {
         chainIds.add(chainId);
     }
+
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
@@ -146,7 +78,7 @@ public class Asset extends BaseNulsData {
         stream.writeString(symbol);
         stream.writeString(name);
         stream.writeUint32(depositNuls);
-        stream.writeString(initNumber);
+        stream.writeBigInteger(initNumber);
         stream.writeShort(decimalPlaces);
         stream.writeBoolean(available);
         stream.writeUint48(createTime);
@@ -169,17 +101,17 @@ public class Asset extends BaseNulsData {
         this.symbol = byteBuffer.readString();
         this.name = byteBuffer.readString();
         this.depositNuls = byteBuffer.readInt32();
-        this.initNumber = byteBuffer.readString();
+        this.initNumber = byteBuffer.readBigInteger();
         this.decimalPlaces = byteBuffer.readShort();
         this.available = byteBuffer.readBoolean();
         this.createTime = byteBuffer.readUint48();
         this.lastUpdateTime = byteBuffer.readUint48();
-        this.address=byteBuffer.readByLengthByte();
+        this.address = byteBuffer.readByLengthByte();
         this.txHash = byteBuffer.readString();
-        int chainIdSize = (int)byteBuffer.readVarInt();
+        int chainIdSize = (int) byteBuffer.readVarInt();
         if (0 < chainIdSize) {
             for (int i = 0; i < chainIdSize; i++) {
-                int  chainId=byteBuffer.readUint16();
+                int chainId = byteBuffer.readUint16();
                 chainIds.add(chainId);
             }
         }
@@ -198,7 +130,7 @@ public class Asset extends BaseNulsData {
         // depositNuls
         size += SerializeUtils.sizeOfInt32();
         // initNumber
-        size += SerializeUtils.sizeOfString(initNumber);
+        size += SerializeUtils.sizeOfBigInteger();
         // decimalPlaces
         size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfBoolean();
@@ -206,33 +138,34 @@ public class Asset extends BaseNulsData {
         size += SerializeUtils.sizeOfUint48();
         // lastUpdateTime
         size += SerializeUtils.sizeOfUint48();
-        size+=SerializeUtils.sizeOfBytes(address);
+        size += SerializeUtils.sizeOfBytes(address);
         size += SerializeUtils.sizeOfString(txHash);
 
-        size+= SerializeUtils.sizeOfVarInt(chainIds == null ? 0 : chainIds.size());
+        size += SerializeUtils.sizeOfVarInt(chainIds == null ? 0 : chainIds.size());
         if (null != chainIds) {
-            for (int chainId : chainIds) {
-                size += SerializeUtils.sizeOfUint16();
-            }
+            size += SerializeUtils.sizeOfUint16() * chainIds.size();
         }
         return size;
     }
-    public byte [] parseToTransaction() throws IOException {
-        AssetTx assetTx = new AssetTx();
-        assetTx.setAddress(this.getAddress());
-        assetTx.setAssetId(this.getAssetId());
-        assetTx.setChainId(this.getChainId());
-        assetTx.setDecimalPlaces(this.getDecimalPlaces());
-        assetTx.setDepositNuls(this.getDepositNuls());
-        assetTx.setInitNumber(this.getInitNumber());
-        assetTx.setName(this.getName());
-        assetTx.setSymbol(this.getSymbol());
-        return assetTx.serialize();
+
+    public byte[] parseToTransaction() throws IOException {
+        TxChain txChain = new TxChain();
+        txChain.setAddress(this.getAddress());
+        txChain.setAssetId(this.getAssetId());
+        txChain.setChainId(this.getChainId());
+        txChain.setDecimalPlaces(this.getDecimalPlaces());
+        txChain.setDepositNuls(this.getDepositNuls());
+        txChain.setInitNumber(this.getInitNumber());
+        txChain.setName(this.getName());
+        txChain.setSymbol(this.getSymbol());
+        return txChain.serialize();
     }
-    public Asset(int assetId){
+
+    public Asset(int assetId) {
         this.assetId = assetId;
     }
-    public Asset(AssetTx tx){
+
+    public Asset(TxChain tx) {
         this.address = tx.getAddress();
         this.assetId = tx.getAssetId();
         this.chainId = tx.getChainId();
@@ -242,17 +175,8 @@ public class Asset extends BaseNulsData {
         this.symbol = tx.getSymbol();
         this.name = tx.getName();
     }
-    public Asset(ChainTx tx){
-        this.address = tx.getAddress();
-        this.assetId = tx.getAssetId();
-        this.chainId = tx.getChainId();
-        this.decimalPlaces = tx.getDecimalPlaces();
-        this.depositNuls = tx.getDepositNuls();
-        this.initNumber = tx.getInitNumber();
-        this.symbol = tx.getSymbol();
-        this.name = tx.getName();
-    }
-    public Asset(){
+
+    public Asset() {
         super();
     }
 }

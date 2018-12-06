@@ -28,7 +28,6 @@ package io.nuls.poc.model.bo.round;
 import io.nuls.base.data.Address;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.utils.manager.ConfigManager;
-import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.thread.TimeService;
@@ -40,25 +39,52 @@ import java.util.Date;
 import java.util.List;
 
 /**
+ * 轮次信息类
+ * Information about rotation
+ *
  * @author tag
  * 2018/11/12
  */
 public class MeetingRound {
-    //总权重
+    /*
+    总权重
+    Total weight
+    */
     private double totalWeight;
-    //本地打包节点在当前轮次的下标
+    /*
+    本地打包节点在当前轮次的下标
+    Subscription of Local Packing Node in Current Round
+    */
     private long index;
-    //当前轮次开始打包时间
+    /*
+    当前轮次开始打包时间
+    Current Round Start Packing Time
+    */
     private long startTime;
-    //当前轮次打包结束时间
+    /*
+    当前轮次打包结束时间
+    End time of front packing
+    */
     private long endTime;
-    //当前轮次打包节点数量
+    /*
+    当前轮次打包节点数量
+    Number of Packing Nodes in Current Round
+    */
     private int memberCount;
-    //当前轮次打包成员列表
+    /*
+    当前轮次打包成员列表
+    Current rounds packaged membership list
+    */
     private List<MeetingMember> memberList;
-    //上一轮次信息
+    /*
+    上一轮轮次信息
+    Last round of information
+    */
     private MeetingRound preRound;
-    //本地打包成员
+    /*
+    本地打包成员信息
+    Locally packaged member information
+    */
     private MeetingMember myMember;
 
     public MeetingRound getPreRound() {
@@ -85,7 +111,14 @@ public class MeetingRound {
         return memberCount;
     }
 
-    public void init(List<MeetingMember> memberList,int chain_id) {
+    /**
+     * 初始化轮次信息
+     * Initialization Round Information
+     *
+     * @param memberList 打包成员信息列表/Packaged Member Information List
+     * @param chainId   链ID/chain id
+     * */
+    public void init(List<MeetingMember> memberList,int chainId) {
         assert (startTime > 0L);
         this.memberList = memberList;
         if (null == memberList || memberList.isEmpty()) {
@@ -99,12 +132,15 @@ public class MeetingRound {
             member = memberList.get(i);
             member.setRoundStartTime(this.getStartTime());
             member.setPackingIndexOfRound(i + 1);
-            member.setPackStartTime(startTime + i * ConfigManager.config_map.get(chain_id).getPacking_interval());
-            member.setPackEndTime(member.getPackStartTime() + ConfigManager.config_map.get(chain_id).getPacking_interval());
-            String allDeposit = BigIntegerUtils.addToString(member.getAgent().getTotalDeposit(),member.getAgent().getDeposit());
-            totalWeight += DoubleUtils.round(DoubleUtils.mul( new BigDecimal(allDeposit),member.getAgent().getCreditVal()).doubleValue());
+            member.setPackStartTime(startTime + i * ConfigManager.config_map.get(chainId).getPackingInterval());
+            member.setPackEndTime(member.getPackStartTime() + ConfigManager.config_map.get(chainId).getPackingInterval());
+            /*
+            轮次总权重等于所有节点权重之和，节点权重=(保证金+总委托金额)*节点信用值
+            Round total weight equals the sum of all node weights, node weight = (margin + total Commission amount)* node credit value
+            */
+            totalWeight += DoubleUtils.mul(member.getAgent().getCreditVal(),new BigDecimal(member.getAgent().getTotalDeposit().add(member.getAgent().getDeposit())));
         }
-        endTime = startTime + memberCount * ConfigManager.config_map.get(chain_id).getPacking_interval();
+        endTime = startTime + memberCount * ConfigManager.config_map.get(chainId).getPackingInterval();
     }
 
     public MeetingMember getMember(int order) {
@@ -126,6 +162,10 @@ public class MeetingRound {
         return null;
     }
 
+    /**
+    * 根据节点地址获取节点对应的打包信息
+    * Get the packing information corresponding to the node according to the address of the node
+    */
     public MeetingMember getMemberByAgentAddress(byte[] address) {
         for (MeetingMember member : memberList) {
             if (Arrays.equals(address, member.getAgent().getAgentAddress())) {

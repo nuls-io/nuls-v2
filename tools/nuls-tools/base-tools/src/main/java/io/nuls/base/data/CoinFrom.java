@@ -7,6 +7,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
  * @author: Charlie
@@ -30,19 +31,20 @@ public class CoinFrom extends BaseNulsData {
     private int assetsId;
 
     /**
-     * 转出数量
+     * uint128 转出数量
      */
-    private String amount;
+    private BigInteger amount;
 
     /**
-     * uint32 交易顺序号，递增
+     * byte[8]
      */
     private byte[] nonce;
 
     /**
      * 0普通交易，-1解锁金额交易（退出共识，退出委托）
      */
-    private long lockTime;
+    private byte locked;
+
 
     public  CoinFrom(){}
 
@@ -52,14 +54,14 @@ public class CoinFrom extends BaseNulsData {
         this.assetsId = assetsId;
     }
 
-    public CoinFrom(byte[] address,int assetsChainId,int assetsId,String amount,long lockTime){
+    public CoinFrom(byte[] address,int assetsChainId,int assetsId, BigInteger amount,byte locked){
         this(address,assetsChainId,assetsId);
         this.amount = amount;
-        this.lockTime = lockTime;
+        this.locked = locked;
     }
 
-    public CoinFrom(byte[] address,int assetsChainId,int assetsId,String amount,byte[] nonce,long lockTime){
-        this(address,assetsChainId,assetsId,amount,lockTime);
+    public CoinFrom(byte[] address,int assetsChainId,int assetsId, BigInteger amount,byte[] nonce,byte locked){
+        this(address,assetsChainId,assetsId,amount,locked);
         this.nonce = nonce;
     }
 
@@ -68,9 +70,9 @@ public class CoinFrom extends BaseNulsData {
         stream.writeBytesWithLength(address);
         stream.writeUint16(assetsChainId);
         stream.writeUint16(assetsId);
-        stream.writeString(amount);
+        stream.writeBigInteger(amount);
         stream.writeBytesWithLength(nonce);
-        stream.writeUint48(lockTime);
+        stream.write(locked);
     }
 
     @Override
@@ -78,20 +80,20 @@ public class CoinFrom extends BaseNulsData {
         this.address = byteBuffer.readByLengthByte();
         this.assetsChainId = byteBuffer.readUint16();
         this.assetsId = byteBuffer.readUint16();
-        this.amount = byteBuffer.readString();
+        this.amount = byteBuffer.readBigInteger();
         this.nonce = byteBuffer.readByLengthByte();
-        this.lockTime = byteBuffer.readUint48();
+        this.locked = byteBuffer.readByte();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfBytes(address);
+        size += Address.ADDRESS_LENGTH;
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
-        size += SerializeUtils.sizeOfString(amount);
-        size += SerializeUtils.sizeOfBytes(nonce);
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfNonce();
+        size += 1;
         return size;
     }
 
@@ -103,6 +105,7 @@ public class CoinFrom extends BaseNulsData {
                 ", assetsId=" + assetsId +
                 ", amount=" + amount +
                 ", nonce=" + nonce +
+                ", locked=" + locked +
                 '}';
     }
 
@@ -130,11 +133,11 @@ public class CoinFrom extends BaseNulsData {
         this.assetsId = assetsId;
     }
 
-    public String getAmount() {
+    public BigInteger getAmount() {
         return amount;
     }
 
-    public void setAmount(String amount) {
+    public void setAmount(BigInteger amount) {
         this.amount = amount;
     }
 
@@ -143,14 +146,16 @@ public class CoinFrom extends BaseNulsData {
     }
 
     public void setNonce(byte[] nonce) {
+
         this.nonce = nonce;
     }
 
-    public long getLockTime() {
-        return lockTime;
+    public byte getLocked() {
+        return locked;
     }
 
-    public void setLockTime(long lockTime) {
-        this.lockTime = lockTime;
+    public void setLocked(byte locked) {
+        this.locked = locked;
     }
+
 }

@@ -35,21 +35,21 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashSet;
 import java.util.Set;
 
 /**
- * @author Niels
+ * 委托信息类
+ * Delegated information class
+ *
+ * @author tag
+ * 2018/11/28
  */
 public class Deposit extends TransactionLogicData {
-
-
-    private String deposit;
-
+    private BigInteger deposit;
     private NulsDigestData agentHash;
-
     private byte[] address;
-
     private transient long time;
     private transient int status;
     private transient NulsDigestData txHash;
@@ -61,7 +61,7 @@ public class Deposit extends TransactionLogicData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(deposit);
+        stream.writeBigInteger(deposit);
         stream.write(address);
         stream.writeNulsData(agentHash);
 
@@ -69,24 +69,25 @@ public class Deposit extends TransactionLogicData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.deposit = byteBuffer.readString();
+        this.deposit = byteBuffer.readBigInteger();
         this.address = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.agentHash = byteBuffer.readHash();
     }
 
+    @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfString(deposit); // deposit.getValue()
+        size += SerializeUtils.sizeOfBigInteger(); // deposit.getValue()
         size += Address.ADDRESS_LENGTH;
         size += this.agentHash.size();
         return size;
     }
 
-    public String getDeposit() {
+    public BigInteger getDeposit() {
         return deposit;
     }
 
-    public void setDeposit(String deposit) {
+    public void setDeposit(BigInteger deposit) {
         this.deposit = deposit;
     }
 
@@ -146,6 +147,7 @@ public class Deposit extends TransactionLogicData {
         this.address = address;
     }
 
+    @Override
     public Set<byte[]> getAddresses() {
         Set<byte[]> addressSet = new HashSet<>();
         addressSet.add(this.address);
