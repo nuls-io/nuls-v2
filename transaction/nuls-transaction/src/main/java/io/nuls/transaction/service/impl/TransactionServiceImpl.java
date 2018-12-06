@@ -280,6 +280,7 @@ public class TransactionServiceImpl implements TransactionService {
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
+                feeCoinFrom.setNonce(TxUtil.getNonce(address, TxConstant.NUlS_CHAINID, TxConstant.NUlS_CHAIN_ASSETID));
                 txSize += feeCoinFrom.size();
                 //todo 新增coinfrom，重新计算本交易预计收取的手续费  跨链交易手续费单价？？
                 targetFee = TransactionFeeCalculator.getMaxFee(txSize);
@@ -292,7 +293,7 @@ public class TransactionServiceImpl implements TransactionService {
                 feeCoinFrom.setAssetsChainId(TxConstant.NUlS_CHAINID);
                 feeCoinFrom.setAssetsId(TxConstant.NUlS_CHAIN_ASSETID);
                 feeCoinFrom.setAmount(fee);
-                feeCoinFrom.setNonce(TxUtil.getNonce(address, TxConstant.NUlS_CHAINID, TxConstant.NUlS_CHAIN_ASSETID));
+
                 iterator.add(feeCoinFrom);
                 actualFee = actualFee.add(fee);
                 if(BigIntegerUtils.isEqualOrGreaterThan(actualFee, targetFee)){
