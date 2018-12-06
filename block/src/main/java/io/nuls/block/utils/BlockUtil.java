@@ -296,6 +296,14 @@ public class BlockUtil {
         return smallBlock;
     }
 
+    /**
+     * 根据smallblock和txmap组装一个完整区块
+     *
+     * @param header
+     * @param txMap
+     * @param txHashList
+     * @return
+     */
     public static Block assemblyBlock(BlockHeader header, Map<NulsDigestData, Transaction> txMap, List<NulsDigestData> txHashList) {
         Block block = new Block();
         block.setHeader(header);

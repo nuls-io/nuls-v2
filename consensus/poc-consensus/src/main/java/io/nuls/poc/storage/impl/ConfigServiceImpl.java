@@ -2,10 +2,9 @@ package io.nuls.poc.storage.impl;
 
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.storage.ConfigService;
-import io.nuls.poc.constant.ConsensusConstant;
-import io.nuls.poc.utils.manager.ConfigManager;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
@@ -31,12 +30,7 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
         if(bean == null){
             return  false;
         }
-        boolean dbSuccess = RocksDBService.put(ConsensusConstant.DB_NAME_CONSUME_CONGIF, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(bean));
-        if(!dbSuccess){
-            return false;
-        }
-        ConfigManager.config_map.put(chainID,bean);
-        return true;
+        return RocksDBService.put(ConsensusConstant.DB_NAME_CONSUME_CONGIF, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(bean));
     }
 
     @Override
@@ -53,12 +47,7 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
     @Override
     public boolean delete(int chainID) {
         try {
-            boolean dbSuccess = RocksDBService.delete(ConsensusConstant.DB_NAME_CONSUME_CONGIF,ByteUtils.intToBytes(chainID));
-            if(!dbSuccess){
-                return false;
-            }
-            ConfigManager.config_map.remove(chainID);
-            return true;
+            return RocksDBService.delete(ConsensusConstant.DB_NAME_CONSUME_CONGIF,ByteUtils.intToBytes(chainID));
         }catch (Exception e){
             Log.error(e);
             return  false;
@@ -69,7 +58,7 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
     public Map<Integer, ConfigBean> getList() {
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSUME_CONGIF);
-            Map<Integer, ConfigBean> configBeanMap = new HashMap<>();
+            Map<Integer, ConfigBean> configBeanMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             for (Entry<byte[], byte[]>entry:list) {
                 int key = ByteUtils.bytesToInt(entry.getKey());
                 ConfigBean value = ObjectUtils.bytesToObject(entry.getValue());

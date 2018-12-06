@@ -65,15 +65,12 @@ public class WsM1 {
         System.out.println(bigDecimal.toBigInteger().intValue());
         System.out.println(new BigInteger("10").divide(new BigInteger("4")));
 
-        int a=11;
-        long b=11L;
-        System.out.println(a==b);
     }
 
     @Test
     public void handshake() throws Exception {
         Constants.kernelUrl = "ws://127.0.0.1:8887";
-        System.out.println("handshake:" + CmdDispatcher.handshakeManager());
+        System.out.println("handshake:" + CmdDispatcher.handshakeKernel());
     }
 
     @Test
@@ -88,7 +85,7 @@ public class WsM1 {
                 .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
-        CmdDispatcher.syncManager();
+        CmdDispatcher.syncKernel();
 
         Thread.sleep(Integer.MAX_VALUE);
     }
@@ -120,13 +117,16 @@ public class WsM1 {
 
         // Call cmd, auto invoke local method after response
         String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getBalance", params, "0","3", new EventCounterInvoke());
-        Thread.sleep(10000);
+        String messageId2 = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getBalance", params, "0","5", new EventCounterInvoke());
+        System.out.println("接下来会不停打印GetBalance，");
+        Thread.sleep(20000);
 
         // Unsubscribe
+        System.out.println("接下来会5秒进入一次EventCount");
         CmdDispatcher.sendUnsubscribe(messageId);
 
-        Thread.sleep(5000);
-        CmdDispatcher.sendUnsubscribe(messageId1);
+        Thread.sleep(20000);
+        //CmdDispatcher.sendUnsubscribe(messageId1);
 
         System.out.println("我开始一次调用多个方法");
         Request request = MessageUtil.defaultRequest();
@@ -146,5 +146,6 @@ public class WsM1 {
         System.out.println("RESPONSE_AUTO_QUEUE："+ClientRuntime.RESPONSE_AUTO_QUEUE.size());
         System.out.println("NEGOTIATE_RESPONSE_QUEUE："+ClientRuntime.NEGOTIATE_RESPONSE_QUEUE.size());
         System.out.println("ACK_QUEUE："+ClientRuntime.ACK_QUEUE.size());
+
     }
 }

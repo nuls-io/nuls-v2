@@ -1,70 +1,88 @@
 package io.nuls.eventbus;
 
-import io.nuls.eventbus.dispatcher.Dispatcher;
-import io.nuls.eventbus.event.DeadEvent;
-import io.nuls.eventbus.handler.SubscriberExceptionHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.nuls.eventbus.model.Subscriber;
+import io.nuls.eventbus.model.Topic;
 
-import java.util.Iterator;
-import java.util.concurrent.Executor;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
-/**
- * 事件总线
- * <p>
- * 转发事件到每个订阅者
- * Event Bus
- * Dispatches events to subscriber
- * Created by wangkun23 on 2018/10/16.
- */
 public class EventBus {
-    final Logger logger = LoggerFactory.getLogger(EventBus.class);
-    private final SubscriberRegistry subscribers = new SubscriberRegistry(this);
 
-    private final Executor executor;
-    private final SubscriberExceptionHandler exceptionHandler;
-    private final Dispatcher dispatcher;
+    public static EventBus INSTANCE;
 
-    EventBus(Executor executor,
-             Dispatcher dispatcher,
-             SubscriberExceptionHandler exceptionHandler) {
-        this.executor = executor;
-        this.dispatcher = dispatcher;
-        this.exceptionHandler = exceptionHandler;
-    }
+    private ConcurrentMap<String, Topic> topicMap = new ConcurrentHashMap<>();
 
-    /**
-     * 订阅者注册后，可以接口所有事件
-     * Registers all subscriber to receive events.
-     *
-     * @param object object whose subscriber should be registered.
-     */
-    public void register(Object object) {
-        logger.info("register new subscriber");
-    }
+    private EventBus(){}
 
-    /**
-     * 订阅者取消注册
-     * Unregisters all subscriber
-     */
-    public void unregister(Object object) {
-        logger.info("subscriber has been unregistered");
-    }
+    public static EventBus getInstance(){
 
-    /**
-     * 发送事件
-     * Posts an event to all registered subscribers.
-     *
-     * @param event event to post.
-     */
-    public void post(Object event) {
-        Iterator<Subscriber> eventSubscribers = subscribers.getSubscribers(event);
-        if (eventSubscribers.hasNext()) {
-            dispatcher.dispatch(event, eventSubscribers);
-        } else if (!(event instanceof DeadEvent)) {
-            // the event had no subscribers and was not itself a DeadEvent
-            post(new DeadEvent(this, event));
+        if(INSTANCE == null){
+            synchronized (EventBus.class){
+                if(INSTANCE == null){
+                    INSTANCE = new EventBus();
+                }
+            }
         }
+        return INSTANCE;
     }
 
+    public int subscribe(Map<String,Object> params){
+        String topicId = (String)params.get("topic");
+        Subscriber subscriber = buildSubscriber(params);
+        synchronized (this){
+            if(topicMap.containsKey(topicId)){
+                Topic topic = topicMap.get(topicId);
+                topicMap.put(topicId,topic.addSubscriber(subscriber));
+            }else{
+                //TODO change this  with proper code return
+                return 1;
+            }
+        }
+        //TODO change this  with proper code return
+        return 0;
+    }
+    public int unsubscribe(Map<String,Object> params){
+        String topicId = (String)params.get("topic");
+        Subscriber subscriber = buildSubscriber(params);
+        synchronized (this){
+            if(topicMap.containsKey(topicId)){
+                Topic topic = topicMap.get(topicId);
+                topicMap.put(topicId,topic.removeSubscriber(subscriber));
+            }else{
+                return 1;
+            }
+        }
+        return 0;
+    }
+
+    public Set<Subscriber> publish(Map<String,Object> params){
+        String topicId = (String)params.get("topic");
+        String abbr = (String)params.get("abbr");
+        String moduleName = (String)params.get("moduleName");
+        String domain = (String)params.get("domain");
+        Object data = params.get("data");
+        Topic topic = null;
+
+        synchronized (this){
+            if(topicMap.containsKey(topicId)){
+                topic = topicMap.get(topicId);
+            }else{
+                topic = new Topic(topicId,abbr,moduleName,domain);
+                topicMap.put(topicId,topic);
+            }
+        }
+
+        return topic.getSubscribers();
+    }
+
+    private Subscriber buildSubscriber(Map<String,Object> params){
+        String abbr = (String)params.get("abbr");
+        String moduleName = (String)params.get("moduleName");
+        String domain = (String)params.get("domain");
+        String url = (String)params.get("url");
+        return new Subscriber(url,abbr,moduleName,domain);
+    }
 }

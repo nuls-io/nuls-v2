@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -35,12 +35,18 @@ import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author: Niels Wang
  * @date: 2018/10/15
  */
 public class LedgerBootstrap {
+
+    static final Logger logger = LoggerFactory.getLogger(LedgerBootstrap.class);
+
+
     public static void main(String[] args) {
         Log.info("ledger Bootstrap start...");
         try {
@@ -68,7 +74,8 @@ public class LedgerBootstrap {
     public static void initServer() {
         try {
             String packageC = "io.nuls.ledger.rpc.cmd";
-            String kernelUrl = AppConfig.moduleConfig.getKernelHost()+":"+AppConfig.moduleConfig.getKernelPort();
+            String kernelUrl = AppConfig.moduleConfig.getKernelHost() + ":" + AppConfig.moduleConfig.getKernelPort();
+            logger.info("kernel start info {}", kernelUrl);
             WsServer.getInstance(ModuleE.LG)
                     //.supportedAPIVersions(new String[]{"1.1", "1.2"})
                     .moduleRoles(ModuleE.LG.abbr, new String[]{"1.1", "1.2"})

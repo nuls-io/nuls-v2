@@ -41,7 +41,6 @@ import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,9 +100,8 @@ public class CmdHandler {
     static synchronized void unsubscribe(WebSocket webSocket, Message message) {
         Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
         for (String requestId : unsubscribe.getUnsubscribeMethods()) {
-            ServerRuntime.UNSUBSCRIBE_LIST.add(webSocket.toString() + "_" + requestId);
+            ServerRuntime.UNSUBSCRIBE_LIST.add(ServerRuntime.genUnsubscribeKey(webSocket, requestId));
         }
-        Collections.addAll(ServerRuntime.UNSUBSCRIBE_LIST, unsubscribe.getUnsubscribeMethods());
     }
 
     /**
@@ -118,13 +116,11 @@ public class CmdHandler {
      */
     static boolean responseWithPeriod(WebSocket webSocket, String messageId, Request request) {
 
-        String key = webSocket.toString() + "_" + messageId;
+        String key = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
         if (ServerRuntime.UNSUBSCRIBE_LIST.contains(key)) {
             Log.info("取消订阅responseWithPeriod：" + key);
             return false;
         }
-
-
 
         /*
         计算如何处理该Request
@@ -173,8 +169,6 @@ public class CmdHandler {
      */
     static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
         for (Object method : requestMethods.keySet()) {
-
-
             Map params = (Map) requestMethods.get(method);
 
             /*
@@ -259,9 +253,9 @@ public class CmdHandler {
      * @return boolean
      */
     static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request) {
-        String key = webSocket.toString() + "_" + messageId;
-        if (ServerRuntime.UNSUBSCRIBE_LIST.contains(key)) {
-            Log.info("取消订阅responseWithEventCount：" + key);
+        String unsubscribeKey = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
+        if (ServerRuntime.UNSUBSCRIBE_LIST.contains(unsubscribeKey)) {
+            Log.info("取消订阅responseWithEventCount：" + unsubscribeKey);
             return false;
         }
 
@@ -273,9 +267,9 @@ public class CmdHandler {
             }
 
             if (changeCount % eventCount == 0) {
-                Object[] objects = ServerRuntime.getCmdLastValue((String) method);
-                Response response = (Response) objects[0];
-                boolean hasSent = (boolean) objects[1];
+                Response response = ServerRuntime.getCmdLastValue((String) method);
+                String eventCountKey = ServerRuntime.genEventCountKey(webSocket, messageId, (String) method);
+                boolean hasSent = ServerRuntime.hasSent(eventCountKey);
                 if (hasSent) {
                     continue;
                 }
@@ -296,7 +290,7 @@ public class CmdHandler {
                     Log.error(e);
                 }
 
-                ServerRuntime.cmdLastResponse.put((String) method, new Object[]{response, true});
+                ServerRuntime.cmdLastResponseBeUsed.put(eventCountKey, true);
             }
         }
         return true;
@@ -489,7 +483,6 @@ public class CmdHandler {
      */
     @SuppressWarnings("unchecked")
     private static Response invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
-
         Class clz = Class.forName(invokeClass);
         Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
 

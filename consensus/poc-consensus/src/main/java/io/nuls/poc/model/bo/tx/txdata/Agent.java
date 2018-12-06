@@ -31,7 +31,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.poc.utils.manager.ConfigManager;
+import io.nuls.poc.model.bo.Chain;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -253,16 +253,16 @@ public class Agent extends TransactionLogicData {
     * 就算节点剩余可委托金额
     * Even if the remaining amount of the node can be delegated
     **/
-    public BigInteger getAvailableDepositAmount(int chainId) {
-        return ConfigManager.config_map.get(chainId).getCommissionMax().subtract(this.getTotalDeposit());
+    public BigInteger getAvailableDepositAmount(Chain chain) {
+        return chain.getConfig().getCommissionMax().subtract(this.getTotalDeposit());
     }
 
     /**
     * 判断该节点是否可委托
     * Determine whether the node can be delegated
     * */
-    public boolean canDeposit(int chainId) {
-        int flag = getAvailableDepositAmount(chainId).compareTo(ConfigManager.config_map.get(chainId).getCommissionMin());
+    public boolean canDeposit(Chain chain) {
+        int flag = getAvailableDepositAmount(chain).compareTo(chain.getConfig().getCommissionMin());
         if(flag >= 1){
             return true;
         }

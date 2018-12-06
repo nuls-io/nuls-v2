@@ -38,28 +38,26 @@ import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
 
 /**
  * 处理收到的{@link CompleteMessage}
+ *
  * @author captain
- * @date 18-11-14 下午4:23
  * @version 1.0
+ * @date 18-11-14 下午4:23
  */
 @Component
 public class CompleteHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = COMPLETE_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Object process(Map map){
-        Integer chainId = Integer.parseInt(map.get("chainId").toString());
-        String nodeId = map.get("nodes").toString();
+    public Object process(Map map) {
         CompleteMessage message = new CompleteMessage();
-
-        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
+            byte[] decode = HexUtil.decode(map.get("messageBody").toString());
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
             Log.warn(e.getMessage());
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        if(message == null) {
+        if (message == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         CacheHandler.requestComplete(message);

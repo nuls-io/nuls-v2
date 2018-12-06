@@ -26,7 +26,8 @@ public class TransactionTest {
         coinFrom.setAssetsChainId(1);
         coinFrom.setAssetsId(2);
         coinFrom.setLocked((byte)0);
-        coinFrom.setNonce("abcdefg".getBytes());
+        byte[] nonce = new byte[8];
+        coinFrom.setNonce(nonce);
         System.out.println(JSONUtils.obj2json(coinFrom));
         return coinFrom;
     }

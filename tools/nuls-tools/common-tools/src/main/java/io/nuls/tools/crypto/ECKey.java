@@ -66,6 +66,7 @@ public class ECKey {
     private static final X9ECParameters CURVE_PARAMS = CustomNamedCurves.getByName("secp256k1");
     public static final ECDomainParameters CURVE;
     public static final BigInteger HALF_CURVE_ORDER;
+    public static final int SIGNUM = 1;
     /**
      * 随机种子
      */

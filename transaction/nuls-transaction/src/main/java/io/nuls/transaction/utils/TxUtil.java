@@ -73,4 +73,9 @@ public class TxUtil {
         //todo 查余额;
         return BigInteger.TEN;
     }
+
+    public static String getPrikey(String address, String password){
+        //todo 查私钥;
+        return "";
+    }
 }

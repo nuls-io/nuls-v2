@@ -94,7 +94,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
                 }
             }
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
         return aliasPoList;
@@ -128,21 +128,22 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
 
     @Override
     public AliasPo getAliasByAddress(int chainId, String address) {
+        AliasPo aliasPo;
         if (!AddressTool.validAddress(chainId, address)) {
             Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
-            return null;
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
-        byte[] aliasBytes = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS + chainId, AddressTool.getAddress(address));
-        if (null == aliasBytes) {
-            return null;
-        }
-        AliasPo aliasPo = new AliasPo();
         try {
+            byte[] aliasBytes = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS + chainId, AddressTool.getAddress(address));
+            if (null == aliasBytes) {
+                return null;
+            }
+            aliasPo = new AliasPo();
             //将byte数组反序列化为AliasPo返回
             aliasPo.parse(aliasBytes, 0);
         } catch (Exception e) {
-            Log.error(e.getMessage());
-            throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
+            Log.error("",e);
+            throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR, e);
         }
         return aliasPo;
     }
@@ -198,8 +199,8 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
         try {
             return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId, StringUtils.bytes(alias));
         } catch (Exception e) {
-            Log.error(e);
-            throw new NulsRuntimeException(AccountErrorCode.DB_DELETE_ERROR);
+            Log.error("",e);
+            throw new NulsRuntimeException(AccountErrorCode.DB_DELETE_ERROR,e);
         }
     }
 
