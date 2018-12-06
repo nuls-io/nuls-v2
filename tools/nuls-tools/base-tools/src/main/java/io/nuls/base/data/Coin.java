@@ -1,14 +1,18 @@
-/*
+/**
  * MIT License
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,50 +22,65 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.message.body;
+package io.nuls.base.data;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
-
-import java.io.IOException;
+import java.math.BigInteger;
 
 /**
- * 转发区块消息
- * @author captain
- * @date 18-11-9 下午2:37
- * @version 1.0
+ * @author: Charlie
+ * @date: 2018-12-05
  */
-@Data
-public class ForwardSmallBlockMessageBody extends MessageBody {
+public abstract class Coin extends BaseNulsData {
 
-    private int chainID;
-    private NulsDigestData blockHash;
+    /**
+     * byte[24] 账户地址
+     */
+    protected byte[] address;
 
-    public ForwardSmallBlockMessageBody() {
+    /**
+     * uint16 资产发行链的id
+     */
+    protected int assetsChainId;
+
+    /**
+     * uint16 资产id
+     */
+    protected int assetsId;
+
+    /**
+     * uint128 数量
+     */
+    protected BigInteger amount;
+
+    public byte[] getAddress() {
+        return address;
     }
 
-    @Override
-    public int size() {
-        int size = 0;
-        size += SerializeUtils.sizeOfInt32();
-        size += SerializeUtils.sizeOfNulsData(blockHash);
-        return size;
+    public void setAddress(byte[] address) {
+        this.address = address;
     }
 
-    @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint32(chainID);
-        stream.writeNulsData(blockHash);
+    public int getAssetsChainId() {
+        return assetsChainId;
     }
 
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainID = byteBuffer.readInt32();
-        this.blockHash = byteBuffer.readHash();
+    public void setAssetsChainId(int assetsChainId) {
+        this.assetsChainId = assetsChainId;
     }
 
+    public int getAssetsId() {
+        return assetsId;
+    }
+
+    public void setAssetsId(int assetsId) {
+        this.assetsId = assetsId;
+    }
+
+    public BigInteger getAmount() {
+        return amount;
+    }
+
+    public void setAmount(BigInteger amount) {
+        this.amount = amount;
+    }
 }

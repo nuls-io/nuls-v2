@@ -1,14 +1,18 @@
-/*
+/**
  * MIT License
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,40 +22,53 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.message;
+package io.nuls.transaction.model.dto;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.message.BaseMessage;
-import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.message.body.GetTxGroupMessageBody;
-import io.nuls.tools.exception.NulsException;
-import lombok.Data;
+
+import java.util.Arrays;
 
 /**
- * 批量请求交易消息
- *
- * @author captain
- * @version 1.0
- * @date 18-11-9 下午2:37
+ * @author: Charlie
+ * @date: 2018-12-05
  */
-@Data
-public class GetTxGroupMessage extends BaseMessage<GetTxGroupMessageBody> {
+public class BlockHeaderDigestDTO {
+
+    private byte[] blockHeaderHash;
+
+    private long height;
+
+    private long time;
+
+    public byte[] getBlockHeaderHash() {
+        return blockHeaderHash;
+    }
+
+    public void setBlockHeaderHash(byte[] blockHeaderHash) {
+        this.blockHeaderHash = blockHeaderHash;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
     @Override
-    public GetTxGroupMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
-        try {
-            return byteBuffer.readNulsData(new GetTxGroupMessageBody());
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
+    public String toString() {
+        return "BlockHeaderDigestDTO{" +
+                "blockHeaderHash=" + Arrays.toString(blockHeaderHash) +
+                ", height=" + height +
+                ", time=" + time +
+                '}';
     }
-
-    public GetTxGroupMessage() {
-        super(CommandConstant.GET_TXGROUP_MESSAGE);
-    }
-
-    public GetTxGroupMessage(long magicNumber, String cmd, GetTxGroupMessageBody body) {
-        super(cmd, magicNumber);
-        this.setMsgBody(body);
-    }
-
 }

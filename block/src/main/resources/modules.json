@@ -49,9 +49,9 @@
   },
   {
     "name": "cacheSize",
-    "remark": "分叉链缓存大小",
+    "remark": "分叉链、孤儿链缓存区块最大数量",
     "readOnly": "true",
-    "value": "524288000"
+    "value": "1000"
   },
   {
     "name": "heightRange",

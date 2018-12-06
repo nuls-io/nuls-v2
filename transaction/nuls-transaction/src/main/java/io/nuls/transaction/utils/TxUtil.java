@@ -24,8 +24,10 @@
 
 package io.nuls.transaction.utils;
 
-import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.Coin;
 import io.nuls.transaction.constant.TxConstant;
+
+import java.math.BigInteger;
 
 /**
  * @author: Charlie
@@ -33,11 +35,8 @@ import io.nuls.transaction.constant.TxConstant;
  */
 public class TxUtil {
 
-
-
-
-    public static boolean isCurrentChainMainAsset(CoinFrom coinFrom){
-        return isCurrentChainMainAsset(coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+    public static boolean isCurrentChainMainAsset(Coin coin){
+        return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
     }
 
     public static boolean isCurrentChainMainAsset(int chainId, int assetId){
@@ -48,6 +47,10 @@ public class TxUtil {
         return false;
     }
 
+    public static boolean isNulsAsset(Coin coin){
+        return isNulsAsset(coin.getAssetsChainId(), coin.getAssetsId());
+    }
+
     public static boolean isNulsAsset(int chainId, int assetId){
         if(chainId == TxConstant.NUlS_CHAINID
                 && assetId ==TxConstant.NUlS_CHAIN_ASSETID) {
@@ -56,7 +59,18 @@ public class TxUtil {
         return false;
     }
 
-    public static boolean isNulsAsset(CoinFrom coinFrom){
-        return isNulsAsset(coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+    public static boolean assetExist(int chainId, int assetId){
+        //todo 查资产是否存在
+        return false;
+    }
+
+    public static byte[] getNonce(byte[] address, int chainId, int assetId){
+        //todo 查nonce
+        return new byte[8];
+    }
+
+    public static BigInteger getBalance(byte[] address, int chainId, int assetId){
+        //todo 查余额;
+        return BigInteger.TEN;
     }
 }

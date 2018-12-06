@@ -32,10 +32,10 @@ import io.nuls.network.model.message.body.MessageBody;
 import io.nuls.tools.exception.NulsException;
 
 /**
- * @program: nuls2.0
- * @description: peer连接主动断开，拒绝业务消息连接
- * @author: lan
- * @create: 2018/11/13
+ *
+ * @description  peer连接主动断开，拒绝业务消息连接
+ * @author lan
+ * @date 2018/11/13
  **/
 public class ByeMessage extends BaseMessage {
     @Override

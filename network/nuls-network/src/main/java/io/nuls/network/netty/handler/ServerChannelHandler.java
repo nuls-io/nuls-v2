@@ -129,8 +129,4 @@ public class ServerChannelHandler extends BaseChannelHandler {
         Log.info("-----------------server channelInactive  node is channelUnregistered -----------------");
     }
 
-    @Override
-    protected boolean validChannel(ChannelHandlerContext ctx) {
-        return true;
-    }
 }

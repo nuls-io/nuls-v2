@@ -35,8 +35,10 @@ import static io.nuls.block.constant.Constant.CLEAN_PARAM;
 import static io.nuls.block.constant.Constant.FORK_CHAINS;
 
 /**
- * 分叉链、孤儿链数据库定时清理器，如果某链ID的数据库超出cacheSize(可配置)，就按排序清理分叉链与孤儿链
- * 因为使用了rocksDb，清理记录后，数据文件大小不能实时变化，所以每次按链的百分比进行固定清理
+ * 分叉链、孤儿链数据库定时清理器
+ * 因为使用了rocksDb，清理记录后，数据文件大小不能实时变化，所以不能按数据库文件大小来做判断标准，每次按链的百分比进行固定清理
+ * 触发条件:为某链ID的数据库缓存的区块总数超过超出cacheSize(可配置)
+ *
  * @author captain
  * @version 1.0
  * @date 18-11-14 下午3:54
@@ -64,9 +66,10 @@ public class ChainsDbSizeMonitor implements Runnable {
                     return;
                 }
                 //获取配置项
-                long cacheSize = Long.parseLong(ConfigManager.getValue(chainId, ConfigConstant.CACHE_SIZE));
+                int cacheSize = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.CACHE_SIZE));
                 //1.获取某链ID的数据库文件大小
-                long actualSize = FileSize.getFolderSize(FORK_CHAINS + chainId);
+                int actualSize = ChainManager.getForkChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
+                actualSize += ChainManager.getOrphanChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
                 Log.info("chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
                 //与阈值比较
                 if (actualSize > cacheSize) {

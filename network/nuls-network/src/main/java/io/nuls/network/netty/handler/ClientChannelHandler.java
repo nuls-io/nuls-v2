@@ -62,8 +62,14 @@ public class ClientChannelHandler extends BaseChannelHandler {
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
     }
-    @Override
-    protected   boolean validChannel(ChannelHandlerContext ctx){
+    /**
+     * 校验channel是否可用
+     * Verify that the channel is available
+     * @param ctx
+     * @param magicNumber
+     * @return
+     */
+    protected   boolean validChannel(ChannelHandlerContext ctx,long magicNumber){
         Channel channel = ctx.channel();
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         String remoteIP = socketChannel.remoteAddress().getHostString();
@@ -75,7 +81,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
             return false;
         }
         //already exist peer ip （In or Out）
-        if( ConnectionManager.getInstance().isPeerConnectExist(remoteIP)){
+        if( ConnectionManager.getInstance().isPeerConnectExceedMaxIn(remoteIP,magicNumber,1)){
             Log.info("dup connect,close channel");
             channel.close();
             return false;
@@ -85,12 +91,13 @@ public class ClientChannelHandler extends BaseChannelHandler {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        if(!validChannel(ctx)){
-            return;
-        }
         Channel channel = ctx.channel();
         Attribute<Node> nodeAttribute = channel.attr(key);
         Node node = nodeAttribute.get();
+        NodeGroupConnector nodeGroupConnector=node.getFirstNodeGroupConnector();
+        if(!validChannel(ctx,nodeGroupConnector.getMagicNumber())){
+            return;
+        }
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         String remoteIP = socketChannel.remoteAddress().getHostString();
         node.setChannel(channel);
@@ -105,7 +112,6 @@ public class ClientChannelHandler extends BaseChannelHandler {
             return;
         }
         //非本机,发送version
-        NodeGroupConnector nodeGroupConnector=node.getFirstNodeGroupConnector();
         nodeGroupConnector.setStatus(NodeGroupConnector.CONNECTING);
         VersionMessage versionMessage=MessageFactory.getInstance().buildVersionMessage(node,nodeGroupConnector.getMagicNumber());
         if(null == versionMessage){

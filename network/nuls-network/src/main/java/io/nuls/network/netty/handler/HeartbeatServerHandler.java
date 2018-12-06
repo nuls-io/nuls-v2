@@ -56,8 +56,4 @@ public class HeartbeatServerHandler extends BaseChannelHandler {
         }
     }
 
-    @Override
-    protected boolean validChannel(ChannelHandlerContext ctx) {
-        return true;
-    }
 }

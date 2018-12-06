@@ -68,12 +68,12 @@ public interface NetworkConstant {
     String NETWORK_MOON_SEED_IP = "network.moon.seed.ip";
 
     String CMD_MESSAGE_VERSION = "version";
-    String CMD_MESSAGE_VERACK = "verack";
+    String CMD_MESSAGE_VERACK = "verAck";
     String CMD_MESSAGE_ADDR = "addr";
-    String CMD_MESSAGE_GET_ADDR = "getaddr";
+    String CMD_MESSAGE_GET_ADDR = "getAddr";
     String CMD_MESSAGE_BYE = "bye";
-
-
+    String CMD_MESSAGE_GET_TIME = "getTime";
+    String CMD_MESSAGE_RESPONSE_TIME = "responseTime";
     /**
      * --------[DB tables] -------
      */

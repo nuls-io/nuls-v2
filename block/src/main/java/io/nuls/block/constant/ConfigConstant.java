@@ -57,7 +57,7 @@ public interface ConfigConstant {
      */
     String CHAIN_SWTICH_THRESHOLD = "chainSwtichThreshold";
     /**
-     * 分叉链、孤儿链区块最大缓存大小
+     * 分叉链、孤儿链区块最大缓存数量
      */
     String CACHE_SIZE = "cacheSize";
     /**

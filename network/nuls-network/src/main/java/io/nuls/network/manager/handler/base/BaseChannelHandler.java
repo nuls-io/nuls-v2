@@ -29,6 +29,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
 import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.model.Node;
 
 /**
  * channel handler
@@ -50,7 +51,7 @@ public abstract class BaseChannelHandler  extends ChannelInboundHandlerAdapter {
     }
 
     /**
-     * 判断是否跨连连接
+     * 判断是否跨链连接
      *Determine whether to connect across connections
      * @param channel
      * @return
@@ -64,12 +65,7 @@ public abstract class BaseChannelHandler  extends ChannelInboundHandlerAdapter {
         return false;
     }
 
-    /**
-     * 校验channel是否可用
-     * Verify that the channel is available
-     * @param ctx
-     * @return
-     */
-    protected abstract boolean validChannel(ChannelHandlerContext ctx);
+
+
 
 }
