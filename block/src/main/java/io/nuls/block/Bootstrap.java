@@ -136,7 +136,7 @@ public class Bootstrap {
                 .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
-        CmdDispatcher.syncManager();
+        CmdDispatcher.syncKernel();
     }
 
     private static void startDaemonThreads() {

@@ -20,6 +20,7 @@
 
 package io.nuls.block.rpc;
 
+import com.google.common.base.Preconditions;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.block.cache.SmallBlockCacheManager;
@@ -115,7 +116,8 @@ public class SmallBlockHandler extends BaseCmd {
         //共识节点打包的交易包括两种交易，一种是在网络上已经广播的普通交易，一种是共识节点生成的特殊交易(如共识奖励、红黄牌)，后面一种交易其他节点的未确认交易池中不可能有，所以都放在SubTxList中
         //还有一种场景时收到smallBlock时，有一些普通交易还没有缓存在未确认交易池中，此时要再从源节点请求
         Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());
-        for (Transaction tx : smallBlock.getSubTxList()) {
+        List<Transaction> subTxList = smallBlock.getSubTxList();
+        for (Transaction tx : subTxList) {
             txMap.put(tx.getHash(), tx);
         }
         List<NulsDigestData> needHashList = new ArrayList<>();
@@ -124,7 +126,7 @@ public class SmallBlockHandler extends BaseCmd {
             if (null == tx) {
                 tx = TransactionUtil.getTransaction(chainId, hash);
                 if (tx != null) {
-                    smallBlock.getSubTxList().add(tx);
+                    subTxList.add(tx);
                     txMap.put(hash, tx);
                 }
             }
@@ -146,7 +148,7 @@ public class SmallBlockHandler extends BaseCmd {
 
         Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
         if (blockService.saveBlock(chainId, block)) {
-            smallBlockCacheManager.cacheSmallBlock(smallBlock);
+            smallBlockCacheManager.cacheSmallBlock(BlockUtil.getSmallBlock(chainId, block));
             blockService.forwardBlock(chainId, headerHash, nodeId);
         } else {
             Log.error("save fail! chainId:{}, height:{}, hash:{}", chainId, header.getHeight(), headerHash);

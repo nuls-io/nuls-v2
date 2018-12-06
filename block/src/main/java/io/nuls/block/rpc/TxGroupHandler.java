@@ -98,7 +98,7 @@ public class TxGroupHandler extends BaseCmd {
 
         Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
         if (blockService.saveBlock(chainId, block)) {
-            smallBlockCacheManager.cacheSmallBlock(smallBlock);
+            smallBlockCacheManager.cacheSmallBlock(BlockUtil.getSmallBlock(chainId, block));
             blockService.forwardBlock(chainId, headerHash, nodeId);
         } else {
             Log.error("save fail! chainId:{}, height:{}, hash:{}", chainId, header.getHeight(), headerHash);

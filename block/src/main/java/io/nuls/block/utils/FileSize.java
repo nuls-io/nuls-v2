@@ -32,6 +32,7 @@ import java.util.concurrent.RecursiveTask;
 import static io.nuls.block.constant.Constant.DATA_PATH;
 
 /**
+ * todo 待删除
  * 文件工具类
  * @author captain
  * @date 18-11-28 下午4:47
