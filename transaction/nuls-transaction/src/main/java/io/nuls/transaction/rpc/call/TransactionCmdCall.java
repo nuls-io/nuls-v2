@@ -15,8 +15,8 @@ import java.util.Map;
 public class TransactionCmdCall {
 
     /**
-     * 交易确认提交
-     * Transaction processor commit
+     * 调用其他模块接口
+     * Call other module interfaces
      */
     public static HashMap request(String cmd,String moduleCode,Map params) {
         HashMap result = new HashMap();
