@@ -120,13 +120,16 @@ public class WsM1 {
 
         // Call cmd, auto invoke local method after response
         String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getBalance", params, "0","3", new EventCounterInvoke());
-        Thread.sleep(10000);
+        String messageId2 = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getBalance", params, "0","5", new EventCounterInvoke());
+        System.out.println("接下来会不停打印GetBalance，");
+        Thread.sleep(20000);
 
         // Unsubscribe
+        System.out.println("接下来会5秒进入一次EventCount");
         CmdDispatcher.sendUnsubscribe(messageId);
 
-        Thread.sleep(5000);
-        CmdDispatcher.sendUnsubscribe(messageId1);
+        Thread.sleep(20000);
+        //CmdDispatcher.sendUnsubscribe(messageId1);
 
         System.out.println("我开始一次调用多个方法");
         Request request = MessageUtil.defaultRequest();
