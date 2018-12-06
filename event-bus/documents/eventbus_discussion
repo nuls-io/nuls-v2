@@ -1,0 +1,26 @@
+Event Bus Module Implementation discussion:
+==========================================
+
+->EventBus module implementation is bit different than other modules with respect to dependencies.
+->EventBus can't set dependencies while bootstrapping as we dont' know how many modules(roles) actually uses EventBus.
+   So we can't predict dependent modules(roles) at start up
+-> Also, we can't just add all modules in the system as dependencies to EventBus. It won't work when we have many modules in future
+
+Proposed implementation:
+--------------
+-> No dependencies will be set up during EventBus bootstrapping
+-> If any module/role subscribes to a topic, get connection information of that module from manager module and store that information at EventBus
+   Challenge here is: We need to have api command at manager module to get desired module connection information
+   Currently, we can get this information with "registerApi" command but it is called during module start up
+-> EventBus should be able to create WsClient. But, there is no mehod exposed as public in rpc-tools to create WsClient
+    EventBus uses this method to create WsClient to dispatch the published event
+   ClientRuntime.java - 
+		static WsClient getWsClient(String url) throws Exception {}   - this should be made as public in order to create WsClient outside of the package
+		
+		Currently it is package private. I can't create WsClient in EventBus module
+		
+-> There is no method available to send Ack message(just acknowledge message, no data at all) in rpc-tools
+		CmdHandler.java:
+		static void ack(WebSocket webSocket, String messageId) throws JsonProcessingException {}  - this mehod also package private, can't call this from other module
+		
+		
