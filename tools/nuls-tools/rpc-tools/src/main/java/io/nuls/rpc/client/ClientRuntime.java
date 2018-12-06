@@ -160,7 +160,7 @@ public class ClientRuntime {
      * @return 与url对应的客户端对象，WsClient object corresponding to URL
      * @throws Exception 连接失败，Connect failed
      */
-    static WsClient getWsClient(String url) throws Exception {
+    public static WsClient getWsClient(String url) throws Exception {
         if (!wsClientMap.containsKey(url)) {
             /*
             如果是第一次连接，则先放入集合

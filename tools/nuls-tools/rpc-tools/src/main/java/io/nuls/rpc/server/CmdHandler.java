@@ -122,8 +122,6 @@ public class CmdHandler {
             return false;
         }
 
-
-
         /*
         计算如何处理该Request
         Calculate how to handle the Request
@@ -171,8 +169,6 @@ public class CmdHandler {
      */
     static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
         for (Object method : requestMethods.keySet()) {
-
-
             Map params = (Map) requestMethods.get(method);
 
             /*
@@ -272,7 +268,7 @@ public class CmdHandler {
 
             if (changeCount % eventCount == 0) {
                 Response response = ServerRuntime.getCmdLastValue((String) method);
-                String eventCountKey=ServerRuntime.genEventCountKey(webSocket,messageId,(String)method);
+                String eventCountKey = ServerRuntime.genEventCountKey(webSocket, messageId, (String) method);
                 boolean hasSent = ServerRuntime.hasSent(eventCountKey);
                 if (hasSent) {
                     continue;
@@ -487,7 +483,6 @@ public class CmdHandler {
      */
     @SuppressWarnings("unchecked")
     private static Response invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
-
         Class clz = Class.forName(invokeClass);
         Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
 
