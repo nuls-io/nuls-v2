@@ -73,7 +73,7 @@ public class WsM1 {
     @Test
     public void handshake() throws Exception {
         Constants.kernelUrl = "ws://127.0.0.1:8887";
-        System.out.println("handshake:" + CmdDispatcher.handshakeManager());
+        System.out.println("handshake:" + CmdDispatcher.handshakeKernel());
     }
 
     @Test
@@ -88,7 +88,7 @@ public class WsM1 {
                 .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
-        CmdDispatcher.syncManager();
+        CmdDispatcher.syncKernel();
 
         Thread.sleep(Integer.MAX_VALUE);
     }

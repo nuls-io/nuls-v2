@@ -40,7 +40,7 @@ public class NoUse {
         wsServer.scanPackage("io.nuls.rpc.cmd.kernel").connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
-        CmdDispatcher.syncManager();
+        CmdDispatcher.syncKernel();
 
         Thread.sleep(Integer.MAX_VALUE);
     }
@@ -57,6 +57,6 @@ public class NoUse {
                 .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
-        CmdDispatcher.syncManager();
+        CmdDispatcher.syncKernel();
     }
 }

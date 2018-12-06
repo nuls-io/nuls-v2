@@ -80,7 +80,7 @@ public class WsServer extends WebSocketServer {
         与核心模块（Manager）握手
         Shake hands with the core module (Manager)
          */
-        if (!CmdDispatcher.handshakeManager()) {
+        if (!CmdDispatcher.handshakeKernel()) {
             throw new Exception("Handshake kernel failed");
         } else {
             Log.info("Connect manager success." + ServerRuntime.local.getModuleName() + " ready!");
