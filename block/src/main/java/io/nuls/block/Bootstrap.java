@@ -79,9 +79,6 @@ public class Bootstrap {
             BlockService service = ContextManager.getServiceBean(BlockService.class);
             service.init(CHAIN_ID);
 
-            //交易注册，用于创世块
-            TransactionManager.putTx(Transaction.class, null);
-
             //5.rpc服务初始化
 //            rpcInit();
 

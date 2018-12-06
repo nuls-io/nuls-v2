@@ -55,7 +55,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link HashMessage}
+ * 处理收到的{@link HashMessage}，用于区块的广播与转发
  *
  * @author captain
  * @version 1.0

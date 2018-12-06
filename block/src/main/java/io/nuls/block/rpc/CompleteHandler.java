@@ -37,7 +37,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
 
 /**
- * 处理收到的{@link CompleteMessage}
+ * 处理收到的{@link CompleteMessage}，用于区块的同步
  *
  * @author captain
  * @version 1.0

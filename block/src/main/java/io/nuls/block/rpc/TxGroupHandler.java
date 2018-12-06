@@ -44,7 +44,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
 
 /**
- * 处理收到的{@link TxGroupMessage}
+ * 处理收到的{@link TxGroupMessage}，用于区块的广播与转发
  *
  * @author captain
  * @version 1.0
