@@ -18,10 +18,10 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
     private TransactionStorageService transactionStorageService;
 
     @Override
-    public Transaction getTransaction(NulsDigestData hash) {
-        if(null == hash){
+    public Transaction getTransaction(int chainId, NulsDigestData hash) {
+        if (null == hash) {
             return null;
         }
-        return transactionStorageService.getTx(hash);
+        return transactionStorageService.getTx(chainId, hash);
     }
 }

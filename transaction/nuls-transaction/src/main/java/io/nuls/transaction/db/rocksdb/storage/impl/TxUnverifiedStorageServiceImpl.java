@@ -33,11 +33,13 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
+import io.nuls.transaction.model.bo.TxWrapper;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
 import java.io.IOException;
 
 /**
+ * 未验证交易存储
  * @author: qinyifeng
  * @date: 2018/11/29
  */
@@ -50,9 +52,9 @@ public class TxUnverifiedStorageServiceImpl implements TxUnverifiedStorageServic
     }
 
     @Override
-    public boolean putTx(Transaction tx) {
+    public boolean putTx(TxWrapper txWrapper) {
         try {
-            queue.offer(tx.serialize());
+            queue.offer(txWrapper.serialize());
             return true;
         } catch (IOException e) {
             Log.error(e);
@@ -61,13 +63,15 @@ public class TxUnverifiedStorageServiceImpl implements TxUnverifiedStorageServic
     }
 
     @Override
-    public Transaction pollTx() {
+    public TxWrapper pollTx() {
         byte[] bytes = queue.poll();
         if (null == bytes) {
             return null;
         }
         try {
-            return TransactionManager.getInstance(new NulsByteBuffer(bytes));
+            TxWrapper txWrapper=new TxWrapper();
+            txWrapper.parse(new NulsByteBuffer(bytes));
+            return txWrapper;
         } catch (Exception e) {
             Log.error(e);
         }

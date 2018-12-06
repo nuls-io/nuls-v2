@@ -24,7 +24,7 @@
  */
 package io.nuls.transaction.db.rocksdb.storage;
 
-import io.nuls.base.data.Transaction;
+import io.nuls.transaction.model.bo.TxWrapper;
 
 /**
  * 本链内发起的所有未验证的交易，包括普通交易和跨链交易
@@ -34,7 +34,16 @@ import io.nuls.base.data.Transaction;
  */
 public interface TxUnverifiedStorageService {
 
-    boolean putTx(Transaction tx);
+    /**
+     * 保存未验证交易数据到FS队列中
+     * @param txWrapper 交易数据封装对象
+     * @return
+     */
+    boolean putTx(TxWrapper txWrapper);
 
-    Transaction pollTx();
+    /**
+     * 从FS队列中获取未验证交易数据
+     * @return
+     */
+    TxWrapper pollTx();
 }

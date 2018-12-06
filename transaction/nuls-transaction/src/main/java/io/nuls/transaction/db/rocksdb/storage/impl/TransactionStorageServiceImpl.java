@@ -12,6 +12,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.db.rocksdb.storage.TransactionStorageService;
+import io.nuls.transaction.model.bo.TxWrapper;
 import io.nuls.transaction.utils.DBUtil;
 
 import java.io.IOException;
@@ -31,10 +32,12 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
     }
 
     @Override
-    public boolean saveTx(Transaction tx) {
-        if (tx == null) {
+    public boolean saveTx(TxWrapper txWrapper) {
+        if (txWrapper == null) {
             return false;
         }
+        Transaction tx = txWrapper.getTx();
+        int chainId=txWrapper.getChainId();
         byte[] txHashBytes = null;
         try {
             txHashBytes = tx.getHash().serialize();
@@ -44,7 +47,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
         }
         boolean result = false;
         try {
-            result = RocksDBService.put(TRANSACTION_CONFIRMED, txHashBytes, tx.serialize());
+            result = RocksDBService.put(TRANSACTION_CONFIRMED + chainId, txHashBytes, tx.serialize());
         } catch (Exception e) {
             Log.error(e);
         }
@@ -52,7 +55,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
     }
 
     @Override
-    public Transaction getTx(NulsDigestData hash) {
+    public Transaction getTx(int chainId,NulsDigestData hash) {
         if (hash == null) {
             return null;
         }
@@ -63,7 +66,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        byte[] txBytes = RocksDBService.get(TRANSACTION_CONFIRMED, hashBytes);
+        byte[] txBytes = RocksDBService.get(TRANSACTION_CONFIRMED+ chainId, hashBytes);
         Transaction tx = null;
         if (null != txBytes) {
             try {
@@ -77,7 +80,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
     }
 
     @Override
-    public boolean removeTx(NulsDigestData hash) {
+    public boolean removeTx(int chainId,NulsDigestData hash) {
         if (hash == null) {
             return false;
         }
