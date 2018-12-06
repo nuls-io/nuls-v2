@@ -31,6 +31,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.CmdParameter;
 import io.nuls.rpc.model.message.*;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
@@ -114,7 +115,7 @@ public class CmdHandler {
      * @param request   请求 / The request
      * @return boolean
      */
-    static boolean responseWithPeriod(WebSocket webSocket, String messageId, Request request) {
+    public static boolean responseWithPeriod(WebSocket webSocket, String messageId, Request request) {
 
         String key = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
         if (ServerRuntime.UNSUBSCRIBE_LIST.contains(key)) {
@@ -167,7 +168,7 @@ public class CmdHandler {
      * @param messageId      原始消息ID / The origin message ID
      * @throws Exception 连接失败 / Connected failed
      */
-    static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
+    public static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
         for (Object method : requestMethods.keySet()) {
             Map params = (Map) requestMethods.get(method);
 
@@ -252,7 +253,7 @@ public class CmdHandler {
      * @param request   请求 / The request
      * @return boolean
      */
-    static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request) {
+    public static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request) {
         String unsubscribeKey = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
         if (ServerRuntime.UNSUBSCRIBE_LIST.contains(unsubscribeKey)) {
             Log.info("取消订阅responseWithEventCount：" + unsubscribeKey);

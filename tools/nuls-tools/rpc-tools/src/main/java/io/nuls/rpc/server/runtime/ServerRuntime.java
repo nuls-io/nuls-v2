@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.rpc.server;
+package io.nuls.rpc.server.runtime;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.*;
@@ -59,7 +59,7 @@ public class ServerRuntime {
      * Key: Websocket+cmd
      * Value: Time(long)
      */
-    static Map<String, Long> cmdInvokeTime = new HashMap<>();
+    public static Map<String, Long> cmdInvokeTime = new HashMap<>();
 
     /**
      * 接口返回值改变次数
@@ -83,7 +83,7 @@ public class ServerRuntime {
      * Key: WebSocket+MessageId+cmd
      * Value: Boolean
      */
-    static Map<String, Boolean> cmdLastResponseBeUsed = new HashMap<>();
+    public static Map<String, Boolean> cmdLastResponseBeUsed = new HashMap<>();
 
     /**
      * 本模块配置信息
@@ -98,32 +98,32 @@ public class ServerRuntime {
      * 单次响应队列，数组的第一个元素是Websocket对象，数组的第二个元素是Message
      * Single called queue. The first element of the array is the websocket object, and the second element of the array is Message.
      */
-    static final Queue<Object[]> REQUEST_SINGLE_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> REQUEST_SINGLE_QUEUE = new ConcurrentLinkedQueue<>();
 
     /**
      * 多次响应队列（根据Period），数组的第一个元素是Websocket对象，数组的第二个元素是Message
      * Multiply called queue (Period). The first element of the array is the websocket object, and the second element of the array is Message.
      */
-    static final Queue<Object[]> REQUEST_PERIOD_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> REQUEST_PERIOD_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
 
     /**
      * 多次响应队列（根据Event count），数组的第一个元素是Websocket对象，数组的第二个元素是Message
      * Multiply called queue (Event count). The first element of the array is the websocket object, and the second element of the array is Message.
      */
-    static final Queue<Object[]> REQUEST_EVENT_COUNT_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> REQUEST_EVENT_COUNT_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
 
     /**
      * 取消订阅列表
      * Unsubscribe list
      */
-    static final List<String> UNSUBSCRIBE_LIST = Collections.synchronizedList(new ArrayList<>());
+    public static final List<String> UNSUBSCRIBE_LIST = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Return the first item of REQUEST_SINGLE_QUEUE
      *
      * @return Object[]
      */
-    static Object[] firstObjArrInRequestSingleQueue() {
+    public static Object[] firstObjArrInRequestSingleQueue() {
         return firstObjArrInQueue(REQUEST_SINGLE_QUEUE);
     }
 
@@ -132,7 +132,7 @@ public class ServerRuntime {
      *
      * @return Object[]
      */
-    static Object[] firstObjArrInRequestPeriodLoopQueue() {
+    public static Object[] firstObjArrInRequestPeriodLoopQueue() {
         return firstObjArrInQueue(REQUEST_PERIOD_LOOP_QUEUE);
     }
 
@@ -141,7 +141,7 @@ public class ServerRuntime {
      *
      * @return Object[]
      */
-    static Object[] firstObjArrInRequestEventCountLoopQueue() {
+    public static Object[] firstObjArrInRequestEventCountLoopQueue() {
         return firstObjArrInQueue(REQUEST_EVENT_COUNT_LOOP_QUEUE);
     }
 
@@ -166,7 +166,7 @@ public class ServerRuntime {
      * @param minVersion Version of remote method
      * @return CmdDetail
      */
-    static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
+    public static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
         /*
         根据version排序
@@ -221,7 +221,7 @@ public class ServerRuntime {
      * @param cmd Command of remote method
      * @return CmdDetail
      */
-    static CmdDetail getLocalInvokeCmd(String cmd) {
+    public static CmdDetail getLocalInvokeCmd(String cmd) {
 
         local.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
@@ -251,7 +251,7 @@ public class ServerRuntime {
      * @param packageName Package full path
      * @throws Exception Duplicate commands found
      */
-    static void scanPackage(String packageName) throws Exception {
+    public static void scanPackage(String packageName) throws Exception {
         /*
         路径为空，跳过
         The path is empty, skip
@@ -386,7 +386,7 @@ public class ServerRuntime {
      * @param cmd Command of remote method
      * @return long
      */
-    static int getCmdChangeCount(String cmd) {
+    public static int getCmdChangeCount(String cmd) {
         try {
             return cmdChangeCount.get(cmd);
         } catch (Exception e) {
@@ -412,7 +412,7 @@ public class ServerRuntime {
      * @param cmd Command of remote method
      * @return Response
      */
-    static Response getCmdLastValue(String cmd) {
+    public static Response getCmdLastValue(String cmd) {
         return cmdLastResponse.get(cmd);
     }
 
@@ -423,7 +423,7 @@ public class ServerRuntime {
      * @param key genKey
      * @return boolean
      */
-    static boolean hasSent(String key) {
+    public static boolean hasSent(String key) {
         return cmdLastResponseBeUsed.get(key) == null
                 ? false
                 : cmdLastResponseBeUsed.get(key);
@@ -451,7 +451,7 @@ public class ServerRuntime {
      * @param messageId Message ID
      * @return The key
      */
-    static String genUnsubscribeKey(WebSocket webSocket, String messageId) {
+    public static String genUnsubscribeKey(WebSocket webSocket, String messageId) {
         return webSocket.toString() + "_" + messageId;
     }
 
@@ -461,7 +461,7 @@ public class ServerRuntime {
      * @param cmd       Command of remote method
      * @return The key
      */
-    static String genEventCountKey(WebSocket webSocket, String messageId, String cmd) {
+    public static String genEventCountKey(WebSocket webSocket, String messageId, String cmd) {
         return webSocket.toString() + "_" + messageId + "_" + cmd;
     }
 }

@@ -25,6 +25,7 @@
 
 package io.nuls.rpc.client;
 
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Response;
@@ -47,7 +48,7 @@ import java.util.Map;
  */
 public class WsClient extends WebSocketClient {
 
-    WsClient(String url) throws URISyntaxException {
+    public WsClient(String url) throws URISyntaxException {
         super(new URI(url));
     }
 
