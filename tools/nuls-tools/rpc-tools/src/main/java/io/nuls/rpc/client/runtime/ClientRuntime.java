@@ -22,16 +22,16 @@
  * SOFTWARE.
  *
  */
-package io.nuls.rpc.client;
+package io.nuls.rpc.client.runtime;
 
+import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.tools.thread.TimeService;
 import org.java_websocket.WebSocket;
 
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
@@ -82,7 +82,7 @@ public class ClientRuntime {
      * When calling a remote method, you can set the local method for automatic callback
      * Key: MessageId that calls remote methods, Value: Local method of automatic callback
      */
-    static final Map<String, BaseInvoke> INVOKE_MAP = new ConcurrentHashMap<>();
+    public static final Map<String, BaseInvoke> INVOKE_MAP = new ConcurrentHashMap<>();
 
     /**
      * 连接其他模块的客户端集合
@@ -91,7 +91,7 @@ public class ClientRuntime {
      * Client Set Connecting Other Modules
      * Key: url(ex: ws://127.0.0.1:8887), Value: WsClient object
      */
-    static Map<String, WsClient> wsClientMap = new ConcurrentHashMap<>();
+    public static Map<String, WsClient> wsClientMap = new ConcurrentHashMap<>();
 
     /**
      * messageId对应的客户端对象，用于取消订阅的Request
@@ -100,14 +100,14 @@ public class ClientRuntime {
      * WsClient object corresponding to messageId, used to unsubscribe the Request
      * key: messageId, value: WsClient
      */
-    static ConcurrentMap<String, WsClient> msgIdKeyWsClientMap = new ConcurrentHashMap<>();
+    public static ConcurrentMap<String, WsClient> msgIdKeyWsClientMap = new ConcurrentHashMap<>();
 
 
     /**
      * 根据角色返回角色的连接信息
      * Return the role's connection information based on the role
      */
-    static String getRemoteUri(String role) {
+    public static String getRemoteUri(String role) {
         Map map = roleMap.get(role);
         return map == null
                 ? null
@@ -117,28 +117,28 @@ public class ClientRuntime {
     /**
      * @return 第一条握手确认消息，The first handshake confirmed message
      */
-    static Message firstMessageInNegotiateResponseQueue() {
+    public static Message firstMessageInNegotiateResponseQueue() {
         return firstMessageInQueue(NEGOTIATE_RESPONSE_QUEUE);
     }
 
     /**
      * @return 第一条确认消息，The first ack message
      */
-    static Message firstMessageInAckQueue() {
+    public static Message firstMessageInAckQueue() {
         return firstMessageInQueue(ACK_QUEUE);
     }
 
     /**
      * @return 第一条需要手动处理的Response消息，The first Response message that needs to be handled manually
      */
-    static Message firstMessageInResponseManualQueue() {
+    public static Message firstMessageInResponseManualQueue() {
         return firstMessageInQueue(RESPONSE_MANUAL_QUEUE);
     }
 
     /**
      * @return 第一条需要自动处理的Response消息，The first Response message that needs to be handled automatically
      */
-    static Message firstMessageInResponseAutoQueue() {
+    public static Message firstMessageInResponseAutoQueue() {
         return firstMessageInQueue(RESPONSE_AUTO_QUEUE);
     }
 

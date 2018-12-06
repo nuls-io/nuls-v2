@@ -28,7 +28,7 @@
 package io.nuls.rpc.cmd.kernel;
 
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.client.ClientRuntime;
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;

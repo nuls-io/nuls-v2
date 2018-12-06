@@ -3,7 +3,7 @@ package io.nuls.rpc.info;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.RegisterApi;
-import io.nuls.rpc.server.ServerRuntime;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.rpc.server.WsServer;
 
 import java.util.ArrayList;
