@@ -69,7 +69,7 @@ public class CoinFrom extends Coin {
     @Override
     public int size() {
         int size = 0;
-        size += Address.ADDRESS_LENGTH;
+        size += SerializeUtils.sizeOfBytes(address);
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfBigInteger();

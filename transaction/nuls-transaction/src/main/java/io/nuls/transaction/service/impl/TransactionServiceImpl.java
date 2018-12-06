@@ -278,6 +278,8 @@ public class TransactionServiceImpl implements TransactionService {
                     continue;
                 }
                 CoinFrom feeCoinFrom = new CoinFrom();
+                byte[] address = coinFrom.getAddress();
+                feeCoinFrom.setAddress(address);
                 txSize += feeCoinFrom.size();
                 //todo 新增coinfrom，重新计算本交易预计收取的手续费  跨链交易手续费单价？？
                 targetFee = TransactionFeeCalculator.getMaxFee(txSize);
@@ -285,9 +287,8 @@ public class TransactionServiceImpl implements TransactionService {
                 BigInteger current = targetFee.subtract(actualFee);
                 //此账户可以支付的手续费
                 BigInteger fee = BigIntegerUtils.isEqualOrGreaterThan(mainAsset, current) ? current : current.subtract(mainAsset);
-                byte[] address = coinFrom.getAddress();
+
                 feeCoinFrom.setLocked(TxConstant.CORSS_TX_LOCKED);
-                feeCoinFrom.setAddress(address);
                 feeCoinFrom.setAssetsChainId(TxConstant.NUlS_CHAINID);
                 feeCoinFrom.setAssetsId(TxConstant.NUlS_CHAIN_ASSETID);
                 feeCoinFrom.setAmount(fee);
