@@ -27,12 +27,12 @@ package io.nuls.network.manager;
 import io.nuls.network.manager.threads.DataShowMonitorTest;
 import io.nuls.network.manager.threads.GroupStatusMonitor;
 import io.nuls.network.manager.threads.NodesConnectTask;
+import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.NettyClient;
-import io.nuls.tools.core.aop.AopUtils;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
-import io.nuls.tools.thread.commom.ThreadPoolInterceiptor;
 
 import java.util.concurrent.*;
 
@@ -82,6 +82,7 @@ public class TaskManager extends BaseManager{
     @Override
     public void start() {
         scheduleGroupStatusMonitor();
+        TimeServiceThreadStart();
         testThread();
     }
 
@@ -109,6 +110,17 @@ public class TaskManager extends BaseManager{
         ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
         executor.scheduleAtFixedRate(new NodesConnectTask(), 5, 10, TimeUnit.SECONDS);
         clientThreadStart = true;
+    }
+
+    /**
+     * 启动时间同步线程
+     * Start the time synchronization thread.
+     */
+    public void TimeServiceThreadStart() {
+        Log.debug("----------- TimeService start -------------");
+        TimeService timeService = TimeService.getInstance();
+        timeService.initWebTimeServer();
+        ThreadUtils.createAndRunThread("TimeService", timeService, true);
     }
 
 }

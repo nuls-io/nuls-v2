@@ -27,6 +27,8 @@ package io.nuls.network;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.tools.thread.TimeService;
 import org.junit.Test;
 
 import java.net.InetAddress;
@@ -66,11 +68,17 @@ public class Test1 {
     @Test
     public void test3(){
         try {
-            WsServer.mockKernel();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+    @Test
+    public void test4(){
+        ThreadUtils.createAndRunThread("mytest",TimeService.getInstance());
+        while(true){
+
+        }
     }
    public static void main(String []args){
             WsServer wsServer = new WsServer(HostInfo.randomPort());

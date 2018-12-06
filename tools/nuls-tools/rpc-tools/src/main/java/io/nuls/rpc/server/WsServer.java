@@ -36,6 +36,7 @@ import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Request;
+import io.nuls.rpc.server.handler.CmdHandler;
 import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.rpc.server.thread.RequestLoopProcessor;
 import io.nuls.rpc.server.thread.RequestSingleProcessor;

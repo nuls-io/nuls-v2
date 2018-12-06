@@ -25,8 +25,14 @@
 
 package io.nuls.network.manager.threads;
 
+import io.nuls.network.manager.ConnectionManager;
+import io.nuls.network.manager.MessageFactory;
+import io.nuls.network.manager.MessageManager;
+import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeGroupConnector;
+import io.nuls.network.model.dto.NetTimeUrl;
+import io.nuls.network.model.message.GetTimeMessage;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.thread.ThreadUtils;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
@@ -51,6 +57,7 @@ public class TimeService implements Runnable {
      */
     private List<String> urlList = new ArrayList<>();
 
+    private List<NetTimeUrl> netTimeUrls = new ArrayList<>();
     /**
      * 时间偏移差距触发点，超过该值会导致本地时间重设，单位毫秒
      * Time migration gap trigger point, which can cause local time reset, unit milliseconds.
@@ -66,12 +73,13 @@ public class TimeService implements Runnable {
      * Resynchronize the interval.
      * 10 minutes;
      */
-    private static final long NET_REFRESH_TIME = 10 * 60 * 1000L;
+    private static final long NET_REFRESH_TIME = 1 * 60 * 1000L;
 
     /**
      * 网络时间偏移值
      */
     private static long netTimeOffset;
+
 
     /**
      * 上次同步时间点
@@ -84,16 +92,16 @@ public class TimeService implements Runnable {
 
 
     private TimeService() {
-        urlList.add("sgp.ntp.org.cn");
-        urlList.add("cn.ntp.org.cn");
-        urlList.add("time1.apple.com");
-        urlList.add("ntp3.aliyun.com");
-        urlList.add("ntp5.aliyun.com");
-        urlList.add("us.ntp.org.cn");
-        urlList.add("kr.ntp.org.cn");
-        urlList.add("de.ntp.org.cn");
-        urlList.add("jp.ntp.org.cn");
-        urlList.add("ntp7.aliyun.com");
+        urlList.add("a.sgp.ntp.org.cn");
+        urlList.add("a.cn.ntp.org.cn");
+        urlList.add("a.time1.apple.com");
+        urlList.add("a.ntp3.aliyun.com");
+        urlList.add("a.ntp5.aliyun.com");
+        urlList.add("a.us.ntp.org.cn");
+        urlList.add("a.kr.ntp.org.cn");
+        urlList.add("a.de.ntp.org.cn");
+        urlList.add("a.jp.ntp.org.cn");
+        urlList.add("a.ntp7.aliyun.com");
     }
     public static void addPeerTime(String nodeId,long requestId,long time){
         if(currentRequestId == requestId){
@@ -106,14 +114,38 @@ public class TimeService implements Runnable {
         }
     }
 
-  private synchronized  void syncPeerTime(){
+    public List<NetTimeUrl> getNetTimeUrls() {
+        return netTimeUrls;
+    }
+    private void sendGetTimeMessage(Node node,long magicNumber){
+        GetTimeMessage getTimeMessage = MessageFactory.getInstance().buildTimeRequestMessage(magicNumber,currentRequestId);
+        MessageManager.getInstance().sendToNode(getTimeMessage,node,true);
+    }
+    private synchronized  void syncPeerTime(){
       //设置请求id
       currentRequestId = System.currentTimeMillis();
-      //TODO：随机发出请求
-
-
+      long beginTime = currentRequestId;
       // peerTimesMap 清空
       peerTimesMap.clear();
+      //随机发出请求
+       List<Node> list = ConnectionManager.getInstance().getCacheAllNodeList();
+       if(list.size()  == 0){
+           return;
+       }
+       int count = 0;
+       for(Node node : list){
+           NodeGroupConnector nodeGroupConnector = node.getFirstNodeGroupConnector();
+           if(null != nodeGroupConnector){
+               sendGetTimeMessage(node,nodeGroupConnector.getMagicNumber());
+               count++;
+           }
+           if(count >= MAX_REQ_PEER_NUMBER){
+               break;
+           }
+       }
+       if(count == 0){
+           return;
+       }
       //数量或时间满足要求
       long intervalTime = 0;
       while(peerTimesMap.size()< MAX_REQ_PEER_NUMBER &&  intervalTime < TIME_WAIT_PEER_RESPONSE){
@@ -122,7 +154,7 @@ public class TimeService implements Runnable {
           } catch (InterruptedException e) {
 
           }
-          intervalTime = System.currentTimeMillis()-currentRequestId;
+          intervalTime = System.currentTimeMillis()-beginTime;
       }
       int size = peerTimesMap.size();
       if(size>0){
@@ -136,6 +168,25 @@ public class TimeService implements Runnable {
           netTimeOffset = sum / size;
       }
   }
+    /**
+     * 按相应时间排序
+     */
+    public  void initWebTimeServer() {
+        for (int i = 0; i < urlList.size(); i++) {
+            long begin = System.currentTimeMillis();
+            long netTime = getWebTime(urlList.get(i));
+            Log.info(urlList.get(i)+"netTime:==="+netTime);
+            Log.info("localtime:==="+System.currentTimeMillis());
+            if (netTime == 0) {
+                continue;
+            }
+            long end = System.currentTimeMillis();
+            NetTimeUrl netTimeUrl = new NetTimeUrl(urlList.get(i),(end-begin));
+            netTimeUrls.add(netTimeUrl);
+        }
+        Collections.sort(netTimeUrls);
+
+    }
 
 
 
@@ -147,21 +198,25 @@ public class TimeService implements Runnable {
         int count = 0;
         long sum = 0L;
 
-        for (int i = 0; i < urlList.size(); i++) {
+        for (int i = 0; i < netTimeUrls.size(); i++) {
             long localBeforeTime = System.currentTimeMillis();
-
-            long netTime = getWebTime(urlList.get(i));
+            long netTime = getWebTime(netTimeUrls.get(i).getUrl());
             Log.info(urlList.get(i)+"netTime:==="+netTime);
             Log.info("localtime:==="+System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }
-
             long localEndTime = System.currentTimeMillis();
-
             long value = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
             count++;
             sum += value;
+            /**
+             * 有3个网络时间返回就可以退出了
+             */
+            if(count >= 3){
+                break;
+            }
+
         }
         if (count > 0) {
             netTimeOffset = sum / count;
@@ -169,7 +224,6 @@ public class TimeService implements Runnable {
             //从对等网络去获取时间
             syncPeerTime();
         }
-
         lastSyncTime = currentTimeMillis();
     }
 
@@ -182,8 +236,8 @@ public class TimeService implements Runnable {
         try {
             NTPUDPClient client = new NTPUDPClient();
             client.open();
-            client.setDefaultTimeout(1000);
-            client.setSoTimeout(1000);
+            client.setDefaultTimeout(500);
+            client.setSoTimeout(500);
             InetAddress inetAddress = InetAddress.getByName(address);
             //Log.debug("start ask time....");
             TimeInfo timeInfo = client.getTime(inetAddress);
@@ -195,14 +249,7 @@ public class TimeService implements Runnable {
         }
     }
 
-    /**
-     * 启动时间同步线程
-     * Start the time synchronization thread.
-     */
-    public void start() {
-        Log.debug("----------- TimeService start -------------");
-        ThreadUtils.createAndRunThread("TimeService", this, true);
-    }
+
 
     /**
      * 循环调用同步网络时间方法
