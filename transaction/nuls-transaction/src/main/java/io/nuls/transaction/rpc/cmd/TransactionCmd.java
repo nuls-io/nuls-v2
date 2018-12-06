@@ -107,7 +107,7 @@ public class TransactionCmd extends BaseCmd {
             //将txHex转换为Transaction对象
             Transaction transaction = Transaction.getInstance(txHex);
             //将交易放入待验证本地交易队列中
-            result = transactionService.newTx(transaction).isSuccess();
+            result = transactionService.newTx(chainId,transaction).isSuccess();
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -156,6 +156,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
+    @CmdAnnotation(cmd = "tx_commit", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction commit")
     public Response commit(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
@@ -172,7 +173,8 @@ public class TransactionCmd extends BaseCmd {
             //将txHex转换为Transaction对象
             Transaction transaction = Transaction.getInstance(txHex);
             TxRegister txRegister = TransactionManager.getInstance().getTxRegister(transaction.getType());
-            result = TransactionCmdCall.txCommit(txRegister.getValidator(), txRegister.getModuleCode(), params);
+            HashMap response = TransactionCmdCall.request(txRegister.getCommit(), txRegister.getModuleCode(), params);
+            result = (Boolean) response.get("value");
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -189,6 +191,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
+    @CmdAnnotation(cmd = "tx_rollback", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction rollback")
     public Response rollback(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
@@ -205,7 +208,8 @@ public class TransactionCmd extends BaseCmd {
             //将txHex转换为Transaction对象
             Transaction transaction = Transaction.getInstance(txHex);
             TxRegister txRegister = TransactionManager.getInstance().getTxRegister(transaction.getType());
-            result = TransactionCmdCall.txCommit(txRegister.getValidator(), txRegister.getModuleCode(), params);
+            HashMap response = TransactionCmdCall.request(txRegister.getRollback(), txRegister.getModuleCode(), params);
+            result = (Boolean) response.get("value");
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
