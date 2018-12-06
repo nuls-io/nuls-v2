@@ -23,12 +23,12 @@ package io.nuls.block.rpc;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
-import io.nuls.block.cache.TemporaryCacheManager;
+import io.nuls.block.cache.SmallBlockCacheManager;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.NetworkUtil;
-import io.nuls.block.utils.SmallBlockDuplicateRemoval;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -44,19 +44,20 @@ import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE
 
 /**
  * 处理收到的{@link HashMessage}
+ *
  * @author captain
- * @date 18-11-14 下午4:23
  * @version 1.0
+ * @date 18-11-14 下午4:23
  */
 @Component
 public class ForwardSmallBlockHandler extends BaseCmd {
 
     @Autowired
     private BlockService service;
-    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
+    private SmallBlockCacheManager smallBlockCacheManager = SmallBlockCacheManager.getInstance();
 
     @CmdAnnotation(cmd = FORWARD_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Object process(Map map){
+    public Object process(Map map) {
 
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodes").toString();
@@ -66,49 +67,25 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            Log.warn(e.getMessage());
+            Log.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        if(message == null || nodeId == null) {
+        if (message == null || nodeId == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         NulsDigestData blockHash = message.getRequestHash();
-        if (!SmallBlockDuplicateRemoval.needDownloadSmallBlock(blockHash)) {
+        if (smallBlockCacheManager.containsSmallBlock(blockHash)) {
             return success();
         }
+
         HashMessage request = new HashMessage();
         request.setRequestHash(blockHash);
-        boolean b = NetworkUtil.sendToNode(chainId, request, nodeId);
-
-        if (!b) {
-            SmallBlockDuplicateRemoval.removeForward(blockHash);
-            return success();
-        }
-
-        waitForReceiveSmallBlockMessage(blockHash);
+        request.setCommand(CommandConstant.GET_SMALL_BLOCK_MESSAGE);
+        NetworkUtil.sendToNode(chainId, request, nodeId);
         return success();
     }
 
-    private void waitForReceiveSmallBlockMessage(NulsDigestData hash) {
-        try {
-            long beginTime = System.currentTimeMillis();
-            while(true) {
-                SmallBlock smallBlock = temporaryCacheManager.getSmallBlockByHash(hash);
-                if(smallBlock == null) {
-                    Thread.sleep(100L);
-                } else {
-                    break;
-                }
-                if(System.currentTimeMillis() - beginTime > 1000L) {
-                    SmallBlockDuplicateRemoval.removeForward(hash);
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            SmallBlockDuplicateRemoval.removeForward(hash);
-        }
-    }
 
 }

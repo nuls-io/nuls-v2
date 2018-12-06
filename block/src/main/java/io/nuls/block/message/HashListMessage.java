@@ -27,6 +27,7 @@ import io.nuls.tools.basic.VarInt;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,21 +35,23 @@ import java.util.List;
 
 /**
  * 批量请求交易消息
+ *
  * @author captain
- * @date 18-11-9 下午2:37
  * @version 1.0
+ * @date 18-11-9 下午2:37
  */
 @Data
+@NoArgsConstructor
 public class HashListMessage extends BaseMessage {
 
-    private List<NulsDigestData> txHashList = new ArrayList<>();
+    private NulsDigestData blockHash;
 
-    public HashListMessage() {
-    }
+    private List<NulsDigestData> txHashList = new ArrayList<>();
 
     @Override
     public int size() {
         int size = 0;
+        size += SerializeUtils.sizeOfNulsData(blockHash);
         size += VarInt.sizeOf(txHashList.size());
         size += this.getTxHashBytesLength();
         return size;
@@ -64,6 +67,7 @@ public class HashListMessage extends BaseMessage {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(blockHash);
         stream.writeVarInt(txHashList.size());
         for (NulsDigestData data : txHashList) {
             stream.writeNulsData(data);
@@ -72,6 +76,7 @@ public class HashListMessage extends BaseMessage {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.blockHash = byteBuffer.readHash();
         long txCount = byteBuffer.readVarInt();
         this.txHashList = new ArrayList<>();
         for (int i = 0; i < txCount; i++) {
