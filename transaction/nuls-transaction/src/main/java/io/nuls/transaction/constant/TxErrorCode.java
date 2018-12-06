@@ -58,4 +58,22 @@ public interface TxErrorCode {
     ErrorCode DB_UPDATE_ERROR = ErrorCode.init("20014");
     ErrorCode DB_QUERY_ERROR = ErrorCode.init("20015");
     ErrorCode DB_DELETE_ERROR = ErrorCode.init("20016");
+
+    ErrorCode UTXO_UNUSABLE = ErrorCode.init("31001");
+    ErrorCode UTXO_STATUS_CHANGE = ErrorCode.init("31002");
+    ErrorCode INVALID_INPUT = ErrorCode.init("31004");
+    ErrorCode INVALID_AMOUNT = ErrorCode.init("31005");
+    ErrorCode ORPHAN_TX = ErrorCode.init("31006");
+    ErrorCode ORPHAN_BLOCK = ErrorCode.init("31007");
+    ErrorCode TX_DATA_VALIDATION_ERROR = ErrorCode.init("31008");
+    ErrorCode FEE_NOT_RIGHT = ErrorCode.init("31009");
+    ErrorCode ROLLBACK_TRANSACTION_FAILED = ErrorCode.init("31010");
+    ErrorCode TRANSACTION_REPEATED = ErrorCode.init("31011");
+    ErrorCode TOO_SMALL_AMOUNT = ErrorCode.init("31012");
+    ErrorCode TX_SIZE_TOO_LARGE = ErrorCode.init("31013");
+    ErrorCode SAVE_TX_ERROR = ErrorCode.init("31014");
+    ErrorCode TX_NOT_EXIST = ErrorCode.init("31015");
+    ErrorCode COINDATA_NOT_FOUND = ErrorCode.init("31016");
+    ErrorCode TX_TYPE_ERROR = ErrorCode.init("31017");
+    ErrorCode TX_NOT_EFFECTIVE = ErrorCode.init("31018");
 }

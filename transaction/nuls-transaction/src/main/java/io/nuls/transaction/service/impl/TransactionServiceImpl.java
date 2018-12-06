@@ -186,7 +186,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      * @throws NulsException
      */
-    public CoinData getCoinData(List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException{
+    private CoinData getCoinData(List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException{
         BigInteger feeTotalFrom = BigInteger.ZERO;
         for(CoinFrom coinFrom : listFrom){
             txSize += coinFrom.size();
@@ -311,16 +311,30 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Result crossTransactionValidator(int chainId, Transaction transaction) {
+        //todo
+        /**
+         * 跨链交易验证器
+         * 交易类型为跨链交易
+         * 地址和签名一一对应
+         * from的地址必须全部是(本链/发起链or相同链）地址
+         * from里面的资产是否存在，是否可以进行跨链交易
+         * 必须包含NULS资产的from
+         * to里面的地址必须是相同链的地址
+         * 手续费？
+         * 签名？
+         */
+
+
         return null;
     }
 
     @Override
     public Result crossTransactionCommit(int chainId, Transaction transaction, BlockHeaderDigestDTO blockHeader) {
-        return null;
+        return Result.getSuccess(TxErrorCode.SUCCESS);
     }
 
     @Override
     public Result crossTransactionRollback(int chainId, Transaction transaction, BlockHeaderDigestDTO blockHeader) {
-        return null;
+        return Result.getSuccess(TxErrorCode.SUCCESS);
     }
 }

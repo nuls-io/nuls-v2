@@ -24,11 +24,19 @@
  */
 package io.nuls.transaction.utils;
 
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.constant.ErrorCode;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.TxRegister;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,7 +58,6 @@ public class TransactionManager {
     public static TransactionManager getInstance(){
         return INSTANCE;
     }
-
 
 
     private TransactionManager() {
@@ -75,6 +82,7 @@ public class TransactionManager {
      */
     public Result verify(Transaction tx){
         //todo 调验证器
+        BaseTxValidate(tx);
         TxRegister txRegister = this.getTxRegister(tx.getType());
         txRegister.getValidator();
 
@@ -122,7 +130,74 @@ public class TransactionManager {
         return list;
     }
 
+    /**
+     * 判断交易是系统交易
+     * @param tx
+     * @return
+     */
+    public boolean isSystemTx(Transaction tx){
+        TxRegister txRegister =TX_REGISTER_MAP.get(tx.getType());
+        return txRegister.getSystemTx();
+    }
 
+    public Result BaseTxValidate(Transaction tx){
+        /**
+         *  交易基础字段
+         *  最大交易size
+         *  交易类型
+         *  交易签名
+         *  交易手续费
+         *  coinData基础校验
+         *
+         */
+
+        boolean result = true;
+        ErrorCode errorCode = TxErrorCode.SUCCESS;
+        do {
+            if (null == tx) {
+                result = false;
+                errorCode = TxErrorCode.TX_NOT_EXIST;
+                break;
+            }
+            if (tx.getHash() == null || tx.getHash().size() == 0 || tx.getHash().size() > TxConstant.TX_HASH_DIGEST_BYTE_MAX_LEN) {
+                result = false;
+                errorCode = TxErrorCode.TX_DATA_VALIDATION_ERROR;
+                break;
+            }
+            if(!contain(tx.getType())) {
+                result = false;
+                errorCode = TxErrorCode.TX_NOT_EFFECTIVE;
+                break;
+            }
+            if (tx.getTime() == 0L) {
+                result = false;
+                errorCode = TxErrorCode.TX_DATA_VALIDATION_ERROR;
+                break;
+            }
+            if(tx.size() > TxConstant.TX_MAX_SIZE){
+                result = false;
+                errorCode = TxErrorCode.TX_SIZE_TOO_LARGE;
+                break;
+            }
+            try {
+                if(!SignatureUtil.validateTransactionSignture(tx)){
+                    result = false;
+                    errorCode = TxErrorCode.SIGNATURE_ERROR;
+                    break;
+                }
+            } catch (NulsException e) {
+                e.printStackTrace();
+                result = false;
+                errorCode = e.getErrorCode();
+                break;
+            }
+
+        } while (false);
+        if (!result) {
+            return Result.getFailed(errorCode);
+        }
+        return Result.getSuccess(errorCode);
+    }
 
 
 }

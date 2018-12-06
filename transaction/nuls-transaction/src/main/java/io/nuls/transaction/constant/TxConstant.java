@@ -66,5 +66,12 @@ public interface TxConstant {
      */
     byte CORSS_TX_LOCKED = 0;
 
+    /**
+     * 交易基础信息
+     */
+    int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
+    int TX_MAX_BYTES = 300;
+    int TX_MAX_SIZE = TX_MAX_BYTES * 1024;
+
 
 }
