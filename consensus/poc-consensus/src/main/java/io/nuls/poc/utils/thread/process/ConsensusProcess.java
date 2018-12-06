@@ -5,14 +5,16 @@ import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.constant.ConsensusConstant;
+import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.BlockData;
+import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.consensus.ConsensusStatus;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
-import io.nuls.poc.utils.manager.ConfigManager;
-import io.nuls.poc.utils.manager.ConsensusManager;
+import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.RoundManager;
-import io.nuls.poc.utils.util.ConsensusUtil;
+import io.nuls.poc.utils.manager.ConsensusManager;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -31,26 +33,38 @@ import java.util.List;
  * 2018/11/15
  * */
 public class ConsensusProcess {
+    private ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
+    private RoundManager roundManager = SpringLiteContext.getBean(RoundManager.class);
+
+
     private boolean hasPacking;
 
-    public void process(int chainId) {
-        boolean canPackage = checkCanPackage(chainId);
-        if (!canPackage) {
-            return;
+    public void process(int chainId){
+        try {
+            boolean canPackage = checkCanPackage(chainId);
+            if (!canPackage) {
+                return;
+            }
+            doWork(chainId);
+        }catch (NulsException e){
+            Log.error(e.getMessage());
         }
-        doWork(chainId);
     }
 
     /**
      * 检查节点打包状态
      * Check node packing status
      * */
-    private boolean checkCanPackage(int chainId) {
+    private boolean checkCanPackage(int chainId) throws NulsException{
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if(chain == null ){
+            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
         /*
         检查模块状态是否为运行中
         Check whether the module status is in operation
         */
-        if (ConsensusManager.getInstance().getAgentStatus().get(chainId).ordinal() <= ConsensusStatus.WAIT_RUNNING.ordinal()) {
+        if (chain.getConsensusStatus().ordinal() <= ConsensusStatus.WAIT_RUNNING.ordinal()) {
             return false;
         }
 
@@ -68,19 +82,20 @@ public class ConsensusProcess {
         检查节点状态是否可打包(区块管理模块同步完成之后设置该状态)
         Check whether the node status can be packaged (set up after the block management module completes synchronization)
         */
-        if(!ConsensusManager.getInstance().getPackingStatus().get(chainId)){
+        if(!chain.isCanPacking()){
             return false;
         }
         return true;
     }
 
 
-    private void doWork(int chainId){
+    private void doWork(int chainId)throws NulsException{
+        Chain chain = chainManager.getChainMap().get(chainId);
         /*
         检查节点状态
         Check node status
         */
-        if (ConsensusManager.getInstance().getAgentStatus().get(chainId).ordinal() < ConsensusStatus.RUNNING.ordinal()) {
+        if (chain.getConsensusStatus().ordinal() < ConsensusStatus.RUNNING.ordinal()) {
             return;
         }
 
@@ -88,7 +103,7 @@ public class ConsensusProcess {
         获取当前轮次信息并验证轮次信息
         Get current round information
          */
-        MeetingRound round = RoundManager.getInstance().getOrResetCurrentRound(chainId,true);
+        MeetingRound round = roundManager.getOrResetCurrentRound(chainId,true);
         if (round == null) {
             return;
         }
@@ -145,8 +160,8 @@ public class ConsensusProcess {
         * After packaging, check whether the packaged block and the latest block in the main chain are continuous. If the block is not continuous,
         * the local node needs to repackage the block when it receives the packaged block from the previous consensus node in the packaging process.
         */
-        //todo 从区块管理模块获取最新区块
-        BlockHeader header = new BlockHeader();
+        Chain chain = chainManager.getChainMap().get(chainId);
+        BlockHeader header =chain.getNewestHeader();
         boolean rePacking = !block.getHeader().getPreHash().equals(header.getHash());
         if(rePacking){
             start = System.currentTimeMillis();
@@ -166,7 +181,8 @@ public class ConsensusProcess {
      * Otherwise, if the block from the previous node has not been received after waiting for a certain time, it will be packed directly.
      * */
     private boolean waitReceiveNewestBlock(int chainId,MeetingMember self, MeetingRound round){
-        long timeout = ConfigManager.config_map.get(chainId).getPackingInterval()/2;
+        Chain chain = chainManager.getChainMap().get(chainId);
+        long timeout = chain.getConfig().getPackingInterval()/2;
         long endTime = self.getPackStartTime() + timeout;
         boolean hasReceiveNewestBlock = false;
         try {
@@ -221,8 +237,8 @@ public class ConsensusProcess {
         Comparing whether the block address of the latest local block is equal to that of the previous node, if equal,
         it means that the previous node has already blocked, and the current node can blocked.
         */
-        //todo  获取本地指定链最新区块（从区块管理模块获取）
-        BlockHeader bestBlockHeader = new BlockHeader();
+        Chain chain = chainManager.getChainMap().get(chainId);
+        BlockHeader bestBlockHeader = chain.getNewestHeader();
         BlockExtendsData blockRoundData = new BlockExtendsData(bestBlockHeader.getExtend());
         byte[] bestPackingAddress = bestBlockHeader.getPackingAddress();
         long bestRoundIndex = blockRoundData.getRoundIndex();
@@ -239,12 +255,11 @@ public class ConsensusProcess {
     }
 
     private Block doPacking(int chainId, MeetingMember self, MeetingRound round) throws NulsException, IOException{
-        //todo 从区块管理模块获取最新区块
-        Block bestBlock = new Block();
-
+        Chain chain = chainManager.getChainMap().get(chainId);
+        BlockHeader bestBlock = chain.getNewestHeader();
         BlockData bd = new BlockData();
-        bd.setHeight(bestBlock.getHeader().getHeight() + 1);
-        bd.setPreHash(bestBlock.getHeader().getHash());
+        bd.setHeight(bestBlock.getHeight() + 1);
+        bd.setPreHash(bestBlock.getHash());
         bd.setTime(self.getPackEndTime());
         BlockExtendsData extendsData = new BlockExtendsData();
         extendsData.setRoundIndex(round.getIndex());
@@ -266,9 +281,10 @@ public class ConsensusProcess {
         组装系统交易（CoinBase/红牌/黄牌）+ 创建区块
         Assembly System Transactions (CoinBase/Red/Yellow)+ Create blocks
         */
-        ConsensusUtil.addConsensusTx(chainId,bestBlock,packingTxList,self,round);
+        ConsensusManager consensusManager = SpringLiteContext.getBean(ConsensusManager.class);
+        consensusManager.addConsensusTx(chainId,bestBlock,packingTxList,self,round);
         bd.setTxList(packingTxList);
-        Block newBlock = ConsensusUtil.createBlock(bd, self.getAgent().getPackingAddress());
+        Block newBlock = consensusManager.createBlock(bd, self.getAgent().getPackingAddress());
         Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtils.convertDate(new Date(self.getPackEndTime())));
         return newBlock;

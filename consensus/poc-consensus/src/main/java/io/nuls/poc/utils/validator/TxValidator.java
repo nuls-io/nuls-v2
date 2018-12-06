@@ -10,6 +10,7 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
+import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
@@ -19,10 +20,7 @@ import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
-import io.nuls.poc.utils.manager.ConfigManager;
-import io.nuls.poc.utils.manager.ConsensusManager;
-import io.nuls.poc.utils.util.ConsensusUtil;
-import io.nuls.poc.utils.util.PoConvertUtil;
+import io.nuls.poc.utils.manager.*;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -49,7 +47,12 @@ public class TxValidator {
     private AgentStorageService agentStorageService;
     @Autowired
     private DepositStorageService depositStorageService;
-
+    @Autowired
+    private ChainManager chainManager;
+    @Autowired
+    private AgentManager agentManager;
+    @Autowired
+    private CoinDataManager coinDataManager;
     /**
      * 验证交易
      * Verifying transactions
@@ -196,6 +199,10 @@ public class TxValidator {
      * @return boolean
      * */
     private boolean createAgentBasicValid(int chainId,Transaction tx,Agent agent)throws NulsException{
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if(chain == null ){
+            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
         if (!AddressTool.validNormalAddress(agent.getPackingAddress(),(short)chainId)) {
             throw new NulsException(ConsensusErrorCode.ADDRESS_ERROR);
         }
@@ -209,11 +216,11 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.DATA_ERROR);
         }
         double commissionRate = agent.getCommissionRate();
-        if (commissionRate < ConfigManager.config_map.get(chainId).getCommissionRateMin() || commissionRate > ConfigManager.config_map.get(chainId).getCommissionRateMax()) {
+        if (commissionRate < chain.getConfig().getCommissionRateMin() || commissionRate > chain.getConfig().getCommissionRateMax()) {
             throw new NulsException(ConsensusErrorCode.COMMISSION_RATE_OUT_OF_RANGE);
         }
         BigInteger deposit = agent.getDeposit();
-        if(deposit.compareTo(ConfigManager.config_map.get(chainId).getDepositMin())<0 && deposit.compareTo(ConfigManager.config_map.get(chainId).getDepositMax())>0){
+        if(deposit.compareTo(chain.getConfig().getDepositMin())<0 && deposit.compareTo(chain.getConfig().getDepositMax())>0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OUT_OF_RANGE);
         }
         CoinData coinData = new CoinData();
@@ -248,7 +255,11 @@ public class TxValidator {
      * @return boolean
      * */
     private boolean createAgentAddrValide(int chainId,Transaction tx,Agent agent)throws NulsException{
-        String seedNodesStr = ConfigManager.config_map.get(chainId).getSeedNodes();
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if(chain == null ){
+            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        String seedNodesStr = chain.getConfig().getSeedNodes();
         if (StringUtils.isBlank(seedNodesStr)){
             return true;
         }
@@ -264,7 +275,7 @@ public class TxValidator {
             }
         }
         //节点地址及出块地址不能重复
-        List<Agent> agentList = ConsensusManager.getInstance().getAllAgentMap().get(chainId);
+        List<Agent> agentList = chain.getAgentList();
         if(agentList != null && agentList.size()>0){
             Set<String> set = new HashSet<>();
             for (Agent agentTemp:agentList) {
@@ -283,7 +294,7 @@ public class TxValidator {
                 throw new NulsException(ConsensusErrorCode.AGENT_PACKING_EXIST);
             }
         }
-        long count = this.getRedPunishCount(chainId,agent.getAgentAddress());
+        long count = this.getRedPunishCount(chain,agent.getAgentAddress());
         if(count > 0){
             throw new NulsException(ConsensusErrorCode.LACK_OF_CREDIT);
         }
@@ -302,8 +313,12 @@ public class TxValidator {
      * @return  boolean
      * */
     private boolean stopAgentCoinDataValid(int chainId,Transaction tx,AgentPo agentPo,StopAgent stopAgent,CoinData coinData)throws NulsException,IOException {
-        Agent agent = PoConvertUtil.poToAgent(agentPo);
-        CoinData localCoinData = ConsensusUtil.getStopAgentCoinData(chainId, ConfigManager.config_map.get(chainId).getAssetsId(), agent, TimeService.currentTimeMillis() + ConfigManager.config_map.get(chainId).getStopAgentLockTime());
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if(chain == null ){
+            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        Agent agent = agentManager.poToAgent(agentPo);
+        CoinData localCoinData = coinDataManager.getStopAgentCoinData(chainId, chain.getConfig().getAssetsId(), agent, TimeService.currentTimeMillis() + chain.getConfig().getStopAgentLockTime());
         BigInteger fee = TransactionFeeCalculator.getMaxFee(tx.size());
         localCoinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
         if(!Arrays.equals(coinData.serialize(),localCoinData.serialize())){
@@ -321,12 +336,16 @@ public class TxValidator {
      * @return boolean
      * */
     private boolean createDepositInfoValid(int chainId,Deposit deposit) throws NulsException{
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if(chain == null ){
+            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
         AgentPo agentPo = agentStorageService.get(deposit.getAgentHash(),chainId);
         if(agentPo == null || agentPo.getDelHeight() >0){
             throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
         List<DepositPo> poList = this.getDepositListByAgent(chainId,deposit.getAgentHash());
-        if(poList != null && poList.size()>ConfigManager.config_map.get(chainId).getDepositNumberMax()){
+        if(poList != null && poList.size()>chain.getConfig().getDepositNumberMax()){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_COUNT);
         }
         //节点当前委托总金额
@@ -334,10 +353,10 @@ public class TxValidator {
         for (DepositPo cd : poList) {
             total = total.add(cd.getDeposit());
         }
-        if(total.compareTo(ConfigManager.config_map.get(chainId).getDepositMax())>0){
+        if(total.compareTo(chain.getConfig().getDepositMax())>0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_OVER_AMOUNT);
         }
-        if(total.compareTo(ConfigManager.config_map.get(chainId).getDepositMin())<0){
+        if(total.compareTo(chain.getConfig().getDepositMin())<0){
             throw new NulsException(ConsensusErrorCode.DEPOSIT_NOT_ENOUGH);
         }
         return true;
@@ -392,12 +411,12 @@ public class TxValidator {
      * 节点是否获得过红牌
      * Does the node get a red card?
      *
-     * @param chainId   链ID/chain id
+     * @param chain      chain info
      * @param address    出块地址/packing address
      * @return long
      * */
-    private long getRedPunishCount(int chainId,byte[] address ) {
-        List<PunishLogPo> list = ConsensusManager.getInstance().getRedPunishMap().get(chainId);
+    private long getRedPunishCount(Chain chain,byte[] address ) {
+        List<PunishLogPo> list = chain.getRedPunishList();
         if (null == list || list.isEmpty()) {
             return 0;
         }

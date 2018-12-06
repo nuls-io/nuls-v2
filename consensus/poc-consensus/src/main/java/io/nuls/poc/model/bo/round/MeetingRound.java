@@ -27,7 +27,7 @@ package io.nuls.poc.model.bo.round;
 
 import io.nuls.base.data.Address;
 import io.nuls.poc.constant.ConsensusErrorCode;
-import io.nuls.poc.utils.manager.ConfigManager;
+import io.nuls.poc.model.bo.Chain;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.thread.TimeService;
@@ -46,45 +46,45 @@ import java.util.List;
  * 2018/11/12
  */
 public class MeetingRound {
-    /*
-    总权重
-    Total weight
-    */
+    /**
+     * 总权重
+     * Total weight
+     * */
     private double totalWeight;
-    /*
-    本地打包节点在当前轮次的下标
-    Subscription of Local Packing Node in Current Round
-    */
+    /**
+     * 本地打包节点在当前轮次的下标
+     * Subscription of Local Packing Node in Current Round
+     * */
     private long index;
-    /*
-    当前轮次开始打包时间
-    Current Round Start Packing Time
-    */
+    /**
+     * 当前轮次开始打包时间
+     * Current Round Start Packing Time
+     * */
     private long startTime;
-    /*
-    当前轮次打包结束时间
-    End time of front packing
-    */
+    /**
+     * 当前轮次打包结束时间
+     * End time of front packing
+     * */
     private long endTime;
-    /*
-    当前轮次打包节点数量
-    Number of Packing Nodes in Current Round
-    */
+    /**
+     * 当前轮次打包节点数量
+     * Number of Packing Nodes in Current Round
+     * */
     private int memberCount;
-    /*
-    当前轮次打包成员列表
-    Current rounds packaged membership list
-    */
+    /**
+     * 当前轮次打包成员列表
+     * Current rounds packaged membership list
+     * */
     private List<MeetingMember> memberList;
-    /*
-    上一轮轮次信息
-    Last round of information
-    */
+    /**
+     * 上一轮轮次信息
+     * Last round of information
+     * */
     private MeetingRound preRound;
-    /*
-    本地打包成员信息
-    Locally packaged member information
-    */
+    /**
+     * 本地打包成员信息
+     * Locally packaged member information
+     * */
     private MeetingMember myMember;
 
     public MeetingRound getPreRound() {
@@ -116,9 +116,9 @@ public class MeetingRound {
      * Initialization Round Information
      *
      * @param memberList 打包成员信息列表/Packaged Member Information List
-     * @param chainId   链ID/chain id
+     * @param chain      chain info
      * */
-    public void init(List<MeetingMember> memberList,int chainId) {
+    public void init(List<MeetingMember> memberList, Chain chain) {
         assert (startTime > 0L);
         this.memberList = memberList;
         if (null == memberList || memberList.isEmpty()) {
@@ -132,15 +132,15 @@ public class MeetingRound {
             member = memberList.get(i);
             member.setRoundStartTime(this.getStartTime());
             member.setPackingIndexOfRound(i + 1);
-            member.setPackStartTime(startTime + i * ConfigManager.config_map.get(chainId).getPackingInterval());
-            member.setPackEndTime(member.getPackStartTime() + ConfigManager.config_map.get(chainId).getPackingInterval());
+            member.setPackStartTime(startTime + i * chain.getConfig().getPackingInterval());
+            member.setPackEndTime(member.getPackStartTime() + chain.getConfig().getPackingInterval());
             /*
             轮次总权重等于所有节点权重之和，节点权重=(保证金+总委托金额)*节点信用值
             Round total weight equals the sum of all node weights, node weight = (margin + total Commission amount)* node credit value
             */
             totalWeight += DoubleUtils.mul(member.getAgent().getCreditVal(),new BigDecimal(member.getAgent().getTotalDeposit().add(member.getAgent().getDeposit())));
         }
-        endTime = startTime + memberCount * ConfigManager.config_map.get(chainId).getPackingInterval();
+        endTime = startTime + memberCount * chain.getConfig().getPackingInterval();
     }
 
     public MeetingMember getMember(int order) {
