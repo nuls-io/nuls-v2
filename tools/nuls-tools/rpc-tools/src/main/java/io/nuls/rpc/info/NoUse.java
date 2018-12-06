@@ -50,8 +50,8 @@ public class NoUse {
      * Analog Startup Module, Unit Test Specific
      */
     public static void mockModule() throws Exception {
-        WsServer.getInstance(ModuleE.TEST)
-                .moduleRoles(new String[]{"1.0"})
+        WsServer.getInstance("test", "TestModule", "test.com")
+                .moduleRoles("test_role", new String[]{"1.0"})
                 .moduleVersion("1.0")
                 .dependencies(ModuleE.CM.abbr, "1.1")
                 .connect("ws://127.0.0.1:8887");
