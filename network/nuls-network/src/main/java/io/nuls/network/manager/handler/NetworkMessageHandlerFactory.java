@@ -58,6 +58,8 @@ public class NetworkMessageHandlerFactory {
         handlerMap.put(GetAddrMessage.class.getName(),GetAddrMessageHandler.getInstance());
         handlerMap.put(AddrMessage.class.getName(),AddrMessageHandler.getInstance());
         handlerMap.put(ByeMessage.class.getName(),ByeMessageHandler.getInstance());
+        handlerMap.put(GetTimeMessage.class.getName(),GetTimeMessageHandler.getInstance());
+        handlerMap.put(TimeMessage.class.getName(),TimeMessageHandler.getInstance());
     }
 
     public BaseMeesageHandlerInf getHandler(BaseMessage message) {
