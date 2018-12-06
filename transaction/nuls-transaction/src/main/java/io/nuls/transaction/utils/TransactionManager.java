@@ -24,21 +24,15 @@
  */
 package io.nuls.transaction.utils;
 
-import io.nuls.base.basic.TransactionFeeCalculator;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.Result;
-import io.nuls.tools.data.BigIntegerUtils;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.TxRegister;
-import io.nuls.transaction.model.dto.CoinDTO;
 
-import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 交易管理类，存储管理交易注册的基本信息
