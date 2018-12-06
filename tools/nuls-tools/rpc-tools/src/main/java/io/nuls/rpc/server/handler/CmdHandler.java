@@ -23,7 +23,7 @@
  *
  */
 
-package io.nuls.rpc.server;
+package io.nuls.rpc.server.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -31,6 +31,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.CmdParameter;
 import io.nuls.rpc.model.message.*;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
@@ -62,7 +63,7 @@ public class CmdHandler {
      * @param webSocket 用于发送消息 / Used to send message
      * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
-    static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
+    public static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
@@ -81,7 +82,7 @@ public class CmdHandler {
      * @param messageId 原始消息ID / The origin message ID
      * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
-    static void ack(WebSocket webSocket, String messageId) throws JsonProcessingException {
+    public static void ack(WebSocket webSocket, String messageId) throws JsonProcessingException {
         Ack ack = new Ack();
         ack.setRequestId(messageId);
 
@@ -97,7 +98,7 @@ public class CmdHandler {
      *
      * @param message 取消订阅的消息体 / Unsubscribe message
      */
-    static synchronized void unsubscribe(WebSocket webSocket, Message message) {
+    public static synchronized void unsubscribe(WebSocket webSocket, Message message) {
         Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
         for (String requestId : unsubscribe.getUnsubscribeMethods()) {
             ServerRuntime.UNSUBSCRIBE_LIST.add(ServerRuntime.genUnsubscribeKey(webSocket, requestId));
@@ -114,7 +115,7 @@ public class CmdHandler {
      * @param request   请求 / The request
      * @return boolean
      */
-    static boolean responseWithPeriod(WebSocket webSocket, String messageId, Request request) {
+    public static boolean responseWithPeriod(WebSocket webSocket, String messageId, Request request) {
 
         String key = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
         if (ServerRuntime.UNSUBSCRIBE_LIST.contains(key)) {
@@ -167,7 +168,7 @@ public class CmdHandler {
      * @param messageId      原始消息ID / The origin message ID
      * @throws Exception 连接失败 / Connected failed
      */
-    static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
+    public static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
         for (Object method : requestMethods.keySet()) {
             Map params = (Map) requestMethods.get(method);
 
@@ -252,7 +253,7 @@ public class CmdHandler {
      * @param request   请求 / The request
      * @return boolean
      */
-    static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request) {
+    public static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request) {
         String unsubscribeKey = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
         if (ServerRuntime.UNSUBSCRIBE_LIST.contains(unsubscribeKey)) {
             Log.info("取消订阅responseWithEventCount：" + unsubscribeKey);

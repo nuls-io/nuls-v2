@@ -299,6 +299,8 @@ public class MessageManager extends BaseManager{
         MessageFactory.putMessage(GetAddrMessage.class);
         MessageFactory.putMessage(AddrMessage.class);
         MessageFactory.putMessage(ByeMessage.class);
+        MessageFactory.putMessage(GetTimeMessage.class);
+        MessageFactory.putMessage(TimeMessage.class);
     }
 
     @Override

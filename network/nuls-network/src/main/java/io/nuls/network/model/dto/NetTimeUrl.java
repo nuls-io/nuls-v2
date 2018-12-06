@@ -22,28 +22,41 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc;
-
-import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.thread.TimeService;
-
-import java.util.HashMap;
-import java.util.Map;
+package io.nuls.network.model.dto;
 
 /**
+ * @author lan
  * @description
- * @author  lan
- * @date 2018/12/05
+ * @date 2018/12/06
  **/
-public class TimeServiceRpc  extends BaseCmd {
-    @CmdAnnotation(cmd = "nw_currentTimeMillis", version = 1.0,
-            description = "currentTimeMillis")
-    public Response currentTimeMillis(Map params) {
-        Map<String,Long> responseData = new HashMap<>();
-        responseData.put("currentTimeMillis",TimeService.currentTimeMillis());
-        return success(responseData);
+public class NetTimeUrl implements Comparable<NetTimeUrl>{
+    private String url;
+    private long time = 0;
+    public NetTimeUrl(String url,long time){
+        this.url = url;
+        this.time = time;
+    }
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    @Override
+    public int compareTo(NetTimeUrl o) {
+        if(this.time > o.getTime()){
+            return 1;
+        }
+        return -1;
     }
 }
-

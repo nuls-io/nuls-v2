@@ -27,6 +27,7 @@ package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
+import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -64,14 +65,13 @@ public class TimeMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
-        Log.info("============================nodeKey="+nodeKey);
         Node node =nodeGroup .getConnectNodeMap().get(nodeKey);
         Log.debug("TimeMessageHandler Recieve:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         /*
          * 处理应答消息
          */
         TimeMessage timeMessage=(TimeMessage)message;
-
+        TimeService.addPeerTime(node.getId(),timeMessage.getMsgBody().getMessageId(),timeMessage.getMsgBody().getTime());
         return new NetworkEventResult(true, null);
     }
 
