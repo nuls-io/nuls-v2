@@ -1,310 +1,414 @@
 package io.nuls.poc.utils.manager;
 
-import io.nuls.base.data.BlockExtendsData;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.*;
+import io.nuls.base.signture.BlockSignature;
+import io.nuls.base.signture.SignatureUtil;
 import io.nuls.poc.constant.ConsensusConstant;
-import io.nuls.poc.model.bo.consensus.ConsensusStatus;
-import io.nuls.poc.model.bo.consensus.PunishType;
-import io.nuls.poc.model.bo.tx.txdata.Agent;
+import io.nuls.poc.constant.ConsensusErrorCode;
+import io.nuls.poc.model.bo.BlockData;
+import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.bo.ChargeResultData;
+import io.nuls.poc.model.bo.round.MeetingMember;
+import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
-import io.nuls.poc.model.po.AgentPo;
-import io.nuls.poc.model.po.DepositPo;
-import io.nuls.poc.model.po.PunishLogPo;
-import io.nuls.poc.storage.AgentStorageService;
-import io.nuls.poc.storage.DepositStorageService;
-import io.nuls.poc.storage.PunishStorageService;
-import io.nuls.poc.utils.compare.AgentComparator;
-import io.nuls.poc.utils.compare.DepositComparator;
-import io.nuls.poc.utils.compare.PunishLogComparator;
-import io.nuls.poc.utils.util.PoConvertUtil;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.ECKey;
+import io.nuls.tools.data.BigIntegerUtils;
+import io.nuls.tools.data.DoubleUtils;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 /**
- * 系统启动时加载缓存的处理器
- * The cmd that loads the cache when the system starts.
- * @author  tag
- * 2018/11/14
- * */
+ * @author tag
+ * 2018/11/19
+ */
+@Component
 public class ConsensusManager {
-    private AgentStorageService agentStorageService = SpringLiteContext.getBean(AgentStorageService.class);
-    private DepositStorageService depositStorageService = SpringLiteContext.getBean(DepositStorageService.class);
-    private PunishStorageService punishStorageService = SpringLiteContext.getBean(PunishStorageService.class);
-
+    @Autowired
+    private ChainManager chainManager;
+    @Autowired
+    private CoinDataManager coinDataManager;
+    @Autowired
+    private PunishManager punishManager;
     /**
-     * 节点各条链的状态
-     * The state of each chain of nodes
-     * */
-    private Map<Integer, ConsensusStatus> agentStatus = new ConcurrentHashMap<>();
-
-    //TODO 信息每条链单独村
-    /**
-     * 节点各条链打包状态
-     * Packing status of each chain of nodes
-     * */
-    private Map<Integer,Boolean> packingStatus = new ConcurrentHashMap<>();
-
-    /**
-     * 存放各条链所有节点信息列表
-     * Store a list of all nodes in each chain
-     * */
-    private Map<Integer,List<Agent>> allAgentMap = new ConcurrentHashMap<>();
-
-    /**
-     * 存放各条链所有的共识信息列表
-     * Store a list of all consensus information for each chain
-     * */
-     private Map<Integer,List<Deposit>> allDepositMap = new ConcurrentHashMap<>();
-
-    /**
-     * 存放各条链黄牌交易列表
-     * Store a list of yellow-card transactions in each chain
-     * */
-    private Map<Integer,List<PunishLogPo>> yellowPunishMap = new ConcurrentHashMap<>();
-
-    /**
-     * 存放各条链红牌交易列表
-     * Store the list of red card transactions in each chain
-     * */
-    private Map<Integer,List<PunishLogPo>> redPunishMap = new ConcurrentHashMap<>();
-
-    /**
-     * 控制该类为单例模式
-     * Control this class as a singleton pattern
-     * */
-    public static ConsensusManager instance = null;
-    private ConsensusManager() { }
-    private static Integer LOCK = 0;
-    public static ConsensusManager getInstance() {
-        synchronized (LOCK) {
-            if (instance == null) {
-                instance = new ConsensusManager();
-            }
-            return instance;
+     * CoinBase transaction & Punish transaction
+     *
+     * @param bestBlock local highest block/本地最新区块
+     * @param txList    all tx of block/需打包的交易列表
+     * @param self      agent meeting data/节点打包信息
+     * @param round     latest local round/本地最新轮次信息
+     */
+    public void addConsensusTx(int chainId, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if(chain == null ){
+            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
+        int assetsId =chain.getConfig().getAssetsId();
+        Transaction coinBaseTransaction = createCoinBaseTx(chainId,assetsId,self, txList, round, bestBlock.getHeight() + 1 + chain.getConfig().getCoinbaseUnlockHeight());
+        txList.add(0, coinBaseTransaction);
+        punishManager.punishTx(chainId,assetsId, bestBlock, txList, self, round);
     }
 
     /**
-     * 初始化数据
-     * Initialization data
+     * 组装CoinBase交易
+     * Assembling CoinBase transactions
      *
-     * @param chainId 链ID
-     * */
-    public void initData(int chainId){
+     * @param chainId      链ID/chain id
+     * @param assetsId      资产ID/assets id
+     * @param member        打包信息/packing info
+     * @param txList        交易列表/transaction list
+     * @param localRound    本地最新轮次/local newest round info
+     * @param unlockHeight  解锁高度/unlock height
+     * @return Transaction
+     */
+    private Transaction createCoinBaseTx(int chainId,int assetsId,MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) throws IOException, NulsException {
+        Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_COINBASE);
         try {
-            //初始化节点状态
-            packingStatus.put(chainId,false);
-            agentStatus.put(chainId, ConsensusStatus.INITING);
-            //从数据库中读取节点信息，共识信息，红黄牌信息存放到对应的map中
-            loadAgents(chainId);
-            loadDeposits(chainId);
-            loadPunishes(chainId);
-            RoundManager.getInstance().initRound(chainId);
-        }catch (Exception e){
+            CoinData coinData = new CoinData();
+            /*
+            计算共识奖励
+            Calculating consensus Awards
+            */
+            List<CoinTo> rewardList = calcReward(chainId,assetsId,txList, member, localRound, unlockHeight);
+            for (CoinTo coin : rewardList) {
+                coinData.addTo(coin);
+            }
+            tx.setTime(member.getPackEndTime());
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            tx.setCoinData(coinData.serialize());
+        } catch (IOException e) {
             Log.error(e);
         }
+        return tx;
     }
 
     /**
-     * 数据黄牌数据
-     * Data yellow card data
+     * 计算共识奖励
+     * Calculating consensus Awards
      *
-     * @param chainId 链ID
-     * */
-    public void clear(int chainId){
-        /*todo
-          从区块管理模块获取最后一个区块的高度,清除200轮之前的红黄牌数据
-          Get the height of the last block from the module management module and clear the red and yellow card data before 200 rounds.
-         */
-        BlockHeader blockHeader = new BlockHeader();
-        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
-        Iterator<PunishLogPo> yellowIterator = yellowPunishMap.get(chainId).iterator();
-        while (yellowIterator.hasNext()){
-            PunishLogPo po = yellowIterator.next();
-            if (po.getRoundIndex() < roundData.getRoundIndex() - ConsensusConstant.INIT_PUNISH_OF_ROUND_COUNT) {
-                yellowIterator.remove();
+     * @param chainId     链ID/chain id
+     * @param txList       交易列表/transaction list
+     * @param self         本地打包信息/local agent packing info
+     * @param localRound   本地最新轮次/local newest round info
+     * @param unlockHeight 解锁高度/unlock height
+     * @return List<CoinTo>
+     */
+    private List<CoinTo> calcReward(int chainId,int assetsId,List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) throws NulsException, IOException {
+        /*
+        链内交易手续费(资产为链内主资产)
+        Intra-chain transaction fees (assets are the main assets in the chain)
+        */
+        BigInteger totalFee = BigInteger.ZERO;
+
+        /*
+        跨链交易手续费(资产为主链主资产)
+        Cross-Chain Transaction Fees (Assets as Main Chain Assets)
+        */
+        BigInteger crossFee = BigInteger.ZERO;
+
+        /*
+        计算区块中交易产生的链内和跨链手续费
+        Calculating intra-chain and cross-chain handling fees for transactions in blocks
+        */
+        for (Transaction tx : txList) {
+            CoinData coinData = new CoinData();
+            coinData.parse(tx.getCoinData(), 0);
+            ChargeResultData resultData = getFee(tx,chainId);
+            if(resultData.getChainId() == chainId){
+                totalFee = totalFee.add(resultData.getFee());
+            }else{
+                crossFee = crossFee.add(resultData.getFee());
             }
         }
-    }
 
-    /**
-     * 初始化节点信息
-     * Initialize node information
-     *
-     * @param chainId  链ID
-     * */
-    public void loadAgents(int chainId) throws Exception{
-        List<Agent> allAgentList = new ArrayList<>();
-        List<AgentPo> poList = this.agentStorageService.getList(chainId);
-        for (AgentPo po : poList) {
-            Agent agent = PoConvertUtil.poToAgent(po);
-            allAgentList.add(agent);
-        }
-        Collections.sort(allAgentList, new AgentComparator());
-        allAgentMap.put(chainId,allAgentList);
-    }
+        /*
+        链内奖励列表
+        Chain reward list
+        */
+        List<CoinTo> inRewardList = new ArrayList<>();
+        /*
+        跨链交易奖励
+        Cross link trading incentives
+        */
+        List<CoinTo> outRewardList = new ArrayList<>();
 
-    /**
-     * 初始化委托信息
-     * Initialize delegation information
-     *
-     * @param chainId  链ID
-     * */
-    public void loadDeposits(int chainId) throws Exception{
-        List<Deposit> allDepositList = new ArrayList<>();
-        List<DepositPo> poList = depositStorageService.getList(chainId);
-        for (DepositPo po : poList) {
-            Deposit deposit = PoConvertUtil.poToDeposit(po);
-            allDepositList.add(deposit);
-        }
-        Collections.sort(allDepositList, new DepositComparator());
-        allDepositMap.put(chainId,allDepositList);
-    }
 
-    /**
-     * 加载所有的红牌信息和指定轮次的黄牌信息
-     * Load all red card information and yellow card information for specified rounds
-     *
-     * @param chainId  链ID
-     * */
-    public void loadPunishes(int chainId) throws Exception{
-        List<PunishLogPo> punishLogList= punishStorageService.getPunishList(chainId);
-        List<PunishLogPo> yellowPunishList = new ArrayList<>();
-        List<PunishLogPo> redPunishList = new ArrayList<>();
-        /**
-         * todo
-         * 从网络模块获取最新区块
-         * */
-        BlockHeader blockHeader = new BlockHeader();
-        if (null == blockHeader) {
-            return;
+        /*
+        如果为种子节点，只领取交易手续费不计算共识奖励（种子节点保证金为0）
+        If it is a seed node, it only receives transaction fee without calculating consensus award (seed node margin is 0)
+        */
+        if (BigIntegerUtils.isEqual(self.getAgent().getDeposit(), BigInteger.ZERO)) {
+            if (!BigIntegerUtils.isEqual(totalFee,BigInteger.ZERO)) {
+                CoinTo agentReword = new CoinTo(self.getAgent().getRewardAddress(),chainId,assetsId,totalFee,unlockHeight);
+                inRewardList.add(agentReword);
+            }
+            if(!BigIntegerUtils.isEqual(crossFee,BigInteger.ZERO)){
+                CoinTo agentReword = new CoinTo(self.getAgent().getRewardAddress(),ConsensusConstant.MAIN_CHAIN_ID,ConsensusConstant.MAIN_ASSETS_ID,crossFee,unlockHeight);
+                outRewardList.add(agentReword);
+            }
+            inRewardList.addAll(outRewardList);
+            return inRewardList;
         }
-        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
-        long breakRoundIndex = roundData.getRoundIndex() - ConsensusConstant.INIT_PUNISH_OF_ROUND_COUNT;
-        for (PunishLogPo po : punishLogList){
-            if(po.getType() == PunishType.RED.getCode()){
-                redPunishList.add(po);
-            }else{
-                if(po.getRoundIndex() <= breakRoundIndex){
+
+        /*
+        本轮次总的出块奖励金(本轮次出块节点数*共识基础奖励 )
+        Total reward in this round
+        */
+        BigDecimal totalAll = DoubleUtils.mul(new BigDecimal(localRound.getMemberCount()), new BigDecimal(ConsensusConstant.BLOCK_REWARD));
+        double commissionRate = DoubleUtils.div(self.getAgent().getCommissionRate(), 100, 2);
+        BigInteger selfAllDeposit = self.getAgent().getDeposit().add(self.getAgent().getTotalDeposit());
+        BigDecimal agentWeight = DoubleUtils.mul(new BigDecimal(selfAllDeposit), self.getAgent().getCreditVal());
+
+        double inBlockReword = totalFee.doubleValue();
+        double outBlockReword = crossFee.doubleValue();
+        if (localRound.getTotalWeight() > 0d && agentWeight.doubleValue() > 0d) {
+            /*
+            本节点共识奖励 = 节点权重/本轮次权重*共识基础奖励
+            Node Consensus Award = Node Weight/Round Weight*Consensus Foundation Award
+            */
+            inBlockReword = DoubleUtils.sum(inBlockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())).doubleValue());
+            outBlockReword = DoubleUtils.sum(outBlockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())).doubleValue());
+        }
+        if (inBlockReword == 0d && outBlockReword == 0d) {
+            return inRewardList;
+        }
+        /*
+        创建节点账户所得共识奖励金，总的奖励金*（保证金/（保证金+委托金额））+ 佣金
+        Incentives for creating node accounts, total incentives * (margin /(margin + commission amount)+commissions
+        */
+        double agentOwnWeight = new BigDecimal(self.getAgent().getDeposit().divide(selfAllDeposit)).doubleValue();
+        double inCaReward = DoubleUtils.mul(inBlockReword, agentOwnWeight);
+        double outCaReward = DoubleUtils.mul(outBlockReword, agentOwnWeight);
+        /*
+        计算各委托账户获得的奖励金
+        Calculate the rewards for each entrusted account
+        */
+        for (Deposit deposit : self.getDepositList()) {
+            /*
+            计算各委托账户权重（委托金额/总的委托金)
+            Calculate the weight of each entrusted account (amount of entrusted account/total entrusted fee)
+            */
+            double weight = new BigDecimal(deposit.getDeposit().divide(selfAllDeposit)).doubleValue();
+
+            /*
+            如果委托账户为创建该节点账户自己,则将节点账户奖励金加上该共识奖励金
+            If the delegated account creates the node account itself, the node account reward is added to the consensus reward.
+            */
+            if (Arrays.equals(deposit.getAddress(), self.getAgent().getAgentAddress())) {
+                inCaReward = inCaReward + DoubleUtils.mul(inBlockReword, weight);
+                outCaReward = outCaReward + DoubleUtils.mul(outBlockReword, weight);
+            }
+            /*
+            如果委托账户不是创建节点账户，则该账户获得实际奖励金 = 奖励金 - 佣金，节点账户奖励金需加上佣金
+            If the entrusted account is not the creation of a node account,
+            the account receives an actual bonus = bonus - commission, which is added to the nodal account bonus.
+            */
+            else {
+                /*
+                委托账户获得的奖励金
+                Reward for entrusted account
+                */
+                double inReward = DoubleUtils.mul(inBlockReword, weight);
+                double outReward = DoubleUtils.mul(outBlockReword, weight);
+
+                /*
+                佣金计算
+                Commission Calculation
+                */
+                double inFee = DoubleUtils.mul(inReward, commissionRate);
+                double outFee = DoubleUtils.mul(outReward, commissionRate);
+                inCaReward = inCaReward + inFee;
+                outCaReward = outCaReward + outFee;
+
+                /*
+                委托账户实际获得的奖励金 = 奖励金 - 佣金
+                Actual bonus for entrusted account = bonus - Commission
+                */
+                double inHisReward = DoubleUtils.sub(inReward, inFee);
+                double outHisReward = DoubleUtils.sub(outReward, outFee);
+                if (inHisReward == 0D && outHisReward == 0D) {
                     continue;
                 }
-                yellowPunishList.add(po);
+                long inDepositReward = DoubleUtils.longValue(inHisReward);
+                long outDepositReward = DoubleUtils.longValue(outHisReward);
+                if(inDepositReward != 0){
+                    CoinTo inRewardCoin = null;
+                    for (CoinTo coin : inRewardList) {
+                        if (Arrays.equals(coin.getAddress(), deposit.getAddress())) {
+                            inRewardCoin = coin;
+                            break;
+                        }
+                    }
+                    if(inRewardCoin == null){
+                        inRewardCoin = new CoinTo(deposit.getAddress(),chainId,assetsId, BigInteger.valueOf(inDepositReward), unlockHeight);
+                        inRewardList.add(inRewardCoin);
+                    }else{
+                        inRewardCoin.setAmount(inRewardCoin.getAmount().add(BigInteger.valueOf(inDepositReward)));
+                    }
+                }
+                if(outDepositReward != 0){
+                    CoinTo outRewardCoin = null;
+                    for (CoinTo coin : outRewardList) {
+                        if (Arrays.equals(coin.getAddress(), deposit.getAddress())) {
+                            outRewardCoin = coin;
+                            break;
+                        }
+                    }
+                    if(outRewardCoin == null){
+                        outRewardCoin = new CoinTo(deposit.getAddress(),ConsensusConstant.MAIN_CHAIN_ID,ConsensusConstant.MAIN_ASSETS_ID, BigInteger.valueOf(outDepositReward), unlockHeight);
+                        outRewardList.add(outRewardCoin);
+                    }else{
+                        outRewardCoin.setAmount(outRewardCoin.getAmount().add(BigInteger.valueOf(outDepositReward)));
+                    }
+                }
             }
         }
-        Collections.sort(yellowPunishList, new PunishLogComparator());
-        Collections.sort(redPunishList, new PunishLogComparator());
-        yellowPunishMap.put(chainId,yellowPunishList);
-        redPunishMap.put(chainId,redPunishList);
+        inRewardList.addAll(outRewardList);
+        inRewardList.sort(new Comparator<CoinTo>() {
+            @Override
+            public int compare(CoinTo o1, CoinTo o2) {
+                return Arrays.hashCode(o1.getAddress()) > Arrays.hashCode(o2.getAddress()) ? 1 : -1;
+            }
+        });
+        if(DoubleUtils.compare(inCaReward,BigDecimal.ZERO.doubleValue())>0){
+            CoinTo inAgentReward = new CoinTo(self.getAgent().getRewardAddress(),chainId,assetsId, BigInteger.valueOf(DoubleUtils.longValue(inCaReward)), unlockHeight);
+            inRewardList.add(0,inAgentReward);
+        }
+        if(DoubleUtils.compare(outCaReward,BigDecimal.ZERO.doubleValue())>0){
+            CoinTo outAgentReward = new CoinTo(self.getAgent().getRewardAddress(),ConsensusConstant.MAIN_CHAIN_ID,ConsensusConstant.MAIN_ASSETS_ID, BigInteger.valueOf(DoubleUtils.longValue(outCaReward)), unlockHeight);
+            inRewardList.add(0,outAgentReward);
+        }
+        return inRewardList;
+    }
+
+
+    /**
+     * 创建区块
+     * create block
+     *
+     * @param blockData       block data/区块数据
+     * @param packingAddress  packing address/打包地址
+     * @return Block
+     */
+    public Block createBlock(BlockData blockData, byte[] packingAddress){
+        //todo 调账户模块接口验证账户正确性+获取账户EcKey
+        ECKey eckey = new ECKey();
+        Block block = new Block();
+        block.setTxs(blockData.getTxList());
+        BlockHeader header = new BlockHeader();
+        block.setHeader(header);
+        try {
+            block.getHeader().setExtend(blockData.getExtendsData().serialize());
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsRuntimeException(e);
+        }
+        header.setHeight(blockData.getHeight());
+        header.setTime(blockData.getTime());
+        header.setPreHash(blockData.getPreHash());
+        header.setTxCount(blockData.getTxList().size());
+        List<NulsDigestData> txHashList = new ArrayList<>();
+        for (int i = 0; i < blockData.getTxList().size(); i++) {
+            Transaction tx = blockData.getTxList().get(i);
+            tx.setBlockHeight(header.getHeight());
+            txHashList.add(tx.getHash());
+        }
+        header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
+        header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
+        BlockSignature scriptSig = new BlockSignature();
+        NulsSignData signData = SignatureUtil.signDigest(header.getHash().getDigestBytes(), eckey);
+        scriptSig.setSignData(signData);
+        scriptSig.setPublicKey(eckey.getPubKey());
+        header.setBlockSignature(scriptSig);
+        return block;
     }
 
     /**
-     * 添加或修改指定链节点
-     * Adding or modifying specified chain nodes
+     * 计算交易手续费
+     * Calculating transaction fees
      *
-     * @param chainId 链ID
-     * @param agent    节点信息
+     * @param tx         transaction/交易
+     * @param chainId    chain id/链ID
+     * @return  ChargeResultData
      * */
-    public void addAgent(int chainId,Agent agent) throws Exception{
-        removeAgent(chainId,agent.getTxHash());
-        allAgentMap.get(chainId).add(agent);
-    }
-
-    /**
-     * 删除指定链节点
-     * Delete the specified link node
-     *
-     * @param chainId 链ID
-     * @param txHash   创建该节点交易的ID
-     * */
-    public void removeAgent(int chainId, NulsDigestData txHash)throws Exception {
-        List<Agent> agentList = allAgentMap.get(chainId);
-        if(agentList == null || agentList.size() == 0){
-            return;
-        }
-        for (Agent agent:agentList) {
-            //todo
-            if(Arrays.equals(txHash.serialize(),agent.getTxHash().serialize())){
-                agentList.remove(agent);
-                return;
+    public ChargeResultData getFee(Transaction tx,int chainId)throws NulsException{
+        Chain chain = chainManager.getChainMap().get(chainId);
+        CoinData coinData = new CoinData();
+        coinData.parse(tx.getCoinData(),0);
+        /*
+        跨链交易计算手续费
+        Cross-Chain Transactions Calculate Processing Fees
+        */
+        if(tx.getType() == ConsensusConstant.TX_TYPE_CROSS_CHAIN){
+            BigInteger fromAmount = BigInteger.ZERO;
+            BigInteger toAmount = BigInteger.ZERO;
+            /*
+            计算链内手续费，from中链内主资产 - to中链内主资产的和
+            Calculate in-chain handling fees, from in-chain main assets - to in-chain main assets and
+            */
+            if(AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress()) == chainId){
+                for (CoinFrom from:coinData.getFrom()) {
+                    if(from.getAssetsChainId() == chainId && from.getAssetsId() == chain.getConfig().getAssetsId()){
+                        fromAmount = fromAmount.add(from.getAmount());
+                    }
+                }
+                for (CoinTo to:coinData.getTo()) {
+                    if(to.getAssetsChainId() == chainId && to.getAssetsId() == chain.getConfig().getAssetsId()){
+                        toAmount = toAmount.add(to.getAmount());
+                    }
+                }
+                return new ChargeResultData(fromAmount.subtract(toAmount),chainId);
             }
-        }
-    }
-
-    public void addDeposit(int chainId,Deposit deposit) throws  Exception{
-        removeAgent(chainId,deposit.getTxHash());
-        allDepositMap.get(chainId).add(deposit);
-    }
-
-    /**
-     * 删除指定链的委托信息
-     * Delete delegate information for a specified chain
-     *
-     * @param chainId 链ID
-     * @param txHash   创建该委托交易的ID
-     * */
-    public void removeDeposit(int chainId,NulsDigestData txHash) throws Exception{
-        List<Deposit> depositList = allDepositMap.get(chainId);
-        if(depositList == null || depositList.size() == 0){
-            loadDeposits(chainId);
-            return;
-        }
-        for (Deposit deposit:depositList) {
-            if(Arrays.equals(txHash.serialize(),deposit.getTxHash().serialize())){
-                depositList.remove(deposit);
-                return;
+            /*
+            计算主链和友链手续费,首先计算CoinData中总的跨链手续费，然后根据比例分跨链手续费
+            Calculate the main chain and friendship chain handling fees, first calculate the total cross-chain handling fees in CoinData,
+            and then divide the cross-chain handling fees according to the proportion.
+            */
+            for (CoinFrom from:coinData.getFrom()) {
+                if(from.getAssetsChainId() == ConsensusConstant.MAIN_CHAIN_ID && from.getAssetsId() == ConsensusConstant.MAIN_ASSETS_ID){
+                    fromAmount = fromAmount.add(from.getAmount());
+                }
             }
+            for (CoinTo to:coinData.getTo()) {
+                if(to.getAssetsChainId() == ConsensusConstant.MAIN_CHAIN_ID  && to.getAssetsId() == ConsensusConstant.MAIN_ASSETS_ID){
+                    toAmount = toAmount.add(to.getAmount());
+                }
+            }
+            /*
+            总的跨链手续费
+            Total cross-chain handling fee
+            */
+            BigInteger fee = fromAmount.subtract(toAmount);
+
+            /*
+            如果当前链为主链,且跨链交易目标连为主链则主链收取全部跨链手续费，如果目标连为其他链则主链收取一定比例的跨链手续费
+            If the current chain is the main chain and the target of cross-chain transaction is connected to the main chain, the main chain charges all cross-chain handling fees,
+            and if the target is connected to other chains, the main chain charges a certain proportion of cross-chain handling fees.
+            */
+            if(chainId == ConsensusConstant.MAIN_CHAIN_ID){
+                int toChainId = AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
+                if(toChainId == ConsensusConstant.MAIN_CHAIN_ID){
+                    return new ChargeResultData(fee,ConsensusConstant.MAIN_CHAIN_ID);
+                }
+                return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(ConsensusConstant.MAIN_COMMISSION_RATIO))).divide(new BigInteger(String.valueOf(ConsensusConstant.MAIN_COMMISSION_RATIO))),ConsensusConstant.MAIN_CHAIN_ID);
+            }
+            return new ChargeResultData(fee.multiply(new BigInteger(String.valueOf(ConsensusConstant.MAIN_COMMISSION_RATIO))).divide(new BigInteger(String.valueOf(ConsensusConstant.MAIN_COMMISSION_RATIO-ConsensusConstant.MAIN_COMMISSION_RATIO))),ConsensusConstant.MAIN_CHAIN_ID);
         }
-    }
-
-    public Map<Integer, Boolean> getPackingStatus() {
-        return packingStatus;
-    }
-
-    public void setPackingStatus(Map<Integer, Boolean> packingStatus) {
-        this.packingStatus = packingStatus;
-    }
-
-    public Map<Integer, List<Agent>> getAllAgentMap() {
-        return allAgentMap;
-    }
-
-    public void setAllAgentMap(Map<Integer, List<Agent>> allAgentMap) {
-        this.allAgentMap = allAgentMap;
-    }
-
-    public Map<Integer, List<Deposit>> getAllDepositMap() {
-        return allDepositMap;
-    }
-
-    public void setAllDepositMap(Map<Integer, List<Deposit>> allDepositMap) {
-        this.allDepositMap = allDepositMap;
-    }
-
-    public Map<Integer, List<PunishLogPo>> getYellowPunishMap() {
-        return yellowPunishMap;
-    }
-
-    public void setYellowPunishMap(Map<Integer, List<PunishLogPo>> yellowPunishMap) {
-        this.yellowPunishMap = yellowPunishMap;
-    }
-
-    public Map<Integer, List<PunishLogPo>> getRedPunishMap() {
-        return redPunishMap;
-    }
-
-    public void setRedPunishMap(Map<Integer, List<PunishLogPo>> redPunishMap) {
-        this.redPunishMap = redPunishMap;
-    }
-
-    public Map<Integer, ConsensusStatus> getAgentStatus() {
-        return agentStatus;
-    }
-
-    public void setAgentStatus(Map<Integer, ConsensusStatus> agentStatus) {
-        this.agentStatus = agentStatus;
+        /*
+        链内交易手续费
+        Processing fees for intra-chain transactions
+        */
+        return new ChargeResultData(coinData.getFee(),chainId);
     }
 }

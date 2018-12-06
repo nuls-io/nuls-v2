@@ -179,4 +179,17 @@ public interface ConsensusConstant {
      * Map初始值
      * */
     int  INIT_CAPACITY =16;
+
+    /**
+     * RPC接口参数控制
+     * RPC Interface Parameter Control
+     * */
+    int MIN_VALUE = 0;
+    int PAGE_NUMBER_INIT_VALUE = 1;
+    int PAGE_SIZE_INIT_VALUE = 10;
+    int PAGE_SIZE_MAX_VALUE = 100;
+    String PARAM_CHAIN_ID = "chainId";
+    String PARAM_ADDRESS = "address";
+    String PARAM_TX = "tx";
+    String PARAM_BLOCK_HEADER ="blockHeader";
  }

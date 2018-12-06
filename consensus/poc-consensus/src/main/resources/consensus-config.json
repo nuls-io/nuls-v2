@@ -1,71 +1,71 @@
 [
   {
-    "key":"packing_interval",
+    "key":"packingInterval",
     "value":10000,
     "readOnly":true
   },
   {
-    "key":"block_size",
+    "key":"blockSize",
     "value":10,
     "readOnly":true
   },
   {
-    "key":"packing_amount",
+    "key":"packingAmount",
     "value":"10000",
     "readOnly":true
   },
   {
-    "key":"coinbase_unlock_height",
+    "key":"coinbaseUnlockHeight",
     "value":1000,
     "readOnly":true
   },
   {
-    "key":"redPublish_lockTime",
+    "key":"redPublishLockTime",
     "value":3600000,
     "readOnly":true
   },
   {
-    "key":"stopAgent_lockTime",
+    "key":"stopAgentLockTime",
     "value":3600000,
     "readOnly":true
   },
   {
-  "key":"commissionRate_min",
+  "key":"commissionRateMin",
   "value":10,
   "readOnly":true
   },
   {
-    "key":"commissionRate_max",
+    "key":"commissionRateMax",
     "value":80,
     "readOnly":true
   },
   {
-    "key":"deposit_min",
+    "key":"depositMin",
     "value":"20000",
     "readOnly":true
   },
   {
-    "key":"deposit_max",
+    "key":"depositMax",
     "value":"500000",
     "readOnly":true
   },
   {
-    "key":"commission_min",
-    "value":200000,
+    "key":"commissionMin",
+    "value":"200000",
     "readOnly":true
   },
   {
-    "key":"commission_max",
+    "key":"commissionMax",
     "value":"500000",
     "readOnly":true
   },
   {
-    "key":"entruster_deposit_min",
+    "key":"entrusterDepositMin",
     "value":"2000",
     "readOnly":true
   },
   {
-    "key":"deposit_number_max",
+    "key":"depositNumberMax",
     "value":100,
     "readOnly":true
   },

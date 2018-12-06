@@ -29,7 +29,8 @@ package io.nuls.poc.model.dto.output;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
-import io.nuls.poc.utils.util.PoConvertUtil;
+import io.nuls.poc.utils.manager.AgentManager;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.BigIntegerUtils;
 
 /**
@@ -79,7 +80,7 @@ public class DepositDTO {
         this(deposit);
         if (agent != null) {
             this.agentAddress = AddressTool.getStringAddressByBytes(agent.getAgentAddress());
-            this.agentName = PoConvertUtil.getAgentId(agent.getTxHash());
+            this.agentName = SpringLiteContext.getBean(AgentManager.class).getAgentId(agent.getTxHash());
         }
     }
 
