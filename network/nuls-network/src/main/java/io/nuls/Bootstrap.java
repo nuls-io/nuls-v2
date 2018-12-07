@@ -147,11 +147,11 @@ public class Bootstrap {
         StorageManager.getInstance().init();
         LocalInfoManager.getInstance().init();
         NodeGroupManager.getInstance().init();
-        NodeManager.getInstance().init();
+        ConnectionManager.getInstance().init();
         MessageManager.getInstance().init();
         RpcManager.getInstance().init();
         TaskManager.getInstance().init();
-        ConnectionManager.getInstance().init();
+
     }
 
     /**
@@ -162,8 +162,7 @@ public class Bootstrap {
     public  void managerStart(){
         Log.debug("managerStart begin=========");
         NodeGroupManager.getInstance().start();
-        NodeManager.getInstance().start();
-        ConnectionManager.getInstance().nettyBoot();
+        ConnectionManager.getInstance().start();
         TaskManager.getInstance().start();
         RpcManager.getInstance().start();
         Log.debug("managerStart end============");
