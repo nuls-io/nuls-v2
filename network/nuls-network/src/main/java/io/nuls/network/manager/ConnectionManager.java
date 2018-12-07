@@ -30,7 +30,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.loker.Lockers;
+import io.nuls.network.locker.Lockers;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.NodeGroupConnector;
