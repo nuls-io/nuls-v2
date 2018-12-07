@@ -145,6 +145,7 @@ public class OrphanChainsMonitor implements Runnable {
         //1.判断与主链是否相连
         if (orphanChain.getParent() == null && tryAppend(masterChain, orphanChain)) {
             orphanChain.setType(ChainTypeEnum.MASTER_APPEND);
+            return;
         }
         //2.判断是否从主链分叉
         if (orphanChain.getParent() == null && tryFork(masterChain, orphanChain)) {
@@ -219,6 +220,7 @@ public class OrphanChainsMonitor implements Runnable {
 
     /**
      * 维护孤儿链，向其他节点请求孤儿链起始区块的上一个区块，仅限于没有父链的孤儿链
+     * todo 异步
      *
      * @param chainId
      * @param orphanChain

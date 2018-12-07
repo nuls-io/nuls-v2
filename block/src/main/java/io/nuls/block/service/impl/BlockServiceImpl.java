@@ -234,6 +234,7 @@ public class BlockServiceImpl implements BlockService {
                 masterChain.getHashList().pollLast();
             }
         } catch (Exception e) {
+            //todo 异常恢复
             Log.error(e);
             return false;
         }
@@ -317,11 +318,11 @@ public class BlockServiceImpl implements BlockService {
         if (!consensusVerify) {
             return false;
         }
-        //4.批量交易验证
-        boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs());
-        if (!transactionVerify) {
-            return false;
-        }
+//        //4.批量交易验证
+//        boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs());
+//        if (!transactionVerify) {
+//            return false;
+//        }
         return true;
     }
 

@@ -40,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SmallBlockCacher {
 
+    //todo LimitHashMap优化
     private static Map<Integer, LimitHashMap<NulsDigestData, CachedSmallBlock>> smallBlockCacheMap = new ConcurrentHashMap<>();
 
     private static Map<Integer, LimitHashMap<NulsDigestData, BlockForwardEnum>> statusCacheMap = new ConcurrentHashMap<>();
@@ -57,6 +58,7 @@ public class SmallBlockCacher {
 
     /**
      * 根据hash获取缓存的{@link SmallBlock}
+     * TODO  注释
      *
      * @param chainId
      * @param blockHash
