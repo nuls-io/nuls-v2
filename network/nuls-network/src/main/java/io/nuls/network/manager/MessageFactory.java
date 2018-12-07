@@ -130,7 +130,7 @@ public class MessageFactory {
             /**
              * 排除自身连接信息，比如组网A=====B，A向B请求地址，B给的地址列表需排除A地址。
              */
-            if(peer.getId().equals(node.getId())){
+            if(peer.getIp().equals(node.getIp())){
                 continue;
             }
             /**
