@@ -89,7 +89,7 @@ public class TransactionBootStrap {
         try {
             LanguageStorageService languageService = SpringLiteContext.getBean(LanguageStorageService.class);
             String languageDB = (String) languageService.getLanguage();
-            I18nUtils.loadLanguage("","");
+            I18nUtils.loadLanguage("languages","");
             String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
             I18nUtils.setLanguage(language);
             if (null == languageDB) {

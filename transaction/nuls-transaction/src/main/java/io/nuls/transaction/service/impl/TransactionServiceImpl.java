@@ -120,7 +120,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return List<CoinFrom>
      * @throws NulsException
      */
-    private List<CoinFrom> assemblyCoinFrom(int currentChainId, List<CoinDTO> listFrom) throws NulsException {
+    public List<CoinFrom> assemblyCoinFrom(int currentChainId, List<CoinDTO> listFrom) throws NulsException {
         List<CoinFrom> coinFroms = new ArrayList<>();
         for(CoinDTO coinDTO : listFrom){
             String addr = coinDTO.getAddress();
@@ -138,6 +138,8 @@ public class TransactionServiceImpl implements TransactionService {
                 //资产不存在 chainId assetId
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
             }
+            coinFrom.setAssetsChainId(assetChainId);
+            coinFrom.setAssetsId(assetId);
             //检查对应资产余额 是否足够
             BigInteger amount = coinDTO.getAmount();
             BigInteger balance = TxUtil.getBalance(address, assetChainId, assetId);
@@ -157,7 +159,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return List<CoinTo>
      * @throws NulsException
      */
-    private List<CoinTo> assemblyCoinTo(List<CoinDTO> listTo) throws NulsException{
+    public List<CoinTo> assemblyCoinTo(List<CoinDTO> listTo) throws NulsException{
         List<CoinTo> coinTos = new ArrayList<>();
         for(CoinDTO coinDTO : listTo){
             byte[] address = AddressTool.getAddress(coinDTO.getAddress());
@@ -309,32 +311,98 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
 
+    /**
+     * 跨链交易验证器
+     * 交易类型为跨链交易
+     * 地址和签名一一对应
+     * from的地址必须全部是(本链/发起链or相同链）地址
+     * from里面的资产是否存在，是否可以进行跨链交易
+     * 必须包含NULS资产的from
+     * to里面的地址必须是相同链的地址
+     * 手续费？
+     * 签名？
+     * @param chainId
+     * @param tx
+     * @return Result
+     */
     @Override
-    public Result crossTransactionValidator(int chainId, Transaction transaction) {
+    public Result crossTransactionValidator(int chainId, Transaction tx) {
         //todo
-        /**
-         * 跨链交易验证器
-         * 交易类型为跨链交易
-         * 地址和签名一一对应
-         * from的地址必须全部是(本链/发起链or相同链）地址
-         * from里面的资产是否存在，是否可以进行跨链交易
-         * 必须包含NULS资产的from
-         * to里面的地址必须是相同链的地址
-         * 手续费？
-         * 签名？
-         */
 
-
-        return null;
+        Result result = transactionManager.BaseTxValidate(tx);
+        if(result.isFailed()){
+            return result;
+        }
+        if(null == tx.getCoinData() || tx.getCoinData().length == 0){
+            return Result.getFailed(TxErrorCode.COINDATA_NOT_FOUND);
+        }
+        try {
+            CoinData coinData = tx.getCoinDataInstance();
+            Result resultCoinFrom = validateCoinFrom(chainId, coinData.getFrom());
+            if(resultCoinFrom.isFailed()){
+                return resultCoinFrom;
+            }
+            Result resultCoinTo = validateCoinTo(coinData.getTo());
+            if(resultCoinTo.isFailed()){
+                return resultCoinTo;
+            }
+        } catch (NulsException e) {
+            e.printStackTrace();
+            return Result.getFailed(TxErrorCode.DESERIALIZE_ERROR);
+        }
+        return Result.getSuccess(TxErrorCode.SUCCESS);
     }
 
-    @Override
-    public Result crossTransactionCommit(int chainId, Transaction transaction, BlockHeaderDigestDTO blockHeader) {
+    public Result validateCoinFrom(int chainId, List<CoinFrom> listFrom){
+        if(null == listFrom || listFrom.size() == 0){
+            return Result.getFailed(TxErrorCode.COINFROM_NOT_FOUND);
+        }
+        boolean hasNulsFrom = false;
+        for(CoinFrom coinFrom : listFrom){
+            byte[] addrBytes = coinFrom.getAddress();
+            String address =  AddressTool.getStringAddressByBytes(addrBytes);
+            if(!AddressTool.validAddress(chainId, address)){
+                return Result.getFailed(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
+            }
+            //验证资产是否存在
+            if(!TxUtil.assetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())){
+                return Result.getFailed(TxErrorCode.ASSET_NOT_EXIST);
+            }
+            //是否有nuls(手续费)
+            if(TxUtil.isNulsAsset(coinFrom)){
+                hasNulsFrom = true;
+            }
+        }
+        if(!hasNulsFrom){
+            return Result.getFailed(TxErrorCode.INSUFFICIENT_FEE);
+        }
+        return Result.getSuccess(TxErrorCode.SUCCESS);
+    }
+
+    public Result validateCoinTo(List<CoinTo> listTo){
+        if(null == listTo || listTo.size() == 0){
+            return Result.getFailed(TxErrorCode.COINTO_NOT_FOUND);
+        }
+        Integer addressChainId = null;
+        for(CoinTo coinTo : listTo){
+            int chainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
+            if(null == addressChainId){
+                addressChainId = chainId;
+                continue;
+            }else if(addressChainId != chainId){
+                return Result.getFailed(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
+            }
+        }
         return Result.getSuccess(TxErrorCode.SUCCESS);
     }
 
     @Override
-    public Result crossTransactionRollback(int chainId, Transaction transaction, BlockHeaderDigestDTO blockHeader) {
+    public Result crossTransactionCommit(int chainId, Transaction tx, BlockHeaderDigestDTO blockHeader) {
+        return Result.getSuccess(TxErrorCode.SUCCESS);
+    }
+
+    @Override
+    public Result crossTransactionRollback(int chainId, Transaction tx, BlockHeaderDigestDTO blockHeader) {
         return Result.getSuccess(TxErrorCode.SUCCESS);
     }
 }
