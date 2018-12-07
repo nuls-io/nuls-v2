@@ -24,10 +24,7 @@
  */
 package io.nuls.network.manager;
 
-import io.nuls.network.manager.threads.DataShowMonitorTest;
-import io.nuls.network.manager.threads.GroupStatusMonitor;
-import io.nuls.network.manager.threads.NodesConnectTask;
-import io.nuls.network.manager.threads.TimeService;
+import io.nuls.network.manager.threads.*;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.NettyClient;
 import io.nuls.tools.log.Log;
@@ -88,7 +85,7 @@ public class TaskManager extends BaseManager{
 
     public void testThread(){
         //测试调试专用 开始
-        //    KernelThreadTest test = new KernelThreadTest();
+//            KernelThreadTest test = new KernelThreadTest();
 //        test.run();
 //        try {
 //            Thread.sleep(5000);

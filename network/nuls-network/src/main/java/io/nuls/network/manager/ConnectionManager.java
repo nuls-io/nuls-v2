@@ -25,10 +25,14 @@
 package io.nuls.network.manager;
 
 
+import io.netty.channel.Channel;
+import io.netty.channel.socket.SocketChannel;
+import io.nuls.network.constant.ManagerStatusEnum;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.loker.Lockers;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.netty.NettyServer;
@@ -36,6 +40,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,14 +54,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConnectionManager extends BaseManager{
     TaskManager taskManager = TaskManager.getInstance();
     private static ConnectionManager instance = new ConnectionManager();
-    public static ConnectionManager getInstance() {
-        return instance;
-    }
-
-    private ConnectionManager() {
-
-    }
-
     /**
      *作为Server 被动连接的peer
      * Passer as a server passive connection
@@ -68,13 +65,58 @@ public class ConnectionManager extends BaseManager{
      */
     private  Map<String, Node> cacheConnectNodeOutMap=new ConcurrentHashMap<>();
 
+
+    public static ConnectionManager getInstance() {
+        return instance;
+    }
+    private ConnectionManager() {
+
+    }
+
     /**
      * Server所有被动连接的IP,通过这个集合判断是否存在过载
      * As the Server all passively connected IP, through this set to determine whether there is overload
      * Key:ip+"_"+magicNumber  value: connectNumber
      */
     private  Map<String, Integer> cacheConnectGroupIpInMap=new ConcurrentHashMap<>();
+    StorageManager storageManager = StorageManager.getInstance();
+    LocalInfoManager localInfoManager = LocalInfoManager.getInstance();
+    private ManagerStatusEnum status=ManagerStatusEnum.UNINITIALIZED;
 
+    public  boolean  isRunning(){
+        return  instance.status==ManagerStatusEnum.RUNNING;
+    }
+
+    /**
+     * 加载种子节点
+     * @param magicNumber
+     */
+    public void loadSeedsNode(long magicNumber){
+        NetworkParam networkParam=NetworkParam.getInstance();
+        List<String> list=networkParam.getSeedIpList();
+        NodeGroup nodeGroup= NodeGroupManager.getInstance().getNodeGroupByMagic(networkParam.getPacketMagic());
+        for(String seed:list){
+            String []peer=seed.split(NetworkConstant.COLON);
+            if(localInfoManager.isSelfIp(peer[0])){
+                continue;
+            }
+            Node node=new Node(peer[0],Integer.valueOf(peer[1]),Node.OUT,false);
+            nodeGroup.addDisConnetNode(node,false);
+        }
+    }
+    public boolean isPeerSingleGroup(Channel channel){
+        SocketChannel socketChannel = (SocketChannel) channel;
+        String remoteIP = socketChannel.remoteAddress().getHostString();
+        int port = socketChannel.remoteAddress().getPort();
+        String nodeId = remoteIP+NetworkConstant.COLON+port;
+        Node node = ConnectionManager.getInstance().getNodeByCache(nodeId);
+        if(null != node){
+            if(null != node.getNodeGroupConnectors() && node.getNodeGroupConnectors().size() > 1){
+                return false;
+            }
+        }
+        return true;
+    }
 
     /**
      * 在物理连接断开时时候进行调用
@@ -277,12 +319,25 @@ public class ConnectionManager extends BaseManager{
 
     @Override
     public void init() {
-
+        status=ManagerStatusEnum.INITIALIZED;
+        Collection<NodeGroup> nodeGroups=NodeGroupManager.getInstance().getNodeGroupCollection();
+        for(NodeGroup nodeGroup:nodeGroups){
+            if(nodeGroup.isSelf()){
+                //自有网络组，增加种子节点的加载，跨链网络组，则无此步骤
+                loadSeedsNode(nodeGroup.getMagicNumber());
+            }
+            //数据库获取node
+            List<Node> nodes=storageManager.getNodesByChainId(nodeGroup.getChainId());
+            for(Node node:nodes){
+                nodeGroup.addDisConnetNode(node,false);
+            }
+        }
     }
 
     @Override
     public void start() {
-
+        nettyBoot();
+        status=ManagerStatusEnum.RUNNING;
     }
 
 

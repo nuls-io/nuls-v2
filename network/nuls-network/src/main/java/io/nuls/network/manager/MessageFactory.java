@@ -127,6 +127,15 @@ public class MessageFactory {
         nodes.addAll(nodeGroup.getDisConnectNodes());
 
         for(Node peer:nodes){
+            /**
+             * 排除自身连接信息，比如组网A=====B，A向B请求地址，B给的地址列表需排除A地址。
+             */
+            if(peer.getIp().equals(node.getIp())){
+                continue;
+            }
+            /**
+             * 只有主动连接的节点地址才可使用。
+             */
             if(Node.OUT == peer.getType()) {
                 try {
                     int port=peer.getRemotePort();

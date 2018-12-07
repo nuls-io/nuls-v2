@@ -21,6 +21,7 @@
 package io.nuls.block.utils;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.SmallBlock;
 
 /**
  * 调用共识模块接口的工具类
@@ -30,7 +31,7 @@ import io.nuls.base.data.BlockHeader;
  */
 public class ConsensusUtil {
 
-    public static boolean verify(int chainId, BlockHeader blockHeader){
+    public static boolean verify(int chainId, SmallBlock smallBlock){
         return true;
     }
 

@@ -23,6 +23,8 @@ package io.nuls.block;
 import io.nuls.base.basic.TransactionManager;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
+import io.nuls.block.cache.CacheHandler;
+import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.config.ConfigLoader;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ContextManager;
@@ -79,8 +81,11 @@ public class Bootstrap {
             BlockService service = ContextManager.getServiceBean(BlockService.class);
             service.init(CHAIN_ID);
 
+            //各类缓存初始化
+            initCache(CHAIN_ID);
+
             //5.rpc服务初始化
-//            rpcInit();
+            rpcInit();
 
             onlyRunWhenTest();
 
@@ -106,6 +111,11 @@ public class Bootstrap {
         } catch (Exception e) {
             Log.error(e);
         }
+    }
+
+    private static void initCache(int chainId) {
+        SmallBlockCacher.init(chainId);
+        CacheHandler.init(chainId);
     }
 
     private static void start() {
@@ -141,8 +151,8 @@ public class Bootstrap {
         ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronize"));
         synExecutor.scheduleAtFixedRate(BlockSynchronizer.getInstance(), 0, 1, TimeUnit.MINUTES);
         //开启区块监控线程
-        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
-        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 1, TimeUnit.MINUTES);
+//        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
+//        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 1, TimeUnit.MINUTES);
         //开启分叉链处理线程
         ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
         forkExecutor.scheduleAtFixedRate(ForkChainsMonitor.getInstance(), 0, 1, TimeUnit.MINUTES);

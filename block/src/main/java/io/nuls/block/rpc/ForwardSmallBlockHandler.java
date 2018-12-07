@@ -22,10 +22,13 @@ package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.cache.SmallBlockCacheManager;
+import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.constant.CommandConstant;
+import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.HashMessage;
+import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.utils.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
@@ -49,8 +52,6 @@ import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE
 @Component
 public class ForwardSmallBlockHandler extends BaseCmd {
 
-    private SmallBlockCacheManager smallBlockCacheManager = SmallBlockCacheManager.getInstance();
-
     @CmdAnnotation(cmd = FORWARD_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Object process(Map map) {
 
@@ -71,16 +72,32 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         }
 
         NulsDigestData blockHash = message.getRequestHash();
-        if (smallBlockCacheManager.containsSmallBlock(blockHash)) {
+        BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
+        //1.已收到完整区块，丢弃
+        if (BlockForwardEnum.COMPLETE.equals(status)) {
             return success();
         }
 
-        HashMessage request = new HashMessage();
-        request.setRequestHash(blockHash);
-        request.setCommand(CommandConstant.GET_SMALL_BLOCK_MESSAGE);
-        if (NetworkUtil.sendToNode(chainId, request, nodeId)) {
-            smallBlockCacheManager.cacheSmallBlockRequest(blockHash);
+        //2.已收到部分区块，还缺失交易信息，发送HashListMessage到源节点
+        if (BlockForwardEnum.INCOMPLETE.equals(status)) {
+            CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
+            HashListMessage request = new HashListMessage();
+            request.setBlockHash(blockHash);
+            request.setTxHashList(block.getMissingTransactions());
+            request.setCommand(CommandConstant.GET_TXGROUP_MESSAGE);
+            NetworkUtil.sendToNode(chainId, request, nodeId);
+            return success();
         }
+
+        //3.未收到区块
+        if (BlockForwardEnum.EMPTY.equals(status)) {
+            HashMessage request = new HashMessage();
+            request.setRequestHash(blockHash);
+            request.setCommand(CommandConstant.GET_SMALL_BLOCK_MESSAGE);
+            NetworkUtil.sendToNode(chainId, request, nodeId);
+            return success();
+        }
+
         return success();
     }
 
