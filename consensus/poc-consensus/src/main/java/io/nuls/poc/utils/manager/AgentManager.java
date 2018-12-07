@@ -24,8 +24,6 @@ import java.util.List;
 public class AgentManager{
     @Autowired
     private AgentStorageService agentStorageService;
-    @Autowired
-    private ChainManager chainManager;
     /**
      * 加载节点信息
      * Initialize node information
@@ -47,27 +45,26 @@ public class AgentManager{
      * 添加指定链节点
      * Adding specified chain nodes
      *
-     * @param chainId    chain id
+     * @param chain      chain info
      * @param agent      agent info
      * */
-    public void addAgent(int chainId,Agent agent){
-        chainManager.getChainMap().get(chainId).getAgentList().add(agent);
+    public void addAgent(Chain chain,Agent agent){
+        chain.getAgentList().add(agent);
     }
 
     /**
      * 修改指定链节点
      * Modifying specified chain nodes
      *
-     * @param chainId    chain id
+     * @param chain      chain info
      * @param agent      agent info
      * */
-    public void updateAgent(int chainId,Agent agent){
-        List<Agent> agentList = chainManager.getChainMap().get(chainId).getAgentList();
+    public void updateAgent(Chain chain,Agent agent){
+        List<Agent> agentList = chain.getAgentList();
         if(agentList == null || agentList.size() == 0){
             agentList.add(agent);
             return;
         }
-        Agent agentTemp;
         for(int index = 0 ;index < agentList.size();index++){
             if(agent.getTxHash().equals(agentList.get(index))){
                 agentList.set(index,agent);
@@ -80,11 +77,11 @@ public class AgentManager{
      * 删除指定链节点
      * Delete the specified link node
      *
-     * @param chainId     chain id
+     * @param chain       chain info
      * @param txHash      创建该节点交易的HASH/Creating the node transaction hash
      * */
-    public void removeAgent(int chainId, NulsDigestData txHash){
-        List<Agent> agentList = chainManager.getChainMap().get(chainId).getAgentList();
+    public void removeAgent(Chain chain, NulsDigestData txHash){
+        List<Agent> agentList = chain.getAgentList();
         if(agentList == null || agentList.size() == 0){
             return;
         }
