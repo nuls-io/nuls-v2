@@ -24,8 +24,6 @@ import java.util.List;
 public class DepositManager {
     @Autowired
     private DepositStorageService depositStorageService;
-    @Autowired
-    private ChainManager chainManager;
 
     /**
      * 初始化委托信息
@@ -48,22 +46,22 @@ public class DepositManager {
      * 添加委托缓存
      * Add delegation cache
      *
-     * @param chainId     chain id
+     * @param chain       chain info
      * @param deposit     deposit info
      * */
-    public void addDeposit(int chainId,Deposit deposit) {
-        chainManager.getChainMap().get(chainId).getDepositList().add(deposit);
+    public void addDeposit(Chain chain,Deposit deposit) {
+        chain.getDepositList().add(deposit);
     }
 
     /**
      * 修改委托缓存
      * modify delegation cache
      *
-     * @param chainId     chain id
+     * @param chain     chain
      * @param deposit     deposit info
      * */
-    public void updateDeposit(int chainId,Deposit deposit){
-        List<Deposit> depositList = chainManager.getChainMap().get(chainId).getDepositList();
+    public void updateDeposit(Chain chain,Deposit deposit){
+        List<Deposit> depositList = chain.getDepositList();
         if(depositList == null || depositList.size() == 0){
             depositList.add(deposit);
             return;
@@ -79,11 +77,11 @@ public class DepositManager {
      * 删除指定链的委托信息
      * Delete delegate information for a specified chain
      *
-     * @param chainId    chain id
+     * @param chain      chain nfo
      * @param txHash     创建该委托交易的Hash/Hash to create the delegated transaction
      * */
-    public void removeDeposit(int chainId, NulsDigestData txHash) throws Exception{
-        List<Deposit> depositList = chainManager.getChainMap().get(chainId).getDepositList();
+    public void removeDeposit(Chain chain, NulsDigestData txHash) throws Exception{
+        List<Deposit> depositList = chain.getDepositList();
         if(depositList == null || depositList.size() == 0){
             return;
         }

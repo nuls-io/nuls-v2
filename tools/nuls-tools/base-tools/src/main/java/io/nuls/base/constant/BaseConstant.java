@@ -50,4 +50,11 @@ public class BaseConstant {
      * and the current address begins with "Ns".8964.
      */
     public static short DEFAULT_CHAIN_ID = 261;
+
+    /**
+     * 出块间隔时间（秒）
+     * Block interval time.
+     * unit:second
+     */
+    public static long BLOCK_TIME_INTERVAL_SECOND = 10;
 }

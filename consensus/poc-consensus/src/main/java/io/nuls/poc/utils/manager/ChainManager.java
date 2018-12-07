@@ -1,5 +1,8 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.BlockRoundData;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -10,10 +13,14 @@ import io.nuls.poc.storage.ConfigService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.thread.TimeService;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +36,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChainManager {
     @Autowired
     private ConfigService configService;
+    @Autowired
+    private AgentManager agentManager;
+    @Autowired
+    private DepositManager depositManager;
+    @Autowired
+    private PunishManager punishManager;
+    @Autowired
+    private RoundManager roundManager;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
@@ -160,9 +175,35 @@ public class ChainManager {
             缓存最近x轮区块头数据
             Cache the latest X rounds of block header data
             */
-            SpringLiteContext.getBean(AgentManager.class).loadAgents(chain);
-            SpringLiteContext.getBean(DepositManager.class).loadDeposits(chain);
-            SpringLiteContext.getBean(PunishManager.class).loadPunishes(chain);
+            int length = 10;
+            List<BlockHeader>blockHeaderList = new ArrayList<>();
+            for (int index = 0;index < length;index++) {
+                BlockHeader blockHeader = new BlockHeader();
+                blockHeader.setHeight(100);
+                blockHeader.setPreHash(NulsDigestData.calcDigestData("00000000000".getBytes()));
+                blockHeader.setTime(TimeService.currentTimeMillis());
+                blockHeader.setTxCount(1);
+                blockHeader.setMerkleHash(NulsDigestData.calcDigestData(new byte[20]));
+
+                // add a round data
+                BlockRoundData roundData = new BlockRoundData();
+                roundData.setConsensusMemberCount(1);
+                roundData.setPackingIndexOfRound(1);
+                roundData.setRoundIndex(1);
+                roundData.setRoundStartTime(TimeService.currentTimeMillis());
+                try {
+                    blockHeader.setExtend(roundData.serialize());
+                } catch (IOException e) {
+                    throw new NulsRuntimeException(e);
+                }
+                blockHeaderList.add(blockHeader);
+            }
+            chain.setBlockHeaderList(blockHeaderList);
+            chain.setNewestHeader(blockHeaderList.get(blockHeaderList.size()-1));
+            agentManager.loadAgents(chain);
+            depositManager.loadDeposits(chain);
+            punishManager.loadPunishes(chain);
+            roundManager.initRound(chain);
         }catch (Exception e){
             Log.error(e);
         }

@@ -103,7 +103,7 @@ public class ConsensusProcess {
         获取当前轮次信息并验证轮次信息
         Get current round information
          */
-        MeetingRound round = roundManager.getOrResetCurrentRound(chainId,true);
+        MeetingRound round = roundManager.getOrResetCurrentRound(chain,true);
         if (round == null) {
             return;
         }
@@ -282,7 +282,7 @@ public class ConsensusProcess {
         Assembly System Transactions (CoinBase/Red/Yellow)+ Create blocks
         */
         ConsensusManager consensusManager = SpringLiteContext.getBean(ConsensusManager.class);
-        consensusManager.addConsensusTx(chainId,bestBlock,packingTxList,self,round);
+        consensusManager.addConsensusTx(chain,bestBlock,packingTxList,self,round);
         bd.setTxList(packingTxList);
         Block newBlock = consensusManager.createBlock(bd, self.getAgent().getPackingAddress());
         Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
