@@ -6,6 +6,12 @@
     "value": "xxx"
   },
   {
+    "name": "smallBlockCache",
+    "remark": "系统正常运行时最多缓存多少个从别的节点接收到的小区块",
+    "readOnly": "true",
+    "value": "50"
+  },
+  {
     "name": "chainSwtichThreshold",
     "remark": "分叉链切换为主链的高度差阈值",
     "readOnly": "true",

@@ -18,44 +18,37 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.thread;
-
-import io.nuls.base.data.Block;
-import io.nuls.block.model.Node;
-import io.nuls.block.utils.BlockDownloadUtils;
-import io.nuls.tools.log.Log;
-import lombok.AllArgsConstructor;
-
-import java.util.Deque;
-import java.util.List;
-import java.util.SortedSet;
-import java.util.concurrent.Callable;
+package io.nuls.block.constant;
 
 /**
- * 区块下载器
+ * 标记区块广播、转发过程中的状态
  *
  * @author captain
  * @version 1.0
- * @date 18-12-4 下午8:29
+ * @date 18-11-28 下午12:01
  */
-@AllArgsConstructor()
-public class BlockDownloader implements Callable<BlockDownLoadResult> {
+public enum BlockForwardEnum {
 
-    private long startHeight;
-    private int size;
-    private int chainId;
-    private int index;
-    private Node node;
+    /**
+     * 没有收到区块
+     * Running exception
+     */
+    EMPTY,
+
+    /**
+     * 收到部分区块，主要是缺失一部分交易
+     * Running exception
+     */
+    INCOMPLETE,
+
+    /**
+     * 收到完整区块
+     * Running exception
+     */
+    COMPLETE;
 
     @Override
-    public BlockDownLoadResult call() {
-        List<Block> blockList = null;
-        try {
-            blockList = BlockDownloadUtils.getBlocks(chainId, node, startHeight, startHeight + size - 1);
-        } catch (Exception e) {
-            Log.error(e);
-        }
-        return new BlockDownLoadResult(startHeight, size, node, blockList, index);
+    public String toString() {
+        return name();
     }
-
 }

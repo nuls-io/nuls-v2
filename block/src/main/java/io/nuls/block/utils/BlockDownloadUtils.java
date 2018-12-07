@@ -58,10 +58,10 @@ public class BlockDownloadUtils {
         HashMessage message = new HashMessage();
         message.setRequestHash(hash);
         message.setCommand(CommandConstant.GET_BLOCK_MESSAGE);
-        Future<Block> future = CacheHandler.addGetBlockByHashRequest(hash);
+        Future<Block> future = CacheHandler.addGetBlockByHashRequest(chainId, hash);
         boolean result = NetworkUtil.sendToNode(chainId, message, node.getId());
         if (!result) {
-            CacheHandler.removeBlockByHashFuture(hash);
+            CacheHandler.removeBlockByHashFuture(chainId, hash);
             return null;
         }
         try {
@@ -70,7 +70,7 @@ public class BlockDownloadUtils {
             Log.error(node.getId(), e);
             return null;
         } finally {
-            CacheHandler.removeBlockByHashFuture(hash);
+            CacheHandler.removeBlockByHashFuture(chainId, hash);
         }
     }
 
@@ -83,24 +83,24 @@ public class BlockDownloadUtils {
      * @return
      * @throws Exception
      */
-    public static SortedSet<Block> getBlocks(int chainId, Node node, long startHeight, long endHeight) throws Exception {
+    public static List<Block> getBlocks(int chainId, Node node, long startHeight, long endHeight) throws Exception {
         Log.info("getBlocks:{}->{} ,from:{}", startHeight, endHeight, node.getId());
         //下载到的区块默认以区块高度排序
-        SortedSet<Block> set = new TreeSet<>((b1, b2) -> (int) (b1.getHeader().getHeight() - b2.getHeader().getHeight()));
+        List<Block> blockList = new ArrayList<>();
         if (startHeight < 0L || startHeight > endHeight) {
-            return set;
+            return blockList;
         }
         //组装批量获取区块消息
         GetBlocksByHeightMessage message = new GetBlocksByHeightMessage(startHeight, endHeight);
         //计算本次请求hash，用来跟踪本次异步请求，缓存taskFuture，用于跟踪异步请求完成
-        NulsDigestData requestHash = NulsDigestData.calcDigestData(message.serialize());
-        Future<CompleteMessage> requestFuture = CacheHandler.newRequest(requestHash);
+        NulsDigestData messageHash = message.getHash();
+        Future<CompleteMessage> requestFuture = CacheHandler.newRequest(chainId, messageHash);
 
         //blockFutures用来保存收到的blocks
         List<Map<NulsDigestData, Future<Block>>> blockFutures = new ArrayList<>();
         for (long i = startHeight; i <= endHeight; i++) {
             NulsDigestData hash = NulsDigestData.calcDigestData(SerializeUtils.uint64ToByteArray(i));
-            Future<Block> blockFuture = CacheHandler.addGetBlockByHeightRequest(hash);
+            Future<Block> blockFuture = CacheHandler.addGetBlockByHeightRequest(chainId, hash);
             Map<NulsDigestData, Future<Block>> blockFutureMap = new HashMap<>(1);
             blockFutureMap.put(hash, blockFuture);
             blockFutures.add(blockFutureMap);
@@ -111,13 +111,13 @@ public class BlockDownloadUtils {
 
         //发送失败清空数据
         if (!result) {
-            CacheHandler.removeRequest(message.getHash());
+            CacheHandler.removeRequest(chainId, messageHash);
             for (Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                 for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
-                    CacheHandler.removeBlockByHeightFuture(entry.getKey());
+                    CacheHandler.removeBlockByHeightFuture(chainId, entry.getKey());
                 }
             }
-            return set;
+            return blockList;
         }
 
         try {
@@ -127,7 +127,7 @@ public class BlockDownloadUtils {
                     for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
                         Block block = entry.getValue().get(30L, TimeUnit.SECONDS);
                         if (block != null) {
-                            set.add(block);
+                            blockList.add(block);
                         }
                     }
                 }
@@ -135,14 +135,14 @@ public class BlockDownloadUtils {
         } catch (Exception e) {
             Log.error(e);
         } finally {
-            CacheHandler.removeRequest(requestHash);
+            CacheHandler.removeRequest(chainId, messageHash);
             for (Map<NulsDigestData, Future<Block>> blockFutureMap : blockFutures) {
                 for (Map.Entry<NulsDigestData, Future<Block>> entry : blockFutureMap.entrySet()) {
-                    CacheHandler.removeBlockByHeightFuture(entry.getKey());
+                    CacheHandler.removeBlockByHeightFuture(chainId, entry.getKey());
                 }
             }
         }
-        return set;
+        return blockList;
     }
 
 }

@@ -32,8 +32,6 @@ import lombok.Setter;
 
 import java.io.IOException;
 
-import static io.nuls.block.constant.CommandConstant.EMPTY_MESSAGE;
-
 /**
  * 通用消息体
  *
@@ -46,7 +44,7 @@ public abstract class BaseMessage extends BaseNulsData {
     private transient NulsDigestData hash;
 
     @Getter @Setter
-    protected String command = EMPTY_MESSAGE;
+    protected String command;
 
     public BaseMessage() {
 
