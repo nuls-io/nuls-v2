@@ -26,8 +26,8 @@ package io.nuls.chain.cmd;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.ChainTxConstants;
-import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
-import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.chain.model.dto.Asset;
+import io.nuls.chain.model.dto.Chain;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -49,7 +49,7 @@ import java.util.Map;
  * @date 2018/11/22
  **/
 @Component
-public class TxModuleValidateCmd extends BaseCmd {
+public class TxModuleValidateCmd extends BaseChainCmd {
     @Autowired
     private TxAssetCmd txAssetCmd;
     @Autowired
@@ -114,15 +114,21 @@ public class TxModuleValidateCmd extends BaseCmd {
         }
     }
 
-    private List<Transaction> errorInRegisterChainAndAssetList(List<Transaction> registerChainAndAssetList) {
-        List<Transaction> error = new ArrayList<>();
-        List<Integer> chainIdList = new ArrayList<>();
-        List<Integer> assetIdList = new ArrayList<>();
+    private List<Transaction> errorInRegisterChainAndAssetList(List<Transaction> registerChainAndAssetList) throws Exception {
+        List<Transaction> errorTransaction = new ArrayList<>();
+        List<Integer> newChainIdList = new ArrayList<>();
+        List<Integer> newAssetIdList = new ArrayList<>();
         for (Transaction tx : registerChainAndAssetList) {
-            RegisterChainAndAssetTransaction registerChainAndAssetTransaction = (RegisterChainAndAssetTransaction) tx;
-//            if (!chainIdList.contains(registerChainAndAssetTransaction.get))
-//                chainIdList.add()
+            Chain newChain = buildChainTxData(tx.hex(), new Transaction(), false);
+            Asset newAsset = buildAssetTxData(tx.hex(), new Transaction());
+            if (!newChainIdList.contains(newChain.getChainId())
+                    && !newAssetIdList.contains(newAsset.getAssetId())) {
+                newChainIdList.add(newChain.getChainId());
+                newAssetIdList.add(newAsset.getAssetId());
+            } else {
+                errorTransaction.add(tx);
+            }
         }
-        return error;
+        return errorTransaction;
     }
 }

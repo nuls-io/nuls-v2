@@ -1,14 +1,12 @@
 package io.nuls.chain.cmd;
 
 
-import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.model.tx.DestroyAssetAndChainTransaction;
 import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
-import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
@@ -17,7 +15,6 @@ import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.log.Log;
 
@@ -221,36 +218,6 @@ public class TxChainCmd extends BaseChainCmd {
         }
     }
 
-    private Chain buildChainTxData(String txHex, Transaction tx,boolean isDelete){
-        try {
-            byte []txBytes = HexUtil.hexToByte(txHex);
-            tx.parse(txBytes,0);
-            TxChain txChain =  new TxChain();
-            txChain.parse(tx.getTxData(),0);
-            Chain chain = new Chain(txChain,isDelete);
-            if(isDelete){
-                chain.setDelTxHash(tx.getHash().toString());
-            }else {
-                chain.setRegTxHash(tx.getHash().toString());
-            }
-            return chain;
-        } catch (Exception e) {
-            Log.error(e);
-            return null;
-        }
-    }
-    private Asset buildAssetTxData(String txHex, Transaction tx){
-        try {
-            byte []txBytes = HexUtil.hexToByte(txHex);
-            tx.parse(txBytes,0);
-            TxChain txChain =  new TxChain();
-            txChain.parse(tx.getTxData(),0);
-            Asset asset = new Asset(txChain);
-            asset.setTxHash(tx.getHash().toString());
-            return asset;
-        } catch (Exception e) {
-            Log.error(e);
-            return null;
-        }
-    }
+
+
 }
