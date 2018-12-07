@@ -133,7 +133,7 @@ public class Bootstrap {
     }
 
     private static void rpcInit() throws Exception {
-        // 启动Server
+        // Start server instance
         WsServer.getInstance(ModuleE.BL)
                 .moduleRoles(new String[]{"1.0"})
                 .moduleVersion("1.0")

@@ -314,7 +314,7 @@ public class BlockServiceImpl implements BlockService {
             }
         }
         //3.共识验证
-        boolean consensusVerify = ConsensusUtil.verify(chainId, block.getHeader());
+        boolean consensusVerify = ConsensusUtil.verify(chainId, block);
         if (!consensusVerify) {
             return false;
         }
