@@ -269,10 +269,10 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public boolean forwardBlock(int chainId, NulsDigestData hash, Node excludeNode) {
+    public boolean forwardBlock(int chainId, NulsDigestData hash, String excludeNode) {
         HashMessage message = new HashMessage(hash);
         message.setCommand(CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE);
-        return NetworkUtil.broadcast(chainId, message, excludeNode.getId());
+        return NetworkUtil.broadcast(chainId, message, excludeNode);
     }
 
     @Override
@@ -378,7 +378,7 @@ public class BlockServiceImpl implements BlockService {
             ContextManager.getContext(chainId).setGenesisBlock(genesisBlock);
             ChainManager.setMasterChain(chainId, Chain.generateMasterChain(chainId, block));
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return null != block;
     }
@@ -391,6 +391,16 @@ public class BlockServiceImpl implements BlockService {
             initLocalBlocks(chainId);
         } catch (Exception e) {
             Log.error(e);
+        }
+    }
+
+    @Override
+    public boolean existBlock(int chainId, NulsDigestData hash) {
+        try {
+            return blockStorageService.query(chainId, hash) == null;
+        } catch (NulsException e) {
+            Log.error(e);
+            return false;
         }
     }
 }

@@ -20,6 +20,7 @@
 package io.nuls.block.utils;
 
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.BaseMessage;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.model.Node;
@@ -48,7 +49,7 @@ public class NetworkUtil {
          * 从kernel获取所有接口列表（实际使用中不需要每次都调用这句话，同步一次即可）
          */
         try {
-            CmdDispatcher.syncManager();
+            CmdDispatcher.syncKernel();
         } catch (Exception e) {
             Log.error(e);
         }
@@ -168,6 +169,7 @@ public class NetworkUtil {
         CompleteMessage message = new CompleteMessage();
         message.setRequestHash(hash);
         message.setSuccess(false);
+        message.setCommand(CommandConstant.COMPLETE_MESSAGE);
         boolean result = sendToNode(chainId, message, nodeId);
         if (!result) {
             Log.warn("send fail message failed:{}, hash:{}", nodeId, hash);
@@ -178,6 +180,7 @@ public class NetworkUtil {
         CompleteMessage message = new CompleteMessage();
         message.setRequestHash(hash);
         message.setSuccess(true);
+        message.setCommand(CommandConstant.COMPLETE_MESSAGE);
         boolean result = sendToNode(chainId, message, nodeId);
         if (!result) {
             Log.warn("send success message failed:{}, hash:{}", nodeId, hash);

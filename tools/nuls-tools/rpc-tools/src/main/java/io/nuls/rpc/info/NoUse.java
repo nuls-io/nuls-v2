@@ -3,7 +3,7 @@ package io.nuls.rpc.info;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.RegisterApi;
-import io.nuls.rpc.server.ServerRuntime;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.rpc.server.WsServer;
 
 import java.util.ArrayList;
@@ -40,7 +40,7 @@ public class NoUse {
         wsServer.scanPackage("io.nuls.rpc.cmd.kernel").connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
-        CmdDispatcher.syncManager();
+        CmdDispatcher.syncKernel();
 
         Thread.sleep(Integer.MAX_VALUE);
     }
@@ -50,13 +50,13 @@ public class NoUse {
      * Analog Startup Module, Unit Test Specific
      */
     public static void mockModule() throws Exception {
-        WsServer.getInstance(ModuleE.TEST)
-                .moduleRoles(new String[]{"1.0"})
+        WsServer.getInstance("test", "TestModule", "test.com")
+                .moduleRoles("test_role", new String[]{"1.0"})
                 .moduleVersion("1.0")
                 .dependencies(ModuleE.CM.abbr, "1.1")
                 .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
-        CmdDispatcher.syncManager();
+        CmdDispatcher.syncKernel();
     }
 }

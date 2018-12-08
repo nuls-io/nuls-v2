@@ -27,7 +27,9 @@ package io.nuls.network.rpc;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.thread.TimeService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -39,7 +41,9 @@ public class TimeServiceRpc  extends BaseCmd {
     @CmdAnnotation(cmd = "nw_currentTimeMillis", version = 1.0,
             description = "currentTimeMillis")
     public Response currentTimeMillis(Map params) {
-        return success();
+        Map<String,Long> responseData = new HashMap<>();
+        responseData.put("currentTimeMillis",TimeService.currentTimeMillis());
+        return success(responseData);
     }
 }
 

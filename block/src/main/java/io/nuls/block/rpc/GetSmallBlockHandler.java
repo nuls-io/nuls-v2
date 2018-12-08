@@ -23,8 +23,9 @@ package io.nuls.block.rpc;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
-import io.nuls.block.cache.TemporaryCacheManager;
+import io.nuls.block.cache.SmallBlockCacheManager;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.utils.NetworkUtil;
@@ -41,7 +42,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link HashMessage}
+ * 处理收到的{@link HashMessage}，用于区块的广播与转发
  * @author captain
  * @date 18-11-14 下午4:23
  * @version 1.0
@@ -49,7 +50,7 @@ import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 @Component
 public class GetSmallBlockHandler extends BaseCmd {
 
-    private TemporaryCacheManager cacheManager = TemporaryCacheManager.getInstance();
+    private SmallBlockCacheManager cacheManager = SmallBlockCacheManager.getInstance();
 
     @CmdAnnotation(cmd = GET_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Object process(Map map){
@@ -73,6 +74,8 @@ public class GetSmallBlockHandler extends BaseCmd {
         SmallBlock smallBlock = cacheManager.getSmallBlockByHash(blockHash);
         if (smallBlock != null) {
             SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
+            smallBlockMessage.setSmallBlock(smallBlock);
+            smallBlockMessage.setCommand(CommandConstant.SMALL_BLOCK_MESSAGE);
             NetworkUtil.sendToNode(chainId, smallBlockMessage, nodeId);
         }
         return success();

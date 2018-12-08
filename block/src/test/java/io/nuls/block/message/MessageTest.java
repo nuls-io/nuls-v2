@@ -66,9 +66,23 @@ public class MessageTest {
     @Test
     public void testBlockMessage() throws Exception {
         BlockMessage message = new BlockMessage();
-        BlockMessage body = new BlockMessage();
-        
-        body.setBlock(GenesisBlock.getInstance());
+
+        message.setBlock(GenesisBlock.getInstance());
+        String hex = HexUtil.byteToHex(message.serialize());
+        System.out.println(hex);
+
+        byte[] bytes = HexUtil.decode(hex);
+        BlockMessage message1 = new BlockMessage();
+        message1.parse(new NulsByteBuffer(bytes));
+
+        assertEquals(message1.getHash(), message.getHash());
+    }
+
+    @Test
+    public void testBlockMessage1() throws Exception {
+        BlockMessage message = new BlockMessage();
+
+        message.setBlock(null);
         String hex = HexUtil.byteToHex(message.serialize());
         System.out.println(hex);
 
@@ -166,7 +180,7 @@ public class MessageTest {
     @Test
     public void testTxGroupMessage() throws Exception {
         TxGroupMessage message = new TxGroupMessage();
-        message.setRequestHash(NulsDigestData.calcDigestData("hello".getBytes()));
+        message.setBlockHash(NulsDigestData.calcDigestData("hello".getBytes()));
         message.setTransactions(BlockGenerator.getTransactions());
         String hex = HexUtil.byteToHex(message.serialize());
         System.out.println(hex);
@@ -180,7 +194,7 @@ public class MessageTest {
 
     @Before
     public void setUp() {
-        TransactionManager.putTx(Transaction.class, null);
+
     }
 
     @After

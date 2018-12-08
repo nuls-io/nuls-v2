@@ -4,6 +4,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.model.bo.TxWrapper;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,9 +21,9 @@ public class TxVerifiedPool {
 
     private final static TxVerifiedPool INSTANCE = new TxVerifiedPool();
 
-    private Queue<Transaction> txQueue;
+    private Queue<TxWrapper> txQueue;
 
-    private LimitHashMap<NulsDigestData, Transaction> orphanContainer;
+    private LimitHashMap<NulsDigestData, TxWrapper> orphanContainer;
 
     private TxVerifiedPool() {
         this.txQueue = new LinkedBlockingDeque<>();
@@ -33,34 +34,34 @@ public class TxVerifiedPool {
         return INSTANCE;
     }
 
-    public boolean addInFirst(Transaction tx, boolean isOrphan) {
+    public boolean addInFirst(TxWrapper txWrapper, boolean isOrphan) {
         try {
-            if (tx == null) {
+            if (txWrapper == null) {
                 return false;
             }
             //check Repeatability
             if (isOrphan) {
-                NulsDigestData hash = tx.getHash();
-                orphanContainer.put(hash, tx);
+                NulsDigestData hash = txWrapper.getTx().getHash();
+                orphanContainer.put(hash, txWrapper);
             } else {
-                ((LinkedBlockingDeque) txQueue).addFirst(tx);
+                ((LinkedBlockingDeque) txQueue).addFirst(txWrapper);
             }
             return true;
         } finally {
         }
     }
 
-    public boolean add(Transaction tx, boolean isOrphan) {
+    public boolean add(TxWrapper txWrapper, boolean isOrphan) {
         try {
-            if (tx == null) {
+            if (txWrapper == null) {
                 return false;
             }
             //check Repeatability
             if (isOrphan) {
-                NulsDigestData hash = tx.getHash();
-                orphanContainer.put(hash, tx);
+                NulsDigestData hash = txWrapper.getTx().getHash();
+                orphanContainer.put(hash, txWrapper);
             } else {
-                txQueue.offer(tx);
+                txQueue.offer(txWrapper);
             }
             return true;
         } finally {
@@ -74,20 +75,20 @@ public class TxVerifiedPool {
      *
      * @return TxContainer
      */
-    public Transaction get() {
+    public TxWrapper get() {
         return txQueue.poll();
     }
 
-    public List<Transaction> getAll() {
-        List<Transaction> txs = new ArrayList<>();
-        Iterator<Transaction> it = txQueue.iterator();
+    public List<TxWrapper> getAll() {
+        List<TxWrapper> txs = new ArrayList<>();
+        Iterator<TxWrapper> it = txQueue.iterator();
         while (it.hasNext()) {
             txs.add(it.next());
         }
         return txs;
     }
 
-    public List<Transaction> getAllOrphan() {
+    public List<TxWrapper> getAllOrphan() {
         return new ArrayList<>(orphanContainer.values());
     }
 

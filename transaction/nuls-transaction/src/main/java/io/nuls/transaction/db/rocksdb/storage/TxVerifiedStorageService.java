@@ -2,6 +2,7 @@ package io.nuls.transaction.db.rocksdb.storage;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.transaction.model.bo.TxWrapper;
 
 /**
  * 验证通过但未打包的交易
@@ -12,9 +13,9 @@ import io.nuls.base.data.Transaction;
  */
 public interface TxVerifiedStorageService {
 
-    boolean putTx(Transaction tx);
+    boolean putTx(TxWrapper txWrapper);
 
-    Transaction getTx(NulsDigestData hash);
+    Transaction getTx(int chainId,NulsDigestData hash);
 
-    boolean removeTx(NulsDigestData hash);
+    boolean removeTx(int chainId,NulsDigestData hash);
 }

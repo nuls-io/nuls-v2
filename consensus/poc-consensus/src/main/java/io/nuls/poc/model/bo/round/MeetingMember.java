@@ -39,45 +39,45 @@ import java.util.List;
  * 2018/11/12
  */
 public class MeetingMember implements Comparable<MeetingMember> {
-    /*
-    轮次下标
-    Subscript in order
-    */
+    /**
+    * 轮次下标
+    * Subscript in order
+    * */
     private long roundIndex;
-    /*
-    轮次开始打包时间
-    Round start packing time
-    */
+    /**
+    * 轮次开始打包时间
+    * Round start packing time
+    * */
     private long roundStartTime;
-    /*
-    节点在轮次中的下标（第几个出块）
-    Subscription of Nodes in Rounds (Number of Blocks)
-    */
+    /**
+    * 节点在轮次中的下标（第几个出块）
+    * Subscription of Nodes in Rounds (Number of Blocks)
+    * */
     private int packingIndexOfRound;
-    /*
-    共识节点对象
-    Consensus node object
-    */
+    /**
+    * 共识节点对象
+    * Consensus node object
+    * */
     private Agent agent;
-    /*
-    共识节--委托信息列表
-    Consensus Festival - Delegation Information List
-    */
+    /**
+    * 共识节--委托信息列表
+    * Consensus Festival - Delegation Information List
+    * */
     private List<Deposit> depositList = new ArrayList<>();
-    /*
-    排序值
-    Ranking value
-    */
+    /**
+    * 排序值
+    * Ranking value
+    * */
     private String sortValue;
-    /*
-    开始打包时间
-    Start packing time
-    */
+    /**
+    * 开始打包时间
+    * Start packing time
+    * */
     private long packStartTime;
-    /*
-    打包结束时间
-    end packing time
-    */
+    /**
+    * 打包结束时间
+    * end packing time
+    * */
     private long packEndTime;
 
     /**

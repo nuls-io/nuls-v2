@@ -1,5 +1,6 @@
 package io.nuls.poc.model.bo;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.consensus.ConsensusStatus;
@@ -24,8 +25,8 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  **/
 public class Chain {
     /**
-     * 基础配置类
-     * Chain infrastructure configuration class
+     * 链基础配置信息
+     * Chain Foundation Configuration Information
      * */
     private ConfigBean config;
 
@@ -42,6 +43,12 @@ public class Chain {
     private boolean canPacking;
 
     /**
+     * 最新区块头
+     * The most new block
+     * */
+     private BlockHeader newestHeader;
+
+     /**
      * 节点列表
      * Agent list
      * */
@@ -66,14 +73,17 @@ public class Chain {
     private List<PunishLogPo> redPunishList;
 
     /**
-     * 分叉证据记录
-     * Evidence of bifurcation
-     * */
+     * 记录链出块地址PackingAddress，同一个高度发出了两个不同的块的证据
+     * 下一轮正常则清零， 连续3轮将会被红牌惩罚
+     * Record the address of each chain out block Packing Address, and the same height gives evidence of two different blocks.
+     * The next round of normal will be cleared, and three consecutive rounds will be punished by red cards.
+     */
     private Map<String, List<Evidence>> evidenceMap;
 
     /**
-     * 待打包红牌交易列表
-     * To Pack Red Card Trading List
+     * 保存本节点需打包的红牌交易,节点打包时需把该集合中所有红牌交易打包并删除
+     * To save the red card transactions that need to be packaged by the node,
+     * the node should pack and delete all the red card transactions in the set when packing.
      * */
     private List<Transaction> redPunishTransactionList;
 
@@ -84,11 +94,16 @@ public class Chain {
     private List<MeetingRound> roundList;
 
     /**
+     * 最新200轮区块头
+     * The latest 200 rounds block
+     * */
+    private List<BlockHeader> blockHeaderList;
+
+    /**
      * 任务线程池
      * Schedule thread pool
      * */
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
-
 
     public Chain(){
         this.consensusStatus = ConsensusStatus.INITING;
@@ -180,6 +195,22 @@ public class Chain {
 
     public void setRoundList(List<MeetingRound> roundList) {
         this.roundList = roundList;
+    }
+
+    public BlockHeader getNewestHeader() {
+        return newestHeader;
+    }
+
+    public void setNewestHeader(BlockHeader newestHeader) {
+        this.newestHeader = newestHeader;
+    }
+
+    public List<BlockHeader> getBlockHeaderList() {
+        return blockHeaderList;
+    }
+
+    public void setBlockHeaderList(List<BlockHeader> blockHeaderList) {
+        this.blockHeaderList = blockHeaderList;
     }
 
     public ScheduledThreadPoolExecutor getScheduledThreadPoolExecutor() {

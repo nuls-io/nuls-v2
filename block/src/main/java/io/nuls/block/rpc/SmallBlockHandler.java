@@ -20,10 +20,12 @@
 
 package io.nuls.block.rpc;
 
+import com.google.common.base.Preconditions;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
-import io.nuls.block.cache.TemporaryCacheManager;
+import io.nuls.block.cache.SmallBlockCacheManager;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.message.HashListMessage;
@@ -32,7 +34,6 @@ import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.NetworkUtil;
-import io.nuls.block.utils.SmallBlockDuplicateRemoval;
 import io.nuls.block.utils.TransactionUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
@@ -54,7 +55,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link HashMessage}
+ * 处理收到的{@link HashMessage}，用于区块的广播与转发
  *
  * @author captain
  * @version 1.0
@@ -63,7 +64,7 @@ import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 @Component
 public class SmallBlockHandler extends BaseCmd {
 
-    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
+    private SmallBlockCacheManager smallBlockCacheManager = SmallBlockCacheManager.getInstance();
     @Autowired
     private BlockService blockService;
 
@@ -87,32 +88,36 @@ public class SmallBlockHandler extends BaseCmd {
         }
 
         SmallBlock smallBlock = message.getSmallBlock();
-
         if (null == smallBlock) {
             Log.warn("recieved a null smallBlock!");
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         BlockHeader header = smallBlock.getHeader();
-        //阻止恶意节点提前出块
+        NulsDigestData headerHash = header.getHash();
+        //阻止恶意节点提前出块，拒绝接收未来一定时间外的区块
         int validBlockInterval = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.VALID_BLOCK_INTERVAL));
         if (header.getTime() > (TimeService.currentTimeMillis() + validBlockInterval)) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        if (!SmallBlockDuplicateRemoval.needProcess(header.getHash())) {
-            return failed(BlockErrorCode.PARAMETER_ERROR);
+        //已经收到别的节点发来的SmallBlock
+        if (smallBlockCacheManager.containsSmallBlock(headerHash)) {
+            return success();
         }
 
-        BlockHeader blockHeader = blockService.getBlockHeader(chainId, header.getHash());
-        if (null != blockHeader) {
-            return failed(BlockErrorCode.PARAMETER_ERROR);
+        //已经保存到数据库了
+        if (blockService.existBlock(chainId, headerHash)) {
+            return success();
         }
 
-        Log.debug("recieve new block from(" + nodeId + "), tx count : " + header.getTxCount() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + header.getHash());
+        Log.debug("recieve new block from(" + nodeId + "), tx count : " + header.getTxCount() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + headerHash);
 
-        Map<NulsDigestData, Transaction> txMap = new HashMap<>((int)blockHeader.getTxCount());
-        for (Transaction tx : smallBlock.getSubTxList()) {
+        //共识节点打包的交易包括两种交易，一种是在网络上已经广播的普通交易，一种是共识节点生成的特殊交易(如共识奖励、红黄牌)，后面一种交易其他节点的未确认交易池中不可能有，所以都放在SubTxList中
+        //还有一种场景时收到smallBlock时，有一些普通交易还没有缓存在未确认交易池中，此时要再从源节点请求
+        Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());
+        List<Transaction> subTxList = smallBlock.getSubTxList();
+        for (Transaction tx : subTxList) {
             txMap.put(tx.getHash(), tx);
         }
         List<NulsDigestData> needHashList = new ArrayList<>();
@@ -121,7 +126,7 @@ public class SmallBlockHandler extends BaseCmd {
             if (null == tx) {
                 tx = TransactionUtil.getTransaction(chainId, hash);
                 if (tx != null) {
-                    smallBlock.getSubTxList().add(tx);
+                    subTxList.add(tx);
                     txMap.put(hash, tx);
                 }
             }
@@ -129,24 +134,25 @@ public class SmallBlockHandler extends BaseCmd {
                 needHashList.add(hash);
             }
         }
+        //获取没有的交易
         if (!needHashList.isEmpty()) {
             Log.info("block height : " + header.getHeight() + ", tx count : " + header.getTxCount() + " , get group tx of " + needHashList.size());
             HashListMessage request = new HashListMessage();
+            request.setBlockHash(headerHash);
             request.setTxHashList(needHashList);
+            request.setCommand(CommandConstant.GET_TXGROUP_MESSAGE);
             NetworkUtil.sendToNode(chainId, request, nodeId);
-            NulsDigestData requestHash = null;
-            try {
-                requestHash = NulsDigestData.calcDigestData(request.serialize());
-            } catch (IOException e) {
-                Log.error(e);
-            }
-            temporaryCacheManager.cacheSmallBlockWithRequest(requestHash, smallBlock);
+            smallBlockCacheManager.cacheSmallBlock(smallBlock);
             return success();
         }
 
         Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-        blockService.saveBlock(chainId, block);
-
+        if (blockService.saveBlock(chainId, block)) {
+            smallBlockCacheManager.cacheSmallBlock(BlockUtil.getSmallBlock(chainId, block));
+            blockService.forwardBlock(chainId, headerHash, nodeId);
+        } else {
+            Log.error("save fail! chainId:{}, height:{}, hash:{}", chainId, header.getHeight(), headerHash);
+        }
         return success();
     }
 

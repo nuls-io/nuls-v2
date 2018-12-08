@@ -17,6 +17,7 @@ import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.rpc.call.TransactionCmdCall;
+import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.TransactionService;
 import io.nuls.transaction.utils.TransactionManager;
 
@@ -35,6 +36,8 @@ public class TransactionCmd extends BaseCmd {
 
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private ConfirmedTransactionService confirmedTransactionService;
 
     /**
      * Register module transactions, validators, processors(commit, rollback), etc.
@@ -107,7 +110,7 @@ public class TransactionCmd extends BaseCmd {
             //将txHex转换为Transaction对象
             Transaction transaction = Transaction.getInstance(txHex);
             //将交易放入待验证本地交易队列中
-            result = transactionService.newTx(transaction).isSuccess();
+            result = transactionService.newTx(chainId, transaction).isSuccess();
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -156,6 +159,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
+    @CmdAnnotation(cmd = "tx_commit", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction commit")
     public Response commit(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
@@ -172,7 +176,8 @@ public class TransactionCmd extends BaseCmd {
             //将txHex转换为Transaction对象
             Transaction transaction = Transaction.getInstance(txHex);
             TxRegister txRegister = TransactionManager.getInstance().getTxRegister(transaction.getType());
-            result = TransactionCmdCall.txCommit(txRegister.getValidator(), txRegister.getModuleCode(), params);
+            HashMap response = TransactionCmdCall.request(txRegister.getCommit(), txRegister.getModuleCode(), params);
+            result = (Boolean) response.get("value");
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -189,6 +194,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
+    @CmdAnnotation(cmd = "tx_rollback", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction rollback")
     public Response rollback(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
@@ -205,7 +211,8 @@ public class TransactionCmd extends BaseCmd {
             //将txHex转换为Transaction对象
             Transaction transaction = Transaction.getInstance(txHex);
             TxRegister txRegister = TransactionManager.getInstance().getTxRegister(transaction.getType());
-            result = TransactionCmdCall.txCommit(txRegister.getValidator(), txRegister.getModuleCode(), params);
+            HashMap response = TransactionCmdCall.request(txRegister.getRollback(), txRegister.getModuleCode(), params);
+            result = (Boolean) response.get("value");
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -223,9 +230,33 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public Response save(List params) {
-
-        return success("success");
+    public Response save(Map params) {
+        Map<String, Boolean> map = new HashMap<>();
+        boolean result = false;
+        try {
+            Object chainIdObj = params == null ? null : params.get("chainId");
+            Object txHexListObj = params == null ? null : params.get("txList");
+            // check parameters
+            if (params == null || chainIdObj == null || txHexListObj == null) {
+                throw new NulsRuntimeException(TxErrorCode.NULL_PARAMETER);
+            }
+            int chainId = (Integer) chainIdObj;
+            List<String> txHexList = (List<String>) txHexListObj;
+            List<Transaction> txList = new ArrayList<>();
+            for (String txHex : txHexList) {
+                //将txHex转换为Transaction对象
+                Transaction tx = Transaction.getInstance(txHex);
+                txList.add(tx);
+            }
+            result = confirmedTransactionService.saveTxList(chainId, txList);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", result);
+        return success(result);
     }
 
     /**

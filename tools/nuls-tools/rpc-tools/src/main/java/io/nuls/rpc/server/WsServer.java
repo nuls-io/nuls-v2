@@ -25,10 +25,10 @@
 
 package io.nuls.rpc.server;
 
-import io.nuls.rpc.client.ClientRuntime;
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.client.HeartbeatProcessor;
-import io.nuls.rpc.client.ResponseAutoProcessor;
+import io.nuls.rpc.client.thread.HeartbeatProcessor;
+import io.nuls.rpc.client.thread.ResponseAutoProcessor;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
@@ -36,6 +36,10 @@ import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Request;
+import io.nuls.rpc.server.handler.CmdHandler;
+import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.rpc.server.thread.RequestLoopProcessor;
+import io.nuls.rpc.server.thread.RequestSingleProcessor;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
@@ -80,7 +84,7 @@ public class WsServer extends WebSocketServer {
         与核心模块（Manager）握手
         Shake hands with the core module (Manager)
          */
-        if (!CmdDispatcher.handshakeManager()) {
+        if (!CmdDispatcher.handshakeKernel()) {
             throw new Exception("Handshake kernel failed");
         } else {
             Log.info("Connect manager success." + ServerRuntime.local.getModuleName() + " ready!");
@@ -112,7 +116,7 @@ public class WsServer extends WebSocketServer {
                     取消订阅，直接响应
                      */
                     Log.info("UnsubscribeFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
-                    CmdHandler.unsubscribe(webSocket,message);
+                    CmdHandler.unsubscribe(webSocket, message);
                     break;
                 case Request:
                     /*
@@ -121,6 +125,11 @@ public class WsServer extends WebSocketServer {
                      */
                     Log.info("RequestFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
                     Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+
+                    if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
+                            && !ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
+                        ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, msg});
+                    }
                     if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
                         ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
                     }
@@ -128,10 +137,6 @@ public class WsServer extends WebSocketServer {
                         ServerRuntime.REQUEST_EVENT_COUNT_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
                     }
 
-                    if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
-                            && !ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
-                        ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, msg});
-                    }
 
                     /*
                     如果需要一个Ack，则发送

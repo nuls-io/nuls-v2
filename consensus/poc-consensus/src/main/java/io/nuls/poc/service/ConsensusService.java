@@ -3,6 +3,10 @@ import io.nuls.tools.basic.Result;
 
 import java.util.Map;
 
+/**
+ * @author tag
+ * 2018/11/12
+ * */
 public interface ConsensusService {
     /**
      * 创建节点

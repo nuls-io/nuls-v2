@@ -24,10 +24,11 @@
  */
 package io.nuls.rpc.client;
 
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.*;
-import io.nuls.rpc.server.ServerRuntime;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
@@ -50,7 +51,7 @@ public class CmdDispatcher {
      * @return boolean
      * @throws Exception 握手失败, handshake failed
      */
-    public static boolean handshakeManager() throws Exception {
+    public static boolean handshakeKernel() throws Exception {
         WsClient wsClient = ClientRuntime.getWsClient(Constants.kernelUrl);
         if (wsClient == null) {
             throw new Exception("Kernel not available");
@@ -82,7 +83,7 @@ public class CmdDispatcher {
      *
      * @throws Exception 核心模块（Manager）不可用，Core Module (Manager) Not Available
      */
-    public static void syncManager() throws Exception {
+    public static void syncKernel() throws Exception {
 
         Message message = MessageUtil.basicMessage(MessageType.Request);
         Request request = MessageUtil.defaultRequest();
@@ -262,7 +263,7 @@ public class CmdDispatcher {
      * @return boolean
      * @throws InterruptedException 连接失败 / connection failure
      */
-    static boolean receiveNegotiateConnectionResponse() throws InterruptedException {
+    public static boolean receiveNegotiateConnectionResponse() throws InterruptedException {
 
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {

@@ -3,46 +3,96 @@ package io.nuls.poc.utils.manager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.poc.constant.ConsensusConstant;
+import io.nuls.poc.constant.ConsensusErrorCode;
+import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.consensus.PunishReasonEnum;
+import io.nuls.poc.model.bo.consensus.PunishType;
+import io.nuls.poc.model.bo.round.MeetingMember;
+import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
+import io.nuls.poc.model.bo.tx.txdata.YellowPunishData;
+import io.nuls.poc.model.po.PunishLogPo;
+import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.utils.compare.EvidenceComparator;
-import io.nuls.poc.utils.util.ConsensusUtil;
+import io.nuls.poc.utils.compare.PunishLogComparator;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import java.util.concurrent.ConcurrentHashMap;
+
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * 惩罚信息管理，用于惩罚数据证据的记录，红黄牌惩罚生成等
+ * Punishment information management, records of punishment data evidence, red and yellow card punishment generation, etc.
+ *
+ * @author tag
+ * 2018/12/5
+ * */
+@Component
 public class PunishManager {
+    @Autowired
+    private ChainManager chainManager;
+    @Autowired
+    private PunishStorageService punishStorageService;
+    @Autowired
+    private CoinDataManager coinDataManager;
     /**
-     * 记录各条链出块地址PackingAddress，同一个高度发出了两个不同的块的证据
-     * 下一轮正常则清零， 连续3轮将会被红牌惩罚
-     * Record the address of each chain out block Packing Address, and the same height gives evidence of two different blocks.
-     * The next round of normal will be cleared, and three consecutive rounds will be punished by red cards.
-     */
-    private Map<Integer,Map<String, List<Evidence>>> bifurcationEvidenceMap = new HashMap<>();
-
-    /**
-     * 保存本节点需打包的红牌交易,节点打包时需把该集合中所有红牌交易打包并删除
-     * To save the red card transactions that need to be packaged by the node,
-     * the node should pack and delete all the red card transactions in the set when packing.
+     * 加载所有的红牌信息和最近X轮换牌数据到缓存
+     * Load all red card information and latest X rotation card data to the cache
+     *
+     * @param chain 链信息/chain info
      * */
-    private Map<Integer,Transaction> redPunishTransactionMap = new ConcurrentHashMap<>();
-
-    public static PunishManager instance = null;
-    private PunishManager() { }
-    private static Integer LOCK = 0;
-    public static PunishManager getInstance() {
-        synchronized (LOCK) {
-            if (instance == null) {
-                instance = new PunishManager();
+    public void loadPunishes(Chain chain) throws Exception{
+        BlockHeader blockHeader = chain.getNewestHeader();
+        if (null == blockHeader) {
+            return;
+        }
+        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
+        long breakRoundIndex = roundData.getRoundIndex() - ConsensusConstant.INIT_PUNISH_OF_ROUND_COUNT;
+        List<PunishLogPo> punishLogList= punishStorageService.getPunishList(chain.getConfig().getChainId());
+        List<PunishLogPo> redPunishList = new ArrayList<>();
+        List<PunishLogPo> yellowPunishList = new ArrayList<>();
+        for (PunishLogPo po:punishLogList) {
+            if(po.getType() == PunishType.RED.getCode()){
+                redPunishList.add(po);
+            }else{
+                if(po.getRoundIndex() <= breakRoundIndex){
+                    continue;
+                }
+                yellowPunishList.add(po);
             }
-            return instance;
+        }
+        Collections.sort(redPunishList, new PunishLogComparator());
+        Collections.sort(yellowPunishList, new PunishLogComparator());
+        chain.setRedPunishList(redPunishList);
+        chain.setYellowPunishList(yellowPunishList);
+    }
+
+    /**
+     * 数据黄牌数据
+     * Data yellow card data
+     *
+     * @param chain 链信息/chain info
+     * */
+    public void clear(Chain chain){
+        BlockHeader blockHeader = chain.getNewestHeader();
+        BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
+        Iterator<PunishLogPo> yellowIterator = chain.getYellowPunishList().iterator();
+        while (yellowIterator.hasNext()){
+            PunishLogPo po = yellowIterator.next();
+            if (po.getRoundIndex() < roundData.getRoundIndex() - ConsensusConstant.INIT_PUNISH_OF_ROUND_COUNT) {
+                yellowIterator.remove();
+            }
         }
     }
+
+
 
     /**
      * 添加分叉证据
@@ -58,8 +108,12 @@ public class PunishManager {
         找到分叉的节点
         Find the bifurcated nodes
         */
+        Chain chain =  chainManager.getChainMap().get(chainId);
+        if(chain == null){
+            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
         Agent agent = null;
-        for (Agent a:ConsensusManager.getInstance().getAllAgentMap().get(chainId)) {
+        for (Agent a:chain.getAgentList()) {
             if (a.getDelHeight() > 0) {
                 continue;
             }
@@ -95,8 +149,12 @@ public class PunishManager {
         找到双花交易的节点
         Find the bifurcated nodes
         */
+        Chain chain =  chainManager.getChainMap().get(chainId);
+        if(chain == null){
+            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
         byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey(),(short)chainId);
-        List<Agent> agentList = ConsensusManager.getInstance().getAllAgentMap().get(chainId);
+        List<Agent> agentList = chain.getAgentList();
         Agent agent = null;
         for (Agent a : agentList) {
             if (a.getDelHeight() > 0) {
@@ -128,10 +186,10 @@ public class PunishManager {
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
             redPunishTransaction.setTxData(redPunishData.serialize());
             redPunishTransaction.setTime(smallBlock.getHeader().getTime());
-            CoinData coinData = ConsensusUtil.getStopAgentCoinData(chainId,ConfigManager.config_map.get(chainId).getAssetsId(), agent, redPunishTransaction.getTime() + ConfigManager.config_map.get(chainId).getRedPublishLockTime());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chainId,chain.getConfig().getAssetsId(), agent, redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
             redPunishTransaction.setCoinData(coinData.serialize());
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
-            redPunishTransactionMap.put(chainId,redPunishTransaction);
+            chainManager.getChainMap().get(chainId).getRedPunishTransactionList().add(redPunishTransaction);
         }catch (IOException e){
             Log.error(e);
         }
@@ -147,12 +205,16 @@ public class PunishManager {
      * @param secondHeader
      * @return boolean
      * */
-    private boolean isRedPunish(int chainId, BlockHeader firstHeader, BlockHeader secondHeader){
+    private boolean isRedPunish(int chainId, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
         //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚
         String packingAddress = AddressTool.getStringAddressByBytes(firstHeader.getPackingAddress());
         BlockExtendsData extendsData = new BlockExtendsData(firstHeader.getExtend());
         long currentRoundIndex = extendsData.getRoundIndex();
-        Map<String, List<Evidence>> currentChainEvidences = bifurcationEvidenceMap.get(chainId);
+        Chain chain =  chainManager.getChainMap().get(chainId);
+        if(chain == null){
+            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        Map<String, List<Evidence>> currentChainEvidences = chain.getEvidenceMap();
         /*
         首先生成一个证据
         First generate an evidence
@@ -164,7 +226,7 @@ public class PunishManager {
         Determine if there is a penalty record for the current chain, and add if not
         */
         if(currentChainEvidences == null){
-            currentChainEvidences = new HashMap<>();
+            currentChainEvidences = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
         }
 
         /*
@@ -175,7 +237,6 @@ public class PunishManager {
             List<Evidence> list = new ArrayList<>();
             list.add(evidence);
             currentChainEvidences.put(packingAddress, list);
-            bifurcationEvidenceMap.put(chainId,currentChainEvidences);
             return false;
         }
         /*
@@ -191,12 +252,10 @@ public class PunishManager {
             long preRoundIndex = list.get(list.size()-1).getRoundIndex();
             if(currentRoundIndex - preRoundIndex != 1){
                 currentChainEvidences.remove(packingAddress);
-                bifurcationEvidenceMap.put(chainId,currentChainEvidences);
                 return false;
             }else{
                 list.add(evidence);
                 currentChainEvidences.put(packingAddress,list);
-                bifurcationEvidenceMap.put(chainId,currentChainEvidences);
                 if(list.size()>= ConsensusConstant.REDPUNISH_BIFURCATION){
                     return true;
                 }
@@ -218,13 +277,17 @@ public class PunishManager {
         RedPunishData redPunishData = new RedPunishData();
         redPunishData.setAddress(agent.getAgentAddress());
         long txTime = 0;
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if(chain == null){
+            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
         try{
             /*
             连续3轮 每一轮两个区块头作为证据 一共 3 * 2 个区块头作为证据
             For three consecutive rounds, two blocks in each round are used as evidence, and a total of 3*2 blocks are used as evidence.
             */
             byte[][] headers = new byte[ConsensusConstant.REDPUNISH_BIFURCATION * 2][];
-            Map<String, List<Evidence>> currentChainEvidences = bifurcationEvidenceMap.get(chainId);
+            Map<String, List<Evidence>> currentChainEvidences = chain.getEvidenceMap();
             List<Evidence> list = currentChainEvidences.get(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
             for (int i = 0; i < list.size() && i < ConsensusConstant.REDPUNISH_BIFURCATION; i++) {
                 Evidence evidence = list.get(i);
@@ -245,32 +308,152 @@ public class PunishManager {
             组装CoinData
             Assemble CoinData
             */
-            CoinData coinData = ConsensusUtil.getStopAgentCoinData(chainId,ConfigManager.config_map.get(chainId).getAssetsId(),agent,redPunishTransaction.getTime()+ConfigManager.config_map.get(chainId).getRedPublishLockTime());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chainId,chain.getConfig().getAssetsId(),agent,redPunishTransaction.getTime()+chain.getConfig().getRedPublishLockTime());
             redPunishTransaction.setCoinData(coinData.serialize());
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             /*
             缓存红牌交易
             Assemble Red Punish transaction
             */
-            redPunishTransactionMap.put(chainId,redPunishTransaction);
+            chainManager.getChainMap().get(chainId).getRedPunishTransactionList().add(redPunishTransaction);
         } catch (IOException e) {
             Log.error(e);
         }
     }
 
-    public Map<Integer, Map<String, List<Evidence>>> getBifurcationEvidenceMap() {
-        return bifurcationEvidenceMap;
+    /**
+     * 组装红/黄牌交易
+     * Assemble Red/Yellow Transaction
+     *
+     * @param bestBlock  Latest local block/本地最新区块
+     * @param txList     A list of transactions to be packaged/需打包的交易列表
+     * @param self       Local Node Packing Information/本地节点打包信息
+     * @param round      Local latest rounds information/本地最新轮次信息
+     */
+    public void punishTx(int chainId, int assetsId, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
+        Transaction yellowPunishTransaction = createYellowPunishTx(bestBlock, self, round);
+        if (null == yellowPunishTransaction) {
+            return;
+        }
+        txList.add(yellowPunishTransaction);
+        /*
+        当连续100个黄牌时，给出一个红牌
+        When 100 yellow CARDS in a row, give a red card.
+        */
+        YellowPunishData yellowPunishData = new YellowPunishData();
+        yellowPunishData.parse(yellowPunishTransaction.getTxData(),0);
+        List<byte[]> addressList = yellowPunishData.getAddressList();
+        Set<Integer> punishedSet = new HashSet<>();
+        for (byte[] address : addressList) {
+            MeetingMember member = round.getMemberByAgentAddress(address);
+            if (null == member) {
+                member = round.getPreRound().getMemberByAgentAddress(address);
+            }
+            if (DoubleUtils.compare(member.getAgent().getCreditVal(), ConsensusConstant.RED_PUNISH_CREDIT_VAL) == -1) {
+                if (!punishedSet.add(member.getPackingIndexOfRound())) {
+                    continue;
+                }
+                if (member.getAgent().getDelHeight() > 0L) {
+                    continue;
+                }
+                Transaction redPunishTransaction = new Transaction(ConsensusConstant.TX_TYPE_RED_PUNISH);
+                RedPunishData redPunishData = new RedPunishData();
+                redPunishData.setAddress(address);
+                redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
+                redPunishTransaction.setTxData(redPunishData.serialize());
+                redPunishTransaction.setTime(self.getPackEndTime());
+                CoinData coinData = coinDataManager.getStopAgentCoinData(chainId,assetsId, redPunishData.getAddress(), redPunishTransaction.getTime() + chainManager.getChainMap().get(chainId).getConfig().getRedPublishLockTime());
+                redPunishTransaction.setCoinData(coinData.serialize());
+                redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
+                txList.add(redPunishTransaction);
+            }
+        }
     }
 
-    public void setBifurcationEvidenceMap(Map<Integer, Map<String, List<Evidence>>> bifurcationEvidenceMap) {
-        this.bifurcationEvidenceMap = bifurcationEvidenceMap;
-    }
+    /**
+     * 组装黄牌
+     * Assemble Yellow Transaction
+     *
+     * @param preBlock  Latest local block/本地最新区块
+     * @param self      A list of transactions to be packaged/需打包的交易列表
+     * @param round     Local latest rounds information/本地最新轮次信息
+     * @return  Transaction
+     */
+    private Transaction createYellowPunishTx(BlockHeader preBlock, MeetingMember self, MeetingRound round) throws NulsException, IOException {
+        BlockExtendsData preBlockRoundData = new BlockExtendsData(preBlock.getExtend());
+        /*
+        如果本节点当前打包轮次比本地最新区块的轮次大一轮以上则返回不生成黄牌交易
+        If the current packing rounds of this node are more than one round larger than the rounds of the latest local block,
+        no yellow card transaction will be generated.
+        */
+        if (self.getRoundIndex() - preBlockRoundData.getRoundIndex() > 1) {
+            return null;
+        }
+        /*
+        计算需要生成的黄牌数量，即当前出的块与本地最新区块之间相差的区块数
+        Calculate the number of yellow cards that need to be generated, that is, the number of blocks that differ from the latest local block
+        */
+        int yellowCount = 0;
 
-    public Map<Integer, Transaction> getRedPunishTransactionMap() {
-        return redPunishTransactionMap;
-    }
+        /*
+        如果当前轮次与本地最新区块是同一轮次，则当前节点在本轮次中的出块下标与最新区块之间的差值减一即为需要生成的光拍交易数
+        If the current round is the same as the latest local block, then the difference between the block subscript of the current node and the latest block in this round is reduced by one,
+        that is, the number of optical beat transactions that need to be generated.
+        */
+        if (self.getRoundIndex() == preBlockRoundData.getRoundIndex() && self.getPackingIndexOfRound() != preBlockRoundData.getPackingIndexOfRound() + 1) {
+            yellowCount = self.getPackingIndexOfRound() - preBlockRoundData.getPackingIndexOfRound() - 1;
+        }
 
-    public void setRedPunishTransactionMap(Map<Integer, Transaction> redPunishTransactionMap) {
-        this.redPunishTransactionMap = redPunishTransactionMap;
+        /*
+        如果当前轮次与本地最新区块不是同一轮次，且当前节点不是本轮次中第一个出块的或则本地最新区块不为它所在轮次中最后一个出块的
+        则黄牌数为：上一轮次出块数-本地最新区块出块下标+当前节点出块下标-1
+        If the current round is not the same as the latest local block, and the current node is not the first block in this round, or the latest local block is not the last block in its round.
+        The yellow card number is: the number of blocks out in the last round - local latest block out subscript + current node out block subscript - 1
+        */
+        if (self.getRoundIndex() != preBlockRoundData.getRoundIndex() && (self.getPackingIndexOfRound() != 1 || preBlockRoundData.getPackingIndexOfRound() != preBlockRoundData.getConsensusMemberCount())) {
+            yellowCount = self.getPackingIndexOfRound() + preBlockRoundData.getConsensusMemberCount() - preBlockRoundData.getPackingIndexOfRound() - 1;
+        }
+        if (yellowCount == 0) {
+            return null;
+        }
+        List<byte[]> addressList = new ArrayList<>();
+        MeetingMember member = null;
+        MeetingRound preRound = null;
+        for (int i = 1; i <= yellowCount; i++) {
+            int index = self.getPackingIndexOfRound() - i;
+            /*
+            本轮次需生成的黄牌
+            Yellow cards to be generated in this round
+            */
+            if (index > 0) {
+                member = round.getMember(index);
+                if (member.getAgent() == null || member.getAgent().getDelHeight() > 0) {
+                    continue;
+                }
+                addressList.add(member.getAgent().getAgentAddress());
+            }
+            /*
+            上一轮需要生成的黄牌
+            Yellow cards needed to be generated in the last round
+            */
+            else {
+                preRound = round.getPreRound();
+                member = preRound.getMember(index + preRound.getMemberCount());
+                if (member.getAgent() == null || member.getAgent().getDelHeight() > 0) {
+                    continue;
+                }
+                addressList.add(member.getAgent().getAgentAddress());
+            }
+        }
+        if (addressList.isEmpty()) {
+            return null;
+        }
+        Transaction punishTx = new Transaction(ConsensusConstant.TX_TYPE_YELLOW_PUNISH);
+        YellowPunishData data = new YellowPunishData();
+        data.setAddressList(addressList);
+        punishTx.setTxData(data.serialize());
+        punishTx.setTime(self.getPackEndTime());
+        punishTx.setHash(NulsDigestData.calcDigestData(punishTx.serializeForHash()));
+        return punishTx;
     }
 }

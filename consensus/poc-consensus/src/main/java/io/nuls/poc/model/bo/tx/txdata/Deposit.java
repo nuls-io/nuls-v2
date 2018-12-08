@@ -77,7 +77,7 @@ public class Deposit extends TransactionLogicData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfBigInteger(); // deposit.getValue()
+        size += SerializeUtils.sizeOfBigInteger();
         size += Address.ADDRESS_LENGTH;
         size += this.agentHash.size();
         return size;

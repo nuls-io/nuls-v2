@@ -21,11 +21,12 @@
 package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.TxGroupMessage;
+import io.nuls.block.utils.NetworkUtil;
 import io.nuls.block.utils.TransactionUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
@@ -42,7 +43,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 
 /**
- * 处理收到的{@link HashListMessage}
+ * 处理收到的{@link HashListMessage}，用于区块的广播与转发
  * @author captain
  * @date 18-11-14 下午4:23
  * @version 1.0
@@ -68,19 +69,13 @@ public class GetTxGroupHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        NulsDigestData requestHash = null;
-        try {
-            requestHash = NulsDigestData.calcDigestData(message.serialize());
-        } catch (IOException e) {
-            Log.error(e);
-            return success();
-        }
-
-        TxGroupMessage response = new TxGroupMessage();
+        TxGroupMessage request = new TxGroupMessage();
         try {
             List<Transaction> transactions = TransactionUtil.getTransactions(chainId, message.getTxHashList());
-            response.setRequestHash(requestHash);
-            response.setTransactions(transactions);
+            request.setBlockHash(message.getBlockHash());
+            request.setTransactions(transactions);
+            request.setCommand(CommandConstant.TXGROUP_MESSAGE);
+            NetworkUtil.sendToNode(chainId, request, nodeId);
         } catch (IOException e) {
             Log.error(e);
         }

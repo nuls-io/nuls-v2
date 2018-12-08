@@ -22,7 +22,7 @@ package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
-import io.nuls.block.cache.TemporaryCacheManager;
+import io.nuls.block.cache.SmallBlockCacheManager;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.message.TxGroupMessage;
 import io.nuls.block.service.BlockService;
@@ -44,7 +44,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
 
 /**
- * 处理收到的{@link TxGroupMessage}
+ * 处理收到的{@link TxGroupMessage}，用于区块的广播与转发
  *
  * @author captain
  * @version 1.0
@@ -55,7 +55,7 @@ public class TxGroupHandler extends BaseCmd {
 
     @Autowired
     private BlockService blockService;
-    private TemporaryCacheManager temporaryCacheManager = TemporaryCacheManager.getInstance();
+    private SmallBlockCacheManager smallBlockCacheManager = SmallBlockCacheManager.getInstance();
 
     @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(List<Object> params) {
@@ -81,11 +81,13 @@ public class TxGroupHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        SmallBlock smallBlock = temporaryCacheManager.getSmallBlockByRequest(message.getRequestHash());
+        SmallBlock smallBlock = smallBlockCacheManager.getSmallBlockByHash(message.getBlockHash());
         if (null == smallBlock) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
+
         BlockHeader header = smallBlock.getHeader();
+        NulsDigestData headerHash = header.getHash();
         Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());
         for (Transaction tx : smallBlock.getSubTxList()) {
             txMap.put(tx.getHash(), tx);
@@ -93,15 +95,14 @@ public class TxGroupHandler extends BaseCmd {
         for (Transaction tx : transactions) {
             txMap.put(tx.getHash(), tx);
         }
-        for (NulsDigestData hash : smallBlock.getTxHashList()) {
-            Transaction tx = txMap.get(hash);
-            if (tx != null) {
-                smallBlock.getSubTxList().add(tx);
-                txMap.put(hash, tx);
-            }
-        }
+
         Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-        blockService.saveBlock(chainId, block);
+        if (blockService.saveBlock(chainId, block)) {
+            smallBlockCacheManager.cacheSmallBlock(BlockUtil.getSmallBlock(chainId, block));
+            blockService.forwardBlock(chainId, headerHash, nodeId);
+        } else {
+            Log.error("save fail! chainId:{}, height:{}, hash:{}", chainId, header.getHeight(), headerHash);
+        }
         return success();
     }
 
