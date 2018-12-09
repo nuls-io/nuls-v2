@@ -47,6 +47,7 @@ public class EventBusCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "eb_send", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Publish the event data to subscribers")
     public Object send(Map<String,Object> params) throws Exception{
+        System.out.println("Publish recieved");
         if(params == null){
             //TODO  add proper error code
             throw new NulsException(new ErrorCode());

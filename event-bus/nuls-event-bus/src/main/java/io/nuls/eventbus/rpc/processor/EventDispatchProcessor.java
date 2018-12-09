@@ -20,6 +20,7 @@ public class EventDispatchProcessor implements Runnable {
     @Override
     public void run() {
         try{
+            System.out.println("Processing the event");
             Object[] objects = EventBusRuntime.firstObjArrInEventDispatchQueue();
             if(null == objects){
                 Thread.sleep(200L);

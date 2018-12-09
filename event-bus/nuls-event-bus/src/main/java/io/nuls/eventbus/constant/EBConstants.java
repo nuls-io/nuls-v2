@@ -13,4 +13,7 @@ public class EBConstants {
     public static String EB_UNSUBSCRIBE = "eb_unsubscribe";
 
     public static String EB_SEND = "eb_send";
+
+    public static String TB_EB_TOPIC = "topic";
+
 }

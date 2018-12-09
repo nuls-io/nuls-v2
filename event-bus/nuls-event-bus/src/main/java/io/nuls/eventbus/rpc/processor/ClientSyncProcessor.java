@@ -34,7 +34,7 @@ public class ClientSyncProcessor implements Runnable {
                     params.put("abbr",moduleAbbr);
                     Response response = CmdDispatcher.requestAndResponse(ModuleE.KE.abbr,"roleInfo",params);
                     if(!response.isSuccess()){
-                        EventBusRuntime.CLIENT_SYNC_QUEUE.offer(objects);
+                        //EventBusRuntime.CLIENT_SYNC_QUEUE.offer(objects);
                         continue;
                     }
                     Object data = response.getResponseData();

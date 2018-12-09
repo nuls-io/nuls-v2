@@ -83,4 +83,12 @@ public class EventBus {
         String domain = (String)params.get("domain");
         return new Subscriber(abbr,moduleName,domain);
     }
+
+    public ConcurrentMap<String, Topic> getTopicMap() {
+        return topicMap;
+    }
+
+    public void setTopicMap(ConcurrentMap<String, Topic> topicMap) {
+        this.topicMap = topicMap;
+    }
 }
