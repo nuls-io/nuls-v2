@@ -22,7 +22,6 @@ package io.nuls.block.storage;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.block.service.BlockStorageService;
-import io.nuls.block.utils.FileSize;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.log.Log;
 import org.junit.After;

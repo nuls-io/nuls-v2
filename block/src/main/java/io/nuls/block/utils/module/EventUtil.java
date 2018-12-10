@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.utils;
+package io.nuls.block.utils.module;
 
 /**
  * 与事件总线模块交互的工具类

@@ -20,10 +20,12 @@
 
 package io.nuls.block;
 
+import com.google.common.collect.Maps;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.service.BlockService;
+import io.nuls.tools.cache.LimitHashMap;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -34,6 +36,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @RunWith(PowerMockRunner.class)
@@ -50,20 +53,15 @@ public class CommonTest {
     }
 
     @Test
-    public void test() throws Exception {
-        SmallBlock smallBlock = new SmallBlock();
-        smallBlock.addBaseTx(new Transaction(1));
-        smallBlock.addBaseTx(new Transaction(2));
-        smallBlock.addBaseTx(new Transaction(3));
-
-        List<Transaction> clone = new ArrayList<>();
-        smallBlock.getSubTxList().forEach(e -> clone.add(e));
-        smallBlock.addBaseTx(new Transaction(4));
-        smallBlock.addBaseTx(new Transaction(5));
-
-        List<Transaction> subTxList = smallBlock.getSubTxList();
-
-        Assert.assertNotEquals(clone.size(), subTxList.size());
+    public void test() {
+        LimitHashMap map = new LimitHashMap(100);
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 10000000; i++) {
+            map.put(i, "hello" + i);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
+        System.out.println(map.size());
     }
 
 }

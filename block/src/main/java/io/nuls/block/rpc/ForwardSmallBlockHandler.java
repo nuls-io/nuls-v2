@@ -29,7 +29,7 @@ import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.model.CachedSmallBlock;
-import io.nuls.block.utils.NetworkUtil;
+import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
