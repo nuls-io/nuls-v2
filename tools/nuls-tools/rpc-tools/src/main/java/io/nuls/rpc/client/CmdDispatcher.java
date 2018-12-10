@@ -280,6 +280,10 @@ public class CmdDispatcher {
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
     public static void sendUnsubscribe(String messageId) throws Exception {
+        if (messageId == null) {
+            return;
+        }
+
         Message message = MessageUtil.basicMessage(MessageType.Unsubscribe);
         Unsubscribe unsubscribe = new Unsubscribe();
         unsubscribe.setUnsubscribeMethods(new String[]{messageId});
