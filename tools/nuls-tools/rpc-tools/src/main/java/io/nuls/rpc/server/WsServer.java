@@ -113,6 +113,7 @@ public class WsServer extends WebSocketServer {
         try {
 
             Message message = JSONUtils.json2pojo(msg, Message.class);
+
             switch (MessageType.valueOf(message.getMessageType())) {
                 case NegotiateConnection:
                     /*
@@ -128,6 +129,15 @@ public class WsServer extends WebSocketServer {
                     CmdHandler.unsubscribe(webSocket, message);
                     break;
                 case Request:
+                    /*
+                    如果不能提供服务，则直接返回
+                    If no service is available, return directly
+                     */
+                    if (!ServerRuntime.startService) {
+                        CmdHandler.serviceNotStarted(webSocket, message.getMessageId());
+                        break;
+                    }
+
                     /*
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing
@@ -183,6 +193,7 @@ public class WsServer extends WebSocketServer {
     /**
      * 根据预定义模块获得一个服务实例
      * Get a server instance with predefined module
+     *
      * @param moduleE 预定义模块 / Pre-defined module
      * @return WsServer
      */
@@ -193,8 +204,9 @@ public class WsServer extends WebSocketServer {
     /**
      * 根据参数获得一个服务实例
      * Get a server instance with Abbreviation & Name
-     * @param abbr 角色 / Role
-     * @param name 名称 / Name
+     *
+     * @param abbr   角色 / Role
+     * @param name   名称 / Name
      * @param domain 域名 / Domian
      * @return WsServer
      */
@@ -219,7 +231,8 @@ public class WsServer extends WebSocketServer {
     /**
      * 设置本模块的依赖角色
      * Setting Dependent Roles for this Module
-     * @param key 依赖的角色 / Dependent roles
+     *
+     * @param key   依赖的角色 / Dependent roles
      * @param value 依赖角色的版本 / Version of dependent roles
      * @return WsServer
      */
@@ -231,6 +244,7 @@ public class WsServer extends WebSocketServer {
     /**
      * 设置本模块的角色（角色名默认为模块编号）
      * Setting up the role of this module(Role name defaults to module code)
+     *
      * @param value 角色版本 / Version of role
      * @return WsServer
      */
@@ -242,7 +256,8 @@ public class WsServer extends WebSocketServer {
     /**
      * 设置本模块的角色
      * Setting up the role of this module
-     * @param key 角色 / Role
+     *
+     * @param key   角色 / Role
      * @param value 角色版本 / Version of role
      * @return WsServer
      */
@@ -254,6 +269,7 @@ public class WsServer extends WebSocketServer {
     /**
      * 设置模块版本
      * Set module version
+     *
      * @param moduleVersion 模块的版本 / Version of module
      * @return WsServer
      */
@@ -265,6 +281,7 @@ public class WsServer extends WebSocketServer {
     /**
      * 扫描指定路径，得到所有接口的详细信息
      * Scan the specified path for details of all interfaces
+     *
      * @param scanPackage 需要扫描的包路径 / Packet paths to be scanned
      * @return WsServer
      * @throws Exception 找到重复命令(cmd) / Find duplicate commands (cmd)

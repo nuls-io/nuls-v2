@@ -91,6 +91,13 @@ public class CmdHandler {
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 
+    public static void serviceNotStarted(WebSocket webSocket, String messageId) throws JsonProcessingException {
+        Response response = MessageUtil.newResponse(messageId, Constants.BOOLEAN_FALSE, "Service not started!");
+        Message rspMsg = MessageUtil.basicMessage(MessageType.Response);
+        rspMsg.setMessageData(response);
+        webSocket.send(JSONUtils.obj2json(rspMsg));
+    }
+
 
     /**
      * 取消订阅
