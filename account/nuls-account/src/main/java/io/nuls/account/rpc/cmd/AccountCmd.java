@@ -1,19 +1,25 @@
 package io.nuls.account.rpc.cmd;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
+import io.nuls.account.model.dto.CoinDto;
+import io.nuls.account.model.dto.MulitpleAddressTransferDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.util.AccountTool;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.Page;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -24,6 +30,10 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -832,4 +842,75 @@ public class AccountCmd extends BaseCmd {
         return success(map);
     }
 
+
+    /**
+     * 创建多账户转账交易
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_multipleAddressTransfer", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "data digest signature")
+    public Object multipleAddressTransfer(Map params) {
+        Log.debug("ac_multipleAddressTransfer start");
+        Map<String, String> map = new HashMap<>(1);
+        try {
+            // check parameters
+            if (params == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+
+            // parse params
+            JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            MulitpleAddressTransferDto transferDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), MulitpleAddressTransferDto.class);
+            List<CoinDto> inputList = transferDto.getInputs();
+            List<CoinDto> outputList = transferDto.getOutputs();
+            if (inputList == null || outputList == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            List<CoinDto> fromList = new ArrayList<>();
+            List<CoinDto> tolList = new ArrayList<>();
+
+//            for (MulipleTxFromDto from : inputList) {
+//                MultipleAddressTransferModel model = new MultipleAddressTransferModel();
+//                if (!AddressTool.validAddress(from.getAddress())) {
+//                    return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+//                }
+//                model.setAddress(AddressTool.getAddress(from.getAddress()));
+//                model.setPassword(from.getPassword());
+//                fromModelList.add(model);
+//            }
+//            if (!validTxRemark(form.getRemark())) {
+//                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+//            }
+//            Long toTotal = 0L;
+//            for (MultipleTxToDto to : form.getOutputs()) {
+//                MultipleAddressTransferModel model = new MultipleAddressTransferModel();
+//                if (!AddressTool.validAddress(to.getToAddress())) {
+//                    return Result.getFailed(AccountErrorCode.ADDRESS_ERROR).toRpcClientResult();
+//                }
+//                model.setAddress(AddressTool.getAddress(to.getToAddress()));
+//                model.setAmount(to.getAmount());
+//                toModelList.add(model);
+//                toTotal += to.getAmount();
+//            }
+//            if (toTotal < 0) {
+//                return Result.getFailed(AccountLedgerErrorCode.PARAMETER_ERROR).toRpcClientResult();
+//            }
+//            Result result = accountLedgerService.multipleAddressTransfer(fromModelList, toModelList, Na.valueOf(toTotal), form.getRemark(), TransactionFeeCalculator.MIN_PRECE_PRE_1024_BYTES);
+//            if (result.isSuccess()) {
+//                Map<String, String> map = new HashMap<>();
+//                map.put("value", (String) result.getData());
+//                result.setData(map);
+//            }
+//            return result.toRpcClientResult();
+
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return failed(e.getMessage());
+        }
+        Log.debug("ac_multipleAddressTransfer end");
+        return success(map);
+    }
 }

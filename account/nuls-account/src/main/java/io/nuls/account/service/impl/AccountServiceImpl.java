@@ -122,7 +122,6 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
                     accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
                     //backup account to keystore
                     keyStoreService.backupAccountToKeyStore(null, chainId, account.getAddress().getBase58(), password);
-                    //TODO
                     //build event data
                     HashMap<String, Object> eventData = new HashMap<>();
                     eventData.put("address", account.getAddress().getBase58());
