@@ -120,7 +120,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
             //将byte数组反序列化为AliasPo返回
             aliasPo.parse(aliasBytes, 0);
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
         return aliasPo;
@@ -156,6 +156,10 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
      */
     @Override
     public boolean saveAlias(int chainId, Alias alias) {
+        AliasPo aliasPo = new AliasPo();
+        aliasPo.setAlias(alias.getAlias());
+        aliasPo.setAddress(alias.getAddress());
+        aliasPo.setChainId(chainId);
         String tableNameKeyIsAlias = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId;
         String tableNameKeyIsAddress = AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS + chainId;
         boolean result = false;
@@ -173,11 +177,11 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
                     return false;
                 }
             }
-            result = RocksDBService.put(tableNameKeyIsAlias, StringUtils.bytes(alias.getAlias()), alias.serialize());
+            result = RocksDBService.put(tableNameKeyIsAlias, StringUtils.bytes(aliasPo.getAlias()), aliasPo.serialize());
             if (!result) {
                 return false;
             }
-            result = RocksDBService.put(tableNameKeyIsAddress, alias.getAddress(), alias.serialize());
+            result = RocksDBService.put(tableNameKeyIsAddress, aliasPo.getAddress(), aliasPo.serialize());
             return result;
         } catch (Exception e) {
             Log.error("", e);
