@@ -55,14 +55,10 @@ public class RequestSingleProcessor implements Runnable {
         while (true) {
             try {
                 /*
-                获取队列中的第一个对象，如果是空，舍弃
-                Get the first item of the queue, If it is an empty object, discard
+                获取队列中的第一个对象
+                Get the first item of the queue
                  */
-                Object[] objects = ServerRuntime.firstObjArrInRequestSingleQueue();
-                if (objects == null) {
-                    Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-                    continue;
-                }
+                Object[] objects = ServerRuntime.REQUEST_SINGLE_QUEUE.take();
 
                 WebSocket webSocket = (WebSocket) objects[0];
                 String msg = (String) objects[1];

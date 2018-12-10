@@ -46,7 +46,6 @@ import java.util.List;
  *
  */
 public class NodesConnectTask implements Runnable  {
-    NodeManager nodeManager = NodeManager.getInstance();
     ConnectionManager connectionManager = ConnectionManager.getInstance();
     StorageManager storageManager = StorageManager.getInstance();
     private void connectPeer(Collection<Node> nodes,long magicNumber){
@@ -106,7 +105,7 @@ public class NodesConnectTask implements Runnable  {
     @Override
     public void run() {
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-        if(!nodeManager.isRunning()){
+        if(!connectionManager.isRunning()){
            return;
         }
             Collection<NodeGroup> nodeGroups = NodeGroupManager.getInstance().getNodeGroupCollection();

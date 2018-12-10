@@ -88,7 +88,7 @@ public class ForkChainsMonitor implements Runnable {
                     Log.info("chainId-{}, switchChain success", chainId);
                     ContextManager.getContext(chainId).setStatus(RunningStatusEnum.RUNNING);
                 } else {
-                    //todo 链切换失败的处理逻辑，暂时认为链切换失败会导致系统异常，运行停止
+                    //todo 链切换失败的处理逻辑，暂时认为链切换失败，恢复主链
                     Log.info("chainId-{}, switchChain fail", chainId);
                     ContextManager.getContext(chainId).setStatus(RunningStatusEnum.EXCEPTION);
                 }

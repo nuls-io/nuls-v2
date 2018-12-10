@@ -26,16 +26,21 @@ package io.nuls.rpc.server.runtime;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.*;
+import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.server.handler.CmdHandler;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * 服务端运行时所需要的变量和方法
@@ -98,64 +103,25 @@ public class ServerRuntime {
      * 单次响应队列，数组的第一个元素是Websocket对象，数组的第二个元素是Message
      * Single called queue. The first element of the array is the websocket object, and the second element of the array is Message.
      */
-    public static final Queue<Object[]> REQUEST_SINGLE_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final LinkedBlockingQueue<Object[]> REQUEST_SINGLE_QUEUE = new LinkedBlockingQueue<>();
 
     /**
      * 多次响应队列（根据Period），数组的第一个元素是Websocket对象，数组的第二个元素是Message
      * Multiply called queue (Period). The first element of the array is the websocket object, and the second element of the array is Message.
      */
-    public static final Queue<Object[]> REQUEST_PERIOD_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final LinkedBlockingQueue<Object[]> REQUEST_PERIOD_LOOP_QUEUE = new LinkedBlockingQueue<>();
 
     /**
-     * 多次响应队列（根据Event count），数组的第一个元素是Websocket对象，数组的第二个元素是Message
-     * Multiply called queue (Event count). The first element of the array is the websocket object, and the second element of the array is Message.
+     * 多次响应（根据Event count），数组的第一个元素是Websocket对象，数组的第二个元素是Message
+     * Multiply called (Event count). The first element of the array is the websocket object, and the second element of the array is Message.
      */
-    public static final Queue<Object[]> REQUEST_EVENT_COUNT_LOOP_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final List<Object[]> REQUEST_EVENT_COUNT_LOOP_LIST = new CopyOnWriteArrayList<>();
 
     /**
      * 取消订阅列表
      * Unsubscribe list
      */
-    public static final List<String> UNSUBSCRIBE_LIST = Collections.synchronizedList(new ArrayList<>());
-
-    /**
-     * Return the first item of REQUEST_SINGLE_QUEUE
-     *
-     * @return Object[]
-     */
-    public static Object[] firstObjArrInRequestSingleQueue() {
-        return firstObjArrInQueue(REQUEST_SINGLE_QUEUE);
-    }
-
-    /**
-     * Return the first item of REQUEST_PERIOD_LOOP_QUEUE
-     *
-     * @return Object[]
-     */
-    public static Object[] firstObjArrInRequestPeriodLoopQueue() {
-        return firstObjArrInQueue(REQUEST_PERIOD_LOOP_QUEUE);
-    }
-
-    /**
-     * Return the first item of REQUEST_EVENT_COUNT_LOOP_QUEUE
-     *
-     * @return Object[]
-     */
-    public static Object[] firstObjArrInRequestEventCountLoopQueue() {
-        return firstObjArrInQueue(REQUEST_EVENT_COUNT_LOOP_QUEUE);
-    }
-
-    /**
-     * 获取队列中的第一个元素，然后移除队列
-     * Get the first item and remove
-     *
-     * @return 队列的第一个元素. The first item in SERVER_RESPONSE_QUEUE.
-     */
-    private static synchronized Object[] firstObjArrInQueue(Queue<Object[]> objectsQueue) {
-        Object[] objects = objectsQueue.peek();
-        objectsQueue.poll();
-        return objects;
-    }
+    public static final List<String> UNSUBSCRIBE_LIST = new CopyOnWriteArrayList<>();
 
 
     /**
@@ -353,15 +319,36 @@ public class ServerRuntime {
     }
 
     /**
-     * Set event count
+     * 1. 更新EventCount内置属性，2. 判断是否需要发送
+     * 1. Update the built-in properties of EventCount, 2. Determine whether to send
      *
      * @param cmd   Command of remote method
      * @param value Response
      */
-    public static void eventCount(String cmd, Response value) {
+    public static void eventCount(String cmd, Response value) throws Exception {
         addCmdChangeCount(cmd);
         setCmdLastValue(cmd, value);
         resetCmdLastResponseBeUsedMap(cmd);
+
+        /*
+        触发EventCount发送，如果满足条件则发送
+        Trigger EventCount Send, Send if the condition is satisfied
+         */
+        for (Object[] objects : ServerRuntime.REQUEST_EVENT_COUNT_LOOP_LIST) {
+            WebSocket webSocket = (WebSocket) objects[0];
+            String msg = (String) objects[1];
+
+            Message message = JSONUtils.json2pojo(msg, Message.class);
+            Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+
+            /*
+            需要继续发送，添加回队列
+            Need to continue sending, add back to queue
+             */
+            if (!CmdHandler.responseWithEventCount(webSocket, message.getMessageId(), request, cmd)) {
+                ServerRuntime.REQUEST_EVENT_COUNT_LOOP_LIST.remove(objects);
+            }
+        }
     }
 
     /**

@@ -4,7 +4,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
@@ -13,7 +12,6 @@ import io.nuls.chain.model.dto.Chain;
 import io.nuls.chain.model.dto.ChainAsset;
 import io.nuls.chain.model.dto.CoinDataAssets;
 import io.nuls.chain.model.tx.AddAssetToChainTransaction;
-import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -44,20 +42,7 @@ public class TxAssetCmd extends BaseChainCmd {
     @Autowired
     private ChainService chainService;
 
-    private Asset buildAssetTxData(String txHex, Transaction tx){
-        try {
-            byte []txBytes = HexUtil.hexToByte(txHex);
-            tx.parse(txBytes,0);
-            TxChain txChain = new TxChain();
-            txChain.parse(tx.getTxData(),0);
-            Asset asset = new Asset(txChain);
-            asset.setTxHash(tx.getHash().toString());
-            return asset;
-        } catch (Exception e) {
-            Log.error(e);
-            return null;
-        }
-    }
+
     @CmdAnnotation(cmd = "cm_assetRegValidator", version = 1.0,
             description = "assetRegValidator")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")

@@ -27,8 +27,8 @@
 
 package io.nuls.test;
 
-import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.invoke.test.EventCounterInvoke;
@@ -43,8 +43,8 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author tangyi
@@ -60,11 +60,57 @@ public class WsM1 {
         String regex = "[(\\[]\\d+,\\d+[)\\]]";
         System.out.println(range.matches(regex));
 
-        BigDecimal bigDecimal=new BigDecimal("1000").divide(new BigDecimal("3"),5, RoundingMode.HALF_DOWN);
+        BigDecimal bigDecimal = new BigDecimal("1000").divide(new BigDecimal("3"), 5, RoundingMode.HALF_DOWN);
         System.out.println(bigDecimal.toString());
         System.out.println(bigDecimal.toBigInteger().intValue());
         System.out.println(new BigInteger("10").divide(new BigInteger("4")));
 
+        List<Integer> list = new CopyOnWriteArrayList<>();
+        new Thread(() -> {
+            for (int i = 0; i < Integer.MAX_VALUE; i++) {
+                list.add(i);
+                try {
+                    Thread.sleep(10L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        new Thread(() -> {
+            while (true) {
+                list.remove(0);
+                try {
+                    Thread.sleep(50L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        new Thread(() -> {
+            System.out.println("求和线程启动");
+            while (true) {
+                int total = 0;
+//                synchronized (list) {
+                    for (int i : list) {
+                        total += i;
+                    }
+//                }
+                System.out.println("和为：" + total);
+                try {
+                    Thread.sleep(50L);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        try {
+            Thread.sleep(Integer.MAX_VALUE);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -113,11 +159,11 @@ public class WsM1 {
         System.out.println("requestAndResponse:" + JSONUtils.obj2json(object));
 
         String messageId1 = CmdDispatcher.requestAndInvokeWithAck
-                (ModuleE.CM.abbr, "getBalance", params, "1","0", new MyInvoke());
+                (ModuleE.CM.abbr, "getBalance", params, "1", "0", new MyInvoke());
 
         // Call cmd, auto invoke local method after response
-        String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getBalance", params, "0","3", new EventCounterInvoke());
-        String messageId2 = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getBalance", params, "0","5", new EventCounterInvoke());
+        String messageId = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getBalance", params, "0", "3", new EventCounterInvoke());
+        String messageId2 = CmdDispatcher.requestAndInvoke(ModuleE.CM.abbr, "getBalance", params, "0", "5", new EventCounterInvoke());
         System.out.println("接下来会不停打印GetBalance，");
         Thread.sleep(20000);
 
@@ -142,10 +188,10 @@ public class WsM1 {
 
         Thread.sleep(5000);
         System.out.println("最后队列的数量：");
-        System.out.println("RESPONSE_MANUAL_QUEUE："+ClientRuntime.RESPONSE_MANUAL_QUEUE.size());
-        System.out.println("RESPONSE_AUTO_QUEUE："+ClientRuntime.RESPONSE_AUTO_QUEUE.size());
-        System.out.println("NEGOTIATE_RESPONSE_QUEUE："+ClientRuntime.NEGOTIATE_RESPONSE_QUEUE.size());
-        System.out.println("ACK_QUEUE："+ClientRuntime.ACK_QUEUE.size());
+        System.out.println("RESPONSE_MANUAL_QUEUE：" + ClientRuntime.RESPONSE_MANUAL_QUEUE.size());
+        System.out.println("RESPONSE_AUTO_QUEUE：" + ClientRuntime.RESPONSE_AUTO_QUEUE.size());
+        System.out.println("NEGOTIATE_RESPONSE_QUEUE：" + ClientRuntime.NEGOTIATE_RESPONSE_QUEUE.size());
+        System.out.println("ACK_QUEUE：" + ClientRuntime.ACK_QUEUE.size());
 
     }
 }

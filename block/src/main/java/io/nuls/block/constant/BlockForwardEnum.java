@@ -18,23 +18,37 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.utils;
-
-import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.SmallBlock;
+package io.nuls.block.constant;
 
 /**
- * 调用共识模块接口的工具类
+ * 标记区块广播、转发过程中的状态
  *
  * @author captain
  * @version 1.0
- * @date 18-11-9 上午10:43
+ * @date 18-11-28 下午12:01
  */
-public class ConsensusUtil {
+public enum BlockForwardEnum {
 
-    public static boolean verify(int chainId, Block block) {
-        return true;
+    /**
+     * 没有收到区块
+     * Running exception
+     */
+    EMPTY,
+
+    /**
+     * 收到部分区块，主要是缺失一部分交易
+     * Running exception
+     */
+    INCOMPLETE,
+
+    /**
+     * 收到完整区块
+     * Running exception
+     */
+    COMPLETE;
+
+    @Override
+    public String toString() {
+        return name();
     }
-
 }

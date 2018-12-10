@@ -21,10 +21,11 @@
 package io.nuls.block.constant;
 
 /**
- * 模块运行状态枚举
- * The module runs state enumeration.
+ * 区块同步状态枚举
  *
- * @author: Lan
+ * @author captain
+ * @date 18-12-6 下午7:02
+ * @version 1.0
  */
 public enum BlockSynStatusEnum {
 

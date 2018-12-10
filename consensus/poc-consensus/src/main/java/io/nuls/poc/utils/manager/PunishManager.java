@@ -3,7 +3,6 @@ package io.nuls.poc.utils.manager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.poc.constant.ConsensusConstant;
-import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.consensus.PunishReasonEnum;
@@ -36,8 +35,6 @@ import java.util.*;
  * */
 @Component
 public class PunishManager {
-    @Autowired
-    private ChainManager chainManager;
     @Autowired
     private PunishStorageService punishStorageService;
     @Autowired
@@ -98,20 +95,16 @@ public class PunishManager {
      * 添加分叉证据
      * Adding bifurcation evidence
      *
-     * @param chainId
+     * @param chain
      * @param firstHeader
      * @param secondHeader
      * @deprecated
      * */
-    public void addEvidenceRecord(int chainId, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
+    public void addEvidenceRecord(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
         /*
         找到分叉的节点
         Find the bifurcated nodes
         */
-        Chain chain =  chainManager.getChainMap().get(chainId);
-        if(chain == null){
-            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
         Agent agent = null;
         for (Agent a:chain.getAgentList()) {
             if (a.getDelHeight() > 0) {
@@ -129,9 +122,9 @@ public class PunishManager {
         验证节点是否应该受红牌惩罚
         Verify whether the node should be punished by a red card
         */
-        boolean isRedPunish = isRedPunish(chainId,firstHeader,secondHeader);
+        boolean isRedPunish = isRedPunish(chain,firstHeader,secondHeader);
         if(isRedPunish){
-            createRedPunishTransaction(chainId,agent);
+            createRedPunishTransaction(chain,agent);
         }
     }
 
@@ -139,21 +132,17 @@ public class PunishManager {
      * 添加双花红牌记录
      * Add Double Flower Red Card Record
      *
-     * @param chainId
+     * @param chain
      * @param txs
      * @param block
      * @deprecated
      * */
-    public void addDoubleSpendRecord(int chainId, List<Transaction> txs,Block block)throws NulsException {
+    public void addDoubleSpendRecord(Chain chain, List<Transaction> txs,Block block)throws NulsException {
         /*
         找到双花交易的节点
         Find the bifurcated nodes
         */
-        Chain chain =  chainManager.getChainMap().get(chainId);
-        if(chain == null){
-            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
-        byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey(),(short)chainId);
+        byte[] packingAddress = AddressTool.getAddress(block.getHeader().getBlockSignature().getPublicKey(),(short)chain.getConfig().getChainId());
         List<Agent> agentList = chain.getAgentList();
         Agent agent = null;
         for (Agent a : agentList) {
@@ -186,10 +175,10 @@ public class PunishManager {
             redPunishData.setReasonCode(PunishReasonEnum.DOUBLE_SPEND.getCode());
             redPunishTransaction.setTxData(redPunishData.serialize());
             redPunishTransaction.setTime(smallBlock.getHeader().getTime());
-            CoinData coinData = coinDataManager.getStopAgentCoinData(chainId,chain.getConfig().getAssetsId(), agent, redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
             redPunishTransaction.setCoinData(coinData.serialize());
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
-            chainManager.getChainMap().get(chainId).getRedPunishTransactionList().add(redPunishTransaction);
+            chain.getRedPunishTransactionList().add(redPunishTransaction);
         }catch (IOException e){
             Log.error(e);
         }
@@ -200,20 +189,16 @@ public class PunishManager {
      * 跟新惩罚证据列表并验证节点是否应该给红牌惩罚
      * Follow the new penalty evidence list and verify whether the node should give a red card penalty
      *
-     * @param chainId
+     * @param chain
      * @param firstHeader
      * @param secondHeader
      * @return boolean
      * */
-    private boolean isRedPunish(int chainId, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
+    private boolean isRedPunish(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
         //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚
         String packingAddress = AddressTool.getStringAddressByBytes(firstHeader.getPackingAddress());
         BlockExtendsData extendsData = new BlockExtendsData(firstHeader.getExtend());
         long currentRoundIndex = extendsData.getRoundIndex();
-        Chain chain =  chainManager.getChainMap().get(chainId);
-        if(chain == null){
-            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
         Map<String, List<Evidence>> currentChainEvidences = chain.getEvidenceMap();
         /*
         首先生成一个证据
@@ -268,19 +253,15 @@ public class PunishManager {
      * 创建红牌交易并放入缓存中
      * Create a red card transaction and put it in the cache
      *
-     * @param chainId
+     * @param chain
      * @param agent
      * @deprecated
      * */
-    private void createRedPunishTransaction(int chainId, Agent agent)throws NulsException{
+    private void createRedPunishTransaction(Chain chain, Agent agent)throws NulsException{
         Transaction redPunishTransaction = new Transaction(ConsensusConstant.TX_TYPE_RED_PUNISH);
         RedPunishData redPunishData = new RedPunishData();
         redPunishData.setAddress(agent.getAgentAddress());
         long txTime = 0;
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if(chain == null){
-            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
         try{
             /*
             连续3轮 每一轮两个区块头作为证据 一共 3 * 2 个区块头作为证据
@@ -308,14 +289,14 @@ public class PunishManager {
             组装CoinData
             Assemble CoinData
             */
-            CoinData coinData = coinDataManager.getStopAgentCoinData(chainId,chain.getConfig().getAssetsId(),agent,redPunishTransaction.getTime()+chain.getConfig().getRedPublishLockTime());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain,agent,redPunishTransaction.getTime()+chain.getConfig().getRedPublishLockTime());
             redPunishTransaction.setCoinData(coinData.serialize());
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             /*
             缓存红牌交易
             Assemble Red Punish transaction
             */
-            chainManager.getChainMap().get(chainId).getRedPunishTransactionList().add(redPunishTransaction);
+            chain.getRedPunishTransactionList().add(redPunishTransaction);
         } catch (IOException e) {
             Log.error(e);
         }
@@ -325,12 +306,13 @@ public class PunishManager {
      * 组装红/黄牌交易
      * Assemble Red/Yellow Transaction
      *
+     * @param chain      Chain info
      * @param bestBlock  Latest local block/本地最新区块
      * @param txList     A list of transactions to be packaged/需打包的交易列表
      * @param self       Local Node Packing Information/本地节点打包信息
      * @param round      Local latest rounds information/本地最新轮次信息
      */
-    public void punishTx(int chainId, int assetsId, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
+    public void punishTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
         Transaction yellowPunishTransaction = createYellowPunishTx(bestBlock, self, round);
         if (null == yellowPunishTransaction) {
             return;
@@ -362,7 +344,7 @@ public class PunishManager {
                 redPunishData.setReasonCode(PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode());
                 redPunishTransaction.setTxData(redPunishData.serialize());
                 redPunishTransaction.setTime(self.getPackEndTime());
-                CoinData coinData = coinDataManager.getStopAgentCoinData(chainId,assetsId, redPunishData.getAddress(), redPunishTransaction.getTime() + chainManager.getChainMap().get(chainId).getConfig().getRedPublishLockTime());
+                CoinData coinData = coinDataManager.getStopAgentCoinData(chain, redPunishData.getAddress(), redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
                 redPunishTransaction.setCoinData(coinData.serialize());
                 redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
                 txList.add(redPunishTransaction);

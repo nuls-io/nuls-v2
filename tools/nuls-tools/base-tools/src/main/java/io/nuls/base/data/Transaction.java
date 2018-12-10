@@ -199,13 +199,9 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return coinData;
     }
 
-    public CoinData getCoinDataInstance(){
+    public CoinData getCoinDataInstance() throws NulsException{
         CoinData coinData = new CoinData();
-        try {
-            coinData.parse(new NulsByteBuffer(this.coinData));
-        } catch (NulsException e) {
-            e.printStackTrace();
-        }
+        coinData.parse(new NulsByteBuffer(this.coinData));
         return coinData;
     }
 
@@ -235,7 +231,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return HexUtil.encode(this.serialize());
     }
 
-    public BigInteger getFee() {
+    public BigInteger getFee() throws NulsException{
         BigInteger fee = BigInteger.ZERO;
         if (null != coinData) {
             CoinData cData = getCoinDataInstance();

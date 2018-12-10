@@ -46,6 +46,9 @@ public interface TxErrorCode {
     ErrorCode NONEWVER = ErrorCode.init("10035");
     ErrorCode INSUFFICIENT_FEE = ErrorCode.init("10036");
     ErrorCode ASSET_NOT_EXIST = ErrorCode.init("10037");
+    ErrorCode CROSS_TX_PAYER_CHAINID_MISMATCH = ErrorCode.init("10038");
+    ErrorCode COINFROM_NOT_FOUND = ErrorCode.init("10039");
+    ErrorCode COINTO_NOT_FOUND = ErrorCode.init("10040");
 
 
 

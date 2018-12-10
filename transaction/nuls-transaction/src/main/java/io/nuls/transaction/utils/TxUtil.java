@@ -61,17 +61,18 @@ public class TxUtil {
 
     public static boolean assetExist(int chainId, int assetId){
         //todo 查资产是否存在
-        return false;
+        return true;
     }
 
     public static byte[] getNonce(byte[] address, int chainId, int assetId){
         //todo 查nonce
-        return new byte[8];
+        byte[] nonce = new byte[]{'a','b','c','d','e','f','g','h'};
+        return nonce;
     }
 
     public static BigInteger getBalance(byte[] address, int chainId, int assetId){
         //todo 查余额;
-        return BigInteger.TEN;
+        return new BigInteger("10000");
     }
 
     public static String getPrikey(String address, String password){
