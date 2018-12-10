@@ -250,6 +250,7 @@ public class CmdHandler {
      * @param webSocket 用于发送消息 / Used to send message
      * @param messageId 原始消息ID / The origin message ID
      * @param request   请求 / The request
+     * @param cmd 触发EventCount的命令 / Command to trigger EventCount
      * @return boolean
      */
     public static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request, String cmd) {

@@ -319,7 +319,8 @@ public class ServerRuntime {
     }
 
     /**
-     * Set event count
+     * 1. 更新EventCount内置属性，2. 判断是否需要发送
+     * 1. Update the built-in properties of EventCount, 2. Determine whether to send
      *
      * @param cmd   Command of remote method
      * @param value Response
@@ -329,6 +330,10 @@ public class ServerRuntime {
         setCmdLastValue(cmd, value);
         resetCmdLastResponseBeUsedMap(cmd);
 
+        /*
+        触发EventCount发送，如果满足条件则发送
+        Trigger EventCount Send, Send if the condition is satisfied
+         */
         for (Object[] objects : ServerRuntime.REQUEST_EVENT_COUNT_LOOP_LIST) {
             WebSocket webSocket = (WebSocket) objects[0];
             String msg = (String) objects[1];
