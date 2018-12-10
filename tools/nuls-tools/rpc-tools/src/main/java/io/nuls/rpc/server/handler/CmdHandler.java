@@ -244,16 +244,15 @@ public class CmdHandler {
 
 
     /**
-     * 处理Request，返回bool类型表示处理完之后是保留还是丢弃
-     * After current processing, do need to keep the Request information and wait for the next processing?
-     * True: keep, False: remove
+     * 处理Request，如果达到EventCount的发送条件，则发送
+     * Processing Request, if EventCount's sending condition is met, then send
      *
      * @param webSocket 用于发送消息 / Used to send message
      * @param messageId 原始消息ID / The origin message ID
      * @param request   请求 / The request
      * @return boolean
      */
-    public static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request) {
+    public static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request, String cmd) {
         String unsubscribeKey = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
         if (ServerRuntime.UNSUBSCRIBE_LIST.contains(unsubscribeKey)) {
             Log.info("取消订阅responseWithEventCount：" + unsubscribeKey);
@@ -264,6 +263,9 @@ public class CmdHandler {
             long changeCount = ServerRuntime.getCmdChangeCount((String) method);
             long eventCount = Long.valueOf(request.getSubscriptionEventCounter());
             if (changeCount == 0) {
+                continue;
+            }
+            if (!cmd.equals(method)) {
                 continue;
             }
 
@@ -286,7 +288,6 @@ public class CmdHandler {
                     webSocket.send(JSONUtils.obj2json(rspMessage));
                 } catch (WebsocketNotConnectedException e) {
                     Log.error("Socket disconnected, remove");
-                    return false;
                 } catch (JsonProcessingException e) {
                     Log.error(e);
                 }
