@@ -22,11 +22,11 @@ public class EventBusCmd extends BaseCmd {
     @CmdAnnotation(cmd = "eb_subscribe", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Subscribe to specific topic")
     public Object subscribe(Map<String,Object> params) throws Exception{
         if(params == null){
-            //TODO  add proper error code
-            throw new NulsException(new ErrorCode());
+            return failed("Required parameters are not missing");
         }
         String messageId = (String)params.get("messageId");
         String moduleAbbr = (String)params.get("abbr");
+        String topic = (String)params.get("topic");
         EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{moduleAbbr, EBConstants.SUBSCRIBE});
         int status = eventBus.subscribe(params);
         return success();

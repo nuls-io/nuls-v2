@@ -43,7 +43,7 @@ public class EbStorageServiceImpl implements EbStorageService {
                 EventBus.getInstance().setTopicMap(topicMap);
             }
         }catch (Exception e){
-           Log.error("Erroe while loading Topics from DB");
+           Log.error("Error while loading Topics from DB");
         }
 
     }
