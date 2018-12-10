@@ -25,8 +25,8 @@
 
 package io.nuls.rpc.server;
 
-import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.client.thread.HeartbeatProcessor;
 import io.nuls.rpc.client.thread.ResponseAutoProcessor;
 import io.nuls.rpc.info.Constants;
@@ -66,6 +66,9 @@ public class WsServer extends WebSocketServer {
     /**
      * 连接核心模块（Manager）
      * Connection Core Module (Manager)
+     *
+     * @param kernelUrl 核心模块连接字符串 / Core Module (Manager) connection URL
+     * @throws Exception IllegalStateException
      */
     public void connect(String kernelUrl) throws Exception {
         /*
@@ -99,6 +102,12 @@ public class WsServer extends WebSocketServer {
     public void onClose(WebSocket webSocket, int code, String reason, boolean remote) {
     }
 
+    /**
+     * Send message
+     *
+     * @param webSocket WebSocket
+     * @param msg       The sent message
+     */
     @Override
     public void onMessage(WebSocket webSocket, String msg) {
         try {
@@ -129,7 +138,7 @@ public class WsServer extends WebSocketServer {
                     if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
                             && !ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
                         ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, msg});
-                    }else{
+                    } else {
                         if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
                             ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
                         }
@@ -174,6 +183,8 @@ public class WsServer extends WebSocketServer {
     /**
      * 根据预定义模块获得一个服务实例
      * Get a server instance with predefined module
+     * @param moduleE 预定义模块 / Pre-defined module
+     * @return WsServer
      */
     public static WsServer getInstance(ModuleE moduleE) {
         return getInstance(moduleE.abbr, moduleE.name, moduleE.domain);
@@ -182,6 +193,10 @@ public class WsServer extends WebSocketServer {
     /**
      * 根据参数获得一个服务实例
      * Get a server instance with Abbreviation & Name
+     * @param abbr 角色 / Role
+     * @param name 名称 / Name
+     * @param domain 域名 / Domian
+     * @return WsServer
      */
     public static WsServer getInstance(String abbr, String name, String domain) {
         WsServer wsServer = new WsServer(HostInfo.randomPort());
@@ -204,6 +219,9 @@ public class WsServer extends WebSocketServer {
     /**
      * 设置本模块的依赖角色
      * Setting Dependent Roles for this Module
+     * @param key 依赖的角色 / Dependent roles
+     * @param value 依赖角色的版本 / Version of dependent roles
+     * @return WsServer
      */
     public WsServer dependencies(String key, String value) {
         ServerRuntime.local.getDependencies().put(key, value);
@@ -213,6 +231,8 @@ public class WsServer extends WebSocketServer {
     /**
      * 设置本模块的角色（角色名默认为模块编号）
      * Setting up the role of this module(Role name defaults to module code)
+     * @param value 角色版本 / Version of role
+     * @return WsServer
      */
     public WsServer moduleRoles(String[] value) {
         ServerRuntime.local.getModuleRoles().put(ServerRuntime.local.getModuleAbbreviation(), value);
@@ -222,6 +242,9 @@ public class WsServer extends WebSocketServer {
     /**
      * 设置本模块的角色
      * Setting up the role of this module
+     * @param key 角色 / Role
+     * @param value 角色版本 / Version of role
+     * @return WsServer
      */
     public WsServer moduleRoles(String key, String[] value) {
         ServerRuntime.local.getModuleRoles().put(key, value);
@@ -231,6 +254,8 @@ public class WsServer extends WebSocketServer {
     /**
      * 设置模块版本
      * Set module version
+     * @param moduleVersion 模块的版本 / Version of module
+     * @return WsServer
      */
     public WsServer moduleVersion(String moduleVersion) {
         ServerRuntime.local.setModuleVersion(moduleVersion);
@@ -240,6 +265,9 @@ public class WsServer extends WebSocketServer {
     /**
      * 扫描指定路径，得到所有接口的详细信息
      * Scan the specified path for details of all interfaces
+     * @param scanPackage 需要扫描的包路径 / Packet paths to be scanned
+     * @return WsServer
+     * @throws Exception 找到重复命令(cmd) / Find duplicate commands (cmd)
      */
     public WsServer scanPackage(String scanPackage) throws Exception {
         ServerRuntime.scanPackage(scanPackage);
