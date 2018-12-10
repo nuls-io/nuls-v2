@@ -106,7 +106,7 @@ public class SmallBlockHandler extends BaseCmd {
             return success();
         }
 
-        //2.已收到部分区块，还缺失交易信息，发送HashListMessage到源节点 todo 不实时计算还缺少那些交易
+        //2.已收到部分区块，还缺失交易信息，发送HashListMessage到源节点 todo 加基础验证
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
             HashListMessage request = new HashListMessage();
@@ -160,7 +160,7 @@ public class SmallBlockHandler extends BaseCmd {
             Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
             if (blockService.saveBlock(chainId, block)) {
                 SmallBlock newSmallBlock = BlockUtil.getSmallBlock(chainId, block);
-                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(needHashList, newSmallBlock);
+                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
                 blockService.forwardBlock(chainId, blockHash, nodeId);

@@ -78,7 +78,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             return success();
         }
 
-        //2.已收到部分区块，还缺失交易信息，发送HashListMessage到源节点 todo 不实时计算还缺少那些交易
+        //2.已收到部分区块，还缺失交易信息，发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
             HashListMessage request = new HashListMessage();

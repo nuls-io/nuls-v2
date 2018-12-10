@@ -141,7 +141,7 @@ public class BlockUtil {
         long blockHeight = block.getHeader().getHeight();
         NulsDigestData blockHash = block.getHeader().getHash();
         NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
-
+//todo fen 3 dian
         Chain masterChain = ChainManager.getMasterChain(chainId);
         long masterChainEndHeight = masterChain.getEndHeight();
         NulsDigestData masterChainEndHash = masterChain.getEndHash();

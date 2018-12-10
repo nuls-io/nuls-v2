@@ -133,7 +133,7 @@ public class Bootstrap {
     }
 
     private static void rpcInit() throws Exception {
-        // 启动Server
+        // Start server instance
         WsServer.getInstance(ModuleE.BL)
                 .moduleRoles(new String[]{"1.0"})
                 .moduleVersion("1.0")
@@ -151,8 +151,8 @@ public class Bootstrap {
         ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronize"));
         synExecutor.scheduleAtFixedRate(BlockSynchronizer.getInstance(), 0, 1, TimeUnit.MINUTES);
         //开启区块监控线程
-        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
-        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 1, TimeUnit.MINUTES);
+//        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
+//        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 1, TimeUnit.MINUTES);
         //开启分叉链处理线程
         ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
         forkExecutor.scheduleAtFixedRate(ForkChainsMonitor.getInstance(), 0, 1, TimeUnit.MINUTES);

@@ -20,17 +20,20 @@
 
 package io.nuls.block.utils;
 
+import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.SmallBlock;
 
 /**
  * 调用共识模块接口的工具类
+ *
  * @author captain
- * @date 18-11-9 上午10:43
  * @version 1.0
+ * @date 18-11-9 上午10:43
  */
 public class ConsensusUtil {
 
-    public static boolean verify(int chainId, BlockHeader blockHeader){
+    public static boolean verify(int chainId, Block block) {
         return true;
     }
 

@@ -75,20 +75,6 @@ public class TransactionManager {
         register(txRegister);
     }
 
-    /**
-     * 验证交易
-     * @param tx
-     * @return
-     */
-    public Result verify(Transaction tx){
-        //todo 调验证器
-        BaseTxValidate(tx);
-        TxRegister txRegister = this.getTxRegister(tx.getType());
-        txRegister.getValidator();
-
-        return null;
-    }
-
     //注册交易
     public boolean register(TxRegister txRegister){
         boolean rs = false;
@@ -140,63 +126,54 @@ public class TransactionManager {
         return txRegister.getSystemTx();
     }
 
+    /**
+     * 验证交易
+     * @param tx
+     * @return
+     */
+    public Result verify(Transaction tx){
+        //todo 调验证器
+        BaseTxValidate(tx);
+        TxRegister txRegister = this.getTxRegister(tx.getType());
+        txRegister.getValidator();
+
+        return null;
+    }
+
+    /**
+     *  交易基础字段
+     *  最大交易size
+     *  交易类型
+     *  交易签名
+     *  交易手续费
+     *
+     */
     public Result BaseTxValidate(Transaction tx){
-        /**
-         *  交易基础字段
-         *  最大交易size
-         *  交易类型
-         *  交易签名
-         *  交易手续费
-         *  coinData基础校验
-         *
-         */
 
-        boolean result = true;
-        ErrorCode errorCode = TxErrorCode.SUCCESS;
-        do {
-            if (null == tx) {
-                result = false;
-                errorCode = TxErrorCode.TX_NOT_EXIST;
-                break;
-            }
-            if (tx.getHash() == null || tx.getHash().size() == 0 || tx.getHash().size() > TxConstant.TX_HASH_DIGEST_BYTE_MAX_LEN) {
-                result = false;
-                errorCode = TxErrorCode.TX_DATA_VALIDATION_ERROR;
-                break;
-            }
-            if(!contain(tx.getType())) {
-                result = false;
-                errorCode = TxErrorCode.TX_NOT_EFFECTIVE;
-                break;
-            }
-            if (tx.getTime() == 0L) {
-                result = false;
-                errorCode = TxErrorCode.TX_DATA_VALIDATION_ERROR;
-                break;
-            }
-            if(tx.size() > TxConstant.TX_MAX_SIZE){
-                result = false;
-                errorCode = TxErrorCode.TX_SIZE_TOO_LARGE;
-                break;
-            }
-            try {
-                if(!SignatureUtil.validateTransactionSignture(tx)){
-                    result = false;
-                    errorCode = TxErrorCode.SIGNATURE_ERROR;
-                    break;
-                }
-            } catch (NulsException e) {
-                e.printStackTrace();
-                result = false;
-                errorCode = e.getErrorCode();
-                break;
-            }
-
-        } while (false);
-        if (!result) {
-            return Result.getFailed(errorCode);
+        if (null == tx) {
+            return Result.getFailed(TxErrorCode.TX_NOT_EXIST);
         }
-        return Result.getSuccess(errorCode);
+        if (tx.getHash() == null || tx.getHash().size() == 0 || tx.getHash().size() > TxConstant.TX_HASH_DIGEST_BYTE_MAX_LEN) {
+            return Result.getFailed(TxErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
+        if(!contain(tx.getType())) {
+            return Result.getFailed(TxErrorCode.TX_NOT_EFFECTIVE);
+        }
+        if (tx.getTime() == 0L) {
+            return Result.getFailed(TxErrorCode.TX_DATA_VALIDATION_ERROR);
+        }
+        if(tx.size() > TxConstant.TX_MAX_SIZE){
+            return Result.getFailed(TxErrorCode.TX_SIZE_TOO_LARGE);
+        }
+        try {
+            if(!SignatureUtil.validateTransactionSignture(tx)){
+                return Result.getFailed(TxErrorCode.SIGNATURE_ERROR);
+            }
+        } catch (NulsException e) {
+            e.printStackTrace();
+            return Result.getFailed(e.getErrorCode());
+        }
+        return Result.getSuccess(TxErrorCode.SUCCESS);
     }
 
 
