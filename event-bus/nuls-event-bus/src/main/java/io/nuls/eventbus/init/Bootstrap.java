@@ -38,7 +38,7 @@ public class Bootstrap {
                     .moduleVersion("1.0")
                     .scanPackage("io.nuls.eventbus.rpc.cmd")
                     .connect("ws://127.0.0.1:8887");
-            CmdDispatcher.syncManager();
+            CmdDispatcher.syncKernel();
         }catch (Exception e){
             Log.error("Event Bus rpc start up failed");
         }
