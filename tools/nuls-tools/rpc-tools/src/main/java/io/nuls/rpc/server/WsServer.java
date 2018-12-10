@@ -129,12 +129,13 @@ public class WsServer extends WebSocketServer {
                     if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
                             && !ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
                         ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, msg});
-                    }
-                    if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
-                        ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
-                    }
-                    if (ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
-                        ServerRuntime.REQUEST_EVENT_COUNT_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
+                    }else{
+                        if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
+                            ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
+                        }
+                        if (ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
+                            ServerRuntime.REQUEST_EVENT_COUNT_LOOP_LIST.add(new Object[]{webSocket, msg});
+                        }
                     }
 
 
