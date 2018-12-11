@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,11 +25,11 @@
  */
 package io.nuls.ledger.db;
 
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.model.AccountState;
-import io.nuls.ledger.serializers.AccountStateSerializer;
-import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.exception.NulsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,9 +40,6 @@ import org.slf4j.LoggerFactory;
 public class RepositoryImpl implements Repository {
     final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Autowired
-    AccountStateSerializer accountStateSerializer;
-
     /**
      * put accountState to rocksdb
      *
@@ -52,7 +49,7 @@ public class RepositoryImpl implements Repository {
     @Override
     public void putAccountState(byte[] key, AccountState accountState) {
         try {
-            RocksDBService.put(DataBaseArea.TB_LEDGER_ACCOUNT, key, accountStateSerializer.serialize(accountState));
+            RocksDBService.put(DataBaseArea.TB_LEDGER_ACCOUNT, key, accountState.serialize());
         } catch (Exception e) {
             logger.error("putAccountState serialize error.", e);
         }
@@ -70,7 +67,12 @@ public class RepositoryImpl implements Repository {
         if (stream == null) {
             return null;
         }
-        AccountState state = accountStateSerializer.deserialize(stream);
-        return state;
+        AccountState accountState = new AccountState();
+        try {
+            accountState.parse(new NulsByteBuffer(stream));
+        } catch (NulsException e) {
+            logger.error("getAccountState serialize error.", e);
+        }
+        return accountState;
     }
 }

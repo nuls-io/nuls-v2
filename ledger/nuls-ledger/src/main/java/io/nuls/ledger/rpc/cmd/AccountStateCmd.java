@@ -85,7 +85,7 @@ public class AccountStateCmd extends BaseCmd {
         Integer chainId = (Integer) params.get("chainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        long nonce = accountStateService.getNonce(address, chainId, assetId);
+        String nonce = accountStateService.getNonce(address, chainId, assetId);
         return success(nonce);
     }
 }
