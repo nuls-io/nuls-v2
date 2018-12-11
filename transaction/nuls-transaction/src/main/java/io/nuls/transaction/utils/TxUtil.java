@@ -35,6 +35,7 @@ import java.math.BigInteger;
  */
 public class TxUtil {
 
+
     public static boolean isCurrentChainMainAsset(Coin coin){
         return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
     }
@@ -59,6 +60,15 @@ public class TxUtil {
         return false;
     }
 
+    public static boolean isTheChainMainAsset(int chainId, Coin coin){
+        return isTheChainMainAsset(chainId, coin.getAssetsChainId(), coin.getAssetsId());
+    }
+
+    public static boolean isTheChainMainAsset(int chainId, int assetChainId, int assetId){
+        //todo 查资产与链的关系是否存在
+        return true;
+    }
+
     public static boolean assetExist(int chainId, int assetId){
         //todo 查资产是否存在
         return true;
@@ -78,5 +88,10 @@ public class TxUtil {
     public static String getPrikey(String address, String password){
         //todo 查私钥;
         return "";
+    }
+
+    public static int getMofMultiSignAddress(byte[] multiSignAddress){
+        //查多签地址的m
+        return 3;
     }
 }

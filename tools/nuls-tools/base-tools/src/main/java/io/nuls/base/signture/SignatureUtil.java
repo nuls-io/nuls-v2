@@ -58,6 +58,7 @@ public class SignatureUtil {
             if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
                 throw new NulsException(new Exception());
             }
+            //todo 签名中可能混合了多个地址的签名，其中可能含有不定数量的多签地址，需要先根据公钥判断地址类型
             for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
                 if (!ECKey.verify(tx.getHash().getDigestBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
                     throw new NulsException(new Exception());

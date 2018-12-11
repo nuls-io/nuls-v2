@@ -134,13 +134,6 @@ public class TransactionServiceImplTest {
     }
 
     @Test
-    public void validateCoinTo() throws NulsException {
-        assemblyCoinTo();
-        Result result = transactionServiceImpl.validateCoinTo(coinTos);
-        System.out.println(result.getErrorCode().getCode() + " : " + result.getErrorCode().getMsg());
-        Assert.assertTrue(result.isSuccess());
-    }
-    @Test
     public void newTx() {
     }
 
