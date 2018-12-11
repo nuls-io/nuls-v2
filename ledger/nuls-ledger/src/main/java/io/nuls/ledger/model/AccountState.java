@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -53,7 +53,7 @@ public class AccountState extends BaseNulsData {
 
     @Setter
     @Getter
-    private long nonce;
+    private String nonce;
 
     @Setter
     @Getter
@@ -71,7 +71,7 @@ public class AccountState extends BaseNulsData {
     @Getter
     private FreezeState freezeState;
 
-    public AccountState(int chainId, int assetId, long nonce, BigInteger balance) {
+    public AccountState(int chainId, int assetId, String nonce, BigInteger balance) {
         this.chainId = chainId;
         this.assetId = assetId;
         this.nonce = nonce;
@@ -88,7 +88,7 @@ public class AccountState extends BaseNulsData {
         return balance.add(freezeState.getTotal());
     }
 
-    public AccountState withNonce(long nonce) {
+    public AccountState withNonce(String nonce) {
         return new AccountState(chainId, assetId, nonce, balance);
     }
 
@@ -104,16 +104,19 @@ public class AccountState extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
         stream.writeUint16(assetId);
-        stream.writeUint32(nonce);
+        stream.writeString(nonce);
         stream.writeBigInteger(balance);
+        stream.writeNulsData(freezeState);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
-        this.nonce = byteBuffer.readUint32();
+        this.nonce = byteBuffer.readString();
         this.balance = byteBuffer.readBigInteger();
+        this.freezeState = new FreezeState();
+        byteBuffer.readNulsData(freezeState);
     }
 
     @Override
@@ -123,8 +126,10 @@ public class AccountState extends BaseNulsData {
         size += SerializeUtils.sizeOfInt16();
         //assetId
         size += SerializeUtils.sizeOfInt16();
-        size += SerializeUtils.sizeOfInt32();
-        size += SerializeUtils.sizeOfInt32();
+        size += SerializeUtils.sizeOfString(nonce);
+        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfNulsData(freezeState);
+
         return size;
     }
 }

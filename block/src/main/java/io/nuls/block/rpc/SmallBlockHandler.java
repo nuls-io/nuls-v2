@@ -34,8 +34,8 @@ import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.block.utils.NetworkUtil;
-import io.nuls.block.utils.TransactionUtil;
+import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -55,7 +55,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link HashMessage}，用于区块的广播与转发
+ * 处理收到的{@link SmallBlockMessage}，用于区块的广播与转发
  *
  * @author captain
  * @version 1.0
@@ -106,7 +106,7 @@ public class SmallBlockHandler extends BaseCmd {
             return success();
         }
 
-        //2.已收到部分区块，还缺失交易信息，发送HashListMessage到源节点 todo 加基础验证
+        //2.已收到部分区块，还缺失交易信息，发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
             HashListMessage request = new HashListMessage();
@@ -119,7 +119,11 @@ public class SmallBlockHandler extends BaseCmd {
 
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
-            Log.debug("recieve new block from(" + nodeId + "), tx count : " + header.getTxCount() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + blockHash);
+            if (!BlockUtil.headerVerify(chainId, header)) {
+                Log.debug("recieve error SmallBlockMessage from(" + nodeId + "), header height:" + header.getHeight() + ", preHash:" + header.getPreHash());
+                return success();
+            }
+            Log.debug("recieve SmallBlockMessage from(" + nodeId + "), tx count : " + header.getTxCount() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + blockHash);
 
             //共识节点打包的交易包括两种交易，一种是在网络上已经广播的普通交易，一种是共识节点生成的特殊交易(如共识奖励、红黄牌)，后面一种交易其他节点的未确认交易池中不可能有，所以都放在SubTxList中
             //还有一种场景时收到smallBlock时，有一些普通交易还没有缓存在未确认交易池中，此时要再从源节点请求

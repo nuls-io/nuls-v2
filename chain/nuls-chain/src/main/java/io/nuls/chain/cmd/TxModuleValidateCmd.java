@@ -27,14 +27,13 @@ package io.nuls.chain.cmd;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.ChainTxConstants;
 import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.Chain;
+import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -106,9 +105,10 @@ public class TxModuleValidateCmd extends BaseChainCmd {
             /*
             验证注册链
              */
+            List<Transaction> errorList = errorInRegisterChainAndAssetList(registerChainAndAssetList);
 
             return success();
-        } catch (NulsException e) {
+        } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
         }
@@ -119,8 +119,8 @@ public class TxModuleValidateCmd extends BaseChainCmd {
         List<Integer> newChainIdList = new ArrayList<>();
         List<Integer> newAssetIdList = new ArrayList<>();
         for (Transaction tx : registerChainAndAssetList) {
-            Chain newChain = buildChainTxData(tx.hex(), new Transaction(), false);
-            Asset newAsset = buildAssetTxData(tx.hex(), new Transaction());
+            BlockChain newChain = buildChainTxData(tx.hex(), new Transaction(), false);
+            Asset newAsset = buildAssetWithTxAsset(tx.hex(), new Transaction());
             if (!newChainIdList.contains(newChain.getChainId())
                     && !newAssetIdList.contains(newAsset.getAssetId())) {
                 newChainIdList.add(newChain.getChainId());

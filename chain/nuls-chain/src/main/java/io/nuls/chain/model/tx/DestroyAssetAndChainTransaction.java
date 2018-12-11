@@ -27,15 +27,11 @@ package io.nuls.chain.model.tx;
 import io.nuls.base.data.Transaction;
 
 /**
- * @program: nuls2.0
- * @description: 跨链注册交易
- * @author: lan
- * @create: 2018/11/19
- **/
+ * @author lan
+ * @date 2018/11/19
+ */
 public class DestroyAssetAndChainTransaction extends Transaction {
-
     public DestroyAssetAndChainTransaction() {
-        super();
+        super(BlockChainTxType.DESTROY_ASSET_AND_CHAIN.getKey());
     }
-
 }

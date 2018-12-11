@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -73,7 +73,10 @@ public class TransferProcessor implements TxProcessor {
             int assetId = from.getAssetsId();
             BigInteger amount = from.getAmount();
 
-            accountStateService.increaseNonce(address, chainId, assetId);
+            //TODO 获取交易前八位
+            //accountStateService.increaseNonce(address, chainId, assetId);
+            String nonce = "";
+            accountStateService.setNonce(address, chainId, assetId, nonce);
             accountStateService.addBalance(address, chainId, assetId, amount.negate());
         }
 

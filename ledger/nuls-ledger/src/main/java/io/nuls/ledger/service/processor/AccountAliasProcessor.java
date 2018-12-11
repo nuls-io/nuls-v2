@@ -61,6 +61,7 @@ public class AccountAliasProcessor implements TxProcessor {
             logger.error("transaction type:{} is not account alias type.", transaction.getType());
             return;
         }
+        TransactionType.valueOf("");
         CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
@@ -68,7 +69,10 @@ public class AccountAliasProcessor implements TxProcessor {
             int chainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
             BigInteger amount = from.getAmount();
-            accountStateService.increaseNonce(address, chainId, assetId);
+            //TODO 获取交易前八位
+            //accountStateService.increaseNonce(address, chainId, assetId);
+            String nonce = "";
+            accountStateService.setNonce(address, chainId, assetId, nonce);
             accountStateService.addBalance(address, chainId, assetId, amount.negate());
         }
     }

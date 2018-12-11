@@ -35,7 +35,8 @@ import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.Chain;
+import io.nuls.chain.model.dto.BlockChain;
+import io.nuls.chain.model.tx.txdata.TxAsset;
 import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.tools.crypto.HexUtil;
@@ -93,7 +94,7 @@ public class BaseChainCmd extends BaseCmd {
         //手续费
         CoinFrom from = new CoinFrom(address, chainId, assetsId, new BigDecimal(amount).toBigInteger(), ByteUtils.copyOf(accountBalance.getNonce().getBytes(), 8), (byte) 0);
         txSize += from.size();
-        BigInteger fee = TransactionFeeCalculator.getMaxFee(txSize);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         String fromAmount = BigIntegerUtils.addToString(amount, fee.toString());
         if (BigIntegerUtils.isLessThan(accountBalance.getAvailable(), fromAmount)) {
             throw new NulsRuntimeException(CmErrorCode.BALANCE_NOT_ENOUGH);
@@ -130,7 +131,7 @@ public class BaseChainCmd extends BaseCmd {
         //手续费
         CoinFrom from = new CoinFrom(address, chainId, assetsId, new BigInteger(amount), ByteUtils.copyOf(txHash.getBytes(), 8), (byte) -1);
         txSize += from.size();
-        BigInteger fee = TransactionFeeCalculator.getMaxFee(txSize);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         String fromAmount = BigIntegerUtils.addToString(amount, fee.toString());
         if (BigIntegerUtils.isLessThan(accountBalance.getAvailable(), fromAmount)) {
             throw new NulsRuntimeException(CmErrorCode.BALANCE_NOT_ENOUGH);
@@ -140,32 +141,47 @@ public class BaseChainCmd extends BaseCmd {
         return coinData;
     }
 
-    protected Chain buildChainTxData(String txHex, Transaction tx, boolean isDelete) {
+    protected BlockChain buildChainTxData(String txHex, Transaction tx, boolean isDelete) {
         try {
             byte[] txBytes = HexUtil.hexToByte(txHex);
             tx.parse(txBytes, 0);
             TxChain txChain = new TxChain();
             txChain.parse(tx.getTxData(), 0);
-            Chain chain = new Chain(txChain, isDelete);
+            BlockChain blockChain = new BlockChain(txChain, isDelete);
             if (isDelete) {
-                chain.setDelTxHash(tx.getHash().toString());
+                blockChain.setDelTxHash(tx.getHash().toString());
             } else {
-                chain.setRegTxHash(tx.getHash().toString());
+                blockChain.setRegTxHash(tx.getHash().toString());
             }
-            return chain;
+            return blockChain;
         } catch (Exception e) {
             Log.error(e);
             return null;
         }
     }
 
-    protected Asset buildAssetTxData(String txHex, Transaction tx) {
+    protected Asset buildAssetWithTxChain(String txHex, Transaction tx) {
         try {
             byte[] txBytes = HexUtil.hexToByte(txHex);
             tx.parse(txBytes, 0);
             TxChain txChain = new TxChain();
             txChain.parse(tx.getTxData(), 0);
             Asset asset = new Asset(txChain);
+            asset.setTxHash(tx.getHash().toString());
+            return asset;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
+    }
+
+    protected Asset buildAssetWithTxAsset(String txHex, Transaction tx) {
+        try {
+            byte[] txBytes = HexUtil.hexToByte(txHex);
+            tx.parse(txBytes, 0);
+            TxAsset txAsset = new TxAsset();
+            txAsset.parse(tx.getTxData(), 0);
+            Asset asset = new Asset();
             asset.setTxHash(tx.getHash().toString());
             return asset;
         } catch (Exception e) {

@@ -25,10 +25,9 @@
 package io.nuls.chain.service.impl;
 
 import io.nuls.base.data.Transaction;
-import io.nuls.chain.info.ChainTxConstants;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.model.dto.AccountBalance;
-import io.nuls.chain.model.dto.Chain;
+import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.service.RpcService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.message.Response;
@@ -90,14 +89,14 @@ public class RpcServiceImpl  implements RpcService {
     }
 
     @Override
-    public boolean createCrossGroup(Chain chain) {
+    public boolean createCrossGroup(BlockChain blockChain) {
         try {
             Map<String,Object> map = new HashMap<>();
-            map.put("chainId",chain.getChainId());
-            map.put("magicNumber",chain.getMagicNumber());
+            map.put("chainId",blockChain.getChainId());
+            map.put("magicNumber",blockChain.getMagicNumber());
             map.put("maxOut","");
             map.put("maxIn","");
-            map.put("minAvailableCount",chain.getMinAvailableNodeNum());
+            map.put("minAvailableCount",blockChain.getMinAvailableNodeNum());
             map.put("seedIps","");
             map.put("isMoonNode","1");
            Response response =  CmdDispatcher.requestAndResponse(CmConstants.MODULE_ROLE, CmConstants.CMD_NW_CREATE_NODEGROUP,map );
@@ -110,7 +109,7 @@ public class RpcServiceImpl  implements RpcService {
     }
 
     @Override
-    public boolean destroyCrossGroup(Chain chain) {
+    public boolean destroyCrossGroup(BlockChain blockChain) {
         try {
             //TODO:远程接口待完善
 //            CmdDispatcher.call(CmConstants.CMD_NW_DELETE_NODEGROUP, new Object[]{},1.0 );

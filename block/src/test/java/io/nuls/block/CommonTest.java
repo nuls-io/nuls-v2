@@ -20,50 +20,72 @@
 
 package io.nuls.block;
 
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.SmallBlock;
-import io.nuls.base.data.Transaction;
-import io.nuls.block.service.BlockService;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
+import io.nuls.tools.cache.LimitHashMap;
+import io.nuls.tools.data.CollectionUtils;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(BlockService.class)
-@PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "org.w3c.*", "javax.management.*"})
 public class CommonTest {
 
-    @Before
-    public void setUp() throws Exception {
-    }
-
-    @After
-    public void tearDown() throws Exception {
+    @Test
+    public void test() {
+        LimitHashMap map = new LimitHashMap(100);
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 20000000; i++) {
+            map.put(i, "hello" + i);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
+        System.out.println(map.size());
     }
 
     @Test
-    public void test() throws Exception {
-        SmallBlock smallBlock = new SmallBlock();
-        smallBlock.addBaseTx(new Transaction(1));
-        smallBlock.addBaseTx(new Transaction(2));
-        smallBlock.addBaseTx(new Transaction(3));
+    public void test1() {
+        Map map = Collections.synchronizedMap(new LinkedHashMap<Integer, String>(100) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<Integer, String> eldest) {
+                return size() > 100;
+            }
+        });
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 20000000; i++) {
+            map.put(i, "hello" + i);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
+        System.out.println(map.size());
+    }
 
-        List<Transaction> clone = new ArrayList<>();
-        smallBlock.getSubTxList().forEach(e -> clone.add(e));
-        smallBlock.addBaseTx(new Transaction(4));
-        smallBlock.addBaseTx(new Transaction(5));
+    @Test
+    public void test2() {
+        Map map = new LinkedHashMap<Integer, String>(100) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<Integer, String> eldest) {
+                return size() > 100;
+            }
+        };
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 20000000; i++) {
+            map.put(i, "hello" + i);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
+        System.out.println(map.size());
+    }
 
-        List<Transaction> subTxList = smallBlock.getSubTxList();
-
-        Assert.assertNotEquals(clone.size(), subTxList.size());
+    @Test
+    public void test3() {
+        Map map = CollectionUtils.getSizedMap(100);
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 20000000; i++) {
+            map.put(i, "hello" + i);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
+        System.out.println(map.size());
     }
 
 }
