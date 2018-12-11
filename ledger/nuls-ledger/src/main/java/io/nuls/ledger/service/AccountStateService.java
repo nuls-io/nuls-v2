@@ -40,11 +40,9 @@ public interface AccountStateService {
 
     AccountState getAccountState(String address, int chainId, int assetId);
 
-    long increaseNonce(String address, int chainId, int assetId);
+    String setNonce(String address, int chainId, int assetId, String nonce);
 
-    long setNonce(String address, int chainId, int assetId, long nonce);
-
-    long getNonce(String address, int chainId, int assetId);
+    String getNonce(String address, int chainId, int assetId);
 
     BigInteger getBalance(String address, int chainId, int assetId);
 
@@ -74,9 +72,9 @@ public interface AccountStateService {
      * @param height
      * @return
      */
-    BigInteger freezeByHeight(String address, int chainId, int assetId, String txHash, BigInteger amount, long height);
+    BigInteger freezeByHeight(String address, int chainId, int assetId, String txHash, BigInteger amount, BigInteger height);
 
-    BigInteger unfreezeByHeight(String addressess, int chainId, int assetId, long latestHeight);
+    BigInteger unfreezeByHeight(String addressess, int chainId, int assetId, BigInteger latestHeight);
 
     /**
      * 根据时间冻结用户的余额

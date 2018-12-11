@@ -65,7 +65,10 @@ public class RegisterAgentProcessor implements TxProcessor {
         for (CoinFrom from : froms) {
             String address = new String(from.getAddress());
 
-            accountStateService.increaseNonce(address, from.getAssetsChainId(), from.getAssetsId());
+            //TODO 获取交易前八位
+            //accountStateService.increaseNonce(address, chainId, assetId);
+            String nonce = "";
+            accountStateService.setNonce(address, from.getAssetsChainId(), from.getAssetsId(),nonce);
             accountStateService.addBalance(address,
                     from.getAssetsChainId(),
                     from.getAssetsId(),

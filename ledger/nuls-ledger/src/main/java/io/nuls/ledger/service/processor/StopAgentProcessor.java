@@ -67,8 +67,10 @@ public class StopAgentProcessor implements TxProcessor {
             int chainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
             BigInteger amount = from.getAmount();
-
-            accountStateService.increaseNonce(address, chainId, assetId);
+            //TODO 获取交易前八位
+            //accountStateService.increaseNonce(address, chainId, assetId);
+            String nonce = "";
+            accountStateService.setNonce(address, chainId, assetId, nonce);
             accountStateService.addBalance(address, chainId, assetId, amount.negate());
         }
 
