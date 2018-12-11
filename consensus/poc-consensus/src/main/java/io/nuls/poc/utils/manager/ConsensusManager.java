@@ -169,22 +169,21 @@ public class ConsensusManager {
 
         double inBlockReword = totalFee.doubleValue();
         double outBlockReword = crossFee.doubleValue();
-        if (localRound.getTotalWeight() > 0d && agentWeight.doubleValue() > 0d) {
+        if (localRound.getTotalWeight() > 0 && agentWeight.doubleValue() > 0) {
             /*
             本节点共识奖励 = 节点权重/本轮次权重*共识基础奖励
             Node Consensus Award = Node Weight/Round Weight*Consensus Foundation Award
             */
             inBlockReword = DoubleUtils.sum(inBlockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())).doubleValue());
-            outBlockReword = DoubleUtils.sum(outBlockReword, DoubleUtils.mul(totalAll, DoubleUtils.div(agentWeight, localRound.getTotalWeight())).doubleValue());
         }
-        if (inBlockReword == 0d && outBlockReword == 0d) {
+        if (inBlockReword == 0 && outBlockReword == 0) {
             return inRewardList;
         }
         /*
         创建节点账户所得共识奖励金，总的奖励金*（保证金/（保证金+委托金额））+ 佣金
         Incentives for creating node accounts, total incentives * (margin /(margin + commission amount)+commissions
         */
-        double agentOwnWeight = new BigDecimal(self.getAgent().getDeposit().divide(selfAllDeposit)).doubleValue();
+        double agentOwnWeight = new BigDecimal(self.getAgent().getDeposit()).divide(new BigDecimal(selfAllDeposit)).doubleValue();
         double inCaReward = DoubleUtils.mul(inBlockReword, agentOwnWeight);
         double outCaReward = DoubleUtils.mul(outBlockReword, agentOwnWeight);
         /*
@@ -196,7 +195,7 @@ public class ConsensusManager {
             计算各委托账户权重（委托金额/总的委托金)
             Calculate the weight of each entrusted account (amount of entrusted account/total entrusted fee)
             */
-            double weight = new BigDecimal(deposit.getDeposit().divide(selfAllDeposit)).doubleValue();
+            double weight = new BigDecimal(deposit.getDeposit()).divide (new BigDecimal(selfAllDeposit)).doubleValue();
 
             /*
             如果委托账户为创建该节点账户自己,则将节点账户奖励金加上该共识奖励金

@@ -24,14 +24,51 @@
  */
 package io.nuls.chain.model.tx;
 
-import io.nuls.base.data.Transaction;
-
 /**
- * @author lan
- * @date 2018/11/19
+ * @author tangyi
  */
-public class RegisterChainAndAssetTransaction extends Transaction {
-    public RegisterChainAndAssetTransaction() {
-        super(BlockChainTxType.REGISTER_CHAIN_AND_ASSET.getKey());
+
+public enum BlockChainTxType {
+    /**
+     * 注册链（必须同时注册一种资产）
+     * Register chain(An asset must be registered at the same time)
+     */
+    REGISTER_CHAIN_AND_ASSET(10101),
+
+    /**
+     * 销毁链（删除最后一种资产的时候同时销毁链）
+     * Destroy chain (Destroy chain when the last asset is deleted)
+     */
+    DESTROY_ASSET_AND_CHAIN(10102),
+
+    /**
+     * 在链上新增资产
+     * Add an asset to the chain
+     */
+    ADD_ASSET_TO_CHAIN(10103),
+
+    /**
+     * 从链上删除资产
+     * Delete an asset from the chain
+     */
+    REMOVE_ASSET_FROM_CHAIN(10104);
+
+    private int key;
+
+    BlockChainTxType(int key) {
+        this.key = key;
+    }
+
+    public int getKey() {
+        return this.key;
+    }
+
+    public static BlockChainTxType valueOf(int key) {
+        for (BlockChainTxType txType : BlockChainTxType.values()) {
+            if (txType.getKey() == key) {
+                return txType;
+            }
+        }
+        throw new IllegalArgumentException("Key is not exist:" + key);
     }
 }

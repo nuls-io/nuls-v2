@@ -8,6 +8,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.bo.consensus.ConsensusStatus;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
@@ -24,6 +25,7 @@ import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.utils.manager.*;
+import io.nuls.poc.utils.validator.BlockValidator;
 import io.nuls.poc.utils.validator.TxValidator;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
@@ -70,6 +72,8 @@ public class ConsensusServiceImpl implements ConsensusService {
     private RoundManager roundManager;
     @Autowired
     private DepositManager depositManager;
+    @Autowired
+    private BlockValidator blockValidator;
     /**
      * 创建节点
      */
@@ -176,7 +180,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             //todo 交易签名
             //todo 将交易传递给交易管理模块
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+
+            Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+            result.put("txHex", HexUtil.encode(tx.serialize()));
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
@@ -221,7 +228,9 @@ public class ConsensusServiceImpl implements ConsensusService {
             tx.setCoinData(coinData.serialize());
             //todo 交易签名
             //todo 将交易传递给交易管理模块
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+            Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+            result.put("txHex", HexUtil.encode(tx.serialize()));
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
@@ -282,7 +291,9 @@ public class ConsensusServiceImpl implements ConsensusService {
             cancelDepositTransaction.setCoinData(coinData.serialize());
             //todo 交易签名
             //todo 将交易传递给交易管理模块
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+            Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+            result.put("txHex", HexUtil.encode(cancelDepositTransaction.serialize()));
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
@@ -674,84 +685,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             Block block = new Block();
             block.parse(new NulsByteBuffer(HexUtil.decode(blockHex)));
-            BlockHeader blockHeader = block.getHeader();
-            //验证梅克尔哈希
-            if (!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))) {
-                return Result.getFailed(ConsensusErrorCode.MERKEL_HASH_ERROR);
-            }
-            BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
-            //todo 获取本地最新区块头,区块管理模块获取
-            BlockHeader bestBlockHeader = new BlockHeader();
-            BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlockHeader.getExtend());
-            //该区块为本地最新区块之前的区块
-            if (extendsData.getRoundIndex() < bestExtendsData.getRoundIndex() || (extendsData.getRoundIndex() == bestExtendsData.getRoundIndex() && extendsData.getPackingIndexOfRound() <= bestExtendsData.getPackingIndexOfRound())) {
-                Log.error("new block rounddata error, block height : " + blockHeader.getHeight() + " , hash :" + blockHeader.getHash());
-                return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
-            }
-            MeetingRound currentRound = roundManager.getCurrentRound(chain);
-            //1.当前区块轮次 < 本地最新轮次 && 区块同步已完成
-            if (isDownload && extendsData.getRoundIndex() < currentRound.getIndex()) {
-                MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
-                if (round != null) {
-                    currentRound = round;
-                }
-            }
-            //标志是否有轮次信息变化
-            boolean hasChangeRound = false;
-            //2.当前区块轮次 > 本地最新轮次
-            if (extendsData.getRoundIndex() > currentRound.getIndex()) {
-                //未来区块
-                if (extendsData.getRoundStartTime() > TimeService.currentTimeMillis() + chain.getConfig().getPackingInterval()) {
-                    Log.error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash());
-                    return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
-                }
-                if (!isDownload && (extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval()) > TimeService.currentTimeMillis() + chain.getConfig().getPackingInterval()) {
-                    Log.error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash());
-                    return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
-                }
-                if (extendsData.getRoundStartTime() < currentRound.getEndTime()) {
-                    Log.error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash());
-                    return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
-                }
-                MeetingRound tempRound = roundManager.getRound(chain, extendsData, !isDownload);
-                if (tempRound.getIndex() > currentRound.getIndex()) {
-                    tempRound.setPreRound(currentRound);
-                    hasChangeRound = true;
-                }
-                currentRound = tempRound;
-            } else if (extendsData.getRoundIndex() < currentRound.getIndex()) {
-                MeetingRound preRound = currentRound.getPreRound();
-                while (preRound != null) {
-                    if (extendsData.getRoundIndex() == preRound.getIndex()) {
-                        currentRound = preRound;
-                        break;
-                    }
-                    preRound = preRound.getPreRound();
-                }
-            }
-            if (extendsData.getRoundIndex() != currentRound.getIndex() || extendsData.getRoundStartTime() != currentRound.getStartTime()) {
-                Log.error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeader.getHash());
-                return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
-            }
-            if (extendsData.getConsensusMemberCount() != currentRound.getMemberCount()) {
-                Log.error("block height " + blockHeader.getHeight() + " packager count is error! hash :" + blockHeader.getHash());
-                return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
-            }
-            Log.debug(currentRound.toString());
-            // 验证打包人是否正确
-            MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
-            if (!Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress())) {
-                Log.error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeader.getHash());
-                return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
-            }
-            if (member.getPackEndTime() != block.getHeader().getTime()) {
-                Log.error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeader.getHash());
-                return Result.getFailed(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
-            }
-            if (hasChangeRound) {
-                roundManager.addRound(chain, currentRound);
-            }
-            //todo 系统交易验证
+            blockValidator.validate(isDownload,chain,block);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
             Log.error(e);
@@ -821,7 +755,32 @@ public class ConsensusServiceImpl implements ConsensusService {
     }
 
     /**
-     * 修改节点状态
+     * 修改节点共识状态
+     */
+    @Override
+    public Result updateAgentConsensusStatus(Map<String, Object> params) {
+        try {
+            if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
+                return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+            }
+            int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+            if(chainId<=ConsensusConstant.MIN_VALUE){
+                return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+            }
+            Chain chain = chainManager.getChainMap().get(chainId);
+            if (chain == null) {
+                throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
+            }
+            chain.setConsensusStatus(ConsensusStatus.RUNNING);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+        }catch (NulsException e){
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    /**
+     * 修改节点打包状态
      */
     @Override
     public Result updateAgentStatus(Map<String, Object> params) {

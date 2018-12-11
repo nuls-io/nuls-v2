@@ -27,15 +27,11 @@ package io.nuls.chain.model.tx;
 import io.nuls.base.data.Transaction;
 
 /**
- * @program: nuls2.0
- * @description: 跨链注册交易
- * @author: lan
- * @create: 2018/11/19
- **/
-public class RemoveAssetFromChainTransaction extends Transaction{
-
+ * @author lan
+ * @date 2018/11/19
+ */
+public class RemoveAssetFromChainTransaction extends Transaction {
     public RemoveAssetFromChainTransaction() {
-        super();
+        super(BlockChainTxType.REMOVE_ASSET_FROM_CHAIN.getKey());
     }
-
 }
