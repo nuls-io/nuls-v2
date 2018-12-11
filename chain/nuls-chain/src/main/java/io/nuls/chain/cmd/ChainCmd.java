@@ -3,6 +3,7 @@ package io.nuls.chain.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
+import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.Asset;
@@ -103,15 +104,16 @@ public class ChainCmd extends BaseChainCmd {
             asset.setCreateTime(TimeService.currentTimeMillis());
             asset.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
             // 组装交易发送
-            RegisterChainAndAssetTransaction crossChainRegTransaction = new RegisterChainAndAssetTransaction();
-            crossChainRegTransaction.setTxData(blockChain.parseToTransaction(asset));
-            crossChainRegTransaction.setTime(TimeService.currentTimeMillis());
+            Transaction tx = new RegisterChainAndAssetTransaction();
+            tx.setTxData(blockChain.parseToTransaction(asset));
+            tx.setTime(TimeService.currentTimeMillis());
             AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(), asset.getAssetId(), String.valueOf(params.get("address")));
             CoinData coinData = this.getRegCoinData(asset.getAddress(), asset.getChainId(),
-                    asset.getAssetId(), String.valueOf(asset.getDepositNuls()), crossChainRegTransaction.size(), accountBalance);
-            crossChainRegTransaction.setCoinData(coinData.serialize());
+                    asset.getAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance);
+            tx.setCoinData(coinData.serialize());
             //todo 交易签名
-            boolean rpcReslt = rpcService.newTx(crossChainRegTransaction);
+            tx.setTransactionSignature(null);
+            boolean rpcReslt = rpcService.newTx(tx);
             if (rpcReslt) {
                 return success(blockChain);
             } else {
