@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.utils;
+package io.nuls.block.utils.module;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
@@ -29,42 +29,54 @@ import java.util.List;
 
 /**
  * 调用交易管理模块的工具类
+ *
  * @author captain
- * @date 18-11-9 上午10:44
  * @version 1.0
+ * @date 18-11-9 上午10:44
  */
 public class TransactionUtil {
 
-    public static boolean verify(int chainId, List<Transaction> transactions){
-        return true;
-    }
-
-    public static List<Transaction> getTransactions(int chainId, long height) throws IOException {
-        return BlockGenerator.getTransactions();
-    }
-
-    public static boolean save(int chainId, List<Transaction> transactions){
-        return true;
-    }
-
-    public static boolean rollback(int chainId, List<Transaction> transactions){
+    /**
+     * 批量保存交易
+     *
+     * @param chainId
+     * @param transactions
+     * @return
+     */
+    public static boolean save(int chainId, List<Transaction> transactions) {
         return true;
     }
 
     /**
-     * 回滚主链上某个高度区块的所有交易，同步返回是否回滚成功
+     * 批量回滚交易
+     *
      * @param chainId
-     * @param height
+     * @param transactions
      * @return
      */
-    public static boolean rollback(int chainId, long height){
+    public static boolean rollback(int chainId, List<NulsDigestData> transactions) {
         return true;
     }
 
+    /**
+     * 批量获取交易
+     *
+     * @param chainId
+     * @param hashList
+     * @return
+     * @throws IOException
+     */
     public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList) throws IOException {
         return BlockGenerator.getTransactions();
     }
 
+    /**
+     * 获取单个交易
+     *
+     * @param chainId
+     * @param hash
+     * @return
+     */
     public static Transaction getTransaction(int chainId, NulsDigestData hash) {
         try {
             return BlockGenerator.getTransactions().get(0);
