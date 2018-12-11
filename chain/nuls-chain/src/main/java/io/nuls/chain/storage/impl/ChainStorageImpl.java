@@ -1,6 +1,6 @@
 package io.nuls.chain.storage.impl;
 
-import io.nuls.chain.model.dto.Chain;
+import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
@@ -17,7 +17,7 @@ import io.nuls.tools.log.Log;
 @Component
 public class ChainStorageImpl implements ChainStorage, InitializingBean {
 
-    private final String TBL = "chain";
+    private final String TBL = "block_chain";
 
     /**
      * 该方法在所有属性被设置之后调用，用于辅助对象初始化
@@ -34,33 +34,21 @@ public class ChainStorageImpl implements ChainStorage, InitializingBean {
         }
     }
 
-    /**
-     * Save chain
-     *
-     * @param key   The key
-     * @param chain Chain object that needs to be saved
-     * @return true/false
-     */
+
     @Override
-    public boolean save(int key, Chain chain) {
+    public boolean save(int key, BlockChain blockChain) {
         try {
-            return RocksDBService.put(TBL, ByteUtils.intToBytes(key), chain.serialize());
+            return RocksDBService.put(TBL, ByteUtils.intToBytes(key), blockChain.serialize());
         } catch (Exception e) {
             Log.error(e);
             return false;
         }
     }
-    /**
-     * update chain
-     *
-     * @param key   The key
-     * @param chain Chain object that needs to be update
-     * @return true/false
-     */
+
     @Override
-    public boolean update(int key, Chain chain) {
+    public boolean update(int key, BlockChain blockChain) {
         try {
-            return RocksDBService.put(TBL, ByteUtils.intToBytes(key), chain.serialize());
+            return RocksDBService.put(TBL, ByteUtils.intToBytes(key), blockChain.serialize());
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -89,16 +77,16 @@ public class ChainStorageImpl implements ChainStorage, InitializingBean {
      * @return Chain object
      */
     @Override
-    public Chain load(int key) {
+    public BlockChain load(int key) {
         byte[] bytes = RocksDBService.get(TBL, ByteUtils.intToBytes(key));
         if (bytes == null) {
             return null;
         }
 
         try {
-            Chain chain = new Chain();
-            chain.parse(bytes, 0);
-            return chain;
+            BlockChain blockChain = new BlockChain();
+            blockChain.parse(bytes, 0);
+            return blockChain;
         } catch (NulsException e) {
             Log.error(e);
             return null;

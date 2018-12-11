@@ -3,7 +3,7 @@ package io.nuls.chain.service.impl;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.Chain;
+import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.ChainAssetStorage;
@@ -38,20 +38,20 @@ public class ChainServiceImpl implements ChainService {
     @Override
     public boolean initChain() {
         int chainId = Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
-        Chain chain = getChain(chainId);
-        if(null == chain){
-            chain = new Chain();
+        BlockChain chain = getChain(chainId);
+        if (null == chain) {
+            chain = new BlockChain();
         }
         chain.setName(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_NAME));
         int assetId = Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID));
         chain.setRegAssetId(assetId);
-        chain.getAssetIds().clear();
-        chain.addCreateAssetId(assetId);
-        chain.getAssetsKey().clear();
-        chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId,assetId));
-        chainStorage.save(chainId,chain);
-        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId,assetId));
-        if(null == asset){
+        chain.getSelfAssetKeyList().clear();
+        chain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
+        chain.getTotalAssetKeyList().clear();
+        chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
+        chainStorage.save(chainId, chain);
+        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
+        if (null == asset) {
             asset = new Asset();
         }
         asset.setChainId(chainId);
@@ -63,37 +63,21 @@ public class ChainServiceImpl implements ChainService {
         return true;
     }
 
-    /**
-     * Save chain
-     *
-     * @param chain Chain object that needs to be saved
-     * @return true/false
-     */
+
     @Override
-    public boolean saveChain(Chain chain) {
-        return chainStorage.save(chain.getChainId(), chain);
+    public boolean saveChain(BlockChain blockChain) {
+        return chainStorage.save(blockChain.getChainId(), blockChain);
     }
 
-    /**
-     * updateChain
-     *
-     * @param chain
-     * @return
-     */
+
     @Override
-    public  boolean updateChain(Chain chain){
-        return chainStorage.update(chain.getChainId(), chain);
+    public boolean updateChain(BlockChain blockChain) {
+        return chainStorage.update(blockChain.getChainId(), blockChain);
     }
 
-    /**
-     * delChain
-     *
-     * @param chain
-     * @return
-     */
     @Override
-    public  boolean delChain(Chain chain){
-        return chainStorage.delete(chain.getChainId());
+    public boolean delChain(BlockChain blockChain) {
+        return chainStorage.delete(blockChain.getChainId());
     }
 
     /**
@@ -103,9 +87,8 @@ public class ChainServiceImpl implements ChainService {
      * @return Chain
      */
     @Override
-    public Chain getChain(int chainId) {
-        Chain chain = chainStorage.load(chainId);
-        return chain;
+    public BlockChain getChain(int chainId) {
+        return chainStorage.load(chainId);
     }
 
 
