@@ -77,29 +77,39 @@ public class BlockStorageServiceImpl implements BlockStorageService {
 
     @Override
     public BlockHeaderPo query(int chainId, long height) {
-        byte[] key = SerializeUtils.uint64ToByteArray(height);
-        byte[] hash = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, key);
-        if (hash == null) {
+        try {
+            byte[] key = SerializeUtils.uint64ToByteArray(height);
+            byte[] hash = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, key);
+            if (hash == null) {
+                return null;
+            }
+            byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash);
+            if (bytes == null) {
+                return null;
+            }
+            BlockHeaderPo blockHeader = new BlockHeaderPo();
+            blockHeader.parse(new NulsByteBuffer(bytes));
+            return blockHeader;
+        } catch (Exception e) {
+            Log.error(e);
             return null;
         }
-        byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash);
-        if (bytes == null) {
-            return null;
-        }
-        BlockHeaderPo blockHeader = new BlockHeaderPo();
-        blockHeader.parse(new NulsByteBuffer(bytes));
-        return blockHeader;
     }
 
     @Override
     public BlockHeaderPo query(int chainId, NulsDigestData hash) {
-        byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash.getDigestBytes());
-        if (bytes == null) {
+        try {
+            byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash.getDigestBytes());
+            if (bytes == null) {
+                return null;
+            }
+            BlockHeaderPo blockHeader = new BlockHeaderPo();
+            blockHeader.parse(new NulsByteBuffer(bytes));
+            return blockHeader;
+        } catch (Exception e) {
+            Log.error(e);
             return null;
         }
-        BlockHeaderPo blockHeader = new BlockHeaderPo();
-        blockHeader.parse(new NulsByteBuffer(bytes));
-        return blockHeader;
     }
 
     @Override
@@ -109,17 +119,27 @@ public class BlockStorageServiceImpl implements BlockStorageService {
 
     @Override
     public boolean remove(int chainId, long height) {
-        byte[] hash = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, SerializeUtils.uint64ToByteArray(height));
-        RocksDBService.delete(BLOCK_HEADER_INDEX + chainId, SerializeUtils.uint64ToByteArray(height));
-        RocksDBService.delete(BLOCK_HEADER + chainId, hash);
-        return true;
+        try {
+            byte[] hash = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, SerializeUtils.uint64ToByteArray(height));
+            RocksDBService.delete(BLOCK_HEADER_INDEX + chainId, SerializeUtils.uint64ToByteArray(height));
+            RocksDBService.delete(BLOCK_HEADER + chainId, hash);
+            return true;
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
     }
 
     @Override
     public boolean destroy(int chainId) {
-        boolean b1 = RocksDBService.destroyTable(BLOCK_HEADER + chainId);
-        boolean b2 = RocksDBService.destroyTable(BLOCK_HEADER_INDEX + chainId);
-        return b1 && b2;
+        try {
+            boolean b1 = RocksDBService.destroyTable(BLOCK_HEADER + chainId);
+            boolean b2 = RocksDBService.destroyTable(BLOCK_HEADER_INDEX + chainId);
+            return b1 && b2;
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
     }
 
     @Override

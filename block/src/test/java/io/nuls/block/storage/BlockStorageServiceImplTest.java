@@ -21,8 +21,13 @@
 package io.nuls.block.storage;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockStorageService;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import org.junit.After;
 import org.junit.Before;
@@ -34,24 +39,24 @@ import static org.junit.Assert.assertNull;
 
 public class BlockStorageServiceImplTest {
 
-    private BlockHeader header;
+    private BlockHeaderPo header;
     private BlockStorageService service;
 
     @Before
     public void setUp() throws Exception {
-//        SpringLiteContext.init("io.nuls.block", new ModularServiceMethodInterceptor());
-//        service = ContextManager.getServiceBean(BlockStorageService.class);
-//        header = new BlockHeader();
-//        header.setHeight(1212);
-//        header.setHash(NulsDigestData.calcDigestData("jyc".getBytes()));
-//        service.init(CHAIN_ID);
+        SpringLiteContext.init("io.nuls.block", new ModularServiceMethodInterceptor());
+        service = ContextManager.getServiceBean(BlockStorageService.class);
+        header = new BlockHeaderPo();
+        header.setHeight(1212);
+        header.setHash(NulsDigestData.calcDigestData("jyc".getBytes()));
+        service.init(CHAIN_ID);
     }
 
     @After
     public void tearDown() throws Exception {
-//        service.destroy(CHAIN_ID);
-//        header = null;
-//        service = null;
+        service.destroy(CHAIN_ID);
+        header = null;
+        service = null;
     }
 
     @Test
@@ -67,36 +72,4 @@ public class BlockStorageServiceImplTest {
         assertNull(service.query(CHAIN_ID, header.getHeight()));
     }
 
-    @Test
-    public void name() throws Exception {
-        RocksDBService.init(DATA_PATH);
-        RocksDBService.destroyTable(FORK_CHAINS + CHAIN_ID);
-        RocksDBService.createTable(FORK_CHAINS + CHAIN_ID);
-        long actualSize = FileSize.getFolderSize(FORK_CHAINS + CHAIN_ID);
-        Log.info("before save, folder size:{}", actualSize);
-        for (int i = 0; i < 100; i++) {
-            String key = i + "";
-            String value = i + "The Times 03/Jan/2009 Chancellor on brink of second bailout for banks";
-            boolean put = RocksDBService.put(FORK_CHAINS + CHAIN_ID, key.getBytes(), value.getBytes());
-            Log.info("save key:{}, result:{}", key, put);
-            Thread.sleep(100L);
-        }
-        actualSize = FileSize.getFolderSize(FORK_CHAINS + CHAIN_ID);
-        Log.info("after save, folder size:{}", actualSize);
-        for (int i = 0; i < 100; i++) {
-            String key = i + "";
-            boolean delete = RocksDBService.delete(FORK_CHAINS + CHAIN_ID, key.getBytes());
-            Log.info("delete key:{}, result:{}", key, delete);
-            Thread.sleep(100L);
-        }
-        actualSize = FileSize.getFolderSize(FORK_CHAINS + CHAIN_ID);
-        Log.info("after delete, folder size:{}", actualSize);
-
-        for (int i = 0; i < 100; i++) {
-            String key = i + "";
-            byte[] bytes = RocksDBService.get(FORK_CHAINS + CHAIN_ID, key.getBytes());
-            System.out.println(bytes);
-            Thread.sleep(100L);
-        }
-    }
 }

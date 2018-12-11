@@ -122,7 +122,6 @@ public class TxGroupHandler extends BaseCmd {
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
             Log.error("It is theoretically impossible to enter this branch");
-            return success();
         }
         return success();
     }

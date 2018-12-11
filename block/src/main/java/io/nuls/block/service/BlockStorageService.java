@@ -22,9 +22,7 @@ package io.nuls.block.service;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.po.BlockHeaderPo;
-import io.nuls.tools.exception.NulsException;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -56,8 +54,6 @@ public interface BlockStorageService {
      * @param chainId
      * @param height
      * @return
-     * @throws UnsupportedEncodingException
-     * @throws NulsException
      */
     BlockHeaderPo query(int chainId, long height);
 
@@ -66,7 +62,6 @@ public interface BlockStorageService {
      * @param chainId
      * @param hash
      * @return
-     * @throws NulsException
      */
     BlockHeaderPo query(int chainId, NulsDigestData hash);
 

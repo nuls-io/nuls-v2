@@ -84,6 +84,12 @@ public enum RunningStatusEnum {
     EXCEPTION,
 
     /**
+     * 维护孤儿链
+     * Clean up the database
+     */
+    MAINTAIN_CHAINS,
+
+    /**
      * 清理数据库中
      * Clean up the database
      */

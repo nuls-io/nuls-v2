@@ -26,7 +26,7 @@ import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.model.CachedSmallBlock;
-import io.nuls.tools.cache.LimitHashMap;
+import io.nuls.tools.data.CollectionUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,10 +40,9 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SmallBlockCacher {
 
-    //todo LimitHashMap优化
-    private static Map<Integer, LimitHashMap<NulsDigestData, CachedSmallBlock>> smallBlockCacheMap = new ConcurrentHashMap<>();
+    private static Map<Integer, Map<NulsDigestData, CachedSmallBlock>> smallBlockCacheMap = new ConcurrentHashMap<>();
 
-    private static Map<Integer, LimitHashMap<NulsDigestData, BlockForwardEnum>> statusCacheMap = new ConcurrentHashMap<>();
+    private static Map<Integer, Map<NulsDigestData, BlockForwardEnum>> statusCacheMap = new ConcurrentHashMap<>();
 
     /**
      * 将一个SmallBlock放入内存中，若不主动删除，则在缓存存满或者存在时间超过1000秒时，自动清理
@@ -58,7 +57,7 @@ public class SmallBlockCacher {
 
     /**
      * 根据hash获取缓存的{@link SmallBlock}
-     * TODO  注释
+     * TODO  注释完整性
      *
      * @param chainId
      * @param blockHash
@@ -76,7 +75,7 @@ public class SmallBlockCacher {
      * @return
      */
     public static BlockForwardEnum getStatus(int chainId, NulsDigestData blockHash) {
-        LimitHashMap<NulsDigestData, BlockForwardEnum> map = statusCacheMap.get(chainId);
+        Map<NulsDigestData, BlockForwardEnum> map = statusCacheMap.get(chainId);
         BlockForwardEnum blockForwardEnum = map.get(blockHash);
         if (blockForwardEnum == null) {
             blockForwardEnum = BlockForwardEnum.EMPTY;
@@ -99,8 +98,10 @@ public class SmallBlockCacher {
 
     public static void init(int chainId) {
         int config = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.SMALL_BLOCK_CACHE));
-        LimitHashMap<NulsDigestData, BlockForwardEnum> map = new LimitHashMap<>(config);
-        statusCacheMap.put(chainId, map);
+        Map<NulsDigestData, CachedSmallBlock> map = CollectionUtils.getSizedMap(config);
+        smallBlockCacheMap.put(chainId, map);
+        Map<NulsDigestData, BlockForwardEnum> statusMap = CollectionUtils.getSizedMap(config);
+        statusCacheMap.put(chainId, statusMap);
     }
 
 }

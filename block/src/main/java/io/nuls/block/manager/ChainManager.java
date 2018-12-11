@@ -158,7 +158,6 @@ public class ChainManager {
      */
     private static boolean switchChain0(int chainId, Chain masterChain, Chain forkChain, Chain subChain) throws Exception {
         //1.计算要从forkChain上添加到主链上多少个区块
-        //todo 待核实
         int target = 0;
         if (subChain != null) {
             target = (int) (subChain.getStartHeight() - forkChain.getStartHeight());

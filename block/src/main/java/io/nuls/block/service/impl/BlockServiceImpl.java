@@ -288,8 +288,7 @@ public class BlockServiceImpl implements BlockService {
         }
         //2.分叉验证逻辑
         if (!localInit) {
-            Result result = BlockUtil.forkVerify(chainId, block);
-            boolean forkVerify = result.isSuccess();
+            boolean forkVerify = BlockUtil.forkVerify(chainId, block);
             if (!forkVerify) {
                 return false;
             }
