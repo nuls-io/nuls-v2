@@ -139,6 +139,11 @@ public interface ConsensusService {
     Result getAgentStatus(Map<String,Object> params);
 
     /**
+     * 修改节点共识状态
+     */
+    Result updateAgentConsensusStatus(Map<String, Object> params);
+
+    /**
      * 修改节点打包状态
      * */
     Result updateAgentStatus(Map<String,Object> params);

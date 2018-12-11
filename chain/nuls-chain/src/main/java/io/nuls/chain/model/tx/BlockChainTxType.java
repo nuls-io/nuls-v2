@@ -1,14 +1,18 @@
 /*
  * MIT License
+ *
  * Copyright (c) 2017-2018 nuls.io
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -16,88 +20,55 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
-
-package io.nuls.block.constant;
+package io.nuls.chain.model.tx;
 
 /**
- * 模块运行状态枚举
- * The module runs state enumeration.
- * @author captain
- * @date 18-11-28 下午5:58
- * @version 1.0
+ * @author tangyi
  */
-public enum RunningStatusEnum {
+
+public enum BlockChainTxType {
+    /**
+     * 注册链（必须同时注册一种资产）
+     * Register chain(An asset must be registered at the same time)
+     */
+    REGISTER_CHAIN_AND_ASSET(10101),
 
     /**
-     * 已停止
-     * stoped
+     * 销毁链（删除最后一种资产的时候同时销毁链）
+     * Destroy chain (Destroy chain when the last asset is deleted)
      */
-    STOPED,
+    DESTROY_ASSET_AND_CHAIN(10102),
 
     /**
-     * 正在初始化
-     * initializing
+     * 在链上新增资产
+     * Add an asset to the chain
      */
-    INITIALIZING,
+    ADD_ASSET_TO_CHAIN(10103),
 
     /**
-     * 初始化完成
-     * initialized
+     * 从链上删除资产
+     * Delete an asset from the chain
      */
-    INITIALIZED,
+    REMOVE_ASSET_FROM_CHAIN(10104);
 
-    /**
-     * 等待中
-     * waiting
-     */
-    WAITING,
+    private int key;
 
-    /**
-     * 同步区块中
-     * synchronizing
-     */
-    SYNCHRONIZING,
+    BlockChainTxType(int key) {
+        this.key = key;
+    }
 
-    /**
-     * 切换主链中
-     * switching
-     */
-    SWITCHING,
+    public int getKey() {
+        return this.key;
+    }
 
-    /**
-     * 运行中
-     * running
-     */
-    RUNNING,
-
-    /**
-     * 正在停止
-     * stopping
-     */
-    STOPPING,
-
-    /**
-     * 运行出现异常
-     * Running exception
-     */
-    EXCEPTION,
-
-    /**
-     * 维护孤儿链
-     * Clean up the database
-     */
-    MAINTAIN_CHAINS,
-
-    /**
-     * 清理数据库中
-     * Clean up the database
-     */
-    DATABASE_CLEANING,
-    ;
-
-    @Override
-    public String toString() {
-        return name();
+    public static BlockChainTxType valueOf(int key) {
+        for (BlockChainTxType txType : BlockChainTxType.values()) {
+            if (txType.getKey() == key) {
+                return txType;
+            }
+        }
+        throw new IllegalArgumentException("Key is not exist:" + key);
     }
 }

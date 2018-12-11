@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AgentTest {
-    protected int chainId = 1;
     protected  String success = "1";
     @BeforeClass
     public static void start() throws Exception {
@@ -36,13 +35,10 @@ public class AgentTest {
         params.put("chainId",1);
         params.put("deposit",20000);
         params.put("commissionRate",10);
-        params.put("packingAddress",rewardAddress.getBase58());
+        params.put("packingAddress",packingAddress.getBase58());
         params.put("password","");
-        params.put("rewardAddress",packingAddress.getBase58());
+        params.put("rewardAddress",rewardAddress.getBase58());
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
-        if(success.equals(cmdResp.getResponseStatus())){
-            System.out.println(cmdResp.getResponseData());
-        }
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -62,7 +58,6 @@ public class AgentTest {
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentCommit", params);
         System.out.println(cmdResp.getResponseData());
     }
-
     @Test
     /**
      * 获取节点列表
@@ -72,16 +67,5 @@ public class AgentTest {
         params.put("chainId",1);
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentList", params);
         System.out.println(cmdResp.getResponseData());
-    }
-
-    @Test
-    public void getRoundInfo() throws Exception{
-        Map<String,Object> params = new HashMap<>();
-        params.put("chainId", chainId);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getRoundInfo", params);
-        System.out.println(cmdResp.getResponseData());
-        if(success.equals(cmdResp.getResponseStatus())){
-            System.out.println(cmdResp.getResponseData());
-        }
     }
 }

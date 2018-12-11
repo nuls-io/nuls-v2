@@ -3,7 +3,7 @@ package io.nuls.chain.service.impl;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.Chain;
+import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.ChainAssetStorage;
@@ -14,9 +14,11 @@ import io.nuls.tools.core.annotation.Service;
 import java.math.BigInteger;
 
 /**
+ * 关于链的所有操作：增删改查
+ * All operations on the chain: Save, delete, update, query
+ *
  * @author tangyi
  * @date 2018/11/8
- * @description
  */
 @Service
 public class ChainServiceImpl implements ChainService {
@@ -31,27 +33,29 @@ public class ChainServiceImpl implements ChainService {
     private AssetService assetService;
 
     /**
-     * init chain
+     * 把Nuls2.0主网默认注册到Nuls2.0上（Nuls2.0主网可以认为是Nuls2.0生态的第一条友链）
+     * Register the Nuls2.0 main network to Nuls2.0 by default (Nuls2.0 main network can be considered as the first friend chain of Nurs2.0 ecosystem)
      *
-     * @return true/false
+     * @throws Exception Any error will throw an exception
      */
     @Override
-    public boolean initChain() {
+    public void initChain() throws Exception {
         int chainId = Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
-        Chain chain = getChain(chainId);
-        if(null == chain){
-            chain = new Chain();
+        BlockChain chain = getChain(chainId);
+        if (null == chain) {
+            chain = new BlockChain();
         }
         chain.setName(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_NAME));
         int assetId = Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID));
         chain.setRegAssetId(assetId);
-        chain.getAssetIds().clear();
-        chain.addCreateAssetId(assetId);
-        chain.getAssetsKey().clear();
-        chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId,assetId));
-        chainStorage.save(chainId,chain);
-        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId,assetId));
-        if(null == asset){
+        chain.getSelfAssetKeyList().clear();
+        chain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
+        chain.getTotalAssetKeyList().clear();
+        chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
+        chainStorage.save(chainId, chain);
+
+        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
+        if (null == asset) {
             asset = new Asset();
         }
         asset.setChainId(chainId);
@@ -60,53 +64,54 @@ public class ChainServiceImpl implements ChainService {
         asset.setSymbol(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_SYMBOL));
         asset.addChainId(chainId);
         assetService.createAsset(asset);
-        return true;
     }
 
     /**
+     * 保存链信息
      * Save chain
      *
-     * @param chain Chain object that needs to be saved
-     * @return true/false
+     * @param blockChain The BlockChain saved
+     * @throws Exception Any error will throw an exception
      */
     @Override
-    public boolean saveChain(Chain chain) {
-        return chainStorage.save(chain.getChainId(), chain);
+    public void saveChain(BlockChain blockChain) throws Exception {
+        chainStorage.save(blockChain.getChainId(), blockChain);
     }
 
     /**
-     * updateChain
+     * 更新链信息
+     * Update chain
      *
-     * @param chain
-     * @return
+     * @param blockChain The BlockChain updated
+     * @throws Exception Any error will throw an exception
      */
     @Override
-    public  boolean updateChain(Chain chain){
-        return chainStorage.update(chain.getChainId(), chain);
+    public void updateChain(BlockChain blockChain) throws Exception {
+        chainStorage.update(blockChain.getChainId(), blockChain);
     }
 
     /**
-     * delChain
+     * 删除链信息
+     * Delete chain
      *
-     * @param chain
-     * @return
+     * @param blockChain The BlockChain deleted
+     * @throws Exception Any error will throw an exception
      */
     @Override
-    public  boolean delChain(Chain chain){
-        return chainStorage.delete(chain.getChainId());
+    public void delChain(BlockChain blockChain) throws Exception {
+        chainStorage.delete(blockChain.getChainId());
     }
 
     /**
-     * Find chain based on key
+     * 根据序号获取链
+     * Get the chain according to the ID
      *
-     * @param chainId The chain ID
-     * @return Chain
+     * @param chainId Chain ID
+     * @return BlockChain
+     * @throws Exception Any error will throw an exception
      */
     @Override
-    public Chain getChain(int chainId) {
-        Chain chain = chainStorage.load(chainId);
-        return chain;
+    public BlockChain getChain(int chainId) throws Exception {
+        return chainStorage.load(chainId);
     }
-
-
 }

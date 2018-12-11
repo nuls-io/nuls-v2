@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.utils;
+package io.nuls.block.utils.module;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;

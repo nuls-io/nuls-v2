@@ -3,7 +3,7 @@ package io.nuls.chain.test;
 
 import io.nuls.chain.ChainBootstrap;
 import io.nuls.chain.info.CmConstants;
-import io.nuls.chain.model.dto.Chain;
+import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.model.dto.Seed;
 import io.nuls.tools.thread.TimeService;
 import org.junit.Before;
@@ -36,23 +36,23 @@ public class ChainCmdTest {
 
     @Test
     public void chainRegValidator() throws Exception {
-        Chain chain = new Chain();
-        chain.setChainId((short) -5);
-        chain.setAddressType(CmConstants.ADDRESS_TYPE_NULS);
+        BlockChain blockChain = new BlockChain();
+        blockChain.setChainId((short) -5);
+        blockChain.setAddressType(CmConstants.ADDRESS_TYPE_NULS);
 //        System.out.println(CmdDispatcher.call("chainRegValidator", new Object[]{chain}, 1.0));
     }
 
     @Test
     public void chainRegCommit() throws Exception {
-        Chain chain = new Chain();
-        chain.setChainId((short) 867);
-        chain.setName("ilovess");
-        chain.setAddressType(CmConstants.ADDRESS_TYPE_NULS);
-        chain.setMagicNumber(19870921);
-        chain.setSupportInflowAsset(false);
-        chain.setSingleNodeMinConnectionNum(6);
-        chain.setMinAvailableNodeNum(66);
-        chain.setTxConfirmedBlockNum(9);
+        BlockChain blockChain = new BlockChain();
+        blockChain.setChainId((short) 867);
+        blockChain.setName("ilovess");
+        blockChain.setAddressType(CmConstants.ADDRESS_TYPE_NULS);
+        blockChain.setMagicNumber(19870921);
+        blockChain.setSupportInflowAsset(false);
+        blockChain.setSingleNodeMinConnectionNum(6);
+        blockChain.setMinAvailableNodeNum(66);
+        blockChain.setTxConfirmedBlockNum(9);
         List<Seed> seedList = new ArrayList<>();
         Seed seed1 = new Seed();
         seed1.setIp("1.1.2.2");
@@ -62,8 +62,8 @@ public class ChainCmdTest {
         seed2.setIp("3.3.4.4");
         seed2.setPort(3344);
         seedList.add(seed2);
-        chain.setDelete(false);
-        chain.setCreateTime(TimeService.currentTimeMillis());
+        blockChain.setDelete(false);
+        blockChain.setCreateTime(TimeService.currentTimeMillis());
 //        System.out.println(CmdDispatcher.call("chainRegCommit", new Object[]{chain}, 1.0));
     }
 

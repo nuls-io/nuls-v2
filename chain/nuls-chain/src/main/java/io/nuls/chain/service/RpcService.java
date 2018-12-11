@@ -26,10 +26,7 @@ package io.nuls.chain.service;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.dto.AccountBalance;
-import io.nuls.chain.model.dto.Chain;
-import io.nuls.rpc.model.message.Response;
-
-import java.util.Map;
+import io.nuls.chain.model.dto.BlockChain;
 
 /**
  * 调用外部接口
@@ -50,9 +47,9 @@ public interface RpcService {
 
     boolean newTx(Transaction tx);
 
-    boolean createCrossGroup(Chain chain);
+    boolean createCrossGroup(BlockChain blockChain);
 
-    boolean destroyCrossGroup(Chain chain);
+    boolean destroyCrossGroup(BlockChain blockChain);
 
 
     /**
