@@ -68,7 +68,7 @@ public class TxUnverifiedProcessTask implements Runnable {
         try {
             Transaction tx = txWrapper.getTx();
             int chainId = txWrapper.getChainId();
-            Result result = transactionManager.verify(tx);
+            Result result = transactionManager.verify(txWrapper.getChainId(), tx);
             //todo 跨链交易单独处理？
             if (result.isFailed()) {
                 return false;
@@ -100,6 +100,7 @@ public class TxUnverifiedProcessTask implements Runnable {
     private void doOrphanTxTask(){
         //todo
         //时间排序TransactionTimeComparator
+
         Iterator<TxWrapper> it = orphanTxList.iterator();
         while (it.hasNext()) {
             TxWrapper tx = it.next();

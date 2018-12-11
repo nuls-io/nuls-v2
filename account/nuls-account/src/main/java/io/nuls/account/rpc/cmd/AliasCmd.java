@@ -1,6 +1,5 @@
 package io.nuls.account.rpc.cmd;
 
-import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.tx.txdata.Alias;
@@ -13,7 +12,6 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
@@ -315,7 +313,7 @@ public class AliasCmd extends BaseCmd {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
         Log.debug("ac_aliasTxCommit end");
-        return success(result);
+        return success(resultMap);
     }
 
     /**
@@ -357,7 +355,7 @@ public class AliasCmd extends BaseCmd {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
         Log.debug("ac_aliasTxRollback end");
-        return success(result);
+        return success(resultMap);
     }
 
 }

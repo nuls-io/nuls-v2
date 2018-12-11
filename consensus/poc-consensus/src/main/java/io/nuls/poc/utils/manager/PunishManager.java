@@ -361,7 +361,7 @@ public class PunishManager {
      * @param round     Local latest rounds information/本地最新轮次信息
      * @return  Transaction
      */
-    private Transaction createYellowPunishTx(BlockHeader preBlock, MeetingMember self, MeetingRound round) throws NulsException, IOException {
+    public Transaction createYellowPunishTx(BlockHeader preBlock, MeetingMember self, MeetingRound round) throws IOException {
         BlockExtendsData preBlockRoundData = new BlockExtendsData(preBlock.getExtend());
         /*
         如果本节点当前打包轮次比本地最新区块的轮次大一轮以上则返回不生成黄牌交易

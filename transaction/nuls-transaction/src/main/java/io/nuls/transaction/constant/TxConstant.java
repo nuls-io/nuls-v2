@@ -53,6 +53,10 @@ public interface TxConstant {
 
     int ORPHAN_CONTAINER_MAX_SIZE = 200000;
 
+
+    int TX_TYPE_COINBASE = 1;
+    int TX_TYPE_REDPUNISH = 8;
+
     /**
      * 跨链交易
      */

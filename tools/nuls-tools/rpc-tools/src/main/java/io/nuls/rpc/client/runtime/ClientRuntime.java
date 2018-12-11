@@ -49,7 +49,7 @@ public class ClientRuntime {
      * Key: 角色，Value：角色的连接信息
      * Key: role, Value: Connection information of the role
      */
-    public static ConcurrentMap<String, Map> roleMap = new ConcurrentHashMap<>();
+    public static Map<String, Map> roleMap = new ConcurrentHashMap<>();
 
     /**
      * 从服务端得到的握手确认
@@ -170,7 +170,7 @@ public class ClientRuntime {
             wsClient.connect();
             long start = TimeService.currentTimeMillis();
             while (!wsClient.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                if (TimeService.currentTimeMillis() - start > Constants.TIMEOUT_TIMEMILLIS) {
+                if (TimeService.currentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
                     throw new Exception("Failed to connect " + url);
                 }
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);

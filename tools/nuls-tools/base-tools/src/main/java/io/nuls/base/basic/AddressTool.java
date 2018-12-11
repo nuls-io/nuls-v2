@@ -327,11 +327,10 @@ public class AddressTool {
         return true;
     }
 
-    public static boolean isPay2ScriptHashAddress(byte[] addr) {
+    public static boolean isMultiSignAddress(byte[] addr) {
         if (addr != null && addr.length > 3) {
             return addr[2] == BaseConstant.P2SH_ADDRESS_TYPE;
         }
-
         return false;
     }
 

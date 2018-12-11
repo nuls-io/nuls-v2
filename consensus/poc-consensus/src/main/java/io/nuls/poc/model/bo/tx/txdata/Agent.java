@@ -112,7 +112,7 @@ public class Agent extends TransactionLogicData {
      *  总委托金额
      *Total amount entrusted
      * */
-    private transient BigInteger totalDeposit;
+    private transient BigInteger totalDeposit = BigInteger.ZERO;
 
     /**
      * 交易HASH

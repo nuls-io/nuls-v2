@@ -1,5 +1,6 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
@@ -16,8 +17,10 @@ import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -358,7 +361,10 @@ public class RoundManager {
         round.setStartTime(startTime);
         setMemberList(chain,round, startBlockHeader);
         //todo 调用账户管理模块获取本地非加密账户地址列表
-        round.calcLocalPacker(new ArrayList<>());
+        List<byte[]> packingAddressList = new ArrayList<>();
+        Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
+        packingAddressList.add(packingAddress.getAddressBytes());
+        round.calcLocalPacker(packingAddressList);
         Log.debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
     }
@@ -404,11 +410,14 @@ public class RoundManager {
             Get the node delegation information for calculating the total amount of the node delegation
             */
             List<Deposit> cdList = getDepositListByAgentId(chain,agent.getTxHash(), startBlockHeader.getHeight());
+            BigInteger totalDeposit = BigInteger.ZERO;
             for (Deposit dtx : cdList) {
-                agent.setTotalDeposit(agent.getTotalDeposit().add(dtx.getDeposit()));
+                totalDeposit = totalDeposit.add(dtx.getDeposit());
             }
+            agent.setTotalDeposit(totalDeposit);
             member.setDepositList(cdList);
             member.setRoundIndex(round.getIndex());
+            member.setAgent(agent);
             /*
             节点总的委托金额是否达到出块节点的最小值
             Does the total delegation amount of the node reach the minimum value of the block node?
@@ -416,7 +425,6 @@ public class RoundManager {
             boolean isItIn = agent.getTotalDeposit().compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT) >= 0 ? true : false;
             if (isItIn) {
                 agent.setCreditVal(calcCreditVal(chain,member, startBlockHeader));
-                member.setAgent(agent);
                 memberList.add(member);
             }
         }

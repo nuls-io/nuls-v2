@@ -1,6 +1,7 @@
 package io.nuls.chain.test;
 
 import io.nuls.chain.model.dto.Asset;
+import io.nuls.chain.model.tx.BlockChainTxType;
 import io.nuls.chain.storage.impl.SeqStorageImpl;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.thread.TimeService;
@@ -18,6 +19,9 @@ public class AssetCmdTest {
 
     @Test
     public void mapSpeed() throws Exception {
+
+        BlockChainTxType.valueOf(1);
+
         RocksDBService.init("../data");
         if (!RocksDBService.existTable("seq")) {
             RocksDBService.createTable("seq");

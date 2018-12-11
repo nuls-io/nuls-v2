@@ -1,7 +1,7 @@
 package io.nuls.chain.storage;
 
 
-import io.nuls.chain.model.dto.Chain;
+import io.nuls.chain.model.dto.BlockChain;
 
 /**
  * @author tangyi
@@ -17,16 +17,16 @@ public interface ChainStorage {
      * @param chain Chain object that needs to be saved
      * @return true/false
      */
-    boolean save(int key, Chain chain);
+    boolean save(int key, BlockChain chain);
 
     /**
      * Update chain
      *
      * @param key
-     * @param chain
+     * @param blockChain
      * @return
      */
-    boolean update(int key, Chain chain);
+    boolean update(int key, BlockChain blockChain);
 
     /**
      * delete chain
@@ -43,7 +43,7 @@ public interface ChainStorage {
      * @param key The key
      * @return Chain object
      */
-    Chain load(int key);
+    BlockChain load(int key);
 
 
 }

@@ -113,7 +113,7 @@ public class TransactionServiceImplTest {
     }
 
 
-    @Test
+   /* @Test
     public void assemblyCoinFrom() throws NulsException {
         coinFroms = transactionServiceImpl.assemblyCoinFrom(TxConstant.CURRENT_CHAINID,froms);
         Assert.assertTrue(coinFroms.size() > 0);
@@ -131,15 +131,8 @@ public class TransactionServiceImplTest {
         Result result = transactionServiceImpl.validateCoinFrom(TxConstant.CURRENT_CHAINID, coinFroms);
         System.out.println(result.getErrorCode().getCode() + " : " + result.getErrorCode().getMsg());
         Assert.assertTrue(result.isSuccess());
-    }
+    }*/
 
-    @Test
-    public void validateCoinTo() throws NulsException {
-        assemblyCoinTo();
-        Result result = transactionServiceImpl.validateCoinTo(coinTos);
-        System.out.println(result.getErrorCode().getCode() + " : " + result.getErrorCode().getMsg());
-        Assert.assertTrue(result.isSuccess());
-    }
     @Test
     public void newTx() {
     }

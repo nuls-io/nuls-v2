@@ -33,7 +33,6 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
@@ -58,8 +57,6 @@ public class RequestLoopProcessor implements Runnable {
 
                 sendPeriodQueue();
 
-                sendEventCountQueue();
-
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
                 Log.error(e);
@@ -71,17 +68,14 @@ public class RequestLoopProcessor implements Runnable {
      * 发送队列的第一个对象，然后放入队列尾
      * Send the first object of the queue and put it at the end of the queue
      *
-     * @throws IOException JSON解析错误 / JSON parsing error
+     * @throws Exception 抛出任何异常 / Throw any exception
      */
-    private void sendPeriodQueue() throws IOException {
+    private void sendPeriodQueue() throws Exception {
         /*
-        获取队列中的第一个对象，如果是空，舍弃
-        Get the first item of the queue, If it is an empty object, discard
+        获取队列中的第一个对象
+        Get the first item of the queue
          */
-        Object[] objects = ServerRuntime.firstObjArrInRequestPeriodLoopQueue();
-        if (objects == null) {
-            return;
-        }
+        Object[] objects = ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.take();
 
         WebSocket webSocket = (WebSocket) objects[0];
         String msg = (String) objects[1];
@@ -96,38 +90,6 @@ public class RequestLoopProcessor implements Runnable {
         boolean isContinue = CmdHandler.responseWithPeriod(webSocket, message.getMessageId(), request);
         if (isContinue) {
             ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, JSONUtils.obj2json(message)});
-        }
-    }
-
-    /**
-     * 发送队列的第一个对象，然后放入队列尾
-     * Send the first object of the queue and put it at the end of the queue
-     *
-     * @throws IOException JSON解析错误 / JSON parsing error
-     */
-    private void sendEventCountQueue() throws IOException {
-        /*
-        获取队列中的第一个对象，如果是空，舍弃
-        Get the first item of the queue, If it is an empty object, discard
-         */
-        Object[] objects = ServerRuntime.firstObjArrInRequestEventCountLoopQueue();
-        if (objects == null) {
-            return;
-        }
-
-        WebSocket webSocket = (WebSocket) objects[0];
-        String msg = (String) objects[1];
-
-        Message message = JSONUtils.json2pojo(msg, Message.class);
-        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-
-        /*
-        需要继续发送，添加回队列
-        Need to continue sending, add back to queue
-         */
-        boolean isContinue = CmdHandler.responseWithEventCount(webSocket, message.getMessageId(), request);
-        if (isContinue) {
-            ServerRuntime.REQUEST_EVENT_COUNT_LOOP_QUEUE.offer(new Object[]{webSocket, JSONUtils.obj2json(message)});
         }
     }
 }
