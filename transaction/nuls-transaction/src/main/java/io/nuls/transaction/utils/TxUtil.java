@@ -25,6 +25,7 @@
 package io.nuls.transaction.utils;
 
 import io.nuls.base.data.Coin;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.transaction.constant.TxConstant;
 
 import java.math.BigInteger;

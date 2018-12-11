@@ -136,11 +136,11 @@ public class TransactionManager {
      * @return
      */
     public Result verify(int chainId, Transaction tx){
-        //todo 调验证器
+
         baseTxValidate(chainId, tx);
         TxRegister txRegister = this.getTxRegister(tx.getType());
         txRegister.getValidator();
-
+        //todo 调验证器
         return null;
     }
 
