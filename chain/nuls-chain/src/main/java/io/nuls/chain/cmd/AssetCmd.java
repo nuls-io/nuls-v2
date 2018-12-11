@@ -8,7 +8,7 @@ import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.Chain;
+import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.model.tx.AddAssetToChainTransaction;
 import io.nuls.chain.model.tx.DestroyAssetAndChainTransaction;
 import io.nuls.chain.model.tx.RemoveAssetFromChainTransaction;
@@ -124,17 +124,17 @@ public class AssetCmd extends BaseChainCmd {
         if (!ByteUtils.arrayEquals(asset.getAddress(), address)) {
             return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
         }
-        /**
-         * 判断链下是否只有这一个资产了，如果是，则进行带链注销交易
+        /*
+          判断链下是否只有这一个资产了，如果是，则进行带链注销交易
          */
-        Chain dbChain = chainService.getChain(chainId);
+        BlockChain dbChain = chainService.getChain(chainId);
         Transaction transaction = null;
-        if (dbChain.getAssetIds().size() == 1 && dbChain.getAssetIds().get(0) == assetId) {
+        if (dbChain.getSelfAssetKeyList().size() == 1
+                && dbChain.getSelfAssetKeyList().get(0).equals(CmRuntimeInfo.getAssetKey(chainId, asset.getAssetId()))) {
             //带链注销
             transaction = new DestroyAssetAndChainTransaction();
             try {
-                transaction.setTxData(dbChain.parseToTransaction(asset, true));
-
+                transaction.setTxData(dbChain.parseToTransaction(asset));
             } catch (IOException e) {
                 e.printStackTrace();
                 return failed("parseToTransaction fail");
