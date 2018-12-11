@@ -4,46 +4,52 @@ package io.nuls.chain.storage;
 import io.nuls.chain.model.dto.BlockChain;
 
 /**
+ * 关于链的所有操作：增删改查
+ * All operations on the chain: Save, delete, update, query
+ *
  * @author tangyi
  * @date 2018/11/8
- * @description
  */
 public interface ChainStorage {
 
     /**
-     * Save chain
+     * 保存链到数据库
+     * Save BlockChain to database
      *
-     * @param key   The key
-     * @param chain Chain object that needs to be saved
-     * @return true/false
+     * @param key        Chain ID
+     * @param blockChain The BlockChain saved
+     * @throws Exception Any error will throw an exception
      */
-    boolean save(int key, BlockChain chain);
+    void save(int key, BlockChain blockChain) throws Exception;
 
     /**
-     * Update chain
+     * 更新链信息
+     * Update BlockChain
      *
-     * @param key
-     * @param blockChain
-     * @return
+     * @param key        Chain ID
+     * @param blockChain The BlockChain updated
+     * @throws Exception Any error will throw an exception
      */
-    boolean update(int key, BlockChain blockChain);
+    void update(int key, BlockChain blockChain) throws Exception;
 
     /**
-     * delete chain
+     * 从数据库彻底删除链
+     * Delete BlockChain in database
      *
-     * @param key
-     * @return
+     * @param key Chain ID
+     * @throws Exception Any error will throw an exception
      */
-    boolean delete(int key);
+    void delete(int key) throws Exception;
 
 
     /**
-     * Find chain based on key
+     * 根据序号获取链
+     * Get the chain according to the ID
      *
-     * @param key The key
-     * @return Chain object
+     * @param key Chain ID
+     * @return BlockChain
+     * @throws Exception Any error will throw an exception
      */
-    BlockChain load(int key);
-
+    BlockChain load(int key) throws Exception;
 
 }

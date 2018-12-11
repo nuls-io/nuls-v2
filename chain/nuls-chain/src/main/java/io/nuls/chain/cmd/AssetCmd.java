@@ -113,43 +113,44 @@ public class AssetCmd extends BaseChainCmd {
     @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
     @Parameter(parameterName = "address", parameterType = "String")
     public Response assetDisable(Map params) {
-        int chainId = Integer.valueOf(params.get("chainId").toString());
-        int assetId = Integer.valueOf(params.get("assetId").toString());
-        byte[] address = AddressTool.getAddress(params.get("address").toString());
-        //身份的校验，账户地址的校验
-        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
-        if (asset == null) {
-            return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
-        }
-        if (!ByteUtils.arrayEquals(asset.getAddress(), address)) {
-            return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
-        }
-        /*
-          判断链下是否只有这一个资产了，如果是，则进行带链注销交易
-         */
-        BlockChain dbChain = chainService.getChain(chainId);
-        Transaction transaction = null;
-        if (dbChain.getSelfAssetKeyList().size() == 1
-                && dbChain.getSelfAssetKeyList().get(0).equals(CmRuntimeInfo.getAssetKey(chainId, asset.getAssetId()))) {
-            //带链注销
-            transaction = new DestroyAssetAndChainTransaction();
-            try {
-                transaction.setTxData(dbChain.parseToTransaction(asset));
-            } catch (IOException e) {
-                e.printStackTrace();
-                return failed("parseToTransaction fail");
-            }
-        } else {
-            //只走资产注销
-            transaction = new RemoveAssetFromChainTransaction();
-            try {
-                transaction.setTxData(asset.parseToTransaction());
-            } catch (IOException e) {
-                e.printStackTrace();
-                return failed("parseToTransaction fail");
-            }
-        }
         try {
+            int chainId = Integer.valueOf(params.get("chainId").toString());
+            int assetId = Integer.valueOf(params.get("assetId").toString());
+            byte[] address = AddressTool.getAddress(params.get("address").toString());
+            //身份的校验，账户地址的校验
+            Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
+            if (asset == null) {
+                return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
+            }
+            if (!ByteUtils.arrayEquals(asset.getAddress(), address)) {
+                return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
+            }
+            /*
+              判断链下是否只有这一个资产了，如果是，则进行带链注销交易
+             */
+            BlockChain dbChain = chainService.getChain(chainId);
+            Transaction transaction = null;
+            if (dbChain.getSelfAssetKeyList().size() == 1
+                    && dbChain.getSelfAssetKeyList().get(0).equals(CmRuntimeInfo.getAssetKey(chainId, asset.getAssetId()))) {
+                //带链注销
+                transaction = new DestroyAssetAndChainTransaction();
+                try {
+                    transaction.setTxData(dbChain.parseToTransaction(asset));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return failed("parseToTransaction fail");
+                }
+            } else {
+                //只走资产注销
+                transaction = new RemoveAssetFromChainTransaction();
+                try {
+                    transaction.setTxData(asset.parseToTransaction());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return failed("parseToTransaction fail");
+                }
+            }
+
             AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(), asset.getAssetId(), String.valueOf(params.get("address")));
             if (null == accountBalance) {
                 return failed("get  rpc CoinData fail.");
