@@ -69,9 +69,7 @@ public class CmConstants {
     public static final String NULS_ASSET_ID = "nuls_asset_id";
     public static final String NULS_ASSET_MAX = "nuls_asset_initNumber_max";
     public static final String NULS_ASSET_SYMBOL = "nuls_asset_symbol";
-    /**
-     * 远程RPC指令
-     */
+
     /**
      * 交易注册
      */
