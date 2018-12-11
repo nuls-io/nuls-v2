@@ -3,6 +3,7 @@ package io.nuls.chain.model.dto;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.chain.model.tx.txdata.TxAsset;
 import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
@@ -166,6 +167,17 @@ public class Asset extends BaseNulsData {
     }
 
     public Asset(TxChain tx) {
+        this.address = tx.getAddress();
+        this.assetId = tx.getAssetId();
+        this.chainId = tx.getChainId();
+        this.decimalPlaces = tx.getDecimalPlaces();
+        this.depositNuls = tx.getDepositNuls();
+        this.initNumber = tx.getInitNumber();
+        this.symbol = tx.getSymbol();
+        this.name = tx.getName();
+    }
+
+    public Asset(TxAsset tx) {
         this.address = tx.getAddress();
         this.assetId = tx.getAssetId();
         this.chainId = tx.getChainId();

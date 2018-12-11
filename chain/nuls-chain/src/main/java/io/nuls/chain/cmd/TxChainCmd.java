@@ -75,7 +75,7 @@ public class TxChainCmd extends BaseChainCmd {
                 return failed(CmErrorCode.C10001);
             }
             //进行资产存储,资产流通表存储
-            Asset asset = buildAssetTxData(txHex, new RegisterChainAndAssetTransaction());
+            Asset asset = buildAssetWithTxChain(txHex, new RegisterChainAndAssetTransaction());
             asset.addChainId(asset.getChainId());
             assetService.createAsset(asset);
 
