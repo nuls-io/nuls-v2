@@ -54,8 +54,9 @@ public interface ChainService {
      *
      * @param chainId Chain ID
      * @return BlockChain
+     * @throws Exception Any error will throw an exception
      */
-    BlockChain getChain(int chainId);
+    BlockChain getChain(int chainId) throws Exception;
 
 
 }

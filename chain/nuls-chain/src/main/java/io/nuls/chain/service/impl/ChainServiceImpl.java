@@ -74,7 +74,7 @@ public class ChainServiceImpl implements ChainService {
      * @throws Exception Any error will throw an exception
      */
     @Override
-    public void saveChain(BlockChain blockChain) {
+    public void saveChain(BlockChain blockChain) throws Exception {
         chainStorage.save(blockChain.getChainId(), blockChain);
     }
 
@@ -86,7 +86,7 @@ public class ChainServiceImpl implements ChainService {
      * @throws Exception Any error will throw an exception
      */
     @Override
-    public void updateChain(BlockChain blockChain) {
+    public void updateChain(BlockChain blockChain) throws Exception {
         chainStorage.update(blockChain.getChainId(), blockChain);
     }
 
@@ -98,20 +98,20 @@ public class ChainServiceImpl implements ChainService {
      * @throws Exception Any error will throw an exception
      */
     @Override
-    public void delChain(BlockChain blockChain) {
+    public void delChain(BlockChain blockChain) throws Exception {
         chainStorage.delete(blockChain.getChainId());
     }
 
     /**
-     * Find chain based on key
+     * 根据序号获取链
+     * Get the chain according to the ID
      *
-     * @param chainId The chain ID
-     * @return Chain
+     * @param chainId Chain ID
+     * @return BlockChain
+     * @throws Exception Any error will throw an exception
      */
     @Override
-    public BlockChain getChain(int chainId) {
+    public BlockChain getChain(int chainId) throws Exception {
         return chainStorage.load(chainId);
     }
-
-
 }
