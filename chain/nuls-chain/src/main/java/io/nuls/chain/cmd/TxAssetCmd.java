@@ -52,7 +52,7 @@ public class TxAssetCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Asset asset = buildAssetTxData(txHex, new AddAssetToChainTransaction());
+            Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
 
             if (assetService.assetExist(asset)) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
@@ -85,7 +85,7 @@ public class TxAssetCmd extends BaseChainCmd {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Asset asset = buildAssetTxData(txHex, new AddAssetToChainTransaction());
+            Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
 
             //获取链信息
             BlockChain dbChain = chainService.getChain(chainId);
@@ -119,7 +119,7 @@ public class TxAssetCmd extends BaseChainCmd {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Asset asset = buildAssetTxData(txHex, new AddAssetToChainTransaction());
+            Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
             //判断库中的asset是否存在，数据正确，则删除
             Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
             if (!ByteUtils.arrayEquals(asset.getAddress(), dbAsset.getAddress())) {
@@ -155,7 +155,7 @@ public class TxAssetCmd extends BaseChainCmd {
     public Response assetDisableValidator(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset asset = buildAssetTxData(txHex, new AddAssetToChainTransaction());
+        Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
         return assetDisableValidator(asset);
     }
 
@@ -201,7 +201,7 @@ public class TxAssetCmd extends BaseChainCmd {
     public Response assetDisableCommit(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset asset = buildAssetTxData(txHex, new AddAssetToChainTransaction());
+        Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
         Response cmdResponse = assetDisableValidator(asset);
         if (cmdResponse.isSuccess()) {
             return cmdResponse;
@@ -224,7 +224,7 @@ public class TxAssetCmd extends BaseChainCmd {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset asset = buildAssetTxData(txHex, new AddAssetToChainTransaction());
+        Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
         /*判断资产是否可用*/
         Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
         if (null == dbAsset || dbAsset.isAvailable()) {
