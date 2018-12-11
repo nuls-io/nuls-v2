@@ -22,67 +22,21 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.constant;
+package io.nuls.network.rpc.external;
+
+import io.nuls.network.model.dto.BestBlockInfo;
 
 /**
- * 管理器运行状态枚举
- * The manager runs state enumeration.
  *
- * @author  Lan
- */
-public enum ManagerStatusEnum {
-
+ * @description 调用外部区块模块接口
+ * @author lan
+ * @date 2018/12/07
+ **/
+public interface  BlockRpcService {
     /**
-     * 未初始化
-     * uninitialized
+     * 获取区块高度
+     * @param chainId  chainId
+     * @return BestBlockInfo
      */
-    UNINITIALIZED,
-
-    /**
-     * 初始化完成
-     * initialized
-     */
-    INITIALIZED,
-
-    /**
-     * 正在初始化
-     * initializing
-     */
-    INITIALIZING,
-
-    /**
-     * 启动中
-     * starting
-     */
-    STARTING,
-
-    /**
-     * 运行中
-     * running
-     */
-    RUNNING,
-
-    /**
-     * 已停止
-     * stoped
-     */
-    STOPED,
-
-    /**
-     * 正在停止
-     * stopping
-     */
-    STOPPING,
-
-    /**
-     * 运行出现异常
-     * Running exception
-     */
-    EXCEPTION,
-    ;
-
-    @Override
-    public String toString() {
-        return name();
-    }
+    BestBlockInfo getBestBlockHeader(int chainId);
 }

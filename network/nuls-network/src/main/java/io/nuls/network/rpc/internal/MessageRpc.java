@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc;
+package io.nuls.network.rpc.internal;
 
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
@@ -42,10 +42,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @program: nuls2.0
- * @description:
- * @author: lan
- * @create: 2018/11/12
+ * @description 消息远程调用,发送消息调用
+ * @author  lan
+ * @date  2018/11/12
  **/
 public class MessageRpc extends BaseCmd{
     /**
@@ -54,7 +53,7 @@ public class MessageRpc extends BaseCmd{
      */
     @CmdAnnotation(cmd = "nw_broadcast", version = 1.0,
             description = "broadcast message")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]")
     @Parameter(parameterName = "excludeNodes", parameterType = "string")
     @Parameter(parameterName = "messageBody", parameterType = "string")
     @Parameter(parameterName = "command", parameterType = "string")
@@ -95,7 +94,7 @@ public class MessageRpc extends BaseCmd{
      */
     @CmdAnnotation(cmd = "nw_sendPeersMsg", version = 1.0,
             description = "send peer message")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1-65535]")
     @Parameter(parameterName = "nodes", parameterType = "string")
     @Parameter(parameterName = "messageBody", parameterType = "string")
     @Parameter(parameterName = "command", parameterType = "string")

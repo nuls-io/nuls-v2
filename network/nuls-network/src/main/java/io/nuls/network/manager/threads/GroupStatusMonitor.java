@@ -32,11 +32,10 @@ import io.nuls.tools.log.Log;
 import java.util.List;
 
 /**
- * @program: nuls2.0
- * @description: Group event monitor
+ * @description  Group event monitor
  * 判断网络组的连接情况，是否稳定连接
- * @author: lan
- * @create: 2018/11/14
+ * @author lan
+ * @date 2018/11/14
  **/
 public class GroupStatusMonitor  implements Runnable  {
     @Override
@@ -49,11 +48,13 @@ public class GroupStatusMonitor  implements Runnable  {
                     long time = nodeGroup.getLatestHandshakeSuccTime()+ NetworkConstant.NODEGROUP_NET_STABLE_TIME_MILLIONS;
                     if(time < System.currentTimeMillis()){
                         if(NodeGroup.WAIT1 == nodeGroup.getStatus()){
+                            Log.info("ChainId={} NET IS IN INIT",nodeGroup.getChainId());
                             //通知链管理模块
+                            //TODO:
                         }
                         //发布网络状态事件
                         nodeGroup.setStatus(NodeGroup.OK);
-                        Log.info("NODE GROUP STATUS UPDATE TO OK");
+                        Log.info("ChainId={} NET STATUS UPDATE TO OK",nodeGroup.getChainId());
                     }
 
                 }
@@ -61,7 +62,7 @@ public class GroupStatusMonitor  implements Runnable  {
                 if(!nodeGroup.isActive()){
                     //发布网络状态事件
                     nodeGroup.setStatus(NodeGroup.WAIT2);
-                    Log.info("NODE GROUP STATUS UPDATE TO WAIT2");
+                    Log.info("ChainId={} NET STATUS UPDATE TO WAITING",nodeGroup.getChainId());
                 }
             }
         }

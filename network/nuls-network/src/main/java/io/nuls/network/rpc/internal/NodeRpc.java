@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc;
+package io.nuls.network.rpc.internal;
 
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.NodeGroupManager;
@@ -44,16 +44,16 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @program: nuls2.0
- * @description: node rpc
- * @author: lan
- * @create: 2018/11/09
+ * @description  Open peer connection remote call node rpc
+ * 开放 peer 连接的远程调用 node rpc
+ * @author  lan
+ * @create  2018/11/09
  **/
 public class NodeRpc extends BaseCmd {
-    NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
-    static  final int STATE_ALL = 0;
-    static  final int STATE_CONNECT = 1;
-    static  final int STATE_DIS_CONNECT = 2;
+    private NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
+    private static  final int STATE_ALL = 0;
+    private  static  final int STATE_CONNECT = 1;
+    private  static  final int STATE_DIS_CONNECT = 2;
 
     /**
      * nw_addNodes
@@ -61,8 +61,8 @@ public class NodeRpc extends BaseCmd {
      */
     @CmdAnnotation(cmd = "nw_addNodes", version = 1.0,
             description = "addNodes")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "isCross", parameterType = "int", parameterValidRange = "[0,1]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "isCross", parameterType = "int", parameterValidRange = "[0,1]")
     @Parameter(parameterName = "nodes", parameterType = "String")
     public Response addNodes(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
@@ -95,7 +95,7 @@ public class NodeRpc extends BaseCmd {
      * 删除节点
      */
     @CmdAnnotation(cmd = "nw_delNodes", version = 1.0,description = "delNodes")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "nodes", parameterType = "String")
     public Response delNodes(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
@@ -127,11 +127,11 @@ public class NodeRpc extends BaseCmd {
         return success( );
     }
     @CmdAnnotation(cmd = "nw_getNodes", version = 1.0,description = "getNodes")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "state", parameterType = "int", parameterValidRange = "[0,2]", parameterValidRegExp = "")
-    @Parameter(parameterName = "isCross", parameterType = "int", parameterValidRange = "[0,1]", parameterValidRegExp = "")
-    @Parameter(parameterName = "startPage", parameterType = "int", parameterValidRange = "[0,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "pageSize", parameterType = "int", parameterValidRange = "[0,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "state", parameterType = "int", parameterValidRange = "[0,2]")
+    @Parameter(parameterName = "isCross", parameterType = "int", parameterValidRange = "[0,1]")
+    @Parameter(parameterName = "startPage", parameterType = "int", parameterValidRange = "[0,65535]")
+    @Parameter(parameterName = "pageSize", parameterType = "int", parameterValidRange = "[0,65535]")
     public Response getNodes(Map params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         int state = Integer.valueOf(String.valueOf(params.get("state")));
@@ -201,7 +201,7 @@ public class NodeRpc extends BaseCmd {
      * 更新区块高度与hash
      */
     @CmdAnnotation(cmd = "nw_updateNodeInfo", version = 1.0,description = "updateNodeInfo")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "nodeId", parameterType = "String")
     @Parameter(parameterName = "blockHeight", parameterType = "long")
     @Parameter(parameterName = "blockHash", parameterType = "String")

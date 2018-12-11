@@ -52,7 +52,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public class ConnectionManager extends BaseManager{
-    TaskManager taskManager = TaskManager.getInstance();
+    private TaskManager taskManager = TaskManager.getInstance();
     private static ConnectionManager instance = new ConnectionManager();
     /**
      *作为Server 被动连接的peer
@@ -79,8 +79,8 @@ public class ConnectionManager extends BaseManager{
      * Key:ip+"_"+magicNumber  value: connectNumber
      */
     private  Map<String, Integer> cacheConnectGroupIpInMap=new ConcurrentHashMap<>();
-    StorageManager storageManager = StorageManager.getInstance();
-    LocalInfoManager localInfoManager = LocalInfoManager.getInstance();
+    private StorageManager storageManager = StorageManager.getInstance();
+    private LocalInfoManager localInfoManager = LocalInfoManager.getInstance();
     private ManagerStatusEnum status=ManagerStatusEnum.UNINITIALIZED;
 
     public  boolean  isRunning(){
@@ -89,9 +89,9 @@ public class ConnectionManager extends BaseManager{
 
     /**
      * 加载种子节点
-     * @param magicNumber
+     *loadSeedsNode
      */
-    public void loadSeedsNode(long magicNumber){
+    private void loadSeedsNode(){
         NetworkParam networkParam=NetworkParam.getInstance();
         List<String> list=networkParam.getSeedIpList();
         NodeGroup nodeGroup= NodeGroupManager.getInstance().getNodeGroupByMagic(networkParam.getPacketMagic());
@@ -111,9 +111,7 @@ public class ConnectionManager extends BaseManager{
         String nodeId = remoteIP+NetworkConstant.COLON+port;
         Node node = ConnectionManager.getInstance().getNodeByCache(nodeId);
         if(null != node){
-            if(null != node.getNodeGroupConnectors() && node.getNodeGroupConnectors().size() > 1){
-                return false;
-            }
+            return null == node.getNodeGroupConnectors() || node.getNodeGroupConnectors().size() <= 1;
         }
         return true;
     }
@@ -121,13 +119,13 @@ public class ConnectionManager extends BaseManager{
     /**
      * 在物理连接断开时时候进行调用
      * Called when the physical connection is broken
-     * @param nodeKey
-     * @param nodeType
+     * @param nodeKey node id
+     * @param nodeType connection in or out
      */
     public void removeCacheConnectNodeMap(String nodeKey,int nodeType){
         Lockers.NODE_ESTABLISH_CONNECT_LOCK.lock();
         try {
-            Node node = null;
+            Node node;
             if (Node.OUT == nodeType) {
                 node = cacheConnectNodeOutMap.get(nodeKey);
                 cacheConnectNodeOutMap.remove(nodeKey);
@@ -150,9 +148,9 @@ public class ConnectionManager extends BaseManager{
     /**
      * 通过连接类型来获取peer连接信息
      * Get peer connection information by connection type
-     * @param nodeId
-     * @param nodeType
-     * @return
+     * @param nodeId node id
+     * @param nodeType connection in or out
+     * @return node
      */
     public Node getNodeByCache(String nodeId,int nodeType)
     {
@@ -167,10 +165,10 @@ public class ConnectionManager extends BaseManager{
      * 通过nodeId来获取peer连接信息，从主动与被动连接缓存中查找
      *Get peer connection information through nodeId,
      * find from active and passive connection cache
-     * @param nodeId
-     * @return
+     * @param nodeId peer node id
+     * @return node
      */
-    public Node getNodeByCache(String nodeId)
+    private Node getNodeByCache(String nodeId)
     {
         if(null != cacheConnectNodeOutMap.get(nodeId)){
             return cacheConnectNodeOutMap.get(nodeId);
@@ -202,27 +200,28 @@ public class ConnectionManager extends BaseManager{
         return true;
     }
 
-    public boolean addGroupMaxInIp(Node node,long magicNum){
+    /**
+     *
+     * @param node peer connection
+     * @param magicNum net id
+     *
+     */
+    public void addGroupMaxInIp(Node node,long magicNum){
         String ip=node.getId().split(NetworkConstant.COLON)[0];
         String key=ip+"_"+magicNum;
-        if(null != cacheConnectGroupIpInMap.get(key)){
-            cacheConnectGroupIpInMap.put(key,cacheConnectGroupIpInMap.get(key)+1);
-        }else{
-            cacheConnectGroupIpInMap.put(key,1);
-        }
-        return true;
+        cacheConnectGroupIpInMap.merge(key, 1, (a, b) -> a + b);
     }
 
     /**
      * 减少链接入地址
      * sub chain max Ip
-     * @param node
-     * @param magicNum
-     * @param isAll
+     * @param node peer node
+     * @param magicNum net id
+     * @param isAll  if true remove all in client,if false remove single
      */
     public void subGroupMaxInIp (Node node,long magicNum,boolean isAll){
         String ip=node.getId().split(NetworkConstant.COLON)[0];
-        String key=ip+"_"+magicNum;
+        String key=ip+NetworkConstant.DOWN_LINE+magicNum;
         if(isAll){
             cacheConnectGroupIpInMap.remove(key);
             return;
@@ -238,46 +237,41 @@ public class ConnectionManager extends BaseManager{
     public boolean isPeerConnectExceedMaxIn(String peerIp,long macgicNumber,int maxInSameIp){
         String key = peerIp+"_"+macgicNumber;
         if(null != cacheConnectGroupIpInMap.get(key)) {
-           if(cacheConnectGroupIpInMap.get(key)>= maxInSameIp){
-               return true;
-           }else{
-               return false;
-            }
+            return cacheConnectGroupIpInMap.get(key) >= maxInSameIp;
         }else{
             return false;
         }
     }
 
-
-    public void nettyBoot(){
+    /**
+     * netty boot
+     */
+    private void nettyBoot(){
         serverStart();
         clientStart();
         Log.info("==========================NettyBoot");
     }
 
+    /**
+     * server start
+     */
     private void serverStart(){
         NettyServer server=new NettyServer(NetworkParam.getInstance().getPort());
         NettyServer serverCross=new NettyServer(NetworkParam.getInstance().getCrossPort());
         server.init();
         serverCross.init();
-        ThreadUtils.createAndRunThread("node server start", new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    server.start();
-                } catch (InterruptedException e) {
-                    Log.error(e);
-                }
+        ThreadUtils.createAndRunThread("node server start", ()-> {
+            try {
+                server.start();
+            } catch (InterruptedException e) {
+                Log.error(e);
             }
         }, false);
-        ThreadUtils.createAndRunThread("node crossServer start", new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    serverCross.start();
-                } catch (InterruptedException e) {
-                    Log.error(e);
-                }
+        ThreadUtils.createAndRunThread("node crossServer start", ()-> {
+            try {
+                serverCross.start();
+            } catch (InterruptedException e) {
+                Log.error(e);
             }
         }, false);
 
@@ -289,7 +283,7 @@ public class ConnectionManager extends BaseManager{
 
     /**
      * connect peer
-     * @param node
+     * @param node node
      */
     public  void connectionNode(Node node) {
         //发起连接
@@ -303,7 +297,10 @@ public class ConnectionManager extends BaseManager{
             Lockers.NODE_LAUNCH_CONNECT_LOCK.unlock();
         }
     }
-    //自我连接
+    /**
+     * 自我连接
+     * selfConnection
+     */
     public void selfConnection(){
         if(LocalInfoManager.getInstance().isConnectedMySelf()){
             return;
@@ -324,7 +321,7 @@ public class ConnectionManager extends BaseManager{
         for(NodeGroup nodeGroup:nodeGroups){
             if(nodeGroup.isSelf()){
                 //自有网络组，增加种子节点的加载，跨链网络组，则无此步骤
-                loadSeedsNode(nodeGroup.getMagicNumber());
+                loadSeedsNode();
             }
             //数据库获取node
             List<Node> nodes=storageManager.getNodesByChainId(nodeGroup.getChainId());

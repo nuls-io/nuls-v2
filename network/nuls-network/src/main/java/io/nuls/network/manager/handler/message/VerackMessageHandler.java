@@ -39,14 +39,12 @@ import io.nuls.network.model.message.body.VerackMessageBody;
 import io.nuls.tools.log.Log;
 
 /**
- * verack message handler
+ * version ack message handler
  * @author lan
  * @date 2018/10/20
  */
 public class VerackMessageHandler extends BaseMessageHandler {
-
     private static VerackMessageHandler instance = new VerackMessageHandler();
-    NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
     private VerackMessageHandler() {
 
     }
@@ -58,38 +56,59 @@ public class VerackMessageHandler extends BaseMessageHandler {
      *
      * 接收消息处理
      * Receive message processing
-     * @param message
-     * @param nodeKey
-     * @param isServer
-     * @return
+     * @param message   address message
+     * @param nodeKey      peer node key
+     * @param isServer client=false or server=true
+     * @return NetworkEventResult
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
         long magicNumber = message.getHeader().getMagicNumber();
-//        Node node  = nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber()).getDisConnectNodeMap().get(nodeKey);
         Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
         if(isServer){
-            //server端能收到verack消息,接收消息并将连接状态跃迁为握手完成
-            Log.debug("VerackMessageHandler Recieve:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+            /*
+             *server端能收到verack消息,接收消息并将连接状态跃迁为握手完成
+             *The server can receive the verack message, receive the message and transition the connection state to the handshake.
+             */
+            Log.debug("VerackMessageHandler Recieve:{}-{}",node.getIp()+":"+node.getRemotePort(),message.getHeader().getCommandStr());
             nodeGroup.addConnetNode(node,true);
-            //握手完成状态
+            /*
+             *更新连接为握手完成状态
+             *Update connection to handshake completion status
+             */
             node.getNodeGroupConnector(message.getHeader().getMagicNumber()).setStatus(NodeGroupConnector.HANDSHAKE);
         }else{
-            //client 端收到verack消息，判断ack状态
+            /*
+             *client 端收到verack消息，判断ack状态,如果是对方连接数过大，则移除连接，并且CONNECT_FAIL_LOCK_MINUTE 分钟内不需要再次连接
+             *The client receives the verack message and determines the ack status. If the number of connections is too large,
+              *  the connection is removed and the connection does not need to be reconnected within CONNECT_FAIL_LOCK_MINUTE minutes.
+             */
             VerackMessage verackMessage = (VerackMessage)message;
             if(VerackMessageBody.VER_CONNECT_MAX == verackMessage.getMsgBody().getAckCode()){
                 node.removeGroupConnector(magicNumber);
                 nodeGroup.addFailConnect(node.getId(),NetworkConstant.CONNECT_FAIL_LOCK_MINUTE);
+                /*
+                 * 如果连接只承载一条链的业务，则将链断开
+                 *If the connection only carries a chain of services, then disconnect the chain
+                 */
                 if(node.getNodeGroupConnectors().size() == 0){
                     node.getChannel().close();
-                    return new NetworkEventResult(true, null);
+                    return   NetworkEventResult.getResultSuccess();
                 }
             }
         }
-        return new NetworkEventResult(true, null);
+        return NetworkEventResult.getResultSuccess();
     }
-
+    /**
+     *
+     * VerackMessageHandler sending a message
+     * @param message   address message
+     * @param node      peer info
+     * @param isServer client=false or server=true
+     * @param asyn  default true
+     * @return NetworkEventResult
+     */
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
         Log.debug("VerackMessageHandler send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());

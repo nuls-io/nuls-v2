@@ -22,27 +22,42 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager.threads;
+package io.nuls.network.rpc.external.impl;
 
-import io.nuls.rpc.server.WsServer;
+import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.model.dto.BestBlockInfo;
+import io.nuls.network.rpc.external.BlockRpcService;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.core.annotation.Service;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * @program: nuls2
- * @description:
- * @author: lan
- * @create: 2018/11/14
+ *
+ * @description
+ * @author lan
+ * @date 2018/12/07
  **/
-public class KernelThreadTest  implements Runnable  {
-    static WsServer s = new WsServer(8887);
+@Service
+public class BlockRpcServiceImpl implements BlockRpcService {
     @Override
-    public void run() {
+    public BestBlockInfo getBestBlockHeader(int chainId) {
+        BestBlockInfo bestBlockInfo = new BestBlockInfo();
+        Map<String,Object> map = new HashMap<>();
+        map.put("chainId",chainId);
         try {
-//            s.init("kernel", null, "io.nuls.rpc.cmd.kernel");
-//            s.start();
-//            CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+            Response response =  CmdDispatcher.requestAndResponse(NetworkConstant.MODULE_ROLE, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER,map );
+            if(response.isSuccess()){
+                Map responseData = (Map)response.getResponseData();
+                bestBlockInfo.setHash(String.valueOf(responseData.get("hash")));
+                bestBlockInfo.setBlockHeight(Long.valueOf(responseData.get("height").toString()));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        return bestBlockInfo;
     }
 }

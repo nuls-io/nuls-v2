@@ -33,26 +33,29 @@ import io.nuls.network.model.message.base.BaseMessage;
 
 import java.util.HashMap;
 import java.util.Map;
+
 /**
- *  message handler factory
+ * 映射 message 与 message handler 的关系
+ * message handler factory
+ * Map the relationship between message and message handler
  * @author lan
  * @date 2018/10/15
  *
  */
-public class NetworkMessageHandlerFactory {
+public class MessageHandlerFactory {
 
     private Map<String, BaseMeesageHandlerInf> handlerMap = new HashMap<>();
 
-    private static NetworkMessageHandlerFactory INSTANCE = new NetworkMessageHandlerFactory();
+    private static MessageHandlerFactory INSTANCE = new MessageHandlerFactory();
 
-    public static NetworkMessageHandlerFactory getInstance() {
+    public static MessageHandlerFactory getInstance() {
         return INSTANCE;
     }
 
     /**
      * add handlerMap in Constructor
      */
-    private NetworkMessageHandlerFactory() {
+    private MessageHandlerFactory() {
         handlerMap.put(VersionMessage.class.getName(),VersionMessageHandler.getInstance());
         handlerMap.put(VerackMessage.class.getName(),VerackMessageHandler.getInstance());
         handlerMap.put(GetAddrMessage.class.getName(),GetAddrMessageHandler.getInstance());
@@ -64,9 +67,5 @@ public class NetworkMessageHandlerFactory {
 
     public BaseMeesageHandlerInf getHandler(BaseMessage message) {
         return handlerMap.get(message.getClass().getName());
-    }
-
-    public BaseMeesageHandlerInf getHandler(String handlerKey) {
-        return handlerMap.get(handlerKey);
     }
 }
