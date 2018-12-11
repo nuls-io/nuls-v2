@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -55,7 +55,7 @@ public class AccountStateServiceImpl implements AccountStateService {
         if (isExist(address, chainId, assetId)) {
             return getAccountState(address, chainId, assetId);
         }
-        Long initialNonce = BigInteger.ZERO.longValue();
+        String initialNonce = BigInteger.ZERO.toString();
         AccountState state = new AccountState(chainId, assetId, initialNonce, BigInteger.ZERO);
         byte[] key = this.getKey(address, chainId, assetId);
         repository.putAccountState(key, state);
@@ -92,16 +92,7 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     @Override
-    public synchronized long increaseNonce(String address, int chainId, int assetId) {
-        AccountState accountState = getAccountState(address, chainId, assetId);
-        accountState = accountState.withIncrementedNonce();
-        byte[] key = this.getKey(address, chainId, assetId);
-        repository.putAccountState(key, accountState);
-        return accountState.getNonce();
-    }
-
-    @Override
-    public synchronized long setNonce(String address, int chainId, int assetId, long nonce) {
+    public synchronized String setNonce(String address, int chainId, int assetId, String nonce) {
         AccountState accountState = getAccountState(address, chainId, assetId);
         accountState = accountState.withNonce(nonce);
         byte[] key = this.getKey(address, chainId, assetId);
@@ -110,7 +101,7 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     @Override
-    public synchronized long getNonce(String address, int chainId, int assetId) {
+    public synchronized String getNonce(String address, int chainId, int assetId) {
         AccountState accountState = getAccountState(address, chainId, assetId);
         return accountState.getNonce();
     }
@@ -151,7 +142,7 @@ public class AccountStateServiceImpl implements AccountStateService {
     }
 
     @Override
-    public BigInteger freezeByHeight(String address, int chainId, int assetId, String txHash, BigInteger amount, long height) {
+    public BigInteger freezeByHeight(String address, int chainId, int assetId, String txHash, BigInteger amount, BigInteger height) {
         AccountState accountState = getAccountState(address, chainId, assetId);
         FreezeHeightState state = new FreezeHeightState();
 
@@ -176,12 +167,12 @@ public class AccountStateServiceImpl implements AccountStateService {
      * @return
      */
     @Override
-    public BigInteger unfreezeByHeight(String address, int chainId, int assetId, long latestHeight) {
+    public BigInteger unfreezeByHeight(String address, int chainId, int assetId, BigInteger latestHeight) {
         AccountState accountState = getAccountState(address, chainId, assetId);
         // 判断高度是否大于区块的最新高度
         List<FreezeHeightState> freezeStates = accountState.getFreezeState().getFreezeHeightStates();
         for (FreezeHeightState state : freezeStates) {
-            if (state.getHeight() < latestHeight) {
+            if (state.getHeight().compareTo(latestHeight) < -1) {
                 // 增加用户可用余额
                 accountState = accountState.withBalanceIncrement(state.getAmount());
                 byte[] key = this.getKey(address, chainId, assetId);
