@@ -1,11 +1,14 @@
 package io.nuls.account.rpc.cmd;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
+import io.nuls.account.util.annotation.ResisterTx;
+import io.nuls.account.util.annotation.TxMethodType;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -49,7 +52,7 @@ public class AliasCmd extends BaseCmd {
             Log.debug("ac_setAlias start,params size:{}", params == null ? 0 : params.size());
         }
         int chainId;
-        String address,password,alias,txHash = null;
+        String address, password, alias, txHash = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
@@ -63,7 +66,7 @@ public class AliasCmd extends BaseCmd {
             address = (String) addressObj;
             password = (String) passwordObj;
             alias = (String) aliasObj;
-            Transaction transaction = aliasService.setAlias(chainId,address,password,alias);
+            Transaction transaction = aliasService.setAlias(chainId, address, password, alias);
             if (transaction != null && transaction.getHash() != null) {
                 txHash = transaction.getHash().getDigestHex();
             }
@@ -90,7 +93,7 @@ public class AliasCmd extends BaseCmd {
     public Object getAliasFee(Map params) {
         Log.debug("ac_getAliasFee start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
-        String address,alias;
+        String address, alias;
         BigInteger fee;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
@@ -103,7 +106,7 @@ public class AliasCmd extends BaseCmd {
             chainId = (Integer) chainIdObj;
             address = (String) addressObj;
             alias = (String) aliasObj;
-            fee = aliasService.getAliasFee(chainId,address,alias);
+            fee = aliasService.getAliasFee(chainId, address, alias);
         } catch (NulsRuntimeException e) {
             Log.info("", e);
             return failed(e.getErrorCode());
@@ -227,7 +230,7 @@ public class AliasCmd extends BaseCmd {
             //TODO after the parameter format was determine,here will be modify
             Transaction transaction = Transaction.getInstance(txHex);
             lists.add(transaction);
-            result = aliasService.accountTxValidate(chainId,lists);
+            result = aliasService.accountTxValidate(chainId, lists);
         } catch (NulsRuntimeException e) {
             Log.info("", e);
             return failed(e.getErrorCode());
@@ -248,6 +251,7 @@ public class AliasCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_aliasTxValidate", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "validate the transaction of alias")
+    @ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.VALID, methodName = "ac_aliasTxValidate")
     public Object aliasTxValidate(Map params) {
         Log.debug("ac_aliasTxValidate start,params size:{}", params == null ? 0 : params.size());
         boolean result;
@@ -263,7 +267,7 @@ public class AliasCmd extends BaseCmd {
             chainId = (Integer) chainIdObj;
             txHex = (String) txHexObj;
             Transaction transaction = Transaction.getInstance(txHex);
-            result = aliasService.aliasTxValidate(chainId,transaction);
+            result = aliasService.aliasTxValidate(chainId, transaction);
         } catch (NulsRuntimeException e) {
             Log.info("", e);
             return failed(e.getErrorCode());
@@ -281,6 +285,7 @@ public class AliasCmd extends BaseCmd {
      * commit the alias transaction
      */
     @CmdAnnotation(cmd = "ac_aliasTxCommit", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "commit the alias transaction")
+    @ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.COMMIT, methodName = "ac_aliasTxCommit")
     public Object aliasTxCommit(Map params) throws NulsException {
         Log.debug("ac_aliasTxCommit start,params size:{}", params == null ? 0 : params.size());
         boolean result = false;
@@ -302,7 +307,7 @@ public class AliasCmd extends BaseCmd {
             Transaction transaction = Transaction.getInstance(txHex);
             Alias alias = new Alias();
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
-            result = aliasService.aliasTxCommit(chainId,alias);
+            result = aliasService.aliasTxCommit(chainId, alias);
         } catch (NulsRuntimeException e) {
             Log.info("", e);
             return failed(e.getErrorCode());
@@ -323,6 +328,7 @@ public class AliasCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_aliasTxRollback", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "rollback the alias info which saved in the db")
+    @ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.ROLLBACK, methodName = "ac_aliasTxRollback")
     public Object rollbackAlias(Map params) throws NulsException {
         Log.debug("ac_aliasTxRollback start,params size:{}", params == null ? 0 : params.size());
         boolean result = false;
@@ -344,7 +350,7 @@ public class AliasCmd extends BaseCmd {
             Transaction transaction = Transaction.getInstance(txHex);
             Alias alias = new Alias();
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
-            result = aliasService.rollbackAlias(chainId,alias);
+            result = aliasService.rollbackAlias(chainId, alias);
         } catch (NulsRuntimeException e) {
             Log.info("", e);
             return failed(e.getErrorCode());

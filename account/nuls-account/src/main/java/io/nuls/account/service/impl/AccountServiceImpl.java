@@ -25,10 +25,12 @@
 
 package io.nuls.account.service.impl;
 
+import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
+import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.rpc.call.EventCmdCall;
 import io.nuls.account.service.AccountCacheService;
@@ -39,22 +41,29 @@ import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.CoinData;
 import io.nuls.base.data.NulsSignData;
+import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.basic.InitializingBean;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.AESEncrypt;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.FormatValidUtils;
+import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.CryptoException;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.thread.TimeService;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -663,5 +672,51 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         //根据密码获得ECKey get ECKey from Password
         ECKey ecKey = account.getEcKey(password);
         return SignatureUtil.signDigest(digest, ecKey).getSignBytes();
+    }
+
+    @Override
+    public String multipleAddressTransfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark, BigInteger price) {
+        //try {
+        for (CoinDto from : fromList) {
+            // 检查to是否为多签地址，如果是多签地址，则返回错误
+            if (AddressTool.isMultiSignAddress(from.getAddress())) {
+                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+            }
+            if (AddressTool.getChainIdByAddress(from.getAddress()) == currentChainId) {
+                throw new NulsRuntimeException(AccountErrorCode.NOT_CURRENT_CHAIN_ADDRESS);
+            }
+        }
+//        for (CoinDto to : toList) {
+//            // 检查to是否为多签地址，如果是多签地址，则返回错误
+//            if (AddressTool.isMultiSignAddress(to.getAddress())) {
+//                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+//            }
+//        }
+        for (CoinDto from : fromList) {
+            //检查账户是否存在
+            Account account = getAccountByAddress(from.getAssetsChainId(), from.getAddress());
+            if (null == account) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            //如果是加密账户，则检查密码是否正确
+            if (account.isEncrypted()) {
+                ObjectUtils.canNotEmpty(from.getPassword(), "the password can not be empty");
+                if (!account.validatePassword(from.getPassword())) {
+                    throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
+                }
+            }
+        }
+        Transaction tx = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
+        if (StringUtils.isNotBlank(remark)) {
+            try {
+                tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
+            } catch (UnsupportedEncodingException e) {
+                Log.error(e);
+            }
+        }
+        tx.setTime(TimeService.currentTimeMillis());
+        CoinData coinData = new CoinData();
+        //}catch (E)
+        return null;
     }
 }

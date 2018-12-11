@@ -102,6 +102,7 @@ public interface AccountErrorCode {
     ErrorCode INPUT_TOO_SMALL = ErrorCode.init("30021");
     ErrorCode MUST_BURN_A_NULS = ErrorCode.init("30022");
     ErrorCode SIGN_COUNT_TOO_LARGE = ErrorCode.init("30023");
+    ErrorCode NOT_CURRENT_CHAIN_ADDRESS = ErrorCode.init("30024");
 
     ErrorCode COINDATA_NOT_FOUND = ErrorCode.init("31016");
     ErrorCode TX_TYPE_ERROR = ErrorCode.init("31017");

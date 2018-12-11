@@ -22,37 +22,42 @@
  * SOFTWARE.
  *
  */
+package io.nuls.account.model.bo.config;
 
-package io.nuls.account.constant;
+import java.io.Serializable;
 
 /**
- * @author: qinyifeng
+ * 账户模块配置类
+ * Account Module Configuration Class
+ *
+ * @author qinyifeng
+ * @date 2018/11/11
  */
-public interface AccountStorageConstant {
+public class ConfigBean implements Serializable {
+    /**
+     * 资产ID
+     * assets id
+     */
+    private int assetsId;
 
     /**
-     * 账户表的名称
-     * The name of the account table
+     * chain id
      */
-    String DB_NAME_ACCOUNT = "account";
-    String DB_NAME_MULTI_SIG_ACCOUNT = "multi_account";
+    private int chainId;
 
-    /**
-     * 以别名为key的别名表名称
-     * The name of the alias table which key is alias
-     */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS = "account_alias_key_alias";
+    public int getAssetsId() {
+        return assetsId;
+    }
 
-    /**
-     * 以地址为key的别名表名称
-     * The name of the alias table which key is address
-     */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS = "account_alias_key_address";
+    public void setAssetsId(int assetsId) {
+        this.assetsId = assetsId;
+    }
 
-    /**
-     * 账户模块配置信息表名称
-     * Account Module Configuration Information Table Name
-     */
-    String DB_NAME_ACCOUNT_CONGIF = "config";
+    public int getChainId() {
+        return chainId;
+    }
 
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
 }

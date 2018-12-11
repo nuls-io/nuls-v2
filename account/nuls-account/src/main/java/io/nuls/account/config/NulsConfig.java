@@ -66,4 +66,30 @@ public class NulsConfig {
      */
     public static String KERNEL_MODULE_URL;
 
+    /**
+     * config file path
+     * */
+    public static String CONFIG_FILE_PATH = "consensus-config.json";
+
+    /**
+     * 主网链ID（卫星链ID）
+     * */
+    public static int MAIN_CHAIN_ID = 1;
+
+    /**
+     * 主网链资产ID（卫星链资产ID）
+     * */
+    public static int MAIN_ASSETS_ID =1;
+
+    /**
+     * 当前链ID
+     * */
+    public static int CURRENT_CHAIN_ID = 1;
+
+    /**
+     * 当前链主资产ID
+     * */
+    public static int CURRENT_MAIN_ASSETS_ID =1;
+
+
 }
