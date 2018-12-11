@@ -29,9 +29,11 @@ import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
+import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -93,7 +95,7 @@ public class BlockUtil {
         return true;
     }
 
-    private static boolean headerVerify(int chainId, BlockHeader header) {
+    public static boolean headerVerify(int chainId, BlockHeader header) {
 
         if (header.getHash() == null) {
             Log.warn("headerVerify fail, block hash can not be null! chainId-{}, height-{}, hash-{}", chainId, header.getHeight(), header.getHash());
@@ -137,51 +139,121 @@ public class BlockUtil {
      * @param block
      * @return
      */
-    public static Result forkVerify(int chainId, Block block) {
+    public static boolean forkVerify(int chainId, Block block) {
+        try {
+            //1.与主链判断
+            ErrorCode mainCode = mainChainProcess(chainId, block).getErrorCode();
+            if (mainCode.equals(BlockErrorCode.SUCCESS)) {
+                return true;
+            }
+
+            if (mainCode.equals(BlockErrorCode.IRRELEVANT_BLOCK)) {
+                //2.与主链没有关联，进入分叉链判断流程
+                ErrorCode forkCode = forkChainProcess(chainId, block).getErrorCode();
+                if (forkCode.equals(BlockErrorCode.IRRELEVANT_BLOCK)) {
+                    //3.与分叉链没有关联，进入孤儿链判断流程
+                    orphanChainProcess(chainId, block);
+                }
+            }
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return false;
+    }
+
+    /**
+     * 区块与主链比对
+     *
+     * @param chainId
+     * @param block
+     * @return
+     */
+    private static Result mainChainProcess(int chainId, Block block) {
         long blockHeight = block.getHeader().getHeight();
         NulsDigestData blockHash = block.getHeader().getHash();
         NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
-//todo fen 3 dian
+
         Chain masterChain = ChainManager.getMasterChain(chainId);
         long masterChainEndHeight = masterChain.getEndHeight();
         NulsDigestData masterChainEndHash = masterChain.getEndHash();
 
+        //1.收到的区块与主链最新高度差大于1000(可配置)，丢弃
+        int value = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.HEIGHT_RANGE));
+        if (Math.abs(blockHeight - masterChainEndHeight) > value) {
+            Log.debug("chainId:{}, received out of range blocks, height:{}, hash:{}", chainId, blockHeight, blockHash);
+            return Result.getFailed(BlockErrorCode.OUT_OF_RANGE);
+        }
+
+        //2.收到的区块可以连到主链，验证通过
+        if (blockHeight == masterChainEndHeight + 1 && blockPreviousHash.equals(masterChainEndHash)) {
+            Log.debug("chainId:{}, received continuous blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
+            return Result.getSuccess(BlockErrorCode.SUCCESS);
+        }
+
+        if (blockHeight <= masterChainEndHeight) {
+            //3.收到的区块是主链上的重复区块，丢弃
+            Block mainBlock = blockService.getBlock(chainId, blockHeight);
+            if (blockHash.equals(mainBlock.getHeader().getHash())) {
+                Log.debug("chainId:{}, received duplicate blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
+                return Result.getFailed(BlockErrorCode.DUPLICATE_MAIN_BLOCK);
+            }
+            //4.收到的区块是主链上的分叉区块，保存区块，并新增一条分叉链链接到主链
+            if (blockPreviousHash.equals(mainBlock.getHeader().getPreHash())) {
+                chainStorageService.save(chainId, block);
+                Chain forkChain = Chain.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
+                ChainManager.addForkChain(chainId, forkChain);
+                Log.debug("chainId:{}, received fork blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
+                return Result.getFailed(BlockErrorCode.FORK_BLOCK);
+            }
+        }
+        //与主链没有关联
+        return Result.getFailed(BlockErrorCode.IRRELEVANT_BLOCK);
+    }
+
+    /**
+     * 区块与分叉链比对
+     *
+     * @param chainId
+     * @param block
+     * @return
+     */
+    private static Result forkChainProcess(int chainId, Block block) {
+        long blockHeight = block.getHeader().getHeight();
+        NulsDigestData blockHash = block.getHeader().getHash();
+        NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
+        SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
         try {
-            //1.收到的区块与主链最新高度差大于1000(可配置)，丢弃
-            int value = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.HEIGHT_RANGE));
-            if (Math.abs(blockHeight - masterChainEndHeight) > value) {
-                Log.debug("chainId:{}, received out of range blocks, height:{}, hash:{}", chainId, blockHeight, blockHash);
-                return Result.getFailed(BlockErrorCode.OUT_OF_RANGE);
-            }
-
-            //2.收到的区块可以连到主链，验证通过
-            if (blockHeight == masterChainEndHeight + 1 && blockPreviousHash.equals(masterChainEndHash)) {
-                Log.debug("chainId:{}, received continuous blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
-                return Result.getSuccess(BlockErrorCode.SUCCESS);
-            }
-
-            if (blockHeight <= masterChainEndHeight) {
-                //3.收到的区块是主链上的重复区块，丢弃
-                Block mainBlock = blockService.getBlock(chainId, blockHeight);
-                if (blockHash.equals(mainBlock.getHeader().getHash())) {
-                    Log.debug("chainId:{}, received duplicate blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
-                    return Result.getFailed(BlockErrorCode.DUPLICATE_MAIN_BLOCK);
-                }
-                //4.收到的区块是主链上的分叉区块，保存区块，并新增一条分叉链链接到主链
-                if (blockPreviousHash.equals(mainBlock.getHeader().getPreHash())) {
+            for (Chain forkChain : forkChains) {
+                long forkChainStartHeight = forkChain.getStartHeight();
+                long forkChainEndHeight = forkChain.getEndHeight();
+                NulsDigestData forkChainEndHash = forkChain.getEndHash();
+                NulsDigestData forkChainPreviousHash = forkChain.getPreviousHash();
+                //1.直连，链尾
+                if (blockHeight == forkChainEndHeight + 1 && blockPreviousHash.equals(forkChainEndHash)) {
                     chainStorageService.save(chainId, block);
-                    Chain forkChain = Chain.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
-                    ChainManager.addForkChain(chainId, forkChain);
-                    Log.debug("chainId:{}, received fork blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
+                    forkChain.addLast(block);
+                    Log.debug("chainId:{}, received continuous blocks of forkChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
+                    return Result.getFailed(BlockErrorCode.FORK_BLOCK);
+                }
+                //2.重复，丢弃
+                if (forkChainStartHeight <= blockHeight && blockHeight <= forkChainEndHeight && forkChain.getHashList().contains(blockHash)) {
+                    Log.debug("chainId:{}, received duplicate blocks of forkChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
+                    return Result.getFailed(BlockErrorCode.FORK_BLOCK);
+                }
+                //3.分叉
+                if (forkChainStartHeight <= blockHeight && blockHeight <= forkChainEndHeight && forkChain.getHashList().contains(blockPreviousHash)) {
+                    chainStorageService.save(chainId, block);
+                    Chain newForkChain = Chain.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
+                    ChainManager.addForkChain(chainId, newForkChain);
+                    Log.debug("chainId:{}, received fork blocks of forkChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
             }
-            //与主链没有关联，进入分叉链判断流程
-            return forkBlockProcess(chainId, block);
         } catch (Exception e) {
             Log.error(e);
         }
-        return Result.getFailed(BlockErrorCode.UNDEFINED_ERROR);
+        //4.与分叉链没有关联，进入孤儿链判断流程
+        return Result.getFailed(BlockErrorCode.IRRELEVANT_BLOCK);
     }
 
     /**
@@ -191,7 +263,7 @@ public class BlockUtil {
      * @param block
      * @return
      */
-    public static Result orphanBlockProcess(int chainId, Block block) {
+    private static Result orphanChainProcess(int chainId, Block block) {
         long blockHeight = block.getHeader().getHeight();
         NulsDigestData blockHash = block.getHeader().getHash();
         NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
@@ -240,52 +312,6 @@ public class BlockUtil {
         return Result.getFailed(BlockErrorCode.UNDEFINED_ERROR);
     }
 
-    /**
-     * 区块与分叉链比对
-     *
-     * @param chainId
-     * @param block
-     * @return
-     */
-    public static Result forkBlockProcess(int chainId, Block block) {
-        long blockHeight = block.getHeader().getHeight();
-        NulsDigestData blockHash = block.getHeader().getHash();
-        NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
-        SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
-        try {
-            for (Chain forkChain : forkChains) {
-                long forkChainStartHeight = forkChain.getStartHeight();
-                long forkChainEndHeight = forkChain.getEndHeight();
-                NulsDigestData forkChainEndHash = forkChain.getEndHash();
-                NulsDigestData forkChainPreviousHash = forkChain.getPreviousHash();
-                //1.直连，链尾
-                if (blockHeight == forkChainEndHeight + 1 && blockPreviousHash.equals(forkChainEndHash)) {
-                    chainStorageService.save(chainId, block);
-                    forkChain.addLast(block);
-                    Log.debug("chainId:{}, received continuous blocks of forkChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
-                    return Result.getFailed(BlockErrorCode.FORK_BLOCK);
-                }
-                //2.重复，丢弃
-                if (forkChainStartHeight <= blockHeight && blockHeight <= forkChainEndHeight && forkChain.getHashList().contains(blockHash)) {
-                    Log.debug("chainId:{}, received duplicate blocks of forkChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
-                    return Result.getFailed(BlockErrorCode.FORK_BLOCK);
-                }
-                //3.分叉
-                if (forkChainStartHeight <= blockHeight && blockHeight <= forkChainEndHeight && forkChain.getHashList().contains(blockPreviousHash)) {
-                    chainStorageService.save(chainId, block);
-                    Chain newForkChain = Chain.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
-                    ChainManager.addForkChain(chainId, newForkChain);
-                    Log.debug("chainId:{}, received fork blocks of forkChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
-                    return Result.getFailed(BlockErrorCode.FORK_BLOCK);
-                }
-            }
-        } catch (Exception e) {
-            Log.error(e);
-        }
-        //4.与分叉链没有关联，进入孤儿链判断流程
-        return orphanBlockProcess(chainId, block);
-    }
-
     public static SmallBlock getSmallBlock(int chainId, Block block) {
         Context context = ContextManager.getContext(chainId);
         List<Integer> systemTransactionType = context.getSystemTransactionType();
@@ -318,6 +344,35 @@ public class BlockUtil {
         }
         block.setTxs(txs);
         return block;
+    }
+
+    public static BlockHeader fromBlockHeaderPo(BlockHeaderPo po) {
+        BlockHeader header = new BlockHeader();
+        header.setHash(po.getHash());
+        header.setHeight(po.getHeight());
+        header.setExtend(po.getExtend());
+        header.setPreHash(po.getPreHash());
+        header.setTime(po.getTime());
+        header.setMerkleHash(po.getMerkleHash());
+        header.setTxCount(po.getTxCount());
+        header.setBlockSignature(po.getBlockSignature());
+        return header;
+    }
+
+
+    public static BlockHeaderPo toBlockHeaderPo(Block block) {
+        BlockHeaderPo po = new BlockHeaderPo();
+        po.setHash(block.getHeader().getHash());
+        po.setPreHash(block.getHeader().getPreHash());
+        po.setMerkleHash(block.getHeader().getMerkleHash());
+        po.setTime(block.getHeader().getTime());
+        po.setHeight(block.getHeader().getHeight());
+        po.setTxCount(block.getHeader().getTxCount());
+        po.setPackingAddress(block.getHeader().getPackingAddress());
+        po.setBlockSignature(block.getHeader().getBlockSignature());
+        po.setExtend(block.getHeader().getExtend());
+        po.setTxHashList(block.getTxHashList());
+        return po;
     }
 
 }

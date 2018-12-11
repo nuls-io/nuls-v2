@@ -49,9 +49,13 @@ public interface TxErrorCode {
     ErrorCode CROSS_TX_PAYER_CHAINID_MISMATCH = ErrorCode.init("10038");
     ErrorCode COINFROM_NOT_FOUND = ErrorCode.init("10039");
     ErrorCode COINTO_NOT_FOUND = ErrorCode.init("10040");
-
-
-
+    ErrorCode IS_MULTI_SIGNATURE_ADDRESS = ErrorCode.init("10041");
+    ErrorCode IS_NOT_MULTI_SIGNATURE_ADDRESS = ErrorCode.init("10042");
+    ErrorCode ONLY_ONE_MULTI_SIGNATURE_ADDRESS_ALLOWED = ErrorCode.init("10043");
+    ErrorCode CROSS_TX_PAYEE_CHAINID_NOT_SAME = ErrorCode.init("10044");
+    ErrorCode COINDATA_IS_INCOMPLETE = ErrorCode.init("10045");
+    ErrorCode PAYEE_AND_PAYER_IS_THE_SAME_CHAIN = ErrorCode.init("10046");
+    ErrorCode TRANSACTION_ALREADY_EXISTS = ErrorCode.init("10046");
 
     ErrorCode DB_TABLE_EXIST = ErrorCode.init("20009");
     ErrorCode DB_TABLE_NOT_EXIST = ErrorCode.init("20010");

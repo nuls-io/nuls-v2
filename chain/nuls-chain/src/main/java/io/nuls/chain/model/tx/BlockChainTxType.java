@@ -33,25 +33,25 @@ public enum BlockChainTxType {
      * 注册链（必须同时注册一种资产）
      * Register chain(An asset must be registered at the same time)
      */
-    REGISTER_CHAIN_AND_ASSET(1),
+    REGISTER_CHAIN_AND_ASSET(10101),
 
     /**
      * 销毁链（删除最后一种资产的时候同时销毁链）
      * Destroy chain (Destroy chain when the last asset is deleted)
      */
-    DESTROY_ASSET_AND_CHAIN(2),
+    DESTROY_ASSET_AND_CHAIN(10102),
 
     /**
      * 在链上新增资产
      * Add an asset to the chain
      */
-    ADD_ASSET_TO_CHAIN(3),
+    ADD_ASSET_TO_CHAIN(10103),
 
     /**
      * 从链上删除资产
      * Delete an asset from the chain
      */
-    REMOVE_ASSET_FROM_CHAIN(4);
+    REMOVE_ASSET_FROM_CHAIN(10104);
 
     private int key;
 

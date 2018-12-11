@@ -21,11 +21,10 @@
 package io.nuls.block.service.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockStorageService;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -42,11 +41,12 @@ import static io.nuls.block.constant.Constant.*;
  * @version 1.0
  */
 @Service
-public class BlockStorageServiceImpl implements BlockStorageService, InitializingBean {
+public class BlockStorageServiceImpl implements BlockStorageService {
 
     @Override
-    public void init(int chainId) throws Exception {
+    public void init(int chainId) {
         try {
+            RocksDBService.init(DATA_PATH);
             if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
                 RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
             }
@@ -62,7 +62,7 @@ public class BlockStorageServiceImpl implements BlockStorageService, Initializin
     }
 
     @Override
-    public boolean save(int chainId, BlockHeader blockHeader) {
+    public boolean save(int chainId, BlockHeaderPo blockHeader) {
         byte[] height = SerializeUtils.uint64ToByteArray(blockHeader.getHeight());
         byte[] hash = blockHeader.getHash().getDigestBytes();
         try {
@@ -76,50 +76,70 @@ public class BlockStorageServiceImpl implements BlockStorageService, Initializin
     }
 
     @Override
-    public BlockHeader query(int chainId, long height) throws NulsException {
-        byte[] key = SerializeUtils.uint64ToByteArray(height);
-        byte[] hash = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, key);
-        if (hash == null) {
+    public BlockHeaderPo query(int chainId, long height) {
+        try {
+            byte[] key = SerializeUtils.uint64ToByteArray(height);
+            byte[] hash = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, key);
+            if (hash == null) {
+                return null;
+            }
+            byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash);
+            if (bytes == null) {
+                return null;
+            }
+            BlockHeaderPo blockHeader = new BlockHeaderPo();
+            blockHeader.parse(new NulsByteBuffer(bytes));
+            return blockHeader;
+        } catch (Exception e) {
+            Log.error(e);
             return null;
         }
-        byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash);
-        if (bytes == null) {
-            return null;
-        }
-        BlockHeader blockHeader = new BlockHeader();
-        blockHeader.parse(new NulsByteBuffer(bytes));
-        return blockHeader;
     }
 
     @Override
-    public BlockHeader query(int chainId, NulsDigestData hash) throws NulsException {
-        byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash.getDigestBytes());
-        if (bytes == null) {
+    public BlockHeaderPo query(int chainId, NulsDigestData hash) {
+        try {
+            byte[] bytes = RocksDBService.get(BLOCK_HEADER + chainId, hash.getDigestBytes());
+            if (bytes == null) {
+                return null;
+            }
+            BlockHeaderPo blockHeader = new BlockHeaderPo();
+            blockHeader.parse(new NulsByteBuffer(bytes));
+            return blockHeader;
+        } catch (Exception e) {
+            Log.error(e);
             return null;
         }
-        BlockHeader blockHeader = new BlockHeader();
-        blockHeader.parse(new NulsByteBuffer(bytes));
-        return blockHeader;
     }
 
     @Override
-    public List<BlockHeader> query(int chainId, long startHeight, long endHeight) {
+    public List<BlockHeaderPo> query(int chainId, long startHeight, long endHeight) {
         return null;
     }
 
     @Override
-    public boolean remove(int chainId, long height) throws Exception {
-        byte[] hash = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, SerializeUtils.uint64ToByteArray(height));
-        RocksDBService.delete(BLOCK_HEADER_INDEX + chainId, SerializeUtils.uint64ToByteArray(height));
-        RocksDBService.delete(BLOCK_HEADER + chainId, hash);
-        return true;
+    public boolean remove(int chainId, long height) {
+        try {
+            byte[] hash = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, SerializeUtils.uint64ToByteArray(height));
+            RocksDBService.delete(BLOCK_HEADER_INDEX + chainId, SerializeUtils.uint64ToByteArray(height));
+            RocksDBService.delete(BLOCK_HEADER + chainId, hash);
+            return true;
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
     }
 
     @Override
-    public boolean destroy(int chainId) throws Exception {
-        boolean b1 = RocksDBService.destroyTable(BLOCK_HEADER + chainId);
-        boolean b2 = RocksDBService.destroyTable(BLOCK_HEADER_INDEX + chainId);
-        return b1 && b2;
+    public boolean destroy(int chainId) {
+        try {
+            boolean b1 = RocksDBService.destroyTable(BLOCK_HEADER + chainId);
+            boolean b2 = RocksDBService.destroyTable(BLOCK_HEADER_INDEX + chainId);
+            return b1 && b2;
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
     }
 
     @Override
@@ -134,7 +154,6 @@ public class BlockStorageServiceImpl implements BlockStorageService, Initializin
         String key = LATEST_BLOCK_HEIGHT + chainId;
         try {
             byte[] bytes = SerializeUtils.uint64ToByteArray(height);
-
             return RocksDBService.put(CHAIN_LATEST_HEIGHT, key.getBytes(), bytes);
         } catch (Exception e) {
             Log.error(e);
@@ -142,12 +161,4 @@ public class BlockStorageServiceImpl implements BlockStorageService, Initializin
         }
     }
 
-    @Override
-    public void afterPropertiesSet() throws NulsException {
-        try {
-            RocksDBService.init(DATA_PATH);
-        } catch (Exception e) {
-            Log.error(e);
-        }
-    }
 }

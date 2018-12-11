@@ -2,6 +2,8 @@ package io.nuls.transaction.model.po;
 
 import io.nuls.transaction.constant.TxConstant;
 
+import java.math.BigInteger;
+
 /**
  * @author: Charlie
  * @date: 2018/11/14
@@ -16,15 +18,18 @@ public class TransactionPO {
 
     private Integer type;
 
-    private Long amount;
+    private Integer assetChainId;
+
+    private Integer assetId;
+
+    private BigInteger amount;
 
     /**
-     * 0:转出, 1:转入, 2:冻结
+     * 0:转出, 1:转入, 2:冻结, 3:解锁
      */
     private Integer state;
 
     private Long time;
-
 
 
     /**
@@ -85,11 +90,27 @@ public class TransactionPO {
         this.time = time;
     }
 
-    public Long getAmount() {
+    public Integer getAssetChainId() {
+        return assetChainId;
+    }
+
+    public void setAssetChainId(Integer assetChainId) {
+        this.assetChainId = assetChainId;
+    }
+
+    public Integer getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(Integer assetId) {
+        this.assetId = assetId;
+    }
+
+    public BigInteger getAmount() {
         return amount;
     }
 
-    public void setAmount(Long amount) {
+    public void setAmount(BigInteger amount) {
         this.amount = amount;
     }
 }

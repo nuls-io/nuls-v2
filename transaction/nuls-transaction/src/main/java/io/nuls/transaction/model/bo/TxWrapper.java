@@ -24,14 +24,17 @@
 
 package io.nuls.transaction.model.bo;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
+import io.nuls.transaction.model.po.TransactionPO;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author: Charlie
@@ -85,5 +88,55 @@ public class TxWrapper extends BaseNulsData {
 
     public void setTx(Transaction tx) {
         this.tx = tx;
+    }
+
+
+    public List<TransactionPO> tx2PO() throws NulsException{
+        List<TransactionPO> list = new ArrayList<>();
+        if(null == tx.getCoinData()){
+            return list;
+        }
+        CoinData coinData = tx.getCoinDataInstance();
+        if(coinData.getFrom() != null){
+            TransactionPO transactionPO = null;
+            for(CoinFrom coinFrom : coinData.getFrom()){
+                transactionPO = new TransactionPO();
+                transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                transactionPO.setHash(tx.getHash().getDigestHex());
+                transactionPO.setType(tx.getType());
+                transactionPO.setAssetChainId(coinFrom.getAssetsChainId());
+                transactionPO.setAssetId(coinFrom.getAssetsId());
+                transactionPO.setAmount(coinFrom.getAmount());
+                // 0普通交易，-1解锁金额交易（退出共识，退出委托）
+                byte locked = coinFrom.getLocked();
+                int state = 0;
+                if(locked == -1){
+                    state = 3;
+                }
+                transactionPO.setState(state);
+                list.add(transactionPO);
+            }
+        }
+        if(coinData.getTo() != null){
+            TransactionPO transactionPO = null;
+            for(CoinTo coinTo : coinData.getTo()){
+                transactionPO = new TransactionPO();
+                transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinTo.getAddress()));
+                transactionPO.setAssetChainId(coinTo.getAssetsChainId());
+                transactionPO.setAssetId(coinTo.getAssetsId());
+                transactionPO.setAmount(coinTo.getAmount());
+                transactionPO.setHash(tx.getHash().getDigestHex());
+                transactionPO.setType(tx.getType());
+                // 解锁高度或解锁时间，-1为永久锁定
+                Long lockTime = coinTo.getLockTime();
+                int state = 1;
+                if(lockTime != 0){
+                    state = 2;
+                }
+                transactionPO.setState(state);
+                list.add(transactionPO);
+            }
+        }
+        return list;
     }
 }

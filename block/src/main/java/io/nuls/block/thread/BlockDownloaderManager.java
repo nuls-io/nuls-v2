@@ -27,6 +27,7 @@ import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockDownloadUtils;
+import io.nuls.block.utils.BlockUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.DoubleUtils;
@@ -220,7 +221,7 @@ public class BlockDownloaderManager implements Callable<Boolean> {
             return false;
         }
 
-        blockService.rollbackBlock(chainId, localBestBlock);
+        blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(localBestBlock));
         localBestBlock = blockService.getLatestBlock(chainId);
         if (checkHashEquality(localBestBlock)) {
             return true;

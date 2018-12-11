@@ -36,6 +36,7 @@ import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.AccountBalance;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.BlockChain;
+import io.nuls.chain.model.tx.txdata.TxAsset;
 import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.tools.crypto.HexUtil;
@@ -159,13 +160,28 @@ public class BaseChainCmd extends BaseCmd {
         }
     }
 
-    protected Asset buildAssetTxData(String txHex, Transaction tx) {
+    protected Asset buildAssetWithTxChain(String txHex, Transaction tx) {
         try {
             byte[] txBytes = HexUtil.hexToByte(txHex);
             tx.parse(txBytes, 0);
             TxChain txChain = new TxChain();
             txChain.parse(tx.getTxData(), 0);
             Asset asset = new Asset(txChain);
+            asset.setTxHash(tx.getHash().toString());
+            return asset;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
+        }
+    }
+
+    protected Asset buildAssetWithTxAsset(String txHex, Transaction tx) {
+        try {
+            byte[] txBytes = HexUtil.hexToByte(txHex);
+            tx.parse(txBytes, 0);
+            TxAsset txAsset = new TxAsset();
+            txAsset.parse(tx.getTxData(), 0);
+            Asset asset = new Asset();
             asset.setTxHash(tx.getHash().toString());
             return asset;
         } catch (Exception e) {

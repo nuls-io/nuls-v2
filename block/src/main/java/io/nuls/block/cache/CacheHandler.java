@@ -44,25 +44,11 @@ public class CacheHandler {
     private static Map<Integer, DataCacher<CompleteMessage>> synTaskCacher = new ConcurrentHashMap<>();
 
     public static CompletableFuture<Block> addGetBlockByHeightRequest(int chainId, NulsDigestData requestHash) {
-        DataCacher<Block> dataCacher = blockByHeightCacher.get(chainId);
-        if (dataCacher != null) {
-            return dataCacher.addFuture(requestHash);
-        } else {
-            dataCacher = new DataCacher<>();
-            blockByHeightCacher.put(chainId, dataCacher);
-            return dataCacher.addFuture(requestHash);
-        }
+        return blockByHeightCacher.get(chainId).addFuture(requestHash);
     }
 
     public static CompletableFuture<Block> addGetBlockByHashRequest(int chainId, NulsDigestData requestHash) {
-        DataCacher<Block> dataCacher = blockByHashCacher.get(chainId);
-        if (dataCacher != null) {
-            return dataCacher.addFuture(requestHash);
-        } else {
-            dataCacher = new DataCacher<>();
-            blockByHashCacher.put(chainId, dataCacher);
-            return dataCacher.addFuture(requestHash);
-        }
+        return blockByHashCacher.get(chainId).addFuture(requestHash);
     }
 
     public static void receiveBlock(int chainId, Block block) {
@@ -74,14 +60,7 @@ public class CacheHandler {
     }
 
     public static Future<CompleteMessage> newRequest(int chainId, NulsDigestData hash) {
-        DataCacher<CompleteMessage> dataCacher = synTaskCacher.get(chainId);
-        if (dataCacher != null) {
-            return dataCacher.addFuture(hash);
-        } else {
-            dataCacher = new DataCacher<>();
-            synTaskCacher.put(chainId, dataCacher);
-            return dataCacher.addFuture(hash);
-        }
+        return synTaskCacher.get(chainId).addFuture(hash);
     }
 
     public static void requestComplete(int chainId, CompleteMessage message) {
@@ -105,7 +84,9 @@ public class CacheHandler {
     }
 
     public static void init(int chainId){
-
+        blockByHeightCacher.put(chainId, new DataCacher<>());
+        blockByHashCacher.put(chainId, new DataCacher<>());
+        synTaskCacher.put(chainId, new DataCacher<>());
     }
 
 }

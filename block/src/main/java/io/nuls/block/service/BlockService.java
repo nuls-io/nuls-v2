@@ -25,6 +25,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.block.model.Node;
+import io.nuls.block.model.po.BlockHeaderPo;
 
 import java.util.List;
 
@@ -63,7 +64,7 @@ public interface BlockService {
      * @param height        区块高度
      * @return
      */
-    BlockHeader getBlockHeader(int chainId, long height);
+    BlockHeaderPo getBlockHeader(int chainId, long height);
 
     /**
      * 根据区块高度获取区块
@@ -118,18 +119,10 @@ public interface BlockService {
     /**
      * 回滚区块
      * @param chainId       链ID
-     * @param block         待回滚区块
+     * @param blockHeaderPo         待回滚区块头
      * @return
      */
-    boolean rollbackBlock(int chainId, Block block);
-
-    /**
-     * 回滚区块
-     * @param chainId       链ID
-     * @param height        待回滚区块的高度
-     * @return
-     */
-    Block rollbackBlock(int chainId, long height);
+    boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo);
 
     /**
      * 转发区块给连接的其他对等节点，允许一个例外（不转发给它）
@@ -166,24 +159,9 @@ public interface BlockService {
     boolean stopChain(int chainId, boolean cleanData);
 
     /**
-     * 验证区块正确性，需要调用共识模块、交易管理模块的接口
-     * @param chainId       链ID
-     * @param block         待验证区块
-     * @return
-     */
-    boolean verifyBlock(int chainId, Block block);
-
-    /**
      * 初始化方法
      * @param chainId
      */
     void init(int chainId);
 
-    /**
-     * 根据hash验证区块是否存在
-     * @param chainId       链ID
-     * @param hash         待验证区块hash
-     * @return
-     */
-    boolean existBlock(int chainId, NulsDigestData hash);
 }

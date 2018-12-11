@@ -28,7 +28,7 @@ import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.message.GetBlocksByHeightMessage;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.model.Node;
-import io.nuls.block.utils.NetworkUtil;
+import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 
