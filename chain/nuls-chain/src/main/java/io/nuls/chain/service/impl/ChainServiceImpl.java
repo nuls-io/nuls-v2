@@ -14,9 +14,11 @@ import io.nuls.tools.core.annotation.Service;
 import java.math.BigInteger;
 
 /**
+ * 关于链的所有操作：增删改查
+ * All operations on the chain: Save, delete, update, query
+ *
  * @author tangyi
  * @date 2018/11/8
- * @description
  */
 @Service
 public class ChainServiceImpl implements ChainService {
@@ -31,12 +33,13 @@ public class ChainServiceImpl implements ChainService {
     private AssetService assetService;
 
     /**
-     * init chain
+     * 把Nuls2.0主网默认注册到Nuls2.0上（Nuls2.0主网可以认为是Nuls2.0生态的第一条友链）
+     * Register the Nuls2.0 main network to Nuls2.0 by default (Nuls2.0 main network can be considered as the first friend chain of Nurs2.0 ecosystem)
      *
-     * @return true/false
+     * @throws Exception Any error will throw an exception
      */
     @Override
-    public boolean initChain() {
+    public void initChain() throws Exception {
         int chainId = Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
         BlockChain chain = getChain(chainId);
         if (null == chain) {
@@ -50,6 +53,7 @@ public class ChainServiceImpl implements ChainService {
         chain.getTotalAssetKeyList().clear();
         chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chainStorage.save(chainId, chain);
+
         Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
         if (null == asset) {
             asset = new Asset();
@@ -60,24 +64,42 @@ public class ChainServiceImpl implements ChainService {
         asset.setSymbol(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_SYMBOL));
         asset.addChainId(chainId);
         assetService.createAsset(asset);
-        return true;
     }
 
-
+    /**
+     * 保存链信息
+     * Save chain
+     *
+     * @param blockChain The BlockChain saved
+     * @throws Exception Any error will throw an exception
+     */
     @Override
-    public boolean saveChain(BlockChain blockChain) {
-        return chainStorage.save(blockChain.getChainId(), blockChain);
+    public void saveChain(BlockChain blockChain) {
+        chainStorage.save(blockChain.getChainId(), blockChain);
     }
 
-
+    /**
+     * 更新链信息
+     * Update chain
+     *
+     * @param blockChain The BlockChain updated
+     * @throws Exception Any error will throw an exception
+     */
     @Override
-    public boolean updateChain(BlockChain blockChain) {
-        return chainStorage.update(blockChain.getChainId(), blockChain);
+    public void updateChain(BlockChain blockChain) {
+        chainStorage.update(blockChain.getChainId(), blockChain);
     }
 
+    /**
+     * 删除链信息
+     * Delete chain
+     *
+     * @param blockChain The BlockChain deleted
+     * @throws Exception Any error will throw an exception
+     */
     @Override
-    public boolean delChain(BlockChain blockChain) {
-        return chainStorage.delete(blockChain.getChainId());
+    public void delChain(BlockChain blockChain) {
+        chainStorage.delete(blockChain.getChainId());
     }
 
     /**
