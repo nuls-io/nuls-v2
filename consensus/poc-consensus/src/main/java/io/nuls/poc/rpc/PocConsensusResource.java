@@ -348,6 +348,18 @@ public class PocConsensusResource extends BaseCmd{
     }
 
     /**
+     * 修改节点共识状态
+     * */
+    @CmdAnnotation(cmd = "cs_updateAgentConsensusStatus", version = 1.0, description = "test getHeight 1.0")
+    public Response updateAgentConsensusStatus(Map<String,Object> params){
+        Result result = service.updateAgentConsensusStatus(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
      * 修改节点打包状态
      * */
     @CmdAnnotation(cmd = "cs_updateAgentStatus", version = 1.0, description = "test getHeight 1.0")

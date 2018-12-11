@@ -44,4 +44,8 @@ public interface ConsensusErrorCode {
     ErrorCode BLOCK_ROUND_VALIDATE_ERROR= ErrorCode.init("70030");
     ErrorCode BANANCE_NOT_ENNOUGH= ErrorCode.init("70031");
     ErrorCode CHAIN_NOT_EXIST= ErrorCode.init("70032");
+    ErrorCode BLOCK_TX_VALID_ERROR = ErrorCode.init("70033");
+    ErrorCode BLOCK_PUNISH_VALID_ERROR = ErrorCode.init("70034");
+    ErrorCode BLOCK_SIGNATURE_ERROR = ErrorCode.init("70035");
+    ErrorCode BLOCK_RED_PUNISH_ERROR = ErrorCode.init("70036");
 }

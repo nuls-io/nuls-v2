@@ -1,5 +1,6 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.BlockRoundData;
 import io.nuls.base.data.NulsDigestData;
@@ -12,11 +13,11 @@ import io.nuls.poc.model.bo.config.ConfigItem;
 import io.nuls.poc.storage.ConfigService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
@@ -44,6 +45,8 @@ public class ChainManager {
     private PunishManager punishManager;
     @Autowired
     private RoundManager roundManager;
+    @Autowired
+    private SchedulerManager schedulerManager;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
@@ -80,7 +83,7 @@ public class ChainManager {
             创建并启动链内任务
             Create and start in-chain tasks
             */
-            SpringLiteContext.getBean(SchedulerManager.class).createChainScheduler(chain);
+            schedulerManager.createChainScheduler(chain);
 
             chainMap.put(chainId,chain);
         }
@@ -175,8 +178,10 @@ public class ChainManager {
             缓存最近x轮区块头数据
             Cache the latest X rounds of block header data
             */
-            int length = 10;
+            int length = 1000;
+            int roundIndex = 1;
             List<BlockHeader>blockHeaderList = new ArrayList<>();
+            Address packingAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
             for (int index = 0;index < length;index++) {
                 BlockHeader blockHeader = new BlockHeader();
                 blockHeader.setHeight(100);
@@ -189,7 +194,11 @@ public class ChainManager {
                 BlockRoundData roundData = new BlockRoundData();
                 roundData.setConsensusMemberCount(1);
                 roundData.setPackingIndexOfRound(1);
-                roundData.setRoundIndex(1);
+                if((index+1)%10 == 0){
+                    roundIndex++;
+                    blockHeader.setPackingAddress(packingAddress.getAddressBytes());
+                }
+                roundData.setRoundIndex(roundIndex);
                 roundData.setRoundStartTime(TimeService.currentTimeMillis());
                 try {
                     blockHeader.setExtend(roundData.serialize());
