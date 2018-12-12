@@ -23,15 +23,15 @@
 package io.nuls.block.exception;
 
 /**
- * 数据库操作异常
+ * 链操作异常
  *
  * @author captain
  * @version 1.0
  * @date 18-12-12 下午12:40
  */
-public class DbRuntimeException extends RuntimeException {
+public class ChainRuntimeException extends RuntimeException {
 
-    public DbRuntimeException(String message) {
+    public ChainRuntimeException(String message) {
         super(message);
     }
 

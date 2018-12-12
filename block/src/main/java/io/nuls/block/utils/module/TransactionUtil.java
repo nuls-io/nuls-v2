@@ -22,7 +22,7 @@ package io.nuls.block.utils.module;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.block.BlockGenerator;
+import io.nuls.block.test.BlockGenerator;
 
 import java.io.IOException;
 import java.util.List;

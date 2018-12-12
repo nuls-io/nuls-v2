@@ -30,6 +30,7 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,12 +61,16 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     }
 
     @Override
-    public boolean save(int chainId, List<Block> blocks) throws Exception {
+    public boolean save(int chainId, List<Block> blocks) {
         Map<byte[], byte[]> map = new HashMap<>(blocks.size());
-        for (Block block : blocks) {
-            map.put(block.getHeader().getHash().getDigestBytes(), block.serialize());
+        try {
+            for (Block block : blocks) {
+                map.put(block.getHeader().getHash().getDigestBytes(), block.serialize());
+            }
+            return RocksDBService.batchPut(FORK_CHAINS + chainId, map);
+        } catch (Exception e) {
+            Log.error(e);
         }
-        RocksDBService.batchPut(FORK_CHAINS + chainId, map);
         return false;
     }
 
@@ -82,42 +87,67 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     }
 
     @Override
-    public Block query(int chainId, NulsDigestData hash) throws NulsException {
+    public Block query(int chainId, NulsDigestData hash) {
         byte[] bytes = RocksDBService.get(FORK_CHAINS + chainId, hash.getDigestBytes());
         Block block = new Block();
-        block.parse(new NulsByteBuffer(bytes));
-        return block;
+        try {
+            block.parse(new NulsByteBuffer(bytes));
+            return block;
+        } catch (NulsException e) {
+            Log.error(e);
+            return null;
+        }
     }
 
     @Override
-    public List<Block> query(int chainId, List<NulsDigestData> hashList) throws NulsException {
+    public List<Block> query(int chainId, List<NulsDigestData> hashList) {
         List<byte[]> keys = hashList.stream().map(e -> e.getDigestBytes()).collect(Collectors.toList());
         List<byte[]> valueList = RocksDBService.multiGetValueList(FORK_CHAINS + chainId, keys);
         List<Block> blockList = new ArrayList<>();
         for (byte[] bytes : valueList) {
             Block block = new Block();
-            block.parse(new NulsByteBuffer(bytes));
+            try {
+                block.parse(new NulsByteBuffer(bytes));
+            } catch (NulsException e) {
+                Log.error(e);
+                return null;
+            }
             blockList.add(block);
         }
         return blockList;
     }
 
     @Override
-    public boolean remove(int chainId, List<NulsDigestData> hashList) throws Exception {
+    public boolean remove(int chainId, List<NulsDigestData> hashList) {
         List<byte[]> keys = hashList.stream().map(e -> e.getDigestBytes()).collect(Collectors.toList());
         Log.debug("delete block, hash:{}", hashList.toString());
-        return RocksDBService.deleteKeys(FORK_CHAINS + chainId, keys);
+        try {
+            return RocksDBService.deleteKeys(FORK_CHAINS + chainId, keys);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new DbRuntimeException("remove blocks error!");
+        }
     }
 
     @Override
-    public boolean remove(int chainId, NulsDigestData hash) throws Exception {
-        return RocksDBService.delete(FORK_CHAINS + chainId, hash.getDigestBytes());
+    public boolean remove(int chainId, NulsDigestData hash) {
+        try {
+            return RocksDBService.delete(FORK_CHAINS + chainId, hash.getDigestBytes());
+        } catch (Exception e) {
+            Log.error(e);
+            throw new DbRuntimeException("remove block error!");
+        }
     }
 
 
     @Override
-    public boolean destroy(int chainId) throws Exception {
-        return RocksDBService.destroyTable(FORK_CHAINS + chainId);
+    public boolean destroy(int chainId) {
+        try {
+            return RocksDBService.destroyTable(FORK_CHAINS + chainId);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new DbRuntimeException("destroy table error!");
+        }
     }
 
 }

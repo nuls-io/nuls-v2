@@ -25,6 +25,7 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
@@ -103,7 +104,7 @@ public class BlockResource extends BaseCmd {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Long height = Long.parseLong(map.get("height").toString());
-            BlockHeader blockHeader = service.getBlockHeader(chainId, height);
+            BlockHeaderPo blockHeader = service.getBlockHeader(chainId, height);
             return success(HexUtil.byteToHex(blockHeader.serialize()));
         } catch (IOException e) {
             Log.error(e);

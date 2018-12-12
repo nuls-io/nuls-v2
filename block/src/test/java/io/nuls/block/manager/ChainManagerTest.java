@@ -21,12 +21,11 @@
 package io.nuls.block.manager;
 
 import com.google.common.collect.Lists;
-import io.nuls.block.BlockGenerator;
-import io.nuls.block.ChainGenerator;
 import io.nuls.block.config.ConfigLoader;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.model.Chain;
 import io.nuls.block.thread.monitor.OrphanChainsMonitor;
+import io.nuls.block.utils.ChainGenerator;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -39,8 +38,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import java.util.SortedSet;
 
 import static io.nuls.block.constant.Constant.*;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -68,9 +65,10 @@ public class ChainManagerTest {
         ConfigLoader.load(MODULES_CONFIG_FILE);
         ContextManager.init(CHAIN_ID);
         ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
-        ChainManager.setMasterChain(CHAIN_ID, Chain.generateMasterChain(CHAIN_ID, BlockGenerator.generate(null)));
+        Chain masterChain = ChainGenerator.newMasterChain(999L, "M", CHAIN_ID);
+        ChainManager.setMasterChain(CHAIN_ID, masterChain);
 
-        Chain chainA = ChainGenerator.newChain(100, 200, "A", null, "A", CHAIN_ID);
+        Chain chainA = ChainGenerator.newChain(100, 200, "A", null, "M", CHAIN_ID);
         Chain chainB = ChainGenerator.newChain(155, 170, "B", null, "C", CHAIN_ID);
         Chain chainC = ChainGenerator.newChain(150, 180, "C", null, "A", CHAIN_ID);
         Chain chainD = ChainGenerator.newChain(160, 190, "D", null, "C", CHAIN_ID);
@@ -91,6 +89,7 @@ public class ChainManagerTest {
         Assert.assertEquals(chainC, chainB.getParent());
         Assert.assertEquals(chainD, chainE.getParent());
         Assert.assertEquals(chainC, chainD.getParent());
+        Assert.assertEquals(0, ChainManager.getOrphanChains(CHAIN_ID).size());
     }
 
     @Test
@@ -102,9 +101,10 @@ public class ChainManagerTest {
         ConfigLoader.load(MODULES_CONFIG_FILE);
         ContextManager.init(CHAIN_ID);
         ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
-        ChainManager.setMasterChain(CHAIN_ID, Chain.generateMasterChain(CHAIN_ID, BlockGenerator.generate(null)));
+        Chain masterChain = ChainGenerator.newMasterChain(999L, "M", CHAIN_ID);
+        ChainManager.setMasterChain(CHAIN_ID, masterChain);
 
-        Chain chainA = ChainGenerator.newChain(100, 199, "A", null, "A", CHAIN_ID);
+        Chain chainA = ChainGenerator.newChain(100, 199, "A", null, "M", CHAIN_ID);
         Chain chainB = ChainGenerator.newChain(400, 499, "B", null, "C", CHAIN_ID);
         Chain chainC = ChainGenerator.newChain(200, 399, "C", null, "A", CHAIN_ID);
         Chain chainD = ChainGenerator.newChain(450, 549, "D", null, "E", CHAIN_ID);
@@ -121,10 +121,6 @@ public class ChainManagerTest {
 
         OrphanChainsMonitor.getInstance().run();
 
-        Assert.assertEquals(3, ChainManager.getOrphanChains(CHAIN_ID).size());
-        Assert.assertTrue(ChainManager.getOrphanChains(CHAIN_ID).contains(chainA));
-        Assert.assertTrue(ChainManager.getOrphanChains(CHAIN_ID).contains(chainE));
-        Assert.assertTrue(ChainManager.getOrphanChains(CHAIN_ID).contains(chainF));
         Assert.assertFalse(ChainManager.getOrphanChains(CHAIN_ID).contains(chainB));
         Assert.assertFalse(ChainManager.getOrphanChains(CHAIN_ID).contains(chainC));
         Assert.assertFalse(ChainManager.getOrphanChains(CHAIN_ID).contains(chainD));
@@ -134,6 +130,7 @@ public class ChainManagerTest {
         Assert.assertEquals(499, chainA.getEndHeight());
         Assert.assertEquals(549, chainE.getEndHeight());
         Assert.assertEquals(chainE, chainF.getParent());
+        Assert.assertEquals(0, ChainManager.getOrphanChains(CHAIN_ID).size());
     }
 
     @Test
@@ -192,38 +189,4 @@ public class ChainManagerTest {
         Assert.assertTrue(RocksDBService.deleteKeys("ccc", Lists.newArrayList()));
     }
 
-    @Test
-    public void testRemoveOrphanChain() throws Exception {
-        PowerMockito.mockStatic(RocksDBService.class);
-        PowerMockito.when(RocksDBService.deleteKeys(anyString(), anyList())).thenReturn(true);
-        Assert.assertTrue(RocksDBService.deleteKeys("aaa", Lists.newArrayList()));
-
-        ConfigLoader.load(MODULES_CONFIG_FILE);
-        ContextManager.init(CHAIN_ID);
-        ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
-
-        Chain chainE = ChainGenerator.newChain(10, 150, "E", null, "E", CHAIN_ID);
-        Chain chainA = ChainGenerator.newChain(100, 200, "A", chainE, "E", CHAIN_ID);
-        Chain chainB = ChainGenerator.newChain(150, 250, "B", chainA, "A", CHAIN_ID);
-        Chain chainC = ChainGenerator.newChain(200, 250, "C", chainA, "A", CHAIN_ID);
-        Chain chainD = ChainGenerator.newChain(125, 175, "D", chainB, "B", CHAIN_ID);
-        ChainManager.addOrphanChain(CHAIN_ID, chainA);
-        ChainManager.addOrphanChain(CHAIN_ID, chainB);
-        ChainManager.addOrphanChain(CHAIN_ID, chainC);
-        ChainManager.addOrphanChain(CHAIN_ID, chainD);
-        ChainManager.addOrphanChain(CHAIN_ID, chainE);
-
-        SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(CHAIN_ID);
-        int i = orphanChains.size() / CLEAN_PARAM;
-        //最少清理一个链
-        i = i == 0 ? 1 : i;
-        Assert.assertEquals(1, i);
-        for (int j = 0; j < i; j++) {
-            Chain chain = orphanChains.first();
-            ChainManager.removeOrphanChain(CHAIN_ID, chain);
-        }
-
-        Assert.assertEquals(4, ChainManager.getOrphanChains(CHAIN_ID).size());
-        Assert.assertEquals(200, orphanChains.first().getEndHeight());
-    }
 }

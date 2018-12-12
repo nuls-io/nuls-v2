@@ -20,21 +20,21 @@
 
 package io.nuls.block;
 
-import io.nuls.base.basic.TransactionManager;
+import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.Transaction;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.config.ConfigLoader;
 import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.context.Context;
+import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
+import io.nuls.block.test.BlockGenerator;
+import io.nuls.block.test.Miner;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.ShutdownHook;
-import io.nuls.block.thread.monitor.ChainsDbSizeMonitor;
-import io.nuls.block.thread.monitor.ForkChainsMonitor;
-import io.nuls.block.thread.monitor.NetworkResetMonitor;
-import io.nuls.block.thread.monitor.OrphanChainsMonitor;
+import io.nuls.block.thread.monitor.*;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
@@ -116,6 +116,7 @@ public class Bootstrap {
     private static void initCache(int chainId) {
         SmallBlockCacher.init(chainId);
         CacheHandler.init(chainId);
+        ChainManager.init(chainId);
     }
 
     private static void start() {
@@ -128,8 +129,11 @@ public class Bootstrap {
      * todo 正式版本删除
      */
     private static void onlyRunWhenTest() {
-        ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
-        new BlockGenerator().start();
+        Context context = ContextManager.getContext(CHAIN_ID);
+        context.setStatus(RunningStatusEnum.RUNNING);
+        Block latestBlock = context.getLatestBlock();
+        new Miner("1", latestBlock).start();
+        new Miner("2", latestBlock).start();
     }
 
     private static void rpcInit() throws Exception {
@@ -147,11 +151,10 @@ public class Bootstrap {
     }
 
     private static void startDaemonThreads() {
-        //开启区块同步线程
-        ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronize"));
-        synExecutor.scheduleWithFixedDelay(BlockSynchronizer.getInstance(), 0, 10, TimeUnit.SECONDS);
-
-        //开启区块监控线程
+//        //开启区块同步线程
+//        ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronize"));
+//        synExecutor.scheduleWithFixedDelay(BlockSynchronizer.getInstance(), 0, 10, TimeUnit.SECONDS);
+//        //开启区块监控线程
 //        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
 //        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
         //开启分叉链处理线程
@@ -160,6 +163,9 @@ public class Bootstrap {
         //开启孤儿链处理线程
         ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
         orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+//        //开启孤儿链维护线程
+//        ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
+//        maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 10, TimeUnit.SECONDS);
         //开启数据库大小监控线程
         ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("DBSize-monitor"));
         dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);

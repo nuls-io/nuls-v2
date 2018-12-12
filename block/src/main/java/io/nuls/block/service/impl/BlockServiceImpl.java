@@ -26,8 +26,10 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.config.GenesisBlock;
 import io.nuls.block.constant.CommandConstant;
+import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.exception.DbRuntimeException;
 import io.nuls.block.manager.ChainManager;
+import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
@@ -37,15 +39,16 @@ import io.nuls.block.service.BlockService;
 import io.nuls.block.service.BlockStorageService;
 import io.nuls.block.service.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
+import io.nuls.block.utils.ChainGenerator;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.block.utils.module.TransactionUtil;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -94,7 +97,8 @@ public class BlockServiceImpl implements BlockService {
             int size = (int) (endHeight - startHeight + 1);
             List<BlockHeader> list = new ArrayList<>(size);
             for (long i = startHeight; i <= endHeight; i++) {
-                BlockHeader blockHeader = blockStorageService.query(chainId, i);
+                BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, i);
+                BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
                 if (blockHeader == null) {
                     return null;
                 }
@@ -109,19 +113,20 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public BlockHeader getBlockHeader(int chainId, NulsDigestData hash) {
-        return blockStorageService.query(chainId, hash);
+        BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, hash);
+        return BlockUtil.fromBlockHeaderPo(blockHeaderPo);
     }
 
     @Override
     public Block getBlock(int chainId, NulsDigestData hash) {
         try {
             Block block = new Block();
-            BlockHeaderPo blockHeader = blockStorageService.query(chainId, hash);
-            if (blockHeader == null) {
+            BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, hash);
+            if (blockHeaderPo == null) {
                 return null;
             }
-            block.setHeader(blockHeader);
-            List<Transaction> transactions = TransactionUtil.getTransactions(chainId, blockHeader.getTxHashList());
+            block.setHeader(BlockUtil.fromBlockHeaderPo(blockHeaderPo));
+            List<Transaction> transactions = TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList());
             block.setTxs(transactions);
             return block;
         } catch (Exception e) {
@@ -134,12 +139,12 @@ public class BlockServiceImpl implements BlockService {
     public Block getBlock(int chainId, long height) {
         try {
             Block block = new Block();
-            BlockHeaderPo blockHeader = blockStorageService.query(chainId, height);
-            if (blockHeader == null) {
+            BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, height);
+            if (blockHeaderPo == null) {
                 return null;
             }
-            block.setHeader(blockHeader);
-            block.setTxs(TransactionUtil.getTransactions(chainId, blockHeader.getTxHashList()));
+            block.setHeader(BlockUtil.fromBlockHeaderPo(blockHeaderPo));
+            block.setTxs(TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList()));
             return block;
         } catch (Exception e) {
             Log.error(e);
@@ -152,13 +157,10 @@ public class BlockServiceImpl implements BlockService {
         try {
             List<Block> list = new ArrayList<>();
             for (long i = startHeight; i <= endHeight; i++) {
-                BlockHeaderPo blockHeader = blockStorageService.query(chainId, i);
-                if (blockHeader == null) {
+                Block block = getBlock(chainId, i);
+                if (block == null) {
                     return null;
                 }
-                Block block = new Block();
-                block.setHeader(blockHeader);
-                block.setTxs(TransactionUtil.getTransactions(chainId, blockHeader.getTxHashList()));
                 list.add(block);
             }
             return list;
@@ -212,6 +214,12 @@ public class BlockServiceImpl implements BlockService {
             ContextManager.getContext(chainId).setLatestBlock(block);
             Chain masterChain = ChainManager.getMasterChain(chainId);
             masterChain.setEndHeight(masterChain.getEndHeight() + 1);
+            int heightRange = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.HEIGHT_RANGE));
+            LinkedList<NulsDigestData> hashList = masterChain.getHashList();
+            if (hashList.size() > heightRange) {
+                hashList.removeFirst();
+            }
+            hashList.addLast(block.getHeader().getHash());
         }
         Log.info("save block success, height-{}, hash-{}, preHash-{}", height, block.getHeader().getHash(), block.getHeader().getPreHash());
         return true;
@@ -251,7 +259,6 @@ public class BlockServiceImpl implements BlockService {
             masterChain.setEndHeight(height - 1);
             masterChain.getHashList().pollLast();
         }
-
         return true;
     }
 
@@ -352,7 +359,7 @@ public class BlockServiceImpl implements BlockService {
             //5.本地区块维护成功
             ContextManager.getContext(chainId).setLatestBlock(block);
             ContextManager.getContext(chainId).setGenesisBlock(genesisBlock);
-            ChainManager.setMasterChain(chainId, Chain.generateMasterChain(chainId, block));
+            ChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block));
         } catch (Exception e) {
             Log.error(e);
         }

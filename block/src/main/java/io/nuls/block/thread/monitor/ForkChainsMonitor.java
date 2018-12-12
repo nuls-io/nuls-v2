@@ -52,8 +52,8 @@ public class ForkChainsMonitor implements Runnable {
 
     @Override
     public void run() {
-        try {
-            for (Integer chainId : ContextManager.chainIds) {
+        for (Integer chainId : ContextManager.chainIds) {
+            try {
                 //判断该链的运行状态，只有正常运行时才会有分叉链的处理
                 RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
                 if (!status.equals(RunningStatusEnum.RUNNING)) {
@@ -86,15 +86,15 @@ public class ForkChainsMonitor implements Runnable {
                 ContextManager.getContext(chainId).setStatus(RunningStatusEnum.SWITCHING);
                 if (ChainManager.switchChain(chainId, masterChain, switchChain)) {
                     Log.info("chainId-{}, switchChain success", chainId);
-                    ContextManager.getContext(chainId).setStatus(RunningStatusEnum.RUNNING);
                 } else {
-                    //todo 链切换失败的处理逻辑，暂时认为链切换失败，恢复主链
-                    Log.info("chainId-{}, switchChain fail", chainId);
-                    ContextManager.getContext(chainId).setStatus(RunningStatusEnum.EXCEPTION);
+                    Log.info("chainId-{}, switchChain fail, auto rollback success", chainId);
                 }
+                ContextManager.getContext(chainId).setStatus(RunningStatusEnum.RUNNING);
+            } catch (Exception e) {
+                Log.info("chainId-{}, switchChain fail, , auto rollback fail", chainId);
+                Log.error(e);
+                ContextManager.getContext(chainId).setStatus(RunningStatusEnum.EXCEPTION);
             }
-        } catch (Exception e) {
-            Log.error(e);
         }
     }
 

@@ -22,12 +22,11 @@ package io.nuls.block.message;
 
 import com.google.common.collect.Lists;
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.TransactionManager;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.base.data.Transaction;
-import io.nuls.block.BlockGenerator;
+import io.nuls.block.test.BlockGenerator;
 import io.nuls.block.config.GenesisBlock;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.After;

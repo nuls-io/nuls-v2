@@ -1,24 +1,26 @@
 /*
- * MIT License
- * Copyright (c) 2017-2018 nuls.io
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ *
+ *  * MIT License
+ *  * Copyright (c) 2017-2018 nuls.io
+ *  * Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  * of this software and associated documentation files (the "Software"), to deal
+ *  * in the Software without restriction, including without limitation the rights
+ *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  * copies of the Software, and to permit persons to whom the Software is
+ *  * furnished to do so, subject to the following conditions:
+ *  * The above copyright notice and this permission notice shall be included in all
+ *  * copies or substantial portions of the Software.
+ *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  * SOFTWARE.
+ *
  */
 
-package io.nuls.block;
+package io.nuls.block.test;
 
 import io.nuls.base.data.*;
 import io.nuls.base.signture.BlockSignature;
@@ -66,7 +68,7 @@ public final class BlockGenerator extends Thread {
      * @throws Exception
      */
     public static Block generate(Block latestBlock) throws Exception {
-        return generate(latestBlock, 1);
+        return generate(latestBlock, 1, "1");
     }
 
     /**
@@ -76,12 +78,12 @@ public final class BlockGenerator extends Thread {
      * @return
      * @throws Exception
      */
-    public static Block generate(Block latestBlock, long seed) throws Exception {
+    public static Block generate(Block latestBlock, long seed, String symbol) throws Exception {
         if (latestBlock == null) {
             return GenesisBlock.getInstance();
         }
         Block block = new Block();
-        block.setTxs(getTransactions(seed));
+        block.setTxs(getTransactions(seed, symbol));
         fillHeader(block, latestBlock.getHeader().getHash(), latestBlock.getHeader().getHeight() + 1);
         return block;
     }
@@ -116,17 +118,17 @@ public final class BlockGenerator extends Thread {
     }
 
     public static List<Transaction> getTransactions() throws IOException {
-        return getTransactions(1);
+        return getTransactions(1, "1");
     }
 
-    public static List<Transaction> getTransactions(long seed) throws IOException {
+    public static List<Transaction> getTransactions(long seed, String symbol) throws IOException {
         List<Transaction> txlist = new ArrayList<>();
         CoinData coinData = new CoinData();
 
         String address = ADDRESS;
         Asserts.notEmpty(address, BlockErrorCode.DATA_ERROR.getMsg());
 
-        String amount = "10000000" + seed;
+        String amount = "10000000" + seed + symbol;
 
         Address ads = Address.fromHashs(address);
 
@@ -150,28 +152,5 @@ public final class BlockGenerator extends Thread {
         txlist.add(tx);
         return txlist;
     }
-
-    @Override
-    public void run() {
-        int i = 0;
-        BlockService blockService = ContextManager.getServiceBean(BlockService.class);
-        while (i < TOTAL) {
-            try {
-                Thread.sleep(1000L);
-                if (!ContextManager.getContext(CHAIN_ID).getStatus().equals(RunningStatusEnum.RUNNING)) {
-                    return;
-                }
-                i++;
-                Block latestBlock = blockService.getLatestBlock(CHAIN_ID);
-                for (int j = 0; j < 5; j++) {
-                    Block block = generate(latestBlock, j);
-                    blockService.saveBlock(CHAIN_ID, block);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
 }
 

@@ -40,9 +40,9 @@ import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
  * 孤儿链的形成原因分析：因为网络问题，在没有收到Block(100)的情况下，已经收到了Block(101)，此时Block(101)不能连接到主链上，形成孤儿链
  * 孤儿链定时处理器
  * 孤儿链处理大致流程：
- *      1.清理无效数据
- *      2.标记
- *      3.复制、清除
+ * 1.清理无效数据
+ * 2.标记
+ * 3.复制、清除
  *
  * @author captain
  * @version 1.0
@@ -144,18 +144,19 @@ public class OrphanChainsMonitor implements Runnable {
         //2.判断是否从主链分叉
         if (orphanChain.getParent() == null && tryFork(masterChain, orphanChain)) {
             orphanChain.setType(ChainTypeEnum.MASTER_FORK);
+            return;
         }
 
         for (Chain forkChain : forkChains) {
             //3.判断与分叉链是否相连
             if (orphanChain.getParent() == null && tryAppend(forkChain, orphanChain)) {
                 orphanChain.setType(ChainTypeEnum.FORK_APPEND);
-                break;
+                return;
             }
             //4.判断是否从分叉链分叉
             if (orphanChain.getParent() == null && tryFork(forkChain, orphanChain)) {
                 orphanChain.setType(ChainTypeEnum.FORK_FORK);
-                break;
+                return;
             }
         }
 
@@ -167,19 +168,19 @@ public class OrphanChainsMonitor implements Runnable {
             //5.判断与孤儿链是否相连
             if (anotherOrphanChain.getParent() == null && tryAppend(orphanChain, anotherOrphanChain)) {
                 anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_APPEND);
-                continue;
+                return;
             }
             if (orphanChain.getParent() == null && tryAppend(anotherOrphanChain, orphanChain)) {
                 orphanChain.setType(ChainTypeEnum.ORPHAN_APPEND);
-                continue;
+                return;
             }
 
             //6.判断是否从孤儿链分叉
             if (anotherOrphanChain.getParent() == null && tryFork(orphanChain, anotherOrphanChain)) {
-                continue;
+                return;
             }
             if (orphanChain.getParent() == null && tryFork(anotherOrphanChain, orphanChain)) {
-                continue;
+                return;
             }
         }
     }
@@ -187,11 +188,12 @@ public class OrphanChainsMonitor implements Runnable {
     /**
      * 尝试把subChain链接到mainChain的末尾，形成mainChain-subChain的结构
      * 两个链相连成功，需要从孤儿链集合中删除subChain
+     *
      * @param mainChain
      * @param subChain
      * @return
      */
-    private boolean tryAppend(Chain mainChain, Chain subChain) throws Exception {
+    private boolean tryAppend(Chain mainChain, Chain subChain) {
         if (mainChain.getEndHeight() + 1 == subChain.getStartHeight() && mainChain.getEndHash().equals(subChain.getPreviousHash())) {
             return ChainManager.append(mainChain, subChain);
         }
@@ -201,11 +203,12 @@ public class OrphanChainsMonitor implements Runnable {
     /**
      * 尝试把subChain分叉到mainChain上
      * 分叉不需要从链集合中删除分叉的链
+     *
      * @param mainChain
      * @param subChain
      * @return
      */
-    private boolean tryFork(Chain mainChain, Chain subChain) throws Exception {
+    private boolean tryFork(Chain mainChain, Chain subChain) {
         if (mainChain.getHashList().contains(subChain.getPreviousHash())) {
             return ChainManager.fork(mainChain, subChain);
         }
