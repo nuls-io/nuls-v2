@@ -1,5 +1,7 @@
 package io.nuls.eventbus.constant;
 
+import io.nuls.rpc.info.Constants;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,5 +40,9 @@ public class EBConstants {
     public static String RPC_PACKAGE_EB = "io.nuls.eventbus.rpc.cmd";
 
     public static String EB_BASE_PACKAGE = "io.nuls.eventbus";
+
+    public static int EVENT_DISPATCH_RETRY_COUNT = 5;
+
+    public static long EVENT_RETRY_WAIT_TIME = 10 * Constants.MILLIS_PER_SECOND;
 
 }

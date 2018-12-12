@@ -12,7 +12,9 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import javassist.bytecode.stackmap.BasicBlock;
 
+import java.nio.channels.NotYetConnectedException;
 import java.util.Set;
 
 public class EventDispatchProcessor implements Runnable {
@@ -34,7 +36,16 @@ public class EventDispatchProcessor implements Runnable {
                     WsClient wsClient = ClientRuntime.getWsClient(url);
 
                    //TODO add retry logic in case of failure in delivery
-                    wsClient.send(JSONUtils.obj2json(buildMessage(data,messageId)));
+                    Message rspMessage = buildMessage(data,messageId);
+                    EventBusRuntime.RETRY_QUEUE.offer(new Object[]{rspMessage,wsClient});
+                    try{
+                        wsClient.send(JSONUtils.obj2json(rspMessage));
+                        //span separate thread to retry for each subscriber
+                        Constants.THREAD_POOL.execute(new RetryProcessor());
+                    }catch (NotYetConnectedException nyce){
+                        Log.error("Client is not connected yet : "+url);
+                        Constants.THREAD_POOL.execute(new RetryProcessor());
+                    }
                 }
                 Thread.sleep(200L);
             }

@@ -15,6 +15,7 @@ public class EventBusRuntime {
 
     public static final Queue<Object[]> CLIENT_SYNC_QUEUE = new ConcurrentLinkedQueue<>();
     public static final Queue<Object[]> EVENT_DISPATCH_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Object[]> RETRY_QUEUE = new ConcurrentLinkedQueue<>();
 
     public static ConcurrentMap<String, Map<String,String>> subscribedRoleInfoMap = new ConcurrentHashMap<>();
     public static ConcurrentMap<String, WsClient> subscribedClientMap = new ConcurrentHashMap<>();
@@ -22,6 +23,8 @@ public class EventBusRuntime {
     public static Object[] firstObjArrInClientSyncQueue(){ return firstObjArrInQueue(CLIENT_SYNC_QUEUE);}
 
     public static Object[] firstObjArrInEventDispatchQueue(){ return firstObjArrInQueue(EVENT_DISPATCH_QUEUE);}
+
+    public static Object[] firstObjArrInRetryQueue(){ return firstObjArrInQueue(RETRY_QUEUE);}
 
     private static synchronized Object[] firstObjArrInQueue(Queue<Object[]> objectsQueue) {
         Object[] objects = objectsQueue.peek();
