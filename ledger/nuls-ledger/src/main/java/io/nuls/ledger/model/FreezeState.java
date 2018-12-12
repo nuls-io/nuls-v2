@@ -77,11 +77,11 @@ public class FreezeState extends BaseNulsData {
     public BigInteger getTotal() {
         BigInteger freeze = BigInteger.ZERO;
         for (FreezeHeightState heightState : freezeHeightStates) {
-            freeze.add(heightState.getAmount());
+            freeze = freeze.add(heightState.getAmount());
         }
 
         for (FreezeLockTimeState lockTimeState : freezeLockTimeStates) {
-            freeze.add(lockTimeState.getAmount());
+            freeze = freeze.add(lockTimeState.getAmount());
         }
         return amount.add(freeze);
     }

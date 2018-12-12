@@ -152,7 +152,8 @@ public class AccountStateServiceImpl implements AccountStateService {
         state.setCreateTime(TimeService.currentTimeMillis());
         accountState.getFreezeState().getFreezeHeightStates().add(state);
         //减去锁定金额
-        accountState.getBalance().subtract(amount);
+        BigInteger balance = accountState.getBalance().subtract(amount);
+        accountState.setBalance(balance);
         byte[] key = this.getKey(address, chainId, assetId);
         repository.putAccountState(key, accountState);
         return accountState.getBalance();
@@ -195,7 +196,8 @@ public class AccountStateServiceImpl implements AccountStateService {
         state.setCreateTime(TimeService.currentTimeMillis());
         accountState.getFreezeState().getFreezeLockTimeStates().add(state);
         //减去锁定金额
-        accountState.getBalance().subtract(amount);
+        BigInteger balance = accountState.getBalance().subtract(amount);
+        accountState.setBalance(balance);
 
         byte[] key = this.getKey(address, chainId, assetId);
         repository.putAccountState(key, accountState);
