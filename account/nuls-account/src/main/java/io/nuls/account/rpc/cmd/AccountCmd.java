@@ -13,6 +13,7 @@ import io.nuls.account.model.dto.MulitpleAddressTransferDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
+import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
@@ -32,10 +33,6 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -56,6 +53,8 @@ public class AccountCmd extends BaseCmd {
     private AccountService accountService;
     @Autowired
     private AccountKeyStoreService keyStoreService;
+    @Autowired
+    private TransactionService transactionService;
 
     /**
      * 创建指定个数的账户
@@ -896,7 +895,7 @@ public class AccountCmd extends BaseCmd {
             if (!validTxRemark(transferDto.getRemark())) {
                 return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
             }
-            String txDigestHex = accountService.multipleAddressTransfer(NulsConfig.CURRENT_CHAIN_ID, inputList, outputList, transferDto.getRemark(), TransactionFeeCalculator.NORMAL_PRICE_PRE_1024_BYTES);
+            String txDigestHex = transactionService.multipleAddressTransfer(NulsConfig.CURRENT_CHAIN_ID, inputList, outputList, transferDto.getRemark(), TransactionFeeCalculator.NORMAL_PRICE_PRE_1024_BYTES);
             map.put("value", txDigestHex);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());

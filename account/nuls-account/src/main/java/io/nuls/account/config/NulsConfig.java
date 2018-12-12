@@ -74,17 +74,17 @@ public class NulsConfig {
     /**
      * 主网链ID（卫星链ID）
      * */
-    public static int MAIN_CHAIN_ID = 1;
+    public static int MAIN_CHAIN_ID = 12345;
 
     /**
-     * 主网链资产ID（卫星链资产ID）
+     * 主网链资产ID（卫星链资产ID，NULS资产）
      * */
     public static int MAIN_ASSETS_ID =1;
 
     /**
      * 当前链ID
      * */
-    public static int CURRENT_CHAIN_ID = 1;
+    public static int CURRENT_CHAIN_ID = 12345;
 
     /**
      * 当前链主资产ID

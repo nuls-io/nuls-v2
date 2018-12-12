@@ -187,4 +187,9 @@ public interface AccountConstant {
      * rpc file path
      * */
     String RPC_PATH = "io.nuls.account.rpc";
+
+    /**
+     * 普通交易为非解锁交易：0，解锁金额交易（退出共识，退出委托）：-1
+     */
+    byte NORMAL_TX_LOCKED = 0;
 }

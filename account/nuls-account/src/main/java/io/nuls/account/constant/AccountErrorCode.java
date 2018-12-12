@@ -51,23 +51,6 @@ public interface AccountErrorCode {
     ErrorCode DOWNLOAD_VERSION_FAILD = ErrorCode.init("10016");
     ErrorCode PARSE_JSON_FAILD = ErrorCode.init("10017");
     ErrorCode FILE_OPERATION_FAILD = ErrorCode.init("10018");
-    ErrorCode ILLEGAL_ACCESS_EXCEPTION = ErrorCode.init("10019");
-    ErrorCode INSTANTIATION_EXCEPTION = ErrorCode.init("10020");
-    ErrorCode UPGRADING = ErrorCode.init("10021");
-    ErrorCode NOT_UPGRADING = ErrorCode.init("10022");
-    ErrorCode VERSION_NOT_NEWEST = ErrorCode.init("10023");
-    ErrorCode SERIALIZE_ERROR = ErrorCode.init("10024");
-    ErrorCode DESERIALIZE_ERROR = ErrorCode.init("10025");
-    ErrorCode HASH_ERROR = ErrorCode.init("10026");
-    ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init("10027");
-    ErrorCode ADDRESS_IS_BLOCK_HOLE = ErrorCode.init("10028");
-    ErrorCode ADDRESS_IS_NOT_BELONGS_TO_CHAIN = ErrorCode.init("10029");
-    ErrorCode VALIDATORS_NOT_FULLY_EXECUTED = ErrorCode.init("10030");
-    ErrorCode BLOCK_IS_NULL = ErrorCode.init("10031");
-    ErrorCode VERSION_TOO_LOW = ErrorCode.init("10032");
-    ErrorCode PUBKEY_REPEAT = ErrorCode.init("10033");
-    ErrorCode COIN_OWNER_ERROR = ErrorCode.init("10034");
-    ErrorCode NONEWVER = ErrorCode.init("10035");
 
     ErrorCode DB_TABLE_EXIST = ErrorCode.init("20009");
     ErrorCode DB_TABLE_NOT_EXIST = ErrorCode.init("20010");
@@ -102,10 +85,12 @@ public interface AccountErrorCode {
     ErrorCode INPUT_TOO_SMALL = ErrorCode.init("30021");
     ErrorCode MUST_BURN_A_NULS = ErrorCode.init("30022");
     ErrorCode SIGN_COUNT_TOO_LARGE = ErrorCode.init("30023");
-    ErrorCode NOT_CURRENT_CHAIN_ADDRESS = ErrorCode.init("30024");
-
-    ErrorCode COINDATA_NOT_FOUND = ErrorCode.init("31016");
-    ErrorCode TX_TYPE_ERROR = ErrorCode.init("31017");
-
+    ErrorCode IS_NOT_CURRENT_CHAIN_ADDRESS = ErrorCode.init("30024");
+    ErrorCode IS_MULTI_SIGNATURE_ADDRESS = ErrorCode.init("30025");
+    ErrorCode IS_NOT_MULTI_SIGNATURE_ADDRESS = ErrorCode.init("30026");
+    ErrorCode ASSET_NOT_EXIST = ErrorCode.init("30027");
+    ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init("30028");
+    ErrorCode INSUFFICIENT_FEE = ErrorCode.init("30029");
+    ErrorCode CHAIN_NOT_EXIST= ErrorCode.init("30030");
 
 }
