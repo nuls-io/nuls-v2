@@ -22,37 +22,23 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.account.constant;
+package io.nuls.account.model.bo;
 
 /**
- * @author: qinyifeng
+ * 账户状态枚举类
+ * Account Status Enumeration Class
+ *
+ * @author qinyifeng
+ * @date 2018/12/11
  */
-public interface AccountStorageConstant {
+public enum AccountStatus {
 
-    /**
-     * 账户表的名称
-     * The name of the account table
-     */
-    String DB_NAME_ACCOUNT = "account";
-    String DB_NAME_MULTI_SIG_ACCOUNT = "multi_account";
-
-    /**
-     * 以别名为key的别名表名称
-     * The name of the alias table which key is alias
-     */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS = "account_alias_key_alias";
-
-    /**
-     * 以地址为key的别名表名称
-     * The name of the alias table which key is address
-     */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS = "account_alias_key_address";
-
-    /**
-     * 账户模块配置信息表名称
-     * Account Module Configuration Information Table Name
-     */
-    String DB_NAME_ACCOUNT_CONGIF = "config";
-
+    /*
+    警告，以下顺序不能调整，否则某些地方的判断会出错
+    Warning, the following order cannot be adjusted, otherwise the judgment in some places may go wrong
+    */
+    INITING,
+    LOADING_CACHE,
+    WAIT_RUNNING,
+    RUNNING,
 }

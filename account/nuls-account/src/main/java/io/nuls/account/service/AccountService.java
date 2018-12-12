@@ -26,9 +26,11 @@ package io.nuls.account.service;
 
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
+import io.nuls.account.model.dto.CoinDto;
 import io.nuls.base.data.NulsSignData;
 import io.nuls.tools.exception.NulsException;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -224,4 +226,5 @@ public interface AccountService {
      * @throws NulsException nulsException
      */
     byte[] signDigest(byte[] digest, int chainId, String address, String password) throws NulsException;
+
 }

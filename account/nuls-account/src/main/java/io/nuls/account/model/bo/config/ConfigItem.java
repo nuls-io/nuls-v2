@@ -22,37 +22,49 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.account.constant;
+package io.nuls.account.model.bo.config;
 
 /**
- * @author: qinyifeng
+ * 配置信息类
+ * Configuration information class
+ *
+ * @author qinyifeng
+ * @date 2018/11/11
  */
-public interface AccountStorageConstant {
+public class ConfigItem {
+    private String key;
+    private Object value;
+    private boolean readOnly;
 
-    /**
-     * 账户表的名称
-     * The name of the account table
-     */
-    String DB_NAME_ACCOUNT = "account";
-    String DB_NAME_MULTI_SIG_ACCOUNT = "multi_account";
+    public  ConfigItem(){
 
-    /**
-     * 以别名为key的别名表名称
-     * The name of the alias table which key is alias
-     */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS = "account_alias_key_alias";
+    }
+    public ConfigItem( Object value, boolean readOnly) {
+        this.value = value;
+        this.readOnly = readOnly;
+    }
 
-    /**
-     * 以地址为key的别名表名称
-     * The name of the alias table which key is address
-     */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS = "account_alias_key_address";
+    public String getKey() {
+        return key;
+    }
 
-    /**
-     * 账户模块配置信息表名称
-     * Account Module Configuration Information Table Name
-     */
-    String DB_NAME_ACCOUNT_CONGIF = "config";
+    public void setKey(String key) {
+        this.key = key;
+    }
 
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValue(Object value) {
+        this.value = value;
+    }
+
+    public boolean isReadOnly() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly = readOnly;
+    }
 }

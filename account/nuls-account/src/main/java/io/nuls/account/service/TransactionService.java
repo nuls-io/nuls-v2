@@ -20,39 +20,33 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package io.nuls.account.constant;
+package io.nuls.account.service;
+
+import io.nuls.account.model.dto.CoinDto;
+
+import java.math.BigInteger;
+import java.util.List;
 
 /**
+ * 账户相关交易接口定义
+ * account service definition
+ *
  * @author: qinyifeng
  */
-public interface AccountStorageConstant {
+public interface TransactionService {
 
     /**
-     * 账户表的名称
-     * The name of the account table
+     * 多地址转账
+     *
+     * @param currentChainId 当前链ID
+     * @param fromList 从指定账户转出
+     * @param toList 转出到指定账户
+     * @param remark 备注
+     * @param price 单价
+     * @return transfer transaction hash
      */
-    String DB_NAME_ACCOUNT = "account";
-    String DB_NAME_MULTI_SIG_ACCOUNT = "multi_account";
-
-    /**
-     * 以别名为key的别名表名称
-     * The name of the alias table which key is alias
-     */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS = "account_alias_key_alias";
-
-    /**
-     * 以地址为key的别名表名称
-     * The name of the alias table which key is address
-     */
-    String DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS = "account_alias_key_address";
-
-    /**
-     * 账户模块配置信息表名称
-     * Account Module Configuration Information Table Name
-     */
-    String DB_NAME_ACCOUNT_CONGIF = "config";
+    String multipleAddressTransfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark, BigInteger price);
 
 }

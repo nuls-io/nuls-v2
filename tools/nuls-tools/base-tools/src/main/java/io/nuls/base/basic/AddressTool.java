@@ -334,6 +334,11 @@ public class AddressTool {
         return false;
     }
 
+    public static boolean isMultiSignAddress(String address) {
+        byte[] addr=AddressTool.getAddress(address);
+        return isMultiSignAddress(addr);
+    }
+
     public static boolean isPackingAddress(String address, int chainId) {
         if (StringUtils.isBlank(address)) {
             return false;

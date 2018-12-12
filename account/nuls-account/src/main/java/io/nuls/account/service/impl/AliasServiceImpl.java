@@ -122,7 +122,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         try {
             //create a set alias transaction
             tx = createAliasTrasaction(chaindId, address, aliasName);
-            fee = TransactionFeeCalculator.getMaxFee(tx.size());
+            fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
             //todo whether need to other operation if the fee is too big
         } catch (Exception e) {
             Log.error("", e);
