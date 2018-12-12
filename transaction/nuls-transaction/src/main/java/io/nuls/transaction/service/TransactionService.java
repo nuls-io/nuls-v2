@@ -71,6 +71,15 @@ public interface TransactionService {
     Result createCrossMultiTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark);
 
     /**
+     * 对多签交易进行签名的数据组装
+     * @param address 执行签名的账户地址
+     * @param password 账户密码
+     * @param tx 待签名的交易数据
+     * @return
+     */
+    Result signMultiTransaction(String address, String password, String tx);
+
+    /**
      * 处理多签交易的签名 追加签名
      * @param txWrapper 交易数据 tx
      * @param ecKey 签名者的eckey
@@ -87,6 +96,8 @@ public interface TransactionService {
      * @return Result
      */
     Result txMultiSignProcess(TxWrapper txWrapper, ECKey ecKey, MultiSignTxSignature multiSignTxSignature);
+
+
 
     Result crossTransactionValidator(int chainId, Transaction transaction);
     Result crossTransactionCommit(int chainId, Transaction transaction, BlockHeaderDigestDTO blockHeader);

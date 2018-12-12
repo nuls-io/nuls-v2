@@ -31,6 +31,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -169,6 +170,26 @@ public class TransactionServiceImpl implements TransactionService {
             return Result.getFailed(TxErrorCode.SERIALIZE_ERROR);
         } catch (NulsException e) {
             e.printStackTrace();
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    @Override
+    public Result signMultiTransaction(String address, String password, String tx) {
+        try {
+            Transaction transaction = Transaction.getInstance(tx);
+            String priKey = TxUtil.getPrikey(address, password);
+            ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
+            MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
+            multiSignTxSignature.parse(new NulsByteBuffer(transaction.getTransactionSignature()));
+            //验证签名地址账户是否属于多签账户
+            List<byte[]> pubkeys = multiSignTxSignature.getPubKeyList();
+            if (pubkeys == null || pubkeys.size() == 0 || !AddressTool.validSignAddress(pubkeys, ecKey.getPubKey())) {
+                return Result.getFailed(TxErrorCode.SIGN_ADDRESS_NOT_MATCH);
+            }
+            return txMultiSignProcess(new TxWrapper(AddressTool.getChainIdByAddress(address), transaction), ecKey);
+        } catch (NulsException e) {
+            Log.error(e);
             return Result.getFailed(e.getErrorCode());
         }
     }
