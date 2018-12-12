@@ -2,8 +2,11 @@ package io.nuls.transaction.service;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.crypto.ECKey;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.model.bo.TxWrapper;
 import io.nuls.transaction.model.dto.BlockHeaderDigestDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 
@@ -67,6 +70,23 @@ public interface TransactionService {
      */
     Result createCrossMultiTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark);
 
+    /**
+     * 处理多签交易的签名 追加签名
+     * @param txWrapper 交易数据 tx
+     * @param ecKey 签名者的eckey
+     * @return Result
+     */
+    Result txMultiSignProcess(TxWrapper txWrapper, ECKey ecKey);
+
+
+    /**
+     * 处理多签交易的签名，第一次签名可以先组装多签账户的基础数据，到签名数据中
+     * @param txWrapper 交易数据 tx
+     * @param ecKey 签名者的 eckey数据
+     * @param multiSignTxSignature 新的签名数据  sign data
+     * @return Result
+     */
+    Result txMultiSignProcess(TxWrapper txWrapper, ECKey ecKey, MultiSignTxSignature multiSignTxSignature);
 
     Result crossTransactionValidator(int chainId, Transaction transaction);
     Result crossTransactionCommit(int chainId, Transaction transaction, BlockHeaderDigestDTO blockHeader);
