@@ -38,7 +38,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link BlockMessage}
+ * 处理收到的{@link BlockMessage}，用于区块的同步
  *
  * @author captain
  * @version 1.0
@@ -49,6 +49,7 @@ public class BlockHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Object process(Map map) {
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
         BlockMessage message = new BlockMessage();
         try {
             byte[] decode = HexUtil.decode(map.get("messageBody").toString());
@@ -61,7 +62,7 @@ public class BlockHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        CacheHandler.receiveBlock(message.getBlock());
+        CacheHandler.receiveBlock(chainId, message.getBlock());
         return success();
     }
 

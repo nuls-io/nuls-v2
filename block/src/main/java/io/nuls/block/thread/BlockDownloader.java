@@ -26,6 +26,8 @@ import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.tools.log.Log;
 import lombok.AllArgsConstructor;
 
+import java.util.Deque;
+import java.util.List;
 import java.util.SortedSet;
 import java.util.concurrent.Callable;
 
@@ -47,13 +49,13 @@ public class BlockDownloader implements Callable<BlockDownLoadResult> {
 
     @Override
     public BlockDownLoadResult call() {
-        SortedSet<Block> blockSet = null;
+        List<Block> blockList = null;
         try {
-            blockSet = BlockDownloadUtils.getBlocks(chainId, node, startHeight, startHeight + size - 1);
+            blockList = BlockDownloadUtils.getBlocks(chainId, node, startHeight, startHeight + size - 1);
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
         }
-        return new BlockDownLoadResult(startHeight, size, node, blockSet, index);
+        return new BlockDownLoadResult(startHeight, size, node, blockList, index);
     }
 
 }

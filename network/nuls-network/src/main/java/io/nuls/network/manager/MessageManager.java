@@ -32,7 +32,7 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.manager.handler.NetworkMessageHandlerFactory;
+import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
@@ -50,7 +50,6 @@ import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
@@ -72,26 +71,20 @@ public class MessageManager extends BaseManager{
         broadcastToANode(message,node,aysn);
 
     }
-    public long getCheckSum(byte []msgBody) throws IOException {
+    public long getCheckSum(byte []msgBody){
         byte [] bodyHash=Sha256Hash.hashTwice(msgBody);
         byte []get4Byte=ByteUtils.subBytes(bodyHash,0,4);
-        long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
-        return checksum;
+        return ByteUtils.bytesToBigInteger(get4Byte).longValue();
     }
-    public  BaseMessage getMessageInstance(String command) {
+    private  BaseMessage getMessageInstance(String command) {
         Class<? extends BaseMessage> msgClass  = MessageFactory.getMessage(command);
         if (null == msgClass) {
             return null;
         }
         try {
-            BaseMessage  message = msgClass.getDeclaredConstructor().newInstance();
-            return message;
-        } catch (InstantiationException e) {
+            return msgClass.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
             Log.error(e);
-
-        } catch (IllegalAccessException e) {
-            Log.error(e);
-
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -103,10 +96,11 @@ public class MessageManager extends BaseManager{
 
     /**
      * 验证消息
-     * @param data
-     * @return
+     * validate message checkSum
+     * @param data data
+     * @return boolean
      */
-    public boolean validate(byte []data,long pChecksum){
+    private boolean validate(byte []data,long pChecksum){
         byte [] bodyHash=Sha256Hash.hashTwice(data);
         byte []get4Byte=ByteUtils.subBytes(bodyHash,0,4);
         long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
@@ -138,9 +132,12 @@ public class MessageManager extends BaseManager{
                 Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
                 BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());
                 if(null != message) {
-                    BaseMeesageHandlerInf handler = NetworkMessageHandlerFactory.getInstance().getHandler(message);
+                    BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(message);
                     message = byteBuffer.readNulsData(message);
-                    handler.recieve(message, nodeKey, isServer);
+                    NetworkEventResult result = handler.recieve(message, nodeKey, isServer);
+                    if(!result.isSuccess()){
+                        Log.error("receiveMessage fail:"+result.getErrorCode().getMsg());
+                    }
                 }else{
                     //外部消息，转外部接口
                     long magicNum=header.getMagicNumber();
@@ -191,8 +188,9 @@ public class MessageManager extends BaseManager{
 
     /**
      * 发送请求地址消息
-     * @param magicNumber
-     * @param asyn
+     * @param magicNumber long
+     * @param isCross boolean
+     * @param asyn boolean
      */
     public boolean sendGetAddrMessage(long magicNumber,boolean isCross,boolean asyn) {
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
@@ -237,13 +235,13 @@ public class MessageManager extends BaseManager{
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
     private  boolean isHandShakeMessage(BaseMessage message){
-        if(message.getHeader().getCommandStr().equals(NetworkConstant.CMD_MESSAGE_VERSION) || message.getHeader().getCommandStr().equals(NetworkConstant.CMD_MESSAGE_VERACK)){
-            return true;
-        }
-        return false;
+        return (message.getHeader().getCommandStr().equals(NetworkConstant.CMD_MESSAGE_VERSION) || message.getHeader().getCommandStr().equals(NetworkConstant.CMD_MESSAGE_VERACK));
+
     }
-    public NetworkEventResult broadcastToANode(BaseMessage message, Node node, boolean asyn) {
-//        not handShakeMessage must be  validate peer status
+    private NetworkEventResult broadcastToANode(BaseMessage message, Node node, boolean asyn) {
+        /*
+        *not handShakeMessage must be  validate peer status
+        */
         if(!isHandShakeMessage(message)) {
             NodeGroupConnector nodeGroupConnector = node.getNodeGroupConnector(message.getHeader().getMagicNumber());
             if (NodeGroupConnector.HANDSHAKE != nodeGroupConnector.getStatus()) {

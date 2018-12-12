@@ -61,7 +61,7 @@ public class BlockExtendsData extends BaseNulsData {
      * @param packing_interval 打包间隔时间（单位：毫秒）
      * */
     public long getRoundEndTime(long packing_interval) {
-        return roundStartTime + consensusMemberCount * packing_interval * 1000L;
+        return roundStartTime + consensusMemberCount * packing_interval;
     }
 
     public BlockExtendsData() {

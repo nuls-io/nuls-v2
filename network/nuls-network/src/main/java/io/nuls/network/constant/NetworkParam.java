@@ -29,7 +29,8 @@ import java.util.List;
 
 /**
  *
- * 网络参数
+ * 加载配置文件的参数放在这个bean对象中
+ * The parameters for loading the configuration file are placed in this bean object.
  * @author  lan
  *
  */

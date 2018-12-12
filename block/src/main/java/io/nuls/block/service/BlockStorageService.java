@@ -20,11 +20,9 @@
 
 package io.nuls.block.service;
 
-import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.block.model.po.BlockHeaderPo;
 
-import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 /**
@@ -40,53 +38,50 @@ public interface BlockStorageService {
      * @param chainId
      * @throws Exception
      */
-    void init(int chainId) throws Exception;
+    void init(int chainId);
 
     /**
-     * 存储一个{@link BlockHeader}
+     * 存储一个{@link BlockHeaderPo}
      * @param chainId
      * @param blockHeader
      * @return
      * @throws Exception
      */
-    boolean save(int chainId, BlockHeader blockHeader) throws Exception;
+    boolean save(int chainId, BlockHeaderPo blockHeader);
 
     /**
-     * 根据链ID和区块高度查询一个{@link BlockHeader}
+     * 根据链ID和区块高度查询一个{@link BlockHeaderPo}
      * @param chainId
      * @param height
      * @return
-     * @throws UnsupportedEncodingException
-     * @throws NulsException
      */
-    BlockHeader query(int chainId, long height) throws UnsupportedEncodingException, NulsException;
+    BlockHeaderPo query(int chainId, long height);
 
     /**
-     * 根据链ID和区块hash查询一个{@link BlockHeader}
+     * 根据链ID和区块hash查询一个{@link BlockHeaderPo}
      * @param chainId
      * @param hash
      * @return
-     * @throws NulsException
      */
-    BlockHeader query(int chainId, NulsDigestData hash) throws NulsException;
+    BlockHeaderPo query(int chainId, NulsDigestData hash);
 
     /**
-     * 根据链ID和高度区间查询{@link BlockHeader}列表
+     * 根据链ID和高度区间查询{@link BlockHeaderPo}列表
      * @param chainId
      * @param startHeight
      * @param endHeight
      * @return
      */
-    List<BlockHeader> query(int chainId, long startHeight, long endHeight);
+    List<BlockHeaderPo> query(int chainId, long startHeight, long endHeight);
 
     /**
-     * 根据链ID和高度区间移除{@link BlockHeader}
+     * 根据链ID和高度区间移除{@link BlockHeaderPo}
      * @param chainId
      * @param height
      * @return
      * @throws Exception
      */
-    boolean remove(int chainId, long height) throws Exception;
+    boolean remove(int chainId, long height);
 
     /**
      * 根据链ID销毁数据库文件
@@ -94,7 +89,7 @@ public interface BlockStorageService {
      * @return
      * @throws Exception
      */
-    boolean destroy(int chainId) throws Exception;
+    boolean destroy(int chainId);
 
     /**
      * 根据链ID查询该链的最新高度

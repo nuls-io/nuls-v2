@@ -28,29 +28,27 @@ package io.nuls.network.manager.handler.base;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
-import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.log.Log;
 
 /**
- * message handler
+ * base message handler
  * @author  lan
  * @date 2018/11/01
  */
 public abstract  class BaseMessageHandler implements BaseMeesageHandlerInf {
-    protected  static final int PlaceHolderSize = ToolsConstant.PLACE_HOLDER.length;
-
     /**
      * 实现发送消息
      * Implement sending a message
-     * @param message
-     * @param node
-     * @param isServer
-     * @param asyn
-     * @return
+     * @param message   address message
+     * @param node      peer info
+     * @param isServer client=false or server=true
+     * @param asyn  default true
+     * @return NetworkEventResult
      */
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
@@ -64,13 +62,13 @@ public abstract  class BaseMessageHandler implements BaseMeesageHandlerInf {
                 future.await();
                 boolean success = future.isSuccess();
                 if (!success) {
-                    return new NetworkEventResult(false, null);
+                    return  NetworkEventResult.getResultFail(NetworkErrorCode.NET_MESSAGE_SEND_FAIL);
                 }
             }
         } catch (Exception e) {
             Log.error(e);
-            return new NetworkEventResult(false,null);
+            return  NetworkEventResult.getResultFail(NetworkErrorCode.NET_MESSAGE_SEND_EXCEPTION);
         }
-        return new NetworkEventResult(true, null);
+        return   NetworkEventResult.getResultSuccess();
     }
 }

@@ -48,7 +48,7 @@ public class MyCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "getHeight", version = 1.1,
             description = "test getHeight 1.1")
-    public Response getHeight1(Map map) {
+    public Response getHeight1(Map map) throws Exception {
         ServerRuntime.eventCount("getHeight", new Response());
         return success("getHeight 1.1");
     }
@@ -71,7 +71,7 @@ public class MyCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "getBalance", version = 1.0, scope = Constants.ADMIN,
             description = "test getBalance")
-    public Response getBalance(Map map) {
+    public Response getBalance(Map map) throws Exception {
         ServerRuntime.eventCount("getBalance", success("getBalance->ha-ha-ha"));
         return success("getBalance->ha-ha-ha");
     }

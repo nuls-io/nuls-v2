@@ -49,7 +49,7 @@ public class AccountCmdTest {
     //protected static AccountService accountService;
 
     protected int chainId = 12345;
-    protected String password = "a12345678";
+    protected String password = "nuls123456";
     protected String newPassword = "c12345678";
     protected String version = "1.0";
     protected String success = "1";
@@ -139,7 +139,7 @@ public class AccountCmdTest {
 
     @Test
     public void createOfflineAccountTest() throws Exception {
-        int count = 1;
+        int count = 10;
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
         params.put("chainId", chainId);

@@ -22,12 +22,11 @@ package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.utils.NetworkUtil;
+import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -42,7 +41,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link HashMessage}
+ * 处理收到的{@link HashMessage}，用于孤儿链的维护
  * @author captain
  * @date 18-11-14 下午4:23
  * @version 1.0
@@ -71,15 +70,7 @@ public class GetBlockHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        NulsDigestData blockHash = message.getRequestHash();
-        try {
-            Block block = service.getBlock(chainId, blockHash);
-            if(block != null) {
-                sendBlock(chainId, block, nodeId);
-            }
-        } catch (Exception e) {
-            return failed(BlockErrorCode.PARAMETER_ERROR);
-        }
+        sendBlock(chainId, service.getBlock(chainId, message.getRequestHash()), nodeId);
         return success();
     }
 

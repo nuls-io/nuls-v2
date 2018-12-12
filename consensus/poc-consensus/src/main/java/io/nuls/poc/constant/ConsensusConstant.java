@@ -87,7 +87,8 @@ public interface ConsensusConstant {
     /**
      * RPC_VERSION
      */
-    public static final double RPC_VERSION = 1.0;
+    double RPC_VERSION = 1.0;
+    int MAIN_VERSION =1;
 
     /**
      * Regularly clear the round before the specified number of rounds of the main chain

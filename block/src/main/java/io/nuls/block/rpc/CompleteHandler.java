@@ -37,7 +37,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
 
 /**
- * 处理收到的{@link CompleteMessage}
+ * 处理收到的{@link CompleteMessage}，用于区块的同步
  *
  * @author captain
  * @version 1.0
@@ -48,6 +48,7 @@ public class CompleteHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = COMPLETE_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Object process(Map map) {
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
         CompleteMessage message = new CompleteMessage();
         try {
             byte[] decode = HexUtil.decode(map.get("messageBody").toString());
@@ -60,7 +61,7 @@ public class CompleteHandler extends BaseCmd {
         if (message == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        CacheHandler.requestComplete(message);
+        CacheHandler.requestComplete(chainId, message);
         return success();
     }
 

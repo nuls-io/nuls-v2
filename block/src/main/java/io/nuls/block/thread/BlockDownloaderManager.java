@@ -27,6 +27,7 @@ import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockDownloadUtils;
+import io.nuls.block.utils.BlockUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.DoubleUtils;
@@ -38,7 +39,6 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
-import java.util.SortedSet;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -139,13 +139,13 @@ public class BlockDownloaderManager implements Callable<Boolean> {
                     retryDownload(executor, result);
                 }
 
-                SortedSet<Block> set = result.getBlockSet();
-                if (set == null) {
+                List<Block> list = result.getBlockList();
+                if (list == null) {
                     executor.shutdown();
                     return true;
                 }
 
-                for (Block block : set) {
+                for (Block block : list) {
                     blockQueue.offer(block);
                 }
             }
@@ -168,24 +168,24 @@ public class BlockDownloaderManager implements Callable<Boolean> {
         int index = result.getIndex() + 1 % nodes.size();
 
         result.setNode(nodes.get(index));
-        SortedSet<Block> blockSet = downloadBlockFromNode(executor, result, index);
-        if (blockSet != null && blockSet.size() > 0) {
-            result.setBlockSet(blockSet);
+        List<Block> blockList = downloadBlockFromNode(executor, result, index);
+        if (blockList != null && blockList.size() > 0) {
+            result.setBlockList(blockList);
         }
         return result.isSuccess() ? result : retryDownload(executor, result);
     }
 
-    private SortedSet<Block> downloadBlockFromNode(ThreadPoolExecutor executor, BlockDownLoadResult result, int index) {
+    private List<Block> downloadBlockFromNode(ThreadPoolExecutor executor, BlockDownLoadResult result, int index) {
         BlockDownloader downloadThread = new BlockDownloader(result.getStartHeight(), result.getSize(), chainId, index, result.getNode());
         FutureTask<BlockDownLoadResult> downloadThreadFuture = new FutureTask<>(downloadThread);
         executor.execute(downloadThreadFuture);
-        SortedSet<Block> blockSet = null;
+        List<Block> blockList = null;
         try {
-            blockSet = downloadThreadFuture.get().getBlockSet();
+            blockList = downloadThreadFuture.get().getBlockList();
         } catch (Exception e) {
             Log.error(e);
         }
-        return blockSet;
+        return blockList;
     }
 
     /**
@@ -221,7 +221,7 @@ public class BlockDownloaderManager implements Callable<Boolean> {
             return false;
         }
 
-        blockService.rollbackBlock(chainId, localBestBlock);
+        blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(localBestBlock));
         localBestBlock = blockService.getLatestBlock(chainId);
         if (checkHashEquality(localBestBlock)) {
             return true;

@@ -23,6 +23,7 @@ package io.nuls.block.service.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.exception.DbRuntimeException;
 import io.nuls.block.service.ChainStorageService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
@@ -69,11 +70,15 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     }
 
     @Override
-    public boolean save(int chainId, Block block) throws Exception {
+    public boolean save(int chainId, Block block) {
         NulsDigestData hash = block.getHeader().getHash();
         byte[] key = hash.getDigestBytes();
         Log.debug("save block, hash:{}", hash);
-        return RocksDBService.put(FORK_CHAINS + chainId, key, block.serialize());
+        try {
+            return RocksDBService.put(FORK_CHAINS + chainId, key, block.serialize());
+        } catch (Exception e) {
+            throw new DbRuntimeException("save block error!");
+        }
     }
 
     @Override

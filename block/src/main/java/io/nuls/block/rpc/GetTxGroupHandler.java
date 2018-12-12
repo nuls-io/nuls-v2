@@ -26,8 +26,8 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.TxGroupMessage;
-import io.nuls.block.utils.NetworkUtil;
-import io.nuls.block.utils.TransactionUtil;
+import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -43,7 +43,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 
 /**
- * 处理收到的{@link HashListMessage}
+ * 处理收到的{@link HashListMessage}，用于区块的广播与转发
  * @author captain
  * @date 18-11-14 下午4:23
  * @version 1.0

@@ -47,24 +47,21 @@ public class NodeGroupManager extends BaseManager{
 
 
     private static NodeGroupManager nodeGroupManager=new NodeGroupManager();
-    StorageManager storageManager=StorageManager.getInstance();
+    private  StorageManager storageManager=StorageManager.getInstance();
     /**
      * key:chainId
      */
-    private  Map<String,NodeGroup> nodeGroupMap=new ConcurrentHashMap<String,NodeGroup>();
+    private  Map<String,NodeGroup> nodeGroupMap=new ConcurrentHashMap<>();
     private ManagerStatusEnum status=ManagerStatusEnum.UNINITIALIZED;
 
     /**
      * key:magicNumber value:chainId
      */
-    private static Map<String,String> mgicNumChainIdMap=new ConcurrentHashMap<String,String>();
+    private static Map<String,String> mgicNumChainIdMap=new ConcurrentHashMap<>();
     private NodeGroupManager(){
 
     }
 
-    public  Map<String,NodeGroup> getNodeGroupMap(){
-        return nodeGroupMap;
-    }
 
     public  Collection<NodeGroup> getNodeGroupCollection(){
         return nodeGroupMap.values();
@@ -77,14 +74,17 @@ public class NodeGroupManager extends BaseManager{
         }
         return nodeGroupMap.get(chainId);
     }
+
     public  NodeGroup  getNodeGroupByChainId(int chainId){
         return nodeGroupMap.get(String.valueOf(chainId));
     }
 
+    /**
+     *
+     * @return List<NodeGroup>
+     */
     public List<NodeGroup> getNodeGroups(){
-        List<NodeGroup> nodeGroups=new ArrayList<>();
-        nodeGroups.addAll(nodeGroupMap.values());
-        return nodeGroups;
+        return new ArrayList<>(nodeGroupMap.values());
 
     }
 
@@ -95,24 +95,24 @@ public class NodeGroupManager extends BaseManager{
         return 0;
     }
 
-    public boolean addNodeGroup(int chainId,NodeGroup nodeGroup){
+    /**
+     *
+     * @param chainId chain Id
+     * @param nodeGroup nodeGroup
+     */
+    public void addNodeGroup(int chainId,NodeGroup nodeGroup){
         nodeGroupMap.put(String.valueOf(chainId),nodeGroup);
         mgicNumChainIdMap.put(String.valueOf(nodeGroup.getMagicNumber()),String.valueOf(chainId));
-        return true;
     }
-    public boolean removeNodeGroup(int chainId){
+    public void removeNodeGroup(int chainId){
         nodeGroupMap.remove(String.valueOf(chainId));
-        if(null != mgicNumChainIdMap.get(chainId)){
-            mgicNumChainIdMap.remove(mgicNumChainIdMap.get(chainId));
+        if(null != mgicNumChainIdMap.get(String.valueOf(chainId))){
+            mgicNumChainIdMap.remove(mgicNumChainIdMap.get(String.valueOf(chainId)));
         }
-        return true;
     }
 
     public boolean validMagicNumber(long magicNumber){
-        if(null != mgicNumChainIdMap.get(String.valueOf(magicNumber))) {
-            return true;
-        }
-        return false;
+        return null != mgicNumChainIdMap.get(String.valueOf(magicNumber));
     }
 
 
@@ -120,7 +120,10 @@ public class NodeGroupManager extends BaseManager{
     public void init() {
         NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
         NetworkParam networkParam=NetworkParam.getInstance();
-        //获取配置的信息，进行自有网络的nodeGroup配置初始化
+        /*
+         * 获取配置的信息，进行自有网络的nodeGroup配置初始化
+         * Obtain the configuration information and initialize the nodeGroup configuration of the own netw
+         */
         NodeGroup nodeGroup=new NodeGroup(networkParam.getPacketMagic(),networkParam.getChainId(), networkParam.getMaxInCount(),networkParam.getMaxOutCount(),
                 0,false);
         if(networkParam.isMoonNode()){
@@ -128,8 +131,13 @@ public class NodeGroupManager extends BaseManager{
             nodeGroup.setCrossActive(true);
         }
         nodeGroupManager.addNodeGroup(networkParam.getChainId(),nodeGroup);
-        //友链跨链部分等待跨链模块的初始化调用，卫星链的跨链group通过数据库进行初始化
-        //获取数据库中已有的nodeGroup跨链网络组信息
+
+        /*
+         *友链跨链部分等待跨链模块的初始化调用，卫星链的跨链group通过数据库进行初始化
+         *获取数据库中已有的nodeGroup跨链网络组信息
+         *  Friends chain cross-chain part waiting for the initialization call of the cross-chain module, the cross-chain group of the satellite chain is initialized through the database
+         * Get the existing nodeGroup cross-chain network group information in the database
+         */
         List<NodeGroup> list=storageManager.getAllNodeGroupFromDb();
         for(NodeGroup dbNodeGroup:list){
             dbNodeGroup.setMoonNet(true);

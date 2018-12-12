@@ -8,9 +8,9 @@ public interface TxConstant {
 
     String MODULE_CODE = "tx";
 
-    int NUlS_CHAINID = 1;
+    int NUlS_CHAINID = 12345;
     int NUlS_CHAIN_ASSETID = 1;
-    int CURRENT_CHAINID = 1;
+    int CURRENT_CHAINID = 12345;
     int CURRENT_CHAIN_ASSETID = 1;
 
     /**
@@ -53,6 +53,10 @@ public interface TxConstant {
 
     int ORPHAN_CONTAINER_MAX_SIZE = 200000;
 
+
+    int TX_TYPE_COINBASE = 1;
+    int TX_TYPE_REDPUNISH = 8;
+
     /**
      * 跨链交易
      */
@@ -65,6 +69,13 @@ public interface TxConstant {
      * 跨链交易固定为非解锁交易
      */
     byte CORSS_TX_LOCKED = 0;
+
+    /**
+     * 交易基础信息
+     */
+    int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
+    int TX_MAX_BYTES = 300;
+    int TX_MAX_SIZE = TX_MAX_BYTES * 1024;
 
 
 }

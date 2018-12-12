@@ -24,10 +24,7 @@
  */
 package io.nuls.network.manager;
 
-import io.nuls.network.manager.threads.DataShowMonitorTest;
-import io.nuls.network.manager.threads.GroupStatusMonitor;
-import io.nuls.network.manager.threads.NodesConnectTask;
-import io.nuls.network.manager.threads.TimeService;
+import io.nuls.network.manager.threads.*;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.NettyClient;
 import io.nuls.tools.log.Log;
@@ -52,26 +49,21 @@ public class TaskManager extends BaseManager{
 
     public static TaskManager getInstance(){
         if(null == taskManager){
-            TaskManager taskManager = new TaskManager();
+            taskManager = new TaskManager();
         }
         return taskManager;
     }
-    private static final ExecutorService executor = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-            60L, TimeUnit.SECONDS,
-            new SynchronousQueue<Runnable>());
+
 
     /**
      * client connect thread
-     * @param node
+     * @param node Node
      */
-    public  void doConnect(Node node) {
-        ThreadUtils.createAndRunThread("doConnect",new Runnable() {
-            @Override
-            public void run() {
-                NettyClient client = new NettyClient(node);
-                client.start();
-            }
-        });;
+     void doConnect(Node node) {
+        ThreadUtils.createAndRunThread("doConnect", () -> {
+            NettyClient client = new NettyClient(node);
+            client.start();
+        });
     }
 
     @Override
@@ -82,28 +74,21 @@ public class TaskManager extends BaseManager{
     @Override
     public void start() {
         scheduleGroupStatusMonitor();
-        TimeServiceThreadStart();
+        timeServiceThreadStart();
         testThread();
     }
 
-    public void testThread(){
+    private void testThread(){
         //测试调试专用 开始
-        //    KernelThreadTest test = new KernelThreadTest();
-//        test.run();
-//        try {
-//            Thread.sleep(5000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
         ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("DataShowMonitorTest"));
         executor.scheduleAtFixedRate(new DataShowMonitorTest(), 5, 10, TimeUnit.SECONDS);
         //测试调试专用 结束
     }
-    public void scheduleGroupStatusMonitor(){
+    private void scheduleGroupStatusMonitor(){
         ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("GroupStatusMonitor"));
         executor.scheduleAtFixedRate(new GroupStatusMonitor(), 5, 10, TimeUnit.SECONDS);
     }
-    public synchronized  void clientConnectThreadStart() {
+    synchronized  void clientConnectThreadStart() {
         if(clientThreadStart){
             return;
         }
@@ -116,7 +101,7 @@ public class TaskManager extends BaseManager{
      * 启动时间同步线程
      * Start the time synchronization thread.
      */
-    public void TimeServiceThreadStart() {
+    private void timeServiceThreadStart() {
         Log.debug("----------- TimeService start -------------");
         TimeService timeService = TimeService.getInstance();
         timeService.initWebTimeServer();

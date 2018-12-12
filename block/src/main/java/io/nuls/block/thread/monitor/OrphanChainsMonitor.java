@@ -20,8 +20,6 @@
 
 package io.nuls.block.thread.monitor;
 
-import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.constant.RunningStatusEnum;
@@ -29,23 +27,22 @@ import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
-import io.nuls.block.model.Node;
-import io.nuls.block.utils.BlockDownloadUtils;
-import io.nuls.block.utils.NetworkUtil;
 import io.nuls.tools.log.Log;
 
-import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+import static io.nuls.block.constant.RunningStatusEnum.EXCEPTION;
+import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_CHAINS;
+import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
 
 /**
  * 孤儿链的形成原因分析：因为网络问题，在没有收到Block(100)的情况下，已经收到了Block(101)，此时Block(101)不能连接到主链上，形成孤儿链
  * 孤儿链定时处理器
  * 孤儿链处理大致流程：
  *      1.清理无效数据
- *      2.维护现有数据
- *      3.标记
- *      4.复制、清除
+ *      2.标记
+ *      3.复制、清除
  *
  * @author captain
  * @version 1.0
@@ -70,7 +67,7 @@ public class OrphanChainsMonitor implements Runnable {
             try {
                 //判断该链的运行状态，只有正常运行时才会有孤儿链的处理
                 RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
-                if (!status.equals(RunningStatusEnum.RUNNING)) {
+                if (!status.equals(RUNNING)) {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
                     return;
                 }
@@ -79,6 +76,7 @@ public class OrphanChainsMonitor implements Runnable {
                 //1.清理链起始高度位于主链最新高度增减30(可配置)范围外的孤儿链
                 long latestHeight = masterChain.getEndHeight();
                 int heightRange = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.HEIGHT_RANGE));
+                ContextManager.getContext(chainId).setStatus(MAINTAIN_CHAINS);
                 for (Chain orphanChain : orphanChains) {
                     if (Math.abs(orphanChain.getStartHeight() - latestHeight) > heightRange) {
                         //清理orphanChain，并递归清理orphanChain的所有子链
@@ -86,18 +84,12 @@ public class OrphanChainsMonitor implements Runnable {
                     }
                 }
 
-                List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
-                //2.维护现有孤儿链，尝试在链首增加区块
-                for (Chain orphanChain : orphanChains) {
-                    maintainOrphanChain(chainId, orphanChain, availableNodes);
-                }
-
                 SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
-                //3.标记、变更链属性阶段
+                //2.标记、变更链属性阶段
                 for (Chain orphanChain : orphanChains) {
                     handle(orphanChain, masterChain, forkChains, orphanChains);
                 }
-                //4.复制、清除阶段
+                //3.复制、清除阶段
                 SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
                 for (Chain orphanChain : orphanChains) {
 
@@ -135,7 +127,9 @@ public class OrphanChainsMonitor implements Runnable {
                     }
                 }
                 ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
+                ContextManager.getContext(chainId).setStatus(RUNNING);
             } catch (Exception e) {
+                ContextManager.getContext(chainId).setStatus(EXCEPTION);
                 Log.error("chainId-{},maintain OrphanChains fail!error msg is:{}", chainId, e.getMessage());
             }
         }
@@ -145,6 +139,7 @@ public class OrphanChainsMonitor implements Runnable {
         //1.判断与主链是否相连
         if (orphanChain.getParent() == null && tryAppend(masterChain, orphanChain)) {
             orphanChain.setType(ChainTypeEnum.MASTER_APPEND);
+            return;
         }
         //2.判断是否从主链分叉
         if (orphanChain.getParent() == null && tryFork(masterChain, orphanChain)) {
@@ -215,32 +210,6 @@ public class OrphanChainsMonitor implements Runnable {
             return ChainManager.fork(mainChain, subChain);
         }
         return false;
-    }
-
-    /**
-     * 维护孤儿链，向其他节点请求孤儿链起始区块的上一个区块，仅限于没有父链的孤儿链
-     *
-     * @param chainId
-     * @param orphanChain
-     */
-    private void maintainOrphanChain(int chainId, Chain orphanChain, List<Node> availableNodes) {
-        if (orphanChain.getParent() != null) {
-            return;
-        }
-        NulsDigestData previousHash = orphanChain.getPreviousHash();
-        Block block;
-        //向其他节点请求孤儿链起始区块的上一个区块
-        for (int i = 0, availableNodesSize = availableNodes.size(); i < availableNodesSize; i++) {
-            Node availableNode = availableNodes.get(i);
-            block = BlockDownloadUtils.getBlockByHash(chainId, previousHash, availableNode);
-            if (block != null) {
-                orphanChain.addFirst(block);
-                orphanChain.setStartHeight(orphanChain.getStartHeight() - 1);
-                orphanChain.setPreviousHash(block.getHeader().getPreHash());
-                orphanChain.getHashList().addFirst(block.getHeader().getHash());
-                return;
-            }
-        }
     }
 
 }

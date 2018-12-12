@@ -85,17 +85,34 @@ public class CmdDispatcher {
      */
     public static void syncKernel() throws Exception {
 
-        Message message = MessageUtil.basicMessage(MessageType.Request);
+        /*
+        打造用于同步的Request
+        Create Request for Synchronization
+         */
         Request request = MessageUtil.defaultRequest();
         request.getRequestMethods().put("registerAPI", ServerRuntime.local);
+        Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
 
+        /*
+        连接核心模块（Manager）
+        Connect to Core Module (Manager)
+         */
         WsClient wsClient = ClientRuntime.getWsClient(Constants.kernelUrl);
         if (wsClient == null) {
             throw new Exception("Kernel not available");
         }
+
+        /*
+        发送请求
+        Send request
+        */
         wsClient.send(JSONUtils.obj2json(message));
 
+        /*
+        获取返回的数据，放入本地变量
+        Get the returned data and place it in the local variable
+         */
         Response response = receiveResponse(message.getMessageId());
         Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("registerAPI");
@@ -103,7 +120,32 @@ public class CmdDispatcher {
         for (Object key : dependMap.keySet()) {
             ClientRuntime.roleMap.put(key.toString(), (Map) dependMap.get(key));
         }
+
         Log.info("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.roleMap));
+
+        /*
+        判断所有依赖的模块是否已经启动（发送握手信息）
+        Determine whether all dependent modules have been started (send handshake information)
+         */
+        if (ServerRuntime.local.getDependencies() == null) {
+            ServerRuntime.startService = true;
+            Log.info("Start service!");
+            return;
+        }
+
+        for (String role : ServerRuntime.local.getDependencies().keySet()) {
+            String url = ClientRuntime.getRemoteUri(role);
+            try {
+                ClientRuntime.getWsClient(url);
+            } catch (Exception e) {
+                Log.error("Dependent modules cannot be connected: " + role);
+                ServerRuntime.startService = false;
+                return;
+            }
+        }
+
+        ServerRuntime.startService = true;
+        Log.info("Start service!");
     }
 
 
@@ -238,6 +280,10 @@ public class CmdDispatcher {
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
     public static void sendUnsubscribe(String messageId) throws Exception {
+        if (messageId == null) {
+            return;
+        }
+
         Message message = MessageUtil.basicMessage(MessageType.Unsubscribe);
         Unsubscribe unsubscribe = new Unsubscribe();
         unsubscribe.setUnsubscribeMethods(new String[]{messageId});

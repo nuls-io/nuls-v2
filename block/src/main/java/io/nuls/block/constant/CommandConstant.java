@@ -29,7 +29,6 @@ package io.nuls.block.constant;
 public interface CommandConstant {
 
     //网络消息对应的RPC命令
-    String EMPTY_MESSAGE = "empty";
     String COMPLETE_MESSAGE = "complete";
     String BLOCK_MESSAGE = "block";
     String GET_BLOCK_MESSAGE = "getBlock";

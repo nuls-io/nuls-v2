@@ -1,5 +1,9 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.data.Address;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.BlockRoundData;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -9,11 +13,15 @@ import io.nuls.poc.model.bo.config.ConfigItem;
 import io.nuls.poc.storage.ConfigService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.parse.SerializeUtils;
+import io.nuls.tools.thread.TimeService;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,6 +37,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ChainManager {
     @Autowired
     private ConfigService configService;
+    @Autowired
+    private AgentManager agentManager;
+    @Autowired
+    private DepositManager depositManager;
+    @Autowired
+    private PunishManager punishManager;
+    @Autowired
+    private RoundManager roundManager;
+    @Autowired
+    private SchedulerManager schedulerManager;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
@@ -65,7 +83,7 @@ public class ChainManager {
             创建并启动链内任务
             Create and start in-chain tasks
             */
-            SpringLiteContext.getBean(SchedulerManager.class).createChainScheduler(chain);
+            schedulerManager.createChainScheduler(chain);
 
             chainMap.put(chainId,chain);
         }
@@ -99,14 +117,13 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if(configMap == null || configMap.size() == 0){
-                int chainId  = ConsensusConstant.MAIN_CHAIN_ID;
                 String configJson = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
                 List<ConfigItem> configItemList = JSONUtils.json2list(configJson,ConfigItem.class);
-                ConfigBean configBean = ConfigManager.initManager(configItemList,chainId);
+                ConfigBean configBean = ConfigManager.initManager(configItemList);
                 if(configBean == null){
                     return null;
                 }
-                configMap.put(chainId,configBean);
+                configMap.put(configBean.getChainId(),configBean);
             }
             return configMap;
         }catch(Exception e){
@@ -160,9 +177,41 @@ public class ChainManager {
             缓存最近x轮区块头数据
             Cache the latest X rounds of block header data
             */
-            SpringLiteContext.getBean(AgentManager.class).loadAgents(chain);
-            SpringLiteContext.getBean(DepositManager.class).loadDeposits(chain);
-            SpringLiteContext.getBean(PunishManager.class).loadPunishes(chain);
+            int length = 1000;
+            int roundIndex = 1;
+            List<BlockHeader>blockHeaderList = new ArrayList<>();
+            Address packingAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
+            for (int index = 0;index < length;index++) {
+                BlockHeader blockHeader = new BlockHeader();
+                blockHeader.setHeight(100);
+                blockHeader.setPreHash(NulsDigestData.calcDigestData("00000000000".getBytes()));
+                blockHeader.setTime(TimeService.currentTimeMillis());
+                blockHeader.setTxCount(1);
+                blockHeader.setMerkleHash(NulsDigestData.calcDigestData(new byte[20]));
+
+                // add a round data
+                BlockRoundData roundData = new BlockRoundData();
+                roundData.setConsensusMemberCount(1);
+                roundData.setPackingIndexOfRound(1);
+                if((index+1)%10 == 0){
+                    roundIndex++;
+                    blockHeader.setPackingAddress(packingAddress.getAddressBytes());
+                }
+                roundData.setRoundIndex(roundIndex);
+                roundData.setRoundStartTime(TimeService.currentTimeMillis());
+                try {
+                    blockHeader.setExtend(roundData.serialize());
+                } catch (IOException e) {
+                    throw new NulsRuntimeException(e);
+                }
+                blockHeaderList.add(blockHeader);
+            }
+            chain.setBlockHeaderList(blockHeaderList);
+            chain.setNewestHeader(blockHeaderList.get(blockHeaderList.size()-1));
+            agentManager.loadAgents(chain);
+            depositManager.loadDeposits(chain);
+            punishManager.loadPunishes(chain);
+            roundManager.initRound(chain);
         }catch (Exception e){
             Log.error(e);
         }

@@ -33,7 +33,7 @@ import java.math.BigInteger;
  * @author: Charlie
  * @date: 2018-12-04
  */
-public class CoinDTO {
+public class CoinDTO implements Cloneable {
 
     private String address;
 
@@ -51,6 +51,17 @@ public class CoinDTO {
      */
     @JsonIgnore
     private String password;
+
+    public CoinDTO() {
+    }
+
+    public CoinDTO(String address, Integer assetsChainId, Integer assetsId, BigInteger amount, String password) {
+        this.address = address;
+        this.assetsChainId = assetsChainId;
+        this.assetsId = assetsId;
+        this.amount = amount;
+        this.password = password;
+    }
 
     public String getAddress() {
         return address;
@@ -101,5 +112,17 @@ public class CoinDTO {
                 ", amount=" + amount +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    @Override
+    public Object clone(){
+        CoinDTO coinDTO = null;
+        try {
+            coinDTO = (CoinDTO)super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+
+        return coinDTO;
     }
 }

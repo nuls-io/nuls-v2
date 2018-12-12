@@ -35,7 +35,7 @@ import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
-import io.nuls.network.manager.handler.NetworkMessageHandlerFactory;
+import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.Node;
@@ -62,7 +62,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
     }
-    protected   boolean validSelfConnection(ChannelHandlerContext ctx,String remoteIP){
+    private   boolean validSelfConnection(ChannelHandlerContext ctx,String remoteIP){
         Channel channel = ctx.channel();
         //如果是本机节点访问自己的服务器，则广播本机服务器到全网
         if (LocalInfoManager.getInstance().isSelfIp(remoteIP)) {
@@ -76,11 +76,11 @@ public class ClientChannelHandler extends BaseChannelHandler {
     /**
      * 校验channel是否可用
      * Verify that the channel is available
-     * @param ctx
-     * @param magicNumber
-     * @return
+     * @param ctx ctx
+     * @param magicNumber magicNumber
+     * @return boolean
      */
-    protected   boolean validConnectNumber(ChannelHandlerContext ctx,long magicNumber, String remoteIP){
+    private   boolean validConnectNumber(ChannelHandlerContext ctx,long magicNumber, String remoteIP){
         Channel channel = ctx.channel();
         //already exist peer ip （In or Out）
         if( ConnectionManager.getInstance().isPeerConnectExceedMaxIn(remoteIP,magicNumber,1)){
@@ -124,7 +124,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
             channel.close();
             return;
         }
-        BaseMeesageHandlerInf handler=NetworkMessageHandlerFactory.getInstance().getHandler(versionMessage);
+        BaseMeesageHandlerInf handler=MessageHandlerFactory.getInstance().getHandler(versionMessage);
         handler.send(versionMessage, node, false,true);
 
     }
@@ -150,7 +150,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
             if (node != null) {
                 ByteBuf buf = (ByteBuf) msg;
                 try {
-                    MessageManager.getInstance().receiveMessage(buf,node.getId(),false);
+                   MessageManager.getInstance().receiveMessage(buf,node.getId(),false);
                 } finally {
                     buf.release();
                 }
@@ -161,6 +161,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
                 Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
             }
         } catch (Exception e) {
+            e.printStackTrace();
             throw e;
         }
     }

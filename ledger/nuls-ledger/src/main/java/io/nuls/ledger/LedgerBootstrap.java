@@ -74,7 +74,7 @@ public class LedgerBootstrap {
     public static void initServer() {
         try {
             String packageC = "io.nuls.ledger.rpc.cmd";
-            String kernelUrl = AppConfig.moduleConfig.getKernelHost() + ":" + AppConfig.moduleConfig.getKernelPort();
+            String kernelUrl = AppConfig.loadModuleConfig().getKernelHost() + ":" + AppConfig.loadModuleConfig().getKernelPort();
             logger.info("kernel start info {}", kernelUrl);
             WsServer.getInstance(ModuleE.LG)
                     //.supportedAPIVersions(new String[]{"1.1", "1.2"})
@@ -96,7 +96,7 @@ public class LedgerBootstrap {
      */
     public static void initRocksDb() {
         try {
-            RocksDBService.init(AppConfig.moduleConfig.getDatabaseDir());
+            RocksDBService.init(AppConfig.loadModuleConfig().getDatabaseDir());
             if (!RocksDBService.existTable(DataBaseArea.TB_LEDGER_ACCOUNT)) {
                 RocksDBService.createTable(DataBaseArea.TB_LEDGER_ACCOUNT);
             } else {

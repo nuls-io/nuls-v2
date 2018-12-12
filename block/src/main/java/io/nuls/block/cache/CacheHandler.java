@@ -25,59 +25,68 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.tools.parse.SerializeUtils;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 /**
  * 异步请求响应结果缓存类
+ *
  * @author captain
  * @version 1.0
  * @date 18-11-14 下午5:35
  */
 public class CacheHandler {
 
-    private static DataCacher<Block> blockByHashCacher = new DataCacher<>();
-    private static DataCacher<Block> blockByHeightCacher = new DataCacher<>();
-    private static DataCacher<CompleteMessage> taskCacher = new DataCacher<>();
+    private static Map<Integer, DataCacher<Block>> blockByHashCacher = new ConcurrentHashMap<>();
+    private static Map<Integer, DataCacher<Block>> blockByHeightCacher = new ConcurrentHashMap<>();
+    private static Map<Integer, DataCacher<CompleteMessage>> synTaskCacher = new ConcurrentHashMap<>();
 
-    public static CompletableFuture<Block> addGetBlockByHeightRequest(NulsDigestData requestHash) {
-        return blockByHeightCacher.addFuture(requestHash);
+    public static CompletableFuture<Block> addGetBlockByHeightRequest(int chainId, NulsDigestData requestHash) {
+        return blockByHeightCacher.get(chainId).addFuture(requestHash);
     }
 
-    public static CompletableFuture<Block> addGetBlockByHashRequest(NulsDigestData requestHash) {
-        return blockByHashCacher.addFuture(requestHash);
+    public static CompletableFuture<Block> addGetBlockByHashRequest(int chainId, NulsDigestData requestHash) {
+        return blockByHashCacher.get(chainId).addFuture(requestHash);
     }
 
-    public static void receiveBlock(Block block) {
+    public static void receiveBlock(int chainId, Block block) {
         NulsDigestData hash = NulsDigestData.calcDigestData(SerializeUtils.uint64ToByteArray(block.getHeader().getHeight()));
-        boolean result = blockByHeightCacher.success(hash, block);
+        boolean result = blockByHeightCacher.get(chainId).success(hash, block);
         if (!result) {
-            blockByHashCacher.success(block.getHeader().getHash(), block);
+            blockByHashCacher.get(chainId).success(block.getHeader().getHash(), block);
         }
     }
 
-    public static Future<CompleteMessage> newRequest(NulsDigestData hash) {
-        return taskCacher.addFuture(hash);
+    public static Future<CompleteMessage> newRequest(int chainId, NulsDigestData hash) {
+        return synTaskCacher.get(chainId).addFuture(hash);
     }
 
-    public static void requestComplete(CompleteMessage message) {
+    public static void requestComplete(int chainId, CompleteMessage message) {
         if (message.isSuccess()) {
-            taskCacher.success(message.getRequestHash(), message);
+            synTaskCacher.get(chainId).success(message.getRequestHash(), message);
         } else {
-            taskCacher.fail(message.getRequestHash());
+            synTaskCacher.get(chainId).fail(message.getRequestHash());
         }
     }
 
-    public static void removeBlockByHeightFuture(NulsDigestData hash) {
-        blockByHeightCacher.removeFuture(hash);
+    public static void removeBlockByHeightFuture(int chainId, NulsDigestData hash) {
+        blockByHeightCacher.get(chainId).removeFuture(hash);
     }
 
-    public static void removeBlockByHashFuture(NulsDigestData hash) {
-        blockByHashCacher.removeFuture(hash);
+    public static void removeBlockByHashFuture(int chainId, NulsDigestData hash) {
+        blockByHashCacher.get(chainId).removeFuture(hash);
     }
 
-    public static void removeRequest(NulsDigestData hash) {
-        taskCacher.removeFuture(hash);
+    public static void removeRequest(int chainId, NulsDigestData hash) {
+        synTaskCacher.get(chainId).removeFuture(hash);
+    }
+
+    public static void init(int chainId){
+        blockByHeightCacher.put(chainId, new DataCacher<>());
+        blockByHashCacher.put(chainId, new DataCacher<>());
+        synTaskCacher.put(chainId, new DataCacher<>());
     }
 
 }
