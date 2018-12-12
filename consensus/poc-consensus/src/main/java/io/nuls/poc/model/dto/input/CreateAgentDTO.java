@@ -7,7 +7,6 @@ package io.nuls.poc.model.dto.input;
  * 2018/11/12
  * */
 public class CreateAgentDTO {
-    private int assetId;
     private int chainId;
     private String agentAddress;
     private String packingAddress;
@@ -15,14 +14,6 @@ public class CreateAgentDTO {
     private double commissionRate;
     private String deposit;
     private String password;
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
-    }
 
     public int getChainId() {
         return chainId;

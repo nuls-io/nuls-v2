@@ -84,6 +84,7 @@ public class HeartbeatProcessor implements Runnable {
                         ClientRuntime.getWsClient(url);
                     }
                 } catch (Exception e) {
+                    ClientRuntime.wsClientMap.remove(url);
                     Log.error(e);
                 }
             }
