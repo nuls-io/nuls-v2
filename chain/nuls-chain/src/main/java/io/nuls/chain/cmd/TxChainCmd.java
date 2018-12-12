@@ -40,16 +40,15 @@ public class TxChainCmd extends BaseChainCmd {
     @CmdAnnotation(cmd = "cm_chainRegValidator", version = 1.0, description = "chainRegValidator")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
     @Parameter(parameterName = "txHex", parameterType = "String")
-    @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response chainRegValidator(Map params) {
         try {
             String txHex = String.valueOf(params.get("txHex"));
-            String secondaryData = String.valueOf(params.get("secondaryData"));
             BlockChain blockChain = buildChainWithTxData(txHex, new RegisterChainAndAssetTransaction(), false);
-            int chainId = blockChain.getChainId();
-            if (chainId < 0) {
-                return failed(CmErrorCode.C10002);
-            }
+
+            /*
+            判断链ID是否已经存在
+            Determine if the chain ID already exists
+             */
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
             if (dbChain != null) {
                 return failed(CmErrorCode.C10001);
@@ -68,12 +67,8 @@ public class TxChainCmd extends BaseChainCmd {
     public Response chainRegCommit(Map params) {
         try {
             String txHex = String.valueOf(params.get("txHex"));
-            String secondaryData = String.valueOf(params.get("secondaryData"));
             BlockChain blockChain = buildChainWithTxData(txHex, new RegisterChainAndAssetTransaction(), false);
-            BlockChain dbChain = chainService.getChain(blockChain.getChainId());
-            if (dbChain != null) {
-                return failed(CmErrorCode.C10001);
-            }
+
             //进行资产存储,资产流通表存储
             Asset asset = buildAssetWithTxChain(txHex, new RegisterChainAndAssetTransaction());
             asset.addChainId(asset.getChainId());

@@ -96,7 +96,7 @@ public class AccountBootstrap {
             WsServer.getInstance(ModuleE.AC)
                     .moduleRoles(new String[]{"1.0"})
                     .moduleVersion("1.0")
-                    .dependencies(ModuleE.LG.abbr, "1.0")
+                    //.dependencies(ModuleE.LG.abbr, "1.0")
                     .scanPackage("io.nuls.account.rpc.cmd")
                     .connect(NulsConfig.KERNEL_MODULE_URL);
 

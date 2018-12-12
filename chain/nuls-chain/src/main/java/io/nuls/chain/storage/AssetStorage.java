@@ -19,7 +19,7 @@ public interface AssetStorage {
      * @param asset Asset object that needs to be saved
      * @return true/false
      */
-    boolean save(String key, Asset asset);
+    void save(String key, Asset asset) throws Exception;
 
     /**
      * Find assets based on key
@@ -27,7 +27,7 @@ public interface AssetStorage {
      * @param key ChainId_AssetId
      * @return Asset object
      */
-    Asset load(String key);
+    Asset load(String key) throws Exception;
 
     /**
      * Physical deletion
@@ -35,7 +35,7 @@ public interface AssetStorage {
      * @param key ChainId_AssetId
      * @return true/false
      */
-    boolean delete(String key);
+    void delete(String key) throws Exception;
 
     /**
      * Get all the assets of the chain
@@ -43,7 +43,7 @@ public interface AssetStorage {
      * @param chainId Chain ID
      * @return List of asset
      */
-    List<Asset> getByChain(int chainId);
+    List<Asset> getByChain(int chainId) throws Exception;
 
 
 }

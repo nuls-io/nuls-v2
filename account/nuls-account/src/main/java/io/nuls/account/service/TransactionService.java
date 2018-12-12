@@ -25,6 +25,7 @@
 package io.nuls.account.service;
 
 import io.nuls.account.model.dto.CoinDto;
+import io.nuls.tools.exception.NulsException;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -41,12 +42,20 @@ public interface TransactionService {
      * 多地址转账
      *
      * @param currentChainId 当前链ID
-     * @param fromList 从指定账户转出
-     * @param toList 转出到指定账户
-     * @param remark 备注
-     * @param price 单价
+     * @param fromList       从指定账户转出
+     * @param toList         转出到指定账户
+     * @param remark         备注
      * @return transfer transaction hash
+     * @throws NulsException
      */
-    String multipleAddressTransfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark, BigInteger price);
+    String multipleAddressTransfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
 
+    /**
+     * 校验该链是否有该资产
+     *
+     * @param chainId
+     * @param assetId
+     * @return
+     */
+    boolean assetExist(int chainId, int assetId);
 }

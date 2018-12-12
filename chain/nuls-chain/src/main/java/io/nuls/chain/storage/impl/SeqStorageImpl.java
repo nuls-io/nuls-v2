@@ -54,42 +54,38 @@ public class SeqStorageImpl implements SeqStorage, InitializingBean {
      * 得到链的下一个序列号
      */
     @Override
-    public int nextSeq(int chainId) {
-        try {
-            /*
-            空，则从1开始
-             */
-            if (SEQ_MAP.get(chainId) == null) {
-                setSeq(chainId, 1);
-                return 1;
-            }
+    public int nextSeq(int chainId) throws Exception {
 
-            /*
-            非空，则尝试返回当前值+1
-             */
-            int nextSeq = SEQ_MAP.get(chainId) + 1;
-            if (setSeq(chainId, nextSeq)) {
-                /*
-                符合规范
-                 */
-                return nextSeq;
-            } else {
-                /*
-                不符合规范，递归调用
-                 */
-                return nextSeq(chainId);
-            }
-        } catch (Exception e) {
-            Log.error(e);
+        /*
+        空，则从1开始
+         */
+        if (SEQ_MAP.get(chainId) == null) {
+            setSeq(chainId, 1);
+            return 1;
         }
-        return 0;
+
+        /*
+        非空，则尝试返回当前值+1
+         */
+        int nextSeq = SEQ_MAP.get(chainId) + 1;
+        if (setSeq(chainId, nextSeq)) {
+            /*
+            符合规范
+             */
+            return nextSeq;
+        } else {
+            /*
+            不符合规范，递归调用
+             */
+            return nextSeq(chainId);
+        }
     }
 
     /**
      * 设置链的序列号
      */
     @Override
-    public boolean setSeq(int chainId, int tarSeq) {
+    public boolean setSeq(int chainId, int tarSeq) throws Exception {
         synchronized (SEQ_MAP) {
             /*
             空：第一次添加链的序列号信息，直接保存
@@ -97,12 +93,7 @@ public class SeqStorageImpl implements SeqStorage, InitializingBean {
              */
             if (SEQ_MAP.get(chainId) == null || tarSeq > SEQ_MAP.get(chainId)) {
                 SEQ_MAP.put(chainId, tarSeq);
-                try {
-                    return RocksDBService.put(TBL, ByteUtils.intToBytes(chainId), ByteUtils.intToBytes(tarSeq));
-                } catch (Exception e) {
-                    Log.error(e);
-                    return false;
-                }
+                return RocksDBService.put(TBL, ByteUtils.intToBytes(chainId), ByteUtils.intToBytes(tarSeq));
             } else {
                 return false;
             }

@@ -37,8 +37,6 @@ import io.nuls.tools.data.StringUtils;
  */
 public class WithdrawDTO {
 
-    private int assetId;
-
     private int chainId;
 
     private String address;
@@ -46,14 +44,6 @@ public class WithdrawDTO {
     private String txHash;
 
     private String password;
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
-    }
 
     public int getChainId() {
         return chainId;

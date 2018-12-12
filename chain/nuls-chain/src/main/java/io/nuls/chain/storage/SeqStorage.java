@@ -35,10 +35,10 @@ public interface SeqStorage {
     /**
      * 得到链的下一个序列号
      */
-    int nextSeq(int chainId);
+    int nextSeq(int chainId) throws Exception;
 
     /**
      * 设置链的序列号
      */
-    boolean setSeq(int chainId, int seq);
+    boolean setSeq(int chainId, int seq) throws Exception;
 }

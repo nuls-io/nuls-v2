@@ -88,10 +88,7 @@ public class ChainCmd extends BaseChainCmd {
             blockChain.setTxConfirmedBlockNum(Integer.valueOf(params.get("txConfirmedBlockNum").toString()));
             blockChain.setRegAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
             blockChain.setCreateTime(TimeService.currentTimeMillis());
-            BlockChain dbChain = chainService.getChain(blockChain.getChainId());
-            if (dbChain != null) {
-                return failed("C10001");
-            }
+
             int assetId = seqService.createAssetId(blockChain.getChainId());
             Asset asset = new Asset(assetId);
             asset.setChainId(blockChain.getChainId());
@@ -103,6 +100,7 @@ public class ChainCmd extends BaseChainCmd {
             asset.setAvailable(true);
             asset.setCreateTime(TimeService.currentTimeMillis());
             asset.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
+
             // 组装交易发送
             Transaction tx = new RegisterChainAndAssetTransaction();
             tx.setTxData(blockChain.parseToTransaction(asset));
@@ -113,13 +111,11 @@ public class ChainCmd extends BaseChainCmd {
             tx.setCoinData(coinData.serialize());
             //todo 交易签名
             tx.setTransactionSignature(null);
-            boolean rpcReslt = rpcService.newTx(tx);
-            if (rpcReslt) {
-                return success(blockChain);
-            } else {
-                Log.error("RPC fail");
-                return failed(new ErrorCode());
-            }
+
+            return rpcService.newTx(tx)
+                    ? success(blockChain)
+                    : failed(new ErrorCode());
+
         } catch (Exception e) {
             Log.error(e);
             return failed(ErrorCode.init("-100"));
