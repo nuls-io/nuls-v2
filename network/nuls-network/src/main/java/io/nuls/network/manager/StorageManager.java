@@ -49,7 +49,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class StorageManager extends BaseManager{
     private static StorageManager storageManager=new StorageManager();
     private static Map<String,NodePo> cacheAllNodes=new ConcurrentHashMap<>();
-    DbService dbService=null;
+    private DbService dbService=null;
     private StorageManager(){
 
     }
@@ -60,7 +60,11 @@ public class StorageManager extends BaseManager{
         return storageManager;
     }
 
-    public List<NodeGroup> getAllNodeGroupFromDb(){
+    /**
+     *  getAllNodeGroupFromDb
+     * @return  List<NodeGroup
+     */
+    List<NodeGroup> getAllNodeGroupFromDb(){
         List<NodeGroup> nodeGroups=new ArrayList<>();
         try {
             List<NodeGroupPo> nodeGroupPos=dbService.getAllNodeGroups();
@@ -74,8 +78,8 @@ public class StorageManager extends BaseManager{
     }
     /**
      * get Nodes
-     * @param chainId
-     * @return
+     * @param chainId chainId
+     * @return  List<Node>
      */
     List<Node> getNodesByChainId(int chainId){
         List<Node> nodes=new ArrayList<>();
@@ -122,17 +126,11 @@ public class StorageManager extends BaseManager{
             e.printStackTrace();
         }
     }
-   public void saveNodeGroups(List<NodeGroupPo> nodeGroups){
-        dbService.saveNodeGroups(nodeGroups);
-   }
-
 
     @Override
     public void init() {
         try {
-
             dbService=SpringLiteContext.getBean(DbServiceImpl.class);
-//            ((InitializingBean)dbService).afterPropertiesSet();
         } catch (Exception e) {
             e.printStackTrace();
         }

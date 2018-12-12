@@ -52,7 +52,7 @@ public class TxAssetCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Asset asset = buildAssetTxData(txHex, new AddAssetToChainTransaction());
+            Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
 
             if (assetService.assetExist(asset)) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
@@ -85,7 +85,7 @@ public class TxAssetCmd extends BaseChainCmd {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            Asset asset = buildAssetTxData(txHex, new AddAssetToChainTransaction());
+            Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
 
             //获取链信息
             BlockChain dbChain = chainService.getChain(chainId);
@@ -115,25 +115,30 @@ public class TxAssetCmd extends BaseChainCmd {
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response assetRegRollback(Map params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
-        String txHex = String.valueOf(params.get("txHex"));
-        String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset asset = buildAssetTxData(txHex, new AddAssetToChainTransaction());
-        //判断库中的asset是否存在，数据正确，则删除
-        Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-        if (!ByteUtils.arrayEquals(asset.getAddress(), dbAsset.getAddress())) {
-            return failed(CmErrorCode.ERROR_ADDRESS_ERROR);
+        try {
+            int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+            String txHex = String.valueOf(params.get("txHex"));
+            String secondaryData = String.valueOf(params.get("secondaryData"));
+            Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
+            //判断库中的asset是否存在，数据正确，则删除
+            Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+            if (!ByteUtils.arrayEquals(asset.getAddress(), dbAsset.getAddress())) {
+                return failed(CmErrorCode.ERROR_ADDRESS_ERROR);
+            }
+            if (null != dbAsset && dbAsset.getTxHash().equalsIgnoreCase(asset.getTxHash())) {
+                assetService.deleteAsset(asset);
+                //更新chain
+                BlockChain dbChain = chainService.getChain(dbAsset.getChainId());
+                dbChain.removeCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, asset.getAssetId()));
+                dbChain.removeCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+                chainService.updateChain(dbChain);
+                return success();
+            }
+            return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
         }
-        if (null != dbAsset && dbAsset.getTxHash().equalsIgnoreCase(asset.getTxHash())) {
-            assetService.deleteAsset(asset);
-            //更新chain
-            BlockChain dbChain = chainService.getChain(dbAsset.getChainId());
-            dbChain.removeCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, asset.getAssetId()));
-            dbChain.removeCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-            chainService.updateChain(dbChain);
-            return success();
-        }
-        return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
     }
 
     /**
@@ -150,7 +155,7 @@ public class TxAssetCmd extends BaseChainCmd {
     public Response assetDisableValidator(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset asset = buildAssetTxData(txHex, new AddAssetToChainTransaction());
+        Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
         return assetDisableValidator(asset);
     }
 
@@ -196,7 +201,7 @@ public class TxAssetCmd extends BaseChainCmd {
     public Response assetDisableCommit(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset asset = buildAssetTxData(txHex, new AddAssetToChainTransaction());
+        Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
         Response cmdResponse = assetDisableValidator(asset);
         if (cmdResponse.isSuccess()) {
             return cmdResponse;
@@ -219,7 +224,7 @@ public class TxAssetCmd extends BaseChainCmd {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        Asset asset = buildAssetTxData(txHex, new AddAssetToChainTransaction());
+        Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
         /*判断资产是否可用*/
         Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
         if (null == dbAsset || dbAsset.isAvailable()) {
@@ -283,46 +288,51 @@ public class TxAssetCmd extends BaseChainCmd {
 
 
     Response assetCirculateValidator(int fromChainId, int toChainId, Map<String, String> fromAssetMap, Map<String, String> toAssetMap) {
-        BlockChain fromChain = chainService.getChain(fromChainId);
-        BlockChain toChain = chainService.getChain(toChainId);
-        if (fromChainId == toChainId) {
-            Log.error("fromChain ==  toChain is not cross tx" + fromChain);
-            return failed("fromChain ==  toChain is not cross tx");
-        }
-        if (fromChainId != 0 && fromChain.isDelete()) {
-            Log.info("fromChain is delete,chainId=" + fromChain.getChainId());
-            return failed("fromChain is delete");
-        }
-        if (toChainId != 0 && toChain.isDelete()) {
-            Log.info("toChain is delete,chainId=" + fromChain.getChainId());
-            return failed("toChain is delete");
-        }
-        //获取链内 资产 状态是否正常
-        Set<String> toAssets = toAssetMap.keySet();
-        Iterator itTo = toAssets.iterator();
-        while (itTo.hasNext()) {
-            String assetKey = itTo.next().toString();
-            Asset asset = assetService.getAsset(assetKey);
-            if (null == asset || !asset.isAvailable()) {
-                return failed("asset is not exsit");
+        try {
+            BlockChain fromChain = chainService.getChain(fromChainId);
+            BlockChain toChain = chainService.getChain(toChainId);
+            if (fromChainId == toChainId) {
+                Log.error("fromChain ==  toChain is not cross tx" + fromChain);
+                return failed("fromChain ==  toChain is not cross tx");
             }
-        }
-        //校验from 资产是否足够
-        Set<String> fromAssets = fromAssetMap.keySet();
-        Iterator itFrom = fromAssets.iterator();
-        while (itFrom.hasNext()) {
-            String assetKey = itFrom.next().toString();
-            Asset asset = assetService.getAsset(assetKey);
-            if (null == asset || !asset.isAvailable()) {
-                return failed("asset is not exsit");
+            if (fromChainId != 0 && fromChain.isDelete()) {
+                Log.info("fromChain is delete,chainId=" + fromChain.getChainId());
+                return failed("fromChain is delete");
             }
-            ChainAsset chainAsset = assetService.getChainAsset(fromChainId, asset);
-            BigDecimal currentAsset = new BigDecimal(chainAsset.getInitNumber()).add(new BigDecimal(chainAsset.getInNumber())).subtract(new BigDecimal(chainAsset.getOutNumber()));
-            if (currentAsset.subtract(new BigDecimal(fromAssetMap.get(assetKey))).doubleValue() < 0) {
-                return failed("asset is not enough");
+            if (toChainId != 0 && toChain.isDelete()) {
+                Log.info("toChain is delete,chainId=" + fromChain.getChainId());
+                return failed("toChain is delete");
             }
+            //获取链内 资产 状态是否正常
+            Set<String> toAssets = toAssetMap.keySet();
+            Iterator itTo = toAssets.iterator();
+            while (itTo.hasNext()) {
+                String assetKey = itTo.next().toString();
+                Asset asset = assetService.getAsset(assetKey);
+                if (null == asset || !asset.isAvailable()) {
+                    return failed("asset is not exsit");
+                }
+            }
+            //校验from 资产是否足够
+            Set<String> fromAssets = fromAssetMap.keySet();
+            Iterator itFrom = fromAssets.iterator();
+            while (itFrom.hasNext()) {
+                String assetKey = itFrom.next().toString();
+                Asset asset = assetService.getAsset(assetKey);
+                if (null == asset || !asset.isAvailable()) {
+                    return failed("asset is not exsit");
+                }
+                ChainAsset chainAsset = assetService.getChainAsset(fromChainId, asset);
+                BigDecimal currentAsset = new BigDecimal(chainAsset.getInitNumber()).add(new BigDecimal(chainAsset.getInNumber())).subtract(new BigDecimal(chainAsset.getOutNumber()));
+                if (currentAsset.subtract(new BigDecimal(fromAssetMap.get(assetKey))).doubleValue() < 0) {
+                    return failed("asset is not enough");
+                }
+            }
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
         }
-        return success();
     }
 
     /**
@@ -397,9 +407,7 @@ public class TxAssetCmd extends BaseChainCmd {
             }
             //to 的处理
             Set<String> toAssetKeys = toAssetMap.keySet();
-            Iterator<String> toAssetKeysIt = toAssetKeys.iterator();
-            while (toAssetKeysIt.hasNext()) {
-                String toAssetKey = toAssetKeysIt.next();
+            for (String toAssetKey : toAssetKeys) {
                 ChainAsset toChainAsset = assetService.getChainAsset(toChainId, toAssetKey);
                 if (null == toChainAsset) {
 //                //链下加资产，资产下增加链
@@ -421,10 +429,11 @@ public class TxAssetCmd extends BaseChainCmd {
                 }
                 assetService.saveOrUpdateChainAsset(toChainId, toChainAsset);
             }
-        } catch (NulsException e) {
-            e.printStackTrace();
+            return failed(CmErrorCode.Err10002);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
         }
-        return failed(CmErrorCode.Err10002);
     }
 
     /**

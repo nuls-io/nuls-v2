@@ -31,24 +31,54 @@ package io.nuls.network.constant;
  *
  */
 public interface NetworkConstant {
+    /**
+     * 模块简称，也是核心模块调用使用的默认角色
+     *Module abbreviation, which is also the default role used by core module calls.
+     */
+    String MODULE_ROLE = "NW";
 
     /**
-     * -----------[netty configs ]------------
+     * ========================================
+     * -----------[netty configs ] -------
+     * ========================================
      */
+
     int READ_IDEL_TIME_OUT = 0;
     int WRITE_IDEL_TIME_OUT = 0;
+    /**
+     * 读写都不存在情况下，100秒超时，单位s
+     * 100 seconds timeout, unit s when there is no reading or writing
+     */
     int ALL_IDEL_TIME_OUT = 100;
+    /**
+     * 记录该帧数据长度
+     * MAX FRAME LENGTH
+     */
     int MAX_FRAME_LENGTH = 10 * 1024 * 1024;
+    /**
+     * netty 发起连接的超时时间,单位秒
+     * netty connect time out,unit s
+     */
     int CONNETCI_TIME_OUT = 6000;
 
+    /**
+     * 握手被拒绝后,锁定的时间,即下次再连接的间隔时间,单位 分钟
+     * After the handshake is rejected, the time of the lock, that is, the interval between the next reconnection, in minutes
+     */
     int CONNECT_FAIL_LOCK_MINUTE=10;
 
-    int NODEGROUP_NET_STABLE_TIME_MILLIONS = 10 * 1000;
     /**
+     * 10秒链内网络数量与高度无变更,则认为网络状态已稳定
+     * 10 seconds The number and speed of the network in the chain are unchanged, and the network status is considered stable.
+     */
+    int NODEGROUP_NET_STABLE_TIME_MILLIONS = 10 * 1000;
+
+    /**
+     * ========================================
      * --------[network configs] -------
+     * ========================================
      */
     String NETWORK_SECTION = "network";
-
     String NETWORK_LANGUAGE = "language";
     String NETWORK_ENCODING = "encoding";
     String NETWORK_DBPATH = "rocksdb.datapath";
@@ -67,6 +97,14 @@ public interface NetworkConstant {
     String NETWORK_CROSS_NODE_MAX_OUT = "network.cross.max.out";
     String NETWORK_MOON_SEED_IP = "network.moon.seed.ip";
 
+    /**
+     *
+     * ========================================
+     * --------[RPC CMD] -------
+     * ========================================
+     * 内部协议指令
+     *Internal protocol directive
+     */
     String CMD_MESSAGE_VERSION = "version";
     String CMD_MESSAGE_VERACK = "verAck";
     String CMD_MESSAGE_ADDR = "addr";
@@ -74,6 +112,18 @@ public interface NetworkConstant {
     String CMD_MESSAGE_BYE = "bye";
     String CMD_MESSAGE_GET_TIME = "getTime";
     String CMD_MESSAGE_RESPONSE_TIME = "responseTime";
+
+    /**
+     *
+     * ========================================
+     * --------[RPC CMD] -------
+     * ========================================
+     * 外部指令
+     *External instruction
+     */
+    String CMD_BL_BEST_BLOCK_HEADER = "bl_bestBlockHeader";
+
+
     /**
      * --------[DB tables] -------
      */
@@ -86,4 +136,5 @@ public interface NetworkConstant {
      */
     String COMMA=",";
     String COLON=":";
+    String DOWN_LINE="_";
 }

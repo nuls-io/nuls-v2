@@ -25,7 +25,7 @@
 package io.nuls.network.manager.threads;
 
 import io.nuls.network.manager.*;
-import io.nuls.network.manager.handler.NetworkMessageHandlerFactory;
+import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -39,19 +39,31 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 定时补充建立连接
+ * 连接定时器，主要任务：
+ *  1>询问种子节点要更多的地址
+ *  2>补充未饱和的网络连接
+ *  3>清除无效的网络连接
+ * Connection timer, main tasks:
+ * 1> Ask the seed node for more addresses
+ * 2>Supply an unsaturated network connection
+ * 3> Clear invalid network connections
  * ues add peer connect
  * @author lan
  * @date 2018/11/01
  *
  */
 public class NodesConnectTask implements Runnable  {
-    ConnectionManager connectionManager = ConnectionManager.getInstance();
-    StorageManager storageManager = StorageManager.getInstance();
+    private ConnectionManager connectionManager = ConnectionManager.getInstance();
+    private StorageManager storageManager = StorageManager.getInstance();
     private void connectPeer(Collection<Node> nodes,long magicNumber){
-        List<String> eliminateNodes = new ArrayList<String>();
+        if(null == nodes){
+            return;
+        }
+        List<Node> nodesList = new ArrayList<>(nodes);
+        Collections.shuffle(nodesList);
+        List<String> eliminateNodes = new ArrayList<>();
        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
-        for (Node node : nodes) {
+        for (Node node : nodesList) {
             //满足丢弃条件的nodes
             if (node.isEliminate()) {
                 if(node.isCrossConnect()){
@@ -61,21 +73,24 @@ public class NodesConnectTask implements Runnable  {
                 }
                 eliminateNodes.add(node.getId());
             } else {
-                /**
+                /*
                  * 判断是否被动连接里已经存在此链的 连接,如果业务已经存在则跳过
+                 * Determine if the connection to this chain already exists in the passive connection, skip if the service already exists
                  */
                 if(connectionManager.isPeerConnectExceedMaxIn(node.getIp(),magicNumber,1)){
                     continue;
                 }
 
-                /**
+                /*
                  * 由于被拒绝过连接，会存在锁定名单，判断peer连接是否还在锁定时间内
+                 * Since the connection is rejected, there will be a lock list to determine if the peer connection is still in the lock time.
                  */
                 if(nodeGroup.isInLockTime(node.getId())){
                     continue;
                 }
-                /**
+                /*
                  * 判断节点是否处于闲置状态
+                 * Determine if the node is idle
                  */
                 if(node.isIdle()) {
                     node.addGroupConnector(magicNumber);
@@ -88,7 +103,7 @@ public class NodesConnectTask implements Runnable  {
                         if(null == nodeGroupConnector){
                             node.addGroupConnector(magicNumber);
                             VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(activeNode, magicNumber);
-                            BaseMeesageHandlerInf handler=NetworkMessageHandlerFactory.getInstance().getHandler(versionMessage);
+                            BaseMeesageHandlerInf handler=MessageHandlerFactory.getInstance().getHandler(versionMessage);
                             handler.send(versionMessage, node, false,true);
                         }
                     }else{
@@ -99,7 +114,10 @@ public class NodesConnectTask implements Runnable  {
 
             }
         }
-        //删除无效节点
+        /*
+         * 删除无效节点
+         * Delete invalid node
+         */
         storageManager.delGroupNodes(eliminateNodes,nodeGroup.getChainId());
     }
     @Override
@@ -115,26 +133,29 @@ public class NodesConnectTask implements Runnable  {
                     continue;
                 }
                 if (!nodeGroup.isHadMaxOutFull()) {
-                    //地址请求
+                    /*
+                     * 连接不饱和，向种子节点寻求更多的地址
+                     *Connection is not saturated, seek more addresses from the seed node
+                     */
                     MessageManager.getInstance().sendGetAddrMessage(nodeGroup.getMagicNumber(),false,true);
                     Collection<Node> nodes = nodeGroup.getDisConnectNodes();
-                    List <Node> nodesList=new ArrayList<>();
-                    nodesList.addAll(nodes);
-                    Collections.shuffle(nodesList);
                     connectPeer(nodes,nodeGroup.getMagicNumber());
                 }
-                /**
+                /*
                  * 跨链连接
+                 * Cross-chain connection
                  */
                 if(!nodeGroup.isHadCrossMaxOutFull()){
-                    //地址请求
+                    /*
+                     * 连接不饱和，向种子节点寻求更多的地址
+                     *Connection is not saturated, seek more addresses from the seed node
+                     */
                     MessageManager.getInstance().sendGetAddrMessage(nodeGroup.getMagicNumber(),true,true);
                     Collection<Node> nodes = nodeGroup.getDisConnectCrossNodes();
-                    List <Node> nodesList=new ArrayList<>();
-                    nodesList.addAll(nodes);
-                    Collections.shuffle(nodesList);
-                    connectPeer(nodesList,nodeGroup.getMagicNumber());
+                    connectPeer(nodes,nodeGroup.getMagicNumber());
                 }
+
+
                 }catch(Exception e){
                     e.printStackTrace();
                 }

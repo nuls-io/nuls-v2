@@ -22,85 +22,30 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.constant;
+package io.nuls.network.model.dto;
 
 /**
- * 模块运行状态枚举
- * The module runs state enumeration.
- *
- * @author: Lan
- */
-public enum ModuleStatusEnum {
+ * @author lan
+ * @description
+ * @date 2018/12/07
+ **/
+public class BestBlockInfo {
+    private String hash;
+    private long blockHeight = 0L;
 
-    /**
-     * 未找到该模块
-     * module not found
-     */
-    NOT_FOUND,
+    public String getHash() {
+        return hash;
+    }
 
-    /**
-     * 未初始化
-     * uninitialized
-     */
-    UNINITIALIZED,
+    public void setHash(String hash) {
+        this.hash = hash;
+    }
 
-    /**
-     * 初始化完成
-     * initialized
-     */
-    INITIALIZED,
+    public long getBlockHeight() {
+        return blockHeight;
+    }
 
-    /**
-     * 正在初始化
-     * initializing
-     */
-    INITIALIZING,
-
-    /**
-     * 启动中
-     * starting
-     */
-    STARTING,
-
-    /**
-     * 运行中
-     * running
-     */
-    RUNNING,
-
-    /**
-     * 已停止
-     * stoped
-     */
-    STOPED,
-
-    /**
-     * 正在停止
-     * stopping
-     */
-    STOPPING,
-
-    /**
-     * 已销毁
-     * destoryed
-     */
-    DESTROYED,
-
-    /**
-     * 正在销毁
-     * destorying
-     */
-    DESTROYING,
-
-    /**
-     * 运行出现异常
-     * Running exception
-     */
-    EXCEPTION,
-    ;
-
-    @Override
-    public String toString() {
-        return name();
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
     }
 }

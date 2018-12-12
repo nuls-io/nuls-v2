@@ -47,7 +47,7 @@ public class CoinDataManager {
         //手续费
         CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,nonce, (byte)0);
         txSize += from.size();
-        BigInteger fee = TransactionFeeCalculator.getMaxFee(txSize);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         BigInteger fromAmount = amount.add(fee);
         if(BigIntegerUtils.isLessThan(available,fromAmount)){
             throw new NulsRuntimeException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
@@ -78,7 +78,7 @@ public class CoinDataManager {
         //手续费
         CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,(byte)-1);
         txSize += from.size();
-        BigInteger fee = TransactionFeeCalculator.getMaxFee(txSize);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         BigInteger fromAmount = amount.add(fee);
         if(BigIntegerUtils.isLessThan(available,fromAmount)){
             throw new NulsRuntimeException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);

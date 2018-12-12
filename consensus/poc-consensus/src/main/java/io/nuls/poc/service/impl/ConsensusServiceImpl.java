@@ -176,7 +176,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             tx.setTxData(stopAgent.serialize());
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeService.currentTimeMillis() + chain.getConfig().getStopAgentLockTime());
             tx.setCoinData(coinData.serialize());
-            BigInteger fee = TransactionFeeCalculator.getMaxFee(tx.size());
+            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             //todo 交易签名
             //todo 将交易传递给交易管理模块
@@ -690,6 +690,9 @@ public class ConsensusServiceImpl implements ConsensusService {
         } catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
+        }catch (IOException e){
+            Log.error(e);
+            return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
 
@@ -698,6 +701,13 @@ public class ConsensusServiceImpl implements ConsensusService {
      */
     @Override
     public Result batchValid(Map<String, Object> params) {
+        /*try {
+
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+        }catch (NulsException e) {
+            Log.error(e);
+            return Result.getFailed(e.getErrorCode());
+        }*/
         return null;
     }
 

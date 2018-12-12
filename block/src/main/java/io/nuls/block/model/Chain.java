@@ -87,11 +87,11 @@ public class Chain {
     private NulsDigestData previousHash;
 
     /**
-     * 链的起始高度
+     * 链的起始高度(包含)
      */
     private long startHeight;
     /**
-     * 链的结束高度
+     * 链的结束高度(包含)
      */
     private long endHeight;
 

@@ -25,8 +25,10 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.model.Chain;
+import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
+import io.nuls.block.utils.BlockUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -104,9 +106,8 @@ public class ChainManager {
             //2.2 回滚主链到指定高度，回滚掉的区块收集起来放入分叉链数据库
             long rollbackHeight = masterChainEndHeight;
             do {
-                Block block = blockService.rollbackBlock(chainId, rollbackHeight--);
-                //block非空说明回滚成功
-                if (block != null) {
+                Block block = blockService.getBlock(chainId, rollbackHeight--);
+                if (blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block))) {
                     blockList.add(block);
                     hashList.addLast(block.getHeader().getHash());
                 } else {
@@ -157,7 +158,6 @@ public class ChainManager {
      */
     private static boolean switchChain0(int chainId, Chain masterChain, Chain forkChain, Chain subChain) throws Exception {
         //1.计算要从forkChain上添加到主链上多少个区块
-        //todo 待核实
         int target = 0;
         if (subChain != null) {
             target = (int) (subChain.getStartHeight() - forkChain.getStartHeight());

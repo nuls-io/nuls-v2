@@ -89,4 +89,19 @@ public class CollectionUtils {
         }
         return sb.toString();
     }
+
+    /**
+     * 获取固定大小的map
+     *
+     * @param size  map元素上限
+     * @return Map  map对象
+     */
+    public static <K, V> Map<K, V> getSizedMap(int size) {
+        return Collections.synchronizedMap(new LinkedHashMap<>(size) {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+                return size() > size;
+            }
+        });
+    }
 }
