@@ -141,18 +141,23 @@ public class BaseChainCmd extends BaseCmd {
         return coinData;
     }
 
-    protected BlockChain buildChainTxData(String txHex, Transaction tx, boolean isDelete) {
+    protected BlockChain buildChainWithTxData(String txHex, Transaction tx, boolean isDelete) {
         try {
             byte[] txBytes = HexUtil.hexToByte(txHex);
             tx.parse(txBytes, 0);
             TxChain txChain = new TxChain();
             txChain.parse(tx.getTxData(), 0);
-            BlockChain blockChain = new BlockChain(txChain, isDelete);
+            BlockChain blockChain = new BlockChain(txChain);
             if (isDelete) {
                 blockChain.setDelTxHash(tx.getHash().toString());
+                blockChain.setRegAddress(txChain.getAddress());
+                blockChain.setRegAssetId(txChain.getAssetId());
             } else {
                 blockChain.setRegTxHash(tx.getHash().toString());
+                blockChain.setDelAddress(txChain.getAddress());
+                blockChain.setDelAssetId(txChain.getAssetId());
             }
+
             return blockChain;
         } catch (Exception e) {
             Log.error(e);

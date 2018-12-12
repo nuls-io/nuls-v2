@@ -119,8 +119,8 @@ public class TxModuleValidateCmd extends BaseChainCmd {
         List<Integer> newChainIdList = new ArrayList<>();
         List<Integer> newAssetIdList = new ArrayList<>();
         for (Transaction tx : registerChainAndAssetList) {
-            BlockChain newChain = buildChainTxData(tx.hex(), new Transaction(), false);
-            Asset newAsset = buildAssetWithTxAsset(tx.hex(), new Transaction());
+            BlockChain newChain = buildChainWithTxData(tx.hex(), new Transaction(), false);
+            Asset newAsset = buildAssetWithTxChain(tx.hex(), new Transaction());
             if (!newChainIdList.contains(newChain.getChainId())
                     && !newAssetIdList.contains(newAsset.getAssetId())) {
                 newChainIdList.add(newChain.getChainId());

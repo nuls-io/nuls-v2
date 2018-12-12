@@ -260,14 +260,8 @@ public class BlockChain extends BaseNulsData {
         super();
     }
 
-    public BlockChain(TxChain txChain, boolean isDelete) {
-        if (isDelete) {
-            this.regAddress = txChain.getAddress();
-            this.regAssetId = txChain.getAssetId();
-        } else {
-            this.delAddress = txChain.getAddress();
-            this.delAssetId = txChain.getAssetId();
-        }
+    public BlockChain(TxChain txChain) {
+
         this.addressType = txChain.getAddressType();
         this.chainId = txChain.getChainId();
         this.magicNumber = txChain.getMagicNumber();

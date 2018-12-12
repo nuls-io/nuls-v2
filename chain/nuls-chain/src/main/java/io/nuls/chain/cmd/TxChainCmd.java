@@ -45,7 +45,7 @@ public class TxChainCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            BlockChain blockChain = buildChainTxData(txHex, new RegisterChainAndAssetTransaction(), false);
+            BlockChain blockChain = buildChainWithTxData(txHex, new RegisterChainAndAssetTransaction(), false);
             int chainId = blockChain.getChainId();
             if (chainId < 0) {
                 return failed(CmErrorCode.C10002);
@@ -69,7 +69,7 @@ public class TxChainCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            BlockChain blockChain = buildChainTxData(txHex, new RegisterChainAndAssetTransaction(), false);
+            BlockChain blockChain = buildChainWithTxData(txHex, new RegisterChainAndAssetTransaction(), false);
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
             if (dbChain != null) {
                 return failed(CmErrorCode.C10001);
@@ -107,7 +107,7 @@ public class TxChainCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            BlockChain blockChain = buildChainTxData(txHex, new RegisterChainAndAssetTransaction(), false);
+            BlockChain blockChain = buildChainWithTxData(txHex, new RegisterChainAndAssetTransaction(), false);
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
             if (null == blockChain || null == dbChain || !blockChain.getRegTxHash().equalsIgnoreCase(dbChain.getRegTxHash())) {
                 return failed(CmErrorCode.C10001);
@@ -131,7 +131,7 @@ public class TxChainCmd extends BaseChainCmd {
     public Response chainDestroyValidator(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
         String secondaryData = String.valueOf(params.get("secondaryData"));
-        BlockChain blockChain = buildChainTxData(txHex, new DestroyAssetAndChainTransaction(), true);
+        BlockChain blockChain = buildChainWithTxData(txHex, new DestroyAssetAndChainTransaction(), true);
         return destroyValidator(blockChain);
     }
 
@@ -169,7 +169,7 @@ public class TxChainCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            BlockChain blockChain = buildChainTxData(txHex, new DestroyAssetAndChainTransaction(), true);
+            BlockChain blockChain = buildChainWithTxData(txHex, new DestroyAssetAndChainTransaction(), true);
             Response cmdResponse = destroyValidator(blockChain);
             if (cmdResponse.isSuccess()) {
                 return cmdResponse;
@@ -200,7 +200,7 @@ public class TxChainCmd extends BaseChainCmd {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             String secondaryData = String.valueOf(params.get("secondaryData"));
-            BlockChain blockChain = buildChainTxData(txHex, new DestroyAssetAndChainTransaction(), true);
+            BlockChain blockChain = buildChainWithTxData(txHex, new DestroyAssetAndChainTransaction(), true);
             Response cmdResponse = destroyValidator(blockChain);
             if (cmdResponse.isSuccess()) {
                 return cmdResponse;
