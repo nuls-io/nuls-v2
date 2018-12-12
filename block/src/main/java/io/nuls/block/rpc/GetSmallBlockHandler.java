@@ -23,12 +23,12 @@ package io.nuls.block.rpc;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
-import io.nuls.block.cache.SmallBlockCacheManager;
+import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
-import io.nuls.block.utils.NetworkUtil;
+import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -50,8 +50,6 @@ import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 @Component
 public class GetSmallBlockHandler extends BaseCmd {
 
-    private SmallBlockCacheManager cacheManager = SmallBlockCacheManager.getInstance();
-
     @CmdAnnotation(cmd = GET_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Object process(Map map){
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
@@ -71,7 +69,7 @@ public class GetSmallBlockHandler extends BaseCmd {
         }
 
         NulsDigestData blockHash = message.getRequestHash();
-        SmallBlock smallBlock = cacheManager.getSmallBlockByHash(blockHash);
+        SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash).getSmallBlock();
         if (smallBlock != null) {
             SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
             smallBlockMessage.setSmallBlock(smallBlock);

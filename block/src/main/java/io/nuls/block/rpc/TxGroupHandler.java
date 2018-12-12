@@ -22,9 +22,11 @@ package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
-import io.nuls.block.cache.SmallBlockCacheManager;
+import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.message.TxGroupMessage;
+import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -55,7 +57,6 @@ public class TxGroupHandler extends BaseCmd {
 
     @Autowired
     private BlockService blockService;
-    private SmallBlockCacheManager smallBlockCacheManager = SmallBlockCacheManager.getInstance();
 
     @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(List<Object> params) {
@@ -81,27 +82,46 @@ public class TxGroupHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        SmallBlock smallBlock = smallBlockCacheManager.getSmallBlockByHash(message.getBlockHash());
-        if (null == smallBlock) {
-            return failed(BlockErrorCode.PARAMETER_ERROR);
+        NulsDigestData blockHash = message.getBlockHash();
+        BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
+        //1.已收到完整区块，丢弃
+        if (BlockForwardEnum.COMPLETE.equals(status)) {
+            return success();
         }
 
-        BlockHeader header = smallBlock.getHeader();
-        NulsDigestData headerHash = header.getHash();
-        Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());
-        for (Transaction tx : smallBlock.getSubTxList()) {
-            txMap.put(tx.getHash(), tx);
-        }
-        for (Transaction tx : transactions) {
-            txMap.put(tx.getHash(), tx);
+        //2.已收到部分区块，还缺失交易信息，收到的应该就是缺失的交易信息
+        if (BlockForwardEnum.INCOMPLETE.equals(status)) {
+            SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash).getSmallBlock();
+            if (null == smallBlock) {
+                return failed(BlockErrorCode.PARAMETER_ERROR);
+            }
+
+            BlockHeader header = smallBlock.getHeader();
+            NulsDigestData headerHash = header.getHash();
+            Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());
+            for (Transaction tx : smallBlock.getSubTxList()) {
+                txMap.put(tx.getHash(), tx);
+            }
+            for (Transaction tx : transactions) {
+                txMap.put(tx.getHash(), tx);
+            }
+
+            Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
+            if (blockService.saveBlock(chainId, block)) {
+                SmallBlock newSmallBlock = BlockUtil.getSmallBlock(chainId, block);
+                CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock);
+                SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
+                SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
+                blockService.forwardBlock(chainId, headerHash, nodeId);
+            } else {
+                Log.error("save fail! chainId:{}, height:{}, hash:{}", chainId, header.getHeight(), headerHash);
+            }
+            return success();
         }
 
-        Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-        if (blockService.saveBlock(chainId, block)) {
-            smallBlockCacheManager.cacheSmallBlock(BlockUtil.getSmallBlock(chainId, block));
-            blockService.forwardBlock(chainId, headerHash, nodeId);
-        } else {
-            Log.error("save fail! chainId:{}, height:{}, hash:{}", chainId, header.getHeight(), headerHash);
+        //3.未收到区块
+        if (BlockForwardEnum.EMPTY.equals(status)) {
+            Log.error("It is theoretically impossible to enter this branch");
         }
         return success();
     }

@@ -70,8 +70,22 @@ public interface AccountConstant {
     /**
      * --------[db configs] -------
      */
-    String DB_SECTION = "db";
+    String CFG_DB_SECTION = "db";
     String DB_DATA_PATH = "rocksdb.datapath";
+
+    /**
+     * --------[chain constant] -------
+     */
+    String CFG_CHAIN_SECTION = "chain";
+    /**
+     * 主链ID（卫星链ID）
+     * */
+    String MAIN_CHAIN_ID = "mainChainId";
+
+    /**
+     * 主链资产ID（卫星链资产ID）
+     * */
+    String MAIN_ASSETS_ID ="mainAssetsId";
 
     /**
      * --------[account constant] -------
@@ -86,6 +100,12 @@ public interface AccountConstant {
      * The cost of setting an alias
      */
     //Na ALIAS_NA = Na.parseNuls(1);
+
+    /**
+     * 转账交易的类型
+     * the type of the transfer transaction
+     */
+    int TX_TYPE_TRANSFER = 2;
 
     /**
      * 设置账户别名的交易类型
@@ -150,4 +170,26 @@ public interface AccountConstant {
      */
     String EVENT_TOPIC_UPDATE_PASSWORD = "evt_ac_updatePassword";
 
+    /**
+     * --------[OTHER constant] -------
+     */
+    /**
+     * Map初始值
+     * */
+    int  INIT_CAPACITY =16;
+
+    /**
+     * account root path
+     * */
+    String ACCOUNT_ROOT_PATH = "io.nuls.account";
+
+    /**
+     * rpc file path
+     * */
+    String RPC_PATH = "io.nuls.account.rpc";
+
+    /**
+     * 普通交易为非解锁交易：0，解锁金额交易（退出共识，退出委托）：-1
+     */
+    byte NORMAL_TX_LOCKED = 0;
 }

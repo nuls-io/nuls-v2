@@ -16,8 +16,18 @@ public interface TransactionH2Service {
 
     int saveTx(TransactionPO txPo);
 
+    /**
+     * 保存多个数据，组装单条插入语句，循环数据集合插入
+     * @param txPoList
+     * @return
+     */
     int saveTxs(List<TransactionPO> txPoList);
 
+    /**
+     * 保存多个数据，按表组装批量插入语句，循环执行多个表的插入
+     * @param txPoList
+     * @return
+     */
     int saveTxsTables(List<TransactionPO> txPoList);
 
     int deleteTx(String address, String txhash);

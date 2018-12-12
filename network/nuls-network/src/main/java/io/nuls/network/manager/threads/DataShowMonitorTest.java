@@ -33,12 +33,11 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * @program: nuls2.0
- * @description: Group event monitor
- * 测试
- * @author: lan
- * @create: 2018/11/14
- **/
+ * Group event monitor
+ * 测试 定时打印连接信息
+ * @author  lan
+ * @create  2018/11/14
+ */
 public class DataShowMonitorTest implements Runnable  {
     @Override
     public void run() {
@@ -46,7 +45,7 @@ public class DataShowMonitorTest implements Runnable  {
         printlnPeer();
     }
 
-    void printlnPeer(){
+   private void printlnPeer(){
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for(NodeGroup nodeGroup:nodeGroupList){

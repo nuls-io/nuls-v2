@@ -49,4 +49,10 @@ public interface AccountStorageConstant {
      */
     String DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS = "account_alias_key_address";
 
+    /**
+     * 账户模块配置信息表名称
+     * Account Module Configuration Information Table Name
+     */
+    String DB_NAME_ACCOUNT_CONGIF = "config";
+
 }

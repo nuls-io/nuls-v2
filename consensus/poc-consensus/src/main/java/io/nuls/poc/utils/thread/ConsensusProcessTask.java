@@ -25,6 +25,7 @@
  */
 package io.nuls.poc.utils.thread;
 
+import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.utils.thread.process.ConsensusProcess;
 import io.nuls.tools.log.Log;
 
@@ -38,17 +39,17 @@ import io.nuls.tools.log.Log;
 public class ConsensusProcessTask implements Runnable {
 
     private ConsensusProcess consensusProcess;
-    private int chainId;
+    private Chain chain;
 
-    public ConsensusProcessTask(int chainId,ConsensusProcess consensusProcess) {
-        this.chainId = chainId;
+    public ConsensusProcessTask(Chain chain,ConsensusProcess consensusProcess) {
+        this.chain = chain;
         this.consensusProcess = consensusProcess;
     }
 
     @Override
     public void run() {
         try {
-            consensusProcess.process(chainId);
+            consensusProcess.process(chain);
         } catch (Exception e) {
             Log.error(e);
         }

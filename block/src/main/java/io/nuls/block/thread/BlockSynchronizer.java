@@ -29,7 +29,7 @@ import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.utils.NetworkUtil;
+import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;

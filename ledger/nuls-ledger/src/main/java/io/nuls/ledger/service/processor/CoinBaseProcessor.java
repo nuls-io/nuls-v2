@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.service.processor;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
@@ -61,7 +62,7 @@ public class CoinBaseProcessor implements TxProcessor {
         //3 增加账户的余额
         List<CoinTo> tos = coinData.getTo();
         for (CoinTo to : tos) {
-            String address = new String(to.getAddress());
+            String address = AddressTool.getStringAddressByBytes(to.getAddress());
             int chainId = to.getAssetsChainId();
             int assetId = to.getAssetsId();
             BigInteger amount = to.getAmount();

@@ -68,6 +68,10 @@ public interface BlockErrorCode {
      */
     ErrorCode FORK_BLOCK = ErrorCode.init("20005");
     /**
+     * 区块与链没有关系(不重复　不分叉　不相连)
+     */
+    ErrorCode IRRELEVANT_BLOCK = ErrorCode.init("20005");
+    /**
      * 链回滚失败
      */
     ErrorCode ROLLBACK_CHAIN_ERROR = ErrorCode.init("20005");

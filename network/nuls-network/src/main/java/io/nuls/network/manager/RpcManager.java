@@ -24,15 +24,13 @@
  */
 package io.nuls.network.manager;
 
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 
 /**
- * @program: nuls2.0
- * @description: Rpc init
- * @author: lan
- * @create: 2018/11/07
+ * @description  Rpc init
+ * @author lan
+ * @date 2018/11/07
  **/
 public class RpcManager extends BaseManager{
     private static RpcManager instance = new RpcManager();

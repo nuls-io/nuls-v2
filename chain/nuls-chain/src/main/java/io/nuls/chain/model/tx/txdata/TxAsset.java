@@ -5,8 +5,10 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
+import lombok.Data;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Set;
 
 /**
@@ -14,79 +16,16 @@ import java.util.Set;
  * @date 2018/11/6
  * @description
  */
+@Data
 public class TxAsset extends TransactionLogicData {
     private int chainId;
     private int assetId;
     private String symbol;
     private String name;
     private int depositNuls;
-    private String initNumber;
+    private BigInteger initNumber;
     private short decimalPlaces;
     private byte[] address;
-
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
-
-    public int getAssetId() {
-        return assetId;
-    }
-
-    public void setAssetId(int assetId) {
-        this.assetId = assetId;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getDepositNuls() {
-        return depositNuls;
-    }
-
-    public void setDepositNuls(int depositNuls) {
-        this.depositNuls = depositNuls;
-    }
-
-    public String getInitNumber() {
-        return initNumber;
-    }
-
-    public void setInitNumber(String initNumber) {
-        this.initNumber = initNumber;
-    }
-
-    public short getDecimalPlaces() {
-        return decimalPlaces;
-    }
-
-    public void setDecimalPlaces(short decimalPlaces) {
-        this.decimalPlaces = decimalPlaces;
-    }
-
-    public byte[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(byte[] address) {
-        this.address = address;
-    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -95,7 +34,7 @@ public class TxAsset extends TransactionLogicData {
         stream.writeString(symbol);
         stream.writeString(name);
         stream.writeUint32(depositNuls);
-        stream.writeString(initNumber);
+        stream.writeBigInteger(initNumber);
         stream.writeShort(decimalPlaces);
         stream.writeBytesWithLength(address);
     }
@@ -107,9 +46,9 @@ public class TxAsset extends TransactionLogicData {
         this.symbol = byteBuffer.readString();
         this.name = byteBuffer.readString();
         this.depositNuls = byteBuffer.readInt32();
-        this.initNumber = byteBuffer.readString();
+        this.initNumber = byteBuffer.readBigInteger();
         this.decimalPlaces = byteBuffer.readShort();
-        this.address=byteBuffer.readByLengthByte();
+        this.address = byteBuffer.readByLengthByte();
     }
 
     @Override
@@ -124,10 +63,10 @@ public class TxAsset extends TransactionLogicData {
         // depositNuls
         size += SerializeUtils.sizeOfInt32();
         // initNumber
-        size += SerializeUtils.sizeOfString(initNumber);
+        size += SerializeUtils.sizeOfBigInteger();
         // decimalPlaces
         size += SerializeUtils.sizeOfInt16();
-        size+=SerializeUtils.sizeOfBytes(address);
+        size += SerializeUtils.sizeOfBytes(address);
 
         return size;
     }

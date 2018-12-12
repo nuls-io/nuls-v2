@@ -26,15 +26,14 @@ package io.nuls.chain.cmd;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.ChainTxConstants;
-import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
-import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.chain.model.dto.Asset;
+import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -49,7 +48,7 @@ import java.util.Map;
  * @date 2018/11/22
  **/
 @Component
-public class TxModuleValidateCmd extends BaseCmd {
+public class TxModuleValidateCmd extends BaseChainCmd {
     @Autowired
     private TxAssetCmd txAssetCmd;
     @Autowired
@@ -106,23 +105,30 @@ public class TxModuleValidateCmd extends BaseCmd {
             /*
             验证注册链
              */
+            List<Transaction> errorList = errorInRegisterChainAndAssetList(registerChainAndAssetList);
 
             return success();
-        } catch (NulsException e) {
+        } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
         }
     }
 
-    private List<Transaction> errorInRegisterChainAndAssetList(List<Transaction> registerChainAndAssetList) {
-        List<Transaction> error = new ArrayList<>();
-        List<Integer> chainIdList = new ArrayList<>();
-        List<Integer> assetIdList = new ArrayList<>();
+    private List<Transaction> errorInRegisterChainAndAssetList(List<Transaction> registerChainAndAssetList) throws Exception {
+        List<Transaction> errorTransaction = new ArrayList<>();
+        List<Integer> newChainIdList = new ArrayList<>();
+        List<Integer> newAssetIdList = new ArrayList<>();
         for (Transaction tx : registerChainAndAssetList) {
-            RegisterChainAndAssetTransaction registerChainAndAssetTransaction = (RegisterChainAndAssetTransaction) tx;
-//            if (!chainIdList.contains(registerChainAndAssetTransaction.get))
-//                chainIdList.add()
+            BlockChain newChain = buildChainWithTxData(tx.hex(), new Transaction(), false);
+            Asset newAsset = buildAssetWithTxChain(tx.hex(), new Transaction());
+            if (!newChainIdList.contains(newChain.getChainId())
+                    && !newAssetIdList.contains(newAsset.getAssetId())) {
+                newChainIdList.add(newChain.getChainId());
+                newAssetIdList.add(newAsset.getAssetId());
+            } else {
+                errorTransaction.add(tx);
+            }
         }
-        return error;
+        return errorTransaction;
     }
 }

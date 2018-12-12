@@ -33,7 +33,7 @@ public class SchedulerManager {
         Chain-related tasks
         */
         ConsensusProcess consensusProcess = new ConsensusProcess();
-        scheduledThreadPoolExecutor.scheduleAtFixedRate(new ConsensusProcessTask(chainId,consensusProcess),1000L,100L, TimeUnit.MILLISECONDS);
+        scheduledThreadPoolExecutor.scheduleAtFixedRate(new ConsensusProcessTask(chain,consensusProcess),1000L,100L, TimeUnit.MILLISECONDS);
         chain.setScheduledThreadPoolExecutor(scheduledThreadPoolExecutor);
     }
 }

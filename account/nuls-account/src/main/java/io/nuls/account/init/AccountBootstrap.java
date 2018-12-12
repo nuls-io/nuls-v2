@@ -4,6 +4,7 @@ import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountParam;
 import io.nuls.account.rpc.call.TransactionCmdCall;
+import io.nuls.account.util.manager.ChainManager;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
@@ -32,13 +33,15 @@ public class AccountBootstrap {
             //读取配置文件，数据存储根目录，初始化打开该目录下所有表连接并放入缓存
             RocksDBService.init(AccountParam.getInstance().getDataPath());
             //springLite容器初始化
-            SpringLiteContext.init("io.nuls.account", new ModularServiceMethodInterceptor());
+            SpringLiteContext.init(AccountConstant.ACCOUNT_ROOT_PATH);
+            //启动链
+            SpringLiteContext.getBean(ChainManager.class).runChain();
             //启动时间同步线程
             TimeService.getInstance().start();
             //启动账户模块服务
             initServer();
-            //注册账户交易
-            TransactionCmdCall.register();
+            //注册账户相关交易
+            TransactionCmdCall.registerTx();
         } catch (Exception e) {
             Log.error("Account Bootstrap failed", e);
             System.exit(-1);
@@ -51,7 +54,7 @@ public class AccountBootstrap {
 
             AccountParam accountParam = AccountParam.getInstance();
             //set data save path
-            accountParam.setDataPath(NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.DB_SECTION, AccountConstant.DB_DATA_PATH, null));
+            accountParam.setDataPath(NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_DB_SECTION, AccountConstant.DB_DATA_PATH, null));
 
             try {
                 //set system encoding
@@ -67,6 +70,10 @@ public class AccountBootstrap {
                     NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = keystoreFolder;
                 }
                 NulsConfig.KERNEL_MODULE_URL = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.KERNEL_MODULE_URL);
+
+                //主链ID、主链资产ID
+                NulsConfig.MAIN_CHAIN_ID = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_CHAIN_SECTION, AccountConstant.MAIN_CHAIN_ID, 0);
+                NulsConfig.MAIN_ASSETS_ID = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_CHAIN_SECTION, AccountConstant.MAIN_ASSETS_ID, 0);
             } catch (Exception e) {
                 Log.error(e);
             }
@@ -89,7 +96,7 @@ public class AccountBootstrap {
             WsServer.getInstance(ModuleE.AC)
                     .moduleRoles(new String[]{"1.0"})
                     .moduleVersion("1.0")
-                    .dependencies(ModuleE.LG.abbr, "1.0")
+                    //.dependencies(ModuleE.LG.abbr, "1.0")
                     .scanPackage("io.nuls.account.rpc.cmd")
                     .connect(NulsConfig.KERNEL_MODULE_URL);
 

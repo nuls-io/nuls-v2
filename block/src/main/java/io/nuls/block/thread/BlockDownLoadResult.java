@@ -24,6 +24,9 @@ import io.nuls.base.data.Block;
 import io.nuls.block.model.Node;
 import lombok.Data;
 
+import java.util.Deque;
+import java.util.List;
+import java.util.Queue;
 import java.util.SortedSet;
 
 /**
@@ -56,15 +59,15 @@ public class BlockDownLoadResult {
      */
     private boolean success = false;
 
-    private SortedSet<Block> blockSet;
+    private List<Block> blockList;
 
-    public BlockDownLoadResult(long startHeight, int size, Node node, SortedSet<Block> blockSet, int index) {
+    public BlockDownLoadResult(long startHeight, int size, Node node, List<Block> blockList, int index) {
         this.startHeight = startHeight;
         this.size = size;
         this.index = index;
         this.node = node;
-        this.blockSet = blockSet;
-        this.setSuccess(blockSet.size() == size);
+        this.blockList = blockList;
+        this.setSuccess(blockList.size() == size);
     }
 
 }

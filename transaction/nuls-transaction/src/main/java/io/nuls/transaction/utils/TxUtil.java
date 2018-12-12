@@ -24,7 +24,11 @@
 
 package io.nuls.transaction.utils;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Coin;
+import io.nuls.base.data.MultiSigAccount;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
 
 import java.math.BigInteger;
@@ -34,6 +38,7 @@ import java.math.BigInteger;
  * @date: 2018-12-05
  */
 public class TxUtil {
+
 
     public static boolean isCurrentChainMainAsset(Coin coin){
         return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
@@ -52,30 +57,50 @@ public class TxUtil {
     }
 
     public static boolean isNulsAsset(int chainId, int assetId){
-        if(chainId == TxConstant.NUlS_CHAINID
-                && assetId ==TxConstant.NUlS_CHAIN_ASSETID) {
+        if(chainId == TxConstant.NULS_CHAINID
+                && assetId ==TxConstant.NULS_CHAIN_ASSETID) {
             return true;
         }
         return false;
     }
 
+    public static boolean isTheChainMainAsset(int chainId, Coin coin) {
+        return isTheChainMainAsset(chainId, coin.getAssetsChainId(), coin.getAssetsId());
+    }
+
+    public static boolean isTheChainMainAsset(int chainId, int assetChainId, int assetId){
+        //todo 查资产与链的关系是否存在
+        return true;
+    }
+
     public static boolean assetExist(int chainId, int assetId){
         //todo 查资产是否存在
-        return false;
+        return true;
     }
 
-    public static byte[] getNonce(byte[] address, int chainId, int assetId){
+    public static byte[] getNonce(byte[] address, int chainId, int assetId) throws NulsException {
         //todo 查nonce
-        return new byte[8];
+        byte[] nonce = new byte[]{'a','b','c','d','e','f','g','h'};
+        return nonce;
     }
 
-    public static BigInteger getBalance(byte[] address, int chainId, int assetId){
+    public static BigInteger getBalance(byte[] address, int chainId, int assetId) throws NulsException {
         //todo 查余额;
-        return BigInteger.TEN;
+        return new BigInteger("10000");
     }
 
-    public static String getPrikey(String address, String password){
+    public static String getPrikey(String address, String password) throws NulsException {
         //todo 查私钥;
         return "";
+    }
+
+  /*  public static int getMofMultiSignAddress(byte[] multiSignAddress) throws NulsException {
+        //查多签地址的m
+        return 3;
+    }*/
+
+    public static MultiSigAccount getMultiSigAccount(byte[] multiSignAddress) throws NulsException {
+        String address = AddressTool.getStringAddressByBytes(multiSignAddress);
+        return new MultiSigAccount();
     }
 }

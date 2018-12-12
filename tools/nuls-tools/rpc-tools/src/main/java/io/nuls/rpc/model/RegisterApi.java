@@ -36,32 +36,28 @@ import java.util.Map;
  * @author tangyi
  * @date 2018/11/19
  */
+@Data
 @ToString
-@NoArgsConstructor
 public class RegisterApi {
 
-    @Getter
-    @Setter
+
     private List<CmdDetail> apiMethods;
-    @Getter
-    @Setter
+
+    /**
+     * Key: Role
+     * Value: Version
+     */
     private Map<String, String> dependencies;
-    @Getter
-    @Setter
+
     private Map<String, String> connectionInformation;
-    @Getter
-    @Setter
+
     private String moduleDomain;
-    @Getter
-    @Setter
+
     private Map<String, String[]> moduleRoles;
-    @Getter
-    @Setter
+
     private String moduleVersion;
-    @Getter
-    @Setter
+
     private String moduleAbbreviation;
-    @Getter
-    @Setter
+
     private String moduleName;
 }

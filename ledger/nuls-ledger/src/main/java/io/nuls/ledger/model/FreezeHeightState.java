@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,12 +25,18 @@
  */
 package io.nuls.ledger.model;
 
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.SerializeUtils;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.io.Serializable;
+import java.io.IOException;
 import java.math.BigInteger;
 
 /**
@@ -39,7 +45,7 @@ import java.math.BigInteger;
  */
 @ToString
 @NoArgsConstructor
-public class FreezeHeightState implements Serializable {
+public class FreezeHeightState extends BaseNulsData {
 
     /**
      * 交易的hash值
@@ -60,9 +66,45 @@ public class FreezeHeightState implements Serializable {
      */
     @Setter
     @Getter
-    private long height;
+    private BigInteger height;
 
     @Setter
     @Getter
     private long createTime;
+
+
+    public FreezeHeightState(byte[] stream) {
+        NulsByteBuffer buffer = new NulsByteBuffer(stream);
+        try {
+            parse(buffer);
+        } catch (NulsException e) {
+            Log.error("", e);
+        }
+    }
+
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeString(txHash);
+        stream.writeBigInteger(amount);
+        stream.writeBigInteger(height);
+        stream.writeUint48(createTime);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.txHash = byteBuffer.readString();
+        this.amount = byteBuffer.readBigInteger();
+        this.height = byteBuffer.readBigInteger();
+        this.createTime = byteBuffer.readUint48();
+    }
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfString(txHash);
+        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfUint48();
+        return size;
+    }
 }

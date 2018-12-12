@@ -48,7 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class TimeService implements Runnable {
     private static final int MAX_REQ_PEER_NUMBER = 8;
-    private static Map<String,Long>  peerTimesMap = new ConcurrentHashMap<String,Long> ();
+    private static Map<String, Long> peerTimesMap = new ConcurrentHashMap<> ();
     private static long currentRequestId = System.currentTimeMillis();
     private static TimeService instance = new TimeService();
 
@@ -62,18 +62,18 @@ public class TimeService implements Runnable {
      * 时间偏移差距触发点，超过该值会导致本地时间重设，单位毫秒
      * Time migration gap trigger point, which can cause local time reset, unit milliseconds.
      **/
-    public static final long TIME_OFFSET_BOUNDARY = 3000L;
+    private static final long TIME_OFFSET_BOUNDARY = 3000L;
     /**
      *  等待对等节点回复时间
      *
      **/
-    public static final long TIME_WAIT_PEER_RESPONSE = 2000L;
+    private static final long TIME_WAIT_PEER_RESPONSE = 2000L;
     /**
      * 重新同步时间间隔
      * Resynchronize the interval.
-     * 10 minutes;
+     * 2 minutes;
      */
-    private static final long NET_REFRESH_TIME = 1 * 60 * 1000L;
+    private static final long NET_REFRESH_TIME = 2 * 60 * 1000L;
 
     /**
      * 网络时间偏移值
@@ -152,7 +152,7 @@ public class TimeService implements Runnable {
           try {
               Thread.sleep(500L);
           } catch (InterruptedException e) {
-
+                e.printStackTrace();
           }
           intervalTime = System.currentTimeMillis()-beginTime;
       }
@@ -160,10 +160,9 @@ public class TimeService implements Runnable {
       if(size>0){
           long sum = 0L;
          Set set = peerTimesMap.keySet();
-         Iterator it = set.iterator();
           //计算
-          while(it.hasNext()){
-              sum += peerTimesMap.get(it.next());
+          for (Object aSet : set) {
+              sum += peerTimesMap.get(aSet.toString());
           }
           netTimeOffset = sum / size;
       }
@@ -172,16 +171,16 @@ public class TimeService implements Runnable {
      * 按相应时间排序
      */
     public  void initWebTimeServer() {
-        for (int i = 0; i < urlList.size(); i++) {
+        for (String anUrlList : urlList) {
             long begin = System.currentTimeMillis();
-            long netTime = getWebTime(urlList.get(i));
-            Log.info(urlList.get(i)+"netTime:==="+netTime);
-            Log.info("localtime:==="+System.currentTimeMillis());
+            long netTime = getWebTime(anUrlList);
+            Log.info(anUrlList + "netTime:===" + netTime);
+            Log.info("localtime:===" + System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }
             long end = System.currentTimeMillis();
-            NetTimeUrl netTimeUrl = new NetTimeUrl(urlList.get(i),(end-begin));
+            NetTimeUrl netTimeUrl = new NetTimeUrl(anUrlList, (end - begin));
             netTimeUrls.add(netTimeUrl);
         }
         Collections.sort(netTimeUrls);
@@ -210,7 +209,7 @@ public class TimeService implements Runnable {
             long value = (netTime + (localEndTime - localBeforeTime) / 2) - localEndTime;
             count++;
             sum += value;
-            /**
+            /*
              * 有3个网络时间返回就可以退出了
              */
             if(count >= 3){
@@ -261,11 +260,9 @@ public class TimeService implements Runnable {
         syncWebTime();
         while (true) {
             long newTime = System.currentTimeMillis();
-
             if (Math.abs(newTime - lastTime) > TIME_OFFSET_BOUNDARY) {
                 Log.debug("local time changed ：{}", newTime - lastTime);
                 syncWebTime();
-
             } else if (currentTimeMillis() - lastSyncTime > NET_REFRESH_TIME) {
                 //每隔一段时间更新网络时间
                 syncWebTime();
@@ -274,7 +271,7 @@ public class TimeService implements Runnable {
             try {
                 Thread.sleep(500L);
             } catch (InterruptedException e) {
-
+                e.printStackTrace();
             }
         }
     }
@@ -290,14 +287,6 @@ public class TimeService implements Runnable {
         return System.currentTimeMillis() + netTimeOffset;
     }
 
-    /**
-     * 获取网络时间偏移值
-     * Gets the network time offset.
-     *
-     * @return long
-     */
-    public static long getNetTimeOffset() {
-        return netTimeOffset;
-    }
+
 
 }

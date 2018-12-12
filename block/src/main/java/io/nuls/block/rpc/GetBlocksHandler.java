@@ -27,7 +27,7 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.GetBlocksByHeightMessage;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.utils.NetworkUtil;
+import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;

@@ -46,8 +46,7 @@ public class LocalInfoManager extends BaseManager {
     }
 
     private IpAddress externalAddress=new IpAddress("0.0.0.0",0);
-    private long  blockHeight=0;
-    private String blockHash="";
+
     /**
      * 是否地址广播
      */
@@ -55,11 +54,16 @@ public class LocalInfoManager extends BaseManager {
     /**
      * 是否已尝试过自己连接自己
      */
-    volatile boolean connectedMySelf;
+    private  volatile boolean connectedMySelf;
     /**
      * 当前节点是否是自身网络种子节点
      */
-    volatile boolean isSelfNetSeed;
+    private volatile boolean isSelfNetSeed;
+
+    /**
+     * 本机IP集合
+     */
+    private static final Set<String> IPS = new HashSet<>();
 
     public void updateExternalAddress(String ip,int port){
         externalAddress.setIpStr(ip);
@@ -67,29 +71,33 @@ public class LocalInfoManager extends BaseManager {
 
     }
 
-    public boolean isConnectedMySelf() {
+    boolean isConnectedMySelf() {
         return connectedMySelf;
     }
 
-    public void setConnectedMySelf(boolean connectedMySelf) {
+    void setConnectedMySelf(boolean connectedMySelf) {
         this.connectedMySelf = connectedMySelf;
     }
 
-    public boolean isSelfNetSeed() {
+    boolean isSelfNetSeed() {
         return isSelfNetSeed;
     }
 
-    public void setSelfNetSeed(boolean selfNetSeed) {
-        isSelfNetSeed = selfNetSeed;
-    }
 
 
-
-    public boolean isAddrBroadcast() {
+    /**
+     *
+     * @return boolean
+     */
+    boolean isAddrBroadcast() {
         return isAddrBroadcast;
     }
 
-    public void setAddrBroadcast(boolean addrBroadcast) {
+    /**
+     * 设置是否已经广播过自身地址
+     * @param addrBroadcast true or false
+     */
+    void setAddrBroadcast(boolean addrBroadcast) {
         isAddrBroadcast = addrBroadcast;
     }
 
@@ -97,54 +105,34 @@ public class LocalInfoManager extends BaseManager {
         return externalAddress;
     }
 
+    /**
+     *  setExternalAddress
+     * @param externalAddress IpAddress
+     */
     public void setExternalAddress(IpAddress externalAddress) {
         this.externalAddress = externalAddress;
     }
 
-    public long getBlockHeight() {
-        return blockHeight;
-    }
-
-    public void setBlockHeight(long blockHeight) {
-        this.blockHeight = blockHeight;
-    }
-
-    public String getBlockHash() {
-        return blockHash;
-    }
-
-    public void setBlockHash(String blockHash) {
-        this.blockHash = blockHash;
-    }
-
-    private static final Set<String> IPS = new HashSet<>();
 
     public boolean isSelfIp(String ip){
        if(externalAddress.getIp().getHostAddress().equals(ip)){
            return true;
        }
-        if(IPS.contains(ip)){
-            return true;
-        }
-        return false;
+        return IPS.contains(ip);
     }
     static {
         List<String> localIPs = getLocalIP();
-        for (String ip : localIPs) {
-            IPS.add(ip);
-        }
+        IPS.addAll(localIPs);
     }
 
     private static ArrayList<String> getLocalIP() {
         ArrayList<String> iplist = new ArrayList<>();
-        boolean loop = false;
         String bindip;
         Enumeration<?> network;
         List<NetworkInterface> netlist = new ArrayList<>();
         try {
             network = NetworkInterface.getNetworkInterfaces();
             while (network.hasMoreElements()) {
-                loop = true;
                 NetworkInterface ni = (NetworkInterface) network.nextElement();
                 if (ni.isLoopback()) {
                     continue;
@@ -152,9 +140,6 @@ public class LocalInfoManager extends BaseManager {
                 netlist.add(0, ni);
                 InetAddress ip;
                 for (NetworkInterface list : netlist) {
-                    if (loop == false) {
-                        break;
-                    }
                     Enumeration<?> card = list.getInetAddresses();
                     while (card.hasMoreElements()) {
                         while (true) {
@@ -162,24 +147,21 @@ public class LocalInfoManager extends BaseManager {
                             try {
                                 ip = (InetAddress) card.nextElement();
                             } catch (Exception e) {
-
+                                e.printStackTrace();
                             }
                             if (ip == null) {
                                 break;
                             }
                             if (!ip.isLoopbackAddress()) {
-                                if (ip.getHostAddress().equalsIgnoreCase("127.0.0.1")) {
+                                if ("127.0.0.1".equalsIgnoreCase(ip.getHostAddress())) {
                                     continue;
                                 }
-                            }
-                            if (ip instanceof Inet6Address) {
-                                continue;
                             }
                             if (ip instanceof Inet4Address) {
                                 bindip = ip.getHostAddress();
                                 boolean addto = true;
-                                for (int n = 0; n < iplist.size(); n++) {
-                                    if (bindip.equals(iplist.get(n))) {
+                                for (String anIplist : iplist) {
+                                    if (bindip.equals(anIplist)) {
                                         addto = false;
                                         break;
                                     }
@@ -210,10 +192,14 @@ public class LocalInfoManager extends BaseManager {
             }
         }
     }
+
     /**
      * 是否是种子节点
+     * Is it a seed node
+     * @param ip  just ip address not port
+     * @return boolean
      */
-    public boolean isSelfSeedNode(String ip) {
+    private boolean isSelfSeedNode(String ip) {
         List<String> seedList=NetworkParam.getInstance().getSeedIpList();
         for (String seedIp : seedList) {
             if (seedIp.equals(ip)) {

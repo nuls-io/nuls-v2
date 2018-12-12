@@ -37,8 +37,8 @@ import java.math.BigInteger;
  */
 public class TransactionFeeCalculator {
 
-    public static final BigInteger MIN_PRICE_PRE_1024_BYTES = BigInteger.valueOf(100000);
-    public static final BigInteger OTHER_PRICE_PRE_1024_BYTES = BigInteger.valueOf(1000000);
+    public static final BigInteger NORMAL_PRICE_PRE_1024_BYTES = BigInteger.valueOf(100000);
+    public static final BigInteger CROSSTX_PRICE_PRE_1024_BYTES = BigInteger.valueOf(1000000);
 
     public static final int KB = 1024;
 
@@ -47,10 +47,10 @@ public class TransactionFeeCalculator {
      * According to the transaction size calculate the handling fee.
      * @param size 交易大小/size of the transaction
      */
-    public static final BigInteger getTransferFee(int size) {
-        BigInteger fee = MIN_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
+    public static final BigInteger getNormalTxFee(int size) {
+        BigInteger fee = NORMAL_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
         if (size % KB > 0) {
-            fee = fee.add(MIN_PRICE_PRE_1024_BYTES);
+            fee = fee.add(NORMAL_PRICE_PRE_1024_BYTES);
         }
         return fee;
     }
@@ -60,10 +60,10 @@ public class TransactionFeeCalculator {
      * According to the transaction size calculate the handling fee.
      * @param size 交易大小/size of the transaction
      */
-    public static final BigInteger getMaxFee(int size) {
-        BigInteger fee = OTHER_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
+    public static final BigInteger getCrossTxFee(int size) {
+        BigInteger fee = CROSSTX_PRICE_PRE_1024_BYTES.multiply(new BigInteger(String.valueOf(size/KB)));
         if (size % KB > 0) {
-            fee = fee.add(OTHER_PRICE_PRE_1024_BYTES);
+            fee = fee.add(CROSSTX_PRICE_PRE_1024_BYTES);
         }
         return fee;
     }
@@ -74,10 +74,10 @@ public class TransactionFeeCalculator {
      * @param size 交易大小/size of the transaction
      */
     public static final BigInteger getFee(int size, BigInteger price) {
-        if(price.compareTo(MIN_PRICE_PRE_1024_BYTES)<0){
+        if(price.compareTo(NORMAL_PRICE_PRE_1024_BYTES)<0){
             throw new NulsRuntimeException(new Exception("data is error"));
         }
-        if(price.compareTo(OTHER_PRICE_PRE_1024_BYTES)>0) {
+        if(price.compareTo(CROSSTX_PRICE_PRE_1024_BYTES)>0) {
             throw new NulsRuntimeException(new Exception("data is error"));
         }
         BigInteger fee = price.multiply(new BigInteger(String.valueOf(size/KB)));

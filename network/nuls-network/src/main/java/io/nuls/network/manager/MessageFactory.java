@@ -47,7 +47,7 @@ import java.util.*;
 public class MessageFactory {
     private static MessageFactory instance=new MessageFactory();
     private static final Map<String, Class<? extends BaseMessage>> MESSAGE_MAP = new HashMap<>();
-    NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
+    private NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
     private  MessageFactory(){
 
     }
@@ -56,7 +56,11 @@ public class MessageFactory {
         return instance;
     }
 
-    public static void putMessage(Class<? extends BaseMessage> msgClass) {
+    /**
+     * putMessage
+     * @param  msgClass BaseMessage
+     */
+    static void putMessage(Class<? extends BaseMessage> msgClass) {
         try {
             BaseMessage message = msgClass.getDeclaredConstructor().newInstance();
             MESSAGE_MAP.put(message.getHeader().getCommandStr(), msgClass);
@@ -65,11 +69,22 @@ public class MessageFactory {
         }
     }
 
-    public static Class<? extends BaseMessage> getMessage(String command) {
+    /**
+     *
+     * @param command String
+     * @return BaseMessage
+     */
+    static Class<? extends BaseMessage> getMessage(String command) {
         return MESSAGE_MAP.get(command);
     }
 
-    public VersionMessage buildVersionMessage(Node node,long magicNumber){
+    /**
+     *
+     * @param node peer connection
+     * @param magicNumber net id
+     * @return VersionMessage
+     */
+    public VersionMessage buildVersionMessage(Node node, long magicNumber){
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByMagic(magicNumber);
         VersionMessageBody versionMessageBody=new VersionMessageBody();
         try {
@@ -81,8 +96,7 @@ public class MessageFactory {
             IpAddress addrMe=LocalInfoManager.getInstance().getExternalAddress();
             versionMessageBody.setAddrMe(addrMe);
             versionMessageBody.setPortMeCross(NetworkParam.getInstance().getCrossPort());
-            VersionMessage versionMessage=new VersionMessage(nodeGroup.getMagicNumber(),NetworkConstant.CMD_MESSAGE_VERSION,versionMessageBody);
-            return versionMessage;
+            return new VersionMessage(nodeGroup.getMagicNumber(),NetworkConstant.CMD_MESSAGE_VERSION,versionMessageBody);
         } catch (UnknownHostException e) {
             e.printStackTrace();
             Log.error(e);
@@ -92,18 +106,37 @@ public class MessageFactory {
 
     }
 
-    public VerackMessage buildVerackMessage(Node node,long magicNumber,int ackCode){
+    /**
+     *
+     * @param node  peer connection
+     * @param magicNumber net id
+     * @param ackCode ack code
+     * @return VerackMessage
+     */
+    public VerackMessage buildVerackMessage(Node node, long magicNumber, int ackCode){
         VerackMessageBody verackMessageBody=new VerackMessageBody(ackCode);
         return new VerackMessage(magicNumber,NetworkConstant.CMD_MESSAGE_VERACK,verackMessageBody);
     }
 
-
+    /**
+     *
+     * @param node peer connection
+     * @param magicNumber net id
+     * @param byeCode byte code
+     * @return ByeMessage
+     */
     public ByeMessage buildByeMessage(Node node,long magicNumber,int byeCode){
         ByeMessageBody byeMessageBody=new ByeMessageBody(byeCode);
         return new ByeMessage(magicNumber,NetworkConstant.CMD_MESSAGE_BYE,byeMessageBody);
     }
 
-    public GetAddrMessage buildGetAddrMessage(Node node,long magicNumber){
+    /**
+     *
+     * @param node peer connection
+     * @param magicNumber net id
+     * @return  GetAddrMessage
+     */
+    GetAddrMessage buildGetAddrMessage(Node node,long magicNumber){
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByMagic(magicNumber);
         MessageBody messageBody=new MessageBody();
         return new GetAddrMessage(nodeGroup.getMagicNumber(),NetworkConstant.CMD_MESSAGE_GET_ADDR,messageBody);
@@ -112,11 +145,11 @@ public class MessageFactory {
     /**
      * 判断连接是跨链还是自有网络，
      * 如果是跨链 走跨链： 返回所有自有网络 跨链端口节点。
-     * @param node
-     * @param magicNumber
+     *Determine if the connection is a cross-chain or an own network,
+     *If it is a cross-chain chain: Return all your own network cross-chain port nodes.
+     * @param node peer connection
+     * @param magicNumber net id
      * @return AddrMessage
-     *
-     *
      */
     public AddrMessage buildAddrMessage(Node node,long magicNumber){
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByMagic(magicNumber);
@@ -127,6 +160,18 @@ public class MessageFactory {
         nodes.addAll(nodeGroup.getDisConnectNodes());
 
         for(Node peer:nodes){
+            /*
+             * 排除自身连接信息，比如组网A=====B，A向B请求地址，B给的地址列表需排除A地址。
+             * Exclude self-connection information, such as networking A=====B,
+             * A requests an address from B, and the address list given by B excludes the A address.
+             */
+            if(peer.getIp().equals(node.getIp())){
+                continue;
+            }
+            /*
+             * 只有主动连接的节点地址才可使用。
+             * Only active node addresses are available for use.
+             */
             if(Node.OUT == peer.getType()) {
                 try {
                     int port=peer.getRemotePort();
@@ -147,9 +192,10 @@ public class MessageFactory {
 
     /**
      * 主动构造地址消息：广播地址消息时使用
-     * @param ipAddressList
-     * @param magicNumber
-     * @return
+     * Actively constructing address messages: used when broadcasting address messages
+     * @param ipAddressList ip set
+     * @param magicNumber net id
+     * @return AddrMessage
      */
     public AddrMessage buildAddrMessage(List<IpAddress> ipAddressList ,long magicNumber){
         AddrMessageBody addrMessageBody=new AddrMessageBody();
@@ -159,20 +205,24 @@ public class MessageFactory {
 
     /**
      * 构造时间请求消息
-     * @param magicNumber
-     * @return
+     * @param magicNumber net id
+     * @param messageId messageId
+     * @return GetTimeMessage
      */
     public GetTimeMessage buildTimeRequestMessage(long magicNumber,long messageId){
         GetTimeMessageBody messageBody=new GetTimeMessageBody();
+        messageBody.setMessageId(messageId);
         return new GetTimeMessage(magicNumber,NetworkConstant.CMD_MESSAGE_GET_TIME,messageBody);
     }
     /**
      * 构造时间应答消息
-     * @param magicNumber
-     * @return
+     * @param magicNumber net id
+     * @param messageId  messageId
+     * @return TimeMessage
      */
     public TimeMessage buildTimeResponseMessage(long magicNumber,long messageId){
         TimeMessageBody messageBody=new TimeMessageBody();
+        messageBody.setMessageId(messageId);
         messageBody.setTime(System.currentTimeMillis());
         return new TimeMessage(magicNumber,NetworkConstant.CMD_MESSAGE_RESPONSE_TIME,messageBody);
     }

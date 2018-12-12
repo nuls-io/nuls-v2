@@ -39,7 +39,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class TransactionSignature extends BaseNulsData {
-    private List<P2PHKSignature> p2PHKSignatures;
+
+    protected List<P2PHKSignature> p2PHKSignatures;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {

@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,17 +25,17 @@
  */
 package io.nuls.ledger.test;
 
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.ledger.model.AccountState;
 import io.nuls.ledger.model.FreezeHeightState;
 import io.nuls.ledger.model.FreezeLockTimeState;
 import io.nuls.ledger.model.FreezeState;
-import io.nuls.ledger.serializers.AccountStateSerializer;
-import io.nuls.ledger.service.AccountStateService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.math.BigInteger;
 
 /**
@@ -47,8 +47,7 @@ public class AccountStateSerializerTest extends BaseTest {
     final Logger logger = LoggerFactory.getLogger(AccountStateSerializerTest.class);
 
     @Test
-    public void test() {
-        AccountStateSerializer accountStateSerializer = SpringLiteContext.getBean(AccountStateSerializer.class);
+    public void test() throws IOException, NulsException {
 
         Integer chainId = 1;
         String address = "NsdzTe4czMVA5Ccc1p9tgiGrKWx7WLNV";
@@ -77,19 +76,20 @@ public class AccountStateSerializerTest extends BaseTest {
 
         FreezeHeightState heightState = new FreezeHeightState();
         heightState.setTxHash("dfdf");
-        heightState.setHeight(100L);
+        heightState.setHeight(BigInteger.valueOf(100L));
         heightState.setAmount(BigInteger.valueOf(900));
         heightState.setCreateTime(System.currentTimeMillis());
         freezeState.getFreezeHeightStates().add(heightState);
 
 
-        AccountState accountState = new AccountState(chainId, assetId, 50, BigInteger.valueOf(100));
+        AccountState accountState = new AccountState(chainId, assetId, "", BigInteger.valueOf(100));
         accountState.setFreezeState(freezeState);
 
 
-        byte[] source = accountStateSerializer.serialize(accountState);
+        byte[] stream = accountState.serialize();
         logger.info("accountState {}", accountState);
-        AccountState accountState2 = accountStateSerializer.deserialize(source);
+        AccountState accountState2 = new AccountState();
+        accountState2.parse(new NulsByteBuffer(stream));
         logger.info("accountState2 {}", accountState2);
     }
 }

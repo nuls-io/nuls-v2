@@ -79,6 +79,7 @@ public class TransactionCmd extends BaseCmd {
 
         } catch (IOException e) {
             e.printStackTrace();
+            return failed(e.getMessage());
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }

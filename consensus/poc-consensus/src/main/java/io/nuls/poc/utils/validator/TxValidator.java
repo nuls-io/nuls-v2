@@ -318,8 +318,8 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         Agent agent = agentManager.poToAgent(agentPo);
-        CoinData localCoinData = coinDataManager.getStopAgentCoinData(chainId, chain.getConfig().getAssetsId(), agent, TimeService.currentTimeMillis() + chain.getConfig().getStopAgentLockTime());
-        BigInteger fee = TransactionFeeCalculator.getMaxFee(tx.size());
+        CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeService.currentTimeMillis() + chain.getConfig().getStopAgentLockTime());
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
         localCoinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
         if(!Arrays.equals(coinData.serialize(),localCoinData.serialize())){
             return false;

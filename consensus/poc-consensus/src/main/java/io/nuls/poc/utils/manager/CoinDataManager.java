@@ -8,7 +8,6 @@ import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
-import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
@@ -26,32 +25,29 @@ import java.util.*;
  * */
 @Component
 public class CoinDataManager {
-    @Autowired
-    private ChainManager chainManager;
     /**
      * 组装CoinData
      * Assemble CoinData
      *
      * @param address  账户地址/Account address
-     * @param chainId  链ID/chain id
-     * @param assetsId 资产ID/assets id
+     * @param chain    chain info
      * @param amount   金额/amount
      * @param lockTime 锁定时间/lock time
      * @param txSize   交易大小/transaction size
      * @return         组装的CoinData/Assembled CoinData
      * */
-    public CoinData getCoinData(byte[] address,int chainId,int assetsId, BigInteger amount, long lockTime, int txSize)throws NulsRuntimeException{
+    public CoinData getCoinData(byte[] address,Chain chain, BigInteger amount, long lockTime, int txSize)throws NulsRuntimeException{
         CoinData coinData = new CoinData();
-        CoinTo to = new CoinTo(address,chainId,assetsId,amount, lockTime);
+        CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
         //todo 账本模块获取nonce 可用余额
         byte[] nonce = new byte[8];
         BigInteger available = new BigInteger("50000000000");
         //手续费
-        CoinFrom from = new CoinFrom(address,chainId,assetsId,amount,nonce, (byte)0);
+        CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,nonce, (byte)0);
         txSize += from.size();
-        BigInteger fee = TransactionFeeCalculator.getMaxFee(txSize);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         BigInteger fromAmount = amount.add(fee);
         if(BigIntegerUtils.isLessThan(available,fromAmount)){
             throw new NulsRuntimeException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
@@ -66,24 +62,23 @@ public class CoinDataManager {
      * Assemble Coin Data for the amount of unlock (from non CE is empty)
      *
      * @param address  账户地址/Account address
-     * @param chainId  链ID/chain id
-     * @param assetsId 资产ID/assets id
+     * @param chain    chain info
      * @param amount   金额/amount
      * @param lockTime 锁定时间/lock time
      * @param txSize   交易大小/transaction size
      * @return         组装的CoinData/Assembled CoinData
      * */
-    public CoinData getUnlockCoinData(byte[] address, int chainId, int assetsId, BigInteger amount, long lockTime, int txSize)throws NulsRuntimeException{
+    public CoinData getUnlockCoinData(byte[] address,Chain chain, BigInteger amount, long lockTime, int txSize)throws NulsRuntimeException{
         CoinData coinData = new CoinData();
-        CoinTo to = new CoinTo(address,chainId,assetsId,amount, lockTime);
+        CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
         //todo 账本模块获取该账户锁定金额
         BigInteger available = new BigInteger("10000");
         //手续费
-        CoinFrom from = new CoinFrom(address,chainId,assetsId,amount,(byte)-1);
+        CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,(byte)-1);
         txSize += from.size();
-        BigInteger fee = TransactionFeeCalculator.getMaxFee(txSize);
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         BigInteger fromAmount = amount.add(fee);
         if(BigIntegerUtils.isLessThan(available,fromAmount)){
             throw new NulsRuntimeException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
@@ -97,24 +92,19 @@ public class CoinDataManager {
      * 根据节点地址组装停止节点的coinData
      * Assemble coinData of stop node according to node address
      *
-     * @param chainId   chain id/链ID
-     * @param assetsId   assets id/资产ID
+     * @param chain      chain info
      * @param address    agent address/节点地址
      * @param lockTime   The end point of the lock (lock start time + lock time) is the length of the lock before./锁定的结束时间点(锁定开始时间点+锁定时长)，之前为锁定的时长
      * @return  CoinData
      */
-    public CoinData getStopAgentCoinData(int chainId, int assetsId, byte[] address, long lockTime) throws NulsException {
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if(chain == null ){
-            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
+    public CoinData getStopAgentCoinData(Chain chain, byte[] address, long lockTime) throws NulsException {
         List<Agent> agentList = chain.getAgentList();
         for (Agent agent : agentList) {
             if (agent.getDelHeight() > 0) {
                 continue;
             }
             if (Arrays.equals(address, agent.getAgentAddress())) {
-                return getStopAgentCoinData(chainId,assetsId, agent, lockTime);
+                return getStopAgentCoinData(chain, agent, lockTime);
             }
         }
         return null;
@@ -124,37 +114,33 @@ public class CoinDataManager {
      * 根据节点组装停止节点的coinData
      * Assemble the coinData of the stop node according to the node
      *
-     * @param chainId   chain id/链ID
-     * @param assetsId   assets id/资产ID
+     * @param chain      chain info
      * @param agent      agent info/节点对象
      * @param lockTime   The end point of the lock (lock start time + lock time) is the length of the lock before./锁定的结束时间点(锁定开始时间点+锁定时长)，之前为锁定的时长
      * @return CoinData
      */
-    public CoinData getStopAgentCoinData(int chainId, int assetsId, Agent agent, long lockTime) throws NulsException {
-        return getStopAgentCoinData(chainId,assetsId, agent, lockTime, null);
+    public CoinData getStopAgentCoinData(Chain chain, Agent agent, long lockTime) throws NulsException {
+        return getStopAgentCoinData(chain, agent, lockTime, null);
     }
 
     /**
      * 组装节点CoinData锁定类型为时间或区块高度
      * Assembly node CoinData lock type is time or block height
      *
-     * @param chainId    chain id/链ID
-     * @param assetsId    assets id/资产ID
+     * @param chain       chain info
      * @param agent       agent info/节点
      * @param lockTime    lock time/锁定时间
      * @param height      lock block height/锁定区块
      * @return CoinData
      */
-    public CoinData getStopAgentCoinData(int chainId, int assetsId, Agent agent, long lockTime, Long height) throws NulsException{
+    public CoinData getStopAgentCoinData(Chain chain, Agent agent, long lockTime, Long height) throws NulsException{
         if (null == agent) {
             return null;
         }
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if(chain == null ){
-            throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
         try {
-            //todo 充交易模块获取创建该节点时的交易
+            int chainId = chain.getConfig().getChainId();
+            int assetsId = chain.getConfig().getAssetsId();
+            //todo 从交易模块获取创建该节点时的交易
             NulsDigestData createTxHash = agent.getTxHash();
             Transaction createAgentTransaction = null;
             if (null == createAgentTransaction) {

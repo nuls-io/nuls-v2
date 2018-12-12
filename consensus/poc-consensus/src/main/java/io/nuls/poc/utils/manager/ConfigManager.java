@@ -30,9 +30,8 @@ public class ConfigManager {
      * Initialize configuration information
      *
      * @param items       配置参数列表
-     * @param chainId    链ID
      * */
-    public static ConfigBean initManager(List<ConfigItem> items, int chainId) throws Exception{
+    public static ConfigBean initManager(List<ConfigItem> items) throws Exception{
         ConfigBean bean = new ConfigBean();
         Class beanClass = bean.getClass();
         Field field;
@@ -55,7 +54,7 @@ public class ConfigManager {
         Save configuration information to database
         */
         ConfigService configService = SpringLiteContext.getBean(ConfigService.class);
-        boolean saveSuccess = configService.save(bean,chainId);
+        boolean saveSuccess = configService.save(bean,bean.getChainId());
         if(saveSuccess){
             return bean;
         }

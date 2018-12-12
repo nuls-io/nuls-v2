@@ -36,6 +36,7 @@ import io.nuls.tools.thread.TimeService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
  * @author Charlie
@@ -198,13 +199,9 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return coinData;
     }
 
-    public CoinData getCoinDataInstance(){
+    public CoinData getCoinDataInstance() throws NulsException{
         CoinData coinData = new CoinData();
-        try {
-            coinData.parse(new NulsByteBuffer(this.coinData));
-        } catch (NulsException e) {
-            e.printStackTrace();
-        }
+        coinData.parse(new NulsByteBuffer(this.coinData));
         return coinData;
     }
 
@@ -223,7 +220,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
         this.size = size;
     }
 
-    public static Transaction getInstance(String Hex) throws Exception{
+    public static Transaction getInstance(String Hex) throws NulsException{
         NulsByteBuffer nulsByteBuffer = new NulsByteBuffer(HexUtil.decode(Hex));
         Transaction transaction = new Transaction();
         transaction.parse(nulsByteBuffer);
@@ -232,6 +229,15 @@ public class Transaction extends BaseNulsData implements Cloneable {
 
     public String hex() throws Exception{
         return HexUtil.encode(this.serialize());
+    }
+
+    public BigInteger getFee() throws NulsException{
+        BigInteger fee = BigInteger.ZERO;
+        if (null != coinData) {
+            CoinData cData = getCoinDataInstance();
+            fee = cData.getFee();
+        }
+        return fee;
     }
 
     public Transaction(){

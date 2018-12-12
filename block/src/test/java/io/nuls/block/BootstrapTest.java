@@ -27,19 +27,6 @@ import org.junit.Test;
 
 public class BootstrapTest {
 
-    @Before
-    public void setUp() throws Exception {
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
-    }
-
-    @Test
-    public void main() throws Exception {
-
-    }
 
     @Test
     public void kernel() throws Exception {

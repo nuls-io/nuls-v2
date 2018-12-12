@@ -32,24 +32,22 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.VersionMessage;
 import io.nuls.network.model.message.body.VersionMessageBody;
+import io.nuls.network.rpc.internal.MessageRpc;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.Test;
 
 import java.net.InetAddress;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
- * @program: nuls2.0
- * @description: test
- * @author: lan
- * @create: 2018/11/21
+ * @description test
+ * @author  lan
+ * @date  2018/11/21
  **/
 public class MessageRpcTest {
 
-    public void addNodeGroup(){
+    private void addNodeGroup(){
         NodeGroup nodeGroup = new NodeGroup(778899,1000,32,55,43,false);
         NodeGroupManager.getInstance().addNodeGroup(1000,nodeGroup);
     }
@@ -58,7 +56,7 @@ public class MessageRpcTest {
     public void broadcast() {
         try {
             addNodeGroup();
-            Map params = new HashMap<>();
+            Map <String,Object>params = new HashMap<>();
             int chainId = 1000;
             String excludeNodes = "20.30.1020:5599,26.35.52.64:6688";
             VersionMessageBody versionMessageBody = new VersionMessageBody();

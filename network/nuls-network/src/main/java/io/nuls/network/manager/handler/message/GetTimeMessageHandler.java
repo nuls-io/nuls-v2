@@ -57,10 +57,10 @@ public class GetTimeMessageHandler extends BaseMessageHandler {
      *
      * 接收消息处理
      * Receive message processing
-     * @param message
-     * @param nodeKey
-     * @param isServer
-     * @return
+     * @param message   address message
+     * @param nodeKey      peer node key
+     * @param isServer client=false or server=true
+     * @return NetworkEventResult
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
@@ -72,9 +72,16 @@ public class GetTimeMessageHandler extends BaseMessageHandler {
          */
         TimeMessage timeMessage=MessageFactory.getInstance().buildTimeResponseMessage(message.getHeader().getMagicNumber(),getTimeMessage.getMsgBody().getMessageId());
         MessageManager.getInstance().sendToNode(timeMessage, node, true);
-        return new NetworkEventResult(true, null);
+        return   NetworkEventResult.getResultSuccess();
     }
-
+    /**
+     * GetTimeMessageHandler
+     * @param message   address message
+     * @param node      peer info
+     * @param isServer client=false or server=true
+     * @param asyn  default true
+     * @return NetworkEventResult
+     */
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
         Log.debug("GetTimeMessageHandler Send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());

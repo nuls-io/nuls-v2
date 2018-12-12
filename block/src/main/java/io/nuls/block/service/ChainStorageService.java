@@ -56,7 +56,7 @@ public interface ChainStorageService {
      * @return
      * @throws Exception
      */
-    boolean save(int chainId, Block block) throws Exception;
+    boolean save(int chainId, Block block);
 
     /**
      * 查询一个区块

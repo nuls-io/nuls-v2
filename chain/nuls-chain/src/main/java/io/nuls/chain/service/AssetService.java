@@ -1,12 +1,10 @@
 package io.nuls.chain.service;
 
 
-import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.ChainAsset;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author tangyi
@@ -27,7 +25,7 @@ public interface AssetService {
      * @param asset
      * @return
      */
-    boolean createAsset(Asset asset);
+    void createAsset(Asset asset) throws Exception;
 
     /**
      * update asset
@@ -35,14 +33,14 @@ public interface AssetService {
      * @param asset
      * @return
      */
-    boolean updateAsset(Asset asset);
+    void updateAsset(Asset asset) throws Exception;
     /**
      * delete asset
      *
      * @param asset
      * @return
      */
-    boolean deleteAsset(Asset asset);
+    void deleteAsset(Asset asset) throws Exception;
 
 
 
@@ -52,7 +50,7 @@ public interface AssetService {
      * @param assetKey The asset key
      * @return Asset object
      */
-    Asset getAsset(String assetKey);
+    Asset getAsset(String assetKey) throws Exception;
 
     /**
      * Set the status of asset
@@ -61,7 +59,7 @@ public interface AssetService {
      * @param available The status of asset
      * @return true/false
      */
-    boolean setStatus(String assetKey, boolean available);
+    void setStatus(String assetKey, boolean available) throws Exception;
 
     /**
      * Get all the assets of the chain
@@ -69,7 +67,7 @@ public interface AssetService {
      * @param chainId The chain ID
      * @return List of asset
      */
-    List<Asset> getAssetByChain(int chainId);
+    List<Asset> getAssetByChain(int chainId) throws Exception;
 
     /**
      * juge asset exist in chain
@@ -77,15 +75,7 @@ public interface AssetService {
      * @param asset
      * @return
      */
-    boolean assetExist(Asset asset);
-
-    /**
-     * Verification of basic data
-     * @param asset Asset object
-     * @return Error map
-     */
-    Map<String,String> basicValidator(Asset asset);
-
+    boolean assetExist(Asset asset) throws Exception;
 
     /**
      * getChainAsset
@@ -93,7 +83,7 @@ public interface AssetService {
      * @param chainId chainId
      * @return Error map
      */
-    ChainAsset getChainAsset(int chainId,Asset asset);
+    ChainAsset getChainAsset(int chainId,Asset asset) throws Exception;
 
     /**
      *
@@ -101,14 +91,14 @@ public interface AssetService {
      * @param assetKey
      * @return
      */
-    ChainAsset getChainAsset(int chainId,String assetKey);
+    ChainAsset getChainAsset(int chainId,String assetKey) throws Exception;
 
     /**
      * saveOrUpdate chainAsset
      *
-     *@param    chainAsset
+     *
      * @param    chainId
-     * @return true/false
+     * @param    chainAsset  @return true/false
      */
-    boolean saveOrUpdateChainAsset(int chainId,ChainAsset chainAsset) ;
+    void saveOrUpdateChainAsset(int chainId, ChainAsset chainAsset) throws Exception;
 }

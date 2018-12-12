@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -61,7 +61,7 @@ public class ValidatorCmd extends BaseCmd {
         Integer chainId = (Integer) params.get("chainId");
         Integer assetId = (Integer) params.get("assetId");
         BigInteger amount = (BigInteger) params.get("amount");
-        Integer nonce = (Integer) params.get("nonce");
+        String nonce = (String) params.get("nonce");
         Boolean result = coinDataValidator.validate(address, chainId, assetId, amount, nonce);
         return success(result);
     }

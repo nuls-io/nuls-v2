@@ -36,6 +36,9 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 /**
  * @author: Niels Wang
@@ -327,12 +330,16 @@ public class AddressTool {
         return true;
     }
 
-    public static boolean isPay2ScriptHashAddress(byte[] addr) {
+    public static boolean isMultiSignAddress(byte[] addr) {
         if (addr != null && addr.length > 3) {
             return addr[2] == BaseConstant.P2SH_ADDRESS_TYPE;
         }
-
         return false;
+    }
+
+    public static boolean isMultiSignAddress(String address) {
+        byte[] addr=AddressTool.getAddress(address);
+        return isMultiSignAddress(addr);
     }
 
     public static boolean isPackingAddress(String address, int chainId) {
@@ -372,6 +379,19 @@ public class AddressTool {
             return false;
         }
         return true;
+    }
+
+    public static boolean validSignAddress(List<byte[]> bytesList, byte[] bytes){
+        if(bytesList == null || bytesList.size() == 0 || bytes == null){
+            return false;
+        }else{
+            for (byte[] tempBytes:bytesList) {
+                if(Arrays.equals(bytes,tempBytes)){
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }
