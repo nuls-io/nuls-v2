@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.service.processor;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
@@ -63,7 +64,7 @@ public class StopAgentProcessor implements TxProcessor {
         //TODO.. 创建共识节点的账户和委托共识的账户区分？
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
-            String address = new String(from.getAddress());
+            String address = AddressTool.getStringAddressByBytes(from.getAddress());
             int chainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
             BigInteger amount = from.getAmount();
@@ -76,7 +77,7 @@ public class StopAgentProcessor implements TxProcessor {
 
         List<CoinTo> tos = coinData.getTo();
         for (CoinTo to : tos) {
-            String address = new String(to.getAddress());
+            String address = AddressTool.getStringAddressByBytes(to.getAddress());
             int chainId = to.getAssetsChainId();
             int assetId = to.getAssetsId();
             BigInteger amount = to.getAmount();

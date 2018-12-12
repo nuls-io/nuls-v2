@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,7 +25,9 @@
  */
 package io.nuls.ledger.service.processor;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.Address;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
@@ -65,7 +67,7 @@ public class AccountAliasProcessor implements TxProcessor {
         CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
-            String address = new String(from.getAddress());
+            String address = AddressTool.getStringAddressByBytes(from.getAddress());
             int chainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
             BigInteger amount = from.getAmount();
