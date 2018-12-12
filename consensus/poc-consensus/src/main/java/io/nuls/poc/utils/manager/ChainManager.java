@@ -117,14 +117,13 @@ public class ChainManager {
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
             if(configMap == null || configMap.size() == 0){
-                int chainId  = ConsensusConstant.MAIN_CHAIN_ID;
                 String configJson = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
                 List<ConfigItem> configItemList = JSONUtils.json2list(configJson,ConfigItem.class);
-                ConfigBean configBean = ConfigManager.initManager(configItemList,chainId);
+                ConfigBean configBean = ConfigManager.initManager(configItemList);
                 if(configBean == null){
                     return null;
                 }
-                configMap.put(chainId,configBean);
+                configMap.put(configBean.getChainId(),configBean);
             }
             return configMap;
         }catch(Exception e){

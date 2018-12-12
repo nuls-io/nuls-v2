@@ -47,7 +47,7 @@ public class ConsensusManager {
      */
     public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
         int assetsId =chain.getConfig().getAssetsId();
-        Transaction coinBaseTransaction = createCoinBaseTx(chain,assetsId,self, txList, round, bestBlock.getHeight() + 1 + chain.getConfig().getCoinbaseUnlockHeight());
+        Transaction coinBaseTransaction = createCoinBaseTx(chain,self, txList, round, bestBlock.getHeight() + 1 + chain.getConfig().getCoinbaseUnlockHeight());
         txList.add(0, coinBaseTransaction);
         punishManager.punishTx(chain, bestBlock, txList, self, round);
     }
@@ -57,14 +57,13 @@ public class ConsensusManager {
      * Assembling CoinBase transactions
      *
      * @param chain         chain info
-     * @param assetsId      资产ID/assets id
      * @param member        打包信息/packing info
      * @param txList        交易列表/transaction list
      * @param localRound    本地最新轮次/local newest round info
      * @param unlockHeight  解锁高度/unlock height
      * @return Transaction
      */
-    private Transaction createCoinBaseTx(Chain chain,int assetsId,MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) throws IOException,NulsException {
+    public Transaction createCoinBaseTx(Chain chain,MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) throws IOException,NulsException {
         Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_COINBASE);
         try {
             CoinData coinData = new CoinData();
@@ -72,7 +71,7 @@ public class ConsensusManager {
             计算共识奖励
             Calculating consensus Awards
             */
-            List<CoinTo> rewardList = calcReward(chain,assetsId,txList, member, localRound, unlockHeight);
+            List<CoinTo> rewardList = calcReward(chain,txList, member, localRound, unlockHeight);
             for (CoinTo coin : rewardList) {
                 coinData.addTo(coin);
             }
@@ -100,8 +99,9 @@ public class ConsensusManager {
      * @param unlockHeight 解锁高度/unlock height
      * @return List<CoinTo>
      */
-    private List<CoinTo> calcReward(Chain chain,int assetsId,List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) throws NulsException{
+    private List<CoinTo> calcReward(Chain chain,List<Transaction> txList, MeetingMember self, MeetingRound localRound, long unlockHeight) throws NulsException{
         int chainId = chain.getConfig().getChainId();
+        int assetsId = chain.getConfig().getAssetsId();
         /*
         链内交易手续费(资产为链内主资产)
         Intra-chain transaction fees (assets are the main assets in the chain)
