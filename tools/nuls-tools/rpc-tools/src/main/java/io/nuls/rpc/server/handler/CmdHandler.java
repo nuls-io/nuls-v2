@@ -143,11 +143,11 @@ public class CmdHandler {
             switch (nextProcess) {
                 case Constants.EXECUTE_AND_KEEP:
                     callCommandsWithPeriod(webSocket, request.getRequestMethods(), messageId);
-                    ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
+                    ServerRuntime.CMD_INVOKE_TIME.put(key, TimeService.currentTimeMillis());
                     return true;
                 case Constants.EXECUTE_AND_REMOVE:
                     callCommandsWithPeriod(webSocket, request.getRequestMethods(), messageId);
-                    ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
+                    ServerRuntime.CMD_INVOKE_TIME.put(key, TimeService.currentTimeMillis());
                     return false;
                 case Constants.SKIP_AND_KEEP:
                     return true;
@@ -269,7 +269,7 @@ public class CmdHandler {
 
         for (Object method : request.getRequestMethods().keySet()) {
             long changeCount = ServerRuntime.getCmdChangeCount((String) method);
-            long eventCount = Long.valueOf(request.getSubscriptionEventCounter());
+            long eventCount = Long.parseLong(request.getSubscriptionEventCounter());
             if (changeCount == 0) {
                 continue;
             }
@@ -300,7 +300,7 @@ public class CmdHandler {
                     Log.error(e);
                 }
 
-                ServerRuntime.cmdLastResponseBeUsed.put(eventCountKey, true);
+                ServerRuntime.CMD_LAST_RESPONSE_BE_USED.put(eventCountKey, true);
             }
         }
         return true;
@@ -324,16 +324,16 @@ public class CmdHandler {
             return Constants.EXECUTE_AND_REMOVE;
         }
 
-        if (!ServerRuntime.cmdInvokeTime.containsKey(key)) {
+        if (!ServerRuntime.CMD_INVOKE_TIME.containsKey(key)) {
             /*
             第一次执行，设置当前时间为执行时间，返回EXECUTE_AND_KEEP（执行，然后保留）
             First execution, set the current time as execution time, return EXECUTE_AND_KEEP (execution, then keep)
              */
-            ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
+            ServerRuntime.CMD_INVOKE_TIME.put(key, TimeService.currentTimeMillis());
             return Constants.EXECUTE_AND_KEEP;
         }
 
-        if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
+        if (TimeService.currentTimeMillis() - ServerRuntime.CMD_INVOKE_TIME.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
             /*
             没有达到执行条件，返回SKIP_AND_KEEP（不执行，然后保留）
             If the execution condition is not met, return SKIP_AND_KEEP (not executed, then keep)
