@@ -28,6 +28,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Coin;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
 
 import java.math.BigInteger;
@@ -63,7 +64,7 @@ public class TxUtil {
         return false;
     }
 
-    public static boolean isTheChainMainAsset(int chainId, Coin coin){
+    public static boolean isTheChainMainAsset(int chainId, Coin coin) {
         return isTheChainMainAsset(chainId, coin.getAssetsChainId(), coin.getAssetsId());
     }
 
@@ -77,28 +78,28 @@ public class TxUtil {
         return true;
     }
 
-    public static byte[] getNonce(byte[] address, int chainId, int assetId){
+    public static byte[] getNonce(byte[] address, int chainId, int assetId) throws NulsException {
         //todo 查nonce
         byte[] nonce = new byte[]{'a','b','c','d','e','f','g','h'};
         return nonce;
     }
 
-    public static BigInteger getBalance(byte[] address, int chainId, int assetId){
+    public static BigInteger getBalance(byte[] address, int chainId, int assetId) throws NulsException {
         //todo 查余额;
         return new BigInteger("10000");
     }
 
-    public static String getPrikey(String address, String password){
+    public static String getPrikey(String address, String password) throws NulsException {
         //todo 查私钥;
         return "";
     }
 
-    public static int getMofMultiSignAddress(byte[] multiSignAddress){
+  /*  public static int getMofMultiSignAddress(byte[] multiSignAddress) throws NulsException {
         //查多签地址的m
         return 3;
-    }
+    }*/
 
-    public static MultiSigAccount getMultiSigAccount(byte[] multiSignAddress){
+    public static MultiSigAccount getMultiSigAccount(byte[] multiSignAddress) throws NulsException {
         String address = AddressTool.getStringAddressByBytes(multiSignAddress);
         return new MultiSigAccount();
     }

@@ -5,11 +5,7 @@ import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author tangyi
@@ -43,20 +39,15 @@ public class ChainAssetStorageImpl implements ChainAssetStorage, InitializingBea
      * @return ChainAsset object
      */
     @Override
-    public ChainAsset load(String key) {
+    public ChainAsset load(String key) throws Exception {
         byte[] bytes = RocksDBService.get(TBL, key.getBytes());
         if (bytes == null) {
             return null;
         }
 
-        try {
-            ChainAsset chainAsset = new ChainAsset();
-            chainAsset.parse(bytes, 0);
-            return chainAsset;
-        } catch (NulsException e) {
-            Log.error(e);
-            return null;
-        }
+        ChainAsset chainAsset = new ChainAsset();
+        chainAsset.parse(bytes, 0);
+        return chainAsset;
     }
 
     /**
@@ -64,16 +55,10 @@ public class ChainAssetStorageImpl implements ChainAssetStorage, InitializingBea
      *
      * @param key        chainId-assetId
      * @param chainAsset ChainAsset object
-     * @return true/false
      */
     @Override
-    public boolean save(String key, ChainAsset chainAsset) {
-        try {
-            return RocksDBService.put(TBL, key.getBytes(), chainAsset.serialize());
-        } catch (Exception e) {
-            Log.error(e);
-            return false;
-        }
+    public void save(String key, ChainAsset chainAsset) throws Exception {
+        RocksDBService.put(TBL, key.getBytes(), chainAsset.serialize());
     }
 
     /**
@@ -82,14 +67,8 @@ public class ChainAssetStorageImpl implements ChainAssetStorage, InitializingBea
      * @param key chainId-assetId
      */
     @Override
-    public boolean delete(String key) {
-        try {
-            return RocksDBService.delete(TBL, key.getBytes());
-        } catch (Exception e) {
-            Log.error(e);
-            return false;
-        }
+    public void delete(String key) throws Exception {
+        RocksDBService.delete(TBL, key.getBytes());
     }
-
 
 }
