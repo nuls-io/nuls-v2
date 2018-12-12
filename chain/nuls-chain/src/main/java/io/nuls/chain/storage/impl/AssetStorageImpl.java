@@ -5,8 +5,6 @@ import io.nuls.chain.storage.AssetStorage;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -42,16 +40,10 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      *
      * @param key   The key
      * @param asset Asset object that needs to be saved
-     * @return true/false
      */
     @Override
-    public boolean save(String key, Asset asset) {
-        try {
-            return RocksDBService.put(TBL, key.getBytes(), asset.serialize());
-        } catch (Exception e) {
-            Log.error(e);
-            return false;
-        }
+    public void save(String key, Asset asset) throws Exception {
+        RocksDBService.put(TBL, key.getBytes(), asset.serialize());
     }
 
     /**
@@ -61,36 +53,25 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      * @return Asset object
      */
     @Override
-    public Asset load(String key) {
+    public Asset load(String key) throws Exception {
         byte[] bytes = RocksDBService.get(TBL, key.getBytes());
         if (bytes == null) {
             return null;
         }
 
-        try {
-            Asset asset = new Asset();
-            asset.parse(bytes, 0);
-            return asset;
-        } catch (NulsException e) {
-            Log.error(e);
-            return null;
-        }
+        Asset asset = new Asset();
+        asset.parse(bytes, 0);
+        return asset;
     }
 
     /**
      * Physical deletion
      *
      * @param key Asset ID
-     * @return true/false
      */
     @Override
-    public boolean delete(String key) {
-        try {
-            return RocksDBService.delete(TBL, key.getBytes());
-        } catch (Exception e) {
-            Log.error(e);
-            return false;
-        }
+    public void delete(String key) throws Exception {
+        RocksDBService.delete(TBL, key.getBytes());
     }
 
     /**
@@ -100,21 +81,20 @@ public class AssetStorageImpl implements AssetStorage, InitializingBean {
      * @return List of asset
      */
     @Override
-    public List<Asset> getByChain(int chainId) {
+    public List<Asset> getByChain(int chainId) throws Exception {
         List<byte[]> bytesList = RocksDBService.valueList(TBL);
         List<Asset> assetList = new ArrayList<>();
         for (byte[] bytes : bytesList) {
-            try {
-                Asset asset = new Asset();
-                asset.parse(bytes, 0);
-                if (asset.getChainId() == chainId) {
-                    assetList.add(asset);
-                }
-            } catch (NulsException e) {
-                Log.error(e);
+            if (bytes == null) {
+                continue;
+            }
+
+            Asset asset = new Asset();
+            asset.parse(bytes, 0);
+            if (asset.getChainId() == chainId) {
+                assetList.add(asset);
             }
         }
         return assetList;
     }
-
 }

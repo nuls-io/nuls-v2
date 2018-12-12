@@ -36,5 +36,5 @@ public interface SeqService {
      * @param chainId
      * @return
      */
-      int  createAssetId(int chainId);
+      int  createAssetId(int chainId) throws Exception;
 }
