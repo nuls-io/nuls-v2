@@ -34,7 +34,6 @@ public class AgentTest {
         Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
         Map<String,Object> params = new HashMap<>();
         params.put("agentAddress",agentAddress.getBase58());
-        params.put("assetId",1);
         params.put("chainId",1);
         params.put("deposit",20000);
         params.put("commissionRate",10);
@@ -65,12 +64,84 @@ public class AgentTest {
 
     @Test
     /**
+     * 保存节点交易回滚
+     * */
+    public void createAgentRollback()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put("chainId",1);
+        params.put("tx","0400a50140a16701005d204e0000000000000000000000000000010001f6db7f28888015528eae577ae82f985589dc63f20100012f627a02ca063f0c1c9466290c376c97a86edf95010001197a64059dd812fcf6e2d4c2bf22f0b320554c770000000000002440680117010001f6db7f28888015528eae577ae82f985589dc63f201000100c0d40100000000000000000000000000080000000000000000000117010001f6db7f28888015528eae577ae82f985589dc63f201000100204e0000000000000000000000000000ffffffff00");
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentRollBack", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    /**
+     * 停止节点
+     * */
+    public void stopAgent()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put("chainId",1);
+        Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
+        params.put("address",agentAddress.getBase58());
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    /**
+     * 停止节点提交
+     * */
+    public void stopAgentCommit()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put("chainId",1);
+        //组装交易
+        BlockHeader blockHeader = new BlockHeader();
+        blockHeader.setHeight(100);
+        //组装blockHeader
+        params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
+        params.put("tx","");
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgentCommit", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    /**
+     * 停止节点交易回滚
+     * */
+    public void stopAgentRollback()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put("chainId",1);
+        params.put("tx","");
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgentRollBack", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    /**
      * 获取节点列表
      * */
     public void getAgentList()throws Exception{
         Map<String,Object>params = new HashMap<>();
         params.put("chainId",1);
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentList", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    public void getAgentInfo()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put("chainId",1);
+        params.put("agentHash","0020fef3f394953c601f6abe82f223d5c5673d3b4d7461e575f663954a7c4e055317");
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentInfo", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    public void getAgentStatus()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put("chainId",1);
+        params.put("agentHash","0020fef3f394953c601f6abe82f223d5c5673d3b4d7461e575f663954a7c4e055317");
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentStatus", params);
         System.out.println(cmdResp.getResponseData());
     }
 }

@@ -444,6 +444,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             List<PunishLogDTO> redPunishList = null;
             //查询红牌交易
             if (type != 1) {
+                redPunishList = new ArrayList<>();
                 for (PunishLogPo po : chain.getRedPunishList()) {
                     if (StringUtils.isNotBlank(address) && !ByteUtils.arrayEquals(po.getAddress(), AddressTool.getAddress(address))) {
                         continue;
@@ -451,6 +452,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                     redPunishList.add(new PunishLogDTO(po));
                 }
             } else if (type != 2) {
+                yellowPunishList = new ArrayList<>();
                 for (PunishLogPo po : chain.getYellowPunishList()) {
                     if (StringUtils.isNotBlank(address) && !ByteUtils.arrayEquals(po.getAddress(), AddressTool.getAddress(address))) {
                         continue;
@@ -519,13 +521,14 @@ public class ConsensusServiceImpl implements ConsensusService {
                 handleList.add(deposit);
             }
             int start = pageNumber * pageSize - pageSize;
-            Page<DepositDTO> page = new Page<>(pageNumber, pageSize, handleList.size());
-            if (start >= handleList.size()) {
+            int handleSize = handleList.size() ;
+            Page<DepositDTO> page = new Page<>(pageNumber, pageSize, handleSize);
+            if (start >= handleSize) {
                 return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
             }
             List<DepositDTO> resultList = new ArrayList<>();
-            for (int i = start; i < depositList.size() && i < (start + pageSize); i++) {
-                Deposit deposit = depositList.get(i);
+            for (int i = start; i < handleSize && i < (start + pageSize); i++) {
+                Deposit deposit = handleList.get(i);
                 List<Agent> agentList = chain.getAgentList();
                 Agent agent = null;
                 for (Agent a : agentList) {
@@ -607,7 +610,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
             }
             int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
-            String address = (String) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+            String address = (String) params.get(ConsensusConstant.PARAM_ADDRESS);
             AccountConsensusInfoDTO dto = new AccountConsensusInfoDTO();
             Chain chain = chainManager.getChainMap().get(chainId);
             if (chain == null) {
@@ -947,7 +950,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
-            transaction.parse(HexUtil.decode(txHex), 0);
+            transaction.parse(HexUtil.decode(txHex) ,0);
             if (!agentService.delete(transaction.getHash(), chainId)) {
                 return Result.getFailed(ConsensusErrorCode.ROLLBACK_FAILED);
             }
