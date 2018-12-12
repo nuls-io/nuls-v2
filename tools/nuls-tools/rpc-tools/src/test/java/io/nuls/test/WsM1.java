@@ -53,6 +53,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 public class WsM1 {
     @Test
+    public void enumTest(){
+
+    }
+
+    @Test
     public void test() {
         String range = "[11,102]";
 //        System.out.println(range.substring(range.indexOf("(")+1,range.indexOf(",")));
