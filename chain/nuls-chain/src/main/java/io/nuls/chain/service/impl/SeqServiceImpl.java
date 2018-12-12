@@ -41,15 +41,12 @@ public class SeqServiceImpl implements SeqService {
     private SeqStorage seqStorage;
 
     /**
-     *
      * createAssetId
-     * @param chainId
-     * @return
+     *
+     * @param chainId Chain ID
      */
     @Override
-    public synchronized  int createAssetId(int chainId) {
-
+    public synchronized int createAssetId(int chainId) throws Exception {
         return seqStorage.nextSeq(chainId);
-
     }
 }

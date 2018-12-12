@@ -3,8 +3,6 @@ package io.nuls.chain.storage;
 
 import io.nuls.chain.model.dto.ChainAsset;
 
-import java.util.List;
-
 public interface ChainAssetStorage {
 
     /**
@@ -13,7 +11,7 @@ public interface ChainAssetStorage {
      * @param key chainId-assetId
      * @return ChainAsset object
      */
-    ChainAsset load(String key);
+    ChainAsset load(String key) throws Exception;
 
     /**
      * Save specific asset values of a specific chain
@@ -22,13 +20,13 @@ public interface ChainAssetStorage {
      * @param chainAsset ChainAsset object
      * @return true/false
      */
-    boolean save(String key, ChainAsset chainAsset);
+    void save(String key, ChainAsset chainAsset) throws Exception;
 
     /**
      * Physical deletion
      * @param key chainId-assetId
      * @return true/false
      */
-    boolean delete(String key);
+    void delete(String key) throws Exception;
 
 }
