@@ -69,7 +69,7 @@ public class NulsConfig {
     /**
      * config file path
      * */
-    public static String CONFIG_FILE_PATH = "consensus-config.json";
+    public static String CONFIG_FILE_PATH = "account-config.json";
 
     /**
      * 主网链ID（卫星链ID）
