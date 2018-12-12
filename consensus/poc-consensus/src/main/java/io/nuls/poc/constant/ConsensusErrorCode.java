@@ -48,4 +48,6 @@ public interface ConsensusErrorCode {
     ErrorCode BLOCK_PUNISH_VALID_ERROR = ErrorCode.init("70034");
     ErrorCode BLOCK_SIGNATURE_ERROR = ErrorCode.init("70035");
     ErrorCode BLOCK_RED_PUNISH_ERROR = ErrorCode.init("70036");
+    ErrorCode BLOCK_COINBASE_VALID_ERROR = ErrorCode.init("70037");
+    ErrorCode TRANSACTION_LIST_IS_NULL = ErrorCode.init("70038");
 }

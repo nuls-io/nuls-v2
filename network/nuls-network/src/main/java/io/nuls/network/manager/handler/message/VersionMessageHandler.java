@@ -32,11 +32,15 @@ import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.NodeGroupConnector;
+import io.nuls.network.model.dto.BestBlockInfo;
 import io.nuls.network.model.message.VerackMessage;
 import io.nuls.network.model.message.VersionMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.VerackMessageBody;
 import io.nuls.network.model.message.body.VersionMessageBody;
+import io.nuls.network.rpc.external.BlockRpcService;
+import io.nuls.network.rpc.external.impl.BlockRpcServiceImpl;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 
 /**
@@ -47,22 +51,22 @@ import io.nuls.tools.log.Log;
 public class VersionMessageHandler extends BaseMessageHandler {
 
     private static VersionMessageHandler instance = new VersionMessageHandler();
-    NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
+    private NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
+    private  LocalInfoManager   localInfoManager =LocalInfoManager.getInstance();
+
     private VersionMessageHandler() {
 
     }
-
     public static VersionMessageHandler getInstance() {
         return instance;
     }
-    LocalInfoManager   localInfoManager =LocalInfoManager.getInstance();
 
     /**
      *  server recieve handler
-     * @param message
-     * @param nodeKey
+     * @param message message
+     * @param nodeKey nodeKey
      */
-    public void serverRecieveHandler(BaseMessage message, String nodeKey){
+    private void serverRecieveHandler(BaseMessage message, String nodeKey){
         VersionMessageBody versionBody=(VersionMessageBody)message.getMsgBody();
         Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
         Log.debug("VersionMessageHandler Recieve:"+"Server"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
@@ -70,16 +74,16 @@ public class VersionMessageHandler extends BaseMessageHandler {
         String peerIp = versionBody.getAddrYou().getIp().getHostAddress();
         int peerPort = versionBody.getAddrYou().getPort();
         localInfoManager.updateExternalAddress(peerIp,peerPort);
-        int maxIn=0;
+        int maxIn;
         if(node.isCrossConnect()){
             maxIn=nodeGroup.getMaxCrossIn();
         }else{
             maxIn=nodeGroup.getMaxIn();
         }
-        /**
+        /*
+         *远程地址与自己地址相同 或者 连接满额处理
          *会存在情况如：种子节点 启动 无法扫描到自己的IP 只有 到握手时候才能知道自己外网IP，发现是自连。
          */
-        //远程地址与自己地址相同 或者 连接满额处理
         if(LocalInfoManager.getInstance().isSelfIp(node.getIp()) || ConnectionManager.getInstance().isPeerConnectExceedMaxIn(node.getIp(),nodeGroup.getMagicNumber(),maxIn)){
             if(node.getNodeGroupConnectors().size() == 0){
                 node.getChannel().close();
@@ -111,10 +115,10 @@ public class VersionMessageHandler extends BaseMessageHandler {
 
     /**
      * client recieve handler
-     * @param message
-     * @param nodeKey
+     * @param message message
+     * @param nodeKey nodeKey
      */
-    public void clientRecieveHandler(BaseMessage message, String nodeKey){
+   private  void clientRecieveHandler(BaseMessage message, String nodeKey){
         VersionMessageBody versionBody=(VersionMessageBody)message.getMsgBody();
         localInfoManager.updateExternalAddress(versionBody.getAddrYou().getIp().getHostAddress(),NetworkParam.getInstance().getPort());
         Node node = nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber()).getDisConnectNodeMap().get(nodeKey);
@@ -139,10 +143,10 @@ public class VersionMessageHandler extends BaseMessageHandler {
      *
      * 接收消息处理
      * Receive message processing
-     * @param message
-     * @param nodeKey
-     * @param isServer
-     * @return
+     * @param message message
+     * @param nodeKey nodeKey
+     * @param isServer isServer
+     * @return NetworkEventResult
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
@@ -157,6 +161,12 @@ public class VersionMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
         Log.debug("VersionMessageHandler send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+        BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
+        int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
+        BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(chainId);
+        VersionMessage versionMessage = (VersionMessage)message;
+        versionMessage.getMsgBody().setBlockHash(bestBlockInfo.getHash());
+        versionMessage.getMsgBody().setBlockHeight(bestBlockInfo.getBlockHeight());
         //VERSION 协议的发送中，节点所属的网络业务状态是连接中
         NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(message.getHeader().getMagicNumber());
         nodeGroupConnector.setStatus(NodeGroupConnector.CONNECTING);

@@ -37,21 +37,21 @@ public interface BaseMeesageHandlerInf {
     /**
      *接收消息处理
      *Receive message processing
-     * @param message
-     * @param nodeKey
-     * @param isServer
-     * @return
+     * @param message   address message
+     * @param nodeKey      peer node key
+     * @param isServer client=false or server=true
+     * @return NetworkEventResult
      */
     NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer);
 
     /**
      * 发送消息处理
      * Send message processing
-     * @param message
-     * @param node
-     * @param isServer
-     * @param asyn
-     * @return
+     * @param message   address message
+     * @param node      peer info
+     * @param isServer client=false or server=true
+     * @param asyn  default true
+     * @return NetworkEventResult
      */
     NetworkEventResult send(BaseMessage message, Node node,boolean isServer, boolean asyn);
 }

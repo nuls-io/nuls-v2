@@ -32,7 +32,7 @@ import io.nuls.tools.constant.ErrorCode;
  * 错误码管理器
  * NetworkErrorCode
  *
- * @author: Lan
+ * @author Lan
  */
 public interface NetworkErrorCode{
     ErrorCode SUCCESS= ErrorCode.init("10000");
@@ -41,7 +41,14 @@ public interface NetworkErrorCode{
 
     ErrorCode DATA_ERROR = ErrorCode.init("20002");
     ErrorCode PARAMETER_ERROR = ErrorCode.init("20003");
+    ErrorCode PEER_NOT_EXIST = ErrorCode.init("20004");
+
+
     ErrorCode NET_MESSAGE_ERROR = ErrorCode.init("40002");
+    ErrorCode NET_MESSAGE_SEND_FAIL = ErrorCode.init("40003");
+    ErrorCode NET_MESSAGE_SEND_EXCEPTION = ErrorCode.init("40004");
+
+
     ErrorCode NET_BROADCAST_FAIL = ErrorCode.init("40011");
     ErrorCode NET_NODE_DEAD = ErrorCode.init("40013");
     ErrorCode NET_NODE_MISS_CHANNEL = ErrorCode.init("40014");

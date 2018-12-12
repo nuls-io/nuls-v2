@@ -17,6 +17,7 @@ import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.h2.util.StringUtils;
 
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -118,7 +119,7 @@ public class H2Test {
         TransactionH2Service ts = new TransactionH2ServiceImpl();
         for (int i=0;i<1;i++) {
             List<TransactionPO> listPo = new ArrayList<>();
-            for (int j=0;j<100;j++) {
+            for (int j=0;j<10000;j++) {
                listPo.add(createTxPo());
             }
             System.out.println(ts.saveTxs(listPo));
@@ -132,15 +133,20 @@ public class H2Test {
         int time = rand.nextInt(1542514842 - 1541001600 + 1) + 1541001600;
         int stateAndType = rand.nextInt(3);
         int type = rand.nextInt(10) + 1;
+        int assetChainId = rand.nextInt(10) + 1;
+        int assetId = rand.nextInt(30) + 1;
         TransactionPO txPo = new TransactionPO();
 
         txPo.setAddress(ranAddress()); //随机表随机地址
 //        txPo.setAddress(ranSingleAddress());//表_0中随机地址
         txPo.setHash(getTestHash());
-        txPo.setAmount((long)amount);
+
+        txPo.setAmount(new BigInteger(amount + ""));
         txPo.setState(stateAndType);
         txPo.setType(type);
         txPo.setTime((long)time);
+        txPo.setAssetChainId(assetChainId);
+        txPo.setAssetId(assetId);
         return txPo;
     }
 

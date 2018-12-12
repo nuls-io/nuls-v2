@@ -33,7 +33,7 @@ import io.nuls.tools.parse.config.IniEntity;
  * <p>
  * Used to manage system configuration items.
  *
- * @author: Niels Wang
+ * @author  Niels Wang
  */
 public class NulsConfig {
     /**

@@ -1,14 +1,14 @@
-package io.nuls.network.loker;
+package io.nuls.network.locker;
 
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * @program: nuls2.0
- * @description: 全局锁,用于同步代码片段
+ *
+ * @description  全局锁,用于同步代码片段
  *                 Lockers
- * @author: lan
- * @create: 2018/11/13
+ * @author  lan
+ * @date 2018/11/13
  **/
 public class Lockers {
     /**

@@ -25,11 +25,11 @@
 package io.nuls.network.manager.handler.base;
 
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.SocketChannel;
-import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.model.Node;
+import io.nuls.network.constant.NetworkConstant;
+
+import static io.nuls.network.constant.NetworkParam.getInstance;
 
 /**
  * channel handler
@@ -40,29 +40,26 @@ public abstract class BaseChannelHandler  extends ChannelInboundHandlerAdapter {
     /**
      * 通过channel获取nodeId
      *Get the nodeId through the channel
-     * @param channel
-     * @return
+     * @param channel netty socket channel
+     * @return String
      */
     protected String getNodeIdByChannel( Channel channel){
         SocketChannel socketChannel = (SocketChannel) channel;
         String remoteIP = socketChannel.remoteAddress().getHostString();
         int port=socketChannel.remoteAddress().getPort();
-        return (remoteIP+":"+port);
+        return (remoteIP+NetworkConstant.COLON +port);
     }
 
     /**
      * 判断是否跨链连接
      *Determine whether to connect across connections
-     * @param channel
-     * @return
+     * @param channel netty socket channel
+     * @return boolean
      */
     protected boolean isServerCrossConnect(Channel channel){
         SocketChannel socketChannel = (SocketChannel) channel;
         int port=socketChannel.localAddress().getPort();
-        if(NetworkParam.getInstance().getCrossPort()==port){
-            return true;
-        }
-        return false;
+        return (getInstance().getCrossPort()==port);
     }
 
 

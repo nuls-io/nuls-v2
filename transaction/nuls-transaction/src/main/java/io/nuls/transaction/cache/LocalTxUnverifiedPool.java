@@ -14,6 +14,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  * @author: Charlie
  * @date: 2018/11/26
  */
+@Deprecated
 public class LocalTxUnverifiedPool {
 
     private static final LocalTxUnverifiedPool INSTANCE = new LocalTxUnverifiedPool();

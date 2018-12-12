@@ -11,6 +11,7 @@ import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
 import io.nuls.poc.model.bo.tx.txdata.YellowPunishData;
+import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.PunishManager;
 import io.nuls.poc.utils.manager.RoundManager;
 import io.nuls.tools.core.annotation.Autowired;
@@ -19,6 +20,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -34,6 +36,8 @@ public class BlockValidator {
    private RoundManager roundManager;
    @Autowired
    private PunishManager punishManager;
+   @Autowired
+   private ConsensusManager consensusManager;
    /**
     * 区块头验证
     * Block verification
@@ -42,7 +46,7 @@ public class BlockValidator {
     * @param chain             chain info
     * @param block             block info
     * */
-   public boolean validate(boolean isDownload, Chain chain, Block block)throws NulsException{
+   public boolean validate(boolean isDownload, Chain chain, Block block)throws NulsException,IOException{
       BlockHeader blockHeader = block.getHeader();
       //验证梅克尔哈希
       if (!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))) {
@@ -56,9 +60,13 @@ public class BlockValidator {
       }
       BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
       MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
-      boolean punishValidResut = punishValidate(block,currentRound,member,chain);
-      if(!punishValidResut){
+      validResult = punishValidate(block,currentRound,member,chain);
+      if(!validResult){
          throw new NulsException(ConsensusErrorCode.BLOCK_PUNISH_VALID_ERROR);
+      }
+      validResult = coinBaseValidate(block,currentRound,member,chain);
+      if(!validResult){
+         throw new NulsException(ConsensusErrorCode.BLOCK_COINBASE_VALID_ERROR);
       }
       return true;
    }
@@ -355,11 +363,18 @@ public class BlockValidator {
     * @param block          block info
     * @param currentRound   Block round information
     * @param member         Node packing information
+    * @param chain          chain info
     * */
-   private boolean coinBaseValidate(Block block, MeetingRound currentRound, MeetingMember member){
+   private boolean coinBaseValidate(Block block, MeetingRound currentRound, MeetingMember member,Chain chain)throws NulsException, IOException {
       Transaction tx = block.getTxs().get(0);
       if (tx.getType() != ConsensusConstant.TX_TYPE_COINBASE) {
          Log.debug("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+         return false;
+      }
+      Transaction coinBaseTransaction = consensusManager.createCoinBaseTx(chain ,member, block.getTxs(), currentRound, block.getHeader().getHeight() + chain.getConfig().getCoinbaseUnlockHeight());
+      if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
+         Log.debug("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+         Log.error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
          return false;
       }
       return true;

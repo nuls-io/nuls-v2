@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc;
+package io.nuls.network.rpc.internal;
 
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
@@ -42,24 +42,25 @@ import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
- * @description: 远程调用接口
- * @author: lan
- * @create: 2018/11/07
+ * @description  远程调用接口
+ * @author  lan
+ * @date  2018/11/07
  **/
 public class NodeGroupRpc extends BaseCmd {
-NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
-DbService dbService=StorageManager.getInstance().getDbService();
+    private NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
+    private DbService dbService=StorageManager.getInstance().getDbService();
     /**
      * nw_createNodeGroup
      * 创建跨链网络
      */
     @CmdAnnotation(cmd = "nw_createNodeGroup", version = 1.0,
             description = "createNodeGroup")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "magicNumber", parameterType = "long", parameterValidRange = "[1,4294967295]")
     @Parameter(parameterName = "maxOut", parameterType = "int",parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "maxIn", parameterType = "int",parameterValidRange = "[1,65535]")
@@ -70,14 +71,14 @@ DbService dbService=StorageManager.getInstance().getDbService();
         List<NodeGroupPo> nodeGroupPos=new ArrayList<>();
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         long magicNumber = Long.valueOf(String.valueOf(params.get("magicNumber")));
-        int maxOut = 0;
+        int maxOut;
         if(StringUtils.isNotBlank(String.valueOf(params.get("maxOut")))){
             maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
         }else {
             maxOut = NetworkParam.getInstance().getMaxOutCount();
         }
 
-        int maxIn = 0;
+        int maxIn;
         if(StringUtils.isNotBlank(String.valueOf(params.get("maxIn")))){
             maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
         }else {
@@ -85,9 +86,9 @@ DbService dbService=StorageManager.getInstance().getDbService();
         }
         int minAvailableCount = Integer.valueOf(String.valueOf(params.get("minAvailableCount")));
         int isMoonNode=Integer.valueOf(String.valueOf(params.get("isMoonNode")));
-        boolean isMoonNet = isMoonNode == 1 ? true : false;
+        boolean isMoonNet = (isMoonNode == 1);
         //友链创建的是链工厂，isSelf 为true
-        boolean isSelf = isMoonNet? false : true;
+        boolean isSelf = !isMoonNet;
         if(!NetworkParam.getInstance().isMoonNode()){
             Log.info("MoonNode is false，but param isMoonNode is 1");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
@@ -112,21 +113,21 @@ DbService dbService=StorageManager.getInstance().getDbService();
      */
     @CmdAnnotation(cmd = "nw_activeCross", version = 1.0,
             description = "activeCross")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "maxOut", parameterType = "int",parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "maxIn", parameterType = "int",parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "seedIps", parameterType = "String")
     public Response activeCross(Map  params) {
         List<NodeGroupPo> nodeGroupPos=new ArrayList<>();
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
-        int maxOut = 0;
+        int maxOut;
         if(StringUtils.isNotBlank(String.valueOf(params.get("maxOut")))){
             maxOut = Integer.valueOf(String.valueOf(params.get("maxOut")));
         }else {
             maxOut = NetworkParam.getInstance().getMaxOutCount();
         }
 
-        int maxIn = 0;
+        int maxIn;
         if(StringUtils.isNotBlank(String.valueOf(params.get("maxIn")))){
             maxIn = Integer.valueOf(String.valueOf(params.get("maxIn")));
         }else {
@@ -147,9 +148,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
         List<String> ipList = new ArrayList<>();
         if(StringUtils.isNotBlank(seedIps)) {
             String[] ips = seedIps.split(NetworkConstant.COMMA);
-            for (String ip : ips) {
-                ipList.add(ip);
-            }
+            Collections.addAll(ipList, ips);
         }
         NetworkParam.getInstance().setMoonSeedIpList(ipList);
         nodeGroup.setCrossActive(true);
@@ -161,7 +160,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
      */
     @CmdAnnotation(cmd = "nw_getGroupByChainId", version = 1.0,
             description = "getGroupByChainId")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response getGroupByChainId(Map  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
@@ -196,7 +195,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
      */
     @CmdAnnotation(cmd = "nw_delNodeGroup", version = 1.0,
             description = "delGroupByChainId")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response delGroupByChainId(Map  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         dbService.deleteGroup(chainId);
@@ -213,7 +212,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
      */
     @CmdAnnotation(cmd = "nw_getSeeds", version = 1.0,
             description = "delGroupByChainId")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response getCrossSeeds(List  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get(0)));
         Log.info("chainId:"+chainId);
@@ -221,7 +220,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
         if(null == seeds){
             return success();
         }
-        StringBuffer seedsStr=new StringBuffer();
+        StringBuilder seedsStr=new StringBuilder();
         for(String seed:seeds){
             seedsStr.append(seed);
             seedsStr.append(",");
@@ -241,7 +240,7 @@ DbService dbService=StorageManager.getInstance().getDbService();
      */
     @CmdAnnotation(cmd = "nw_reconnect", version = 1.0,
             description = "reconnect")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response reconnect(Map  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         Log.info("chainId:"+chainId);
@@ -256,8 +255,8 @@ DbService dbService=StorageManager.getInstance().getDbService();
      */
     @CmdAnnotation(cmd = "nw_getGroups", version = 1.0,
             description = "getGroups")
-    @Parameter(parameterName = "startPage", parameterType = "int", parameterValidRange = "[0,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "pageSize", parameterType = "int", parameterValidRange = "[0,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "startPage", parameterType = "int", parameterValidRange = "[0,65535]")
+    @Parameter(parameterName = "pageSize", parameterType = "int", parameterValidRange = "[0,65535]")
     public Response getGroups(Map  params) {
         int startPage=Integer.valueOf(String.valueOf(params.get("startPage")));
         int pageSize=Integer.valueOf(String.valueOf(params.get("pageSize")));

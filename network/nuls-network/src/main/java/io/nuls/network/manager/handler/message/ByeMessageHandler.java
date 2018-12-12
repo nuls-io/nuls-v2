@@ -25,6 +25,7 @@
 package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
@@ -34,10 +35,11 @@ import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.tools.log.Log;
 
 /**
- * @program: nuls2.0
- * @description: bye message handler
- * @author: lan
- * @create: 2018/11/13
+ * @description
+ * 处理Bye 协议消息，是拒绝握手,断开业务连接关系的协议处理
+ * bye message handler,Handling the Bye protocol message is a protocol that refuses to handshake and disconnects the service connection.
+ * @author  lan
+ * @date  2018/11/13
  **/
 public class ByeMessageHandler extends BaseMessageHandler {
     private static ByeMessageHandler instance = new ByeMessageHandler();
@@ -53,10 +55,10 @@ public class ByeMessageHandler extends BaseMessageHandler {
      *
      * 接收消息处理
      * Receive message processing
-     * @param message
-     * @param nodeKey
-     * @param isServer
-     * @return
+     * @param message   address message
+     * @param nodeKey      peer node key
+     * @param isServer client=false or server=true
+     * @return NetworkEventResult
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey, boolean isServer) {
@@ -69,13 +71,13 @@ public class ByeMessageHandler extends BaseMessageHandler {
         Node node = nodeGroup.getConnectNode(nodeKey);
         if(null == node){
             Log.error("(nodeKey="+nodeKey+")node is not exist!");
-            return new NetworkEventResult(false, null);
+            return  NetworkEventResult.getResultFail(NetworkErrorCode.PEER_NOT_EXIST);
         }
 
         nodeGroup.removePeerNode(node,true,false);
         if(Node.OUT == node.getType()) {
             nodeGroup.addFailConnect(node.getId(), NetworkConstant.CONNECT_FAIL_LOCK_MINUTE);
         }
-        return  new NetworkEventResult(true, null);
+        return   NetworkEventResult.getResultSuccess();
     }
 }

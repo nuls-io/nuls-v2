@@ -36,7 +36,9 @@ import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.tools.log.Log;
 
 /**
+ * 发送与接收 连接地址 协议消息处理类
  * get address message handler
+ * Send and receive connection address protocol message processing class
  * @author lan
  * @date 2018/10/15
  *
@@ -56,10 +58,10 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
      *
      * 接收消息处理
      * Receive message processing
-     * @param message
-     * @param nodeKey
-     * @param isServer
-     * @return
+     * @param message   address message
+     * @param nodeKey      peer node key
+     * @param isServer client=false or server=true
+     * @return NetworkEventResult
      */
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
@@ -72,7 +74,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
         }else {
             MessageManager.getInstance().sendToNode(addressMessage, node, true);
         }
-        return new NetworkEventResult(true, null);
+        return  NetworkEventResult.getResultSuccess();
     }
 
     @Override

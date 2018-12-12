@@ -38,8 +38,8 @@ import io.nuls.tools.constant.ErrorCode;
  */
 public class NetworkEventResult {
 
-    private boolean success = true;
-    private ErrorCode errorCode =NetworkErrorCode.SUCCESS;
+    private boolean success;
+    private ErrorCode errorCode;
     private BaseNulsData resultData;
 
     public NetworkEventResult(boolean success,ErrorCode errorCode,BaseNulsData resultData) {
@@ -74,5 +74,18 @@ public class NetworkEventResult {
 
     public void setResultData(BaseNulsData resultData) {
         this.resultData = resultData;
+    }
+
+    public static NetworkEventResult getResultSuccess() {
+        return  new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
+    }
+    public static NetworkEventResult getResultSuccess(BaseNulsData resultData) {
+        return  new NetworkEventResult(true, NetworkErrorCode.SUCCESS,resultData);
+    }
+    public static NetworkEventResult getResultFail(ErrorCode errorCode) {
+        return  new NetworkEventResult(false,errorCode);
+    }
+    public static NetworkEventResult getResultFail(ErrorCode errorCode,BaseNulsData resultData) {
+        return  new NetworkEventResult(false,errorCode,resultData);
     }
 }

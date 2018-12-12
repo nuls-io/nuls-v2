@@ -24,20 +24,13 @@
  */
 package io.nuls.network.manager.threads;
 
-import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.manager.NodeGroupManager;
-import io.nuls.network.model.NodeGroup;
-import io.nuls.tools.log.Log;
-
-import java.util.List;
-
 /**
  *
- * @description: 定时清理缓存中过期数据信息
+ * @description  定时清理缓存中过期数据信息
  *Timed cleaning of expired data information in the cache
  *
- * @author: lan
- * @create: 2018/11/14
+ * @author lan
+ * @date  2018/11/14
  **/
 public class CacheClearTask implements Runnable  {
     @Override

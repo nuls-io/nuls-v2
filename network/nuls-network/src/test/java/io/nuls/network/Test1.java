@@ -24,8 +24,7 @@
  */
 package io.nuls.network;
 
-import io.nuls.rpc.info.HostInfo;
-import io.nuls.rpc.server.WsServer;
+import io.nuls.network.model.Node;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
@@ -33,6 +32,11 @@ import org.junit.Test;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Test1 {
 
@@ -67,30 +71,54 @@ public class Test1 {
     }
     @Test
     public void test3(){
-        try {
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
 
     }
     @Test
     public void test4(){
         ThreadUtils.createAndRunThread("mytest",TimeService.getInstance());
-        while(true){
+
+    }
+    @Test
+    public void test5(){
+        Map<String,Node> a=new ConcurrentHashMap<>();
+        Node node1 = new Node("1.1.1.1",80,1,false);
+        a.put(node1.getId(),node1);
+        Map<String,Node> b=new ConcurrentHashMap<>();
+        Node node2 = new Node("3.1.1.1",80,1,false);
+        b.put(node2.getId(),node2);
+        b.put(node1.getId(),node1);
+        a.clear();
+        Collection<Node> c = b.values();
+        for(Node i:c){
+            System.out.println(i.getId());
 
         }
     }
-   public static void main(String []args){
-            WsServer wsServer = new WsServer(HostInfo.randomPort());
-       try {
-//           wsServer.init(ModuleE.CM, "io.nuls.rpc.cmd.test");
-//           wsServer.connect("ws://127.0.0.1:8887");
-//           CmdDispatcher.syncKernel();
-       } catch (Exception e) {
-           e.printStackTrace();
-       }
-
+    @Test
+    public void test6(){
+        List<Node> list = new ArrayList<>();
+        Node node1 = new Node("1.1.1.1",80,1,false);
+        list.add(node1);
+        Node node2 = new Node("3.1.1.1",80,1,false);
+        list.add(node2);
+        List<Node> list2 = new ArrayList<>();
+        list2.add(node1);
+        list2.add(node2);
+        list.clear();
+        for(Node i:list2){
+            System.out.println(i.getId());
         }
+    }
+    @Test
+    public void test7(){
+        String key = "dfs";
+        Map<String,Integer> cacheConnectGroupIpInMap = new ConcurrentHashMap<>();
+        cacheConnectGroupIpInMap.merge(key, 1, (a, b) -> a + b);
+        System.out.println(cacheConnectGroupIpInMap.get(key));
+        cacheConnectGroupIpInMap.merge(key, 1, (a, b) -> a + b);
+        System.out.println(cacheConnectGroupIpInMap.get(key));
 
 
+    }
 }

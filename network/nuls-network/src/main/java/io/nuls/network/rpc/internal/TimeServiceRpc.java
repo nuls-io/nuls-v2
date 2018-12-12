@@ -22,12 +22,12 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc;
+package io.nuls.network.rpc.internal;
 
+import io.nuls.network.manager.threads.TimeService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.thread.TimeService;
 
 import java.util.HashMap;
 import java.util.Map;
