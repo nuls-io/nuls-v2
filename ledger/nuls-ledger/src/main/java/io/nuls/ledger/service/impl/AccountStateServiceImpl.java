@@ -32,6 +32,7 @@ import io.nuls.ledger.model.FreezeLockTimeState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.thread.TimeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -152,7 +153,8 @@ public class AccountStateServiceImpl implements AccountStateService {
         state.setCreateTime(TimeService.currentTimeMillis());
         accountState.getFreezeState().getFreezeHeightStates().add(state);
         //减去锁定金额
-        accountState.getBalance().subtract(amount);
+        BigInteger balance = accountState.getBalance().subtract(amount);
+        accountState.setBalance(balance);
         byte[] key = this.getKey(address, chainId, assetId);
         repository.putAccountState(key, accountState);
         return accountState.getBalance();
@@ -195,7 +197,8 @@ public class AccountStateServiceImpl implements AccountStateService {
         state.setCreateTime(TimeService.currentTimeMillis());
         accountState.getFreezeState().getFreezeLockTimeStates().add(state);
         //减去锁定金额
-        accountState.getBalance().subtract(amount);
+        BigInteger balance = accountState.getBalance().subtract(amount);
+        accountState.setBalance(balance);
 
         byte[] key = this.getKey(address, chainId, assetId);
         repository.putAccountState(key, accountState);
@@ -229,6 +232,6 @@ public class AccountStateServiceImpl implements AccountStateService {
      */
     private byte[] getKey(String address, int chainId, int assetId) {
         String key = address + "-" + chainId + "-" + assetId;
-        return key.getBytes();
+        return HexUtil.decode(key);
     }
 }

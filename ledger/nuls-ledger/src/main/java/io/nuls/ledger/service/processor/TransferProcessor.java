@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.service.processor;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
@@ -68,7 +69,7 @@ public class TransferProcessor implements TxProcessor {
         //BigInteger txCost;
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
-            String address = new String(from.getAddress());
+            String address = AddressTool.getStringAddressByBytes(from.getAddress());
             int chainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
             BigInteger amount = from.getAmount();
@@ -82,7 +83,7 @@ public class TransferProcessor implements TxProcessor {
 
         List<CoinTo> tos = coinData.getTo();
         for (CoinTo to : tos) {
-            String address = new String(to.getAddress());
+            String address = AddressTool.getStringAddressByBytes(to.getAddress());
             int chainId = to.getAssetsChainId();
             int assetId = to.getAssetsId();
             BigInteger amount = to.getAmount();

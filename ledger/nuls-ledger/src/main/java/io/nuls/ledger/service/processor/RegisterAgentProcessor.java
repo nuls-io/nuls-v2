@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.service.processor;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
@@ -63,12 +64,12 @@ public class RegisterAgentProcessor implements TxProcessor {
         //1 减去用户的可用余额
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
-            String address = new String(from.getAddress());
+            String address = AddressTool.getStringAddressByBytes(from.getAddress());
 
             //TODO 获取交易前八位
             //accountStateService.increaseNonce(address, chainId, assetId);
             String nonce = "";
-            accountStateService.setNonce(address, from.getAssetsChainId(), from.getAssetsId(),nonce);
+            accountStateService.setNonce(address, from.getAssetsChainId(), from.getAssetsId(), nonce);
             accountStateService.addBalance(address,
                     from.getAssetsChainId(),
                     from.getAssetsId(),
@@ -77,7 +78,7 @@ public class RegisterAgentProcessor implements TxProcessor {
         //2 增加冻结金额,永久锁定,只有在注销节点时,才会退还
         List<CoinTo> tos = coinData.getTo();
         for (CoinTo to : tos) {
-            String address = new String(to.getAddress());
+            String address = AddressTool.getStringAddressByBytes(to.getAddress());
             accountStateService.freezeByLockTime(address,
                     to.getAssetsId(),
                     to.getAssetsId(),
