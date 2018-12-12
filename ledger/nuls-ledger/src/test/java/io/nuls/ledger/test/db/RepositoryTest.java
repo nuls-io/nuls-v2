@@ -50,7 +50,7 @@ public class RepositoryTest {
     public void before() {
         try {
             AppConfig.loadModuleConfig();
-            RocksDBService.init(AppConfig.moduleConfig.getDatabaseDir());
+            RocksDBService.init(AppConfig.loadModuleConfig().getDatabaseDir());
             if (!RocksDBService.existTable(DataBaseArea.TB_LEDGER_ACCOUNT)) {
                 RocksDBService.createTable(DataBaseArea.TB_LEDGER_ACCOUNT);
             }
