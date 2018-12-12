@@ -99,6 +99,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String remoteIP = channel.remoteAddress().getHostString();
         Log.info("Server Node is exceptionCaught:" +remoteIP + ":" + channel.remoteAddress().getPort());
+        Log.error(cause.getMessage());
         if (!(cause instanceof IOException)) {
             Log.error(cause);
         }

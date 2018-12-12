@@ -22,42 +22,34 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.rpc.external.impl;
+package io.nuls.network.manager.threads;
 
-import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.model.dto.BestBlockInfo;
-import io.nuls.network.rpc.external.BlockRpcService;
-import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.Bootstrap;
+import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.tools.thread.commom.NulsThreadFactory;
+import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
- *
- * @description
  * @author lan
- * @date 2018/12/07
+ * @description
+ * @date 2018/12/12
  **/
-@Service
-public class BlockRpcServiceImpl implements BlockRpcService {
-    @Override
-    public BestBlockInfo getBestBlockHeader(int chainId) {
-        BestBlockInfo bestBlockInfo = new BestBlockInfo();
-        Map<String,Object> map = new HashMap<>();
-        map.put("chainId",chainId);
+public class ThreadTest {
+    public void start(){
+        Bootstrap.getInstance().moduleStart();
+    }
+    @Test
+    public void clientConnectTest(){
+        start();
+        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
+        executor.scheduleAtFixedRate(new NodesConnectTaskTest(), 5, 10, TimeUnit.SECONDS);
         try {
-            Response response =  CmdDispatcher.requestAndResponse(NetworkConstant.MODULE_ROLE, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER,map );
-            if(null != response && response.isSuccess()){
-                Map responseData = (Map)response.getResponseData();
-                bestBlockInfo.setHash(String.valueOf(responseData.get("hash")));
-                bestBlockInfo.setBlockHeight(Long.valueOf(responseData.get("height").toString()));
-            }
-        } catch (Exception e) {
+            Thread.sleep(1000000000);
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        return bestBlockInfo;
     }
 }

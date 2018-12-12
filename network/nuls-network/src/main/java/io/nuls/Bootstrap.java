@@ -71,7 +71,7 @@ public class Bootstrap {
 
     }
 
-    private void moduleStart(){
+    public void moduleStart(){
         try {
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
 //            --add-exports java.base/jdk.internal.misc=ALL-UNNAMED

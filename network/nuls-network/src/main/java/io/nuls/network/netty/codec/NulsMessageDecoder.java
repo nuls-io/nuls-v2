@@ -44,7 +44,6 @@ public class NulsMessageDecoder extends ByteToMessageDecoder {
     ConnectionManager connectionManager = ConnectionManager.getInstance();
     private NulsLengthFieldBasedFrameDecoder newDecoder = new NulsLengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, MAX_FRAME_LENGTH, 4, 4, 16, 0, true);
 
-
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         long readMagicNumber = in.getUnsignedIntLE(0);
