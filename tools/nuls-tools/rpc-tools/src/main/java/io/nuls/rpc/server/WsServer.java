@@ -81,7 +81,7 @@ public class WsServer extends WebSocketServer {
         设置核心模块（Manager）连接地址
         Setting the Connection URL of Core Module(Manager)
          */
-        Constants.kernelUrl = kernelUrl;
+        ServerRuntime.setKernelUrl(kernelUrl);
 
         /*
         与核心模块（Manager）握手

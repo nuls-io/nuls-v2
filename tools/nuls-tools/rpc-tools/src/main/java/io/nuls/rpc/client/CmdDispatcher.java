@@ -52,7 +52,7 @@ public class CmdDispatcher {
      * @throws Exception 握手失败, handshake failed
      */
     public static boolean handshakeKernel() throws Exception {
-        WsClient wsClient = ClientRuntime.getWsClient(Constants.kernelUrl);
+        WsClient wsClient = ClientRuntime.getWsClient(ServerRuntime.kernelUrl);
         if (wsClient == null) {
             throw new Exception("Kernel not available");
         }
@@ -98,7 +98,7 @@ public class CmdDispatcher {
         连接核心模块（Manager）
         Connect to Core Module (Manager)
          */
-        WsClient wsClient = ClientRuntime.getWsClient(Constants.kernelUrl);
+        WsClient wsClient = ClientRuntime.getWsClient(ServerRuntime.kernelUrl);
         if (wsClient == null) {
             throw new Exception("Kernel not available");
         }
@@ -118,10 +118,10 @@ public class CmdDispatcher {
         Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
         for (Object key : dependMap.keySet()) {
-            ClientRuntime.roleMap.put(key.toString(), (Map) dependMap.get(key));
+            ClientRuntime.ROLE_MAP.put(key.toString(), (Map) dependMap.get(key));
         }
 
-        Log.info("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.roleMap));
+        Log.info("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.ROLE_MAP));
 
         /*
         判断所有依赖的模块是否已经启动（发送握手信息）
@@ -265,7 +265,7 @@ public class CmdDispatcher {
             如果是需要重复发送的消息（订阅消息），记录messageId与客户端的对应关系，用于取消订阅
             If it is a message (subscription message) that needs to be sent repeatedly, record the relationship between the messageId and the WsClient
              */
-            ClientRuntime.msgIdKeyWsClientMap.put(message.getMessageId(), wsClient);
+            ClientRuntime.MSG_ID_KEY_WS_CLIENT_MAP.put(message.getMessageId(), wsClient);
         }
 
         return message.getMessageId();
@@ -293,7 +293,7 @@ public class CmdDispatcher {
         根据messageId获取WsClient，发送取消订阅命令，然后移除本地信息
         Get the WsClient according to messageId, send the unsubscribe command, and then remove the local information
          */
-        WsClient wsClient = ClientRuntime.msgIdKeyWsClientMap.get(messageId);
+        WsClient wsClient = ClientRuntime.MSG_ID_KEY_WS_CLIENT_MAP.get(messageId);
         if (wsClient != null) {
             wsClient.send(JSONUtils.obj2json(message));
             Log.info("取消订阅：" + JSONUtils.obj2json(message));

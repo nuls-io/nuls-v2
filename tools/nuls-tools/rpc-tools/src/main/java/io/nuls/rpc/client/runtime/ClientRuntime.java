@@ -49,7 +49,7 @@ public class ClientRuntime {
      * Key: 角色，Value：角色的连接信息
      * Key: role, Value: Connection information of the role
      */
-    public static Map<String, Map> roleMap = new ConcurrentHashMap<>();
+    public static final Map<String, Map> ROLE_MAP = new ConcurrentHashMap<>();
 
     /**
      * 从服务端得到的握手确认
@@ -91,7 +91,7 @@ public class ClientRuntime {
      * Client Set Connecting Other Modules
      * Key: url(ex: ws://127.0.0.1:8887), Value: WsClient object
      */
-    public static Map<String, WsClient> wsClientMap = new ConcurrentHashMap<>();
+    public static final Map<String, WsClient> WS_CLIENT_MAP = new ConcurrentHashMap<>();
 
     /**
      * messageId对应的客户端对象，用于取消订阅的Request
@@ -100,7 +100,7 @@ public class ClientRuntime {
      * WsClient object corresponding to messageId, used to unsubscribe the Request
      * key: messageId, value: WsClient
      */
-    public static ConcurrentMap<String, WsClient> msgIdKeyWsClientMap = new ConcurrentHashMap<>();
+    public static final ConcurrentMap<String, WsClient> MSG_ID_KEY_WS_CLIENT_MAP = new ConcurrentHashMap<>();
 
 
     /**
@@ -108,7 +108,7 @@ public class ClientRuntime {
      * Return the role's connection information based on the role
      */
     public static String getRemoteUri(String role) {
-        Map map = roleMap.get(role);
+        Map map = ROLE_MAP.get(role);
         return map == null
                 ? null
                 : "ws://" + map.get(Constants.KEY_IP) + ":" + map.get(Constants.KEY_PORT);
@@ -161,7 +161,7 @@ public class ClientRuntime {
      * @throws Exception 连接失败，Connect failed
      */
     public static WsClient getWsClient(String url) throws Exception {
-        if (!wsClientMap.containsKey(url)) {
+        if (!WS_CLIENT_MAP.containsKey(url)) {
             /*
             如果是第一次连接，则先放入集合
             If it's the first connection, put it in the collection first
@@ -175,14 +175,14 @@ public class ClientRuntime {
                 }
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             }
-            wsClientMap.put(url, wsClient);
+            WS_CLIENT_MAP.put(url, wsClient);
         }
 
         /*
         从Map中返回客户端对象
         Return WsClient objects from Map
          */
-        return wsClientMap.get(url);
+        return WS_CLIENT_MAP.get(url);
     }
 
     /**
@@ -194,7 +194,7 @@ public class ClientRuntime {
      */
     public static boolean isPureDigital(String string) {
         try {
-            return Integer.valueOf(string) > 0;
+            return Integer.parseInt(string) > 0;
         } catch (Exception e) {
             return false;
         }

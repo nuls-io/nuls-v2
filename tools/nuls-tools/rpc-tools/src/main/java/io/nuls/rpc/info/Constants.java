@@ -192,12 +192,6 @@ public class Constants {
     public static final String PARAM_WRONG_FORMAT = "Param wrong format";
     public static final String PARAM_NULL = "Param null";
 
-    /**
-     * 核心模块（Manager）的连接地址
-     * URL of Core Module (Manager)
-     */
-    public static String kernelUrl = "";
-
 
     /**
      * 获取下一个messageId

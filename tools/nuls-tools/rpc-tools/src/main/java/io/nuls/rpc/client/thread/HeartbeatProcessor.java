@@ -52,7 +52,7 @@ public class HeartbeatProcessor implements Runnable {
     @Override
     public void run() {
         while (true) {
-            for (String url : ClientRuntime.wsClientMap.keySet()) {
+            for (String url : ClientRuntime.WS_CLIENT_MAP.keySet()) {
                 /*
                 打造握手消息
                 Create handshake messages
@@ -72,7 +72,7 @@ public class HeartbeatProcessor implements Runnable {
                     发送握手消息
                     Send handshake messages
                      */
-                    WsClient wsClient = ClientRuntime.wsClientMap.get(url);
+                    WsClient wsClient = ClientRuntime.WS_CLIENT_MAP.get(url);
                     wsClient.send(jsonMessage);
 
                     /*
@@ -80,11 +80,11 @@ public class HeartbeatProcessor implements Runnable {
                     If the handshake fails, reconnect
                      */
                     if (!CmdDispatcher.receiveNegotiateConnectionResponse()) {
-                        ClientRuntime.wsClientMap.remove(url);
+                        ClientRuntime.WS_CLIENT_MAP.remove(url);
                         ClientRuntime.getWsClient(url);
                     }
                 } catch (Exception e) {
-                    ClientRuntime.wsClientMap.remove(url);
+                    ClientRuntime.WS_CLIENT_MAP.remove(url);
                     Log.error(e);
                 }
             }
