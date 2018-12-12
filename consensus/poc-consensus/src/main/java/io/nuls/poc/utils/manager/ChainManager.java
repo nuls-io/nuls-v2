@@ -181,6 +181,7 @@ public class ChainManager {
             int roundIndex = 1;
             List<BlockHeader>blockHeaderList = new ArrayList<>();
             Address packingAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
+            Address packingAddress1 = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
             for (int index = 0;index < length;index++) {
                 BlockHeader blockHeader = new BlockHeader();
                 blockHeader.setHeight(100);
@@ -191,10 +192,13 @@ public class ChainManager {
 
                 // add a round data
                 BlockRoundData roundData = new BlockRoundData();
-                roundData.setConsensusMemberCount(1);
-                roundData.setPackingIndexOfRound(1);
+                roundData.setConsensusMemberCount(2);
+                roundData.setPackingIndexOfRound(2);
                 if((index+1)%10 == 0){
                     roundIndex++;
+                    blockHeader.setPackingAddress(packingAddress1.getAddressBytes());
+                }
+                if((index+1)%10 == 6){
                     blockHeader.setPackingAddress(packingAddress.getAddressBytes());
                 }
                 roundData.setRoundIndex(roundIndex);

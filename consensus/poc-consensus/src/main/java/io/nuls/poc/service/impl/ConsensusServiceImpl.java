@@ -25,6 +25,7 @@ import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.utils.manager.*;
+import io.nuls.poc.utils.validator.BatchValidator;
 import io.nuls.poc.utils.validator.BlockValidator;
 import io.nuls.poc.utils.validator.TxValidator;
 import io.nuls.tools.basic.Result;
@@ -74,6 +75,8 @@ public class ConsensusServiceImpl implements ConsensusService {
     private DepositManager depositManager;
     @Autowired
     private BlockValidator blockValidator;
+    @Autowired
+    private BatchValidator batchValidator;
     /**
      * 创建节点
      */
@@ -701,14 +704,34 @@ public class ConsensusServiceImpl implements ConsensusService {
      */
     @Override
     public Result batchValid(Map<String, Object> params) {
-        /*try {
-
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+        try {
+            if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
+                return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+            }
+            int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+            Chain chain = chainManager.getChainMap().get(chainId);
+            if (chain == null) {
+                throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
+            }
+            List<String>txHexs = JSONUtils.json2list((String) params.get(ConsensusConstant.PARAM_TX),String.class);
+            List<Transaction> txList = new ArrayList<>();
+            for (String txHex : txHexs) {
+                Transaction tx = new Transaction();
+                tx.parse(HexUtil.decode(txHex),0);
+            }
+            batchValidator.batchValid(txList,chain);
+            List<String> resultTxHexs = new ArrayList<>();
+            for (Transaction tx:txList) {
+                resultTxHexs.add(HexUtil.encode(tx.serialize()));
+            }
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultTxHexs);
         }catch (NulsException e) {
             Log.error(e);
             return Result.getFailed(e.getErrorCode());
-        }*/
-        return null;
+        }catch (IOException io){
+            Log.error(io);
+            return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
+        }
     }
 
     /**
