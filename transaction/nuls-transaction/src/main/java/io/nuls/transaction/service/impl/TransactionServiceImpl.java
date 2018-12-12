@@ -25,10 +25,13 @@
 package io.nuls.transaction.service.impl;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
+import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -116,7 +119,7 @@ public class TransactionServiceImpl implements TransactionService {
     private Result assemblyCrossTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark, boolean isMultiSign) {
         Transaction tx = new Transaction(TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER);
         CrossTxData txData = new CrossTxData();
-        txData.setChainId(TxConstant.NUlS_CHAINID);
+        txData.setChainId(TxConstant.CURRENT_CHAINID);
         tx.setRemark(StringUtils.bytes(remark));
         try {
             tx.setTxData(txData.serialize());
@@ -132,15 +135,31 @@ public class TransactionServiceImpl implements TransactionService {
             if(chainIdFrom == chainIdTo){
                 return Result.getFailed(TxErrorCode.PAYEE_AND_PAYER_IS_THE_SAME_CHAIN);
             }
-            int signatureSize = isMultiSign ? getMultiSignAddressSignatureSize(fromAddress) : getSignatureSize(coinFromList);
-            CoinData coinData = getCoinData(coinFromList, coinToList, tx.size() + signatureSize);
-            tx.setTxData(coinData.serialize());
+            MultiSigAccount multiSigAccount = null;
+            int txSize = tx.size();
+            if(isMultiSign){
+                //多签交易，计算签名大小，取多签地址m来计算
+                multiSigAccount = TxUtil.getMultiSigAccount(fromAddress);
+                txSize += getMultiSignAddressSignatureSize(multiSigAccount.getM());
+            }else{
+                txSize += getSignatureSize(coinFromList);
+            }
+            CoinData coinData = getCoinData(coinFromList, coinToList, txSize);
+            tx.setCoinData(coinData.serialize());
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             List<ECKey> signEcKeys = new ArrayList<>();
             for (CoinDTO coinDTO : listFrom) {
                 String priKey = TxUtil.getPrikey(coinDTO.getAddress(), coinDTO.getPassword());
                 ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
                 signEcKeys.add(ecKey);
+            }
+            if(isMultiSign){
+                //组装多签地址信息
+                MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
+                multiSignTxSignature.setM(multiSigAccount.getM());
+                multiSignTxSignature.setPubKeyList(multiSigAccount.getPubKeyList());
+                //多签交易有且只有一个地址的eckey
+                return txMultiSignProcess(tx, signEcKeys.get(0), multiSignTxSignature);
             }
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
             this.newTx(currentChainId, tx);
@@ -151,6 +170,40 @@ public class TransactionServiceImpl implements TransactionService {
         } catch (NulsException e) {
             e.printStackTrace();
             return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    public Result txMultiSignProcess(Transaction tx, ECKey ecKey){
+        return txMultiSignProcess(tx, ecKey, null);
+    }
+
+    public Result txMultiSignProcess(Transaction tx, ECKey ecKey, MultiSignTxSignature multiSignTxSignature){
+
+        try {
+            if(null == multiSignTxSignature) {
+                multiSignTxSignature = new MultiSignTxSignature();
+                multiSignTxSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+            }
+            List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+            if (multiSignTxSignature.getP2PHKSignatures() != null && multiSignTxSignature.getP2PHKSignatures().size() > 0) {
+                p2PHKSignatures = multiSignTxSignature.getP2PHKSignatures();
+            }
+            P2PHKSignature p2PHKSignature = new P2PHKSignature();
+            p2PHKSignature.setPublicKey(ecKey.getPubKey());
+            //用当前交易的hash和账户的私钥账户
+            p2PHKSignature.setSignData(SignatureUtil.signDigest(tx.getHash().getDigestBytes(), ecKey));
+            p2PHKSignatures.add(p2PHKSignature);
+            if (p2PHKSignatures.size() == multiSignTxSignature.getM()) {
+
+            }else{
+
+            }
+
+            //TxUtil.getMofMultiSignAddress(ecKey.getPubKey());
+            return Result.getSuccess(TxErrorCode.SUCCESS);
+        } catch (NulsException e) {
+            e.printStackTrace();
+            return Result.getFailed(TxErrorCode.DESERIALIZE_ERROR);
         }
     }
 
@@ -175,12 +228,10 @@ public class TransactionServiceImpl implements TransactionService {
     /**
      * 获取多重签名地址，最小签名数，签名后的size
      *
-     * @param multiSignAddress 多签地址
+     * @param signNumber m
      * @return int
      */
-    private int getMultiSignAddressSignatureSize(byte[] multiSignAddress) {
-        //todo 获取多重签名地址的m，最小签名数量
-        int signNumber = TxUtil.getMofMultiSignAddress(multiSignAddress);
+    private int getMultiSignAddressSignatureSize(int signNumber) {
         int size = signNumber * P2PHKSignature.SERIALIZE_LENGTH;
         return size;
     }
@@ -335,7 +386,7 @@ public class TransactionServiceImpl implements TransactionService {
     private BigInteger getFeeDirect(List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee) throws NulsException {
         for (CoinFrom coinFrom : listFrom) {
             if (TxUtil.isNulsAsset(coinFrom)) {
-                BigInteger mainAsset = TxUtil.getBalance(coinFrom.getAddress(), TxConstant.NUlS_CHAINID, TxConstant.NUlS_CHAIN_ASSETID);
+                BigInteger mainAsset = TxUtil.getBalance(coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
                 //当前还差的手续费
                 BigInteger current = targetFee.subtract(actualFee);
                 //如果余额大于等于目标手续费，则直接收取全额手续费
@@ -369,14 +420,14 @@ public class TransactionServiceImpl implements TransactionService {
         while (iterator.hasNext()) {
             CoinFrom coinFrom = iterator.next();
             if (!TxUtil.isNulsAsset(coinFrom)) {
-                BigInteger mainAsset = TxUtil.getBalance(coinFrom.getAddress(), TxConstant.NUlS_CHAINID, TxConstant.NUlS_CHAIN_ASSETID);
+                BigInteger mainAsset = TxUtil.getBalance(coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
                 if (BigIntegerUtils.isEqualOrLessThan(mainAsset, BigInteger.ZERO)) {
                     continue;
                 }
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
-                feeCoinFrom.setNonce(TxUtil.getNonce(address, TxConstant.NUlS_CHAINID, TxConstant.NUlS_CHAIN_ASSETID));
+                feeCoinFrom.setNonce(TxUtil.getNonce(address, TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID));
                 txSize += feeCoinFrom.size();
                 //新增coinfrom，重新计算本交易预计收取的手续费
                 targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
@@ -386,8 +437,8 @@ public class TransactionServiceImpl implements TransactionService {
                 BigInteger fee = BigIntegerUtils.isEqualOrGreaterThan(mainAsset, current) ? current : mainAsset;
 
                 feeCoinFrom.setLocked(TxConstant.CORSS_TX_LOCKED);
-                feeCoinFrom.setAssetsChainId(TxConstant.NUlS_CHAINID);
-                feeCoinFrom.setAssetsId(TxConstant.NUlS_CHAIN_ASSETID);
+                feeCoinFrom.setAssetsChainId(TxConstant.NULS_CHAINID);
+                feeCoinFrom.setAssetsId(TxConstant.NULS_CHAIN_ASSETID);
                 feeCoinFrom.setAmount(fee);
 
                 iterator.add(feeCoinFrom);

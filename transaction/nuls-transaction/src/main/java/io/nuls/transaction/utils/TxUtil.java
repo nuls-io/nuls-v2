@@ -24,7 +24,9 @@
 
 package io.nuls.transaction.utils;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Coin;
+import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.transaction.constant.TxConstant;
 
@@ -54,8 +56,8 @@ public class TxUtil {
     }
 
     public static boolean isNulsAsset(int chainId, int assetId){
-        if(chainId == TxConstant.NUlS_CHAINID
-                && assetId ==TxConstant.NUlS_CHAIN_ASSETID) {
+        if(chainId == TxConstant.NULS_CHAINID
+                && assetId ==TxConstant.NULS_CHAIN_ASSETID) {
             return true;
         }
         return false;
@@ -94,5 +96,10 @@ public class TxUtil {
     public static int getMofMultiSignAddress(byte[] multiSignAddress){
         //查多签地址的m
         return 3;
+    }
+
+    public static MultiSigAccount getMultiSigAccount(byte[] multiSignAddress){
+        String address = AddressTool.getStringAddressByBytes(multiSignAddress);
+        return new MultiSigAccount();
     }
 }
