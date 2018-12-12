@@ -16,7 +16,6 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.Page;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -848,11 +847,12 @@ public class AccountCmd extends BaseCmd {
 
     /**
      * 创建多账户转账交易
+     * create a multi-account transfer transaction
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_multipleAddressTransfer", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "data digest signature")
+    @CmdAnnotation(cmd = "ac_multipleAddressTransfer", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi-account transfer transaction")
     public Object multipleAddressTransfer(Map params) {
         Log.debug("ac_multipleAddressTransfer start");
         Map<String, String> map = new HashMap<>(1);
@@ -895,7 +895,7 @@ public class AccountCmd extends BaseCmd {
             if (!validTxRemark(transferDto.getRemark())) {
                 return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
             }
-            String txDigestHex = transactionService.multipleAddressTransfer(NulsConfig.CURRENT_CHAIN_ID, inputList, outputList, transferDto.getRemark(), TransactionFeeCalculator.NORMAL_PRICE_PRE_1024_BYTES);
+            String txDigestHex = transactionService.multipleAddressTransfer(NulsConfig.CURRENT_CHAIN_ID, inputList, outputList, transferDto.getRemark());
             map.put("value", txDigestHex);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());

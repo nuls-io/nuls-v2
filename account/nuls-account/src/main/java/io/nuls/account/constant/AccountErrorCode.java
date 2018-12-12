@@ -51,6 +51,8 @@ public interface AccountErrorCode {
     ErrorCode DOWNLOAD_VERSION_FAILD = ErrorCode.init("10016");
     ErrorCode PARSE_JSON_FAILD = ErrorCode.init("10017");
     ErrorCode FILE_OPERATION_FAILD = ErrorCode.init("10018");
+    ErrorCode SERIALIZE_ERROR = ErrorCode.init("10019");
+    ErrorCode DESERIALIZE_ERROR = ErrorCode.init("10020");
 
     ErrorCode DB_TABLE_EXIST = ErrorCode.init("20009");
     ErrorCode DB_TABLE_NOT_EXIST = ErrorCode.init("20010");
@@ -92,5 +94,6 @@ public interface AccountErrorCode {
     ErrorCode INSUFFICIENT_BALANCE = ErrorCode.init("30028");
     ErrorCode INSUFFICIENT_FEE = ErrorCode.init("30029");
     ErrorCode CHAIN_NOT_EXIST= ErrorCode.init("30030");
+    ErrorCode COINDATA_IS_INCOMPLETE = ErrorCode.init("30031");
 
 }

@@ -31,6 +31,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.CoinDto;
+import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.TxUtil;
@@ -40,22 +41,29 @@ import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.MultiSignTxSignature;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.signture.SignatureUtil;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.crypto.ECKey;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.thread.TimeService;
 
-import java.io.UnsupportedEncodingException;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 
 /**
  * @author: qinyifeng
@@ -69,49 +77,52 @@ public class TransactionServiceImpl implements TransactionService {
     private ChainManager chainManager;
 
     @Override
-    public String multipleAddressTransfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark, BigInteger price) {
-        //try {
-        for (CoinDto from : fromList) {
-            // 检查to是否为多签地址，如果是多签地址，则返回错误
-            if (AddressTool.isMultiSignAddress(from.getAddress())) {
-                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-            }
-            if (AddressTool.getChainIdByAddress(from.getAddress()) == currentChainId) {
-                throw new NulsRuntimeException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
-            }
-        }
-//        for (CoinDto to : toList) {
-//            // 检查to是否为多签地址，如果是多签地址，则返回错误
-//            if (AddressTool.isMultiSignAddress(to.getAddress())) {
-//                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-//            }
-//        }
-        for (CoinDto from : fromList) {
-            //检查账户是否存在
-            Account account = accountService.getAccount(from.getAssetsChainId(), from.getAddress());
-            if (null == account) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-            }
-            //如果是加密账户，则检查密码是否正确
-            if (account.isEncrypted()) {
-                ObjectUtils.canNotEmpty(from.getPassword(), "the password can not be empty");
-                if (!account.validatePassword(from.getPassword())) {
-                    throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
-            }
-        }
+    public String multipleAddressTransfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
+        Transaction tx = this.assemblyTransaction(currentChainId, fromList, toList, remark);
+        return tx.getHash().getDigestHex();
+    }
+
+
+    private Transaction assemblyTransaction(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
         Transaction tx = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
-        if (StringUtils.isNotBlank(remark)) {
-            try {
-                tx.setRemark(remark.getBytes(NulsConfig.DEFAULT_ENCODING));
-            } catch (UnsupportedEncodingException e) {
-                Log.error(e);
+        tx.setRemark(StringUtils.bytes(remark));
+        try {
+            //组装coinFrom、coinTo数据
+            List<CoinFrom> coinFromList = assemblyCoinFrom(currentChainId, fromList);
+            List<CoinTo> coinToList = assemblyCoinTo(currentChainId, toList);
+            //来源地址或转出地址为空
+            if (coinFromList.size() == 0 || coinToList.size() == 0) {
+                throw new NulsRuntimeException(AccountErrorCode.COINDATA_IS_INCOMPLETE);
             }
+            //交易总大小=交易数据大小+签名数据大小
+            int txSize = tx.size() + getSignatureSize(coinFromList);
+            //组装coinData数据
+            CoinData coinData = getCoinData(coinFromList, coinToList, txSize);
+            tx.setCoinData(coinData.serialize());
+            //计算交易数据摘要哈希
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            //创建ECKey用于签名
+            List<ECKey> signEcKeys = new ArrayList<>();
+            for (CoinDto from : fromList) {
+                //检查账户是否存在
+                Account account = accountService.getAccount(from.getAssetsChainId(), from.getAddress());
+                if (null == account) {
+                    throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+                }
+                ECKey ecKey = account.getEcKey(from.getPassword());
+                signEcKeys.add(ecKey);
+            }
+            //交易签名
+            SignatureUtil.createTransactionSignture(tx, signEcKeys);
+            //发起新交易
+            TransactionCmdCall.newTx(currentChainId, tx.getHash().getDigestHex());
+        } catch (NulsException e) {
+            throw new NulsRuntimeException(e.getErrorCode());
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
         }
-        tx.setTime(TimeService.currentTimeMillis());
-        CoinData coinData = new CoinData();
-        //}catch (E)
-        return null;
+        return tx;
     }
 
     /**
@@ -147,7 +158,7 @@ public class TransactionServiceImpl implements TransactionService {
             if (BigIntegerUtils.isLessThan(balance, amount)) {
                 throw new NulsException(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
-            //
+            //查询账本获取nonce值
             byte[] nonce = TxUtil.getNonce(assetChainId, assetId, addressByte);
             CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, amount, nonce, AccountConstant.NORMAL_TX_LOCKED);
             coinFroms.add(coinFrom);
@@ -191,6 +202,7 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     /**
+     * 组装coinData数据
      * assembly coinData
      *
      * @param listFrom
@@ -200,34 +212,36 @@ public class TransactionServiceImpl implements TransactionService {
      * @throws NulsException
      */
     private CoinData getCoinData(List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException {
+        //总来源费用
         BigInteger feeTotalFrom = BigInteger.ZERO;
         for (CoinFrom coinFrom : listFrom) {
             txSize += coinFrom.size();
-            if (TxUtil.isNulsAsset(coinFrom)) {
+            if (TxUtil.isCurrentChainMainAsset(coinFrom)) {
                 feeTotalFrom = feeTotalFrom.add(coinFrom.getAmount());
             }
         }
+        //总转出费用
         BigInteger feeTotalTo = BigInteger.ZERO;
         for (CoinTo coinTo : listTo) {
             txSize += coinTo.size();
-            if (TxUtil.isNulsAsset(coinTo)) {
+            if (TxUtil.isCurrentChainMainAsset(coinTo)) {
                 feeTotalTo = feeTotalTo.add(coinTo.getAmount());
             }
         }
         //本交易预计收取的手续费
-        BigInteger targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
+        BigInteger targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
         //实际收取的手续费, 可能自己已经组装完成
         BigInteger actualFee = feeTotalFrom.subtract(feeTotalTo);
         if (BigIntegerUtils.isLessThan(actualFee, BigInteger.ZERO)) {
-            //所有from中账户的nuls余额总和小于to的总和，不够支付手续费
+            //所有from中账户的当前链主资产余额总和小于to的总和，不够支付手续费
             throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
         } else if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
-            //只从资产为nuls的coinfrom中收取手续费
+            //只从资产为当前链主资产的coinfrom中收取手续费
             actualFee = getFeeDirect(listFrom, targetFee, actualFee);
             if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
-                //如果没收到足够的手续费，则从CoinFrom中资产不是nuls的coin账户中查找nuls余额，并组装新的coinfrom来收取手续费
+                //如果没收到足够的手续费，则从CoinFrom中资产不是当前链主资产的coin账户中查找当前链主资产余额，并组装新的coinfrom来收取手续费
                 if (!getFeeIndirect(listFrom, txSize, targetFee, actualFee)) {
-                    //所有from中账户的nuls余额总和都不够支付手续费
+                    //所有from中账户的当前链主资产余额总和都不够支付手续费
                     throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
                 }
             }
@@ -245,6 +259,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @param assetId
      * @return
      */
+    @Override
     public boolean assetExist(int chainId, int assetId) {
         Chain chain = chainManager.getChainMap().get(chainId);
         if (chain == null) {
@@ -257,8 +272,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * Only collect fees from CoinFrom's coins whose assets are nuls, and return the actual amount charged.
-     * 只从CoinFrom中资产为nuls的coin中收取手续费，返回实际收取的数额
+     * Only the fee is charged from the coin in CoinFrom for the current chain main asset, and the actual amount is returned.
+     * 只从CoinFrom中资产为当前链主资产的coin中收取手续费，返回实际收取的数额
      *
      * @param listFrom  All coins transferred out 转出的所有coin
      * @param targetFee The amount of the fee that needs to be charged 需要收取的手续费数额
@@ -268,8 +283,9 @@ public class TransactionServiceImpl implements TransactionService {
      */
     private BigInteger getFeeDirect(List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee) throws NulsException {
         for (CoinFrom coinFrom : listFrom) {
-            if (TxUtil.isNulsAsset(coinFrom)) {
-                BigInteger mainAsset = TxUtil.getBalance(NulsConfig.MAIN_CHAIN_ID, NulsConfig.MAIN_ASSETS_ID, coinFrom.getAddress());
+            //必须为当前链主资产
+            if (TxUtil.isCurrentChainMainAsset(coinFrom)) {
+                BigInteger mainAsset = TxUtil.getBalance(NulsConfig.CURRENT_CHAIN_ID, NulsConfig.CURRENT_MAIN_ASSETS_ID, coinFrom.getAddress());
                 //当前还差的手续费
                 BigInteger current = targetFee.subtract(actualFee);
                 //如果余额大于等于目标手续费，则直接收取全额手续费
@@ -288,8 +304,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     /**
-     * 从CoinFrom中资产不为nuls的coin中收取nuls手续费，返回是否收取完成
-     * Only collect the nuls fee from the coin in CoinFrom whose assets are not nuls, and return whether the charge is completed.
+     * 从CoinFrom中资产不为当前链主资产的coin中收取当前链主资产手续费，返回是否收取完成
+     * From the coin in CoinFrom, the current chain main asset handling fee is not collected in the coin of the current chain main asset, and the return is collected.
      *
      * @param listFrom  All coins transferred out 转出的所有coin
      * @param txSize    Current transaction size
@@ -302,26 +318,29 @@ public class TransactionServiceImpl implements TransactionService {
         ListIterator<CoinFrom> iterator = listFrom.listIterator();
         while (iterator.hasNext()) {
             CoinFrom coinFrom = iterator.next();
-            if (!TxUtil.isNulsAsset(coinFrom)) {
-                BigInteger mainAsset = TxUtil.getBalance(NulsConfig.MAIN_CHAIN_ID, NulsConfig.MAIN_ASSETS_ID, coinFrom.getAddress());
+            //如果不为当前链主资产
+            if (!TxUtil.isCurrentChainMainAsset(coinFrom)) {
+                //查询该地址在当前链的主资产余额
+                BigInteger mainAsset = TxUtil.getBalance(NulsConfig.CURRENT_CHAIN_ID, NulsConfig.CURRENT_MAIN_ASSETS_ID, coinFrom.getAddress());
                 if (BigIntegerUtils.isEqualOrLessThan(mainAsset, BigInteger.ZERO)) {
                     continue;
                 }
+                //组装手续费作为CoinFrom
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
-                feeCoinFrom.setNonce(TxUtil.getNonce(NulsConfig.MAIN_CHAIN_ID, NulsConfig.MAIN_ASSETS_ID, address));
+                feeCoinFrom.setNonce(TxUtil.getNonce(NulsConfig.CURRENT_CHAIN_ID, NulsConfig.CURRENT_MAIN_ASSETS_ID, address));
                 txSize += feeCoinFrom.size();
-                //新增coinfrom，重新计算本交易预计收取的手续费
-                targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
+                //由于新增CoinFrom，需要重新计算本交易预计收取的手续费
+                targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
                 //当前还差的手续费
                 BigInteger current = targetFee.subtract(actualFee);
                 //此账户可以支付的手续费
                 BigInteger fee = BigIntegerUtils.isEqualOrGreaterThan(mainAsset, current) ? current : mainAsset;
 
                 feeCoinFrom.setLocked(AccountConstant.NORMAL_TX_LOCKED);
-                feeCoinFrom.setAssetsChainId(NulsConfig.MAIN_CHAIN_ID);
-                feeCoinFrom.setAssetsId(NulsConfig.MAIN_ASSETS_ID);
+                feeCoinFrom.setAssetsChainId(NulsConfig.CURRENT_CHAIN_ID);
+                feeCoinFrom.setAssetsId(NulsConfig.CURRENT_MAIN_ASSETS_ID);
                 feeCoinFrom.setAmount(fee);
 
                 iterator.add(feeCoinFrom);
@@ -336,5 +355,34 @@ public class TransactionServiceImpl implements TransactionService {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 通过coinfrom计算签名数据的size
+     * 如果coinfrom有重复地址则只计算一次；如果有多签地址，只计算m个地址的size
+     *
+     * @param coinFroms
+     * @return
+     */
+    private int getSignatureSize(List<CoinFrom> coinFroms) {
+        int size = 0;
+        Set<String> signAddress = new HashSet<>();
+        for (CoinFrom coinFrom : coinFroms) {
+            byte[] address = coinFrom.getAddress();
+            signAddress.add(AddressTool.getStringAddressByBytes(address));
+        }
+        size += signAddress.size() * P2PHKSignature.SERIALIZE_LENGTH;
+        return size;
+    }
+
+    /**
+     * 获取多重签名地址，最小签名数，签名后的size
+     *
+     * @param signNumber m
+     * @return int
+     */
+    private int getMultiSignAddressSignatureSize(int signNumber) {
+        int size = signNumber * P2PHKSignature.SERIALIZE_LENGTH;
+        return size;
     }
 }
