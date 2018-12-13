@@ -13,7 +13,7 @@ import java.util.Queue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 /**
- * 交易已完成交易管理模块的校验, 包括孤儿交易
+ * 交易已完成交易管理模块的校验(打包的时候从这里取), 包括孤儿交易
  * @author: Charlie
  * @date: 2018/11/13
  */

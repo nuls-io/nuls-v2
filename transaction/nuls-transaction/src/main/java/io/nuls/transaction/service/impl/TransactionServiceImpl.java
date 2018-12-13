@@ -199,6 +199,12 @@ public class TransactionServiceImpl implements TransactionService {
         }
     }
 
+    /**
+     * 验证跨链coin 数据是否存在， from和to不能是同一链
+     * @param coinFromList
+     * @param coinToList
+     * @throws NulsException
+     */
     private void valiCoin(List<CoinFrom> coinFromList, List<CoinTo> coinToList) throws NulsException {
         if (coinFromList.size() == 0 || coinToList.size() == 0) {
             throw new NulsException(TxErrorCode.COINDATA_IS_INCOMPLETE);
@@ -588,5 +594,17 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public boolean crossTransactionRollback(int chainId, Transaction tx, BlockHeaderDigestDTO blockHeader) {
         return true;
+    }
+
+    @Override
+    public List<String> packableTxs(int chainId, String endtimestamp, String maxTxDataSize) throws NulsException {
+
+        return null;
+    }
+
+    @Override
+    public boolean batchVerify(int chainId, List<String> list) throws NulsException {
+
+        return false;
     }
 }

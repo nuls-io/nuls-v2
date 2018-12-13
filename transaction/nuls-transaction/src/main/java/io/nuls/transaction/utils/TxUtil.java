@@ -115,13 +115,9 @@ public class TxUtil {
         return "";
     }
 
-  /*  public static int getMofMultiSignAddress(byte[] multiSignAddress) throws NulsException {
-        //查多签地址的m
-        return 3;
-    }*/
-
     public static MultiSigAccount getMultiSigAccount(byte[] multiSignAddress) throws NulsException {
         String address = AddressTool.getStringAddressByBytes(multiSignAddress);
+        //todo
         return new MultiSigAccount();
     }
 }
