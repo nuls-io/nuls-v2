@@ -43,7 +43,7 @@ public class BlockDownLoadResult {
      */
     private long startHeight;
     /**
-     * 下载区块个数
+     * 预计下载区块个数
      */
     private int size;
     /**
@@ -58,7 +58,9 @@ public class BlockDownLoadResult {
      * 标志从node节点批量下载区块是否成功，要全部下载完成才算成功
      */
     private boolean success = false;
-
+    /**
+     * 实际下载到的区块列表
+     */
     private List<Block> blockList;
 
     public BlockDownLoadResult(long startHeight, int size, Node node, List<Block> blockList, int index) {

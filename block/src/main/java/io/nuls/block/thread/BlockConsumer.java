@@ -30,9 +30,10 @@ import java.util.concurrent.Callable;
 
 /**
  * 消费同步到的区块
+ *
  * @author captain
- * @date 18-11-8 下午5:45
  * @version 1.0
+ * @date 18-11-8 下午5:45
  */
 public class BlockConsumer implements Callable<Boolean> {
 
@@ -53,7 +54,7 @@ public class BlockConsumer implements Callable<Boolean> {
             while ((block = blockQueue.take()) != null) {
                 boolean saveBlock = blockService.saveBlock(chainId, block);
                 if (!saveBlock) {
-                   return false;
+                    return false;
                 }
             }
             return true;

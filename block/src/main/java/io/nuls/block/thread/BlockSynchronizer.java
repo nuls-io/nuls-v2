@@ -188,7 +188,6 @@ public class BlockSynchronizer implements Runnable {
      */
     public BlockDownloaderParams statistics(List<Node> availableNodes, int chainId) {
         BlockDownloaderParams params = new BlockDownloaderParams();
-        params.setChainId(chainId);
         params.setAvailableNodesCount(availableNodes.size());
         List<Node> nodeList = new ArrayList<>();
         params.setNodes(nodeList);

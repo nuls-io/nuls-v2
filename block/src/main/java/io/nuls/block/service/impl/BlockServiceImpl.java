@@ -199,7 +199,7 @@ public class BlockServiceImpl implements BlockService {
             return false;
         }
         //4.保存交易
-        if (!TransactionUtil.save(chainId, block.getTxs())) {
+        if (!TransactionUtil.save(chainId, block.getTxHashList())) {
             Log.info("save transactions fail!chainId-{},height-{}", chainId, height);
             if (!blockStorageService.remove(chainId, height)) {
                 throw new DbRuntimeException("save blockheader error!");

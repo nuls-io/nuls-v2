@@ -36,10 +36,6 @@ import java.util.List;
 public class BlockDownloaderParams {
 
     /**
-     * 链Id
-     */
-    private int chainId;
-    /**
      * 网络最新高度
      */
     private long netLatestHeight;
@@ -51,10 +47,6 @@ public class BlockDownloaderParams {
      * 本地最新高度
      */
     private long localLatestHeight;
-    /**
-     * 本地最新HASH
-     */
-    private String localLatestHash;
     /**
      * 网络上一致可用的节点
      */
