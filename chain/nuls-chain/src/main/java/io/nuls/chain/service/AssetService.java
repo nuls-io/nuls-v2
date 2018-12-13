@@ -34,6 +34,7 @@ public interface AssetService {
      * @return
      */
     void updateAsset(Asset asset) throws Exception;
+
     /**
      * delete asset
      *
@@ -41,7 +42,6 @@ public interface AssetService {
      * @return
      */
     void deleteAsset(Asset asset) throws Exception;
-
 
 
     /**
@@ -55,7 +55,7 @@ public interface AssetService {
     /**
      * Set the status of asset
      *
-     * @param assetKey   The asset key
+     * @param assetKey  The asset key
      * @param available The status of asset
      * @return true/false
      */
@@ -79,26 +79,43 @@ public interface AssetService {
 
     /**
      * getChainAsset
-     * @param asset Asset object
+     *
+     * @param asset   Asset object
      * @param chainId chainId
      * @return Error map
      */
-    ChainAsset getChainAsset(int chainId,Asset asset) throws Exception;
+    ChainAsset getChainAsset(int chainId, Asset asset) throws Exception;
 
     /**
-     *
      * @param chainId
      * @param assetKey
      * @return
      */
-    ChainAsset getChainAsset(int chainId,String assetKey) throws Exception;
+    ChainAsset getChainAsset(int chainId, String assetKey) throws Exception;
 
     /**
      * saveOrUpdate chainAsset
      *
-     *
-     * @param    chainId
-     * @param    chainAsset  @return true/false
+     * @param chainId
+     * @param chainAsset @return true/false
      */
     void saveOrUpdateChainAsset(int chainId, ChainAsset chainAsset) throws Exception;
+
+    /**
+     * 注册资产
+     * Register asset
+     *
+     * @param asset   The registered Asset
+     * @throws Exception Any error will throw an exception
+     */
+    void registerAsset(Asset asset) throws Exception;
+
+    /**
+     * 回滚注册资产
+     * Rollback the registered Asset
+     *
+     * @param asset The Asset be rollback
+     * @throws Exception Any error will throw an exception
+     */
+    void registerAssetRollback(Asset asset) throws Exception;
 }
