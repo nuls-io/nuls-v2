@@ -26,6 +26,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.util.*;
 
@@ -159,7 +160,6 @@ public class TxAssetCmd extends BaseChainCmd {
 
     /**
      * 链注销回滚
-     *
      */
     @CmdAnnotation(cmd = "cm_assetDisableRollback", version = 1.0, description = "assetDisableRollback")
     @Parameter(parameterName = "txHex", parameterType = "String")
@@ -184,42 +184,47 @@ public class TxAssetCmd extends BaseChainCmd {
         }
     }
 
-    private List<CoinDataAssets> getChainAssetList(Map params) throws NulsException {
+    private List<CoinDataAssets> getChainAssetList(String coinDataHex) throws NulsException {
         List<CoinDataAssets> list = new ArrayList<>();
-        String coinDataHex = String.valueOf(params.get("coinDatas"));
-        byte[] coinDataByte = HexUtil.hexToByte(coinDataHex);
-        CoinData coinData = new CoinData();
+
         int fromChainId = 0;
         int toChainId = 0;
-        Map<String, String> fromAssetMap = new HashMap<>();
-        Map<String, String> toAssetMap = new HashMap<>();
+        Map<String, BigInteger> fromAssetMap = new HashMap<>(1);
+        Map<String, BigInteger> toAssetMap = new HashMap<>(1);
+
+        // 打造CoinData
+        byte[] coinDataByte = HexUtil.hexToByte(coinDataHex);
+        CoinData coinData = new CoinData();
         coinData.parse(coinDataByte, 0);
-        //from 资产封装
+
+        // 从CoinData中取出from的资产信息，放入Map中（同类型相加）
         List<CoinFrom> listFrom = coinData.getFrom();
         for (CoinFrom coinFrom : listFrom) {
             fromChainId = AddressTool.getChainIdByAddress(coinFrom.getAddress());
-            int assetChainId = coinFrom.getAssetsChainId();
-            int assetId = coinFrom.getAssetsId();
-            String asssetKey = CmRuntimeInfo.getAssetKey(assetChainId, assetId);
-            BigDecimal amount = new BigDecimal(coinFrom.getAmount());
-            if (null != fromAssetMap.get(asssetKey)) {
-                amount = new BigDecimal(fromAssetMap.get(asssetKey)).add(amount);
+            String assetKey = CmRuntimeInfo.getAssetKey(coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+            BigInteger amount = coinFrom.getAmount();
+            BigInteger current = fromAssetMap.get(assetKey);
+            if (current != null) {
+                amount = amount.add(current);
             }
-            fromAssetMap.put(asssetKey, amount.toString());
+            fromAssetMap.put(assetKey, amount);
         }
-        //to资产封装
+
+        // 从CoinData中取出to的资产信息，放入Map中（同类型相加）
         List<CoinTo> listTo = coinData.getTo();
         for (CoinTo coinTo : listTo) {
             toChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
             int assetChainId = coinTo.getAssetsChainId();
             int assetId = coinTo.getAssetsId();
-            String asssetKey = CmRuntimeInfo.getAssetKey(assetChainId, assetId);
-            BigDecimal amount = new BigDecimal(coinTo.getAmount());
-            if (null != toAssetMap.get(asssetKey)) {
-                amount = new BigDecimal(toAssetMap.get(asssetKey)).add(amount);
+            String assetKey = CmRuntimeInfo.getAssetKey(assetChainId, assetId);
+            BigInteger amount = coinTo.getAmount();
+            BigInteger current = toAssetMap.get(assetKey);
+            if (current != null) {
+                amount = amount.add(current);
             }
-            toAssetMap.put(asssetKey, amount.toString());
+            toAssetMap.put(assetKey, amount);
         }
+
         CoinDataAssets fromCoinDataAssets = new CoinDataAssets();
         fromCoinDataAssets.setChainId(fromChainId);
         fromCoinDataAssets.setAssetsMap(fromAssetMap);
@@ -232,7 +237,7 @@ public class TxAssetCmd extends BaseChainCmd {
 
     }
 
-    private Response assetCirculateValidator(int fromChainId, int toChainId, Map<String, String> fromAssetMap, Map<String, String> toAssetMap) {
+    private Response assetCirculateValidator(int fromChainId, int toChainId, Map<String, BigInteger> fromAssetMap, Map<String, BigInteger> toAssetMap) {
         try {
             BlockChain fromChain = chainService.getChain(fromChainId);
             BlockChain toChain = chainService.getChain(toChainId);
@@ -280,20 +285,20 @@ public class TxAssetCmd extends BaseChainCmd {
 
     /**
      * 跨链流通校验
-     *
      */
     @CmdAnnotation(cmd = "cm_assetCirculateValidator", version = 1.0, description = "assetCirculateValidator")
     @Parameter(parameterName = "coinDatas", parameterType = "String")
     public Response assetCirculateValidator(Map params) {
         //提取 从哪条链 转 哪条链，是否是跨链，链 手续费共多少？
         try {
-            List<CoinDataAssets> list = getChainAssetList(params);
+            String coinDataHex = String.valueOf(params.get("coinDatas"));
+            List<CoinDataAssets> list = getChainAssetList(coinDataHex);
             CoinDataAssets fromCoinDataAssets = list.get(0);
             CoinDataAssets toCoinDataAssets = list.get(1);
             int fromChainId = fromCoinDataAssets.getChainId();
             int toChainId = toCoinDataAssets.getChainId();
-            Map<String, String> fromAssetMap = fromCoinDataAssets.getAssetsMap();
-            Map<String, String> toAssetMap = toCoinDataAssets.getAssetsMap();
+            Map<String, BigInteger> fromAssetMap = fromCoinDataAssets.getAssetsMap();
+            Map<String, BigInteger> toAssetMap = toCoinDataAssets.getAssetsMap();
             return assetCirculateValidator(fromChainId, toChainId, fromAssetMap, toAssetMap);
         } catch (NulsException e) {
             e.printStackTrace();
@@ -303,20 +308,20 @@ public class TxAssetCmd extends BaseChainCmd {
 
     /**
      * 跨链流通提交
-     *
      */
     @CmdAnnotation(cmd = "cm_assetCirculateCommit", version = 1.0, description = "assetCirculateCommit")
     @Parameter(parameterName = "coinDatas", parameterType = "String")
     public Response assetCirculateCommit(Map params) {
         //A链转B链资产X，数量N ;A链X资产减少N, B链 X资产 增加N。
         try {
-            List<CoinDataAssets> list = getChainAssetList(params);
+            String coinDataHex = String.valueOf(params.get("coinDatas"));
+            List<CoinDataAssets> list = getChainAssetList(coinDataHex);
             CoinDataAssets fromCoinDataAssets = list.get(0);
             CoinDataAssets toCoinDataAssets = list.get(1);
             int fromChainId = fromCoinDataAssets.getChainId();
             int toChainId = toCoinDataAssets.getChainId();
-            Map<String, String> fromAssetMap = fromCoinDataAssets.getAssetsMap();
-            Map<String, String> toAssetMap = toCoinDataAssets.getAssetsMap();
+            Map<String, BigInteger> fromAssetMap = fromCoinDataAssets.getAssetsMap();
+            Map<String, BigInteger> toAssetMap = toCoinDataAssets.getAssetsMap();
             Response response = assetCirculateValidator(fromChainId, toChainId, fromAssetMap, toAssetMap);
             if (!response.isSuccess()) {
                 return response;
@@ -329,18 +334,19 @@ public class TxAssetCmd extends BaseChainCmd {
                 fromChainAsset.setOutNumber(BigIntegerUtils.stringToBigInteger(currentAsset.toString()));
                 assetService.saveOrUpdateChainAsset(fromChainId, fromChainAsset);
             }
-            if (isMainChain(toChainId)) {
-                //toChainId == nuls chain  不需要进行跨外链的 手续费在coinBase里增加。
-            } else {
+            if (!isMainChain(toChainId)) {
+                //toChainId == nuls chain  需要进行跨外链的 手续费在coinBase里增加。
+
                 //提取toChainId的 手续费资产，如果存将手续费放入外链给的回执，也取消 外链手续费增加。
                 String mainAssetKey = CmRuntimeInfo.getMainAsset();
-                String allFromMainAmount = fromAssetMap.get(mainAssetKey);
-                String allToMainAmount = toAssetMap.get(mainAssetKey);
-                BigDecimal feeAmount = new BigDecimal(allFromMainAmount).subtract(new BigDecimal(allToMainAmount)).multiply(BigDecimal.valueOf(0.4));
+                BigInteger allFromMainAmount = fromAssetMap.get(mainAssetKey);
+                BigInteger allToMainAmount = toAssetMap.get(mainAssetKey);
+                BigInteger feeAmount = allFromMainAmount.subtract(allToMainAmount)
+                        .multiply(new BigInteger("4").divide(new BigInteger("10")));
                 if (null != toAssetMap.get(mainAssetKey)) {
-                    feeAmount = feeAmount.add(new BigDecimal(toAssetMap.get(mainAssetKey)));
+                    feeAmount = feeAmount.add(toAssetMap.get(mainAssetKey));
                 }
-                toAssetMap.put(mainAssetKey, feeAmount.toString());
+                toAssetMap.put(mainAssetKey, feeAmount);
             }
             //to 的处理
             Set<String> toAssetKeys = toAssetMap.keySet();
@@ -358,7 +364,7 @@ public class TxAssetCmd extends BaseChainCmd {
                     toChainAsset = new ChainAsset();
                     toChainAsset.setChainId(asset.getChainId());
                     toChainAsset.setAssetId(asset.getAssetId());
-                    toChainAsset.setInNumber(BigIntegerUtils.stringToBigInteger(toAssetMap.get(toAssetKey)));
+                    toChainAsset.setInNumber(toAssetMap.get(toAssetKey));
                 } else {
                     BigDecimal inAsset = new BigDecimal(toChainAsset.getInNumber());
                     BigDecimal inNumberBigDec = new BigDecimal(toAssetMap.get(toAssetKey)).add(inAsset);
@@ -375,7 +381,6 @@ public class TxAssetCmd extends BaseChainCmd {
 
     /**
      * 跨链流通回滚
-     *
      */
     @CmdAnnotation(cmd = "cm_assetCirculateRollBack", version = 1.0, description = "assetCirculateRollBack")
     @Parameter(parameterName = "coinDatas", parameterType = "String")
