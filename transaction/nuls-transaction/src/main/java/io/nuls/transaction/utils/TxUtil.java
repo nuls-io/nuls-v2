@@ -26,10 +26,13 @@ package io.nuls.transaction.utils;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Coin;
+import io.nuls.base.data.CoinData;
 import io.nuls.base.data.MultiSigAccount;
-import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxErrorCode;
 
 import java.math.BigInteger;
 
@@ -39,6 +42,24 @@ import java.math.BigInteger;
  */
 public class TxUtil {
 
+
+    public static CoinData getCoinData(Transaction tx) throws NulsException{
+        try {
+            return tx.getCoinDataInstance();
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.DESERIALIZE_COINDATA_ERROR);
+        }
+    }
+
+    public static Transaction getTransaction(String hex) throws NulsException{
+        try {
+            return Transaction.getInstance(hex);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.DESERIALIZE_TX_ERROR);
+        }
+    }
 
     public static boolean isCurrentChainMainAsset(Coin coin){
         return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());

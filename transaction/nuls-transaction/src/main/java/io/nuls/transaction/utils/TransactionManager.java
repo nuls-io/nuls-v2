@@ -31,6 +31,7 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.TxRegister;
@@ -135,13 +136,13 @@ public class TransactionManager {
      * @param tx
      * @return
      */
-    public Result verify(int chainId, Transaction tx){
+    public boolean verify(int chainId, Transaction tx) throws NulsException{
 
         baseTxValidate(chainId, tx);
         TxRegister txRegister = this.getTxRegister(tx.getType());
         txRegister.getValidator();
         //todo 调验证器
-        return null;
+        return false;
     }
 
     /**
@@ -158,50 +159,42 @@ public class TransactionManager {
      * @param tx
      * @return Result
      */
-    public Result baseTxValidate(int chainId, Transaction tx){
+    public boolean baseTxValidate(int chainId, Transaction tx) throws NulsException {
 
         if (null == tx) {
-            return Result.getFailed(TxErrorCode.TX_NOT_EXIST);
+            throw new NulsException(TxErrorCode.TX_NOT_EXIST);
         }
         if (tx.getHash() == null || tx.getHash().size() == 0 || tx.getHash().size() > TxConstant.TX_HASH_DIGEST_BYTE_MAX_LEN) {
-            return Result.getFailed(TxErrorCode.TX_DATA_VALIDATION_ERROR);
+            throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         if(!contain(tx.getType())) {
-            return Result.getFailed(TxErrorCode.TX_NOT_EFFECTIVE);
+            throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE);
         }
         if (tx.getTime() == 0L) {
-            return Result.getFailed(TxErrorCode.TX_DATA_VALIDATION_ERROR);
+            throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
         }
         if(tx.size() > TxConstant.TX_MAX_SIZE){
-            return Result.getFailed(TxErrorCode.TX_SIZE_TOO_LARGE);
+            throw new NulsException(TxErrorCode.TX_SIZE_TOO_LARGE);
         }
-        try {
-            //todo 确认验证签名正确性
-            if(!SignatureUtil.validateTransactionSignture(tx)){
-                return Result.getFailed(TxErrorCode.SIGNATURE_ERROR);
-            }
-            //如果有coinData, 则进行验证
-            if(null != tx.getCoinData() && tx.getCoinData().length > 0) {
-                //coinData基础验证以及手续费 (from中所有的nuls资产-to中所有nuls资产)
-                CoinData coinData = tx.getCoinDataInstance();
-                Result resultCoinFrom = validateCoinFromBase(chainId, tx.getType(),coinData.getFrom());
-                if (resultCoinFrom.isFailed()) {
-                    return resultCoinFrom;
-                }
-                Result resultCoinTo = validateCoinToBase(coinData.getTo());
-                if (resultCoinTo.isFailed()) {
-                    return resultCoinTo;
-                }
-                Result resultFee =  validateFee(chainId, tx.getType(), tx.size(), coinData);
-                if (resultFee.isFailed()) {
-                    return resultFee;
-                }
-            }
-        } catch (NulsException e) {
-            e.printStackTrace();
-            return Result.getFailed(TxErrorCode.DESERIALIZE_ERROR);
+        //todo 确认验证签名正确性
+        if(!SignatureUtil.validateTransactionSignture(tx)){
+            throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
         }
-        return Result.getSuccess(TxErrorCode.SUCCESS);
+        //如果有coinData, 则进行验证
+        if(null != tx.getCoinData() && tx.getCoinData().length > 0) {
+            //coinData基础验证以及手续费 (from中所有的nuls资产-to中所有nuls资产)
+            CoinData coinData = TxUtil.getCoinData(tx);
+            if (!validateCoinFromBase(chainId, tx.getType(),coinData.getFrom())) {
+                return false;
+            }
+            if (!validateCoinToBase(coinData.getTo())) {
+                return false;
+            }
+            if (!validateFee(chainId, tx.getType(), tx.size(), coinData)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -210,27 +203,27 @@ public class TransactionManager {
      * @param listFrom
      * @return Result
      */
-    public Result validateCoinFromBase(int chainId, int type, List<CoinFrom> listFrom){
+    public boolean validateCoinFromBase(int chainId, int type, List<CoinFrom> listFrom) throws NulsException {
         //coinBase交易没有from
         if(type == TxConstant.TX_TYPE_COINBASE) {
-            return Result.getSuccess(TxErrorCode.SUCCESS);
+            throw new NulsException(TxErrorCode.SUCCESS);
         }
         if(null == listFrom || listFrom.size() == 0){
-            return Result.getFailed(TxErrorCode.COINFROM_NOT_FOUND);
+            throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
         }
         for(CoinFrom coinFrom : listFrom){
             byte[] addrBytes = coinFrom.getAddress();
             String address =  AddressTool.getStringAddressByBytes(addrBytes);
             //from中地址对应的链id是否是发起链id
             if(!AddressTool.validAddress(chainId, address)){
-                return Result.getFailed(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
+                throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
             }
             //验证资产是否存在
             if(!TxUtil.assetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())){
-                return Result.getFailed(TxErrorCode.ASSET_NOT_EXIST);
+                throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
             }
         }
-        return Result.getSuccess(TxErrorCode.SUCCESS);
+        return true;
     }
 
     /**
@@ -238,9 +231,9 @@ public class TransactionManager {
      * @param listTo
      * @return Result
      */
-    public Result validateCoinToBase(List<CoinTo> listTo){
+    public boolean validateCoinToBase(List<CoinTo> listTo) throws NulsException {
         if (null == listTo || listTo.size() == 0) {
-            return Result.getFailed(TxErrorCode.COINTO_NOT_FOUND);
+            throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
         }
         //验证收款方是不是属于同一条链
         Integer addressChainId = null;
@@ -250,10 +243,10 @@ public class TransactionManager {
                 addressChainId = chainId;
                 continue;
             }else if(addressChainId != chainId){
-                return Result.getFailed(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
+                throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
             }
         }
-        return Result.getSuccess(TxErrorCode.SUCCESS);
+        return true;
     }
 
     /**
@@ -264,10 +257,10 @@ public class TransactionManager {
      * @param coinData
      * @return Result
      */
-    private Result validateFee(int chainId, int type, int txSize, CoinData coinData){
+    private boolean validateFee(int chainId, int type, int txSize, CoinData coinData) throws NulsException {
         if(type == TxConstant.TX_TYPE_REDPUNISH){
             //红牌惩罚没有手续费
-            return Result.getSuccess(TxErrorCode.SUCCESS);
+            return true;
         }
         BigInteger feeFrom = BigInteger.ZERO;
         for(CoinFrom coinFrom : coinData.getFrom()){
@@ -292,7 +285,7 @@ public class TransactionManager {
         if(BigIntegerUtils.isLessThan(fee, targetFee)) {
             Result.getFailed(TxErrorCode.INSUFFICIENT_FEE);
         }
-        return Result.getSuccess(TxErrorCode.SUCCESS);
+        return true;
     }
 
     /**

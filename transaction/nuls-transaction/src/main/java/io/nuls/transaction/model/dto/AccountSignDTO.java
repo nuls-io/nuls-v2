@@ -1,18 +1,18 @@
-/*
+/**
  * MIT License
- *
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
- *
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,46 +20,25 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
 package io.nuls.transaction.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import java.math.BigInteger;
-
 /**
  * @author: Charlie
- * @date: 2018-12-04
+ * @date: 2018-12-13
  */
-public class CoinDTO implements Cloneable {
+public class AccountSignDTO {
 
     private String address;
 
-    private Integer assetsChainId;
-
-    private Integer assetsId;
-
-    /**
-     * uint128 转出数量
-     */
-    private BigInteger amount;
-
-    /**
-     * 当address为普通地址时，该对应的密码，用于签名
-     */
-    @JsonIgnore
     private String password;
 
-    public CoinDTO() {
+    public AccountSignDTO() {
     }
 
-    public CoinDTO(String address, Integer assetsChainId, Integer assetsId, BigInteger amount, String password) {
+    public AccountSignDTO(String address, String password) {
         this.address = address;
-        this.assetsChainId = assetsChainId;
-        this.assetsId = assetsId;
-        this.amount = amount;
         this.password = password;
     }
 
@@ -69,30 +48,6 @@ public class CoinDTO implements Cloneable {
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public int getAssetsChainId() {
-        return assetsChainId;
-    }
-
-    public void setAssetsChainId(int assetsChainId) {
-        this.assetsChainId = assetsChainId;
-    }
-
-    public int getAssetsId() {
-        return assetsId;
-    }
-
-    public void setAssetsId(int assetsId) {
-        this.assetsId = assetsId;
-    }
-
-    public BigInteger getAmount() {
-        return amount;
-    }
-
-    public void setAmount(BigInteger amount) {
-        this.amount = amount;
     }
 
     public String getPassword() {
@@ -105,24 +60,9 @@ public class CoinDTO implements Cloneable {
 
     @Override
     public String toString() {
-        return "CoinDTO{" +
+        return "AccountSignDTO{" +
                 "address='" + address + '\'' +
-                ", assetsChainId=" + assetsChainId +
-                ", assetsId=" + assetsId +
-                ", amount=" + amount +
                 ", password='" + password + '\'' +
                 '}';
-    }
-
-    @Override
-    public Object clone(){
-        CoinDTO coinDTO = null;
-        try {
-            coinDTO = (CoinDTO)super.clone();
-        } catch (CloneNotSupportedException e) {
-            e.printStackTrace();
-        }
-
-        return coinDTO;
     }
 }
