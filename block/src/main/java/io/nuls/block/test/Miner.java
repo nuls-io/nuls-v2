@@ -28,19 +28,28 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
 import lombok.Data;
 
+import java.util.Random;
+
 import static io.nuls.block.constant.Constant.CHAIN_ID;
 
+/**
+ * 测试用生产区块的矿工
+ *
+ * @author captain
+ * @version 1.0
+ * @date 18-12-13 下午3:00
+ */
 @Data
 public class Miner extends Thread {
 
     private static final long TOTAL = Long.MAX_VALUE;
     private String symbol;
-    private long period = 10000;
-    private int flag = 1;
+    private boolean slow;
     private Block startBlock;
     private Block previousBlock;
 
-    public Miner(String symbol, Block startBlock) {
+    public Miner(String symbol, Block startBlock, boolean slow) {
+        this.slow = slow;
         this.symbol = symbol;
         this.startBlock = startBlock;
     }
@@ -51,11 +60,10 @@ public class Miner extends Thread {
         BlockService blockService = ContextManager.getServiceBean(BlockService.class);
         while (i < TOTAL) {
             try {
-                if (i%20==0) {
-                    flag *= -1;
-                    period += (5000 * flag);
+                if (i % 20 == 0) {
+                    slow = !slow;
                 }
-                Thread.sleep((long) (Math.random() * period));
+                Thread.sleep((long) (new Random().nextInt(5) * 1000));
                 if (!ContextManager.getContext(CHAIN_ID).getStatus().equals(RunningStatusEnum.RUNNING)) {
                     return;
                 }

@@ -175,9 +175,10 @@ public class ChainManager {
         }
 
         //2.往主链上添加区块
+        LinkedList<NulsDigestData> hashList = forkChain.getHashList();
         int count = 0;
         while (target > count) {
-            NulsDigestData hash = forkChain.getHashList().pop();
+            NulsDigestData hash = hashList.pop();
             Block block = chainStorageService.query(chainId, hash);
             boolean saveBlock = blockService.saveBlock(chainId, block);
             if (saveBlock) {
@@ -188,14 +189,14 @@ public class ChainManager {
         }
 
         //3.上一步结束后，如果forkChain中还有区块，组成新的分叉链，连接到主链上
-        if (forkChain.getHashList().size() > 0) {
+        if (hashList.size() > 0) {
             Chain newForkChain = new Chain();
             newForkChain.setChainId(chainId);
             newForkChain.setStartHeight(target + forkChain.getStartHeight());
             newForkChain.setParent(masterChain);
             newForkChain.setEndHeight(forkChain.getEndHeight());
             newForkChain.setPreviousHash(subChain.getPreviousHash());
-            newForkChain.setHashList(forkChain.getHashList());
+            newForkChain.setHashList(hashList);
 
             //4.低于subChain的链重新链接到主链masterChain
             SortedSet<Chain> lowerSubChains = forkChain.getSons().headSet(subChain);
@@ -215,7 +216,8 @@ public class ChainManager {
         }
 
         //6.收尾工作
-        return deleteForkChain(chainId, forkChain);
+        deleteForkChain(chainId, forkChain, false);
+        return true;
     }
 
     /**
@@ -254,8 +256,14 @@ public class ChainManager {
      * @param chainId
      * @return
      */
-    private static boolean deleteForkChain(int chainId, Chain chain) {
-        return forkChains.get(chainId).remove(chain);
+    public static void deleteForkChain(int chainId, Chain chain, boolean recursively) {
+        forkChains.get(chainId).remove(chain);
+        chainStorageService.remove(chainId, chain.getHashList());
+        if (recursively) {
+            for (Chain son : chain.getSons()) {
+                deleteForkChain(chainId, son, true);
+            }
+        }
     }
 
     /**

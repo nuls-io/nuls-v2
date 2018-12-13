@@ -78,6 +78,9 @@ public class OrphanChainsMaintainer implements Runnable {
                     return;
                 }
                 SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+                if (orphanChains.size() < 1) {
+                    return;
+                }
                 List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
                 //维护现有孤儿链，尝试在链首增加区块
                 ContextManager.getContext(chainId).setStatus(MAINTAIN_CHAINS);

@@ -107,7 +107,7 @@ public class BlockUtil {
             return false;
         }
 
-        if (null == header.getPackingAddress()) {
+        if (null == header.getPackingAddress(chainId)) {
             Log.warn("headerVerify fail, block packingAddress can not be null! chainId-{}, height-{}, hash-{}", chainId, header.getHeight(), header.getHash());
             return false;
         }
@@ -369,7 +369,6 @@ public class BlockUtil {
         po.setTime(blockHeader.getTime());
         po.setHeight(blockHeader.getHeight());
         po.setTxCount(blockHeader.getTxCount());
-        po.setPackingAddress(blockHeader.getPackingAddress());
         po.setBlockSignature(blockHeader.getBlockSignature());
         po.setExtend(blockHeader.getExtend());
         po.setTxHashList(block.getTxHashList());

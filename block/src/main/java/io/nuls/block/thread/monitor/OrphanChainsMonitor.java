@@ -73,6 +73,9 @@ public class OrphanChainsMonitor implements Runnable {
                 }
                 Chain masterChain = ChainManager.getMasterChain(chainId);
                 SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+                if (orphanChains.size() < 1) {
+                    return;
+                }
                 //1.清理链起始高度位于主链最新高度增减30(可配置)范围外的孤儿链
                 long latestHeight = masterChain.getEndHeight();
                 int heightRange = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.HEIGHT_RANGE));
@@ -87,46 +90,16 @@ public class OrphanChainsMonitor implements Runnable {
                 SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                 //2.标记、变更链属性阶段
                 for (Chain orphanChain : orphanChains) {
-                    handle(orphanChain, masterChain, forkChains, orphanChains);
+                    mark(orphanChain, masterChain, forkChains, orphanChains);
                 }
                 //3.复制、清除阶段
                 SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
                 for (Chain orphanChain : orphanChains) {
-
-                    //如果标记为与主链相连，orphanChain不会复制到新的孤儿链集合，也不会进入分叉链集合，但是所有orphanChain的直接子链标记为ChainTypeEnum.MASTER_FORK
-                    if (orphanChain.getType().equals(ChainTypeEnum.MASTER_APPEND)) {
-                        orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.MASTER_FORK));
-                        continue;
-                    }
-                    //如果标记为从主链分叉，orphanChain不会复制到新的孤儿链集合，但是会进入分叉链集合，所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
-                    if (orphanChain.getType().equals(ChainTypeEnum.MASTER_FORK)) {
-                        ChainManager.addForkChain(chainId, orphanChain);
-                        orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
-                        continue;
-                    }
-
-                    //如果标记为与分叉链相连，orphanChain不会复制到新的孤儿链集合，也不会进入分叉链集合，但是所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
-                    if (orphanChain.getType().equals(ChainTypeEnum.FORK_APPEND)) {
-                        orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
-                        continue;
-                    }
-                    //如果标记为从分叉链分叉，orphanChain不会复制到新的孤儿链集合，但是会进入分叉链集合，所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
-                    if (orphanChain.getType().equals(ChainTypeEnum.FORK_FORK)) {
-                        ChainManager.addForkChain(chainId, orphanChain);
-                        orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
-                        continue;
-                    }
-
-                    //如果标记为与孤儿链相连，不会复制到新的孤儿链集合，所有orphanChain的直接子链会复制到新的孤儿链集合，类型不变
-                    if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_APPEND)) {
-                        continue;
-                    }
-                    //如果标记为孤儿链(未变化)，或者从孤儿链分叉，复制到新的孤儿链集合
-                    if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN)) {
-                        maintainedOrphanChains.add(orphanChain);
-                    }
+                    copy(chainId, maintainedOrphanChains, orphanChain);
                 }
                 ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
+                forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
+                maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
                 ContextManager.getContext(chainId).setStatus(RUNNING);
             } catch (Exception e) {
                 ContextManager.getContext(chainId).setStatus(EXCEPTION);
@@ -135,7 +108,49 @@ public class OrphanChainsMonitor implements Runnable {
         }
     }
 
-    private void handle(Chain orphanChain, Chain masterChain, SortedSet<Chain> forkChains, SortedSet<Chain> orphanChains) throws Exception {
+    private void copy(Integer chainId, SortedSet<Chain> maintainedOrphanChains, Chain orphanChain) {
+        //如果标记为与主链相连，orphanChain不会复制到新的孤儿链集合，也不会进入分叉链集合，但是所有orphanChain的直接子链标记为ChainTypeEnum.MASTER_FORK
+        if (orphanChain.getType().equals(ChainTypeEnum.MASTER_APPEND)) {
+            orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.MASTER_FORK));
+            return;
+        }
+        //如果标记为从主链分叉，orphanChain不会复制到新的孤儿链集合，但是会进入分叉链集合，所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        if (orphanChain.getType().equals(ChainTypeEnum.MASTER_FORK)) {
+            ChainManager.addForkChain(chainId, orphanChain);
+            orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
+            return;
+        }
+
+        //如果标记为与分叉链相连，orphanChain不会复制到新的孤儿链集合，也不会进入分叉链集合，但是所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        if (orphanChain.getType().equals(ChainTypeEnum.FORK_APPEND)) {
+            orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
+            return;
+        }
+        //如果标记为从分叉链分叉，orphanChain不会复制到新的孤儿链集合，但是会进入分叉链集合，所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        if (orphanChain.getType().equals(ChainTypeEnum.FORK_FORK)) {
+            ChainManager.addForkChain(chainId, orphanChain);
+            orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
+            return;
+        }
+
+        //如果标记为与孤儿链相连，不会复制到新的孤儿链集合，所有orphanChain的直接子链会复制到新的孤儿链集合，类型不变
+        if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_APPEND)) {
+            return;
+        }
+
+        //如果标记为与孤儿链分叉，会复制到新的孤儿链集合，所有orphanChain的直接子链会复制到新的孤儿链集合，类型不变
+        if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_FORK)) {
+            maintainedOrphanChains.add(orphanChain);
+            return;
+        }
+
+        //如果标记为孤儿链(未变化)，或者从孤儿链分叉，复制到新的孤儿链集合
+        if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN)) {
+            maintainedOrphanChains.add(orphanChain);
+        }
+    }
+
+    private void mark(Chain orphanChain, Chain masterChain, SortedSet<Chain> forkChains, SortedSet<Chain> orphanChains)  {
         //1.判断与主链是否相连
         if (orphanChain.getParent() == null && tryAppend(masterChain, orphanChain)) {
             orphanChain.setType(ChainTypeEnum.MASTER_APPEND);
@@ -177,9 +192,11 @@ public class OrphanChainsMonitor implements Runnable {
 
             //6.判断是否从孤儿链分叉
             if (anotherOrphanChain.getParent() == null && tryFork(orphanChain, anotherOrphanChain)) {
+                anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_FORK);
                 return;
             }
             if (orphanChain.getParent() == null && tryFork(anotherOrphanChain, orphanChain)) {
+                orphanChain.setType(ChainTypeEnum.ORPHAN_FORK);
                 return;
             }
         }

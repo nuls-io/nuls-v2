@@ -20,17 +20,21 @@
 
 package io.nuls.block.storage;
 
+import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockStorageService;
+import io.nuls.block.test.BlockGenerator;
+import io.nuls.block.utils.BlockUtil;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import static io.nuls.block.constant.Constant.*;
@@ -39,24 +43,16 @@ import static org.junit.Assert.assertNull;
 
 public class BlockStorageServiceImplTest {
 
-    private BlockHeaderPo header;
-    private BlockStorageService service;
+    private static BlockHeaderPo header;
+    private static BlockStorageService service;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void beforeClass() throws Exception {
         SpringLiteContext.init("io.nuls.block", new ModularServiceMethodInterceptor());
         service = ContextManager.getServiceBean(BlockStorageService.class);
-        header = new BlockHeaderPo();
-        header.setHeight(1212);
-        header.setHash(NulsDigestData.calcDigestData("jyc".getBytes()));
         service.init(CHAIN_ID);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        service.destroy(CHAIN_ID);
-        header = null;
-        service = null;
+        Block block = BlockGenerator.generate(null);
+        header = BlockUtil.toBlockHeaderPo(block);
     }
 
     @Test
