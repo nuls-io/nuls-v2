@@ -3,6 +3,7 @@ package io.nuls.chain.info;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.constant.ErrorCode;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,9 @@ public class CmConstants {
 
     private CmConstants() {
     }
+
+    public static final BigInteger ZERO = new BigInteger("0");
+
     public static final String MODULE_ROLE = "CM";
     public static final String ADDRESS_TYPE_NULS = "nuls";
     public static final String ADDRESS_TYPE_OTHER = "other";
@@ -73,11 +77,11 @@ public class CmConstants {
     /**
      * 交易注册
      */
-    public static final String  CMD_TX_REGISTER = "tx_register";
+    public static final String CMD_TX_REGISTER = "tx_register";
     /**
      * 创建交易
      */
-    public static final String  CMD_TX_NEW_TX = "newTx";
+    public static final String CMD_TX_NEW_TX = "newTx";
 
     public static final String CMD_NW_CROSS_SEEDS = "nw_getSeeds";
 
@@ -95,7 +99,6 @@ public class CmConstants {
      * //TODO 该地址需要加上链ID，否则无法适配新的地址规则
      */
     public static final byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
-
 
 
 }
