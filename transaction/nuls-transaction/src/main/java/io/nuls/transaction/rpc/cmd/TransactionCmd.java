@@ -238,20 +238,14 @@ public class TransactionCmd extends BaseCmd {
         boolean result = false;
         try {
             Object chainIdObj = params == null ? null : params.get("chainId");
-            Object txHexListObj = params == null ? null : params.get("txList");
+            Object txHashListObj = params == null ? null : params.get("txHashList");
             // check parameters
-            if (params == null || chainIdObj == null || txHexListObj == null) {
+            if (params == null || chainIdObj == null || txHashListObj == null) {
                 throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             int chainId = (Integer) chainIdObj;
-            List<String> txHexList = (List<String>) txHexListObj;
-            List<Transaction> txList = new ArrayList<>();
-            for (String txHex : txHexList) {
-                //将txHex转换为Transaction对象
-                Transaction tx = TxUtil.getTransaction(txHex);
-                txList.add(tx);
-            }
-            result = confirmedTransactionService.saveTxList(chainId, txList);
+            List<String> txHashList = (List<String>) txHashListObj;
+            result = confirmedTransactionService.saveTxList(chainId, txHashList);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -319,5 +313,34 @@ public class TransactionCmd extends BaseCmd {
         return success("success");
     }
 
+    public Response batchVerify(Map params){
+        Map<String, Boolean> map = new HashMap<>();
+        boolean result = false;
+        try {
+            Object chainIdObj = params == null ? null : params.get("chainId");
+            Object txHexListObj = params == null ? null : params.get("txList");
+            // check parameters
+            if (params == null || chainIdObj == null || txHexListObj == null) {
+                throw new NulsException(TxErrorCode.NULL_PARAMETER);
+            }
+            int chainId = (Integer) chainIdObj;
+            List<String> txHexList = (List<String>) txHexListObj;
+            List<Transaction> txList = new ArrayList<>();
+            for (String txHex : txHexList) {
+                //将txHex转换为Transaction对象
+                Transaction tx = TxUtil.getTransaction(txHex);
+                txList.add(tx);
+            }
+            result = confirmedTransactionService.saveTxList(chainId, txList);
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", result);
+        return success(result);
+        return success("success");
+    }
 
 }

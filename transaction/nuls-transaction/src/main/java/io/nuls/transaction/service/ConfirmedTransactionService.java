@@ -36,8 +36,8 @@ public interface ConfirmedTransactionService {
     /**
      * 批量保存交易
      * @param chainId
-     * @param txList
+     * @param txHashList
      * @return
      */
-    boolean saveTxList(int chainId, List<Transaction> txList);
+    boolean saveTxList(int chainId, List<String> txHashList);
 }
