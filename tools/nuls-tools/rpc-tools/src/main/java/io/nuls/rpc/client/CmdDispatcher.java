@@ -83,6 +83,7 @@ public class CmdDispatcher {
      *
      * @throws Exception 核心模块（Manager）不可用，Core Module (Manager) Not Available
      */
+    @SuppressWarnings("unchecked")
     public static void syncKernel() throws Exception {
 
         /*
@@ -117,8 +118,9 @@ public class CmdDispatcher {
         Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
-        for (Object key : dependMap.keySet()) {
-            ClientRuntime.ROLE_MAP.put(key.toString(), (Map) dependMap.get(key));
+        for (Object object : dependMap.entrySet()) {
+            Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
+            ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
         }
 
         Log.info("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.ROLE_MAP));
