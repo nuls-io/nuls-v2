@@ -70,10 +70,6 @@ public class AccountBootstrap {
                     NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = keystoreFolder;
                 }
                 NulsConfig.KERNEL_MODULE_URL = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.KERNEL_MODULE_URL);
-
-                //主链ID、主链资产ID
-                NulsConfig.MAIN_CHAIN_ID = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_CHAIN_SECTION, AccountConstant.MAIN_CHAIN_ID, 0);
-                NulsConfig.MAIN_ASSETS_ID = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_CHAIN_SECTION, AccountConstant.MAIN_ASSETS_ID, 0);
             } catch (Exception e) {
                 Log.error(e);
             }

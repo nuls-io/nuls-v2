@@ -47,7 +47,7 @@ public class NulsConfig {
      * 模块配置文件名称
      * Module configuration file name.
      */
-    public static  String MODULES_CONFIG_FILE = "modules.ini";
+    public static String MODULES_CONFIG_FILE = "modules.ini";
 
     /**
      * 系统使用的编码方式
@@ -58,7 +58,7 @@ public class NulsConfig {
     /**
      * 导出keystore备份文件目录
      */
-    public static String ACCOUNTKEYSTORE_FOLDER_NAME ="keystore/backup";
+    public static String ACCOUNTKEYSTORE_FOLDER_NAME = "keystore/backup";
 
     /**
      * 内核模块地址
@@ -68,28 +68,28 @@ public class NulsConfig {
 
     /**
      * config file path
-     * */
+     */
     public static String CONFIG_FILE_PATH = "account-config.json";
 
     /**
      * 主网链ID（卫星链ID）
-     * */
-    public static int MAIN_CHAIN_ID = 12345;
+     */
+    public final static int MAIN_CHAIN_ID = 12345;
 
     /**
      * 主网链资产ID（卫星链资产ID，NULS资产）
-     * */
-    public static int MAIN_ASSETS_ID =1;
+     */
+    public final static int MAIN_ASSETS_ID = 1;
 
     /**
      * 当前链ID
-     * */
+     */
     public static int CURRENT_CHAIN_ID = 12345;
 
     /**
      * 当前链主资产ID
-     * */
-    public static int CURRENT_MAIN_ASSETS_ID =1;
+     */
+    public static int CURRENT_MAIN_ASSETS_ID = 1;
 
 
 }
