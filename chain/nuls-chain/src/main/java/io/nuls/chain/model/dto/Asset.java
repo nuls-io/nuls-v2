@@ -7,9 +7,7 @@ import io.nuls.chain.model.tx.txdata.TxAsset;
 import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -21,50 +19,31 @@ import java.util.List;
  * @date 2018/11/6
  * @description
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 @ToString
 public class Asset extends BaseNulsData {
-    @Getter
-    @Setter
+    /**
+     * 资产是在哪条链上注册的
+     * Which chain is the asset registered on
+     */
     private int chainId;
-    @Getter
-    @Setter
+
     private int assetId;
-    @Getter
-    @Setter
     private String symbol;
-    @Getter
-    @Setter
     private String name;
-    @Getter
-    @Setter
     private int depositNuls;
-    @Getter
-    @Setter
     private BigInteger initNumber;
-    @Getter
-    @Setter
     private short decimalPlaces;
-    @Getter
-    @Setter
     private boolean available;
-    @Getter
-    @Setter
     private long createTime;
-    @Getter
-    @Setter
     private long lastUpdateTime;
-    @Getter
-    @Setter
     private byte[] address;
-    @Getter
-    @Setter
     private String txHash;
 
     /**
      * 资产流通的链集合
      */
-    @Getter
-    @Setter
     List<Integer> chainIds = new ArrayList<>();
 
 

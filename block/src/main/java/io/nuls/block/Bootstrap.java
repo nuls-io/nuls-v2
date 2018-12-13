@@ -30,10 +30,8 @@ import io.nuls.block.context.Context;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.test.BlockGenerator;
 import io.nuls.block.test.Miner;
 import io.nuls.block.thread.BlockSynchronizer;
-import io.nuls.block.thread.ShutdownHook;
 import io.nuls.block.thread.monitor.*;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
@@ -84,10 +82,10 @@ public class Bootstrap {
             //各类缓存初始化
             initCache(CHAIN_ID);
 
+            onlyRunWhenTest();
+
             //5.rpc服务初始化
             rpcInit();
-
-            onlyRunWhenTest();
 
             //开启后台工作线程
             startDaemonThreads();
@@ -95,7 +93,6 @@ public class Bootstrap {
             while (true) {
                 for (Integer chainId : ContextManager.chainIds) {
                     if (RunningStatusEnum.STOPPING.equals(ContextManager.getContext(chainId).getStatus())) {
-                        Runtime.getRuntime().addShutdownHook(new ShutdownHook());
                         System.exit(0);
                     }
                     BlockHeader header = ContextManager.getContext(chainId).getLatestBlock().getHeader();
@@ -132,8 +129,8 @@ public class Bootstrap {
         Context context = ContextManager.getContext(CHAIN_ID);
         context.setStatus(RunningStatusEnum.RUNNING);
         Block latestBlock = context.getLatestBlock();
-        new Miner("1", latestBlock).start();
-        new Miner("2", latestBlock).start();
+        new Miner("1", latestBlock, false).start();
+//        new Miner("2", latestBlock, true).start();
     }
 
     private static void rpcInit() throws Exception {
@@ -144,16 +141,16 @@ public class Bootstrap {
                 .dependencies(ModuleE.KE.abbr, "1.0")
                 .dependencies(ModuleE.NW.abbr, "1.0")
                 .scanPackage("io.nuls.block.rpc")
-                .connect("ws://127.0.0.1:8887");
+                .connect("ws://192.168.1.191:8887");
 
         // Get information from kernel
         CmdDispatcher.syncKernel();
     }
 
     private static void startDaemonThreads() {
-//        //开启区块同步线程
-//        ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronize"));
-//        synExecutor.scheduleWithFixedDelay(BlockSynchronizer.getInstance(), 0, 10, TimeUnit.SECONDS);
+        //开启区块同步线程
+        ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronizer"));
+        synExecutor.scheduleWithFixedDelay(BlockSynchronizer.getInstance(), 0, 10, TimeUnit.SECONDS);
 //        //开启区块监控线程
 //        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
 //        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
@@ -163,11 +160,11 @@ public class Bootstrap {
         //开启孤儿链处理线程
         ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
         orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
-//        //开启孤儿链维护线程
-//        ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
-//        maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 10, TimeUnit.SECONDS);
+        //开启孤儿链维护线程
+        ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
+        maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 10, TimeUnit.SECONDS);
         //开启数据库大小监控线程
-        ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("DBSize-monitor"));
+        ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
         dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
     }
 

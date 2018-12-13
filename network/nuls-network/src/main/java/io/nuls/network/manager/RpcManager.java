@@ -24,6 +24,7 @@
  */
 package io.nuls.network.manager;
 
+import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 
@@ -52,6 +53,8 @@ public class RpcManager extends BaseManager{
                     .dependencies(ModuleE.KE.abbr, "1.1")
                     .scanPackage("io.nuls.network.rpc")
                     .connect("ws://127.0.0.1:8887");
+            // Get information from kernel
+            CmdDispatcher.syncKernel();
         } catch (Exception e) {
             e.printStackTrace();
         }

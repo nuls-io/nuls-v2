@@ -114,6 +114,7 @@ public class SmallBlockHandler extends BaseCmd {
             request.setTxHashList(block.getMissingTransactions());
             request.setCommand(CommandConstant.GET_TXGROUP_MESSAGE);
             NetworkUtil.sendToNode(chainId, request, nodeId);
+            NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
             return success();
         }
 
@@ -124,7 +125,7 @@ public class SmallBlockHandler extends BaseCmd {
                 return success();
             }
             Log.debug("recieve SmallBlockMessage from(" + nodeId + "), tx count : " + header.getTxCount() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + blockHash);
-
+            NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
             //共识节点打包的交易包括两种交易，一种是在网络上已经广播的普通交易，一种是共识节点生成的特殊交易(如共识奖励、红黄牌)，后面一种交易其他节点的未确认交易池中不可能有，所以都放在SubTxList中
             //还有一种场景时收到smallBlock时，有一些普通交易还没有缓存在未确认交易池中，此时要再从源节点请求
             Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());

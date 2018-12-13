@@ -40,7 +40,10 @@ public class RocksDBService {
     }
 
     public static boolean createTable(String tableName) throws Exception {
-        return RocksDBManager.createTable(tableName);
+        if (!RocksDBService.existTable(tableName)) {
+            return RocksDBManager.createTable(tableName);
+        }
+        return false;
     }
 
     public static boolean destroyTable(String table) throws Exception {
@@ -53,6 +56,7 @@ public class RocksDBService {
 
     /**
      * 判断表是否存在
+     *
      * @param table
      * @return
      */

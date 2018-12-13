@@ -96,8 +96,14 @@ public class BlockSynchronizer implements Runnable {
         if (availableNodes.size() >= Integer.parseInt(config)) {
             //3.统计网络中可用节点的一致区块高度、区块hash
             BlockDownloaderParams params = statistics(availableNodes, chainId);
-            if (params.getNodes().size() == 0) {
+            int size = params.getNodes().size();
+            if (size == 0) {
                 statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
+                return;
+            }
+            //网络上所有节点高度都是0，说明是该链第一次运行
+            if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
+                statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                 return;
             }
             //4.更新下载状态为“下载中”

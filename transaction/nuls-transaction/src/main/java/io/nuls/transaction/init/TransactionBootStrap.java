@@ -11,6 +11,8 @@ import io.nuls.tools.parse.I18nUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 import io.nuls.transaction.scheduler.TransactionScheduler;
+import io.nuls.transaction.utils.manager.ChainManager;
+
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Properties;
@@ -41,7 +43,8 @@ public class TransactionBootStrap {
             initDB();
             //初始化上下文
             SpringLiteContext.init(TxConstant.CONTEXT_PATH);
-
+            //启动链
+            SpringLiteContext.getBean(ChainManager.class).runChain();
             //初始化国际资源文件语言
             initLanguage();
             //加载本地配置参数,并启动本地服务

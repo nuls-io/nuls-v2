@@ -49,9 +49,9 @@ public class ChainGenerator {
      * @param chainId
      * @return
      */
-    public static Chain newChain(long startHeight, long endHeight, String symbol, Chain parent, String parentSymbol, int chainId){
+    public static Chain newChain(long startHeight, long endHeight, String symbol, Chain parent, String parentSymbol, int chainId, ChainTypeEnum type){
         Chain chain = new Chain();
-        chain.setType(ChainTypeEnum.ORPHAN);
+        chain.setType(type);
         chain.setChainId(chainId);
         chain.setStartHeight(startHeight);
         chain.setEndHeight(endHeight);
@@ -64,6 +64,7 @@ public class ChainGenerator {
         if (parent != null) {
             parent.getSons().add(chain);
         }
+        chain.setStartHashCode(hashList.getFirst().hashCode());
         chain.setPreviousHash(NulsDigestData.calcDigestData((parentSymbol + (startHeight-1)).getBytes()));
         return chain;
     }
@@ -86,6 +87,7 @@ public class ChainGenerator {
             hashList.add(NulsDigestData.calcDigestData((symbol + i).getBytes()));
         }
         chain.setHashList(hashList);
+        chain.setStartHashCode(hashList.getFirst().hashCode());
         chain.setPreviousHash(NulsDigestData.calcDigestData((symbol + (0-1)).getBytes()));
         return chain;
     }
@@ -113,6 +115,7 @@ public class ChainGenerator {
         chain.setPreviousHash(preHash);
         chain.setParent(parent);
         chain.setType(type);
+        chain.setStartHashCode(header.getHash().hashCode());
         if (parent != null) {
             parent.getSons().add(chain);
         }
@@ -136,6 +139,7 @@ public class ChainGenerator {
         chain.setType(ChainTypeEnum.MASTER);
         chain.setParent(null);
         chain.setPreviousHash(header.getPreHash());
+        chain.setStartHashCode(header.getHash().hashCode());
         LinkedList<NulsDigestData> hashs = new LinkedList();
         NulsDigestData hash = header.getHash();
         hashs.add(hash);

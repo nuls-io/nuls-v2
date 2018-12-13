@@ -187,4 +187,19 @@ public class NetworkUtil {
         }
     }
 
+    public static void setHashAndHeight(int chainId, NulsDigestData hash, long height, String nodeId) {
+        try {
+            Map<String, Object> params = new HashMap<>(5);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("nodeId", nodeId);
+            params.put("blockHeight", height);
+            params.put("blockHash", hash.toString());
+
+            CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_updateNodeInfo", params);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
+
 }
