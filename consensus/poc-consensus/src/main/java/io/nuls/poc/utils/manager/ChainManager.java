@@ -110,6 +110,7 @@ public class ChainManager {
             读取数据库链信息配置
             Read database chain information configuration
              */
+            configService.delete(1);
             Map<Integer, ConfigBean> configMap = configService.getList();
             /*
             如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
@@ -192,8 +193,8 @@ public class ChainManager {
 
                 // add a round data
                 BlockRoundData roundData = new BlockRoundData();
-                roundData.setConsensusMemberCount(2);
-                roundData.setPackingIndexOfRound(2);
+                roundData.setConsensusMemberCount(5);
+                roundData.setPackingIndexOfRound(5);
                 if((index+1)%10 == 0){
                     roundIndex++;
                     blockHeader.setPackingAddress(packingAddress1.getAddressBytes());

@@ -144,4 +144,13 @@ public class AgentTest {
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentStatus", params);
         System.out.println(cmdResp.getResponseData());
     }
+
+    public static void main(String[] args){
+        Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfa".getBytes()));
+        Address rewardAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmga".getBytes()));
+        Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqma".getBytes()));
+        System.out.println(agentAddress.getBase58());
+        System.out.println(rewardAddress.getBase58());
+        System.out.println(packingAddress.getBase58());
+    }
 }

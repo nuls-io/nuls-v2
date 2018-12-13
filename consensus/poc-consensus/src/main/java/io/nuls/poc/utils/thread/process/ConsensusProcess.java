@@ -11,6 +11,7 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.consensus.ConsensusStatus;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
+import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.RoundManager;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -34,6 +35,7 @@ import java.util.List;
 public class ConsensusProcess {
     private RoundManager roundManager = SpringLiteContext.getBean(RoundManager.class);
 
+    private ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
 
     private boolean hasPacking;
 
@@ -168,6 +170,8 @@ public class ConsensusProcess {
             return;
         }
         //todo 打包成功后将区块传给区块管理模块广播
+        chain.setNewestHeader(block.getHeader());
+        chain.getBlockHeaderList().add(block.getHeader());
     }
 
     /**
@@ -233,7 +237,7 @@ public class ConsensusProcess {
         */
         BlockHeader bestBlockHeader = chain.getNewestHeader();
         BlockExtendsData blockRoundData = new BlockExtendsData(bestBlockHeader.getExtend());
-        byte[] bestPackingAddress = bestBlockHeader.getPackingAddress();
+        byte[] bestPackingAddress = bestBlockHeader.getPackingAddress(chain.getConfig().getChainId());
         long bestRoundIndex = blockRoundData.getRoundIndex();
         int bestPackingIndex = blockRoundData.getPackingIndexOfRound();
 

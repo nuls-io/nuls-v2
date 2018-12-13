@@ -141,7 +141,7 @@ public class BlockValidator {
       Log.debug(currentRound.toString());
       // 验证打包人是否正确
       MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
-      if (!Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress())) {
+      if (!Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
          Log.error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
       }
