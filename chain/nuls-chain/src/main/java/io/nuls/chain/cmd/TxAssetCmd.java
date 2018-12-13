@@ -42,8 +42,7 @@ public class TxAssetCmd extends BaseChainCmd {
     private ChainService chainService;
 
 
-    @CmdAnnotation(cmd = "cm_assetRegValidator", version = 1.0,
-            description = "assetRegValidator")
+    @CmdAnnotation(cmd = "cm_assetRegValidator", version = 1.0, description = "assetRegValidator")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
@@ -64,7 +63,6 @@ public class TxAssetCmd extends BaseChainCmd {
 
 
     @CmdAnnotation(cmd = "cm_assetRegCommit", version = 1.0, description = "assetRegCommit")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response assetRegCommit(Map params) {
@@ -73,18 +71,10 @@ public class TxAssetCmd extends BaseChainCmd {
             if (cmdResponse.isSuccess()) {
                 return cmdResponse;
             }
-            int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String txHex = String.valueOf(params.get("txHex"));
             Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
 
-            //获取链信息
-            BlockChain dbChain = chainService.getChain(chainId);
-            dbChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, asset.getAssetId()));
-            dbChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-            //提交asset
-            assetService.createAsset(asset);
-            //更新chain
-            chainService.updateChain(dbChain);
+            assetService.registerAsset(asset);
         } catch (Exception e) {
             Log.error(e);
             return failed(CmErrorCode.Err10002);
@@ -93,38 +83,16 @@ public class TxAssetCmd extends BaseChainCmd {
         return success();
     }
 
-    /**
-     * 资产回滚
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "cm_assetRegRollback", version = 1.0,
-            description = "assetRegRollback")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+
+    @CmdAnnotation(cmd = "cm_assetRegRollback", version = 1.0, description = "assetRegRollback")
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response assetRegRollback(Map params) {
         try {
-            int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String txHex = String.valueOf(params.get("txHex"));
-
             Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
-            //判断库中的asset是否存在，数据正确，则删除
-            Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-            if (!ByteUtils.arrayEquals(asset.getAddress(), dbAsset.getAddress())) {
-                return failed(CmErrorCode.ERROR_ADDRESS_ERROR);
-            }
-            if (dbAsset.getTxHash().equalsIgnoreCase(asset.getTxHash())) {
-                assetService.deleteAsset(asset);
-                //更新chain
-                BlockChain dbChain = chainService.getChain(dbAsset.getChainId());
-                dbChain.removeCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, asset.getAssetId()));
-                dbChain.removeCirculateAssetId(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-                chainService.updateChain(dbChain);
-                return success();
-            }
-            return failed(CmErrorCode.ERROR_ASSET_NOT_EXIST);
+            assetService.registerAssetRollback(asset);
+            return success();
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -134,47 +102,40 @@ public class TxAssetCmd extends BaseChainCmd {
     /**
      * 资产注销校验
      */
-    @CmdAnnotation(cmd = "cm_assetDisableValidator", version = 1.0,
-            description = "assetDisableValidator")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @CmdAnnotation(cmd = "cm_assetDisableValidator", version = 1.0, description = "assetDisableValidator")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response assetDisableValidator(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
-        String secondaryData = String.valueOf(params.get("secondaryData"));
         Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
         try {
-            return assetDisableValidator(asset);
+            Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
+
+            if (!ByteUtils.arrayEquals(asset.getAddress(), dbAsset.getAddress())) {
+                return failed(CmErrorCode.ERROR_ADDRESS_ERROR);
+            }
+            if (!asset.getTxHash().equalsIgnoreCase(dbAsset.getTxHash())) {
+                return failed(CmErrorCode.A10017);
+            }
+            if (asset.getChainId() != dbAsset.getChainId()) {
+                return failed(CmErrorCode.ERROR_CHAIN_ASSET_NOT_MATCH);
+            }
+            ChainAsset chainAsset = assetService.getChainAsset(asset.getChainId(), dbAsset);
+            BigDecimal initAsset = new BigDecimal(chainAsset.getInitNumber());
+            BigDecimal inAsset = new BigDecimal(chainAsset.getInNumber());
+            BigDecimal outAsset = new BigDecimal(chainAsset.getOutNumber());
+            BigDecimal currentNumber = initAsset.add(inAsset).subtract(outAsset);
+            double actual = currentNumber.divide(initAsset, 8, RoundingMode.HALF_DOWN).doubleValue();
+            double config = Double.parseDouble(CmConstants.PARAM_MAP.get(CmConstants.ASSET_RECOVERY_RATE));
+            if (actual < config) {
+                return failed(CmErrorCode.ERROR_ASSET_RECOVERY_RATE);
+            }
+            return success();
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
         }
-    }
-
-    private Response assetDisableValidator(Asset asset) throws Exception {
-
-        Asset dbAsset = assetService.getAsset(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()));
-
-        if (!ByteUtils.arrayEquals(asset.getAddress(), dbAsset.getAddress())) {
-            return failed(CmErrorCode.ERROR_ADDRESS_ERROR);
-        }
-        if (!asset.getTxHash().equalsIgnoreCase(dbAsset.getTxHash())) {
-            return failed(CmErrorCode.A10017);
-        }
-        if (asset.getChainId() != dbAsset.getChainId()) {
-            return failed(CmErrorCode.ERROR_CHAIN_ASSET_NOT_MATCH);
-        }
-        ChainAsset chainAsset = assetService.getChainAsset(asset.getChainId(), dbAsset);
-        BigDecimal initAsset = new BigDecimal(chainAsset.getInitNumber());
-        BigDecimal inAsset = new BigDecimal(chainAsset.getInNumber());
-        BigDecimal outAsset = new BigDecimal(chainAsset.getOutNumber());
-        BigDecimal currentNumber = initAsset.add(inAsset).subtract(outAsset);
-        double actual = currentNumber.divide(initAsset, 8, RoundingMode.HALF_DOWN).doubleValue();
-        double config = Double.parseDouble(CmConstants.PARAM_MAP.get(CmConstants.ASSET_RECOVERY_RATE));
-        if (actual < config) {
-            return failed(CmErrorCode.ERROR_ASSET_RECOVERY_RATE);
-        }
-        return success();
     }
 
     /**
@@ -182,18 +143,12 @@ public class TxAssetCmd extends BaseChainCmd {
      */
     @CmdAnnotation(cmd = "cm_assetDisableCommit", version = 1.0,
             description = "assetDisableCommit")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response assetDisableCommit(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
-        String secondaryData = String.valueOf(params.get("secondaryData"));
         Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
         try {
-            Response cmdResponse = assetDisableValidator(asset);
-            if (cmdResponse.isSuccess()) {
-                return cmdResponse;
-            }
             assetService.setStatus(CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId()), false);
             return success();
         } catch (Exception e) {
@@ -205,17 +160,12 @@ public class TxAssetCmd extends BaseChainCmd {
     /**
      * 链注销回滚
      *
-     * @param params
-     * @return
      */
     @CmdAnnotation(cmd = "cm_assetDisableRollback", version = 1.0, description = "assetDisableRollback")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response assetDisableRollback(Map params) {
-        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
         String txHex = String.valueOf(params.get("txHex"));
-        String secondaryData = String.valueOf(params.get("secondaryData"));
         Asset asset = buildAssetWithTxChain(txHex, new AddAssetToChainTransaction());
         try {
             /*判断资产是否可用*/
@@ -233,7 +183,6 @@ public class TxAssetCmd extends BaseChainCmd {
             return failed(e.getMessage());
         }
     }
-
 
     private List<CoinDataAssets> getChainAssetList(Map params) throws NulsException {
         List<CoinDataAssets> list = new ArrayList<>();
@@ -283,8 +232,7 @@ public class TxAssetCmd extends BaseChainCmd {
 
     }
 
-
-    Response assetCirculateValidator(int fromChainId, int toChainId, Map<String, String> fromAssetMap, Map<String, String> toAssetMap) {
+    private Response assetCirculateValidator(int fromChainId, int toChainId, Map<String, String> fromAssetMap, Map<String, String> toAssetMap) {
         try {
             BlockChain fromChain = chainService.getChain(fromChainId);
             BlockChain toChain = chainService.getChain(toChainId);
@@ -302,9 +250,8 @@ public class TxAssetCmd extends BaseChainCmd {
             }
             //获取链内 资产 状态是否正常
             Set<String> toAssets = toAssetMap.keySet();
-            Iterator itTo = toAssets.iterator();
-            while (itTo.hasNext()) {
-                String assetKey = itTo.next().toString();
+            for (Object toAsset : toAssets) {
+                String assetKey = toAsset.toString();
                 Asset asset = assetService.getAsset(assetKey);
                 if (null == asset || !asset.isAvailable()) {
                     return failed("asset is not exsit");
@@ -312,9 +259,8 @@ public class TxAssetCmd extends BaseChainCmd {
             }
             //校验from 资产是否足够
             Set<String> fromAssets = fromAssetMap.keySet();
-            Iterator itFrom = fromAssets.iterator();
-            while (itFrom.hasNext()) {
-                String assetKey = itFrom.next().toString();
+            for (Object fromAsset : fromAssets) {
+                String assetKey = fromAsset.toString();
                 Asset asset = assetService.getAsset(assetKey);
                 if (null == asset || !asset.isAvailable()) {
                     return failed("asset is not exsit");
@@ -335,8 +281,6 @@ public class TxAssetCmd extends BaseChainCmd {
     /**
      * 跨链流通校验
      *
-     * @param params
-     * @return
      */
     @CmdAnnotation(cmd = "cm_assetCirculateValidator", version = 1.0, description = "assetCirculateValidator")
     @Parameter(parameterName = "coinDatas", parameterType = "String")
@@ -360,8 +304,6 @@ public class TxAssetCmd extends BaseChainCmd {
     /**
      * 跨链流通提交
      *
-     * @param params
-     * @return
      */
     @CmdAnnotation(cmd = "cm_assetCirculateCommit", version = 1.0, description = "assetCirculateCommit")
     @Parameter(parameterName = "coinDatas", parameterType = "String")
@@ -381,9 +323,7 @@ public class TxAssetCmd extends BaseChainCmd {
             }
             //from 的处理
             Set<String> assetKeys = fromAssetMap.keySet();
-            Iterator<String> assetKeysIt = assetKeys.iterator();
-            while (assetKeysIt.hasNext()) {
-                String assetKey = assetKeysIt.next();
+            for (String assetKey : assetKeys) {
                 ChainAsset fromChainAsset = assetService.getChainAsset(fromChainId, assetKey);
                 BigDecimal currentAsset = new BigDecimal(fromChainAsset.getOutNumber()).add(new BigDecimal(fromAssetMap.get(assetKey)));
                 fromChainAsset.setOutNumber(BigIntegerUtils.stringToBigInteger(currentAsset.toString()));
@@ -436,8 +376,6 @@ public class TxAssetCmd extends BaseChainCmd {
     /**
      * 跨链流通回滚
      *
-     * @param params
-     * @return
      */
     @CmdAnnotation(cmd = "cm_assetCirculateRollBack", version = 1.0, description = "assetCirculateRollBack")
     @Parameter(parameterName = "coinDatas", parameterType = "String")
