@@ -9,6 +9,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -20,6 +21,7 @@ import io.nuls.transaction.rpc.call.TransactionCmdCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.TransactionService;
 import io.nuls.transaction.utils.TransactionManager;
+import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,15 +53,15 @@ public class TransactionCmd extends BaseCmd {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
         // check parameters
-        if (params == null) {
-            throw new NulsRuntimeException(TxErrorCode.NULL_PARAMETER);
-        }
         try {
+            if (params == null) {
+                throw new NulsException(TxErrorCode.NULL_PARAMETER);
+            }
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDTO.class);
             List<TxRegisterDTO> txRegisterList = moduleTxRegisterDto.getList();
             if (moduleTxRegisterDto == null || txRegisterList == null) {
-                throw new NulsRuntimeException(TxErrorCode.NULL_PARAMETER);
+                throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             //循环注册多种交易
             for (TxRegisterDTO txRegisterDto : txRegisterList) {
@@ -74,13 +76,13 @@ public class TransactionCmd extends BaseCmd {
                 txRegister.setUnlockTx(txRegisterDto.isUnlockTx());
                 txRegister.setVerifySignature(txRegisterDto.isVerifySignature());
                 //注册交易
-                result = transactionService.register(txRegister).isSuccess();
+                result = transactionService.register(txRegister);
             }
 
         } catch (IOException e) {
             e.printStackTrace();
             return failed(e.getMessage());
-        } catch (NulsRuntimeException e) {
+        } catch (NulsException e) {
             return failed(e.getErrorCode());
         }
 
@@ -104,15 +106,15 @@ public class TransactionCmd extends BaseCmd {
             Object txHexObj = params == null ? null : params.get("txHex");
             // check parameters
             if (params == null || chainIdObj == null || txHexObj == null) {
-                throw new NulsRuntimeException(TxErrorCode.NULL_PARAMETER);
+                throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             int chainId = (Integer) chainIdObj;
             String txHex = (String) txHexObj;
             //将txHex转换为Transaction对象
-            Transaction transaction = Transaction.getInstance(txHex);
+            Transaction transaction = TxUtil.getTransaction(txHex);
             //将交易放入待验证本地交易队列中
-            result = transactionService.newTx(chainId, transaction).isSuccess();
-        } catch (NulsRuntimeException e) {
+            result = transactionService.newTx(chainId, transaction);
+        } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -136,7 +138,7 @@ public class TransactionCmd extends BaseCmd {
             Object endtimestampObj = params == null ? null : params.get("endtimestamp");
             Object maxTxDataSizeObj = params == null ? null : params.get("maxTxDataSize");
             if (params == null || chainIdObj == null || endtimestampObj == null || maxTxDataSizeObj == null) {
-                throw new NulsRuntimeException(TxErrorCode.NULL_PARAMETER);
+                throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             // parse params
             //链ID
@@ -148,7 +150,7 @@ public class TransactionCmd extends BaseCmd {
 
             //TODO 查询可打包交易列表
 
-        } catch (NulsRuntimeException e) {
+        } catch (NulsException e) {
             return failed(e.getErrorCode());
         }
         return success(packableTxsList);
@@ -170,16 +172,16 @@ public class TransactionCmd extends BaseCmd {
             Object secondaryDataHexObj = params == null ? null : params.get("secondaryDataHex");
             // check parameters
             if (params == null || chainIdObj == null || txHexObj == null || secondaryDataHexObj == null) {
-                throw new NulsRuntimeException(TxErrorCode.NULL_PARAMETER);
+                throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             int chainId = (Integer) chainIdObj;
             String txHex = (String) txHexObj;
             //将txHex转换为Transaction对象
-            Transaction transaction = Transaction.getInstance(txHex);
+            Transaction transaction = TxUtil.getTransaction(txHex);
             TxRegister txRegister = TransactionManager.getInstance().getTxRegister(transaction.getType());
             HashMap response = TransactionCmdCall.request(txRegister.getCommit(), txRegister.getModuleCode(), params);
             result = (Boolean) response.get("value");
-        } catch (NulsRuntimeException e) {
+        } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -205,16 +207,16 @@ public class TransactionCmd extends BaseCmd {
             Object secondaryDataHexObj = params == null ? null : params.get("secondaryDataHex");
             // check parameters
             if (params == null || chainIdObj == null || txHexObj == null || secondaryDataHexObj == null) {
-                throw new NulsRuntimeException(TxErrorCode.NULL_PARAMETER);
+                throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             int chainId = (Integer) chainIdObj;
             String txHex = (String) txHexObj;
             //将txHex转换为Transaction对象
-            Transaction transaction = Transaction.getInstance(txHex);
+            Transaction transaction = TxUtil.getTransaction(txHex);
             TxRegister txRegister = TransactionManager.getInstance().getTxRegister(transaction.getType());
             HashMap response = TransactionCmdCall.request(txRegister.getRollback(), txRegister.getModuleCode(), params);
             result = (Boolean) response.get("value");
-        } catch (NulsRuntimeException e) {
+        } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
@@ -239,18 +241,18 @@ public class TransactionCmd extends BaseCmd {
             Object txHexListObj = params == null ? null : params.get("txList");
             // check parameters
             if (params == null || chainIdObj == null || txHexListObj == null) {
-                throw new NulsRuntimeException(TxErrorCode.NULL_PARAMETER);
+                throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             int chainId = (Integer) chainIdObj;
             List<String> txHexList = (List<String>) txHexListObj;
             List<Transaction> txList = new ArrayList<>();
             for (String txHex : txHexList) {
                 //将txHex转换为Transaction对象
-                Transaction tx = Transaction.getInstance(txHex);
+                Transaction tx = TxUtil.getTransaction(txHex);
                 txList.add(tx);
             }
             result = confirmedTransactionService.saveTxList(chainId, txList);
-        } catch (NulsRuntimeException e) {
+        } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);

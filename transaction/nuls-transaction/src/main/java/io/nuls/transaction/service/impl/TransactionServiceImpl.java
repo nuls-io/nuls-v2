@@ -40,6 +40,7 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -48,6 +49,7 @@ import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.model.bo.CrossTxData;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.TxWrapper;
+import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.BlockHeaderDigestDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.service.TransactionService;
@@ -73,38 +75,87 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private TxVerifiedStorageService txVerifiedStorageService;
 
+    @Override
+    public boolean register(TxRegister txRegister) {
+        return transactionManager.register(txRegister);
+    }
 
     @Override
-    public Result newTx(int chainId, Transaction tx) {
+    public boolean newTx(int chainId, Transaction tx) throws NulsException {
         //todo 判断已验证未打包的交易里面是否有此交易；已确认的交易中是否有此交易
         Transaction txExist = txVerifiedStorageService.getTx(chainId, tx.getHash());
         if(null != txExist){
-            return Result.getSuccess(TxErrorCode.TRANSACTION_ALREADY_EXISTS);
+            throw new NulsException(TxErrorCode.TRANSACTION_ALREADY_EXISTS);
         }
         TxWrapper txWrapper = new TxWrapper(chainId, tx);
         txUnverifiedStorageService.putTx(txWrapper);
-        return Result.getSuccess(TxErrorCode.SUCCESS);
+        return true;
+    }
+
+
+
+    @Override
+    public Transaction getTransaction(NulsDigestData hash) throws NulsException {
+        //todo 是否需要
+        return new Transaction();
     }
 
     @Override
-    public Result register(TxRegister txRegister) {
-        boolean rs = transactionManager.register(txRegister);
-        return Result.getSuccess(TxErrorCode.SUCCESS).setData(rs);
+    public Map<String, String> createCrossMultiTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) throws NulsException {
+        return createCrossMultiTransaction(currentChainId, listFrom, listTo, remark, null);
+    }
+
+
+    @Override
+    public Map<String, String> createCrossMultiTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark, AccountSignDTO accountSignDTO) throws NulsException {
+        Transaction tx = new Transaction(TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER);
+        CrossTxData txData = new CrossTxData();
+        txData.setChainId(currentChainId);
+        tx.setRemark(StringUtils.bytes(remark));
+        try {
+            tx.setTxData(txData.serialize());
+            List<CoinFrom> coinFromList = assemblyCoinFrom(currentChainId, listFrom, true);
+            List<CoinTo> coinToList = assemblyCoinTo(listTo);
+            valiCoin(coinFromList, coinToList);
+            //多签交易，计算签名大小，取多签地址m来计算
+            byte[] fromAddress = coinFromList.get(0).getAddress();
+            MultiSigAccount multiSigAccount = TxUtil.getMultiSigAccount(fromAddress);
+            int txSize = tx.size();
+            txSize += getMultiSignAddressSignatureSize(multiSigAccount.getM());
+            CoinData coinData = getCoinData(coinFromList, coinToList, txSize);
+            tx.setCoinData(coinData.serialize());
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            //如果发起者没有发送自己的数据则不用签名
+            if(null == accountSignDTO){
+                //如果密码为空直接返回未签名的多签交易
+                Map<String, String> map = new HashMap<>(2);
+                map.put(TxConstant.MULTI_TX_HEX, HexUtil.encode(tx.serialize()));
+                return map;
+            }else {
+                //获多签交易发起者的eckey,进行第一个签名
+                String priKey = TxUtil.getPrikey(accountSignDTO.getAddress(), accountSignDTO.getPassword());
+                ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
+                //验证签名地址账户是否属于多签账户
+                if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), ecKey.getPubKey())) {
+                    throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH);
+                }
+                //组装多签地址信息
+                MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
+                multiSignTxSignature.setM(multiSigAccount.getM());
+                multiSignTxSignature.setPubKeyList(multiSigAccount.getPubKeyList());
+                //多签交易有且只有一个地址的eckey
+                return txMultiSignProcess(new TxWrapper(currentChainId, tx), ecKey, multiSignTxSignature);
+            }
+        } catch (IOException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
+        }
     }
 
     @Override
-    public Result getTransaction(NulsDigestData hash) {
-        return Result.getSuccess(TxErrorCode.SUCCESS);
-    }
-
-    @Override
-    public Result createCrossTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) {
-        return assemblyCrossTransaction(currentChainId, listFrom, listTo, remark, false);
-    }
-
-    @Override
-    public Result createCrossMultiTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) {
-        return assemblyCrossTransaction(currentChainId, listFrom, listTo, remark, true);
+    public String createCrossTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) throws NulsException {
+        Transaction tx = assemblyCrossTransaction(currentChainId, listFrom, listTo, remark, false);
+        return tx.getHash().getDigestHex();
     }
 
     /**
@@ -117,95 +168,89 @@ public class TransactionServiceImpl implements TransactionService {
      * @param isMultiSign    是否是多签地址交易 is Multi-sign address transaction
      * @return
      */
-    private Result assemblyCrossTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark, boolean isMultiSign) {
+    private Transaction assemblyCrossTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark, boolean isMultiSign) throws NulsException {
         Transaction tx = new Transaction(TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER);
-        CrossTxData txData = new CrossTxData();
-        txData.setChainId(currentChainId);
-        tx.setRemark(StringUtils.bytes(remark));
         try {
+            CrossTxData txData = new CrossTxData();
+            txData.setChainId(currentChainId);
             tx.setTxData(txData.serialize());
+            tx.setRemark(StringUtils.bytes(remark));
             List<CoinFrom> coinFromList = assemblyCoinFrom(currentChainId, listFrom, isMultiSign);
             List<CoinTo> coinToList = assemblyCoinTo(listTo);
-            if (coinFromList.size() == 0 || coinToList.size() == 0) {
-                return Result.getFailed(TxErrorCode.COINDATA_IS_INCOMPLETE);
-            }
-            byte[] fromAddress = coinFromList.get(0).getAddress();
-            int chainIdFrom = AddressTool.getChainIdByAddress(fromAddress);
-            byte[] toAddress = coinToList.get(0).getAddress();
-            int chainIdTo = AddressTool.getChainIdByAddress(toAddress);
-            if(chainIdFrom == chainIdTo){
-                return Result.getFailed(TxErrorCode.PAYEE_AND_PAYER_IS_THE_SAME_CHAIN);
-            }
-            MultiSigAccount multiSigAccount = null;
+            valiCoin(coinFromList, coinToList);
             int txSize = tx.size();
-            if(isMultiSign){
-                //多签交易，计算签名大小，取多签地址m来计算
-                multiSigAccount = TxUtil.getMultiSigAccount(fromAddress);
-                txSize += getMultiSignAddressSignatureSize(multiSigAccount.getM());
-            }else{
-                txSize += getSignatureSize(coinFromList);
-            }
+            txSize += getSignatureSize(coinFromList);
             CoinData coinData = getCoinData(coinFromList, coinToList, txSize);
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+            //签名
             List<ECKey> signEcKeys = new ArrayList<>();
             for (CoinDTO coinDTO : listFrom) {
                 String priKey = TxUtil.getPrikey(coinDTO.getAddress(), coinDTO.getPassword());
                 ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
                 signEcKeys.add(ecKey);
             }
-            if(isMultiSign){
-                //组装多签地址信息
-                MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
-                multiSignTxSignature.setM(multiSigAccount.getM());
-                multiSignTxSignature.setPubKeyList(multiSigAccount.getPubKeyList());
-                //多签交易有且只有一个地址的eckey
-                return txMultiSignProcess(new TxWrapper(currentChainId, tx), signEcKeys.get(0), multiSignTxSignature);
-            }
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
             this.newTx(currentChainId, tx);
-            return Result.getSuccess(TxErrorCode.SUCCESS).setData(tx.getHash().getDigestHex());
+            return tx;
         } catch (IOException e) {
-            e.printStackTrace();
-            return Result.getFailed(TxErrorCode.SERIALIZE_ERROR);
-        } catch (NulsException e) {
-            e.printStackTrace();
-            return Result.getFailed(e.getErrorCode());
-        }
-    }
-
-    @Override
-    public Result signMultiTransaction(String address, String password, String tx) {
-        try {
-            Transaction transaction = Transaction.getInstance(tx);
-            String priKey = TxUtil.getPrikey(address, password);
-            ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
-            MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
-            multiSignTxSignature.parse(new NulsByteBuffer(transaction.getTransactionSignature()));
-            //验证签名地址账户是否属于多签账户
-            List<byte[]> pubkeys = multiSignTxSignature.getPubKeyList();
-            if (pubkeys == null || pubkeys.size() == 0 || !AddressTool.validSignAddress(pubkeys, ecKey.getPubKey())) {
-                return Result.getFailed(TxErrorCode.SIGN_ADDRESS_NOT_MATCH);
-            }
-            return txMultiSignProcess(new TxWrapper(AddressTool.getChainIdByAddress(address), transaction), ecKey);
-        } catch (NulsException e) {
             Log.error(e);
-            return Result.getFailed(e.getErrorCode());
+            throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
+        }
+    }
+
+    private void valiCoin(List<CoinFrom> coinFromList, List<CoinTo> coinToList) throws NulsException {
+        if (coinFromList.size() == 0 || coinToList.size() == 0) {
+            throw new NulsException(TxErrorCode.COINDATA_IS_INCOMPLETE);
+        }
+        byte[] toAddress = coinToList.get(0).getAddress();
+        int chainIdTo = AddressTool.getChainIdByAddress(toAddress);
+        byte[] fromAddress = coinFromList.get(0).getAddress();
+        int chainIdFrom = AddressTool.getChainIdByAddress(fromAddress);
+        //from和to地址是同一链的地址，则不能创建跨链交易
+        if(chainIdFrom == chainIdTo){
+            throw new NulsException(TxErrorCode.PAYEE_AND_PAYER_IS_THE_SAME_CHAIN);
         }
     }
 
     @Override
-    public Result txMultiSignProcess(TxWrapper txWrapper, ECKey ecKey){
+    public Map<String, String> signMultiTransaction(String address, String password, String tx) throws NulsException {
+        Transaction transaction = TxUtil.getTransaction(tx);
+        String priKey = TxUtil.getPrikey(address, password);
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
+        MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
+        multiSignTxSignature.parse(new NulsByteBuffer(transaction.getTransactionSignature()));
+        //验证签名地址账户是否属于多签账户
+        if (!AddressTool.validSignAddress(multiSignTxSignature.getPubKeyList(), ecKey.getPubKey())) {
+            throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH);
+        }
+        return txMultiSignProcess(new TxWrapper(AddressTool.getChainIdByAddress(address), transaction), ecKey);
+    }
+
+    @Override
+    public Map<String, String> txMultiSignProcess(TxWrapper txWrapper, ECKey ecKey) throws NulsException {
         return txMultiSignProcess(txWrapper, ecKey, null);
     }
 
     @Override
-    public Result txMultiSignProcess(TxWrapper txWrapper, ECKey ecKey, MultiSignTxSignature multiSignTxSignature){
+    public Map<String, String> txMultiSignProcess(TxWrapper txWrapper, ECKey ecKey, MultiSignTxSignature multiSignTxSignature) throws NulsException {
         Transaction tx = txWrapper.getTx();
         try {
             if(null == multiSignTxSignature) {
                 multiSignTxSignature = new MultiSignTxSignature();
-                multiSignTxSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+                if(null != tx.getTransactionSignature()) {
+                    multiSignTxSignature.parse(new NulsByteBuffer(tx.getTransactionSignature()));
+                }else{
+                    //组装多签交易签名信息
+                    List<CoinFrom> coinFromList = TxUtil.getCoinData(tx).getFrom();
+                    if (null == coinFromList || coinFromList.size() == 0) {
+                        throw new NulsException(TxErrorCode.COINDATA_IS_INCOMPLETE);
+                    }
+                    byte[] fromAddress = coinFromList.get(0).getAddress();
+                    MultiSigAccount multiSigAccount = TxUtil.getMultiSigAccount(fromAddress);
+                    multiSignTxSignature.setM(multiSigAccount.getM());
+                    multiSignTxSignature.setPubKeyList(multiSigAccount.getPubKeyList());
+                }
             }
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             if (multiSignTxSignature.getP2PHKSignatures() != null && multiSignTxSignature.getP2PHKSignatures().size() > 0) {
@@ -216,23 +261,22 @@ public class TransactionServiceImpl implements TransactionService {
             //用当前交易的hash和账户的eckey签名
             p2PHKSignature.setSignData(SignatureUtil.signDigest(tx.getHash().getDigestBytes(), ecKey));
             p2PHKSignatures.add(p2PHKSignature);
+            Map<String, String> map = new HashMap<>();
             if (p2PHKSignatures.size() == multiSignTxSignature.getM()) {
                 p2PHKSignatures.sort(P2PHKSignature.PUBKEY_COMPARATOR);
                 multiSignTxSignature.setP2PHKSignatures(p2PHKSignatures);
                 tx.setTransactionSignature(multiSignTxSignature.serialize());
                 this.newTx(txWrapper.getChainId(), tx);
-                return Result.getSuccess(TxErrorCode.SUCCESS).setData(tx.getHash().getDigestHex());
+                map.put(TxConstant.MULTI_TX_HASH, tx.getHash().getDigestHex());
             }else{
                 multiSignTxSignature.setP2PHKSignatures(p2PHKSignatures);
                 tx.setTransactionSignature(multiSignTxSignature.serialize());
-                return Result.getSuccess(TxErrorCode.SUCCESS).setData(HexUtil.encode(tx.serialize()));
+                map.put(TxConstant.MULTI_TX_HEX, HexUtil.encode(tx.serialize()));
             }
+            return map;
         } catch (IOException e) {
             Log.error(e);
-            return Result.getFailed(TxErrorCode.IO_ERROR);
-        } catch (NulsException e) {
-            Log.error(e);
-            return Result.getFailed(TxErrorCode.DESERIALIZE_ERROR);
+            throw new NulsException(TxErrorCode.IO_ERROR);
         }
     }
 
@@ -497,25 +541,18 @@ public class TransactionServiceImpl implements TransactionService {
      * @return Result
      */
     @Override
-    public Result crossTransactionValidator(int chainId, Transaction tx) {
-        Result result = transactionManager.baseTxValidate(chainId, tx);
-        if (result.isFailed()) {
-            return result;
+    public boolean crossTransactionValidator(int chainId, Transaction tx) throws NulsException {
+        if (!transactionManager.baseTxValidate(chainId, tx)) {
+            return false;
         }
         if (null == tx.getCoinData() || tx.getCoinData().length == 0) {
-            return Result.getFailed(TxErrorCode.COINDATA_NOT_FOUND);
+            throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
         }
-        try {
-            CoinData coinData = tx.getCoinDataInstance();
-            Result resultCoinFrom = validateCoinFrom(chainId, coinData.getFrom());
-            if (resultCoinFrom.isFailed()) {
-                return resultCoinFrom;
-            }
-        } catch (NulsException e) {
-            e.printStackTrace();
-            return Result.getFailed(TxErrorCode.DESERIALIZE_ERROR);
+        CoinData coinData = TxUtil.getCoinData(tx);
+        if (!validateCoinFrom(chainId, coinData.getFrom())) {
+            return false;
         }
-        return Result.getSuccess(TxErrorCode.SUCCESS);
+        return true;
     }
 
     /**
@@ -525,9 +562,9 @@ public class TransactionServiceImpl implements TransactionService {
      * @param listFrom
      * @return
      */
-    private Result validateCoinFrom(int chainId, List<CoinFrom> listFrom) {
+    private boolean validateCoinFrom(int chainId, List<CoinFrom> listFrom) throws NulsException {
         if (null == listFrom || listFrom.size() == 0) {
-            return Result.getFailed(TxErrorCode.COINFROM_NOT_FOUND);
+            throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
         }
         boolean hasNulsFrom = false;
         for (CoinFrom coinFrom : listFrom) {
@@ -537,19 +574,19 @@ public class TransactionServiceImpl implements TransactionService {
             }
         }
         if (!hasNulsFrom) {
-            return Result.getFailed(TxErrorCode.INSUFFICIENT_FEE);
+            throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
         }
-        return Result.getSuccess(TxErrorCode.SUCCESS);
+        return true;
     }
 
 
     @Override
-    public Result crossTransactionCommit(int chainId, Transaction tx, BlockHeaderDigestDTO blockHeader) {
-        return Result.getSuccess(TxErrorCode.SUCCESS);
+    public boolean crossTransactionCommit(int chainId, Transaction tx, BlockHeaderDigestDTO blockHeader) {
+        return true;
     }
 
     @Override
-    public Result crossTransactionRollback(int chainId, Transaction tx, BlockHeaderDigestDTO blockHeader) {
-        return Result.getSuccess(TxErrorCode.SUCCESS);
+    public boolean crossTransactionRollback(int chainId, Transaction tx, BlockHeaderDigestDTO blockHeader) {
+        return true;
     }
 }

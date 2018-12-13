@@ -57,6 +57,8 @@ public interface TxErrorCode {
     ErrorCode PAYEE_AND_PAYER_IS_THE_SAME_CHAIN = ErrorCode.init("10046");
     ErrorCode TRANSACTION_ALREADY_EXISTS = ErrorCode.init("10047");
     ErrorCode SIGN_ADDRESS_NOT_MATCH = ErrorCode.init("10048");
+    ErrorCode DESERIALIZE_TX_ERROR = ErrorCode.init("10049");
+    ErrorCode DESERIALIZE_COINDATA_ERROR = ErrorCode.init("10050");
 
     ErrorCode DB_TABLE_EXIST = ErrorCode.init("20009");
     ErrorCode DB_TABLE_NOT_EXIST = ErrorCode.init("20010");

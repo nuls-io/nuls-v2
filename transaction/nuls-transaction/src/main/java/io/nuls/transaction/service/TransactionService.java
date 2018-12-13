@@ -5,12 +5,15 @@ import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.crypto.ECKey;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.TxWrapper;
+import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.BlockHeaderDigestDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -25,7 +28,7 @@ public interface TransactionService {
      * @param txRegister
      * @return Result
      */
-    Result register(TxRegister txRegister);
+    boolean register(TxRegister txRegister);
 
     /**
      * 收到一个新的交易
@@ -34,7 +37,7 @@ public interface TransactionService {
      * @param transaction
      * @return Result
      */
-    Result newTx(int chainId, Transaction transaction);
+    boolean newTx(int chainId, Transaction transaction) throws NulsException;
 
     /**
      * 获取一笔交易
@@ -43,7 +46,7 @@ public interface TransactionService {
      * @param hash
      * @return Result
      */
-    Result getTransaction(NulsDigestData hash);
+    Transaction getTransaction(NulsDigestData hash) throws NulsException;
 
 
     /**
@@ -56,7 +59,7 @@ public interface TransactionService {
      * @param remark 交易备注 remark
      * @return Result
      */
-    Result createCrossTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark);
+    String createCrossTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) throws NulsException;
 
     /**
      * 创建跨链多签签名地址交易
@@ -68,7 +71,9 @@ public interface TransactionService {
      * @param remark 交易备注 remark
      * @return Result
      */
-    Result createCrossMultiTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark);
+    Map<String, String> createCrossMultiTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark, AccountSignDTO accountSignDTO) throws NulsException;
+
+    Map<String, String> createCrossMultiTransaction(int currentChainId, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) throws NulsException;
 
     /**
      * 对多签交易进行签名的数据组装
@@ -77,7 +82,7 @@ public interface TransactionService {
      * @param tx 待签名的交易数据
      * @return
      */
-    Result signMultiTransaction(String address, String password, String tx);
+    Map<String, String> signMultiTransaction(String address, String password, String tx) throws NulsException;
 
     /**
      * 处理多签交易的签名 追加签名
@@ -85,7 +90,7 @@ public interface TransactionService {
      * @param ecKey 签名者的eckey
      * @return Result
      */
-    Result txMultiSignProcess(TxWrapper txWrapper, ECKey ecKey);
+    Map<String, String> txMultiSignProcess(TxWrapper txWrapper, ECKey ecKey) throws NulsException;
 
 
     /**
@@ -95,12 +100,12 @@ public interface TransactionService {
      * @param multiSignTxSignature 新的签名数据  sign data
      * @return Result
      */
-    Result txMultiSignProcess(TxWrapper txWrapper, ECKey ecKey, MultiSignTxSignature multiSignTxSignature);
+    Map<String, String> txMultiSignProcess(TxWrapper txWrapper, ECKey ecKey, MultiSignTxSignature multiSignTxSignature) throws NulsException;
 
 
 
-    Result crossTransactionValidator(int chainId, Transaction transaction);
-    Result crossTransactionCommit(int chainId, Transaction transaction, BlockHeaderDigestDTO blockHeader);
-    Result crossTransactionRollback(int chainId, Transaction transaction, BlockHeaderDigestDTO blockHeader);
+    boolean crossTransactionValidator(int chainId, Transaction transaction) throws NulsException;
+    boolean crossTransactionCommit(int chainId, Transaction transaction, BlockHeaderDigestDTO blockHeader) throws NulsException;
+    boolean crossTransactionRollback(int chainId, Transaction transaction, BlockHeaderDigestDTO blockHeader) throws NulsException;
 
 }

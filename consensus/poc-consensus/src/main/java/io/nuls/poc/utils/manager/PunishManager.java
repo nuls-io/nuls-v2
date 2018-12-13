@@ -40,7 +40,7 @@ public class PunishManager {
     @Autowired
     private CoinDataManager coinDataManager;
     /**
-     * 加载所有的红牌信息和最近X轮换牌数据到缓存
+     * 加载所有的红牌信息和最近X黃牌数据到缓存
      * Load all red card information and latest X rotation card data to the cache
      *
      * @param chain 链信息/chain info
@@ -72,8 +72,8 @@ public class PunishManager {
     }
 
     /**
-     * 数据黄牌数据
-     * Data yellow card data
+     * 清理黄牌数据
+     * Clean up yellow card data
      *
      * @param chain 链信息/chain info
      * */
@@ -110,7 +110,7 @@ public class PunishManager {
             if (a.getDelHeight() > 0) {
                 continue;
             }
-            if (Arrays.equals(a.getPackingAddress(), firstHeader.getPackingAddress())) {
+            if (Arrays.equals(a.getPackingAddress(), firstHeader.getPackingAddress(chain.getConfig().getChainId()))) {
                 agent = a;
                 break;
             }
@@ -196,7 +196,7 @@ public class PunishManager {
      * */
     private boolean isRedPunish(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
         //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚
-        String packingAddress = AddressTool.getStringAddressByBytes(firstHeader.getPackingAddress());
+        String packingAddress = AddressTool.getStringAddressByBytes(firstHeader.getPackingAddress(chain.getConfig().getChainId()));
         BlockExtendsData extendsData = new BlockExtendsData(firstHeader.getExtend());
         long currentRoundIndex = extendsData.getRoundIndex();
         Map<String, List<Evidence>> currentChainEvidences = chain.getEvidenceMap();

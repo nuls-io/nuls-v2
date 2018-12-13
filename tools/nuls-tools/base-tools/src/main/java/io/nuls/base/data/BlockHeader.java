@@ -27,7 +27,6 @@ package io.nuls.base.data;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -177,9 +176,9 @@ public class BlockHeader extends BaseNulsData {
         this.blockSignature = scriptSign;
     }
 
-    public byte[] getPackingAddress() {
+    public byte[] getPackingAddress(int chainID) {
         if (null == packingAddress && this.blockSignature != null) {
-            this.packingAddress = AddressTool.getAddress(blockSignature.getPublicKey(), BaseConstant.DEFAULT_CHAIN_ID);
+            this.packingAddress = AddressTool.getAddress(blockSignature.getPublicKey(), chainID);
         }
         return packingAddress;
     }

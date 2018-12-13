@@ -327,6 +327,8 @@ public class ConsensusManager {
         scriptSig.setSignData(signData);
         scriptSig.setPublicKey(eckey.getPubKey());
         header.setBlockSignature(scriptSig);
+        //todo 设置了签名后可以去掉
+        header.setPackingAddress(packingAddress);
         return block;
     }
 
