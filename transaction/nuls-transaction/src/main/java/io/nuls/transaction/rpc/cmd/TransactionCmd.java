@@ -313,7 +313,7 @@ public class TransactionCmd extends BaseCmd {
         return success("success");
     }
 
-    public Response batchVerify(Map params){
+  /*  public Response batchVerify(Map params){
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
         try {
@@ -342,5 +342,5 @@ public class TransactionCmd extends BaseCmd {
         return success(result);
         return success("success");
     }
-
+*/
 }
