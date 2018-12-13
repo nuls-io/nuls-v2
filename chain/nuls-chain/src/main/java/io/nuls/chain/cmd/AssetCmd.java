@@ -22,6 +22,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
@@ -50,17 +51,19 @@ public class AssetCmd extends BaseChainCmd {
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
     @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
     public Response asset(Map params) {
-        int chainId = Integer.valueOf(params.get("chainId").toString());
-        int assetId = Integer.valueOf(params.get("assetId").toString());
-        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
-        return success(asset);
+        try {
+            int chainId = Integer.valueOf(params.get("chainId").toString());
+            int assetId = Integer.valueOf(params.get("assetId").toString());
+            Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
+            return success(asset);
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
     }
 
     /**
      * 资产注册
-     *
-     * @param params
-     * @return
      */
     @CmdAnnotation(cmd = "cm_assetReg", version = 1.0,
             description = "assetReg")
@@ -71,40 +74,45 @@ public class AssetCmd extends BaseChainCmd {
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]", parameterValidRegExp = "")
     @Parameter(parameterName = "address", parameterType = "String")
     public Response assetReg(Map params) {
-        int chainId = Integer.valueOf(params.get("chainId").toString());
-        int assetId = seqService.createAssetId(chainId);
-        Asset asset = new Asset(assetId);
-        asset.setChainId(chainId);
-        asset.setSymbol((String) params.get("symbol"));
-        asset.setName((String) params.get("name"));
-        asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS)));
-        asset.setInitNumber(new BigInteger(params.get("initNumber").toString()));
-        asset.setDecimalPlaces(Short.valueOf(params.get("decimalPlaces").toString()));
-        asset.setAvailable(true);
-        asset.setCreateTime(TimeService.currentTimeMillis());
-        asset.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
-        if (assetService.assetExist(asset)) {
-            return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
-        }
-        // 组装交易发送
-        AddAssetToChainTransaction assetRegTransaction = new AddAssetToChainTransaction();
         try {
-            assetRegTransaction.setTxData(asset.parseToTransaction());
-            AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(), asset.getAssetId(), String.valueOf(params.get("address")));
-            CoinData coinData = this.getRegCoinData(asset.getAddress(), asset.getChainId(),
-                    asset.getAssetId(), String.valueOf(asset.getDepositNuls()), assetRegTransaction.size(), accountBalance);
-            assetRegTransaction.setCoinData(coinData.serialize());
-            //todo 交易签名
-        } catch (IOException e) {
-            e.printStackTrace();
-            return failed("parseToTransaction fail");
-        }
+            int chainId = Integer.valueOf(params.get("chainId").toString());
+            int assetId = seqService.createAssetId(chainId);
+            Asset asset = new Asset(assetId);
+            asset.setChainId(chainId);
+            asset.setSymbol((String) params.get("symbol"));
+            asset.setName((String) params.get("name"));
+            asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS)));
+            asset.setInitNumber(new BigInteger(params.get("initNumber").toString()));
+            asset.setDecimalPlaces(Short.valueOf(params.get("decimalPlaces").toString()));
+            asset.setAvailable(true);
+            asset.setCreateTime(TimeService.currentTimeMillis());
+            asset.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
+            if (assetService.assetExist(asset)) {
+                return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
+            }
+            // 组装交易发送
+            AddAssetToChainTransaction assetRegTransaction = new AddAssetToChainTransaction();
+            try {
+                assetRegTransaction.setTxData(asset.parseToTransaction());
+                AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(), asset.getAssetId(), String.valueOf(params.get("address")));
+                CoinData coinData = this.getRegCoinData(asset.getAddress(), asset.getChainId(),
+                        asset.getAssetId(), String.valueOf(asset.getDepositNuls()), assetRegTransaction.size(), accountBalance);
+                assetRegTransaction.setCoinData(coinData.serialize());
+                //todo 交易签名
+            } catch (IOException e) {
+                e.printStackTrace();
+                return failed("parseToTransaction fail");
+            }
 
-        boolean rpcReslt = rpcService.newTx(assetRegTransaction);
-        if (rpcReslt) {
-            return success("sent asset newTx");
-        } else {
-            return failed("sent asset fail");
+            boolean rpcReslt = rpcService.newTx(assetRegTransaction);
+            if (rpcReslt) {
+                return success("sent asset newTx");
+            } else {
+                return failed("sent asset fail");
+            }
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
         }
     }
 
