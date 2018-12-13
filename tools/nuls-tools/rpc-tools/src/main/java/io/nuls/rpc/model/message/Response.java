@@ -26,9 +26,7 @@ package io.nuls.rpc.model.message;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.rpc.info.Constants;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 import lombok.ToString;
 
 /**
@@ -38,49 +36,37 @@ import lombok.ToString;
  * @author tangyi
  * @date 2018/11/15
  */
+@Data
 @ToString
-@NoArgsConstructor
 public class Response {
     /**
      * This is the original request ID referred by a Request message
      */
-    @Getter
-    @Setter
     private String requestId;
 
     /**
      * The time that the target service took to process the request in milliseconds.
      */
-    @Getter
-    @Setter
     private String responseProcessingTime;
 
     /**
      * The response status, 1 if successful, 0 otherwise.
      */
-    @Getter
-    @Setter
     private String responseStatus;
 
     /**
      * A string that could offer more clarification about the result of the process.
      */
-    @Getter
-    @Setter
     private String responseComment;
 
     /**
      * The maximum number of objects that the response contains per request.
      */
-    @Getter
-    @Setter
     private String responseMaxSize;
 
     /**
      * An object array that contains the result of the method processed, one object per request
      */
-    @Getter
-    @Setter
     private Object responseData;
 
     /**

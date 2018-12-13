@@ -24,9 +24,7 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 import lombok.ToString;
 
 /**
@@ -36,20 +34,16 @@ import lombok.ToString;
  * @author tangyi
  * @date 2018/11/15
  */
+@Data
 @ToString
-@NoArgsConstructor
 public class NegotiateConnectionResponse {
     /**
      * An unsigned small integer value, 0 if negotiation was a failure and 1 if it was successful
      */
-    @Getter
-    @Setter
     private String negotiationStatus;
 
     /**
      * A string value, useful to describe what exactly went wrong when the connection was rejected.
      */
-    @Getter
-    @Setter
     private String negotiationComment;
 }
