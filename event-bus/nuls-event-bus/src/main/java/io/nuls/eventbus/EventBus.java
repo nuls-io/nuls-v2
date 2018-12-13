@@ -1,14 +1,18 @@
 package io.nuls.eventbus;
 
+import io.nuls.eventbus.constant.EbErrorCode;
 import io.nuls.eventbus.model.Subscriber;
 import io.nuls.eventbus.model.Topic;
+import io.nuls.tools.exception.NulsRuntimeException;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * @author naveen
+ */
 public class EventBus {
 
     public static EventBus INSTANCE;
@@ -17,19 +21,14 @@ public class EventBus {
 
     private EventBus(){}
 
-    public static EventBus getInstance(){
-
+    public static synchronized EventBus getInstance(){
         if(INSTANCE == null){
-            synchronized (EventBus.class){
-                if(INSTANCE == null){
-                    INSTANCE = new EventBus();
-                }
-            }
+            INSTANCE = new EventBus();
         }
         return INSTANCE;
     }
 
-    public int subscribe(Map<String,Object> params){
+    public void subscribe(Map<String,Object> params) throws NulsRuntimeException {
         String topicId = (String)params.get("topic");
         Subscriber subscriber = buildSubscriber(params);
         synchronized (this){
@@ -37,14 +36,11 @@ public class EventBus {
                 Topic topic = topicMap.get(topicId);
                 topicMap.put(topicId,topic.addSubscriber(subscriber));
             }else{
-                //TODO change this  with proper code return
-                return 1;
+                throw new NulsRuntimeException(EbErrorCode.TOPIC_NOT_FOUND);
             }
         }
-        //TODO change this  with proper code return
-        return 0;
     }
-    public int unsubscribe(Map<String,Object> params){
+    public void unsubscribe(Map<String,Object> params) throws NulsRuntimeException{
         String topicId = (String)params.get("topic");
         Subscriber subscriber = buildSubscriber(params);
         synchronized (this){
@@ -52,10 +48,9 @@ public class EventBus {
                 Topic topic = topicMap.get(topicId);
                 topicMap.put(topicId,topic.removeSubscriber(subscriber));
             }else{
-                return 1;
+                throw new NulsRuntimeException(EbErrorCode.TOPIC_NOT_FOUND);
             }
         }
-        return 0;
     }
 
     public Set<Subscriber> publish(Map<String,Object> params){
@@ -63,9 +58,7 @@ public class EventBus {
         String abbr = (String)params.get("abbr");
         String moduleName = (String)params.get("moduleName");
         String domain = (String)params.get("domain");
-        Object data = params.get("data");
         Topic topic = null;
-
         synchronized (this){
             if(topicMap.containsKey(topicId)){
                 topic = topicMap.get(topicId);
@@ -73,8 +66,8 @@ public class EventBus {
                 topic = new Topic(topicId,abbr,moduleName,domain);
                 topicMap.put(topicId,topic);
             }
+            return topic.getSubscribers();
         }
-        return topic.getSubscribers();
     }
 
     private Subscriber buildSubscriber(Map<String,Object> params){

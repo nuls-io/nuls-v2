@@ -1,4 +1,4 @@
-package io.nuls.eventbus.rpc.processor;
+package io.nuls.eventbus.runtime;
 
 import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.info.Constants;
@@ -11,6 +11,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * @author naveen
+ */
 public class EventBusRuntime {
 
     public static final Queue<Object[]> CLIENT_SYNC_QUEUE = new ConcurrentLinkedQueue<>();

@@ -25,7 +25,6 @@
  */
 package io.nuls.ledger.test.cmd;
 
-import io.nuls.rpc.client.ClientRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;

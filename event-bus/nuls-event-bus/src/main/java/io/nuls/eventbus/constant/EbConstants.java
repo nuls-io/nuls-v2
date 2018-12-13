@@ -5,7 +5,10 @@ import io.nuls.rpc.info.Constants;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EBConstants {
+/**
+ * @author naveen
+ */
+public class EbConstants {
 
     public static String SUBSCRIBE = "subscribe";
 

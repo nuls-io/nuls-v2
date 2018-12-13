@@ -1,9 +1,8 @@
 package io.nuls.eventbus.rpc.processor;
 
 
-import io.nuls.eventbus.constant.EBConstants;
+import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
@@ -15,6 +14,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * @author naveen
+ */
 public class ClientSyncProcessor implements Runnable {
 
     @Override
@@ -34,7 +36,6 @@ public class ClientSyncProcessor implements Runnable {
                     params.put("abbr",moduleAbbr);
                     Response response = CmdDispatcher.requestAndResponse(ModuleE.KE.abbr,"roleInfo",params);
                     if(!response.isSuccess()){
-                        //EventBusRuntime.CLIENT_SYNC_QUEUE.offer(objects);
                         continue;
                     }
                     Object data = response.getResponseData();
