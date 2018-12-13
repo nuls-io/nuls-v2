@@ -21,6 +21,7 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.manager.ContextManager;
@@ -64,6 +65,7 @@ import java.util.*;
  * @version 1.0
  * @date 18-11-15 下午1:54
  */
+@EqualsAndHashCode
 public class Chain {
 
     public static final Comparator<Chain> COMPARATOR = Comparator.comparingLong(Chain::getStartHeight).thenComparingInt(Chain::getStartHashCode);
@@ -99,6 +101,12 @@ public class Chain {
     private long startHeight;
 
     /**
+     * 链的起始hash转换为int，排序时用
+     */
+    @Getter @Setter
+    private int startHashCode;
+
+    /**
      * 链的结束高度(包含)
      */
     @Getter @Setter
@@ -126,27 +134,6 @@ public class Chain {
     }
 
     /**
-     * 获取链的起始hash
-     *
-     * @return
-     */
-    public NulsDigestData getStartHash() {
-        if (isMaster()) {
-            return ContextManager.getContext(chainId).getGenesisBlock().getHeader().getHash();
-        }
-        return hashList.getFirst();
-    }
-
-    /**
-     * 获取链的起始hash
-     *
-     * @return
-     */
-    public int getStartHashCode() {
-        return getStartHash().hashCode();
-    }
-
-    /**
      * 判断本链是否为主链
      * @return
      */
@@ -160,9 +147,11 @@ public class Chain {
      * @param block
      */
     public void addFirst(Block block) {
-        this.setPreviousHash(block.getHeader().getPreHash());
-        this.setStartHeight(block.getHeader().getHeight());
-        this.getHashList().addFirst(block.getHeader().getHash());
+        BlockHeader blockHeader = block.getHeader();
+        this.setPreviousHash(blockHeader.getPreHash());
+        this.setStartHeight(blockHeader.getHeight());
+        this.getHashList().addFirst(blockHeader.getHash());
+        this.setStartHashCode(blockHeader.getHash().hashCode());
     }
 
     /**

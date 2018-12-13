@@ -22,6 +22,7 @@ package io.nuls.block.manager;
 
 import com.google.common.collect.Lists;
 import io.nuls.block.config.ConfigLoader;
+import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.model.Chain;
 import io.nuls.block.thread.monitor.OrphanChainsMonitor;
@@ -29,10 +30,7 @@ import io.nuls.block.utils.ChainGenerator;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -53,6 +51,11 @@ public class ChainManagerTest {
         SpringLiteContext.init("io.nuls.block", new ModularServiceMethodInterceptor());
     }
 
+    @Before
+    public void setUp() throws Exception {
+        ChainManager.init(CHAIN_ID);
+    }
+
     @After
     public void tearDown() throws Exception {
         ChainManager.setMasterChain(CHAIN_ID, null);
@@ -68,11 +71,11 @@ public class ChainManagerTest {
         Chain masterChain = ChainGenerator.newMasterChain(999L, "M", CHAIN_ID);
         ChainManager.setMasterChain(CHAIN_ID, masterChain);
 
-        Chain chainA = ChainGenerator.newChain(100, 200, "A", null, "M", CHAIN_ID);
-        Chain chainB = ChainGenerator.newChain(155, 170, "B", null, "C", CHAIN_ID);
-        Chain chainC = ChainGenerator.newChain(150, 180, "C", null, "A", CHAIN_ID);
-        Chain chainD = ChainGenerator.newChain(160, 190, "D", null, "C", CHAIN_ID);
-        Chain chainE = ChainGenerator.newChain(170, 180, "E", null, "D", CHAIN_ID);
+        Chain chainA = ChainGenerator.newChain(100, 200, "A", null, "M", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainB = ChainGenerator.newChain(155, 170, "B", null, "C", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainC = ChainGenerator.newChain(150, 180, "C", null, "A", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainD = ChainGenerator.newChain(160, 190, "D", null, "C", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainE = ChainGenerator.newChain(170, 180, "E", null, "D", CHAIN_ID, ChainTypeEnum.ORPHAN);
         ChainManager.addOrphanChain(CHAIN_ID, chainA);
         ChainManager.addOrphanChain(CHAIN_ID, chainB);
         ChainManager.addOrphanChain(CHAIN_ID, chainC);
@@ -104,12 +107,12 @@ public class ChainManagerTest {
         Chain masterChain = ChainGenerator.newMasterChain(999L, "M", CHAIN_ID);
         ChainManager.setMasterChain(CHAIN_ID, masterChain);
 
-        Chain chainA = ChainGenerator.newChain(100, 199, "A", null, "M", CHAIN_ID);
-        Chain chainB = ChainGenerator.newChain(400, 499, "B", null, "C", CHAIN_ID);
-        Chain chainC = ChainGenerator.newChain(200, 399, "C", null, "A", CHAIN_ID);
-        Chain chainD = ChainGenerator.newChain(450, 549, "D", null, "E", CHAIN_ID);
-        Chain chainE = ChainGenerator.newChain(300, 449, "E", null, "C", CHAIN_ID);
-        Chain chainF = ChainGenerator.newChain(500, 599, "F", chainD, "D", CHAIN_ID);
+        Chain chainA = ChainGenerator.newChain(100, 199, "A", null, "M", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainB = ChainGenerator.newChain(400, 499, "B", null, "C", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainC = ChainGenerator.newChain(200, 399, "C", null, "A", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainD = ChainGenerator.newChain(450, 549, "D", null, "E", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainE = ChainGenerator.newChain(300, 449, "E", null, "C", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainF = ChainGenerator.newChain(500, 599, "F", chainD, "D", CHAIN_ID, ChainTypeEnum.ORPHAN);
         ChainManager.addOrphanChain(CHAIN_ID, chainA);
         ChainManager.addOrphanChain(CHAIN_ID, chainB);
         ChainManager.addOrphanChain(CHAIN_ID, chainC);
@@ -146,16 +149,16 @@ public class ChainManagerTest {
 //        masterChain.setEndHash(NulsDigestData.calcDigestData(("A" + (999)).getBytes()));
         ChainManager.setMasterChain(CHAIN_ID, masterChain);
 
-        Chain chainB = ChainGenerator.newChain(200, 299, "B", masterChain, "A", CHAIN_ID);
-        Chain chainC = ChainGenerator.newChain(250, 399, "C", chainB, "B", CHAIN_ID);
-        Chain chainD = ChainGenerator.newChain(400, 499, "D", null, "C", CHAIN_ID);
-        Chain chainE = ChainGenerator.newChain(450, 499, "E", chainD, "D", CHAIN_ID);
-        Chain chainF = ChainGenerator.newChain(1000, 1099, "F", null, "A", CHAIN_ID);
-        Chain chainG = ChainGenerator.newChain(300, 399, "G", null, "C", CHAIN_ID);
-        Chain chainH = ChainGenerator.newChain(100, 199, "H", null, "A", CHAIN_ID);
-        Chain chainI = ChainGenerator.newChain(150, 199, "I", null, "H", CHAIN_ID);
-        Chain chainJ = ChainGenerator.newChain(200, 299, "J", null, "H", CHAIN_ID);
-        Chain chainK = ChainGenerator.newChain(250, 299, "K", chainJ, "J", CHAIN_ID);
+        Chain chainB = ChainGenerator.newChain(200, 299, "B", masterChain, "A", CHAIN_ID, ChainTypeEnum.FORK);
+        Chain chainC = ChainGenerator.newChain(250, 399, "C", chainB, "B", CHAIN_ID, ChainTypeEnum.FORK);
+        Chain chainD = ChainGenerator.newChain(400, 499, "D", null, "C", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainE = ChainGenerator.newChain(450, 499, "E", chainD, "D", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainF = ChainGenerator.newChain(1000, 1099, "F", null, "A", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainG = ChainGenerator.newChain(300, 399, "G", null, "C", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainH = ChainGenerator.newChain(100, 199, "H", null, "A", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainI = ChainGenerator.newChain(150, 199, "I", null, "H", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainJ = ChainGenerator.newChain(200, 299, "J", null, "H", CHAIN_ID, ChainTypeEnum.ORPHAN);
+        Chain chainK = ChainGenerator.newChain(250, 299, "K", chainJ, "J", CHAIN_ID, ChainTypeEnum.ORPHAN);
         ChainManager.addForkChain(CHAIN_ID, chainB);
         ChainManager.addForkChain(CHAIN_ID, chainC);
         ChainManager.addOrphanChain(CHAIN_ID, chainD);
@@ -169,8 +172,8 @@ public class ChainManagerTest {
 
         OrphanChainsMonitor.getInstance().run();
 
-        Assert.assertEquals(0, ChainManager.getOrphanChains(CHAIN_ID).size());
         Assert.assertEquals(7, ChainManager.getForkChains(CHAIN_ID).size());
+        Assert.assertEquals(0, ChainManager.getOrphanChains(CHAIN_ID).size());
         Assert.assertEquals(1099, masterChain.getEndHeight());
         Assert.assertEquals(499, chainC.getEndHeight());
         Assert.assertEquals(299, chainH.getEndHeight());

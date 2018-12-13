@@ -221,7 +221,7 @@ public class BlockServiceImpl implements BlockService {
             }
             hashList.addLast(block.getHeader().getHash());
         }
-        Log.info("save block success, height-{}, hash-{}, preHash-{}", height, block.getHeader().getHash(), block.getHeader().getPreHash());
+        Log.debug("save block success, height-{}, hash-{}, preHash-{}", height, block.getHeader().getHash(), block.getHeader().getPreHash());
         return true;
     }
 
@@ -274,7 +274,7 @@ public class BlockServiceImpl implements BlockService {
         SmallBlockMessage message = new SmallBlockMessage();
         message.setSmallBlock(BlockUtil.getSmallBlock(chainId, block));
         message.setCommand(CommandConstant.SMALL_BLOCK_MESSAGE);
-        return NetworkUtil.broadcast(chainId, message, "");
+        return NetworkUtil.broadcast(chainId, message);
     }
 
     @Override
