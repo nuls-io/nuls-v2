@@ -10,8 +10,6 @@ public interface TxConstant {
 
     int NULS_CHAINID = 12345;
     int NULS_CHAIN_ASSETID = 1;
-    int CURRENT_CHAINID = 12345;
-    int CURRENT_CHAIN_ASSETID = 1;
 
     /**
      * context path
@@ -83,7 +81,13 @@ public interface TxConstant {
     String MULTI_TX_HASH = "txHash";
     String MULTI_TX_HEX = "txHex";
 
+    /**
+     * Map初始值
+     * */
+    int  INIT_CAPACITY =16;
 
-
-
+    /**
+     * config file path
+     * */
+    String CONFIG_FILE_PATH = "transaction-config.json";
 }
