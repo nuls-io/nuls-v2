@@ -26,10 +26,14 @@ package io.nuls.transaction.utils;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Coin;
+import io.nuls.base.data.CoinData;
 import io.nuls.base.data.MultiSigAccount;
+import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxErrorCode;
 
 import java.math.BigInteger;
 
@@ -39,26 +43,43 @@ import java.math.BigInteger;
  */
 public class TxUtil {
 
+    public static CoinData getCoinData(Transaction tx) throws NulsException {
+        try {
+            return tx.getCoinDataInstance();
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.DESERIALIZE_COINDATA_ERROR);
+        }
+    }
 
-    public static boolean isCurrentChainMainAsset(Coin coin){
+    public static Transaction getTransaction(String hex) throws NulsException {
+        try {
+            return Transaction.getInstance(hex);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.DESERIALIZE_TX_ERROR);
+        }
+    }
+
+    public static boolean isCurrentChainMainAsset(Coin coin) {
         return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
     }
 
-    public static boolean isCurrentChainMainAsset(int chainId, int assetId){
-        if(chainId == TxConfig.CURRENT_CHAINID
-                && assetId ==TxConfig.CURRENT_CHAIN_ASSETID) {
+    public static boolean isCurrentChainMainAsset(int chainId, int assetId) {
+        if (chainId == TxConfig.CURRENT_CHAINID
+                && assetId == TxConfig.CURRENT_CHAIN_ASSETID) {
             return true;
         }
         return false;
     }
 
-    public static boolean isNulsAsset(Coin coin){
+    public static boolean isNulsAsset(Coin coin) {
         return isNulsAsset(coin.getAssetsChainId(), coin.getAssetsId());
     }
 
-    public static boolean isNulsAsset(int chainId, int assetId){
-        if(chainId == TxConstant.NULS_CHAINID
-                && assetId ==TxConstant.NULS_CHAIN_ASSETID) {
+    public static boolean isNulsAsset(int chainId, int assetId) {
+        if (chainId == TxConstant.NULS_CHAINID
+                && assetId == TxConstant.NULS_CHAIN_ASSETID) {
             return true;
         }
         return false;
@@ -68,19 +89,19 @@ public class TxUtil {
         return isTheChainMainAsset(chainId, coin.getAssetsChainId(), coin.getAssetsId());
     }
 
-    public static boolean isTheChainMainAsset(int chainId, int assetChainId, int assetId){
+    public static boolean isTheChainMainAsset(int chainId, int assetChainId, int assetId) {
         //todo 查资产与链的关系是否存在
         return true;
     }
 
-    public static boolean assetExist(int chainId, int assetId){
+    public static boolean assetExist(int chainId, int assetId) {
         //todo 查资产是否存在
         return true;
     }
 
     public static byte[] getNonce(byte[] address, int chainId, int assetId) throws NulsException {
         //todo 查nonce
-        byte[] nonce = new byte[]{'a','b','c','d','e','f','g','h'};
+        byte[] nonce = new byte[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
         return nonce;
     }
 

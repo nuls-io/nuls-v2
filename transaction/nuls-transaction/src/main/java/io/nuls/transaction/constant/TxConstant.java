@@ -10,8 +10,6 @@ public interface TxConstant {
 
     int NULS_CHAINID = 12345;
     int NULS_CHAIN_ASSETID = 1;
-    //int CURRENT_CHAINID = 12345;
-    //int CURRENT_CHAIN_ASSETID = 1;
 
     /**
      * context path
@@ -76,6 +74,12 @@ public interface TxConstant {
     int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
     int TX_MAX_BYTES = 300;
     int TX_MAX_SIZE = TX_MAX_BYTES * 1024;
+
+    /**
+     * 创建多签交易时，返回map的key
+     */
+    String MULTI_TX_HASH = "txHash";
+    String MULTI_TX_HEX = "txHex";
 
     /**
      * Map初始值
