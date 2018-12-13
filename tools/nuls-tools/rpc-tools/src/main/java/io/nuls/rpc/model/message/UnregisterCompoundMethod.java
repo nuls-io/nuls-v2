@@ -24,9 +24,7 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 import lombok.ToString;
 
 /**
@@ -36,15 +34,13 @@ import lombok.ToString;
  * @author tangyi
  * @date 2018/11/15
  */
+@Data
 @ToString
-@NoArgsConstructor
 public class UnregisterCompoundMethod {
     /**
      * This is the string that identifies the virtual method.
      * If it is empty then all virtual methods registered by the caller should be unregistered.
      */
-    @Getter
-    @Setter
     private String unregisterCompoundMethodName;
 
 }

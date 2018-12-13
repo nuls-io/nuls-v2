@@ -33,14 +33,12 @@ import lombok.*;
  * @author tangyi
  * @date 2018/11/15
  */
+@Data
 @ToString
-@NoArgsConstructor
 public class Ack {
     /**
      * 请求的消息号
      * This is the original request ID referred by a Request message
      */
-    @Getter
-    @Setter
     private String requestId;
 }

@@ -24,9 +24,7 @@
  */
 package io.nuls.rpc.model.message;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 import lombok.ToString;
 
 /**
@@ -36,30 +34,24 @@ import lombok.ToString;
  * @author tangyi
  * @date 2018/11/15
  */
+@Data
 @ToString
-@NoArgsConstructor
 public class NegotiateConnection {
 
     /**
      * Protocol version
      */
-    @Getter
-    @Setter
     private String protocolVersion;
 
     /**
      * A String that represents the algorithm that will be used to receive and send messages if CompressionRate is greater than 0.
      * The default is zlib which a library is available in most development languages.
      */
-    @Getter
-    @Setter
     private String compressionAlgorithm;
 
     /**
      * An integer between 0 and 9 that establishes the compression level in which the messages should be sent and received for this connection.
      * 0 means no compression while 9 maximum compression
      */
-    @Getter
-    @Setter
     private String compressionRate;
 }
