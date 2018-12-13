@@ -18,20 +18,22 @@ public class RetryProcessor implements Runnable {
     public void run() {
         try{
             Object[] objects = EventBusRuntime.firstObjArrInRetryQueue();
-            if(null == objects){
-                Thread.sleep(100L);
-            }else{
+            if(null != objects){
                 Message rspMessage = (Message)objects[0];
                 WsClient wsClient = (WsClient)objects[1];
-                int retryAttempt = 0;
-                boolean ackResponse = false;
-                while (retryAttempt <= EBConstants.EVENT_DISPATCH_RETRY_COUNT && !ackResponse){
-                    ackResponse = receiveAck(rspMessage.getMessageId());
+                int retryAttempt = 1;
+                boolean ackResponse = receiveAck(rspMessage.getMessageId());
+                while (retryAttempt <= EbConstants.EVENT_DISPATCH_RETRY_COUNT && !ackResponse){
                     retryAttempt = retryAttempt + 1;
-                    Thread.sleep(EBConstants.EVENT_RETRY_WAIT_TIME);
+                    Thread.sleep(EbConstants.EVENT_RETRY_WAIT_TIME);
+                    try{
+                        wsClient.send(rspMessage);
+                        ackResponse = receiveAck(rspMessage.getMessageId());
+                    }catch(NotYetConnectedException nyce){
+                        ackResponse = false;
+                    }
                 }
             }
-            Thread.sleep(100L);
         }catch (Exception e){
             Log.error(e.getMessage());
         }
