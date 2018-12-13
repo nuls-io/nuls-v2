@@ -27,8 +27,6 @@ public class EventBusRuntime {
     public static Object[] firstObjArrInRetryQueue(){ return firstObjArrInQueue(RETRY_QUEUE);}
 
     private static synchronized Object[] firstObjArrInQueue(Queue<Object[]> objectsQueue) {
-        Object[] objects = objectsQueue.peek();
-        objectsQueue.poll();
-        return objects;
+        return objectsQueue.poll();
     }
 }
