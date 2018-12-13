@@ -61,7 +61,7 @@ public class ServerRuntime {
      * 本模块所有对外提供的接口的详细信息
      * local module(io.nuls.rpc.RegisterApi) information
      */
-    public static RegisterApi LOCAL = new RegisterApi();
+    public static final RegisterApi LOCAL = new RegisterApi();
 
 
     /**

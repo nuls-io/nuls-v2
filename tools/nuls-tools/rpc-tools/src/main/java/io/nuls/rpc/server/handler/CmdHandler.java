@@ -175,9 +175,12 @@ public class CmdHandler {
      * @param messageId      原始消息ID / The origin message ID
      * @throws Exception 连接失败 / Connected failed
      */
+    @SuppressWarnings("unchecked")
     public static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
-        for (Object method : requestMethods.keySet()) {
-            Map params = (Map) requestMethods.get(method);
+        for (Object object : requestMethods.entrySet()) {
+            Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
+            String method = entry.getKey();
+            Map params = entry.getValue();
 
             /*
             构造返回的消息对象
@@ -192,8 +195,8 @@ public class CmdHandler {
             Get the corresponding method from the locally registered CMD
              */
             CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
-                    ? ServerRuntime.getLocalInvokeCmd((String) method)
-                    : ServerRuntime.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
+                    ? ServerRuntime.getLocalInvokeCmd(method)
+                    : ServerRuntime.getLocalInvokeCmd(method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
             /*
             找不到本地方法，则返回"CMD_NOT_FOUND"错误
