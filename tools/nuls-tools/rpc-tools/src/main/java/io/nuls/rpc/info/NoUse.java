@@ -2,9 +2,8 @@ package io.nuls.rpc.info;
 
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.RegisterApi;
-import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.rpc.server.WsServer;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,17 +24,14 @@ public class NoUse {
     public static void mockKernel() throws Exception {
         WsServer wsServer = new WsServer(8887);
         // Start server instance
-        RegisterApi registerApi = new RegisterApi();
-        registerApi.setApiMethods(new ArrayList<>());
-        registerApi.setModuleAbbreviation(ModuleE.KE.abbr);
-        registerApi.setModuleName(ModuleE.KE.name);
-        registerApi.setModuleDomain(ModuleE.KE.domain);
+        ServerRuntime.LOCAL.setApiMethods(new ArrayList<>());
+        ServerRuntime.LOCAL.setModuleAbbreviation(ModuleE.KE.abbr);
+        ServerRuntime.LOCAL.setModuleName(ModuleE.KE.name);
+        ServerRuntime.LOCAL.setModuleDomain(ModuleE.KE.domain);
         Map<String, String> connectionInformation = new HashMap<>(2);
         connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
         connectionInformation.put(Constants.KEY_PORT, wsServer.getPort() + "");
-        registerApi.setConnectionInformation(connectionInformation);
-
-        ServerRuntime.local = registerApi;
+        ServerRuntime.LOCAL.setConnectionInformation(connectionInformation);
 
         wsServer.scanPackage("io.nuls.rpc.cmd.kernel").connect("ws://127.0.0.1:8887");
 

@@ -90,7 +90,7 @@ public class CmdDispatcher {
         Create Request for Synchronization
          */
         Request request = MessageUtil.defaultRequest();
-        request.getRequestMethods().put("registerAPI", ServerRuntime.local);
+        request.getRequestMethods().put("registerAPI", ServerRuntime.LOCAL);
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
 
@@ -127,13 +127,13 @@ public class CmdDispatcher {
         判断所有依赖的模块是否已经启动（发送握手信息）
         Determine whether all dependent modules have been started (send handshake information)
          */
-        if (ServerRuntime.local.getDependencies() == null) {
+        if (ServerRuntime.LOCAL.getDependencies() == null) {
             ServerRuntime.startService = true;
             Log.info("Start service!");
             return;
         }
 
-        for (String role : ServerRuntime.local.getDependencies().keySet()) {
+        for (String role : ServerRuntime.LOCAL.getDependencies().keySet()) {
             String url = ClientRuntime.getRemoteUri(role);
             try {
                 ClientRuntime.getWsClient(url);

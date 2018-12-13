@@ -61,7 +61,7 @@ public class ServerRuntime {
      * 本模块所有对外提供的接口的详细信息
      * local module(io.nuls.rpc.RegisterApi) information
      */
-    public static RegisterApi local = new RegisterApi();
+    public static RegisterApi LOCAL = new RegisterApi();
 
 
     /**
@@ -70,7 +70,7 @@ public class ServerRuntime {
      * Key: Websocket+cmd
      * Value: Time(long)
      */
-    public static final Map<String, Long> CMD_INVOKE_TIME = new HashMap<>();
+    public static final Map<String, Long> CMD_INVOKE_TIME = new ConcurrentHashMap<>();
 
     /**
      * 接口返回值改变次数
@@ -78,7 +78,7 @@ public class ServerRuntime {
      * Key: Cmd
      * Value: Change count
      */
-    private static final Map<String, Integer> CMD_CHANGE_COUNT = new HashMap<>();
+    private static final Map<String, Integer> CMD_CHANGE_COUNT = new ConcurrentHashMap<>();
 
     /**
      * 接口最近一次的返回值
@@ -94,7 +94,7 @@ public class ServerRuntime {
      * Key: WebSocket+MessageId+cmd
      * Value: Boolean
      */
-    public static final Map<String, Boolean> CMD_LAST_RESPONSE_BE_USED = new HashMap<>();
+    public static final Map<String, Boolean> CMD_LAST_RESPONSE_BE_USED = new ConcurrentHashMap<>();
 
     /**
      * 本模块配置信息
@@ -154,10 +154,10 @@ public class ServerRuntime {
         根据version排序
         Sort according to version
          */
-        local.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : local.getApiMethods()) {
+        for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
             /*
             cmd不一致，跳过
             CMD inconsistency, skip
@@ -205,10 +205,10 @@ public class ServerRuntime {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd) {
 
-        local.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : local.getApiMethods()) {
+        for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
@@ -256,7 +256,7 @@ public class ServerRuntime {
                 Repeated interfaces are registered only once
                  */
                 if (!isRegister(cmdDetail)) {
-                    local.getApiMethods().add(cmdDetail);
+                    LOCAL.getApiMethods().add(cmdDetail);
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
@@ -324,7 +324,7 @@ public class ServerRuntime {
      */
     private static boolean isRegister(CmdDetail sourceCmdDetail) {
         boolean exist = false;
-        for (CmdDetail cmdDetail : local.getApiMethods()) {
+        for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
             if (cmdDetail.getMethodName().equals(sourceCmdDetail.getMethodName()) && cmdDetail.getVersion() == sourceCmdDetail.getVersion()) {
                 exist = true;
                 break;
