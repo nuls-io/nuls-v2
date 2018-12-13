@@ -2,7 +2,6 @@ package io.nuls.chain.cmd;
 
 
 import io.nuls.chain.info.CmErrorCode;
-import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.model.tx.DestroyAssetAndChainTransaction;
@@ -31,14 +30,16 @@ public class TxChainCmd extends BaseChainCmd {
 
     @Autowired
     private ChainService chainService;
+
     @Autowired
     private AssetService assetService;
+
     @Autowired
     private RpcService rpcService;
 
 
     @CmdAnnotation(cmd = "cm_chainRegValidator", version = 1.0, description = "chainRegValidator")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txHex", parameterType = "String")
     public Response chainRegValidator(Map params) {
         try {
@@ -61,25 +62,24 @@ public class TxChainCmd extends BaseChainCmd {
     }
 
     @CmdAnnotation(cmd = "cm_chainRegCommit", version = 1.0, description = "chainRegCommit")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response chainRegCommit(Map params) {
         try {
             String txHex = String.valueOf(params.get("txHex"));
             BlockChain blockChain = buildChainWithTxData(txHex, new RegisterChainAndAssetTransaction(), false);
-
-            //进行资产存储,资产流通表存储
             Asset asset = buildAssetWithTxChain(txHex, new RegisterChainAndAssetTransaction());
-            asset.addChainId(asset.getChainId());
-            assetService.createAsset(asset);
 
-            //进行链存储:
-            blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
-            blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
-            chainService.saveChain(blockChain);
+            /*
+            注册链
+            Register a new chain
+             */
+            chainService.registerBlockChain(blockChain, asset);
 
-            //通知网络模块创建链
+            /*
+            通知网络模块创建链
+             */
             rpcService.createCrossGroup(blockChain);
             return success();
         } catch (Exception e) {
@@ -88,30 +88,29 @@ public class TxChainCmd extends BaseChainCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "cm_chainRegRollback", version = 1.0, description = "chainRegRollback")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "txHex", parameterType = "String")
-    @Parameter(parameterName = "secondaryData", parameterType = "String")
     /**
      * 尽量不要让链中注册提交后，执行回滚。否则如果期间有跨连业务了，回滚很容易造成问题。
      *
      * @param params Map
      * @return Response object
      */
+    @CmdAnnotation(cmd = "cm_chainRegRollback", version = 1.0, description = "chainRegRollback")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response chainRegRollback(Map params) {
         try {
             String txHex = String.valueOf(params.get("txHex"));
-            String secondaryData = String.valueOf(params.get("secondaryData"));
             BlockChain blockChain = buildChainWithTxData(txHex, new RegisterChainAndAssetTransaction(), false);
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
-            if (null == blockChain || null == dbChain || !blockChain.getRegTxHash().equalsIgnoreCase(dbChain.getRegTxHash())) {
+            if (null == dbChain || !blockChain.getRegTxHash().equalsIgnoreCase(dbChain.getRegTxHash())) {
                 return failed(CmErrorCode.C10001);
             }
-            chainService.delChain(blockChain);
-            int assetId = blockChain.getRegAssetId();
-            Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), assetId));
-            assetService.deleteAsset(asset);
+
+            chainService.registerBlockChainRollback(blockChain);
+
             rpcService.destroyCrossGroup(blockChain);
+
             return success(blockChain);
         } catch (Exception e) {
             Log.error(e);
@@ -120,17 +119,13 @@ public class TxChainCmd extends BaseChainCmd {
     }
 
     @CmdAnnotation(cmd = "cm_chainDestroyValidator", version = 1.0, description = "chainDestroyValidator")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response chainDestroyValidator(Map params) {
         String txHex = String.valueOf(params.get("txHex"));
-        String secondaryData = String.valueOf(params.get("secondaryData"));
         BlockChain blockChain = buildChainWithTxData(txHex, new DestroyAssetAndChainTransaction(), true);
-        return destroyValidator(blockChain);
-    }
 
-    private Response destroyValidator(BlockChain blockChain) {
         try {
             if (null == blockChain) {
                 return failed(CmErrorCode.ERROR_CHAIN_NOT_FOUND);
@@ -157,28 +152,16 @@ public class TxChainCmd extends BaseChainCmd {
     }
 
     @CmdAnnotation(cmd = "cm_chainDestroyCommit", version = 1.0, description = "chainDestroyCommit")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response chainDestroyCommit(Map params) {
         try {
             String txHex = String.valueOf(params.get("txHex"));
-            String secondaryData = String.valueOf(params.get("secondaryData"));
             BlockChain blockChain = buildChainWithTxData(txHex, new DestroyAssetAndChainTransaction(), true);
-            Response cmdResponse = destroyValidator(blockChain);
-            if (cmdResponse.isSuccess()) {
-                return cmdResponse;
-            }
-            //更新资产
-            assetService.setStatus(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), blockChain.getDelAssetId()), false);
-            //更新链
-            BlockChain dbChain = chainService.getChain(blockChain.getChainId());
-            dbChain.setDelAddress(blockChain.getDelAddress());
-            dbChain.setDelAssetId(blockChain.getDelAssetId());
-            dbChain.setDelTxHash(blockChain.getDelTxHash());
-            dbChain.removeCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), blockChain.getDelAssetId()));
-            dbChain.setDelete(true);
-            chainService.updateChain(dbChain);
+
+            BlockChain dbChain = chainService.destroyBlockChain(blockChain);
+
             rpcService.destroyCrossGroup(dbChain);
             return success();
         } catch (Exception e) {
@@ -188,35 +171,27 @@ public class TxChainCmd extends BaseChainCmd {
     }
 
     @CmdAnnotation(cmd = "cm_chainDestroyRollback", version = 1.0, description = "chainDestroyRollback")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "secondaryData", parameterType = "String")
     public Response chainDestroyRollback(Map params) {
         try {
             String txHex = String.valueOf(params.get("txHex"));
-            String secondaryData = String.valueOf(params.get("secondaryData"));
             BlockChain blockChain = buildChainWithTxData(txHex, new DestroyAssetAndChainTransaction(), true);
-            Response cmdResponse = destroyValidator(blockChain);
-            if (cmdResponse.isSuccess()) {
-                return cmdResponse;
-            }
+
             BlockChain dbChain = chainService.getChain(blockChain.getChainId());
             if (!dbChain.isDelete()) {
                 return failed(CmErrorCode.ERROR_CHAIN_STATUS);
             }
-            //资产回滚
-            String assetKey = CmRuntimeInfo.getAssetKey(dbChain.getChainId(), dbChain.getDelAssetId());
-            assetService.setStatus(assetKey, true);
-            //链回滚
-            dbChain.setDelete(false);
-            chainService.updateChain(dbChain);
+
+            chainService.destroyBlockChainRollback(dbChain);
+
             rpcService.createCrossGroup(dbChain);
+
             return success();
         } catch (Exception e) {
             Log.error(e);
             return failed(CmErrorCode.Err10002, e.getMessage());
         }
     }
-
-
 }

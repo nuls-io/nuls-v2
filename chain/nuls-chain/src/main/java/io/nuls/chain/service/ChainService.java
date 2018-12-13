@@ -1,6 +1,7 @@
 package io.nuls.chain.service;
 
 
+import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.BlockChain;
 
 /**
@@ -59,4 +60,38 @@ public interface ChainService {
     BlockChain getChain(int chainId) throws Exception;
 
 
+    /**
+     * 注册链
+     * Register a new chain
+     * @param blockChain The BlockChain saved
+     * @param asset The Asset saved
+     * @throws Exception Any error will throw an exception
+     */
+    void registerBlockChain(BlockChain blockChain, Asset asset) throws Exception;
+
+    /**
+     * 回滚注册链
+     * Rollback the registered BlockChain
+     * @param blockChain The rollback BlockChain
+     * @throws Exception Any error will throw an exception
+     */
+    void registerBlockChainRollback(BlockChain blockChain) throws Exception;
+
+    /**
+     * 销毁链
+     * Destroy a exist BlockChain
+     *
+     * @param blockChain The BlockChain destroyed
+     * @return The BlockChain after destroyed
+     * @throws Exception Any error will throw an exception
+     */
+    BlockChain destroyBlockChain(BlockChain blockChain) throws Exception;
+
+    /**
+     * 回滚销毁的链
+     * Rollback the destroyed BlockChain
+     * @param dbChain The BlockChain need to be rollback
+     * @throws Exception Any error will throw an exception
+     */
+    void destroyBlockChainRollback(BlockChain dbChain) throws Exception;
 }
