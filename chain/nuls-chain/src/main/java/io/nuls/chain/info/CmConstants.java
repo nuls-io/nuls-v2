@@ -103,7 +103,7 @@ public class CmConstants {
      * 黑洞地址，该地址的资产无法找回
      * //TODO 该地址需要加上链ID，否则无法适配新的地址规则
      */
-    public static final byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
+    public static final byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("JQJmP5xKDzAgJ8tJSQkCtKwbodAu20423");
 
 
 }

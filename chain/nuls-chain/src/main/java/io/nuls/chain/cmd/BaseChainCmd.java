@@ -71,7 +71,7 @@ public class BaseChainCmd extends BaseCmd {
                             int txSize, AccountBalance accountBalance) throws NulsRuntimeException {
         txSize = txSize + P2PHKSignature.SERIALIZE_LENGTH;
         CoinData coinData = new CoinData();
-        String lockRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS_lOCK);
+        String lockRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS_lOCK);
         BigInteger lockAmount = new BigDecimal(amount).multiply(new BigDecimal(lockRate)).toBigInteger();
         BigInteger destroyAmount = new BigInteger(amount).subtract(lockAmount);
         CoinTo to1 = new CoinTo(address, chainId, assetsId, lockAmount, -1);
@@ -100,7 +100,7 @@ public class BaseChainCmd extends BaseCmd {
                                 int txSize, String txHash, AccountBalance accountBalance) throws NulsRuntimeException {
         txSize = txSize + P2PHKSignature.SERIALIZE_LENGTH;
 
-        String lockRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS_lOCK);
+        String lockRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS_lOCK);
         BigInteger lockAmount = new BigDecimal(amount).multiply(new BigDecimal(lockRate)).toBigInteger();
         CoinTo to = new CoinTo(address, chainId, assetsId, lockAmount, 0);
 

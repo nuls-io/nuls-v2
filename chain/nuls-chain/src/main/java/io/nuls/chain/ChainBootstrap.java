@@ -166,10 +166,13 @@ public class ChainBootstrap {
      * @throws Exception Any error will throw an exception
      */
     private void initMainChain() throws Exception {
-        //初始化数据，在数据库初始化后进行处理
         SpringLiteContext.getBean(ChainService.class).initMainChain();
     }
 
+    /**
+     *
+     * @throws Exception Any error will throw an exception
+     */
     private void startRpcServer() throws Exception {
         WsServer.getInstance(ModuleE.CM)
                 .moduleRoles(new String[]{"1.0"})

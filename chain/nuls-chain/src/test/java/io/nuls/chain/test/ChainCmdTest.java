@@ -1,10 +1,12 @@
 package io.nuls.chain.test;
 
 
-import io.nuls.chain.ChainBootstrap;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.model.dto.Seed;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.NoUse;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.thread.TimeService;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,8 +21,8 @@ import java.util.List;
  */
 public class ChainCmdTest {
     @Before
-    public void init() {
-        ChainBootstrap.getInstance().start();
+    public void init() throws Exception {
+        NoUse.mockModule();
     }
 
     @Test
@@ -30,8 +32,7 @@ public class ChainCmdTest {
 
     @Test
     public void chainReg() throws Exception {
-//        System.out.println(CmdDispatcher.call("chainReg",
-//                new Object[]{(short) 867, "ilovess", "NULS", 19870921, true, 5, 10, 8, "1.1.2.2:1122,3.3.4.4:3344", false}));
+        System.out.println(CmdDispatcher.requestAndResponse(ModuleE.CM.abbr, "cm_chainReg", null));
     }
 
     @Test
