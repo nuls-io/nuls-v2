@@ -5,10 +5,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -18,25 +15,19 @@ import java.math.BigInteger;
  * @date 2018/11/12
  * @description
  */
-
+@EqualsAndHashCode(callSuper = true)
+@Data
 @ToString
-@NoArgsConstructor
 public class ChainAsset extends BaseNulsData {
 
-    @Getter
-    @Setter
     private int chainId;
-    @Getter
-    @Setter
+
     private int assetId;
-    @Getter
-    @Setter
+
     private BigInteger initNumber = BigInteger.ZERO;
-    @Getter
-    @Setter
+
     private BigInteger inNumber = BigInteger.ZERO;
-    @Getter
-    @Setter
+
     private BigInteger outNumber = BigInteger.ZERO;
 
 

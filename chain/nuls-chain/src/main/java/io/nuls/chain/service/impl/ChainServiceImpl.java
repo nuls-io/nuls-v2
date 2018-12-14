@@ -6,7 +6,6 @@ import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
-import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -25,9 +24,6 @@ public class ChainServiceImpl implements ChainService {
 
     @Autowired
     private ChainStorage chainStorage;
-
-    @Autowired
-    private ChainAssetStorage chainAssetStorage;
 
     @Autowired
     private AssetService assetService;

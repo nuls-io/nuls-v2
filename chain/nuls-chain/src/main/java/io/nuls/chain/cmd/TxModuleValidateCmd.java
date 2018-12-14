@@ -43,10 +43,8 @@ import java.util.Map;
 
 /**
  * @author lan
- * @program nuls2.0
- * @description moduleValidateCmd
  * @date 2018/11/22
- **/
+ */
 @Component
 public class TxModuleValidateCmd extends BaseChainCmd {
     @Autowired
@@ -60,7 +58,7 @@ public class TxModuleValidateCmd extends BaseChainCmd {
      */
     @CmdAnnotation(cmd = "cm_chainModuleTxValidate", version = 1.0,
             description = "chainModuleTxValidate")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "txHexs", parameterType = "array")
     public Response chainModuleTxValidate(Map params) {
         try {
@@ -68,7 +66,6 @@ public class TxModuleValidateCmd extends BaseChainCmd {
             //1获取交易类型
             //2进入不同验证器里处理
             //3封装失败交易返回
-            int chainId = Integer.valueOf(params.get("chainId").toString());
             List<Transaction> registerChainAndAssetList = new ArrayList<>();
             List<Transaction> destroyAssetAndChainList = new ArrayList<>();
             List<Transaction> addAssetToChainList = new ArrayList<>();
