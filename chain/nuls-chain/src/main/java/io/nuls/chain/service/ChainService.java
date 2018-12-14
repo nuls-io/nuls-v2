@@ -20,7 +20,7 @@ public interface ChainService {
      *
      * @throws Exception Any error will throw an exception
      */
-    void initChain() throws Exception;
+    void initMainChain() throws Exception;
 
     /**
      * 保存链信息
