@@ -45,12 +45,13 @@ public class ClientSyncProcessor implements Runnable {
                     connectionInfoMap.put(Constants.KEY_PORT,"8876");
                     switch (cmd){
                         case "subscribe":
-                            if (!ClientRuntime.roleMap.containsKey(moduleAbbr)){
-                                ClientRuntime.roleMap.put(moduleAbbr,connectionInfoMap);
+                            if (!ClientRuntime.ROLE_MAP.containsKey(moduleAbbr)){
+                                ClientRuntime.ROLE_MAP.put(moduleAbbr,connectionInfoMap);
+                                ClientRuntime.getWsClient(ClientRuntime.getRemoteUri(moduleAbbr));
                             }
                             break;
                         case "unsubscribe":
-                            ClientRuntime.roleMap.remove(moduleAbbr);
+                            ClientRuntime.ROLE_MAP.remove(moduleAbbr);
                             break;
                          default:
 

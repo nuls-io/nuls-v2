@@ -43,7 +43,7 @@ public class EbStorageServiceImpl implements EbStorageService {
                 Map<byte[],byte[]> map = RocksDBService.multiGet(EbConstants.TB_EB_TOPIC,keys);
                 for(byte[] key : map.keySet()){
                     byte[] obj = map.get(key);
-                    topicMap.put(ObjectUtils.bytesToObject(key),ObjectUtils.bytesToObject(obj));
+                    topicMap.put(new String(key),ObjectUtils.bytesToObject(obj));
                 }
             }
         }catch (Exception e){
