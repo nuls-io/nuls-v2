@@ -63,26 +63,13 @@ public class BlockConsumer implements Callable<Boolean> {
         try {
 
             for (Future<BlockDownLoadResult> task : futures) {
-                BlockDownLoadResult result = null;
-                try {
-                    result = task.get();
-                } catch (Exception e) {
-                    Log.error(e);
-                }
-
+                BlockDownLoadResult result = task.get();
                 if (result == null || !result.isSuccess()) {
                     retryDownload(result);
                 }
-
-                List<Block> list = result.getBlockList();
-                if (list == null) {
-                    executor.shutdown();
-                    return true;
-                }
-
-                for (Block block : list) {
-                    blockQueue.offer(block);
-                }
+                Node node = result.getNode();
+                node.adjustCredit(true);
+                params.getNodes().offer(node);
             }
             futures.clear();
 
@@ -94,7 +81,7 @@ public class BlockConsumer implements Callable<Boolean> {
                 }
             }
             return true;
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             Log.error(e);
             return false;
         }
@@ -107,7 +94,10 @@ public class BlockConsumer implements Callable<Boolean> {
      * @return
      */
     private BlockDownLoadResult retryDownload(BlockDownLoadResult result) {
-        Log.info("retry download blocks, fail node:{}, start:{}", result.getNode(), result.getStartHeight());
+        Node node = result.getNode();
+        Log.info("retry download blocks, fail node:{}, start:{}", node, result.getStartHeight());
+        node.adjustCredit(false);
+        params.getNodes().offer(node);
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         try {
             result.setNode(nodes.take());

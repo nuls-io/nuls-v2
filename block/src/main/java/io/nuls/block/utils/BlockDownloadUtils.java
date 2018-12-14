@@ -54,7 +54,7 @@ public class BlockDownloadUtils {
         HashMessage message = new HashMessage();
         message.setRequestHash(hash);
         message.setCommand(CommandConstant.GET_BLOCK_MESSAGE);
-        Future<Block> future = CacheHandler.addGetBlockByHashRequest(chainId, hash);
+        Future<Block> future = CacheHandler.addSingleBlockRequest(chainId, hash);
         boolean result = NetworkUtil.sendToNode(chainId, message, node.getId());
         if (!result) {
             CacheHandler.removeBlockByHashFuture(chainId, hash);

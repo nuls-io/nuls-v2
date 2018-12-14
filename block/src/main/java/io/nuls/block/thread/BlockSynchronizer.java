@@ -116,7 +116,7 @@ public class BlockSynchronizer implements Runnable {
             FutureTask<Boolean> downloadFutrue = new FutureTask<>(downloader);
             ThreadUtils.createAndRunThread("block-downloader-manager-" + chainId, downloadFutrue);
 
-            //6.开启区块消费线程BlockConsumer，与上面的BlockDownloaderManager共用一个队列blockQueue
+            //6.开启区块消费线程BlockConsumer，与上面的BlockDownloader共用一个队列blockQueue
             BlockConsumer consumer = new BlockConsumer(chainId, futures, executor, params);
             FutureTask<Boolean> consumerFuture = new FutureTask<>(consumer);
             ThreadUtils.createAndRunThread("block-consumer-" + chainId, consumerFuture);

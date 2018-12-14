@@ -26,8 +26,8 @@ import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
-import io.nuls.tools.parse.SerializeUtils;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
@@ -41,55 +41,81 @@ import java.util.concurrent.*;
  */
 public class CacheHandler {
 
-    private static Map<Integer, DataCacher<CompleteMessage>> synTaskCacher = new ConcurrentHashMap<>();
-    private static Map<Integer, BlockingQueue<Block>> blockingQueueMap = new ConcurrentHashMap<>();
+    /**
+     * 批量下载区块请求-hash缓存
+     */
+    private static Map<Integer, DataCacher<CompleteMessage>> batchBlockHashCacher = new ConcurrentHashMap<>();
+    /**
+     * 批量下载区块请求-区块缓存
+     */
+    private static Map<Integer, BlockingQueue<Block>> batchBlockCacher = new ConcurrentHashMap<>();
 
-    private static Map<Integer, DataCacher<Block>> blockByHashCacher = new ConcurrentHashMap<>();
+    /**
+     * 单个下载区块请求-hash缓存
+     */
+    private static Map<Integer, List<NulsDigestData>> singleBlockHashCacher = new ConcurrentHashMap<>();
+    /**
+     * 单个下载区块请求-区块缓存
+     */
+    private static Map<Integer, DataCacher<Block>> singleBlockCacher = new ConcurrentHashMap<>();
 
-    public static CompletableFuture<Block> addGetBlockByHashRequest(int chainId, NulsDigestData requestHash) {
-        return blockByHashCacher.get(chainId).addFuture(requestHash);
+    /**
+     * 初始化
+     *
+     * @param chainId
+     */
+    public static void init(int chainId){
+        int blockCache = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.BLOCK_CACHE));
+        singleBlockCacher.put(chainId, new DataCacher<>());
+        singleBlockHashCacher.put(chainId, new LinkedList<>());
+        batchBlockCacher.put(chainId, new ArrayBlockingQueue<>(blockCache));
+        batchBlockHashCacher.put(chainId, new DataCacher<>());
     }
 
+    public static CompletableFuture<Block> addSingleBlockRequest(int chainId, NulsDigestData requestHash) {
+        return singleBlockCacher.get(chainId).addFuture(requestHash);
+    }
+
+    public static Future<CompleteMessage> addBatchBlockRequest(int chainId, NulsDigestData hash) {
+        return batchBlockHashCacher.get(chainId).addFuture(hash);
+    }
+
+    /**
+     * 根据requestHash判断该区块是同步区块过程中收到的区块，还是孤儿链维护过程收到的区块，还是恶意区块
+     *
+     * @param chainId
+     * @param message
+     */
     public static void receiveBlock(int chainId, BlockMessage message) {
-        DataCacher<CompleteMessage> cacher = synTaskCacher.get(chainId);
+        DataCacher<CompleteMessage> cacher = batchBlockHashCacher.get(chainId);
         NulsDigestData requestHash = message.getRequestHash();
         Block block = message.getBlock();
         if (cacher.contains(requestHash)) {
-            blockingQueueMap.get(chainId).offer(block);
+            batchBlockCacher.get(chainId).offer(block);
             return;
         }
-        blockByHashCacher.get(chainId).success(block.getHeader().getHash(), block);
-
+        if (singleBlockHashCacher.get(chainId).contains(requestHash)) {
+            singleBlockCacher.get(chainId).success(block.getHeader().getHash(), block);
+        }
     }
 
-    public static Future<CompleteMessage> newRequest(int chainId, NulsDigestData hash) {
-        return synTaskCacher.get(chainId).addFuture(hash);
-    }
-
-    public static void requestComplete(int chainId, CompleteMessage message) {
+    public static void batchComplete(int chainId, CompleteMessage message) {
         if (message.isSuccess()) {
-            synTaskCacher.get(chainId).success(message.getRequestHash(), message);
+            batchBlockHashCacher.get(chainId).success(message.getRequestHash(), message);
         } else {
-            synTaskCacher.get(chainId).fail(message.getRequestHash());
+            batchBlockHashCacher.get(chainId).fail(message.getRequestHash());
         }
     }
 
     public static void removeBlockByHashFuture(int chainId, NulsDigestData hash) {
-        blockByHashCacher.get(chainId).removeFuture(hash);
+        singleBlockCacher.get(chainId).removeFuture(hash);
     }
 
     public static void removeRequest(int chainId, NulsDigestData hash) {
-        synTaskCacher.get(chainId).removeFuture(hash);
-    }
-
-    public static void init(int chainId){
-        int blockCache = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.BLOCK_CACHE));
-        blockingQueueMap.put(chainId, new ArrayBlockingQueue<>(blockCache));
-        blockByHashCacher.put(chainId, new DataCacher<>());
-        synTaskCacher.put(chainId, new DataCacher<>());
+        batchBlockHashCacher.get(chainId).removeFuture(hash);
     }
 
     public static BlockingQueue<Block> getBlockQueue(int chainId) {
-        return blockingQueueMap.get(chainId);
+        return batchBlockCacher.get(chainId);
     }
 }
