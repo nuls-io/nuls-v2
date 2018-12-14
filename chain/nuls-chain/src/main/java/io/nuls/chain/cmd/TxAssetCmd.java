@@ -353,7 +353,7 @@ public class TxAssetCmd extends BaseChainCmd {
             for (String toAssetKey : toAssetKeys) {
                 ChainAsset toChainAsset = assetService.getChainAsset(toChainId, toAssetKey);
                 if (null == toChainAsset) {
-//                //链下加资产，资产下增加链
+                    //链下加资产，资产下增加链
                     BlockChain toChain = chainService.getChain(toChainId);
                     Asset asset = assetService.getAsset(CmRuntimeInfo.getMainAsset());
                     toChain.addCirculateAssetId(CmRuntimeInfo.getMainAsset());

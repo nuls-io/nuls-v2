@@ -30,11 +30,9 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
 /**
- * @program: nuls2.0
- * @description:
- * @author: lan
- * @create: 2018/11/26
- **/
+ * @author lan
+ * @date 2018/11/26
+ */
 @Service
 public class SeqServiceImpl implements SeqService {
     @Autowired

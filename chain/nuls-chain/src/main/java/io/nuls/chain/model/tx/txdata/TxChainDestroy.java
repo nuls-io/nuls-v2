@@ -5,6 +5,9 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.io.IOException;
 import java.util.Set;
@@ -12,8 +15,10 @@ import java.util.Set;
 /**
  * @author tangyi
  * @date 2018/11/7
- * @description
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
+@ToString
 public class TxChainDestroy extends TransactionLogicData {
     private int chainId;
     private String name;
@@ -23,70 +28,6 @@ public class TxChainDestroy extends TransactionLogicData {
     private int minAvailableNodeNum;
     private int singleNodeMinConnectionNum;
     private byte[] address;
-
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getAddressType() {
-        return addressType;
-    }
-
-    public void setAddressType(String addressType) {
-        this.addressType = addressType;
-    }
-
-    public long getMagicNumber() {
-        return magicNumber;
-    }
-
-    public void setMagicNumber(long magicNumber) {
-        this.magicNumber = magicNumber;
-    }
-
-    public boolean isSupportInflowAsset() {
-        return supportInflowAsset;
-    }
-
-    public void setSupportInflowAsset(boolean supportInflowAsset) {
-        this.supportInflowAsset = supportInflowAsset;
-    }
-
-    public int getMinAvailableNodeNum() {
-        return minAvailableNodeNum;
-    }
-
-    public void setMinAvailableNodeNum(int minAvailableNodeNum) {
-        this.minAvailableNodeNum = minAvailableNodeNum;
-    }
-
-    public int getSingleNodeMinConnectionNum() {
-        return singleNodeMinConnectionNum;
-    }
-
-    public void setSingleNodeMinConnectionNum(int singleNodeMinConnectionNum) {
-        this.singleNodeMinConnectionNum = singleNodeMinConnectionNum;
-    }
-
-    public byte[] getAddress() {
-        return address;
-    }
-
-    public void setAddress(byte[] address) {
-        this.address = address;
-    }
 
 
     @Override

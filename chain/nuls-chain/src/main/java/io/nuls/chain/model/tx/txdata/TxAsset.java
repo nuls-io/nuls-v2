@@ -6,6 +6,8 @@ import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -16,7 +18,9 @@ import java.util.Set;
  * @date 2018/11/6
  * @description
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
+@ToString
 public class TxAsset extends TransactionLogicData {
     private int chainId;
     private int assetId;
