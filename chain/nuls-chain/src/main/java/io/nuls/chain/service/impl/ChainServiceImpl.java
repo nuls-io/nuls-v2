@@ -6,7 +6,6 @@ import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
-import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -27,9 +26,6 @@ public class ChainServiceImpl implements ChainService {
     private ChainStorage chainStorage;
 
     @Autowired
-    private ChainAssetStorage chainAssetStorage;
-
-    @Autowired
     private AssetService assetService;
 
     /**
@@ -39,25 +35,22 @@ public class ChainServiceImpl implements ChainService {
      * @throws Exception Any error will throw an exception
      */
     @Override
-    public void initChain() throws Exception {
+    public void initMainChain() throws Exception {
         int chainId = Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
         BlockChain chain = getChain(chainId);
-        if (null == chain) {
-            chain = new BlockChain();
+        if (chain != null) {
+            return;
         }
+
+        chain = new BlockChain();
         chain.setName(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_NAME));
-        int assetId = Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID));
+        int assetId = Integer.parseInt(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID));
         chain.setRegAssetId(assetId);
-        chain.getSelfAssetKeyList().clear();
         chain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
-        chain.getTotalAssetKeyList().clear();
         chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chainStorage.save(chainId, chain);
 
-        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
-        if (null == asset) {
-            asset = new Asset();
-        }
+        Asset asset = new Asset();
         asset.setChainId(chainId);
         asset.setAssetId(assetId);
         asset.setInitNumber(new BigInteger(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_MAX)));
@@ -184,6 +177,7 @@ public class ChainServiceImpl implements ChainService {
     /**
      * 回滚销毁的链
      * Rollback the destroyed BlockChain
+     *
      * @param dbChain The BlockChain need to be rollback
      * @throws Exception Any error will throw an exception
      */

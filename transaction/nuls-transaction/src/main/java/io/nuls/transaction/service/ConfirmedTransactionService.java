@@ -34,10 +34,18 @@ public interface ConfirmedTransactionService {
     boolean saveTx(int chainId, Transaction transaction);
 
     /**
-     * 批量保存交易
+     * 批量保存已确认交易
      * @param chainId
      * @param txHashList
      * @return
      */
-    boolean saveTxList(int chainId, List<String> txHashList);
+    boolean saveTxList(int chainId, List<byte[]> txHashList);
+
+    /**
+     * 批量回滚已确认交易
+     * @param chainId
+     * @param txHashList
+     * @return
+     */
+    boolean rollbackTxList(int chainId, List<byte[]> txHashList);
 }

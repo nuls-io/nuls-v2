@@ -17,6 +17,7 @@ import io.nuls.transaction.model.bo.TxWrapper;
 import io.nuls.transaction.utils.DBUtil;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,5 +114,44 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
             Log.error(e);
         }
         return result;
+    }
+
+    @Override
+    public boolean removeTxList(int chainId, List<byte[]> hashList) {
+        //check params
+        if (hashList == null || hashList.size() == 0) {
+            return false;
+        }
+
+        try {
+            //delete transaction
+            return RocksDBService.deleteKeys(TRANSACTION_CONFIRMED + chainId, hashList);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return false;
+    }
+
+    @Override
+    public List<Transaction> getTxList(int chainId, List<byte[]> hashList) {
+        //check params
+        if (hashList == null || hashList.size() == 0) {
+            return null;
+        }
+        List<Transaction> txList = new ArrayList<>();
+        //根据交易hash批量查询交易数据
+        List<byte[]> list = RocksDBService.multiGetValueList(TRANSACTION_CONFIRMED + chainId, hashList);
+        if (list != null) {
+            for (byte[] value : list) {
+                Transaction tx = new Transaction();
+                try {
+                    tx.parse(value, 0);
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+                txList.add(tx);
+            }
+        }
+        return txList;
     }
 }
