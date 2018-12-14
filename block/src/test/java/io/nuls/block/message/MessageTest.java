@@ -126,7 +126,7 @@ public class MessageTest {
 
     @Test
     public void testGetBlocksByHeightMessage() throws Exception {
-        GetBlocksByHeightMessage message = new GetBlocksByHeightMessage();
+        HeightRangeMessage message = new HeightRangeMessage();
 
         message.setStartHeight(111);
         message.setEndHeight(222);
@@ -134,7 +134,7 @@ public class MessageTest {
         System.out.println(hex);
 
         byte[] bytes = HexUtil.decode(hex);
-        GetBlocksByHeightMessage message1 = new GetBlocksByHeightMessage();
+        HeightRangeMessage message1 = new HeightRangeMessage();
         message1.parse(new NulsByteBuffer(bytes));
 
         assertEquals(message1.getHash(), message.getHash());

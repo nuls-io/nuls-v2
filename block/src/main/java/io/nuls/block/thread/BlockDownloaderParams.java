@@ -25,6 +25,7 @@ import io.nuls.block.model.Node;
 import lombok.Data;
 
 import java.util.List;
+import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * 一次区块下载过程中用到的参数
@@ -50,7 +51,7 @@ public class BlockDownloaderParams {
     /**
      * 网络上一致可用的节点
      */
-    private List<Node> nodes;
+    private PriorityBlockingQueue<Node> nodes;
     /**
      * 网络上可用节点数>=nodes.size()
      */

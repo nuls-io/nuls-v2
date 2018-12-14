@@ -20,12 +20,15 @@
 
 package io.nuls.block.thread;
 
+import io.nuls.block.model.Node;
 import io.nuls.tools.log.Log;
 import org.junit.Test;
 
+import java.util.concurrent.PriorityBlockingQueue;
+
 import static org.junit.Assert.assertEquals;
 
-public class BlockDownloaderManagerTest {
+public class BlockDownloaderTest {
 
     @Test
     public void test2() {
@@ -75,5 +78,25 @@ public class BlockDownloaderManagerTest {
             long round = (long) Math.ceil((double) totalCount / (roundDownloads));
             assertEquals(11, round);
         }
+    }
+
+    @Test
+    public void test3() throws InterruptedException {
+        var queue = new PriorityBlockingQueue<Node>(3, Node.comparator);
+        Node node1 = new Node();
+        node1.setCredit(100);
+        queue.add(node1);
+
+        Node node2 = new Node();
+        node2.setCredit(90);
+        queue.add(node2);
+
+        Node node3 = new Node();
+        node3.setCredit(110);
+        queue.add(node3);
+
+        assertEquals(110, queue.take().getCredit());
+        assertEquals(100, queue.take().getCredit());
+        assertEquals(90, queue.take().getCredit());
     }
 }

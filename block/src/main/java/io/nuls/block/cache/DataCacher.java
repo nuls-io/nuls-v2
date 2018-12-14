@@ -69,4 +69,8 @@ public class DataCacher<T> {
     public void removeFuture(NulsDigestData hash) {
         cacher.remove(hash);
     }
+
+    public boolean contains(NulsDigestData hash){
+        return cacher.containsKey(hash);
+    }
 }

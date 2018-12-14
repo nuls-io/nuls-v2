@@ -30,9 +30,10 @@ import java.util.List;
 
 /**
  * 每条链对应一个Context，维护一些链运行期间的信息
+ *
  * @author captain
- * @date 18-11-20 上午10:46
  * @version 1.0
+ * @date 18-11-20 上午10:46
  */
 @Data
 @NoArgsConstructor
@@ -58,16 +59,6 @@ public class Context {
 
     private List<Chain> forkChains;
 
-    public Block getGenesisBlock() {
-        while (genesisBlock == null) {
-            try {
-                Thread.sleep(100L);
-            } catch (InterruptedException e) {
-            }
-        }
-        return genesisBlock;
-    }
-
     public void setGenesisBlock(Block block) {
         this.genesisBlock = block;
     }
@@ -76,7 +67,7 @@ public class Context {
         this.status = status;
     }
 
-    public long getLatestHeight(){
+    public long getLatestHeight() {
         return latestBlock.getHeader().getHeight();
     }
 }

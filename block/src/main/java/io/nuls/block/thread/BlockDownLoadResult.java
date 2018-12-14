@@ -47,29 +47,23 @@ public class BlockDownLoadResult {
      */
     private int size;
     /**
-     * 区块来源节点在所有可用节点列表中的下标
-     */
-    private int index;
-    /**
      * 区块来源节点
      */
     private Node node;
     /**
      * 标志从node节点批量下载区块是否成功，要全部下载完成才算成功
      */
-    private boolean success = false;
+    private boolean success;
     /**
-     * 实际下载到的区块列表
+     * 耗时
      */
-    private List<Block> blockList;
+    private long duration;
 
-    public BlockDownLoadResult(long startHeight, int size, Node node, List<Block> blockList, int index) {
+    public BlockDownLoadResult(long startHeight, int size, Node node, boolean b) {
         this.startHeight = startHeight;
         this.size = size;
-        this.index = index;
         this.node = node;
-        this.blockList = blockList;
-        this.setSuccess(blockList.size() == size);
+        this.success = b;
     }
 
 }

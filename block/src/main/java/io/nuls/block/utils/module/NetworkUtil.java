@@ -21,8 +21,8 @@ package io.nuls.block.utils.module;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.message.BaseMessage;
 import io.nuls.block.message.CompleteMessage;
+import io.nuls.block.message.base.BaseMessage;
 import io.nuls.block.model.Node;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;

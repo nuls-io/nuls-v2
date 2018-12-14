@@ -22,16 +22,18 @@ package io.nuls.block.cache;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.constant.ConfigConstant;
+import io.nuls.block.manager.ConfigManager;
+import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.tools.parse.SerializeUtils;
 
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 /**
- * 异步请求响应结果缓存类
+ * 主要缓存区块同步过程中收到的区块，还有孤儿链维护线程请求的单个区块
  *
  * @author captain
  * @version 1.0
@@ -39,24 +41,25 @@ import java.util.concurrent.Future;
  */
 public class CacheHandler {
 
-    private static Map<Integer, DataCacher<Block>> blockByHashCacher = new ConcurrentHashMap<>();
-    private static Map<Integer, DataCacher<Block>> blockByHeightCacher = new ConcurrentHashMap<>();
     private static Map<Integer, DataCacher<CompleteMessage>> synTaskCacher = new ConcurrentHashMap<>();
+    private static Map<Integer, BlockingQueue<Block>> blockingQueueMap = new ConcurrentHashMap<>();
 
-    public static CompletableFuture<Block> addGetBlockByHeightRequest(int chainId, NulsDigestData requestHash) {
-        return blockByHeightCacher.get(chainId).addFuture(requestHash);
-    }
+    private static Map<Integer, DataCacher<Block>> blockByHashCacher = new ConcurrentHashMap<>();
 
     public static CompletableFuture<Block> addGetBlockByHashRequest(int chainId, NulsDigestData requestHash) {
         return blockByHashCacher.get(chainId).addFuture(requestHash);
     }
 
-    public static void receiveBlock(int chainId, Block block) {
-        NulsDigestData hash = NulsDigestData.calcDigestData(SerializeUtils.uint64ToByteArray(block.getHeader().getHeight()));
-        boolean result = blockByHeightCacher.get(chainId).success(hash, block);
-        if (!result) {
-            blockByHashCacher.get(chainId).success(block.getHeader().getHash(), block);
+    public static void receiveBlock(int chainId, BlockMessage message) {
+        DataCacher<CompleteMessage> cacher = synTaskCacher.get(chainId);
+        NulsDigestData requestHash = message.getRequestHash();
+        Block block = message.getBlock();
+        if (cacher.contains(requestHash)) {
+            blockingQueueMap.get(chainId).offer(block);
+            return;
         }
+        blockByHashCacher.get(chainId).success(block.getHeader().getHash(), block);
+
     }
 
     public static Future<CompleteMessage> newRequest(int chainId, NulsDigestData hash) {
@@ -71,10 +74,6 @@ public class CacheHandler {
         }
     }
 
-    public static void removeBlockByHeightFuture(int chainId, NulsDigestData hash) {
-        blockByHeightCacher.get(chainId).removeFuture(hash);
-    }
-
     public static void removeBlockByHashFuture(int chainId, NulsDigestData hash) {
         blockByHashCacher.get(chainId).removeFuture(hash);
     }
@@ -84,9 +83,13 @@ public class CacheHandler {
     }
 
     public static void init(int chainId){
-        blockByHeightCacher.put(chainId, new DataCacher<>());
+        int blockCache = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.BLOCK_CACHE));
+        blockingQueueMap.put(chainId, new ArrayBlockingQueue<>(blockCache));
         blockByHashCacher.put(chainId, new DataCacher<>());
         synTaskCacher.put(chainId, new DataCacher<>());
     }
 
+    public static BlockingQueue<Block> getBlockQueue(int chainId) {
+        return blockingQueueMap.get(chainId);
+    }
 }

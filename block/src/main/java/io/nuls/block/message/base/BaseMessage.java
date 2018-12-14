@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.message;
+package io.nuls.block.message.base;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;

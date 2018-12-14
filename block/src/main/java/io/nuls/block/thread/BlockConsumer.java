@@ -21,12 +21,14 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
+import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
 import io.nuls.tools.log.Log;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Callable;
+import java.util.List;
+import java.util.concurrent.*;
 
 /**
  * 消费同步到的区块
@@ -37,19 +39,53 @@ import java.util.concurrent.Callable;
  */
 public class BlockConsumer implements Callable<Boolean> {
 
+    /**
+     * 区块下载参数
+     */
+    private BlockDownloaderParams params;
+    private ThreadPoolExecutor executor;
+    private List<Future<BlockDownLoadResult>> futures;
     private BlockingQueue<Block> blockQueue;
     private int chainId;
 
     private BlockService blockService = ContextManager.getServiceBean(BlockService.class);
 
-    public BlockConsumer(int chainId, BlockingQueue<Block> blockQueue) {
-        this.blockQueue = blockQueue;
+    public BlockConsumer(int chainId, List<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params) {
+        this.params = params;
+        this.executor = executor;
+        this.futures = futures;
+        this.blockQueue = CacheHandler.getBlockQueue(chainId);
         this.chainId = chainId;
     }
 
     @Override
     public Boolean call() {
         try {
+
+            for (Future<BlockDownLoadResult> task : futures) {
+                BlockDownLoadResult result = null;
+                try {
+                    result = task.get();
+                } catch (Exception e) {
+                    Log.error(e);
+                }
+
+                if (result == null || !result.isSuccess()) {
+                    retryDownload(result);
+                }
+
+                List<Block> list = result.getBlockList();
+                if (list == null) {
+                    executor.shutdown();
+                    return true;
+                }
+
+                for (Block block : list) {
+                    blockQueue.offer(block);
+                }
+            }
+            futures.clear();
+
             Block block;
             while ((block = blockQueue.take()) != null) {
                 boolean saveBlock = blockService.saveBlock(chainId, block);
@@ -62,6 +98,41 @@ public class BlockConsumer implements Callable<Boolean> {
             Log.error(e);
             return false;
         }
+    }
+
+    /**
+     * 下载失败重试，直到成功为止
+     *
+     * @param result
+     * @return
+     */
+    private BlockDownLoadResult retryDownload(BlockDownLoadResult result) {
+        Log.info("retry download blocks, fail node:{}, start:{}", result.getNode(), result.getStartHeight());
+        PriorityBlockingQueue<Node> nodes = params.getNodes();
+        try {
+            result.setNode(nodes.take());
+        } catch (InterruptedException e) {
+            Log.error(e);
+        }
+
+        List<Block> blockList = downloadBlockFromNode(result);
+        if (blockList != null && blockList.size() > 0) {
+            result.setBlockList(blockList);
+        }
+        return result.isSuccess() ? result : retryDownload(result);
+    }
+
+    private List<Block> downloadBlockFromNode(BlockDownLoadResult result) {
+        BlockDownloader.Worker worker = new BlockDownloader.Worker(result.getStartHeight(), result.getSize(), chainId, result.getNode());
+        FutureTask<BlockDownLoadResult> downloadThreadFuture = new FutureTask<>(worker);
+        executor.execute(downloadThreadFuture);
+        List<Block> blockList = null;
+        try {
+            blockList = downloadThreadFuture.get().getBlockList();
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return blockList;
     }
 
 }
