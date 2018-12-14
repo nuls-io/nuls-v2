@@ -10,6 +10,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.utils.DBUtil;
+import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -95,7 +96,7 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
     }
 
     @Override
-    public List<CrossChainTx> getAllTx(NulsDigestData hash) {
+    public List<CrossChainTx> getAllTx() {
         List<CrossChainTx> ccTxPoList = new ArrayList<>();
         try {
             List<byte[]> list = RocksDBService.valueList(TRANSACTION_CROSSCHAIN);

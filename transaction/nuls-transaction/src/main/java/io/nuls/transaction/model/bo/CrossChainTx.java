@@ -35,7 +35,7 @@ import java.io.IOException;
 
 
 /**
- * 记录跨链交易验证过程中的状态和数据的模型
+ * 记录由非NULS主网发起的跨链交易验证过程中的状态和数据的模型
  * @author: Charlie
  * @date: 2018/11/13
  */

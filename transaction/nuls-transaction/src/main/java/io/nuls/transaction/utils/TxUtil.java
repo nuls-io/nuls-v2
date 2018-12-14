@@ -25,15 +25,18 @@
 package io.nuls.transaction.utils;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.model.bo.CrossTxData;
 
 import java.math.BigInteger;
 
@@ -43,7 +46,25 @@ import java.math.BigInteger;
  */
 public class TxUtil {
 
+
+    public static CrossTxData getCrossTxData(Transaction tx) throws NulsException{
+        if(null == tx){
+            throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+        }
+        CrossTxData crossTxData = new CrossTxData();
+        try {
+            crossTxData.parse(new NulsByteBuffer(tx.getTxData()));
+            return crossTxData;
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
+        }
+    }
+
     public static CoinData getCoinData(Transaction tx) throws NulsException {
+        if(null == tx){
+            throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+        }
         try {
             return tx.getCoinDataInstance();
         } catch (NulsException e) {
@@ -53,6 +74,9 @@ public class TxUtil {
     }
 
     public static Transaction getTransaction(String hex) throws NulsException {
+        if(StringUtils.isBlank(hex)){
+            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
+        }
         try {
             return Transaction.getInstance(hex);
         } catch (NulsException e) {

@@ -159,7 +159,7 @@ public class TransactionManager {
      * @param tx
      * @return Result
      */
-    public boolean baseTxValidate(int chainId, Transaction tx) throws NulsException {
+    private boolean baseTxValidate(int chainId, Transaction tx) throws NulsException {
 
         if (null == tx) {
             throw new NulsException(TxErrorCode.TX_NOT_EXIST);
@@ -199,6 +199,8 @@ public class TransactionManager {
 
     /**
      * 验证交易的付款方数据
+     * 1.from中地址对应的链id是否是发起链id
+     * 2.验证资产是否存在
      * @param chainId
      * @param listFrom
      * @return Result
@@ -228,6 +230,7 @@ public class TransactionManager {
 
     /**
      * 验证交易的收款方数据(coinTo是不是属于同一条链)
+     * 1.收款方所有地址是不是属于同一条链
      * @param listTo
      * @return Result
      */
