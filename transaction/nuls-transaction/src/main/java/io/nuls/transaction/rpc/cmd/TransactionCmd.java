@@ -192,13 +192,13 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
-     * Execute transaction processor rollback
-     *
+     * Execute transaction processor single rollback
+     * 单个交易回滚
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "tx_rollback", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction rollback")
-    public Response rollback(Map params) {
+    @CmdAnnotation(cmd = "tx_rollbackSingle", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction rollback")
+    public Response rollbackSingle(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
         try {
@@ -206,7 +206,7 @@ public class TransactionCmd extends BaseCmd {
             Object txHexObj = params == null ? null : params.get("txHex");
             Object secondaryDataHexObj = params == null ? null : params.get("secondaryDataHex");
             // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null || secondaryDataHexObj == null) {
+            if (params == null || chainIdObj == null || txHexObj == null) {
                 throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             int chainId = (Integer) chainIdObj;
@@ -233,7 +233,8 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public Response save(Map params) {
+    @CmdAnnotation(cmd = "tx_save", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction rollback")
+    public Response txSave(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
         try {
@@ -244,8 +245,47 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             int chainId = (Integer) chainIdObj;
-            List<String> txHashList = (List<String>) txHashListObj;
+            List<String> txHashHexList = (List<String>) txHashListObj;
+            List<byte[]> txHashList = new ArrayList<>();
+            //将交易hashHex解码为交易hash字节数组
+            txHashHexList.forEach(hashHex -> txHashList.add(HexUtil.decode(hashHex)));
+            //批量保存已确认交易
             result = confirmedTransactionService.saveTxList(chainId, txHashList);
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", result);
+        return success(result);
+    }
+
+    /**
+     * rollback the transaction in the new block that was verified to the database
+     * 回滚新区块的交易
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "tx_rollback", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction rollback")
+    public Response txRollback(Map params) {
+        Map<String, Boolean> map = new HashMap<>();
+        boolean result = false;
+        try {
+            Object chainIdObj = params == null ? null : params.get("chainId");
+            Object txHashListObj = params == null ? null : params.get("txHashList");
+            // check parameters
+            if (params == null || chainIdObj == null || txHashListObj == null) {
+                throw new NulsException(TxErrorCode.NULL_PARAMETER);
+            }
+            int chainId = (Integer) chainIdObj;
+            List<String> txHashHexList = (List<String>) txHashListObj;
+            List<byte[]> txHashList = new ArrayList<>();
+            //将交易hashHex解码为交易hash字节数组
+            txHashHexList.forEach(hashHex -> txHashList.add(HexUtil.decode(hashHex)));
+            //批量回滚已确认交易
+            result = confirmedTransactionService.rollbackTxList(chainId, txHashList);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {

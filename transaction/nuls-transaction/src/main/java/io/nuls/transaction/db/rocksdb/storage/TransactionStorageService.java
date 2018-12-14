@@ -44,4 +44,21 @@ public interface TransactionStorageService {
      * @return
      */
     boolean removeTx(int chainId,NulsDigestData hash);
+
+    /**
+     * 根据交易hash批量删除已确认交易数据
+     * @param chainId
+     * @param hashList
+     * @return 删除是否成功
+     */
+    boolean removeTxList(int chainId, List<byte[]> hashList);
+
+    /**
+     * 根据交易hash批量查询已确认交易数据
+     *
+     * @param chainId
+     * @param hashList
+     * @return 交易数据列表
+     */
+    List<Transaction> getTxList(int chainId, List<byte[]> hashList);
 }
