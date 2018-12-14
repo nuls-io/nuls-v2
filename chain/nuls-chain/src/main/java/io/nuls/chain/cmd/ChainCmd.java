@@ -90,7 +90,7 @@ public class ChainCmd extends BaseChainCmd {
             asset.setChainId(blockChain.getChainId());
             asset.setSymbol((String) params.get("symbol"));
             asset.setName((String) params.get("name"));
-            asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS)));
+            asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS)));
             asset.setInitNumber(new BigInteger(params.get("initNumber").toString()));
             asset.setDecimalPlaces(Short.valueOf(params.get("decimalPlaces").toString()));
             asset.setAvailable(true);
