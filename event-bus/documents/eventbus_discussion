@@ -24,3 +24,12 @@ Proposed implementation:
 		static void ack(WebSocket webSocket, String messageId) throws JsonProcessingException {}  - this mehod also package private, can't call this from other module
 		
 		
+14th December
+---------
+-> How would sender specify that it needs acknowledgement on receipt of the message ? Here sender is sending the message type as RESPONSE.
+   eventbus sends event to subcribers and it should specify that it requires acknowledgement from the subcriber on receipt of event data.
+   We can set up acknowledgement flag if message type is REQUEST but we dont have this for RESPONSE type.
+->EventBus always sends event data as RESPONSE to subscribers				
+
+			Module A  ------------------------------------->  EventBus  -----------------------------------------> Subscriber (Module B)
+		   (acts as client)	publishes event       (acts as server)          sends data to subscriber      (acts as Client who wants receive event data)
