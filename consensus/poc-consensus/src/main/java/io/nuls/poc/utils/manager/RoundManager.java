@@ -7,7 +7,7 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.model.bo.consensus.PunishType;
+import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;

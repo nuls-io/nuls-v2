@@ -185,7 +185,7 @@ public class ChainManager {
             Address packingAddress1 = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
             for (int index = 0;index < length;index++) {
                 BlockHeader blockHeader = new BlockHeader();
-                blockHeader.setHeight(100);
+                blockHeader.setHeight(index+1);
                 blockHeader.setPreHash(NulsDigestData.calcDigestData("00000000000".getBytes()));
                 blockHeader.setTime(TimeService.currentTimeMillis());
                 blockHeader.setTxCount(1);

@@ -25,7 +25,7 @@
  *
  */
 
-package io.nuls.test;
+package io.nuls.test.rpc;
 
 import io.nuls.rpc.info.NoUse;
 import org.junit.Test;

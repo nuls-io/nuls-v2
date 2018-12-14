@@ -24,36 +24,24 @@
  *
  */
 
-package io.nuls.poc.model.bo.consensus;
+package io.nuls.poc.utils.enumeration;
 
 /**
- * 惩罚类型枚举类
- * Punishment Type Enumeration Class
+ * 共识状态枚举类
+ * Consensus State Enumeration Class
  *
  * @author tag
- * 2018/11/28
+ * 2018/11/13
  */
-public enum PunishType {
+public enum ConsensusStatus {
 
-    /**
-     * 黄牌惩罚
-     * yellow punish
-     * */
-    YELLOW(0),
+    /*
+    警告，以下顺序不能调整，否则某些地方的判断会出错
+    Warning, the following order cannot be adjusted, otherwise the judgment in some places may go wrong
+    */
 
-    /**
-     * 红牌惩罚
-     * red punish
-     * */
-    RED(1);
-
-    private final byte code;
-
-    PunishType(int code) {
-        this.code = (byte) code;
-    }
-
-    public byte getCode() {
-        return code;
-    }
+    INITING,
+    LOADING_CACHE,
+    WAIT_RUNNING,
+    RUNNING,
 }

@@ -8,7 +8,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.model.bo.consensus.ConsensusStatus;
+import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;

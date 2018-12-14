@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.poc.model.bo.consensus;
+package io.nuls.poc.utils.enumeration;
 import io.nuls.tools.parse.I18nUtils;
 
 /**
