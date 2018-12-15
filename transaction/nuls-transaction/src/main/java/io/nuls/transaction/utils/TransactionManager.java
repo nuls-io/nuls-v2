@@ -59,6 +59,9 @@ public class TransactionManager {
         return INSTANCE;
     }
 
+    public Map<Integer, TxRegister> getTxRegisterMap(){
+        return TX_REGISTER_MAP;
+    }
 
     private TransactionManager() {
         //TODO 注册跨链交易

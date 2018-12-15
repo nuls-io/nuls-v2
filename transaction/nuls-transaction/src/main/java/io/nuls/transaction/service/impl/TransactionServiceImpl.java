@@ -39,6 +39,7 @@ import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.thread.TimeService;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -624,8 +625,12 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<String> packableTxs(int chainId, String endtimestamp, String maxTxDataSize) throws NulsException {
-
+    public List<String> packableTxs(int chainId, long endtimestamp, String maxTxDataSize) throws NulsException {
+        TimeService.currentTimeMillis();
+        /**
+         * 1.取出交易的逻辑
+         * 2.调用批量验证的逻辑 batchVerify ？
+         */
         return null;
     }
 
@@ -633,6 +638,9 @@ public class TransactionServiceImpl implements TransactionService {
     public boolean batchVerify(int chainId, List<String> txHexList) throws NulsException {
 
         List<Transaction> txList = new ArrayList<>();
+
+        //组装统一验证参数数据,key为各模块统一验证器cmd
+        Map<String, List<String>> moduleVerifyMap = new HashMap<>();
         for (String txHex : txHexList) {
             //将txHex转换为Transaction对象
             Transaction tx = TxUtil.getTransaction(txHex);
@@ -643,18 +651,31 @@ public class TransactionServiceImpl implements TransactionService {
                     //如果是跨链交易，发起链不是当前链，则核对(跨链验证的结果)
                     CrossChainTx crossChainTx =  crossChainTxStorageService.getTx(tx.getHash());
                     //todo
+                    /**
+                     * 核对(跨链验证的结果)
+                     */
                 }
             }
             //验证单个交易
-            if(transactionManager.verify(chainId, tx)){
-                return false;
-            }
+            transactionManager.verify(chainId, tx);
+
             //验证coinData
+            TxUtil.verifyCoinData(txHex);
+            //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+            TxRegister txRegister = transactionManager.getTxRegister(tx.getType());
+            if(moduleVerifyMap.containsKey(txRegister.getModuleValidator())){
+                moduleVerifyMap.get(txRegister.getModuleValidator()).add(txHex);
+            }else{
+                List<String> txHexs = new ArrayList<>();
+                txHexs.add(txHex);
+                moduleVerifyMap.put(txRegister.getModuleValidator(), txHexs);
+            }
         }
-
+        //todo 是否需要统一验证coinData?
+        TxUtil.verifyCoinData(txHexList);
         //统一验证
+        TxUtil.txsModuleValidator(moduleVerifyMap);
 
-
-        return false;
+        return true;
     }
 }

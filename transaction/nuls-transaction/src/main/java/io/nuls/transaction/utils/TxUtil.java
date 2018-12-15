@@ -39,6 +39,8 @@ import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.CrossTxData;
 
 import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -141,7 +143,39 @@ public class TxUtil {
 
     public static MultiSigAccount getMultiSigAccount(byte[] multiSignAddress) throws NulsException {
         String address = AddressTool.getStringAddressByBytes(multiSignAddress);
-        //todo
+        //todo 获取多签账户
         return new MultiSigAccount();
     }
+
+    public static boolean verifyCoinData(List<String> txHexList) throws NulsException {
+        //todo 批量验证CoinData 不确定是否需要
+        return true;
+    }
+
+    public static boolean verifyCoinData(String txHex) throws NulsException {
+        //todo 验证CoinData
+        return true;
+    }
+
+    public static boolean txValidator(String txHex) throws NulsException {
+        //todo 调用交易验证器
+        return true;
+    }
+
+    public static boolean txsModuleValidator(Map<String, List<String>> map) throws NulsException {
+        //todo 调用交易模块统一验证器 批量
+        boolean rs = true;
+        for(Map.Entry<String, List<String>> entry : map.entrySet()){
+            rs = txsModuleValidator(entry.getKey(), entry.getValue());
+            if(!rs){
+                break;
+            }
+        }
+        return rs;
+    }
+
+    public static boolean txsModuleValidator(String moduleValidator, List<String> txHexList) throws NulsException {
+        return true;
+    }
+
 }
