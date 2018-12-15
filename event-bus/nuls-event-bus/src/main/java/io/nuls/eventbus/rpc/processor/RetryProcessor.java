@@ -14,7 +14,8 @@ import io.nuls.tools.thread.TimeService;
 import java.nio.channels.NotYetConnectedException;
 import java.util.Map;
 
-/**
+/** Separate thread for each subscriber to perform retry process in case event data is not sent successfully.
+ *  subscriber has to send acknowledgement for the retry process.
  * @author naveen
  */
 public class RetryProcessor implements Runnable {
@@ -26,6 +27,7 @@ public class RetryProcessor implements Runnable {
             if(null != objects){
                 Message rspMessage = (Message)objects[0];
                 WsClient wsClient = (WsClient)objects[1];
+                String role = (String)objects[2];
                 int retryAttempt = 1;
                 boolean ackResponse = receiveAck(rspMessage.getMessageId());
                 while (retryAttempt <= EbConstants.EVENT_DISPATCH_RETRY_COUNT && !ackResponse){
@@ -36,6 +38,7 @@ public class RetryProcessor implements Runnable {
                         ackResponse = receiveAck(rspMessage.getMessageId());
                     }catch(NotYetConnectedException nyce){
                         ackResponse = false;
+                        EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{role, EbConstants.SUBSCRIBE});
                     }
                 }
             }
@@ -49,7 +52,7 @@ public class RetryProcessor implements Runnable {
         while (TimeService.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
             Message message = ClientRuntime.firstMessageInAckQueue();
             if (message == null) {
-                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+                /*Thread.sleep(Constants.INTERVAL_TIMEMILLIS);*/
                 continue;
             }
             Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
@@ -57,7 +60,7 @@ public class RetryProcessor implements Runnable {
                 return true;
             }
             ClientRuntime.ACK_QUEUE.offer(message);
-            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+            /*Thread.sleep(Constants.INTERVAL_TIMEMILLIS);*/
         }
         return false;
     }

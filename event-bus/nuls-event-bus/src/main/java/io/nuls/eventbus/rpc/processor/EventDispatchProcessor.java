@@ -1,5 +1,6 @@
 package io.nuls.eventbus.rpc.processor;
 
+import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.model.Subscriber;
 import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.rpc.client.WsClient;
@@ -39,14 +40,15 @@ public class EventDispatchProcessor implements Runnable {
 
                    //TODO add retry logic in case of failure in delivery
                     Message rspMessage = buildMessage(data,messageId);
-                    EventBusRuntime.RETRY_QUEUE.offer(new Object[]{rspMessage,wsClient});
+                    EventBusRuntime.RETRY_QUEUE.offer(new Object[]{rspMessage,wsClient,subscriber.getModuleAbbr()});
                     try{
                         wsClient.send(JSONUtils.obj2json(rspMessage));
                         //span separate thread to retry for each subscriber
-                        Constants.THREAD_POOL.execute(new RetryProcessor());
+                        EbConstants.RETRY_THREAD_POOL.execute(new RetryProcessor());
                     }catch (NotYetConnectedException nyce){
                         Log.error("Client is not connected yet : "+url);
-                        Constants.THREAD_POOL.execute(new RetryProcessor());
+                        EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{subscriber.getModuleAbbr(), EbConstants.SUBSCRIBE});
+                        EbConstants.RETRY_THREAD_POOL.execute(new RetryProcessor());
                     }
                 }
                 Thread.sleep(200L);

@@ -1,9 +1,12 @@
 package io.nuls.eventbus.constant;
 
 import io.nuls.rpc.info.Constants;
+import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.tools.thread.commom.NulsThreadFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 /**
  * @author naveen
@@ -47,5 +50,11 @@ public class EbConstants {
     public static int EVENT_DISPATCH_RETRY_COUNT = 5;
 
     public static long EVENT_RETRY_WAIT_TIME = 10 * Constants.MILLIS_PER_SECOND;
+
+    /**
+     * Thread pool for retry mechanism
+     */
+    public static final ExecutorService RETRY_THREAD_POOL = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("RetryProcessor"));
+
 
 }
