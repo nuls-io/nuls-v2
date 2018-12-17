@@ -32,9 +32,10 @@ import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 所有网络上传输的消息的基类，定义了网络消息的基本格式
@@ -94,7 +95,8 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
         try {
             return  getCheckSum()== this.getHeader().getChecksum();
         } catch (IOException e) {
-            Log.error(e);
+            e.printStackTrace();
+            Log.error(e.getMessage());
             return false;
 
         }
@@ -133,17 +135,6 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
 
     public void setHeader(MessageHeader header) {
         this.header = header;
-    }
-
-    public NulsDigestData getHash() {
-        if (hash == null) {
-            try {
-                this.hash = NulsDigestData.calcDigestData(this.serialize());
-            } catch (IOException e) {
-                Log.error(e);
-            }
-        }
-        return hash;
     }
 
 }

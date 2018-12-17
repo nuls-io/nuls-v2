@@ -41,9 +41,10 @@ import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.message.VersionMessage;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * client channel handler
@@ -175,7 +176,8 @@ public class ClientChannelHandler extends BaseChannelHandler {
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();
         if (!(cause instanceof IOException)) {
-            Log.error(cause);
+            cause.printStackTrace();
+            Log.error(cause.getMessage());
             Log.error("===========exceptionCaught===========");
         }
         ctx.channel().close();

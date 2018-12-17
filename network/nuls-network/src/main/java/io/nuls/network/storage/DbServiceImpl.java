@@ -34,13 +34,14 @@ import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * DbServiceImpl
@@ -64,7 +65,7 @@ public class DbServiceImpl implements DbService,InitializingBean {
             }
         }
         }catch (Exception e){
-            Log.error(e);
+            Log.error(e.getMessage());
             throw new NulsException(e);
         }
         return list;
@@ -83,7 +84,7 @@ public class DbServiceImpl implements DbService,InitializingBean {
                 }
             }
         }catch (Exception e){
-            Log.error(e);
+            Log.error(e.getMessage());
             throw new NulsException(e);
         }
         return list;
@@ -101,7 +102,7 @@ public class DbServiceImpl implements DbService,InitializingBean {
                 }
             }
         }catch (Exception e){
-            Log.error(e);
+            Log.error(e.getMessage());
             throw new NulsException(e);
         }
         return nodeMap;
@@ -215,7 +216,7 @@ public class DbServiceImpl implements DbService,InitializingBean {
                 RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_GROUP_NODESKEYS);
             }
         }catch (Exception e){
-            Log.error(e);
+            Log.error(e.getMessage());
             throw new NulsException(e);
         }
     }

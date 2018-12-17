@@ -28,12 +28,12 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeGroupManager;
-import io.nuls.tools.log.Log;
 
 import java.nio.ByteOrder;
 import java.util.List;
 
 import static io.nuls.network.constant.NetworkConstant.MAX_FRAME_LENGTH;
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * @desription:

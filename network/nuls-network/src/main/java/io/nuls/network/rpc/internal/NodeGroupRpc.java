@@ -39,12 +39,13 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * @description  远程调用接口

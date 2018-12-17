@@ -36,7 +36,7 @@ import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.message.VerackMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.VerackMessageBody;
-import io.nuls.tools.log.Log;
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * version ack message handler

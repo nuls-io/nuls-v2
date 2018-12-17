@@ -28,10 +28,11 @@ import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.tools.log.Log;
 
 import java.util.Collection;
 import java.util.List;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * Group event monitor
