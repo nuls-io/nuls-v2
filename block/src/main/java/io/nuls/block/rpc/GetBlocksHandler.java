@@ -24,6 +24,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.service.BlockService;
@@ -93,6 +94,7 @@ public class GetBlocksHandler extends BaseCmd {
 
     private void sendBlock(int chainId, Block block, String nodeId, NulsDigestData requestHash) {
         BlockMessage blockMessage = new BlockMessage(requestHash, block);
+        blockMessage.setCommand(CommandConstant.BLOCK_MESSAGE);
         boolean result = NetworkUtil.sendToNode(chainId, blockMessage, nodeId);
         if (!result) {
             Log.warn("send block failed:{},height:{}", nodeId, block.getHeader().getHeight());

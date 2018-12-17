@@ -43,7 +43,8 @@ import io.nuls.tools.log.Log;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
-import java.util.*;
+import java.util.List;
+import java.util.Queue;
 import java.util.concurrent.*;
 
 /**
@@ -61,21 +62,16 @@ public class BlockDownloader implements Callable<Boolean> {
      * 区块下载参数
      */
     private BlockDownloaderParams params;
-    /**
-     * 用来保存下载到的区块
-     */
-    private Queue<Block> blockQueue;
     private ThreadPoolExecutor executor;
-    private List<Future<BlockDownLoadResult>> futures;
+    private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
     @Autowired
     private BlockService blockService;
 
-    public BlockDownloader(int chainId, List<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params) {
+    public BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params) {
         this.params = params;
         this.executor = executor;
         this.futures = futures;
-        this.blockQueue = CacheHandler.getBlockQueue(chainId);
         this.chainId = chainId;
     }
 
@@ -94,9 +90,12 @@ public class BlockDownloader implements Callable<Boolean> {
             while (latestHeight <= netLatestHeight) {
                 Node node = nodes.take();
                 int size = maxDowncount * 100 / node.getCredit();
+                if (latestHeight + size > netLatestHeight) {
+                    size = (int) (netLatestHeight - latestHeight);
+                }
                 Worker worker = new Worker(latestHeight, size, chainId, node);
                 Future<BlockDownLoadResult> future = executor.submit(worker);
-                futures.add(future);
+                futures.offer(future);
                 latestHeight += size;
             }
         } catch (Exception e) {
@@ -200,7 +199,7 @@ public class BlockDownloader implements Callable<Boolean> {
                 message.setCommand(CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE);
                 //计算本次请求hash，用来跟踪本次异步请求
                 NulsDigestData messageHash = message.getHash();
-                Future<CompleteMessage> requestFuture = CacheHandler.addBatchBlockRequest(chainId, messageHash);
+                Future<CompleteMessage> future = CacheHandler.addBatchBlockRequest(chainId, messageHash);
 
                 //发送消息给目标节点
                 boolean result = NetworkUtil.sendToNode(chainId, message, node.getId());
@@ -208,17 +207,16 @@ public class BlockDownloader implements Callable<Boolean> {
                 //发送失败清空数据
                 if (!result) {
                     CacheHandler.removeRequest(chainId, messageHash);
+                    return new BlockDownLoadResult(startHeight, size, node, false);
                 }
 
-                b = requestFuture.get(30L, TimeUnit.SECONDS).isSuccess();
-                CacheHandler.removeRequest(chainId, messageHash);
+                CompleteMessage completeMessage = future.get(30L, TimeUnit.SECONDS);
+                b = completeMessage.isSuccess();
             } catch (Exception e) {
                 Log.error(e);
             }
             return new BlockDownLoadResult(startHeight, size, node, b);
         }
-
     }
-
 
 }

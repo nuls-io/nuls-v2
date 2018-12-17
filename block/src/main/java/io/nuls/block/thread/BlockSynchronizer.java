@@ -110,16 +110,21 @@ public class BlockSynchronizer implements Runnable {
             PriorityBlockingQueue<Node> nodes = params.getNodes();
             int nodeCount = nodes.size();
             ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount, 0, new NulsThreadFactory("block-downloader-" + chainId));
-            List<Future<BlockDownLoadResult>> futures = new ArrayList<>();
+            BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
             //5.开启区块下载器BlockDownloader
             BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params);
             FutureTask<Boolean> downloadFutrue = new FutureTask<>(downloader);
-            ThreadUtils.createAndRunThread("block-downloader-manager-" + chainId, downloadFutrue);
+            ThreadUtils.createAndRunThread("block-downloader-" + chainId, downloadFutrue);
 
-            //6.开启区块消费线程BlockConsumer，与上面的BlockDownloader共用一个队列blockQueue
-            BlockConsumer consumer = new BlockConsumer(chainId, futures, executor, params);
+            //6.开启区块收集线程BlockCollector，收集BlockDownloader下载的区块
+            BlockCollector collector = new BlockCollector(chainId, futures, executor, params);
+            ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
+
+            //7.开启区块消费线程BlockConsumer，与上面的BlockDownloader共用一个队列blockQueue
+            BlockConsumer consumer = new BlockConsumer(chainId);
             FutureTask<Boolean> consumerFuture = new FutureTask<>(consumer);
             ThreadUtils.createAndRunThread("block-consumer-" + chainId, consumerFuture);
+
 
             try {
                 Boolean downResult = downloadFutrue.get();

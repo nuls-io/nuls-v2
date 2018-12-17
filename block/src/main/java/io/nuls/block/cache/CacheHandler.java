@@ -46,9 +46,13 @@ public class CacheHandler {
      */
     private static Map<Integer, DataCacher<CompleteMessage>> batchBlockHashCacher = new ConcurrentHashMap<>();
     /**
-     * 批量下载区块请求-区块缓存
+     * 批量下载区块请求-排序后的区块缓存队列，供BlockConsumer使用
      */
-    private static Map<Integer, BlockingQueue<Block>> batchBlockCacher = new ConcurrentHashMap<>();
+    private static Map<Integer, BlockingQueue<Block>> blockQueueCacher = new ConcurrentHashMap<>();
+    /**
+     * 批量下载区块请求-排序前的区块缓存队列，由BlockDownloader放入队列，供BlockCollector使用
+     */
+    private static Map<Integer, Map<NulsDigestData, List<Block>>> workerBlockCacher = new ConcurrentHashMap<>();
 
     /**
      * 单个下载区块请求-hash缓存
@@ -68,7 +72,7 @@ public class CacheHandler {
         int blockCache = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.BLOCK_CACHE));
         singleBlockCacher.put(chainId, new DataCacher<>());
         singleBlockHashCacher.put(chainId, new LinkedList<>());
-        batchBlockCacher.put(chainId, new ArrayBlockingQueue<>(blockCache));
+        blockQueueCacher.put(chainId, new ArrayBlockingQueue<>(blockCache));
         batchBlockHashCacher.put(chainId, new DataCacher<>());
     }
 
@@ -87,24 +91,24 @@ public class CacheHandler {
      * @param message
      */
     public static void receiveBlock(int chainId, BlockMessage message) {
-        DataCacher<CompleteMessage> cacher = batchBlockHashCacher.get(chainId);
         NulsDigestData requestHash = message.getRequestHash();
+        List<Block> blockList = workerBlockCacher.get(chainId).get(requestHash);
         Block block = message.getBlock();
-        if (cacher.contains(requestHash)) {
-            batchBlockCacher.get(chainId).offer(block);
+        if (blockList != null) {
+            blockList.add(block);
             return;
         }
         if (singleBlockHashCacher.get(chainId).contains(requestHash)) {
-            singleBlockCacher.get(chainId).success(block.getHeader().getHash(), block);
+            singleBlockCacher.get(chainId).complete(block.getHeader().getHash(), block);
         }
     }
 
+    public static List<Block> getBlockList(int chainId, NulsDigestData requestHash) {
+        return workerBlockCacher.get(chainId).get(requestHash);
+    }
+
     public static void batchComplete(int chainId, CompleteMessage message) {
-        if (message.isSuccess()) {
-            batchBlockHashCacher.get(chainId).success(message.getRequestHash(), message);
-        } else {
-            batchBlockHashCacher.get(chainId).fail(message.getRequestHash());
-        }
+        batchBlockHashCacher.get(chainId).complete(message.getRequestHash(), message);
     }
 
     public static void removeBlockByHashFuture(int chainId, NulsDigestData hash) {
@@ -116,6 +120,6 @@ public class CacheHandler {
     }
 
     public static BlockingQueue<Block> getBlockQueue(int chainId) {
-        return batchBlockCacher.get(chainId);
+        return blockQueueCacher.get(chainId);
     }
 }

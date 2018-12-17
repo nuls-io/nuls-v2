@@ -39,41 +39,19 @@ import java.util.concurrent.*;
  */
 public class BlockConsumer implements Callable<Boolean> {
 
-    /**
-     * 区块下载参数
-     */
-    private BlockDownloaderParams params;
-    private ThreadPoolExecutor executor;
-    private List<Future<BlockDownLoadResult>> futures;
-    private BlockingQueue<Block> blockQueue;
     private int chainId;
 
     private BlockService blockService = ContextManager.getServiceBean(BlockService.class);
 
-    public BlockConsumer(int chainId, List<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params) {
-        this.params = params;
-        this.executor = executor;
-        this.futures = futures;
-        this.blockQueue = CacheHandler.getBlockQueue(chainId);
+    public BlockConsumer(int chainId) {
         this.chainId = chainId;
     }
 
     @Override
     public Boolean call() {
         try {
-
-            for (Future<BlockDownLoadResult> task : futures) {
-                BlockDownLoadResult result = task.get();
-                if (result == null || !result.isSuccess()) {
-                    retryDownload(result);
-                }
-                Node node = result.getNode();
-                node.adjustCredit(true);
-                params.getNodes().offer(node);
-            }
-            futures.clear();
-
             Block block;
+            BlockingQueue<Block> blockQueue = CacheHandler.getBlockQueue(chainId);
             while ((block = blockQueue.take()) != null) {
                 boolean saveBlock = blockService.saveBlock(chainId, block);
                 if (!saveBlock) {
@@ -85,44 +63,6 @@ public class BlockConsumer implements Callable<Boolean> {
             Log.error(e);
             return false;
         }
-    }
-
-    /**
-     * 下载失败重试，直到成功为止
-     *
-     * @param result
-     * @return
-     */
-    private BlockDownLoadResult retryDownload(BlockDownLoadResult result) {
-        Node node = result.getNode();
-        Log.info("retry download blocks, fail node:{}, start:{}", node, result.getStartHeight());
-        node.adjustCredit(false);
-        params.getNodes().offer(node);
-        PriorityBlockingQueue<Node> nodes = params.getNodes();
-        try {
-            result.setNode(nodes.take());
-        } catch (InterruptedException e) {
-            Log.error(e);
-        }
-
-        List<Block> blockList = downloadBlockFromNode(result);
-        if (blockList != null && blockList.size() > 0) {
-            result.setBlockList(blockList);
-        }
-        return result.isSuccess() ? result : retryDownload(result);
-    }
-
-    private List<Block> downloadBlockFromNode(BlockDownLoadResult result) {
-        BlockDownloader.Worker worker = new BlockDownloader.Worker(result.getStartHeight(), result.getSize(), chainId, result.getNode());
-        FutureTask<BlockDownLoadResult> downloadThreadFuture = new FutureTask<>(worker);
-        executor.execute(downloadThreadFuture);
-        List<Block> blockList = null;
-        try {
-            blockList = downloadThreadFuture.get().getBlockList();
-        } catch (Exception e) {
-            Log.error(e);
-        }
-        return blockList;
     }
 
 }
