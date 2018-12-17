@@ -24,6 +24,9 @@
  */
 package io.nuls.tools.parse;
 
+import io.nuls.tools.io.IoUtils;
+import io.nuls.tools.parse.config.ConfigItem;
+import io.nuls.tools.parse.config.ConfigManager;
 import io.nuls.tools.parse.config.IniEntity;
 import org.ini4j.Config;
 import org.ini4j.Ini;
@@ -31,6 +34,9 @@ import org.ini4j.Ini;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 /**
@@ -69,4 +75,17 @@ public class ConfigLoader {
         return new IniEntity(ini);
     }
 
+    /**
+     * 读取json配置文件
+     * @param fileName
+     * @throws Exception
+     */
+    public static void loadJsonCfg(String fileName) throws Exception {
+        String configJson = IoUtils.read(fileName);
+        List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
+        Map<String, ConfigItem> map = new HashMap<>(configItems.size());
+        configItems.forEach(e -> map.put(e.getName(), e));
+        ConfigManager.add(map);
+        map.clear();
+    }
 }

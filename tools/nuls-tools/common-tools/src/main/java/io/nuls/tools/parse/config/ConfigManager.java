@@ -1,18 +1,14 @@
 /*
  * MIT License
- *
  * Copyright (c) 2017-2018 nuls.io
- *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,33 +16,56 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
 
-package io.nuls.network.cfg;
+package io.nuls.tools.parse.config;
 
-
-import io.nuls.tools.parse.config.IniEntity;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * 用来管理配置项
- * <p>
- * Used to manage system configuration items.
- *
- * @author  Niels Wang
+ * 配置管理器，维护所有本节点上运行的链的配置信息
+ * @author captain
+ * @date 18-11-8 下午1:37
+ * @version 1.0
  */
-public class NulsConfig {
-    /**
-     * 模块配置文件名称
-     * Module configuration file name.
-     */
-    public static  String MODULES_CONFIG_FILE = "modules.json";
+public class ConfigManager {
 
     /**
-     * 模块配置文件中加载的所有配置项
-     * All the configuration items that are loaded in the module configuration file.
+     * 配置信息
      */
-    public static IniEntity MODULES_CONFIG;
+    private static  Map<String, ConfigItem> configItemsMap = new HashMap<>();
 
+    /**
+     * 获取的参数
+     * @param name
+     * @return String
+     */
+    public static String getValue(String name) {
+        return configItemsMap.get(name).getValue();
+    }
+
+    /**
+     * 设置的参数
+     * @param name
+     * @param value
+     * @return
+     */
+    public static boolean setValue(String name, String value) {
+        ConfigItem item = configItemsMap.get(name);
+        if (item.isReadOnly()) {
+            return false;
+        }
+        item.setValue(value);
+        return true;
+    }
+
+    /**
+     * 新增设置参数
+     * @param map
+     */
+    public static void add(Map<String, ConfigItem> map) {
+       configItemsMap.putAll(map);
+    }
 
 }

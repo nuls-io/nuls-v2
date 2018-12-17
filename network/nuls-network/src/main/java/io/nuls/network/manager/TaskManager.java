@@ -56,6 +56,7 @@ public class TaskManager extends BaseManager{
 
 
     /**
+     * 所有client主动连接通过该方法调用线程发出
      * client connect thread
      * @param node Node
      */
@@ -74,7 +75,7 @@ public class TaskManager extends BaseManager{
     @Override
     public void start() {
         scheduleGroupStatusMonitor();
-        timeServiceThreadStart();
+//        timeServiceThreadStart();
         testThread();
     }
 

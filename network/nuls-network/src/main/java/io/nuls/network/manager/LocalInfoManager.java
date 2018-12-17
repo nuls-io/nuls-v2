@@ -145,9 +145,12 @@ public class LocalInfoManager extends BaseManager {
                         while (true) {
                             ip = null;
                             try {
-                                ip = (InetAddress) card.nextElement();
+                                Object object = card.nextElement();
+                                if(object instanceof  InetAddress){
+                                    ip = (InetAddress) card.nextElement();
+                                }
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Log.debug(e.getMessage());
                             }
                             if (ip == null) {
                                 break;
