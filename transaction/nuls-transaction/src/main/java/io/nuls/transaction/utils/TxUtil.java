@@ -86,8 +86,12 @@ public class TxUtil {
             throw new NulsException(TxErrorCode.DESERIALIZE_TX_ERROR);
         }
     }
+/*    public static boolean isNulsMainnet() {
+        return TxConfig.CURRENT_CHAINID == TxConstant.NULS_CHAINID;
+    }*/
 
-    public static boolean isCurrentChainMainAsset(Coin coin) {
+
+/*    public static boolean isCurrentChainMainAsset(Coin coin) {
         return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
     }
 
@@ -97,7 +101,7 @@ public class TxUtil {
             return true;
         }
         return false;
-    }
+    }*/
 
     public static boolean isNulsAsset(Coin coin) {
         return isNulsAsset(coin.getAssetsChainId(), coin.getAssetsId());
@@ -162,11 +166,11 @@ public class TxUtil {
         return true;
     }
 
-    public static boolean txsModuleValidator(Map<String, List<String>> map) throws NulsException {
+    public static boolean txsModuleValidators(Map<String, List<String>> map) throws NulsException {
         //todo 调用交易模块统一验证器 批量
         boolean rs = true;
         for(Map.Entry<String, List<String>> entry : map.entrySet()){
-            rs = txsModuleValidator(entry.getKey(), entry.getValue());
+            rs = txModuleValidator(entry.getKey(), entry.getValue());
             if(!rs){
                 break;
             }
@@ -174,8 +178,10 @@ public class TxUtil {
         return rs;
     }
 
-    public static boolean txsModuleValidator(String moduleValidator, List<String> txHexList) throws NulsException {
+    public static boolean txModuleValidator(String moduleValidator, List<String> txHexList) throws NulsException {
+        //todo 调用交易模块统一验证器
         return true;
     }
+
 
 }

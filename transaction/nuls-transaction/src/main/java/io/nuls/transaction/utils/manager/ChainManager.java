@@ -118,9 +118,9 @@ public class ChainManager {
                 }
                 configMap.put(configBean.getChainId(), configBean);
                 //设置当前链ID
-                TxConfig.CURRENT_CHAINID = configBean.getChainId();
+//                TxConfig.CURRENT_CHAINID = configBean.getChainId();
                 //设置当前链主资产ID
-                TxConfig.CURRENT_CHAIN_ASSETID = configBean.getAssetsId();
+//                TxConfig.CURRENT_CHAIN_ASSETID = configBean.getAssetsId();
             }
             return configMap;
         } catch (Exception e) {
@@ -153,5 +153,13 @@ public class ChainManager {
 
     public void setChainMap(Map<Integer, Chain> chainMap) {
         this.chainMap = chainMap;
+    }
+
+    public boolean containsKey(int key){
+        return this.chainMap.containsKey(key);
+    }
+
+    public Chain getChain(int key){
+        return this.chainMap.get(key);
     }
 }
