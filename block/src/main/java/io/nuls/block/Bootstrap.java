@@ -129,8 +129,8 @@ public class Bootstrap {
         Context context = ContextManager.getContext(CHAIN_ID);
         context.setStatus(RunningStatusEnum.RUNNING);
         Block latestBlock = context.getLatestBlock();
-//        new Miner("1", latestBlock, false).start();
-//        new Miner("2", latestBlock, true).start();
+        new Miner("1", latestBlock, false).start();
+        new Miner("2", latestBlock, true).start();
     }
 
     private static void rpcInit() throws Exception {
