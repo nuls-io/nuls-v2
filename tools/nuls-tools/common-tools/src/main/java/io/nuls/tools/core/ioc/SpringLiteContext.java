@@ -24,6 +24,7 @@
  */
 package io.nuls.tools.core.ioc;
 
+import ch.qos.logback.classic.Logger;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -35,7 +36,7 @@ import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorManager;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 
@@ -63,6 +64,8 @@ public class SpringLiteContext {
     private static MethodInterceptor interceptor;
 
     private static boolean success;
+
+    private static Logger logger = LoggerBuilder.getBasicLoggger();
 
     /**
      * 使用默认的拦截器加载roc环境
@@ -106,12 +109,12 @@ public class SpringLiteContext {
                         try {
                             ((InitializingBean) bean).afterPropertiesSet();
                         } catch (Exception e) {
-                            Log.error(e);
+                            logger.error(e.getMessage());
                         }
                     }
                 }
             } catch (Exception e) {
-                Log.debug(key + " autowire fields failed!");
+                logger.debug(key + " autowire fields failed!");
             }
         }
     }
@@ -259,7 +262,7 @@ public class SpringLiteContext {
             try {
                 loadBean(beanName, clazz, aopProxy);
             } catch (NulsException e) {
-                Log.error(e);
+                logger.error(e.getMessage());
                 return;
             }
         }
@@ -270,7 +273,7 @@ public class SpringLiteContext {
                 Constructor constructor = clazz.getDeclaredConstructor();
                 interceptor = (BeanMethodInterceptor) constructor.newInstance();
             } catch (Exception e) {
-                Log.error(e);
+                logger.error(e.getMessage());
                 return;
             }
             BeanMethodInterceptorManager.addBeanMethodInterceptor(((Interceptor) interceptorAnn).value(), interceptor);
@@ -319,11 +322,11 @@ public class SpringLiteContext {
      */
     private static Object loadBean(String beanName, Class clazz, boolean proxy) throws NulsException {
         if (BEAN_OK_MAP.containsKey(beanName)) {
-            Log.error("model name repetition (" + beanName + "):" + clazz.getName());
+            logger.error("model name repetition (" + beanName + "):" + clazz.getName());
             return BEAN_OK_MAP.get(beanName);
         }
         if (BEAN_TEMP_MAP.containsKey(beanName)) {
-            Log.error("model name repetition (" + beanName + "):" + clazz.getName());
+            logger.error("model name repetition (" + beanName + "):" + clazz.getName());
             return BEAN_TEMP_MAP.get(beanName);
         }
         Object bean = null;
@@ -333,10 +336,10 @@ public class SpringLiteContext {
             try {
                 bean = clazz.newInstance();
             } catch (InstantiationException e) {
-                Log.error(e);
+                logger.error(e.getMessage());
                 throw new NulsException(e);
             } catch (IllegalAccessException e) {
-                Log.error(e);
+                logger.error(e.getMessage());
                 throw new NulsException(e);
             }
         }

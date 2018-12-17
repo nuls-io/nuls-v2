@@ -23,7 +23,6 @@ package io.nuls.block.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.block.message.base.BaseMessage;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Data;
 

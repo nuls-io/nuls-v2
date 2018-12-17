@@ -15,7 +15,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
@@ -67,6 +67,13 @@ public class ChainManager {
             Chain chain = new Chain();
             int chainId = entry.getKey();
             chain.setConfig(entry.getValue());
+
+            /*
+            * 初始化链日志对象
+            * Initialization Chain Log Objects
+            * */
+            chain.setLogger(LoggerBuilder.getLogger(ConsensusConstant.BASIC_LOGGER_NAME+chain));
+
             /*
             初始化链数据库表
             Initialize linked database tables
@@ -128,7 +135,7 @@ public class ChainManager {
             }
             return configMap;
         }catch(Exception e){
-            Log.error(e);
+            LoggerBuilder.getBasicLoggger().error(e.getMessage());
             return null;
         }
     }
@@ -159,9 +166,9 @@ public class ChainManager {
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH+chainId);
         }catch (Exception e){
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.info(e.getMessage());
+                LoggerBuilder.getBasicLoggger().info(e.getMessage());
             }else{
-                Log.error(e);
+                LoggerBuilder.getBasicLoggger().error(e.getMessage());
             }
         }
     }
@@ -218,7 +225,7 @@ public class ChainManager {
             punishManager.loadPunishes(chain);
             roundManager.initRound(chain);
         }catch (Exception e){
-            Log.error(e);
+            LoggerBuilder.getBasicLoggger().error(e.getMessage());
         }
     }
 

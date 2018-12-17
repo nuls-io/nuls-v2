@@ -6,7 +6,6 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.log.Log;
 
 /**
  * 关于链的所有操作：增删改查

@@ -21,7 +21,6 @@
 package io.nuls.block.thread;
 
 import io.nuls.block.model.Node;
-import io.nuls.tools.log.Log;
 import org.junit.Test;
 
 import java.util.concurrent.PriorityBlockingQueue;

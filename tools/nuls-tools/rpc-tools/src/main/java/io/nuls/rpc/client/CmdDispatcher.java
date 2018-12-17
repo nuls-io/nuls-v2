@@ -29,7 +29,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -122,8 +122,7 @@ public class CmdDispatcher {
             Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
             ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
         }
-
-        Log.info("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.ROLE_MAP));
+        LoggerBuilder.getBasicLoggger().info("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.ROLE_MAP));
 
         /*
         判断所有依赖的模块是否已经启动（发送握手信息）
@@ -131,7 +130,7 @@ public class CmdDispatcher {
          */
         if (ServerRuntime.LOCAL.getDependencies() == null) {
             ServerRuntime.startService = true;
-            Log.info("Start service!");
+            LoggerBuilder.getBasicLoggger().info("Start service!");
             return;
         }
 
@@ -140,14 +139,14 @@ public class CmdDispatcher {
             try {
                 ClientRuntime.getWsClient(url);
             } catch (Exception e) {
-                Log.error("Dependent modules cannot be connected: " + role);
+                LoggerBuilder.getBasicLoggger().error("Dependent modules cannot be connected: " + role);
                 ServerRuntime.startService = false;
                 return;
             }
         }
 
         ServerRuntime.startService = true;
-        Log.info("Start service!");
+        LoggerBuilder.getBasicLoggger().info("Start service!");
     }
 
 
@@ -256,7 +255,7 @@ public class CmdDispatcher {
             return "-1";
         }
         WsClient wsClient = ClientRuntime.getWsClient(url);
-        Log.info("SendRequest to "
+        LoggerBuilder.getBasicLoggger().info("SendRequest to "
                 + wsClient.getRemoteSocketAddress().getHostString() + ":" + wsClient.getRemoteSocketAddress().getPort() + "->"
                 + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
@@ -298,7 +297,7 @@ public class CmdDispatcher {
         WsClient wsClient = ClientRuntime.MSG_ID_KEY_WS_CLIENT_MAP.get(messageId);
         if (wsClient != null) {
             wsClient.send(JSONUtils.obj2json(message));
-            Log.info("取消订阅：" + JSONUtils.obj2json(message));
+            LoggerBuilder.getBasicLoggger().info("取消订阅：" + JSONUtils.obj2json(message));
             ClientRuntime.INVOKE_MAP.remove(messageId);
         }
     }

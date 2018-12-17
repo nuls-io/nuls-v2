@@ -30,7 +30,6 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;

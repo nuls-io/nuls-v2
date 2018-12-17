@@ -23,7 +23,6 @@ package io.nuls.block.manager;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.context.Context;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
 import lombok.Data;
 
 import java.util.HashMap;

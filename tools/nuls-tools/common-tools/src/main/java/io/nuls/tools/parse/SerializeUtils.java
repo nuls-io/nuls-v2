@@ -30,7 +30,7 @@ import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import org.spongycastle.crypto.digests.RIPEMD160Digest;
 
 import java.io.ByteArrayOutputStream;
@@ -565,7 +565,7 @@ public class SerializeUtils {
         try {
             bytes = val.getBytes(ToolsConstant.DEFAULT_ENCODING);
         } catch (UnsupportedEncodingException e) {
-            Log.error(e);
+            LoggerBuilder.getBasicLoggger().error(e.getMessage());
             throw new NulsRuntimeException(e);
         }
         return sizeOfBytes(bytes);

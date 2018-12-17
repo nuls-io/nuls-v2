@@ -7,7 +7,6 @@ import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.test.TestUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.thread.TimeService;
 import org.junit.Before;

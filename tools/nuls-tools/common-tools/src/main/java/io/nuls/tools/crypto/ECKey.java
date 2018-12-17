@@ -27,7 +27,7 @@ package io.nuls.tools.crypto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.primitives.UnsignedBytes;
 import io.nuls.tools.data.ObjectUtils;
-import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongycastle.asn1.ASN1InputStream;
@@ -367,7 +367,7 @@ public class ECKey {
                 // Thus, we always use the positive versions. See: http://r6.ca/blog/20111119T211504Z.html
                 return new ECDSASignature(r.getPositiveValue(), s.getPositiveValue());
             } catch (IOException e) {
-                Log.error(e);
+                LoggerBuilder.getBasicLoggger().error(e.getMessage());
                 throw new RuntimeException(e);
             } finally {
                 if (decoder != null) {

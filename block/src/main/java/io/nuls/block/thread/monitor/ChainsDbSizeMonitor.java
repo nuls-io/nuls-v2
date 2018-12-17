@@ -26,13 +26,11 @@ import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
-import io.nuls.tools.log.Log;
 
 import java.util.SortedSet;
 
 import static io.nuls.block.constant.Constant.CLEAN_PARAM;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
-import static io.nuls.block.constant.RunningStatusEnum.SYNCHRONIZING;
 
 /**
  * 分叉链、孤儿链数据库定时清理器

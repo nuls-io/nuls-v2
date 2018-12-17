@@ -29,7 +29,6 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 
 /**
  * @author: Chralie
