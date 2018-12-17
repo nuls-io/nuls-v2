@@ -27,6 +27,7 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class CommonTest {
 
@@ -87,5 +88,17 @@ public class CommonTest {
         System.out.println(end - start);
         System.out.println(map.size());
     }
+
+    @Test
+    public void thenApply() {
+        String result = CompletableFuture.supplyAsync(() -> "hello").thenApply(s -> s + " world").join();
+        System.out.println(result);
+    }
+
+    @Test
+    public void thenAccept(){
+        CompletableFuture.supplyAsync(() -> "hello").thenAccept(s -> System.out.println(s+" world"));
+    }
+
 
 }

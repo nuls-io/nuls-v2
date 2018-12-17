@@ -21,6 +21,7 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.Node;
 import lombok.Data;
 
@@ -58,8 +59,13 @@ public class BlockDownLoadResult {
      * 耗时
      */
     private long duration;
+    /**
+     * 对应的请求hash
+     */
+    private NulsDigestData messageHash;
 
-    public BlockDownLoadResult(long startHeight, int size, Node node, boolean b) {
+    public BlockDownLoadResult(NulsDigestData messageHash, long startHeight, int size, Node node, boolean b) {
+        this.messageHash = messageHash;
         this.startHeight = startHeight;
         this.size = size;
         this.node = node;

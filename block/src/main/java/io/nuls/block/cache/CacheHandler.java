@@ -46,10 +46,6 @@ public class CacheHandler {
      */
     private static Map<Integer, DataCacher<CompleteMessage>> batchBlockHashCacher = new ConcurrentHashMap<>();
     /**
-     * 批量下载区块请求-排序后的区块缓存队列，供BlockConsumer使用
-     */
-    private static Map<Integer, BlockingQueue<Block>> blockQueueCacher = new ConcurrentHashMap<>();
-    /**
      * 批量下载区块请求-排序前的区块缓存队列，由BlockDownloader放入队列，供BlockCollector使用
      */
     private static Map<Integer, Map<NulsDigestData, List<Block>>> workerBlockCacher = new ConcurrentHashMap<>();
@@ -72,7 +68,6 @@ public class CacheHandler {
         int blockCache = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.BLOCK_CACHE));
         singleBlockCacher.put(chainId, new DataCacher<>());
         singleBlockHashCacher.put(chainId, new LinkedList<>());
-        blockQueueCacher.put(chainId, new ArrayBlockingQueue<>(blockCache));
         batchBlockHashCacher.put(chainId, new DataCacher<>());
     }
 
@@ -117,9 +112,5 @@ public class CacheHandler {
 
     public static void removeRequest(int chainId, NulsDigestData hash) {
         batchBlockHashCacher.get(chainId).removeFuture(hash);
-    }
-
-    public static BlockingQueue<Block> getBlockQueue(int chainId) {
-        return blockQueueCacher.get(chainId);
     }
 }

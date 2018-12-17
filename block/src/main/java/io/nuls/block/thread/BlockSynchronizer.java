@@ -38,7 +38,6 @@ import io.nuls.tools.thread.TimeService;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -110,6 +109,7 @@ public class BlockSynchronizer implements Runnable {
             PriorityBlockingQueue<Node> nodes = params.getNodes();
             int nodeCount = nodes.size();
             ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount, 0, new NulsThreadFactory("block-downloader-" + chainId));
+            BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
             BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
             //5.开启区块下载器BlockDownloader
             BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params);
@@ -117,11 +117,11 @@ public class BlockSynchronizer implements Runnable {
             ThreadUtils.createAndRunThread("block-downloader-" + chainId, downloadFutrue);
 
             //6.开启区块收集线程BlockCollector，收集BlockDownloader下载的区块
-            BlockCollector collector = new BlockCollector(chainId, futures, executor, params);
+            BlockCollector collector = new BlockCollector(chainId, futures, executor, params, queue);
             ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
 
             //7.开启区块消费线程BlockConsumer，与上面的BlockDownloader共用一个队列blockQueue
-            BlockConsumer consumer = new BlockConsumer(chainId);
+            BlockConsumer consumer = new BlockConsumer(chainId, queue);
             FutureTask<Boolean> consumerFuture = new FutureTask<>(consumer);
             ThreadUtils.createAndRunThread("block-consumer-" + chainId, consumerFuture);
 
@@ -195,7 +195,7 @@ public class BlockSynchronizer implements Runnable {
     public BlockDownloaderParams statistics(List<Node> availableNodes, int chainId) {
         BlockDownloaderParams params = new BlockDownloaderParams();
         params.setAvailableNodesCount(availableNodes.size());
-        PriorityBlockingQueue<Node> nodeQueue = new PriorityBlockingQueue<>(availableNodes.size(), Node.comparator);
+        PriorityBlockingQueue<Node> nodeQueue = new PriorityBlockingQueue<>(availableNodes.size(), Node.COMPARATOR);
         params.setNodes(nodeQueue);
         //每个节点的(最新HASH+最新高度)是key
         String key = "";

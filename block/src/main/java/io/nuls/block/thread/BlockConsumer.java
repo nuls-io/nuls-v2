@@ -40,19 +40,19 @@ import java.util.concurrent.*;
 public class BlockConsumer implements Callable<Boolean> {
 
     private int chainId;
-
+    private BlockingQueue<Block> queue;
     private BlockService blockService = ContextManager.getServiceBean(BlockService.class);
 
-    public BlockConsumer(int chainId) {
+    public BlockConsumer(int chainId, BlockingQueue<Block> queue) {
         this.chainId = chainId;
+        this.queue = queue;
     }
 
     @Override
     public Boolean call() {
         try {
             Block block;
-            BlockingQueue<Block> blockQueue = CacheHandler.getBlockQueue(chainId);
-            while ((block = blockQueue.take()) != null) {
+            while ((block = queue.take()) != null) {
                 boolean saveBlock = blockService.saveBlock(chainId, block);
                 if (!saveBlock) {
                     return false;

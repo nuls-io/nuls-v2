@@ -192,13 +192,13 @@ public class BlockDownloader implements Callable<Boolean> {
         public BlockDownLoadResult call() {
             boolean b = false;
             long endHeight = startHeight + size - 1;
+            Log.info("getBlocks:{}->{} ,from:{}, start", startHeight, endHeight, node.getId());
+            //组装批量获取区块消息
+            HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
+            message.setCommand(CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE);
+            //计算本次请求hash，用来跟踪本次异步请求
+            NulsDigestData messageHash = message.getHash();
             try {
-                Log.info("getBlocks:{}->{} ,from:{}, start", startHeight, endHeight, node.getId());
-                //组装批量获取区块消息
-                HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
-                message.setCommand(CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE);
-                //计算本次请求hash，用来跟踪本次异步请求
-                NulsDigestData messageHash = message.getHash();
                 Future<CompleteMessage> future = CacheHandler.addBatchBlockRequest(chainId, messageHash);
 
                 //发送消息给目标节点
@@ -207,7 +207,7 @@ public class BlockDownloader implements Callable<Boolean> {
                 //发送失败清空数据
                 if (!result) {
                     CacheHandler.removeRequest(chainId, messageHash);
-                    return new BlockDownLoadResult(startHeight, size, node, false);
+                    return new BlockDownLoadResult(messageHash, startHeight, size, node, false);
                 }
 
                 CompleteMessage completeMessage = future.get(30L, TimeUnit.SECONDS);
@@ -215,7 +215,7 @@ public class BlockDownloader implements Callable<Boolean> {
             } catch (Exception e) {
                 Log.error(e);
             }
-            return new BlockDownLoadResult(startHeight, size, node, b);
+            return new BlockDownLoadResult(messageHash, startHeight, size, node, b);
         }
     }
 

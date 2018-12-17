@@ -82,7 +82,7 @@ public class BlockDownloaderTest {
 
     @Test
     public void test3() throws InterruptedException {
-        var queue = new PriorityBlockingQueue<Node>(3, Node.comparator);
+        var queue = new PriorityBlockingQueue<Node>(3, Node.COMPARATOR);
         Node node1 = new Node();
         node1.setCredit(100);
         queue.add(node1);

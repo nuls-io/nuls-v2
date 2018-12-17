@@ -38,7 +38,7 @@ public class Node {
     /**
      * 节点比较器，默认按信用值排序
      */
-    public static final Comparator comparator = Comparator.comparingInt(Node::getCredit).reversed();
+    public static final Comparator COMPARATOR = Comparator.comparingInt(Node::getCredit).reversed();
 
     /**
      * ip+port

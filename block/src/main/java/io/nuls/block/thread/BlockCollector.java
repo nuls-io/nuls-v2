@@ -31,6 +31,7 @@ import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.message.HeightRangeMessage;
+import io.nuls.block.model.Chain;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockDownloadUtils;
@@ -43,6 +44,7 @@ import io.nuls.tools.log.Log;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.*;
@@ -58,21 +60,24 @@ import java.util.concurrent.*;
 @NoArgsConstructor
 public class BlockCollector implements Runnable {
 
+    public static final Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
     /**
      * 区块下载参数
      */
     private BlockDownloaderParams params;
+    private BlockingQueue<Block> queue;
     private ThreadPoolExecutor executor;
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
     @Autowired
     private BlockService blockService;
 
-    public BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params) {
+    public BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
         this.params = params;
         this.executor = executor;
         this.futures = futures;
         this.chainId = chainId;
+        this.queue = queue;
     }
 
     @Override
@@ -84,6 +89,9 @@ public class BlockCollector implements Runnable {
                     Node node = result.getNode();
                     node.adjustCredit(true);
                     params.getNodes().offer(node);
+                    List<Block> blockList = CacheHandler.getBlockList(chainId, result.getMessageHash());
+                    blockList.sort(BLOCK_COMPARATOR);
+                    queue.addAll(blockList);
                     continue;
                 }
                 retryDownload(result);
