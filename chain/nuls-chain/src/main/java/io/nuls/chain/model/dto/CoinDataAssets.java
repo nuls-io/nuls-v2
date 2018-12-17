@@ -31,11 +31,9 @@ import java.math.BigInteger;
 import java.util.Map;
 
 /**
- * @program: nuls2.0
- * @description:
- * @author: lan
- * @create: 2018/11/29
- **/
+ * @author lan
+ * @date 2018/11/29
+ */
 @Data
 @ToString
 public class CoinDataAssets {

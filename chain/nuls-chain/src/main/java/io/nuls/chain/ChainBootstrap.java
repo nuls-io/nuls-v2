@@ -2,10 +2,10 @@ package io.nuls.chain;
 
 import io.nuls.chain.config.NulsConfig;
 import io.nuls.chain.info.CmConstants;
-import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.service.ChainService;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.rpc.info.HostInfo;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -14,7 +14,12 @@ import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.TimeService;
 
+import java.util.Map;
+
 /**
+ * 链管理模块启动类
+ * Main class of BlockChain module
+ *
  * @author tangyi
  * @date 2018/11/7
  */
@@ -25,6 +30,12 @@ public class ChainBootstrap {
     private ChainBootstrap() {
     }
 
+    /**
+     * 单例模式，只能启动一个链管理模块
+     * Singleton mode, only one chain management module can be started
+     *
+     * @return ChainBootstrap
+     */
     public static ChainBootstrap getInstance() {
         if (chainBootstrap == null) {
             synchronized (ChainBootstrap.class) {
@@ -37,106 +48,143 @@ public class ChainBootstrap {
         return chainBootstrap;
     }
 
+    /**
+     * 链管理模块启动入口
+     * Chain management module startup entry
+     *
+     * @param args null
+     */
     public static void main(String[] args) {
         ChainBootstrap.getInstance().start();
     }
 
     public void start() {
         try {
-
             Log.info("Chain Bootstrap start...");
 
+            /* Read resources/module.ini to initialize the configuration */
             initCfg();
 
-            initModule();
+            /* Configuration to Map */
+            initWithFile();
 
+            /* Database data to Map */
+            initWithDatabase();
+
+            /* 自动注入 (Autowired) */
             SpringLiteContext.init("io.nuls.chain", new ModularServiceMethodInterceptor());
 
-            // module init params
-            initChain();
-            startRpcServer();
+            /* 把Nuls2.0主网信息存入数据库中 (Store the Nuls2.0 main network information into the database) */
+            initMainChain();
+
+            /* Start time service */
             TimeService.getInstance().start();
 
+            /* 提供对外接口 (Provide external interface) */
+            startRpcServer();
+
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
     }
 
+    /**
+     * 读取resources/module.ini，初始化配置
+     * Read resources/module.ini to initialize the configuration
+     *
+     * @throws Exception Any error will throw an exception
+     */
     private void initCfg() throws Exception {
-
+        /* 读取resources/module.ini (Read resources/module.ini) */
         NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
 
-        // database data path
-        CmRuntimeInfo.dataPath = NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.DB, CmConstants.DB_DATA_PATH, null);
-
-        // set system encoding
+        /* 设置系统编码 (Set system encoding) */
         NulsConfig.DEFAULT_ENCODING = NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CFG_SYSTEM_SECTION, CmConstants.CFG_SYSTEM_DEFAULT_ENCODING);
 
-        // set system language
+        /* 设置系统语言 (Set system language) */
         String language = NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CFG_SYSTEM_SECTION, CmConstants.CFG_SYSTEM_LANGUAGE);
         I18nUtils.loadLanguage("languages", language);
         I18nUtils.setLanguage(language);
-
     }
 
-    private void initModule() throws Exception {
+    /**
+     * 把初始化配置的值从NulsConfig.MODULES_CONFIG中放到Map中，不同类型的值放进不同Map
+     * Put the value of the initial configuration from NulsConfig.MODULES_CONFIG into the Map
+     */
+    private void initWithFile() {
+        /* 基本配置信息 (Basic configuration) */
+        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_SYMBOL_MAX);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_NAME_MAX);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_DEPOSIT_NULS);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_INIT_NUMBER_MIN);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_INIT_NUMBER_MAX);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_DECIMAL_PLACES_MIN);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_DECIMAL_PLACES_MAX);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_RECOVERY_RATE);
 
-        CmConstants.PARAM_MAP.put(
-                CmConstants.ASSET_SYMBOL_MAX, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_SYMBOL_MAX, null));
-        CmConstants.PARAM_MAP.put(
-                CmConstants.ASSET_NAME_MAX, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_NAME_MAX, null));
-        CmConstants.PARAM_MAP.put(
-                CmConstants.ASSET_DEPOSITNULS, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_DEPOSITNULS, null));
-        CmConstants.PARAM_MAP.put(
-                CmConstants.ASSET_INITNUMBER_MIN, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_INITNUMBER_MIN, null));
-        CmConstants.PARAM_MAP.put(
-                CmConstants.ASSET_INITNUMBER_MAX, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_INITNUMBER_MAX, null));
-        CmConstants.PARAM_MAP.put(
-                CmConstants.ASSET_DECIMALPLACES_MIN, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_DECIMALPLACES_MIN, null));
-        CmConstants.PARAM_MAP.put(
-                CmConstants.ASSET_DECIMALPLACES_MAX, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_DECIMALPLACES_MAX, null));
-        CmConstants.PARAM_MAP.put(
-                CmConstants.ASSET_RECOVERY_RATE, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.PARAM, CmConstants.ASSET_RECOVERY_RATE, null));
+        /* 默认的跨链主资产 (Nuls) (Default cross-chain master asset) */
+        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.CHAIN_ASSET, CmConstants.NULS_CHAIN_ID);
+        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.CHAIN_ASSET, CmConstants.NULS_CHAIN_NAME);
+        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.CHAIN_ASSET, CmConstants.NULS_ASSET_ID);
+        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.CHAIN_ASSET, CmConstants.NULS_ASSET_MAX);
+        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.CHAIN_ASSET, CmConstants.NULS_ASSET_SYMBOL);
+    }
 
-        CmConstants.CHAIN_ASSET_MAP.put(
-                CmConstants.NULS_CHAIN_ID, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CHAIN_ASSET, CmConstants.NULS_CHAIN_ID, null));
-        CmConstants.CHAIN_ASSET_MAP.put(
-                CmConstants.NULS_CHAIN_NAME, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CHAIN_ASSET, CmConstants.NULS_CHAIN_NAME, null));
-        CmConstants.CHAIN_ASSET_MAP.put(
-                CmConstants.NULS_ASSET_ID, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CHAIN_ASSET, CmConstants.NULS_ASSET_ID, null));
-        CmConstants.CHAIN_ASSET_MAP.put(
-                CmConstants.NULS_ASSET_MAX, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CHAIN_ASSET, CmConstants.NULS_ASSET_MAX, null));
-        CmConstants.CHAIN_ASSET_MAP.put(
-                CmConstants.NULS_ASSET_SYMBOL, NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CHAIN_ASSET, CmConstants.NULS_ASSET_SYMBOL, null));
+    /**
+     * 如果数据库中有相同的配置，则以数据库为准
+     * If the database has the same configuration, use the database data
+     *
+     * @throws Exception Any error will throw an exception
+     */
+    private void initWithDatabase() throws Exception {
+        /* 打开数据库连接 (Open database connection) */
+        RocksDBService.init(CmConstants.DATA_PATH);
 
-
-        /*
-          Read the configuration file, store the data in the root directory
-          Initialize all table connections under the directory and put them into the cache
-         */
-        RocksDBService.init(CmRuntimeInfo.dataPath);
-
+        /* 配置信息的表：param (Table of configuration: param) */
         if (!RocksDBService.existTable(CmConstants.PARAM)) {
             RocksDBService.createTable(CmConstants.PARAM);
         }
 
-        for (String key : CmConstants.PARAM_MAP.keySet()) {
+        /* 读取表中的数据更新Map (Read the data in the table, then update map) */
+        for (Map.Entry<String, String> entry : CmConstants.PARAM_MAP.entrySet()) {
+            String key = entry.getKey();
             byte[] value = RocksDBService.get(CmConstants.PARAM, key.getBytes());
             if (value != null) {
                 CmConstants.PARAM_MAP.put(key, new String(value));
             }
         }
-
     }
-    private void initChain() throws Exception {
-        //初始化数据，在数据库初始化后进行处理
-        ChainService chainService = SpringLiteContext.getBean(ChainService.class);
-        chainService.initChain();
 
+    private void configToMap(Map<String, String> toMap, String section, String key) {
+        toMap.put(key, NulsConfig.MODULES_CONFIG.getCfgValue(section, key, null));
     }
+
+    /**
+     * 把Nuls2.0主网信息存入数据库中
+     * Store the Nuls2.0 main network information into the database
+     *
+     * @throws Exception Any error will throw an exception
+     */
+    private void initMainChain() throws Exception {
+        SpringLiteContext.getBean(ChainService.class).initMainChain();
+    }
+
+    /**
+     *
+     * @throws Exception Any error will throw an exception
+     */
     private void startRpcServer() throws Exception {
-        WsServer wsServer = new WsServer(HostInfo.randomPort());
-//        wsServer.init("cm", new String[]{"m2", "m3"}, "io.nuls.chain.cmd");
-//        wsServer.startAndSyncKernel("ws://127.0.0.1:8887");
+        WsServer.getInstance(ModuleE.CM)
+                .moduleRoles(new String[]{"1.0"})
+                .moduleVersion("1.0")
+//                .dependencies(ModuleE.LG.abbr, "1.1")
+//                .dependencies(ModuleE.BL.abbr, "2.1")
+                .scanPackage("io.nuls.chain.cmd")
+                .connect("ws://127.0.0.1:8887");
+
+        // Get information from kernel
+        CmdDispatcher.syncKernel();
     }
+
+
 }

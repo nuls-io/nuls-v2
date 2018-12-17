@@ -1,4 +1,4 @@
-package io.nuls.test;
+package io.nuls.test.rpc;
 
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
@@ -14,6 +14,13 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 节点相关操作测试
+ * Node-related operation testing
+ *
+ * @author tag
+ * 2018/12/1
+ * */
 public class AgentTest {
     protected  String success = "1";
     @BeforeClass

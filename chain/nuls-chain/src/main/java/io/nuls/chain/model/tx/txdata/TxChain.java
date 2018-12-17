@@ -5,10 +5,7 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.basic.TransactionLogicData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -19,54 +16,28 @@ import java.util.Set;
  * @date 2018/11/7
  * @description
  */
+@EqualsAndHashCode(callSuper = true)
+@Data
 @ToString
-@NoArgsConstructor
 public class TxChain extends TransactionLogicData {
-    @Getter
-    @Setter
+
     private int chainId;
-    @Getter
-    @Setter
     private String name;
-    @Getter
-    @Setter
     private String addressType;
-    @Getter
-    @Setter
     private long magicNumber;
-    @Getter
-    @Setter
     private boolean supportInflowAsset;
-    @Getter
-    @Setter
     private int minAvailableNodeNum;
-    @Getter
-    @Setter
     private int singleNodeMinConnectionNum;
-    @Getter
-    @Setter
     private byte[] address;
 
     /**
      * 下面这些是创建链的时候，必须携带的资产信息
      */
-    @Getter
-    @Setter
     private int assetId;
-    @Getter
-    @Setter
     private String symbol;
-    @Getter
-    @Setter
     private String assetName;
-    @Getter
-    @Setter
     private int depositNuls;
-    @Getter
-    @Setter
     private BigInteger initNumber;
-    @Getter
-    @Setter
     private short decimalPlaces;
 
 

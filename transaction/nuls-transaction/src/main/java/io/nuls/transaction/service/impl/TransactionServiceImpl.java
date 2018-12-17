@@ -31,8 +31,6 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.base.signture.TransactionSignature;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
@@ -40,12 +38,15 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.thread.TimeService;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
+import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.model.bo.CrossTxData;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.TxWrapper;
@@ -74,6 +75,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private TxVerifiedStorageService txVerifiedStorageService;
+
+    @Autowired
+    private CrossChainTxStorageService crossChainTxStorageService;
 
     @Override
     public boolean register(TxRegister txRegister) {
@@ -541,6 +545,7 @@ public class TransactionServiceImpl implements TransactionService {
      * 地址和签名一一对应
      * from里面的资产是否存在，是否可以进行跨链交易
      * 必须包含NULS资产的from
+     * 验证txData发起链id和from地址链id是否一致
      *
      * @param chainId
      * @param tx
@@ -548,15 +553,21 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public boolean crossTransactionValidator(int chainId, Transaction tx) throws NulsException {
-        if (!transactionManager.baseTxValidate(chainId, tx)) {
+        /*if (!transactionManager.baseTxValidate(chainId, tx)) {
             return false;
-        }
+        }*/
         if (null == tx.getCoinData() || tx.getCoinData().length == 0) {
             throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
         }
         CoinData coinData = TxUtil.getCoinData(tx);
         if (!validateCoinFrom(chainId, coinData.getFrom())) {
             return false;
+        }
+        //验证txData发起链id和from地址链id是否一致
+        int fromChainId = getCrossTxFromsOriginChainId(tx);
+        CrossTxData crossTxData = TxUtil.getCrossTxData(tx);
+        if(fromChainId != crossTxData.getChainId()){
+            throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
         }
         return true;
     }
@@ -586,25 +597,85 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
 
+
+    /**
+     * 获取跨链交易tx中froms里面地址的链id
+     * @param tx
+     * @return
+     */
+    private int getCrossTxFromsOriginChainId(Transaction tx) throws NulsException {
+        CoinData coinData = TxUtil.getCoinData(tx);
+        if(null == coinData.getFrom() || coinData.getFrom().size() == 0){
+            throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
+        }
+        return AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
+
+    }
+
     @Override
     public boolean crossTransactionCommit(int chainId, Transaction tx, BlockHeaderDigestDTO blockHeader) {
+        //todo 调账本记账
         return true;
     }
 
     @Override
     public boolean crossTransactionRollback(int chainId, Transaction tx, BlockHeaderDigestDTO blockHeader) {
+        //todo 调账本回滚？
         return true;
     }
 
     @Override
-    public List<String> packableTxs(int chainId, String endtimestamp, String maxTxDataSize) throws NulsException {
-
+    public List<String> packableTxs(int chainId, long endtimestamp, String maxTxDataSize) throws NulsException {
+        TimeService.currentTimeMillis();
+        /**
+         * 1.取出交易的逻辑
+         * 2.调用批量验证的逻辑 batchVerify ？
+         */
         return null;
     }
 
     @Override
-    public boolean batchVerify(int chainId, List<String> list) throws NulsException {
+    public boolean batchVerify(int chainId, List<String> txHexList) throws NulsException {
 
-        return false;
+        List<Transaction> txList = new ArrayList<>();
+
+        //组装统一验证参数数据,key为各模块统一验证器cmd
+        Map<String, List<String>> moduleVerifyMap = new HashMap<>();
+        for (String txHex : txHexList) {
+            //将txHex转换为Transaction对象
+            Transaction tx = TxUtil.getTransaction(txHex);
+            txList.add(tx);
+            if(tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER){
+                CrossTxData crossTxData = TxUtil.getCrossTxData(tx);
+                if(crossTxData.getChainId() != TxConfig.CURRENT_CHAINID){
+                    //如果是跨链交易，发起链不是当前链，则核对(跨链验证的结果)
+                    CrossChainTx crossChainTx =  crossChainTxStorageService.getTx(tx.getHash());
+                    //todo
+                    /**
+                     * 核对(跨链验证的结果)
+                     */
+                }
+            }
+            //验证单个交易
+            transactionManager.verify(chainId, tx);
+
+            //验证coinData
+            TxUtil.verifyCoinData(txHex);
+            //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+            TxRegister txRegister = transactionManager.getTxRegister(tx.getType());
+            if(moduleVerifyMap.containsKey(txRegister.getModuleValidator())){
+                moduleVerifyMap.get(txRegister.getModuleValidator()).add(txHex);
+            }else{
+                List<String> txHexs = new ArrayList<>();
+                txHexs.add(txHex);
+                moduleVerifyMap.put(txRegister.getModuleValidator(), txHexs);
+            }
+        }
+        //todo 是否需要统一验证coinData?
+        TxUtil.verifyCoinData(txHexList);
+        //统一验证
+        TxUtil.txsModuleValidator(moduleVerifyMap);
+
+        return true;
     }
 }

@@ -74,7 +74,9 @@ public class TxUnverifiedProcessTask implements Runnable {
             Transaction tx = txWrapper.getTx();
             int chainId = txWrapper.getChainId();
             boolean rs = transactionManager.verify(txWrapper.getChainId(), tx);
-            //todo 跨链交易单独处理？
+
+            //todo 跨链交易单独处理, 是否需要进行跨链验证？
+
             if (!rs) {
                 return false;
             }

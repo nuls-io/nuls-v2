@@ -44,7 +44,6 @@ public class PunishStorageServiceImpl implements PunishStorageService {
             Log.error(e);
             return false;
         }
-
     }
 
     @Override
@@ -63,14 +62,4 @@ public class PunishStorageServiceImpl implements PunishStorageService {
             throw e;
         }
     }
-
-    /*@Override
-    public void afterPropertiesSet() throws NulsException {
-        try {
-            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH);
-        }catch (Exception e){
-            Log.error(e);
-            throw new NulsException(e);
-        }
-    }*/
 }

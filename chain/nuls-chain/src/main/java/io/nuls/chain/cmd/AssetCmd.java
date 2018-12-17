@@ -48,8 +48,8 @@ public class AssetCmd extends BaseChainCmd {
 
     @CmdAnnotation(cmd = "cm_asset", version = 1.0,
             description = "asset")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response asset(Map params) {
         try {
             int chainId = Integer.valueOf(params.get("chainId").toString());
@@ -67,11 +67,11 @@ public class AssetCmd extends BaseChainCmd {
      */
     @CmdAnnotation(cmd = "cm_assetReg", version = 1.0,
             description = "assetReg")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "symbol", parameterType = "array")
     @Parameter(parameterName = "name", parameterType = "String")
     @Parameter(parameterName = "initNumber", parameterType = "String")
-    @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]", parameterValidRegExp = "")
+    @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]")
     @Parameter(parameterName = "address", parameterType = "String")
     public Response assetReg(Map params) {
         try {
@@ -81,7 +81,7 @@ public class AssetCmd extends BaseChainCmd {
             asset.setChainId(chainId);
             asset.setSymbol((String) params.get("symbol"));
             asset.setName((String) params.get("name"));
-            asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS)));
+            asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS)));
             asset.setInitNumber(new BigInteger(params.get("initNumber").toString()));
             asset.setDecimalPlaces(Short.valueOf(params.get("decimalPlaces").toString()));
             asset.setAvailable(true);
@@ -117,8 +117,8 @@ public class AssetCmd extends BaseChainCmd {
     }
 
     @CmdAnnotation(cmd = "cm_assetDisable", version = 1.0, description = "assetDisable")
-    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
-    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]", parameterValidRegExp = "")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "address", parameterType = "String")
     public Response assetDisable(Map params) {
         try {
@@ -137,7 +137,7 @@ public class AssetCmd extends BaseChainCmd {
               判断链下是否只有这一个资产了，如果是，则进行带链注销交易
              */
             BlockChain dbChain = chainService.getChain(chainId);
-            Transaction transaction = null;
+            Transaction transaction;
             if (dbChain.getSelfAssetKeyList().size() == 1
                     && dbChain.getSelfAssetKeyList().get(0).equals(CmRuntimeInfo.getAssetKey(chainId, asset.getAssetId()))) {
                 //带链注销
@@ -166,8 +166,8 @@ public class AssetCmd extends BaseChainCmd {
             CoinData coinData = this.getDisableCoinData(address, chainId, assetId, String.valueOf(asset.getDepositNuls()), transaction.size(), dbChain.getRegTxHash(), accountBalance);
             transaction.setCoinData(coinData.serialize());
             //TODO:交易签名
-            boolean rpcReslt = rpcService.newTx(transaction);
-            if (rpcReslt) {
+            boolean rpcResult = rpcService.newTx(transaction);
+            if (rpcResult) {
                 return success(asset);
             } else {
                 return failed("sent tx fail");

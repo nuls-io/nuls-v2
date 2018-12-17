@@ -8,7 +8,7 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.model.bo.consensus.ConsensusStatus;
+import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.utils.manager.ChainManager;
@@ -170,8 +170,8 @@ public class ConsensusProcess {
             return;
         }
         //todo 打包成功后将区块传给区块管理模块广播
-        chain.setNewestHeader(block.getHeader());
         chain.getBlockHeaderList().add(block.getHeader());
+        chain.setNewestHeader(block.getHeader());
     }
 
     /**

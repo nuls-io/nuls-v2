@@ -303,6 +303,14 @@ public class ServerRuntime {
                 CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());
                 cmdParameters.add(cmdParameter);
             }
+
+            if(Parameters.class.getName().equals(annotation.annotationType().getName())){
+                Parameters parameters = (Parameters) annotation;
+                for (Parameter parameter : parameters.value()) {
+                    CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());
+                    cmdParameters.add(cmdParameter);
+                }
+            }
         }
         if (cmdDetail == null) {
             return null;

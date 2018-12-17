@@ -34,6 +34,11 @@ public class Subscriber implements Serializable {
     @Setter
     private String url;
 
+    public Subscriber(String abbr,String moduleName,String domain) {
+        this.moduleAbbr = abbr;
+        this.moduleName = moduleName;
+        this.domain = domain;
+    }
     public Subscriber(String url,String abbr,String moduleName,String domain){
         this.url = url;
         this.moduleAbbr = abbr;
@@ -48,11 +53,11 @@ public class Subscriber implements Serializable {
 
         Subscriber that = (Subscriber) o;
 
-        return this.url.equals(that.url);
+        return this.moduleAbbr.equals(that.moduleAbbr);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.url);
+        return Objects.hash(this.moduleAbbr);
     }
 }

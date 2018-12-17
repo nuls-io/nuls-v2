@@ -50,10 +50,8 @@ import java.math.BigInteger;
 
 /**
  * @author lan
- * @program nuls2.0
- * @description
  * @date 2018/11/28
- **/
+ */
 public class BaseChainCmd extends BaseCmd {
 
     boolean isMainChain(int chainId) {
@@ -68,21 +66,12 @@ public class BaseChainCmd extends BaseCmd {
 
     /**
      * 注册链或资产封装coinData,x%资产进入黑洞，y%资产进入锁定
-     *
-     * @param address
-     * @param chainId
-     * @param assetsId
-     * @param amount         必须是整形
-     * @param txSize
-     * @param accountBalance
-     * @return
-     * @throws NulsRuntimeException
      */
-    public CoinData getRegCoinData(byte[] address, int chainId, int assetsId, String amount,
-                                   int txSize, AccountBalance accountBalance) throws NulsRuntimeException {
+    CoinData getRegCoinData(byte[] address, int chainId, int assetsId, String amount,
+                            int txSize, AccountBalance accountBalance) throws NulsRuntimeException {
         txSize = txSize + P2PHKSignature.SERIALIZE_LENGTH;
         CoinData coinData = new CoinData();
-        String lockRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS_lOCK);
+        String lockRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS_lOCK);
         BigInteger lockAmount = new BigDecimal(amount).multiply(new BigDecimal(lockRate)).toBigInteger();
         BigInteger destroyAmount = new BigInteger(amount).subtract(lockAmount);
         CoinTo to1 = new CoinTo(address, chainId, assetsId, lockAmount, -1);
@@ -106,22 +95,12 @@ public class BaseChainCmd extends BaseCmd {
 
     /**
      * 注销资产进行处理
-     *
-     * @param address
-     * @param chainId
-     * @param assetsId
-     * @param amount
-     * @param txSize
-     * @param txHash
-     * @param accountBalance
-     * @return
-     * @throws NulsRuntimeException
      */
-    public CoinData getDisableCoinData(byte[] address, int chainId, int assetsId, String amount,
-                                       int txSize, String txHash, AccountBalance accountBalance) throws NulsRuntimeException {
+    CoinData getDisableCoinData(byte[] address, int chainId, int assetsId, String amount,
+                                int txSize, String txHash, AccountBalance accountBalance) throws NulsRuntimeException {
         txSize = txSize + P2PHKSignature.SERIALIZE_LENGTH;
 
-        String lockRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSITNULS_lOCK);
+        String lockRate = CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS_lOCK);
         BigInteger lockAmount = new BigDecimal(amount).multiply(new BigDecimal(lockRate)).toBigInteger();
         CoinTo to = new CoinTo(address, chainId, assetsId, lockAmount, 0);
 
@@ -141,7 +120,7 @@ public class BaseChainCmd extends BaseCmd {
         return coinData;
     }
 
-    protected BlockChain buildChainWithTxData(String txHex, Transaction tx, boolean isDelete) {
+    BlockChain buildChainWithTxData(String txHex, Transaction tx, boolean isDelete) {
         try {
             byte[] txBytes = HexUtil.hexToByte(txHex);
             tx.parse(txBytes, 0);
@@ -165,7 +144,7 @@ public class BaseChainCmd extends BaseCmd {
         }
     }
 
-    protected Asset buildAssetWithTxChain(String txHex, Transaction tx) {
+    Asset buildAssetWithTxChain(String txHex, Transaction tx) {
         try {
             byte[] txBytes = HexUtil.hexToByte(txHex);
             tx.parse(txBytes, 0);

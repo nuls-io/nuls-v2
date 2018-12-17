@@ -37,8 +37,7 @@ public interface CrossChainTxStorageService {
 
     /**
      * 查询所有跨链交易
-     * @param hash
      * @return
      */
-    List<CrossChainTx> getAllTx(NulsDigestData hash);
+    List<CrossChainTx> getAllTx();
 }

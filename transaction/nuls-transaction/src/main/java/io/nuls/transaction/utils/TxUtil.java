@@ -25,17 +25,22 @@
 package io.nuls.transaction.utils;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.model.bo.CrossTxData;
 
 import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -43,7 +48,25 @@ import java.math.BigInteger;
  */
 public class TxUtil {
 
+
+    public static CrossTxData getCrossTxData(Transaction tx) throws NulsException{
+        if(null == tx){
+            throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+        }
+        CrossTxData crossTxData = new CrossTxData();
+        try {
+            crossTxData.parse(new NulsByteBuffer(tx.getTxData()));
+            return crossTxData;
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
+        }
+    }
+
     public static CoinData getCoinData(Transaction tx) throws NulsException {
+        if(null == tx){
+            throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+        }
         try {
             return tx.getCoinDataInstance();
         } catch (NulsException e) {
@@ -53,6 +76,9 @@ public class TxUtil {
     }
 
     public static Transaction getTransaction(String hex) throws NulsException {
+        if(StringUtils.isBlank(hex)){
+            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
+        }
         try {
             return Transaction.getInstance(hex);
         } catch (NulsException e) {
@@ -117,7 +143,39 @@ public class TxUtil {
 
     public static MultiSigAccount getMultiSigAccount(byte[] multiSignAddress) throws NulsException {
         String address = AddressTool.getStringAddressByBytes(multiSignAddress);
-        //todo
+        //todo 获取多签账户
         return new MultiSigAccount();
     }
+
+    public static boolean verifyCoinData(List<String> txHexList) throws NulsException {
+        //todo 批量验证CoinData 不确定是否需要
+        return true;
+    }
+
+    public static boolean verifyCoinData(String txHex) throws NulsException {
+        //todo 验证CoinData
+        return true;
+    }
+
+    public static boolean txValidator(String txHex) throws NulsException {
+        //todo 调用交易验证器
+        return true;
+    }
+
+    public static boolean txsModuleValidator(Map<String, List<String>> map) throws NulsException {
+        //todo 调用交易模块统一验证器 批量
+        boolean rs = true;
+        for(Map.Entry<String, List<String>> entry : map.entrySet()){
+            rs = txsModuleValidator(entry.getKey(), entry.getValue());
+            if(!rs){
+                break;
+            }
+        }
+        return rs;
+    }
+
+    public static boolean txsModuleValidator(String moduleValidator, List<String> txHexList) throws NulsException {
+        return true;
+    }
+
 }

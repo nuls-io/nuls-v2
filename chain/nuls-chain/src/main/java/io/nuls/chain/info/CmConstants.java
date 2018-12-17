@@ -10,12 +10,17 @@ import java.util.Map;
 /**
  * @author tangyi
  * @date 2018/11/8
- * @description
  */
 public class CmConstants {
 
     private CmConstants() {
     }
+
+    /**
+     * 数据库文件存放路径
+     * The database file storage path
+     */
+    public static final String DATA_PATH = "../data";
 
     public static final BigInteger ZERO = new BigInteger("0");
 
@@ -56,14 +61,14 @@ public class CmConstants {
     public static final String PARAM = "param";
     public static final String ASSET_SYMBOL_MAX = "asset_symbol_max";
     public static final String ASSET_NAME_MAX = "asset_name_max";
-    public static final String ASSET_DEPOSITNULS = "asset_depositNuls";
-    public static final String ASSET_DEPOSITNULS_DESTROY = "asset_depositNuls_destroy_rate";
-    public static final String ASSET_DEPOSITNULS_lOCK = "asset_depositNuls_lock_rate";
+    public static final String ASSET_DEPOSIT_NULS = "asset_depositNuls";
+    public static final String ASSET_DEPOSIT_NULS_DESTROY = "asset_depositNuls_destroy_rate";
+    public static final String ASSET_DEPOSIT_NULS_lOCK = "asset_depositNuls_lock_rate";
 
-    public static final String ASSET_INITNUMBER_MIN = "asset_initNumber_min";
-    public static final String ASSET_INITNUMBER_MAX = "asset_initNumber_max";
-    public static final String ASSET_DECIMALPLACES_MIN = "asset_decimalPlaces_min";
-    public static final String ASSET_DECIMALPLACES_MAX = "asset_decimalPlaces_max";
+    public static final String ASSET_INIT_NUMBER_MIN = "asset_initNumber_min";
+    public static final String ASSET_INIT_NUMBER_MAX = "asset_initNumber_max";
+    public static final String ASSET_DECIMAL_PLACES_MIN = "asset_decimalPlaces_min";
+    public static final String ASSET_DECIMAL_PLACES_MAX = "asset_decimalPlaces_max";
     public static final String ASSET_RECOVERY_RATE = "asset_recovery_rate";
 
     public static final Map<String, String> CHAIN_ASSET_MAP = new HashMap<>();
@@ -98,7 +103,7 @@ public class CmConstants {
      * 黑洞地址，该地址的资产无法找回
      * //TODO 该地址需要加上链ID，否则无法适配新的地址规则
      */
-    public static final byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
+    public static final byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("JQJmP5xKDzAgJ8tJSQkCtKwbodAu20423");
 
 
 }
