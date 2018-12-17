@@ -101,7 +101,8 @@ public class TimeService implements Runnable {
             long localBeforeTime = System.currentTimeMillis();
 
             long netTime = getWebTime(urlList.get(i));
-
+            Log.info(urlList.get(i)+"netTime:==="+netTime);
+            Log.info("localtime:==="+System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }
@@ -136,6 +137,7 @@ public class TimeService implements Runnable {
             //Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
+            e.printStackTrace();
             return 0L;
         }
     }
@@ -197,4 +199,5 @@ public class TimeService implements Runnable {
     public static long getNetTimeOffset() {
         return netTimeOffset;
     }
+
 }
