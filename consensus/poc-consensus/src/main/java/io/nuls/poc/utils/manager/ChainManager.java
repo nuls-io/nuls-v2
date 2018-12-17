@@ -19,7 +19,6 @@ import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
-import org.apache.commons.logging.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -136,7 +135,7 @@ public class ChainManager {
             }
             return configMap;
         }catch(Exception e){
-            Log.error(e);
+            LoggerBuilder.getBasicLoggger().error(e.getMessage());
             return null;
         }
     }
@@ -167,9 +166,9 @@ public class ChainManager {
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH+chainId);
         }catch (Exception e){
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.info(e.getMessage());
+                LoggerBuilder.getBasicLoggger().info(e.getMessage());
             }else{
-                Log.error(e);
+                LoggerBuilder.getBasicLoggger().error(e.getMessage());
             }
         }
     }
@@ -226,7 +225,7 @@ public class ChainManager {
             punishManager.loadPunishes(chain);
             roundManager.initRound(chain);
         }catch (Exception e){
-            Log.error(e);
+            LoggerBuilder.getBasicLoggger().error(e.getMessage());
         }
     }
 

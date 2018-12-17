@@ -3,7 +3,7 @@ import ch.qos.logback.classic.Logger;
 
 public class LbTest {
     public static void main(String[] args){
-        Logger builder = LoggerBuilder.getLogger("test");
+        Logger builder = LoggerBuilder.getLogger("test","consensus");
         while (true){
             builder.debug("test log debug");
             builder.info("test log info");
