@@ -39,7 +39,6 @@ import io.nuls.rpc.server.handler.CmdHandler;
 import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.rpc.server.thread.RequestLoopProcessor;
 import io.nuls.rpc.server.thread.RequestSingleProcessor;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;

@@ -21,13 +21,9 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
-import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
-import io.nuls.tools.log.Log;
 
-import java.util.List;
 import java.util.concurrent.*;
 
 /**

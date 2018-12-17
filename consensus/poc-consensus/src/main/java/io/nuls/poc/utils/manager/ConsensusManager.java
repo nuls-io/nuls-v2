@@ -18,7 +18,6 @@ import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.math.BigDecimal;

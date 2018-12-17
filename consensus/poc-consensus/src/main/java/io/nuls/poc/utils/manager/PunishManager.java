@@ -21,7 +21,6 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.util.*;

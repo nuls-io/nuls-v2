@@ -34,7 +34,6 @@ import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 import org.java_websocket.WebSocket;

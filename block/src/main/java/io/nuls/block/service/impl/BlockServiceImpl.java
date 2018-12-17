@@ -45,7 +45,6 @@ import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.LinkedList;

@@ -17,7 +17,6 @@ import io.nuls.poc.utils.manager.RoundManager;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;

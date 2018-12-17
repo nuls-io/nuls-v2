@@ -38,7 +38,6 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;

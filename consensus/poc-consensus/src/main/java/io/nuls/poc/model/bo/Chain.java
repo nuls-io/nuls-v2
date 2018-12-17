@@ -1,5 +1,6 @@
 package io.nuls.poc.model.bo;
 
+import ch.qos.logback.classic.Logger;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.model.bo.config.ConfigBean;
@@ -98,6 +99,8 @@ public class Chain {
      * The latest 200 rounds block
      * */
     private List<BlockHeader> blockHeaderList;
+
+    private Logger logger;
 
     /**
      * 任务线程池
@@ -219,5 +222,13 @@ public class Chain {
 
     public void setScheduledThreadPoolExecutor(ScheduledThreadPoolExecutor scheduledThreadPoolExecutor) {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
+    }
+
+    public Logger getLogger() {
+        return logger;
+    }
+
+    public void setLogger(Logger logger) {
+        this.logger = logger;
     }
 }

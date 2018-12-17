@@ -43,7 +43,6 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

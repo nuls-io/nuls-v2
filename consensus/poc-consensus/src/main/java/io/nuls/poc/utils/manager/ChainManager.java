@@ -15,10 +15,11 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
+import org.apache.commons.logging.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,6 +68,13 @@ public class ChainManager {
             Chain chain = new Chain();
             int chainId = entry.getKey();
             chain.setConfig(entry.getValue());
+
+            /*
+            * 初始化链日志对象
+            * Initialization Chain Log Objects
+            * */
+            chain.setLogger(LoggerBuilder.getLogger(ConsensusConstant.BASIC_LOGGER_NAME+chain));
+
             /*
             初始化链数据库表
             Initialize linked database tables

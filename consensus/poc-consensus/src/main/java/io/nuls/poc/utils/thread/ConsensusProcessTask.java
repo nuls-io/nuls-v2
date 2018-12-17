@@ -27,7 +27,6 @@ package io.nuls.poc.utils.thread;
 
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.utils.thread.process.ConsensusProcess;
-import io.nuls.tools.log.Log;
 
 /**
  * 共识任务

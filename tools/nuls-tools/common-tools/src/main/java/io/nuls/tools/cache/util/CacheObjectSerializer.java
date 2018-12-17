@@ -25,7 +25,7 @@
 
 package io.nuls.tools.cache.util;
 
-import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.runtime.RuntimeSchema;
@@ -59,10 +59,10 @@ public class CacheObjectSerializer<T> implements Serializer<T> {
         try {
             t = (T) clazz.newInstance();
         } catch (InstantiationException e) {
-            Log.error(e);
+            LoggerBuilder.getBasicLoggger().error(e.getMessage());
             return null;
         } catch (IllegalAccessException e) {
-            Log.error(e);
+            LoggerBuilder.getBasicLoggger().error(e.getMessage());
             return null;
         }
         ProtostuffIOUtil.mergeFrom(byteBuffer.array(), t, schema);

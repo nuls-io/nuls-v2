@@ -32,7 +32,6 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.MessageUtil;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.Map;

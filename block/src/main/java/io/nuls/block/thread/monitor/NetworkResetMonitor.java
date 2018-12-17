@@ -25,7 +25,6 @@ import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
 /**

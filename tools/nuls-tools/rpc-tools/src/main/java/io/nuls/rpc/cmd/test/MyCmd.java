@@ -33,7 +33,6 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.tools.log.Log;
 
 import java.util.Map;
 
