@@ -30,7 +30,6 @@ import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;

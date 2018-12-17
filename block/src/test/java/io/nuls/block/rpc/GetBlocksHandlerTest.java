@@ -20,12 +20,11 @@
 
 package io.nuls.block.rpc;
 
-import io.nuls.block.message.GetBlocksByHeightMessage;
+import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.Test;
 
@@ -43,7 +42,7 @@ public class GetBlocksHandlerTest {
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", CHAIN_ID);
         params.put("nodes", "192.168.1.191:8003");
-        GetBlocksByHeightMessage message = new GetBlocksByHeightMessage();
+        HeightRangeMessage message = new HeightRangeMessage();
         message.setStartHeight(1000);
         message.setEndHeight(1010);
         message.setCommand(GET_BLOCKS_BY_HEIGHT_MESSAGE);

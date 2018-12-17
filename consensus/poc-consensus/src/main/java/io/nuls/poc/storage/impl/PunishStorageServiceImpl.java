@@ -6,7 +6,6 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;

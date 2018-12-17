@@ -23,6 +23,7 @@ package io.nuls.block.rpc;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.service.BlockService;
@@ -34,7 +35,6 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.util.Map;
 
@@ -42,9 +42,10 @@ import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
 
 /**
  * 处理收到的{@link HashMessage}，用于孤儿链的维护
+ *
  * @author captain
- * @date 18-11-14 下午4:23
  * @version 1.0
+ * @date 18-11-14 下午4:23
  */
 @Component
 public class GetBlockHandler extends BaseCmd {
@@ -53,7 +54,7 @@ public class GetBlockHandler extends BaseCmd {
     private BlockService service;
 
     @CmdAnnotation(cmd = GET_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "Handling received request block messages")
-    public Object process(Map map){
+    public Object process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodes").toString();
         HashMessage message = new HashMessage();
@@ -66,7 +67,7 @@ public class GetBlockHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        if(message == null || nodeId == null) {
+        if (message == null || nodeId == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
@@ -75,7 +76,8 @@ public class GetBlockHandler extends BaseCmd {
     }
 
     private void sendBlock(int chainId, Block block, String nodeId) {
-        BlockMessage message = new BlockMessage(block);
+        BlockMessage message = new BlockMessage(block.getHeader().getHash(), block);
+        message.setCommand(CommandConstant.BLOCK_MESSAGE);
         boolean result = NetworkUtil.sendToNode(chainId, message, nodeId);
         if (!result) {
             Log.warn("send block failed:{},height:{}", nodeId, block.getHeader().getHeight());

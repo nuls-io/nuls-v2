@@ -33,7 +33,7 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.TimeMessage;
 import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.tools.log.Log;
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * time message handler

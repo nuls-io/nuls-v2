@@ -23,43 +23,50 @@ package io.nuls.block.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Block;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.message.base.BaseMessage;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
+import lombok.*;
 
 import java.io.IOException;
 
 /**
  * 完整的区块消息
+ *
  * @author captain
- * @date 18-11-20 上午11:08
  * @version 1.0
+ * @date 18-11-20 上午11:08
  */
-@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class BlockMessage extends BaseMessage {
-
+    /**
+     * 用来区分批量获取区块请求和单个区块请求，也可以用来过滤非法消息
+     */
+    @Getter
+    private NulsDigestData requestHash;
+    /**
+     * 区块数据
+     */
+    @Getter @Setter
     private Block block;
-
-    public BlockMessage() {
-    }
-
-    public BlockMessage(Block block) {
-        this.block = block;
-    }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer buffer) throws IOException {
+        buffer.writeNulsData(requestHash);
         buffer.writeNulsData(block);
     }
 
     @Override
     public void parse(NulsByteBuffer nulsByteBuffer) throws NulsException {
+        this.requestHash = nulsByteBuffer.readHash();
         this.block = nulsByteBuffer.readNulsData(new Block());
     }
 
     @Override
     public int size() {
-        return SerializeUtils.sizeOfNulsData(block);
+        return SerializeUtils.sizeOfNulsData(requestHash) + SerializeUtils.sizeOfNulsData(block);
     }
 
 }

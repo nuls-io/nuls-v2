@@ -29,12 +29,17 @@ import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.service.TransactionService;
+import io.nuls.transaction.utils.manager.ChainManager;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -47,6 +52,7 @@ import java.util.Map;
  * @author: Charlie
  * @date: 2018/11/22
  */
+@Service
 public class TransactionManager {
     /**
      * 交易注册信息
@@ -62,6 +68,12 @@ public class TransactionManager {
     public Map<Integer, TxRegister> getTxRegisterMap(){
         return TX_REGISTER_MAP;
     }
+
+    @Autowired
+    private TransactionService transactionService;
+
+    @Autowired
+    private ChainManager chainManager;
 
     private TransactionManager() {
         //TODO 注册跨链交易
@@ -142,6 +154,10 @@ public class TransactionManager {
     public boolean verify(int chainId, Transaction tx) throws NulsException{
 
         baseTxValidate(chainId, tx);
+        //如果是跨链交易直接调模块内部验证器接口，不走cmd命令
+        if(tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER){
+            transactionService.crossTransactionValidator(chainId, tx);
+        }
         TxRegister txRegister = this.getTxRegister(tx.getType());
         txRegister.getValidator();
         //todo 调验证器
@@ -216,17 +232,44 @@ public class TransactionManager {
         if(null == listFrom || listFrom.size() == 0){
             throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
         }
+        //todo 根据chainId获取链信息
+        if (!chainManager.containsKey(chainId)) {
+            throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+        }
+        //根据chainid获取链信息
+        Chain chain = chainManager.getChain(chainId);
+
         for(CoinFrom coinFrom : listFrom){
             byte[] addrBytes = coinFrom.getAddress();
-            String address =  AddressTool.getStringAddressByBytes(addrBytes);
-            //from中地址对应的链id是否是发起链id
-            if(!AddressTool.validAddress(chainId, address)){
-                throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
+            int addrChainId = AddressTool.getChainIdByAddress(addrBytes);
+
+            //如果不是跨链交易，from中地址对应的链id必须发起链id，跨链交易在验证器中验证
+            if(type != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER){
+                if(chainId != addrChainId) {
+                    throw new NulsException(TxErrorCode.CHAINID_ERROR);
+                }
+
             }
-            //验证资产是否存在
-            if(!TxUtil.assetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())){
-                throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
+            //当交易不是转账以及跨链转账时，from的资产必须是该链主资产。(转账以及跨链交易，在验证器中验证资产)
+            if(type != TxConstant.TX_TYPE_TRANSFER && type != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER ) {
+                if(chain.getConfig().getAssetsId() != coinFrom.getAssetsId()) {
+                    throw new NulsException(TxErrorCode.ASSETID_ERROR);
+                }
             }
+
+            if(chainId == TxConstant.NULS_CHAINID) {
+                //如果chainId是主网则通过连管理验证资产是否存在
+                if (!TxUtil.assetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
+                    throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
+                }
+            }/*else{
+               if(chain.getConfig().getAssetsId() != coinFrom.getAssetsId()){
+                   //todo 普通交易如果资产不是该链资产，还需通过主网验证 是否需要？
+               }
+            }*/
+            /* 1.没有进行链内转账交易的资产合法性验证(因为可能出现链外资产)，
+               2.跨链交易(非主网发起)from地址与发起链匹配的验证，需各验证器进行验证
+             */
         }
         return true;
     }

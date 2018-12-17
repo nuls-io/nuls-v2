@@ -53,6 +53,8 @@ public interface TxConstant {
 
 
     int TX_TYPE_COINBASE = 1;
+    int TX_TYPE_TRANSFER = 2;
+
     int TX_TYPE_REDPUNISH = 8;
 
     /**

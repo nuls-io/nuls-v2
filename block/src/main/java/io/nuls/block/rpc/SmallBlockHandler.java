@@ -29,7 +29,6 @@ import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.message.HashListMessage;
-import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.service.BlockService;
@@ -44,7 +43,6 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
 import java.util.ArrayList;

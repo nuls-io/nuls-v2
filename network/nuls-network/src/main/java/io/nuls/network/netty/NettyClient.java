@@ -36,10 +36,10 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.AttributeKey;
 import io.nuls.network.model.Node;
 import io.nuls.network.netty.handler.ClientChannelHandler;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
 import static io.nuls.network.constant.NetworkConstant.CONNETCI_TIME_OUT;
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * NettyClient

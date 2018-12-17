@@ -33,13 +33,16 @@ import io.nuls.network.manager.*;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
+import io.nuls.tools.parse.config.ConfigManager;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * boot strap
@@ -76,7 +79,7 @@ public class Bootstrap {
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
 //            --add-exports java.base/jdk.internal.misc=ALL-UNNAMED
 //            --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED
-            cfgInit();
+            jsonCfgInit();
             managerInit();
             managerStart();
         } catch (Exception e) {
@@ -89,46 +92,42 @@ public class Bootstrap {
      * 配置信息初始化
      *Configuration information initialization
      */
-    public  void cfgInit() {
+    private  void jsonCfgInit() throws Exception {
         try {
             NetworkParam networkParam = NetworkParam.getInstance();
-            NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
+            ConfigLoader.loadJsonCfg(NulsConfig.MODULES_CONFIG_FILE);
             // set system language
-            String language = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_LANGUAGE,"en");
+            String language = ConfigManager.getValue( NetworkConstant.NETWORK_LANGUAGE);
             networkParam.setLanguage(language);
             I18nUtils.loadLanguage("languages", language);
             I18nUtils.setLanguage(language);
             //set encode
-            String encoding = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_ENCODING,"UTF-8");
+            String encoding = ConfigManager.getValue(NetworkConstant.NETWORK_ENCODING);
             networkParam.setEncoding(encoding);
             //set db path
-            String dbPath =  NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_DBPATH,"./data");
+            String dbPath = ConfigManager.getValue(NetworkConstant.NETWORK_DBPATH);
             networkParam.setDbPath(dbPath);
             //net parameters
-            networkParam.setChainId(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_CHAIN_ID, 0));
-            networkParam.setPacketMagic(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_MAGIC, 123456789));
-            networkParam.setMaxInCount(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_NODE_MAX_IN, 10));
-            networkParam.setMaxOutCount(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_NODE_MAX_OUT, 100));
-            networkParam.setMaxInSameIp((int)(networkParam.getMaxInCount()/networkParam.getMaxOutCount()));
-            networkParam.setPort(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_SERVER_PORT, 8003));
-            String seedIp = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_SELF_SEED_IP, "192.168.1.131:8003");
+            networkParam.setChainId(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_SELF_CHAIN_ID)));
+            networkParam.setPacketMagic(Long.valueOf(ConfigManager.getValue( NetworkConstant.NETWORK_SELF_MAGIC)));
+            networkParam.setMaxInCount(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_SELF_NODE_MAX_IN)));
+            networkParam.setMaxOutCount(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_SELF_NODE_MAX_OUT)));
+            networkParam.setMaxInSameIp(networkParam.getMaxInCount()/networkParam.getMaxOutCount());
+            networkParam.setPort(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_SELF_SERVER_PORT)));
+            String seedIp = ConfigManager.getValue(NetworkConstant.NETWORK_SELF_SEED_IP);
             List<String> ipList = new ArrayList<>();
-            for (String ip : seedIp.split(NetworkConstant.COMMA)) {
-                ipList.add(ip);
-            }
+            Collections.addAll(ipList, seedIp.split(NetworkConstant.COMMA));
             networkParam.setSeedIpList(ipList);
             //moon config
-            networkParam.setMoonNode(Boolean.valueOf(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MOON_NODE, false)));
-            networkParam.setCrossMaxInCount(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_CROSS_NODE_MAX_IN, 1));
-            networkParam.setCrossMaxOutCount(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_CROSS_NODE_MAX_OUT, 1));
-            networkParam.setCorssMaxInSameIp((int)(networkParam.getCrossMaxInCount()/networkParam.getCrossMaxOutCount()));
-            networkParam.setCrossPort(NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_CROSS_SERVER_PORT, 0));
-            String seedMoonIp = NulsConfig.MODULES_CONFIG.getCfgValue(NetworkConstant.NETWORK_SECTION, NetworkConstant.NETWORK_MOON_SEED_IP, "0.0.0.0:8003");
+            networkParam.setMoonNode(Boolean.valueOf(ConfigManager.getValue((NetworkConstant.NETWORK_MOON_NODE))));
+            networkParam.setCrossMaxInCount(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_CROSS_NODE_MAX_IN)));
+            networkParam.setCrossMaxOutCount(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_CROSS_NODE_MAX_OUT)));
+            networkParam.setCorssMaxInSameIp((networkParam.getCrossMaxInCount()/networkParam.getCrossMaxOutCount()));
+            networkParam.setCrossPort(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_CROSS_SERVER_PORT)));
+            String seedMoonIp = ConfigManager.getValue(NetworkConstant.NETWORK_MOON_SEED_IP);
             List<String> ipMoonList = new ArrayList<>();
-            for (String ip : seedMoonIp.split(NetworkConstant.COMMA)) {
-                ipMoonList.add(ip);
-            }
-            networkParam.setSeedIpList(ipList);
+            Collections.addAll(ipMoonList, seedMoonIp.split(NetworkConstant.COMMA));
+            networkParam.setMoonSeedIpList(ipMoonList);
         } catch (IOException e) {
             Log.error("Network Bootstrap cfgInit failed", e);
             throw new RuntimeException("Network Bootstrap cfgInit failed");
@@ -136,12 +135,11 @@ public class Bootstrap {
             e.printStackTrace();
         }
     }
-
     /**
      * 管理器初始化
      *Manager initialization
      */
-    public  void managerInit(){
+    private  void managerInit(){
         RocksDBService.init(NetworkParam.getInstance().getDbPath());
         SpringLiteContext.init("io.nuls.network", new ModularServiceMethodInterceptor());
         StorageManager.getInstance().init();
@@ -159,7 +157,7 @@ public class Bootstrap {
      * 启动管理模块
      * Manager start
      */
-    public  void managerStart(){
+    private  void managerStart(){
         Log.debug("managerStart begin=========");
         NodeGroupManager.getInstance().start();
         ConnectionManager.getInstance().start();

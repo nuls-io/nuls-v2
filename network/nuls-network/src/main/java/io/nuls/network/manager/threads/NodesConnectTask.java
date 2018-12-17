@@ -31,12 +31,13 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.message.VersionMessage;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 连接定时器，主要任务：

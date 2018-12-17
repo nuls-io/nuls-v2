@@ -43,7 +43,7 @@ public class TransactionUtil {
      * @param transactions
      * @return
      */
-    public static boolean save(int chainId, List<Transaction> transactions) {
+    public static boolean save(int chainId, List<NulsDigestData> transactions) {
         return true;
     }
 

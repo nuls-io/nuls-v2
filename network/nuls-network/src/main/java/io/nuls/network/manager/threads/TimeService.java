@@ -32,13 +32,14 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.dto.NetTimeUrl;
 import io.nuls.network.model.message.GetTimeMessage;
-import io.nuls.tools.log.Log;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
 import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 时间服务类：用于同步网络标准时间

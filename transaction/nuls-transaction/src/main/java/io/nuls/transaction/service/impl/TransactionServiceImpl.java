@@ -560,7 +560,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new NulsException(TxErrorCode.COINDATA_NOT_FOUND);
         }
         CoinData coinData = TxUtil.getCoinData(tx);
-        if (!validateCoinFrom(chainId, coinData.getFrom())) {
+        if (!validateCoinFrom(coinData.getFrom())) {
             return false;
         }
         //验证txData发起链id和from地址链id是否一致
@@ -575,11 +575,10 @@ public class TransactionServiceImpl implements TransactionService {
     /**
      * 验证跨链交易的付款方数据
      *
-     * @param chainId
      * @param listFrom
      * @return
      */
-    private boolean validateCoinFrom(int chainId, List<CoinFrom> listFrom) throws NulsException {
+    private boolean validateCoinFrom(List<CoinFrom> listFrom) throws NulsException {
         if (null == listFrom || listFrom.size() == 0) {
             throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
         }
@@ -588,6 +587,10 @@ public class TransactionServiceImpl implements TransactionService {
             //是否有nuls(手续费)
             if (TxUtil.isNulsAsset(coinFrom)) {
                 hasNulsFrom = true;
+            }
+            //只有主网才会进入跨链交易验证器，直接验证资产即可
+            if (!TxUtil.assetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
+                throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
             }
         }
         if (!hasNulsFrom) {
@@ -647,7 +650,7 @@ public class TransactionServiceImpl implements TransactionService {
             txList.add(tx);
             if(tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER){
                 CrossTxData crossTxData = TxUtil.getCrossTxData(tx);
-                if(crossTxData.getChainId() != TxConfig.CURRENT_CHAINID){
+                if(crossTxData.getChainId() != chainId){
                     //如果是跨链交易，发起链不是当前链，则核对(跨链验证的结果)
                     CrossChainTx crossChainTx =  crossChainTxStorageService.getTx(tx.getHash());
                     //todo
@@ -674,7 +677,7 @@ public class TransactionServiceImpl implements TransactionService {
         //todo 是否需要统一验证coinData?
         TxUtil.verifyCoinData(txHexList);
         //统一验证
-        TxUtil.txsModuleValidator(moduleVerifyMap);
+        TxUtil.txsModuleValidators(moduleVerifyMap);
 
         return true;
     }

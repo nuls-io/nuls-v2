@@ -32,7 +32,8 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.nuls.network.netty.handler.ServerChannelHandler;
-import io.nuls.tools.log.Log;
+import static io.nuls.network.utils.LoggerUtil.Log;
+
 /**
  * NettyServer
  * @author lan

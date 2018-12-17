@@ -21,7 +21,6 @@
 package io.nuls.block.cache;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.tools.log.Log;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
@@ -46,7 +45,7 @@ public class DataCacher<T> {
         return future;
     }
 
-    public boolean success(NulsDigestData hash, T t) {
+    public boolean complete(NulsDigestData hash, T t) {
         CompletableFuture<T> future = cacher.get(hash);
         if (future == null) {
             Log.debug("DataCacher Time out:{}", hash.getDigestHex());
@@ -57,16 +56,11 @@ public class DataCacher<T> {
         return true;
     }
 
-    public void fail(NulsDigestData hash) {
-        CompletableFuture<T> future = cacher.get(hash);
-        if (future == null) {
-            return;
-        }
-        future.complete(null);
+    public void removeFuture(NulsDigestData hash) {
         cacher.remove(hash);
     }
 
-    public void removeFuture(NulsDigestData hash) {
-        cacher.remove(hash);
+    public boolean contains(NulsDigestData hash){
+        return cacher.containsKey(hash);
     }
 }

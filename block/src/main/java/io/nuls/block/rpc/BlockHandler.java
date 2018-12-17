@@ -62,7 +62,7 @@ public class BlockHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        CacheHandler.receiveBlock(chainId, message.getBlock());
+        CacheHandler.receiveBlock(chainId, message);
         return success();
     }
 

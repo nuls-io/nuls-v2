@@ -28,11 +28,14 @@ import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.dto.BestBlockInfo;
 import io.nuls.network.rpc.external.BlockRpcService;
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  *
@@ -48,7 +51,12 @@ public class BlockRpcServiceImpl implements BlockRpcService {
         Map<String,Object> map = new HashMap<>();
         map.put("chainId",chainId);
         try {
-            Response response =  CmdDispatcher.requestAndResponse(NetworkConstant.MODULE_ROLE, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER,map );
+            long startTime = System.currentTimeMillis();
+            Log.info("start RPC Time :{}",startTime);
+            Response response =  CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER,map );
+            long endTime = System.currentTimeMillis();
+            Log.info("end RPC Time :{}",System.currentTimeMillis());
+            Log.info("used Time :{}",endTime-startTime);
             if(null != response && response.isSuccess()){
                 Map responseData = (Map)response.getResponseData();
                 bestBlockInfo.setHash(String.valueOf(responseData.get("hash")));

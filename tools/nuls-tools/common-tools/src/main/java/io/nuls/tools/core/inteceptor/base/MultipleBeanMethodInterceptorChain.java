@@ -24,7 +24,7 @@
  */
 package io.nuls.tools.core.inteceptor.base;
 
-import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import net.sf.cglib.proxy.MethodProxy;
 
 import java.lang.annotation.Annotation;
@@ -108,7 +108,7 @@ public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorCha
         try {
             result = execute(null, object, method, params);
         } catch (Exception e) {
-            Log.error(e);
+            LoggerBuilder.getBasicLoggger().error(e.getMessage());
             throw e;
         } finally {
             index = -1;

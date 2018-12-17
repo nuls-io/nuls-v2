@@ -33,7 +33,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.LoggerBuilder;
 
 import java.util.Map;
 
@@ -57,7 +57,7 @@ public class MyCmd extends BaseCmd {
             description = "test getHeight 1.3")
     @Parameter(parameterName = "aaa", parameterType = "int", parameterValidRange = "(1,100]")
     public Response getHeight2(Map map) {
-        Log.info("getHeight version 1.3");
+        LoggerBuilder.getBasicLoggger().info("getHeight version 1.3");
         return success("getHeight->1.3");
     }
 
@@ -65,7 +65,7 @@ public class MyCmd extends BaseCmd {
             description = "test getHeight 2.0")
     @Parameter(parameterName = "bbb", parameterType = "string", parameterValidRegExp = "^[A-Za-z0-9\\-]+$")
     public Response getHeight3(Map map) {
-        Log.info("getHeight version 2.0");
+        LoggerBuilder.getBasicLoggger().info("getHeight version 2.0");
         return success("getHeight->2.0");
     }
 

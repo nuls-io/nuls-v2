@@ -38,10 +38,11 @@ import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.po.NodePo;
-import io.nuls.tools.log.Log;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
+
 
 /**
  * address message handler

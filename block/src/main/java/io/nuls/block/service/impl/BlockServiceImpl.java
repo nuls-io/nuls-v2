@@ -45,7 +45,6 @@ import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -177,6 +176,7 @@ public class BlockServiceImpl implements BlockService {
 
     private boolean saveBlock(int chainId, Block block, boolean localInit) {
         long height = block.getHeader().getHeight();
+        NulsDigestData hash = block.getHeader().getHash();
         //1.验证区块
         if (!verifyBlock(chainId, block, localInit)) {
             Log.error("verify block fail!chainId-{},height-{}", chainId, height);
@@ -199,7 +199,7 @@ public class BlockServiceImpl implements BlockService {
             return false;
         }
         //4.保存交易
-        if (!TransactionUtil.save(chainId, block.getTxs())) {
+        if (!TransactionUtil.save(chainId, block.getTxHashList())) {
             Log.info("save transactions fail!chainId-{},height-{}", chainId, height);
             if (!blockStorageService.remove(chainId, height)) {
                 throw new DbRuntimeException("save blockheader error!");
@@ -219,9 +219,9 @@ public class BlockServiceImpl implements BlockService {
             if (hashList.size() > heightRange) {
                 hashList.removeFirst();
             }
-            hashList.addLast(block.getHeader().getHash());
+            hashList.addLast(hash);
         }
-        Log.debug("save block success, height-{}, hash-{}, preHash-{}", height, block.getHeader().getHash(), block.getHeader().getPreHash());
+        Log.debug("save block success, height-{}, hash-{}, preHash-{}", height, hash, block.getHeader().getPreHash());
         return true;
     }
 

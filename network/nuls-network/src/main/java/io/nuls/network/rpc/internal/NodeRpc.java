@@ -37,7 +37,8 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.log.Log;
+import static io.nuls.network.utils.LoggerUtil.Log;
+
 
 import java.util.ArrayList;
 import java.util.List;

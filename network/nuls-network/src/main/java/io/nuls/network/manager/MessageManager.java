@@ -48,10 +48,11 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 消息管理器，用于收发消息
@@ -84,7 +85,8 @@ public class MessageManager extends BaseManager{
         try {
             return msgClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            Log.error(e);
+            e.printStackTrace();
+            Log.error(e.getMessage());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -264,7 +266,8 @@ public class MessageManager extends BaseManager{
                 }
             }
         } catch (Exception e) {
-            Log.error(e);
+            e.printStackTrace();
+            Log.error(e.getMessage());
             return new NetworkEventResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
@@ -284,7 +287,8 @@ public class MessageManager extends BaseManager{
                     }
                 }
             } catch (Exception e) {
-                Log.error(e);
+                e.printStackTrace();
+                Log.error(e.getMessage());
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);

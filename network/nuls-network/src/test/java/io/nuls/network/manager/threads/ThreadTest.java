@@ -38,18 +38,19 @@ import java.util.concurrent.TimeUnit;
  * @date 2018/12/12
  **/
 public class ThreadTest {
-    public void start(){
+    private void start(){
         Bootstrap.getInstance().moduleStart();
     }
     @Test
     public void clientConnectTest(){
         start();
         ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
-        executor.scheduleAtFixedRate(new NodesConnectTaskTest(), 5, 10, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(new NodesConnectTaskTest(), 5, 1, TimeUnit.SECONDS);
         try {
             Thread.sleep(1000000000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
+
 }

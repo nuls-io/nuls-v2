@@ -24,13 +24,15 @@
  */
 package io.nuls.network.manager.threads;
 
+import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.tools.log.Log;
 
 import java.util.Collection;
 import java.util.List;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * Group event monitor
@@ -42,26 +44,45 @@ public class DataShowMonitorTest implements Runnable  {
     @Override
     public void run() {
         //test
+        printlnCachePeer();
         printlnPeer();
+        printlnMem();
     }
-
+   private void printlnCachePeer(){
+      List<Node> list= ConnectionManager.getInstance().getCacheAllNodeList();
+      Log.info("============================printlnCachePeer:"+list.size());
+      for(Node node:list){
+          Log.info("============================cache connect:"+node.getId());
+      }
+   }
+   private void printlnMem(){
+//       byte[] bys = new byte[1024*1024];//申请1M内存
+       Log.debug("Java进程可以向操作系统申请到的最大内存:"+(Runtime.getRuntime().maxMemory())/(1024*1024)+"M");
+       Log.debug("Java进程空闲内存:"+(Runtime.getRuntime().freeMemory())/(1024*1024)+"M");
+       Log.debug("Java进程现在从操作系统那里已经申请了内存:"+(Runtime.getRuntime().totalMemory())/(1024*1024)+"M");
+   }
    private void printlnPeer(){
+
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for(NodeGroup nodeGroup:nodeGroupList){
             Collection<Node> c1=nodeGroup.getConnectNodes();
+            Log.info("============================printlnPeer c1============="+c1.size());
             for(Node n:c1){
                 Log.info("*************connect:"+n.getId());
             }
             Collection<Node> c2=nodeGroup.getDisConnectNodes();
+            Log.info("============================printlnPeer c2============="+c2.size());
             for(Node n:c2){
                 Log.info("***********disconnect:"+n.getId());
             }
             Collection<Node> c3=nodeGroup.getConnectCrossNodes();
+            Log.info("============================printlnPeer c3============="+c3.size());
             for(Node n:c3){
                 Log.info("************cross connect:"+n.getId());
             }
             Collection<Node> c4=nodeGroup.getDisConnectCrossNodes();
+            Log.info("============================printlnPeer c4============="+c4.size());
             for(Node n:c4){
                 Log.info("*************cross disconnect:"+n.getId());
             }

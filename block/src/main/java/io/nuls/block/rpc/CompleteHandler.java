@@ -30,7 +30,6 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.util.Map;
 
@@ -61,7 +60,7 @@ public class CompleteHandler extends BaseCmd {
         if (message == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        CacheHandler.requestComplete(chainId, message);
+        CacheHandler.batchComplete(chainId, message);
         return success();
     }
 

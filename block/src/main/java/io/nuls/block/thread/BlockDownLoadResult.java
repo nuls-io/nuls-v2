@@ -21,6 +21,7 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.Node;
 import lombok.Data;
 
@@ -43,13 +44,9 @@ public class BlockDownLoadResult {
      */
     private long startHeight;
     /**
-     * 下载区块个数
+     * 预计下载区块个数
      */
     private int size;
-    /**
-     * 区块来源节点在所有可用节点列表中的下标
-     */
-    private int index;
     /**
      * 区块来源节点
      */
@@ -57,17 +54,22 @@ public class BlockDownLoadResult {
     /**
      * 标志从node节点批量下载区块是否成功，要全部下载完成才算成功
      */
-    private boolean success = false;
+    private boolean success;
+    /**
+     * 耗时
+     */
+    private long duration;
+    /**
+     * 对应的请求hash
+     */
+    private NulsDigestData messageHash;
 
-    private List<Block> blockList;
-
-    public BlockDownLoadResult(long startHeight, int size, Node node, List<Block> blockList, int index) {
+    public BlockDownLoadResult(NulsDigestData messageHash, long startHeight, int size, Node node, boolean b) {
+        this.messageHash = messageHash;
         this.startHeight = startHeight;
         this.size = size;
-        this.index = index;
         this.node = node;
-        this.blockList = blockList;
-        this.setSuccess(blockList.size() == size);
+        this.success = b;
     }
 
 }

@@ -24,8 +24,8 @@
  */
 
 package io.nuls.tools.thread;
-
-import io.nuls.tools.log.Log;
+import ch.qos.logback.classic.Logger;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
@@ -89,6 +89,9 @@ public class TimeService implements Runnable {
      */
     private static long lastSyncTime;
 
+    private Logger logger = LoggerBuilder.getBasicLoggger();
+
+
     /**
      * 同步网络时间
      */
@@ -101,7 +104,8 @@ public class TimeService implements Runnable {
             long localBeforeTime = System.currentTimeMillis();
 
             long netTime = getWebTime(urlList.get(i));
-
+            logger.info(urlList.get(i)+"netTime:==="+netTime);
+            logger.info("localtime:==="+System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }
@@ -136,6 +140,7 @@ public class TimeService implements Runnable {
             //Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
+            e.printStackTrace();
             return 0L;
         }
     }
@@ -145,7 +150,7 @@ public class TimeService implements Runnable {
      * Start the time synchronization thread.
      */
     public void start() {
-        Log.debug("----------- TimeService start -------------");
+        logger.debug("----------- TimeService start -------------");
         ThreadUtils.createAndRunThread("TimeService", this, true);
     }
 
@@ -161,7 +166,7 @@ public class TimeService implements Runnable {
             long newTime = System.currentTimeMillis();
 
             if (Math.abs(newTime - lastTime) > TIME_OFFSET_BOUNDARY) {
-                Log.debug("local time changed ：{}", newTime - lastTime);
+                logger.debug("local time changed ：{}", newTime - lastTime);
                 syncWebTime();
 
             } else if (currentTimeMillis() - lastSyncTime > NET_REFRESH_TIME) {
@@ -197,4 +202,5 @@ public class TimeService implements Runnable {
     public static long getNetTimeOffset() {
         return netTimeOffset;
     }
+
 }

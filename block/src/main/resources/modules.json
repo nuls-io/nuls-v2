@@ -6,6 +6,12 @@
     "value": "xxx"
   },
   {
+    "name": "blockCache",
+    "remark": "同步区块时最多缓存多少个区块",
+    "readOnly": "true",
+    "value": "1000"
+  },
+  {
     "name": "smallBlockCache",
     "remark": "系统正常运行时最多缓存多少个从别的节点接收到的小区块",
     "readOnly": "true",
@@ -75,7 +81,7 @@
     "name": "minNodeAmount",
     "remark": "最小可用节点个数，低于此数不同步区块",
     "readOnly": "false",
-    "value": "10"
+    "value": "1"
   },
   {
     "name": "downloadNumber",
