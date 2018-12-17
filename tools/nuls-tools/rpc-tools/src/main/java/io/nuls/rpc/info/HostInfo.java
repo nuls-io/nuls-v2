@@ -24,8 +24,13 @@
  */
 package io.nuls.rpc.info;
 
+import io.nuls.tools.log.logback.LoggerBuilder;
+
 import java.io.IOException;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.Socket;
+import java.net.SocketException;
 import java.util.Enumeration;
 import java.util.Random;
 
@@ -53,7 +58,7 @@ public class HostInfo {
                 return getLinuxLocalIp();
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerBuilder.getBasicLoggger().error(e.getMessage());
             return "";
         }
     }

@@ -32,6 +32,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.MessageUtil;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.Map;
@@ -64,7 +65,7 @@ public class HeartbeatProcessor implements Runnable {
                 try {
                     jsonMessage = JSONUtils.obj2json(message);
                 } catch (JsonProcessingException e) {
-                    Log.error(e);
+                    LoggerBuilder.getBasicLoggger().error(e.getMessage());
                     continue;
                 }
 
@@ -86,7 +87,7 @@ public class HeartbeatProcessor implements Runnable {
                     }
                 } catch (Exception e) {
                     ClientRuntime.WS_CLIENT_MAP.remove(entry.getKey());
-                    Log.error(e);
+                    LoggerBuilder.getBasicLoggger().error(e.getMessage());
                 }
             }
 
@@ -97,7 +98,7 @@ public class HeartbeatProcessor implements Runnable {
                  */
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS * 100);
             } catch (InterruptedException e) {
-                Log.error(e);
+                LoggerBuilder.getBasicLoggger().error(e.getMessage());
             }
         }
     }
