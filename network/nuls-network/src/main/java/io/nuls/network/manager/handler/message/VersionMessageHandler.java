@@ -86,11 +86,13 @@ public class VersionMessageHandler extends BaseMessageHandler {
          */
         if(LocalInfoManager.getInstance().isSelfIp(node.getIp()) || ConnectionManager.getInstance().isPeerConnectExceedMaxIn(node.getIp(),nodeGroup.getMagicNumber(),maxIn)){
             if(node.getNodeGroupConnectors().size() == 0){
+                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===close connection.");
                 node.getChannel().close();
                 node.setIdle(true);
                 return;
             }else{
                 //client 回复过载消息--reply over maxIn
+                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===-reply over maxIn.");
                 VerackMessage verackMessage=MessageFactory.getInstance().buildVerackMessage(node,message.getHeader().getMagicNumber(), VerackMessageBody.VER_CONNECT_MAX);
                 MessageManager.getInstance().sendToNode(verackMessage,node,true);
                 return;

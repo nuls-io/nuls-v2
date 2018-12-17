@@ -17,7 +17,7 @@ public class Lockers {
      */
     public final static Lock NODE_LAUNCH_CONNECT_LOCK = new ReentrantLock();
     /**
-     * 用于已建立的peer连接 增加与移除的锁定。
+     * 用于已建立的peer连接 增加与移除的锁定。cacheConnectNodeOutMap与cacheConnectNodeInMap 容器的处理逻辑同步！
      * Used for established peer connections to establish and disconnect locks.
      */
     public final static Lock NODE_ESTABLISH_CONNECT_LOCK = new ReentrantLock();
