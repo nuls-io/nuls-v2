@@ -3,6 +3,7 @@ package io.nuls.rpc.invoke.test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.parse.JSONUtils;
 
 /**
@@ -20,8 +21,8 @@ public class EventCounterInvoke extends BaseInvoke {
     @Override
     public void callBack(Response response) {
         try {
-            Log.info("EventCounterInvoke 进入了！！！！！");
-            Log.info(JSONUtils.obj2json(response));
+            LoggerBuilder.getBasicLoggger().info("EventCounterInvoke 进入了！！！！！");
+            LoggerBuilder.getBasicLoggger().info(JSONUtils.obj2json(response));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
