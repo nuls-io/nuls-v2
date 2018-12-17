@@ -32,12 +32,6 @@ package io.nuls.network.constant;
  */
 public interface NetworkConstant {
     /**
-     * 模块简称，也是核心模块调用使用的默认角色
-     *Module abbreviation, which is also the default role used by core module calls.
-     */
-    String MODULE_ROLE = "NW";
-
-    /**
      * ========================================
      * -----------[netty configs ] -------
      * ========================================
