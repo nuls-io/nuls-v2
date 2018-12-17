@@ -25,11 +25,9 @@ public class EventDispatchProcessor implements Runnable {
     @Override
     public void run() {
         try{
-            System.out.println("Processing the event");
+            Log.info("Processing the published event starts..");
             Object[] objects = EventBusRuntime.firstObjArrInEventDispatchQueue();
-            if(null == objects){
-                Thread.sleep(200L);
-            }else{
+            if(null != objects){
                 Object data = objects[0];
                 Set<Subscriber> subscribers =(Set<Subscriber>) objects[1];
                 //TODO does messageID needs to be taken from subscriber ? if yes, it has to be stored while subscription
@@ -37,11 +35,10 @@ public class EventDispatchProcessor implements Runnable {
                 for (Subscriber subscriber : subscribers){
                     String url = ClientRuntime.getRemoteUri(subscriber.getModuleAbbr());
                     WsClient wsClient = ClientRuntime.getWsClient(url);
-
-                   //TODO add retry logic in case of failure in delivery
                     Message rspMessage = buildMessage(data,messageId);
                     EventBusRuntime.RETRY_QUEUE.offer(new Object[]{rspMessage,wsClient,subscriber.getModuleAbbr()});
                     try{
+                        Log.debug("Sending event to subscriber :"+subscriber.getModuleAbbr());
                         wsClient.send(JSONUtils.obj2json(rspMessage));
                         //span separate thread to retry for each subscriber
                         EbConstants.RETRY_THREAD_POOL.execute(new RetryProcessor());
@@ -51,7 +48,7 @@ public class EventDispatchProcessor implements Runnable {
                         EbConstants.RETRY_THREAD_POOL.execute(new RetryProcessor());
                     }
                 }
-                Thread.sleep(200L);
+                Log.info("Processing the published event Ends..");
             }
         }catch (Exception e){
             Log.error(e);

@@ -4,8 +4,10 @@ import io.nuls.eventbus.EventBus;
 import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.constant.EbErrorCode;
 import io.nuls.eventbus.model.Subscriber;
+import io.nuls.eventbus.rpc.processor.EventDispatchProcessor;
 import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
@@ -74,6 +76,7 @@ public class EventBusCmd extends BaseCmd {
         Set<Subscriber> subscribers = eventBus.publish(params);
         if(!subscribers.isEmpty()){
             EventBusRuntime.EVENT_DISPATCH_QUEUE.offer(new Object[]{data,subscribers,messageId});
+            Constants.THREAD_POOL.execute(new EventDispatchProcessor());
         }
         return success();
     }

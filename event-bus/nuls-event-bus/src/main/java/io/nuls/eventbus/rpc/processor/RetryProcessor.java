@@ -23,15 +23,18 @@ public class RetryProcessor implements Runnable {
     @Override
     public void run() {
         try{
+            Log.info("Retry thread running..");
             Object[] objects = EventBusRuntime.firstObjArrInRetryQueue();
             if(null != objects){
                 Message rspMessage = (Message)objects[0];
                 WsClient wsClient = (WsClient)objects[1];
                 String role = (String)objects[2];
-                int retryAttempt = 1;
+                int retryAttempt = 0;
                 boolean ackResponse = receiveAck(rspMessage.getMessageId());
+                Log.debug("Acknowledgement for send event messageId: "+rspMessage.getMessageId() +" --> "+ackResponse);
                 while (retryAttempt <= EbConstants.EVENT_DISPATCH_RETRY_COUNT && !ackResponse){
                     retryAttempt = retryAttempt + 1;
+                    Log.debug("Retry for Subscriber : "+role +" --> "+"Retry Attempt:"+retryAttempt);
                     Thread.sleep(EbConstants.EVENT_RETRY_WAIT_TIME);
                     try{
                         wsClient.send(JSONUtils.obj2json(rspMessage));
