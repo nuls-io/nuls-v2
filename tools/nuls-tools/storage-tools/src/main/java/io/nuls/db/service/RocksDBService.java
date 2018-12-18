@@ -22,6 +22,7 @@ package io.nuls.db.service;
 import io.nuls.db.manager.RocksDBManager;
 import io.nuls.db.model.Entry;
 import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.log.Log;
 
 import java.util.Arrays;
 import java.util.List;
