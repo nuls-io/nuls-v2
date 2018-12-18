@@ -56,7 +56,6 @@ public class ClientSyncProcessor implements Runnable {
                             ClientRuntime.ROLE_MAP.remove(moduleAbbr);
                             break;
                          default:
-
                     }
                     Thread.sleep(200L);
                 }

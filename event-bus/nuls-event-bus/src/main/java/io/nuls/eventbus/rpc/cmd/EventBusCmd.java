@@ -9,6 +9,7 @@ import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 
@@ -29,7 +30,8 @@ public class EventBusCmd extends BaseCmd {
         }
         String moduleAbbr = (String)params.get("abbr");
         String topic = (String)params.get("topic");
-        if(topic == null || moduleAbbr == null){
+        String callBackCmd = (String)params.get("callBackCmd");
+        if(StringUtils.isBlank(topic) || StringUtils.isBlank(moduleAbbr) || StringUtils.isBlank(callBackCmd)){
             return failed(EbErrorCode.PARAMS_MISSING);
         }
         try{
@@ -49,7 +51,7 @@ public class EventBusCmd extends BaseCmd {
         }
         String moduleAbbr = (String)params.get("abbr");
         String topic = (String)params.get("topic");
-        if(topic == null || moduleAbbr == null){
+        if(StringUtils.isBlank(topic) || StringUtils.isBlank(moduleAbbr)){
             return failed(EbErrorCode.PARAMS_MISSING);
         }
         try{
@@ -69,13 +71,12 @@ public class EventBusCmd extends BaseCmd {
         }
         Object data = params.get("data");
         String topic = (String)params.get("topic");
-        if(topic == null){
+        if(StringUtils.isBlank(topic)){
             return failed(EbErrorCode.PARAMS_MISSING);
         }
-        String messageId = (String)params.get("messageId");
         Set<Subscriber> subscribers = eventBus.publish(params);
         if(!subscribers.isEmpty()){
-            EventBusRuntime.EVENT_DISPATCH_QUEUE.offer(new Object[]{data,subscribers,messageId});
+            EventBusRuntime.EVENT_DISPATCH_QUEUE.offer(new Object[]{data,subscribers});
             Constants.THREAD_POOL.execute(new EventDispatchProcessor());
         }
         return success();

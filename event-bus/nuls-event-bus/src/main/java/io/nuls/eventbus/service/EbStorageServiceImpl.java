@@ -13,6 +13,7 @@ import io.nuls.tools.log.Log;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -41,9 +42,9 @@ public class EbStorageServiceImpl implements EbStorageService {
             List<byte[]> keys = RocksDBService.keyList(EbConstants.TB_EB_TOPIC);
             if(!keys.isEmpty()){
                 Map<byte[],byte[]> map = RocksDBService.multiGet(EbConstants.TB_EB_TOPIC,keys);
-                for(byte[] key : map.keySet()){
-                    byte[] obj = map.get(key);
-                    topicMap.put(new String(key),ObjectUtils.bytesToObject(obj));
+                Set<Map.Entry<byte[],byte[]>> entrySet = map.entrySet();
+                for(Map.Entry<byte[],byte[]> entry : entrySet){
+                    topicMap.put(new String(entry.getKey()),ObjectUtils.bytesToObject(entry.getValue()));
                 }
             }
         }catch (Exception e){

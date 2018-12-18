@@ -54,7 +54,7 @@ public class EbConstants {
     /**
      * Thread pool for retry mechanism
      */
-    public static final ExecutorService RETRY_THREAD_POOL = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("RetryProcessor"));
+    public static final ExecutorService SEND_RETRY_THREAD_POOL = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("SendRetryProcessor"));
 
 
 }
