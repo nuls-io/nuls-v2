@@ -30,6 +30,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 
 import java.util.Map;
 

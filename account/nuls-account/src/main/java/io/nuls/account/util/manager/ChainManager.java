@@ -36,6 +36,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.io.IoUtils;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.List;

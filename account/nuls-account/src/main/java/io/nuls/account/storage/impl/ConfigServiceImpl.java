@@ -36,6 +36,7 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 
 import java.util.HashMap;
 import java.util.List;

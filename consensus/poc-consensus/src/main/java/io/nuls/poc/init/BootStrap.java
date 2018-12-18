@@ -12,7 +12,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 
@@ -49,8 +49,8 @@ public class BootStrap {
             registerTx();
             initServer();
         } catch (Exception e) {
-            LoggerBuilder.getBasicLoggger().error("consensus startup error！");
-            LoggerBuilder.getBasicLoggger().error(e.getMessage());
+            Log.error("consensus startup error！");
+            Log.error(e);
         }
     }
 
@@ -157,10 +157,10 @@ public class BootStrap {
                         .connect("ws://127.0.0.1:8887");
                 CmdDispatcher.syncKernel();
             } catch (Exception e) {
-                LoggerBuilder.getBasicLoggger().error("Account initServer failed", e);
+                Log.error("Account initServer failed", e);
             }
         } catch (Exception e) {
-            LoggerBuilder.getBasicLoggger().error("Consensus startup webSocket server error!");
+            Log.error("Consensus startup webSocket server error!");
             e.printStackTrace();
         }
     }

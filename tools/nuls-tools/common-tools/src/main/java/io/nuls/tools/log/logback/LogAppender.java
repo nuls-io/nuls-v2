@@ -67,7 +67,8 @@ public class LogAppender {
         //但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
         encoder.setContext(context);
         //设置格式
-        encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] %replace(%caller{1}){'\\t|Caller.{1}0|\\r\\n', ''} - %msg%n");
+        /*encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] %replace(%caller{1}){'\\t|Caller.{1}0|\\r\\n', ''} - %msg%n");*/
+        encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS}  [%thread] %-5level - %msg%n");
         encoder.start();
         //加入下面两个节点
         appender.setRollingPolicy(policy);
@@ -85,7 +86,7 @@ public class LogAppender {
         //但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
         encoder.setContext(context);
         //设置格式
-        encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS} %5p [%t] %replace(%caller{1}){'\\t|Caller.{1}0|\\r\\n', ''} - %msg%n");
+        encoder.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS}  [%thread] %-5level - %msg%n");
         encoder.start();
         //加入下面两个节点
         appender.setEncoder(encoder);

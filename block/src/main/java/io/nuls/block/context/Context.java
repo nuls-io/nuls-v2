@@ -20,9 +20,11 @@
 
 package io.nuls.block.context;
 
+import ch.qos.logback.classic.Logger;
 import io.nuls.base.data.Block;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.model.Chain;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -39,6 +41,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Context {
 
+    private Logger logger;
     /**
      * 代表该链的运行状态
      */
