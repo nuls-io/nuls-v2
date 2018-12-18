@@ -18,11 +18,11 @@ import java.util.Map;
  * */
 public class LoggerBuilder {
 
-    private static final Map<String, Logger> container = new HashMap<>();
+    private static final Map<String, NulsLogger> container = new HashMap<>();
 
-    public static Logger getLogger(String folderName,String fileName) {
+    public static NulsLogger getLogger(String folderName,String fileName) {
         String realKey = folderName+"/"+fileName;
-        Logger logger = container.get(realKey);
+        NulsLogger logger = container.get(realKey);
         if(logger != null) {
             return logger;
         }
@@ -37,8 +37,8 @@ public class LoggerBuilder {
         return logger;
     }
 
-    public static Logger getLogger(String fileName) {
-        Logger logger = container.get(fileName);
+    public static NulsLogger getLogger(String fileName) {
+        NulsLogger logger = container.get(fileName);
         if(logger != null) {
             return logger;
         }
@@ -54,7 +54,7 @@ public class LoggerBuilder {
     }
 
 
-    private static Logger build(String fileName) {
+    private static NulsLogger build(String fileName) {
         RollingFileAppender fileAppender = LogAppender.getAppender(fileName);
         Appender consoleAppender = LogAppender.createConsoleAppender();
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -63,6 +63,6 @@ public class LoggerBuilder {
         logger.setAdditive(false);
         logger.addAppender(fileAppender);
         logger.addAppender(consoleAppender);
-        return logger;
+        return new NulsLogger(logger);
     }
 }

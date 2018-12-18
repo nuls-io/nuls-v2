@@ -1,6 +1,5 @@
 package io.nuls.poc.utils.thread.process;
 
-import ch.qos.logback.classic.Logger;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
@@ -18,6 +17,7 @@ import io.nuls.poc.utils.manager.RoundManager;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class ConsensusProcess {
 
     private ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
 
-    private Logger consensusLogger;
+    private NulsLogger consensusLogger;
 
     private boolean hasPacking;
 
@@ -126,7 +126,7 @@ public class ConsensusProcess {
         if(!hasPacking && member.getPackStartTime() < TimeService.currentTimeMillis() && member.getPackEndTime() > TimeService.currentTimeMillis()){
             hasPacking = true;
             try {
-                if (consensusLogger.isDebugEnabled()) {
+                if (consensusLogger.getLogger().isDebugEnabled()) {
                     consensusLogger.debug("当前网络时间： " + DateUtils.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
                             DateUtils.convertDate(new Date(member.getPackStartTime())) + " , 我的打包结束时间: " +
                             DateUtils.convertDate(new Date(member.getPackEndTime())) + " , 当前轮开始时间: " +

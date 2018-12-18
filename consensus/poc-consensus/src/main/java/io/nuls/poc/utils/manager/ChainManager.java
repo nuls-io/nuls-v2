@@ -1,6 +1,5 @@
 package io.nuls.poc.utils.manager;
 
-import ch.qos.logback.classic.Logger;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.BlockRoundData;
@@ -18,6 +17,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
@@ -148,7 +148,7 @@ public class ChainManager {
      * @param chainId  chain id
      * */
     private void initTable(int chainId){
-        Logger logger = chainMap.get(chainId).getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME);
+        NulsLogger logger = chainMap.get(chainId).getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME);
         try {
             /*
             创建共识节点表
@@ -181,8 +181,8 @@ public class ChainManager {
         * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
         * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
         * */
-        Logger consensusLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.CONSENSUS_LOGGER_NAME);
-        Logger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.BASIC_LOGGER_NAME);
+        NulsLogger consensusLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.CONSENSUS_LOGGER_NAME);
+        NulsLogger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.BASIC_LOGGER_NAME);
         chain.getLoggerMap().put(ConsensusConstant.CONSENSUS_LOGGER_NAME,consensusLogger);
         chain.getLoggerMap().put(ConsensusConstant.BASIC_LOGGER_NAME,rpcLogger);
     }
