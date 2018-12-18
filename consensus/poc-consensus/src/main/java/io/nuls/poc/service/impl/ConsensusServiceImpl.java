@@ -1,5 +1,6 @@
 package io.nuls.poc.service.impl;
 
+import ch.qos.logback.classic.Logger;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
@@ -8,7 +9,6 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
@@ -24,6 +24,7 @@ import io.nuls.poc.service.ConsensusService;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.storage.PunishStorageService;
+import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.utils.manager.*;
 import io.nuls.poc.utils.validator.BatchValidator;
 import io.nuls.poc.utils.validator.BlockValidator;
@@ -38,6 +39,7 @@ import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -76,6 +78,8 @@ public class ConsensusServiceImpl implements ConsensusService {
     private BlockValidator blockValidator;
     @Autowired
     private BatchValidator batchValidator;
+
+    private Logger logger = LoggerBuilder.getBasicLoggger();
     /**
      * 创建节点
      */
@@ -127,11 +131,11 @@ public class ConsensusServiceImpl implements ConsensusService {
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHex", HexUtil.encode(tx.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
-        } catch (IOException io) {
-            Log.error(io);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         } catch (NulsRuntimeException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -187,10 +191,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             result.put("txHex", HexUtil.encode(tx.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
-        } catch (IOException io) {
-            Log.error(io);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -234,10 +238,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             result.put("txHex", HexUtil.encode(tx.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
-        } catch (IOException io) {
-            Log.error(io);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -297,10 +301,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             result.put("txHex", HexUtil.encode(cancelDepositTransaction.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
-        } catch (IOException io) {
-            Log.error(io);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -378,7 +382,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             page.setList(resultList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -413,7 +417,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 }
             }
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
         return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
@@ -464,7 +468,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             resultMap.put("yellowPunish", yellowPunishList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -542,7 +546,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             page.setList(resultList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -594,7 +598,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             dto.setPackingAgentCount(packingAgentCount);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(dto);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -658,12 +662,12 @@ public class ConsensusServiceImpl implements ConsensusService {
             try {
                 //todo 从账本模块获取账户可用余额
             } catch (Exception e) {
-                Log.error(e);
+                logger.error(e.getMessage());
                 dto.setUsableBalance(BigIntegerUtils.ZERO);
             }
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(dto);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -693,10 +697,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             blockValidator.validate(isDownload,chain,block);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }catch (IOException e){
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -728,10 +732,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultTxHexs);
         }catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
-        }catch (IOException io){
-            Log.error(io);
+        }catch (IOException e){
+            logger.error(e.getMessage());
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
@@ -756,7 +760,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             MeetingRound round = roundManager.getOrResetCurrentRound(chain, true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(round);
         }catch (NulsException e){
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -784,7 +788,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 result.put("status", 1);
             }
         } catch (Exception e) {
-            Log.error(e);
+            logger.error(e.getMessage());
         }
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
     }
@@ -809,7 +813,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             chain.setConsensusStatus(ConsensusStatus.RUNNING);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -834,7 +838,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             chain.setCanPacking(true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -882,10 +886,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
-        } catch (IOException et) {
-            Log.error(et);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -925,7 +929,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             agentManager.addAgent(chain,agent);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -956,7 +960,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             agentManager.removeAgent(chain,transaction.getHash());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -983,10 +987,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
-        } catch (IOException et) {
-            Log.error(et);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -1047,10 +1051,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             agentManager.updateAgent(chain,agentManager.poToAgent(agentPo));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
-        } catch (Exception et) {
-            Log.error(et);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -1101,10 +1105,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             agentManager.updateAgent(chain,agentManager.poToAgent(agentPo));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
-        } catch (Exception et) {
-            Log.error(et);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -1131,10 +1135,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
-        } catch (IOException et) {
-            Log.error(et);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -1174,7 +1178,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             depositManager.addDeposit(chain,deposit);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -1205,10 +1209,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             depositManager.removeDeposit(chain,transaction.getHash());
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
-        }catch (Exception ep){
-            Log.error(ep);
+        }catch (Exception e){
+            logger.error(e.getMessage());
         }
         return Result.getFailed(ConsensusErrorCode.ROLLBACK_FAILED);
     }
@@ -1235,10 +1239,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
-        } catch (IOException et) {
-            Log.error(et);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
     }
@@ -1283,7 +1287,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             depositManager.updateDeposit(chain,depositManager.poToDeposit(po));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }
@@ -1326,7 +1330,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             depositManager.updateDeposit(chain,depositManager.poToDeposit(po));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
-            Log.error(e);
+            logger.error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }
     }

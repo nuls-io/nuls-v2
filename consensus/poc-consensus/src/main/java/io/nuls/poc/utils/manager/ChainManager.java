@@ -1,5 +1,6 @@
 package io.nuls.poc.utils.manager;
 
+import ch.qos.logback.classic.Logger;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.BlockRoundData;
@@ -72,7 +73,7 @@ public class ChainManager {
             * 初始化链日志对象
             * Initialization Chain Log Objects
             * */
-            chain.setLogger(LoggerBuilder.getLogger(ConsensusConstant.BASIC_LOGGER_NAME+chain));
+            initLogger(chain);
 
             /*
             初始化链数据库表
@@ -171,6 +172,17 @@ public class ChainManager {
                 LoggerBuilder.getBasicLoggger().error(e.getMessage());
             }
         }
+    }
+
+    private void initLogger(Chain chain){
+        /*
+        * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
+        * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
+        * */
+        Logger consensusLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.CONSENSUS_LOGGER_NAME);
+        Logger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.RPC_LOGGER_NAME);
+        chain.getLoggerMap().put(ConsensusConstant.CONSENSUS_LOGGER_NAME,consensusLogger);
+        chain.getLoggerMap().put(ConsensusConstant.RPC_LOGGER_NAME,rpcLogger);
     }
 
     /**

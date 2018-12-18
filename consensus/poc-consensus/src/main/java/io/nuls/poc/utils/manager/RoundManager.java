@@ -7,12 +7,12 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
+import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.data.StringUtils;
@@ -363,7 +363,7 @@ public class RoundManager {
         Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
         packingAddressList.add(packingAddress.getAddressBytes());
         round.calcLocalPacker(packingAddressList);
-        Log.debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
+        chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
     }
 
@@ -586,7 +586,7 @@ public class RoundManager {
         }
         if (firstBlockHeader == null) {
             firstBlockHeader = chain.getNewestHeader();
-            Log.warn("the first block of pre round not found");
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).warn("the first block of pre round not found");
         }
         return firstBlockHeader;
     }

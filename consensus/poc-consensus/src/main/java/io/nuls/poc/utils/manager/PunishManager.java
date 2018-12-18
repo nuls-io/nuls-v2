@@ -5,8 +5,6 @@ import io.nuls.base.data.*;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.consensus.Evidence;
-import io.nuls.poc.utils.enumeration.PunishReasonEnum;
-import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
@@ -16,6 +14,8 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.utils.compare.EvidenceComparator;
 import io.nuls.poc.utils.compare.PunishLogComparator;
+import io.nuls.poc.utils.enumeration.PunishReasonEnum;
+import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
@@ -179,7 +179,7 @@ public class PunishManager {
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             chain.getRedPunishTransactionList().add(redPunishTransaction);
         }catch (IOException e){
-            Log.error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
         }
     }
 
@@ -278,7 +278,7 @@ public class PunishManager {
             }
             redPunishData.setEvidence(ByteUtils.concatenate(headers));
         }catch (IOException e){
-            Log.error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
         }
         try {
             redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
@@ -297,7 +297,7 @@ public class PunishManager {
             */
             chain.getRedPunishTransactionList().add(redPunishTransaction);
         } catch (IOException e) {
-            Log.error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
         }
     }
 
