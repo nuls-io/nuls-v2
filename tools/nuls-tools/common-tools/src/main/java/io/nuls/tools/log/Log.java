@@ -46,7 +46,7 @@ public class Log {
         BASIC_LOGGER.info(msg);
     }
 
-    public void info(String msg, Object... objs) {
+    public static void info(String msg, Object... objs) {
         BASIC_LOGGER.info(msg, objs);
     }
 
@@ -69,7 +69,7 @@ public class Log {
         BASIC_LOGGER.warn(msg);
     }
 
-    public void warn(String msg, Object... objs) {
+    public static void warn(String msg, Object... objs) {
         BASIC_LOGGER.warn(msg, objs);
     }
 
