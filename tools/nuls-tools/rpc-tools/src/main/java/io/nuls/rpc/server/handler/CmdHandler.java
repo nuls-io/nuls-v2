@@ -34,7 +34,7 @@ import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 import org.java_websocket.WebSocket;
@@ -126,7 +126,7 @@ public class CmdHandler {
 
         String key = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
         if (ServerRuntime.UNSUBSCRIBE_LIST.contains(key)) {
-            LoggerBuilder.getBasicLoggger().info("取消订阅responseWithPeriod：" + key);
+            Log.info("取消订阅responseWithPeriod：" + key);
             return false;
         }
 
@@ -157,10 +157,10 @@ public class CmdHandler {
                     return false;
             }
         } catch (WebsocketNotConnectedException e) {
-            LoggerBuilder.getBasicLoggger().error("Socket disconnected, remove");
+            Log.error("Socket disconnected, remove");
             return false;
         } catch (Exception e) {
-            LoggerBuilder.getBasicLoggger().error(e.getMessage());
+            Log.error(e.getMessage());
             return false;
         }
     }
@@ -224,7 +224,7 @@ public class CmdHandler {
             }
 
             Message rspMessage = execute(cmdDetail, params, messageId);
-            LoggerBuilder.getBasicLoggger().info("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
+            Log.info("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
             webSocket.send(JSONUtils.obj2json(rspMessage));
         }
     }
@@ -266,7 +266,7 @@ public class CmdHandler {
     public static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request, String cmd) {
         String unsubscribeKey = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
         if (ServerRuntime.UNSUBSCRIBE_LIST.contains(unsubscribeKey)) {
-            LoggerBuilder.getBasicLoggger().info("取消订阅responseWithEventCount：" + unsubscribeKey);
+            Log.info("取消订阅responseWithEventCount：" + unsubscribeKey);
             return false;
         }
 
@@ -295,12 +295,12 @@ public class CmdHandler {
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 try {
-                    LoggerBuilder.getBasicLoggger().info("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
+                    Log.info("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
                     webSocket.send(JSONUtils.obj2json(rspMessage));
                 } catch (WebsocketNotConnectedException e) {
-                    LoggerBuilder.getBasicLoggger().error("Socket disconnected, remove");
+                    Log.error("Socket disconnected, remove");
                 } catch (JsonProcessingException e) {
-                    LoggerBuilder.getBasicLoggger().error(e.getMessage());
+                    Log.error(e.getMessage());
                 }
 
                 ServerRuntime.CMD_LAST_RESPONSE_BE_USED.put(eventCountKey, true);

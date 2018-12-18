@@ -20,6 +20,8 @@
 
 package io.nuls.block.constant;
 
+import io.nuls.tools.log.Log;
+
 /**
  * 配置常量
  * @author lan
@@ -86,5 +88,4 @@ public interface Constant {
      * 每次清理几分之一
      */
     int CLEAN_PARAM = 2;
-
 }

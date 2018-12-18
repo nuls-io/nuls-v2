@@ -15,6 +15,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.log.Log;
 
 import java.util.List;
 import java.util.Map;

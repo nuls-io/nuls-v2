@@ -29,6 +29,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;

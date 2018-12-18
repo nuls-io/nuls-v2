@@ -7,6 +7,7 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;

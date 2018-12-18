@@ -27,6 +27,7 @@ import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
+import io.nuls.tools.log.Log;
 
 import java.util.SortedSet;
 import java.util.TreeSet;

@@ -29,7 +29,7 @@ import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
@@ -88,14 +88,14 @@ public class WsClient extends WebSocketClient {
                     } else {
                         ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);
                     }
-                    LoggerBuilder.getBasicLoggger().info("ResponseFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
+                    Log.info("ResponseFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
                     break;
                 default:
                     break;
             }
 
         } catch (IOException e) {
-            LoggerBuilder.getBasicLoggger().error(e.getMessage());
+            Log.error(e.getMessage());
         }
     }
 
@@ -105,6 +105,6 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        LoggerBuilder.getBasicLoggger().error(e.getMessage());
+        Log.error(e.getMessage());
     }
 }
