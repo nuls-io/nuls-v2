@@ -56,6 +56,10 @@ public class ResponseAutoProcessor implements Runnable {
                 Get the first item of the queue
                  */
                 Message message = ClientRuntime.firstMessageInResponseAutoQueue();
+                if (message == null) {
+                    Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+                    continue;
+                }
 
                 /*
                 获取Response对象，这里得到的对象一定是需要自动调用本地方法

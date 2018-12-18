@@ -168,9 +168,9 @@ public class CmdDispatcher {
      * 发送Request，并等待Response
      * Send Request and wait for Response
      *
-     * @param role   远程方法所属的角色，The role of remote method
-     * @param cmd    远程方法的命令，Command of the remote method
-     * @param params 远程方法所需的参数，Parameters of the remote method
+     * @param role    远程方法所属的角色，The role of remote method
+     * @param cmd     远程方法的命令，Command of the remote method
+     * @param params  远程方法所需的参数，Parameters of the remote method
      * @param timeOut 超时时间, timeout millis
      * @return 远程方法的返回结果，Response of the remote method
      * @throws Exception 请求超时（timeOut），timeout (timeOut)
@@ -365,6 +365,10 @@ public class CmdDispatcher {
             Get the first item of the queue
              */
             Message message = ClientRuntime.firstMessageInResponseManualQueue();
+            if (message == null) {
+                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+                continue;
+            }
 
             Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
             if (response.getRequestId().equals(messageId)) {
