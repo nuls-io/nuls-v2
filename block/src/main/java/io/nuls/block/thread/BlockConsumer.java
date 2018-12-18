@@ -23,22 +23,26 @@ package io.nuls.block.thread;
 import io.nuls.base.data.Block;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
 
 import java.util.concurrent.*;
 
 /**
- * 消费同步到的区块
+ * 消费共享队列中的区块
  *
  * @author captain
  * @version 1.0
  * @date 18-11-8 下午5:45
  */
+@Component
 public class BlockConsumer implements Callable<Boolean> {
 
     private int chainId;
     private BlockingQueue<Block> queue;
-    private BlockService blockService = ContextManager.getServiceBean(BlockService.class);
+    @Autowired
+    private BlockService blockService;
 
     public BlockConsumer(int chainId, BlockingQueue<Block> queue) {
         this.chainId = chainId;

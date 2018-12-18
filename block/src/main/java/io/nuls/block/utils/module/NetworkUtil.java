@@ -81,7 +81,7 @@ public class NetworkUtil {
                 Node node = new Node();
                 node.setId((String) map.get("nodeId"));
                 node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
-//            node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
+                node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
                 nodes.add(node);
             }
             return nodes;

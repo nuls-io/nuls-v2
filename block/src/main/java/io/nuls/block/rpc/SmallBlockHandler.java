@@ -69,7 +69,7 @@ public class SmallBlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Object process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
-        String nodeId = map.get("nodes").toString();
+        String nodeId = map.get("nodeId").toString();
         SmallBlockMessage message = new SmallBlockMessage();
 
         byte[] decode = HexUtil.decode(map.get("messageBody").toString());

@@ -71,20 +71,25 @@ public class BlockSynchronizer implements Runnable {
     @Override
     public void run() {
         for (Integer chainId : ContextManager.chainIds) {
-            BlockSynStatusEnum synStatus = statusEnumMap.get(chainId);
-            if (synStatus == null) {
-                statusEnumMap.put(chainId, synStatus = BlockSynStatusEnum.WAITING);
-            }
-            RunningStatusEnum runningStatus = ContextManager.getContext(chainId).getStatus();
-            if (synStatus.equals(BlockSynStatusEnum.WAITING) && runningStatus.equals(RunningStatusEnum.RUNNING)) {
-                synchronize(chainId);
-            } else {
-                Log.info("skip Block Synchronize, SynStatus:{}, RunningStatus:{}", synStatus, runningStatus);
+            try {
+                BlockSynStatusEnum synStatus = statusEnumMap.get(chainId);
+                if (synStatus == null) {
+                    statusEnumMap.put(chainId, synStatus = BlockSynStatusEnum.WAITING);
+                }
+                RunningStatusEnum runningStatus = ContextManager.getContext(chainId).getStatus();
+                if (synStatus.equals(BlockSynStatusEnum.WAITING) && runningStatus.equals(RunningStatusEnum.RUNNING)) {
+                    synchronize(chainId);
+                } else {
+                    Log.info("skip Block Synchronize, SynStatus:{}, RunningStatus:{}", synStatus, runningStatus);
+                }
+            } catch (Exception e) {
+                Log.error(e);
+                statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
             }
         }
     }
 
-    private void synchronize(int chainId) {
+    private void synchronize(int chainId) throws Exception {
         //1.调用网络模块接口获取当前chainID网络的可用节点
         List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
 
@@ -125,23 +130,17 @@ public class BlockSynchronizer implements Runnable {
             FutureTask<Boolean> consumerFuture = new FutureTask<>(consumer);
             ThreadUtils.createAndRunThread("block-consumer-" + chainId, consumerFuture);
 
+            Boolean downResult = downloadFutrue.get();
+            Boolean storageResult = consumerFuture.get();
+            boolean success = downResult != null && downResult && storageResult != null && storageResult;
 
-            try {
-                Boolean downResult = downloadFutrue.get();
-                Boolean storageResult = consumerFuture.get();
-                boolean success = downResult != null && downResult && storageResult != null && storageResult;
-
-                if (success) {
-                    if (checkIsNewest(chainId, params)) {
-                        statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
-                    } else {
-                        statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
-                    }
+            if (success) {
+                if (checkIsNewest(chainId, params)) {
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                 } else {
-                    statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
                 }
-            } catch (Exception e) {
-                Log.error(e);
+            } else {
                 statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
             }
         }

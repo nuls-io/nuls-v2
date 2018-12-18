@@ -143,6 +143,7 @@ public class MessageManager extends BaseManager{
                     }
                 }else{
                     //外部消息，转外部接口
+                    CmdDispatcher.syncKernel();
                     long magicNum=header.getMagicNumber();
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
                     Map<String,Object> paramMap = new HashMap<>();
