@@ -3,7 +3,7 @@ package io.nuls.rpc.invoke.test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 /**
@@ -21,7 +21,7 @@ public class MyInvoke extends BaseInvoke {
     @Override
     public void callBack(Response response) {
         try {
-            LoggerBuilder.getBasicLoggger().info("Period进入了！！！！！\n" + JSONUtils.obj2json(response));
+            Log.info("Period进入了！！！！！\n" + JSONUtils.obj2json(response));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
