@@ -26,10 +26,14 @@ package io.nuls.network.manager;
 
 import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.dto.IpAddress;
-import io.nuls.tools.log.Log;
 
-import java.net.*;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.*;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 用于管理本地节点的相关信息
@@ -150,7 +154,7 @@ public class LocalInfoManager extends BaseManager {
                                     ip = (InetAddress) card.nextElement();
                                 }
                             } catch (Exception e) {
-                                Log.debug(e.getMessage());
+
                             }
                             if (ip == null) {
                                 break;

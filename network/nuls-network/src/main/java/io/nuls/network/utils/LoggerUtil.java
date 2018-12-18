@@ -22,39 +22,16 @@
  * SOFTWARE.
  *
  */
+package io.nuls.network.utils;
 
-package io.nuls.network.netty.handler;
-
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.timeout.IdleStateEvent;
-import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.handler.base.BaseChannelHandler;
-import io.nuls.network.model.Node;
-import static io.nuls.network.utils.LoggerUtil.Log;
-
+import ch.qos.logback.classic.Logger;
+import io.nuls.tools.log.logback.LoggerBuilder;
 
 /**
- *
- * @desription:
- * @author: PierreLuo
- */
-public class HeartbeatServerHandler extends BaseChannelHandler {
-
-    @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-
-        if (evt instanceof IdleStateEvent) {
-            Log.info(getNodeIdByChannel(ctx.channel())+"====userEventTriggered  IdleStateEvent==");
-            String nodeId = this.getNodeIdByChannel(ctx.channel());
-            Node node = ConnectionManager.getInstance().getNodeByCache(nodeId, Node.OUT);
-            if(null != node){
-                node.setBad(true);
-            }
-            ctx.channel().close();
-
-        } else {
-            super.userEventTriggered(ctx, evt);
-        }
-    }
-
+ * @author lan
+ * @description
+ * @date 2018/12/17
+ **/
+public class LoggerUtil {
+   public static Logger Log = LoggerBuilder.getBasicLoggger();
 }

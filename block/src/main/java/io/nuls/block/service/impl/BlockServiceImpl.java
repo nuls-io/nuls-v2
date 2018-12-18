@@ -176,6 +176,7 @@ public class BlockServiceImpl implements BlockService {
 
     private boolean saveBlock(int chainId, Block block, boolean localInit) {
         long height = block.getHeader().getHeight();
+        NulsDigestData hash = block.getHeader().getHash();
         //1.验证区块
         if (!verifyBlock(chainId, block, localInit)) {
             Log.error("verify block fail!chainId-{},height-{}", chainId, height);
@@ -218,9 +219,9 @@ public class BlockServiceImpl implements BlockService {
             if (hashList.size() > heightRange) {
                 hashList.removeFirst();
             }
-            hashList.addLast(block.getHeader().getHash());
+            hashList.addLast(hash);
         }
-        Log.debug("save block success, height-{}, hash-{}, preHash-{}", height, block.getHeader().getHash(), block.getHeader().getPreHash());
+        Log.debug("save block success, height-{}, hash-{}, preHash-{}", height, hash, block.getHeader().getPreHash());
         return true;
     }
 

@@ -33,8 +33,7 @@ import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.tools.log.Log;
-
+import static io.nuls.network.utils.LoggerUtil.Log;
 /**
  * 发送与接收 连接地址 协议消息处理类
  * get address message handler

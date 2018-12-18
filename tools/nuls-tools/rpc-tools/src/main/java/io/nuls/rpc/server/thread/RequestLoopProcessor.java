@@ -29,6 +29,7 @@ import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.server.handler.CmdHandler;
 import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 
@@ -58,7 +59,7 @@ public class RequestLoopProcessor implements Runnable {
 
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
-                Log.error(e);
+                LoggerBuilder.getBasicLoggger().error(e.getMessage());
             }
         }
     }

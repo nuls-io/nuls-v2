@@ -41,8 +41,7 @@ import io.nuls.network.model.message.body.VersionMessageBody;
 import io.nuls.network.rpc.external.BlockRpcService;
 import io.nuls.network.rpc.external.impl.BlockRpcServiceImpl;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
-
+import static io.nuls.network.utils.LoggerUtil.Log;
 /**
  * version message handler
  * @author lan

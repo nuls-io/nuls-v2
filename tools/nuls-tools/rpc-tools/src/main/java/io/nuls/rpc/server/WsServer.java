@@ -39,6 +39,7 @@ import io.nuls.rpc.server.handler.CmdHandler;
 import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.rpc.server.thread.RequestLoopProcessor;
 import io.nuls.rpc.server.thread.RequestSingleProcessor;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
@@ -88,7 +89,7 @@ public class WsServer extends WebSocketServer {
         if (!CmdDispatcher.handshakeKernel()) {
             throw new Exception("Handshake kernel failed");
         } else {
-            Log.info("Connect manager success." + ServerRuntime.LOCAL.getModuleName() + " ready!");
+            LoggerBuilder.getBasicLoggger().info("Connect manager success." + ServerRuntime.LOCAL.getModuleName() + " ready!");
         }
     }
 
@@ -123,7 +124,7 @@ public class WsServer extends WebSocketServer {
                     /*
                     取消订阅，直接响应
                      */
-                    Log.info("UnsubscribeFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
+                    LoggerBuilder.getBasicLoggger().info("UnsubscribeFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
                     CmdHandler.unsubscribe(webSocket, message);
                     break;
                 case Request:
@@ -140,7 +141,7 @@ public class WsServer extends WebSocketServer {
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing
                      */
-                    Log.info("RequestFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
+                    LoggerBuilder.getBasicLoggger().info("RequestFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
                     Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
 
                     if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
@@ -169,13 +170,13 @@ public class WsServer extends WebSocketServer {
             }
 
         } catch (Exception e) {
-            Log.error(e);
+            LoggerBuilder.getBasicLoggger().error(e.getMessage());
         }
     }
 
     @Override
     public void onError(WebSocket webSocket, Exception ex) {
-        Log.error(ex);
+        LoggerBuilder.getBasicLoggger().error(ex.getMessage());
     }
 
 
@@ -185,7 +186,7 @@ public class WsServer extends WebSocketServer {
         Constants.THREAD_POOL.execute(new RequestSingleProcessor());
         Constants.THREAD_POOL.execute(new RequestLoopProcessor());
         Constants.THREAD_POOL.execute(new HeartbeatProcessor());
-        Log.info("Server<" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
+        LoggerBuilder.getBasicLoggger().info("Server<" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
     }
 
     /**

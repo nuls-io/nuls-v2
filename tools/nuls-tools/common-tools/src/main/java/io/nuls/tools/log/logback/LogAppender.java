@@ -26,10 +26,11 @@ public class LogAppender {
     private final static String PROJECT_PATH = "user.dir";
     /**
      * 通过传入的名字和级别，动态设置appender
-     * @param name
+     *
+     * @param fileName
      * @return
      */
-    public static RollingFileAppender getAppender(String name){
+    public static RollingFileAppender getAppender(String fileName){
         String rootPath = System.getProperty(PROJECT_PATH);
         DateFormat format = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.SIMPLIFIED_CHINESE);
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -38,19 +39,17 @@ public class LogAppender {
         //设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
         // 但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
         appender.setContext(context);
-        //appender的name属性
-        appender.setName(name);
         //设置文件名
-        appender.setFile(OptionHelper.substVars(rootPath+"/logs/" + format.format(new Date())+"/"+name + ".log",context));
+        appender.setFile(OptionHelper.substVars(rootPath+"/logs/"+"/" + format.format(new Date())+"/"+fileName + ".log",context));
         appender.setAppend(true);
         appender.setPrudent(false);
 
         //设置文件创建时间及大小的类
         SizeAndTimeBasedRollingPolicy policy = new SizeAndTimeBasedRollingPolicy();
         //文件名格式
-        String fp = OptionHelper.substVars(rootPath+"/logs/"+ format.format(new Date())+"/"+ name + "/.%d{yyyy-MM-dd}.%i.zip",context);
+        String fp = OptionHelper.substVars(rootPath+"/logs/"+"/" + format.format(new Date())+"/"+ fileName + "/.%d{yyyy-MM-dd}.%i.zip",context);
         //最大日志文件大小
-        policy.setMaxFileSize("1MB");
+        policy.setMaxFileSize("100MB");
         //设置文件名模式
         policy.setFileNamePattern(fp);
         //设置最大历史记录为15条

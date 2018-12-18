@@ -76,6 +76,7 @@ public class Miner extends Thread {
                 }
                 previousBlock = block;
                 blockService.saveBlock(CHAIN_ID, block);
+                blockService.broadcastBlock(CHAIN_ID, block);
             } catch (Exception e) {
                 e.printStackTrace();
             }

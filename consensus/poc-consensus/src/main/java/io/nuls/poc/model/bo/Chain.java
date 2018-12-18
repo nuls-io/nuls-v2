@@ -100,7 +100,7 @@ public class Chain {
      * */
     private List<BlockHeader> blockHeaderList;
 
-    private Logger logger;
+    private Map<String,Logger> loggerMap;
 
     /**
      * 任务线程池
@@ -224,11 +224,11 @@ public class Chain {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
     }
 
-    public Logger getLogger() {
-        return logger;
+    public Map<String, Logger> getLoggerMap() {
+        return loggerMap;
     }
 
-    public void setLogger(Logger logger) {
-        this.logger = logger;
+    public void setLoggerMap(Map<String, Logger> loggerMap) {
+        this.loggerMap = loggerMap;
     }
 }

@@ -6,7 +6,7 @@ import io.nuls.tools.log.logback.LoggerBuilder;
 public class LogUtilTest {
     public static void main(String[] args){
         //logger.debug("test logger");
-        Logger log = LoggerBuilder.getLogger("blockLog");
+        Logger log = LoggerBuilder.getLogger("blockLog","test");
         while(true){
             log.warn("test block log");
         }
