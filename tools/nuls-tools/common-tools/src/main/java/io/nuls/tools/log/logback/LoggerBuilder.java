@@ -17,9 +17,6 @@ import java.util.Map;
  * 2018/12/17
  * */
 public class LoggerBuilder {
-    private static final String BASIC_NAME = "common/nuls";
-
-    private static final Logger BASIC_LOGGER = build(BASIC_NAME);
 
     private static final Map<String, Logger> container = new HashMap<>();
 
@@ -56,9 +53,6 @@ public class LoggerBuilder {
         return logger;
     }
 
-    public static Logger getBasicLoggger(){
-        return BASIC_LOGGER;
-    }
 
     private static Logger build(String fileName) {
         RollingFileAppender fileAppender = LogAppender.getAppender(fileName);
