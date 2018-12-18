@@ -1,8 +1,7 @@
 package io.nuls.tools.io;
 
-import ch.qos.logback.classic.Logger;
 import io.nuls.tools.data.ObjectUtils;
-import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.Log;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -13,7 +12,6 @@ import java.net.URL;
  */
 public class IoUtils {
     private static final int SIZE = 1024 * 8;
-    private static Logger logger = LoggerBuilder.getBasicLoggger();
     /**
      * 读取远程文件字节流
      *
@@ -21,7 +19,7 @@ public class IoUtils {
      * @return 读取回的字节流
      */
     public static byte[] download(String urlStr) throws IOException {
-        logger.info("Get the version info file from " + urlStr);
+        Log.info("Get the version info file from " + urlStr);
         URL url = new URL(urlStr);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setConnectTimeout(60 * 1000);
@@ -73,7 +71,7 @@ public class IoUtils {
         try {
             br = new BufferedReader(new FileReader(realPath));
         } catch (FileNotFoundException e) {
-            logger.error(e.getMessage());
+            Log.error(e.getMessage());
             throw new Exception(e);
         }
         StringBuilder str = new StringBuilder();
@@ -89,13 +87,13 @@ public class IoUtils {
                 }
             }
         } catch (IOException e) {
-            logger.error(e.getMessage());
+            Log.error(e.getMessage());
             throw new Exception(e);
         } finally {
             try {
                 br.close();
             } catch (IOException e) {
-                logger.error(e.getMessage());
+                Log.error(e.getMessage());
             }
         }
         return str.toString();
