@@ -33,6 +33,7 @@ public class ChainCmdTest {
     public void chain() throws Exception {
         Map<String, String> yiFeng = new HashMap<>();
         yiFeng.put("initNumber", "222");
+        yiFeng.put("test", "33");
         JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         Asset asset = JSONUtils.map2pojo(yiFeng, Asset.class);
         System.out.println(JSONUtils.obj2json(asset));
