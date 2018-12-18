@@ -50,7 +50,7 @@ public class BootStrap {
             initServer();
         } catch (Exception e) {
             Log.error("consensus startup error！");
-            Log.error(e.getMessage());
+            Log.error(e);
         }
     }
 

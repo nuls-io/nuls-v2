@@ -2,7 +2,15 @@ package io.nuls.tools.log.logback;
 
 import ch.qos.logback.classic.Logger;
 
+/**
+ * 系统日志类
+ * System Log Class
+ *
+ * @author tag
+ * 2018/12/18
+ * */
 public class NulsLogger {
+    private String BASIC_PATH = "io.nuls.tools.log.Log";
     private Logger logger;
 
     public NulsLogger(Logger logger){
@@ -157,6 +165,9 @@ public class NulsLogger {
         if (stack.length > 1) {
             // index为3上一级调用的堆栈信息，index为1和2都为Log类自己调两次（可忽略），index为0为主线程触发（可忽略）
             StackTraceElement ste = stack[3];
+            if(BASIC_PATH.equals(ste.getClassName())){
+                ste = stack[4];
+            }
             if (ste != null) {
                 // 获取类名、方法名、日志的代码行数
                 logTrace.append(ste.getClassName());
