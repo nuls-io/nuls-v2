@@ -21,6 +21,7 @@
 package io.nuls.block.cache;
 
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.tools.log.Log;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;

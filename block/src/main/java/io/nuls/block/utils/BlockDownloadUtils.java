@@ -27,6 +27,7 @@ import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.model.Node;
 import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.tools.log.Log;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;

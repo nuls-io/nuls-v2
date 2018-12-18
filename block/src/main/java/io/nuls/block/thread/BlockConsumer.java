@@ -23,6 +23,7 @@ package io.nuls.block.thread;
 import io.nuls.base.data.Block;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
+import io.nuls.tools.log.Log;
 
 import java.util.concurrent.*;
 

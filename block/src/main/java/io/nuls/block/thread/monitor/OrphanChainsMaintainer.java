@@ -29,6 +29,7 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.model.Node;
 import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.tools.log.Log;
 
 import java.util.List;
 import java.util.SortedSet;
