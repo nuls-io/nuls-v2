@@ -39,7 +39,6 @@ public interface TxConstant {
     long TX_UNVERIFIED_QUEUE_MAXSIZE = 10000000L;
 
 
-
     /**
      * H2
      */
@@ -85,11 +84,16 @@ public interface TxConstant {
 
     /**
      * Map初始值
-     * */
-    int  INIT_CAPACITY =16;
+     */
+    int INIT_CAPACITY = 16;
 
     /**
      * config file path
-     * */
+     */
     String CONFIG_FILE_PATH = "transaction-config.json";
+
+    /**
+     * 打包交易，预留模块统一验证的时间 毫秒
+     */
+    long VERIFY_OFFSET = 500L;
 }
