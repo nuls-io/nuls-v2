@@ -141,7 +141,7 @@ public interface TransactionService {
      * @return
      * @throws NulsException
      */
-    List<String> packableTxs(int chainId, long endtimestamp, String maxTxDataSize) throws NulsException;
+    List<String> getPackableTxs(int chainId, long endtimestamp, String maxTxDataSize) throws NulsException;
 
     /**
      * 收到新区快时，验证共识发过来的待验证完整交易列表

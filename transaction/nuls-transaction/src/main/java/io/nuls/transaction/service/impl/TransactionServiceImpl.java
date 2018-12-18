@@ -588,7 +588,7 @@ public class TransactionServiceImpl implements TransactionService {
             if (TxUtil.isNulsAsset(coinFrom)) {
                 hasNulsFrom = true;
             }
-            //只有主网才会进入跨链交易验证器，直接验证资产即可
+            //只有NULS主网节点才会进入跨链交易验证器，直接验证资产即可
             if (!TxUtil.assetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
             }
@@ -628,14 +628,19 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public List<String> packableTxs(int chainId, long endtimestamp, String maxTxDataSize) throws NulsException {
-        TimeService.currentTimeMillis();
+    public List<String> getPackableTxs(int chainId, long endtimestamp, String maxTxDataSize) throws NulsException {
+        long start = TimeService.currentTimeMillis();
         /**
-         * 1.取出交易的逻辑
-         * 2.调用批量验证的逻辑 batchVerify ？
+         * 1.打包好一个block，如果和前一个(当前本地最新)区块连不上，则返还到TxVerifiedPool
+         */
+        /**
+         * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
+         * 2.取交易同时执行交易验证，然后coinData的验证(先发送开始验证的标识)
+         * 3.冲突检测，模块统一验证，如果有没验证通过的的交易，则将该交易之后的所有交易再从1.开始执行一次
          */
         return null;
     }
+
 
     @Override
     public boolean batchVerify(int chainId, List<String> txHexList) throws NulsException {

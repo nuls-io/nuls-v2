@@ -33,6 +33,7 @@ import io.nuls.base.data.NulsSignData;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
