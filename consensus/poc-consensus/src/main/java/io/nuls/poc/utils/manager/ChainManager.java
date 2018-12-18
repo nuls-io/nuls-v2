@@ -100,11 +100,19 @@ public class ChainManager {
 
     /**
      * 停止一条链
-     * Delete a chain
+     * stop a chain
      *
      * @param chainId 链ID/chain id
      * */
     public void stopChain(int chainId){
+
+    }
+
+    /**
+     * 删除一条链
+     * delete a chain
+     * */
+    public void deleteChain(int chainId){
 
     }
 
@@ -203,7 +211,7 @@ public class ChainManager {
             int length = 1000;
             int roundIndex = 1;
             List<BlockHeader>blockHeaderList = new ArrayList<>();
-            Address packingAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
+            Address packingAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
             Address packingAddress1 = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
             for (int index = 0;index < length;index++) {
                 BlockHeader blockHeader = new BlockHeader();

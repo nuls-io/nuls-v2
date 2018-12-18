@@ -11,9 +11,8 @@ import ch.qos.logback.core.util.FileSize;
 import ch.qos.logback.core.util.OptionHelper;
 import org.slf4j.LoggerFactory;
 
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 /**
  * 日志打印管理类，日志文件创建，日志文件大小，保存时间，日志输出格式等设置管理
@@ -32,7 +31,7 @@ public class LogAppender {
      */
     public static RollingFileAppender getAppender(String fileName){
         String rootPath = System.getProperty(PROJECT_PATH);
-        DateFormat format = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.SIMPLIFIED_CHINESE);
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         RollingFileAppender appender = new RollingFileAppender();
 
@@ -55,7 +54,7 @@ public class LogAppender {
         //设置最大历史记录为15条
         policy.setMaxHistory(7);
         //总大小限制
-        policy.setTotalSizeCap(FileSize.valueOf("10GB"));
+        policy.setTotalSizeCap(FileSize.valueOf("2GB"));
         //设置父节点是appender
         policy.setParent(appender);
         //设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
