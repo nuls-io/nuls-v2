@@ -53,7 +53,7 @@ public class BlockRpcServiceImpl implements BlockRpcService {
         try {
             long startTime = System.currentTimeMillis();
             Log.info("start RPC Time :{}",startTime);
-            Response response =  CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER,map );
+            Response response =  CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER,map,500 );
             long endTime = System.currentTimeMillis();
             Log.info("end RPC Time :{}",System.currentTimeMillis());
             Log.info("used Time :{}",endTime-startTime);
