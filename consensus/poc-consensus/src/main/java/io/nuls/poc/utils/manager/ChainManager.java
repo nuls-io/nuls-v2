@@ -80,7 +80,7 @@ public class ChainManager {
             初始化链数据库表
             Initialize linked database tables
             */
-            initTable(chainId);
+            initTable(chain);
 
             /*
             加载链缓存数据
@@ -145,10 +145,11 @@ public class ChainManager {
     /**
      * 初始化链相关表
      * Initialization chain correlation table
-     * @param chainId  chain id
+     * @param chain   chain info
      * */
-    private void initTable(int chainId){
-        NulsLogger logger = chainMap.get(chainId).getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME);
+    private void initTable(Chain chain){
+        NulsLogger logger = chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME);
+        int chainId = chain.getConfig().getChainId();
         try {
             /*
             创建共识节点表

@@ -118,6 +118,7 @@ public class Chain {
         this.evidenceMap = new HashMap<>();
         this.redPunishTransactionList = new ArrayList<>();
         this.roundList = new ArrayList<>();
+        this.loggerMap = new HashMap<>();
     }
 
     public ConfigBean getConfig() {
