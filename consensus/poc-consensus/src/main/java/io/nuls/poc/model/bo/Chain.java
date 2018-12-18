@@ -1,15 +1,15 @@
 package io.nuls.poc.model.bo;
 
-import ch.qos.logback.classic.Logger;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
+import io.nuls.poc.utils.enumeration.ConsensusStatus;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -100,7 +100,7 @@ public class Chain {
      * */
     private List<BlockHeader> blockHeaderList;
 
-    private Map<String,Logger> loggerMap;
+    private Map<String, NulsLogger> loggerMap;
 
     /**
      * 任务线程池
@@ -224,11 +224,11 @@ public class Chain {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
     }
 
-    public Map<String, Logger> getLoggerMap() {
+    public Map<String, NulsLogger> getLoggerMap() {
         return loggerMap;
     }
 
-    public void setLoggerMap(Map<String, Logger> loggerMap) {
+    public void setLoggerMap(Map<String, NulsLogger> loggerMap) {
         this.loggerMap = loggerMap;
     }
 }
