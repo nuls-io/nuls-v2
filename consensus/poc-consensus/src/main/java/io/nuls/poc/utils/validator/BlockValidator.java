@@ -368,7 +368,7 @@ public class BlockValidator {
    private boolean coinBaseValidate(Block block, MeetingRound currentRound, MeetingMember member,Chain chain)throws NulsException, IOException {
       Transaction tx = block.getTxs().get(0);
       if (tx.getType() != ConsensusConstant.TX_TYPE_COINBASE) {
-         chain.getLoggerMap().get(ConsensusConstant.RPC_LOGGER_NAME).debug("Coinbase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+         chain.getLoggerMap().get(ConsensusConstant.RPC_LOGGER_NAME).debug("CoinBase transaction order wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
          return false;
       }
       Transaction coinBaseTransaction = consensusManager.createCoinBaseTx(chain ,member, block.getTxs(), currentRound, block.getHeader().getHeight() + chain.getConfig().getCoinbaseUnlockHeight());

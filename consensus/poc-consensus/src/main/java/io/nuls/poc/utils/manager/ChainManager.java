@@ -148,6 +148,7 @@ public class ChainManager {
      * @param chainId  chain id
      * */
     private void initTable(int chainId){
+        Logger logger = chainMap.get(chainId).getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME);
         try {
             /*
             创建共识节点表
@@ -168,9 +169,9 @@ public class ChainManager {
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH+chainId);
         }catch (Exception e){
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.info(e.getMessage());
+                logger.error(e.getMessage());
             }else{
-                Log.error(e.getMessage());
+                logger.error(e.getMessage());
             }
         }
     }
@@ -181,9 +182,9 @@ public class ChainManager {
         * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
         * */
         Logger consensusLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.CONSENSUS_LOGGER_NAME);
-        Logger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.RPC_LOGGER_NAME);
+        Logger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.BASIC_LOGGER_NAME);
         chain.getLoggerMap().put(ConsensusConstant.CONSENSUS_LOGGER_NAME,consensusLogger);
-        chain.getLoggerMap().put(ConsensusConstant.RPC_LOGGER_NAME,rpcLogger);
+        chain.getLoggerMap().put(ConsensusConstant.BASIC_LOGGER_NAME,rpcLogger);
     }
 
     /**
@@ -238,7 +239,7 @@ public class ChainManager {
             punishManager.loadPunishes(chain);
             roundManager.initRound(chain);
         }catch (Exception e){
-            Log.error(e.getMessage());
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
         }
     }
 
