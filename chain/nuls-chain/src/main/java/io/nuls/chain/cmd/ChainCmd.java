@@ -12,16 +12,20 @@ import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
 import io.nuls.chain.service.SeqService;
+import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -73,8 +77,9 @@ public class ChainCmd extends BaseChainCmd {
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]")
     public Response chainReg(Map params) {
         try {
-            BlockChain blockChain = new BlockChain();
-            blockChain.setChainId(Integer.valueOf(params.get("chainId").toString()));
+            BlockChain blockChain = JSONUtils.map2pojo(params,BlockChain.class);
+            int chainId = Integer.parseInt(params.get("chainId").toString());
+            blockChain.setChainId(chainId);
             blockChain.setName((String) params.get("name"));
             blockChain.setAddressType((String) params.get("addressType"));
             blockChain.setMagicNumber(Long.valueOf(params.get("magicNumber").toString()));
@@ -107,11 +112,22 @@ public class ChainCmd extends BaseChainCmd {
             tx.setCoinData(coinData.serialize());
 
             // TODO 设置正确的交易签名
-            tx.setTransactionSignature(null);
+            Map<String, Object> signDigestParam = new HashMap<>();
+            signDigestParam.put("chainId", chainId);
+            signDigestParam.put("address", params.get("address"));
+            signDigestParam.put("password", params.get("password"));
+            signDigestParam.put("dataHex", tx.hex());
 
-            return rpcService.newTx(tx)
-                    ? success(blockChain)
-                    : failed(new ErrorCode());
+            Response response = CmdDispatcher.requestAndResponse("ac", "ac_signDigest", signDigestParam);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                String signatureHex = (String) responseData.get("signatureHex");
+                tx.setTransactionSignature(HexUtil.decode(signatureHex));
+                return rpcService.newTx(tx) ? success(blockChain) : failed(new ErrorCode());
+            }else {
+                return failed(ErrorCode.init("-100"));
+            }
+
 
         } catch (Exception e) {
             Log.error(e);
