@@ -12,12 +12,12 @@ import lombok.Setter;
 import java.io.IOException;
 
 /**
- * 广播新的跨链交易hash
+ * 本节点创建的交易完成本地验证后广播hash给其他节点
  *
  * @author: qinyifeng
- * @date: 2018/12/17
+ * @date: 2018/12/18
  */
-public class BroadcastCrossTxHashMessage extends BaseMessage {
+public class BroadcastTxMessage extends BaseMessage {
     /**
      * 链ID
      */
