@@ -67,13 +67,12 @@ public class SmallBlockHandler extends BaseCmd {
     private BlockService blockService;
 
     @CmdAnnotation(cmd = SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Response process(List<Object> params) {
-
-        Integer chainId = Integer.parseInt(params.get(0).toString());
-        String nodeId = params.get(1).toString();
+    public Object process(Map map) {
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        String nodeId = map.get("nodes").toString();
         SmallBlockMessage message = new SmallBlockMessage();
 
-        byte[] decode = HexUtil.decode(params.get(2).toString());
+        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {

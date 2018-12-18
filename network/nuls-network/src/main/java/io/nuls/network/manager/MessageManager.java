@@ -43,6 +43,7 @@ import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
@@ -148,7 +149,7 @@ public class MessageManager extends BaseManager{
                     paramMap.put("chainId",chainId);
                     paramMap.put("nodeId",nodeKey);
                     paramMap.put("messageBody",HexUtil.byteToHex(payLoadBody));
-                    Response response = CmdDispatcher.requestAndResponse(null,header.getCommandStr(),paramMap);
+                    Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr,header.getCommandStr(),paramMap);
                     Log.info("response："+response);
                     byteBuffer.setCursor(payLoad.length);
                 }

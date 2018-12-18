@@ -133,7 +133,7 @@ public class Bootstrap {
         context.setStatus(RunningStatusEnum.RUNNING);
         context.setSystemTransactionType(List.of(Constant.TX_TYPE_COINBASE));
         Block latestBlock = context.getLatestBlock();
-        new Miner("1", latestBlock, false).start();
+//        new Miner("1", latestBlock, false).start();
 //        new Miner("2", latestBlock, true).start();
     }
 
