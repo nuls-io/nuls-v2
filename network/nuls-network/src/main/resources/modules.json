@@ -51,7 +51,7 @@
     "name": "network.self.seed.ip",
     "remark": "种子节点",
     "readOnly": "false",
-    "value": "192.168.3.8:8008"
+    "value": "192.168.1.191:8008"
   },
   {
     "name": "network.cross.server.port",
