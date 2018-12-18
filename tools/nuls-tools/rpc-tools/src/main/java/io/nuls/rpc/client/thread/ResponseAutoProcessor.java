@@ -52,14 +52,10 @@ public class ResponseAutoProcessor implements Runnable {
         while (true) {
             try {
                 /*
-                获取队列中的第一个对象，如果是空，舍弃
-                Get the first item of the queue, If it is an empty object, discard
+                获取队列中的第一个对象
+                Get the first item of the queue
                  */
                 Message message = ClientRuntime.firstMessageInResponseAutoQueue();
-                if (message == null) {
-                    Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-                    continue;
-                }
 
                 /*
                 获取Response对象，这里得到的对象一定是需要自动调用本地方法
