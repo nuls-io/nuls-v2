@@ -20,7 +20,9 @@ import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
-import io.nuls.poc.utils.manager.*;
+import io.nuls.poc.utils.manager.AgentManager;
+import io.nuls.poc.utils.manager.ChainManager;
+import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -378,7 +380,6 @@ public class TxValidator {
                 return false;
             }
         }catch (NulsException e){
-            Log.error(e);
             throw e;
         }
         return true;
@@ -441,7 +442,6 @@ public class TxValidator {
         try {
             depositList = depositStorageService.getList(chainId);
         }catch (Exception e){
-            Log.error(e);
             throw new NulsException(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
         //todo  获取本地最新高度

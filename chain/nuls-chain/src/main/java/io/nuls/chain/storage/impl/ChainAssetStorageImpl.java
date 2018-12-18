@@ -5,6 +5,7 @@ import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.log.Log;
 
 /**
  * @author tangyi

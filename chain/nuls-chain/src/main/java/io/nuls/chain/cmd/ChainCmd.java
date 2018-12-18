@@ -19,9 +19,9 @@ import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
-import java.math.BigInteger;
 import java.util.Map;
 
 /**
@@ -45,15 +45,15 @@ public class ChainCmd extends BaseChainCmd {
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response chain(Map params) {
         try {
-            int chainId = Integer.valueOf(params.get("chainId").toString());
+            int chainId = Integer.parseInt(params.get("chainId").toString());
             BlockChain blockChain = chainService.getChain(chainId);
             if (blockChain == null) {
-                return failed("C10003");
+                return failed(ErrorCode.init("C10003"));
             }
             return success(blockChain);
         } catch (Exception e) {
             Log.error(e);
-            return failed(ErrorCode.init("-100"));
+            return failed(e.getMessage());
         }
     }
 
@@ -71,52 +71,41 @@ public class ChainCmd extends BaseChainCmd {
     @Parameter(parameterName = "name", parameterType = "String")
     @Parameter(parameterName = "initNumber", parameterType = "String")
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]")
+    @Parameter(parameterName = "password", parameterType = "String")
     public Response chainReg(Map params) {
         try {
-            BlockChain blockChain = new BlockChain();
-            blockChain.setChainId(Integer.valueOf(params.get("chainId").toString()));
-            blockChain.setName((String) params.get("name"));
-            blockChain.setAddressType((String) params.get("addressType"));
-            blockChain.setMagicNumber(Long.valueOf(params.get("magicNumber").toString()));
-            blockChain.setSupportInflowAsset(Boolean.valueOf(params.get("supportInflowAsset").toString()));
-            blockChain.setMinAvailableNodeNum(Integer.valueOf(params.get("minAvailableNodeNum").toString()));
-            blockChain.setSingleNodeMinConnectionNum(Integer.valueOf(params.get("singleNodeMinConnectionNum").toString()));
-            blockChain.setTxConfirmedBlockNum(Integer.valueOf(params.get("txConfirmedBlockNum").toString()));
+            /* 组装BlockChain (BlockChain object) */
+            BlockChain blockChain = JSONUtils.map2pojo(params, BlockChain.class);
             blockChain.setRegAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
             blockChain.setCreateTime(TimeService.currentTimeMillis());
 
+            /* 组装Asset (Asset object) */
             int assetId = seqService.createAssetId(blockChain.getChainId());
-            Asset asset = new Asset(assetId);
+            Asset asset = JSONUtils.map2pojo(params, Asset.class);
+            asset.setAssetId(assetId);
             asset.setChainId(blockChain.getChainId());
-            asset.setSymbol((String) params.get("symbol"));
-            asset.setName((String) params.get("name"));
             asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS)));
-            asset.setInitNumber(new BigInteger(params.get("initNumber").toString()));
-            asset.setDecimalPlaces(Short.valueOf(params.get("decimalPlaces").toString()));
             asset.setAvailable(true);
             asset.setCreateTime(TimeService.currentTimeMillis());
-            asset.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
+            asset.setAddress(blockChain.getRegAddress());
 
-            // 组装交易发送
+            /* 组装交易发送 (Send transaction) */
             Transaction tx = new RegisterChainAndAssetTransaction();
             tx.setTxData(blockChain.parseToTransaction(asset));
             tx.setTime(TimeService.currentTimeMillis());
             AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(), asset.getAssetId(), String.valueOf(params.get("address")));
-            CoinData coinData = this.getRegCoinData(asset.getAddress(), asset.getChainId(),
+            CoinData coinData = super.getRegCoinData(asset.getAddress(), asset.getChainId(),
                     asset.getAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance);
             tx.setCoinData(coinData.serialize());
 
-            // TODO 设置正确的交易签名
-            tx.setTransactionSignature(null);
+            /* 判断签名是否正确 (Determine if the signature is correct) */
+            tx = signDigest(asset.getChainId(), (String) params.get("address"), (String) params.get("password"), tx);
 
-            return rpcService.newTx(tx)
-                    ? success(blockChain)
-                    : failed(new ErrorCode());
-
+            /* 发送到交易模块 (Send to transaction module) */
+            return rpcService.newTx(tx) ? success(blockChain) : failed("Register chain failed");
         } catch (Exception e) {
             Log.error(e);
-            return failed(ErrorCode.init("-100"));
+            return failed(e.getMessage());
         }
     }
-
 }

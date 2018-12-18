@@ -2,7 +2,6 @@ package io.nuls.transaction.db.rocksdb.storage;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.transaction.model.bo.TxWrapper;
 
 import java.util.List;
 
@@ -16,10 +15,11 @@ public interface TransactionStorageService {
 
     /**
      * 保存交易数据
-     * @param txWrapper 交易数据封装对象
+     * @param chainId
+     * @param tx
      * @return
      */
-    boolean saveTx(TxWrapper txWrapper);
+    boolean saveTx(int chainId, Transaction tx);
 
     /**
      * 批量保存交易
@@ -35,7 +35,7 @@ public interface TransactionStorageService {
      * @param hash 交易hash
      * @return
      */
-    Transaction getTx(int chainId,NulsDigestData hash);
+    Transaction getTx(int chainId, NulsDigestData hash);
 
     /**
      * 删除交易数据

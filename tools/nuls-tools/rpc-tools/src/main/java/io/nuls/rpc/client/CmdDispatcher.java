@@ -29,7 +29,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -114,7 +114,7 @@ public class CmdDispatcher {
         获取返回的数据，放入本地变量
         Get the returned data and place it in the local variable
          */
-        Response response = receiveResponse(message.getMessageId());
+        Response response = receiveResponse(message.getMessageId(), Constants.TIMEOUT_TIMEMILLIS);
         Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
@@ -122,7 +122,7 @@ public class CmdDispatcher {
             Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
             ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
         }
-        LoggerBuilder.getBasicLoggger().info("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.ROLE_MAP));
+        Log.info("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.ROLE_MAP));
 
         /*
         判断所有依赖的模块是否已经启动（发送握手信息）
@@ -130,7 +130,7 @@ public class CmdDispatcher {
          */
         if (ServerRuntime.LOCAL.getDependencies() == null) {
             ServerRuntime.startService = true;
-            LoggerBuilder.getBasicLoggger().info("Start service!");
+            Log.info("Start service!");
             return;
         }
 
@@ -139,14 +139,14 @@ public class CmdDispatcher {
             try {
                 ClientRuntime.getWsClient(url);
             } catch (Exception e) {
-                LoggerBuilder.getBasicLoggger().error("Dependent modules cannot be connected: " + role);
+                Log.error("Dependent modules cannot be connected: " + role);
                 ServerRuntime.startService = false;
                 return;
             }
         }
 
         ServerRuntime.startService = true;
-        LoggerBuilder.getBasicLoggger().info("Start service!");
+        Log.info("Start service!");
     }
 
 
@@ -161,9 +161,24 @@ public class CmdDispatcher {
      * @throws Exception 请求超时（1分钟），timeout (1 minute)
      */
     public static Response requestAndResponse(String role, String cmd, Map params) throws Exception {
+        return requestAndResponse(role, cmd, params, Constants.TIMEOUT_TIMEMILLIS);
+    }
+
+    /**
+     * 发送Request，并等待Response
+     * Send Request and wait for Response
+     *
+     * @param role    远程方法所属的角色，The role of remote method
+     * @param cmd     远程方法的命令，Command of the remote method
+     * @param params  远程方法所需的参数，Parameters of the remote method
+     * @param timeOut 超时时间, timeout millis
+     * @return 远程方法的返回结果，Response of the remote method
+     * @throws Exception 请求超时（timeOut），timeout (timeOut)
+     */
+    public static Response requestAndResponse(String role, String cmd, Map params, long timeOut) throws Exception {
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
         String messageId = sendRequest(role, request);
-        return receiveResponse(messageId);
+        return receiveResponse(messageId, timeOut);
     }
 
     /**
@@ -255,7 +270,7 @@ public class CmdDispatcher {
             return "-1";
         }
         WsClient wsClient = ClientRuntime.getWsClient(url);
-        LoggerBuilder.getBasicLoggger().info("SendRequest to "
+        Log.info("SendRequest to "
                 + wsClient.getRemoteSocketAddress().getHostString() + ":" + wsClient.getRemoteSocketAddress().getPort() + "->"
                 + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
@@ -297,7 +312,7 @@ public class CmdDispatcher {
         WsClient wsClient = ClientRuntime.MSG_ID_KEY_WS_CLIENT_MAP.get(messageId);
         if (wsClient != null) {
             wsClient.send(JSONUtils.obj2json(message));
-            LoggerBuilder.getBasicLoggger().info("取消订阅：" + JSONUtils.obj2json(message));
+            Log.info("取消订阅：" + JSONUtils.obj2json(message));
             ClientRuntime.INVOKE_MAP.remove(messageId);
         }
     }
@@ -341,13 +356,13 @@ public class CmdDispatcher {
      * @return Response
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
-    private static Response receiveResponse(String messageId) throws Exception {
+    private static Response receiveResponse(String messageId, long timeOut) throws Exception {
 
         long timeMillis = System.currentTimeMillis();
-        while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
+        while (System.currentTimeMillis() - timeMillis <= timeOut) {
             /*
-            获取队列中的第一个对象，如果是空，舍弃
-            Get the first item of the queue, If it is an empty object, discard
+            获取队列中的第一个对象
+            Get the first item of the queue
              */
             Message message = ClientRuntime.firstMessageInResponseManualQueue();
             if (message == null) {

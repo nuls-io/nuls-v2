@@ -37,6 +37,7 @@ import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;

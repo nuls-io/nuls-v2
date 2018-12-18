@@ -59,7 +59,7 @@ public class ChainManager {
      * 初始化并启动链
      * Initialize and start the chain
      */
-    public void runChain() {
+    public void runChain() throws Exception{
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             return;

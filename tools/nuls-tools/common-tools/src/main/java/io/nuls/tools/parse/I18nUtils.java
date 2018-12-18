@@ -27,7 +27,7 @@ package io.nuls.tools.parse;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.Log;
 
 import java.io.*;
 import java.net.URL;
@@ -94,7 +94,7 @@ public class I18nUtils {
                 }
             }
         } catch (IOException e) {
-            LoggerBuilder.getBasicLoggger().error(e.getMessage());
+            Log.error(e.getMessage());
         }
     }
 

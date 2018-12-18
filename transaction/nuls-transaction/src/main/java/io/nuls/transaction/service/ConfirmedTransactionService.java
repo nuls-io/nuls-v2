@@ -3,6 +3,7 @@ package io.nuls.transaction.service;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.Result;
+import io.nuls.transaction.model.bo.Chain;
 
 import java.util.List;
 

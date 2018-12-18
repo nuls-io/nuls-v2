@@ -1,18 +1,22 @@
 package io.nuls.chain.test;
 
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.model.dto.Seed;
 import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -22,12 +26,17 @@ import java.util.List;
 public class ChainCmdTest {
     @Before
     public void init() throws Exception {
-        NoUse.mockModule();
+//        NoUse.mockModule();
     }
 
     @Test
     public void chain() throws Exception {
-//        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 867}));
+        Map<String, String> yiFeng = new HashMap<>();
+        yiFeng.put("initNumber", "222");
+        yiFeng.put("test", "33");
+        JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        Asset asset = JSONUtils.map2pojo(yiFeng, Asset.class);
+        System.out.println(JSONUtils.obj2json(asset));
     }
 
     @Test

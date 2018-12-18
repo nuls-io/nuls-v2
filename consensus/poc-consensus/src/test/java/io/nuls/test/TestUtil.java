@@ -3,6 +3,7 @@ package io.nuls.test;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
+import io.nuls.tools.log.Log;
 
 public class TestUtil {
     public static void initTable(int chainId){

@@ -21,6 +21,7 @@ package io.nuls.db.service;
 
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.manager.RocksDBManager;
+import io.nuls.tools.log.Log;
 import org.rocksdb.RocksDB;
 import org.rocksdb.WriteBatch;
 import org.rocksdb.WriteOptions;

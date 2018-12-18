@@ -1,5 +1,6 @@
 package io.nuls.chain;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.chain.config.NulsConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.service.ChainService;
@@ -9,8 +10,10 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.util.Map;
@@ -35,7 +38,7 @@ public class ChainBootstrap {
      *
      * @return ChainBootstrap
      */
-    public static ChainBootstrap getInstance() {
+    private static ChainBootstrap getInstance() {
         if (chainBootstrap == null) {
             synchronized (ChainBootstrap.class) {
                 if (chainBootstrap == null) {
@@ -57,9 +60,12 @@ public class ChainBootstrap {
         ChainBootstrap.getInstance().start();
     }
 
-    public void start() {
+    private void start() {
         try {
             Log.info("Chain Bootstrap start...");
+
+            /* 如果属性不匹配，不要报错 (If the attributes do not match, don't report an error) */
+            JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
             /* Read resources/module.ini to initialize the configuration */
             initCfg();

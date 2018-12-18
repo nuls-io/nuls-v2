@@ -39,6 +39,7 @@ import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.DoubleUtils;
+import io.nuls.tools.log.Log;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 

@@ -12,6 +12,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 
@@ -57,14 +58,14 @@ public class BootStrap {
      * 初始化系统编码
      * Initialization System Coding
      */
-    private static void initSys() {
+    private static void initSys() throws Exception{
         try {
             System.setProperty(ConsensusConstant.SYS_FILE_ENCODING, UTF_8.name());
             Field charset = Charset.class.getDeclaredField("defaultCharset");
             charset.setAccessible(true);
             charset.set(null, UTF_8);
         } catch (Exception e) {
-            Log.error(e);
+            throw e;
         }
     }
 
@@ -72,13 +73,13 @@ public class BootStrap {
      * 初始化数据库
      * Initialization database
      */
-    private static void initDB() {
+    private static void initDB() throws Exception{
         try {
             Properties properties = ConfigLoader.loadProperties(ConsensusConstant.DB_CONFIG_NAME);
             String path = properties.getProperty(ConsensusConstant.DB_DATA_PATH, ConsensusConstant.DB_DATA_DEFAULT_PATH);
             RocksDBService.init(path);
         } catch (Exception e) {
-            Log.error(e);
+            throw e;
         }
     }
 
@@ -86,7 +87,7 @@ public class BootStrap {
      * 初始化国际化资源文件语言
      * Initialization of International Resource File Language
      */
-    private static void initLanguage() {
+    private static void initLanguage() throws Exception{
         try {
             LanguageService languageService = SpringLiteContext.getBean(LanguageService.class);
             String languageDB = languageService.getLanguage();
@@ -97,7 +98,7 @@ public class BootStrap {
                 languageService.saveLanguage(language);
             }
         } catch (Exception e) {
-            Log.error(e);
+            throw e;
         }
     }
 

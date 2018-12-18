@@ -1,6 +1,6 @@
 package io.nuls.tools.thread;
 
-import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 import io.nuls.tools.thread.commom.ThreadCache;
 
@@ -102,7 +102,7 @@ public class ThreadUtils {
         }
         BlockingQueue<Runnable> blockingQueue = TEMPORARY_THREAD_POOL.getQueue();
         if (blockingQueue.size() > 200) {
-            LoggerBuilder.getBasicLoggger().info("Task Queue 100 Size Warning!!! Task info is " + runnable.toString());
+            Log.info("Task Queue 100 Size Warning!!! Task info is " + runnable.toString());
         }
         TEMPORARY_THREAD_POOL.execute(runnable);
         int i = TEMPORARY_THREAD_POOL.getQueue().size();

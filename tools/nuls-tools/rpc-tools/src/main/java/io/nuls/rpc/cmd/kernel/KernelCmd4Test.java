@@ -34,7 +34,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.HashMap;
@@ -65,7 +65,7 @@ public class KernelCmd4Test extends BaseCmd {
             dependMap.put("Dependencies", ClientRuntime.ROLE_MAP);
             return success(dependMap);
         } catch (Exception e) {
-            LoggerBuilder.getBasicLoggger().error(e.getMessage());
+            Log.error(e.getMessage());
             return failed(e.getMessage());
         }
     }

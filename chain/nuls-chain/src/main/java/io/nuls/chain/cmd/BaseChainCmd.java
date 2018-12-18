@@ -38,14 +38,20 @@ import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.model.tx.txdata.TxAsset;
 import io.nuls.chain.model.tx.txdata.TxChain;
+import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.thread.TimeService;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author lan
@@ -171,5 +177,32 @@ public class BaseChainCmd extends BaseCmd {
             Log.error(e);
             return null;
         }
+    }
+
+    Asset setDefaultAssetValue(Asset asset) {
+        asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS)));
+        asset.setAvailable(true);
+        asset.setCreateTime(TimeService.currentTimeMillis());
+
+        return asset;
+    }
+
+    Transaction signDigest(int chainId, String address, String password, Transaction tx) throws Exception {
+        Map<String, Object> signDigestParam = new HashMap<>(4);
+        signDigestParam.put("chainId", chainId);
+        signDigestParam.put("address", address);
+        signDigestParam.put("password", password);
+        signDigestParam.put("dataHex", tx);
+
+        Response response = CmdDispatcher.requestAndResponse("ac", "ac_signDigest", signDigestParam);
+        if (!response.isSuccess()) {
+            throw new Exception("ac_signDigest error.");
+        }
+
+        Map responseData = (Map) response.getResponseData();
+        String signatureHex = (String) responseData.get("signatureHex");
+        tx.setTransactionSignature(HexUtil.decode(signatureHex));
+
+        return tx;
     }
 }

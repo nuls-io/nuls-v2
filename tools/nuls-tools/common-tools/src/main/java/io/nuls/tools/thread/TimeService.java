@@ -24,8 +24,8 @@
  */
 
 package io.nuls.tools.thread;
-import ch.qos.logback.classic.Logger;
-import io.nuls.tools.log.logback.LoggerBuilder;
+
+import io.nuls.tools.log.Log;
 import org.apache.commons.net.ntp.NTPUDPClient;
 import org.apache.commons.net.ntp.TimeInfo;
 
@@ -89,7 +89,6 @@ public class TimeService implements Runnable {
      */
     private static long lastSyncTime;
 
-    private Logger logger = LoggerBuilder.getBasicLoggger();
 
 
     /**
@@ -104,8 +103,8 @@ public class TimeService implements Runnable {
             long localBeforeTime = System.currentTimeMillis();
 
             long netTime = getWebTime(urlList.get(i));
-            logger.info(urlList.get(i)+"netTime:==="+netTime);
-            logger.info("localtime:==="+System.currentTimeMillis());
+            Log.info(urlList.get(i)+"netTime:==="+netTime);
+            Log.info("localtime:==="+System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }
@@ -135,9 +134,7 @@ public class TimeService implements Runnable {
             client.setDefaultTimeout(1000);
             client.setSoTimeout(1000);
             InetAddress inetAddress = InetAddress.getByName(address);
-            //Log.debug("start ask time....");
             TimeInfo timeInfo = client.getTime(inetAddress);
-            //Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
             e.printStackTrace();
@@ -150,7 +147,7 @@ public class TimeService implements Runnable {
      * Start the time synchronization thread.
      */
     public void start() {
-        logger.debug("----------- TimeService start -------------");
+        Log.debug("----------- TimeService start -------------");
         ThreadUtils.createAndRunThread("TimeService", this, true);
     }
 
@@ -166,7 +163,7 @@ public class TimeService implements Runnable {
             long newTime = System.currentTimeMillis();
 
             if (Math.abs(newTime - lastTime) > TIME_OFFSET_BOUNDARY) {
-                logger.debug("local time changed ：{}", newTime - lastTime);
+                Log.debug("local time changed ：{}", newTime - lastTime);
                 syncWebTime();
 
             } else if (currentTimeMillis() - lastSyncTime > NET_REFRESH_TIME) {

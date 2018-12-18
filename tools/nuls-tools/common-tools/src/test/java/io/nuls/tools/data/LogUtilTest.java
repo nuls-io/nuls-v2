@@ -1,12 +1,12 @@
 package io.nuls.tools.data;
 
-import ch.qos.logback.classic.Logger;
 import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.logback.NulsLogger;
 
 public class LogUtilTest {
     public static void main(String[] args){
         //logger.debug("test logger");
-        Logger log = LoggerBuilder.getLogger("blockLog","test");
+        NulsLogger log = LoggerBuilder.getLogger("blockLog","test");
         while(true){
             log.warn("test block log");
         }

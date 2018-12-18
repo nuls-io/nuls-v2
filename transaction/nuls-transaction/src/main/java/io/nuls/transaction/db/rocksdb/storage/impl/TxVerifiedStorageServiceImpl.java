@@ -11,7 +11,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
-import io.nuls.transaction.model.bo.TxWrapper;
+import io.nuls.transaction.model.bo.Chain;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,12 +48,10 @@ public class TxVerifiedStorageServiceImpl implements TxVerifiedStorageService, I
     }
 
     @Override
-    public boolean putTx(TxWrapper txWrapper) {
-        if (txWrapper == null) {
+    public boolean putTx(int chainId, Transaction tx) {
+        if (tx == null) {
             return false;
         }
-        Transaction tx = txWrapper.getTx();
-        int chainId = txWrapper.getChainId();
         byte[] txHashBytes = null;
         try {
             txHashBytes = tx.getHash().serialize();
