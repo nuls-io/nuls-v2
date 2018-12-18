@@ -27,6 +27,7 @@ package io.nuls.account.model.po;
 
 
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.util.log.LogUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;
@@ -88,7 +89,7 @@ public class AccountPo extends BaseNulsData {
         try {
             account.setAddress(Address.fromHashs(this.getAddress()));
         } catch (Exception e) {
-            Log.error(e);
+            LogUtil.error(e);
         }
         account.setAlias(this.getAlias());
         account.setExtend(this.getExtend());
