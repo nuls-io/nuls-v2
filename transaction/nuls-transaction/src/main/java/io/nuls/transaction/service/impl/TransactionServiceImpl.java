@@ -51,7 +51,7 @@ import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.BlockHeaderDigestDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.service.TransactionService;
-import io.nuls.transaction.utils.manager.TransactionManager;
+import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;

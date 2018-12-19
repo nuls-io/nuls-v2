@@ -1,4 +1,4 @@
-package io.nuls.transaction.utils.manager;
+package io.nuls.transaction.manager;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.transaction.model.bo.Chain;
@@ -13,19 +13,11 @@ import java.util.Map;
  */
 public class CrossTxVerifyingManager {
 
-    //private static final CrossTxVerifyingManager INSTANCE = new CrossTxVerifyingManager();
 
-    //private Map<NulsDigestData, CrossChainTx> crossTxVerifyingMap;
-
-    public CrossTxVerifyingManager(Chain chain){
+    public void initCrossTxVerifyingMap(Chain chain){
         //TODO 查数据库
         //this.crossTxVerifyingMap = new HashMap<>();
-
     }
-
-//    public static CrossTxVerifyingManager getInstance(){
-//        return INSTANCE;
-//    }
 
     public void putCrossChainTx(Chain chain, CrossChainTx crossChainTx){
         chain.getCrossTxVerifyingMap().put(crossChainTx.getTx().getHash(), crossChainTx);

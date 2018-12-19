@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.transaction.utils.manager;
+package io.nuls.transaction.manager;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
