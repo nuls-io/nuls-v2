@@ -43,8 +43,6 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @version 1.0
  * @date 18-11-9 下午4:25
  */
-@Component
-@NoArgsConstructor
 public class BlockCollector implements Runnable {
 
     public static final Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());

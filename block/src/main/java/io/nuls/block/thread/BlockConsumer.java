@@ -25,7 +25,9 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
+import lombok.NoArgsConstructor;
 
 import java.util.concurrent.*;
 
@@ -36,17 +38,16 @@ import java.util.concurrent.*;
  * @version 1.0
  * @date 18-11-8 下午5:45
  */
-@Component
 public class BlockConsumer implements Callable<Boolean> {
 
     private int chainId;
     private BlockingQueue<Block> queue;
-    @Autowired
     private BlockService blockService;
 
     public BlockConsumer(int chainId, BlockingQueue<Block> queue) {
         this.chainId = chainId;
         this.queue = queue;
+        this.blockService = SpringLiteContext.getBean(BlockService.class);
     }
 
     @Override

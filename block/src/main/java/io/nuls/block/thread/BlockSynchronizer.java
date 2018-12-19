@@ -32,6 +32,7 @@ import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
@@ -50,8 +51,6 @@ import java.util.concurrent.*;
  * @version 1.0
  * @date 18-11-8 下午5:49
  */
-@Component
-@NoArgsConstructor
 public class BlockSynchronizer implements Runnable {
 
     /**
@@ -61,11 +60,14 @@ public class BlockSynchronizer implements Runnable {
 
     private static final BlockSynchronizer INSTANCE = new BlockSynchronizer();
 
-    @Autowired
     private BlockService blockService;
 
     public static BlockSynchronizer getInstance() {
         return INSTANCE;
+    }
+
+    private BlockSynchronizer() {
+        this.blockService = SpringLiteContext.getBean(BlockService.class);
     }
 
     @Override

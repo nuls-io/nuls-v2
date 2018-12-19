@@ -22,6 +22,7 @@ package io.nuls.block.service;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.po.BlockHeaderPo;
+import io.nuls.tools.core.annotation.Service;
 
 import java.util.List;
 
