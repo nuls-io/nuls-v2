@@ -149,7 +149,9 @@ public class AddrMessageHandler extends BaseMessageHandler {
          *存储节点信息
          * Broadcast to own network
          */
-        StorageManager.getInstance().saveNodes(addNodes,nodeGroup.getChainId());
+        if (addNodes.size() > 0) {
+            StorageManager.getInstance().saveNodes(addNodes,nodeGroup.getChainId());
+        }
 
         return NetworkEventResult.getResultSuccess();
     }
