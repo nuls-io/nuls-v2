@@ -44,7 +44,7 @@ public class EbStorageServiceImpl implements EbStorageService {
                 Map<byte[],byte[]> map = RocksDBService.multiGet(EbConstants.TB_EB_TOPIC,keys);
                 Set<Map.Entry<byte[],byte[]>> entrySet = map.entrySet();
                 for(Map.Entry<byte[],byte[]> entry : entrySet){
-                    topicMap.put(new String(entry.getKey()),ObjectUtils.bytesToObject(entry.getValue()));
+                    topicMap.put(new String(entry.getKey(),EbConstants.MODULE_CONFIG_MAP.get(EbConstants.ENCODING)),ObjectUtils.bytesToObject(entry.getValue()));
                 }
             }
         }catch (Exception e){
@@ -57,7 +57,7 @@ public class EbStorageServiceImpl implements EbStorageService {
     public void putTopic(Topic topic) {
         try{
             if(null != topic && StringUtils.isNotBlank(topic.getTopicId())){
-                RocksDBService.put(EbConstants.TB_EB_TOPIC,topic.getTopicId().getBytes(),ObjectUtils.objectToBytes(topic));
+                RocksDBService.put(EbConstants.TB_EB_TOPIC,topic.getTopicId().getBytes(EbConstants.MODULE_CONFIG_MAP.get(EbConstants.ENCODING)),ObjectUtils.objectToBytes(topic));
             }
         }catch (Exception e){
             Log.error("Topic save failed :"+e.getMessage());
