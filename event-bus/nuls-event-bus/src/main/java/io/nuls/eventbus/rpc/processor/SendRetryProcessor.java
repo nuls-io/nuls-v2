@@ -34,7 +34,7 @@ public class SendRetryProcessor implements Runnable {
                 String messageId = sendEvent(subscriber,params);
                 int retryAttempt = 0;
                 Log.debug("Acknowledgement for send event messageId: "+messageId +" received");
-                while (retryAttempt <= EbConstants.EVENT_DISPATCH_RETRY_COUNT && messageId != null){
+                while (retryAttempt <= EbConstants.EVENT_DISPATCH_RETRY_COUNT && messageId == null){
                     Thread.sleep(EbConstants.EVENT_RETRY_WAIT_TIME);
                     retryAttempt = retryAttempt + 1;
                     Log.debug("Retry for Subscriber : "+subscriber.getModuleAbbr() +" --> "+"Retry Attempt:"+retryAttempt);
@@ -47,6 +47,11 @@ public class SendRetryProcessor implements Runnable {
     }
 
     private String sendEvent(Subscriber subscriber,Map<String,Object> params){
-        return CmdDispatcher.requestAndInvokeWithAck(subscriber.getModuleAbbr(),subscriber.getCallBackCmd(),params,Constants.ZERO,Constants.ZERO,new EventAuditInvoke());
+        try{
+            return CmdDispatcher.requestAndInvokeWithAck(subscriber.getModuleAbbr(),subscriber.getCallBackCmd(),params,Constants.ZERO,Constants.ZERO,new EventAuditInvoke());
+        }catch (Exception e){
+            Log.error("Exception in sending event to subscriber :"+subscriber.getModuleAbbr()+" ->"+e.getMessage());
+        }
+        return null;
     }
 }
