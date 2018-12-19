@@ -270,7 +270,7 @@ public class CmdDispatcher {
             return "-1";
         }
         WsClient wsClient = ClientRuntime.getWsClient(url);
-        Log.info("SendRequest to "
+        Log.debug("SendRequest to "
                 + wsClient.getRemoteSocketAddress().getHostString() + ":" + wsClient.getRemoteSocketAddress().getPort() + "->"
                 + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));

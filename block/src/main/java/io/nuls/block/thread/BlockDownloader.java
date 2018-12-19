@@ -94,7 +94,7 @@ public class BlockDownloader implements Callable<Boolean> {
                 startHeight += size;
             }
             long end = System.currentTimeMillis();
-            Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, end - start / total);
+            Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -207,7 +207,7 @@ public class BlockDownloader implements Callable<Boolean> {
                     return new BlockDownLoadResult(messageHash, startHeight, size, node, false);
                 }
 
-                CompleteMessage completeMessage = future.get(30L, TimeUnit.SECONDS);
+                CompleteMessage completeMessage = future.get(60L, TimeUnit.SECONDS);
                 b = completeMessage.isSuccess();
             } catch (Exception e) {
                 Log.error(e);
