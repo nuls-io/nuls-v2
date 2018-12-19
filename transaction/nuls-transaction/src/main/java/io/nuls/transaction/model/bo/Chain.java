@@ -6,12 +6,11 @@ import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
-import io.nuls.transaction.utils.manager.TransactionManager;
+import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -40,7 +39,7 @@ public class Chain {
     /**
      * 日志
      */
-    private Map<String, NulsLogger> loggerMap;
+    private NulsLogger logger;
 
     /**
      * 管理接收的其他链创建的跨链交易(如果有), 暂存验证中的跨链交易.
@@ -76,7 +75,6 @@ public class Chain {
 
     public Chain() throws Exception {
         this.accountStatus = RunningStatus.INITING;
-        this.loggerMap = new HashMap<>();
         this.crossTxVerifyingMap = new HashMap<>();
         this.txRegisterMap = new HashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
@@ -111,12 +109,12 @@ public class Chain {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
     }
 
-    public Map<String, NulsLogger> getLoggerMap() {
-        return loggerMap;
+    public NulsLogger getLogger() {
+        return logger;
     }
 
-    public void setLoggerMap(Map<String, NulsLogger> loggerMap) {
-        this.loggerMap = loggerMap;
+    public void setLogger(NulsLogger logger) {
+        this.logger = logger;
     }
 
     public Map<NulsDigestData, CrossChainTx> getCrossTxVerifyingMap() {

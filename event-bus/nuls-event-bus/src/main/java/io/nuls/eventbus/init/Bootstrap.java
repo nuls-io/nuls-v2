@@ -54,6 +54,7 @@ public class Bootstrap {
             IniEntity moduleConfig = ConfigLoader.loadIni(EbConstants.MODULE_FILE);
             EbConstants.MODULE_CONFIG_MAP.put(EbConstants.LANGUAGE,moduleConfig.getCfgValue(EbConstants.SYSTEM_SECTION, EbConstants.LANGUAGE));
             EbConstants.MODULE_CONFIG_MAP.put(EbConstants.ENCODING,moduleConfig.getCfgValue(EbConstants.SYSTEM_SECTION, EbConstants.ENCODING));
+            EbConstants.MODULE_CONFIG_MAP.put(EbConstants.KERNEL_URL,moduleConfig.getCfgValue(EbConstants.SYSTEM_SECTION, EbConstants.KERNEL_URL));
             EbConstants.MODULE_CONFIG_MAP.put(EbConstants.ROCKS_DB_PATH,moduleConfig.getCfgValue(EbConstants.DB_SECTION, EbConstants.ROCKS_DB_PATH));
             I18nUtils.loadLanguage("languages",EbConstants.MODULE_CONFIG_MAP.get(EbConstants.LANGUAGE));
             I18nUtils.setLanguage(EbConstants.MODULE_CONFIG_MAP.get(EbConstants.LANGUAGE));
@@ -85,7 +86,6 @@ public class Bootstrap {
             roles.stream().map(role -> EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{role, EbConstants.SUBSCRIBE}));
         }
         Constants.THREAD_POOL.execute(new ClientSyncProcessor());
-        Constants.THREAD_POOL.execute(new EventDispatchProcessor());
     }
 
     public static void initDB(){
