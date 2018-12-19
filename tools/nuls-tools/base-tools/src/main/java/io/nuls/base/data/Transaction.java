@@ -221,7 +221,11 @@ public class Transaction extends BaseNulsData implements Cloneable {
     }
 
     public static Transaction getInstance(String Hex) throws NulsException{
-        NulsByteBuffer nulsByteBuffer = new NulsByteBuffer(HexUtil.decode(Hex));
+        return getInstance(HexUtil.decode(Hex));
+    }
+
+    public static Transaction getInstance(byte[] txBytes) throws NulsException{
+        NulsByteBuffer nulsByteBuffer = new NulsByteBuffer(txBytes);
         Transaction transaction = new Transaction();
         transaction.parse(nulsByteBuffer);
         return transaction;

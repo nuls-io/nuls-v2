@@ -2,7 +2,6 @@ package io.nuls.transaction.service.impl;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
@@ -11,14 +10,14 @@ import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.rocksdb.storage.TransactionStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
+import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
-import io.nuls.transaction.model.bo.TxWrapper;
 import io.nuls.transaction.rpc.call.TransactionCmdCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
-import io.nuls.transaction.utils.TransactionManager;
+import io.nuls.transaction.utils.manager.ChainManager;
+import io.nuls.transaction.utils.manager.TransactionManager;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,8 +31,15 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
 
     @Autowired
     private TransactionStorageService transactionStorageService;
+
     @Autowired
     private TxVerifiedStorageService txVerifiedStorageService;
+
+    @Autowired
+    private TransactionManager transactionManager;
+
+    @Autowired
+    private ChainManager chainManager;
 
     @Override
     public Transaction getTransaction(int chainId, NulsDigestData hash) {
@@ -44,13 +50,12 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
     }
 
     @Override
-    public boolean saveTx(int chainId, Transaction transaction) {
+    public boolean saveTx(int chainId, Transaction tx) {
         //check params
         if (chainId <= 0) {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
         }
-        TxWrapper txWrapper = new TxWrapper(chainId, transaction);
-        return transactionStorageService.saveTx(txWrapper);
+        return transactionStorageService.saveTx(chainId, tx);
     }
 
     @Override
@@ -79,8 +84,9 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
         boolean rollback = false;
         //根据交易hash查询已确认交易数据
         List<Transaction> confirmedTxList = transactionStorageService.getTxList(chainId, txHashList);
+        Chain chain = chainManager.getChain(chainId);
         for (Transaction tx : confirmedTxList) {
-            TxRegister txRegister = TransactionManager.getInstance().getTxRegister(tx.getType());
+            TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
             Map params = new HashMap();
             params.put("chainId", chainId);
             try {
