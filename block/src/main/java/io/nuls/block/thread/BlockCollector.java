@@ -68,7 +68,7 @@ public class BlockCollector implements Runnable {
         BlockDownLoadResult result;
         try {
             while ((result = futures.take().get()) != null) {
-                if (result != null && result.isSuccess()) { result.getNode();
+                if (result != null && result.isSuccess()) {
                     Node node = result.getNode();
                     int size = result.getSize();
                     long startHeight = result.getStartHeight();
@@ -97,7 +97,10 @@ public class BlockCollector implements Runnable {
      * @return
      */
     private void retryDownload(BlockDownLoadResult result) {
+        //归还下载失败的节点
         Node node = result.getNode();
+        node.adjustCredit(false);
+        params.getNodes().offer(node);
         Log.info("retry download blocks, fail node:{}, start:{}", node, result.getStartHeight());
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         try {
@@ -105,8 +108,6 @@ public class BlockCollector implements Runnable {
         } catch (InterruptedException e) {
             Log.error(e);
         }
-        node.adjustCredit(false);
-        params.getNodes().offer(node);
 
         if (downloadBlockFromNode(result)) {
             return;
