@@ -10,8 +10,7 @@ import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
-import io.nuls.transaction.scheduler.TransactionScheduler;
-import io.nuls.transaction.utils.manager.ChainManager;
+import io.nuls.transaction.manager.ChainManager;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
@@ -104,7 +103,7 @@ public class TransactionBootStrap {
     }
 
     public static void sysStart(int chainId){
-//        TransactionScheduler.getInstance().start();
+//        SchedulerManagersss.getInstance().start();
     }
 
     /**

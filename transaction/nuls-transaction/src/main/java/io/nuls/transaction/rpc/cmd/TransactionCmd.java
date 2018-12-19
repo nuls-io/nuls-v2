@@ -17,8 +17,8 @@ import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.rpc.call.TransactionCmdCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.TransactionService;
-import io.nuls.transaction.utils.manager.ChainManager;
-import io.nuls.transaction.utils.manager.TransactionManager;
+import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
