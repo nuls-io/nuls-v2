@@ -1,4 +1,4 @@
-package io.nuls.transaction.scheduler;
+package io.nuls.transaction.manager;
 
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.thread.ThreadUtils;
@@ -15,15 +15,13 @@ import java.util.concurrent.TimeUnit;
  * @date: 2018/11/13
  */
 @Service
-public class TransactionScheduler {
+public class SchedulerManagersss {
 
-    private ScheduledThreadPoolExecutor threadPool;
-
-    public boolean createTransactionScheduler(Chain chain) {
+    /*public boolean createTransactionScheduler(Chain chain) {
         ScheduledThreadPoolExecutor threadPool = ThreadUtils.createScheduledThreadPool(1,
                 new NulsThreadFactory(TxConstant.MODULE_CODE));
         threadPool.scheduleAtFixedRate(new TxUnverifiedProcessTask(chain), 5, 1, TimeUnit.SECONDS);
         chain.setScheduledThreadPoolExecutor(threadPool);
         return true;
-    }
+    }*/
 }
