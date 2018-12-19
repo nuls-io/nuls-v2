@@ -40,7 +40,6 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.log.Log;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
 import java.util.concurrent.*;
 
@@ -78,20 +77,20 @@ public class BlockDownloader implements Callable<Boolean> {
 
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         long netLatestHeight = params.getNetLatestHeight();
-        long latestHeight = ContextManager.getContext(chainId).getLatestHeight();
+        long startHeight = ContextManager.getContext(chainId).getLatestHeight() + 1;
         int maxDowncount = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.DOWNLOAD_NUMBER));
 
         try {
-            while (latestHeight <= netLatestHeight) {
+            while (startHeight <= netLatestHeight) {
                 Node node = nodes.take();
                 int size = maxDowncount * 100 / node.getCredit();
-                if (latestHeight + size > netLatestHeight) {
-                    size = (int) (netLatestHeight - latestHeight);
+                if (startHeight + size > netLatestHeight) {
+                    size = (int) (netLatestHeight - startHeight);
                 }
-                Worker worker = new Worker(latestHeight, size, chainId, node);
+                Worker worker = new Worker(startHeight, size, chainId, node);
                 Future<BlockDownLoadResult> future = executor.submit(worker);
                 futures.offer(future);
-                latestHeight += size;
+                startHeight += size;
             }
         } catch (Exception e) {
             Log.error(e);
