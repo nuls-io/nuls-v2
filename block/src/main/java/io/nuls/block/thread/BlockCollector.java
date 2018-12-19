@@ -23,41 +23,26 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.cache.CacheHandler;
-import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.constant.ConfigConstant;
-import io.nuls.block.manager.ConfigManager;
-import io.nuls.block.manager.ContextManager;
-import io.nuls.block.message.CompleteMessage;
-import io.nuls.block.message.HeightRangeMessage;
-import io.nuls.block.model.Chain;
 import io.nuls.block.model.Node;
-import io.nuls.block.service.BlockService;
-import io.nuls.block.utils.BlockDownloadUtils;
-import io.nuls.block.utils.BlockUtil;
-import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.log.Log;
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Future;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * 区块下载管理器
+ * 区块收集器，收集下载器下载到的区块，排序后放入共享队列
  *
  * @author captain
  * @version 1.0
  * @date 18-11-9 下午4:25
  */
-@Component
-@NoArgsConstructor
 public class BlockCollector implements Runnable {
 
     public static final Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
@@ -69,8 +54,6 @@ public class BlockCollector implements Runnable {
     private ThreadPoolExecutor executor;
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
-    @Autowired
-    private BlockService blockService;
 
     public BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
         this.params = params;
@@ -85,16 +68,21 @@ public class BlockCollector implements Runnable {
         BlockDownLoadResult result;
         try {
             while ((result = futures.take().get()) != null) {
-                if (result != null && result.isSuccess()) {
+                if (result != null && result.isSuccess()) { result.getNode();
                     Node node = result.getNode();
+                    int size = result.getSize();
+                    long startHeight = result.getStartHeight();
+                    long endHeight = startHeight + size - 1;
+                    Log.info("getBlocks:{}->{} ,from:{}, success", startHeight, endHeight, node.getId());
                     node.adjustCredit(true);
                     params.getNodes().offer(node);
                     List<Block> blockList = CacheHandler.getBlockList(chainId, result.getMessageHash());
                     blockList.sort(BLOCK_COMPARATOR);
                     queue.addAll(blockList);
                     continue;
+                } else {
+                    retryDownload(result);
                 }
-                retryDownload(result);
             }
         } catch (Exception e) {
             Log.error(e);

@@ -26,6 +26,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.block.model.Node;
 import io.nuls.block.model.po.BlockHeaderPo;
+import io.nuls.tools.core.annotation.Service;
 
 import java.util.List;
 

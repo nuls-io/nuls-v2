@@ -162,4 +162,9 @@ public interface ConsensusService {
      * 运行主链
      * */
     Result runMainChain(Map<String,Object> params);
+
+    /**
+     * 缓存最新区块
+     * */
+    Result addBlock(Map<String,Object> params);
 }

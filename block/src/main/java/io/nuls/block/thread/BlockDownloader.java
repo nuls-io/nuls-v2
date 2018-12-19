@@ -36,12 +36,10 @@ import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.log.Log;
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
 import java.util.concurrent.*;
 
@@ -52,8 +50,6 @@ import java.util.concurrent.*;
  * @version 1.0
  * @date 18-11-9 下午4:25
  */
-@Component
-@NoArgsConstructor
 public class BlockDownloader implements Callable<Boolean> {
 
     /**
@@ -63,7 +59,6 @@ public class BlockDownloader implements Callable<Boolean> {
     private ThreadPoolExecutor executor;
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
-    @Autowired
     private BlockService blockService;
 
     public BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params) {
@@ -71,6 +66,7 @@ public class BlockDownloader implements Callable<Boolean> {
         this.executor = executor;
         this.futures = futures;
         this.chainId = chainId;
+        this.blockService = SpringLiteContext.getBean(BlockService.class);
     }
 
     @Override
@@ -81,21 +77,24 @@ public class BlockDownloader implements Callable<Boolean> {
 
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         long netLatestHeight = params.getNetLatestHeight();
-        long latestHeight = ContextManager.getContext(chainId).getLatestHeight();
+        long startHeight = ContextManager.getContext(chainId).getLatestHeight() + 1;
         int maxDowncount = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.DOWNLOAD_NUMBER));
-
         try {
-            while (latestHeight <= netLatestHeight) {
+            long total = netLatestHeight - startHeight + 1;
+            long start = System.currentTimeMillis();
+            while (startHeight <= netLatestHeight) {
                 Node node = nodes.take();
                 int size = maxDowncount * 100 / node.getCredit();
-                if (latestHeight + size > netLatestHeight) {
-                    size = (int) (netLatestHeight - latestHeight);
+                if (startHeight + size > netLatestHeight) {
+                    size = (int) (netLatestHeight - startHeight + 1);
                 }
-                Worker worker = new Worker(latestHeight, size, chainId, node);
+                Worker worker = new Worker(startHeight, size, chainId, node);
                 Future<BlockDownLoadResult> future = executor.submit(worker);
                 futures.offer(future);
-                latestHeight += size;
+                startHeight += size;
             }
+            long end = System.currentTimeMillis();
+            Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, end - start / total);
         } catch (Exception e) {
             Log.error(e);
             return false;

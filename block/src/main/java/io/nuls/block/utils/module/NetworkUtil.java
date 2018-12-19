@@ -81,7 +81,7 @@ public class NetworkUtil {
                 Node node = new Node();
                 node.setId((String) map.get("nodeId"));
                 node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
-//            node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
+                node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
                 nodes.add(node);
             }
             return nodes;
@@ -200,6 +200,20 @@ public class NetworkUtil {
         } catch (Exception e) {
             Log.error(e);
         }
+    }
+
+    public static long currentTime() {
+        try {
+            Map<String, Object> params = new HashMap<>(1);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
+            Map responseData = (Map) response.getResponseData();
+            Map result = (Map) responseData.get("nw_currentTimeMillis");
+            return (Long) result.get("currentTimeMillis");
+        } catch (Exception e) {
+            Log.error("get nw_currentTimeMillis fail");
+        }
+        return System.currentTimeMillis();
     }
 
 }

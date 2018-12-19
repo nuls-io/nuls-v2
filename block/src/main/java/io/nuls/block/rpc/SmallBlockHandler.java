@@ -67,13 +67,12 @@ public class SmallBlockHandler extends BaseCmd {
     private BlockService blockService;
 
     @CmdAnnotation(cmd = SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Response process(List<Object> params) {
-
-        Integer chainId = Integer.parseInt(params.get(0).toString());
-        String nodeId = params.get(1).toString();
+    public Object process(Map map) {
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        String nodeId = map.get("nodeId").toString();
         SmallBlockMessage message = new SmallBlockMessage();
 
-        byte[] decode = HexUtil.decode(params.get(2).toString());
+        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
@@ -95,7 +94,7 @@ public class SmallBlockHandler extends BaseCmd {
         NulsDigestData blockHash = header.getHash();
         //阻止恶意节点提前出块，拒绝接收未来一定时间外的区块
         int validBlockInterval = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.VALID_BLOCK_INTERVAL));
-        if (header.getTime() > (TimeService.currentTimeMillis() + validBlockInterval)) {
+        if (header.getTime() > (NetworkUtil.currentTime() + validBlockInterval)) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 

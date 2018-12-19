@@ -31,6 +31,7 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -192,6 +193,7 @@ public class BlockResource extends BaseCmd {
             Block block = new Block();
             block.parse(new NulsByteBuffer((NulsDigestData.fromDigestHex(map.get("hash").toString()).getDigestBytes())));
             if (service.saveBlock(chainId, block) && service.broadcastBlock(chainId, block)) {
+                ServerRuntime.eventCount(BEST_BLOCK,  null);
                 return success();
             } else {
                 return failed(BlockErrorCode.PARAMETER_ERROR);

@@ -75,9 +75,4 @@ public class NetworkUtilTest {
     @Test
     public void resetNetwork() {
     }
-
-    @Test
-    public void sendToNode() {
-    }
-
 }

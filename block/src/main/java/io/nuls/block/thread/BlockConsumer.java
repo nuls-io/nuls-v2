@@ -23,12 +23,16 @@ package io.nuls.block.thread;
 import io.nuls.base.data.Block;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
+import lombok.NoArgsConstructor;
 
 import java.util.concurrent.*;
 
 /**
- * 消费同步到的区块
+ * 消费共享队列中的区块
  *
  * @author captain
  * @version 1.0
@@ -38,11 +42,12 @@ public class BlockConsumer implements Callable<Boolean> {
 
     private int chainId;
     private BlockingQueue<Block> queue;
-    private BlockService blockService = ContextManager.getServiceBean(BlockService.class);
+    private BlockService blockService;
 
     public BlockConsumer(int chainId, BlockingQueue<Block> queue) {
         this.chainId = chainId;
         this.queue = queue;
+        this.blockService = SpringLiteContext.getBean(BlockService.class);
     }
 
     @Override
