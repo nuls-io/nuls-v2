@@ -157,12 +157,12 @@ public class BlockSynchronizer implements Runnable {
     private boolean checkIsNewest(int chainId, BlockDownloaderParams params) throws Exception {
 
         long downloadBestHeight = params.getNetLatestHeight();
-        long time = TimeService.currentTimeMillis();
+        long time = NetworkUtil.currentTime();
         long timeout = 60 * 1000L;
         long localBestHeight = 0L;
 
         while (true) {
-            if (TimeService.currentTimeMillis() - time > timeout) {
+            if (NetworkUtil.currentTime() - time > timeout) {
                 break;
             }
 
@@ -171,7 +171,7 @@ public class BlockSynchronizer implements Runnable {
                 break;
             } else if (bestHeight != localBestHeight) {
                 localBestHeight = bestHeight;
-                time = TimeService.currentTimeMillis();
+                time = NetworkUtil.currentTime();
             }
             Thread.sleep(100L);
         }

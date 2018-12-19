@@ -202,4 +202,19 @@ public class NetworkUtil {
         }
     }
 
+    public static long currentTime() {
+        try {
+            Map<String, Object> params = new HashMap<>(5);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
+            Map responseData = (Map) response.getResponseData();
+            List list = (List) responseData.get("nw_currentTimeMillis");
+
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return 0L;
+    }
+
 }

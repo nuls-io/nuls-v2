@@ -94,7 +94,7 @@ public class SmallBlockHandler extends BaseCmd {
         NulsDigestData blockHash = header.getHash();
         //阻止恶意节点提前出块，拒绝接收未来一定时间外的区块
         int validBlockInterval = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.VALID_BLOCK_INTERVAL));
-        if (header.getTime() > (TimeService.currentTimeMillis() + validBlockInterval)) {
+        if (header.getTime() > (NetworkUtil.currentTime() + validBlockInterval)) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
