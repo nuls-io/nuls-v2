@@ -24,29 +24,16 @@
  */
 package io.nuls.chain.model.dto;
 
+import lombok.Data;
+import lombok.ToString;
+
 /**
- * @program
- * @description
  * @author lan
- * @create 2018/11/29
- **/
+ * @date  2018/11/29
+ */
+@Data
+@ToString
 public class AccountBalance {
     private String available;
     private String nonce;
-
-    public String getAvailable() {
-        return available;
-    }
-
-    public void setAvailable(String available) {
-        this.available = available;
-    }
-
-    public String getNonce() {
-        return nonce;
-    }
-
-    public void setNonce(String nonce) {
-        this.nonce = nonce;
-    }
 }

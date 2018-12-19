@@ -25,40 +25,34 @@ import io.nuls.block.model.Node;
 import lombok.Data;
 
 import java.util.List;
+import java.util.concurrent.PriorityBlockingQueue;
 
 /**
  * 一次区块下载过程中用到的参数
+ *
  * @author captain
- * @date 18-11-9 上午10:58
  * @version 1.0
+ * @date 18-11-9 上午10:58
  */
 @Data
 public class BlockDownloaderParams {
 
     /**
-     * 链Id
-     */
-    private int chainId;
-    /**
-     * 网络最新高度
+     * 网络最新区块高度
      */
     private long netLatestHeight;
     /**
-     * 网络最新HSAH
+     * 网络最新区块hash
      */
     private NulsDigestData netLatestHash;
     /**
-     * 本地最新高度
+     * 本地最新区块高度
      */
     private long localLatestHeight;
     /**
-     * 本地最新HASH
-     */
-    private String localLatestHash;
-    /**
      * 网络上一致可用的节点
      */
-    private List<Node> nodes;
+    private PriorityBlockingQueue<Node> nodes;
     /**
      * 网络上可用节点数>=nodes.size()
      */

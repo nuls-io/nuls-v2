@@ -38,10 +38,11 @@ import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.po.NodePo;
-import io.nuls.tools.log.Log;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
+
 
 /**
  * address message handler
@@ -148,7 +149,9 @@ public class AddrMessageHandler extends BaseMessageHandler {
          *存储节点信息
          * Broadcast to own network
          */
-        StorageManager.getInstance().saveNodes(addNodes,nodeGroup.getChainId());
+        if (addNodes.size() > 0) {
+            StorageManager.getInstance().saveNodes(addNodes,nodeGroup.getChainId());
+        }
 
         return NetworkEventResult.getResultSuccess();
     }

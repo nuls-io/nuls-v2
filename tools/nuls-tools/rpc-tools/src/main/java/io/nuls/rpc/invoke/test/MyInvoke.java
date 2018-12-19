@@ -22,7 +22,6 @@ public class MyInvoke extends BaseInvoke {
     public void callBack(Response response) {
         try {
             Log.info("Period进入了！！！！！\n" + JSONUtils.obj2json(response));
-
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

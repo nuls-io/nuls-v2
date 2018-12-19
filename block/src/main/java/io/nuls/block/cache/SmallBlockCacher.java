@@ -32,7 +32,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 缓存收到的SmallBlock
+ * 系统正常运行时缓存区块的广播、转发消息
+ *  1.缓存收到的SmallBlock
+ *  2.缓存状态标记
  *
  * @author captain
  * @version 1.0
@@ -96,6 +98,11 @@ public class SmallBlockCacher {
         statusCacheMap.get(chainId).put(blockHash, blockForwardEnum);
     }
 
+    /**
+     * 缓存初始化
+     *
+     * @param chainId
+     */
     public static void init(int chainId) {
         int config = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.SMALL_BLOCK_CACHE));
         Map<NulsDigestData, CachedSmallBlock> map = CollectionUtils.getSizedMap(config);

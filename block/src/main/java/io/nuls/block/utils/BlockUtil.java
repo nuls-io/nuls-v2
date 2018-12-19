@@ -107,7 +107,7 @@ public class BlockUtil {
             return false;
         }
 
-        if (null == header.getPackingAddress()) {
+        if (null == header.getPackingAddress(chainId)) {
             Log.warn("headerVerify fail, block packingAddress can not be null! chainId-{}, height-{}, hash-{}", chainId, header.getHeight(), header.getHash());
             return false;
         }
@@ -192,15 +192,15 @@ public class BlockUtil {
 
         if (blockHeight <= masterChainEndHeight) {
             //3.收到的区块是主链上的重复区块，丢弃
-            Block mainBlock = blockService.getBlock(chainId, blockHeight);
-            if (blockHash.equals(mainBlock.getHeader().getHash())) {
+            BlockHeaderPo blockHeader = blockService.getBlockHeader(chainId, blockHeight);
+            if (blockHash.equals(blockHeader.getHash())) {
                 Log.debug("chainId:{}, received duplicate blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                 return Result.getFailed(BlockErrorCode.DUPLICATE_MAIN_BLOCK);
             }
             //4.收到的区块是主链上的分叉区块，保存区块，并新增一条分叉链链接到主链
-            if (blockPreviousHash.equals(mainBlock.getHeader().getPreHash())) {
+            if (blockPreviousHash.equals(blockHeader.getPreHash())) {
                 chainStorageService.save(chainId, block);
-                Chain forkChain = Chain.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
+                Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 ChainManager.addForkChain(chainId, forkChain);
                 Log.debug("chainId:{}, received fork blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
@@ -243,7 +243,7 @@ public class BlockUtil {
                 //3.分叉
                 if (forkChainStartHeight <= blockHeight && blockHeight <= forkChainEndHeight && forkChain.getHashList().contains(blockPreviousHash)) {
                     chainStorageService.save(chainId, block);
-                    Chain newForkChain = Chain.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
+                    Chain newForkChain = ChainGenerator.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
                     ChainManager.addForkChain(chainId, newForkChain);
                     Log.debug("chainId:{}, received fork blocks of forkChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
@@ -295,7 +295,7 @@ public class BlockUtil {
                 //3.分叉
                 if (orphanChainStartHeight <= blockHeight && blockHeight <= orphanChainEndHeight && orphanChain.getHashList().contains(blockPreviousHash)) {
                     chainStorageService.save(chainId, block);
-                    Chain forkOrphanChain = Chain.generate(chainId, block, orphanChain, ChainTypeEnum.ORPHAN);
+                    Chain forkOrphanChain = ChainGenerator.generate(chainId, block, orphanChain, ChainTypeEnum.ORPHAN);
                     ChainManager.addOrphanChain(chainId, forkOrphanChain);
                     Log.debug("chainId:{}, received fork blocks of orphanChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
@@ -303,7 +303,7 @@ public class BlockUtil {
             }
             //4.与主链、分叉链、孤儿链都无关，形成一个新的孤儿链
             chainStorageService.save(chainId, block);
-            Chain newOrphanChain = Chain.generate(chainId, block, null, ChainTypeEnum.ORPHAN);
+            Chain newOrphanChain = ChainGenerator.generate(chainId, block, null, ChainTypeEnum.ORPHAN);
             ChainManager.addOrphanChain(chainId, newOrphanChain);
             return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
         } catch (Exception e) {
@@ -362,15 +362,15 @@ public class BlockUtil {
 
     public static BlockHeaderPo toBlockHeaderPo(Block block) {
         BlockHeaderPo po = new BlockHeaderPo();
-        po.setHash(block.getHeader().getHash());
-        po.setPreHash(block.getHeader().getPreHash());
-        po.setMerkleHash(block.getHeader().getMerkleHash());
-        po.setTime(block.getHeader().getTime());
-        po.setHeight(block.getHeader().getHeight());
-        po.setTxCount(block.getHeader().getTxCount());
-        po.setPackingAddress(block.getHeader().getPackingAddress());
-        po.setBlockSignature(block.getHeader().getBlockSignature());
-        po.setExtend(block.getHeader().getExtend());
+        BlockHeader blockHeader = block.getHeader();
+        po.setHash(blockHeader.getHash());
+        po.setPreHash(blockHeader.getPreHash());
+        po.setMerkleHash(blockHeader.getMerkleHash());
+        po.setTime(blockHeader.getTime());
+        po.setHeight(blockHeader.getHeight());
+        po.setTxCount(blockHeader.getTxCount());
+        po.setBlockSignature(blockHeader.getBlockSignature());
+        po.setExtend(blockHeader.getExtend());
         po.setTxHashList(block.getTxHashList());
         return po;
     }

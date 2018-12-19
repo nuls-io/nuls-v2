@@ -143,11 +143,11 @@ public class CmdHandler {
             switch (nextProcess) {
                 case Constants.EXECUTE_AND_KEEP:
                     callCommandsWithPeriod(webSocket, request.getRequestMethods(), messageId);
-                    ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
+                    ServerRuntime.CMD_INVOKE_TIME.put(key, TimeService.currentTimeMillis());
                     return true;
                 case Constants.EXECUTE_AND_REMOVE:
                     callCommandsWithPeriod(webSocket, request.getRequestMethods(), messageId);
-                    ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
+                    ServerRuntime.CMD_INVOKE_TIME.put(key, TimeService.currentTimeMillis());
                     return false;
                 case Constants.SKIP_AND_KEEP:
                     return true;
@@ -160,7 +160,7 @@ public class CmdHandler {
             Log.error("Socket disconnected, remove");
             return false;
         } catch (Exception e) {
-            Log.error(e);
+            Log.error(e.getMessage());
             return false;
         }
     }
@@ -175,9 +175,12 @@ public class CmdHandler {
      * @param messageId      原始消息ID / The origin message ID
      * @throws Exception 连接失败 / Connected failed
      */
+    @SuppressWarnings("unchecked")
     public static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
-        for (Object method : requestMethods.keySet()) {
-            Map params = (Map) requestMethods.get(method);
+        for (Object object : requestMethods.entrySet()) {
+            Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
+            String method = entry.getKey();
+            Map params = entry.getValue();
 
             /*
             构造返回的消息对象
@@ -192,8 +195,8 @@ public class CmdHandler {
             Get the corresponding method from the locally registered CMD
              */
             CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
-                    ? ServerRuntime.getLocalInvokeCmd((String) method)
-                    : ServerRuntime.getLocalInvokeCmd((String) method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
+                    ? ServerRuntime.getLocalInvokeCmd(method)
+                    : ServerRuntime.getLocalInvokeCmd(method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
             /*
             找不到本地方法，则返回"CMD_NOT_FOUND"错误
@@ -269,7 +272,7 @@ public class CmdHandler {
 
         for (Object method : request.getRequestMethods().keySet()) {
             long changeCount = ServerRuntime.getCmdChangeCount((String) method);
-            long eventCount = Long.valueOf(request.getSubscriptionEventCounter());
+            long eventCount = Long.parseLong(request.getSubscriptionEventCounter());
             if (changeCount == 0) {
                 continue;
             }
@@ -297,10 +300,10 @@ public class CmdHandler {
                 } catch (WebsocketNotConnectedException e) {
                     Log.error("Socket disconnected, remove");
                 } catch (JsonProcessingException e) {
-                    Log.error(e);
+                    Log.error(e.getMessage());
                 }
 
-                ServerRuntime.cmdLastResponseBeUsed.put(eventCountKey, true);
+                ServerRuntime.CMD_LAST_RESPONSE_BE_USED.put(eventCountKey, true);
             }
         }
         return true;
@@ -324,16 +327,16 @@ public class CmdHandler {
             return Constants.EXECUTE_AND_REMOVE;
         }
 
-        if (!ServerRuntime.cmdInvokeTime.containsKey(key)) {
+        if (!ServerRuntime.CMD_INVOKE_TIME.containsKey(key)) {
             /*
             第一次执行，设置当前时间为执行时间，返回EXECUTE_AND_KEEP（执行，然后保留）
             First execution, set the current time as execution time, return EXECUTE_AND_KEEP (execution, then keep)
              */
-            ServerRuntime.cmdInvokeTime.put(key, TimeService.currentTimeMillis());
+            ServerRuntime.CMD_INVOKE_TIME.put(key, TimeService.currentTimeMillis());
             return Constants.EXECUTE_AND_KEEP;
         }
 
-        if (TimeService.currentTimeMillis() - ServerRuntime.cmdInvokeTime.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
+        if (TimeService.currentTimeMillis() - ServerRuntime.CMD_INVOKE_TIME.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
             /*
             没有达到执行条件，返回SKIP_AND_KEEP（不执行，然后保留）
             If the execution condition is not met, return SKIP_AND_KEEP (not executed, then keep)
@@ -361,6 +364,7 @@ public class CmdHandler {
     private static String paramsValidation(CmdDetail cmdDetail, Map params) {
 
         List<CmdParameter> cmdParameterList = cmdDetail.getParameters();
+        System.out.println("aaa:"+cmdParameterList.size());
         for (CmdParameter cmdParameter : cmdParameterList) {
             /*
             如果定义了参数格式，但是参数为空，返回错误

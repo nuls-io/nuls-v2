@@ -35,6 +35,8 @@ import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
+import java.util.Map;
+
 /**
  * 心跳检测线程。如果握手不成功，则重新连接
  * Heartbeat detection threads. If the handshake is unsuccessful, reconnect
@@ -52,7 +54,7 @@ public class HeartbeatProcessor implements Runnable {
     @Override
     public void run() {
         while (true) {
-            for (String url : ClientRuntime.wsClientMap.keySet()) {
+            for (Map.Entry<String, WsClient> entry : ClientRuntime.WS_CLIENT_MAP.entrySet()) {
                 /*
                 打造握手消息
                 Create handshake messages
@@ -72,7 +74,7 @@ public class HeartbeatProcessor implements Runnable {
                     发送握手消息
                     Send handshake messages
                      */
-                    WsClient wsClient = ClientRuntime.wsClientMap.get(url);
+                    WsClient wsClient = entry.getValue();
                     wsClient.send(jsonMessage);
 
                     /*
@@ -80,11 +82,11 @@ public class HeartbeatProcessor implements Runnable {
                     If the handshake fails, reconnect
                      */
                     if (!CmdDispatcher.receiveNegotiateConnectionResponse()) {
-                        ClientRuntime.wsClientMap.remove(url);
-                        ClientRuntime.getWsClient(url);
+                        ClientRuntime.WS_CLIENT_MAP.remove(entry.getKey());
+                        ClientRuntime.getWsClient(entry.getKey());
                     }
                 } catch (Exception e) {
-                    ClientRuntime.wsClientMap.remove(url);
+                    ClientRuntime.WS_CLIENT_MAP.remove(entry.getKey());
                     Log.error(e);
                 }
             }

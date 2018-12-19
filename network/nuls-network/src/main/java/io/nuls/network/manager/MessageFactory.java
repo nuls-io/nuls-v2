@@ -32,11 +32,12 @@ import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.body.*;
-import io.nuls.tools.log.Log;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 /**
  * 消息工厂，用于组装消息
  * message  build factory
@@ -99,7 +100,7 @@ public class MessageFactory {
             return new VersionMessage(nodeGroup.getMagicNumber(),NetworkConstant.CMD_MESSAGE_VERSION,versionMessageBody);
         } catch (UnknownHostException e) {
             e.printStackTrace();
-            Log.error(e);
+            Log.error(e.getMessage());
         }
 
         return null;

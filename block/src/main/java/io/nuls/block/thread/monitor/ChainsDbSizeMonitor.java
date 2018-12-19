@@ -32,7 +32,6 @@ import java.util.SortedSet;
 
 import static io.nuls.block.constant.Constant.CLEAN_PARAM;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
-import static io.nuls.block.constant.RunningStatusEnum.SYNCHRONIZING;
 
 /**
  * 分叉链、孤儿链数据库定时清理器
@@ -61,7 +60,7 @@ public class ChainsDbSizeMonitor implements Runnable {
             try {
                 //判断该链的运行状态，只有正常运行时才会有数据库的处理
                 RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
-                if (!status.equals(RUNNING) || !status.equals(SYNCHRONIZING)) {
+                if (!status.equals(RUNNING)) {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
                     return;
                 }
@@ -109,8 +108,9 @@ public class ChainsDbSizeMonitor implements Runnable {
                             }
                         }
                     }
+                    Log.info("after clear, chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
+                    ContextManager.getContext(chainId).setStatus(RUNNING);
                 }
-                ContextManager.getContext(chainId).setStatus(RUNNING);
             } catch (Exception e) {
                 ContextManager.getContext(chainId).setStatus(RunningStatusEnum.EXCEPTION);
                 Log.error(e);

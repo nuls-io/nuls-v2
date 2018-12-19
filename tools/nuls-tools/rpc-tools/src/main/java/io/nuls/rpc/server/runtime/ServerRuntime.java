@@ -61,7 +61,7 @@ public class ServerRuntime {
      * 本模块所有对外提供的接口的详细信息
      * local module(io.nuls.rpc.RegisterApi) information
      */
-    public static RegisterApi local = new RegisterApi();
+    public static final RegisterApi LOCAL = new RegisterApi();
 
 
     /**
@@ -70,7 +70,7 @@ public class ServerRuntime {
      * Key: Websocket+cmd
      * Value: Time(long)
      */
-    public static Map<String, Long> cmdInvokeTime = new HashMap<>();
+    public static final Map<String, Long> CMD_INVOKE_TIME = new ConcurrentHashMap<>();
 
     /**
      * 接口返回值改变次数
@@ -78,7 +78,7 @@ public class ServerRuntime {
      * Key: Cmd
      * Value: Change count
      */
-    private static Map<String, Integer> cmdChangeCount = new HashMap<>();
+    private static final Map<String, Integer> CMD_CHANGE_COUNT = new ConcurrentHashMap<>();
 
     /**
      * 接口最近一次的返回值
@@ -86,7 +86,7 @@ public class ServerRuntime {
      * Key: Cmd
      * Value: The Response object
      */
-    private static Map<String, Response> cmdLastResponse = new HashMap<>();
+    private static final Map<String, Response> CMD_LAST_RESPONSE = new HashMap<>();
 
     /**
      * 接口最近一次的返回值是否被使用过
@@ -94,7 +94,7 @@ public class ServerRuntime {
      * Key: WebSocket+MessageId+cmd
      * Value: Boolean
      */
-    public static Map<String, Boolean> cmdLastResponseBeUsed = new HashMap<>();
+    public static final Map<String, Boolean> CMD_LAST_RESPONSE_BE_USED = new ConcurrentHashMap<>();
 
     /**
      * 本模块配置信息
@@ -102,7 +102,7 @@ public class ServerRuntime {
      * Key: The key
      * Value: Config detail
      */
-    public static Map<String, ConfigItem> configItemMap = new ConcurrentHashMap<>();
+    public static final Map<String, ConfigItem> CONFIG_ITEM_MAP = new ConcurrentHashMap<>();
 
 
     /**
@@ -129,6 +129,16 @@ public class ServerRuntime {
      */
     public static final List<String> UNSUBSCRIBE_LIST = new CopyOnWriteArrayList<>();
 
+    /**
+     * 核心模块（Manager）的连接地址
+     * URL of Core Module (Manager)
+     */
+    public static String kernelUrl = "";
+
+    public static void setKernelUrl(String url) {
+        kernelUrl = url;
+    }
+
 
     /**
      * 根据cmd命令和版本号获取本地方法
@@ -144,10 +154,10 @@ public class ServerRuntime {
         根据version排序
         Sort according to version
          */
-        local.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : local.getApiMethods()) {
+        for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
             /*
             cmd不一致，跳过
             CMD inconsistency, skip
@@ -195,10 +205,10 @@ public class ServerRuntime {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd) {
 
-        local.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
+        LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
 
         CmdDetail find = null;
-        for (CmdDetail cmdDetail : local.getApiMethods()) {
+        for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
                 continue;
             }
@@ -246,7 +256,7 @@ public class ServerRuntime {
                 Repeated interfaces are registered only once
                  */
                 if (!isRegister(cmdDetail)) {
-                    local.getApiMethods().add(cmdDetail);
+                    LOCAL.getApiMethods().add(cmdDetail);
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
@@ -293,6 +303,14 @@ public class ServerRuntime {
                 CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());
                 cmdParameters.add(cmdParameter);
             }
+
+            if(Parameters.class.getName().equals(annotation.annotationType().getName())){
+                Parameters parameters = (Parameters) annotation;
+                for (Parameter parameter : parameters.value()) {
+                    CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());
+                    cmdParameters.add(cmdParameter);
+                }
+            }
         }
         if (cmdDetail == null) {
             return null;
@@ -314,7 +332,7 @@ public class ServerRuntime {
      */
     private static boolean isRegister(CmdDetail sourceCmdDetail) {
         boolean exist = false;
-        for (CmdDetail cmdDetail : local.getApiMethods()) {
+        for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
             if (cmdDetail.getMethodName().equals(sourceCmdDetail.getMethodName()) && cmdDetail.getVersion() == sourceCmdDetail.getVersion()) {
                 exist = true;
                 break;
@@ -364,11 +382,11 @@ public class ServerRuntime {
      * @param cmd Command of remote method
      */
     private static void addCmdChangeCount(String cmd) {
-        if (!cmdChangeCount.containsKey(cmd)) {
-            cmdChangeCount.put(cmd, 1);
+        if (!CMD_CHANGE_COUNT.containsKey(cmd)) {
+            CMD_CHANGE_COUNT.put(cmd, 1);
         } else {
-            int count = cmdChangeCount.get(cmd);
-            cmdChangeCount.put(cmd, count + 1);
+            int count = CMD_CHANGE_COUNT.get(cmd);
+            CMD_CHANGE_COUNT.put(cmd, count + 1);
         }
     }
 
@@ -381,7 +399,7 @@ public class ServerRuntime {
      */
     public static int getCmdChangeCount(String cmd) {
         try {
-            return cmdChangeCount.get(cmd);
+            return CMD_CHANGE_COUNT.get(cmd);
         } catch (Exception e) {
             return 0;
         }
@@ -395,7 +413,7 @@ public class ServerRuntime {
      * @param value Response
      */
     private static void setCmdLastValue(String cmd, Response value) {
-        cmdLastResponse.put(cmd, value);
+        CMD_LAST_RESPONSE.put(cmd, value);
     }
 
     /**
@@ -406,7 +424,7 @@ public class ServerRuntime {
      * @return Response
      */
     public static Response getCmdLastValue(String cmd) {
-        return cmdLastResponse.get(cmd);
+        return CMD_LAST_RESPONSE.get(cmd);
     }
 
     /**
@@ -417,9 +435,9 @@ public class ServerRuntime {
      * @return boolean
      */
     public static boolean hasSent(String key) {
-        return cmdLastResponseBeUsed.get(key) == null
+        return CMD_LAST_RESPONSE_BE_USED.get(key) == null
                 ? false
-                : cmdLastResponseBeUsed.get(key);
+                : CMD_LAST_RESPONSE_BE_USED.get(key);
     }
 
     /**
@@ -429,9 +447,9 @@ public class ServerRuntime {
      * @param cmd Command of remote method
      */
     private static void resetCmdLastResponseBeUsedMap(String cmd) {
-        for (String key : cmdLastResponseBeUsed.keySet()) {
+        for (String key : CMD_LAST_RESPONSE_BE_USED.keySet()) {
             if (key.endsWith("_" + cmd)) {
-                cmdLastResponseBeUsed.put(key, false);
+                CMD_LAST_RESPONSE_BE_USED.put(key, false);
             }
         }
     }

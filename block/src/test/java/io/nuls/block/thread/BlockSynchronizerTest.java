@@ -21,6 +21,7 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.config.ConfigLoader;
 import io.nuls.block.model.Node;
 import org.junit.After;
 import org.junit.Assert;
@@ -30,10 +31,14 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.nuls.block.constant.Constant.CHAIN_ID;
+import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
+
 public class BlockSynchronizerTest {
 
     @Before
     public void setUp() throws Exception {
+        ConfigLoader.load(MODULES_CONFIG_FILE);
     }
 
     @After
@@ -58,7 +63,7 @@ public class BlockSynchronizerTest {
             node.setHash(NulsDigestData.calcDigestData("sss".getBytes()));
             nodeList.add(node);
         }
-        BlockDownloaderParams params = BlockSynchronizer.getInstance().statistics(nodeList, 888);
+        BlockDownloaderParams params = BlockSynchronizer.getInstance().statistics(nodeList, CHAIN_ID);
         Assert.assertTrue(params.getNodes().size() == 80);
 
         //测试一致节点比例，一致节点低于80%
@@ -77,7 +82,7 @@ public class BlockSynchronizerTest {
             node.setHash(NulsDigestData.calcDigestData("sss".getBytes()));
             nodeList.add(node);
         }
-        params = BlockSynchronizer.getInstance().statistics(nodeList, 888);
+        params = BlockSynchronizer.getInstance().statistics(nodeList, CHAIN_ID);
         Assert.assertTrue(params.getNodes().size() == 0);
 
         //测试一致节点hash与高度是否正确
@@ -103,8 +108,9 @@ public class BlockSynchronizerTest {
             node.setHash(NulsDigestData.calcDigestData("666".getBytes()));
             nodeList.add(node);
         }
-        params = BlockSynchronizer.getInstance().statistics(nodeList, 888);
-        Assert.assertTrue(params.getNodes().get(0).getHeight() == 888 && params.getNodes().get(0).getHash().equals(NulsDigestData.calcDigestData("888".getBytes())));
+        params = BlockSynchronizer.getInstance().statistics(nodeList, CHAIN_ID);
+        Node node = params.getNodes().poll();
+        Assert.assertTrue(node.getHeight() == 888 && node.getHash().equals(NulsDigestData.calcDigestData("888".getBytes())));
     }
 
 }

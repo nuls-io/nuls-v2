@@ -565,7 +565,7 @@ public class SerializeUtils {
         try {
             bytes = val.getBytes(ToolsConstant.DEFAULT_ENCODING);
         } catch (UnsupportedEncodingException e) {
-            Log.error(e);
+            Log.error(e.getMessage());
             throw new NulsRuntimeException(e);
         }
         return sizeOfBytes(bytes);

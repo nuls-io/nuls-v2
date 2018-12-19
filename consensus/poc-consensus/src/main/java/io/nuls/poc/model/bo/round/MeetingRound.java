@@ -33,6 +33,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.thread.TimeService;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -138,7 +139,11 @@ public class MeetingRound {
             轮次总权重等于所有节点权重之和，节点权重=(保证金+总委托金额)*节点信用值
             Round total weight equals the sum of all node weights, node weight = (margin + total Commission amount)* node credit value
             */
-            totalWeight += DoubleUtils.mul(member.getAgent().getCreditVal(),new BigDecimal(member.getAgent().getTotalDeposit().add(member.getAgent().getDeposit())));
+            BigInteger ownTotalWeight = BigInteger.ZERO;
+            if(!member.getAgent().getTotalDeposit().equals(BigInteger.ZERO)){
+                ownTotalWeight = member.getAgent().getTotalDeposit().add(member.getAgent().getDeposit());
+            }
+            totalWeight += DoubleUtils.mul(member.getAgent().getCreditVal(),new BigDecimal(ownTotalWeight));
         }
         endTime = startTime + memberCount * chain.getConfig().getPackingInterval();
     }

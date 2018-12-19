@@ -23,6 +23,7 @@ package io.nuls.block;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.config.GenesisBlock;
+import io.nuls.block.test.BlockGenerator;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -66,8 +67,8 @@ public class BlockGeneratorTest {
     @Test
     public void fork() throws Exception {
         Block root = BlockGenerator.generate(null);
-        Block block1 = BlockGenerator.generate(root, 1);
-        Block block2 = BlockGenerator.generate(root, 2);
+        Block block1 = BlockGenerator.generate(root, 1, "1");
+        Block block2 = BlockGenerator.generate(root, 2, "1");
         Assert.assertEquals(root.getHeader().getHash(), block1.getHeader().getPreHash());
         Assert.assertEquals(block1.getHeader().getPreHash(), block2.getHeader().getPreHash());
         Assert.assertNotEquals(block1.getHeader().getHash(), block2.getHeader().getHash());

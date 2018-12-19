@@ -12,7 +12,6 @@ import java.net.URL;
  */
 public class IoUtils {
     private static final int SIZE = 1024 * 8;
-
     /**
      * 读取远程文件字节流
      *
@@ -72,7 +71,7 @@ public class IoUtils {
         try {
             br = new BufferedReader(new FileReader(realPath));
         } catch (FileNotFoundException e) {
-            Log.error(e);
+            Log.error(e.getMessage());
             throw new Exception(e);
         }
         StringBuilder str = new StringBuilder();
@@ -88,13 +87,13 @@ public class IoUtils {
                 }
             }
         } catch (IOException e) {
-            Log.error(e);
+            Log.error(e.getMessage());
             throw new Exception(e);
         } finally {
             try {
                 br.close();
             } catch (IOException e) {
-                Log.error(e);
+                Log.error(e.getMessage());
             }
         }
         return str.toString();

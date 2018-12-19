@@ -9,6 +9,7 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.util.annotation.ResisterTx;
 import io.nuls.account.util.annotation.TxMethodType;
+import io.nuls.account.util.log.LogUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -17,7 +18,6 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -48,9 +48,7 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_setAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set the alias of account")
     public Object setAlias(Map params) {
-        if (Log.isDebugEnabled()) {
-            Log.debug("ac_setAlias start,params size:{}", params == null ? 0 : params.size());
-        }
+        LogUtil.debug("ac_setAlias start,params size:{}", params == null ? 0 : params.size());
         int chainId;
         String address, password, alias, txHash = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -71,15 +69,15 @@ public class AliasCmd extends BaseCmd {
                 txHash = transaction.getHash().getDigestHex();
             }
         } catch (NulsRuntimeException e) {
-            Log.info("", e);
+            LogUtil.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, String> result = new HashMap<>();
         result.put("txHash", txHash);
-        Log.debug("ac_getAliasByAddress end");
+        LogUtil.debug("ac_getAliasByAddress end");
         return success(result);
     }
 
@@ -91,7 +89,7 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getAliasFee", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Gets to set the alias transaction fee")
     public Object getAliasFee(Map params) {
-        Log.debug("ac_getAliasFee start,params size:{}", params == null ? 0 : params.size());
+        LogUtil.debug("ac_getAliasFee start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
         String address, alias;
         BigInteger fee;
@@ -108,16 +106,16 @@ public class AliasCmd extends BaseCmd {
             alias = (String) aliasObj;
             fee = aliasService.getAliasFee(chainId, address, alias);
         } catch (NulsRuntimeException e) {
-            Log.info("", e);
+            LogUtil.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, String> result = new HashMap<>();
         result.put("fee", fee == null ? "" : fee.toString());
         //TODO is need to format?
-        Log.debug("ac_getAliasFee end");
+        LogUtil.debug("ac_getAliasFee end");
         return success(result);
     }
 
@@ -132,7 +130,7 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getAliasByAddress", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "get the alias by address")
     public Object getAliasByAddress(Map params) {
-        Log.debug("ac_getAliasByAddress start,params size:{}", params == null ? 0 : params.size());
+        LogUtil.debug("ac_getAliasByAddress start,params size:{}", params == null ? 0 : params.size());
         String alias;
         int chainId = 0;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -147,15 +145,15 @@ public class AliasCmd extends BaseCmd {
             address = (String) addressObj;
             alias = aliasService.getAliasByAddress(chainId, address);
         } catch (NulsRuntimeException e) {
-            Log.info("", e);
+            LogUtil.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, String> result = new HashMap<>();
         result.put("alias", alias);
-        Log.debug("ac_getAliasByAddress end");
+        LogUtil.debug("ac_getAliasByAddress end");
         return success(result);
     }
 
@@ -167,7 +165,7 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_isAliasUsable", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "check whether the account is usable")
     public Object isAliasUsable(Map params) {
-        Log.debug("ac_isAliasUsable start,params size:{}", params == null ? 0 : params.size());
+        LogUtil.debug("ac_isAliasUsable start,params size:{}", params == null ? 0 : params.size());
         boolean isAliasUsable = false;
         int chainId;
         String alias;
@@ -182,15 +180,15 @@ public class AliasCmd extends BaseCmd {
             alias = (String) aliasObj;
             isAliasUsable = aliasService.isAliasUsable(chainId, alias);
         } catch (NulsRuntimeException e) {
-            Log.info("", e);
+            LogUtil.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, Boolean> result = new HashMap<>();
         result.put("value", isAliasUsable);
-        Log.debug("ac_isAliasUsable end");
+        LogUtil.debug("ac_isAliasUsable end");
         return success(result);
     }
 
@@ -213,7 +211,7 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_accountTxValidate", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "validate the transaction")
     public Object accountTxValidate(Map params) {
-        Log.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
+        LogUtil.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
         String txHex;
         List<Transaction> lists = null;
@@ -232,15 +230,15 @@ public class AliasCmd extends BaseCmd {
             lists.add(transaction);
             result = aliasService.accountTxValidate(chainId, lists);
         } catch (NulsRuntimeException e) {
-            Log.info("", e);
+            LogUtil.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, List<Transaction>> resultMap = new HashMap<>();
         resultMap.put("list", result);
-        Log.debug("ac_accountTxValidate end");
+        LogUtil.debug("ac_accountTxValidate end");
         return success(result);
     }
 
@@ -253,7 +251,7 @@ public class AliasCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_aliasTxValidate", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "validate the transaction of alias")
     @ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.VALID, methodName = "ac_aliasTxValidate")
     public Object aliasTxValidate(Map params) {
-        Log.debug("ac_aliasTxValidate start,params size:{}", params == null ? 0 : params.size());
+        LogUtil.debug("ac_aliasTxValidate start,params size:{}", params == null ? 0 : params.size());
         boolean result;
         int chainId;
         String txHex;
@@ -269,15 +267,15 @@ public class AliasCmd extends BaseCmd {
             Transaction transaction = Transaction.getInstance(txHex);
             result = aliasService.aliasTxValidate(chainId, transaction);
         } catch (NulsRuntimeException e) {
-            Log.info("", e);
+            LogUtil.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
-        Log.debug("ac_aliasTxCommit end");
+        LogUtil.debug("ac_aliasTxCommit end");
         return success(result);
     }
 
@@ -287,7 +285,7 @@ public class AliasCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_aliasTxCommit", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "commit the alias transaction")
     @ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.COMMIT, methodName = "ac_aliasTxCommit")
     public Object aliasTxCommit(Map params) throws NulsException {
-        Log.debug("ac_aliasTxCommit start,params size:{}", params == null ? 0 : params.size());
+        LogUtil.debug("ac_aliasTxCommit start,params size:{}", params == null ? 0 : params.size());
         boolean result = false;
         int chainId = 0;
         String txHex;
@@ -309,15 +307,15 @@ public class AliasCmd extends BaseCmd {
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
             result = aliasService.aliasTxCommit(chainId, alias);
         } catch (NulsRuntimeException e) {
-            Log.info("", e);
+            LogUtil.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
-        Log.debug("ac_aliasTxCommit end");
+        LogUtil.debug("ac_aliasTxCommit end");
         return success(resultMap);
     }
 
@@ -330,7 +328,7 @@ public class AliasCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_aliasTxRollback", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "rollback the alias info which saved in the db")
     @ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.ROLLBACK, methodName = "ac_aliasTxRollback")
     public Object rollbackAlias(Map params) throws NulsException {
-        Log.debug("ac_aliasTxRollback start,params size:{}", params == null ? 0 : params.size());
+        LogUtil.debug("ac_aliasTxRollback start,params size:{}", params == null ? 0 : params.size());
         boolean result = false;
         int chainId = 0;
         String txHex;
@@ -352,15 +350,15 @@ public class AliasCmd extends BaseCmd {
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
             result = aliasService.rollbackAlias(chainId, alias);
         } catch (NulsRuntimeException e) {
-            Log.info("", e);
+            LogUtil.info("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
-        Log.debug("ac_aliasTxRollback end");
+        LogUtil.debug("ac_aliasTxRollback end");
         return success(resultMap);
     }
 

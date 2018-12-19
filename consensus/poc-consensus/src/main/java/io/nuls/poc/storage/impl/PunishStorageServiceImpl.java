@@ -2,9 +2,9 @@ package io.nuls.poc.storage.impl;
 
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.PunishStorageService;
-import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 
@@ -44,7 +44,6 @@ public class PunishStorageServiceImpl implements PunishStorageService {
             Log.error(e);
             return false;
         }
-
     }
 
     @Override
@@ -63,14 +62,4 @@ public class PunishStorageServiceImpl implements PunishStorageService {
             throw e;
         }
     }
-
-    /*@Override
-    public void afterPropertiesSet() throws NulsException {
-        try {
-            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH);
-        }catch (Exception e){
-            Log.error(e);
-            throw new NulsException(e);
-        }
-    }*/
 }

@@ -1,22 +1,22 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.model.bo.consensus.PunishType;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
+import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -46,7 +46,7 @@ public class RoundManager {
      * @param chain          chain info
      * @param meetingRound   需添加的轮次信息/round info
      * */
-    public void addRound(Chain chain,MeetingRound meetingRound) throws NulsException{
+    public void addRound(Chain chain,MeetingRound meetingRound){
         List<MeetingRound> roundList = chain.getRoundList();
         if(roundList == null){
             roundList = new ArrayList<>();
@@ -62,7 +62,7 @@ public class RoundManager {
      * @param count     保留几轮轮次信息/Keep several rounds of information
      * @return boolean
      * */
-    public boolean clearRound(Chain chain,int count) throws NulsException{
+    public boolean clearRound(Chain chain,int count){
         List<MeetingRound> roundList =chain .getRoundList();
         if (roundList.size() > count) {
             roundList = roundList.subList(roundList.size() - count, roundList.size());
@@ -97,7 +97,6 @@ public class RoundManager {
      * Check if you need to reset rounds
      *
      * @param chain     chain info
-     * @deprecated
      * */
     public void checkIsNeedReset(Chain chain) throws NulsException{
         /*
@@ -155,9 +154,8 @@ public class RoundManager {
      * Initialize Round Information (recalculate Round Information)
      *
      * @param chain            chain info
-     * @return MeetingRound
      * */
-    public MeetingRound initRound(Chain chain) throws NulsException{
+    public void initRound(Chain chain) throws NulsException{
         MeetingRound currentRound = resetRound(chain,false);
         /*
         如果当前没有设置它的上一轮次，则找到它的上一轮的轮次并设置
@@ -177,7 +175,6 @@ public class RoundManager {
             MeetingRound preRound = getRound(chain,extendsData,false);
             currentRound.setPreRound(preRound);
         }
-        return currentRound;
     }
 
     /**
@@ -261,7 +258,7 @@ public class RoundManager {
             if (isRealTime && roundData == null) {
                 return getRoundByRealTime(chain);
             } else if (!isRealTime && roundData == null) {
-                return getRoundByNotRealTime(chain);
+                return getRoundByNewestBlock(chain);
             } else {
                 return getRoundByExpectedRound(chain,roundData);
             }
@@ -320,7 +317,7 @@ public class RoundManager {
      * @param chain          chain info
      * @return MeetingRound
      * */
-    private MeetingRound getRoundByNotRealTime(Chain chain) throws NulsException{
+    private MeetingRound getRoundByNewestBlock(Chain chain) throws NulsException{
         BlockHeader bestBlockHeader = chain.getNewestHeader();
         BlockExtendsData extendsData = new BlockExtendsData(bestBlockHeader.getExtend());
         extendsData.setRoundStartTime(extendsData.getRoundEndTime(chain.getConfig().getPackingInterval()));
@@ -329,7 +326,7 @@ public class RoundManager {
     }
 
     /**
-     * 根据最新区块数据计算下一轮轮次信息
+     * 根据指定区块数据计算下一轮轮次信息
      * Calculate next round information based on the latest block data
      *
      * @param chain      chain info
@@ -362,10 +359,10 @@ public class RoundManager {
         setMemberList(chain,round, startBlockHeader);
         //todo 调用账户管理模块获取本地非加密账户地址列表
         List<byte[]> packingAddressList = new ArrayList<>();
-        Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
+        Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
         packingAddressList.add(packingAddress.getAddressBytes());
         round.calcLocalPacker(packingAddressList);
-        Log.debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
+        chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
     }
 
@@ -388,7 +385,7 @@ public class RoundManager {
         if(StringUtils.isNotBlank(seedNodesStr)){
             seedNodes = seedNodesStr.split(",");
             for (String address : seedNodes) {
-                byte[] addressByte = address.getBytes();
+                byte[] addressByte = AddressTool.getAddress(address);
                 MeetingMember member = new MeetingMember();
                 Agent agent = new Agent();
                 agent.setAgentAddress(addressByte);
@@ -559,15 +556,13 @@ public class RoundManager {
 
 
     /**
-     * todo
      * 获取指定轮次前一轮打包的第一个区块
      * Gets the first block packaged in the previous round of the specified round
-     * (该接口应该放到区块管理模块)
+     *
      * @param chain       chain info
      * @param roundIndex  轮次下标
      * */
     private BlockHeader getFirstBlockOfPreRound(Chain chain,long roundIndex) throws NulsException{
-
         BlockHeader firstBlockHeader = null;
         long startRoundIndex = 0L;
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
@@ -590,14 +585,12 @@ public class RoundManager {
         }
         if (firstBlockHeader == null) {
             firstBlockHeader = chain.getNewestHeader();
-            Log.warn("the first block of pre round not found");
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).warn("the first block of pre round not found");
         }
         return firstBlockHeader;
     }
 
     /**
-     * todo
-     * 该接口应该放到区块管理模块
      * 获取地址出块数量
      * Get the number of address blocks
      *
@@ -618,7 +611,7 @@ public class RoundManager {
             if (roundData.getRoundIndex() < roundStart) {
                 break;
             }
-            if (Arrays.equals(blockHeader.getPackingAddress(), packingAddress)) {
+            if (Arrays.equals(blockHeader.getPackingAddress(chain.getConfig().getChainId()), packingAddress)) {
                 count++;
             }
         }

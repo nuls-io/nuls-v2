@@ -9,6 +9,13 @@ import lombok.Setter;
 
 import java.util.List;
 
+/**
+ * 缓存的区块对象，用于区块广播、转发
+ *
+ * @author captain
+ * @version 1.0
+ * @date 18-12-13 下午3:01
+ */
 @NoArgsConstructor
 @AllArgsConstructor
 public class CachedSmallBlock {

@@ -36,7 +36,6 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.netty.NettyServer;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 
 import java.util.ArrayList;
@@ -44,6 +43,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 /**
  * 连接管理器,连接的启动，停止，连接引用缓存管理
  * Connection manager, connection start, stop, connection reference cache management
@@ -264,14 +265,16 @@ public class ConnectionManager extends BaseManager{
             try {
                 server.start();
             } catch (InterruptedException e) {
-                Log.error(e);
+                e.printStackTrace();
+                Log.error(e.getMessage());
             }
         }, false);
         ThreadUtils.createAndRunThread("node crossServer start", ()-> {
             try {
                 serverCross.start();
             } catch (InterruptedException e) {
-                Log.error(e);
+                e.printStackTrace();
+                Log.error(e.getMessage());
             }
         }, false);
 

@@ -8,9 +8,11 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
+import io.nuls.tools.thread.TimeService;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
-import io.nuls.transaction.scheduler.TransactionScheduler;
+import io.nuls.transaction.manager.ChainManager;
+
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Properties;
@@ -25,15 +27,13 @@ public class TransactionBootStrap {
 
     public static void main(String[] args) {
         try {
-            init(1);
-            //TimeService.getInstance().start();
-            System.out.println();
+            init();
         }catch (Exception e){
             Log.error("Transaction startup error!");
             Log.error(e);
         }
     }
-    public static void init(int chainId){
+    public static void init(){
         try{
             //初始化系统参数
             initSys();
@@ -41,13 +41,13 @@ public class TransactionBootStrap {
             initDB();
             //初始化上下文
             SpringLiteContext.init(TxConstant.CONTEXT_PATH);
-
+            //启动链
+            SpringLiteContext.getBean(ChainManager.class).runChain();
             //初始化国际资源文件语言
             initLanguage();
-            //加载本地配置参数,并启动本地服务
-            sysStart(chainId);
             //启动WebSocket服务,向外提供RPC接口
             initServer();
+            TimeService.getInstance().start();
         }catch (Exception e){
             Log.error(e);
         }
@@ -98,10 +98,6 @@ public class TransactionBootStrap {
         }catch (Exception e){
             Log.error(e);
         }
-    }
-
-    public static void sysStart(int chainId){
-        TransactionScheduler.getInstance().start();
     }
 
     /**

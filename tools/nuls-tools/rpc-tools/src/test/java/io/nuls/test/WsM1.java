@@ -37,6 +37,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.MessageUtil;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.server.WsServer;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.parse.JSONUtils;
 import org.junit.Test;
 
@@ -120,7 +121,7 @@ public class WsM1 {
 
     @Test
     public void handshake() throws Exception {
-        Constants.kernelUrl = "ws://127.0.0.1:8887";
+        ServerRuntime.setKernelUrl("ws://127.0.0.1:8887");
         System.out.println("handshake:" + CmdDispatcher.handshakeKernel());
     }
 
@@ -130,8 +131,8 @@ public class WsM1 {
         WsServer.getInstance(ModuleE.CM)
                 .moduleRoles(new String[]{"1.0", "2.4"})
                 .moduleVersion("1.2")
-                .dependencies(ModuleE.LG.abbr, "1.1")
-                .dependencies(ModuleE.BL.abbr, "2.1")
+//                .dependencies(ModuleE.LG.abbr, "1.1")
+//                .dependencies(ModuleE.BL.abbr, "2.1")
                 .scanPackage("io.nuls.rpc.cmd.test")
                 .connect("ws://127.0.0.1:8887");
 

@@ -22,11 +22,8 @@ package io.nuls.block.thread.monitor;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.constant.ChainTypeEnum;
-import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ChainManager;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.Node;
@@ -36,7 +33,6 @@ import io.nuls.tools.log.Log;
 
 import java.util.List;
 import java.util.SortedSet;
-import java.util.TreeSet;
 
 import static io.nuls.block.constant.RunningStatusEnum.EXCEPTION;
 import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_CHAINS;
@@ -78,6 +74,9 @@ public class OrphanChainsMaintainer implements Runnable {
                     return;
                 }
                 SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+                if (orphanChains.size() < 1) {
+                    return;
+                }
                 List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
                 //维护现有孤儿链，尝试在链首增加区块
                 ContextManager.getContext(chainId).setStatus(MAINTAIN_CHAINS);

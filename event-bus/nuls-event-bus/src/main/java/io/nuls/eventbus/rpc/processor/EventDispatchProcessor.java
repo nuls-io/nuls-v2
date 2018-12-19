@@ -1,39 +1,35 @@
 package io.nuls.eventbus.rpc.processor;
 
+import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.model.Subscriber;
-import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.message.Message;
-import io.nuls.rpc.model.message.MessageType;
-import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.server.ServerRuntime;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
+import io.nuls.eventbus.runtime.EventBusRuntime;
 
+import io.nuls.tools.log.Log;
+
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
+/**
+ * @author naveen
+ */
 public class EventDispatchProcessor implements Runnable {
 
     @Override
     public void run() {
         try{
+            Log.info("Processing the published event starts..");
             Object[] objects = EventBusRuntime.firstObjArrInEventDispatchQueue();
-            if(null == objects){
-                Thread.sleep(1000L);
-            }else{
+            if(null != objects){
                 Object data = objects[0];
                 Set<Subscriber> subscribers =(Set<Subscriber>) objects[1];
-                //TODO does messageID needs to be taken from subscriber ? if yes, it has to be stored while subscription
-                String messageId = (String)objects[2];
-                Message rspMessage = Constants.basicMessage(Constants.nextSequence(), MessageType.Response);
-                Response response = ServerRuntime.newResponse(messageId,Constants.booleanString(true),"");
-                response.setResponseData(data);
                 for (Subscriber subscriber : subscribers){
-                    WsClient wsClient = EventBusRuntime.getWsClient(subscriber.getUrl());
-                   //TODO add retry logic in case of failure in delivery
-                    wsClient.send(JSONUtils.obj2json(data));
+                    Map<String,Object> params = new HashMap<>(1);
+                    params.put("data",data);
+                    EventBusRuntime.SEND_AND_RETRY_QUEUE.offer(new Object[]{subscriber,params});
+                    EbConstants.SEND_RETRY_THREAD_POOL.execute(new SendRetryProcessor());
                 }
-
+                Log.info("Processing the published event Ends..");
             }
         }catch (Exception e){
             Log.error(e);

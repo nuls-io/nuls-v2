@@ -94,7 +94,7 @@ public class I18nUtils {
                 }
             }
         } catch (IOException e) {
-            Log.error(e);
+            Log.error(e.getMessage());
         }
     }
 

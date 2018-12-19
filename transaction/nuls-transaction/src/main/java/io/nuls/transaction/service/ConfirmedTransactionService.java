@@ -3,6 +3,7 @@ package io.nuls.transaction.service;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.Result;
+import io.nuls.transaction.model.bo.Chain;
 
 import java.util.List;
 
@@ -34,10 +35,18 @@ public interface ConfirmedTransactionService {
     boolean saveTx(int chainId, Transaction transaction);
 
     /**
-     * 批量保存交易
+     * 批量保存已确认交易
      * @param chainId
-     * @param txList
+     * @param txHashList
      * @return
      */
-    boolean saveTxList(int chainId, List<Transaction> txList);
+    boolean saveTxList(int chainId, List<byte[]> txHashList);
+
+    /**
+     * 批量回滚已确认交易
+     * @param chainId
+     * @param txHashList
+     * @return
+     */
+    boolean rollbackTxList(int chainId, List<byte[]> txHashList);
 }

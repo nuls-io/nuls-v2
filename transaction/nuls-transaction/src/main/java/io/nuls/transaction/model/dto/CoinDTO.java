@@ -47,7 +47,7 @@ public class CoinDTO implements Cloneable {
     private BigInteger amount;
 
     /**
-     * address对应的密码，用于签名
+     * 当address为普通地址时，该对应的密码，用于签名
      */
     @JsonIgnore
     private String password;

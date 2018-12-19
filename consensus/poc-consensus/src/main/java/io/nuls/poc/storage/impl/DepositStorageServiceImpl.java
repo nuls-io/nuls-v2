@@ -99,14 +99,4 @@ public class DepositStorageServiceImpl implements DepositStorageService {
         }
         return 0;
     }
-
-    /*@Override
-    public void afterPropertiesSet() throws NulsException {
-        try {
-            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT);
-        }catch (Exception e){
-            Log.error(e);
-            throw new NulsException(e);
-        }
-    }*/
 }

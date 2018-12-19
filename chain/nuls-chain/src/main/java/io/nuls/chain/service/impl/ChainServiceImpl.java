@@ -6,7 +6,6 @@ import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
-import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -27,9 +26,6 @@ public class ChainServiceImpl implements ChainService {
     private ChainStorage chainStorage;
 
     @Autowired
-    private ChainAssetStorage chainAssetStorage;
-
-    @Autowired
     private AssetService assetService;
 
     /**
@@ -39,25 +35,22 @@ public class ChainServiceImpl implements ChainService {
      * @throws Exception Any error will throw an exception
      */
     @Override
-    public void initChain() throws Exception {
+    public void initMainChain() throws Exception {
         int chainId = Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
         BlockChain chain = getChain(chainId);
-        if (null == chain) {
-            chain = new BlockChain();
+        if (chain != null) {
+            return;
         }
+
+        chain = new BlockChain();
         chain.setName(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_NAME));
-        int assetId = Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID));
+        int assetId = Integer.parseInt(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID));
         chain.setRegAssetId(assetId);
-        chain.getSelfAssetKeyList().clear();
         chain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
-        chain.getTotalAssetKeyList().clear();
         chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chainStorage.save(chainId, chain);
 
-        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(chainId, assetId));
-        if (null == asset) {
-            asset = new Asset();
-        }
+        Asset asset = new Asset();
         asset.setChainId(chainId);
         asset.setAssetId(assetId);
         asset.setInitNumber(new BigInteger(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_MAX)));
@@ -113,5 +106,88 @@ public class ChainServiceImpl implements ChainService {
     @Override
     public BlockChain getChain(int chainId) throws Exception {
         return chainStorage.load(chainId);
+    }
+
+
+    /**
+     * 注册链
+     * Register a new chain
+     *
+     * @param blockChain The BlockChain saved
+     * @param asset      The Asset saved
+     * @throws Exception Any error will throw an exception
+     */
+    @Override
+    public void registerBlockChain(BlockChain blockChain, Asset asset) throws Exception {
+        /*
+        1. 插入资产表
+        2. 插入资产流通表
+         */
+        asset.addChainId(asset.getChainId());
+        assetService.createAsset(asset);
+
+        /*
+        3. 插入链
+         */
+        blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
+        blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
+        saveChain(blockChain);
+    }
+
+    /**
+     * 回滚注册链
+     * Rollback the registered BlockChain
+     *
+     * @param blockChain The rollback BlockChain
+     * @throws Exception Any error will throw an exception
+     */
+    @Override
+    public void registerBlockChainRollback(BlockChain blockChain) throws Exception {
+        delChain(blockChain);
+        int assetId = blockChain.getRegAssetId();
+        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), assetId));
+        assetService.deleteAsset(asset);
+    }
+
+    /**
+     * 销毁链
+     * Destroy a exist BlockChain
+     *
+     * @param blockChain The BlockChain destroyed
+     * @return The BlockChain after destroyed
+     * @throws Exception Any error will throw an exception
+     */
+    @Override
+    public BlockChain destroyBlockChain(BlockChain blockChain) throws Exception {
+        //更新资产
+        assetService.setStatus(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), blockChain.getDelAssetId()), false);
+
+        //更新链
+        BlockChain dbChain = getChain(blockChain.getChainId());
+        dbChain.setDelAddress(blockChain.getDelAddress());
+        dbChain.setDelAssetId(blockChain.getDelAssetId());
+        dbChain.setDelTxHash(blockChain.getDelTxHash());
+        dbChain.removeCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), blockChain.getDelAssetId()));
+        dbChain.setDelete(true);
+        updateChain(dbChain);
+
+        return dbChain;
+    }
+
+    /**
+     * 回滚销毁的链
+     * Rollback the destroyed BlockChain
+     *
+     * @param dbChain The BlockChain need to be rollback
+     * @throws Exception Any error will throw an exception
+     */
+    @Override
+    public void destroyBlockChainRollback(BlockChain dbChain) throws Exception {
+        //资产回滚
+        String assetKey = CmRuntimeInfo.getAssetKey(dbChain.getChainId(), dbChain.getDelAssetId());
+        assetService.setStatus(assetKey, true);
+        //链回滚
+        dbChain.setDelete(false);
+        updateChain(dbChain);
     }
 }

@@ -32,10 +32,20 @@ public class Subscriber implements Serializable {
 
     @Getter
     @Setter
-    private String url;
+    private String callBackCmd;
 
-    public Subscriber(String url,String abbr,String moduleName,String domain){
-        this.url = url;
+    public Subscriber(String abbr,String callBackCmd) {
+        this.moduleAbbr = abbr;
+        this.callBackCmd = callBackCmd;
+    }
+
+    public Subscriber(String abbr,String moduleName,String domain) {
+        this.moduleAbbr = abbr;
+        this.moduleName = moduleName;
+        this.domain = domain;
+    }
+    public Subscriber(String abbr,String moduleName,String domain,String callBackCmd){
+        this.callBackCmd = callBackCmd;
         this.moduleAbbr = abbr;
         this.moduleName = moduleName;
         this.domain = domain;
@@ -48,11 +58,11 @@ public class Subscriber implements Serializable {
 
         Subscriber that = (Subscriber) o;
 
-        return this.url.equals(that.url);
+        return this.moduleAbbr.equals(that.moduleAbbr);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.url);
+        return Objects.hash(this.moduleAbbr);
     }
 }

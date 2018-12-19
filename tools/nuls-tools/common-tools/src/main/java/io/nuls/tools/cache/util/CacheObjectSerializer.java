@@ -59,10 +59,10 @@ public class CacheObjectSerializer<T> implements Serializer<T> {
         try {
             t = (T) clazz.newInstance();
         } catch (InstantiationException e) {
-            Log.error(e);
+            Log.error(e.getMessage());
             return null;
         } catch (IllegalAccessException e) {
-            Log.error(e);
+            Log.error(e.getMessage());
             return null;
         }
         ProtostuffIOUtil.mergeFrom(byteBuffer.array(), t, schema);

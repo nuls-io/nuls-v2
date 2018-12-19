@@ -75,7 +75,7 @@ public class RequestSingleProcessor implements Runnable {
 
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
-                Log.error(e);
+                Log.error(e.getMessage());
             }
         }
     }

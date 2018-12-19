@@ -10,8 +10,6 @@ public interface TxConstant {
 
     int NULS_CHAINID = 12345;
     int NULS_CHAIN_ASSETID = 1;
-    int CURRENT_CHAINID = 12345;
-    int CURRENT_CHAIN_ASSETID = 1;
 
     /**
      * context path
@@ -22,6 +20,7 @@ public interface TxConstant {
      * webSocket config
      */
     String TX_MODULE_NAME = "transaction";
+
     String TX_CMD_PATH = "io.nuls.transaction.rpc.cmd";
     int TX_CMD_PORT = 8823;
     String KERNEL_URL = "ws://127.0.0.1:8887";
@@ -41,7 +40,6 @@ public interface TxConstant {
     long TX_UNVERIFIED_QUEUE_MAXSIZE = 10000000L;
 
 
-
     /**
      * H2
      */
@@ -55,6 +53,8 @@ public interface TxConstant {
 
 
     int TX_TYPE_COINBASE = 1;
+    int TX_TYPE_TRANSFER = 2;
+
     int TX_TYPE_REDPUNISH = 8;
 
     /**
@@ -77,5 +77,24 @@ public interface TxConstant {
     int TX_MAX_BYTES = 300;
     int TX_MAX_SIZE = TX_MAX_BYTES * 1024;
 
+    /**
+     * 创建多签交易时，返回map的key
+     */
+    String MULTI_TX_HASH = "txHash";
+    String MULTI_TX_HEX = "txHex";
 
+    /**
+     * Map初始值
+     */
+    int INIT_CAPACITY = 16;
+
+    /**
+     * config file path
+     */
+    String CONFIG_FILE_PATH = "transaction-config.json";
+
+    /**
+     * 打包交易，预留模块统一验证的时间 毫秒
+     */
+    long VERIFY_OFFSET = 500L;
 }

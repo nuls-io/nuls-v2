@@ -7,9 +7,11 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.utils.DBUtil;
+import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,15 +24,13 @@ import java.util.List;
 @Service
 public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageService, InitializingBean {
 
-    private static final String TRANSACTION_CROSSCHAIN = "transaction_crosschain";
-
     @Override
     public void afterPropertiesSet() throws NulsException {
-        DBUtil.createTable(TRANSACTION_CROSSCHAIN);
+        //DBUtil.createTable(TxDBConstant.DB_TRANSACTION_CROSSCHAIN);
     }
 
     @Override
-    public boolean putTx(CrossChainTx ctx) {
+    public boolean putTx(int chainId, CrossChainTx ctx) {
         if (null == ctx) {
             return false;
         }
@@ -43,7 +43,7 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
         }
         boolean result = false;
         try {
-            result = RocksDBService.put(TRANSACTION_CROSSCHAIN, txHashBytes, ctx.serialize());
+            result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_CROSSCHAIN + chainId, txHashBytes, ctx.serialize());
         } catch (Exception e) {
             Log.error(e);
         }
@@ -52,12 +52,12 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
     }
 
     @Override
-    public boolean removeTx(NulsDigestData hash) {
+    public boolean removeTx(int chainId, NulsDigestData hash) {
         if (hash == null) {
             return false;
         }
         try {
-            return RocksDBService.delete(TRANSACTION_CROSSCHAIN, hash.serialize());
+            return RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CROSSCHAIN + chainId, hash.serialize());
         } catch (IOException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -69,7 +69,7 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
     }
 
     @Override
-    public CrossChainTx getTx(NulsDigestData hash) {
+    public CrossChainTx getTx(int chainId, NulsDigestData hash) {
         if (hash == null) {
             return null;
         }
@@ -80,7 +80,7 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        byte[] txBytes = RocksDBService.get(TRANSACTION_CROSSCHAIN, hashBytes);
+        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CROSSCHAIN + chainId, hashBytes);
 
         if (null == txBytes) {
             return null;
@@ -95,10 +95,10 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
     }
 
     @Override
-    public List<CrossChainTx> getAllTx(NulsDigestData hash) {
+    public List<CrossChainTx> getTxList(int chainId) {
         List<CrossChainTx> ccTxPoList = new ArrayList<>();
         try {
-            List<byte[]> list = RocksDBService.valueList(TRANSACTION_CROSSCHAIN);
+            List<byte[]> list = RocksDBService.valueList(TxDBConstant.DB_TRANSACTION_CROSSCHAIN + chainId);
             if (list != null) {
                 for (byte[] value : list) {
                     CrossChainTx ccTx = new CrossChainTx();

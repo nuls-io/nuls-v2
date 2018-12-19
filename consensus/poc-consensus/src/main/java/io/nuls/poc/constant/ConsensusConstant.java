@@ -193,4 +193,11 @@ public interface ConsensusConstant {
     String PARAM_ADDRESS = "address";
     String PARAM_TX = "tx";
     String PARAM_BLOCK_HEADER ="blockHeader";
+
+    /**
+     * 共识模块日志管理
+     * Consensus module log management
+     * */
+    String CONSENSUS_LOGGER_NAME = "consensus/consensus";
+    String BASIC_LOGGER_NAME = "rpc/rpc";
  }

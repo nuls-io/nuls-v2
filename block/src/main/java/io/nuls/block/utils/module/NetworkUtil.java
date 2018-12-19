@@ -21,8 +21,8 @@ package io.nuls.block.utils.module;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.message.BaseMessage;
 import io.nuls.block.message.CompleteMessage;
+import io.nuls.block.message.base.BaseMessage;
 import io.nuls.block.model.Node;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
@@ -81,7 +81,7 @@ public class NetworkUtil {
                 Node node = new Node();
                 node.setId((String) map.get("nodeId"));
                 node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
-//            node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
+                node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
                 nodes.add(node);
             }
             return nodes;
@@ -185,6 +185,35 @@ public class NetworkUtil {
         if (!result) {
             Log.warn("send success message failed:{}, hash:{}", nodeId, hash);
         }
+    }
+
+    public static void setHashAndHeight(int chainId, NulsDigestData hash, long height, String nodeId) {
+        try {
+            Map<String, Object> params = new HashMap<>(5);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("nodeId", nodeId);
+            params.put("blockHeight", height);
+            params.put("blockHash", hash.toString());
+
+            CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_updateNodeInfo", params);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+    }
+
+    public static long currentTime() {
+        try {
+            Map<String, Object> params = new HashMap<>(1);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
+            Map responseData = (Map) response.getResponseData();
+            Map result = (Map) responseData.get("nw_currentTimeMillis");
+            return (Long) result.get("currentTimeMillis");
+        } catch (Exception e) {
+            Log.error("get nw_currentTimeMillis fail");
+        }
+        return System.currentTimeMillis();
     }
 
 }

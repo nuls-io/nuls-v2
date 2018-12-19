@@ -20,9 +20,11 @@
 
 package io.nuls.block.context;
 
+import ch.qos.logback.classic.Logger;
 import io.nuls.base.data.Block;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.model.Chain;
+import io.nuls.tools.log.logback.LoggerBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -30,14 +32,14 @@ import java.util.List;
 
 /**
  * 每条链对应一个Context，维护一些链运行期间的信息
+ *
  * @author captain
- * @date 18-11-20 上午10:46
  * @version 1.0
+ * @date 18-11-20 上午10:46
  */
 @Data
 @NoArgsConstructor
 public class Context {
-
     /**
      * 代表该链的运行状态
      */
@@ -58,16 +60,6 @@ public class Context {
 
     private List<Chain> forkChains;
 
-    public Block getGenesisBlock() {
-        while (genesisBlock == null) {
-            try {
-                Thread.sleep(100L);
-            } catch (InterruptedException e) {
-            }
-        }
-        return genesisBlock;
-    }
-
     public void setGenesisBlock(Block block) {
         this.genesisBlock = block;
     }
@@ -76,7 +68,7 @@ public class Context {
         this.status = status;
     }
 
-    public long getLatestHeight(){
+    public long getLatestHeight() {
         return latestBlock.getHeader().getHeight();
     }
 }

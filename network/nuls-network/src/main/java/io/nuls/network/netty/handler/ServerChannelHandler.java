@@ -34,9 +34,10 @@ import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.model.Node;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * Server channel handler
@@ -99,8 +100,10 @@ public class ServerChannelHandler extends BaseChannelHandler {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String remoteIP = channel.remoteAddress().getHostString();
         Log.info("Server Node is exceptionCaught:" +remoteIP + ":" + channel.remoteAddress().getPort());
+        Log.error(cause.getMessage());
         if (!(cause instanceof IOException)) {
-            Log.error(cause);
+            cause.printStackTrace();
+            Log.error(cause.getMessage());
         }
         ctx.channel().close();
     }

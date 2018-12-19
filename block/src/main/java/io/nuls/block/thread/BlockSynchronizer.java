@@ -32,12 +32,13 @@ import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
+import io.nuls.tools.thread.commom.NulsThreadFactory;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,12 +46,11 @@ import java.util.concurrent.*;
 
 /**
  * 区块同步主线程，管理多条链的区块同步
+ *
  * @author captain
- * @date 18-11-8 下午5:49
  * @version 1.0
+ * @date 18-11-8 下午5:49
  */
-@Component
-@NoArgsConstructor
 public class BlockSynchronizer implements Runnable {
 
     /**
@@ -60,11 +60,14 @@ public class BlockSynchronizer implements Runnable {
 
     private static final BlockSynchronizer INSTANCE = new BlockSynchronizer();
 
-    @Autowired
     private BlockService blockService;
 
     public static BlockSynchronizer getInstance() {
         return INSTANCE;
+    }
+
+    private BlockSynchronizer() {
+        this.blockService = SpringLiteContext.getBean(BlockService.class);
     }
 
     @Override
@@ -76,18 +79,19 @@ public class BlockSynchronizer implements Runnable {
                     statusEnumMap.put(chainId, synStatus = BlockSynStatusEnum.WAITING);
                 }
                 RunningStatusEnum runningStatus = ContextManager.getContext(chainId).getStatus();
-                if (synStatus.equals(BlockSynStatusEnum.WAITING) && runningStatus.equals(RunningStatusEnum.RUNNING)) {
+//                if (synStatus.equals(BlockSynStatusEnum.WAITING) && runningStatus.equals(RunningStatusEnum.RUNNING)) {
                     synchronize(chainId);
-                } else {
-                    Log.info("skip Block Synchronize, SynStatus:{}, RunningStatus:{}", synStatus, runningStatus);
-                }
-            } catch (Exception error) {
-                Log.error(error);
+//                } else {
+//                    Log.info("skip Block Synchronize, SynStatus:{}, RunningStatus:{}", synStatus, runningStatus);
+//                }
+            } catch (Exception e) {
+                Log.error(e);
+                statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
             }
         }
     }
 
-    private void synchronize(int chainId) {
+    private void synchronize(int chainId) throws Exception {
         //1.调用网络模块接口获取当前chainID网络的可用节点
         List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
 
@@ -96,45 +100,57 @@ public class BlockSynchronizer implements Runnable {
         if (availableNodes.size() >= Integer.parseInt(config)) {
             //3.统计网络中可用节点的一致区块高度、区块hash
             BlockDownloaderParams params = statistics(availableNodes, chainId);
-            if (params.getNodes().size() == 0) {
+            int size = params.getNodes().size();
+            if (size == 0) {
                 statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
+                return;
+            }
+            //网络上所有节点高度都是0，说明是该链第一次运行
+            if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
+//                statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                 return;
             }
             //4.更新下载状态为“下载中”
             statusEnumMap.put(chainId, BlockSynStatusEnum.RUNNING);
-            BlockingQueue<Block> blockQueue = new LinkedBlockingQueue<>();
 
-            //5.开启区块下载管理器BlockDownloaderManager
-            BlockDownloaderManager downloadThreadManager = new BlockDownloaderManager(chainId, params, blockQueue);
-            FutureTask<Boolean> threadManagerFuture = new FutureTask<>(downloadThreadManager);
-            ThreadUtils.createAndRunThread("block-downloader-manager-" + chainId, threadManagerFuture);
+            PriorityBlockingQueue<Node> nodes = params.getNodes();
+            int nodeCount = nodes.size();
+            ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount, 0, new NulsThreadFactory("block-downloader-" + chainId));
+            BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
+            BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
+            //5.开启区块下载器BlockDownloader
+            BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params);
+            FutureTask<Boolean> downloadFutrue = new FutureTask<>(downloader);
+            ThreadUtils.createAndRunThread("block-downloader-" + chainId, downloadFutrue);
 
-            //6.开启区块消费线程BlockConsumer，与上面的BlockDownloaderManager共用一个队列blockQueue
-            BlockConsumer blockConsumer = new BlockConsumer(chainId, blockQueue);
-            FutureTask<Boolean> dataStorageFuture = new FutureTask<>(blockConsumer);
-            ThreadUtils.createAndRunThread("block-consumer-" + chainId, dataStorageFuture);
+            //6.开启区块收集线程BlockCollector，收集BlockDownloader下载的区块
+            BlockCollector collector = new BlockCollector(chainId, futures, executor, params, queue);
+            ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
 
-            try {
-                Boolean downResult = threadManagerFuture.get();
-                blockQueue.offer(new Block());
-                Boolean storageResult = dataStorageFuture.get();
-                boolean success = downResult != null && downResult && storageResult != null && storageResult;
+            //7.开启区块消费线程BlockConsumer，与上面的BlockDownloader共用一个队列blockQueue
+            BlockConsumer consumer = new BlockConsumer(chainId, queue);
+            FutureTask<Boolean> consumerFuture = new FutureTask<>(consumer);
+            ThreadUtils.createAndRunThread("block-consumer-" + chainId, consumerFuture);
 
-                if (success && checkIsNewest(chainId, params)) {
+            Boolean downResult = downloadFutrue.get();
+            Boolean storageResult = consumerFuture.get();
+            boolean success = downResult != null && downResult && storageResult != null && storageResult;
+
+            if (success) {
+                if (checkIsNewest(chainId, params)) {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
-                } else if (BlockSynStatusEnum.WAITING.equals(statusEnumMap.get(chainId))) {
-                    statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
+                } else {
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
                 }
-            } catch (Exception e) {
-                Log.error(e);
+            } else {
                 statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
             }
-
         }
     }
 
     /**
      * 检查本地区块是否同步到最新高度，如果不是最新高度，变更同步状态为BlockSynStatusEnum.WAITING，等待下次同步
+     *
      * @param chainId
      * @param params
      * @return
@@ -143,12 +159,12 @@ public class BlockSynchronizer implements Runnable {
     private boolean checkIsNewest(int chainId, BlockDownloaderParams params) throws Exception {
 
         long downloadBestHeight = params.getNetLatestHeight();
-        long time = TimeService.currentTimeMillis();
+        long time = NetworkUtil.currentTime();
         long timeout = 60 * 1000L;
         long localBestHeight = 0L;
 
         while (true) {
-            if (TimeService.currentTimeMillis() - time > timeout) {
+            if (NetworkUtil.currentTime() - time > timeout) {
                 break;
             }
 
@@ -157,12 +173,12 @@ public class BlockSynchronizer implements Runnable {
                 break;
             } else if (bestHeight != localBestHeight) {
                 localBestHeight = bestHeight;
-                time = TimeService.currentTimeMillis();
+                time = NetworkUtil.currentTime();
             }
             Thread.sleep(100L);
         }
 
-        BlockDownloaderParams newestParams = statistics(chainId);
+        BlockDownloaderParams newestParams = statistics(NetworkUtil.getAvailableNodes(chainId), chainId);
         if (newestParams.getNetLatestHeight() > blockService.getLatestBlock(chainId).getHeader().getHeight()) {
             statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
             return false;
@@ -170,22 +186,18 @@ public class BlockSynchronizer implements Runnable {
         return true;
     }
 
-    public BlockDownloaderParams statistics(int chainId) {
-        return statistics(NetworkUtil.getAvailableNodes(chainId), chainId);
-    }
-
     /**
      * 统计网络中可用节点的一致区块高度、区块hash，构造下载参数
-     * @date 18-11-8 下午4:55
+     *
      * @param
      * @return
+     * @date 18-11-8 下午4:55
      */
     public BlockDownloaderParams statistics(List<Node> availableNodes, int chainId) {
         BlockDownloaderParams params = new BlockDownloaderParams();
-        params.setChainId(chainId);
         params.setAvailableNodesCount(availableNodes.size());
-        List<Node> nodeList = new ArrayList<>();
-        params.setNodes(nodeList);
+        PriorityBlockingQueue<Node> nodeQueue = new PriorityBlockingQueue<>(availableNodes.size(), Node.COMPARATOR);
+        params.setNodes(nodeQueue);
         //每个节点的(最新HASH+最新高度)是key
         String key = "";
         int count = 0;
@@ -193,7 +205,7 @@ public class BlockSynchronizer implements Runnable {
         Map<String, List<Node>> nodeMap = new HashMap<>(availableNodes.size());
         //一个以key为主键统计次数
         Map<String, Integer> countMap = new HashMap<>(availableNodes.size());
-        for (Node node: availableNodes){
+        for (Node node : availableNodes) {
             String tempKey = node.getHash().getDigestHex() + node.getHeight();
             if (countMap.containsKey(tempKey)) {
                 //tempKey已存在，统计次数加1
@@ -224,9 +236,10 @@ public class BlockSynchronizer implements Runnable {
 
         int config = availableNodes.size() * Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.CONSISTENCY_NODE_PERCENT)) / 100;
         if (count >= config) {
-            nodeList = nodeMap.get(key);
-            params.setNetLatestHash(nodeList.get(0).getHash());
-            params.setNetLatestHeight(nodeList.get(0).getHeight());
+            nodeQueue.addAll(nodeMap.get(key));
+            Node node = nodeQueue.peek();
+            params.setNetLatestHash(node.getHash());
+            params.setNetLatestHeight(node.getHeight());
         }
         return params;
     }

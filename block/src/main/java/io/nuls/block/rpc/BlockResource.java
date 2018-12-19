@@ -25,11 +25,13 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -103,7 +105,7 @@ public class BlockResource extends BaseCmd {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Long height = Long.parseLong(map.get("height").toString());
-            BlockHeader blockHeader = service.getBlockHeader(chainId, height);
+            BlockHeaderPo blockHeader = service.getBlockHeader(chainId, height);
             return success(HexUtil.byteToHex(blockHeader.serialize()));
         } catch (IOException e) {
             Log.error(e);
@@ -191,6 +193,7 @@ public class BlockResource extends BaseCmd {
             Block block = new Block();
             block.parse(new NulsByteBuffer((NulsDigestData.fromDigestHex(map.get("hash").toString()).getDigestBytes())));
             if (service.saveBlock(chainId, block) && service.broadcastBlock(chainId, block)) {
+                ServerRuntime.eventCount(BEST_BLOCK,  null);
                 return success();
             } else {
                 return failed(BlockErrorCode.PARAMETER_ERROR);

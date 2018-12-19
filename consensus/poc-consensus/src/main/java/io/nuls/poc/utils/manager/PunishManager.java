@@ -5,8 +5,6 @@ import io.nuls.base.data.*;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.consensus.Evidence;
-import io.nuls.poc.model.bo.consensus.PunishReasonEnum;
-import io.nuls.poc.model.bo.consensus.PunishType;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
@@ -16,12 +14,13 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.utils.compare.EvidenceComparator;
 import io.nuls.poc.utils.compare.PunishLogComparator;
+import io.nuls.poc.utils.enumeration.PunishReasonEnum;
+import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.util.*;
@@ -40,7 +39,7 @@ public class PunishManager {
     @Autowired
     private CoinDataManager coinDataManager;
     /**
-     * 加载所有的红牌信息和最近X轮换牌数据到缓存
+     * 加载所有的红牌信息和最近X黃牌数据到缓存
      * Load all red card information and latest X rotation card data to the cache
      *
      * @param chain 链信息/chain info
@@ -72,8 +71,8 @@ public class PunishManager {
     }
 
     /**
-     * 数据黄牌数据
-     * Data yellow card data
+     * 清理黄牌数据
+     * Clean up yellow card data
      *
      * @param chain 链信息/chain info
      * */
@@ -110,7 +109,7 @@ public class PunishManager {
             if (a.getDelHeight() > 0) {
                 continue;
             }
-            if (Arrays.equals(a.getPackingAddress(), firstHeader.getPackingAddress())) {
+            if (Arrays.equals(a.getPackingAddress(), firstHeader.getPackingAddress(chain.getConfig().getChainId()))) {
                 agent = a;
                 break;
             }
@@ -180,7 +179,7 @@ public class PunishManager {
             redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
             chain.getRedPunishTransactionList().add(redPunishTransaction);
         }catch (IOException e){
-            Log.error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
         }
     }
 
@@ -196,7 +195,7 @@ public class PunishManager {
      * */
     private boolean isRedPunish(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
         //验证出块地址PackingAddress，记录分叉的连续次数，如达到连续3轮则红牌惩罚
-        String packingAddress = AddressTool.getStringAddressByBytes(firstHeader.getPackingAddress());
+        String packingAddress = AddressTool.getStringAddressByBytes(firstHeader.getPackingAddress(chain.getConfig().getChainId()));
         BlockExtendsData extendsData = new BlockExtendsData(firstHeader.getExtend());
         long currentRoundIndex = extendsData.getRoundIndex();
         Map<String, List<Evidence>> currentChainEvidences = chain.getEvidenceMap();
@@ -279,7 +278,7 @@ public class PunishManager {
             }
             redPunishData.setEvidence(ByteUtils.concatenate(headers));
         }catch (IOException e){
-            Log.error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
         }
         try {
             redPunishData.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
@@ -298,7 +297,7 @@ public class PunishManager {
             */
             chain.getRedPunishTransactionList().add(redPunishTransaction);
         } catch (IOException e) {
-            Log.error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
         }
     }
 

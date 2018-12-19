@@ -28,12 +28,12 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeGroupManager;
-import io.nuls.tools.log.Log;
 
 import java.nio.ByteOrder;
 import java.util.List;
 
 import static io.nuls.network.constant.NetworkConstant.MAX_FRAME_LENGTH;
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * @desription:
@@ -43,7 +43,6 @@ import static io.nuls.network.constant.NetworkConstant.MAX_FRAME_LENGTH;
 public class NulsMessageDecoder extends ByteToMessageDecoder {
     ConnectionManager connectionManager = ConnectionManager.getInstance();
     private NulsLengthFieldBasedFrameDecoder newDecoder = new NulsLengthFieldBasedFrameDecoder(ByteOrder.LITTLE_ENDIAN, MAX_FRAME_LENGTH, 4, 4, 16, 0, true);
-
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {

@@ -30,7 +30,8 @@ import io.netty.handler.timeout.IdleStateEvent;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.model.Node;
-import io.nuls.tools.log.Log;
+import static io.nuls.network.utils.LoggerUtil.Log;
+
 
 /**
  *

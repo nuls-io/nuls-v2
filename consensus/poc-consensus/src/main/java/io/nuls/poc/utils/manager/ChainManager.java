@@ -16,6 +16,8 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
@@ -67,11 +69,18 @@ public class ChainManager {
             Chain chain = new Chain();
             int chainId = entry.getKey();
             chain.setConfig(entry.getValue());
+
+            /*
+            * 初始化链日志对象
+            * Initialization Chain Log Objects
+            * */
+            initLogger(chain);
+
             /*
             初始化链数据库表
             Initialize linked database tables
             */
-            initTable(chainId);
+            initTable(chain);
 
             /*
             加载链缓存数据
@@ -91,11 +100,19 @@ public class ChainManager {
 
     /**
      * 停止一条链
-     * Delete a chain
+     * stop a chain
      *
      * @param chainId 链ID/chain id
      * */
     public void stopChain(int chainId){
+
+    }
+
+    /**
+     * 删除一条链
+     * delete a chain
+     * */
+    public void deleteChain(int chainId){
 
     }
 
@@ -110,6 +127,7 @@ public class ChainManager {
             读取数据库链信息配置
             Read database chain information configuration
              */
+            configService.delete(1);
             Map<Integer, ConfigBean> configMap = configService.getList();
             /*
             如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
@@ -127,7 +145,7 @@ public class ChainManager {
             }
             return configMap;
         }catch(Exception e){
-            Log.error(e);
+            Log.error(e.getMessage());
             return null;
         }
     }
@@ -135,9 +153,11 @@ public class ChainManager {
     /**
      * 初始化链相关表
      * Initialization chain correlation table
-     * @param chainId  chain id
+     * @param chain   chain info
      * */
-    private void initTable(int chainId){
+    private void initTable(Chain chain){
+        NulsLogger logger = chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME);
+        int chainId = chain.getConfig().getChainId();
         try {
             /*
             创建共识节点表
@@ -158,11 +178,22 @@ public class ChainManager {
             RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH+chainId);
         }catch (Exception e){
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.info(e.getMessage());
+                logger.error(e.getMessage());
             }else{
-                Log.error(e);
+                logger.error(e.getMessage());
             }
         }
+    }
+
+    private void initLogger(Chain chain){
+        /*
+        * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
+        * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
+        * */
+        NulsLogger consensusLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.CONSENSUS_LOGGER_NAME);
+        NulsLogger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.BASIC_LOGGER_NAME);
+        chain.getLoggerMap().put(ConsensusConstant.CONSENSUS_LOGGER_NAME,consensusLogger);
+        chain.getLoggerMap().put(ConsensusConstant.BASIC_LOGGER_NAME,rpcLogger);
     }
 
     /**
@@ -180,20 +211,21 @@ public class ChainManager {
             int length = 1000;
             int roundIndex = 1;
             List<BlockHeader>blockHeaderList = new ArrayList<>();
-            Address packingAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
+            Address packingAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
             Address packingAddress1 = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
             for (int index = 0;index < length;index++) {
                 BlockHeader blockHeader = new BlockHeader();
-                blockHeader.setHeight(100);
+                blockHeader.setHeight(index+1);
                 blockHeader.setPreHash(NulsDigestData.calcDigestData("00000000000".getBytes()));
                 blockHeader.setTime(TimeService.currentTimeMillis());
                 blockHeader.setTxCount(1);
+                blockHeader.setHash(new NulsDigestData());
                 blockHeader.setMerkleHash(NulsDigestData.calcDigestData(new byte[20]));
 
                 // add a round data
                 BlockRoundData roundData = new BlockRoundData();
-                roundData.setConsensusMemberCount(2);
-                roundData.setPackingIndexOfRound(2);
+                roundData.setConsensusMemberCount(5);
+                roundData.setPackingIndexOfRound(5);
                 if((index+1)%10 == 0){
                     roundIndex++;
                     blockHeader.setPackingAddress(packingAddress1.getAddressBytes());
@@ -217,7 +249,7 @@ public class ChainManager {
             punishManager.loadPunishes(chain);
             roundManager.initRound(chain);
         }catch (Exception e){
-            Log.error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
         }
     }
 

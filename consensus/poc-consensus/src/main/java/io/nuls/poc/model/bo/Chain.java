@@ -3,12 +3,13 @@ package io.nuls.poc.model.bo;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.model.bo.config.ConfigBean;
-import io.nuls.poc.model.bo.consensus.ConsensusStatus;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
+import io.nuls.poc.utils.enumeration.ConsensusStatus;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -99,6 +100,8 @@ public class Chain {
      * */
     private List<BlockHeader> blockHeaderList;
 
+    private Map<String, NulsLogger> loggerMap;
+
     /**
      * 任务线程池
      * Schedule thread pool
@@ -115,6 +118,7 @@ public class Chain {
         this.evidenceMap = new HashMap<>();
         this.redPunishTransactionList = new ArrayList<>();
         this.roundList = new ArrayList<>();
+        this.loggerMap = new HashMap<>();
     }
 
     public ConfigBean getConfig() {
@@ -219,5 +223,13 @@ public class Chain {
 
     public void setScheduledThreadPoolExecutor(ScheduledThreadPoolExecutor scheduledThreadPoolExecutor) {
         this.scheduledThreadPoolExecutor = scheduledThreadPoolExecutor;
+    }
+
+    public Map<String, NulsLogger> getLoggerMap() {
+        return loggerMap;
+    }
+
+    public void setLoggerMap(Map<String, NulsLogger> loggerMap) {
+        this.loggerMap = loggerMap;
     }
 }

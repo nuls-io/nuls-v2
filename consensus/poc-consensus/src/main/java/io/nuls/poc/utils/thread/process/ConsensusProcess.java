@@ -8,22 +8,25 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.Chain;
-import io.nuls.poc.model.bo.consensus.ConsensusStatus;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
+import io.nuls.poc.utils.enumeration.ConsensusStatus;
+import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.RoundManager;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
 /**
  * 共识处理器
  * Consensus processor
@@ -34,6 +37,9 @@ import java.util.List;
 public class ConsensusProcess {
     private RoundManager roundManager = SpringLiteContext.getBean(RoundManager.class);
 
+    private ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
+
+    private NulsLogger consensusLogger;
 
     private boolean hasPacking;
 
@@ -43,9 +49,12 @@ public class ConsensusProcess {
             if (!canPackage) {
                 return;
             }
+            if(consensusLogger == null){
+                consensusLogger = chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME);
+            }
             doWork(chain);
         }catch (NulsException e){
-            Log.error(e.getMessage());
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
         }
     }
 
@@ -119,8 +128,8 @@ public class ConsensusProcess {
         if(!hasPacking && member.getPackStartTime() < TimeService.currentTimeMillis() && member.getPackEndTime() > TimeService.currentTimeMillis()){
             hasPacking = true;
             try {
-                if (Log.isDebugEnabled()) {
-                    Log.debug("当前网络时间： " + DateUtils.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
+                if (consensusLogger.getLogger().isDebugEnabled()) {
+                    consensusLogger.debug("当前网络时间： " + DateUtils.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
                             DateUtils.convertDate(new Date(member.getPackStartTime())) + " , 我的打包结束时间: " +
                             DateUtils.convertDate(new Date(member.getPackEndTime())) + " , 当前轮开始时间: " +
                             DateUtils.convertDate(new Date(round.getStartTime())) + " , 当前轮结束开始时间: " +
@@ -128,20 +137,20 @@ public class ConsensusProcess {
                 }
                 packing(chain, member, round);
             } catch (Exception e) {
-                Log.error(e);
+                consensusLogger.error(e.getMessage());
             }
             while (member.getPackEndTime() > TimeService.currentTimeMillis()) {
                 try {
                     Thread.sleep(500L);
                 } catch (InterruptedException e) {
-                    Log.error(e);
+                    consensusLogger.error(e.getMessage());
                 }
             }
             hasPacking = false;
         }
     }
 
-    private void packing(Chain chain,MeetingMember self, MeetingRound round) throws IOException, NulsException {
+    private void packing(Chain chain,MeetingMember self, MeetingRound round) throws IOException, NulsException{
         /*
         等待出块
         Wait for blocks
@@ -149,7 +158,7 @@ public class ConsensusProcess {
         waitReceiveNewestBlock(chain,self, round);
         long start = System.currentTimeMillis();
         Block block = doPacking(chain, self, round);
-        Log.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms");
+        consensusLogger.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms");
 
         /*
         * 打包完成之后，查看打包区块和主链最新区块是否连续，如果不连续表示打包过程中收到了上一个共识节点打包的区块，此时本地节点需要重新打包区块
@@ -161,13 +170,23 @@ public class ConsensusProcess {
         if(rePacking){
             start = System.currentTimeMillis();
             block=doPacking(chain, self, round);
-            Log.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms");
+            consensusLogger.info("doPacking use:" + (System.currentTimeMillis() - start) + "ms");
         }
         if (null == block) {
-            Log.error("make a null block");
+            consensusLogger.error("make a null block");
             return;
         }
-        //todo 打包成功后将区块传给区块管理模块广播
+        try {
+            Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
+            params.put("chainId",chain.getConfig().getChainId());
+            params.put("hash", HexUtil.encode(block.serialize()));
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr,"receivePackingBlock", params);
+            if(!cmdResp.isSuccess()){
+                consensusLogger.info("add block interface call failed!");
+            }
+        }catch (Exception e){
+            consensusLogger.error(e);
+        }
     }
 
     /**
@@ -195,7 +214,7 @@ public class ConsensusProcess {
                 }
             }
         } catch (InterruptedException e) {
-            Log.error(e);
+            consensusLogger.error(e.getMessage());
         }
         return !hasReceiveNewestBlock;
     }
@@ -215,7 +234,7 @@ public class ConsensusProcess {
         if(myIndex == 1){
             preRound = round.getPreRound();
             if(preRound == null){
-                Log.error("PreRound is null!");
+                consensusLogger.error("PreRound is null!");
                 return true;
             }
             preMember = preRound.getMember(preRound.getMemberCount());
@@ -233,7 +252,7 @@ public class ConsensusProcess {
         */
         BlockHeader bestBlockHeader = chain.getNewestHeader();
         BlockExtendsData blockRoundData = new BlockExtendsData(bestBlockHeader.getExtend());
-        byte[] bestPackingAddress = bestBlockHeader.getPackingAddress();
+        byte[] bestPackingAddress = bestBlockHeader.getPackingAddress(chain.getConfig().getChainId());
         long bestRoundIndex = blockRoundData.getRoundIndex();
         int bestPackingIndex = blockRoundData.getPackingIndexOfRound();
 
@@ -265,7 +284,7 @@ public class ConsensusProcess {
         str.append(" ,order:" + self.getPackingIndexOfRound());
         str.append(",packTime:" + new Date(self.getPackEndTime()));
         str.append("\n");
-        Log.debug("pack round:" + str);
+        consensusLogger.debug("pack round:" + str);
         //todo 从交易管理模块获取打包交易
         List<Transaction> packingTxList = new ArrayList<>();
 
@@ -276,8 +295,8 @@ public class ConsensusProcess {
         ConsensusManager consensusManager = SpringLiteContext.getBean(ConsensusManager.class);
         consensusManager.addConsensusTx(chain,bestBlock,packingTxList,self,round);
         bd.setTxList(packingTxList);
-        Block newBlock = consensusManager.createBlock(bd, self.getAgent().getPackingAddress());
-        Log.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
+        Block newBlock = consensusManager.createBlock(chain,bd, self.getAgent().getPackingAddress());
+        consensusLogger.info("make block height:" + newBlock.getHeader().getHeight() + ",txCount: " + newBlock.getTxs().size() + " , block size: " + newBlock.size() + " , time:" + DateUtils.convertDate(new Date(newBlock.getHeader().getTime())) + ",packEndTime:" +
                 DateUtils.convertDate(new Date(self.getPackEndTime())));
         return newBlock;
     }

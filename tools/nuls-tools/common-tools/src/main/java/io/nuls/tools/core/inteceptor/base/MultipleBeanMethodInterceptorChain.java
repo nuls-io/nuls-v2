@@ -108,7 +108,7 @@ public class MultipleBeanMethodInterceptorChain extends BeanMethodInterceptorCha
         try {
             result = execute(null, object, method, params);
         } catch (Exception e) {
-            Log.error(e);
+            Log.error(e.getMessage());
             throw e;
         } finally {
             index = -1;

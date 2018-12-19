@@ -52,8 +52,8 @@ public class ResponseAutoProcessor implements Runnable {
         while (true) {
             try {
                 /*
-                获取队列中的第一个对象，如果是空，舍弃
-                Get the first item of the queue, If it is an empty object, discard
+                获取队列中的第一个对象
+                Get the first item of the queue
                  */
                 Message message = ClientRuntime.firstMessageInResponseAutoQueue();
                 if (message == null) {
@@ -77,7 +77,7 @@ public class ResponseAutoProcessor implements Runnable {
 
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
-                Log.error(e);
+                Log.error(e.getMessage());
             }
         }
     }

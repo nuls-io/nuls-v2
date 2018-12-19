@@ -23,15 +23,49 @@ package io.nuls.block.model;
 import io.nuls.base.data.NulsDigestData;
 import lombok.Data;
 
+import java.util.Comparator;
+
 /**
  * 节点
+ *
  * @author captain
- * @date 18-11-30 下午2:48
  * @version 1.0
+ * @date 18-11-30 下午2:48
  */
 @Data
 public class Node {
+
+    /**
+     * 节点比较器，默认按信用值排序
+     */
+    public static final Comparator COMPARATOR = Comparator.comparingInt(Node::getCredit).reversed();
+
+    /**
+     * ip+port
+     */
     private String id;
+    /**
+     * 最新区块高度
+     */
     private long height;
+    /**
+     * 最新区块hash
+     */
     private NulsDigestData hash;
+    /**
+     * 下载信用值
+     */
+    private int credit = 100;
+
+    /**
+     * 调整信用值
+     */
+    public void adjustCredit(boolean success){
+        if (success) {
+            credit = Math.min(200, credit + 20);
+        } else {
+            credit = Math.max(20, credit - 20);
+        }
+
+    }
 }

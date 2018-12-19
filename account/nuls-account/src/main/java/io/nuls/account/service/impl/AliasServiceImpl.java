@@ -36,11 +36,13 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.storage.AliasStorageService;
+import io.nuls.account.util.log.LogUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.constant.BaseConstant;
-import io.nuls.base.data.*;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -48,12 +50,17 @@ import io.nuls.tools.data.FormatValidUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -109,7 +116,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             //todo sign the transaction
             //todo send the transaction to transaction manage module
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION,e);
         }
         return tx;
@@ -125,7 +132,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
             //todo whether need to other operation if the fee is too big
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION,e);
         }
         return fee;
@@ -135,7 +142,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     public String getAliasByAddress(int chainId, String address) {
         //check if the account is legal
         if (!AddressTool.validAddress(chainId, address)) {
-            Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
+            LogUtil.debug("the address is illegal,chainId:{},address:{}", chainId, address);
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         //get aliasPO
@@ -191,7 +198,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 }
             }
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION,e);
         }
         return new ArrayList<>(result);
@@ -241,7 +248,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
 //        try {
 //            sig.parse(transaction.getTransactionSignature(), 0);
 //        } catch (NulsException e) {
-//            Log.error("", e);
+//            LogUtilUtil.error("", e);
 //            throw new NulsRuntimeException(e.getErrorCode());
 //        }
 //        boolean sign;
@@ -275,7 +282,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
             }
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             this.rollbackAlias(chainId, alias);
             return false;
         }
@@ -301,7 +308,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 }
             }
         } catch (Exception e) {
-            Log.error("",e);
+            LogUtil.error("",e);
             throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR,e);
         }
         return result;

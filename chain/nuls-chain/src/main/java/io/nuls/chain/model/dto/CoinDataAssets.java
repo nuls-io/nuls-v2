@@ -24,32 +24,19 @@
  */
 package io.nuls.chain.model.dto;
 
-import java.util.HashMap;
+import lombok.Data;
+import lombok.ToString;
+
+import java.math.BigInteger;
 import java.util.Map;
 
 /**
- * @program: nuls2.0
- * @description:
- * @author: lan
- * @create: 2018/11/29
- **/
+ * @author lan
+ * @date 2018/11/29
+ */
+@Data
+@ToString
 public class CoinDataAssets {
     private int chainId;
-    Map<String,String> assetsMap= new HashMap<>() ;
-
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
-
-    public Map<String, String> getAssetsMap() {
-        return assetsMap;
-    }
-
-    public void setAssetsMap(Map<String, String> assetsMap) {
-        this.assetsMap = assetsMap;
-    }
+    private Map<String, BigInteger> assetsMap;
 }

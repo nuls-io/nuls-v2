@@ -25,13 +25,22 @@
 package io.nuls.transaction.utils;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Coin;
-import io.nuls.base.data.MultiSigAccount;
-import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.*;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.model.bo.CrossTxData;
+import io.nuls.transaction.model.po.TransactionPO;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -40,25 +49,74 @@ import java.math.BigInteger;
 public class TxUtil {
 
 
-    public static boolean isCurrentChainMainAsset(Coin coin){
+    public static CrossTxData getCrossTxData(Transaction tx) throws NulsException{
+        if(null == tx){
+            throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+        }
+        CrossTxData crossTxData = new CrossTxData();
+        try {
+            crossTxData.parse(new NulsByteBuffer(tx.getTxData()));
+            return crossTxData;
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
+        }
+    }
+
+    public static CoinData getCoinData(Transaction tx) throws NulsException {
+        if(null == tx){
+            throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+        }
+        try {
+            return tx.getCoinDataInstance();
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.DESERIALIZE_COINDATA_ERROR);
+        }
+    }
+
+    public static Transaction getTransaction(byte[] txBytes) throws NulsException {
+        if(null == txBytes || txBytes.length == 0){
+            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
+        }
+        try {
+            return Transaction.getInstance(txBytes);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.DESERIALIZE_TX_ERROR);
+        }
+    }
+
+    public static Transaction getTransaction(String hex) throws NulsException {
+        if(StringUtils.isBlank(hex)){
+            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
+        }
+       return getTransaction(HexUtil.decode(hex));
+    }
+/*    public static boolean isNulsMainnet() {
+        return TxConfig.CURRENT_CHAINID == TxConstant.NULS_CHAINID;
+    }*/
+
+
+/*    public static boolean isCurrentChainMainAsset(Coin coin) {
         return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
     }
 
-    public static boolean isCurrentChainMainAsset(int chainId, int assetId){
-        if(chainId == TxConstant.CURRENT_CHAINID
-                && assetId ==TxConstant.CURRENT_CHAIN_ASSETID) {
+    public static boolean isCurrentChainMainAsset(int chainId, int assetId) {
+        if (chainId == TxConfig.CURRENT_CHAINID
+                && assetId == TxConfig.CURRENT_CHAIN_ASSETID) {
             return true;
         }
         return false;
-    }
+    }*/
 
-    public static boolean isNulsAsset(Coin coin){
+    public static boolean isNulsAsset(Coin coin) {
         return isNulsAsset(coin.getAssetsChainId(), coin.getAssetsId());
     }
 
-    public static boolean isNulsAsset(int chainId, int assetId){
-        if(chainId == TxConstant.NULS_CHAINID
-                && assetId ==TxConstant.NULS_CHAIN_ASSETID) {
+    public static boolean isNulsAsset(int chainId, int assetId) {
+        if (chainId == TxConstant.NULS_CHAINID
+                && assetId == TxConstant.NULS_CHAIN_ASSETID) {
             return true;
         }
         return false;
@@ -68,19 +126,19 @@ public class TxUtil {
         return isTheChainMainAsset(chainId, coin.getAssetsChainId(), coin.getAssetsId());
     }
 
-    public static boolean isTheChainMainAsset(int chainId, int assetChainId, int assetId){
+    public static boolean isTheChainMainAsset(int chainId, int assetChainId, int assetId) {
         //todo 查资产与链的关系是否存在
         return true;
     }
 
-    public static boolean assetExist(int chainId, int assetId){
+    public static boolean assetExist(int chainId, int assetId) {
         //todo 查资产是否存在
         return true;
     }
 
     public static byte[] getNonce(byte[] address, int chainId, int assetId) throws NulsException {
         //todo 查nonce
-        byte[] nonce = new byte[]{'a','b','c','d','e','f','g','h'};
+        byte[] nonce = new byte[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
         return nonce;
     }
 
@@ -94,13 +152,93 @@ public class TxUtil {
         return "";
     }
 
-  /*  public static int getMofMultiSignAddress(byte[] multiSignAddress) throws NulsException {
-        //查多签地址的m
-        return 3;
-    }*/
-
     public static MultiSigAccount getMultiSigAccount(byte[] multiSignAddress) throws NulsException {
         String address = AddressTool.getStringAddressByBytes(multiSignAddress);
+        //todo 获取多签账户
         return new MultiSigAccount();
     }
+
+    public static boolean verifyCoinData(List<String> txHexList) throws NulsException {
+        //todo 批量验证CoinData 不确定是否需要
+        return true;
+    }
+
+    public static boolean verifyCoinData(String txHex) throws NulsException {
+        //todo 验证CoinData
+        return true;
+    }
+
+    public static boolean txValidator(String txHex) throws NulsException {
+        //todo 调用交易验证器
+        return true;
+    }
+
+    public static boolean txsModuleValidators(Map<String, List<String>> map) throws NulsException {
+        //todo 调用交易模块统一验证器 批量
+        boolean rs = true;
+        for(Map.Entry<String, List<String>> entry : map.entrySet()){
+            rs = txModuleValidator(entry.getKey(), entry.getValue());
+            if(!rs){
+                break;
+            }
+        }
+        return rs;
+    }
+
+    public static boolean txModuleValidator(String moduleValidator, List<String> txHexList) throws NulsException {
+        //todo 调用交易模块统一验证器
+        return true;
+    }
+
+
+    public static List<TransactionPO> tx2PO(Transaction tx) throws NulsException{
+        List<TransactionPO> list = new ArrayList<>();
+        if(null == tx.getCoinData()){
+            return list;
+        }
+        CoinData coinData = tx.getCoinDataInstance();
+        if(coinData.getFrom() != null){
+            TransactionPO transactionPO = null;
+            for(CoinFrom coinFrom : coinData.getFrom()){
+                transactionPO = new TransactionPO();
+                transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                transactionPO.setHash(tx.getHash().getDigestHex());
+                transactionPO.setType(tx.getType());
+                transactionPO.setAssetChainId(coinFrom.getAssetsChainId());
+                transactionPO.setAssetId(coinFrom.getAssetsId());
+                transactionPO.setAmount(coinFrom.getAmount());
+                // 0普通交易，-1解锁金额交易（退出共识，退出委托）
+                byte locked = coinFrom.getLocked();
+                int state = 0;
+                if(locked == -1){
+                    state = 3;
+                }
+                transactionPO.setState(state);
+                list.add(transactionPO);
+            }
+        }
+        if(coinData.getTo() != null){
+            TransactionPO transactionPO = null;
+            for(CoinTo coinTo : coinData.getTo()){
+                transactionPO = new TransactionPO();
+                transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinTo.getAddress()));
+                transactionPO.setAssetChainId(coinTo.getAssetsChainId());
+                transactionPO.setAssetId(coinTo.getAssetsId());
+                transactionPO.setAmount(coinTo.getAmount());
+                transactionPO.setHash(tx.getHash().getDigestHex());
+                transactionPO.setType(tx.getType());
+                // 解锁高度或解锁时间，-1为永久锁定
+                Long lockTime = coinTo.getLockTime();
+                int state = 1;
+                if(lockTime != 0){
+                    state = 2;
+                }
+                transactionPO.setState(state);
+                list.add(transactionPO);
+            }
+        }
+        return list;
+    }
+
+
 }

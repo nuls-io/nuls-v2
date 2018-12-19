@@ -22,16 +22,18 @@ package io.nuls.block.cache;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
-import io.nuls.tools.parse.SerializeUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 /**
- * 异步请求响应结果缓存类
+ * 主要缓存区块同步过程中收到的区块，还有孤儿链维护线程请求的单个区块
  *
  * @author captain
  * @version 1.0
@@ -39,54 +41,70 @@ import java.util.concurrent.Future;
  */
 public class CacheHandler {
 
-    private static Map<Integer, DataCacher<Block>> blockByHashCacher = new ConcurrentHashMap<>();
-    private static Map<Integer, DataCacher<Block>> blockByHeightCacher = new ConcurrentHashMap<>();
-    private static Map<Integer, DataCacher<CompleteMessage>> synTaskCacher = new ConcurrentHashMap<>();
+    /**
+     * 批量下载区块请求-hash缓存
+     */
+    private static Map<Integer, DataCacher<CompleteMessage>> batchBlockHashCacher = new ConcurrentHashMap<>();
+    /**
+     * 批量下载区块请求-排序前的区块缓存队列，由BlockDownloader放入队列，供BlockCollector使用
+     */
+    private static Map<Integer, Map<NulsDigestData, List<Block>>> workerBlockCacher = new ConcurrentHashMap<>();
 
-    public static CompletableFuture<Block> addGetBlockByHeightRequest(int chainId, NulsDigestData requestHash) {
-        return blockByHeightCacher.get(chainId).addFuture(requestHash);
+    /**
+     * 单个下载区块请求-区块缓存
+     */
+    private static Map<Integer, DataCacher<Block>> singleBlockCacher = new ConcurrentHashMap<>();
+
+    /**
+     * 初始化
+     *
+     * @param chainId
+     */
+    public static void init(int chainId){
+        workerBlockCacher.put(chainId, new ConcurrentHashMap<>());
+        singleBlockCacher.put(chainId, new DataCacher<>());
+        batchBlockHashCacher.put(chainId, new DataCacher<>());
     }
 
-    public static CompletableFuture<Block> addGetBlockByHashRequest(int chainId, NulsDigestData requestHash) {
-        return blockByHashCacher.get(chainId).addFuture(requestHash);
+    public static CompletableFuture<Block> addSingleBlockRequest(int chainId, NulsDigestData requestHash) {
+        return singleBlockCacher.get(chainId).addFuture(requestHash);
     }
 
-    public static void receiveBlock(int chainId, Block block) {
-        NulsDigestData hash = NulsDigestData.calcDigestData(SerializeUtils.uint64ToByteArray(block.getHeader().getHeight()));
-        boolean result = blockByHeightCacher.get(chainId).success(hash, block);
-        if (!result) {
-            blockByHashCacher.get(chainId).success(block.getHeader().getHash(), block);
+    public static Future<CompleteMessage> addBatchBlockRequest(int chainId, NulsDigestData hash) {
+        workerBlockCacher.get(chainId).put(hash, new ArrayList<>());
+        return batchBlockHashCacher.get(chainId).addFuture(hash);
+    }
+
+    /**
+     * 根据requestHash判断该区块是同步区块过程中收到的区块，还是孤儿链维护过程收到的区块，还是恶意区块
+     *
+     * @param chainId
+     * @param message
+     */
+    public static void receiveBlock(int chainId, BlockMessage message) {
+        NulsDigestData requestHash = message.getRequestHash();
+        List<Block> blockList = workerBlockCacher.get(chainId).get(requestHash);
+        Block block = message.getBlock();
+        if (blockList != null) {
+            blockList.add(block);
+            return;
         }
+        singleBlockCacher.get(chainId).complete(block.getHeader().getHash(), block);
     }
 
-    public static Future<CompleteMessage> newRequest(int chainId, NulsDigestData hash) {
-        return synTaskCacher.get(chainId).addFuture(hash);
+    public static List<Block> getBlockList(int chainId, NulsDigestData requestHash) {
+        return workerBlockCacher.get(chainId).get(requestHash);
     }
 
-    public static void requestComplete(int chainId, CompleteMessage message) {
-        if (message.isSuccess()) {
-            synTaskCacher.get(chainId).success(message.getRequestHash(), message);
-        } else {
-            synTaskCacher.get(chainId).fail(message.getRequestHash());
-        }
-    }
-
-    public static void removeBlockByHeightFuture(int chainId, NulsDigestData hash) {
-        blockByHeightCacher.get(chainId).removeFuture(hash);
+    public static void batchComplete(int chainId, CompleteMessage message) {
+        batchBlockHashCacher.get(chainId).complete(message.getRequestHash(), message);
     }
 
     public static void removeBlockByHashFuture(int chainId, NulsDigestData hash) {
-        blockByHashCacher.get(chainId).removeFuture(hash);
+        singleBlockCacher.get(chainId).removeFuture(hash);
     }
 
     public static void removeRequest(int chainId, NulsDigestData hash) {
-        synTaskCacher.get(chainId).removeFuture(hash);
+        batchBlockHashCacher.get(chainId).removeFuture(hash);
     }
-
-    public static void init(int chainId){
-        blockByHeightCacher.put(chainId, new DataCacher<>());
-        blockByHashCacher.put(chainId, new DataCacher<>());
-        synTaskCacher.put(chainId, new DataCacher<>());
-    }
-
 }

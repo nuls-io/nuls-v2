@@ -34,12 +34,17 @@ import lombok.*;
  * @date 2018/11/15
  */
 @ToString
-@NoArgsConstructor
 public class Unsubscribe {
     /**
      * An array that holds all methods that the caller wants to unsubscribe
      */
-    @Getter
-    @Setter
     private String[] unsubscribeMethods;
+
+    public String[] getUnsubscribeMethods() {
+        return unsubscribeMethods.clone();
+    }
+
+    public void setUnsubscribeMethods(String[] unsubscribeMethods) {
+        this.unsubscribeMethods = unsubscribeMethods.clone();
+    }
 }

@@ -18,6 +18,14 @@ import java.math.BigInteger;
 public class AssetCmdTest {
 
     @Test
+    public void a() throws Exception{
+        BigInteger a=new BigInteger("1000");
+        BigInteger b=new BigInteger("4");
+        BigInteger c=new BigInteger("10");
+        System.out.println(a.multiply(b).divide(c));
+    }
+
+    @Test
     public void mapSpeed() throws Exception {
 
         BlockChainTxType.valueOf(1);

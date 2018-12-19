@@ -106,7 +106,7 @@ public class SpringLiteContext {
                         try {
                             ((InitializingBean) bean).afterPropertiesSet();
                         } catch (Exception e) {
-                            Log.error(e);
+                            Log.error(e.getMessage());
                         }
                     }
                 }
@@ -259,7 +259,7 @@ public class SpringLiteContext {
             try {
                 loadBean(beanName, clazz, aopProxy);
             } catch (NulsException e) {
-                Log.error(e);
+                Log.error(e.getMessage());
                 return;
             }
         }
@@ -270,7 +270,7 @@ public class SpringLiteContext {
                 Constructor constructor = clazz.getDeclaredConstructor();
                 interceptor = (BeanMethodInterceptor) constructor.newInstance();
             } catch (Exception e) {
-                Log.error(e);
+                Log.error(e.getMessage());
                 return;
             }
             BeanMethodInterceptorManager.addBeanMethodInterceptor(((Interceptor) interceptorAnn).value(), interceptor);
@@ -333,10 +333,10 @@ public class SpringLiteContext {
             try {
                 bean = clazz.newInstance();
             } catch (InstantiationException e) {
-                Log.error(e);
+                Log.error(e.getMessage());
                 throw new NulsException(e);
             } catch (IllegalAccessException e) {
-                Log.error(e);
+                Log.error(e.getMessage());
                 throw new NulsException(e);
             }
         }

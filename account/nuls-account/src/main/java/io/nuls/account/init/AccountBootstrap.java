@@ -4,15 +4,14 @@ import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountParam;
 import io.nuls.account.rpc.call.TransactionCmdCall;
+import io.nuls.account.util.log.LogUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
-import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.TimeService;
@@ -25,7 +24,7 @@ import java.io.IOException;
  */
 public class AccountBootstrap {
     public static void main(String[] args) {
-        Log.info("Account Bootstrap start...");
+        LogUtil.info("Account Bootstrap start...");
 
         try {
             //初始化配置
@@ -43,7 +42,7 @@ public class AccountBootstrap {
             //注册账户相关交易
             TransactionCmdCall.registerTx();
         } catch (Exception e) {
-            Log.error("Account Bootstrap failed", e);
+            LogUtil.error("Account Bootstrap failed", e);
             System.exit(-1);
         }
     }
@@ -70,15 +69,11 @@ public class AccountBootstrap {
                     NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = keystoreFolder;
                 }
                 NulsConfig.KERNEL_MODULE_URL = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.KERNEL_MODULE_URL);
-
-                //主链ID、主链资产ID
-                NulsConfig.MAIN_CHAIN_ID = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_CHAIN_SECTION, AccountConstant.MAIN_CHAIN_ID, 0);
-                NulsConfig.MAIN_ASSETS_ID = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_CHAIN_SECTION, AccountConstant.MAIN_ASSETS_ID, 0);
             } catch (Exception e) {
-                Log.error(e);
+                LogUtil.error(e);
             }
         } catch (IOException e) {
-            Log.error("Account Bootstrap initCfg failed", e);
+            LogUtil.error("Account Bootstrap initCfg failed", e);
             throw new RuntimeException("Account Bootstrap initCfg failed");
         }
     }
@@ -104,7 +99,7 @@ public class AccountBootstrap {
             CmdDispatcher.syncKernel();
 
         } catch (Exception e) {
-            Log.error("Account initServer failed", e);
+            LogUtil.error("Account initServer failed", e);
         }
     }
 }

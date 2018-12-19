@@ -22,6 +22,7 @@ package io.nuls.block.service;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
@@ -47,7 +48,7 @@ public interface ChainStorageService {
      * @return
      * @throws Exception
      */
-    boolean save(int chainId, List<Block> blocks) throws Exception;
+    boolean save(int chainId, List<Block> blocks);
 
     /**
      * 存储一个区块
@@ -65,7 +66,7 @@ public interface ChainStorageService {
      * @return
      * @throws NulsException
      */
-    Block query(int chainId, NulsDigestData hash) throws NulsException;
+    Block query(int chainId, NulsDigestData hash);
 
     /**
      * 查询一条链
@@ -74,7 +75,7 @@ public interface ChainStorageService {
      * @return
      * @throws NulsException
      */
-    List<Block> query(int chainId, List<NulsDigestData> hashList) throws NulsException;
+    List<Block> query(int chainId, List<NulsDigestData> hashList);
 
     /**
      * 移除一条链
@@ -83,7 +84,7 @@ public interface ChainStorageService {
      * @return
      * @throws Exception
      */
-    boolean remove(int chainId, List<NulsDigestData> hashList) throws Exception;
+    boolean remove(int chainId, List<NulsDigestData> hashList);
 
     /**
      * 移除一个区块
@@ -92,7 +93,7 @@ public interface ChainStorageService {
      * @return
      * @throws Exception
      */
-    boolean remove(int chainId, NulsDigestData hash) throws Exception;
+    boolean remove(int chainId, NulsDigestData hash);
 
     /**
      * 销毁链存储
@@ -100,6 +101,6 @@ public interface ChainStorageService {
      * @return
      * @throws Exception
      */
-    boolean destroy(int chainId) throws Exception;
+    boolean destroy(int chainId);
 
 }

@@ -12,7 +12,6 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -215,7 +214,7 @@ public class CoinDataManager {
             }
             return coinData;
         } catch (NulsException e) {
-            Log.error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
             throw e;
         }
     }

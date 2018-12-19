@@ -1,7 +1,7 @@
 package io.nuls.poc.model.dto.output;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.poc.model.bo.consensus.PunishReasonEnum;
+import io.nuls.poc.utils.enumeration.PunishReasonEnum;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.tools.data.DateUtils;
 

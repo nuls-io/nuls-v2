@@ -40,7 +40,7 @@ public class NulsConfig {
      * 模块配置文件名称
      * Module configuration file name.
      */
-    public static  String MODULES_CONFIG_FILE = "modules.ini";
+    public static  String MODULES_CONFIG_FILE = "modules.json";
 
     /**
      * 模块配置文件中加载的所有配置项

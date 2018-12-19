@@ -28,7 +28,6 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.transaction.model.bo.TxWrapper;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -37,7 +36,7 @@ import java.util.Comparator;
  * @author: Charlie
  * @date: 2018-12-11
  */
-public class TransactionTimeComparator implements Comparator<TxWrapper> {
+public class TransactionTimeComparator implements Comparator<Transaction> {
 
     private static TransactionTimeComparator instance = new TransactionTimeComparator();
 
@@ -49,9 +48,7 @@ public class TransactionTimeComparator implements Comparator<TxWrapper> {
     }
 
     @Override
-    public int compare(TxWrapper t1, TxWrapper t2) {
-        Transaction o1 = t1.getTx();
-        Transaction o2 = t2.getTx();
+    public int compare(Transaction o1, Transaction o2) {
         if(o1.getHash().equals(o2.getHash())){
             return 0;
         }

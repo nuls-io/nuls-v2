@@ -43,15 +43,17 @@ import io.nuls.network.model.message.*;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 消息管理器，用于收发消息
@@ -84,7 +86,8 @@ public class MessageManager extends BaseManager{
         try {
             return msgClass.getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            Log.error(e);
+            e.printStackTrace();
+            Log.error(e.getMessage());
         } catch (NoSuchMethodException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
@@ -140,13 +143,14 @@ public class MessageManager extends BaseManager{
                     }
                 }else{
                     //外部消息，转外部接口
+                    CmdDispatcher.syncKernel();
                     long magicNum=header.getMagicNumber();
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
                     Map<String,Object> paramMap = new HashMap<>();
                     paramMap.put("chainId",chainId);
                     paramMap.put("nodeId",nodeKey);
                     paramMap.put("messageBody",HexUtil.byteToHex(payLoadBody));
-                    Response response = CmdDispatcher.requestAndResponse(null,header.getCommandStr(),paramMap);
+                    Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr,header.getCommandStr(),paramMap);
                     Log.info("response："+response);
                     byteBuffer.setCursor(payLoad.length);
                 }
@@ -264,7 +268,8 @@ public class MessageManager extends BaseManager{
                 }
             }
         } catch (Exception e) {
-            Log.error(e);
+            e.printStackTrace();
+            Log.error(e.getMessage());
             return new NetworkEventResult(false, NetworkErrorCode.NET_MESSAGE_ERROR);
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
@@ -284,7 +289,8 @@ public class MessageManager extends BaseManager{
                     }
                 }
             } catch (Exception e) {
-                Log.error(e);
+                e.printStackTrace();
+                Log.error(e.getMessage());
             }
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);

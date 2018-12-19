@@ -29,7 +29,6 @@ import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.message.HashListMessage;
-import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.service.BlockService;
@@ -68,13 +67,12 @@ public class SmallBlockHandler extends BaseCmd {
     private BlockService blockService;
 
     @CmdAnnotation(cmd = SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Response process(List<Object> params) {
-
-        Integer chainId = Integer.parseInt(params.get(0).toString());
-        String nodeId = params.get(1).toString();
+    public Object process(Map map) {
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        String nodeId = map.get("nodeId").toString();
         SmallBlockMessage message = new SmallBlockMessage();
 
-        byte[] decode = HexUtil.decode(params.get(2).toString());
+        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
@@ -96,7 +94,7 @@ public class SmallBlockHandler extends BaseCmd {
         NulsDigestData blockHash = header.getHash();
         //阻止恶意节点提前出块，拒绝接收未来一定时间外的区块
         int validBlockInterval = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.VALID_BLOCK_INTERVAL));
-        if (header.getTime() > (TimeService.currentTimeMillis() + validBlockInterval)) {
+        if (header.getTime() > (NetworkUtil.currentTime() + validBlockInterval)) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
@@ -114,6 +112,7 @@ public class SmallBlockHandler extends BaseCmd {
             request.setTxHashList(block.getMissingTransactions());
             request.setCommand(CommandConstant.GET_TXGROUP_MESSAGE);
             NetworkUtil.sendToNode(chainId, request, nodeId);
+            NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
             return success();
         }
 
@@ -124,7 +123,7 @@ public class SmallBlockHandler extends BaseCmd {
                 return success();
             }
             Log.debug("recieve SmallBlockMessage from(" + nodeId + "), tx count : " + header.getTxCount() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + blockHash);
-
+            NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
             //共识节点打包的交易包括两种交易，一种是在网络上已经广播的普通交易，一种是共识节点生成的特殊交易(如共识奖励、红黄牌)，后面一种交易其他节点的未确认交易池中不可能有，所以都放在SubTxList中
             //还有一种场景时收到smallBlock时，有一些普通交易还没有缓存在未确认交易池中，此时要再从源节点请求
             Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());

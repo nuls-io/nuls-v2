@@ -77,19 +77,19 @@ public class TransactionServiceImpl implements TransactionService {
     private ChainManager chainManager;
 
     @Override
-    public String multipleAddressTransfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
-        Transaction tx = this.assemblyTransaction(currentChainId, fromList, toList, remark);
+    public String multipleAddressTransfer(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
+        Transaction tx = this.assemblyTransaction(chainId, fromList, toList, remark);
         return tx.getHash().getDigestHex();
     }
 
 
-    private Transaction assemblyTransaction(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
+    private Transaction assemblyTransaction(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
         Transaction tx = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
         tx.setRemark(StringUtils.bytes(remark));
         try {
             //组装coinFrom、coinTo数据
-            List<CoinFrom> coinFromList = assemblyCoinFrom(currentChainId, fromList);
-            List<CoinTo> coinToList = assemblyCoinTo(currentChainId, toList);
+            List<CoinFrom> coinFromList = assemblyCoinFrom(chainId, fromList);
+            List<CoinTo> coinToList = assemblyCoinTo(chainId, toList);
             //来源地址或转出地址为空
             if (coinFromList.size() == 0 || coinToList.size() == 0) {
                 throw new NulsRuntimeException(AccountErrorCode.COINDATA_IS_INCOMPLETE);
@@ -97,7 +97,7 @@ public class TransactionServiceImpl implements TransactionService {
             //交易总大小=交易数据大小+签名数据大小
             int txSize = tx.size() + getSignatureSize(coinFromList);
             //组装coinData数据
-            CoinData coinData = getCoinData(coinFromList, coinToList, txSize);
+            CoinData coinData = getCoinData(chainId, coinFromList, coinToList, txSize);
             tx.setCoinData(coinData.serialize());
             //计算交易数据摘要哈希
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
@@ -115,7 +115,7 @@ public class TransactionServiceImpl implements TransactionService {
             //交易签名
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
             //发起新交易
-            TransactionCmdCall.newTx(currentChainId, tx.getHash().getDigestHex());
+            TransactionCmdCall.newTx(chainId, tx.getHash().getDigestHex());
         } catch (NulsException e) {
             throw new NulsRuntimeException(e.getErrorCode());
         } catch (IOException e) {
@@ -133,7 +133,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return List<CoinFrom>
      * @throws NulsException
      */
-    private List<CoinFrom> assemblyCoinFrom(int currentChainId, List<CoinDto> listFrom) throws NulsException {
+    private List<CoinFrom> assemblyCoinFrom(int chainId, List<CoinDto> listFrom) throws NulsException {
         List<CoinFrom> coinFroms = new ArrayList<>();
         for (CoinDto coinDto : listFrom) {
             String address = coinDto.getAddress();
@@ -143,7 +143,7 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new NulsException(AccountErrorCode.IS_MULTI_SIGNATURE_ADDRESS);
             }
             //转账交易转出地址必须是本链地址
-            if (!AddressTool.validAddress(currentChainId, address)) {
+            if (!AddressTool.validAddress(chainId, address)) {
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
             //检查该链是否有该资产
@@ -175,24 +175,24 @@ public class TransactionServiceImpl implements TransactionService {
      * @return List<CoinTo>
      * @throws NulsException
      */
-    private List<CoinTo> assemblyCoinTo(int currentChainId, List<CoinDto> listTo) throws NulsException {
+    private List<CoinTo> assemblyCoinTo(int chainId, List<CoinDto> listTo) throws NulsException {
         List<CoinTo> coinTos = new ArrayList<>();
         for (CoinDto coinDto : listTo) {
             String address = coinDto.getAddress();
             byte[] addressByte = AddressTool.getAddress(address);
             //转账交易转出地址必须是本链地址
-            if (!AddressTool.validAddress(currentChainId, address)) {
+            if (!AddressTool.validAddress(chainId, address)) {
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
             }
             //检查该链是否有该资产
-            int chainId = coinDto.getAssetsChainId();
+            int assetsChainId = coinDto.getAssetsChainId();
             int assetId = coinDto.getAssetsId();
-            if (!TxUtil.assetExist(chainId, assetId)) {
+            if (!this.assetExist(assetsChainId, assetId)) {
                 throw new NulsException(AccountErrorCode.ASSET_NOT_EXIST);
             }
             CoinTo coinTo = new CoinTo();
             coinTo.setAddress(addressByte);
-            coinTo.setAssetsChainId(chainId);
+            coinTo.setAssetsChainId(assetsChainId);
             coinTo.setAssetsId(assetId);
             coinTo.setAmount(coinDto.getAmount());
             coinTos.add(coinTo);
@@ -211,12 +211,12 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      * @throws NulsException
      */
-    private CoinData getCoinData(List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException {
+    private CoinData getCoinData(int chainId, List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException {
         //总来源费用
         BigInteger feeTotalFrom = BigInteger.ZERO;
         for (CoinFrom coinFrom : listFrom) {
             txSize += coinFrom.size();
-            if (TxUtil.isCurrentChainMainAsset(coinFrom)) {
+            if (this.assetExist(chainId, coinFrom.getAssetsId())) {
                 feeTotalFrom = feeTotalFrom.add(coinFrom.getAmount());
             }
         }
@@ -224,7 +224,7 @@ public class TransactionServiceImpl implements TransactionService {
         BigInteger feeTotalTo = BigInteger.ZERO;
         for (CoinTo coinTo : listTo) {
             txSize += coinTo.size();
-            if (TxUtil.isCurrentChainMainAsset(coinTo)) {
+            if (this.assetExist(chainId, coinTo.getAssetsId())) {
                 feeTotalTo = feeTotalTo.add(coinTo.getAmount());
             }
         }
@@ -237,10 +237,10 @@ public class TransactionServiceImpl implements TransactionService {
             throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
         } else if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
             //只从资产为当前链主资产的coinfrom中收取手续费
-            actualFee = getFeeDirect(listFrom, targetFee, actualFee);
+            actualFee = getFeeDirect(chainId, listFrom, targetFee, actualFee);
             if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
                 //如果没收到足够的手续费，则从CoinFrom中资产不是当前链主资产的coin账户中查找当前链主资产余额，并组装新的coinfrom来收取手续费
-                if (!getFeeIndirect(listFrom, txSize, targetFee, actualFee)) {
+                if (!getFeeIndirect(chainId, listFrom, txSize, targetFee, actualFee)) {
                     //所有from中账户的当前链主资产余额总和都不够支付手续费
                     throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
                 }
@@ -281,11 +281,13 @@ public class TransactionServiceImpl implements TransactionService {
      * @return BigInteger The amount of the fee actually charged 实际收取的手续费数额
      * @throws NulsException
      */
-    private BigInteger getFeeDirect(List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee) throws NulsException {
+    private BigInteger getFeeDirect(int chainId, List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee) throws NulsException {
+        Chain chain = chainManager.getChainMap().get(chainId);
+        int assetsId = chain.getConfig().getAssetsId();
         for (CoinFrom coinFrom : listFrom) {
             //必须为当前链主资产
-            if (TxUtil.isCurrentChainMainAsset(coinFrom)) {
-                BigInteger mainAsset = TxUtil.getBalance(NulsConfig.CURRENT_CHAIN_ID, NulsConfig.CURRENT_MAIN_ASSETS_ID, coinFrom.getAddress());
+            if (this.assetExist(chainId, coinFrom.getAssetsId())) {
+                BigInteger mainAsset = TxUtil.getBalance(chainId, assetsId, coinFrom.getAddress());
                 //当前还差的手续费
                 BigInteger current = targetFee.subtract(actualFee);
                 //如果余额大于等于目标手续费，则直接收取全额手续费
@@ -314,14 +316,16 @@ public class TransactionServiceImpl implements TransactionService {
      * @return boolean
      * @throws NulsException
      */
-    private boolean getFeeIndirect(List<CoinFrom> listFrom, int txSize, BigInteger targetFee, BigInteger actualFee) throws NulsException {
+    private boolean getFeeIndirect(int chainId, List<CoinFrom> listFrom, int txSize, BigInteger targetFee, BigInteger actualFee) throws NulsException {
         ListIterator<CoinFrom> iterator = listFrom.listIterator();
+        Chain chain = chainManager.getChainMap().get(chainId);
+        int assetsId = chain.getConfig().getAssetsId();
         while (iterator.hasNext()) {
             CoinFrom coinFrom = iterator.next();
             //如果不为当前链主资产
-            if (!TxUtil.isCurrentChainMainAsset(coinFrom)) {
+            if (!this.assetExist(chainId, coinFrom.getAssetsId())) {
                 //查询该地址在当前链的主资产余额
-                BigInteger mainAsset = TxUtil.getBalance(NulsConfig.CURRENT_CHAIN_ID, NulsConfig.CURRENT_MAIN_ASSETS_ID, coinFrom.getAddress());
+                BigInteger mainAsset = TxUtil.getBalance(chainId, assetsId, coinFrom.getAddress());
                 if (BigIntegerUtils.isEqualOrLessThan(mainAsset, BigInteger.ZERO)) {
                     continue;
                 }
@@ -329,7 +333,7 @@ public class TransactionServiceImpl implements TransactionService {
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
-                feeCoinFrom.setNonce(TxUtil.getNonce(NulsConfig.CURRENT_CHAIN_ID, NulsConfig.CURRENT_MAIN_ASSETS_ID, address));
+                feeCoinFrom.setNonce(TxUtil.getNonce(chainId, assetsId, address));
                 txSize += feeCoinFrom.size();
                 //由于新增CoinFrom，需要重新计算本交易预计收取的手续费
                 targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);
@@ -339,8 +343,8 @@ public class TransactionServiceImpl implements TransactionService {
                 BigInteger fee = BigIntegerUtils.isEqualOrGreaterThan(mainAsset, current) ? current : mainAsset;
 
                 feeCoinFrom.setLocked(AccountConstant.NORMAL_TX_LOCKED);
-                feeCoinFrom.setAssetsChainId(NulsConfig.CURRENT_CHAIN_ID);
-                feeCoinFrom.setAssetsId(NulsConfig.CURRENT_MAIN_ASSETS_ID);
+                feeCoinFrom.setAssetsChainId(chainId);
+                feeCoinFrom.setAssetsId(assetsId);
                 feeCoinFrom.setAmount(fee);
 
                 iterator.add(feeCoinFrom);

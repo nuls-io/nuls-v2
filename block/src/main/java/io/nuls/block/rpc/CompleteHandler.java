@@ -61,7 +61,7 @@ public class CompleteHandler extends BaseCmd {
         if (message == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        CacheHandler.requestComplete(chainId, message);
+        CacheHandler.batchComplete(chainId, message);
         return success();
     }
 

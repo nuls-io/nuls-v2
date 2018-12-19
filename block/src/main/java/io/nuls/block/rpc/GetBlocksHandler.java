@@ -24,8 +24,9 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.BlockMessage;
-import io.nuls.block.message.GetBlocksByHeightMessage;
+import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -41,7 +42,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 
 /**
- * 处理收到的{@link GetBlocksByHeightMessage}，用于区块的同步
+ * 处理收到的{@link HeightRangeMessage}，用于区块的同步
  * @author captain
  * @date 18-11-14 下午4:23
  * @version 1.0
@@ -56,8 +57,8 @@ public class GetBlocksHandler extends BaseCmd {
     @CmdAnnotation(cmd = GET_BLOCKS_BY_HEIGHT_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Object process(Map map){
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
-        String nodeId = map.get("nodes").toString();
-        GetBlocksByHeightMessage message = new GetBlocksByHeightMessage();
+        String nodeId = map.get("nodeId").toString();
+        HeightRangeMessage message = new HeightRangeMessage();
 
         byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         message.parse(new NulsByteBuffer(decode));
@@ -82,7 +83,7 @@ public class GetBlocksHandler extends BaseCmd {
                     NetworkUtil.sendFail(chainId, requestHash, nodeId);
                     return failed(BlockErrorCode.PARAMETER_ERROR);
                 }
-                sendBlock(chainId, block, nodeId);
+                sendBlock(chainId, block, nodeId, requestHash);
             } while (endHeight >= startHeight);
             NetworkUtil.sendSuccess(chainId, requestHash, nodeId);
         } catch (Exception e) {
@@ -91,8 +92,9 @@ public class GetBlocksHandler extends BaseCmd {
         return success();
     }
 
-    private void sendBlock(int chainId, Block block, String nodeId) {
-        BlockMessage blockMessage = new BlockMessage();
+    private void sendBlock(int chainId, Block block, String nodeId, NulsDigestData requestHash) {
+        BlockMessage blockMessage = new BlockMessage(requestHash, block);
+        blockMessage.setCommand(CommandConstant.BLOCK_MESSAGE);
         boolean result = NetworkUtil.sendToNode(chainId, blockMessage, nodeId);
         if (!result) {
             Log.warn("send block failed:{},height:{}", nodeId, block.getHeader().getHeight());

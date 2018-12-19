@@ -18,7 +18,6 @@ import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -79,11 +78,11 @@ public class ConsensusManager {
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             tx.setCoinData(coinData.serialize());
         } catch (IOException e) {
-            Log.error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
             throw e;
-        }catch (NulsException ne){
-            Log.error(ne);
-            throw ne;
+        }catch (NulsException e){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            throw e;
         }
         return tx;
     }
@@ -293,11 +292,12 @@ public class ConsensusManager {
      * 创建区块
      * create block
      *
+     * @param chain        chain info
      * @param blockData       block data/区块数据
      * @param packingAddress  packing address/打包地址
      * @return Block
      */
-    public Block createBlock(BlockData blockData, byte[] packingAddress){
+    public Block createBlock(Chain chain,BlockData blockData, byte[] packingAddress){
         //todo 调账户模块接口验证账户正确性+获取账户EcKey
         ECKey eckey = new ECKey();
         Block block = new Block();
@@ -307,7 +307,7 @@ public class ConsensusManager {
         try {
             block.getHeader().setExtend(blockData.getExtendsData().serialize());
         } catch (IOException e) {
-            Log.error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
             throw new NulsRuntimeException(e);
         }
         header.setHeight(blockData.getHeight());
@@ -327,6 +327,8 @@ public class ConsensusManager {
         scriptSig.setSignData(signData);
         scriptSig.setPublicKey(eckey.getPubKey());
         header.setBlockSignature(scriptSig);
+        //todo 设置了签名后可以去掉
+        header.setPackingAddress(packingAddress);
         return block;
     }
 

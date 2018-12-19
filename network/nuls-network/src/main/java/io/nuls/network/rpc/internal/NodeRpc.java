@@ -37,7 +37,8 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.log.Log;
+import static io.nuls.network.utils.LoggerUtil.Log;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -141,24 +142,42 @@ public class NodeRpc extends BaseCmd {
         Log.info("chainId:"+chainId+"==state:"+state+"==isCross:"+isCross+"==startPage："+startPage+"==pageSize:"+pageSize);
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
         List<Node> nodes=new ArrayList<>();
+        /*
+         * 普通连接
+         * comment connection
+         */
         if(0 == isCross){
+
             if(STATE_ALL == state) {
+                /*
+                 * all connection
+                 */
                 if(null!=nodeGroup.getConnectNodes()) {
                     nodes.addAll(nodeGroup.getConnectNodes());
                 }
                 if(null!=nodeGroup.getDisConnectNodes()) {
-                    nodes.addAll(nodeGroup.getConnectNodes());
+                    nodes.addAll(nodeGroup.getDisConnectNodes());
                 }
             }else if(STATE_CONNECT == state){
+                /*
+                 * only  connection
+                 */
                 if(null!=nodeGroup.getConnectNodes()) {
                     nodes.addAll(nodeGroup.getConnectNodes());
                 }
             }else if(STATE_DIS_CONNECT == state){
+                /*
+                 * only dis connection
+                 */
                 if(null!=nodeGroup.getDisConnectNodes()) {
-                    nodes.addAll(nodeGroup.getConnectNodes());
+                    nodes.addAll(nodeGroup.getDisConnectNodes());
                 }
             }
         }else{
+            /*
+             * 跨链连接
+             * cross connection
+             */
             if(STATE_ALL == state) {
                 if(null!=nodeGroup.getConnectCrossNodes()) {
                     nodes.addAll(nodeGroup.getConnectCrossNodes());

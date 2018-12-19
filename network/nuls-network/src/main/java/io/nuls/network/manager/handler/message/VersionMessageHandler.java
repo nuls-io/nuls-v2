@@ -41,8 +41,7 @@ import io.nuls.network.model.message.body.VersionMessageBody;
 import io.nuls.network.rpc.external.BlockRpcService;
 import io.nuls.network.rpc.external.impl.BlockRpcServiceImpl;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
-
+import static io.nuls.network.utils.LoggerUtil.Log;
 /**
  * version message handler
  * @author lan
@@ -86,11 +85,13 @@ public class VersionMessageHandler extends BaseMessageHandler {
          */
         if(LocalInfoManager.getInstance().isSelfIp(node.getIp()) || ConnectionManager.getInstance().isPeerConnectExceedMaxIn(node.getIp(),nodeGroup.getMagicNumber(),maxIn)){
             if(node.getNodeGroupConnectors().size() == 0){
+                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===close connection.");
                 node.getChannel().close();
                 node.setIdle(true);
                 return;
             }else{
                 //client 回复过载消息--reply over maxIn
+                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===-reply over maxIn.");
                 VerackMessage verackMessage=MessageFactory.getInstance().buildVerackMessage(node,message.getHeader().getMagicNumber(), VerackMessageBody.VER_CONNECT_MAX);
                 MessageManager.getInstance().sendToNode(verackMessage,node,true);
                 return;
@@ -121,23 +122,27 @@ public class VersionMessageHandler extends BaseMessageHandler {
    private  void clientRecieveHandler(BaseMessage message, String nodeKey){
         VersionMessageBody versionBody=(VersionMessageBody)message.getMsgBody();
         localInfoManager.updateExternalAddress(versionBody.getAddrYou().getIp().getHostAddress(),NetworkParam.getInstance().getPort());
-        Node node = nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber()).getDisConnectNodeMap().get(nodeKey);
-        Log.debug("VersionMessageHandler Recieve:Client"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
-        NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(message.getHeader().getMagicNumber());
-        nodeGroupConnector.setStatus(NodeGroupConnector.HANDSHAKE);
-        //node加入到Group的连接中
-        NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
-        nodeGroup.addConnetNode(node,true);
-        //存储需要的信息
-        node.setVersionProtocolInfos(message.getHeader().getMagicNumber(),versionBody.getProtocolVersion(),versionBody.getBlockHeight(),versionBody.getBlockHash());
-        node.setRemoteCrossPort(versionBody.getPortMeCross());
-        //client:接收到server端消息，进行verack答复
-        VerackMessage verackMessage=MessageFactory.getInstance().buildVerackMessage(node,message.getHeader().getMagicNumber(), VerackMessageBody.VER_SUCCESS);
-        //从已连接池中获取node节点
-        node = nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber()).getConnectNodeMap().get(nodeKey);
-        MessageManager.getInstance().sendToNode(verackMessage,node,true);
-        //自我连接
-        ConnectionManager.getInstance().selfConnection();
+       /*
+        * node 不一定只存在disconnectNodeMap中，多链情况下，可以是已存业务的连接。
+        */
+       Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.OUT);
+//       Node node = nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber()).getDisConnectNodeMap().get(nodeKey);
+       Log.debug("VersionMessageHandler Recieve:Client"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+       NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(message.getHeader().getMagicNumber());
+       nodeGroupConnector.setStatus(NodeGroupConnector.HANDSHAKE);
+       //node加入到Group的连接中
+       NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
+       nodeGroup.addConnetNode(node,true);
+       //存储需要的信息
+       node.setVersionProtocolInfos(message.getHeader().getMagicNumber(),versionBody.getProtocolVersion(),versionBody.getBlockHeight(),versionBody.getBlockHash());
+       node.setRemoteCrossPort(versionBody.getPortMeCross());
+       //client:接收到server端消息，进行verack答复
+       VerackMessage verackMessage=MessageFactory.getInstance().buildVerackMessage(node,message.getHeader().getMagicNumber(), VerackMessageBody.VER_SUCCESS);
+       //从已连接池中获取node节点
+       node = nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber()).getConnectNodeMap().get(nodeKey);
+       MessageManager.getInstance().sendToNode(verackMessage,node,true);
+       //自我连接
+       ConnectionManager.getInstance().selfConnection();
     }
     /**
      *
@@ -155,7 +160,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         }else{
             clientRecieveHandler(message, nodeKey);
         }
-        return null;
+        return NetworkEventResult.getResultSuccess();
     }
 
     @Override

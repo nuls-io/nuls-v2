@@ -32,7 +32,6 @@ import io.nuls.rpc.client.thread.ResponseAutoProcessor;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Request;
@@ -81,7 +80,7 @@ public class WsServer extends WebSocketServer {
         设置核心模块（Manager）连接地址
         Setting the Connection URL of Core Module(Manager)
          */
-        Constants.kernelUrl = kernelUrl;
+        ServerRuntime.setKernelUrl(kernelUrl);
 
         /*
         与核心模块（Manager）握手
@@ -90,7 +89,7 @@ public class WsServer extends WebSocketServer {
         if (!CmdDispatcher.handshakeKernel()) {
             throw new Exception("Handshake kernel failed");
         } else {
-            Log.info("Connect manager success." + ServerRuntime.local.getModuleName() + " ready!");
+            Log.info("Connect manager success." + ServerRuntime.LOCAL.getModuleName() + " ready!");
         }
     }
 
@@ -171,13 +170,13 @@ public class WsServer extends WebSocketServer {
             }
 
         } catch (Exception e) {
-            Log.error(e);
+            Log.error(e.getMessage());
         }
     }
 
     @Override
     public void onError(WebSocket webSocket, Exception ex) {
-        Log.error(ex);
+        Log.error(ex.getMessage());
     }
 
 
@@ -187,7 +186,7 @@ public class WsServer extends WebSocketServer {
         Constants.THREAD_POOL.execute(new RequestSingleProcessor());
         Constants.THREAD_POOL.execute(new RequestLoopProcessor());
         Constants.THREAD_POOL.execute(new HeartbeatProcessor());
-        Log.info("Server<" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.local.getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
+        Log.info("Server<" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
     }
 
     /**
@@ -212,18 +211,16 @@ public class WsServer extends WebSocketServer {
      */
     public static WsServer getInstance(String abbr, String name, String domain) {
         WsServer wsServer = new WsServer(HostInfo.randomPort());
-        RegisterApi registerApi = new RegisterApi();
-        registerApi.setModuleAbbreviation(abbr);
-        registerApi.setModuleName(name);
-        registerApi.setModuleDomain(domain);
+        ServerRuntime.LOCAL.setModuleAbbreviation(abbr);
+        ServerRuntime.LOCAL.setModuleName(name);
+        ServerRuntime.LOCAL.setModuleDomain(domain);
         Map<String, String> connectionInformation = new HashMap<>(2);
         connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
         connectionInformation.put(Constants.KEY_PORT, wsServer.getPort() + "");
-        registerApi.setConnectionInformation(connectionInformation);
-        registerApi.setApiMethods(new ArrayList<>());
-        registerApi.setDependencies(new HashMap<>(16));
-        registerApi.setModuleRoles(new HashMap<>(1));
-        ServerRuntime.local = registerApi;
+        ServerRuntime.LOCAL.setConnectionInformation(connectionInformation);
+        ServerRuntime.LOCAL.setApiMethods(new ArrayList<>());
+        ServerRuntime.LOCAL.setDependencies(new HashMap<>(16));
+        ServerRuntime.LOCAL.setModuleRoles(new HashMap<>(1));
 
         return wsServer;
     }
@@ -237,7 +234,7 @@ public class WsServer extends WebSocketServer {
      * @return WsServer
      */
     public WsServer dependencies(String key, String value) {
-        ServerRuntime.local.getDependencies().put(key, value);
+        ServerRuntime.LOCAL.getDependencies().put(key, value);
         return this;
     }
 
@@ -249,7 +246,7 @@ public class WsServer extends WebSocketServer {
      * @return WsServer
      */
     public WsServer moduleRoles(String[] value) {
-        ServerRuntime.local.getModuleRoles().put(ServerRuntime.local.getModuleAbbreviation(), value);
+        ServerRuntime.LOCAL.getModuleRoles().put(ServerRuntime.LOCAL.getModuleAbbreviation(), value);
         return this;
     }
 
@@ -262,7 +259,7 @@ public class WsServer extends WebSocketServer {
      * @return WsServer
      */
     public WsServer moduleRoles(String key, String[] value) {
-        ServerRuntime.local.getModuleRoles().put(key, value);
+        ServerRuntime.LOCAL.getModuleRoles().put(key, value);
         return this;
     }
 
@@ -274,7 +271,7 @@ public class WsServer extends WebSocketServer {
      * @return WsServer
      */
     public WsServer moduleVersion(String moduleVersion) {
-        ServerRuntime.local.setModuleVersion(moduleVersion);
+        ServerRuntime.LOCAL.setModuleVersion(moduleVersion);
         return this;
     }
 

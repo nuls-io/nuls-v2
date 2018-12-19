@@ -29,9 +29,6 @@ import io.nuls.rpc.info.NoUse;
 import org.junit.Before;
 import org.junit.Test;
 
-/**
- * mock kernel for Test
- */
 public class AppTest {
 
     @Before
@@ -40,7 +37,7 @@ public class AppTest {
     }
 
     @Test
-    public void mockKernel() {
+    public void test() {
         try {
             NoUse.mockKernel();
         } catch (Exception e) {

@@ -26,19 +26,20 @@ import java.util.Map;
 import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * 共识模块启动及初始化管理
  * Consensus Module Startup and Initialization Management
  *
  * @author tag
  * 2018/11/7
- * */
+ */
 public class BootStrap {
     /**
      * 共识模块启动方法
      * Consensus module startup method
-     * */
-    public static void main(String[] args){
+     */
+    public static void main(String[] args) {
         try {
             initSys();
             initDB();
@@ -47,7 +48,7 @@ public class BootStrap {
             SpringLiteContext.getBean(ChainManager.class).runChain();
             registerTx();
             initServer();
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error("consensus startup error！");
             Log.error(e);
         }
@@ -56,74 +57,75 @@ public class BootStrap {
     /**
      * 初始化系统编码
      * Initialization System Coding
-     * */
-    private static void initSys(){
+     */
+    private static void initSys() throws Exception{
         try {
             System.setProperty(ConsensusConstant.SYS_FILE_ENCODING, UTF_8.name());
             Field charset = Charset.class.getDeclaredField("defaultCharset");
             charset.setAccessible(true);
             charset.set(null, UTF_8);
-        }catch (Exception e){
-            Log.error(e);
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     /**
      * 初始化数据库
      * Initialization database
-     * */
-    private static void initDB(){
+     */
+    private static void initDB() throws Exception{
         try {
             Properties properties = ConfigLoader.loadProperties(ConsensusConstant.DB_CONFIG_NAME);
             String path = properties.getProperty(ConsensusConstant.DB_DATA_PATH, ConsensusConstant.DB_DATA_DEFAULT_PATH);
             RocksDBService.init(path);
-        }catch (Exception e){
-            Log.error(e);
+        } catch (Exception e) {
+            throw e;
         }
     }
 
     /**
      * 初始化国际化资源文件语言
      * Initialization of International Resource File Language
-     * */
-    private static void initLanguage(){
+     */
+    private static void initLanguage() throws Exception{
         try {
             LanguageService languageService = SpringLiteContext.getBean(LanguageService.class);
             String languageDB = languageService.getLanguage();
-            I18nUtils.loadLanguage("","");
+            I18nUtils.loadLanguage("", "");
             String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
             I18nUtils.setLanguage(language);
             if (null == languageDB) {
                 languageService.saveLanguage(language);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
+            throw e;
         }
     }
 
     /**
      * 向交易模块注册交易
      * Register transactions with the transaction module
-     * */
-    private static void registerTx(){
+     */
+    private static void registerTx() {
         List<Class> classList = ScanUtil.scan(ConsensusConstant.RPC_PATH);
-        if(classList == null || classList.size() == 0){
+        if (classList == null || classList.size() == 0) {
             return;
         }
-        Map<Integer, TxRegisterDetail> registerDetailMap= new HashMap<>(16);
-        for (Class clz:classList){
+        Map<Integer, TxRegisterDetail> registerDetailMap = new HashMap<>(16);
+        for (Class clz : classList) {
             Method[] methods = clz.getMethods();
-            for (Method method:methods) {
+            for (Method method : methods) {
                 ResisterTx annotation = getRegisterAnnotation(method);
-                if(annotation != null){
-                    if (!registerDetailMap.containsKey(annotation.txType())){
-                        registerDetailMap.put(annotation.txType(),new TxRegisterDetail(annotation.txType()));
+                if (annotation != null) {
+                    if (!registerDetailMap.containsKey(annotation.txType())) {
+                        registerDetailMap.put(annotation.txType(), new TxRegisterDetail(annotation.txType()));
                     }
-                    if(annotation.methodType().equals(TxMethodType.COMMIT)){
+                    if (annotation.methodType().equals(TxMethodType.COMMIT)) {
                         registerDetailMap.get(annotation.txType()).setCommitCmd(annotation.methodName());
-                    }else if(annotation.methodType().equals(TxMethodType.VALID)){
+                    } else if (annotation.methodType().equals(TxMethodType.VALID)) {
                         registerDetailMap.get(annotation.txType()).setValidateCmd(annotation.methodName());
-                    }else if(annotation.methodType().equals(TxMethodType.ROLLBACK)){
+                    } else if (annotation.methodType().equals(TxMethodType.ROLLBACK)) {
                         registerDetailMap.get(annotation.txType()).setRollbackCmd(annotation.methodName());
                     }
                 }
@@ -132,11 +134,11 @@ public class BootStrap {
         //todo 向交易管理模块注册交易
     }
 
-    private static ResisterTx getRegisterAnnotation(Method method){
+    private static ResisterTx getRegisterAnnotation(Method method) {
         Annotation[] annotations = method.getDeclaredAnnotations();
-        for (Annotation annotation:annotations) {
-            if(ResisterTx.class.equals(annotation.annotationType())){
-                return (ResisterTx)annotation;
+        for (Annotation annotation : annotations) {
+            if (ResisterTx.class.equals(annotation.annotationType())) {
+                return (ResisterTx) annotation;
             }
         }
         return null;
@@ -144,8 +146,8 @@ public class BootStrap {
 
     /**
      * 共识模块启动WebSocket服务，用于其他模块连接共识模块与共识模块交互
-     * */
-    private static void initServer(){
+     */
+    private static void initServer() {
         try {
             try {
                 WsServer.getInstance(ModuleE.CS)
@@ -158,7 +160,7 @@ public class BootStrap {
             } catch (Exception e) {
                 Log.error("Account initServer failed", e);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error("Consensus startup webSocket server error!");
             e.printStackTrace();
         }

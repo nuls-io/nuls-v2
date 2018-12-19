@@ -25,9 +25,9 @@
  */
 package io.nuls.poc.utils.thread;
 
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.utils.thread.process.ConsensusProcess;
-import io.nuls.tools.log.Log;
 
 /**
  * 共识任务
@@ -51,7 +51,7 @@ public class ConsensusProcessTask implements Runnable {
         try {
             consensusProcess.process(chain);
         } catch (Exception e) {
-            Log.error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
         }
     }
 }

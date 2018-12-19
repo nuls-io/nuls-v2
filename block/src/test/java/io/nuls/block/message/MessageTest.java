@@ -22,12 +22,11 @@ package io.nuls.block.message;
 
 import com.google.common.collect.Lists;
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.TransactionManager;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.base.data.Transaction;
-import io.nuls.block.BlockGenerator;
+import io.nuls.block.test.BlockGenerator;
 import io.nuls.block.config.GenesisBlock;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.After;
@@ -127,7 +126,7 @@ public class MessageTest {
 
     @Test
     public void testGetBlocksByHeightMessage() throws Exception {
-        GetBlocksByHeightMessage message = new GetBlocksByHeightMessage();
+        HeightRangeMessage message = new HeightRangeMessage();
 
         message.setStartHeight(111);
         message.setEndHeight(222);
@@ -135,7 +134,7 @@ public class MessageTest {
         System.out.println(hex);
 
         byte[] bytes = HexUtil.decode(hex);
-        GetBlocksByHeightMessage message1 = new GetBlocksByHeightMessage();
+        HeightRangeMessage message1 = new HeightRangeMessage();
         message1.parse(new NulsByteBuffer(bytes));
 
         assertEquals(message1.getHash(), message.getHash());

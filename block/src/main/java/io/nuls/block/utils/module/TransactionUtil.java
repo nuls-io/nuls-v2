@@ -22,7 +22,7 @@ package io.nuls.block.utils.module;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.block.BlockGenerator;
+import io.nuls.block.test.BlockGenerator;
 
 import java.io.IOException;
 import java.util.List;
@@ -43,7 +43,7 @@ public class TransactionUtil {
      * @param transactions
      * @return
      */
-    public static boolean save(int chainId, List<Transaction> transactions) {
+    public static boolean save(int chainId, List<NulsDigestData> transactions) {
         return true;
     }
 

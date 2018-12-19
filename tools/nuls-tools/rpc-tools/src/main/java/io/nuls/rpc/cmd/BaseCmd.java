@@ -50,7 +50,7 @@ public abstract class BaseCmd {
      */
     protected void setConfigItem(String key, Object value, boolean readOnly) {
         ConfigItem configItem = new ConfigItem(key, value, readOnly);
-        ServerRuntime.configItemMap.put(key, configItem);
+        ServerRuntime.CONFIG_ITEM_MAP.put(key, configItem);
     }
 
     /**
