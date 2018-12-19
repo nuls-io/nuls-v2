@@ -18,10 +18,16 @@ import java.io.IOException;
  * @date: 2018/12/17
  */
 public class ReceiveCrossTxMessage extends BaseMessage {
+    /**
+     * 链ID
+     */
     @Getter
     @Setter
     private int chainId;
 
+    /**
+     * 交易hash
+     */
     @Getter
     @Setter
     private NulsDigestData requestHash;
