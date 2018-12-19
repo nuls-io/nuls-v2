@@ -98,6 +98,7 @@ public class BootStrap {
                 languageService.saveLanguage(language);
             }
         } catch (Exception e) {
+            Log.error(e);
             throw e;
         }
     }

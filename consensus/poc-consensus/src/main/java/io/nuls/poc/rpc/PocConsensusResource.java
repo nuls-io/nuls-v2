@@ -406,4 +406,16 @@ public class PocConsensusResource extends BaseCmd{
         }
         return success(result.getData());
     }
+
+    /**
+     * 缓存新区块头
+     * */
+    @CmdAnnotation(cmd = "cs_addBlock", version = 1.0, description = "test getHeight 1.0")
+    public Response addBlock(Map<String,Object> params){
+        Result result = service.runMainChain(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
 }
