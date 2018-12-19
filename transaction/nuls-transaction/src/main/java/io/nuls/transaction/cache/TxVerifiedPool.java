@@ -2,66 +2,64 @@ package io.nuls.transaction.cache;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.tools.cache.LimitHashMap;
-import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.model.bo.TxWrapper;
+import io.nuls.tools.core.annotation.Service;
+import io.nuls.transaction.model.bo.Chain;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingDeque;
 
 /**
  * 交易已完成交易管理模块的校验(打包的时候从这里取), 包括孤儿交易
  * @author: Charlie
  * @date: 2018/11/13
  */
+@Service
 public class TxVerifiedPool {
 
-    private final static TxVerifiedPool INSTANCE = new TxVerifiedPool();
+   // private final static TxVerifiedPool INSTANCE = new TxVerifiedPool();
 
-    private Queue<TxWrapper> txQueue;
+//    private BlockingDeque<TxWrapper> txQueue;
 
-    private LimitHashMap<NulsDigestData, TxWrapper> orphanContainer;
+//    private LimitHashMap<NulsDigestData, TxWrapper> orphanContainer;
 
-    private TxVerifiedPool() {
+   /* private TxVerifiedPool() {
         this.txQueue = new LinkedBlockingDeque<>();
         this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
-    }
+    }*/
 
-    public static TxVerifiedPool getInstance() {
-        return INSTANCE;
-    }
+//    public static TxVerifiedPool getInstance() {
+//        return INSTANCE;
+//    }
 
-    public boolean addInFirst(TxWrapper txWrapper, boolean isOrphan) {
+    public boolean addInFirst(Chain chain, Transaction tx, boolean isOrphan) {
         try {
-            if (txWrapper == null) {
+            if (tx == null) {
                 return false;
             }
             //check Repeatability
             if (isOrphan) {
-                NulsDigestData hash = txWrapper.getTx().getHash();
-                orphanContainer.put(hash, txWrapper);
+                NulsDigestData hash = tx.getHash();
+                chain.getOrphanContainer().put(hash, tx);
             } else {
-                ((LinkedBlockingDeque) txQueue).addFirst(txWrapper);
+                chain.getTxQueue().addFirst(tx);
             }
             return true;
         } finally {
         }
     }
 
-    public boolean add(TxWrapper txWrapper, boolean isOrphan) {
+    public boolean add(Chain chain, Transaction tx, boolean isOrphan) {
         try {
-            if (txWrapper == null) {
+            if (tx == null) {
                 return false;
             }
             //check Repeatability
             if (isOrphan) {
-                NulsDigestData hash = txWrapper.getTx().getHash();
-                orphanContainer.put(hash, txWrapper);
+                NulsDigestData hash = tx.getHash();
+                chain.getOrphanContainer().put(hash, tx);
             } else {
-                txQueue.offer(txWrapper);
+                chain.getTxQueue().offer(tx);
             }
             return true;
         } finally {
@@ -75,53 +73,53 @@ public class TxVerifiedPool {
      *
      * @return TxContainer
      */
-    public TxWrapper get() {
-        return txQueue.poll();
+    public Transaction get(Chain chain) {
+        return chain.getTxQueue().poll();
     }
 
-    public List<TxWrapper> getAll() {
-        List<TxWrapper> txs = new ArrayList<>();
-        Iterator<TxWrapper> it = txQueue.iterator();
+    public List<Transaction> getAll(Chain chain) {
+        List<Transaction> txs = new ArrayList<>();
+        Iterator<Transaction> it = chain.getTxQueue().iterator();
         while (it.hasNext()) {
             txs.add(it.next());
         }
         return txs;
     }
 
-    public List<TxWrapper> getAllOrphan() {
-        return new ArrayList<>(orphanContainer.values());
+    public List<Transaction> getAllOrphan(Chain chain) {
+        return new ArrayList<>(chain.getOrphanContainer().values());
     }
 
-    public void remove(NulsDigestData hash) {
-        orphanContainer.remove(hash);
+    public void remove(Chain chain, NulsDigestData hash) {
+        chain.getOrphanContainer().remove(hash);
     }
 
-    public boolean exist(NulsDigestData hash) {
-        return orphanContainer.containsKey(hash);
+    public boolean exist(Chain chain, NulsDigestData hash) {
+        return chain.getOrphanContainer().containsKey(hash);
     }
 
-    public void clear() {
+    public void clear(Chain chain) {
         try {
-            txQueue.clear();
-            orphanContainer.clear();
+            chain.getTxQueue().clear();
+            chain.getOrphanContainer().clear();
         } finally {
         }
     }
 
-    public int size() {
-        return txQueue.size();
+    public int size(Chain chain) {
+        return chain.getTxQueue().size();
     }
 
-    public int getPoolSize() {
-        return txQueue.size();
+    public int getPoolSize(Chain chain) {
+        return chain.getTxQueue().size();
     }
 
-    public int getOrphanPoolSize() {
-        return orphanContainer.size();
+    public int getOrphanPoolSize(Chain chain) {
+        return chain.getOrphanContainer().size();
     }
 
-    public void removeOrphan(NulsDigestData hash) {
-        this.orphanContainer.remove(hash);
+    public void removeOrphan(Chain chain, NulsDigestData hash) {
+        chain.getOrphanContainer().remove(hash);
     }
 
 }

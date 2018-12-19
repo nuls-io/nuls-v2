@@ -104,7 +104,7 @@ public class TransactionBootStrap {
     }
 
     public static void sysStart(int chainId){
-        TransactionScheduler.getInstance().start();
+//        TransactionScheduler.getInstance().start();
     }
 
     /**
