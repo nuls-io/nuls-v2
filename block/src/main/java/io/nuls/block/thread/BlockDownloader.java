@@ -79,19 +79,22 @@ public class BlockDownloader implements Callable<Boolean> {
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = ContextManager.getContext(chainId).getLatestHeight() + 1;
         int maxDowncount = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.DOWNLOAD_NUMBER));
-
         try {
+            long total = netLatestHeight - startHeight + 1;
+            long start = System.currentTimeMillis();
             while (startHeight <= netLatestHeight) {
                 Node node = nodes.take();
                 int size = maxDowncount * 100 / node.getCredit();
                 if (startHeight + size > netLatestHeight) {
-                    size = (int) (netLatestHeight - startHeight);
+                    size = (int) (netLatestHeight - startHeight + 1);
                 }
                 Worker worker = new Worker(startHeight, size, chainId, node);
                 Future<BlockDownLoadResult> future = executor.submit(worker);
                 futures.offer(future);
                 startHeight += size;
             }
+            long end = System.currentTimeMillis();
+            Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, end - start / total);
         } catch (Exception e) {
             Log.error(e);
             return false;

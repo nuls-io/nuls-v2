@@ -31,6 +31,7 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -187,13 +188,13 @@ public class BlockResource extends BaseCmd {
     @CmdAnnotation(cmd = RECEIVE_PACKING_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "block", parameterType = "string")
-    public Object receivePackingBlock(Map map) {
+    public Response receivePackingBlock(Map map) {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = new Block();
-            block.parse(new NulsByteBuffer((NulsDigestData.fromDigestHex(map.get("hash").toString()).getDigestBytes())));
+            block.parse(new NulsByteBuffer((NulsDigestData.fromDigestHex(map.get("block").toString()).getDigestBytes())));
             if (service.saveBlock(chainId, block) && service.broadcastBlock(chainId, block)) {
-                ServerRuntime.eventCount(BEST_BLOCK,  null);
+                //通知共识模块
                 return success();
             } else {
                 return failed(BlockErrorCode.PARAMETER_ERROR);

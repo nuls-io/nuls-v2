@@ -23,6 +23,14 @@ package io.nuls.block.utils.module;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.SmallBlock;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.log.Log;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 调用共识模块接口的工具类
@@ -34,6 +42,19 @@ import io.nuls.base.data.SmallBlock;
 public class ConsensusUtil {
 
     public static boolean verify(int chainId, Block block) {
+//        try {
+//            Map<String, Object> params = new HashMap<>(5);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put("chainId", chainId);
+//            params.put("nodes", nodeId);
+//            params.put("messageBody", HexUtil.byteToHex(message.serialize()));
+//            params.put("command", message.getCommand());
+//
+//            return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
+//        } catch (Exception e) {
+//            Log.error(e);
+//            return false;
+//        }
         return true;
     }
 
