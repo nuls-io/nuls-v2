@@ -204,17 +204,16 @@ public class NetworkUtil {
 
     public static long currentTime() {
         try {
-            Map<String, Object> params = new HashMap<>(5);
+            Map<String, Object> params = new HashMap<>(1);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-
             Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
             Map responseData = (Map) response.getResponseData();
-            List list = (List) responseData.get("nw_currentTimeMillis");
-
+            Map result = (Map) responseData.get("nw_currentTimeMillis");
+            return (Long) result.get("currentTimeMillis");
         } catch (Exception e) {
-            Log.error(e);
+            Log.error("get nw_currentTimeMillis fail");
         }
-        return 0L;
+        return System.currentTimeMillis();
     }
 
 }

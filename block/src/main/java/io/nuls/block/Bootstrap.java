@@ -35,6 +35,7 @@ import io.nuls.block.service.BlockService;
 import io.nuls.block.test.Miner;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.monitor.*;
+import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
@@ -84,10 +85,10 @@ public class Bootstrap {
             //各类缓存初始化
             initCache(CHAIN_ID);
 
-            onlyRunWhenTest();
-
             //5.rpc服务初始化
             rpcInit();
+
+            onlyRunWhenTest();
 
             //开启后台工作线程
             startDaemonThreads();
