@@ -1,7 +1,7 @@
 package io.nuls.account.util.log;
 
-import ch.qos.logback.classic.Logger;
 import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.logback.NulsLogger;
 
 /**
  * 账户模块日志类
@@ -13,7 +13,7 @@ import io.nuls.tools.log.logback.LoggerBuilder;
 public class LogUtil {
     private static final String FOLDER_NAME = "account";
     private static final String FILE_NAME = "account";
-    private static final Logger LOGGER = LoggerBuilder.getLogger(FOLDER_NAME, FILE_NAME);
+    private static final NulsLogger LOGGER = LoggerBuilder.getLogger(FOLDER_NAME, FILE_NAME);
 
     /**
      * 提供debug级别基本的日志输出
@@ -21,15 +21,11 @@ public class LogUtil {
      * @param msg 需要显示的消息
      */
     public static void debug(String msg) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(msg);
-        }
+        LOGGER.debug(msg);
     }
 
     public static void debug(String msg, Object... objs) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(msg, objs);
-        }
+        LOGGER.debug(msg, objs);
     }
 
     /**
@@ -39,9 +35,7 @@ public class LogUtil {
      * @param throwable 异常信息
      */
     public static void debug(String msg, Throwable throwable) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(msg, throwable);
-        }
+        LOGGER.debug(msg, throwable);
     }
 
     /**

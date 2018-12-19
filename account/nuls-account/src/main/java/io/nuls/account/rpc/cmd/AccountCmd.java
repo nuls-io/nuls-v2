@@ -895,7 +895,7 @@ public class AccountCmd extends BaseCmd {
             if (!validTxRemark(transferDto.getRemark())) {
                 return Result.getFailed(AccountErrorCode.PARAMETER_ERROR);
             }
-            String txDigestHex = transactionService.multipleAddressTransfer(NulsConfig.CURRENT_CHAIN_ID, inputList, outputList, transferDto.getRemark());
+            String txDigestHex = transactionService.multipleAddressTransfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
             map.put("value", txDigestHex);
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
