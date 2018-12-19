@@ -1331,6 +1331,35 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
     }
 
+    /**
+     * 缓存最新区块
+     */
+    @Override
+    public Result addBlock(Map<String,Object> params){
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        try {
+            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER);
+            BlockHeader header = new BlockHeader();
+            header.parse(HexUtil.decode(headerHex),0);
+            chain.getBlockHeaderList().add(header);
+            chain.setNewestHeader(header);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+        }catch (NulsException e){
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e.getMessage());
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
     private void fillAgentList(Chain chain, List<Agent> agentList, List<Deposit> depositList) throws NulsException {
         MeetingRound round = roundManager.getCurrentRound(chain);
         for (Agent agent : agentList) {

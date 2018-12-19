@@ -219,6 +219,7 @@ public class ChainManager {
                 blockHeader.setPreHash(NulsDigestData.calcDigestData("00000000000".getBytes()));
                 blockHeader.setTime(TimeService.currentTimeMillis());
                 blockHeader.setTxCount(1);
+                blockHeader.setHash(new NulsDigestData());
                 blockHeader.setMerkleHash(NulsDigestData.calcDigestData(new byte[20]));
 
                 // add a round data
@@ -248,7 +249,7 @@ public class ChainManager {
             punishManager.loadPunishes(chain);
             roundManager.initRound(chain);
         }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
         }
     }
 
