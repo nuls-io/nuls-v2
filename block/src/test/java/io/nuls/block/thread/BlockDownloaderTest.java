@@ -20,10 +20,14 @@
 
 package io.nuls.block.thread;
 
+import io.nuls.block.constant.ConfigConstant;
+import io.nuls.block.manager.ConfigManager;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Node;
 import io.nuls.tools.log.Log;
 import org.junit.Test;
 
+import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import static org.junit.Assert.assertEquals;
@@ -32,32 +36,16 @@ public class BlockDownloaderTest {
 
     @Test
     public void test2() {
-        int nodeCount = 10;
-        int maxDowncount = 10;
-        long latestHeight = 999;
-        long netLatestHeight = 2000;
-        long totalCount = netLatestHeight - latestHeight;
-        int roundDownloads = maxDowncount * nodeCount;
-        //需要下载多少轮
-        long round = (long) Math.ceil((double) totalCount / (roundDownloads));
-        for (long i = 0; i < round; i++) {
-            long startHeight = (latestHeight + 1) + i * roundDownloads;
-            for (int j = 0; j < nodeCount; j++) {
-                long start = startHeight + j * maxDowncount;
-                int size = maxDowncount;
+        long netLatestHeight = 158;
+        long startHeight = 1;
 
-                //最后一个节点的下载区块数，特殊计算
-                boolean isEnd = false;
-                if (start + size > netLatestHeight) {
-                    size = (int) (netLatestHeight - start) + 1;
-                    isEnd = true;
-                }
-
-                Log.info("round{} download {}->{}, form node{}", i+1, start, start+size-1, j);
-                if (isEnd) {
-                    break;
-                }
+        while (startHeight <= netLatestHeight) {
+            int size = 20;
+            if (startHeight + size > netLatestHeight) {
+                size = (int) (netLatestHeight - startHeight + 1);
             }
+            Log.info("get blocks {}->{}", startHeight, startHeight + size - 1);
+            startHeight += size;
         }
     }
 

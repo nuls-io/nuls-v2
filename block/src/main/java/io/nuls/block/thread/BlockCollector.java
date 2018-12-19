@@ -68,16 +68,21 @@ public class BlockCollector implements Runnable {
         BlockDownLoadResult result;
         try {
             while ((result = futures.take().get()) != null) {
-                if (result != null && result.isSuccess()) {
+                if (result != null && result.isSuccess()) { result.getNode();
                     Node node = result.getNode();
+                    int size = result.getSize();
+                    long startHeight = result.getStartHeight();
+                    long endHeight = startHeight + size - 1;
+                    Log.info("getBlocks:{}->{} ,from:{}, success", startHeight, endHeight, node.getId());
                     node.adjustCredit(true);
                     params.getNodes().offer(node);
                     List<Block> blockList = CacheHandler.getBlockList(chainId, result.getMessageHash());
                     blockList.sort(BLOCK_COMPARATOR);
                     queue.addAll(blockList);
                     continue;
+                } else {
+                    retryDownload(result);
                 }
-                retryDownload(result);
             }
         } catch (Exception e) {
             Log.error(e);
