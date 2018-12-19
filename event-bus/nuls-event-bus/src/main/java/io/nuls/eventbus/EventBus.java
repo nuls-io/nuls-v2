@@ -72,9 +72,10 @@ public class EventBus {
 
     private Subscriber buildSubscriber(Map<String,Object> params){
         String abbr = (String)params.get("abbr");
+        String callBackCmd = (String)params.get("callBackCmd");
         String moduleName = (String)params.get("moduleName");
         String domain = (String)params.get("domain");
-        return new Subscriber(abbr,moduleName,domain);
+        return new Subscriber(abbr,moduleName,domain, callBackCmd);
     }
 
     public ConcurrentMap<String, Topic> getTopicMap() {
