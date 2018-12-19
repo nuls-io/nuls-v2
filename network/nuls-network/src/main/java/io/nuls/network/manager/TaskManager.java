@@ -80,7 +80,7 @@ public class TaskManager extends BaseManager{
     @Override
     public void start() {
         scheduleGroupStatusMonitor();
-//        timeServiceThreadStart();
+        timeServiceThreadStart();
         testThread();
     }
 
