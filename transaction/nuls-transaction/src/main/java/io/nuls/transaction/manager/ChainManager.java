@@ -22,18 +22,23 @@
  * SOFTWARE.
  *
  */
-package io.nuls.transaction.utils.manager;
+package io.nuls.transaction.manager;
 
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.constant.DBErrorCode;
+import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.db.rocksdb.storage.ConfigStorageService;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.bo.config.ConfigItem;
 
@@ -53,13 +58,19 @@ public class ChainManager {
     @Autowired
     private ConfigStorageService configService;
 
+    @Autowired
+    private SchedulerManager schedulerManager;
+
+    @Autowired
+    private CrossTxVerifyingManager crossTxVerifyingManager;
+
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
     /**
      * 初始化并启动链
      * Initialize and start the chain
      */
-    public void runChain() throws Exception{
+    public void runChain() throws Exception {
         Map<Integer, ConfigBean> configMap = configChain();
         if (configMap == null || configMap.size() == 0) {
             return;
@@ -72,15 +83,18 @@ public class ChainManager {
             Chain chain = new Chain();
             int chainId = entry.getKey();
             chain.setConfig(entry.getValue());
+            initLogger(chain);
             /*
             初始化链数据库表
             Initialize linked database tables
             */
-            //initTable(chainId);
-
+            initTable(chain);
+            initCache(chain);
+            schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chainId, chain);
         }
     }
+
 
     /**
      * 停止一条链
@@ -117,10 +131,6 @@ public class ChainManager {
                     return null;
                 }
                 configMap.put(configBean.getChainId(), configBean);
-                //设置当前链ID
-//                TxConfig.CURRENT_CHAINID = configBean.getChainId();
-                //设置当前链主资产ID
-//                TxConfig.CURRENT_CHAIN_ASSETID = configBean.getAssetsId();
             }
             return configMap;
         } catch (Exception e) {
@@ -133,18 +143,57 @@ public class ChainManager {
      * 初始化链相关表
      * Initialization chain correlation table
      *
-     * @param chainId chain id
+     * @param chain
      */
-    private void initTable(int chainId) {
+    private void initTable(Chain chain) {
+        NulsLogger logger = chain.getLogger();
+        int chainId = chain.getConfig().getChainId();
         try {
-            //DBUtil.createTable(MODULE_CONGIF);
+            /*
+            创建已验证交易表
+            Create verified transaction table
+            */
+            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_VERIFIED + chainId);
+
+            /*
+            创建已确认交易表
+            Create confirmed transaction table
+            */
+            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId);
+
+            /*
+            创建跨链交易表
+            Create cross chain transaction able
+            */
+            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CROSSCHAIN + chainId);
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.info(e.getMessage());
-            } else {
-                Log.error(e);
+                logger.error(e.getMessage());
             }
         }
+    }
+
+    /**
+     * 初始化链缓存数据
+     * Initialize chain caching data
+     *
+     * @param chain chain info
+     */
+    private void initCache(Chain chain) {
+        /**
+         * 管理接收的其他链创建的跨链交易(如果有), 暂存验证中的跨链交易.
+         *  TODO 初始化时需查数据库
+         */
+        crossTxVerifyingManager.initCrossTxVerifyingMap(chain);
+    }
+
+    private void initLogger(Chain chain) {
+        /*
+         * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
+         * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
+         * */
+        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.MODULE_CODE);
+        chain.setLogger(txLogger);
     }
 
     public Map<Integer, Chain> getChainMap() {
@@ -155,11 +204,11 @@ public class ChainManager {
         this.chainMap = chainMap;
     }
 
-    public boolean containsKey(int key){
+    public boolean containsKey(int key) {
         return this.chainMap.containsKey(key);
     }
 
-    public Chain getChain(int key){
+    public Chain getChain(int key) {
         return this.chainMap.get(key);
     }
 }

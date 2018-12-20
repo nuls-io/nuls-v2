@@ -12,12 +12,12 @@ import lombok.Setter;
 import java.io.IOException;
 
 /**
- * 广播新的跨链交易hash
+ * 向链内其他节点广播本节点对于某个跨链交易的验证结果
  *
  * @author: qinyifeng
- * @date: 2018/12/17
+ * @date: 2018/12/18
  */
-public class BroadcastCrossTxHashMessage extends BaseMessage {
+public class BroadcastCrossNodeRsMessage extends BaseMessage {
     /**
      * 链ID
      */
@@ -26,17 +26,33 @@ public class BroadcastCrossTxHashMessage extends BaseMessage {
     private int chainId;
 
     /**
-     * 交易hash
+     * 转换NULS主网协议后交易hash
      */
     @Getter
     @Setter
     private NulsDigestData requestHash;
+
+    /**
+     * 验证的节点对交易的签名
+     */
+    @Getter
+    @Setter
+    private byte[] transactionSignature;
+
+    /**
+     * 验证结果
+     */
+    @Getter
+    @Setter
+    private boolean result;
 
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfNulsData(requestHash);
+        size += SerializeUtils.sizeOfBytes(transactionSignature);
+        size += SerializeUtils.sizeOfBoolean();
         return size;
     }
 
@@ -44,11 +60,15 @@ public class BroadcastCrossTxHashMessage extends BaseMessage {
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
         stream.writeNulsData(requestHash);
+        stream.writeBytesWithLength(transactionSignature);
+        stream.writeBoolean(result);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
         this.requestHash = byteBuffer.readHash();
+        this.transactionSignature = byteBuffer.readByLengthByte();
+        this.result = byteBuffer.readBoolean();
     }
 }

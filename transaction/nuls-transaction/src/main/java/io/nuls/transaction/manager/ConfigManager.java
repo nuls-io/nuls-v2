@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls.transaction.utils.manager;
+package io.nuls.transaction.manager;
 
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.transaction.db.rocksdb.storage.ConfigStorageService;

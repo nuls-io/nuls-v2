@@ -224,7 +224,7 @@ public class CmdHandler {
             }
 
             Message rspMessage = execute(cmdDetail, params, messageId);
-            Log.info("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
+            Log.debug("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
             webSocket.send(JSONUtils.obj2json(rspMessage));
         }
     }
@@ -364,7 +364,6 @@ public class CmdHandler {
     private static String paramsValidation(CmdDetail cmdDetail, Map params) {
 
         List<CmdParameter> cmdParameterList = cmdDetail.getParameters();
-        System.out.println("aaa:"+cmdParameterList.size());
         for (CmdParameter cmdParameter : cmdParameterList) {
             /*
             如果定义了参数格式，但是参数为空，返回错误

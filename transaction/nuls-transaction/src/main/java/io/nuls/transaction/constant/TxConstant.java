@@ -20,6 +20,7 @@ public interface TxConstant {
      * webSocket config
      */
     String TX_MODULE_NAME = "transaction";
+
     String TX_CMD_PATH = "io.nuls.transaction.rpc.cmd";
     int TX_CMD_PORT = 8823;
     String KERNEL_URL = "ws://127.0.0.1:8887";

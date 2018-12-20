@@ -14,8 +14,8 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.rpc.call.TransactionCmdCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
-import io.nuls.transaction.utils.manager.ChainManager;
-import io.nuls.transaction.utils.manager.TransactionManager;
+import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.manager.TransactionManager;
 
 import java.io.IOException;
 import java.util.HashMap;

@@ -58,4 +58,8 @@ public class ConsensusUtil {
         return true;
     }
 
+    public static void sendBlock() {
+
+    }
+
 }

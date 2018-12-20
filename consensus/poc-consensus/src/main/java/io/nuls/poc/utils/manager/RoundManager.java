@@ -97,7 +97,6 @@ public class RoundManager {
      * Check if you need to reset rounds
      *
      * @param chain     chain info
-     * @deprecated
      * */
     public void checkIsNeedReset(Chain chain) throws NulsException{
         /*

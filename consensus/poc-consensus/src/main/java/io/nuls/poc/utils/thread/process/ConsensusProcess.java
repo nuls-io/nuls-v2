@@ -14,17 +14,19 @@ import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.RoundManager;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
 /**
  * 共识处理器
  * Consensus processor
@@ -148,7 +150,7 @@ public class ConsensusProcess {
         }
     }
 
-    private void packing(Chain chain,MeetingMember self, MeetingRound round) throws IOException, NulsException {
+    private void packing(Chain chain,MeetingMember self, MeetingRound round) throws IOException, NulsException{
         /*
         等待出块
         Wait for blocks
@@ -174,9 +176,17 @@ public class ConsensusProcess {
             consensusLogger.error("make a null block");
             return;
         }
-        //todo 打包成功后将区块传给区块管理模块广播
-        chain.getBlockHeaderList().add(block.getHeader());
-        chain.setNewestHeader(block.getHeader());
+        try {
+            Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
+            params.put("chainId",chain.getConfig().getChainId());
+            params.put("hash", HexUtil.encode(block.serialize()));
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr,"receivePackingBlock", params);
+            if(!cmdResp.isSuccess()){
+                consensusLogger.info("add block interface call failed!");
+            }
+        }catch (Exception e){
+            consensusLogger.error(e);
+        }
     }
 
     /**
