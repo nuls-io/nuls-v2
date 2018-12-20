@@ -20,7 +20,6 @@
 
 package io.nuls.block.rpc;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
@@ -43,7 +42,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 
 import static io.nuls.block.constant.CommandConstant.*;
 
@@ -224,8 +222,9 @@ public class BlockResource extends BaseCmd {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = new Block();
-            block.parse(new NulsByteBuffer((NulsDigestData.fromDigestHex(map.get("block").toString()).getDigestBytes())));
-            if (service.saveBlock(chainId, block, 1) && service.broadcastBlock(chainId, block)) {
+            block.parse(HexUtil.decode((String) map.get("block")),0);
+            if (service.saveBlock(chainId, block, 1) ) {
+                service.broadcastBlock(chainId, block);
                 //通知共识模块
                 ConsensusUtil.sendBlockHeader(chainId, block.getHeader());
                 return success();
