@@ -30,8 +30,8 @@ import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.storage.AliasStorageService;
+import io.nuls.account.util.log.LogUtil;
 import io.nuls.base.basic.AddressTool;
-
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
@@ -64,7 +64,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
                 RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS);
             } catch (Exception e) {
                 if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                    Log.error(e.getMessage());
+                    LogUtilUtil.error(e.getMessage());
                     throw new NulsRuntimeException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
                 }
             }
@@ -93,7 +93,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
                 }
             }
         } catch (Exception e) {
-            Log.error("",e);
+            LogUtil.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
         return aliasPoList;
@@ -119,7 +119,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
             //将byte数组反序列化为AliasPo返回
             aliasPo.parse(aliasBytes, 0);
         } catch (Exception e) {
-            Log.error("",e);
+            LogUtil.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
         return aliasPo;
@@ -129,7 +129,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
     public AliasPo getAliasByAddress(int chainId, String address) {
         AliasPo aliasPo;
         if (!AddressTool.validAddress(chainId, address)) {
-            Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
+            LogUtil.debug("the address is illegal,chainId:{},address:{}", chainId, address);
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         try {
@@ -141,7 +141,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
             //将byte数组反序列化为AliasPo返回
             aliasPo.parse(aliasBytes, 0);
         } catch (Exception e) {
-            Log.error("",e);
+            LogUtil.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR, e);
         }
         return aliasPo;
@@ -183,7 +183,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
             result = RocksDBService.put(tableNameKeyIsAddress, aliasPo.getAddress(), aliasPo.serialize());
             return result;
         } catch (Exception e) {
-            Log.error("", e);
+            LogUtil.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_ERROR);
         }
     }
@@ -202,7 +202,7 @@ public class AliasStorageServiceImpl implements AliasStorageService, Initializin
         try {
             return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId, StringUtils.bytes(alias));
         } catch (Exception e) {
-            Log.error("",e);
+            LogUtil.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.DB_DELETE_ERROR,e);
         }
     }

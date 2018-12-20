@@ -1,4 +1,4 @@
-package io.nuls.transaction.db.rocksdb.storage;
+package io.nuls.transaction.service;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.transaction.model.bo.CrossChainTx;
@@ -9,10 +9,10 @@ import java.util.List;
  * 验证过程中的跨链交易
  * Cross-chain transaction in verification
  *
- * @author: Charlie
- * @date: 2018/11/13
+ * @author: qinyifeng
+ * @date: 2018/12/19
  */
-public interface CrossChainTxStorageService {
+public interface CrossChainTxService {
 
     /**
      * 新增或修改跨链交易数据

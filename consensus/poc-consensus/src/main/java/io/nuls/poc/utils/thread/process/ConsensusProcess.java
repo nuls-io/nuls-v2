@@ -180,7 +180,7 @@ public class ConsensusProcess {
             Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
             params.put("chainId",chain.getConfig().getChainId());
             params.put("hash", HexUtil.encode(block.serialize()));
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr,"receivePackingBlock", params);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr,"receivePackingBlock", params);
             if(!cmdResp.isSuccess()){
                 consensusLogger.info("add block interface call failed!");
             }
