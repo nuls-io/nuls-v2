@@ -253,7 +253,7 @@ public class TransactionCmd extends BaseCmd {
             //将交易hashHex解码为交易hash字节数组
             txHashHexList.forEach(hashHex -> txHashList.add(HexUtil.decode(hashHex)));
             //批量保存已确认交易
-            result = confirmedTransactionService.saveTxList(chainId, txHashList);
+            result = confirmedTransactionService.saveTxList(chainManager.getChain(chainId), txHashList);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -288,7 +288,7 @@ public class TransactionCmd extends BaseCmd {
             //将交易hashHex解码为交易hash字节数组
             txHashHexList.forEach(hashHex -> txHashList.add(HexUtil.decode(hashHex)));
             //批量回滚已确认交易
-            result = confirmedTransactionService.rollbackTxList(chainId, txHashList);
+            result = confirmedTransactionService.rollbackTxList(chainManager.getChain(chainId), txHashList);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {

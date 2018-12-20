@@ -42,24 +42,25 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
     private ChainManager chainManager;
 
     @Override
-    public Transaction getTransaction(int chainId, NulsDigestData hash) {
+    public Transaction getTransaction(Chain chain, NulsDigestData hash) {
         if (null == hash) {
             return null;
         }
-        return transactionStorageService.getTx(chainId, hash);
+        return transactionStorageService.getTx(chain.getChainId(), hash);
     }
 
     @Override
-    public boolean saveTx(int chainId, Transaction tx) {
+    public boolean saveTx(Chain chain, Transaction tx) {
         //check params
-        if (chainId <= 0) {
+        if (null == tx) {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
         }
-        return transactionStorageService.saveTx(chainId, tx);
+        return transactionStorageService.saveTx(chain.getChainId(), tx);
     }
 
     @Override
-    public boolean saveTxList(int chainId, List<byte[]> txHashList) {
+    public boolean saveTxList(Chain chain, List<byte[]> txHashList) {
+        int chainId = chain.getChainId();
         //check params
         if (chainId <= 0 || txHashList == null || txHashList.size() == 0) {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
@@ -76,7 +77,8 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
     }
 
     @Override
-    public boolean rollbackTxList(int chainId, List<byte[]> txHashList) {
+    public boolean rollbackTxList(Chain chain, List<byte[]> txHashList) {
+        int chainId = chain.getChainId();
         //check params
         if (chainId <= 0 || txHashList == null || txHashList.size() == 0) {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
@@ -84,7 +86,6 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
         boolean rollback = false;
         //根据交易hash查询已确认交易数据
         List<Transaction> confirmedTxList = transactionStorageService.getTxList(chainId, txHashList);
-        Chain chain = chainManager.getChain(chainId);
         for (Transaction tx : confirmedTxList) {
             TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
             Map params = new HashMap();

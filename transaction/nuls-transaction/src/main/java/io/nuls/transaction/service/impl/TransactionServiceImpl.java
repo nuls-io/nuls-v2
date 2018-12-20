@@ -50,11 +50,13 @@ import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.BlockHeaderDigestDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
+import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.TransactionService;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -79,6 +81,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private CrossChainTxStorageService crossChainTxStorageService;
+
+    @Autowired
+    private ConfirmedTransactionService confirmedTransactionService;
 
     @Override
     public boolean register(Chain chain, TxRegister txRegister) {
@@ -562,6 +567,9 @@ public class TransactionServiceImpl implements TransactionService {
         if (!validateCoinFrom(coinData.getFrom())) {
             return false;
         }
+        if (!validateCoinTo(coinData.getTo())) {
+            return false;
+        }
         //验证txData发起链id和from地址链id是否一致
         int fromChainId = getCrossTxFromsOriginChainId(tx);
         CrossTxData crossTxData = TxUtil.getCrossTxData(tx);
@@ -598,6 +606,19 @@ public class TransactionServiceImpl implements TransactionService {
         return true;
     }
 
+    private boolean validateCoinTo(List<CoinTo> listTo) throws NulsException {
+        if (null == listTo || listTo.size() == 0) {
+            throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
+        }
+        //验证跨链交易的from和to的资产是否存在(有效)
+        for (CoinTo coinTo : listTo) {
+            if(!TxUtil.assetExist(coinTo.getAssetsChainId(), coinTo.getAssetsId())){
+                throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
+            }
+        }
+        return true;
+    }
+
 
 
     /**
@@ -626,35 +647,177 @@ public class TransactionServiceImpl implements TransactionService {
         return true;
     }
 
+    /**
+     * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
+     * 2.取交易同时执行交易验证，然后coinData的验证(先发送开始验证的标识)
+     * 3.冲突检测，模块统一验证，如果有没验证通过的交易，则将该交易之后的所有交易再从1.开始执行一次
+     */
     @Override
-    public List<String> getPackableTxs(Chain chain, long endtimestamp, String maxTxDataSize) throws NulsException {
+    public List<String> getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize) throws NulsException {
         long start = TimeService.currentTimeMillis();
+        //组装统一验证参数数据,key为各模块统一验证器cmd
+        Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY);
         List<Transaction> packingTxList = new ArrayList<>();
+//        Map<String, Coin> toMaps = new HashMap<>();
+//        Set<String> fromSet = new HashSet<>();
+        long totalSize = 0L;
         while(true){
             if(endtimestamp - TimeService.currentTimeMillis() <= TxConstant.VERIFY_OFFSET){
                 break;
             }
             Transaction tx = txVerifiedPool.get(chain);
+            if (tx == null) {
+                try {
+                    Thread.sleep(100L);
+                } catch (InterruptedException e) {
+                    Log.error("packaging error ", e);
+                }
+                continue;
+            }
+            long txSize = tx.size();
+            if ((totalSize + txSize) > maxTxDataSize) {
+                txVerifiedPool.addInFirst(chain, tx, false);
+                break;
+            }
 
-
+            //从已确认的交易中进行重复交易判断
+            Transaction repeatTx = confirmedTransactionService.getTransaction(chain, tx.getHash());
+            if (repeatTx != null) {
+                continue;
+            }
+            String txHex = null;
+            try {
+                txHex = tx.hex();
+            } catch (Exception e) {
+                chain.getLogger().warn(e.getMessage(), e);
+                continue;
+            }
+            //验证tx
+            if(!transactionManager.verify(chain, tx)){
+                continue;
+            }
+            //验证coinData
+            if(!TxUtil.verifyCoinData(chain, txHex)){
+                continue;
+            }
+            packingTxList.add(tx);
+            totalSize += txSize;
+            //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
+            TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
+            if(moduleVerifyMap.containsKey(txRegister.getModuleValidator())){
+                moduleVerifyMap.get(txRegister.getModuleValidator()).add(txHex);
+            }else{
+                List<String> txHexs = new ArrayList<>();
+                txHexs.add(txHex);
+                moduleVerifyMap.put(txRegister.getModuleValidator(), txHexs);
+            }
         }
-        /**
-         * 1.打包好一个block，如果和前一个(当前本地最新)区块连不上，则返还到TxVerifiedPool
-         */
-        /**
-         * 1.按时间取出交易执行时间为endtimestamp-500，预留500毫秒给统一验证，
-         * 2.取交易同时执行交易验证，然后coinData的验证(先发送开始验证的标识)
-         * 3.冲突检测，模块统一验证，如果有没验证通过的的交易，则将该交易之后的所有交易再从1.开始执行一次
-         */
+        //统一验证过滤掉的结合
+//        Map<String, List<Transaction>> filterTxMap = new HashMap<>();
+        List<Transaction> filterList = new ArrayList<>();
+        txModuleValidatorPackable(chain, moduleVerifyMap, filterList);
+
         return null;
     }
 
+    /**
+     * 1.统一验证
+     * 2a:如果没有不通过的验证的交易则结束!!
+     * 2b.有不通过的验证时，moduleVerifyMap过滤掉不通过的交易.
+     * 3.重新验证同一个模块中不通过交易后面的交易(包括单个verify和coinData)，再执行1.递归？
+     * @param moduleVerifyMap
+     * @param filterList
+     */
+    private boolean txModuleValidatorPackable(Chain chain, Map<String, List<String>> moduleVerifyMap, List<Transaction> filterList) throws NulsException {
+        //for(Map.Entry<String, List<String>> entry : moduleVerifyMap.entrySet()){
+        Iterator<Map.Entry<String, List<String>>> it = moduleVerifyMap.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry<String, List<String>> entry = it.next();
+            List<String> txhashList = TxUtil.txModuleValidator(entry.getKey(), entry.getValue());
+            if(null == txhashList || txhashList.size() == 0){
+                //模块统一验证没有冲突的，从map中干掉
+                it.remove();
+                break;
+            }
+            //记录冲突的交易，以及对应的索引
+            int startIndex = filter(entry.getValue(), txhashList, filterList);
+            if(startIndex >= 0){
+                //从模块验证集合中，删除冲突交易以及之前的交易，以便重新验证之后的交易
+                entry.getValue().subList(0, startIndex + 1).clear();
+            }
+        }
+        if(moduleVerifyMap.isEmpty()){
+            return true;
+        }
+        verifyAgain(chain, moduleVerifyMap, filterList);
+        return txModuleValidatorPackable(chain, moduleVerifyMap, filterList);
+    }
+
+    private void verifyAgain(Chain chain, Map<String, List<String>> moduleVerifyMap, List<Transaction> filterList) throws NulsException {
+        Iterator<Map.Entry<String, List<String>>> it = moduleVerifyMap.entrySet().iterator();
+        while(it.hasNext()){
+            Map.Entry<String, List<String>> entry = it.next();
+            Iterator<String> iterator = entry.getValue().iterator();
+            while(iterator.hasNext()){
+                String txHex = iterator.next();
+                Transaction tx = TxUtil.getTransaction(txHex);
+                //验证tx
+                if(!transactionManager.verify(chain, tx)){
+
+                    continue;
+                }
+                //验证coinData
+                if(!TxUtil.verifyCoinData(chain, txHex)){
+                    continue;
+                }
+
+            }
+        }
+    }
+
+    private int filter(List<String> txHexList, List<String> txhashList, List<Transaction> filterList) throws NulsException{
+        int startIndex = -1;
+        for(int i=0; i< txHexList.size(); i++) {
+            String txhex = txhashList.get(i);
+            Transaction tx = TxUtil.getTransaction(txhex);
+            for(String txHash : txhashList){
+                if(tx.getHash().equals(NulsDigestData.fromDigestHex(txHash))){
+                    filterList.add(tx);
+                    if(startIndex == -1){
+                        startIndex = i;
+                    }
+                }
+            }
+        }
+        return startIndex;
+    }
+
+  /*  private void filter(List<String> txHexList, List<String> txhashList, String key, Map<String, List<Transaction>> filterTxMap) throws NulsException{
+        for(String txhex : txHexList) {
+            Transaction tx = TxUtil.getTransaction(txhex);
+            for(String txHash : txhashList){
+                if(tx.getHash().equals(NulsDigestData.fromDigestHex(txHash))){
+                    if (filterTxMap.containsKey(key)) {
+                        filterTxMap.get(key).add(tx);
+                    } else {
+                        List<Transaction> txs = new ArrayList<>();
+                        txs.add(tx);
+                        filterTxMap.put(key, txs);
+                    }
+                }
+            }
+
+        }
+    }*/
+
+    //从最终要返回的集合中过滤被干掉的交易
+    private void filterTx(List<Transaction> packingTxList, Map<String, List<String>> filterTxMap){
+
+    }
 
     @Override
     public boolean batchVerify(Chain chain, List<String> txHexList) throws NulsException {
-
         List<Transaction> txList = new ArrayList<>();
-
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<String, List<String>> moduleVerifyMap = new HashMap<>();
         for (String txHex : txHexList) {
@@ -673,10 +836,13 @@ public class TransactionServiceImpl implements TransactionService {
                 }
             }
             //验证单个交易
-            transactionManager.verify(chain, tx);
-
+            if(!transactionManager.verify(chain, tx)){
+                return false;
+            }
             //验证coinData
-            TxUtil.verifyCoinData(txHex);
+            if(!TxUtil.verifyCoinData(chain, tx)){
+                return false;
+            }
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
             if(moduleVerifyMap.containsKey(txRegister.getModuleValidator())){
@@ -687,11 +853,22 @@ public class TransactionServiceImpl implements TransactionService {
                 moduleVerifyMap.put(txRegister.getModuleValidator(), txHexs);
             }
         }
-        //todo 是否需要统一验证coinData?
-        TxUtil.verifyCoinData(txHexList);
         //统一验证
         TxUtil.txsModuleValidators(moduleVerifyMap);
-
         return true;
     }
+
+
+    @Override
+    public boolean clearInvalidTxFromVerifiedStorage(Chain chain, List<String> txHashList){
+        for(String txHash : txHashList){
+            try {
+                txVerifiedStorageService.removeTx(chain.getChainId(), NulsDigestData.fromDigestHex(txHash));
+            } catch (NulsException e) {
+                chain.getLogger().error(e);
+            }
+        }
+        return true;
+    }
+
 }
