@@ -654,12 +654,9 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public List<String> getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize) throws NulsException {
-        long start = TimeService.currentTimeMillis();
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY);
         List<Transaction> packingTxList = new ArrayList<>();
-//        Map<String, Coin> toMaps = new HashMap<>();
-//        Set<String> fromSet = new HashSet<>();
         long totalSize = 0L;
         while (true) {
             if (endtimestamp - TimeService.currentTimeMillis() <= TxConstant.VERIFY_OFFSET) {
