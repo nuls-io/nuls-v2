@@ -20,6 +20,7 @@ public class SendRetryProcessor implements Runnable {
     SendRetryProcessor(Object[] obj){
         this.subscriberEvent = obj;
     }
+
     @Override
     public void run() {
         try{

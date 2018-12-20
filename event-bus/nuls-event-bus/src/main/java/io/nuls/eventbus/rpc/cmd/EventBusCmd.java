@@ -64,7 +64,7 @@ public class EventBusCmd extends BaseCmd {
         try{
             eventBus.unsubscribe(params);
         }catch (NulsRuntimeException nre){
-            Log.error("Subscription is failed");
+            Log.error("UnSubscribe is failed");
             return failed(nre.getErrorCode());
         }
         EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{moduleAbbr, EbConstants.UNSUBSCRIBE});

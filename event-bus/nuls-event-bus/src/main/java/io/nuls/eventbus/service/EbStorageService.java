@@ -28,6 +28,7 @@ public interface EbStorageService {
     void putTopic(Topic topic);
 
     /**
+     * gets topic for the given key
      * @param key  topic key to get Topic from DB
      * @return Topic topic by topic name
      */
