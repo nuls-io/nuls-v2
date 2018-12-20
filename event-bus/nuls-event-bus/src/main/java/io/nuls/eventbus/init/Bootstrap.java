@@ -81,7 +81,7 @@ public class Bootstrap {
         if(roles != null){
             roles.stream().map(role -> EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{role, EbConstants.SUBSCRIBE}));
         }
-        Constants.THREAD_POOL.execute(new ClientSyncProcessor());
+        EbConstants.EB_THREAD_POOL.execute(new ClientSyncProcessor());
     }
 
     private static void initDB(){
