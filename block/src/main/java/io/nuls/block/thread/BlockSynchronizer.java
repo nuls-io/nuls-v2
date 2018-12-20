@@ -139,8 +139,8 @@ public class BlockSynchronizer implements Runnable {
             Boolean storageResult = consumerFuture.get();
             boolean success = downResult != null && downResult && storageResult != null && storageResult;
             long end = System.currentTimeMillis();
-            Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
             if (success) {
+                Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
                 if (checkIsNewest(chainId, params)) {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                 } else {
