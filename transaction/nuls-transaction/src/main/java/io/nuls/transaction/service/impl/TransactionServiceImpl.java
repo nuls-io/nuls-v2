@@ -50,6 +50,10 @@ import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.BlockHeaderDigestDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
+import io.nuls.transaction.rpc.call.AccountCall;
+import io.nuls.transaction.rpc.call.ChainCall;
+import io.nuls.transaction.rpc.call.LegerCall;
+import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.TransactionService;
 import io.nuls.transaction.manager.TransactionManager;
@@ -127,7 +131,7 @@ public class TransactionServiceImpl implements TransactionService {
             valiCoin(coinFromList, coinToList);
             //多签交易，计算签名大小，取多签地址m来计算
             byte[] fromAddress = coinFromList.get(0).getAddress();
-            MultiSigAccount multiSigAccount = TxUtil.getMultiSigAccount(fromAddress);
+            MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(fromAddress);
             int txSize = tx.size();
             txSize += getMultiSignAddressSignatureSize(multiSigAccount.getM());
             CoinData coinData = getCoinData(coinFromList, coinToList, txSize);
@@ -141,7 +145,7 @@ public class TransactionServiceImpl implements TransactionService {
                 return map;
             } else {
                 //获多签交易发起者的eckey,进行第一个签名
-                String priKey = TxUtil.getPrikey(accountSignDTO.getAddress(), accountSignDTO.getPassword());
+                String priKey = AccountCall.getPrikey(accountSignDTO.getAddress(), accountSignDTO.getPassword());
                 ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
                 //验证签名地址账户是否属于多签账户
                 if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), ecKey.getPubKey())) {
@@ -194,7 +198,7 @@ public class TransactionServiceImpl implements TransactionService {
             //签名
             List<ECKey> signEcKeys = new ArrayList<>();
             for (CoinDTO coinDTO : listFrom) {
-                String priKey = TxUtil.getPrikey(coinDTO.getAddress(), coinDTO.getPassword());
+                String priKey = AccountCall.getPrikey(coinDTO.getAddress(), coinDTO.getPassword());
                 ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
                 signEcKeys.add(ecKey);
             }
@@ -231,7 +235,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Map<String, String> signMultiTransaction(Chain chain, String address, String password, String tx) throws NulsException {
         Transaction transaction = TxUtil.getTransaction(tx);
-        String priKey = TxUtil.getPrikey(address, password);
+        String priKey = AccountCall.getPrikey(address, password);
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
         MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
         multiSignTxSignature.parse(new NulsByteBuffer(transaction.getTransactionSignature()));
@@ -261,7 +265,7 @@ public class TransactionServiceImpl implements TransactionService {
                         throw new NulsException(TxErrorCode.COINDATA_IS_INCOMPLETE);
                     }
                     byte[] fromAddress = coinFromList.get(0).getAddress();
-                    MultiSigAccount multiSigAccount = TxUtil.getMultiSigAccount(fromAddress);
+                    MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(fromAddress);
                     multiSignTxSignature.setM(multiSigAccount.getM());
                     multiSignTxSignature.setPubKeyList(multiSigAccount.getPubKeyList());
                 }
@@ -359,16 +363,16 @@ public class TransactionServiceImpl implements TransactionService {
             }
             int assetChainId = coinDTO.getAssetsChainId();
             int assetId = coinDTO.getAssetsId();
-            if (!TxUtil.assetExist(assetChainId, assetId)) {
+            if (!ChainCall.assetExist(assetChainId, assetId)) {
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
             }
             //检查对应资产余额 是否足够
             BigInteger amount = coinDTO.getAmount();
-            BigInteger balance = TxUtil.getBalance(address, assetChainId, assetId);
+            BigInteger balance = LegerCall.getBalance(address, assetChainId, assetId);
             if (BigIntegerUtils.isLessThan(balance, amount)) {
                 throw new NulsException(TxErrorCode.INSUFFICIENT_BALANCE);
             }
-            byte[] nonce = TxUtil.getNonce(address, assetChainId, assetId);
+            byte[] nonce = LegerCall.getNonce(address, assetChainId, assetId);
             CoinFrom coinFrom = new CoinFrom(address, assetChainId, assetId, amount, nonce, TxConstant.CORSS_TX_LOCKED);
             coinFroms.add(coinFrom);
         }
@@ -400,7 +404,7 @@ public class TransactionServiceImpl implements TransactionService {
             int chainId = coinDTO.getAssetsChainId();
             int assetId = coinDTO.getAssetsId();
             coinTo.setAmount(coinDTO.getAmount());
-            if (!TxUtil.assetExist(chainId, assetId)) {
+            if (!ChainCall.assetExist(chainId, assetId)) {
                 //资产不存在 chainId assetId
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
             }
@@ -473,7 +477,7 @@ public class TransactionServiceImpl implements TransactionService {
     private BigInteger getFeeDirect(List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee) throws NulsException {
         for (CoinFrom coinFrom : listFrom) {
             if (TxUtil.isNulsAsset(coinFrom)) {
-                BigInteger mainAsset = TxUtil.getBalance(coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
+                BigInteger mainAsset = LegerCall.getBalance(coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
                 //当前还差的手续费
                 BigInteger current = targetFee.subtract(actualFee);
                 //如果余额大于等于目标手续费，则直接收取全额手续费
@@ -507,14 +511,14 @@ public class TransactionServiceImpl implements TransactionService {
         while (iterator.hasNext()) {
             CoinFrom coinFrom = iterator.next();
             if (!TxUtil.isNulsAsset(coinFrom)) {
-                BigInteger mainAsset = TxUtil.getBalance(coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
+                BigInteger mainAsset = LegerCall.getBalance(coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
                 if (BigIntegerUtils.isEqualOrLessThan(mainAsset, BigInteger.ZERO)) {
                     continue;
                 }
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
-                feeCoinFrom.setNonce(TxUtil.getNonce(address, TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID));
+                feeCoinFrom.setNonce(LegerCall.getNonce(address, TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID));
                 txSize += feeCoinFrom.size();
                 //新增coinfrom，重新计算本交易预计收取的手续费
                 targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
@@ -596,7 +600,7 @@ public class TransactionServiceImpl implements TransactionService {
                 hasNulsFrom = true;
             }
             //只有NULS主网节点才会进入跨链交易验证器，直接验证资产即可
-            if (!TxUtil.assetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
+            if (!ChainCall.assetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
             }
         }
@@ -612,7 +616,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         //验证跨链交易的from和to的资产是否存在(有效)
         for (CoinTo coinTo : listTo) {
-            if (!TxUtil.assetExist(coinTo.getAssetsChainId(), coinTo.getAssetsId())) {
+            if (!ChainCall.assetExist(coinTo.getAssetsChainId(), coinTo.getAssetsId())) {
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
             }
         }
@@ -655,7 +659,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<String> getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize) throws NulsException {
         //组装统一验证参数数据,key为各模块统一验证器cmd
-        Map<String, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY);
+        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY);
         List<Transaction> packingTxList = new ArrayList<>();
         long totalSize = 0L;
         while (true) {
@@ -694,19 +698,19 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             //验证coinData
-            if (!TxUtil.verifyCoinData(chain, txHex)) {
+            if (!LegerCall.verifyCoinData(chain, txHex)) {
                 continue;
             }
             packingTxList.add(tx);
             totalSize += txSize;
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-            if (moduleVerifyMap.containsKey(txRegister.getModuleValidator())) {
-                moduleVerifyMap.get(txRegister.getModuleValidator()).add(txHex);
+            if (moduleVerifyMap.containsKey(txRegister)) {
+                moduleVerifyMap.get(txRegister).add(txHex);
             } else {
                 List<String> txHexs = new ArrayList<>();
                 txHexs.add(txHex);
-                moduleVerifyMap.put(txRegister.getModuleValidator(), txHexs);
+                moduleVerifyMap.put(txRegister, txHexs);
             }
         }
         //统一验证以及之后的再次验证过滤掉的交易集合
@@ -715,7 +719,7 @@ public class TransactionServiceImpl implements TransactionService {
         //过滤要未通过验证的交易
         filterTx(packingTxList, filterList);
         List<String> packableTxs = new ArrayList<>();
-        for(Transaction tx : packingTxList){
+        for (Transaction tx : packingTxList) {
             try {
                 packableTxs.add(tx.hex());
             } catch (Exception e) {
@@ -734,11 +738,11 @@ public class TransactionServiceImpl implements TransactionService {
      * @param moduleVerifyMap
      * @param filterList
      */
-    private boolean txModuleValidatorPackable(Chain chain, Map<String, List<String>> moduleVerifyMap, List<Transaction> filterList) throws NulsException {
-        Iterator<Map.Entry<String, List<String>>> it = moduleVerifyMap.entrySet().iterator();
+    private boolean txModuleValidatorPackable(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, List<Transaction> filterList) throws NulsException {
+        Iterator<Map.Entry<TxRegister, List<String>>> it = moduleVerifyMap.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<String, List<String>> entry = it.next();
-            List<String> txhashList = TxUtil.txModuleValidator(chain, entry.getKey(), entry.getValue());
+            Map.Entry<TxRegister, List<String>> entry = it.next();
+            List<String> txhashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
             if (null == txhashList || txhashList.size() == 0) {
                 //模块统一验证没有冲突的，从map中干掉
                 it.remove();
@@ -758,10 +762,10 @@ public class TransactionServiceImpl implements TransactionService {
         return txModuleValidatorPackable(chain, moduleVerifyMap, filterList);
     }
 
-    private void verifyAgain(Chain chain, Map<String, List<String>> moduleVerifyMap, List<Transaction> filterList) throws NulsException {
-        Iterator<Map.Entry<String, List<String>>> it = moduleVerifyMap.entrySet().iterator();
+    private void verifyAgain(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, List<Transaction> filterList) throws NulsException {
+        Iterator<Map.Entry<TxRegister, List<String>>> it = moduleVerifyMap.entrySet().iterator();
         while (it.hasNext()) {
-            Map.Entry<String, List<String>> entry = it.next();
+            Map.Entry<TxRegister, List<String>> entry = it.next();
             Iterator<String> iterator = entry.getValue().iterator();
             while (iterator.hasNext()) {
                 String txHex = iterator.next();
@@ -774,7 +778,7 @@ public class TransactionServiceImpl implements TransactionService {
                 }
                 //向账本模块发送要批量验证coinData的标识
                 //验证coinData
-                if (!TxUtil.verifyCoinData(chain, txHex)) {
+                if (!LegerCall.verifyCoinData(chain, txHex)) {
                     filterList.add(tx);
                     iterator.remove();
                     continue;
@@ -802,6 +806,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     /**
      * 从最终要返回的集合中过滤被没通过的交易
+     *
      * @param packingTxList
      * @param filterList
      */
@@ -819,7 +824,7 @@ public class TransactionServiceImpl implements TransactionService {
     public boolean batchVerify(Chain chain, List<String> txHexList) throws NulsException {
         List<Transaction> txList = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
-        Map<String, List<String>> moduleVerifyMap = new HashMap<>();
+        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>();
         for (String txHex : txHexList) {
             //将txHex转换为Transaction对象
             Transaction tx = TxUtil.getTransaction(txHex);
@@ -840,21 +845,21 @@ public class TransactionServiceImpl implements TransactionService {
                 return false;
             }
             //验证coinData
-            if (!TxUtil.verifyCoinData(chain, tx)) {
+            if (!LegerCall.verifyCoinData(chain, tx)) {
                 return false;
             }
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-            if (moduleVerifyMap.containsKey(txRegister.getModuleValidator())) {
-                moduleVerifyMap.get(txRegister.getModuleValidator()).add(txHex);
+            if (moduleVerifyMap.containsKey(txRegister)) {
+                moduleVerifyMap.get(txRegister).add(txHex);
             } else {
                 List<String> txHexs = new ArrayList<>();
                 txHexs.add(txHex);
-                moduleVerifyMap.put(txRegister.getModuleValidator(), txHexs);
+                moduleVerifyMap.put(txRegister, txHexs);
             }
         }
         //统一验证
-        TxUtil.txsModuleValidators(chain, moduleVerifyMap);
+        TransactionCall.txsModuleValidators(chain, moduleVerifyMap);
         return true;
     }
 

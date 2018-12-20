@@ -14,7 +14,7 @@ import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
-import io.nuls.transaction.rpc.call.TransactionCmdCall;
+import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.TransactionService;
 import io.nuls.transaction.manager.ChainManager;
@@ -54,11 +54,13 @@ public class TransactionCmd extends BaseCmd {
     public Response register(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
-        // check parameters
         try {
-            if (params == null) {
+            // check parameters
+            Object chainIdObj = params == null ? null : params.get("chainId");
+            if (params == null || chainIdObj == null) {
                 throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
+            int chainId = (Integer) chainIdObj;
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDTO.class);
             List<TxRegisterDTO> txRegisterList = moduleTxRegisterDto.getList();
@@ -79,7 +81,7 @@ public class TransactionCmd extends BaseCmd {
                 txRegister.setVerifySignature(txRegisterDto.isVerifySignature());
 
                 //todo 注册交易 需要传chainId
-                result = transactionService.register(chainManager.getChain(-1111111111), txRegister);
+                result = transactionService.register(chainManager.getChain(chainId), txRegister);
             }
 
         } catch (IOException e) {
@@ -174,7 +176,7 @@ public class TransactionCmd extends BaseCmd {
             Object txHexObj = params == null ? null : params.get("txHex");
             Object secondaryDataHexObj = params == null ? null : params.get("secondaryDataHex");
             // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null || secondaryDataHexObj == null) {
+            if (params == null || chainIdObj == null || txHexObj == null) {
                 throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             int chainId = (Integer) chainIdObj;
@@ -182,7 +184,7 @@ public class TransactionCmd extends BaseCmd {
             //将txHex转换为Transaction对象
             Transaction transaction = TxUtil.getTransaction(txHex);
             TxRegister txRegister = transactionManager.getTxRegister(chainManager.getChain(chainId), transaction.getType());
-            HashMap response = TransactionCmdCall.request(txRegister.getCommit(), txRegister.getModuleCode(), params);
+            HashMap response = (HashMap)TransactionCall.request(txRegister.getCommit(), txRegister.getModuleCode(), params);
             result = (Boolean) response.get("value");
         } catch (NulsException e) {
             return failed(e.getErrorCode());
@@ -217,7 +219,7 @@ public class TransactionCmd extends BaseCmd {
             //将txHex转换为Transaction对象
             Transaction transaction = TxUtil.getTransaction(txHex);
             TxRegister txRegister = transactionManager.getTxRegister(chainManager.getChain(chainId), transaction.getType());
-            HashMap response = TransactionCmdCall.request(txRegister.getRollback(), txRegister.getModuleCode(), params);
+            HashMap response = (HashMap)TransactionCall.request(txRegister.getRollback(), txRegister.getModuleCode(), params);
             result = (Boolean) response.get("value");
         } catch (NulsException e) {
             return failed(e.getErrorCode());
