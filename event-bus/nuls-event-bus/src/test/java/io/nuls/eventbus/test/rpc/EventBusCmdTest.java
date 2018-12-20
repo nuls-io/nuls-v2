@@ -4,7 +4,6 @@ import io.nuls.eventbus.EventBus;
 import io.nuls.eventbus.model.Topic;
 import io.nuls.eventbus.rpc.cmd.EventBusCmd;
 import io.nuls.eventbus.rpc.processor.ClientSyncProcessor;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -18,7 +17,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class EventBusCmdTest {
 
-    EventBusCmd eventBusCmd = new EventBusCmd();
+    private final EventBusCmd eventBusCmd = new EventBusCmd();
 
     @Before
     public void before(){

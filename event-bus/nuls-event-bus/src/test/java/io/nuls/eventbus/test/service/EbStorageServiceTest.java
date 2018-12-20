@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentMap;
 
 public class EbStorageServiceTest {
 
-    EbStorageService ebStorageService = new EbStorageServiceImpl();
+    private final EbStorageService ebStorageService = new EbStorageServiceImpl();
 
     @Before
     public void before(){
