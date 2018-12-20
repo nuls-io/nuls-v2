@@ -77,14 +77,12 @@ public class BlockDownloader implements Callable<Boolean> {
 
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         long netLatestHeight = params.getNetLatestHeight();
-        long startHeight = ContextManager.getContext(chainId).getLatestHeight() + 1;
+        long startHeight = params.getLocalLatestHeight() + 1;
         int maxDowncount = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.DOWNLOAD_NUMBER));
         try {
-            long total = netLatestHeight - startHeight + 1;
-            long start = System.currentTimeMillis();
             while (startHeight <= netLatestHeight) {
                 Node node = nodes.take();
-                int size = maxDowncount * 100 / node.getCredit();
+                int size = maxDowncount * node.getCredit() / 100;
                 if (startHeight + size > netLatestHeight) {
                     size = (int) (netLatestHeight - startHeight + 1);
                 }
@@ -93,8 +91,6 @@ public class BlockDownloader implements Callable<Boolean> {
                 futures.offer(future);
                 startHeight += size;
             }
-            long end = System.currentTimeMillis();
-            Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -189,7 +185,6 @@ public class BlockDownloader implements Callable<Boolean> {
         public BlockDownLoadResult call() {
             boolean b = false;
             long endHeight = startHeight + size - 1;
-            Log.info("getBlocks:{}->{} ,from:{}, start", startHeight, endHeight, node.getId());
             //组装批量获取区块消息
             HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
             message.setCommand(CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE);

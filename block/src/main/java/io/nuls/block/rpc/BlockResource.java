@@ -132,7 +132,9 @@ public class BlockResource extends BaseCmd {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Integer size = Integer.parseInt(map.get("size").toString());
             long latestHeight = ContextManager.getContext(chainId).getLatestHeight();
-            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, latestHeight - size + 1, latestHeight);
+            long startHeight = latestHeight - size + 1;
+            startHeight = startHeight < 0 ? 0 : startHeight;
+            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, startHeight, latestHeight);
             List<String> hexList = new ArrayList<>();
             for (BlockHeader blockHeader : blockHeaders) {
                 hexList.add(HexUtil.byteToHex(blockHeader.serialize()));
