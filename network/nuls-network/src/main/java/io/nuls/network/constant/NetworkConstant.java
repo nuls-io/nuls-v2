@@ -124,7 +124,7 @@ public interface NetworkConstant {
     String DB_NAME_NETWORK_NODEGROUPS="nwNodeGroups";
     String DB_NAME_NETWORK_NODES="nwNodes";
     String DB_NAME_NETWORK_GROUP_NODESKEYS="nwGroupNodesKeys";
-
+    String DB_NAME_NETWORK_PROTOCOL_REGISTER="nwProtocolRegister";
     /**
      * --------[Special Splitter] -------
      */

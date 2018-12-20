@@ -27,6 +27,7 @@ package io.nuls.network.storage;
 import io.nuls.network.model.po.GroupNodeKeys;
 import io.nuls.network.model.po.NodeGroupPo;
 import io.nuls.network.model.po.NodePo;
+import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
@@ -71,6 +72,14 @@ public interface  DbService {
     public NodeGroupPo getNodeGroupByChainId(int chainId) throws NulsException;
     public GroupNodeKeys getGroupNodeKeysByChainId(int chainId) throws NulsException;
 
+    /**
+     * save protocol register info
+     */
 
+    public void saveOrUpdateProtocolRegisterInfo(RoleProtocolPo roleProtocolPo);
+    /**
+     * init protocol register info
+     */
+    public List<RoleProtocolPo> getProtocolRegisterInfos();
 
 }

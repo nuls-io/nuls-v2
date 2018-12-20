@@ -27,9 +27,11 @@ package io.nuls.network.storage;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.po.GroupNodeKeys;
 import io.nuls.network.model.po.NodeGroupPo;
 import io.nuls.network.model.po.NodePo;
+import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
@@ -204,6 +206,35 @@ public class DbServiceImpl implements DbService,InitializingBean {
     }
 
     @Override
+    public void saveOrUpdateProtocolRegisterInfo(RoleProtocolPo roleProtocolPo) {
+        try {
+            RocksDBService.put(NetworkConstant.DB_NAME_NETWORK_PROTOCOL_REGISTER,
+                    ByteUtils.toBytes(roleProtocolPo.getRole(), NetworkParam.getInstance().getEncoding()),roleProtocolPo.serialize());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public List<RoleProtocolPo> getProtocolRegisterInfos() {
+        List<Entry<byte[],byte[]>> protocolRegisterBytes=RocksDBService.entryList(NetworkConstant.DB_NAME_NETWORK_PROTOCOL_REGISTER);
+        List<RoleProtocolPo>  roleProtocolPos=new ArrayList<>();
+        try {
+            if(null != protocolRegisterBytes && protocolRegisterBytes.size()> 0){
+                for( Entry<byte[],byte[]> poBytes:protocolRegisterBytes){
+                    RoleProtocolPo roleProtocolPo=new RoleProtocolPo();
+                    roleProtocolPo.parse(poBytes.getValue(),0);
+                    roleProtocolPos.add(roleProtocolPo);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            Log.error(e.getMessage());
+        }
+        return roleProtocolPos;
+    }
+
+    @Override
     public void afterPropertiesSet() throws NulsException {
         try {
             if (!RocksDBService.existTable(NetworkConstant.DB_NAME_NETWORK_NODEGROUPS)) {
@@ -214,6 +245,10 @@ public class DbServiceImpl implements DbService,InitializingBean {
             }
             if (!RocksDBService.existTable(NetworkConstant.DB_NAME_NETWORK_GROUP_NODESKEYS)) {
                 RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_GROUP_NODESKEYS);
+            }
+
+            if (!RocksDBService.existTable(NetworkConstant.DB_NAME_NETWORK_PROTOCOL_REGISTER)) {
+                RocksDBService.createTable(NetworkConstant.DB_NAME_NETWORK_PROTOCOL_REGISTER);
             }
         }catch (Exception e){
             Log.error(e.getMessage());
