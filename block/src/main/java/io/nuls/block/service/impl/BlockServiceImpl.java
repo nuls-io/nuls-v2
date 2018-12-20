@@ -172,10 +172,15 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public boolean saveBlock(int chainId, Block block) {
-        return saveBlock(chainId, block, false);
+        return saveBlock(chainId, block, false, 0);
     }
 
-    private boolean saveBlock(int chainId, Block block, boolean localInit) {
+    @Override
+    public boolean saveBlock(int chainId, Block block, int download) {
+        return saveBlock(chainId, block, false, download);
+    }
+
+    private boolean saveBlock(int chainId, Block block, boolean localInit, int download) {
         long height = block.getHeader().getHeight();
         NulsDigestData hash = block.getHeader().getHash();
         //1.验证区块
@@ -317,7 +322,7 @@ public class BlockServiceImpl implements BlockService {
             //1.判断有没有创世块，如果没有就初始化创世块并保存
             if (null == genesisBlock) {
                 genesisBlock = GenesisBlock.getInstance();
-                saveBlock(chainId, genesisBlock, true);
+                saveBlock(chainId, genesisBlock, true, 0);
             }
 
             //2.获取缓存的最新区块高度（缓存的最新高度与实际的最新高度最多相差1，理论上不会有相差多个高度的情况，所以异常场景也只考虑了高度相差1）
