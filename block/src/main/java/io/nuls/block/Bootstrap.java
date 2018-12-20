@@ -20,7 +20,6 @@
 
 package io.nuls.block;
 
-import com.google.common.collect.Lists;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.block.cache.CacheHandler;
@@ -32,10 +31,8 @@ import io.nuls.block.context.Context;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.test.Miner;
 import io.nuls.block.thread.BlockSynchronizer;
-import io.nuls.block.thread.monitor.*;
-import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.thread.monitor.OrphanChainsMonitor;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
@@ -43,7 +40,6 @@ import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.TimeService;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
 import java.util.List;
@@ -142,8 +138,8 @@ public class Bootstrap {
         WsServer.getInstance(ModuleE.BL)
                 .moduleRoles(new String[]{"1.0"})
                 .moduleVersion("1.0")
-                .dependencies(ModuleE.KE.abbr, "1.0")
-                .dependencies(ModuleE.NW.abbr, "1.0")
+                //.dependencies(ModuleE.KE.abbr, "1.0")
+                //.dependencies(ModuleE.NW.abbr, "1.0")
                 .scanPackage("io.nuls.block.rpc")
                 .connect("ws://127.0.0.1:8887");
 
