@@ -77,6 +77,8 @@ public class ConsensusServiceImpl implements ConsensusService {
     private BlockValidator blockValidator;
     @Autowired
     private BatchValidator batchValidator;
+    @Autowired
+    private BlockManager blockManager;
 
     /**
      * 创建节点
@@ -669,7 +671,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = dto.getChainId();
-        boolean isDownload = dto.isDownload();
+        /*
+        * 0区块下载中，1接收到最新区块
+        * */
+        boolean isDownload = (dto.getDownload()==0);
         String blockHex = dto.getBlock();
         Chain chain = chainManager.getChainMap().get(chainId);
         if (chain == null) {
@@ -1351,8 +1356,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER);
             BlockHeader header = new BlockHeader();
             header.parse(HexUtil.decode(headerHex),0);
-            chain.getBlockHeaderList().add(header);
-            chain.setNewestHeader(header);
+            blockManager.addNewBlock(chain,header);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e.getMessage());

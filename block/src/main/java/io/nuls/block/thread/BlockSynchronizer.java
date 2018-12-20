@@ -85,7 +85,8 @@ public class BlockSynchronizer implements Runnable {
 //                    Log.info("skip Block Synchronize, SynStatus:{}, RunningStatus:{}", synStatus, runningStatus);
 //                }
             } catch (Exception e) {
-                Log.error(e);
+                e.printStackTrace();
+//                Log.error(e);
                 statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
             }
         }
@@ -115,27 +116,30 @@ public class BlockSynchronizer implements Runnable {
 
             PriorityBlockingQueue<Node> nodes = params.getNodes();
             int nodeCount = nodes.size();
-            ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount, 0, new NulsThreadFactory("block-downloader-" + chainId));
+            ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount, 0, new NulsThreadFactory("worker-" + chainId));
             BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
             BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
+            long netLatestHeight = params.getNetLatestHeight();
+            long startHeight = ContextManager.getContext(chainId).getLatestHeight() + 1;
+            long total = netLatestHeight - startHeight + 1;
+            long start = System.currentTimeMillis();
             //5.开启区块下载器BlockDownloader
             BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params);
-            FutureTask<Boolean> downloadFutrue = new FutureTask<>(downloader);
-            ThreadUtils.createAndRunThread("block-downloader-" + chainId, downloadFutrue);
+            Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
 
             //6.开启区块收集线程BlockCollector，收集BlockDownloader下载的区块
             BlockCollector collector = new BlockCollector(chainId, futures, executor, params, queue);
             ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
 
             //7.开启区块消费线程BlockConsumer，与上面的BlockDownloader共用一个队列blockQueue
-            BlockConsumer consumer = new BlockConsumer(chainId, queue);
-            FutureTask<Boolean> consumerFuture = new FutureTask<>(consumer);
-            ThreadUtils.createAndRunThread("block-consumer-" + chainId, consumerFuture);
+            BlockConsumer consumer = new BlockConsumer(chainId, queue, params);
+            Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
 
             Boolean downResult = downloadFutrue.get();
             Boolean storageResult = consumerFuture.get();
             boolean success = downResult != null && downResult && storageResult != null && storageResult;
-
+            long end = System.currentTimeMillis();
+            Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
             if (success) {
                 if (checkIsNewest(chainId, params)) {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);

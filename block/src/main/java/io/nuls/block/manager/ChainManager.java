@@ -148,8 +148,8 @@ public class ChainManager {
 
     private static void saveBlockList(int chainId, List<Block> blockList) {
         //主链回滚中途失败，把前面回滚的区块再加回主链
-        for (Block block1 : blockList) {
-            if (!blockService.saveBlock(chainId, block1)) {
+        for (Block block : blockList) {
+            if (!blockService.saveBlock(chainId, block)) {
                 throw new ChainRuntimeException("switchChain fail");
             }
         }

@@ -55,6 +55,7 @@ public class KernelCmd4Test extends BaseCmd {
     public Response registerAPI(Map<String, Object> map) {
         try {
             RegisterApi registerApi = JSONUtils.map2pojo(map, RegisterApi.class);
+            Log.info("注册的方法：" + JSONUtils.obj2json(registerApi));
             if (registerApi != null) {
                 Map<String, Object> role = new HashMap<>(3);
                 role.put(Constants.KEY_IP, registerApi.getConnectionInformation().get(Constants.KEY_IP));
@@ -70,7 +71,7 @@ public class KernelCmd4Test extends BaseCmd {
         }
     }
 
-    @CmdAnnotation(cmd = "method1", version = 1.0,  minEvent = 1,
+    @CmdAnnotation(cmd = "method1", version = 1.0, minEvent = 1,
             description = "Test method1")
     @Parameter(parameterName = "param1", parameterType = "string")
     public Response method1(Map<String, Object> map) {

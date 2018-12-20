@@ -29,6 +29,7 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupNodeKeys;
 import io.nuls.network.model.po.NodeGroupPo;
 import io.nuls.network.model.po.NodePo;
+import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.network.storage.DbService;
 import io.nuls.network.storage.DbServiceImpl;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -114,6 +115,13 @@ public class StorageManager extends BaseManager{
             e.printStackTrace();
         }
     }
+
+    /**
+     * 删除 数据库 group信息
+     * delGroupNodes
+     * @param list list
+     * @param chainId chainId
+     */
     public void delGroupNodes(List<String> list,int chainId) {
         try {
             GroupNodeKeys groupNodeKeys = dbService.getGroupNodeKeysByChainId(chainId);
@@ -125,6 +133,15 @@ public class StorageManager extends BaseManager{
         } catch (NulsException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 加载所有模块的协议注册信息
+     * load ProtocolRegisterInfos form db
+     * @return  List<RoleProtocolPo>
+     */
+    public List<RoleProtocolPo> getProtocolRegisterInfos(){
+        return dbService.getProtocolRegisterInfos();
     }
 
     @Override

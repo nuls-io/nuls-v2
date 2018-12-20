@@ -45,9 +45,9 @@ public class BootStrap {
             initDB();
             SpringLiteContext.init(ConsensusConstant.CONTEXT_PATH);
             initLanguage();
+            initServer();
             SpringLiteContext.getBean(ChainManager.class).runChain();
             registerTx();
-            initServer();
         } catch (Exception e) {
             Log.error("consensus startup error！");
             Log.error(e);
@@ -153,7 +153,7 @@ public class BootStrap {
                 WsServer.getInstance(ModuleE.CS)
                         .moduleRoles(new String[]{"1.0"})
                         .moduleVersion("1.0")
-                        //.dependencies(ModuleE.LG.abbr, "1.0")
+                        .dependencies(ModuleE.BL.abbr, "1.0")
                         .scanPackage("io.nuls.poc.rpc")
                         .connect("ws://127.0.0.1:8887");
                 CmdDispatcher.syncKernel();

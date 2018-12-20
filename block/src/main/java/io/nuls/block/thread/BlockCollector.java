@@ -24,6 +24,9 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
 import io.nuls.block.cache.CacheHandler;
+import io.nuls.block.constant.ConfigConstant;
+import io.nuls.block.manager.ConfigManager;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Node;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
@@ -67,26 +70,30 @@ public class BlockCollector implements Runnable {
     public void run() {
         BlockDownLoadResult result;
         try {
-            while ((result = futures.take().get()) != null) {
-                if (result != null && result.isSuccess()) { result.getNode();
+            long netLatestHeight = params.getNetLatestHeight();
+            long startHeight = params.getLocalLatestHeight() + 1;
+
+            while (startHeight <= netLatestHeight) {
+                result = futures.take().get();
+                int size = result.getSize();
+                if (result.isSuccess()) {
                     Node node = result.getNode();
-                    int size = result.getSize();
-                    long startHeight = result.getStartHeight();
                     long endHeight = startHeight + size - 1;
-                    Log.info("getBlocks:{}->{} ,from:{}, success", startHeight, endHeight, node.getId());
+                    Log.info("get {} blocks:{}->{} ,from:{}, success", size, startHeight, endHeight, node.getId());
                     node.adjustCredit(true);
                     params.getNodes().offer(node);
                     List<Block> blockList = CacheHandler.getBlockList(chainId, result.getMessageHash());
                     blockList.sort(BLOCK_COMPARATOR);
                     queue.addAll(blockList);
-                    continue;
                 } else {
                     retryDownload(result);
                 }
+                startHeight += size;
             }
         } catch (Exception e) {
             Log.error(e);
         }
+        System.out.println("11111111111111111111111");
     }
 
 
@@ -97,7 +104,10 @@ public class BlockCollector implements Runnable {
      * @return
      */
     private void retryDownload(BlockDownLoadResult result) {
+        //归还下载失败的节点
         Node node = result.getNode();
+        node.adjustCredit(false);
+        params.getNodes().offer(node);
         Log.info("retry download blocks, fail node:{}, start:{}", node, result.getStartHeight());
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         try {
@@ -105,8 +115,6 @@ public class BlockCollector implements Runnable {
         } catch (InterruptedException e) {
             Log.error(e);
         }
-        node.adjustCredit(false);
-        params.getNodes().offer(node);
 
         if (downloadBlockFromNode(result)) {
             return;

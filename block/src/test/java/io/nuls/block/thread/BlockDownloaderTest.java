@@ -87,4 +87,10 @@ public class BlockDownloaderTest {
         assertEquals(100, queue.take().getCredit());
         assertEquals(90, queue.take().getCredit());
     }
+
+    @Test
+    public void name() {
+
+        int size = 20 * 100 / 120;
+    }
 }

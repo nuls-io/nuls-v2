@@ -147,7 +147,7 @@ public class SmallBlockHandler extends BaseCmd {
             }
             //获取没有的交易
             if (!needHashList.isEmpty()) {
-                Log.info("block height : " + header.getHeight() + ", tx count : " + header.getTxCount() + " , get group tx of " + needHashList.size());
+                Log.debug("block height : " + header.getHeight() + ", tx count : " + header.getTxCount() + " , get group tx of " + needHashList.size());
                 HashListMessage request = new HashListMessage();
                 request.setBlockHash(blockHash);
                 request.setTxHashList(needHashList);
@@ -161,7 +161,7 @@ public class SmallBlockHandler extends BaseCmd {
             }
 
             Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-            if (blockService.saveBlock(chainId, block)) {
+            if (blockService.saveBlock(chainId, block, 1)) {
                 SmallBlock newSmallBlock = BlockUtil.getSmallBlock(chainId, block);
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);

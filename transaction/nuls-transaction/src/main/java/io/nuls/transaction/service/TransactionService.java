@@ -134,6 +134,7 @@ public interface TransactionService {
     boolean crossTransactionValidator(Chain chain, Transaction transaction) throws NulsException;
 
     boolean crossTransactionCommit(Chain chain, Transaction transaction, BlockHeaderDigestDTO blockHeader) throws NulsException;
+
     boolean crossTransactionRollback(Chain chain, Transaction transaction, BlockHeaderDigestDTO blockHeader) throws NulsException;
 
 
@@ -145,7 +146,7 @@ public interface TransactionService {
      * @return
      * @throws NulsException
      */
-    List<String> getPackableTxs(Chain chain, long endtimestamp, String maxTxDataSize) throws NulsException;
+    List<String> getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize) throws NulsException;
 
     /**
      * 收到新区快时，验证共识发过来的待验证完整交易列表
@@ -156,4 +157,12 @@ public interface TransactionService {
      */
     boolean batchVerify(Chain chain, List<String> list) throws NulsException;
 
+
+    /**
+     * 从已验证未打包交易中删除无效的交易或已经确认的交易
+     * @param chain
+     * @param txHashList
+     * @return
+     */
+    boolean clearInvalidTxFromVerifiedStorage(Chain chain, List<String> txHashList);
 }
