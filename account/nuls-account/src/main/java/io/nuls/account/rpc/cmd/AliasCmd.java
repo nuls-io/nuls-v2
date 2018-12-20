@@ -213,24 +213,35 @@ public class AliasCmd extends BaseCmd {
     public Object accountTxValidate(Map params) {
         LogUtil.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
-        String txHex;
+        List<String> txHexList;
         List<Transaction> lists = null;
-        List<Transaction> result;
+        List<Transaction> result = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object txHexListObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX_LIST);
         try {
             // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null) {
+            if (params == null || chainIdObj == null || txHexListObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chainId = (Integer) chainIdObj;
-            txHex = (String) txHexObj;
+            txHexList = (List<String>) txHexListObj;
             //TODO after the parameter format was determine,here will be modify
-            Transaction transaction = Transaction.getInstance(txHex);
-            lists.add(transaction);
-            result = aliasService.accountTxValidate(chainId, lists);
+            if (txHexList != null) {
+                //Transaction transaction = Transaction.getInstance(txHex);
+                txHexList.forEach(txHex -> {
+                    try {
+                        lists.add(Transaction.getInstance(txHex));
+                    } catch (NulsException e) {
+                        e.printStackTrace();
+                    }
+                });
+                result = aliasService.accountTxValidate(chainId, lists);
+            }
         } catch (NulsRuntimeException e) {
-            LogUtil.info("", e);
+            LogUtil.error("", e);
+            return failed(e.getErrorCode());
+        } catch (NulsException e) {
+            LogUtil.error("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
             LogUtil.error("", e);
@@ -239,7 +250,7 @@ public class AliasCmd extends BaseCmd {
         Map<String, List<Transaction>> resultMap = new HashMap<>();
         resultMap.put("list", result);
         LogUtil.debug("ac_accountTxValidate end");
-        return success(result);
+        return success(resultMap);
     }
 
     /**
@@ -276,7 +287,7 @@ public class AliasCmd extends BaseCmd {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
         LogUtil.debug("ac_aliasTxCommit end");
-        return success(result);
+        return success(resultMap);
     }
 
     /**
@@ -296,12 +307,11 @@ public class AliasCmd extends BaseCmd {
         Object secondaryDataHexObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
         try {
             // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null || secondaryDataHexObj == null) {
+            if (params == null || chainIdObj == null || txHexObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chainId = (Integer) chainIdObj;
             txHex = (String) txHexObj;
-            secondaryDataHex = (String) secondaryDataHexObj;
             Transaction transaction = Transaction.getInstance(txHex);
             Alias alias = new Alias();
             alias.parse(new NulsByteBuffer(transaction.getTxData()));
@@ -339,12 +349,11 @@ public class AliasCmd extends BaseCmd {
         Object secondaryDataHexObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
         try {
             // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null || secondaryDataHexObj == null) {
+            if (params == null || chainIdObj == null || txHexObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chainId = (Integer) chainIdObj;
             txHex = (String) txHexObj;
-            secondaryDataHex = (String) secondaryDataHexObj;
             Transaction transaction = Transaction.getInstance(txHex);
             Alias alias = new Alias();
             alias.parse(new NulsByteBuffer(transaction.getTxData()));

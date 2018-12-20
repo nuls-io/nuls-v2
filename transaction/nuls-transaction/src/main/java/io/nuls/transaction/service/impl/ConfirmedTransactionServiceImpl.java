@@ -12,7 +12,7 @@ import io.nuls.transaction.db.rocksdb.storage.TransactionStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
-import io.nuls.transaction.rpc.call.TransactionCmdCall;
+import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
@@ -95,7 +95,7 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
             } catch (IOException e) {
                 Log.error(e);
             }
-            HashMap response = TransactionCmdCall.request(txRegister.getRollback(), txRegister.getModuleCode(), params);
+            HashMap response = (HashMap)TransactionCall.request(txRegister.getRollback(), txRegister.getModuleCode(), params);
             rollback = (Boolean) response.get("value");
         }
         if (rollback) {

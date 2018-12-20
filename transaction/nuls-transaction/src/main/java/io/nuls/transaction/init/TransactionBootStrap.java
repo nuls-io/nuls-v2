@@ -107,10 +107,10 @@ public class TransactionBootStrap {
     public static void initServer(){
         try {
             // Start server instance
-            WsServer.getInstance(ModuleE.AC)
+            WsServer.getInstance(ModuleE.TX)
                     .moduleRoles(new String[]{"1.0"})
                     .moduleVersion("1.0")
-                    .dependencies(ModuleE.LG.abbr, "1.0")
+                    //.dependencies(ModuleE.LG.abbr, "1.0")
                     .scanPackage("io.nuls.transaction.rpc.cmd")
                     .connect("ws://127.0.0.1:8887");
 

@@ -37,6 +37,8 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.rpc.call.ChainCall;
+import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.TransactionService;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -167,13 +169,12 @@ public class TransactionManager {
             }
             TxRegister txRegister = this.getTxRegister(chain, tx.getType());
 
-            //todo 调验证器
-
-            return TxUtil.txValidator(chain, txRegister.getValidator(), tx.hex());
-        } catch (NulsException e){
+            //调验证器
+            return TransactionCall.txValidator(chain, txRegister.getValidator(), txRegister.getModuleCode(), tx.hex());
+        } catch (NulsException e) {
             chain.getLogger().error(e.getErrorCode().getMsg(), e.fillInStackTrace());
             return false;
-        } catch (Exception e){
+        } catch (Exception e) {
             chain.getLogger().error(TxErrorCode.IO_ERROR.getMsg());
             return false;
         }
@@ -271,7 +272,7 @@ public class TransactionManager {
 
             if (chainId == TxConstant.NULS_CHAINID) {
                 //如果chainId是主网则通过连管理验证资产是否存在
-                if (!TxUtil.assetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
+                if (!ChainCall.assetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
                     throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
                 }
             }/*else{
@@ -355,9 +356,9 @@ public class TransactionManager {
     /**
      * 累积计算当前coinfrom中可用于计算手续费的资产
      *
-     * @param type    tx type
+     * @param type  tx type
      * @param chain chain id
-     * @param coin    coinfrom
+     * @param coin  coinfrom
      * @return BigInteger
      */
     private BigInteger accrueFee(int type, Chain chain, Coin coin) {
@@ -369,7 +370,7 @@ public class TransactionManager {
             }
         } else {
             //不为跨链交易时，只算发起链的主资产
-            if(TxUtil.isChainAssetExist(chain, coin)){
+            if (TxUtil.isChainAssetExist(chain, coin)) {
                 fee = fee.add(coin.getAmount());
             }
         }
