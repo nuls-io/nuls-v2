@@ -224,7 +224,7 @@ public class BlockResource extends BaseCmd {
             Block block = new Block();
             block.parse(HexUtil.decode((String) map.get("block")),0);
             if (service.saveBlock(chainId, block, 1) ) {
-                service.broadcastBlock(chainId, block)
+                service.broadcastBlock(chainId, block);
                 //通知共识模块
                 ConsensusUtil.sendBlockHeader(chainId, block.getHeader());
                 return success();
