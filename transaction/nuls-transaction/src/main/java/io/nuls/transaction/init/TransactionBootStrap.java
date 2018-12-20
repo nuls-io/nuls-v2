@@ -12,6 +12,7 @@ import io.nuls.tools.thread.TimeService;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.manager.TransactionManager;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
