@@ -16,28 +16,38 @@ public interface CrossChainTxStorageService {
 
     /**
      * 新增或修改跨链交易数据
+     *
+     * @param chainId
      * @param ctx
      * @return
      */
-    boolean putTx(CrossChainTx ctx);
+    boolean putTx(int chainId, CrossChainTx ctx);
 
     /**
      * 删除跨链交易
+     *
+     * @param chainId
      * @param hash
      * @return
      */
-    boolean removeTx(NulsDigestData hash);
+    boolean removeTx(int chainId, NulsDigestData hash);
 
     /**
      * 根据交易哈希查询跨链交易
+     *
+     * @param chainId
      * @param hash
      * @return
      */
-    CrossChainTx getTx(NulsDigestData hash);
+    CrossChainTx getTx(int chainId, NulsDigestData hash);
 
     /**
-     * 查询所有跨链交易
+     * 查询指定链下所有跨链交易
+     * Query all cross-chain transactions in the specified chain
+     *
+     * @param chainId
      * @return
      */
-    List<CrossChainTx> getAllTx();
+    List<CrossChainTx> getTxList(int chainId);
+
 }

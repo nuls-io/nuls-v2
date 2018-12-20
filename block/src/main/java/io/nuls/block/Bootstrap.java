@@ -20,7 +20,6 @@
 
 package io.nuls.block;
 
-import com.google.common.collect.Lists;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.block.cache.CacheHandler;
@@ -32,9 +31,8 @@ import io.nuls.block.context.Context;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.test.Miner;
 import io.nuls.block.thread.BlockSynchronizer;
-import io.nuls.block.thread.monitor.*;
+import io.nuls.block.thread.monitor.OrphanChainsMonitor;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
@@ -42,7 +40,6 @@ import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.TimeService;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
 import java.util.List;
@@ -69,7 +66,6 @@ public class Bootstrap {
 
             start();
 
-            TimeService.getInstance().start();
             //1.加载配置
             ConfigLoader.load(MODULES_CONFIG_FILE);
             //2.加载Context
@@ -85,10 +81,10 @@ public class Bootstrap {
             //各类缓存初始化
             initCache(CHAIN_ID);
 
-            onlyRunWhenTest();
-
             //5.rpc服务初始化
             rpcInit();
+
+            onlyRunWhenTest();
 
             //开启后台工作线程
             startDaemonThreads();
@@ -133,7 +129,7 @@ public class Bootstrap {
         context.setStatus(RunningStatusEnum.RUNNING);
         context.setSystemTransactionType(List.of(Constant.TX_TYPE_COINBASE));
         Block latestBlock = context.getLatestBlock();
-        new Miner("1", latestBlock, false).start();
+//        new Miner("1", latestBlock, false).start();
 //        new Miner("2", latestBlock, true).start();
     }
 
@@ -142,8 +138,8 @@ public class Bootstrap {
         WsServer.getInstance(ModuleE.BL)
                 .moduleRoles(new String[]{"1.0"})
                 .moduleVersion("1.0")
-                .dependencies(ModuleE.KE.abbr, "1.0")
-                .dependencies(ModuleE.NW.abbr, "1.0")
+                //.dependencies(ModuleE.KE.abbr, "1.0")
+                //.dependencies(ModuleE.NW.abbr, "1.0")
                 .scanPackage("io.nuls.block.rpc")
                 .connect("ws://127.0.0.1:8887");
 
@@ -153,8 +149,8 @@ public class Bootstrap {
 
     private static void startDaemonThreads() {
         //开启区块同步线程
-//        ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronizer"));
-//        synExecutor.scheduleWithFixedDelay(BlockSynchronizer.getInstance(), 0, 10, TimeUnit.SECONDS);
+        ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronizer"));
+        synExecutor.scheduleWithFixedDelay(BlockSynchronizer.getInstance(), 0, 10, TimeUnit.SECONDS);
 //        //开启区块监控线程
 //        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
 //        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
@@ -162,8 +158,8 @@ public class Bootstrap {
 //        ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
 //        forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
         //开启孤儿链处理线程
-//        ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
-//        orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+        ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
+        orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
         //开启孤儿链维护线程
 //        ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
 //        maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 10, TimeUnit.SECONDS);

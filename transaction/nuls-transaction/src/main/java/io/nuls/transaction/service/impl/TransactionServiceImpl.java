@@ -828,7 +828,7 @@ public class TransactionServiceImpl implements TransactionService {
                 CrossTxData crossTxData = TxUtil.getCrossTxData(tx);
                 if(crossTxData.getChainId() != chain.getConfig().getAssetsId()){
                     //如果是跨链交易，发起链不是当前链，则核对(跨链验证的结果)
-                    CrossChainTx crossChainTx =  crossChainTxStorageService.getTx(tx.getHash());
+                    CrossChainTx crossChainTx =  crossChainTxStorageService.getTx(crossTxData.getChainId(),tx.getHash());
                     //todo
                     /**
                      * 核对(跨链验证的结果)

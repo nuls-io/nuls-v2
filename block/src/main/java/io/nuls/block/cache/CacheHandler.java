@@ -22,15 +22,15 @@ package io.nuls.block.cache;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.constant.ConfigConstant;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 
 /**
  * 主要缓存区块同步过程中收到的区块，还有孤儿链维护线程请求的单个区块
@@ -51,10 +51,6 @@ public class CacheHandler {
     private static Map<Integer, Map<NulsDigestData, List<Block>>> workerBlockCacher = new ConcurrentHashMap<>();
 
     /**
-     * 单个下载区块请求-hash缓存
-     */
-    private static Map<Integer, List<NulsDigestData>> singleBlockHashCacher = new ConcurrentHashMap<>();
-    /**
      * 单个下载区块请求-区块缓存
      */
     private static Map<Integer, DataCacher<Block>> singleBlockCacher = new ConcurrentHashMap<>();
@@ -65,9 +61,8 @@ public class CacheHandler {
      * @param chainId
      */
     public static void init(int chainId){
-        int blockCache = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.BLOCK_CACHE));
+        workerBlockCacher.put(chainId, new ConcurrentHashMap<>());
         singleBlockCacher.put(chainId, new DataCacher<>());
-        singleBlockHashCacher.put(chainId, new LinkedList<>());
         batchBlockHashCacher.put(chainId, new DataCacher<>());
     }
 
@@ -76,6 +71,7 @@ public class CacheHandler {
     }
 
     public static Future<CompleteMessage> addBatchBlockRequest(int chainId, NulsDigestData hash) {
+        workerBlockCacher.get(chainId).put(hash, new ArrayList<>());
         return batchBlockHashCacher.get(chainId).addFuture(hash);
     }
 
@@ -93,9 +89,7 @@ public class CacheHandler {
             blockList.add(block);
             return;
         }
-        if (singleBlockHashCacher.get(chainId).contains(requestHash)) {
-            singleBlockCacher.get(chainId).complete(block.getHeader().getHash(), block);
-        }
+        singleBlockCacher.get(chainId).complete(block.getHeader().getHash(), block);
     }
 
     public static List<Block> getBlockList(int chainId, NulsDigestData requestHash) {

@@ -29,9 +29,15 @@ import java.util.List;
 
 /**
  * 创建多账户转账交易
+ *
  * @author: qinyifeng
  */
 public class MulitpleAddressTransferDto {
+
+    /**
+     * 链ID
+     */
+    private int chainId;
 
     /**
      * 交易输入
@@ -47,6 +53,14 @@ public class MulitpleAddressTransferDto {
      * 备注
      */
     private String remark;
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
+    }
 
     public List<CoinDto> getInputs() {
         return inputs;

@@ -48,5 +48,6 @@ public interface CommandConstant {
     String GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
     String GET_BLOCK_HEADER_BY_HASH = "getBlockHeaderByHash";
     String GET_BLOCK_BY_HASH = "getBlockByHash";
+    String GET_LATEST_BLOCK_HEADERS = "getLatestBlockHeaders";
     String RECEIVE_PACKING_BLOCK = "receivePackingBlock";
 }

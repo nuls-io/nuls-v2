@@ -51,7 +51,20 @@ public class TransactionCmdTest {
         txParams.put("verifySignature", true);
         txRegisterList.add(txParams);
         params.put("list",txRegisterList);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "tx_register", params);
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_register");
+        boolean value = (Boolean) result.get("value");
+        assertTrue(value);
+    }
+
+    @Test
+    public void txCommitTest() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, version);
+        params.put("chainId", chainId);
+        params.put("txHex", "txHextxHextxHex");
+        params.put("secondaryDataHex", "secondaryDataHexsecondaryDataHex");
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_commit", params);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_register");
         boolean value = (Boolean) result.get("value");
         assertTrue(value);

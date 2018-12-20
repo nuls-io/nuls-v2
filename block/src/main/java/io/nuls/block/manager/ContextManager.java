@@ -65,7 +65,6 @@ public class ContextManager {
         Context context = new Context();
         context.setChainId(chainId);
         context.setStatus(RunningStatusEnum.INITIALIZING);
-        context.setLogger(LoggerBuilder.getLogger("folderName","fileName"));
         chainIds.add(chainId);
         ContextManager.contextMap.put(chainId, context);
         Log.info("new context add! chainId-{}", chainId);

@@ -39,7 +39,7 @@ import java.math.BigInteger;
  */
 public class TxUtil {
 
-    public static boolean isCurrentChainMainAsset(Coin coin) {
+    public static boolean isCurrentChainMainAsset2(Coin coin) {
         return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
     }
 
@@ -68,11 +68,14 @@ public class TxUtil {
     }
 
     public static boolean isTheChainMainAsset(int chainId, int assetChainId, int assetId) {
-        //todo 查资产与链的关系是否存在
+        if (assetChainId == chainId
+                && assetId == NulsConfig.CURRENT_MAIN_ASSETS_ID) {
+            return true;
+        }
         return true;
     }
 
-    public static boolean assetExist(int chainId, int assetId) {
+    public static boolean assetExist2(int chainId, int assetId) {
         //todo 查资产是否存在
         return true;
     }

@@ -40,8 +40,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class Context {
-
-    private Logger logger;
     /**
      * 代表该链的运行状态
      */

@@ -61,7 +61,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                 //判断该链的运行状态，只有正常运行时才会有数据库的处理
                 RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
                 if (!status.equals(RUNNING)) {
-                    Log.info("skip process, status is {}, chainId-{}", status, chainId);
+                    Log.debug("skip process, status is {}, chainId-{}", status, chainId);
                     return;
                 }
                 //获取配置项
@@ -69,7 +69,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                 //1.获取某链ID的数据库缓存的所有区块数量
                 int actualSize = ChainManager.getForkChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
                 actualSize += ChainManager.getOrphanChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
-                Log.info("chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
+                Log.debug("chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
                 //与阈值比较
                 while (actualSize > cacheSize) {
                     Log.info("before clear, chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);

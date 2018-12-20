@@ -74,7 +74,10 @@ public class TransactionManager {
     @Autowired
     private ChainManager chainManager;
 
-    private TransactionManager(Chain chain) {
+    public TransactionManager() {
+    }
+
+    public TransactionManager(Chain chain) {
         //TODO 需要改地方注册跨链交易
         TxRegister txRegister = new TxRegister();
         txRegister.setModuleCode(TxConstant.MODULE_CODE);
