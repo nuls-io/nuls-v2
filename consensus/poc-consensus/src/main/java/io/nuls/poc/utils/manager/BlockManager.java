@@ -38,7 +38,8 @@ public class BlockManager {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("init blockHeader failed!");
                 return;
             }
-            List<String> blockHeaderHexs = (List<String>)cmdResp.getResponseData();
+            Map<String,Object> resultMap = (Map<String,Object>)cmdResp.getResponseData();
+            List<String> blockHeaderHexs = (List<String>)resultMap.get("getLatestBlockHeaders");
             List<BlockHeader>blockHeaders = new ArrayList<>();
             for (String blockHeaderHex:blockHeaderHexs) {
                 BlockHeader blockHeader = new BlockHeader();
