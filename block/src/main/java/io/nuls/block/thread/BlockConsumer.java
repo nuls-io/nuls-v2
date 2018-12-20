@@ -21,7 +21,9 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
+import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
@@ -29,6 +31,7 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -40,11 +43,16 @@ import java.util.concurrent.*;
  */
 public class BlockConsumer implements Callable<Boolean> {
 
+    /**
+     * 区块下载参数
+     */
+    private BlockDownloaderParams params;
     private int chainId;
     private BlockingQueue<Block> queue;
     private BlockService blockService;
 
-    public BlockConsumer(int chainId, BlockingQueue<Block> queue) {
+    public BlockConsumer(int chainId, BlockingQueue<Block> queue, BlockDownloaderParams params) {
+        this.params = params;
         this.chainId = chainId;
         this.queue = queue;
         this.blockService = SpringLiteContext.getBean(BlockService.class);
@@ -53,13 +61,19 @@ public class BlockConsumer implements Callable<Boolean> {
     @Override
     public Boolean call() {
         try {
+            long netLatestHeight = params.getNetLatestHeight();
+            long startHeight = params.getLocalLatestHeight() + 1;
+
             Block block;
-            while ((block = queue.take()) != null) {
+            while (startHeight <= netLatestHeight) {
+                block = queue.take();
                 boolean saveBlock = blockService.saveBlock(chainId, block);
                 if (!saveBlock) {
                     return false;
                 }
+                startHeight++;
             }
+            System.out.println("2222222222222222222222");
             return true;
         } catch (Exception e) {
             Log.error(e);

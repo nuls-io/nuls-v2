@@ -85,7 +85,8 @@ public class BlockSynchronizer implements Runnable {
 //                    Log.info("skip Block Synchronize, SynStatus:{}, RunningStatus:{}", synStatus, runningStatus);
 //                }
             } catch (Exception e) {
-                Log.error(e);
+                e.printStackTrace();
+//                Log.error(e);
                 statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
             }
         }
@@ -118,6 +119,10 @@ public class BlockSynchronizer implements Runnable {
             ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount, 0, new NulsThreadFactory("worker-" + chainId));
             BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
             BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
+            long netLatestHeight = params.getNetLatestHeight();
+            long startHeight = ContextManager.getContext(chainId).getLatestHeight() + 1;
+            long total = netLatestHeight - startHeight + 1;
+            long start = System.currentTimeMillis();
             //5.开启区块下载器BlockDownloader
             BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params);
             Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
@@ -127,13 +132,14 @@ public class BlockSynchronizer implements Runnable {
             ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
 
             //7.开启区块消费线程BlockConsumer，与上面的BlockDownloader共用一个队列blockQueue
-            BlockConsumer consumer = new BlockConsumer(chainId, queue);
+            BlockConsumer consumer = new BlockConsumer(chainId, queue, params);
             Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
 
             Boolean downResult = downloadFutrue.get();
             Boolean storageResult = consumerFuture.get();
             boolean success = downResult != null && downResult && storageResult != null && storageResult;
-
+            long end = System.currentTimeMillis();
+            Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
             if (success) {
                 if (checkIsNewest(chainId, params)) {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
