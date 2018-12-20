@@ -46,11 +46,11 @@ public class ConsensusUtil {
 //            Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
 //            params.put("chainId", chainId);
-//            params.put("nodes", nodeId);
-//            params.put("messageBody", HexUtil.byteToHex(message.serialize()));
-//            params.put("command", message.getCommand());
 //
-//            return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
+//            params.put("download", true);
+//            params.put("block", HexUtil.byteToHex(block.serialize()));
+//
+//            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
 //        } catch (Exception e) {
 //            Log.error(e);
 //            return false;
@@ -58,8 +58,18 @@ public class ConsensusUtil {
         return true;
     }
 
-    public static void sendBlock() {
+    public static boolean sendBlockHeader(int chainId, BlockHeader blockHeader) {
+        try {
+            Map<String, Object> params = new HashMap<>(5);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("blockHeader", blockHeader);
 
+            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
     }
 
 }

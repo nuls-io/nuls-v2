@@ -129,6 +129,16 @@ public interface BlockService {
     boolean saveBlock(int chainId, Block block);
 
     /**
+     * 保存区块，已经考虑失败回滚操作，不抛出异常情况下，不会有垃圾数据
+     *
+     * @param chainId 链ID
+     * @param block   待保存区块
+     * @param download   是否最新区块,最新区块-1
+     * @return
+     */
+    boolean saveBlock(int chainId, Block block, int download);
+
+    /**
      * 回滚区块，已经考虑失败回滚操作，不抛出异常情况下，不会有垃圾数据
      *
      * @param chainId       链ID

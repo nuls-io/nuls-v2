@@ -24,6 +24,9 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
 import io.nuls.block.cache.CacheHandler;
+import io.nuls.block.constant.ConfigConstant;
+import io.nuls.block.manager.ConfigManager;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Node;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
@@ -67,26 +70,30 @@ public class BlockCollector implements Runnable {
     public void run() {
         BlockDownLoadResult result;
         try {
-            while ((result = futures.take().get()) != null) {
-                if (result != null && result.isSuccess()) {
+            long netLatestHeight = params.getNetLatestHeight();
+            long startHeight = params.getLocalLatestHeight() + 1;
+
+            while (startHeight <= netLatestHeight) {
+                result = futures.take().get();
+                int size = result.getSize();
+                if (result.isSuccess()) {
                     Node node = result.getNode();
-                    int size = result.getSize();
-                    long startHeight = result.getStartHeight();
                     long endHeight = startHeight + size - 1;
-                    Log.info("getBlocks:{}->{} ,from:{}, success", startHeight, endHeight, node.getId());
+                    Log.info("get {} blocks:{}->{} ,from:{}, success", size, startHeight, endHeight, node.getId());
                     node.adjustCredit(true);
                     params.getNodes().offer(node);
                     List<Block> blockList = CacheHandler.getBlockList(chainId, result.getMessageHash());
                     blockList.sort(BLOCK_COMPARATOR);
                     queue.addAll(blockList);
-                    continue;
                 } else {
                     retryDownload(result);
                 }
+                startHeight += size;
             }
         } catch (Exception e) {
             Log.error(e);
         }
+        System.out.println("11111111111111111111111");
     }
 
 

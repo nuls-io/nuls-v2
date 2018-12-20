@@ -123,6 +123,12 @@ public interface ConsensusConstant {
     int INIT_PUNISH_OF_ROUND_COUNT = 200;
 
     /**
+     * 系统启动时缓存指定数量的区块
+     * Buffer a specified number of blocks at system startup
+     * */
+    int INIT_BLOCK_HEADER_COUNT = 200;
+
+    /**
      * 系统运行的最小连接节点数量
      * The number of minimum connection nodes that the system runs.
      */
