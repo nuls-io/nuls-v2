@@ -9,7 +9,7 @@ package io.nuls.poc.model.dto.input;
  * */
 public class ValidBlockDTO {
     private int chainId;
-    private boolean download;
+    private int download;
     private String block;
 
     public int getChainId() {
@@ -20,11 +20,11 @@ public class ValidBlockDTO {
         this.chainId = chainId;
     }
 
-    public boolean isDownload() {
+    public int getDownload() {
         return download;
     }
 
-    public void setDownload(boolean download) {
+    public void setDownload(int download) {
         this.download = download;
     }
 

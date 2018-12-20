@@ -366,7 +366,7 @@ public class PocConsensusResource extends BaseCmd{
      * */
     @CmdAnnotation(cmd = "cs_validBlock", version = 1.0, description = "verify block correctness 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "download", parameterType = "boolean")
+    @Parameter(parameterName = "download", parameterType = "int")
     @Parameter(parameterName = "block", parameterType = "String")
     public Response validBlock(Map<String,Object> params){
         Result result = service.validBlock(params);
