@@ -85,7 +85,8 @@ public class BlockSynchronizer implements Runnable {
 //                    Log.info("skip Block Synchronize, SynStatus:{}, RunningStatus:{}", synStatus, runningStatus);
 //                }
             } catch (Exception e) {
-                Log.error(e);
+                e.printStackTrace();
+//                Log.error(e);
                 statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
             }
         }

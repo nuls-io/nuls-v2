@@ -87,6 +87,7 @@ public class BlockCollector implements Runnable {
         } catch (Exception e) {
             Log.error(e);
         }
+        System.out.println("232222222222222222222222");
     }
 
 

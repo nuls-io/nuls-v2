@@ -25,6 +25,7 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.module.ConsensusUtil;
@@ -39,7 +40,10 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import static io.nuls.block.constant.CommandConstant.*;
 
@@ -108,6 +112,32 @@ public class BlockResource extends BaseCmd {
             Long height = Long.parseLong(map.get("height").toString());
             BlockHeaderPo blockHeader = service.getBlockHeader(chainId, height);
             return success(HexUtil.byteToHex(blockHeader.serialize()));
+        } catch (IOException e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取区块头
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_LATEST_BLOCK_HEADERS, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "size", parameterType = "int")
+    public Object getLatestBlockHeaders(Map map) {
+        try {
+            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            Integer size = Integer.parseInt(map.get("size").toString());
+            long latestHeight = ContextManager.getContext(chainId).getLatestHeight();
+            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, latestHeight - size + 1, latestHeight);
+            List<String> hexList = new ArrayList<>();
+            for (BlockHeader blockHeader : blockHeaders) {
+                hexList.add(HexUtil.byteToHex(blockHeader.serialize()));
+            }
+            return success(hexList);
         } catch (IOException e) {
             Log.error(e);
             return failed(e.getMessage());
