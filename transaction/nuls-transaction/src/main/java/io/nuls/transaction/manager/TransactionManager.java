@@ -166,11 +166,15 @@ public class TransactionManager {
                 transactionService.crossTransactionValidator(chain, tx);
             }
             TxRegister txRegister = this.getTxRegister(chain, tx.getType());
-            txRegister.getValidator();
+
             //todo 调验证器
-            return true;
+
+            return TxUtil.txValidator(chain, txRegister.getValidator(), tx.hex());
         } catch (NulsException e){
-            chain.getLogger().info(e.getErrorCode().getMsg(), e.fillInStackTrace());
+            chain.getLogger().error(e.getErrorCode().getMsg(), e.fillInStackTrace());
+            return false;
+        } catch (Exception e){
+            chain.getLogger().error(TxErrorCode.IO_ERROR.getMsg());
             return false;
         }
 

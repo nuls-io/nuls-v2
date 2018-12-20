@@ -93,22 +93,20 @@ public class TxUtil {
         }
        return getTransaction(HexUtil.decode(hex));
     }
-/*    public static boolean isNulsMainnet() {
-        return TxConfig.CURRENT_CHAINID == TxConstant.NULS_CHAINID;
-    }*/
 
-
-/*    public static boolean isCurrentChainMainAsset(Coin coin) {
-        return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
-    }
-
-    public static boolean isCurrentChainMainAsset(int chainId, int assetId) {
-        if (chainId == TxConfig.CURRENT_CHAINID
-                && assetId == TxConfig.CURRENT_CHAIN_ASSETID) {
-            return true;
+    public static MultiSigAccount getMultiSigAccount(String hex) throws NulsException{
+        if(StringUtils.isBlank(hex)){
+            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
         }
-        return false;
-    }*/
+        MultiSigAccount multiSigAccount = new MultiSigAccount();
+        try {
+            multiSigAccount.parse(new NulsByteBuffer(HexUtil.decode(hex)));
+            return multiSigAccount;
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
+        }
+    }
 
     public static boolean isNulsAsset(Coin coin) {
         return isNulsAsset(coin.getAssetsChainId(), coin.getAssetsId());
@@ -123,20 +121,11 @@ public class TxUtil {
     }
 
     public static boolean isChainAssetExist(Chain chain, Coin coin) {
-        if(chain.getConfig().getChainId() == coin.getAssetsId() &&
+        if(chain.getConfig().getChainId() == coin.getAssetsChainId() &&
                 chain.getConfig().getAssetsId() == coin.getAssetsId()){
             return true;
         }
         return false;
-    }
-
-    public static boolean isTheChainMainAsset(int chainId, Coin coin) {
-        return isTheChainMainAsset(chainId, coin.getAssetsChainId(), coin.getAssetsId());
-    }
-
-    public static boolean isTheChainMainAsset(int chainId, int assetChainId, int assetId) {
-        //todo 查资产与链的关系是否存在
-        return true;
     }
 
     public static boolean assetExist(int chainId, int assetId) {
@@ -157,6 +146,7 @@ public class TxUtil {
 
     public static String getPrikey(String address, String password) throws NulsException {
         //todo 查私钥;
+        int chainId = AddressTool.getChainIdByAddress(address);
         return "";
     }
 
@@ -166,10 +156,6 @@ public class TxUtil {
         return new MultiSigAccount();
     }
 
-/*    public static boolean verifyCoinData(List<String> txHexList) throws NulsException {
-        //todo 批量验证CoinData 不确定是否需要
-        return true;
-    }*/
 
     public static boolean verifyCoinData(Chain chain, String txHex){
         //todo 验证CoinData
@@ -192,16 +178,16 @@ public class TxUtil {
         }
     }
 
-    public static boolean txValidator(String txHex){
+    public static boolean txValidator(Chain chain, String cmd, String txHex){
         //todo 调用交易验证器
         return true;
     }
 
-    public static boolean txsModuleValidators(Map<String, List<String>> map) {
+    public static boolean txsModuleValidators(Chain chain, Map<String, List<String>> map) {
         //todo 调用交易模块统一验证器 批量
         boolean rs = true;
         for(Map.Entry<String, List<String>> entry : map.entrySet()){
-            List<String> list = txModuleValidator(entry.getKey(), entry.getValue());
+            List<String> list = txModuleValidator(chain, entry.getKey(), entry.getValue());
             if(list.size() > 0){
                 rs = false;
                 break;
@@ -216,7 +202,7 @@ public class TxUtil {
      * @param txHexList
      * @return
      */
-    public static List<String> txModuleValidator(String moduleValidator, List<String> txHexList) {
+    public static List<String> txModuleValidator(Chain chain, String moduleValidator, List<String> txHexList) {
         //todo 调用交易模块统一验证器
         return new ArrayList<>();
     }
