@@ -71,15 +71,12 @@ public class BlockDownloader implements Callable<Boolean> {
 
     @Override
     public Boolean call() {
-        if (!checkLocalBlock()) {
-            return false;
-        }
-
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
         int maxDowncount = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.DOWNLOAD_NUMBER));
         try {
+            Log.info("BlockDownloader start work from {} to {}", startHeight, netLatestHeight);
             while (startHeight <= netLatestHeight) {
                 Node node = nodes.take();
                 int size = maxDowncount * node.getCredit() / 100;
@@ -91,79 +88,13 @@ public class BlockDownloader implements Callable<Boolean> {
                 futures.offer(future);
                 startHeight += size;
             }
+            Log.info("BlockDownloader stop work");
         } catch (Exception e) {
             Log.error(e);
             return false;
         }
         executor.shutdown();
         return true;
-    }
-
-    /**
-     * 区块同步前，与网络区块作对比，检查本地区块是否需要回滚
-     *
-     * @return
-     */
-    private boolean checkLocalBlock() {
-        Block localBlock = blockService.getLatestBlock(chainId);
-        long localHeight = localBlock.getHeader().getHeight();
-        long netHeight = params.getNetLatestHeight();
-        //得到共同高度
-        long commonHeight = Math.min(localHeight, netHeight);
-        if (checkHashEquality(localBlock)) {
-            if (commonHeight < netHeight) {
-                //commonHeight区块的hash一致，正常，比远程节点落后，下载区块
-                return true;
-            }
-        } else {
-            //需要回滚的场景，要满足可用节点数(10个)>配置，一致可用节点数(6个)占比超80%两个条件
-            if (params.getNodes().size() >= Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.MIN_NODE_AMOUNT))
-                    && DoubleUtils.div(params.getNodes().size(), params.getAvailableNodesCount(), 2) >= Double.parseDouble(ConfigManager.getValue(chainId, ConfigConstant.CONSISTENCY_NODE_PERCENT)) * 100
-            ) {
-                return checkRollback(localBlock, 0);
-            }
-        }
-        return false;
-    }
-
-    private boolean checkRollback(Block localBestBlock, int rollbackCount) {
-        //每次最多回滚10个区块，等待下次同步，这样可以避免被恶意节点攻击，大量回滚正常区块。
-        if (rollbackCount >= Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.MAX_ROLLBACK))) {
-            return false;
-        }
-
-        blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(localBestBlock));
-        localBestBlock = blockService.getLatestBlock(chainId);
-        if (checkHashEquality(localBestBlock)) {
-            return true;
-        }
-
-        return checkRollback(localBestBlock, rollbackCount + 1);
-    }
-
-    /**
-     * 根据传入的区块localBlock判断localBlock.hash与网络上同高度的区块hash是否一致
-     *
-     * @author captain
-     * @date 18-11-9 下午6:13
-     * @version 1.0
-     */
-    private boolean checkHashEquality(Block localBlock) {
-        NulsDigestData localHash = localBlock.getHeader().getHash();
-        long localHeight = localBlock.getHeader().getHeight();
-        long netHeight = params.getNetLatestHeight();
-        //得到共同高度
-        long commonHeight = Math.min(localHeight, netHeight);
-        NulsDigestData remoteHash = params.getNetLatestHash();
-        //如果双方共同高度<网络高度，要进行hash判断，需要从网络上下载区块，因为params里只有最新的区块hash，没有旧的hash
-        if (commonHeight < netHeight) {
-            for (Node node : params.getNodes()) {
-                Block remoteBlock = BlockDownloadUtils.getBlockByHash(chainId, localHash, node);
-                remoteHash = remoteBlock.getHeader().getHash();
-                break;
-            }
-        }
-        return localHash.equals(remoteHash);
     }
 
     /**
