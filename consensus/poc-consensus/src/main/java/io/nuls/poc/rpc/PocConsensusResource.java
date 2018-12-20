@@ -420,7 +420,7 @@ public class PocConsensusResource extends BaseCmd{
     /**
      * 修改节点共识状态
      * */
-    @CmdAnnotation(cmd = "cs_updateAgentConsensusStatus", version = 1.0, description = "test getHeight 1.0")
+    @CmdAnnotation(cmd = "cs_updateAgentConsensusStatus", version = 1.0, description = "modifying the Node Consensus State 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response updateAgentConsensusStatus(Map<String,Object> params){
         Result result = service.updateAgentConsensusStatus(params);
@@ -433,7 +433,7 @@ public class PocConsensusResource extends BaseCmd{
     /**
      * 修改节点打包状态
      * */
-    @CmdAnnotation(cmd = "cs_updateAgentStatus", version = 1.0, description = "test getHeight 1.0")
+    @CmdAnnotation(cmd = "cs_updateAgentStatus", version = 1.0, description = "modifying the Packing State of Nodes 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response updateAgentStatus(Map<String,Object> params){
         Result result = service.updateAgentStatus(params);
@@ -446,7 +446,7 @@ public class PocConsensusResource extends BaseCmd{
     /**
      * 停止一条子链
      * */
-    @CmdAnnotation(cmd = "cs_stopChain", version = 1.0, description = "test getHeight 1.0")
+    @CmdAnnotation(cmd = "cs_stopChain", version = 1.0, description = "stop a chain 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response stopChain(Map<String,Object> params){
         Result result = service.stopChain(params);
@@ -459,7 +459,7 @@ public class PocConsensusResource extends BaseCmd{
     /**
      * 运行一条子链
      * */
-    @CmdAnnotation(cmd = "cs_runChain", version = 1.0, description = "test getHeight 1.0")
+    @CmdAnnotation(cmd = "cs_runChain", version = 1.0, description = "Running a sub chain 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response runChain(Map<String,Object> params){
         Result result = service.runChain(params);
@@ -472,7 +472,7 @@ public class PocConsensusResource extends BaseCmd{
     /**
      * 启动主链
      * */
-    @CmdAnnotation(cmd = "cs_runMainChain", version = 1.0, description = "test getHeight 1.0")
+    @CmdAnnotation(cmd = "cs_runMainChain", version = 1.0, description = "run main chain 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response runMainChain(Map<String,Object> params){
         Result result = service.runMainChain(params);
@@ -485,7 +485,7 @@ public class PocConsensusResource extends BaseCmd{
     /**
      * 缓存新区块头
      * */
-    @CmdAnnotation(cmd = "cs_addBlock", version = 1.0, description = "test getHeight 1.0")
+    @CmdAnnotation(cmd = "cs_addBlock", version = 1.0, description = "add block 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
     public Response addBlock(Map<String,Object> params){
