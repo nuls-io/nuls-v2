@@ -93,7 +93,6 @@ public class BlockCollector implements Runnable {
         } catch (Exception e) {
             Log.error(e);
         }
-        System.out.println("11111111111111111111111");
     }
 
 

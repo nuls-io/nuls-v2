@@ -27,9 +27,14 @@ package io.nuls.network.rpc.internal;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.manager.StorageManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.base.MessageHeader;
+import io.nuls.network.model.po.ProtocolHandlerPo;
+import io.nuls.network.model.po.RoleProtocolPo;
+import io.nuls.network.storage.DbService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -41,12 +46,57 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.network.utils.LoggerUtil.Log;
+
 /**
- * @description 消息远程调用,发送消息调用
+ * @description 消息远程调用
+ * 模块消息处理器注册
+ * 发送消息调用
  * @author  lan
  * @date  2018/11/12
  **/
 public class MessageRpc extends BaseCmd{
+
+    private MessageManager messageManager =  MessageManager.getInstance();
+    private DbService dbService=StorageManager.getInstance().getDbService();
+
+    @CmdAnnotation(cmd = "nw_protocolRegister", version = 1.0,
+            description = "protocol cmd register")
+    @Parameter(parameterName = "role", parameterType = "string")
+    @Parameter(parameterName = "protocolCmds", parameterType = "arrays")
+    public Response protocolRegister(Map params) {
+        try {
+            String role = String.valueOf(params.get("role"));
+            Log.info(role);
+            /*
+             * 如果外部模块修改了调用注册信息，进行重启，则清理缓存信息，并重新注册
+             * clear cache protocolRoleHandler
+             */
+            messageManager.clearCacheProtocolRoleHandlerMap(role);
+            List<Map<String,String>> protocolCmds = (List<Map<String,String>>)params.get("protocolCmds");
+            List<ProtocolHandlerPo> protocolHandlerPos = new ArrayList<>();
+            for(Map map : protocolCmds){
+                ProtocolRoleHandler protocolRoleHandler = new ProtocolRoleHandler(role,map.get("handler").toString());
+                messageManager.addProtocolRoleHandlerMap(map.get("protocolCmd").toString(),protocolRoleHandler);
+                ProtocolHandlerPo protocolHandlerPo = new ProtocolHandlerPo(map.get("protocolCmd").toString(),map.get("handler").toString());
+                protocolHandlerPos.add(protocolHandlerPo);
+            }
+            /*
+             * 进行持久化存库
+             * save info to db
+             */
+            RoleProtocolPo roleProtocolPo = new RoleProtocolPo();
+            roleProtocolPo.setRole(role);
+            roleProtocolPo.setProtocolHandlerPos(protocolHandlerPos);
+            dbService.saveOrUpdateProtocolRegisterInfo(roleProtocolPo);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return failed(NetworkErrorCode.PARAMETER_ERROR);
+        }
+        return success();
+    }
+
     /**
      * nw_broadcast
      * 外部广播接收

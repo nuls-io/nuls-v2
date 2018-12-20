@@ -25,12 +25,15 @@
 package io.nuls.network.manager.threads;
 
 import io.nuls.network.manager.ConnectionManager;
+import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.dto.ProtocolRoleHandler;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
 
@@ -47,7 +50,20 @@ public class DataShowMonitorTest implements Runnable  {
         printlnCachePeer();
         printlnPeer();
         printlnMem();
+        printlnProtocolMap();
     }
+
+    private void printlnProtocolMap(){
+        Collection<Map<String,ProtocolRoleHandler>> values =MessageManager.getInstance().getProtocolRoleHandlerMap().values();
+        for (Map<String,ProtocolRoleHandler> map : values) {
+            Collection<ProtocolRoleHandler> list = map.values();
+            for (ProtocolRoleHandler protocolRoleHandler : list) {
+               Log.debug("protocolRoleHandler =================={}==={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
+            }
+        }
+
+    }
+
    private void printlnCachePeer(){
       List<Node> list= ConnectionManager.getInstance().getCacheAllNodeList();
       Log.info("============================printlnCachePeer:"+list.size());

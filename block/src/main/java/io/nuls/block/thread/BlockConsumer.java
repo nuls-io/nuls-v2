@@ -73,7 +73,6 @@ public class BlockConsumer implements Callable<Boolean> {
                 }
                 startHeight++;
             }
-            System.out.println("2222222222222222222222");
             return true;
         } catch (Exception e) {
             Log.error(e);

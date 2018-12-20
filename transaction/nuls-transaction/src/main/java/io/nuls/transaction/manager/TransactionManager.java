@@ -74,7 +74,10 @@ public class TransactionManager {
     @Autowired
     private ChainManager chainManager;
 
-    private TransactionManager(Chain chain) {
+    public TransactionManager() {
+    }
+
+    public TransactionManager(Chain chain) {
         //TODO 需要改地方注册跨链交易
         TxRegister txRegister = new TxRegister();
         txRegister.setModuleCode(TxConstant.MODULE_CODE);
@@ -155,17 +158,22 @@ public class TransactionManager {
      * @param tx
      * @return
      */
-    public boolean verify(Chain chain, Transaction tx) throws NulsException {
-
-        baseTxValidate(chain, tx);
-        //如果是跨链交易直接调模块内部验证器接口，不走cmd命令
-        if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-            transactionService.crossTransactionValidator(chain, tx);
+    public boolean verify(Chain chain, Transaction tx) {
+        try {
+            baseTxValidate(chain, tx);
+            //如果是跨链交易直接调模块内部验证器接口，不走cmd命令
+            if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
+                transactionService.crossTransactionValidator(chain, tx);
+            }
+            TxRegister txRegister = this.getTxRegister(chain, tx.getType());
+            txRegister.getValidator();
+            //todo 调验证器
+            return true;
+        } catch (NulsException e){
+            chain.getLogger().info(e.getErrorCode().getMsg(), e.fillInStackTrace());
+            return false;
         }
-        TxRegister txRegister = this.getTxRegister(chain, tx.getType());
-        txRegister.getValidator();
-        //todo 调验证器
-        return false;
+
     }
 
     /**
@@ -313,14 +321,14 @@ public class TransactionManager {
             //红牌惩罚没有手续费
             return true;
         }
-        int chainId = chain.getConfig().getChainId();
+        //int chainId = chain.getConfig().getChainId();
         BigInteger feeFrom = BigInteger.ZERO;
         for (CoinFrom coinFrom : coinData.getFrom()) {
-            feeFrom = feeFrom.add(accrueFee(type, chainId, coinFrom));
+            feeFrom = feeFrom.add(accrueFee(type, chain, coinFrom));
         }
         BigInteger feeTo = BigInteger.ZERO;
         for (CoinTo coinTo : coinData.getTo()) {
-            feeFrom = feeFrom.add(accrueFee(type, chainId, coinTo));
+            feeFrom = feeFrom.add(accrueFee(type, chain, coinTo));
         }
         //交易中实际的手续费
         BigInteger fee = feeFrom.subtract(feeTo);
@@ -344,11 +352,11 @@ public class TransactionManager {
      * 累积计算当前coinfrom中可用于计算手续费的资产
      *
      * @param type    tx type
-     * @param chainId chain id
+     * @param chain chain id
      * @param coin    coinfrom
      * @return BigInteger
      */
-    private BigInteger accrueFee(int type, int chainId, Coin coin) {
+    private BigInteger accrueFee(int type, Chain chain, Coin coin) {
         BigInteger fee = BigInteger.ZERO;
         if (type == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
             //为跨链交易时，只算nuls
@@ -357,7 +365,7 @@ public class TransactionManager {
             }
         } else {
             //不为跨链交易时，只算发起链的主资产
-            if (TxUtil.isTheChainMainAsset(chainId, coin)) {
+            if(TxUtil.isChainAssetExist(chain, coin)){
                 fee = fee.add(coin.getAmount());
             }
         }

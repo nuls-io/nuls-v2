@@ -31,9 +31,9 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossTxData;
 import io.nuls.transaction.model.po.TransactionPO;
 
@@ -122,6 +122,14 @@ public class TxUtil {
         return false;
     }
 
+    public static boolean isChainAssetExist(Chain chain, Coin coin) {
+        if(chain.getConfig().getChainId() == coin.getAssetsId() &&
+                chain.getConfig().getAssetsId() == coin.getAssetsId()){
+            return true;
+        }
+        return false;
+    }
+
     public static boolean isTheChainMainAsset(int chainId, Coin coin) {
         return isTheChainMainAsset(chainId, coin.getAssetsChainId(), coin.getAssetsId());
     }
@@ -158,36 +166,59 @@ public class TxUtil {
         return new MultiSigAccount();
     }
 
-    public static boolean verifyCoinData(List<String> txHexList) throws NulsException {
+/*    public static boolean verifyCoinData(List<String> txHexList) throws NulsException {
         //todo 批量验证CoinData 不确定是否需要
         return true;
-    }
+    }*/
 
-    public static boolean verifyCoinData(String txHex) throws NulsException {
+    public static boolean verifyCoinData(Chain chain, String txHex){
         //todo 验证CoinData
+        /*try {
+
+            return true;
+        } catch (NulsException e){
+            chain.getLogger().info(e.getErrorCode().getMsg(), e.fillInStackTrace());
+            return false;
+        }*/
         return true;
     }
+    public static boolean verifyCoinData(Chain chain, Transaction tx){
+        //todo 验证CoinData
+        try {
+            return verifyCoinData(chain, tx.hex());
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+            return false;
+        }
+    }
 
-    public static boolean txValidator(String txHex) throws NulsException {
+    public static boolean txValidator(String txHex){
         //todo 调用交易验证器
         return true;
     }
 
-    public static boolean txsModuleValidators(Map<String, List<String>> map) throws NulsException {
+    public static boolean txsModuleValidators(Map<String, List<String>> map) {
         //todo 调用交易模块统一验证器 批量
         boolean rs = true;
         for(Map.Entry<String, List<String>> entry : map.entrySet()){
-            rs = txModuleValidator(entry.getKey(), entry.getValue());
-            if(!rs){
+            List<String> list = txModuleValidator(entry.getKey(), entry.getValue());
+            if(list.size() > 0){
+                rs = false;
                 break;
             }
         }
         return rs;
     }
 
-    public static boolean txModuleValidator(String moduleValidator, List<String> txHexList) throws NulsException {
+    /**
+     * 统一验证返回被干掉的交易hash
+     * @param moduleValidator
+     * @param txHexList
+     * @return
+     */
+    public static List<String> txModuleValidator(String moduleValidator, List<String> txHexList) {
         //todo 调用交易模块统一验证器
-        return true;
+        return new ArrayList<>();
     }
 
 

@@ -21,4 +21,10 @@ public class Lockers {
      * Used for established peer connections to establish and disconnect locks.
      */
     public final static Lock NODE_ESTABLISH_CONNECT_LOCK = new ReentrantLock();
+
+    /**
+     * 用于同步锁定协议注册与清理
+     *Used for synchronous lock protocol registration and cleanup
+     */
+    public final static Lock PROTOCOL_HANDLERS_REGISTER_LOCK = new ReentrantLock();
 }

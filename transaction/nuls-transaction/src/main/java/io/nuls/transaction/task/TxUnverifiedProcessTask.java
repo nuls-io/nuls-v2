@@ -80,14 +80,13 @@ public class TxUnverifiedProcessTask implements Runnable {
         try {
             int chainId = chain.getChainId();
             boolean rs = transactionManager.verify(chain, tx);
-
             //todo 跨链交易单独处理, 是否需要进行跨链验证？
 
             if (!rs) {
                 return false;
             }
             //获取一笔交易(从已确认交易库中获取？)
-            Transaction transaction = confirmedTransactionService.getTransaction(chainId,tx.getHash());
+            Transaction transaction = confirmedTransactionService.getTransaction(chain,tx.getHash());
             if(null != transaction){
                 return isOrphanTx;
             }
