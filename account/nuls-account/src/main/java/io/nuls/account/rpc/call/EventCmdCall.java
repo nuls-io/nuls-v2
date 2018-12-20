@@ -28,7 +28,7 @@ public class EventCmdCall {
             params.put(Constants.VERSION_KEY_STR, RpcConstant.EVENT_SEND_VERSION);
             params.put(RpcConstant.EVENT_SEND_TOPIC, topic);
             params.put(RpcConstant.EVENT_SEND_DATA, data);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.EB.abbr, RpcConstant.EVENT_SEND_CMD, params);
+            //Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.EB.abbr, RpcConstant.EVENT_SEND_CMD, params);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -93,22 +93,20 @@ public class TxUtil {
         }
        return getTransaction(HexUtil.decode(hex));
     }
-/*    public static boolean isNulsMainnet() {
-        return TxConfig.CURRENT_CHAINID == TxConstant.NULS_CHAINID;
-    }*/
 
-
-/*    public static boolean isCurrentChainMainAsset(Coin coin) {
-        return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
-    }
-
-    public static boolean isCurrentChainMainAsset(int chainId, int assetId) {
-        if (chainId == TxConfig.CURRENT_CHAINID
-                && assetId == TxConfig.CURRENT_CHAIN_ASSETID) {
-            return true;
+    public static MultiSigAccount getMultiSigAccount(String hex) throws NulsException{
+        if(StringUtils.isBlank(hex)){
+            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
         }
-        return false;
-    }*/
+        MultiSigAccount multiSigAccount = new MultiSigAccount();
+        try {
+            multiSigAccount.parse(new NulsByteBuffer(HexUtil.decode(hex)));
+            return multiSigAccount;
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
+        }
+    }
 
     public static boolean isNulsAsset(Coin coin) {
         return isNulsAsset(coin.getAssetsChainId(), coin.getAssetsId());
@@ -123,104 +121,12 @@ public class TxUtil {
     }
 
     public static boolean isChainAssetExist(Chain chain, Coin coin) {
-        if(chain.getConfig().getChainId() == coin.getAssetsId() &&
+        if(chain.getConfig().getChainId() == coin.getAssetsChainId() &&
                 chain.getConfig().getAssetsId() == coin.getAssetsId()){
             return true;
         }
         return false;
     }
-
-    public static boolean isTheChainMainAsset(int chainId, Coin coin) {
-        return isTheChainMainAsset(chainId, coin.getAssetsChainId(), coin.getAssetsId());
-    }
-
-    public static boolean isTheChainMainAsset(int chainId, int assetChainId, int assetId) {
-        //todo 查资产与链的关系是否存在
-        return true;
-    }
-
-    public static boolean assetExist(int chainId, int assetId) {
-        //todo 查资产是否存在
-        return true;
-    }
-
-    public static byte[] getNonce(byte[] address, int chainId, int assetId) throws NulsException {
-        //todo 查nonce
-        byte[] nonce = new byte[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-        return nonce;
-    }
-
-    public static BigInteger getBalance(byte[] address, int chainId, int assetId) throws NulsException {
-        //todo 查余额;
-        return new BigInteger("10000");
-    }
-
-    public static String getPrikey(String address, String password) throws NulsException {
-        //todo 查私钥;
-        return "";
-    }
-
-    public static MultiSigAccount getMultiSigAccount(byte[] multiSignAddress) throws NulsException {
-        String address = AddressTool.getStringAddressByBytes(multiSignAddress);
-        //todo 获取多签账户
-        return new MultiSigAccount();
-    }
-
-/*    public static boolean verifyCoinData(List<String> txHexList) throws NulsException {
-        //todo 批量验证CoinData 不确定是否需要
-        return true;
-    }*/
-
-    public static boolean verifyCoinData(Chain chain, String txHex){
-        //todo 验证CoinData
-        /*try {
-
-            return true;
-        } catch (NulsException e){
-            chain.getLogger().info(e.getErrorCode().getMsg(), e.fillInStackTrace());
-            return false;
-        }*/
-        return true;
-    }
-    public static boolean verifyCoinData(Chain chain, Transaction tx){
-        //todo 验证CoinData
-        try {
-            return verifyCoinData(chain, tx.hex());
-        } catch (Exception e) {
-            chain.getLogger().error(e);
-            return false;
-        }
-    }
-
-    public static boolean txValidator(String txHex){
-        //todo 调用交易验证器
-        return true;
-    }
-
-    public static boolean txsModuleValidators(Map<String, List<String>> map) {
-        //todo 调用交易模块统一验证器 批量
-        boolean rs = true;
-        for(Map.Entry<String, List<String>> entry : map.entrySet()){
-            List<String> list = txModuleValidator(entry.getKey(), entry.getValue());
-            if(list.size() > 0){
-                rs = false;
-                break;
-            }
-        }
-        return rs;
-    }
-
-    /**
-     * 统一验证返回被干掉的交易hash
-     * @param moduleValidator
-     * @param txHexList
-     * @return
-     */
-    public static List<String> txModuleValidator(String moduleValidator, List<String> txHexList) {
-        //todo 调用交易模块统一验证器
-        return new ArrayList<>();
-    }
-
 
     public static List<TransactionPO> tx2PO(Transaction tx) throws NulsException{
         List<TransactionPO> list = new ArrayList<>();

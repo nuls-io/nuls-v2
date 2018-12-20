@@ -113,7 +113,10 @@ public interface RpcParameterNameConstant {
      */
     String SECONDARY_DATA_Hex = "secondaryDataHex";
 
-
+    /**
+     * the hex of transaction list
+     */
+    String TX_HEX_LIST = "txHexList";
 
 
 }

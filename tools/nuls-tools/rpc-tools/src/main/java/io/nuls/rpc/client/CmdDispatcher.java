@@ -27,6 +27,8 @@ package io.nuls.rpc.client;
 import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
+import io.nuls.rpc.invoke.KernelInvoke;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.log.Log;
@@ -83,7 +85,6 @@ public class CmdDispatcher {
      *
      * @throws Exception 核心模块（Manager）不可用，Core Module (Manager) Not Available
      */
-    @SuppressWarnings("unchecked")
     public static void syncKernel() throws Exception {
 
         /*
@@ -115,13 +116,16 @@ public class CmdDispatcher {
         Get the returned data and place it in the local variable
          */
         Response response = receiveResponse(message.getMessageId(), Constants.TIMEOUT_TIMEMILLIS);
-        Map responseData = (Map) response.getResponseData();
-        Map methodMap = (Map) responseData.get("registerAPI");
-        Map dependMap = (Map) methodMap.get("Dependencies");
-        for (Object object : dependMap.entrySet()) {
-            Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
-            ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
-        }
+        new KernelInvoke().callBack(response);
+//        Map responseData = (Map) response.getResponseData();
+//        Map methodMap = (Map) responseData.get("registerAPI");
+//        Map dependMap = (Map) methodMap.get("Dependencies");
+//        for (Object object : dependMap.entrySet()) {
+//            Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
+//            ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
+//        }
+
+        CmdDispatcher.requestAndInvoke(ModuleE.KE.abbr,"registerAPI",JSONUtils.json2map(JSONUtils.obj2json(ServerRuntime.LOCAL)),"0","1",new KernelInvoke());
         Log.info("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.ROLE_MAP));
 
         /*
