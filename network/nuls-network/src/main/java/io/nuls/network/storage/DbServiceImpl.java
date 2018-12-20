@@ -27,7 +27,6 @@ package io.nuls.network.storage;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.model.po.GroupNodeKeys;
 import io.nuls.network.model.po.NodeGroupPo;
 import io.nuls.network.model.po.NodePo;
@@ -53,7 +52,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  */
 @Service
 public class DbServiceImpl implements DbService,InitializingBean {
-    public static String DEFAULT_ENCODING = "UTF-8";
+    private  static String DEFAULT_ENCODING = "UTF-8";
     @Override
     public List<NodeGroupPo> getAllNodeGroups() throws NulsException {
         List<byte[]>  nodeGroupBytes=RocksDBService.valueList(NetworkConstant.DB_NAME_NETWORK_NODEGROUPS);
@@ -209,7 +208,7 @@ public class DbServiceImpl implements DbService,InitializingBean {
     public void saveOrUpdateProtocolRegisterInfo(RoleProtocolPo roleProtocolPo) {
         try {
             RocksDBService.put(NetworkConstant.DB_NAME_NETWORK_PROTOCOL_REGISTER,
-                    ByteUtils.toBytes(roleProtocolPo.getRole(), NetworkParam.getInstance().getEncoding()),roleProtocolPo.serialize());
+                    ByteUtils.toBytes(roleProtocolPo.getRole(), DEFAULT_ENCODING),roleProtocolPo.serialize());
         } catch (Exception e) {
             e.printStackTrace();
         }

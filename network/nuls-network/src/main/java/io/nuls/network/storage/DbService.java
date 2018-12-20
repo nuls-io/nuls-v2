@@ -42,44 +42,44 @@ import java.util.Map;
 public interface  DbService {
     /**
      * get nodeGroups
-     * @return
+     * @return List<NodeGroupPo>
      */
     List<NodeGroupPo> getAllNodeGroups() throws NulsException;
 
     /**
      * get nodes
-     * @return
+     * @return  List<NodePo>
      */
-    public List<NodePo> getAllNodes() throws NulsException;
-    public Map<String,NodePo> getAllNodesMap() throws NulsException;
+    List<NodePo> getAllNodes() throws NulsException;
+    Map<String,NodePo> getAllNodesMap() throws NulsException;
     /**
-     * save node groups
-     * @param nodeGroups
+     * @description  save node groups
+     * @param nodeGroups nodeGroups
      */
-    public void saveNodeGroups(List<NodeGroupPo> nodeGroups);
+    void saveNodeGroups(List<NodeGroupPo> nodeGroups);
 
-    public void saveNodes(List<NodePo> nodePos);
-    public void batchSaveGroupNodeKeys(List<GroupNodeKeys> groupNodeKeysList);
-    public void saveGroupNodeKeys(GroupNodeKeys groupNodeKeys);
+    void saveNodes(List<NodePo> nodePos);
+    void batchSaveGroupNodeKeys(List<GroupNodeKeys> groupNodeKeysList);
+    void saveGroupNodeKeys(GroupNodeKeys groupNodeKeys);
 
-    public void deleteNode(String nodeId);
+    void deleteNode(String nodeId);
 
-    public void deleteGroup(int chainId);
+    void deleteGroup(int chainId);
 
-    public void deleteGroupNodeKeys(int chainId);
+    void deleteGroupNodeKeys(int chainId);
 
 
-    public NodeGroupPo getNodeGroupByChainId(int chainId) throws NulsException;
-    public GroupNodeKeys getGroupNodeKeysByChainId(int chainId) throws NulsException;
+     NodeGroupPo getNodeGroupByChainId(int chainId) throws NulsException;
+     GroupNodeKeys getGroupNodeKeysByChainId(int chainId) throws NulsException;
 
     /**
      * save protocol register info
      */
 
-    public void saveOrUpdateProtocolRegisterInfo(RoleProtocolPo roleProtocolPo);
+    void saveOrUpdateProtocolRegisterInfo(RoleProtocolPo roleProtocolPo);
     /**
      * init protocol register info
      */
-    public List<RoleProtocolPo> getProtocolRegisterInfos();
+    List<RoleProtocolPo> getProtocolRegisterInfos();
 
 }
