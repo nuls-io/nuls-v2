@@ -48,14 +48,14 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class NodeGroup  implements Dto {
     private long magicNumber = 0;
-    private int chainId = 0;;
-    private int maxOut = 0;;
-    private int maxIn = 0;;
+    private int chainId = 0;
+    private int maxOut = 0;
+    private int maxIn = 0;
     /**
      * 友链跨链最大连接数
      */
-    private int maxCrossOut = 0;;
-    private int maxCrossIn = 0;;
+    private int maxCrossOut = 0;
+    private int maxCrossIn = 0;
 
     private int minAvailableCount = 0;
     /**
@@ -368,29 +368,24 @@ public class NodeGroup  implements Dto {
 
 
     public boolean existSelfGroupList(String nodeId){
-        if(null == this.getConnectNodeMap().get(nodeId) && null == this.getDisConnectNodeMap().get(nodeId)){
-            return false;
-        }
-        return true;
+        return null != this.getConnectNodeMap().get(nodeId) || null != this.getDisConnectNodeMap().get(nodeId);
     }
     public boolean existCrossGroupList(String nodeId){
-        if( null == this.getConnectCrossNodeMap().get(nodeId) && null == this.getDisConnectCrossNodeMap().get(nodeId)){
-            return false;
-        }
-        return true;
+        return null != this.getConnectCrossNodeMap().get(nodeId) || null != this.getDisConnectCrossNodeMap().get(nodeId);
     }
 
     /**
      * 移除节点,判断是否承载有多链业务
      * 删除peer，注销链，bye消息，重启链rpc 中调用
-     * @param node
-     * @param connectChange
+     * @param node node
+     * @param connectChange connectChange
      */
     public boolean removePeerNode(Node node,boolean connectChange,boolean sendBye){
         NodeGroupConnector connector = node.getNodeGroupConnector(magicNumber);
         if(null != connector && node.getNodeGroupConnectors().size() == 1){
             //channelInactive code all the remove logic
             node.getChannel().close();
+            ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),node.getType());
         }else{
             //Just remove the node group relation
             if(sendBye){
@@ -402,14 +397,12 @@ public class NodeGroup  implements Dto {
                 }
             }
             addDisConnetNode(node,connectChange);
-            if(Node.IN ==  node.getType()) {
-                ConnectionManager.getInstance().subGroupMaxInIp(node, magicNumber, false);
-            }
+            ConnectionManager.getInstance().subGroupMaxIp(node, magicNumber, false);
             node.removeGroupConnector(magicNumber);
         }
         return true;
     }
-    public  Map<String,Node> getNodeMapByType(boolean isCross,boolean isConnect){
+    private  Map<String,Node> getNodeMapByType(boolean isCross,boolean isConnect){
         if(!isCross){
             if (isConnect) {
                 return connectNodeMap;
@@ -426,8 +419,8 @@ public class NodeGroup  implements Dto {
     }
     /**
      * 如果是连接的节点变更 connectChange=true，如果不是connectChange=false
-     * @param node
-     * @param connectChange
+     * @param node node
+     * @param connectChange connectChange
      */
     public void addDisConnetNode(Node node,boolean connectChange){
         NETWORK_GROUP_NODE_CONNECT_LOCK.lock();

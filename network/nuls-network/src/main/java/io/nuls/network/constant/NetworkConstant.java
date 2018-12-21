@@ -66,7 +66,11 @@ public interface NetworkConstant {
      * 10 seconds The number and speed of the network in the chain are unchanged, and the network status is considered stable.
      */
     int NODEGROUP_NET_STABLE_TIME_MILLIONS = 10 * 1000;
-
+    /**
+     *  连接重复最大次数
+     *  connect try number of times
+     */
+    int NODE_CONNECT_TRY_MAX_TIMES = 50;
     /**
      * ========================================
      * --------[network configs] -------
