@@ -20,44 +20,93 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
 
-package io.nuls.base.data;
+package io.nuls.account.model.po;
 
+
+import io.nuls.account.model.bo.Account;
+import io.nuls.account.util.log.LogUtil;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.base.data.Address;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.MultiSigAccount;
+import io.nuls.tools.crypto.ECKey;
+import io.nuls.tools.crypto.EncryptedData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 多签地址账户
+ * @author: EdwardChan
  *
- * @author: qinyifeng
- * @date: 2018/12/12
+ * Dec.19th 2018
+ *
  */
-public class MultiSigAccount extends BaseNulsData {
+public class MultiSigAccountPo extends BaseNulsData {
 
     private int chainId;
+
     private Address address;
-    private byte m;
+
     private List<byte[]> pubKeyList;
+
+    private byte m;
+
+
     private String alias;
+
+    public MultiSigAccountPo() {
+    }
+
+    public MultiSigAccountPo(MultiSigAccount multiSigAccount) {
+        this.chainId = multiSigAccount.getChainId();
+        this.address = multiSigAccount.getAddress();
+        this.pubKeyList = multiSigAccount.getPubKeyList();
+        this.m = multiSigAccount.getM();
+        this.alias = multiSigAccount.getAlias();
+    }
+
+    public MultiSigAccount toAccount() {
+        MultiSigAccount account = new MultiSigAccount();
+        account.setChainId(chainId);
+        account.setAddress(address);
+        account.setPubKeyList(pubKeyList);
+        account.setM(m);
+        account.setAlias(alias);
+        return account;
+    }
+
+    @Override
+    public int size() {
+        int size = 4;//chainId
+        size += Address.ADDRESS_LENGTH;
+        size += 4;
+        for (byte[] bytes:pubKeyList) {
+            size += SerializeUtils.sizeOfBytes(bytes);
+        }
+        size += 1;
+        size += SerializeUtils.sizeOfString(alias);
+        return size;
+    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(chainId);
         stream.write(address.getAddressBytes());
-        stream.write(m);
         stream.writeUint32(pubKeyList.size());
         for (int i = 0; i < pubKeyList.size(); i++) {
             stream.writeBytesWithLength(pubKeyList.get(i));
         }
+        stream.write(m);
         stream.writeString(alias);
+
     }
 
     @Override
@@ -65,26 +114,13 @@ public class MultiSigAccount extends BaseNulsData {
         this.chainId = byteBuffer.readInt32();
         byte[] bytes = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.address = Address.fromHashs(bytes);
-        this.m = byteBuffer.readByte();
         this.pubKeyList = new ArrayList<>();
         long count = byteBuffer.readUint32();
         for (int i = 0; i < count; i++) {
             pubKeyList.add(byteBuffer.readByLengthByte());
         }
+        this.m = byteBuffer.readByte();
         this.alias = byteBuffer.readString();
-    }
-
-    @Override
-    public int size() {
-        int size = SerializeUtils.sizeOfUint32();
-        size += Address.ADDRESS_LENGTH;
-        size += 1;
-        size += SerializeUtils.sizeOfUint32();
-        for (int i = 0; i < pubKeyList.size(); i++) {
-            size += SerializeUtils.sizeOfBytes(pubKeyList.get(i));
-        }
-        size += SerializeUtils.sizeOfString(alias);
-        return size;
     }
 
     public int getChainId() {
@@ -119,18 +155,11 @@ public class MultiSigAccount extends BaseNulsData {
         this.m = m;
     }
 
-    public void addPubkeys(List<String> pubkeys) {
-        this.pubKeyList = new ArrayList<>();
-        for (String pubkeyStr : pubkeys) {
-            pubKeyList.add(HexUtil.decode(pubkeyStr));
-        }
+    public String getAlias() {
+        return alias;
     }
 
     public void setAlias(String alias) {
         this.alias = alias;
-    }
-
-    public String getAlias() {
-        return alias;
     }
 }

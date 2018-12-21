@@ -118,5 +118,18 @@ public interface RpcParameterNameConstant {
      */
     String TX_HEX_LIST = "txHexList";
 
+    /**
+     * pubKeys
+     */
+    String PUB_KEYS = "pubKeys";
+
+
+    /**
+     * minSigns
+     */
+    String MIN_SIGNS = "minSigns";
+
+
+
 
 }
