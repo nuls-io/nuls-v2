@@ -86,7 +86,7 @@ public final class GenesisBlock extends Block {
 
     }
 
-    private synchronized void init(String json) throws Exception {
+    private void init(String json) throws Exception {
         if (status > 0) {
             return;
         }

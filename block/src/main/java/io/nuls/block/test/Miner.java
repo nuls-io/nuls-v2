@@ -44,12 +44,10 @@ public class Miner extends Thread {
 
     private static final long TOTAL = Long.MAX_VALUE;
     private String symbol;
-    private boolean slow;
     private Block startBlock;
     private Block previousBlock;
 
-    public Miner(String symbol, Block startBlock, boolean slow) {
-        this.slow = slow;
+    public Miner(String symbol, Block startBlock) {
         this.symbol = symbol;
         this.startBlock = startBlock;
     }
@@ -60,10 +58,6 @@ public class Miner extends Thread {
         BlockService blockService = ContextManager.getServiceBean(BlockService.class);
         while (i < TOTAL) {
             try {
-                if (i % 20 == 0) {
-                    slow = !slow;
-                }
-                Thread.sleep((long) (new Random().nextInt(5) * 1000));
                 if (!ContextManager.getContext(CHAIN_ID).getStatus().equals(RunningStatusEnum.RUNNING)) {
                     return;
                 }
@@ -77,6 +71,7 @@ public class Miner extends Thread {
                 previousBlock = block;
                 blockService.saveBlock(CHAIN_ID, block);
                 blockService.broadcastBlock(CHAIN_ID, block);
+                Thread.sleep((long) (new Random().nextInt(10) * 1000));
             } catch (Exception e) {
                 e.printStackTrace();
             }
