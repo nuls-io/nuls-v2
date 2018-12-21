@@ -88,7 +88,7 @@ public class WsClient extends WebSocketClient {
                     } else {
                         ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);
                     }
-                    Log.debug("ResponseFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
+                    Log.info("ResponseFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
                     break;
                 default:
                     break;
