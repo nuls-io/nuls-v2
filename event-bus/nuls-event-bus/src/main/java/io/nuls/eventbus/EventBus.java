@@ -4,6 +4,8 @@ import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.constant.EbErrorCode;
 import io.nuls.eventbus.model.Subscriber;
 import io.nuls.eventbus.model.Topic;
+import io.nuls.eventbus.service.EbStorageService;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.util.Map;
@@ -21,6 +23,9 @@ public class EventBus {
 
     private ConcurrentMap<String, Topic> topicMap = new ConcurrentHashMap<>();
 
+    @Autowired
+    private EbStorageService ebStorageService;
+
     private EventBus(){}
 
     public static synchronized EventBus getInstance(){
@@ -37,6 +42,7 @@ public class EventBus {
             if(topicMap.containsKey(topicId)){
                 Topic topic = topicMap.get(topicId);
                 topicMap.put(topicId,topic.addSubscriber(subscriber));
+                ebStorageService.putTopic(topic);
             }else{
                 throw new NulsRuntimeException(EbErrorCode.TOPIC_NOT_FOUND);
             }
@@ -49,6 +55,7 @@ public class EventBus {
             if(topicMap.containsKey(topicId)){
                 Topic topic = topicMap.get(topicId);
                 topicMap.put(topicId,topic.removeSubscriber(subscriber));
+                ebStorageService.putTopic(topic);
             }else{
                 throw new NulsRuntimeException(EbErrorCode.TOPIC_NOT_FOUND);
             }
@@ -67,6 +74,7 @@ public class EventBus {
             }else{
                 topic = new Topic(topicId,abbr,moduleName,domain);
                 topicMap.put(topicId,topic);
+                ebStorageService.putTopic(topic);
             }
             return topic.getSubscribers();
         }
