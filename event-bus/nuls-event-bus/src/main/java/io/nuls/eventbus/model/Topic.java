@@ -1,6 +1,5 @@
 package io.nuls.eventbus.model;
 
-import io.nuls.rpc.model.ModuleE;
 import lombok.*;
 
 import java.io.Serializable;
@@ -8,6 +7,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+/**
+ * @author naveen
+ */
 @ToString
 @NoArgsConstructor
 public class Topic implements Serializable {
@@ -46,7 +48,7 @@ public class Topic implements Serializable {
         this.moduleName = name;
         this.domain = domain;
         this.createTime = System.currentTimeMillis();
-        subscribers = new CopyOnWriteArraySet<Subscriber>();
+        subscribers = new CopyOnWriteArraySet<>();
     }
 
     public Topic addSubscriber(Subscriber subscriber){

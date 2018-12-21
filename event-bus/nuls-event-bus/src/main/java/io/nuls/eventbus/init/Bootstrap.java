@@ -7,7 +7,6 @@ import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.model.Topic;
 import io.nuls.eventbus.rpc.processor.ClientSyncProcessor;
 import io.nuls.eventbus.runtime.EventBusRuntime;
-import io.nuls.eventbus.rpc.processor.EventDispatchProcessor;
 import io.nuls.eventbus.service.EbStorageService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
@@ -31,9 +30,7 @@ import java.util.stream.Collectors;
  */
 public class Bootstrap {
 
-    private static EbStorageService ebStorageService;
-
-    public static void main(String args[]){
+    public static void main(String[] args){
         Log.info("Event Bus module bootstrap starts...");
         try {
             initConfig();
@@ -49,7 +46,7 @@ public class Bootstrap {
         }
     }
 
-    public static void initConfig(){
+    private static void initConfig(){
         try {
             IniEntity moduleConfig = ConfigLoader.loadIni(EbConstants.MODULE_FILE);
             EbConstants.MODULE_CONFIG_MAP.put(EbConstants.LANGUAGE,moduleConfig.getCfgValue(EbConstants.SYSTEM_SECTION, EbConstants.LANGUAGE));
@@ -65,7 +62,7 @@ public class Bootstrap {
         }
     }
 
-    public static void startRpc() throws Exception{
+    private static void startRpc() throws Exception{
         try{
             WsServer.getInstance(ModuleE.EB)
                     .moduleRoles(new String[]{"1.0"})
@@ -75,21 +72,20 @@ public class Bootstrap {
             CmdDispatcher.syncKernel();
         }catch (Exception e){
             Log.error("Event Bus rpc start up failed");
-            Constants.THREAD_POOL.shutdownNow();
+            throw new Exception("Event Bus rpc start up failed");
         }
     }
 
-    public static void startProcessors(){
-        ConcurrentMap<String, Topic> topics = EventBus.getInstance().getTopicMap();
-        if(!topics.isEmpty()){
-            Set<String> roles = topics.values().stream().flatMap(topic -> topic.getSubscribers().stream().map(subscriber -> subscriber.getModuleAbbr())).collect(Collectors.toSet());
+    private static void startProcessors(){
+        Set<String> roles = EventBus.getInstance().getAllSubscribers();
+        if(roles != null){
             roles.stream().map(role -> EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{role, EbConstants.SUBSCRIBE}));
         }
-        Constants.THREAD_POOL.execute(new ClientSyncProcessor());
+        EbConstants.EB_THREAD_POOL.execute(new ClientSyncProcessor());
     }
 
-    public static void initDB(){
-        ebStorageService = SpringLiteContext.getBean(EbStorageService.class);
+    private static void initDB(){
+        EbStorageService ebStorageService = SpringLiteContext.getBean(EbStorageService.class);
         ebStorageService.init();
         ConcurrentMap<String,Topic> map = ebStorageService.loadTopics();
         if(!map.isEmpty()){

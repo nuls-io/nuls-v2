@@ -1,6 +1,5 @@
 package io.nuls.eventbus.model;
 
-import io.nuls.rpc.model.ModuleE;
 import lombok.*;
 
 import java.io.Serializable;

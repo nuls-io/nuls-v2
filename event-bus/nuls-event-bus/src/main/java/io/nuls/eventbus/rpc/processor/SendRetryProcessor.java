@@ -3,18 +3,10 @@ package io.nuls.eventbus.rpc.processor;
 import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.model.Subscriber;
 import io.nuls.eventbus.rpc.invoke.EventAuditInvoke;
-import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.message.Ack;
-import io.nuls.rpc.model.message.Message;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 
-import java.nio.channels.NotYetConnectedException;
 import java.util.Map;
 
 /** Separate thread for each subscriber to perform retry process in case event data is not sent successfully.
@@ -23,14 +15,19 @@ import java.util.Map;
  */
 public class SendRetryProcessor implements Runnable {
 
+    private final Object[] subscriberEvent;
+
+    SendRetryProcessor(Object[] obj){
+        this.subscriberEvent = obj;
+    }
+
     @Override
     public void run() {
         try{
-            Object[] objects = EventBusRuntime.firstObjArrInRetryQueue();
-            if(null != objects){
-                Subscriber subscriber = (Subscriber)objects[0];
+            if(null != subscriberEvent){
+                Subscriber subscriber = (Subscriber)subscriberEvent[0];
                 Log.info("SendAndRetry thread running for Subscriber : "+subscriber.getModuleAbbr());
-                Map<String,Object> params = (Map<String,Object>)objects[1];
+                Map<String,Object> params = (Map<String,Object>)subscriberEvent[1];
                 String messageId = sendEvent(subscriber,params);
                 int retryAttempt = 0;
                 Log.debug("Acknowledgement for send event messageId: "+messageId +" received");
