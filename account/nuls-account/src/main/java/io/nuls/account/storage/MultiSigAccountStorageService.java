@@ -22,35 +22,54 @@
  * SOFTWARE.
  *
  */
-package io.nuls.rpc.invoke;
 
-import io.nuls.rpc.client.runtime.ClientRuntime;
-import io.nuls.rpc.model.message.Response;
+package io.nuls.account.storage;
 
-import java.util.Map;
+import io.nuls.account.model.po.AccountPo;
+import io.nuls.account.model.po.MultiSigAccountPo;
+import io.nuls.base.data.Address;
+
+import java.util.List;
 
 /**
- * @author tangyi
- * @date 2018/12/20
- * @description
+ * 账户数据存储服务接口
+ * Account data storage service interface
+ *
+ * @author: EdwardChan
  */
-public class KernelInvoke extends BaseInvoke {
+public interface MultiSigAccountStorageService {
+
     /**
-     * 自动回调的类需要重写的方法
-     * A method that needs to be rewritten for a class that calls back automatically
+     * 创建账户
+     * save account
      *
-     * @param response 请求的响应信息，Response information to requests
+     * @return
      */
-    @SuppressWarnings("unchecked")
-    @Override
-    public void callBack(Response response) {
-        ClientRuntime.ROLE_MAP.clear();
-        Map responseData = (Map) response.getResponseData();
-        Map methodMap = (Map) responseData.get("registerAPI");
-        Map dependMap = (Map) methodMap.get("Dependencies");
-        for (Object object : dependMap.entrySet()) {
-            Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
-            ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
-        }
-    }
+    boolean saveAccount(MultiSigAccountPo multiSigAccountPo);
+
+    /**
+     * 删除账户
+     * Delete account
+     *
+     * @param address Account address to be deleted
+     * @return the result of the opration
+     */
+    boolean removeAccount(Address address);
+
+    /**
+     * 获取所有账户
+     *
+     * @return the result of the opration and Result<List<Account>>
+     */
+    List<MultiSigAccountPo> getAccountList();
+
+    /**
+     * 根据账户获取账户信息
+     * According to the account to obtain account information
+     *
+     * @param address
+     * @return the result of the opration
+     */
+    MultiSigAccountPo getAccount(byte[] address);
+
 }

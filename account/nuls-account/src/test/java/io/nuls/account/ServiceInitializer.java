@@ -26,7 +26,7 @@ public class ServiceInitializer {
     public static void initialize() throws Exception {
         if (!isInitialized) {
             //NoUse.mockKernel();
-            //AccountBootstrap.main(null);
+            AccountBootstrap.main(null);
 
             isInitialized = Boolean.TRUE;
         }

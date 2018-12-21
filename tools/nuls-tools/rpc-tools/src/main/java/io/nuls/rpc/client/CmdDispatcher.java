@@ -116,16 +116,13 @@ public class CmdDispatcher {
         Get the returned data and place it in the local variable
          */
         Response response = receiveResponse(message.getMessageId(), Constants.TIMEOUT_TIMEMILLIS);
-        new KernelInvoke().callBack(response);
-//        Map responseData = (Map) response.getResponseData();
-//        Map methodMap = (Map) responseData.get("registerAPI");
-//        Map dependMap = (Map) methodMap.get("Dependencies");
-//        for (Object object : dependMap.entrySet()) {
-//            Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
-//            ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
-//        }
+        BaseInvoke baseInvoke = new KernelInvoke();
+        baseInvoke.callBack(response);
 
-        CmdDispatcher.requestAndInvoke(ModuleE.KE.abbr,"registerAPI",JSONUtils.json2map(JSONUtils.obj2json(ServerRuntime.LOCAL)),"0","1",new KernelInvoke());
+        /*
+        当有新模块注册到Kernel(Manager)时，需要同步连接信息
+         */
+        CmdDispatcher.requestAndInvoke(ModuleE.KE.abbr, "registerAPI", JSONUtils.json2map(JSONUtils.obj2json(ServerRuntime.LOCAL)), "0", "1", baseInvoke);
         Log.info("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.ROLE_MAP));
 
         /*
@@ -271,7 +268,7 @@ public class CmdDispatcher {
          */
         String url = ClientRuntime.getRemoteUri(role);
         if (url == null) {
-            return "-1";
+            throw new Exception("Cannot find url based on role: " + role);
         }
         WsClient wsClient = ClientRuntime.getWsClient(url);
         Log.debug("SendRequest to "
