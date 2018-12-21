@@ -288,15 +288,24 @@ public class CmdHandler {
                     continue;
                 }
 
+
+                /*
+                这段代码非常不优雅，可以改进下（我没时间了，怕改出BUG），代码的业务逻辑如下：
+                用户的cmd会返回一个对象，RPC会自动把这个对象替换为Map，Key是调用的方法名，Value是内容（Berzeck强烈要求）
+                因此在这里创建一个新对象
+                注意：如果不创建新对象，直接使用response对象的话，在大家都订阅了一个方法的时候会出现多重嵌套的问题（因为对象的引用被改变了）
+                 */
+                Response realResponse = new Response();
+                realResponse.setRequestId(messageId);
+                realResponse.setResponseStatus(response.getResponseStatus());
+                realResponse.setResponseComment(response.getResponseComment());
+                realResponse.setResponseMaxSize(response.getResponseMaxSize());
+
                 Map<String, Object> responseData = new HashMap<>(1);
-                try {
-                    if (!((Map) response.getResponseData()).containsKey(method)) {
-                        responseData.put((String) method, response.getResponseData());
-                        response.setResponseData(responseData);
-                    }
-                } catch (Exception ignore) {
-                }
-                response.setRequestId(messageId);
+                responseData.put((String) method, response.getResponseData());
+                response.setResponseData(responseData);
+                realResponse.setResponseData(responseData);
+
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 try {
