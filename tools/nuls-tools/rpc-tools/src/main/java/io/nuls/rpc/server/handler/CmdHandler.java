@@ -289,8 +289,13 @@ public class CmdHandler {
                 }
 
                 Map<String, Object> responseData = new HashMap<>(1);
-                responseData.put((String) method, response.getResponseData());
-                response.setResponseData(responseData);
+                try {
+                    if (!((Map) response.getResponseData()).containsKey(method)) {
+                        responseData.put((String) method, response.getResponseData());
+                        response.setResponseData(responseData);
+                    }
+                } catch (Exception ignore) {
+                }
                 response.setRequestId(messageId);
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
