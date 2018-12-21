@@ -54,7 +54,7 @@ public class GetTxGroupHandler extends BaseCmd {
     @CmdAnnotation(cmd = GET_TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Object process(Map map){
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
-        String nodeId = map.get("nodes").toString();
+        String nodeId = map.get("nodeId").toString();
         HashListMessage  message = new HashListMessage ();
 
         byte[] decode = HexUtil.decode(map.get("messageBody").toString());

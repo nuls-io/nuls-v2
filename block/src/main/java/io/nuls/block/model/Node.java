@@ -64,7 +64,7 @@ public class Node {
         if (success) {
             credit = Math.min(200, credit + 20);
         } else {
-            credit = Math.max(0, credit - 20);
+            credit = Math.max(20, credit - 20);
         }
 
     }

@@ -6,14 +6,13 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
-import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.rocksdb.storage.TransactionStorageService;
-import io.nuls.transaction.model.bo.TxWrapper;
+import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.utils.DBUtil;
 
 import java.io.IOException;
@@ -37,12 +36,10 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
     }
 
     @Override
-    public boolean saveTx(TxWrapper txWrapper) {
-        if (txWrapper == null) {
+    public boolean saveTx(int chainId, Transaction tx) {
+        if (tx == null) {
             return false;
         }
-        Transaction tx = txWrapper.getTx();
-        int chainId=txWrapper.getChainId();
         byte[] txHashBytes = null;
         try {
             txHashBytes = tx.getHash().serialize();

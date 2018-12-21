@@ -25,6 +25,8 @@
 
 package io.nuls.transaction.model.bo;
 
+import io.nuls.base.data.Transaction;
+
 /**
  * @author: Charlie
  * @date: 2018/11/12
@@ -153,5 +155,16 @@ public class TxRegister {
 
     public void setModuleCode(String moduleCode) {
         this.moduleCode = moduleCode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof TxRegister)) {
+            return false;
+        }
+        return this.getTxType()==(((TxRegister) obj).getTxType());
     }
 }

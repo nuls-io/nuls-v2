@@ -28,6 +28,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.storage.ConfigService;
+import io.nuls.account.util.log.LogUtil;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
@@ -57,7 +58,7 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
             try {
                 RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF);
             } catch (Exception e) {
-                Log.error(e);
+                LogUtil.error(e);
                 throw new NulsException(e);
             }
         }
@@ -77,7 +78,7 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
             byte[] value = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF,ByteUtils.intToBytes(chainID));
             return ObjectUtils.bytesToObject(value);
         }catch (Exception e){
-            Log.error(e);
+            LogUtil.error(e);
             return null;
         }
     }
@@ -87,7 +88,7 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
         try {
             return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF,ByteUtils.intToBytes(chainID));
         }catch (Exception e){
-            Log.error(e);
+            LogUtil.error(e);
             return  false;
         }
     }
@@ -104,7 +105,7 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
             }
             return configBeanMap;
         }catch (Exception e){
-            Log.error(e);
+            LogUtil.error(e);
             return null;
         }
     }

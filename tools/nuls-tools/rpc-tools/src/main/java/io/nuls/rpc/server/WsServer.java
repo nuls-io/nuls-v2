@@ -27,7 +27,6 @@ package io.nuls.rpc.server;
 
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.client.runtime.ClientRuntime;
-import io.nuls.rpc.client.thread.HeartbeatProcessor;
 import io.nuls.rpc.client.thread.ResponseAutoProcessor;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
@@ -185,7 +184,7 @@ public class WsServer extends WebSocketServer {
         Constants.THREAD_POOL.execute(new ResponseAutoProcessor());
         Constants.THREAD_POOL.execute(new RequestSingleProcessor());
         Constants.THREAD_POOL.execute(new RequestLoopProcessor());
-        Constants.THREAD_POOL.execute(new HeartbeatProcessor());
+//        Constants.THREAD_POOL.execute(new HeartbeatProcessor());
         Log.info("Server<" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
     }
 

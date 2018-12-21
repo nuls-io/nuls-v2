@@ -77,6 +77,8 @@ public class ConsensusServiceImpl implements ConsensusService {
     private BlockValidator blockValidator;
     @Autowired
     private BatchValidator batchValidator;
+    @Autowired
+    private BlockManager blockManager;
 
     /**
      * 创建节点
@@ -669,7 +671,10 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = dto.getChainId();
-        boolean isDownload = dto.isDownload();
+        /*
+        * 0区块下载中，1接收到最新区块
+        * */
+        boolean isDownload = (dto.getDownload()==0);
         String blockHex = dto.getBlock();
         Chain chain = chainManager.getChainMap().get(chainId);
         if (chain == null) {
@@ -1326,6 +1331,34 @@ public class ConsensusServiceImpl implements ConsensusService {
             depositManager.updateDeposit(chain, depositManager.poToDeposit(po));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e.getMessage());
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    /**
+     * 缓存最新区块
+     */
+    @Override
+    public Result addBlock(Map<String,Object> params){
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        try {
+            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER);
+            BlockHeader header = new BlockHeader();
+            header.parse(HexUtil.decode(headerHex),0);
+            blockManager.addNewBlock(chain,header);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+        }catch (NulsException e){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e.getMessage());
             return Result.getFailed(e.getErrorCode());
         }

@@ -57,7 +57,7 @@ public class GetBlocksHandler extends BaseCmd {
     @CmdAnnotation(cmd = GET_BLOCKS_BY_HEIGHT_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Object process(Map map){
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
-        String nodeId = map.get("nodes").toString();
+        String nodeId = map.get("nodeId").toString();
         HeightRangeMessage message = new HeightRangeMessage();
 
         byte[] decode = HexUtil.decode(map.get("messageBody").toString());

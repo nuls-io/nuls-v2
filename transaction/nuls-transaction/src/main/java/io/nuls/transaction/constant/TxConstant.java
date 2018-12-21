@@ -20,6 +20,7 @@ public interface TxConstant {
      * webSocket config
      */
     String TX_MODULE_NAME = "transaction";
+
     String TX_CMD_PATH = "io.nuls.transaction.rpc.cmd";
     int TX_CMD_PORT = 8823;
     String KERNEL_URL = "ws://127.0.0.1:8887";
@@ -37,7 +38,6 @@ public interface TxConstant {
     String DB_DATA_PATH = "rocksdb.datapath";
     String TX_UNVERIFIED_QUEUE = "tx_unverified_queue";
     long TX_UNVERIFIED_QUEUE_MAXSIZE = 10000000L;
-
 
 
     /**
@@ -85,11 +85,16 @@ public interface TxConstant {
 
     /**
      * Map初始值
-     * */
-    int  INIT_CAPACITY =16;
+     */
+    int INIT_CAPACITY = 16;
 
     /**
      * config file path
-     * */
+     */
     String CONFIG_FILE_PATH = "transaction-config.json";
+
+    /**
+     * 打包交易，预留模块统一验证的时间 毫秒
+     */
+    long VERIFY_OFFSET = 500L;
 }

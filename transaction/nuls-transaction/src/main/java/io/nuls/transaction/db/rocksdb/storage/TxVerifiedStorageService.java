@@ -2,7 +2,6 @@ package io.nuls.transaction.db.rocksdb.storage;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.transaction.model.bo.TxWrapper;
 
 import java.util.List;
 
@@ -18,10 +17,11 @@ public interface TxVerifiedStorageService {
     /**
      * 保存已验证交易
      *
-     * @param txWrapper
+     * @param chainId
+     * @param tx
      * @return 保存是否成功
      */
-    boolean putTx(TxWrapper txWrapper);
+    boolean putTx(int chainId, Transaction tx);
 
     /**
      * 根据交易hash查询已验证交易数据

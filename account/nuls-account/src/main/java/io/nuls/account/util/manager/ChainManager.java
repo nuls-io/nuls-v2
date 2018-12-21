@@ -30,6 +30,7 @@ import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.bo.config.ConfigItem;
 import io.nuls.account.storage.ConfigService;
+import io.nuls.account.util.log.LogUtil;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
@@ -125,7 +126,7 @@ public class ChainManager {
             }
             return configMap;
         } catch (Exception e) {
-            Log.error(e);
+            LogUtil.error(e);
             return null;
         }
     }
@@ -147,9 +148,9 @@ public class ChainManager {
             }
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                Log.info(e.getMessage());
+                LogUtil.info(e.getMessage());
             } else {
-                Log.error(e);
+                LogUtil.error(e);
             }
         }
     }

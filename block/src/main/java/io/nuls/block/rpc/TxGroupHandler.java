@@ -59,12 +59,12 @@ public class TxGroupHandler extends BaseCmd {
     private BlockService blockService;
 
     @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Response process(List<Object> params) {
-        Integer chainId = Integer.parseInt(params.get(0).toString());
-        String nodeId = params.get(1).toString();
+    public Object process(Map map) {
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        String nodeId = map.get("nodeId").toString();
         TxGroupMessage message = new TxGroupMessage();
 
-        byte[] decode = HexUtil.decode(params.get(2).toString());
+        byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
@@ -107,7 +107,7 @@ public class TxGroupHandler extends BaseCmd {
             }
 
             Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-            if (blockService.saveBlock(chainId, block)) {
+            if (blockService.saveBlock(chainId, block, 1)) {
                 SmallBlock newSmallBlock = BlockUtil.getSmallBlock(chainId, block);
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);

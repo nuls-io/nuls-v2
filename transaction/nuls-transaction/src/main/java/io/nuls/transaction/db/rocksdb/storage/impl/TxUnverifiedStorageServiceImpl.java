@@ -27,34 +27,35 @@ package io.nuls.transaction.db.rocksdb.storage.impl;
 
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.TransactionManager;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
-import io.nuls.transaction.model.bo.TxWrapper;
+import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.utils.TxUtil;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
 import java.io.IOException;
 
 /**
  * 未验证交易存储
+ *
  * @author: qinyifeng
  * @date: 2018/11/29
  */
 @Service
 public class TxUnverifiedStorageServiceImpl implements TxUnverifiedStorageService {
 
-    private PersistentQueue queue = new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE, TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE);
+//    private PersistentQueue queue = new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE, TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE);
 
-    public TxUnverifiedStorageServiceImpl() throws Exception {
-    }
+//    public TxUnverifiedStorageServiceImpl() throws Exception {
+//    }
 
     @Override
-    public boolean putTx(TxWrapper txWrapper) {
+    public boolean putTx(Chain chain, Transaction tx) {
         try {
-            queue.offer(txWrapper.serialize());
+            chain.getUnverifiedQueue().offer(tx.serialize());
             return true;
         } catch (IOException e) {
             Log.error(e);
@@ -63,15 +64,13 @@ public class TxUnverifiedStorageServiceImpl implements TxUnverifiedStorageServic
     }
 
     @Override
-    public TxWrapper pollTx() {
-        byte[] bytes = queue.poll();
+    public Transaction pollTx(Chain chain) {
+        byte[] bytes = chain.getUnverifiedQueue().poll();
         if (null == bytes) {
             return null;
         }
         try {
-            TxWrapper txWrapper=new TxWrapper();
-            txWrapper.parse(new NulsByteBuffer(bytes));
-            return txWrapper;
+            return TxUtil.getTransaction(bytes);
         } catch (Exception e) {
             Log.error(e);
         }

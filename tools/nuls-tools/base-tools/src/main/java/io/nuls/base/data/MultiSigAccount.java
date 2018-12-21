@@ -42,6 +42,7 @@ import java.util.List;
  */
 public class MultiSigAccount extends BaseNulsData {
 
+    private int chainId;
     private Address address;
     private byte m;
     private List<byte[]> pubKeyList;
@@ -49,16 +50,19 @@ public class MultiSigAccount extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint32(chainId);
         stream.write(address.getAddressBytes());
         stream.write(m);
         stream.writeUint32(pubKeyList.size());
         for (int i = 0; i < pubKeyList.size(); i++) {
             stream.writeBytesWithLength(pubKeyList.get(i));
         }
+        stream.writeString(alias);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.chainId = byteBuffer.readInt32();
         byte[] bytes = byteBuffer.readBytes(Address.ADDRESS_LENGTH);
         this.address = Address.fromHashs(bytes);
         this.m = byteBuffer.readByte();
@@ -67,17 +71,28 @@ public class MultiSigAccount extends BaseNulsData {
         for (int i = 0; i < count; i++) {
             pubKeyList.add(byteBuffer.readByLengthByte());
         }
+        this.alias = byteBuffer.readString();
     }
 
     @Override
     public int size() {
-        int size = Address.ADDRESS_LENGTH;
+        int size = SerializeUtils.sizeOfUint32();
+        size += Address.ADDRESS_LENGTH;
         size += 1;
         size += SerializeUtils.sizeOfUint32();
         for (int i = 0; i < pubKeyList.size(); i++) {
             size += SerializeUtils.sizeOfBytes(pubKeyList.get(i));
         }
+        size += SerializeUtils.sizeOfString(alias);
         return size;
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
     }
 
     public Address getAddress() {

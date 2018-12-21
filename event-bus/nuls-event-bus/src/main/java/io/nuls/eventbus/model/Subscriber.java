@@ -1,6 +1,5 @@
 package io.nuls.eventbus.model;
 
-import io.nuls.rpc.model.ModuleE;
 import lombok.*;
 
 import java.io.Serializable;
@@ -32,15 +31,20 @@ public class Subscriber implements Serializable {
 
     @Getter
     @Setter
-    private String url;
+    private String callBackCmd;
+
+    public Subscriber(String abbr,String callBackCmd) {
+        this.moduleAbbr = abbr;
+        this.callBackCmd = callBackCmd;
+    }
 
     public Subscriber(String abbr,String moduleName,String domain) {
         this.moduleAbbr = abbr;
         this.moduleName = moduleName;
         this.domain = domain;
     }
-    public Subscriber(String url,String abbr,String moduleName,String domain){
-        this.url = url;
+    public Subscriber(String abbr,String moduleName,String domain,String callBackCmd){
+        this.callBackCmd = callBackCmd;
         this.moduleAbbr = abbr;
         this.moduleName = moduleName;
         this.domain = domain;

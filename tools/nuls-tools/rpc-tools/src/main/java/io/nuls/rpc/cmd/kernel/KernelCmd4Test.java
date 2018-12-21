@@ -34,6 +34,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -55,6 +56,7 @@ public class KernelCmd4Test extends BaseCmd {
     public Response registerAPI(Map<String, Object> map) {
         try {
             RegisterApi registerApi = JSONUtils.map2pojo(map, RegisterApi.class);
+            Log.info("注册的方法：" + JSONUtils.obj2json(registerApi));
             if (registerApi != null) {
                 Map<String, Object> role = new HashMap<>(3);
                 role.put(Constants.KEY_IP, registerApi.getConnectionInformation().get(Constants.KEY_IP));
@@ -63,14 +65,15 @@ public class KernelCmd4Test extends BaseCmd {
             }
             Map<String, Object> dependMap = new HashMap<>(1);
             dependMap.put("Dependencies", ClientRuntime.ROLE_MAP);
+            ServerRuntime.eventCount("registerAPI", success(dependMap));
             return success(dependMap);
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
             return failed(e.getMessage());
         }
     }
 
-    @CmdAnnotation(cmd = "method1", version = 1.0,  minEvent = 1,
+    @CmdAnnotation(cmd = "method1", version = 1.0, minEvent = 1,
             description = "Test method1")
     @Parameter(parameterName = "param1", parameterType = "string")
     public Response method1(Map<String, Object> map) {

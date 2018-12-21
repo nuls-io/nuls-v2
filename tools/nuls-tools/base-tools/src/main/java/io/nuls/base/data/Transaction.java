@@ -37,6 +37,7 @@ import io.nuls.tools.thread.TimeService;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.Arrays;
 
 /**
  * @author Charlie
@@ -62,6 +63,15 @@ public class Transaction extends BaseNulsData implements Cloneable {
     protected transient TxStatusEnum status = TxStatusEnum.UNCONFIRM;
 
     protected transient int size;
+
+    public Transaction() {
+
+    }
+
+    public Transaction(int type) {
+        this.time = TimeService.currentTimeMillis();
+        this.type = type;
+    }
 
     @Override
     public int size() {
@@ -95,7 +105,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
             NulsOutputStreamBuffer buffer = new NulsOutputStreamBuffer(bos);
             if (size == 0) {
                 bos.write(ToolsConstant.PLACE_HOLDER);
-            }else {
+            } else {
                 buffer.writeUint16(type);
                 buffer.writeUint48(time);
                 buffer.writeBytesWithLength(remark);
@@ -199,7 +209,7 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return coinData;
     }
 
-    public CoinData getCoinDataInstance() throws NulsException{
+    public CoinData getCoinDataInstance() throws NulsException {
         CoinData coinData = new CoinData();
         coinData.parse(new NulsByteBuffer(this.coinData));
         return coinData;
@@ -220,18 +230,22 @@ public class Transaction extends BaseNulsData implements Cloneable {
         this.size = size;
     }
 
-    public static Transaction getInstance(String Hex) throws NulsException{
-        NulsByteBuffer nulsByteBuffer = new NulsByteBuffer(HexUtil.decode(Hex));
+    public static Transaction getInstance(String Hex) throws NulsException {
+        return getInstance(HexUtil.decode(Hex));
+    }
+
+    public static Transaction getInstance(byte[] txBytes) throws NulsException {
+        NulsByteBuffer nulsByteBuffer = new NulsByteBuffer(txBytes);
         Transaction transaction = new Transaction();
         transaction.parse(nulsByteBuffer);
         return transaction;
     }
 
-    public String hex() throws Exception{
+    public String hex() throws Exception {
         return HexUtil.encode(this.serialize());
     }
 
-    public BigInteger getFee() throws NulsException{
+    public BigInteger getFee() throws NulsException {
         BigInteger fee = BigInteger.ZERO;
         if (null != coinData) {
             CoinData cData = getCoinDataInstance();
@@ -240,12 +254,14 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return fee;
     }
 
-    public Transaction(){
-
-    }
-
-    public Transaction(int type) {
-        this.time = TimeService.currentTimeMillis();
-        this.type = type;
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof Transaction)) {
+            return false;
+        }
+        return this.getHash().equals(((Transaction) obj).getHash());
     }
 }

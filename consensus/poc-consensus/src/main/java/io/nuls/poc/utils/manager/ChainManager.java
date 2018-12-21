@@ -1,9 +1,5 @@
 package io.nuls.poc.utils.manager;
 
-import io.nuls.base.data.Address;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.BlockRoundData;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -13,17 +9,12 @@ import io.nuls.poc.model.bo.config.ConfigItem;
 import io.nuls.poc.storage.ConfigService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.parse.SerializeUtils;
-import io.nuls.tools.thread.TimeService;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,6 +40,8 @@ public class ChainManager {
     private RoundManager roundManager;
     @Autowired
     private SchedulerManager schedulerManager;
+    @Autowired
+    private BlockManager blockManager;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
@@ -100,11 +93,19 @@ public class ChainManager {
 
     /**
      * 停止一条链
-     * Delete a chain
+     * stop a chain
      *
      * @param chainId 链ID/chain id
      * */
     public void stopChain(int chainId){
+
+    }
+
+    /**
+     * 删除一条链
+     * delete a chain
+     * */
+    public void deleteChain(int chainId){
 
     }
 
@@ -196,51 +197,13 @@ public class ChainManager {
      * */
     private void initCache(Chain chain){
         try {
-            /*todo
-            缓存最近x轮区块头数据
-            Cache the latest X rounds of block header data
-            */
-            int length = 1000;
-            int roundIndex = 1;
-            List<BlockHeader>blockHeaderList = new ArrayList<>();
-            Address packingAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
-            Address packingAddress1 = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
-            for (int index = 0;index < length;index++) {
-                BlockHeader blockHeader = new BlockHeader();
-                blockHeader.setHeight(index+1);
-                blockHeader.setPreHash(NulsDigestData.calcDigestData("00000000000".getBytes()));
-                blockHeader.setTime(TimeService.currentTimeMillis());
-                blockHeader.setTxCount(1);
-                blockHeader.setMerkleHash(NulsDigestData.calcDigestData(new byte[20]));
-
-                // add a round data
-                BlockRoundData roundData = new BlockRoundData();
-                roundData.setConsensusMemberCount(5);
-                roundData.setPackingIndexOfRound(5);
-                if((index+1)%10 == 0){
-                    roundIndex++;
-                    blockHeader.setPackingAddress(packingAddress1.getAddressBytes());
-                }
-                if((index+1)%10 == 6){
-                    blockHeader.setPackingAddress(packingAddress.getAddressBytes());
-                }
-                roundData.setRoundIndex(roundIndex);
-                roundData.setRoundStartTime(TimeService.currentTimeMillis());
-                try {
-                    blockHeader.setExtend(roundData.serialize());
-                } catch (IOException e) {
-                    throw new NulsRuntimeException(e);
-                }
-                blockHeaderList.add(blockHeader);
-            }
-            chain.setBlockHeaderList(blockHeaderList);
-            chain.setNewestHeader(blockHeaderList.get(blockHeaderList.size()-1));
+            blockManager.loadBlockHeader(chain);
             agentManager.loadAgents(chain);
             depositManager.loadDeposits(chain);
             punishManager.loadPunishes(chain);
             roundManager.initRound(chain);
         }catch (Exception e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
         }
     }
 

@@ -28,7 +28,7 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.transaction.service.ChainService;
-import io.nuls.transaction.utils.manager.ChainManager;
+import io.nuls.transaction.manager.ChainManager;
 
 import java.util.Map;
 

@@ -25,12 +25,15 @@
 package io.nuls.network.manager.threads;
 
 import io.nuls.network.manager.ConnectionManager;
+import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.dto.ProtocolRoleHandler;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
 
@@ -47,7 +50,20 @@ public class DataShowMonitorTest implements Runnable  {
         printlnCachePeer();
         printlnPeer();
         printlnMem();
+        printlnProtocolMap();
     }
+
+    private void printlnProtocolMap(){
+        Collection<Map<String,ProtocolRoleHandler>> values =MessageManager.getInstance().getProtocolRoleHandlerMap().values();
+        for (Map<String,ProtocolRoleHandler> map : values) {
+            Collection<ProtocolRoleHandler> list = map.values();
+            for (ProtocolRoleHandler protocolRoleHandler : list) {
+               Log.debug("protocolRoleHandler =================={}==={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
+            }
+        }
+
+    }
+
    private void printlnCachePeer(){
       List<Node> list= ConnectionManager.getInstance().getCacheAllNodeList();
       Log.info("============================printlnCachePeer:"+list.size());
@@ -57,9 +73,9 @@ public class DataShowMonitorTest implements Runnable  {
    }
    private void printlnMem(){
 //       byte[] bys = new byte[1024*1024];//申请1M内存
-       Log.debug("Java进程可以向操作系统申请到的最大内存:"+(Runtime.getRuntime().maxMemory())/(1024*1024)+"M");
-       Log.debug("Java进程空闲内存:"+(Runtime.getRuntime().freeMemory())/(1024*1024)+"M");
-       Log.debug("Java进程现在从操作系统那里已经申请了内存:"+(Runtime.getRuntime().totalMemory())/(1024*1024)+"M");
+//       Log.debug("Java进程可以向操作系统申请到的最大内存:"+(Runtime.getRuntime().maxMemory())/(1024*1024)+"M");
+//       Log.debug("Java进程空闲内存:"+(Runtime.getRuntime().freeMemory())/(1024*1024)+"M");
+//       Log.debug("Java进程现在从操作系统那里已经申请了内存:"+(Runtime.getRuntime().totalMemory())/(1024*1024)+"M");
    }
    private void printlnPeer(){
 

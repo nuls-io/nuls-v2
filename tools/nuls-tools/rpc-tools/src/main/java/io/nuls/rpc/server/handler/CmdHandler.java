@@ -224,7 +224,7 @@ public class CmdHandler {
             }
 
             Message rspMessage = execute(cmdDetail, params, messageId);
-            Log.info("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
+            Log.debug("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
             webSocket.send(JSONUtils.obj2json(rspMessage));
         }
     }
@@ -288,10 +288,24 @@ public class CmdHandler {
                     continue;
                 }
 
+
+                /*
+                这段代码非常不优雅，可以改进下（我没时间了，怕改出BUG），代码的业务逻辑如下：
+                用户的cmd会返回一个对象，RPC会自动把这个对象替换为Map，Key是调用的方法名，Value是内容（Berzeck强烈要求）
+                因此在这里创建一个新对象
+                注意：如果不创建新对象，直接使用response对象的话，在大家都订阅了一个方法的时候会出现多重嵌套的问题（因为对象的引用被改变了）
+                 */
+                Response realResponse = new Response();
+                realResponse.setRequestId(messageId);
+                realResponse.setResponseStatus(response.getResponseStatus());
+                realResponse.setResponseComment(response.getResponseComment());
+                realResponse.setResponseMaxSize(response.getResponseMaxSize());
+
                 Map<String, Object> responseData = new HashMap<>(1);
                 responseData.put((String) method, response.getResponseData());
                 response.setResponseData(responseData);
-                response.setRequestId(messageId);
+                realResponse.setResponseData(responseData);
+
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 try {
@@ -364,7 +378,6 @@ public class CmdHandler {
     private static String paramsValidation(CmdDetail cmdDetail, Map params) {
 
         List<CmdParameter> cmdParameterList = cmdDetail.getParameters();
-        System.out.println("aaa:"+cmdParameterList.size());
         for (CmdParameter cmdParameter : cmdParameterList) {
             /*
             如果定义了参数格式，但是参数为空，返回错误

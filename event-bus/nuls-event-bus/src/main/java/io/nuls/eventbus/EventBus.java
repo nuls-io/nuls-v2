@@ -1,5 +1,6 @@
 package io.nuls.eventbus;
 
+import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.constant.EbErrorCode;
 import io.nuls.eventbus.model.Subscriber;
 import io.nuls.eventbus.model.Topic;
@@ -9,13 +10,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 /**
  * @author naveen
  */
 public class EventBus {
 
-    public static EventBus INSTANCE;
+    private static EventBus INSTANCE;
 
     private ConcurrentMap<String, Topic> topicMap = new ConcurrentHashMap<>();
 
@@ -29,7 +31,7 @@ public class EventBus {
     }
 
     public void subscribe(Map<String,Object> params) throws NulsRuntimeException {
-        String topicId = (String)params.get("topic");
+        String topicId = (String)params.get(EbConstants.CMD_PARAM_TOPIC);
         Subscriber subscriber = buildSubscriber(params);
         synchronized (this){
             if(topicMap.containsKey(topicId)){
@@ -41,7 +43,7 @@ public class EventBus {
         }
     }
     public void unsubscribe(Map<String,Object> params) throws NulsRuntimeException{
-        String topicId = (String)params.get("topic");
+        String topicId = (String)params.get(EbConstants.CMD_PARAM_TOPIC);
         Subscriber subscriber = buildSubscriber(params);
         synchronized (this){
             if(topicMap.containsKey(topicId)){
@@ -54,11 +56,11 @@ public class EventBus {
     }
 
     public Set<Subscriber> publish(Map<String,Object> params){
-        String topicId = (String)params.get("topic");
-        String abbr = (String)params.get("abbr");
-        String moduleName = (String)params.get("moduleName");
-        String domain = (String)params.get("domain");
-        Topic topic = null;
+        String topicId = (String)params.get(EbConstants.CMD_PARAM_TOPIC);
+        String abbr = (String)params.get(EbConstants.CMD_PARAM_ROLE);
+        String moduleName = (String)params.get(EbConstants.CMD_PARAM_ROLE_NAME);
+        String domain = (String)params.get(EbConstants.CMD_PARAM_DOMAIN);
+        Topic topic;
         synchronized (this){
             if(topicMap.containsKey(topicId)){
                 topic = topicMap.get(topicId);
@@ -71,14 +73,15 @@ public class EventBus {
     }
 
     private Subscriber buildSubscriber(Map<String,Object> params){
-        String abbr = (String)params.get("abbr");
-        String moduleName = (String)params.get("moduleName");
-        String domain = (String)params.get("domain");
-        return new Subscriber(abbr,moduleName,domain);
+        String abbr = (String)params.get(EbConstants.CMD_PARAM_ROLE);
+        String callBackCmd = (String)params.get(EbConstants.CMD_PARAM_ROLE_CALLBACK);
+        String moduleName = (String)params.get(EbConstants.CMD_PARAM_ROLE_NAME);
+        String domain = (String)params.get(EbConstants.CMD_PARAM_DOMAIN);
+        return new Subscriber(abbr,moduleName,domain, callBackCmd);
     }
 
-    public ConcurrentMap<String, Topic> getTopicMap() {
-        return topicMap;
+    public Set<String> getAllSubscribers(){
+        return topicMap.values().stream().flatMap(topic -> topic.getSubscribers().stream().map(subscriber -> subscriber.getModuleAbbr())).collect(Collectors.toSet());
     }
 
     public void setTopicMap(ConcurrentMap<String, Topic> topicMap) {

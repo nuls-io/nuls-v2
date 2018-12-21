@@ -38,6 +38,7 @@ public class TransactionCmdTest {
     public void txRegisterTest() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
+        params.put("chainId", chainId);
         params.put("moduleCode", "ac");
         params.put("moduleValidator", "ac_accountTxValidate");
         List<Map> txRegisterList=new ArrayList<>();
@@ -51,7 +52,20 @@ public class TransactionCmdTest {
         txParams.put("verifySignature", true);
         txRegisterList.add(txParams);
         params.put("list",txRegisterList);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "tx_register", params);
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_register");
+        boolean value = (Boolean) result.get("value");
+        assertTrue(value);
+    }
+
+    @Test
+    public void txCommitTest() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, version);
+        params.put("chainId", chainId);
+        params.put("txHex", "0300bce49bca67010029215635667168583533426d7835376755754736426268717a46784d4d54393339333006e588abe5908d320001173930042301b50e18cbcd1891499450f125de50851bd09a39300100010000000000000000000000000000000000000000");
+        params.put("secondaryDataHex", "");
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_commit", params);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("tx_register");
         boolean value = (Boolean) result.get("value");
         assertTrue(value);

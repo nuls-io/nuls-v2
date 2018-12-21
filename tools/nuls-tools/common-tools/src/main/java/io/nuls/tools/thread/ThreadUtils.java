@@ -91,6 +91,32 @@ public class ThreadUtils {
     /**
      * 通过线程池执行任务
      *
+     * @param callable
+     * @param <V>
+     * @return
+     */
+    public static final <V> Future<V> asynExecuteCallable(Callable<V> callable) {
+        if (null == callable) {
+            throw new RuntimeException("runnable is null");
+        }
+        if (TEMPORARY_THREAD_POOL == null) {
+            throw new RuntimeException("temporary thread pool not initialized yet");
+        }
+        BlockingQueue<Runnable> blockingQueue = TEMPORARY_THREAD_POOL.getQueue();
+        if (blockingQueue.size() > 200) {
+            Log.info("Task Queue 100 Size Warning!!! Task info is " + callable.toString());
+        }
+        Future<V> future = TEMPORARY_THREAD_POOL.submit(callable);
+        int i = TEMPORARY_THREAD_POOL.getQueue().size();
+        if (i > 10) {
+            System.out.println("thread pool size:" + i);
+        }
+        return future;
+    }
+
+    /**
+     * 通过线程池执行任务
+     *
      * @param runnable Runnable
      */
     public static final void asynExecuteRunnable(Runnable runnable) {

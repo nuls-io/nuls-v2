@@ -56,7 +56,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
     public Object process(Map map) {
 
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
-        String nodeId = map.get("nodes").toString();
+        String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
 
         byte[] decode = HexUtil.decode(map.get("messageBody").toString());
