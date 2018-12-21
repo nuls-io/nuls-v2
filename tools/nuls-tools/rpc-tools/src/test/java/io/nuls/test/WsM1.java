@@ -143,6 +143,12 @@ public class WsM1 {
     }
 
     @Test
+    public void testModule() throws Exception{
+        NoUse.mockModule();
+        Thread.sleep(Integer.MAX_VALUE);
+    }
+
+    @Test
     public void testHeight() throws Exception {
         /*
         单元测试专用：单元测试时需要告知内核地址，以及同步接口列表
