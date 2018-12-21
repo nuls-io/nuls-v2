@@ -27,6 +27,7 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
+import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
@@ -223,12 +224,10 @@ public class BlockResource extends BaseCmd {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = new Block();
             block.parse(HexUtil.decode((String) map.get("block")),0);
-            if (service.saveBlock(chainId, block, 1) ) {
-                service.broadcastBlock(chainId, block);
-                //通知共识模块
-                ConsensusUtil.sendBlockHeader(chainId, block.getHeader());
+            if (service.saveBlock(chainId, block, 1) && service.broadcastBlock(chainId, block)) {
                 return success();
             } else {
+                service.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block));
                 return failed(BlockErrorCode.PARAMETER_ERROR);
             }
         } catch (Exception e) {

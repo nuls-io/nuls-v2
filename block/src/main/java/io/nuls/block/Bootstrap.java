@@ -33,6 +33,7 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.test.Miner;
 import io.nuls.block.thread.BlockSynchronizer;
+import io.nuls.block.thread.monitor.ChainsDbSizeMonitor;
 import io.nuls.block.thread.monitor.OrphanChainsMonitor;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.client.CmdDispatcher;
@@ -133,8 +134,8 @@ public class Bootstrap {
         context.setStatus(RunningStatusEnum.RUNNING);
         context.setSystemTransactionType(List.of(Constant.TX_TYPE_COINBASE));
         Block latestBlock = context.getLatestBlock();
-        new Miner("1", latestBlock).start();
-//        new Miner("2", latestBlock, true).start();
+//        new Miner("1", latestBlock).start();
+//        new Miner("2", latestBlock).start();
     }
 
     private static void rpcInit() throws Exception {
@@ -153,8 +154,8 @@ public class Bootstrap {
 
     private static void startDaemonThreads() {
         //开启区块同步线程
-//        ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronizer"));
-//        synExecutor.scheduleWithFixedDelay(BlockSynchronizer.getInstance(), 0, 10, TimeUnit.SECONDS);
+        ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronizer"));
+        synExecutor.scheduleWithFixedDelay(BlockSynchronizer.getInstance(), 0, 10, TimeUnit.SECONDS);
 //        //开启区块监控线程
 //        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
 //        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
@@ -162,14 +163,14 @@ public class Bootstrap {
 //        ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
 //        forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
         //开启孤儿链处理线程
-//        ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
-//        orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+        ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
+        orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
         //开启孤儿链维护线程
 //        ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
 //        maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 10, TimeUnit.SECONDS);
         //开启数据库大小监控线程
-//        ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
-//        dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+        ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
+        dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
     }
 
 }
