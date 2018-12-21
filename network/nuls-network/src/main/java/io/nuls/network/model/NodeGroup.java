@@ -237,6 +237,11 @@ public class NodeGroup  implements Dto {
         this.hightest = hightest;
     }
 
+    /**
+     * 在可连接数量范围内
+     *
+     * @return boolean
+     */
     public boolean isInMaxOutNumber() {
         return maxOut > hadConnectOut.intValue();
     }
@@ -251,17 +256,16 @@ public class NodeGroup  implements Dto {
     public Node getConnectCrossNode(String nodeId){
         return  this.getConnectCrossNodeMap().get(nodeId);
     }
-    public boolean isHadMaxInFull() {
-        return maxIn <= hadConnectIn.intValue();
+    public boolean isInMaxInNumber() {
+        return maxIn > hadConnectIn.intValue();
     }
 
-
-    public boolean isHadCrossMaxOutFull() {
-        return maxCrossOut <= hadCrossConnectOut.intValue();
+    public boolean isInCrossMaxOutNumber() {
+        return maxCrossOut > hadCrossConnectOut.intValue();
     }
 
-    public boolean isHadCrossMaxInFull() {
-        return maxCrossIn <= hadCrossConnectIn.intValue();
+    public boolean isInCrossMaxInNumber() {
+        return maxCrossIn > hadCrossConnectIn.intValue();
     }
 
     public Map<String, Node> getDisConnectNodeMap() {

@@ -146,7 +146,7 @@ public class NodesConnectTask implements Runnable  {
                  * 跨链连接
                  * Cross-chain connection
                  */
-                if(!nodeGroup.isHadCrossMaxOutFull()){
+                if(nodeGroup.isInCrossMaxOutNumber()){
                     /*
                      * 连接不饱和，向种子节点寻求更多的地址
                      *Connection is not saturated, seek more addresses from the seed node

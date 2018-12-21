@@ -83,7 +83,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
          * 远程地址与自己地址相同 或者 连接满额处理
          * 会存在情况如：种子节点 启动 无法扫描到自己的IP 只有 到握手时候才能知道自己外网IP，发现是自连。
          */
-        if(LocalInfoManager.getInstance().isSelfIp(node.getIp()) || ConnectionManager.getInstance().isPeerConnectExceedMax(node.getIp(),nodeGroup.getMagicNumber(),maxIn,Node.IN)){
+        if(LocalInfoManager.getInstance().isSelfIp(node.getIp())  || ConnectionManager.getInstance().isPeerConnectExceedMax(node.getIp(),nodeGroup.getMagicNumber(),maxIn,Node.IN)){
             if(node.getNodeGroupConnectors().size() == 0){
                 Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===close connection.");
                 node.getChannel().close();
