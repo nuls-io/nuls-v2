@@ -84,7 +84,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
     private   boolean validConnectNumber(ChannelHandlerContext ctx,long magicNumber, String remoteIP){
         Channel channel = ctx.channel();
         //already exist peer ip （In or Out）
-        if( ConnectionManager.getInstance().isPeerConnectExceedMaxIn(remoteIP,magicNumber,1)){
+        if( ConnectionManager.getInstance().isPeerConnectExceedMax(remoteIP,magicNumber,1,Node.OUT)){
             Log.info("dup connect,close channel");
             channel.close();
             return false;

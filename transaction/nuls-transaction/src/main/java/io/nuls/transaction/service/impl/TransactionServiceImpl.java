@@ -361,7 +361,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
             int assetChainId = coinDTO.getAssetsChainId();
             int assetId = coinDTO.getAssetsId();
-            if (!ChainCall.assetExist(assetChainId, assetId)) {
+            if (!ChainCall.verifyAssetExist(assetChainId, assetId)) {
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
             }
             //检查对应资产余额 是否足够
@@ -402,7 +402,7 @@ public class TransactionServiceImpl implements TransactionService {
             int chainId = coinDTO.getAssetsChainId();
             int assetId = coinDTO.getAssetsId();
             coinTo.setAmount(coinDTO.getAmount());
-            if (!ChainCall.assetExist(chainId, assetId)) {
+            if (!ChainCall.verifyAssetExist(chainId, assetId)) {
                 //资产不存在 chainId assetId
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
             }
@@ -598,7 +598,7 @@ public class TransactionServiceImpl implements TransactionService {
                 hasNulsFrom = true;
             }
             //只有NULS主网节点才会进入跨链交易验证器，直接验证资产即可
-            if (!ChainCall.assetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
+            if (!ChainCall.verifyAssetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
             }
         }
@@ -614,7 +614,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         //验证跨链交易的from和to的资产是否存在(有效)
         for (CoinTo coinTo : listTo) {
-            if (!ChainCall.assetExist(coinTo.getAssetsChainId(), coinTo.getAssetsId())) {
+            if (!ChainCall.verifyAssetExist(coinTo.getAssetsChainId(), coinTo.getAssetsId())) {
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
             }
         }

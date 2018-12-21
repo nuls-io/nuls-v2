@@ -72,7 +72,7 @@ public class BlockCollector implements Runnable {
         try {
             long netLatestHeight = params.getNetLatestHeight();
             long startHeight = params.getLocalLatestHeight() + 1;
-
+            Log.info("BlockCollector start work");
             while (startHeight <= netLatestHeight) {
                 result = futures.take().get();
                 int size = result.getSize();
@@ -90,10 +90,10 @@ public class BlockCollector implements Runnable {
                 }
                 startHeight += size;
             }
+            Log.info("BlockCollector stop work");
         } catch (Exception e) {
             Log.error(e);
         }
-        System.out.println("11111111111111111111111");
     }
 
 

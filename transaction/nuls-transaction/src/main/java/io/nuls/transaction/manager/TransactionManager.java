@@ -272,7 +272,7 @@ public class TransactionManager {
 
             if (chainId == TxConstant.NULS_CHAINID) {
                 //如果chainId是主网则通过连管理验证资产是否存在
-                if (!ChainCall.assetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
+                if (!ChainCall.verifyAssetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
                     throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
                 }
             }/*else{

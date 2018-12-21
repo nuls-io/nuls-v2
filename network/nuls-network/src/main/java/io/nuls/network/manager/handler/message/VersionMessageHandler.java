@@ -80,10 +80,10 @@ public class VersionMessageHandler extends BaseMessageHandler {
             maxIn=nodeGroup.getMaxIn();
         }
         /*
-         *远程地址与自己地址相同 或者 连接满额处理
-         *会存在情况如：种子节点 启动 无法扫描到自己的IP 只有 到握手时候才能知道自己外网IP，发现是自连。
+         * 远程地址与自己地址相同 或者 连接满额处理
+         * 会存在情况如：种子节点 启动 无法扫描到自己的IP 只有 到握手时候才能知道自己外网IP，发现是自连。
          */
-        if(LocalInfoManager.getInstance().isSelfIp(node.getIp()) || ConnectionManager.getInstance().isPeerConnectExceedMaxIn(node.getIp(),nodeGroup.getMagicNumber(),maxIn)){
+        if(LocalInfoManager.getInstance().isSelfIp(node.getIp())  || ConnectionManager.getInstance().isPeerConnectExceedMax(node.getIp(),nodeGroup.getMagicNumber(),maxIn,Node.IN)){
             if(node.getNodeGroupConnectors().size() == 0){
                 Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===close connection.");
                 node.getChannel().close();
@@ -98,7 +98,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
             }
         }else{
             //add maxIn count
-            ConnectionManager.getInstance().addGroupMaxInIp(node,nodeGroup.getMagicNumber());
+            ConnectionManager.getInstance().addGroupMaxIp(node,nodeGroup.getMagicNumber(),Node.IN);
         }
         //服务端首次知道channel的网络属性，进行channel归属
         node.addGroupConnector(message.getHeader().getMagicNumber());

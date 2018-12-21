@@ -78,7 +78,7 @@ public class NodesConnectTask implements Runnable  {
                  * 判断是否被动连接里已经存在此链的 连接,如果业务已经存在则跳过
                  * Determine if the connection to this chain already exists in the passive connection, skip if the service already exists
                  */
-                if(connectionManager.isPeerConnectExceedMaxIn(node.getIp(),magicNumber,1)){
+                if(connectionManager.isPeerConnectExceedMax(node.getIp(),magicNumber,1,Node.OUT)){
                     continue;
                 }
 
@@ -133,7 +133,7 @@ public class NodesConnectTask implements Runnable  {
                 if(nodeGroup.isLock()){
                     continue;
                 }
-                if (!nodeGroup.isHadMaxOutFull()) {
+                if (nodeGroup.isInMaxOutNumber()) {
                     /*
                      * 连接不饱和，向种子节点寻求更多的地址
                      *Connection is not saturated, seek more addresses from the seed node
@@ -146,7 +146,7 @@ public class NodesConnectTask implements Runnable  {
                  * 跨链连接
                  * Cross-chain connection
                  */
-                if(!nodeGroup.isHadCrossMaxOutFull()){
+                if(nodeGroup.isInCrossMaxOutNumber()){
                     /*
                      * 连接不饱和，向种子节点寻求更多的地址
                      *Connection is not saturated, seek more addresses from the seed node

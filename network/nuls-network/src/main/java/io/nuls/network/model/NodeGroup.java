@@ -38,6 +38,7 @@ import io.nuls.network.model.po.NodeGroupPo;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -47,17 +48,17 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  */
 public class NodeGroup  implements Dto {
-    private long magicNumber = 0;
-    private int chainId = 0;;
-    private int maxOut = 0;;
-    private int maxIn = 0;;
+    private long magicNumber;
+    private int chainId;
+    private int maxOut;
+    private int maxIn;
     /**
      * 友链跨链最大连接数
      */
-    private int maxCrossOut = 0;;
-    private int maxCrossIn = 0;;
+    private int maxCrossOut = 0;
+    private int maxCrossIn = 0;
 
-    private int minAvailableCount = 0;
+    private int minAvailableCount ;
     /**
      * 最大高度peer id
      */
@@ -82,7 +83,7 @@ public class NodeGroup  implements Dto {
      * 是否卫星网络,只要卫星链上的节点就是true，如果是友链节点为false
      * 节点是否是卫星节点
      */
-    private boolean isMoonNet = false;
+    private boolean isMoonNet;
     /**
      * self net-未连接或等待握手的节点
      */
@@ -110,13 +111,13 @@ public class NodeGroup  implements Dto {
      */
     private Map<String ,Long> failConnectMap = new ConcurrentHashMap<>();
 
-    private volatile int hadConnectOut=0;
+    private   AtomicInteger hadConnectOut= new AtomicInteger();
 
-    private volatile int hadConnectIn=0;
+    private   AtomicInteger  hadConnectIn= new AtomicInteger();
 
-    private volatile int hadCrossConnectOut=0;
+    private   AtomicInteger  hadCrossConnectOut= new AtomicInteger();
 
-    private volatile  int hadCrossConnectIn=0;
+    private   AtomicInteger  hadCrossConnectIn= new AtomicInteger();
 
     private ReentrantLock NETWORK_GROUP_NODE_CONNECT_LOCK = new ReentrantLock();
 
@@ -130,8 +131,8 @@ public class NodeGroup  implements Dto {
     public final static int WAIT1 = 1;
     public final static int WAIT2= 2;
     public final static int OK = 3;
-    public final static int DESTROY = -1;
-    public final static int RECONNECT = -2;
+    private final static int DESTROY = -1;
+    private final static int RECONNECT = -2;
     private volatile int status;
 
     public NodeGroup(long  magicNumber,int chainId,int maxIn,int maxOut,int minAvailableCount,boolean isMoonNet) {
@@ -235,8 +236,14 @@ public class NodeGroup  implements Dto {
     public void setHightest(long hightest) {
         this.hightest = hightest;
     }
-    public boolean isHadMaxOutFull() {
-        return maxOut <= hadConnectOut;
+
+    /**
+     * 在可连接数量范围内
+     *
+     * @return boolean
+     */
+    public boolean isInMaxOutNumber() {
+        return maxOut > hadConnectOut.intValue();
     }
 
     public Node getConnectNode(String nodeId){
@@ -249,17 +256,16 @@ public class NodeGroup  implements Dto {
     public Node getConnectCrossNode(String nodeId){
         return  this.getConnectCrossNodeMap().get(nodeId);
     }
-    public boolean isHadMaxInFull() {
-        return maxIn <= hadConnectIn;
+    public boolean isInMaxInNumber() {
+        return maxIn > hadConnectIn.intValue();
     }
 
-
-    public boolean isHadCrossMaxOutFull() {
-        return maxCrossOut <= hadCrossConnectOut;
+    public boolean isInCrossMaxOutNumber() {
+        return maxCrossOut > hadCrossConnectOut.intValue();
     }
 
-    public boolean isHadCrossMaxInFull() {
-        return maxCrossIn <= hadCrossConnectIn;
+    public boolean isInCrossMaxInNumber() {
+        return maxCrossIn > hadCrossConnectIn.intValue();
     }
 
     public Map<String, Node> getDisConnectNodeMap() {
@@ -315,35 +321,19 @@ public class NodeGroup  implements Dto {
     }
 
     public int getHadConnectOut() {
-        return hadConnectOut;
-    }
-
-    public void setHadConnectOut(int hadConnectOut) {
-        this.hadConnectOut = hadConnectOut;
+        return hadConnectOut.intValue();
     }
 
     public int getHadConnectIn() {
-        return hadConnectIn;
-    }
-
-    public void setHadConnectIn(int hadConnectIn) {
-        this.hadConnectIn = hadConnectIn;
+        return hadConnectIn.intValue();
     }
 
     public int getHadCrossConnectOut() {
-        return hadCrossConnectOut;
-    }
-
-    public void setHadCrossConnectOut(int hadCrossConnectOut) {
-        this.hadCrossConnectOut = hadCrossConnectOut;
+        return hadCrossConnectOut.intValue();
     }
 
     public int getHadCrossConnectIn() {
-        return hadCrossConnectIn;
-    }
-
-    public void setHadCrossConnectIn(int hadCrossConnectIn) {
-        this.hadCrossConnectIn = hadCrossConnectIn;
+        return hadCrossConnectIn.intValue();
     }
 
     public void setMaxCrossOut(int maxCrossOut) {
@@ -368,29 +358,24 @@ public class NodeGroup  implements Dto {
 
 
     public boolean existSelfGroupList(String nodeId){
-        if(null == this.getConnectNodeMap().get(nodeId) && null == this.getDisConnectNodeMap().get(nodeId)){
-            return false;
-        }
-        return true;
+        return null != this.getConnectNodeMap().get(nodeId) || null != this.getDisConnectNodeMap().get(nodeId);
     }
     public boolean existCrossGroupList(String nodeId){
-        if( null == this.getConnectCrossNodeMap().get(nodeId) && null == this.getDisConnectCrossNodeMap().get(nodeId)){
-            return false;
-        }
-        return true;
+        return null != this.getConnectCrossNodeMap().get(nodeId) || null != this.getDisConnectCrossNodeMap().get(nodeId);
     }
 
     /**
      * 移除节点,判断是否承载有多链业务
      * 删除peer，注销链，bye消息，重启链rpc 中调用
-     * @param node
-     * @param connectChange
+     * @param node node
+     * @param connectChange connectChange
      */
     public boolean removePeerNode(Node node,boolean connectChange,boolean sendBye){
         NodeGroupConnector connector = node.getNodeGroupConnector(magicNumber);
         if(null != connector && node.getNodeGroupConnectors().size() == 1){
             //channelInactive code all the remove logic
             node.getChannel().close();
+            ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),node.getType());
         }else{
             //Just remove the node group relation
             if(sendBye){
@@ -402,14 +387,12 @@ public class NodeGroup  implements Dto {
                 }
             }
             addDisConnetNode(node,connectChange);
-            if(Node.IN ==  node.getType()) {
-                ConnectionManager.getInstance().subGroupMaxInIp(node, magicNumber, false);
-            }
+            ConnectionManager.getInstance().subGroupMaxIp(node, magicNumber, false);
             node.removeGroupConnector(magicNumber);
         }
         return true;
     }
-    public  Map<String,Node> getNodeMapByType(boolean isCross,boolean isConnect){
+    private  Map<String,Node> getNodeMapByType(boolean isCross,boolean isConnect){
         if(!isCross){
             if (isConnect) {
                 return connectNodeMap;
@@ -426,8 +409,8 @@ public class NodeGroup  implements Dto {
     }
     /**
      * 如果是连接的节点变更 connectChange=true，如果不是connectChange=false
-     * @param node
-     * @param connectChange
+     * @param node node
+     * @param connectChange connectChange
      */
     public void addDisConnetNode(Node node,boolean connectChange){
         NETWORK_GROUP_NODE_CONNECT_LOCK.lock();
@@ -440,29 +423,27 @@ public class NodeGroup  implements Dto {
             if (connectChange) {
                 if (Node.OUT == node.getType()) {
                     if (node.isCrossConnect()) {
-                        hadCrossConnectOut--;
+                        hadCrossConnectOut.getAndDecrement();
                     } else {
-                        hadConnectOut--;
+                        hadConnectOut.getAndDecrement();
                     }
                 } else {
                     if (node.isCrossConnect()) {
-                        hadCrossConnectIn--;
+                        hadCrossConnectIn.getAndDecrement();
                     } else {
-                        hadConnectIn--;
+                        hadConnectIn.getAndDecrement();
                     }
                 }
             }
-            if (connectMap.containsKey(node.getId())) {
-                connectMap.remove(node.getId());
-            }
+            connectMap.remove(node.getId());
         }finally {
             NETWORK_GROUP_NODE_CONNECT_LOCK.unlock();
         }
     }
     /**
      * 如果是连接的节点变更 connectChange=true，如果不是connectChange=false
-     * @param node
-     * @param connectChange
+     * @param node node
+     * @param connectChange connectChange
      */
     public void addConnetNode(Node node,boolean connectChange){
         NETWORK_GROUP_NODE_CONNECT_LOCK.lock();
@@ -473,22 +454,20 @@ public class NodeGroup  implements Dto {
             if(connectChange) {
                 if (Node.OUT == node.getType()) {
                     if(node.isCrossConnect()){
-                        hadCrossConnectOut++;
+                        hadCrossConnectOut.getAndIncrement();
                     }else {
-                        hadConnectOut++;
+                        hadConnectOut.getAndIncrement();
                     }
                 } else {
                     if(node.isCrossConnect()){
-                        hadCrossConnectIn++;
+                        hadCrossConnectIn.getAndIncrement();
                     }else{
-                        hadConnectIn++;
+                        hadConnectIn.getAndIncrement();
                     }
 
                 }
             }
-            if (disConnectMap.containsKey(node.getId())) {
-                disConnectMap.remove(node.getId());
-            }
+            disConnectMap.remove(node.getId());
         }finally {
             NETWORK_GROUP_NODE_CONNECT_LOCK.unlock();
         }
@@ -498,14 +477,14 @@ public class NodeGroup  implements Dto {
     /**
      *
      * 网络是否可使用 非自有网络满足跨链连接最小数
-     * @return
+     * @return boolean
      */
     public boolean isActive(){
         if(DESTROY == status || RECONNECT == status){
             return false;
         }
 
-        int activeConnectNum=0;
+        int activeConnectNum;
         if(isSelf){
             activeConnectNum=connectNodeMap.size();
         }else{
@@ -516,14 +495,11 @@ public class NodeGroup  implements Dto {
                 return false;
             }
         }
-        if(activeConnectNum > 0) {
-            return true;
-        }
-        return false;
+        return activeConnectNum > 0;
     }
     /**
      * 获取网络中最高区块连接器
-     * @return
+     * @return NodeGroupConnector
      */
     public NodeGroupConnector getHightestNodeGroupInfo(){
         Node node=connectNodeMap.get(hightestBlockNodeId);
@@ -603,10 +579,7 @@ public class NodeGroup  implements Dto {
     }
 
     public boolean isLock(){
-        if(DESTROY == status || RECONNECT == status){
-            return true;
-        }
-        return false;
+        return DESTROY == status || RECONNECT == status;
     }
 
     public void  addFailConnect(String nodeId,int addMinute){
@@ -614,9 +587,7 @@ public class NodeGroup  implements Dto {
     }
     public boolean isInLockTime(String nodeId){
         if(null != failConnectMap.get(nodeId)){
-           if(failConnectMap.get(nodeId)> System.currentTimeMillis()){
-                return true;
-           }
+            return failConnectMap.get(nodeId) > System.currentTimeMillis();
         }
         return false;
     }
