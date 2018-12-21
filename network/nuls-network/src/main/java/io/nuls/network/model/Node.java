@@ -292,7 +292,7 @@ public class Node  implements Dto {
          *如果是种子节点，不去移除
          * not eliminate if seed node
          */
-        if(NetworkParam.getInstance().getSeedIpList().contains(id)){
+        if(NetworkParam.getInstance().getSeedIpList().contains(id) && failCount <= NetworkConstant.NODE_CONNECT_TRY_MAX_TIMES ){
             return false;
         }
         return isBad;
