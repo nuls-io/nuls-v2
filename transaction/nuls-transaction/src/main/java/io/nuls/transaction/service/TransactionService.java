@@ -1,5 +1,6 @@
 package io.nuls.transaction.service;
 
+import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.MultiSignTxSignature;
@@ -8,7 +9,6 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.dto.AccountSignDTO;
-import io.nuls.transaction.model.dto.BlockHeaderDigestDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 
 import java.util.List;
@@ -133,9 +133,9 @@ public interface TransactionService {
      */
     boolean crossTransactionValidator(Chain chain, Transaction transaction) throws NulsException;
 
-    boolean crossTransactionCommit(Chain chain, Transaction transaction, BlockHeaderDigestDTO blockHeader) throws NulsException;
+    boolean crossTransactionCommit(Chain chain, Transaction transaction, BlockHeaderDigest blockHeader) throws NulsException;
 
-    boolean crossTransactionRollback(Chain chain, Transaction transaction, BlockHeaderDigestDTO blockHeader) throws NulsException;
+    boolean crossTransactionRollback(Chain chain, Transaction transaction, BlockHeaderDigest blockHeader) throws NulsException;
 
 
     /**

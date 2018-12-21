@@ -37,7 +37,7 @@ public class TransactionCall {
         return result;
     }
 
-    public static boolean txValidator(Chain chain, String cmd, String moduleCode, String txHex) {
+    public static boolean txProcess(Chain chain, String cmd, String moduleCode, String txHex) {
         //调用单个交易验证器
         HashMap params = new HashMap();
         params.put("chianId", chain.getChainId());

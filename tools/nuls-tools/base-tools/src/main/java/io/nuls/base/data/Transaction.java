@@ -44,25 +44,30 @@ import java.util.Arrays;
  */
 public class Transaction extends BaseNulsData implements Cloneable {
 
-    protected int type;
+    private int type;
 
-    protected byte[] coinData;
+    private byte[] coinData;
 
-    protected byte[] txData;
+    private byte[] txData;
 
-    protected long time;
+    private long time;
 
     private byte[] transactionSignature;
 
-    protected byte[] remark;
+    private byte[] remark;
 
-    protected transient NulsDigestData hash;
+    private transient NulsDigestData hash;
 
-    protected long blockHeight = -1L;
+    private long blockHeight = -1L;
 
-    protected transient TxStatusEnum status = TxStatusEnum.UNCONFIRM;
+    private transient TxStatusEnum status = TxStatusEnum.UNCONFIRM;
 
-    protected transient int size;
+    private transient int size;
+
+    /**
+     * 在区块中的顺序，存储在rocksDB中是无序的，保存区块时赋值，取出后根据此值排序
+     */
+    private int inBlockIndex;
 
     public Transaction() {
 
@@ -207,6 +212,14 @@ public class Transaction extends BaseNulsData implements Cloneable {
 
     public byte[] getCoinData() {
         return coinData;
+    }
+
+    public int getInBlockIndex() {
+        return inBlockIndex;
+    }
+
+    public void setInBlockIndex(int inBlockIndex) {
+        this.inBlockIndex = inBlockIndex;
     }
 
     public CoinData getCoinDataInstance() throws NulsException {

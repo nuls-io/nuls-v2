@@ -48,7 +48,6 @@ import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.AccountSignDTO;
-import io.nuls.transaction.model.dto.BlockHeaderDigestDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.ChainCall;
@@ -60,7 +59,6 @@ import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.math.BigInteger;
 import java.util.*;
 
@@ -576,7 +574,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         //验证txData发起链id和from地址链id是否一致
         int fromChainId = getCrossTxFromsOriginChainId(tx);
-        CrossTxData crossTxData = TxUtil.getCrossTxData(tx);
+        CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
         if (fromChainId != crossTxData.getChainId()) {
             throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
         }
@@ -640,13 +638,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public boolean crossTransactionCommit(Chain chain, Transaction tx, BlockHeaderDigestDTO blockHeader) {
+    public boolean crossTransactionCommit(Chain chain, Transaction tx, BlockHeaderDigest blockHeaderDigest) {
         //todo 调账本记账
         return true;
     }
 
     @Override
-    public boolean crossTransactionRollback(Chain chain, Transaction tx, BlockHeaderDigestDTO blockHeader) {
+    public boolean crossTransactionRollback(Chain chain, Transaction tx, BlockHeaderDigest blockHeaderDigest) {
         //todo 调账本回滚？
         return true;
     }
@@ -830,7 +828,7 @@ public class TransactionServiceImpl implements TransactionService {
             Transaction tx = TxUtil.getTransaction(txHex);
             txList.add(tx);
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-                CrossTxData crossTxData = TxUtil.getCrossTxData(tx);
+                CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
                 if (crossTxData.getChainId() != chain.getConfig().getAssetsId()) {
                     //如果是跨链交易，发起链不是当前链，则核对(跨链验证的结果)
                     CrossChainTx crossChainTx = crossChainTxStorageService.getTx(crossTxData.getChainId(), tx.getHash());
@@ -838,6 +836,7 @@ public class TransactionServiceImpl implements TransactionService {
                     /**
                      * 核对(跨链验证的结果)
                      */
+                    return false;
                 }
             }
             //验证单个交易

@@ -170,7 +170,7 @@ public class TransactionManager {
             TxRegister txRegister = this.getTxRegister(chain, tx.getType());
 
             //调验证器
-            return TransactionCall.txValidator(chain, txRegister.getValidator(), txRegister.getModuleCode(), tx.hex());
+            return TransactionCall.txProcess(chain, txRegister.getValidator(), txRegister.getModuleCode(), tx.hex());
         } catch (NulsException e) {
             chain.getLogger().error(e.getErrorCode().getMsg(), e.fillInStackTrace());
             return false;

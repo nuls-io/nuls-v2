@@ -1,6 +1,8 @@
 package io.nuls.transaction.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import io.nuls.base.data.BlockHeaderDigest;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -10,7 +12,9 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
@@ -167,7 +171,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "tx_commit", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction commit")
+/*    @CmdAnnotation(cmd = "tx_commit", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction commit")
     public Response commit(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
@@ -183,9 +187,15 @@ public class TransactionCmd extends BaseCmd {
             String txHex = (String) txHexObj;
             //将txHex转换为Transaction对象
             Transaction transaction = TxUtil.getTransaction(txHex);
-            TxRegister txRegister = transactionManager.getTxRegister(chainManager.getChain(chainId), transaction.getType());
-            HashMap response = (HashMap)TransactionCall.request(txRegister.getCommit(), txRegister.getModuleCode(), params);
-            result = (Boolean) response.get("value");
+            if(transaction.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER){
+                Chain chain = chainManager.getChain(chainId);
+                // todo secondaryDataHexObj 反序列化
+                // result = transactionService.crossTransactionCommit(chain, transaction, secondaryDataHexObj);
+            }else {
+                TxRegister txRegister = transactionManager.getTxRegister(chainManager.getChain(chainId), transaction.getType());
+                HashMap response = (HashMap) TransactionCall.request(txRegister.getCommit(), txRegister.getModuleCode(), params);
+                result = (Boolean) response.get("value");
+            }
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -194,7 +204,7 @@ public class TransactionCmd extends BaseCmd {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
         return success(result);
-    }
+    }*/
 
     /**
      * Execute transaction processor single rollback
@@ -202,7 +212,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "tx_rollbackSingle", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction rollback")
+/*    @CmdAnnotation(cmd = "tx_rollbackSingle", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction rollback")
     public Response rollbackSingle(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
@@ -229,7 +239,7 @@ public class TransactionCmd extends BaseCmd {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
         return success(result);
-    }
+    }*/
 
     /**
      * Save the transaction in the new block that was verified to the database
@@ -245,17 +255,21 @@ public class TransactionCmd extends BaseCmd {
         try {
             Object chainIdObj = params == null ? null : params.get("chainId");
             Object txHashListObj = params == null ? null : params.get("txHashList");
+            Object secondaryDataHexObj = params == null ? null : params.get("secondaryDataHex");
             // check parameters
             if (params == null || chainIdObj == null || txHashListObj == null) {
                 throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             int chainId = (Integer) chainIdObj;
             List<String> txHashHexList = (List<String>) txHashListObj;
-            List<byte[]> txHashList = new ArrayList<>();
+            List<NulsDigestData> txHashList = new ArrayList<>();
             //将交易hashHex解码为交易hash字节数组
-            txHashHexList.forEach(hashHex -> txHashList.add(HexUtil.decode(hashHex)));
+            for(String hashHex : txHashHexList){
+                txHashList.add(NulsDigestData.fromDigestHex(hashHex));
+            }
             //批量保存已确认交易
-            result = confirmedTransactionService.saveTxList(chainManager.getChain(chainId), txHashList);
+            BlockHeaderDigest blockHeaderDigest = TxUtil.getInstance((String)secondaryDataHexObj, BlockHeaderDigest.class);
+            result = confirmedTransactionService.saveTxList(chainManager.getChain(chainId), txHashList, blockHeaderDigest);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -280,17 +294,21 @@ public class TransactionCmd extends BaseCmd {
         try {
             Object chainIdObj = params == null ? null : params.get("chainId");
             Object txHashListObj = params == null ? null : params.get("txHashList");
+            Object secondaryDataHexObj = params == null ? null : params.get("secondaryDataHex");
             // check parameters
             if (params == null || chainIdObj == null || txHashListObj == null) {
                 throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             int chainId = (Integer) chainIdObj;
             List<String> txHashHexList = (List<String>) txHashListObj;
-            List<byte[]> txHashList = new ArrayList<>();
+            List<NulsDigestData> txHashList = new ArrayList<>();
             //将交易hashHex解码为交易hash字节数组
-            txHashHexList.forEach(hashHex -> txHashList.add(HexUtil.decode(hashHex)));
+            for(String hashHex : txHashHexList){
+                txHashList.add(NulsDigestData.fromDigestHex(hashHex));
+            }
             //批量回滚已确认交易
-            result = confirmedTransactionService.rollbackTxList(chainManager.getChain(chainId), txHashList);
+            BlockHeaderDigest blockHeaderDigest = TxUtil.getInstance((String)secondaryDataHexObj, BlockHeaderDigest.class);
+//            result = confirmedTransactionService.rollbackTxList(chainManager.getChain(chainId), txHashList, blockHeaderDigest);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
