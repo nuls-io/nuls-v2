@@ -41,6 +41,7 @@ public class KernelInvoke extends BaseInvoke {
      *
      * @param response 请求的响应信息，Response information to requests
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void callBack(Response response) {
         ClientRuntime.ROLE_MAP.clear();
@@ -51,6 +52,5 @@ public class KernelInvoke extends BaseInvoke {
             Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
             ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
         }
-        System.out.println("KernelInvoke进来了");
     }
 }
