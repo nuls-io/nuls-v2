@@ -7,8 +7,8 @@ import io.nuls.eventbus.model.Subscriber;
 import io.nuls.eventbus.rpc.processor.EventDispatchProcessor;
 import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
@@ -21,16 +21,21 @@ import java.util.Set;
  */
 public class EventBusCmd extends BaseCmd {
 
-    private EventBus eventBus = EventBus.getInstance();
+    private final EventBus eventBus = EventBus.getInstance();
 
-    @CmdAnnotation(cmd = "eb_subscribe", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Subscribe to specific topic")
-    public Object subscribe(Map<String,Object> params) throws Exception{
+    @CmdAnnotation(cmd = EbConstants.EB_SUBSCRIBE, version = 1.0, description = "Subscribe to specific topic")
+    @Parameter(parameterName = EbConstants.CMD_PARAM_ROLE, parameterType = "String")
+    @Parameter(parameterName = EbConstants.CMD_PARAM_ROLE_NAME, parameterType = "String")
+    @Parameter(parameterName = EbConstants.CMD_PARAM_DOMAIN, parameterType = "String")
+    @Parameter(parameterName = EbConstants.CMD_PARAM_TOPIC, parameterType = "String")
+    @Parameter(parameterName = EbConstants.CMD_PARAM_ROLE_CALLBACK, parameterType = "String")
+    public Object subscribe(Map<String,Object> params){
         if(params == null){
             return failed(EbErrorCode.PARAMS_MISSING);
         }
-        String moduleAbbr = (String)params.get("abbr");
-        String topic = (String)params.get("topic");
-        String callBackCmd = (String)params.get("callBackCmd");
+        String moduleAbbr = (String)params.get(EbConstants.CMD_PARAM_ROLE);
+        String topic = (String)params.get(EbConstants.CMD_PARAM_TOPIC);
+        String callBackCmd = (String)params.get(EbConstants.CMD_PARAM_ROLE_CALLBACK);
         if(StringUtils.isBlank(topic) || StringUtils.isBlank(moduleAbbr) || StringUtils.isBlank(callBackCmd)){
             return failed(EbErrorCode.PARAMS_MISSING);
         }
@@ -44,40 +49,47 @@ public class EventBusCmd extends BaseCmd {
         return success();
     }
 
-    @CmdAnnotation(cmd = "eb_unsubscribe", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "UnSubscribe to specific topic")
-    public Object unsubscribe(Map<String,Object> params) throws Exception{
+    @CmdAnnotation(cmd = EbConstants.EB_UNSUBSCRIBE, version = 1.0, description = "UnSubscribe to specific topic")
+    @Parameter(parameterName = EbConstants.CMD_PARAM_TOPIC, parameterType = "String")
+    @Parameter(parameterName = EbConstants.CMD_PARAM_ROLE, parameterType = "String")
+    public Object unsubscribe(Map<String,Object> params){
         if(params == null){
             return failed(EbErrorCode.PARAMS_MISSING);
         }
-        String moduleAbbr = (String)params.get("abbr");
-        String topic = (String)params.get("topic");
+        String moduleAbbr = (String)params.get(EbConstants.CMD_PARAM_ROLE);
+        String topic = (String)params.get(EbConstants.CMD_PARAM_TOPIC);
         if(StringUtils.isBlank(topic) || StringUtils.isBlank(moduleAbbr)){
             return failed(EbErrorCode.PARAMS_MISSING);
         }
         try{
             eventBus.unsubscribe(params);
         }catch (NulsRuntimeException nre){
-            Log.error("Subscription is failed");
+            Log.error("UnSubscribe is failed");
             return failed(nre.getErrorCode());
         }
         EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{moduleAbbr, EbConstants.UNSUBSCRIBE});
         return success();
     }
 
-    @CmdAnnotation(cmd = "eb_send", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Publish the event data to subscribers")
-    public Object send(Map<String,Object> params) throws Exception{
+    @CmdAnnotation(cmd = EbConstants.EB_SEND, version = 1.0, description = "Publish the event data to subscribers")
+    @Parameter(parameterName = EbConstants.CMD_PARAM_TOPIC, parameterType = "String")
+    @Parameter(parameterName = EbConstants.CMD_PARAM_ROLE, parameterType = "String")
+    @Parameter(parameterName = EbConstants.CMD_PARAM_ROLE_NAME, parameterType = "String")
+    @Parameter(parameterName = EbConstants.CMD_PARAM_DOMAIN, parameterType = "String")
+    @Parameter(parameterName = EbConstants.CMD_PARAM_DATA, parameterType = "Object")
+    public Object send(Map<String,Object> params){
         if(params == null){
             return failed(EbErrorCode.PARAMS_MISSING);
         }
-        Object data = params.get("data");
-        String topic = (String)params.get("topic");
+        Object data = params.get(EbConstants.CMD_PARAM_DATA);
+        String topic = (String)params.get(EbConstants.CMD_PARAM_TOPIC);
         if(StringUtils.isBlank(topic)){
             return failed(EbErrorCode.PARAMS_MISSING);
         }
         Set<Subscriber> subscribers = eventBus.publish(params);
         if(!subscribers.isEmpty()){
             EventBusRuntime.EVENT_DISPATCH_QUEUE.offer(new Object[]{data,subscribers});
-            Constants.THREAD_POOL.execute(new EventDispatchProcessor());
+            EbConstants.EB_THREAD_POOL.execute(new EventDispatchProcessor());
         }
         return success();
     }

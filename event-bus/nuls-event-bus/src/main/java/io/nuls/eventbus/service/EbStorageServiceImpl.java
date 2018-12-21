@@ -1,16 +1,13 @@
 package io.nuls.eventbus.service;
 
 import io.nuls.db.service.RocksDBService;
-import io.nuls.eventbus.EventBus;
 import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.model.Topic;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.CollectionUtils;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +34,7 @@ public class EbStorageServiceImpl implements EbStorageService {
 
     @Override
     public ConcurrentMap<String,Topic> loadTopics() {
-        ConcurrentMap<String,Topic> topicMap = new ConcurrentHashMap();
+        ConcurrentMap<String,Topic> topicMap = new ConcurrentHashMap<>();
         try{
             List<byte[]> keys = RocksDBService.keyList(EbConstants.TB_EB_TOPIC);
             if(!keys.isEmpty()){

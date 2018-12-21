@@ -20,37 +20,33 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
-package io.nuls.rpc.invoke;
 
-import io.nuls.rpc.client.runtime.ClientRuntime;
-import io.nuls.rpc.model.message.Response;
+package io.nuls.account.service;
 
-import java.util.Map;
+import io.nuls.base.data.MultiSigAccount;
+
+import java.util.List;
 
 /**
- * @author tangyi
- * @date 2018/12/20
- * @description
+ * 多签账户Service接口
+ *
+ * MultiSignAccount service definition
+ *
+ * @author: EdwardChan
  */
-public class KernelInvoke extends BaseInvoke {
+public interface MultiSignAccountService {
+
     /**
-     * 自动回调的类需要重写的方法
-     * A method that needs to be rewritten for a class that calls back automatically
+     * 创建多签账户
      *
-     * @param response 请求的响应信息，Response information to requests
+     * Create a multi sign account
+     *
+     * @param chainId  链ID
+     * @param pubKeys    the public keys
+     * @param m    the min number of sign.
+     * @return the MultiSigAccount which was created.
      */
-    @SuppressWarnings("unchecked")
-    @Override
-    public void callBack(Response response) {
-        ClientRuntime.ROLE_MAP.clear();
-        Map responseData = (Map) response.getResponseData();
-        Map methodMap = (Map) responseData.get("registerAPI");
-        Map dependMap = (Map) methodMap.get("Dependencies");
-        for (Object object : dependMap.entrySet()) {
-            Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
-            ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
-        }
-    }
+     MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int m);
+
 }
