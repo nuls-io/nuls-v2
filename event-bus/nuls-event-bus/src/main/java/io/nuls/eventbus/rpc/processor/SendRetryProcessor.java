@@ -3,6 +3,7 @@ package io.nuls.eventbus.rpc.processor;
 import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.model.Subscriber;
 import io.nuls.eventbus.rpc.invoke.EventAuditInvoke;
+import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.tools.log.Log;
@@ -48,6 +49,8 @@ class SendRetryProcessor implements Runnable {
             return CmdDispatcher.requestAndInvokeWithAck(subscriber.getModuleAbbr(),subscriber.getCallBackCmd(),params,Constants.ZERO,Constants.ZERO,new EventAuditInvoke());
         }catch (Exception e){
             Log.error("Exception in sending event to subscriber :"+subscriber.getModuleAbbr()+" ->"+e.getMessage());
+            //get latest connection info from Kernel for the role
+            EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{subscriber.getModuleAbbr(), EbConstants.SUBSCRIBE});
         }
         return null;
     }

@@ -37,7 +37,7 @@ public class PublisherTest {
         try {
            Response response = CmdDispatcher.requestAndResponse(ModuleE.EB.abbr,"eb_send",params);
             System.out.println(response.toString());
-            Assert.assertEquals("0",response.getResponseStatus());
+            Assert.assertEquals("1",response.getResponseStatus());
         } catch (Exception e) {
             e.printStackTrace();
         }

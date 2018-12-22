@@ -38,7 +38,7 @@ public class SubscriberTest {
         try {
             Response response = CmdDispatcher.requestAndResponse(ModuleE.EB.abbr,"eb_subscribe",params);
             System.out.println(response.toString());
-            Assert.assertEquals("0",response.getResponseStatus());
+            Assert.assertEquals("1",response.getResponseStatus());
             Thread.sleep(Integer.MAX_VALUE);
         } catch (Exception e) {
             e.printStackTrace();
