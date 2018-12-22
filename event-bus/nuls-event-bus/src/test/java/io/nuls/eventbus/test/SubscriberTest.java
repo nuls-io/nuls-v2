@@ -11,13 +11,13 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PublisherTest {
+public class SubscriberTest {
 
     @Before
     public void before(){
         try {
-            WsServer.getInstance(ModuleE.AC.abbr, "module", "test.com")
-                    .moduleRoles(ModuleE.AC.abbr, new String[]{"1.0"})
+            WsServer.getInstance(ModuleE.LG.abbr, "module", "test.com")
+                    .moduleRoles(ModuleE.LG.abbr, new String[]{"1.0"})
                     .moduleVersion("1.0")
                     .dependencies(ModuleE.EB.abbr, "1.0")
                     .connect("ws://127.0.0.1:8887");
@@ -30,16 +30,19 @@ public class PublisherTest {
     }
 
     @Test
-    public void sendEvent(){
+    public void subscribe(){
         Map<String,Object> params = new HashMap<>();
-        params.put("data","This is test event data");
+        params.put("role",ModuleE.LG);
         params.put("topic","ac_create");
+        params.put("callBackCmd","receiveEvent");
         try {
-           Response response = CmdDispatcher.requestAndResponse(ModuleE.EB.abbr,"eb_send",params);
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.EB.abbr,"eb_subscribe",params);
             System.out.println(response.toString());
             Assert.assertEquals("0",response.getResponseStatus());
+            Thread.sleep(Integer.MAX_VALUE);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
 }

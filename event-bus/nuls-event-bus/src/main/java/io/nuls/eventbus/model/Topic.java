@@ -14,6 +14,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @NoArgsConstructor
 public class Topic implements Serializable {
 
+    private static final long serialVersionUID = -3703883040872615403L;
+
     @Getter
     @Setter
     private String topicId;

@@ -13,6 +13,8 @@ import java.util.Objects;
 @AllArgsConstructor
 public class Subscriber implements Serializable {
 
+    private static final long serialVersionUID = -4204832123982044991L;
+
     @Getter
     @Setter
     private String moduleAbbr;

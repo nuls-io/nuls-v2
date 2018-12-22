@@ -9,7 +9,6 @@ import io.nuls.eventbus.rpc.processor.ClientSyncProcessor;
 import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.eventbus.service.EbStorageService;
 import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
@@ -23,7 +22,6 @@ import io.nuls.tools.thread.TimeService;
 import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-import java.util.stream.Collectors;
 
 /**
  * @author naveen
