@@ -6,6 +6,7 @@ import io.nuls.eventbus.model.Subscriber;
 import io.nuls.eventbus.model.Topic;
 import io.nuls.eventbus.service.EbStorageService;
 import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.util.Map;
@@ -23,10 +24,11 @@ public class EventBus {
 
     private ConcurrentMap<String, Topic> topicMap = new ConcurrentHashMap<>();
 
-    @Autowired
     private EbStorageService ebStorageService;
 
-    private EventBus(){}
+    private EventBus(){
+        this.ebStorageService = SpringLiteContext.getBean(EbStorageService.class);
+    }
 
     public static synchronized EventBus getInstance(){
         if(INSTANCE == null){
