@@ -160,7 +160,7 @@ public class CmdHandler {
             Log.error("Socket disconnected, remove");
             return false;
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
             return false;
         }
     }
@@ -288,7 +288,6 @@ public class CmdHandler {
                     continue;
                 }
 
-
                 /*
                 这段代码非常不优雅，可以改进下（我没时间了，怕改出BUG），代码的业务逻辑如下：
                 用户的cmd会返回一个对象，RPC会自动把这个对象替换为Map，Key是调用的方法名，Value是内容（Berzeck强烈要求）
@@ -306,7 +305,7 @@ public class CmdHandler {
                 realResponse.setResponseData(responseData);
 
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
-                rspMessage.setMessageData(response);
+                rspMessage.setMessageData(realResponse);
                 try {
                     Log.info("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
                     webSocket.send(JSONUtils.obj2json(rspMessage));

@@ -126,7 +126,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         * node 不一定只存在disconnectNodeMap中，多链情况下，可以是已存业务的连接。
         */
        Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.OUT);
-//       Node node = nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber()).getDisConnectNodeMap().get(nodeKey);
+      //client发出version后获得，得到server回复，建立握手
        Log.debug("VersionMessageHandler Recieve:Client"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
        NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(message.getHeader().getMagicNumber());
        nodeGroupConnector.setStatus(NodeGroupConnector.HANDSHAKE);
@@ -136,8 +136,11 @@ public class VersionMessageHandler extends BaseMessageHandler {
        //存储需要的信息
        node.setVersionProtocolInfos(message.getHeader().getMagicNumber(),versionBody.getProtocolVersion(),versionBody.getBlockHeight(),versionBody.getBlockHash());
        node.setRemoteCrossPort(versionBody.getPortMeCross());
+       //进行计数增加
+       ConnectionManager.getInstance().addGroupMaxIp(node,message.getHeader().getMagicNumber(),Node.OUT);
        //client:接收到server端消息，进行verack答复
        VerackMessage verackMessage=MessageFactory.getInstance().buildVerackMessage(node,message.getHeader().getMagicNumber(), VerackMessageBody.VER_SUCCESS);
+
        //从已连接池中获取node节点
        node = nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber()).getConnectNodeMap().get(nodeKey);
        MessageManager.getInstance().sendToNode(verackMessage,node,true);
