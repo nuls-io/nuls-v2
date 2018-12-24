@@ -45,6 +45,9 @@ public class Context {
      */
     private RunningStatusEnum status;
 
+    /**
+     * 链ID
+     */
     private int chainId;
 
     /**
@@ -52,12 +55,24 @@ public class Context {
      */
     private List<Integer> systemTransactionType;
 
+    /**
+     * 最新区快
+     */
     private Block latestBlock;
 
+    /**
+     * 创世区块
+     */
     private Block genesisBlock;
 
+    /**
+     * 主链
+     */
     private Chain masterChain;
 
+    /**
+     * 分叉链集合
+     */
     private List<Chain> forkChains;
 
     public void setGenesisBlock(Block block) {

@@ -25,8 +25,6 @@
 
 package io.nuls.transaction.model.bo;
 
-import io.nuls.base.data.Transaction;
-
 /**
  * @author: Charlie
  * @date: 2018/11/12

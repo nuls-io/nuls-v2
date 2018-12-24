@@ -123,7 +123,7 @@ public class BlockCollector implements Runnable {
     }
 
     private boolean downloadBlockFromNode(BlockDownLoadResult result) {
-        BlockDownloader.Worker worker = new BlockDownloader.Worker(result.getStartHeight(), result.getSize(), chainId, result.getNode());
+        BlockWorker worker = new BlockWorker(result.getStartHeight(), result.getSize(), chainId, result.getNode());
         Future<BlockDownLoadResult> submit = executor.submit(worker);
         try {
             return submit.get().isSuccess();

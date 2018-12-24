@@ -22,28 +22,55 @@
  * SOFTWARE.
  */
 
-package io.nuls.transaction.model.dto;
+package io.nuls.base.data;
 
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
 
-import java.util.Arrays;
+import java.io.IOException;
 
 /**
  * @author: Charlie
- * @date: 2018-12-05
+ * @date: 2018-12-21
  */
-public class BlockHeaderDigestDTO {
+public class BlockHeaderDigest extends BaseNulsData {
 
-    private byte[] blockHeaderHash;
+    private NulsDigestData blockHeaderHash;
 
     private long height;
 
     private long time;
 
-    public byte[] getBlockHeaderHash() {
+    @Override
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeNulsData(blockHeaderHash);
+        stream.writeUint32(height);
+        stream.writeUint48(time);
+    }
+
+    @Override
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.blockHeaderHash = byteBuffer.readHash();
+        this.height = byteBuffer.readUint32();
+        this.time = byteBuffer.readUint48();
+    }
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfNulsData(blockHeaderHash);
+        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfUint48();
+        return size;
+    }
+
+    public NulsDigestData getBlockHeaderHash() {
         return blockHeaderHash;
     }
 
-    public void setBlockHeaderHash(byte[] blockHeaderHash) {
+    public void setBlockHeaderHash(NulsDigestData blockHeaderHash) {
         this.blockHeaderHash = blockHeaderHash;
     }
 
@@ -61,14 +88,5 @@ public class BlockHeaderDigestDTO {
 
     public void setTime(long time) {
         this.time = time;
-    }
-
-    @Override
-    public String toString() {
-        return "BlockHeaderDigestDTO{" +
-                "blockHeaderHash=" + Arrays.toString(blockHeaderHash) +
-                ", height=" + height +
-                ", time=" + time +
-                '}';
     }
 }

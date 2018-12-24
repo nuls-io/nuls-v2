@@ -34,34 +34,16 @@ import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.CrossTxData;
 import io.nuls.transaction.model.po.TransactionPO;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author: Charlie
  * @date: 2018-12-05
  */
 public class TxUtil {
-
-
-    public static CrossTxData getCrossTxData(Transaction tx) throws NulsException{
-        if(null == tx){
-            throw new NulsException(TxErrorCode.TX_NOT_EXIST);
-        }
-        CrossTxData crossTxData = new CrossTxData();
-        try {
-            crossTxData.parse(new NulsByteBuffer(tx.getTxData()));
-            return crossTxData;
-        } catch (NulsException e) {
-            Log.error(e);
-            throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
-        }
-    }
 
     public static CoinData getCoinData(Transaction tx) throws NulsException {
         if(null == tx){
@@ -94,19 +76,30 @@ public class TxUtil {
        return getTransaction(HexUtil.decode(hex));
     }
 
-    public static MultiSigAccount getMultiSigAccount(String hex) throws NulsException{
-        if(StringUtils.isBlank(hex)){
+    public static <T> T getInstance(byte[] bytes, Class<? extends BaseNulsData> clazz) throws NulsException {
+        if(null == bytes || bytes.length == 0){
             throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
         }
-        MultiSigAccount multiSigAccount = new MultiSigAccount();
         try {
-            multiSigAccount.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-            return multiSigAccount;
+            BaseNulsData baseNulsData = clazz.getDeclaredConstructor().newInstance();
+            baseNulsData.parse(new NulsByteBuffer(bytes));
+            return (T) baseNulsData;
         } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
+        } catch (Exception e){
             Log.error(e);
             throw new NulsException(TxErrorCode.DESERIALIZE_ERROR);
         }
     }
+
+    public static <T> T getInstance(String hex, Class<? extends BaseNulsData> clazz) throws NulsException {
+        if(StringUtils.isBlank(hex)){
+            throw new NulsException(TxErrorCode.DATA_NOT_FOUND);
+        }
+       return getInstance(HexUtil.decode(hex), clazz);
+    }
+
 
     public static boolean isNulsAsset(Coin coin) {
         return isNulsAsset(coin.getAssetsChainId(), coin.getAssetsId());

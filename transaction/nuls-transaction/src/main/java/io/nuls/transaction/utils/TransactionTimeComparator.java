@@ -27,6 +27,7 @@ package io.nuls.transaction.utils;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.Arrays;
@@ -36,16 +37,17 @@ import java.util.Comparator;
  * @author: Charlie
  * @date: 2018-12-11
  */
+@Service
 public class TransactionTimeComparator implements Comparator<Transaction> {
 
-    private static TransactionTimeComparator instance = new TransactionTimeComparator();
+/*    private static final TransactionTimeComparator INSTANCE = new TransactionTimeComparator();
 
     public static TransactionTimeComparator getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
     private TransactionTimeComparator() {
-    }
+    }*/
 
     @Override
     public int compare(Transaction o1, Transaction o2) {

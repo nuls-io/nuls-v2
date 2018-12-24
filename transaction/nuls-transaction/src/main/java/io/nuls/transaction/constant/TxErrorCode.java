@@ -62,6 +62,10 @@ public interface TxErrorCode {
     ErrorCode CHAIN_NOT_FOUND = ErrorCode.init("10051");
     ErrorCode CHAINID_ERROR = ErrorCode.init("10052");
     ErrorCode ASSETID_ERROR = ErrorCode.init("10053");
+    ErrorCode TX_COMMIT_FAIL = ErrorCode.init("10054");
+    ErrorCode TX_ROLLBACK_FAIL = ErrorCode.init("10055");
+    ErrorCode TX_VERIFY_FAIL = ErrorCode.init("10056");
+    ErrorCode COINDATA_VERIFY_FAIL = ErrorCode.init("10057");
 
 
 

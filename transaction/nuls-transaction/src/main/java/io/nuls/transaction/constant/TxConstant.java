@@ -61,7 +61,7 @@ public interface TxConstant {
      * 跨链交易
      */
     int TX_TYPE_CROSS_CHAIN_TRANSFER = 10;
-    String TX_MODULE_VALIDATOR = "txValidator";
+    String TX_MODULE_VALIDATOR = "txProcess";
     String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
     String CROSS_TRANSFER_COMMIT = "crossTxCommit";
     String CROSS_TRANSFER_ROLLBACK = "crossTxCommit";

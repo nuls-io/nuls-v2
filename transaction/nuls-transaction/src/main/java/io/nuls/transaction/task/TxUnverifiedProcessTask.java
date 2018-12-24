@@ -36,7 +36,7 @@ public class TxUnverifiedProcessTask implements Runnable {
     private TxVerifiedStorageService txVerifiedStorageService = SpringLiteContext.getBean(TxVerifiedStorageService.class);
     private TransactionH2Service transactionH2Service = SpringLiteContext.getBean(TransactionH2Service.class);
 
-    private TransactionTimeComparator txComparator = TransactionTimeComparator.getInstance();
+    private TransactionTimeComparator txComparator = SpringLiteContext.getBean(TransactionTimeComparator.class);
     private List<Transaction> orphanTxList = new ArrayList<>();
 
     //private static final int MAX_ORPHAN_SIZE = 200000;
