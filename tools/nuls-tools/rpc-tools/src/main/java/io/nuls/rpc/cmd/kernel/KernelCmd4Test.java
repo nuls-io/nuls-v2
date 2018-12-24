@@ -56,7 +56,7 @@ public class KernelCmd4Test extends BaseCmd {
     public Response registerAPI(Map<String, Object> map) {
         try {
             RegisterApi registerApi = JSONUtils.map2pojo(map, RegisterApi.class);
-            Log.info("注册的方法：" + JSONUtils.obj2json(registerApi));
+            Log.debug("注册的方法：" + JSONUtils.obj2json(registerApi));
             if (registerApi != null) {
                 Map<String, Object> role = new HashMap<>(3);
                 role.put(Constants.KEY_IP, registerApi.getConnectionInformation().get(Constants.KEY_IP));

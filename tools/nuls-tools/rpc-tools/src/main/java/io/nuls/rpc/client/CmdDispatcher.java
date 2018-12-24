@@ -123,7 +123,7 @@ public class CmdDispatcher {
         当有新模块注册到Kernel(Manager)时，需要同步连接信息
          */
         CmdDispatcher.requestAndInvoke(ModuleE.KE.abbr, "registerAPI", JSONUtils.json2map(JSONUtils.obj2json(ServerRuntime.LOCAL)), "0", "1", baseInvoke);
-        Log.info("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.ROLE_MAP));
+        Log.debug("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.ROLE_MAP));
 
         /*
         判断所有依赖的模块是否已经启动（发送握手信息）
@@ -131,7 +131,7 @@ public class CmdDispatcher {
          */
         if (ServerRuntime.LOCAL.getDependencies() == null) {
             ServerRuntime.startService = true;
-            Log.info("Start service!");
+            Log.debug("Start service!");
             return;
         }
 
@@ -147,7 +147,7 @@ public class CmdDispatcher {
         }
 
         ServerRuntime.startService = true;
-        Log.info("Start service!");
+        Log.debug("Start service!");
     }
 
 
@@ -313,7 +313,7 @@ public class CmdDispatcher {
         WsClient wsClient = ClientRuntime.MSG_ID_KEY_WS_CLIENT_MAP.get(messageId);
         if (wsClient != null) {
             wsClient.send(JSONUtils.obj2json(message));
-            Log.info("取消订阅：" + JSONUtils.obj2json(message));
+            Log.debug("取消订阅：" + JSONUtils.obj2json(message));
             ClientRuntime.INVOKE_MAP.remove(messageId);
         }
     }
