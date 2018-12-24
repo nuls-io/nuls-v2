@@ -31,14 +31,23 @@ import io.nuls.base.data.*;
 import io.nuls.base.script.*;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.ECKey;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.*;
 
+/**
+ * 交易签名工具类
+ * Transaction Signature Tool Class
+ *
+ * @author tag
+ * 2018/10/10
+ * */
 @Component
 public class SignatureUtil {
     private static final Logger log = LoggerFactory.getLogger(SignatureUtil.class);
@@ -150,6 +159,21 @@ public class SignatureUtil {
             signatures.add(createSignatureByEckey(tx, ecKey));
         }
         return signatures;
+    }
+
+    /**
+     * 生成交易的签名传统
+     *
+     * @param tx       交易
+     * @param priKey   私钥
+     */
+    public static P2PHKSignature createSignatureByPriKey(Transaction tx, String priKey) {
+        ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(priKey)));
+        P2PHKSignature p2PHKSignature = new P2PHKSignature();
+        p2PHKSignature.setPublicKey(ecKey.getPubKey());
+        //用当前交易的hash和账户的私钥账户
+        p2PHKSignature.setSignData(signDigest(tx.getHash().getDigestBytes(), ecKey));
+        return p2PHKSignature;
     }
 
     /**

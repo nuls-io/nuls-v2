@@ -294,7 +294,6 @@ public class BlockValidator {
             return false;
          }
          //todo 账本模块验证双花
-
       }
       /*
       红牌交易类型为连续分叉

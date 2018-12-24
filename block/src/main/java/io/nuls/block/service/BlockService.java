@@ -133,7 +133,7 @@ public interface BlockService {
      *
      * @param chainId 链ID
      * @param block   待保存区块
-     * @param download   是否最新区块,最新区块-1
+     * @param download   是否最新区块,最新区块-1,非最新区块-0
      * @return
      */
     boolean saveBlock(int chainId, Block block, int download);

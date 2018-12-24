@@ -141,7 +141,6 @@ public class BlockBootstrap {
     private static void onlyRunWhenTest() {
         Context context = ContextManager.getContext(CHAIN_ID);
         context.setStatus(RunningStatusEnum.RUNNING);
-        context.setSystemTransactionType(List.of(Constant.TX_TYPE_COINBASE));
         Block latestBlock = context.getLatestBlock();
 //        new Miner("1", latestBlock).start();
 //        new Miner("2", latestBlock).start();

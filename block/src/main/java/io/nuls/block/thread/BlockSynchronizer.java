@@ -32,6 +32,7 @@ import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.block.utils.BlockUtil;
+import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.DoubleUtils;
@@ -148,6 +149,7 @@ public class BlockSynchronizer implements Runnable {
                 Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
                 if (checkIsNewest(chainId, params)) {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    ConsensusUtil.notice(chainId);
                 } else {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
                 }

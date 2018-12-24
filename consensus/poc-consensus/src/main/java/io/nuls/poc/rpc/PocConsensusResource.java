@@ -495,4 +495,19 @@ public class PocConsensusResource extends BaseCmd{
         }
         return success(result.getData());
     }
+
+    /**
+     * 区块分叉记录
+     * */
+    @CmdAnnotation(cmd = "cs_addEvidenceRecord", version = 1.0, description = "add block 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHeader", parameterType = "String")
+    @Parameter(parameterName = "evidenceHeader", parameterType = "String")
+    public Response addEvidenceRecord(Map<String,Object> params){
+        Result result = service.addEvidenceRecord(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
 }

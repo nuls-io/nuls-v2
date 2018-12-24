@@ -50,4 +50,7 @@ public interface ConsensusErrorCode {
     ErrorCode BLOCK_RED_PUNISH_ERROR = ErrorCode.init("70036");
     ErrorCode BLOCK_COINBASE_VALID_ERROR = ErrorCode.init("70037");
     ErrorCode TRANSACTION_LIST_IS_NULL = ErrorCode.init("70038");
+    ErrorCode INTERFACE_CALL_FAILED = ErrorCode.init("70039");
+    ErrorCode ACCOUNT_VALID_ERROR = ErrorCode.init("70040");
+    ErrorCode TX_SIGNTURE_ERROR = ErrorCode.init("70041");
 }
