@@ -26,6 +26,7 @@ package io.nuls.rpc.invoke;
 
 import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.log.Log;
 
 import java.util.Map;
 
@@ -44,12 +45,14 @@ public class KernelInvoke extends BaseInvoke {
     @SuppressWarnings("unchecked")
     @Override
     public void callBack(Response response) {
+        Log.info("有模块信息改变，重新同步：");
         ClientRuntime.ROLE_MAP.clear();
         Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
         for (Object object : dependMap.entrySet()) {
             Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
+            Log.info("注入：[key=" + entry.getKey() + ",value=" + entry.getValue() + "]");
             ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
         }
     }

@@ -95,7 +95,7 @@ public class WsClient extends WebSocketClient {
             }
 
         } catch (IOException e) {
-            Log.error(e.getMessage());
+            Log.error(e);
         }
     }
 
@@ -105,6 +105,6 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        Log.error(e.getMessage());
+        Log.error(e);
     }
 }

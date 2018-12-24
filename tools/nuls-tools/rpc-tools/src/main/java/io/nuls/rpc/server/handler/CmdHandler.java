@@ -160,7 +160,7 @@ public class CmdHandler {
             Log.error("Socket disconnected, remove");
             return false;
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
             return false;
         }
     }
@@ -287,7 +287,6 @@ public class CmdHandler {
                 if (hasSent) {
                     continue;
                 }
-
 
                 /*
                 这段代码非常不优雅，可以改进下（我没时间了，怕改出BUG），代码的业务逻辑如下：

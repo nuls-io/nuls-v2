@@ -58,7 +58,7 @@ public class HostInfo {
                 return getLinuxLocalIp();
             }
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
             return "";
         }
     }
