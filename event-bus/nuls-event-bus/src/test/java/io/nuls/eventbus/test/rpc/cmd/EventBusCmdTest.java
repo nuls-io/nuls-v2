@@ -3,8 +3,6 @@ package io.nuls.eventbus.test.rpc.cmd;
 import io.nuls.eventbus.EventBus;
 import io.nuls.eventbus.model.Topic;
 import io.nuls.eventbus.rpc.cmd.EventBusCmd;
-import io.nuls.eventbus.rpc.processor.ClientSyncProcessor;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import org.junit.Assert;
@@ -36,7 +34,7 @@ public class EventBusCmdTest {
         params.put("callBackCmd", "eventReceive");
         try {
             Response response = (Response) eventBusCmd.subscribe(params);
-            Assert.assertTrue(response.getResponseStatus().equals("1"));
+            Assert.assertEquals("1",response.getResponseStatus());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -49,7 +47,7 @@ public class EventBusCmdTest {
         params.put("role", ModuleE.LG.abbr);
         try {
             Response response = (Response) eventBusCmd.subscribe(params);
-            Assert.assertTrue(response.getResponseStatus().equals("0"));
+            Assert.assertEquals("0",response.getResponseStatus());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -62,7 +60,7 @@ public class EventBusCmdTest {
         params.put("role", ModuleE.LG.abbr);
         try {
             Response response = (Response) eventBusCmd.subscribe(params);
-            Assert.assertTrue(response.getResponseStatus().equals("0"));
+            Assert.assertEquals("0",response.getResponseStatus());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -75,7 +73,7 @@ public class EventBusCmdTest {
         params.put("role", ModuleE.LG.abbr);
         try {
             Response response = (Response) eventBusCmd.unsubscribe(params);
-            Assert.assertTrue(response.getResponseStatus().equals("1"));
+            Assert.assertEquals("1",response.getResponseStatus());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -88,7 +86,7 @@ public class EventBusCmdTest {
         params.put("role", ModuleE.LG.abbr);
         try {
             Response response = (Response) eventBusCmd.unsubscribe(params);
-            Assert.assertTrue(response.getResponseStatus().equals("0"));
+            Assert.assertEquals("0",response.getResponseStatus());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -100,7 +98,7 @@ public class EventBusCmdTest {
         params.put("role", ModuleE.LG.abbr);
         try {
             Response response = (Response) eventBusCmd.send(params);
-            Assert.assertTrue(response.getResponseStatus().equals("0"));
+            Assert.assertEquals("0",response.getResponseStatus());
         } catch (Exception e) {
             e.printStackTrace();
         }

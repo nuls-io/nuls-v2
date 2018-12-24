@@ -47,7 +47,7 @@ public class EbStorageServiceTest {
         for(Subscriber sub : fromStorage.getSubscribers()){
             System.out.println("Subscriber module:"+sub.getModuleAbbr());
         }
-        Assert.assertTrue("ac_create".equals(fromStorage.getTopicId()));
+        Assert.assertEquals("ac_create",fromStorage.getTopicId());
     }
 
     @Test
