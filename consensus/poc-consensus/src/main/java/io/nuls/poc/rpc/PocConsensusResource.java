@@ -489,7 +489,7 @@ public class PocConsensusResource extends BaseCmd{
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
     public Response addBlock(Map<String,Object> params){
-        Result result = service.runMainChain(params);
+        Result result = service.addBlock(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }

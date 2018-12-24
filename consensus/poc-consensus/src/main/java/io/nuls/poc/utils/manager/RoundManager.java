@@ -1,6 +1,7 @@
 package io.nuls.poc.utils.manager;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
@@ -16,6 +17,7 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.math.BigInteger;
@@ -357,9 +359,9 @@ public class RoundManager {
         setMemberList(chain,round, startBlockHeader);
         //todo 调用账户管理模块获取本地非加密账户地址列表
         List<byte[]> packingAddressList = new ArrayList<>();
-        /*Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("WsqeNFVMM2bWcGMfDi2VaaWe9RosH0100".getBytes()));
-        packingAddressList.add(packingAddress.getAddressBytes());*/
-        packingAddressList.add(AddressTool.getAddress("WsqeNFVMM2bWcGMfDi2VaaWe9RosH0100"));
+        Address packingAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
+        packingAddressList.add(packingAddress.getAddressBytes());
+        //packingAddressList.add(AddressTool.getAddress("WsqeNFVMM2bWcGMfDi2VaaWe9RosH0100"));
         round.calcLocalPacker(packingAddressList);
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;

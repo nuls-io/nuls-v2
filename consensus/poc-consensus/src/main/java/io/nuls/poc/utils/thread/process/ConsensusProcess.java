@@ -11,6 +11,7 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
+import io.nuls.poc.utils.manager.BlockManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.RoundManager;
@@ -38,6 +39,8 @@ public class ConsensusProcess {
     private RoundManager roundManager = SpringLiteContext.getBean(RoundManager.class);
 
     private ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
+
+    private BlockManager blockManager = SpringLiteContext.getBean(BlockManager.class);
 
     private NulsLogger consensusLogger;
 
@@ -183,7 +186,9 @@ public class ConsensusProcess {
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr,"receivePackingBlock", params);
             if(!cmdResp.isSuccess()){
                 consensusLogger.info("add block interface call failed!");
+                return;
             }
+            blockManager.addNewBlock(chain,block.getHeader());
         }catch (Exception e){
             consensusLogger.error(e);
         }
