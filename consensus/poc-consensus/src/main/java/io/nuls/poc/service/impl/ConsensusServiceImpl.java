@@ -62,6 +62,7 @@ import java.util.*;
 public class ConsensusServiceImpl implements ConsensusService {
     @Autowired
     private AgentStorageService agentService;
+
     @Autowired
     private DepositStorageService depositService;
     @Autowired
@@ -84,6 +85,8 @@ public class ConsensusServiceImpl implements ConsensusService {
     private BatchValidator batchValidator;
     @Autowired
     private BlockManager blockManager;
+    @Autowired
+    private PunishManager punishManager;
 
     /**
      * 创建节点
@@ -1376,6 +1379,35 @@ public class ConsensusServiceImpl implements ConsensusService {
             BlockHeader header = new BlockHeader();
             header.parse(HexUtil.decode(headerHex),0);
             blockManager.addNewBlock(chain,header);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+        }catch (NulsException e){
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e.getMessage());
+            return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    /**
+     * 区块分叉记录
+     */
+    @Override
+    public Result addEvidenceRecord(Map<String, Object> params) {
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER) == null || params.get(ConsensusConstant.PARAM_EVIDENCE_HEADER) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        try {
+            BlockHeader header = new BlockHeader();
+            header.parse(HexUtil.decode((String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER)),0);
+            BlockHeader evidenceHeader = new BlockHeader();
+            evidenceHeader.parse(HexUtil.decode((String) params.get(ConsensusConstant.PARAM_EVIDENCE_HEADER)),0);
+            punishManager.addEvidenceRecord(chain,header,evidenceHeader);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         }catch (NulsException e){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e.getMessage());

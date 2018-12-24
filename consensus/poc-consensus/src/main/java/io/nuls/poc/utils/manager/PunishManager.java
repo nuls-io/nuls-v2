@@ -97,7 +97,6 @@ public class PunishManager {
      * @param chain
      * @param firstHeader
      * @param secondHeader
-     * @deprecated
      * */
     public void addEvidenceRecord(Chain chain, BlockHeader firstHeader, BlockHeader secondHeader)throws NulsException{
         /*
@@ -254,7 +253,6 @@ public class PunishManager {
      *
      * @param chain
      * @param agent
-     * @deprecated
      * */
     private void createRedPunishTransaction(Chain chain, Agent agent)throws NulsException{
         Transaction redPunishTransaction = new Transaction(ConsensusConstant.TX_TYPE_RED_PUNISH);

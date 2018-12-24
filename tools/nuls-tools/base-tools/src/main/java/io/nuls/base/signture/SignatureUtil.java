@@ -41,6 +41,13 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
+/**
+ * 交易签名工具类
+ * Transaction Signature Tool Class
+ *
+ * @author tag
+ * 2018/10/10
+ * */
 @Component
 public class SignatureUtil {
     private static final Logger log = LoggerFactory.getLogger(SignatureUtil.class);
