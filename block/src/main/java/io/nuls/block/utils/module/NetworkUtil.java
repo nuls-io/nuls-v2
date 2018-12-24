@@ -123,7 +123,7 @@ public class NetworkUtil {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("excludeNodes", excludeNodes);
-            params.put("messageBody", HexUtil.byteToHex(message.serialize()));
+            params.put("messageBody", HexUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
 
             return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
@@ -147,7 +147,7 @@ public class NetworkUtil {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("nodes", nodeId);
-            params.put("messageBody", HexUtil.byteToHex(message.serialize()));
+            params.put("messageBody", HexUtil.encode(message.serialize()));
             params.put("command", message.getCommand());
 
             return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();

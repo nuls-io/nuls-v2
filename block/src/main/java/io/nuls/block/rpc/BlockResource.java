@@ -72,7 +72,7 @@ public class BlockResource extends BaseCmd {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             BlockHeader blockHeader = service.getLatestBlockHeader(chainId);
-            return success(HexUtil.byteToHex(blockHeader.serialize()));
+            return success(HexUtil.encode(blockHeader.serialize()));
         } catch (IOException e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -91,7 +91,7 @@ public class BlockResource extends BaseCmd {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = service.getLatestBlock(chainId);
-            return success(HexUtil.byteToHex(block.serialize()));
+            return success(HexUtil.encode(block.serialize()));
         } catch (IOException e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -112,7 +112,7 @@ public class BlockResource extends BaseCmd {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Long height = Long.parseLong(map.get("height").toString());
             BlockHeaderPo blockHeader = service.getBlockHeader(chainId, height);
-            return success(HexUtil.byteToHex(blockHeader.serialize()));
+            return success(HexUtil.encode(blockHeader.serialize()));
         } catch (IOException e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -138,7 +138,7 @@ public class BlockResource extends BaseCmd {
             List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, startHeight, latestHeight);
             List<String> hexList = new ArrayList<>();
             for (BlockHeader blockHeader : blockHeaders) {
-                hexList.add(HexUtil.byteToHex(blockHeader.serialize()));
+                hexList.add(HexUtil.encode(blockHeader.serialize()));
             }
             return success(hexList);
         } catch (IOException e) {
@@ -161,7 +161,7 @@ public class BlockResource extends BaseCmd {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Long height = Long.parseLong(map.get("height").toString());
             Block block = service.getBlock(chainId, height);
-            return success(HexUtil.byteToHex(block.serialize()));
+            return success(HexUtil.encode(block.serialize()));
         } catch (IOException e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -182,7 +182,7 @@ public class BlockResource extends BaseCmd {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
             BlockHeader blockHeader = service.getBlockHeader(chainId, hash);
-            return success(HexUtil.byteToHex(blockHeader.serialize()));
+            return success(HexUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
@@ -203,7 +203,7 @@ public class BlockResource extends BaseCmd {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
             Block block = service.getBlock(chainId, hash);
-            return success(HexUtil.byteToHex(block.serialize()));
+            return success(HexUtil.encode(block.serialize()));
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());

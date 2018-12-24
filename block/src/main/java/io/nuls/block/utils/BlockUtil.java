@@ -32,6 +32,7 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
+import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
@@ -169,9 +170,10 @@ public class BlockUtil {
      * @return
      */
     private static Result mainChainProcess(int chainId, Block block) {
-        long blockHeight = block.getHeader().getHeight();
-        NulsDigestData blockHash = block.getHeader().getHash();
-        NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
+        BlockHeader header = block.getHeader();
+        long blockHeight = header.getHeight();
+        NulsDigestData blockHash = header.getHash();
+        NulsDigestData blockPreviousHash = header.getPreHash();
 
         Chain masterChain = ChainManager.getMasterChain(chainId);
         long masterChainEndHeight = masterChain.getEndHeight();
@@ -202,6 +204,7 @@ public class BlockUtil {
                 chainStorageService.save(chainId, block);
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 ChainManager.addForkChain(chainId, forkChain);
+                ConsensusUtil.fork(chainId, ContextManager.getContext(chainId).getLatestBlock().getHeader(), header);
                 Log.debug("chainId:{}, received fork blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
             }

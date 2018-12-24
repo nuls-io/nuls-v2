@@ -22,6 +22,7 @@ package io.nuls.block.utils.module;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.block.constant.Constant;
 import io.nuls.block.test.BlockGenerator;
 
 import java.io.IOException;
@@ -35,6 +36,27 @@ import java.util.List;
  * @date 18-11-9 上午10:44
  */
 public class TransactionUtil {
+
+    /**
+     * 获取系统交易类型
+     *
+     * @param chainId
+     * @return
+     */
+    public static List<Integer> getSystemTypes(int chainId) {
+        return List.of(1, 7);
+    }
+
+    /**
+     * 批量验证交易
+     *
+     * @param chainId
+     * @param transactions
+     * @return
+     */
+    public static boolean verify(int chainId, List<Transaction> transactions) {
+        return true;
+    }
 
     /**
      * 批量保存交易

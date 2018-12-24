@@ -20,7 +20,7 @@ import java.util.Map;
  * 2018/12/1
  * */
 public class ConsensusTest {
-    private  int chainId = 1;
+    private  int chainId = 9861;
     private  String success = "1";
 
     @BeforeClass

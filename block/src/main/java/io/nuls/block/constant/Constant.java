@@ -28,12 +28,6 @@ package io.nuls.block.constant;
 public interface Constant {
 
     /**
-     * 共识奖励交易的类型
-     * A consensus award for the type of trade.
-     */
-    int TX_TYPE_COINBASE = 1;
-
-    /**
      * 空值占位符
      * Null placeholder.
      */

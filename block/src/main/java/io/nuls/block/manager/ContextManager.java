@@ -22,6 +22,7 @@ package io.nuls.block.manager;
 
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.context.Context;
+import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.LoggerBuilder;
@@ -65,6 +66,7 @@ public class ContextManager {
         Context context = new Context();
         context.setChainId(chainId);
         context.setStatus(RunningStatusEnum.INITIALIZING);
+        context.setSystemTransactionType(TransactionUtil.getSystemTypes(chainId));
         chainIds.add(chainId);
         ContextManager.contextMap.put(chainId, context);
         Log.info("new context add! chainId-{}", chainId);

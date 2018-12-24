@@ -21,6 +21,7 @@
 package io.nuls.block.utils.module;
 
 import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
@@ -53,7 +54,7 @@ public class ConsensusUtil {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("download", download);
-            params.put("block", HexUtil.byteToHex(block.serialize()));
+            params.put("block", HexUtil.encode(block.serialize()));
 
             return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
         } catch (Exception e) {
@@ -75,6 +76,27 @@ public class ConsensusUtil {
             params.put("chainId", chainId);
 
             return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 同步完成时通知共识模块
+     *
+     * @param chainId
+     * @return
+     */
+    public static boolean fork(int chainId, BlockHeader masterHeader, BlockHeader forkHeader) {
+        try {
+            Map<String, Object> params = new HashMap<>(5);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("blockHeader", HexUtil.encode(masterHeader.serialize()));
+            params.put("evidenceHeader", HexUtil.encode(forkHeader.serialize()));
+
+            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_addEvidenceRecord", params).isSuccess();
         } catch (Exception e) {
             Log.error(e);
             return false;

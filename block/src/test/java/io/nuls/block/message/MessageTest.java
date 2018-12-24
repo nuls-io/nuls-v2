@@ -48,14 +48,14 @@ public class MessageTest {
         HashMessage m1 = new HashMessage();
         {
             m1.setRequestHash(NulsDigestData.fromDigestHex("00202385c6ea81795592278265e3d42d4c454dcf05fe368e8ba9d6799dc43695f3e6"));
-            String hex = HexUtil.byteToHex(m1.serialize());
+            String hex = HexUtil.encode(m1.serialize());
             System.out.println(hex);
         }
 
         HashMessage m2 = new HashMessage();
         {
             m2.setRequestHash(NulsDigestData.fromDigestHex("00202385c6ea81795592278265e3d42d4c454dcf05fe368e8ba9d6799dc43695f3e6"));
-            String hex = HexUtil.byteToHex(m2.serialize());
+            String hex = HexUtil.encode(m2.serialize());
             System.out.println(hex);
         }
 
@@ -67,7 +67,7 @@ public class MessageTest {
         BlockMessage message = new BlockMessage();
 
         message.setBlock(GenesisBlock.getInstance());
-        String hex = HexUtil.byteToHex(message.serialize());
+        String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
         byte[] bytes = HexUtil.decode(hex);
@@ -82,7 +82,7 @@ public class MessageTest {
         BlockMessage message = new BlockMessage();
 
         message.setBlock(null);
-        String hex = HexUtil.byteToHex(message.serialize());
+        String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
         byte[] bytes = HexUtil.decode(hex);
@@ -97,7 +97,7 @@ public class MessageTest {
         HashMessage message = new HashMessage();
         message.setRequestHash(NulsDigestData.fromDigestHex("0020e643ab908b37ce52b4cdaeb3219846162235b466cb78491832d766ba0a3a5e98"));
         
-        String hex = HexUtil.byteToHex(message.serialize());
+        String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
         byte[] bytes = HexUtil.decode(hex);
@@ -114,7 +114,7 @@ public class MessageTest {
         
         body.setRequestHash(NulsDigestData.calcDigestData("hello".getBytes()));
         body.setSuccess(true);
-        String hex = HexUtil.byteToHex(message.serialize());
+        String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
         byte[] bytes = HexUtil.decode(hex);
@@ -130,7 +130,7 @@ public class MessageTest {
 
         message.setStartHeight(111);
         message.setEndHeight(222);
-        String hex = HexUtil.byteToHex(message.serialize());
+        String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
         byte[] bytes = HexUtil.decode(hex);
@@ -146,7 +146,7 @@ public class MessageTest {
         HashListMessage body = new HashListMessage();
         
         body.setTxHashList(Lists.newArrayList(NulsDigestData.calcDigestData("hello".getBytes())));
-        String hex = HexUtil.byteToHex(message.serialize());
+        String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
         byte[] bytes = HexUtil.decode(hex);
@@ -166,7 +166,7 @@ public class MessageTest {
         smallBlock.addBaseTx(transaction);
         smallBlock.setTxHashList(Lists.newArrayList(transaction.getHash()));
         message.setSmallBlock(smallBlock);
-        String hex = HexUtil.byteToHex(message.serialize());
+        String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
         byte[] bytes = HexUtil.decode(hex);
@@ -181,7 +181,7 @@ public class MessageTest {
         TxGroupMessage message = new TxGroupMessage();
         message.setBlockHash(NulsDigestData.calcDigestData("hello".getBytes()));
         message.setTransactions(BlockGenerator.getTransactions(4));
-        String hex = HexUtil.byteToHex(message.serialize());
+        String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
         byte[] bytes = HexUtil.decode(hex);

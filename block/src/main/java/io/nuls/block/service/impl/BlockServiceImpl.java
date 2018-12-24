@@ -311,6 +311,12 @@ public class BlockServiceImpl implements BlockService {
         if (!consensusVerify) {
             return false;
         }
+
+        //4.交易验证
+        boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs());
+        if (!transactionVerify) {
+            return false;
+        }
         return true;
     }
 
