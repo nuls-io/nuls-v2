@@ -160,7 +160,7 @@ public class MessageTest {
     public void testSmallBlockMessage() throws Exception {
         SmallBlockMessage message = new SmallBlockMessage();
         Block block = BlockGenerator.generate(null);
-        Transaction transaction = BlockGenerator.getTransactions().get(0);
+        Transaction transaction = BlockGenerator.getTransactions(3).get(0);
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
         smallBlock.addBaseTx(transaction);
@@ -180,7 +180,7 @@ public class MessageTest {
     public void testTxGroupMessage() throws Exception {
         TxGroupMessage message = new TxGroupMessage();
         message.setBlockHash(NulsDigestData.calcDigestData("hello".getBytes()));
-        message.setTransactions(BlockGenerator.getTransactions());
+        message.setTransactions(BlockGenerator.getTransactions(4));
         String hex = HexUtil.byteToHex(message.serialize());
         System.out.println(hex);
 

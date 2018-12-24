@@ -3,6 +3,7 @@ package io.nuls.transaction.rpc.call;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.log.Log;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 
@@ -24,19 +25,28 @@ public class TransactionCall {
      * Call other module interfaces
      */
     public static Object request(String cmd, String moduleCode, Map params) {
-        HashMap result = new HashMap();
+        Object result = new Object();
         try {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             Response cmdResp = CmdDispatcher.requestAndResponse(moduleCode, cmd, params);
             if (cmdResp.isSuccess()) {
-                result = (HashMap) ((HashMap) cmdResp.getResponseData()).get(cmd);
+                result = ((HashMap) cmdResp.getResponseData()).get(cmd);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e);
         }
         return result;
     }
 
+    /**
+     * 单个交易验证器
+     * Single transaction validator
+     * @param chain
+     * @param cmd
+     * @param moduleCode
+     * @param txHex
+     * @return
+     */
     public static boolean txValidator(Chain chain, String cmd, String moduleCode, String txHex) {
         //调用单个交易验证器
         HashMap params = new HashMap();
@@ -46,6 +56,13 @@ public class TransactionCall {
         return (Boolean) result.get("value");
     }
 
+    /**
+     * 批量调用模块交易统一验证器
+     * Batch call module transaction integrate validator
+     * @param chain
+     * @param map
+     * @return
+     */
     public static boolean txsModuleValidators(Chain chain, Map<TxRegister, List<String>> map) {
         //调用交易模块统一验证器 批量
         boolean rs = true;
@@ -60,11 +77,11 @@ public class TransactionCall {
     }
 
     /**
-     * 统一验证返回被干掉的交易hash
-     *
+     * 单个模块交易统一验证器
+     * Single module transaction integrate validator
      * @param moduleValidator
      * @param txHexList
-     * @return
+     * @return 返回未通过验证的交易hash / return unverified transaction hash
      */
     public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txHexList) {
         //调用交易模块统一验证器

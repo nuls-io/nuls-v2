@@ -20,7 +20,6 @@
 package io.nuls.block.utils.module;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.message.base.BaseMessage;
 import io.nuls.block.model.Node;
@@ -36,11 +35,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.block.constant.CommandConstant.*;
+
 /**
  * 调用网络模块接口的工具
+ *
  * @author captain
- * @date 18-11-9 下午3:48
  * @version 1.0
+ * @date 18-11-9 下午3:48
  */
 public class NetworkUtil {
 
@@ -56,10 +58,9 @@ public class NetworkUtil {
     }
 
     /**
-     * todo 待完善
-     * 获取可用节点
-     * @date 18-11-9 下午3:49
-     * @param
+     * 根据链ID获取可用节点
+     *
+     * @param chainId
      * @return
      */
     public static List<Node> getAvailableNodes(int chainId) {
@@ -92,12 +93,11 @@ public class NetworkUtil {
     }
 
     /**
-     * 重置网络节点
-     * @date 18-11-9 下午3:49
-     * @param
-     * @return
+     * 根据链ID重置网络节点
+     *
+     * @param chainId
      */
-    public static void resetNetwork(int chainId){
+    public static void resetNetwork(int chainId) {
         try {
             Map<String, Object> params = new HashMap<>(2);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -111,12 +111,13 @@ public class NetworkUtil {
 
     /**
      * 给网络上节点广播消息
+     *
      * @param chainId
      * @param message
-     * @param excludeNodes      排除的节点
+     * @param excludeNodes 排除的节点
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes){
+    public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes) {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -134,12 +135,13 @@ public class NetworkUtil {
 
     /**
      * 给指定节点发送消息
+     *
      * @param chainId
      * @param message
      * @param nodeId
      * @return
      */
-    public static boolean sendToNode(int chainId, BaseMessage message, String nodeId){
+    public static boolean sendToNode(int chainId, BaseMessage message, String nodeId) {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -157,11 +159,12 @@ public class NetworkUtil {
 
     /**
      * 给网络上节点广播消息
+     *
      * @param chainId
      * @param message
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message){
+    public static boolean broadcast(int chainId, BaseMessage message) {
         return broadcast(chainId, message, null);
     }
 
@@ -169,7 +172,7 @@ public class NetworkUtil {
         CompleteMessage message = new CompleteMessage();
         message.setRequestHash(hash);
         message.setSuccess(false);
-        message.setCommand(CommandConstant.COMPLETE_MESSAGE);
+        message.setCommand(COMPLETE_MESSAGE);
         boolean result = sendToNode(chainId, message, nodeId);
         if (!result) {
             Log.warn("send fail message failed:{}, hash:{}", nodeId, hash);
@@ -180,13 +183,21 @@ public class NetworkUtil {
         CompleteMessage message = new CompleteMessage();
         message.setRequestHash(hash);
         message.setSuccess(true);
-        message.setCommand(CommandConstant.COMPLETE_MESSAGE);
+        message.setCommand(COMPLETE_MESSAGE);
         boolean result = sendToNode(chainId, message, nodeId);
         if (!result) {
             Log.warn("send success message failed:{}, hash:{}", nodeId, hash);
         }
     }
 
+    /**
+     * 设置节点最新高度与hash
+     *
+     * @param chainId
+     * @param hash
+     * @param height
+     * @param nodeId
+     */
     public static void setHashAndHeight(int chainId, NulsDigestData hash, long height, String nodeId) {
         try {
             Map<String, Object> params = new HashMap<>(5);
@@ -202,6 +213,11 @@ public class NetworkUtil {
         }
     }
 
+    /**
+     * 获取时间戳
+     *
+     * @return
+     */
     public static long currentTime() {
         try {
             Map<String, Object> params = new HashMap<>(1);
@@ -214,6 +230,31 @@ public class NetworkUtil {
             Log.error("get nw_currentTimeMillis fail");
         }
         return System.currentTimeMillis();
+    }
+
+    /**
+     * 注册消息处理器
+     *
+     * @return
+     */
+    public static boolean register() {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            List<Map<String, String>> cmds = new ArrayList<>();
+            map.put("role", ModuleE.BL.abbr);
+            List<String> list = List.of(COMPLETE_MESSAGE, BLOCK_MESSAGE, GET_BLOCK_MESSAGE, FORWARD_SMALL_BLOCK_MESSAGE, GET_BLOCKS_BY_HEIGHT_MESSAGE, GET_TXGROUP_MESSAGE, SMALL_BLOCK_MESSAGE, GET_SMALL_BLOCK_MESSAGE, TXGROUP_MESSAGE);
+            for (String s : list) {
+                Map<String, String> cmd = new HashMap<>();
+                cmd.put("protocolCmd", s);
+                cmd.put("handler", s);
+                cmds.add(cmd);
+            }
+            map.put("protocolCmds", cmds);
+            return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
+        } catch (Exception e) {
+            Log.error("get nw_protocolRegister fail");
+        }
+        return false;
     }
 
 }

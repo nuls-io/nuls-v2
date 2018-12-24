@@ -78,7 +78,7 @@ public class NodesConnectTask implements Runnable  {
                  * 判断是否被动连接里已经存在此链的 连接,如果业务已经存在则跳过
                  * Determine if the connection to this chain already exists in the passive connection, skip if the service already exists
                  */
-                if(connectionManager.isPeerConnectExceedMaxIn(node.getIp(),magicNumber,1)){
+                if(connectionManager.isPeerConnectExceedMax(node.getIp(),magicNumber,1,Node.OUT)){
                     continue;
                 }
 

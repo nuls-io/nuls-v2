@@ -65,6 +65,7 @@ public class BlockConsumer implements Callable<Boolean> {
             long startHeight = params.getLocalLatestHeight() + 1;
 
             Block block;
+            Log.info("BlockConsumer start work");
             while (startHeight <= netLatestHeight) {
                 block = queue.take();
                 boolean saveBlock = blockService.saveBlock(chainId, block);
@@ -73,7 +74,7 @@ public class BlockConsumer implements Callable<Boolean> {
                 }
                 startHeight++;
             }
-            System.out.println("2222222222222222222222");
+            Log.info("BlockConsumer stop work");
             return true;
         } catch (Exception e) {
             Log.error(e);

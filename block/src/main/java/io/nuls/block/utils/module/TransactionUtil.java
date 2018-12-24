@@ -67,7 +67,7 @@ public class TransactionUtil {
      * @throws IOException
      */
     public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList) throws IOException {
-        return BlockGenerator.getTransactions();
+        return BlockGenerator.getTransactions(hashList.size());
     }
 
     /**
@@ -79,7 +79,7 @@ public class TransactionUtil {
      */
     public static Transaction getTransaction(int chainId, NulsDigestData hash) {
         try {
-            return BlockGenerator.getTransactions().get(0);
+            return BlockGenerator.getTransactions(1).get(0);
         } catch (IOException e) {
             e.printStackTrace();
         }

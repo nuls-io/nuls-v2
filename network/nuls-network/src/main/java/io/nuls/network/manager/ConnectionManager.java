@@ -75,11 +75,12 @@ public class ConnectionManager extends BaseManager{
     }
 
     /**
-     * Server所有被动连接的IP,通过这个集合判断是否存在过载
+     * Server所有连接的IP,通过这个集合判断是否存在过载
      * As the Server all passively connected IP, through this set to determine whether there is overload
-     * Key:ip+"_"+magicNumber  value: connectNumber
+     * Key:ip+"_"+magicNumber+(_OUT=_2 OR _IN=_1 )  value: connectNumber
      */
-    private  Map<String, Integer> cacheConnectGroupIpInMap=new ConcurrentHashMap<>();
+    private  Map<String, Integer> cacheConnectGroupIpMap=new ConcurrentHashMap<>();
+
     private StorageManager storageManager = StorageManager.getInstance();
     private LocalInfoManager localInfoManager = LocalInfoManager.getInstance();
     private ManagerStatusEnum status=ManagerStatusEnum.UNINITIALIZED;
@@ -133,10 +134,10 @@ public class ConnectionManager extends BaseManager{
             } else {
                 node = cacheConnectNodeInMap.get(nodeKey);
                 cacheConnectNodeInMap.remove(nodeKey);
-                List<NodeGroupConnector> list = node.getNodeGroupConnectors();
-                for (NodeGroupConnector nodeGroupConnector : list) {
-                    subGroupMaxInIp(node, nodeGroupConnector.getMagicNumber(), true);
-                }
+            }
+            List<NodeGroupConnector> list = node.getNodeGroupConnectors();
+            for (NodeGroupConnector nodeGroupConnector : list) {
+                subGroupMaxIp(node, nodeGroupConnector.getMagicNumber(), true);
             }
             if(null != node) {
                 node.disConnectNodeChannel();
@@ -201,16 +202,17 @@ public class ConnectionManager extends BaseManager{
         return true;
     }
 
+
     /**
      *
      * @param node peer connection
      * @param magicNum net id
      *
      */
-    public void addGroupMaxInIp(Node node,long magicNum){
+    public void addGroupMaxIp(Node node,long magicNum,int nodeType){
         String ip=node.getId().split(NetworkConstant.COLON)[0];
-        String key=ip+"_"+magicNum;
-        cacheConnectGroupIpInMap.merge(key, 1, (a, b) -> a + b);
+        String key=ip+NetworkConstant.DOWN_LINE+magicNum+NetworkConstant.DOWN_LINE+nodeType;
+        cacheConnectGroupIpMap.merge(key, 1, (a, b) -> a + b);
     }
 
     /**
@@ -220,28 +222,53 @@ public class ConnectionManager extends BaseManager{
      * @param magicNum net id
      * @param isAll  if true remove all in client,if false remove single
      */
-    public void subGroupMaxInIp (Node node,long magicNum,boolean isAll){
+    public void subGroupMaxIp (Node node,long magicNum,boolean isAll){
         String ip=node.getId().split(NetworkConstant.COLON)[0];
-        String key=ip+NetworkConstant.DOWN_LINE+magicNum;
+        String key=ip+NetworkConstant.DOWN_LINE+magicNum+NetworkConstant.DOWN_LINE+node.getType() ;
         if(isAll){
-            cacheConnectGroupIpInMap.remove(key);
+            cacheConnectGroupIpMap.remove(key);
             return;
         }
-        if(null != cacheConnectGroupIpInMap.get(key) && cacheConnectGroupIpInMap.get(key)>1){
-            cacheConnectGroupIpInMap.put(key,cacheConnectGroupIpInMap.get(key)-1);
+
+        if(null != cacheConnectGroupIpMap.get(key) && cacheConnectGroupIpMap.get(key)>1){
+            cacheConnectGroupIpMap.put(key,cacheConnectGroupIpMap.get(key)-1);
         }else{
-            cacheConnectGroupIpInMap.remove(key);
+            cacheConnectGroupIpMap.remove(key);
         }
     }
 
 
-    public boolean isPeerConnectExceedMaxIn(String peerIp,long macgicNumber,int maxInSameIp){
-        String key = peerIp+"_"+macgicNumber;
-        if(null != cacheConnectGroupIpInMap.get(key)) {
-            return cacheConnectGroupIpInMap.get(key) >= maxInSameIp;
-        }else{
-            return false;
+
+    /**
+     * client-主动连接 判断是否已经有业务对应的被动连接 存在.如果存在返回false.
+     * server-被动连接  判断是否有业务对应的连接存在最大值，并且判断是否作为client主动业务已经存在该连接.
+     * @param peerIp peerIp
+     * @param macgicNumber macgicNumber
+     * @param maxInSameIp maxInSameIp
+     * @param nodeType nodeType
+     * @return boolean : true exceed
+     */
+    public boolean isPeerConnectExceedMax(String peerIp,long macgicNumber,int maxInSameIp,int nodeType){
+        String key = peerIp+NetworkConstant.DOWN_LINE+macgicNumber+NetworkConstant.DOWN_LINE+nodeType;
+        if(nodeType == Node.IN){
+            String tempKey =  peerIp+NetworkConstant.DOWN_LINE+macgicNumber+NetworkConstant.DOWN_LINE+ Node.OUT;
+            //并且判断是否作为client主动业务已经存在该连接.
+            if(null != cacheConnectGroupIpMap.get(tempKey)){
+                return true;
+            }
+            //判断是否有业务对应的连接存在最大值
+            if(null != cacheConnectGroupIpMap.get(key)) {
+                return cacheConnectGroupIpMap.get(key) >= maxInSameIp;
+            }
+        }else {
+            String tempKey =  peerIp+NetworkConstant.DOWN_LINE+macgicNumber+Node.IN;
+            //判断是否已经有业务对应的被动连接 存在
+            if (null != cacheConnectGroupIpMap.get(key) ||  null != cacheConnectGroupIpMap.get(tempKey)) {
+                return true;
+            }
+
         }
+        return false;
     }
 
     /**
