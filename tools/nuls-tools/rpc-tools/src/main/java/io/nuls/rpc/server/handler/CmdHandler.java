@@ -160,7 +160,7 @@ public class CmdHandler {
             Log.error("Socket disconnected, remove");
             return false;
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
             return false;
         }
     }
