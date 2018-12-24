@@ -288,7 +288,6 @@ public class CmdHandler {
                     continue;
                 }
 
-
                 /*
                 这段代码非常不优雅，可以改进下（我没时间了，怕改出BUG），代码的业务逻辑如下：
                 用户的cmd会返回一个对象，RPC会自动把这个对象替换为Map，Key是调用的方法名，Value是内容（Berzeck强烈要求）
