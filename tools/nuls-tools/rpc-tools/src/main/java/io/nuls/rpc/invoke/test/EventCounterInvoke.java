@@ -21,8 +21,8 @@ public class EventCounterInvoke extends BaseInvoke {
     @Override
     public void callBack(Response response) {
         try {
-            Log.info("EventCounterInvoke 进入了！！！！！");
-            Log.info(JSONUtils.obj2json(response));
+            Log.debug("EventCounterInvoke 进入了！！！！！");
+            Log.debug(JSONUtils.obj2json(response));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }

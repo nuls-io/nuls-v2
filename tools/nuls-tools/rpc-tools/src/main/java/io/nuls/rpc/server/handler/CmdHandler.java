@@ -126,7 +126,7 @@ public class CmdHandler {
 
         String key = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
         if (ServerRuntime.UNSUBSCRIBE_LIST.contains(key)) {
-            Log.info("取消订阅responseWithPeriod：" + key);
+            Log.debug("取消订阅responseWithPeriod：" + key);
             return false;
         }
 
@@ -266,7 +266,7 @@ public class CmdHandler {
     public static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request, String cmd) {
         String unsubscribeKey = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
         if (ServerRuntime.UNSUBSCRIBE_LIST.contains(unsubscribeKey)) {
-            Log.info("取消订阅responseWithEventCount：" + unsubscribeKey);
+            Log.debug("取消订阅responseWithEventCount：" + unsubscribeKey);
             return false;
         }
 
@@ -307,7 +307,7 @@ public class CmdHandler {
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(realResponse);
                 try {
-                    Log.info("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
+                    Log.debug("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
                     webSocket.send(JSONUtils.obj2json(rspMessage));
                 } catch (WebsocketNotConnectedException e) {
                     Log.error("Socket disconnected, remove");
