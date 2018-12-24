@@ -20,6 +20,7 @@
 
 package io.nuls.block.config;
 
+import io.nuls.block.model.GenesisBlock;
 import org.junit.Test;
 
 public class GenesisBlockTest {
