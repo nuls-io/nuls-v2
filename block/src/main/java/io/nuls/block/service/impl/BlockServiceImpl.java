@@ -184,7 +184,7 @@ public class BlockServiceImpl implements BlockService {
         long height = block.getHeader().getHeight();
         NulsDigestData hash = block.getHeader().getHash();
         //1.验证区块
-        if (!verifyBlock(chainId, block, localInit)) {
+        if (!verifyBlock(chainId, block, localInit, download)) {
             Log.error("verify block fail!chainId-{},height-{}", chainId, height);
             return false;
         }
@@ -293,7 +293,7 @@ public class BlockServiceImpl implements BlockService {
         return false;
     }
 
-    private boolean verifyBlock(int chainId, Block block, boolean localInit) {
+    private boolean verifyBlock(int chainId, Block block, boolean localInit, int download) {
         //1.验证一些基本信息如区块大小限制、字段非空验证
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (!basicVerify) {
@@ -307,7 +307,7 @@ public class BlockServiceImpl implements BlockService {
             }
         }
         //3.共识验证
-        boolean consensusVerify = ConsensusUtil.verify(chainId, block);
+        boolean consensusVerify = ConsensusUtil.verify(chainId, block, download);
         if (!consensusVerify) {
             return false;
         }
@@ -358,7 +358,7 @@ public class BlockServiceImpl implements BlockService {
             //4.latestHeight已经维护成功，上面的步骤保证了latestHeight这个高度的区块数据在本地是完整的，但是区块数据的内容并不一定是正确的，所以要继续验证latestBlock
             block = getBlock(chainId, latestHeight);
             //系统初始化时，区块的验证跳过分叉链验证，因为此时主链还没有加载完成，无法进行分叉链判断
-            while (null != block && !verifyBlock(chainId, block, true)) {
+            while (null != block && !verifyBlock(chainId, block, true, 0)) {
                 rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), true);
                 block = getBlock(chainId, block.getHeader().getPreHash());
             }

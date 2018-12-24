@@ -21,8 +21,6 @@
 package io.nuls.block.utils.module;
 
 import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.SmallBlock;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
@@ -41,31 +39,42 @@ import java.util.Map;
  */
 public class ConsensusUtil {
 
-    public static boolean verify(int chainId, Block block) {
-//        try {
-//            Map<String, Object> params = new HashMap<>(5);
-//            params.put(Constants.VERSION_KEY_STR, "1.0");
-//            params.put("chainId", chainId);
-//
-//            params.put("download", true);
-//            params.put("block", HexUtil.byteToHex(block.serialize()));
-//
-//            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
-//        } catch (Exception e) {
-//            Log.error(e);
-//            return false;
-//        }
-        return true;
-    }
-
-    public static boolean sendBlockHeader(int chainId, BlockHeader blockHeader) {
+    /**
+     * 共识验证
+     *
+     * @param chainId
+     * @param block
+     * @param download
+     * @return
+     */
+    public static boolean verify(int chainId, Block block, int download) {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            params.put("blockHeader", blockHeader);
+            params.put("download", download);
+            params.put("block", HexUtil.byteToHex(block.serialize()));
 
-            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();
+            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 同步完成时通知共识模块
+     *
+     * @param chainId
+     * @return
+     */
+    public static boolean notice(int chainId) {
+        try {
+            Map<String, Object> params = new HashMap<>(5);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+
+            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
         } catch (Exception e) {
             Log.error(e);
             return false;
