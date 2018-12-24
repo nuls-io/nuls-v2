@@ -305,7 +305,7 @@ public class CmdHandler {
                 realResponse.setResponseData(responseData);
 
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
-                rspMessage.setMessageData(response);
+                rspMessage.setMessageData(realResponse);
                 try {
                     Log.info("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
                     webSocket.send(JSONUtils.obj2json(rspMessage));
