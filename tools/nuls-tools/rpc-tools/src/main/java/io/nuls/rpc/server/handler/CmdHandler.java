@@ -303,7 +303,6 @@ public class CmdHandler {
 
                 Map<String, Object> responseData = new HashMap<>(1);
                 responseData.put((String) method, response.getResponseData());
-                response.setResponseData(responseData);
                 realResponse.setResponseData(responseData);
 
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
@@ -314,7 +313,7 @@ public class CmdHandler {
                 } catch (WebsocketNotConnectedException e) {
                     Log.error("Socket disconnected, remove");
                 } catch (JsonProcessingException e) {
-                    Log.error(e.getMessage());
+                    Log.error(e);
                 }
 
                 ServerRuntime.CMD_LAST_RESPONSE_BE_USED.put(eventCountKey, true);
