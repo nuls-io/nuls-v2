@@ -58,7 +58,7 @@ public class HostInfo {
                 return getLinuxLocalIp();
             }
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
             return "";
         }
     }
@@ -171,7 +171,8 @@ public class HostInfo {
     private static boolean isLocalPortUsing(int port) {
         try {
             InetAddress address = InetAddress.getByName("127.0.0.1");
-            new Socket(address, port);
+            Socket socket = new Socket(address, port);
+            socket.close();
             return true;
         } catch (IOException e) {
             return false;
