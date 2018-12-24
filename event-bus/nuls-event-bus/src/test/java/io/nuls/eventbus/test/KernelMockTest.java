@@ -29,7 +29,7 @@ import io.nuls.rpc.info.NoUse;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AppTest {
+public class KernelMockTest {
 
     @Before
     public void before() {

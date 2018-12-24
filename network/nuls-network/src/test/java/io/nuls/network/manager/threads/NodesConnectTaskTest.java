@@ -65,7 +65,7 @@ public class NodesConnectTaskTest implements Runnable  {
                 if(nodeGroup.isLock()){
                     continue;
                 }
-                if (!nodeGroup.isHadMaxOutFull()) {
+                if (nodeGroup.isInCrossMaxOutNumber()) {
 
                     connectPeer(nodeGroup);
                 }
