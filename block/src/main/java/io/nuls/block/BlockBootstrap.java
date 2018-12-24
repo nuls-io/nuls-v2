@@ -102,25 +102,22 @@ public class BlockBootstrap {
      * @throws Exception
      */
     private static void init() throws Exception {
-        //1.加载配置
-        ConfigLoader.load(MODULES_CONFIG_FILE);
-        //2.加载Context
-        ContextManager.init(CHAIN_ID);
-
-        //3.扫描包路径io.nuls.block，初始化bean
+        //扫描包路径io.nuls.block，初始化bean
         SpringLiteContext.init("io.nuls.block", new ModularServiceMethodInterceptor());
-
-        //4.服务初始化
+        //rpc服务初始化
+        rpcInit();
+        //加载配置
+        ConfigLoader.load(MODULES_CONFIG_FILE);
+        //加载Context
+        ContextManager.init(CHAIN_ID);
+        //服务初始化
         BlockService service = ContextManager.getServiceBean(BlockService.class);
         service.init(CHAIN_ID);
-
         //各类缓存初始化
         SmallBlockCacher.init(CHAIN_ID);
         CacheHandler.init(CHAIN_ID);
         ChainManager.init(CHAIN_ID);
 
-        //5.rpc服务初始化
-        rpcInit();
     }
 
     /**
