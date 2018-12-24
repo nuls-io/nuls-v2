@@ -50,5 +50,5 @@ public interface ConfirmedTransactionService {
      * @param txHashList
      * @return
      */
-//    boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeaderDigest blockHeaderDigest) throws NulsException;
+    boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeaderDigest blockHeaderDigest) throws NulsException;
 }
