@@ -107,13 +107,14 @@ public class BlockSynchronizer implements Runnable {
             }
             //网络上所有节点高度都是0，说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
-//                statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                 return;
             }
             //4.更新下载状态为“下载中”
             statusEnumMap.put(chainId, BlockSynStatusEnum.RUNNING);
 
             if (!checkLocalBlock(chainId, params)) {
+                statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                 return;
             }
             params.setLocalLatestHeight(ContextManager.getContext(chainId).getLatestHeight());

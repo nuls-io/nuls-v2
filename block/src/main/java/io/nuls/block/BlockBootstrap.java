@@ -60,7 +60,7 @@ import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
  * @version 1.0
  * @date 18-11-8 上午10:20
  */
-public class Bootstrap {
+public class BlockBootstrap {
 
     public static void main(String[] args) {
         Thread.currentThread().setName("block-main");
@@ -68,31 +68,6 @@ public class Bootstrap {
             init();
 
             start();
-
-            //1.加载配置
-            ConfigLoader.load(MODULES_CONFIG_FILE);
-            //2.加载Context
-            ContextManager.init(CHAIN_ID);
-
-            //3.扫描包路径io.nuls.block，初始化bean
-            SpringLiteContext.init("io.nuls.block", new ModularServiceMethodInterceptor());
-
-            //4.服务初始化
-            BlockService service = ContextManager.getServiceBean(BlockService.class);
-            service.init(CHAIN_ID);
-
-            //各类缓存初始化
-            initCache(CHAIN_ID);
-
-            //5.rpc服务初始化
-            rpcInit();
-
-            NetworkUtil.register();
-
-            onlyRunWhenTest();
-
-            //开启后台工作线程
-            startDaemonThreads();
 
             while (true) {
                 for (Integer chainId : ContextManager.chainIds) {
@@ -114,16 +89,50 @@ public class Bootstrap {
         }
     }
 
-    private static void initCache(int chainId) {
-        SmallBlockCacher.init(chainId);
-        CacheHandler.init(chainId);
-        ChainManager.init(chainId);
+    /**
+     * 系统初始化
+     * 1.加载配置信息
+     * 2.初始化context
+     * 3.初始化bean
+     * 4.初始化数据库
+     * 5.初始化缓存
+     * 6.初始化rpc
+     * 7.初始化本地区块
+     *
+     * @throws Exception
+     */
+    private static void init() throws Exception {
+        //1.加载配置
+        ConfigLoader.load(MODULES_CONFIG_FILE);
+        //2.加载Context
+        ContextManager.init(CHAIN_ID);
+
+        //3.扫描包路径io.nuls.block，初始化bean
+        SpringLiteContext.init("io.nuls.block", new ModularServiceMethodInterceptor());
+
+        //4.服务初始化
+        BlockService service = ContextManager.getServiceBean(BlockService.class);
+        service.init(CHAIN_ID);
+
+        //各类缓存初始化
+        SmallBlockCacher.init(CHAIN_ID);
+        CacheHandler.init(CHAIN_ID);
+        ChainManager.init(CHAIN_ID);
+
+        //5.rpc服务初始化
+        rpcInit();
     }
 
+    /**
+     * 系统正式运行
+     */
     private static void start() {
-    }
+        NetworkUtil.register();
 
-    private static void init() {
+        onlyRunWhenTest();
+
+        //开启后台工作线程
+        startDaemonThreads();
     }
 
     /**
