@@ -204,6 +204,8 @@ public class ConnectionManager extends BaseManager{
 
 
     /**
+     * 放在业务握手时候进行调用，不放在物理socket建立调用。
+     * 因为连接是多链共享的
      *
      * @param node peer connection
      * @param magicNum net id
@@ -261,12 +263,11 @@ public class ConnectionManager extends BaseManager{
                 return cacheConnectGroupIpMap.get(key) >= maxInSameIp;
             }
         }else {
-            String tempKey =  peerIp+NetworkConstant.DOWN_LINE+macgicNumber+Node.IN;
+            String tempKey =  peerIp+NetworkConstant.DOWN_LINE+macgicNumber+NetworkConstant.DOWN_LINE+macgicNumber+Node.IN;
             //判断是否已经有业务对应的被动连接 存在
             if (null != cacheConnectGroupIpMap.get(key) ||  null != cacheConnectGroupIpMap.get(tempKey)) {
                 return true;
             }
-
         }
         return false;
     }
