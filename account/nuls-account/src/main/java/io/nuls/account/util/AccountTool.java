@@ -25,8 +25,10 @@
 
 package io.nuls.account.util;
 
+import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
+import io.nuls.account.util.log.LogUtil;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
 import io.nuls.tools.crypto.ECKey;
@@ -38,7 +40,14 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.thread.TimeService;
 
+import java.io.ByteArrayOutputStream;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+
+import static io.nuls.base.script.ScriptOpCodes.OP_CHECKMULTISIG;
 
 /**
  * @author: qinyifeng
@@ -121,6 +130,41 @@ public class AccountTool {
         //get prikey
         return new BigInteger(1, Sha256Hash.hash(pwPriBytes));
     }
+
+    public static byte[] createMultiSigAccountOriginBytes(int chainId, int n, List<String> pubKeys) throws NulsException {
+        byte[] result = null;
+        if (n < 2 || (pubKeys == null ? 0 : pubKeys.size()) < n) {
+            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+        }
+        HashSet<String> hashSet = new HashSet(pubKeys);
+        List<String> list = new ArrayList<>();
+        list.addAll(hashSet);
+        if (pubKeys.size() < n) {
+            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+        }
+        Collections.sort(list, AccountConstant.PUBKEY_COMPARATOR);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            byteArrayOutputStream.write(chainId);
+            byteArrayOutputStream.write(n);
+            for (String pubKey : pubKeys) {
+                byteArrayOutputStream.write(HexUtil.decode(pubKey));
+            }
+            result = byteArrayOutputStream.toByteArray();
+        } catch (Exception e) {
+            LogUtil.error("",e);
+            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+        } finally {
+            try {
+                byteArrayOutputStream.close();
+            } catch (Exception e) {
+            }
+        }
+        return  result;
+    }
+
+
+
 
 
 

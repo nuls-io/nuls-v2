@@ -26,7 +26,11 @@
 package io.nuls.account.constant;
 
 
+import com.google.common.primitives.UnsignedBytes;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.tools.crypto.HexUtil;
+
+import java.util.Comparator;
 
 /**
  * @author: qinyifeng
@@ -192,4 +196,13 @@ public interface AccountConstant {
      * 普通交易为非解锁交易：0，解锁金额交易（退出共识，退出委托）：-1
      */
     byte NORMAL_TX_LOCKED = 0;
+
+    public static final Comparator<String> PUBKEY_COMPARATOR = new Comparator<String>() {
+        private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+
+        @Override
+        public int compare(String k1, String k2) {
+            return comparator.compare(HexUtil.decode(k1), HexUtil.decode(k2));
+        }
+    };
 }
