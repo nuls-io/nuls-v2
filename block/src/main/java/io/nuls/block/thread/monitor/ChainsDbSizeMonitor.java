@@ -35,7 +35,7 @@ import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
 
 /**
  * 分叉链、孤儿链数据库定时清理器
- * 因为使用了rocksDb，清理记录后，数据文件大小不能实时变化，所以不能按数据库文件大小来做判断标准，每次按区块的百分比清理
+ * 因为使用了rocksDb,清理记录后,数据文件大小不能实时变化,所以不能按数据库文件大小来做判断标准,每次按区块的百分比清理
  * 触发条件:某链ID的数据库缓存的区块总数超过超出cacheSize(可配置)
  *
  * @author captain
@@ -58,7 +58,7 @@ public class ChainsDbSizeMonitor implements Runnable {
     public void run() {
         for (Integer chainId : ContextManager.chainIds) {
             try {
-                //判断该链的运行状态，只有正常运行时才会有数据库的处理
+                //判断该链的运行状态,只有正常运行时才会有数据库的处理
                 RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
                 if (!status.equals(RUNNING)) {
                     Log.debug("skip process, status is {}, chainId-{}", status, chainId);

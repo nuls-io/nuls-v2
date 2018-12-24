@@ -21,11 +21,10 @@
 package io.nuls.block.manager;
 
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.context.Context;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.log.logback.LoggerBuilder;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -44,35 +43,22 @@ public class ContextManager {
 
     public static List<Integer> chainIds = new CopyOnWriteArrayList<>();
 
-    private static Map<Integer, Context> contextMap = new HashMap<>();
+    private static Map<Integer, ChainContext> contextMap = new HashMap<>();
 
     private ContextManager() {
     }
 
-    public static final <T> T getServiceBean(Class<T> tClass) {
-        return SpringLiteContext.getBean(tClass);
-    }
-
-    public static <T> List<T> getServiceBeanList(Class<T> tClass) {
-        try {
-            return SpringLiteContext.getBeanList(tClass);
-        } catch (Exception e) {
-            Log.error(e);
-        }
-        return null;
-    }
-
     public static void init(int chainId) {
-        Context context = new Context();
-        context.setChainId(chainId);
-        context.setStatus(RunningStatusEnum.INITIALIZING);
-        context.setSystemTransactionType(TransactionUtil.getSystemTypes(chainId));
+        ChainContext chainContext = new ChainContext();
+        chainContext.setChainId(chainId);
+        chainContext.setStatus(RunningStatusEnum.INITIALIZING);
+        chainContext.setSystemTransactionType(TransactionUtil.getSystemTypes(chainId));
         chainIds.add(chainId);
-        ContextManager.contextMap.put(chainId, context);
-        Log.info("new context add! chainId-{}", chainId);
+        ContextManager.contextMap.put(chainId, chainContext);
+        Log.info("new chainContext add! chainId-{}", chainId);
     }
 
-    public static Context getContext(int chainId) {
+    public static ChainContext getContext(int chainId) {
         return contextMap.get(chainId);
     }
 }

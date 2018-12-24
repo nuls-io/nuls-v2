@@ -85,7 +85,7 @@ public interface ConfigConstant {
      */
     String EXTEND_MAX_SIZE = "extendMaxSize";
     /**
-     * 为阻止恶意节点提前出块，设置此参数
+     * 为阻止恶意节点提前出块,设置此参数
      * 区块时间戳大于当前时间多少就丢弃该区块
      */
     String VALID_BLOCK_INTERVAL = "validBlockInterval";

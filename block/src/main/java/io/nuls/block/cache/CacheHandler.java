@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 /**
- * 主要缓存区块同步过程中收到的区块，还有孤儿链维护线程请求的单个区块
+ * 主要缓存区块同步过程中收到的区块,还有孤儿链维护线程请求的单个区块
  *
  * @author captain
  * @version 1.0
@@ -49,7 +49,7 @@ public class CacheHandler {
     private static Map<Integer, DataCacher<CompleteMessage>> completeCacher = new ConcurrentHashMap<>();
 
     /**
-     * 批量下载区块请求-排序前的区块缓存队列，由BlockDownloader放入队列，供BlockCollector取出排序后放入共享队列
+     * 批量下载区块请求-排序前的区块缓存队列,由BlockDownloader放入队列,供BlockCollector取出排序后放入共享队列
      */
     private static Map<Integer, Map<NulsDigestData, List<Block>>> workerBlockCacher = new ConcurrentHashMap<>();
 
@@ -70,7 +70,7 @@ public class CacheHandler {
     }
 
     /**
-     * 下载单个区块任务开始时，添加缓存
+     * 下载单个区块任务开始时,添加缓存
      *
      * @param chainId
      * @param requestHash
@@ -81,7 +81,7 @@ public class CacheHandler {
     }
 
     /**
-     * 一个{@link BlockWorker}开始工作时，进行缓存初始化
+     * 一个{@link BlockWorker}开始工作时,进行缓存初始化
      *
      * @param chainId
      * @param hash
@@ -93,7 +93,7 @@ public class CacheHandler {
     }
 
     /**
-     * 根据requestHash判断该区块是同步区块过程中收到的区块，还是孤儿链维护过程收到的区块，还是恶意区块，分别放入不同的缓存
+     * 根据requestHash判断该区块是同步区块过程中收到的区块,还是孤儿链维护过程收到的区块,还是恶意区块,分别放入不同的缓存
      *
      * @param chainId
      * @param message

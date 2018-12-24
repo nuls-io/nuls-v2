@@ -20,13 +20,13 @@
 
 package io.nuls.block.manager;
 
-import io.nuls.block.config.ConfigItem;
+import io.nuls.tools.parse.config.ConfigItem;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 配置管理器，维护所有本节点上运行的链的配置信息
+ * 配置管理器,维护所有本节点上运行的链的配置信息
  * @author captain
  * @date 18-11-8 下午1:37
  * @version 1.0

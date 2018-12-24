@@ -36,7 +36,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * 消息测试类，测试各种类型的消息序列化与反序列化
+ * 消息测试类,测试各种类型的消息序列化与反序列化
  * @author captain
  * @date 18-11-16 下午12:17
  * @version 1.0

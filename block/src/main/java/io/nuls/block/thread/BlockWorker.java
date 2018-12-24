@@ -36,7 +36,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
         //组装批量获取区块消息
         HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
         message.setCommand(CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE);
-        //计算本次请求hash，用来跟踪本次异步请求
+        //计算本次请求hash,用来跟踪本次异步请求
         NulsDigestData messageHash = message.getHash();
         try {
             Future<CompleteMessage> future = CacheHandler.addBatchBlockRequest(chainId, messageHash);

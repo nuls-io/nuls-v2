@@ -46,7 +46,7 @@ public interface Constant {
     int CHAIN_ID = 9861;
 
     /**
-     * 最新区块高度，缓存到数据库中，以便重启时恢复本地最新高度
+     * 最新区块高度,缓存到数据库中,以便重启时恢复本地最新高度
      * Module configuration file name.
      */
     String LATEST_BLOCK_HEIGHT = "latest_block_height";

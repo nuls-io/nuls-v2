@@ -42,7 +42,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 
 /**
- * 处理收到的{@link HeightRangeMessage}，用于区块的同步
+ * 处理收到的{@link HeightRangeMessage},用于区块的同步
  * @author captain
  * @date 18-11-14 下午4:23
  * @version 1.0

@@ -38,7 +38,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link BlockMessage}，用于区块的同步
+ * 处理收到的{@link BlockMessage},用于区块的同步
  *
  * @author captain
  * @version 1.0
