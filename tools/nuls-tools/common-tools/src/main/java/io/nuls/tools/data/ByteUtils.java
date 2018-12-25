@@ -2,7 +2,9 @@ package io.nuls.tools.data;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -305,5 +307,41 @@ public class ByteUtils {
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 判断字节数组中是否包含某一个字节数组
+     * Determine whether or not a byte array is included in the byte array
+     *
+     * @param byteList
+     * @param bytes
+     * */
+    public static boolean contains(List<byte[]> byteList,byte[] bytes){
+        if(byteList.isEmpty() || bytes == null){
+            return false;
+        }
+        for (byte[] bytesTemp:byteList) {
+            if(arrayEquals(bytes,bytesTemp)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 字节数组列表转为字符串列表
+     * Byte Array List to String List
+     *
+     * @param byteList
+     * */
+    public static List<String> bytesToStrings(List<byte[]> byteList){
+        if(byteList.isEmpty()){
+            return null;
+        }
+        List<String> stringList = new ArrayList<>();
+        for (byte[] bytes:byteList) {
+            stringList.add(asString(bytes));
+        }
+        return stringList;
     }
 }

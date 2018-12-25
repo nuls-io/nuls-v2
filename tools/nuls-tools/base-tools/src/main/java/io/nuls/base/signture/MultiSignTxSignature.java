@@ -26,6 +26,7 @@ package io.nuls.base.signture;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -83,6 +84,25 @@ public class MultiSignTxSignature extends TransactionSignature {
         this.pubKeyList.add(pubkey);
     }
 
+    /**
+     * 签名验证
+     * */
+    public List<P2PHKSignature> getValidSignature(){
+        if(m <= 0 || pubKeyList == null || pubKeyList.size() == 0 || m>pubKeyList.size()){
+            return null;
+        }
+        List<P2PHKSignature> validSignatures = new ArrayList<>();
+        List<String> pubKeyStrList = ByteUtils.bytesToStrings(pubKeyList);
+        for (P2PHKSignature p2PHKSignature:p2PHKSignatures) {
+            if(pubKeyStrList.contains(ByteUtils.asString(p2PHKSignature.getPublicKey()))){
+                validSignatures.add(p2PHKSignature);
+            }
+        }
+        if(validSignatures.size()<m || validSignatures.size() > pubKeyList.size()){
+            return null;
+        }
+        return validSignatures;
+    }
 
     public byte getM() {
         return m;

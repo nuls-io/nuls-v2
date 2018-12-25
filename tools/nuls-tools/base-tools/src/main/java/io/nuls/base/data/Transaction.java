@@ -24,6 +24,7 @@
  */
 package io.nuls.base.data;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.constant.TxStatusEnum;
@@ -37,7 +38,7 @@ import io.nuls.tools.thread.TimeService;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Charlie
@@ -265,6 +266,26 @@ public class Transaction extends BaseNulsData implements Cloneable {
             fee = cData.getFee();
         }
         return fee;
+    }
+
+    /**
+     * 判断交易是否为多签交易
+     * Judging whether a transaction is a multi-signature transaction
+     * */
+    public boolean isMultiSignTx()throws NulsException {
+        if(null == coinData){
+            return false;
+        }
+        CoinData cData = getCoinDataInstance();
+        List<CoinFrom> from = cData.getFrom();
+        if(from == null || from.size() == 0){
+            return false;
+        }
+        CoinFrom coinFrom = from.get(0);
+        if(AddressTool.isMultiSignAddress(coinFrom.getAddress())){
+            return true;
+        }
+        return false;
     }
 
     @Override

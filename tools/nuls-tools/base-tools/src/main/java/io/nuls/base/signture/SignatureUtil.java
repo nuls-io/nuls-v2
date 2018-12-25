@@ -27,15 +27,19 @@ package io.nuls.base.signture;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.BaseConstant;
-import io.nuls.base.data.*;
-import io.nuls.base.script.*;
+import io.nuls.base.data.Address;
+import io.nuls.base.data.NulsSignData;
+import io.nuls.base.data.Transaction;
+import io.nuls.base.script.Script;
+import io.nuls.base.script.ScriptBuilder;
+import io.nuls.base.script.ScriptChunk;
+import io.nuls.base.script.ScriptOpCodes;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -50,8 +54,6 @@ import java.util.*;
  * */
 @Component
 public class SignatureUtil {
-    private static final Logger log = LoggerFactory.getLogger(SignatureUtil.class);
-
     /**
      * 验证交易中所有签名正确性
      *
@@ -62,19 +64,40 @@ public class SignatureUtil {
             if (tx.getTransactionSignature() == null && tx.getTransactionSignature().length == 0) {
                 throw new NulsException(new Exception());
             }
-            TransactionSignature transactionSignature = new TransactionSignature();
-            transactionSignature.parse(tx.getTransactionSignature(), 0);
-            if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
-                throw new NulsException(new Exception());
-            }
-            //todo 签名中可能混合了多个地址的签名，其中可能含有不定数量的多签地址，需要先根据公钥判断地址类型
-            for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
-                if (!ECKey.verify(tx.getHash().getDigestBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
-                    throw new NulsException(new Exception());
+            if(!tx.isMultiSignTx()){
+                TransactionSignature transactionSignature = new TransactionSignature();
+                transactionSignature.parse(tx.getTransactionSignature(), 0);
+                if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
+                    throw new NulsException(new Exception("Transaction unsigned ！"));
+                }
+                for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
+                    if (!ECKey.verify(tx.getHash().getDigestBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                        throw new NulsException(new Exception("Transaction signature error !"));
+                    }
+                }
+            }else {
+                MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+                transactionSignature.parse(tx.getTransactionSignature(), 0);
+                if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
+                    throw new NulsException(new Exception("Transaction unsigned ！"));
+                }
+                List<P2PHKSignature> validSignatures = transactionSignature.getValidSignature();
+                int validCount = 0;
+                for (P2PHKSignature signature : validSignatures) {
+                    if (ECKey.verify(tx.getHash().getDigestBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
+                        validCount++;
+                    }
+                    if(validCount >= transactionSignature.getM()){
+                        break;
+                    }
+                }
+                if(validCount < transactionSignature.getM()){
+                    throw new NulsException(new Exception("Transaction signature error !"));
                 }
             }
+
         } catch (NulsException e) {
-            log.error("TransactionSignature parse error!");
+            Log.error("TransactionSignature parse error!");
             throw e;
         }
         return true;
@@ -120,7 +143,7 @@ public class SignatureUtil {
                 }
             }
         } catch (NulsException e) {
-            log.error("TransactionSignature parse error!");
+            Log.error("TransactionSignature parse error!");
             throw e;
         }
         return addressSet;
@@ -142,7 +165,7 @@ public class SignatureUtil {
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
         } catch (IOException e) {
-            log.error("TransactionSignature serialize error!");
+            Log.error("TransactionSignature serialize error!");
             throw e;
         }
     }
@@ -379,5 +402,4 @@ public class SignatureUtil {
         nulsSignData.setSignBytes(signbytes);
         return nulsSignData;
     }
-
 }
