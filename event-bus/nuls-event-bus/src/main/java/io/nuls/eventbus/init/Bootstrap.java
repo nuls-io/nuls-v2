@@ -24,10 +24,25 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ * Bootstrap class for Event Bus module.
+ * <p> It does following operations
+ *  <ul>
+ *      <li>Loads module configuration data from modules.ini file</li>
+ *      <li>Initializes annotated driven dependency management</li>
+ *      <li>Starts {@code TimeService} thread</li>
+ *      <li>initializes Rocks DB and loads topics from the db</li>
+ *      <li>starts websocket server and registers Event Bus module with Kernel module</li>
+ *      <li>starts {@code ClientSyncProcessor} thread to sync role connection info</li>
+ *  </ul>
+ * </p>
  * @author naveen
  */
 public class Bootstrap {
 
+    /**
+     *  main() method for starting the module
+     * @param args
+     */
     public static void main(String[] args){
         Log.info("Event Bus module bootstrap starts...");
         try {

@@ -17,10 +17,17 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ * Continuously running thread to sync roles connection information
+ * <p> When any role subscribe to a topic, role is kept in the client sync Queue.
+ *     It connects to Kernel modules and gets connection information for the role and stores at event bus runtime</p>
+ *  <p>If operation is unsubscribe, it removed the role from role map from event bus if the role is no more subscribed any topic</p>
  * @author naveen
  */
 public class ClientSyncProcessor implements Runnable {
 
+    /**
+     * Runnable thread to sync role connection information from kernel
+     */
     @Override
     public void run() {
         while (true){
