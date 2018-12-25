@@ -11,7 +11,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
+import static io.nuls.eventbus.util.EbLog.Log;
 
 import java.util.Map;
 import java.util.Set;

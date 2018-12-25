@@ -8,7 +8,7 @@ import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.log.Log;
+import static io.nuls.eventbus.util.EbLog.Log;
 
 import java.util.HashMap;
 import java.util.Map;

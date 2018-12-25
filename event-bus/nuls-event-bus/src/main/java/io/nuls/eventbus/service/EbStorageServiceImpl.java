@@ -6,7 +6,7 @@ import io.nuls.eventbus.model.Topic;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.data.StringUtils;
-import io.nuls.tools.log.Log;
+import static io.nuls.eventbus.util.EbLog.Log;
 
 import java.util.List;
 import java.util.Map;

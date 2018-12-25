@@ -4,7 +4,7 @@ import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.model.Subscriber;
 import io.nuls.eventbus.runtime.EventBusRuntime;
 
-import io.nuls.tools.log.Log;
+import static io.nuls.eventbus.util.EbLog.Log;
 
 import java.util.HashMap;
 import java.util.Map;

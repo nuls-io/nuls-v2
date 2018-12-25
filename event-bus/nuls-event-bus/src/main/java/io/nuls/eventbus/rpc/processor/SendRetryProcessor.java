@@ -6,7 +6,7 @@ import io.nuls.eventbus.rpc.invoke.EventAuditInvoke;
 import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
-import io.nuls.tools.log.Log;
+import static io.nuls.eventbus.util.EbLog.Log;
 
 import java.util.Map;
 
