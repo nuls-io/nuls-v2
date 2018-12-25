@@ -43,7 +43,7 @@ public interface Constant {
      * 模块配置文件名称
      * Module configuration file name.
      */
-    int CHAIN_ID = 9861;
+    int CHAIN_ID = 1;
 
     /**
      * 最新区块高度,缓存到数据库中,以便重启时恢复本地最新高度
