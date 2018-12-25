@@ -51,7 +51,7 @@ public class ConsensusUtil {
     public static boolean verify(int chainId, Block block, int download) {
         try {
             Map<String, Object> params = new HashMap<>(5);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("download", download);
             params.put("block", HexUtil.encode(block.serialize()));

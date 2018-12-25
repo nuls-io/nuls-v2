@@ -37,6 +37,7 @@ import io.nuls.block.utils.ConfigLoader;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
@@ -121,9 +122,18 @@ public class BlockBootstrap {
      * 系统正式运行
      */
     private static void start() {
-        onlyRunWhenTest();
-        //开启后台工作线程
-        startDaemonThreads();
+        try {
+            Log.info("wait depend modules ready");
+            while (!ServerRuntime.isReady()) {
+                Thread.sleep(100L);
+            }
+            Log.error("service start");
+            onlyRunWhenTest();
+            //开启后台工作线程
+            startDaemonThreads();
+        } catch (Exception e) {
+            Log.error("error occur when start, {}", e.getMessage());
+        }
     }
 
     /**
@@ -149,6 +159,7 @@ public class BlockBootstrap {
 
         // Get information from kernel
         CmdDispatcher.syncKernel();
+
     }
 
     private static void startDaemonThreads() {
