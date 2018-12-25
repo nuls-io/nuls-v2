@@ -26,8 +26,8 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.base.data.Transaction;
+import io.nuls.block.model.GenesisBlock;
 import io.nuls.block.test.BlockGenerator;
-import io.nuls.block.config.GenesisBlock;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.After;
 import org.junit.Before;
@@ -36,7 +36,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
- * 消息测试类，测试各种类型的消息序列化与反序列化
+ * 消息测试类,测试各种类型的消息序列化与反序列化
  * @author captain
  * @date 18-11-16 下午12:17
  * @version 1.0

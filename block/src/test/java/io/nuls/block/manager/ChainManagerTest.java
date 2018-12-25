@@ -21,12 +21,12 @@
 package io.nuls.block.manager;
 
 import com.google.common.collect.Lists;
-import io.nuls.block.config.ConfigLoader;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.model.Chain;
 import io.nuls.block.thread.monitor.OrphanChainsMonitor;
 import io.nuls.block.utils.ChainGenerator;
+import io.nuls.block.utils.ConfigLoader;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -37,7 +37,8 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import static io.nuls.block.constant.Constant.*;
+import static io.nuls.block.constant.Constant.CHAIN_ID;
+import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 

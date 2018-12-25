@@ -48,7 +48,7 @@ public class NetworkUtil {
 
     static {
         /*
-         * 从kernel获取所有接口列表（实际使用中不需要每次都调用这句话，同步一次即可）
+         * 从kernel获取所有接口列表（实际使用中不需要每次都调用这句话,同步一次即可）
          */
         try {
             CmdDispatcher.syncKernel();

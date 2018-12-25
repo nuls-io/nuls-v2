@@ -43,24 +43,6 @@ import static io.nuls.block.constant.Constant.*;
 public class BlockStorageServiceImpl implements BlockStorageService {
 
     @Override
-    public void init(int chainId) {
-        try {
-            RocksDBService.init(DATA_PATH);
-            if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
-                RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
-            }
-            if (!RocksDBService.existTable(BLOCK_HEADER + chainId)) {
-                RocksDBService.createTable(BLOCK_HEADER + chainId);
-            }
-            if (!RocksDBService.existTable(BLOCK_HEADER_INDEX + chainId)) {
-                RocksDBService.createTable(BLOCK_HEADER_INDEX + chainId);
-            }
-        } catch (Exception e) {
-            Log.error(e);
-        }
-    }
-
-    @Override
     public boolean save(int chainId, BlockHeaderPo blockHeader) {
         byte[] height = SerializeUtils.uint64ToByteArray(blockHeader.getHeight());
         byte[] hash = blockHeader.getHash().getDigestBytes();

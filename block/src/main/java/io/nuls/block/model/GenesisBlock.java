@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.config;
+package io.nuls.block.model;
 
 import io.nuls.base.data.*;
 import io.nuls.base.signture.BlockSignature;

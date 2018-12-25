@@ -42,7 +42,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link HashMessage}，用于孤儿链的维护
+ * 处理收到的{@link HashMessage},用于孤儿链的维护
  *
  * @author captain
  * @version 1.0

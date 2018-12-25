@@ -43,7 +43,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 
 /**
- * 处理收到的{@link HashListMessage}，用于区块的广播与转发
+ * 处理收到的{@link HashListMessage},用于区块的广播与转发
  * @author captain
  * @date 18-11-14 下午4:23
  * @version 1.0

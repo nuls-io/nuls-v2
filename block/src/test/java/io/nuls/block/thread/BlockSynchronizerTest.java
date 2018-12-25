@@ -21,8 +21,8 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.config.ConfigLoader;
 import io.nuls.block.model.Node;
+import io.nuls.block.utils.ConfigLoader;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -47,7 +47,7 @@ public class BlockSynchronizerTest {
 
     @Test
     public void statistics() {
-        //测试一致节点比例，一致节点超过80%
+        //测试一致节点比例,一致节点超过80%
         List<Node> nodeList = new ArrayList<>();
         for (int i = 0; i < 80; i++) {
             Node node = new Node();
@@ -66,7 +66,7 @@ public class BlockSynchronizerTest {
         BlockDownloaderParams params = BlockSynchronizer.getInstance().statistics(nodeList, CHAIN_ID);
         Assert.assertTrue(params.getNodes().size() == 80);
 
-        //测试一致节点比例，一致节点低于80%
+        //测试一致节点比例,一致节点低于80%
         nodeList.clear();
         for (int i = 0; i < 79; i++) {
             Node node = new Node();

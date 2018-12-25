@@ -120,7 +120,7 @@ public interface BlockService {
     List<Block> getBlock(int chainId, long startHeight, long endHeight);
 
     /**
-     * 保存区块，已经考虑失败回滚操作，不抛出异常情况下，不会有垃圾数据
+     * 保存区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
      *
      * @param chainId 链ID
      * @param block   待保存区块
@@ -129,7 +129,7 @@ public interface BlockService {
     boolean saveBlock(int chainId, Block block);
 
     /**
-     * 保存区块，已经考虑失败回滚操作，不抛出异常情况下，不会有垃圾数据
+     * 保存区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
      *
      * @param chainId 链ID
      * @param block   待保存区块
@@ -139,7 +139,7 @@ public interface BlockService {
     boolean saveBlock(int chainId, Block block, int download);
 
     /**
-     * 回滚区块，已经考虑失败回滚操作，不抛出异常情况下，不会有垃圾数据
+     * 回滚区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
      *
      * @param chainId       链ID
      * @param blockHeaderPo 待回滚区块头
@@ -148,11 +148,11 @@ public interface BlockService {
     boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo);
 
     /**
-     * 转发区块给连接的其他对等节点，允许一个例外（不转发给它）
+     * 转发区块给连接的其他对等节点,允许一个例外（不转发给它）
      *
      * @param chainId
      * @param hash        区块
-     * @param excludeNode 需要排除的节点，因为从该节点处接收的本区块
+     * @param excludeNode 需要排除的节点,因为从该节点处接收的本区块
      * @return
      */
     boolean forwardBlock(int chainId, NulsDigestData hash, String excludeNode);

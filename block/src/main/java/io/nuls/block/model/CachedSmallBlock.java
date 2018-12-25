@@ -10,7 +10,7 @@ import lombok.Setter;
 import java.util.List;
 
 /**
- * 缓存的区块对象，用于区块广播、转发
+ * 缓存的区块对象,用于区块广播、转发
  *
  * @author captain
  * @version 1.0

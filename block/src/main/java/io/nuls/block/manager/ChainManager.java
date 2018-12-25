@@ -37,7 +37,7 @@ import io.nuls.tools.log.Log;
 import java.util.*;
 
 /**
- * 分叉链管理器，维护主链、分叉链集合、孤儿链集合
+ * 分叉链管理器,维护主链、分叉链集合、孤儿链集合
  *
  * @author captain
  * @version 1.0
@@ -52,25 +52,25 @@ public class ChainManager {
     private static ChainStorageService chainStorageService;
 
     /**
-     * 本机运行的所有主链集合，按照chainID区分
+     * 本机运行的所有主链集合,按照chainID区分
      */
     private static Map<Integer, Chain> masterChains = new HashMap<>();
 
     /**
-     * 本机运行的所有分叉链集合，按照chainID区分
+     * 本机运行的所有分叉链集合,按照chainID区分
      */
     private static Map<Integer, SortedSet<Chain>> forkChains = new HashMap<>();
 
     /**
-     * 本机运行的所有孤儿链集合，按照chainID区分
+     * 本机运行的所有孤儿链集合,按照chainID区分
      */
     private static Map<Integer, SortedSet<Chain>> orphanChains = new HashMap<>();
 
     /**
-     * forkChain比masterChain更长，切换主链
+     * forkChain比masterChain更长,切换主链
      * 切换分三步
-     * 1.计算出最长分叉链与主链的分叉点，并得到要切换成主链的分叉链集合B
-     * 2.回滚主链到分叉高度。
+     * 1.计算出最长分叉链与主链的分叉点,并得到要切换成主链的分叉链集合B
+     * 2.回滚主链到分叉高度.
      * 3.依次添加分叉链集合B中的区块到主链
      *
      * @param chainId
@@ -80,7 +80,7 @@ public class ChainManager {
      */
     public static boolean switchChain(int chainId, Chain masterChain, Chain forkChain) {
 
-        //1.获取主链与最长分叉链的分叉点，并记录从分叉点开始的最长分叉链路径
+        //1.获取主链与最长分叉链的分叉点,并记录从分叉点开始的最长分叉链路径
         Stack<Chain> switchChainPath = new Stack<>();
         while (forkChain.getParent() != null) {
             switchChainPath.push(forkChain);
@@ -92,7 +92,7 @@ public class ChainManager {
         Log.info("calculate fork point complete");
 
         //2.回滚主链
-        //2.1 回滚主链到指定高度，回滚掉的区块收集起来放入分叉链数据库
+        //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库
         LinkedList<NulsDigestData> hashList = new LinkedList<>();
         List<Block> blockList = new ArrayList<>();
         long rollbackHeight = masterChainEndHeight;
@@ -128,7 +128,7 @@ public class ChainManager {
             saveBlockList(chainId, blockList);
             return false;
         }
-        //至此，主链回滚完成
+        //至此,主链回滚完成
         Log.info("masterChain rollback complete");
 
         //3.依次添加最长分叉链路径上所有分叉链区块
@@ -147,7 +147,7 @@ public class ChainManager {
     }
 
     private static void saveBlockList(int chainId, List<Block> blockList) {
-        //主链回滚中途失败，把前面回滚的区块再加回主链
+        //主链回滚中途失败,把前面回滚的区块再加回主链
         for (Block block : blockList) {
             if (!blockService.saveBlock(chainId, block)) {
                 throw new ChainRuntimeException("switchChain fail");
@@ -158,7 +158,7 @@ public class ChainManager {
     /**
      * 从分叉链forkChain上取区块添加到主链masterChain上
      * 取多少个区块由forkChain与subChain的起始高度差计算得出
-     * subChain是forkChain的子链之一，位于最长分叉链的路径上
+     * subChain是forkChain的子链之一,位于最长分叉链的路径上
      *
      * @param masterChain
      * @param forkChain
@@ -188,7 +188,7 @@ public class ChainManager {
             }
         }
 
-        //3.上一步结束后，如果forkChain中还有区块，组成新的分叉链，连接到主链上
+        //3.上一步结束后,如果forkChain中还有区块,组成新的分叉链,连接到主链上
         if (hashList.size() > 0) {
             Chain newForkChain = new Chain();
             newForkChain.setChainId(chainId);
@@ -251,7 +251,7 @@ public class ChainManager {
     }
 
     /**
-     * 直接从集合中删除分叉链，与removeForkChain的应用场景不一样
+     * 直接从集合中删除分叉链,与removeForkChain的应用场景不一样
      *
      * @param chainId
      * @return
@@ -267,7 +267,7 @@ public class ChainManager {
     }
 
     /**
-     * 移除分叉链，分叉链占用空间超出限制时，清理空间
+     * 移除分叉链,分叉链占用空间超出限制时,清理空间
      *
      * @param chainId
      * @return
@@ -346,7 +346,7 @@ public class ChainManager {
 
     /**
      * 移除孤儿链
-     * 孤儿链占用空间超出限制时，清理空间
+     * 孤儿链占用空间超出限制时,清理空间
      *
      * @param chainId
      * @param chain
@@ -418,12 +418,12 @@ public class ChainManager {
     }
 
     /**
-     * 两个链相连，形成mainChain-subChain结构
-     * 如果mainChain是主链，除更新内存中chain的属性外，还需要把subChain的区块提交到主链
-     * 如果mainChain不是主链，只需要更新内存中chain的属性，不需要操作区块数据
+     * 两个链相连,形成mainChain-subChain结构
+     * 如果mainChain是主链,除更新内存中chain的属性外,还需要把subChain的区块提交到主链
+     * 如果mainChain不是主链,只需要更新内存中chain的属性,不需要操作区块数据
      *
      * @param mainChain
-     * @param subChain  能连到其他链的一定是孤儿链，因为分叉链是从一个分叉区块开始构建的，分叉链初始化时已经设置了parent属性
+     * @param subChain  能连到其他链的一定是孤儿链,因为分叉链是从一个分叉区块开始构建的,分叉链初始化时已经设置了parent属性
      * @return
      */
     public static boolean append(Chain mainChain, Chain subChain) {
@@ -448,7 +448,7 @@ public class ChainManager {
 
     /**
      * 从mainChain分叉出subChain
-     * 只需要更新内存中chain的属性，不需要操作区块数据
+     * 只需要更新内存中chain的属性,不需要操作区块数据
      *
      * @param mainChain
      * @param forkChain
