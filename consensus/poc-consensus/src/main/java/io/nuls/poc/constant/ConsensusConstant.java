@@ -201,6 +201,7 @@ public interface ConsensusConstant {
     String PARAM_BLOCK_HEADER ="blockHeader";
     String PARAM_EVIDENCE_HEADER ="evidenceHeader";
     String VALID_RESULT ="valid";
+    String PARAM_STATUS = "status";
 
     /**
      * 共识模块日志管理
