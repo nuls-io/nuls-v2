@@ -51,7 +51,6 @@ import io.nuls.tools.log.Log;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static io.nuls.block.constant.Constant.*;
 
@@ -199,19 +198,27 @@ public class BlockServiceImpl implements BlockService {
             }
             return false;
         }
-        //3.保存区块头
-        if (!blockStorageService.save(chainId, BlockUtil.toBlockHeaderPo(block))) {
+        //3.保存区块头,保存交易
+        BlockHeaderPo blockHeaderPo = BlockUtil.toBlockHeaderPo(block);
+        if (!blockStorageService.save(chainId, blockHeaderPo) || !TransactionUtil.save(chainId, block.getTxHashList())) {
             Log.error("save blockheader fail!chainId-{},height-{}", chainId, height);
             if (!blockStorageService.remove(chainId, height)) {
-                throw new DbRuntimeException("save blockheader error!");
+                throw new DbRuntimeException("remove blockheader error!");
+            }
+            if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
+                throw new DbRuntimeException("setLatestHeight error!");
             }
             return false;
         }
-        //4.保存交易
-        if (!TransactionUtil.save(chainId, block.getTxHashList())) {
-            Log.info("save transactions fail!chainId-{},height-{}", chainId, height);
+        //4.保存区块头,完全保存,更新标记
+        blockHeaderPo.setComplete(true);
+        if (!blockStorageService.save(chainId, blockHeaderPo)) {
+            Log.error("update blockheader fail!chainId-{},height-{}", chainId, height);
+            if (!TransactionUtil.rollback(chainId, block.getTxHashList())) {
+                throw new DbRuntimeException("remove transactions error!");
+            }
             if (!blockStorageService.remove(chainId, height)) {
-                throw new DbRuntimeException("save blockheader error!");
+                throw new DbRuntimeException("remove blockheader error!");
             }
             if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                 throw new DbRuntimeException("setLatestHeight error!");
@@ -302,25 +309,17 @@ public class BlockServiceImpl implements BlockService {
         if (!basicVerify) {
             return false;
         }
-        //2.分叉验证逻辑
-        if (!localInit) {
-            boolean forkVerify = BlockUtil.forkVerify(chainId, block);
-            if (!forkVerify) {
-                return false;
-            }
-        }
-        //3.共识验证
-        boolean consensusVerify = ConsensusUtil.verify(chainId, block, download);
-        if (!consensusVerify) {
-            return false;
+
+        if (localInit) {
+            return basicVerify;
         }
 
-        //4.交易验证
-        boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs());
-        if (!transactionVerify) {
-            return false;
-        }
-        return true;
+        //分叉验证
+        return BlockUtil.forkVerify(chainId, block)
+                //共识验证
+                && ConsensusUtil.verify(chainId, block, download)
+                //交易验证
+                && TransactionUtil.verify(chainId, block.getTxs());
     }
 
     private boolean initLocalBlocks(int chainId) {
@@ -344,33 +343,14 @@ public class BlockServiceImpl implements BlockService {
                 latestHeight = latestHeight -1;
                 blockStorageService.setLatestHeight(chainId, latestHeight);
             } else {
-                //如果有对应高度的header,继续检查是否有对应高度的所有transaction
-                List<Transaction> transactions = TransactionUtil.getTransactions(chainId, blockHeader.getTxHashList());
-                //没有这个高度的交易,只回滚区块头
-                if (transactions == null || transactions.size() == 0) {
+                if (!blockHeader.isComplete()) {
                     blockStorageService.remove(chainId, latestHeight);
                     latestHeight = latestHeight -1;
                     blockStorageService.setLatestHeight(chainId, latestHeight);
-                } else {
-                    NulsDigestData merkleHash = NulsDigestData.calcMerkleDigestData(transactions.stream().map(e -> e.getHash()).collect(Collectors.toList()));
-                    NulsDigestData blockMerkleHash = blockHeader.getMerkleHash();
-                    //merkleHash不一致,回滚区块头,回滚交易
-                    if (!merkleHash.equals(blockMerkleHash)) {
-                        blockStorageService.remove(chainId, latestHeight);
-                        TransactionUtil.rollback(chainId, blockHeader.getTxHashList());
-                        latestHeight = latestHeight - 1;
-                        blockStorageService.setLatestHeight(chainId, latestHeight);
-                    }
                 }
             }
-
             //4.latestHeight已经维护成功,上面的步骤保证了latestHeight这个高度的区块数据在本地是完整的,但是区块数据的内容并不一定是正确的,所以要继续验证latestBlock
             block = getBlock(chainId, latestHeight);
-            //系统初始化时,区块的验证跳过分叉链验证,因为此时主链还没有加载完成,无法进行分叉链判断
-            while (null != block && !verifyBlock(chainId, block, true, 0)) {
-                rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), true);
-                block = getBlock(chainId, block.getHeader().getPreHash());
-            }
             //5.本地区块维护成功
             ContextManager.getContext(chainId).setLatestBlock(block);
             ContextManager.getContext(chainId).setGenesisBlock(genesisBlock);
@@ -384,24 +364,20 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public void init(int chainId) {
         try {
-            try {
-                RocksDBService.init(DATA_PATH);
-                if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
-                    RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
-                }
-                if (!RocksDBService.existTable(BLOCK_HEADER + chainId)) {
-                    RocksDBService.createTable(BLOCK_HEADER + chainId);
-                }
-                if (!RocksDBService.existTable(BLOCK_HEADER_INDEX + chainId)) {
-                    RocksDBService.createTable(BLOCK_HEADER_INDEX + chainId);
-                }
-                if (RocksDBService.existTable(FORK_CHAINS + chainId)) {
-                    RocksDBService.destroyTable(FORK_CHAINS + chainId);
-                }
-                RocksDBService.createTable(FORK_CHAINS + chainId);
-            } catch (Exception e) {
-                Log.error(e);
+            RocksDBService.init(DATA_PATH);
+            if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
+                RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
             }
+            if (!RocksDBService.existTable(BLOCK_HEADER + chainId)) {
+                RocksDBService.createTable(BLOCK_HEADER + chainId);
+            }
+            if (!RocksDBService.existTable(BLOCK_HEADER_INDEX + chainId)) {
+                RocksDBService.createTable(BLOCK_HEADER_INDEX + chainId);
+            }
+            if (RocksDBService.existTable(FORK_CHAINS + chainId)) {
+                RocksDBService.destroyTable(FORK_CHAINS + chainId);
+            }
+            RocksDBService.createTable(FORK_CHAINS + chainId);
             initLocalBlocks(chainId);
         } catch (Exception e) {
             Log.error(e);

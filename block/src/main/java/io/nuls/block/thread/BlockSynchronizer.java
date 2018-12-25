@@ -109,6 +109,7 @@ public class BlockSynchronizer implements Runnable {
             //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
                 statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                ConsensusUtil.notice(chainId, 1);
                 return;
             }
             //4.更新下载状态为“下载中”
@@ -116,6 +117,7 @@ public class BlockSynchronizer implements Runnable {
 
             if (!checkLocalBlock(chainId, params)) {
                 statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                ConsensusUtil.notice(chainId, 1);
                 return;
             }
             params.setLocalLatestHeight(ContextManager.getContext(chainId).getLatestHeight());
@@ -149,7 +151,7 @@ public class BlockSynchronizer implements Runnable {
                 Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
                 if (checkIsNewest(chainId, params)) {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
-                    ConsensusUtil.notice(chainId);
+                    ConsensusUtil.notice(chainId, 1);
                 } else {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
                 }

@@ -67,13 +67,15 @@ public class ConsensusUtil {
      * 同步完成时通知共识模块
      *
      * @param chainId
+     * @param status        1-正常,0-等待
      * @return
      */
-    public static boolean notice(int chainId) {
+    public static boolean notice(int chainId, int status) {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
+            params.put("status", status);
 
             return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
         } catch (Exception e) {
