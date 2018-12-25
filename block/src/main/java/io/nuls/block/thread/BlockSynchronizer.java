@@ -81,7 +81,7 @@ public class BlockSynchronizer implements Runnable {
                 }
                 RunningStatusEnum runningStatus = ContextManager.getContext(chainId).getStatus();
                 if (!synStatus.equals(BlockSynStatusEnum.RUNNING)) {
-                    synchronize(chainId);
+                    synchronize(chainId, synStatus);
                 } else {
                     Log.info("skip Block Synchronize, SynStatus:{}, RunningStatus:{}", synStatus, runningStatus);
                 }
@@ -92,7 +92,7 @@ public class BlockSynchronizer implements Runnable {
         }
     }
 
-    private void synchronize(int chainId) throws Exception {
+    private void synchronize(int chainId, BlockSynStatusEnum synStatus) throws Exception {
         //1.调用网络模块接口获取当前chainID网络的可用节点
         List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
 
@@ -103,21 +103,28 @@ public class BlockSynchronizer implements Runnable {
             BlockDownloaderParams params = statistics(availableNodes, chainId);
             int size = params.getNodes().size();
             if (size == 0) {
-                statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
+                if (!synStatus.equals(BlockSynStatusEnum.FAIL)) {
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
+                    ConsensusUtil.notice(chainId, 0);
+                }
                 return;
             }
             //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
-                statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
-                ConsensusUtil.notice(chainId, 1);
+                if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    ConsensusUtil.notice(chainId, 1);
+                }
                 return;
             }
             //4.更新下载状态为“下载中”
             statusEnumMap.put(chainId, BlockSynStatusEnum.RUNNING);
 
             if (!checkLocalBlock(chainId, params)) {
-                statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
-                ConsensusUtil.notice(chainId, 1);
+                if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    ConsensusUtil.notice(chainId, 1);
+                }
                 return;
             }
             params.setLocalLatestHeight(ContextManager.getContext(chainId).getLatestHeight());
