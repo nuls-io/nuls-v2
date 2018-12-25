@@ -375,6 +375,7 @@ public class BlockUtil {
         po.setBlockSignature(blockHeader.getBlockSignature());
         po.setExtend(blockHeader.getExtend());
         po.setTxHashList(block.getTxHashList());
+        po.setComplete(false);
         return po;
     }
 

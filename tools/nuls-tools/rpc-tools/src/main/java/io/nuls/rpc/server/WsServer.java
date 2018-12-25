@@ -131,7 +131,7 @@ public class WsServer extends WebSocketServer {
                     如果不能提供服务，则直接返回
                     If no service is available, return directly
                      */
-                    if (!ServerRuntime.startService) {
+                    if (!ServerRuntime.isReady()) {
                         CmdHandler.serviceNotStarted(webSocket, message.getMessageId());
                         break;
                     }
