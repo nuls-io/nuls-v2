@@ -71,54 +71,59 @@ public class ChainsDbSizeMonitor implements Runnable {
                 //获取配置项
                 int cacheSize = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.CACHE_SIZE));
                 //1.获取某链ID的数据库缓存的所有区块数量
-                ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
-                if (writeLock.tryLock(1, TimeUnit.SECONDS)) {
+                ReentrantReadWriteLock.ReadLock readLock = context.getReadLock();
+                if (readLock.tryLock(1, TimeUnit.SECONDS)) {
                     int actualSize = ChainManager.getForkChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
                     actualSize += ChainManager.getOrphanChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
                     Log.debug("chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
-                    //与阈值比较
-                    while (actualSize > cacheSize) {
-                        Log.info("before clear, chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
-                        context.setStatus(RunningStatusEnum.DATABASE_CLEANING);
-                        //2.按顺序清理分叉链和孤儿链
-                        SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
-                        int forkSize = forkChains.size();
-                        if (forkSize > 0) {
-                            int i = forkSize / CLEAN_PARAM;
-                            //最少清理一个链
-                            i = i == 0 ? 1 : i;
-                            for (int j = 0; j < i; j++) {
-                                Chain chain = forkChains.first();
-                                boolean b = ChainManager.removeForkChain(chainId, chain);
-                                if (!b) {
-                                    Log.error("remove fork chain fail, chain:", chain);
-                                } else {
-                                    actualSize -= chain.getHashList().size();
+                    if (actualSize > cacheSize) {
+                        readLock.unlock();
+                    }
+                    ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
+                    if (writeLock.tryLock(1, TimeUnit.SECONDS)) {
+                        //与阈值比较
+                        while (actualSize > cacheSize) {
+                            Log.info("before clear, chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
+                            context.setStatus(RunningStatusEnum.DATABASE_CLEANING);
+                            //2.按顺序清理分叉链和孤儿链
+                            SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
+                            int forkSize = forkChains.size();
+                            if (forkSize > 0) {
+                                int i = forkSize / CLEAN_PARAM;
+                                //最少清理一个链
+                                i = i == 0 ? 1 : i;
+                                for (int j = 0; j < i; j++) {
+                                    Chain chain = forkChains.first();
+                                    boolean b = ChainManager.removeForkChain(chainId, chain);
+                                    if (!b) {
+                                        Log.error("remove fork chain fail, chain:", chain);
+                                    } else {
+                                        actualSize -= chain.getHashList().size();
+                                    }
                                 }
                             }
-                        }
 
-                        SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
-                        int orphanSize = orphanChains.size();
-                        if (orphanSize > 0) {
-                            int i = orphanSize / CLEAN_PARAM;
-                            //最少清理一个链
-                            i = i == 0 ? 1 : i;
-                            for (int j = 0; j < i; j++) {
-                                Chain chain = orphanChains.first();
-                                boolean b = ChainManager.removeOrphanChain(chainId, chain);
-                                if (!b) {
-                                    Log.error("remove orphan chain fail, chain:", chain);
-                                } else {
-                                    actualSize -= chain.getHashList().size();
+                            SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+                            int orphanSize = orphanChains.size();
+                            if (orphanSize > 0) {
+                                int i = orphanSize / CLEAN_PARAM;
+                                //最少清理一个链
+                                i = i == 0 ? 1 : i;
+                                for (int j = 0; j < i; j++) {
+                                    Chain chain = orphanChains.first();
+                                    boolean b = ChainManager.removeOrphanChain(chainId, chain);
+                                    if (!b) {
+                                        Log.error("remove orphan chain fail, chain:", chain);
+                                    } else {
+                                        actualSize -= chain.getHashList().size();
+                                    }
                                 }
                             }
+                            Log.info("after clear, chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
+                            context.setStatus(RUNNING);
                         }
-                        Log.info("after clear, chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
-                        context.setStatus(RUNNING);
                     }
                 }
-                writeLock.unlock();
             } catch (Exception e) {
                 context.setStatus(RunningStatusEnum.EXCEPTION);
                 Log.error(e);
