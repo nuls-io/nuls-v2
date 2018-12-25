@@ -14,6 +14,7 @@ import io.nuls.transaction.db.rocksdb.storage.TransactionStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.rpc.call.LegerCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.manager.ChainManager;
@@ -80,20 +81,27 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
                 if (null == tx) {
                     throw new NulsException(TxErrorCode.TX_NOT_EXIST);
                 }
-                //设置交易在block中的顺序
-                //tx.setInBlockIndex(i);
                 //保存交易
-                boolean rs = transactionStorageService.saveTx(chainId, tx);
-                if (rs) {
-                    //执行交易commit
-                    TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                    rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
-                    if (!rs) {
-                        //提交失败，之前删除当前交易
-                        transactionStorageService.removeTx(chainId, tx.getHash());
-                        chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
-                    }
-                }
+//                boolean rs = transactionStorageService.saveTx(chainId, tx);
+//                if (rs) {
+//                    //执行交易commit
+//                    TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
+//                    rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
+//                    if (!rs) {
+//                        //提交失败，之前删除当前交易
+//                        transactionStorageService.removeTx(chainId, tx.getHash());
+//                        chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
+//                    }else {
+//                        //发送给账本模块
+//                        rs = LegerCall.sendTx(chain.getChainId(), tx, true);
+//                        if (!rs) {
+//                            transactionStorageService.removeTx(chainId, tx.getHash());
+//                            chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
+//                        }
+//                    }
+//
+//                }
+                boolean rs = saveCommitTx(chain, tx);
                 if (rs) {
                     savedList.add(tx);
                 } else {
@@ -111,6 +119,43 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
         }
     }
 
+
+    private boolean saveCommitTx(Chain chain, Transaction tx) throws Exception{
+        boolean rs = transactionStorageService.saveTx(chain.getChainId(), tx);
+        if(!rs){
+            return false;
+        }
+        TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
+        rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
+        if (!rs) {
+            //提交失败，之前删除当前交易
+            transactionStorageService.removeTx(chain.getChainId(), tx.getHash());
+            chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
+            return false;
+        }
+        rs = LegerCall.sendTx(chain.getChainId(), tx, true);
+        if (!rs) {
+            transactionStorageService.removeTx(chain.getChainId(), tx.getHash());
+            chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
+        }
+        return rs;
+
+
+       /* if (rs) {
+            //执行交易commit
+            TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
+            rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
+            if (!rs) {
+                //提交失败，之前删除当前交易
+                transactionStorageService.removeTx(chain.getChainId(), tx.getHash());
+                chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
+            }else {
+                //发送给账本模块
+
+            }
+
+        }*/
+    }
 
     private boolean rollbackTxList(Chain chain, List<Transaction> savedList, BlockHeaderDigest blockHeaderDigest, boolean atomicity) throws NulsException {
         if (null == chain || savedList == null || savedList.size() == 0) {

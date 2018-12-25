@@ -89,8 +89,8 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
     public MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int m) {
         MultiSigAccount multiSigAccount = null;
         try {
-            Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubKeys);
-            Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
+            //Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubKeys);
+            Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId,m,pubKeys)));
             MultiSigAccountPo multiSigAccountPo = new MultiSigAccountPo();
             multiSigAccountPo.setChainId(chainId);
             multiSigAccountPo.setAddress(address);

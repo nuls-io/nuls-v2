@@ -75,8 +75,8 @@ public class ConsensusManager {
                 coinData.addTo(coin);
             }
             tx.setTime(member.getPackEndTime());
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             tx.setCoinData(coinData.serialize());
+            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         } catch (IOException e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
             throw e;
@@ -305,7 +305,7 @@ public class ConsensusManager {
         BlockHeader header = new BlockHeader();
         block.setHeader(header);
         try {
-            block.getHeader().setExtend(blockData.getExtendsData().serialize());
+            header.setExtend(blockData.getExtendsData().serialize());
         } catch (IOException e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
             throw new NulsRuntimeException(e);
