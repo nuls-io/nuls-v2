@@ -5,24 +5,24 @@ import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
-import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.TransactionService;
-import io.nuls.transaction.manager.ChainManager;
-import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -54,19 +54,23 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "tx_register", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "module transaction registration")
+    @CmdAnnotation(cmd = TxCmd.TX_REGISTER, version = 1.0, description = "module transaction registration")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "moduleCode", parameterType = "String")
+    @Parameter(parameterName = "moduleValidator", parameterType = "String")
+    @Parameter(parameterName = "list", parameterType = "List")
     public Response register(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
         try {
-            // check parameters
-            Object chainIdObj = params == null ? null : params.get("chainId");
-            if (params == null || chainIdObj == null) {
-                throw new NulsException(TxErrorCode.NULL_PARAMETER);
-            }
-            int chainId = (Integer) chainIdObj;
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("moduleCode"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("moduleValidator"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("list"), TxErrorCode.PARAMETER_ERROR.getMsg());
+
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDTO.class);
+
             List<TxRegisterDTO> txRegisterList = moduleTxRegisterDto.getList();
             if (moduleTxRegisterDto == null || txRegisterList == null) {
                 throw new NulsException(TxErrorCode.NULL_PARAMETER);
@@ -84,8 +88,7 @@ public class TransactionCmd extends BaseCmd {
                 txRegister.setUnlockTx(txRegisterDto.isUnlockTx());
                 txRegister.setVerifySignature(txRegisterDto.isVerifySignature());
 
-                //todo 注册交易 需要传chainId
-                result = transactionService.register(chainManager.getChain(chainId), txRegister);
+                result = transactionService.register(chainManager.getChain(moduleTxRegisterDto.getChainId()), txRegister);
             }
 
         } catch (IOException e) {
@@ -106,7 +109,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "newTx", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "receive a new transaction")
+    @CmdAnnotation(cmd = "newTx", version = 1.0, description = "receive a new transaction")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHex", parameterType = "String")
     public Response newTx(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
@@ -138,7 +143,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "tx_packableTxs", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "returns a list of packaged transactions")
+    @CmdAnnotation(cmd = TxCmd.TX_PACKABLETXS, version = 1.0, description = "returns a list of packaged transactions")
     public Response packableTxs(Map params) {
         List<Transaction> packableTxsList = new ArrayList<>();
         try {
@@ -165,81 +170,8 @@ public class TransactionCmd extends BaseCmd {
         return success(packableTxsList);
     }
 
-    /**
-     * Execute the transaction processor commit
-     *
-     * @param params
-     * @return
-     */
-/*    @CmdAnnotation(cmd = "tx_commit", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction commit")
-    public Response commit(Map params) {
-        Map<String, Boolean> map = new HashMap<>();
-        boolean result = false;
-        try {
-            Object chainIdObj = params == null ? null : params.get("chainId");
-            Object txHexObj = params == null ? null : params.get("txHex");
-            Object secondaryDataHexObj = params == null ? null : params.get("secondaryDataHex");
-            // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null) {
-                throw new NulsException(TxErrorCode.NULL_PARAMETER);
-            }
-            int chainId = (Integer) chainIdObj;
-            String txHex = (String) txHexObj;
-            //将txHex转换为Transaction对象
-            Transaction transaction = TxUtil.getTransaction(txHex);
-            if(transaction.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER){
-                Chain chain = chainManager.getChain(chainId);
-                // todo secondaryDataHexObj 反序列化
-                // result = transactionService.crossTransactionCommit(chain, transaction, secondaryDataHexObj);
-            }else {
-                TxRegister txRegister = transactionManager.getTxRegister(chainManager.getChain(chainId), transaction.getType());
-                HashMap response = (HashMap) TransactionCall.request(txRegister.getCommit(), txRegister.getModuleCode(), params);
-                result = (Boolean) response.get("value");
-            }
-        } catch (NulsException e) {
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-        Map<String, Boolean> resultMap = new HashMap<>();
-        resultMap.put("value", result);
-        return success(result);
-    }*/
 
-    /**
-     * Execute transaction processor single rollback
-     * 单个交易回滚
-     * @param params
-     * @return
-     */
-/*    @CmdAnnotation(cmd = "tx_rollbackSingle", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction rollback")
-    public Response rollbackSingle(Map params) {
-        Map<String, Boolean> map = new HashMap<>();
-        boolean result = false;
-        try {
-            Object chainIdObj = params == null ? null : params.get("chainId");
-            Object txHexObj = params == null ? null : params.get("txHex");
-            Object secondaryDataHexObj = params == null ? null : params.get("secondaryDataHex");
-            // check parameters
-            if (params == null || chainIdObj == null || txHexObj == null) {
-                throw new NulsException(TxErrorCode.NULL_PARAMETER);
-            }
-            int chainId = (Integer) chainIdObj;
-            String txHex = (String) txHexObj;
-            //将txHex转换为Transaction对象
-            Transaction transaction = TxUtil.getTransaction(txHex);
-            TxRegister txRegister = transactionManager.getTxRegister(chainManager.getChain(chainId), transaction.getType());
-            HashMap response = (HashMap)TransactionCall.request(txRegister.getRollback(), txRegister.getModuleCode(), params);
-            result = (Boolean) response.get("value");
-        } catch (NulsException e) {
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-        Map<String, Boolean> resultMap = new HashMap<>();
-        resultMap.put("value", result);
-        return success(result);
-    }*/
+
 
     /**
      * Save the transaction in the new block that was verified to the database
@@ -248,7 +180,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "tx_save", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction rollback")
+    @CmdAnnotation(cmd = TxCmd.TX_SAVE, version = 1.0, description = "transaction save")
     public Response txSave(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
@@ -287,7 +219,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "tx_rollback", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transaction rollback")
+    @CmdAnnotation(cmd = TxCmd.TX_ROLLBACK, version = 1.0, description = "transaction rollback")
     public Response txRollback(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
@@ -320,13 +252,27 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_GET_SYSTEM_TYPES, version = 1.0, description = "Get system transaction types")
+    public Response getSystemTypes(Map params) {
+        ObjectUtils.canNotEmpty(params.get("chainId"));
+        //todo 获取交易
+        return success("success");
+    }
+
+    /**
+     * 获取交易
      * Get the transaction that have been packaged into the block from the database
      *
      * @param params
      * @return
      */
-    public Response getTx(List params) {
-
+    @CmdAnnotation(cmd = TxCmd.TX_GETTX, version = 1.0, description = "Get transaction ")
+    public Response getTx(Map params) {
+        //todo 获取交易
         return success("success");
     }
 
@@ -336,23 +282,11 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    public Response delete(List params) {
-
+   /* @CmdAnnotation(cmd = TxCmd.TX_DELETE, version = 1.0, description = "Delete transaction")
+    public Response delete(Map params) {
         return success("success");
-    }
+    }*/
 
-    /**
-     * Local validation of transactions (including cross-chain transactions),
-     * including calling the validator, verifying the coinData.
-     * Cross-chain verification of cross-chain transactions is not included.
-     *
-     * @param params
-     * @return
-     */
-    public Response verify(List params) {
-
-        return success("success");
-    }
 
     /**
      * Returns the relationship list of the transaction and its corresponding commit processor and rollback processor
@@ -360,8 +294,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
+    @CmdAnnotation(cmd = TxCmd.TX_GETTXPROCESSORS, version = 1.0, description = "")
     public Response getTxProcessors(List params) {
-
+        //todo 获取所有交易与其对应的处理器的关系列表
         return success("success");
     }
 
@@ -371,11 +306,22 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
+    @CmdAnnotation(cmd = TxCmd.TX_GETTXS, version = 1.0, description = "Get transaction record")
     public Response getTxs(List params) {
-
+        //todo
         return success("success");
     }
 
+    /**
+     * The transaction is verified locally before the block is saved,
+     * including calling the validator, verifying the coinData, etc.
+     * If it is a cross-chain transaction and not initiated by the current chain,
+     * the result of the cross-chain verification is checked.
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_VERIFY, version = 1.0, description = "")
     public Response batchVerify(Map params){
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
