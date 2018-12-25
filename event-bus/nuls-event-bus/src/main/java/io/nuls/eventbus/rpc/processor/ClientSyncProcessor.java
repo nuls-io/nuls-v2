@@ -6,7 +6,6 @@ import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.client.runtime.ClientRuntime;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.Log;
@@ -33,24 +32,9 @@ public class ClientSyncProcessor implements Runnable {
                     String moduleAbbr = (String)objects[0];
                     String cmd = (String)objects[1];
                     Log.info("Sync process started for Subscriber :"+moduleAbbr +" for the operation:"+cmd);
-                    ConcurrentMap<String,String> connectionInfoMap = new ConcurrentHashMap<>(2);
-                    //TODO get module connection info from manager module, send request to retrieve
-                    Map<String,Object> params = new HashMap<>(1);
-                    params.put(EbConstants.CMD_PARAM_ROLE,moduleAbbr);
-                    Response response = CmdDispatcher.requestAndResponse(ModuleE.KE.abbr,"roleInfo",params);
-                    if(!response.isSuccess()){
-                        Log.error("Couldn't get connection info from kernel for the role:"+moduleAbbr);
-                        continue;
-                    }
-                    Object data = response.getResponseData();
-                    // TODO parse this response to get connection info
-                    //added for test
-                    connectionInfoMap.put(Constants.KEY_IP,"127.0.0.1");
-                    connectionInfoMap.put(Constants.KEY_PORT,"8871");
                     switch (cmd){
                         case EbConstants.SUBSCRIBE:
-                            ClientRuntime.ROLE_MAP.put(moduleAbbr,connectionInfoMap);
-                            ClientRuntime.getWsClient(ClientRuntime.getRemoteUri(moduleAbbr));
+                            syncRoleConnectionInfo(moduleAbbr);
                             break;
                         case EbConstants.UNSUBSCRIBE:
                             Set<String> roles = EventBus.getInstance().getAllSubscribers();
@@ -66,6 +50,26 @@ public class ClientSyncProcessor implements Runnable {
             }catch (Exception e){
                 Log.error(e);
             }
+        }
+    }
+
+    private void syncRoleConnectionInfo(String subscriber){
+        Map<String,Object> params = new HashMap<>(1);
+        params.put(EbConstants.CMD_PARAM_ROLE,subscriber);
+        try {
+            //TODO update with actual command from kernel for role connection info
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.KE.abbr,"roleInfo",params);
+            if(response.isSuccess()){
+                ConcurrentMap<String,String> connectionInfoMap = new ConcurrentHashMap<>(2);
+                Object data = response.getResponseData();
+                //parse data to get connection information
+                ClientRuntime.ROLE_MAP.put(subscriber,connectionInfoMap);
+                ClientRuntime.getWsClient(ClientRuntime.getRemoteUri(subscriber));
+            }else{
+                Log.error(response.getResponseComment());
+            }
+        }catch (Exception e){
+            Log.error("Couldn't get connection info from kernel for the role:"+subscriber);
         }
     }
 }
