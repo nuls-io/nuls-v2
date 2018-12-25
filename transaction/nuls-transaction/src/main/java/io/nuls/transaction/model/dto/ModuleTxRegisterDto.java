@@ -33,6 +33,8 @@ import java.util.List;
  * @date: 2018/11/30
  */
 public class ModuleTxRegisterDTO {
+
+    private int chainId;
     /**
      * 模块编码
      */
@@ -48,6 +50,14 @@ public class ModuleTxRegisterDTO {
 
     public ModuleTxRegisterDTO() {
 
+    }
+
+    public int getChainId() {
+        return chainId;
+    }
+
+    public void setChainId(int chainId) {
+        this.chainId = chainId;
     }
 
     public String getModuleCode() {
