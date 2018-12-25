@@ -20,6 +20,7 @@
 
 package io.nuls.block.rpc;
 
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
@@ -225,7 +226,7 @@ public class BlockResource extends BaseCmd {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = new Block();
-            block.parse(HexUtil.decode((String) map.get("block")),0);
+            block.parse(new NulsByteBuffer(HexUtil.decode((String) map.get("block"))));
             if (service.saveBlock(chainId, block, 1)) {
                 Map params = new HashMap();
                 params.put("chainId",chainId );
@@ -233,7 +234,6 @@ public class BlockResource extends BaseCmd {
                 CmdDispatcher.requestAndResponse(ModuleE.CS.abbr,"cs_addBlock", params);
                 return success();
             } else {
-                service.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block));
                 return failed(BlockErrorCode.PARAMETER_ERROR);
             }
         } catch (Exception e) {
