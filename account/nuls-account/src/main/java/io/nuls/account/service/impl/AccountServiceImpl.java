@@ -52,8 +52,10 @@ import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.CryptoException;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -661,7 +663,12 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         }
         //根据密码获得ECKey get ECKey from Password
         ECKey ecKey = account.getEcKey(password);
-        return SignatureUtil.signDigest(digest, ecKey).getSignBytes();
+        try {
+            return SignatureUtil.signDigest(digest, ecKey).serialize();
+        } catch (IOException e) {
+            Log.error(e.getMessage());
+            throw new NulsRuntimeException(AccountErrorCode.IO_ERROR);
+        }
     }
 
 }
