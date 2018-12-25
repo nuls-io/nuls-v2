@@ -57,7 +57,7 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (multiSigAccount == null) { //create failed
                 throw new NulsRuntimeException(AccountErrorCode.FAILED);
             }
-            map.put("address","");
+            map.put("address",multiSigAccount.getAddress().getBase58());
             map.put("minSigns",minSigns);
             map.put("pubKeys",pubKeys);
         } catch (NulsRuntimeException e) {
