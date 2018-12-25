@@ -304,7 +304,7 @@ public class ServerRuntime {
                 cmdParameters.add(cmdParameter);
             }
 
-            if(Parameters.class.getName().equals(annotation.annotationType().getName())){
+            if (Parameters.class.getName().equals(annotation.annotationType().getName())) {
                 Parameters parameters = (Parameters) annotation;
                 for (Parameter parameter : parameters.value()) {
                     CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());
@@ -474,5 +474,13 @@ public class ServerRuntime {
      */
     public static String genEventCountKey(WebSocket webSocket, String messageId, String cmd) {
         return webSocket.toString() + "_" + messageId + "_" + cmd;
+    }
+
+    /**
+     * 本模块是否可以启动服务（所依赖模块是否可以连接）
+     * Can this module start the service? (Can the dependent modules be connected?)
+     */
+    public static boolean isReady() {
+        return startService;
     }
 }
