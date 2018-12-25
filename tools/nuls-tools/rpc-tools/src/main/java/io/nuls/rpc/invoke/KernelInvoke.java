@@ -45,12 +45,10 @@ public class KernelInvoke extends BaseInvoke {
     @SuppressWarnings("unchecked")
     @Override
     public void callBack(Response response) {
-        Log.info("有模块信息改变，重新同步：");
-
         Map responseData = (Map) response.getResponseData();
         Map methodMap = (Map) responseData.get("registerAPI");
         Map dependMap = (Map) methodMap.get("Dependencies");
-        StringBuilder logInfo = new StringBuilder("\n");
+        StringBuilder logInfo = new StringBuilder("\n有模块信息改变，重新同步：\n");
         for (Object object : dependMap.entrySet()) {
             Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
             logInfo.append("注入：[key=").append(entry.getKey()).append(",value=").append(entry.getValue()).append("]\n");
