@@ -834,10 +834,11 @@ public class ConsensusServiceImpl implements ConsensusService {
      */
     @Override
     public Result updateAgentStatus(Map<String, Object> params) {
-            if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
+            if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_STATUS) == null) {
                 return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
             }
             int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+            int status = (Integer) params.get(ConsensusConstant.PARAM_STATUS);
             if (chainId <= ConsensusConstant.MIN_VALUE) {
                 return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
             }
@@ -845,7 +846,11 @@ public class ConsensusServiceImpl implements ConsensusService {
             if (chain == null) {
                 return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
             }
-            chain.setCanPacking(true);
+            if(status == 1){
+                chain.setCanPacking(true);
+            }else{
+                chain.setCanPacking(false);
+            }
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
 
     }
