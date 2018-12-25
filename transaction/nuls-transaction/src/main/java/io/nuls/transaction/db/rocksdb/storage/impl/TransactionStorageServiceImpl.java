@@ -57,7 +57,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
     }
 
     @Override
-    public boolean saveTxList(int chainId,List<Transaction> txList) {
+    public boolean saveTxList(int chainId, List<Transaction> txList) {
         if (null == txList || txList.size() == 0) {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
         }

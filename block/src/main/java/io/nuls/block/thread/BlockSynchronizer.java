@@ -32,6 +32,7 @@ import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.block.utils.BlockUtil;
+import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.DoubleUtils;
@@ -45,7 +46,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 /**
- * 区块同步主线程，管理多条链的区块同步
+ * 区块同步主线程,管理多条链的区块同步
  *
  * @author captain
  * @version 1.0
@@ -80,7 +81,7 @@ public class BlockSynchronizer implements Runnable {
                 }
                 RunningStatusEnum runningStatus = ContextManager.getContext(chainId).getStatus();
                 if (!synStatus.equals(BlockSynStatusEnum.RUNNING)) {
-                    synchronize(chainId);
+                    synchronize(chainId, synStatus);
                 } else {
                     Log.info("skip Block Synchronize, SynStatus:{}, RunningStatus:{}", synStatus, runningStatus);
                 }
@@ -91,7 +92,7 @@ public class BlockSynchronizer implements Runnable {
         }
     }
 
-    private void synchronize(int chainId) throws Exception {
+    private void synchronize(int chainId, BlockSynStatusEnum synStatus) throws Exception {
         //1.调用网络模块接口获取当前chainID网络的可用节点
         List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
 
@@ -102,19 +103,28 @@ public class BlockSynchronizer implements Runnable {
             BlockDownloaderParams params = statistics(availableNodes, chainId);
             int size = params.getNodes().size();
             if (size == 0) {
-                statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
+                if (!synStatus.equals(BlockSynStatusEnum.FAIL)) {
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
+                    ConsensusUtil.notice(chainId, 0);
+                }
                 return;
             }
-            //网络上所有节点高度都是0，说明是该链第一次运行
+            //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
-                statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    ConsensusUtil.notice(chainId, 1);
+                }
                 return;
             }
             //4.更新下载状态为“下载中”
             statusEnumMap.put(chainId, BlockSynStatusEnum.RUNNING);
 
             if (!checkLocalBlock(chainId, params)) {
-                statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    ConsensusUtil.notice(chainId, 1);
+                }
                 return;
             }
             params.setLocalLatestHeight(ContextManager.getContext(chainId).getLatestHeight());
@@ -132,11 +142,11 @@ public class BlockSynchronizer implements Runnable {
             BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params);
             Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
 
-            //6.开启区块收集线程BlockCollector，收集BlockDownloader下载的区块
+            //6.开启区块收集线程BlockCollector,收集BlockDownloader下载的区块
             BlockCollector collector = new BlockCollector(chainId, futures, executor, params, queue);
             ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
 
-            //7.开启区块消费线程BlockConsumer，与上面的BlockDownloader共用一个队列blockQueue
+            //7.开启区块消费线程BlockConsumer,与上面的BlockDownloader共用一个队列blockQueue
             BlockConsumer consumer = new BlockConsumer(chainId, queue, params);
             Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
 
@@ -148,6 +158,7 @@ public class BlockSynchronizer implements Runnable {
                 Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
                 if (checkIsNewest(chainId, params)) {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    ConsensusUtil.notice(chainId, 1);
                 } else {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
                 }
@@ -158,7 +169,7 @@ public class BlockSynchronizer implements Runnable {
     }
 
     /**
-     * 检查本地区块是否同步到最新高度，如果不是最新高度，变更同步状态为BlockSynStatusEnum.WAITING，等待下次同步
+     * 检查本地区块是否同步到最新高度,如果不是最新高度,变更同步状态为BlockSynStatusEnum.WAITING,等待下次同步
      *
      * @param chainId
      * @param params
@@ -196,7 +207,7 @@ public class BlockSynchronizer implements Runnable {
     }
 
     /**
-     * 统计网络中可用节点的一致区块高度、区块hash，构造下载参数
+     * 统计网络中可用节点的一致区块高度、区块hash,构造下载参数
      *
      * @param
      * @return
@@ -217,24 +228,24 @@ public class BlockSynchronizer implements Runnable {
         for (Node node : availableNodes) {
             String tempKey = node.getHash().getDigestHex() + node.getHeight();
             if (countMap.containsKey(tempKey)) {
-                //tempKey已存在，统计次数加1
+                //tempKey已存在,统计次数加1
                 countMap.put(tempKey, countMap.get(tempKey) + 1);
             } else {
-                //tempKey不存在，初始化统计次数
+                //tempKey不存在,初始化统计次数
                 countMap.put(tempKey, 1);
             }
 
             if (nodeMap.containsKey(tempKey)) {
-                //tempKey已存在，添加到持有节点列表中
+                //tempKey已存在,添加到持有节点列表中
                 List<Node> nodes = nodeMap.get(tempKey);
                 nodes.add(node);
             } else {
-                //tempKey不存在，新增持有节点列表
+                //tempKey不存在,新增持有节点列表
                 nodeMap.put(tempKey, Lists.newArrayList(node));
             }
         }
 
-        //最终统计出出现频率最大的key，就获取到当前可信的最新高度与最新hash，以及可信的节点列表
+        //最终统计出出现频率最大的key,就获取到当前可信的最新高度与最新hash,以及可信的节点列表
         for (Map.Entry<String, Integer> entry : countMap.entrySet()) {
             Integer value = entry.getValue();
             if (value > count) {
@@ -254,7 +265,7 @@ public class BlockSynchronizer implements Runnable {
     }
 
     /**
-     * 区块同步前，与网络区块作对比，检查本地区块是否需要回滚
+     * 区块同步前,与网络区块作对比,检查本地区块是否需要回滚
      *
      * @return
      * @param chainId
@@ -268,11 +279,11 @@ public class BlockSynchronizer implements Runnable {
         long commonHeight = Math.min(localHeight, netHeight);
         if (checkHashEquality(localBlock, chainId, params)) {
             if (commonHeight < netHeight) {
-                //commonHeight区块的hash一致，正常，比远程节点落后，下载区块
+                //commonHeight区块的hash一致,正常,比远程节点落后,下载区块
                 return true;
             }
         } else {
-            //需要回滚的场景，要满足可用节点数(10个)>配置，一致可用节点数(6个)占比超80%两个条件
+            //需要回滚的场景,要满足可用节点数(10个)>配置,一致可用节点数(6个)占比超80%两个条件
             if (params.getNodes().size() >= Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.MIN_NODE_AMOUNT))
                     && DoubleUtils.div(params.getNodes().size(), params.getAvailableNodesCount(), 2) >= Double.parseDouble(ConfigManager.getValue(chainId, ConfigConstant.CONSISTENCY_NODE_PERCENT)) * 100
             ) {
@@ -283,7 +294,7 @@ public class BlockSynchronizer implements Runnable {
     }
 
     private boolean checkRollback(Block localBestBlock, int rollbackCount, int chainId, BlockDownloaderParams params) {
-        //每次最多回滚10个区块，等待下次同步，这样可以避免被恶意节点攻击，大量回滚正常区块。
+        //每次最多回滚10个区块,等待下次同步,这样可以避免被恶意节点攻击,大量回滚正常区块.
         if (rollbackCount >= Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.MAX_ROLLBACK))) {
             return false;
         }
@@ -311,7 +322,7 @@ public class BlockSynchronizer implements Runnable {
         //得到共同高度
         long commonHeight = Math.min(localHeight, netHeight);
         NulsDigestData remoteHash = params.getNetLatestHash();
-        //如果双方共同高度<网络高度，要进行hash判断，需要从网络上下载区块，因为params里只有最新的区块hash，没有旧的hash
+        //如果双方共同高度<网络高度,要进行hash判断,需要从网络上下载区块,因为params里只有最新的区块hash,没有旧的hash
         if (commonHeight < netHeight) {
             for (Node node : params.getNodes()) {
                 Block remoteBlock = BlockDownloadUtils.getBlockByHash(chainId, localHash, node);

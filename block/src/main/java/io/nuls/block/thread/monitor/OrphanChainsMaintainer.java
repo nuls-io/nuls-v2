@@ -39,7 +39,7 @@ import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_CHAINS;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
 
 /**
- * 孤儿链的形成原因分析：因为网络问题，在没有收到Block(100)的情况下，已经收到了Block(101)，此时Block(101)不能连接到主链上，形成孤儿链
+ * 孤儿链的形成原因分析：因为网络问题,在没有收到Block(100)的情况下,已经收到了Block(101),此时Block(101)不能连接到主链上,形成孤儿链
  * 孤儿链定时维护处理器
  * 孤儿链处理大致流程：
  *      1.清理无效数据
@@ -67,7 +67,7 @@ public class OrphanChainsMaintainer implements Runnable {
 
         for (Integer chainId : ContextManager.chainIds) {
             try {
-                //判断该链的运行状态，只有正常运行时才会有孤儿链的处理
+                //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
                 RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
                 if (!status.equals(RUNNING)) {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
@@ -78,7 +78,7 @@ public class OrphanChainsMaintainer implements Runnable {
                     return;
                 }
                 List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
-                //维护现有孤儿链，尝试在链首增加区块
+                //维护现有孤儿链,尝试在链首增加区块
                 ContextManager.getContext(chainId).setStatus(MAINTAIN_CHAINS);
                 for (Chain orphanChain : orphanChains) {
                     maintainOrphanChain(chainId, orphanChain, availableNodes);
@@ -92,7 +92,7 @@ public class OrphanChainsMaintainer implements Runnable {
     }
 
     /**
-     * 维护孤儿链，向其他节点请求孤儿链起始区块的上一个区块，仅限于没有父链的孤儿链
+     * 维护孤儿链,向其他节点请求孤儿链起始区块的上一个区块,仅限于没有父链的孤儿链
      *
      * @param chainId
      * @param orphanChain

@@ -46,7 +46,7 @@ public class GetBlocksHandlerTest {
         message.setStartHeight(1000);
         message.setEndHeight(1010);
         message.setCommand(GET_BLOCKS_BY_HEIGHT_MESSAGE);
-        params.put("messageBody", HexUtil.byteToHex(message.serialize()));
+        params.put("messageBody", HexUtil.encode(message.serialize()));
         params.put("command", GET_BLOCKS_BY_HEIGHT_MESSAGE);
         Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_BLOCKS_BY_HEIGHT_MESSAGE, params);
         System.out.println(response);

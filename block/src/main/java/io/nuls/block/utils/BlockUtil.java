@@ -24,14 +24,15 @@ import io.nuls.base.data.*;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.constant.ConfigConstant;
-import io.nuls.block.context.Context;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
+import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
@@ -148,10 +149,10 @@ public class BlockUtil {
             }
 
             if (mainCode.equals(BlockErrorCode.IRRELEVANT_BLOCK)) {
-                //2.与主链没有关联，进入分叉链判断流程
+                //2.与主链没有关联,进入分叉链判断流程
                 ErrorCode forkCode = forkChainProcess(chainId, block).getErrorCode();
                 if (forkCode.equals(BlockErrorCode.IRRELEVANT_BLOCK)) {
-                    //3.与分叉链没有关联，进入孤儿链判断流程
+                    //3.与分叉链没有关联,进入孤儿链判断流程
                     orphanChainProcess(chainId, block);
                 }
             }
@@ -169,39 +170,41 @@ public class BlockUtil {
      * @return
      */
     private static Result mainChainProcess(int chainId, Block block) {
-        long blockHeight = block.getHeader().getHeight();
-        NulsDigestData blockHash = block.getHeader().getHash();
-        NulsDigestData blockPreviousHash = block.getHeader().getPreHash();
+        BlockHeader header = block.getHeader();
+        long blockHeight = header.getHeight();
+        NulsDigestData blockHash = header.getHash();
+        NulsDigestData blockPreviousHash = header.getPreHash();
 
         Chain masterChain = ChainManager.getMasterChain(chainId);
         long masterChainEndHeight = masterChain.getEndHeight();
         NulsDigestData masterChainEndHash = masterChain.getEndHash();
 
-        //1.收到的区块与主链最新高度差大于1000(可配置)，丢弃
+        //1.收到的区块与主链最新高度差大于1000(可配置),丢弃
         int value = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.HEIGHT_RANGE));
         if (Math.abs(blockHeight - masterChainEndHeight) > value) {
             Log.debug("chainId:{}, received out of range blocks, height:{}, hash:{}", chainId, blockHeight, blockHash);
             return Result.getFailed(BlockErrorCode.OUT_OF_RANGE);
         }
 
-        //2.收到的区块可以连到主链，验证通过
+        //2.收到的区块可以连到主链,验证通过
         if (blockHeight == masterChainEndHeight + 1 && blockPreviousHash.equals(masterChainEndHash)) {
             Log.debug("chainId:{}, received continuous blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
             return Result.getSuccess(BlockErrorCode.SUCCESS);
         }
 
         if (blockHeight <= masterChainEndHeight) {
-            //3.收到的区块是主链上的重复区块，丢弃
+            //3.收到的区块是主链上的重复区块,丢弃
             BlockHeaderPo blockHeader = blockService.getBlockHeader(chainId, blockHeight);
             if (blockHash.equals(blockHeader.getHash())) {
                 Log.debug("chainId:{}, received duplicate blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                 return Result.getFailed(BlockErrorCode.DUPLICATE_MAIN_BLOCK);
             }
-            //4.收到的区块是主链上的分叉区块，保存区块，并新增一条分叉链链接到主链
+            //4.收到的区块是主链上的分叉区块,保存区块,并新增一条分叉链链接到主链
             if (blockPreviousHash.equals(blockHeader.getPreHash())) {
                 chainStorageService.save(chainId, block);
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 ChainManager.addForkChain(chainId, forkChain);
+                ConsensusUtil.fork(chainId, ContextManager.getContext(chainId).getLatestBlock().getHeader(), header);
                 Log.debug("chainId:{}, received fork blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
             }
@@ -228,14 +231,14 @@ public class BlockUtil {
                 long forkChainEndHeight = forkChain.getEndHeight();
                 NulsDigestData forkChainEndHash = forkChain.getEndHash();
                 NulsDigestData forkChainPreviousHash = forkChain.getPreviousHash();
-                //1.直连，链尾
+                //1.直连,链尾
                 if (blockHeight == forkChainEndHeight + 1 && blockPreviousHash.equals(forkChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     forkChain.addLast(block);
                     Log.debug("chainId:{}, received continuous blocks of forkChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
-                //2.重复，丢弃
+                //2.重复,丢弃
                 if (forkChainStartHeight <= blockHeight && blockHeight <= forkChainEndHeight && forkChain.getHashList().contains(blockHash)) {
                     Log.debug("chainId:{}, received duplicate blocks of forkChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
@@ -252,7 +255,7 @@ public class BlockUtil {
         } catch (Exception e) {
             Log.error(e);
         }
-        //4.与分叉链没有关联，进入孤儿链判断流程
+        //4.与分叉链没有关联,进入孤儿链判断流程
         return Result.getFailed(BlockErrorCode.IRRELEVANT_BLOCK);
     }
 
@@ -274,7 +277,7 @@ public class BlockUtil {
                 long orphanChainEndHeight = orphanChain.getEndHeight();
                 NulsDigestData orphanChainEndHash = orphanChain.getEndHash();
                 NulsDigestData orphanChainPreviousHash = orphanChain.getPreviousHash();
-                //1.直连，分链头、链尾两种情况
+                //1.直连,分链头、链尾两种情况
                 if (blockHeight == orphanChainEndHeight + 1 && blockPreviousHash.equals(orphanChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     orphanChain.addLast(block);
@@ -287,7 +290,7 @@ public class BlockUtil {
                     Log.debug("chainId:{}, received continuous blocks of orphanChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
-                //2.重复，丢弃
+                //2.重复,丢弃
                 if (orphanChainStartHeight <= blockHeight && blockHeight <= orphanChainEndHeight && orphanChain.getHashList().contains(blockHash)) {
                     Log.debug("chainId:{}, received duplicate blocks of orphanChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
@@ -301,7 +304,7 @@ public class BlockUtil {
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
             }
-            //4.与主链、分叉链、孤儿链都无关，形成一个新的孤儿链
+            //4.与主链、分叉链、孤儿链都无关,形成一个新的孤儿链
             chainStorageService.save(chainId, block);
             Chain newOrphanChain = ChainGenerator.generate(chainId, block, null, ChainTypeEnum.ORPHAN);
             ChainManager.addOrphanChain(chainId, newOrphanChain);
@@ -313,8 +316,8 @@ public class BlockUtil {
     }
 
     public static SmallBlock getSmallBlock(int chainId, Block block) {
-        Context context = ContextManager.getContext(chainId);
-        List<Integer> systemTransactionType = context.getSystemTransactionType();
+        ChainContext chainContext = ContextManager.getContext(chainId);
+        List<Integer> systemTransactionType = chainContext.getSystemTransactionType();
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
         smallBlock.setTxHashList(block.getTxHashList());
@@ -372,6 +375,7 @@ public class BlockUtil {
         po.setBlockSignature(blockHeader.getBlockSignature());
         po.setExtend(blockHeader.getExtend());
         po.setTxHashList(block.getTxHashList());
+        po.setComplete(false);
         return po;
     }
 

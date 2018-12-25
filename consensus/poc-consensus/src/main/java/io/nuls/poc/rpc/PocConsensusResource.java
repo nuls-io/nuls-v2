@@ -435,6 +435,7 @@ public class PocConsensusResource extends BaseCmd{
      * */
     @CmdAnnotation(cmd = "cs_updateAgentStatus", version = 1.0, description = "modifying the Packing State of Nodes 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "status", parameterType = "int")
     public Response updateAgentStatus(Map<String,Object> params){
         Result result = service.updateAgentStatus(params);
         if(result.isFailed()){
@@ -490,6 +491,21 @@ public class PocConsensusResource extends BaseCmd{
     @Parameter(parameterName = "blockHeader", parameterType = "String")
     public Response addBlock(Map<String,Object> params){
         Result result = service.addBlock(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
+     * 区块分叉记录
+     * */
+    @CmdAnnotation(cmd = "cs_addEvidenceRecord", version = 1.0, description = "add evidence record 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHeader", parameterType = "String")
+    @Parameter(parameterName = "evidenceHeader", parameterType = "String")
+    public Response addEvidenceRecord(Map<String,Object> params){
+        Result result = service.addEvidenceRecord(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }

@@ -18,7 +18,7 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.config;
+package io.nuls.block.model;
 
 import io.nuls.base.data.*;
 import io.nuls.base.signture.BlockSignature;
@@ -132,7 +132,7 @@ public final class GenesisBlock extends Block {
         }
 
         Transaction tx = new Transaction();
-        tx.setType(Constant.TX_TYPE_COINBASE);
+        tx.setType(1);
         tx.setTime(this.blockTime);
         tx.setCoinData(coinData.serialize());
         String remark = (String) jsonMap.get(CONFIG_FILED_REMARK);

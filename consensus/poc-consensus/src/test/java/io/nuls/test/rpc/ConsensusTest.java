@@ -57,6 +57,7 @@ public class ConsensusTest {
     public void updateAgentStatus()throws Exception{
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
+        params.put("status", 1);
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params);
         System.out.println(cmdResp.getResponseData());
     }

@@ -36,12 +36,6 @@ import java.util.List;
 public interface ChainStorageService {
 
     /**
-     * 链存储初始化
-     * @param chainId
-     */
-    void init(int chainId);
-
-    /**
      * 存储一条链
      * @param chainId
      * @param blocks

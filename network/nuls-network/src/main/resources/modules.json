@@ -27,7 +27,7 @@
     "name": "network.self.chainId",
     "remark": "自有主网链id",
     "readOnly": "true",
-    "value": "9861"
+    "value": "1"
   },
   {
     "name": "network.self.magic",
@@ -51,7 +51,7 @@
     "name": "network.self.seed.ip",
     "remark": "种子节点",
     "readOnly": "false",
-    "value": "192.168.3.8:8008"
+    "value": "192.168.1.175:8008"
   },
   {
     "name": "network.cross.server.port",

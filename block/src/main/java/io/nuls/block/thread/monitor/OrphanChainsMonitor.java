@@ -37,7 +37,7 @@ import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_CHAINS;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
 
 /**
- * 孤儿链的形成原因分析：因为网络问题，在没有收到Block(100)的情况下，已经收到了Block(101)，此时Block(101)不能连接到主链上，形成孤儿链
+ * 孤儿链的形成原因分析：因为网络问题,在没有收到Block(100)的情况下,已经收到了Block(101),此时Block(101)不能连接到主链上,形成孤儿链
  * 孤儿链定时处理器
  * 孤儿链处理大致流程：
  * 1.清理无效数据
@@ -65,7 +65,7 @@ public class OrphanChainsMonitor implements Runnable {
 
         for (Integer chainId : ContextManager.chainIds) {
             try {
-                //判断该链的运行状态，只有正常运行时才会有孤儿链的处理
+                //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
                 RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
                 if (!status.equals(RUNNING)) {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
@@ -82,7 +82,7 @@ public class OrphanChainsMonitor implements Runnable {
                 ContextManager.getContext(chainId).setStatus(MAINTAIN_CHAINS);
                 for (Chain orphanChain : orphanChains) {
                     if (Math.abs(orphanChain.getStartHeight() - latestHeight) > heightRange) {
-                        //清理orphanChain，并递归清理orphanChain的所有子链
+                        //清理orphanChain,并递归清理orphanChain的所有子链
                         ChainManager.deleteOrphanChain(chainId, orphanChain, true);
                     }
                 }
@@ -109,42 +109,42 @@ public class OrphanChainsMonitor implements Runnable {
     }
 
     private void copy(Integer chainId, SortedSet<Chain> maintainedOrphanChains, Chain orphanChain) {
-        //如果标记为与主链相连，orphanChain不会复制到新的孤儿链集合，也不会进入分叉链集合，但是所有orphanChain的直接子链标记为ChainTypeEnum.MASTER_FORK
+        //如果标记为与主链相连,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,但是所有orphanChain的直接子链标记为ChainTypeEnum.MASTER_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.MASTER_APPEND)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.MASTER_FORK));
             return;
         }
-        //如果标记为从主链分叉，orphanChain不会复制到新的孤儿链集合，但是会进入分叉链集合，所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        //如果标记为从主链分叉,orphanChain不会复制到新的孤儿链集合,但是会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.MASTER_FORK)) {
             ChainManager.addForkChain(chainId, orphanChain);
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
 
-        //如果标记为与分叉链相连，orphanChain不会复制到新的孤儿链集合，也不会进入分叉链集合，但是所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        //如果标记为与分叉链相连,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,但是所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.FORK_APPEND)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
-        //如果标记为从分叉链分叉，orphanChain不会复制到新的孤儿链集合，但是会进入分叉链集合，所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        //如果标记为从分叉链分叉,orphanChain不会复制到新的孤儿链集合,但是会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.FORK_FORK)) {
             ChainManager.addForkChain(chainId, orphanChain);
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
 
-        //如果标记为与孤儿链相连，不会复制到新的孤儿链集合，所有orphanChain的直接子链会复制到新的孤儿链集合，类型不变
+        //如果标记为与孤儿链相连,不会复制到新的孤儿链集合,所有orphanChain的直接子链会复制到新的孤儿链集合,类型不变
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_APPEND)) {
             return;
         }
 
-        //如果标记为与孤儿链分叉，会复制到新的孤儿链集合，所有orphanChain的直接子链会复制到新的孤儿链集合，类型不变
+        //如果标记为与孤儿链分叉,会复制到新的孤儿链集合,所有orphanChain的直接子链会复制到新的孤儿链集合,类型不变
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_FORK)) {
             maintainedOrphanChains.add(orphanChain);
             return;
         }
 
-        //如果标记为孤儿链(未变化)，或者从孤儿链分叉，复制到新的孤儿链集合
+        //如果标记为孤儿链(未变化),或者从孤儿链分叉,复制到新的孤儿链集合
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN)) {
             maintainedOrphanChains.add(orphanChain);
         }
@@ -203,8 +203,8 @@ public class OrphanChainsMonitor implements Runnable {
     }
 
     /**
-     * 尝试把subChain链接到mainChain的末尾，形成mainChain-subChain的结构
-     * 两个链相连成功，需要从孤儿链集合中删除subChain
+     * 尝试把subChain链接到mainChain的末尾,形成mainChain-subChain的结构
+     * 两个链相连成功,需要从孤儿链集合中删除subChain
      *
      * @param mainChain
      * @param subChain

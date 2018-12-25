@@ -25,6 +25,7 @@ import java.util.List;
 public class BlockHeaderPo extends BaseNulsData {
 
     private transient NulsDigestData hash;
+    private boolean complete;
     private NulsDigestData preHash;
     private NulsDigestData merkleHash;
     private long time;
@@ -39,6 +40,7 @@ public class BlockHeaderPo extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
+        size += SerializeUtils.sizeOfBoolean();
         size += SerializeUtils.sizeOfNulsData(preHash);
         size += SerializeUtils.sizeOfNulsData(merkleHash);
         size += SerializeUtils.sizeOfUint48();
@@ -54,6 +56,7 @@ public class BlockHeaderPo extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeBoolean(complete);
         stream.writeNulsData(preHash);
         stream.writeNulsData(merkleHash);
         stream.writeUint48(time);
@@ -68,6 +71,7 @@ public class BlockHeaderPo extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.complete = byteBuffer.readBoolean();
         this.preHash = byteBuffer.readHash();
         this.merkleHash = byteBuffer.readHash();
         this.time = byteBuffer.readUint48();

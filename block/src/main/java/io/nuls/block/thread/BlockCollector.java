@@ -40,7 +40,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * 区块收集器，收集下载器下载到的区块，排序后放入共享队列
+ * 区块收集器,收集下载器下载到的区块,排序后放入共享队列
  *
  * @author captain
  * @version 1.0
@@ -98,7 +98,7 @@ public class BlockCollector implements Runnable {
 
 
     /**
-     * 下载失败重试，直到成功为止
+     * 下载失败重试,直到成功为止
      *
      * @param result
      * @return

@@ -26,6 +26,7 @@ import io.nuls.base.data.Block;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.service.BlockService;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import lombok.Data;
 
 import java.util.Random;
@@ -55,7 +56,7 @@ public class Miner extends Thread {
     @Override
     public void run() {
         int i = 0;
-        BlockService blockService = ContextManager.getServiceBean(BlockService.class);
+        BlockService blockService = SpringLiteContext.getBean(BlockService.class);
         while (i < TOTAL) {
             try {
                 if (!ContextManager.getContext(CHAIN_ID).getStatus().equals(RunningStatusEnum.RUNNING)) {

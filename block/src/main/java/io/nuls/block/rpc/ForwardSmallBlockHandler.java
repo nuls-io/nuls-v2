@@ -43,7 +43,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link HashMessage}，用于区块的广播与转发
+ * 处理收到的{@link HashMessage},用于区块的广播与转发
  *
  * @author captain
  * @version 1.0
@@ -73,12 +73,12 @@ public class ForwardSmallBlockHandler extends BaseCmd {
 
         NulsDigestData blockHash = message.getRequestHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        //1.已收到完整区块，丢弃
+        //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
             return success();
         }
 
-        //2.已收到部分区块，还缺失交易信息，发送HashListMessage到源节点
+        //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
             HashListMessage request = new HashListMessage();

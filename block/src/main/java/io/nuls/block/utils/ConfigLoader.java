@@ -20,37 +20,33 @@
  *
  */
 
-package io.nuls.block.constant;
+package io.nuls.block.utils;
+
+import io.nuls.block.manager.ConfigManager;
+import io.nuls.tools.io.IoUtils;
+import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.parse.config.ConfigItem;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static io.nuls.block.constant.Constant.CHAIN_ID;
 
 /**
- * 标记区块同步过程中的状态
- *
+ * 配置加载器
  * @author captain
+ * @date 18-11-8 下午1:37
  * @version 1.0
- * @date 18-11-28 下午12:01
  */
-public enum BlockDownloadEnum {
+public class ConfigLoader {
 
-    /**
-     * 没有收到区块
-     * Running exception
-     */
-    DOWNLOADING,
-
-    /**
-     * 收到部分区块,主要是缺失一部分交易
-     * Running exception
-     */
-    SUCCESS,
-
-    /**
-     * 收到完整区块
-     * Running exception
-     */
-    FAIL;
-
-    @Override
-    public String toString() {
-        return name();
+    public static void load(String fileName) throws Exception {
+        String configJson = IoUtils.read(fileName);
+        List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
+        Map<String, ConfigItem> map = new HashMap<>(configItems.size());
+        configItems.forEach(e -> map.put(e.getName(), e));
+        ConfigManager.add(CHAIN_ID, map);
     }
+
 }
