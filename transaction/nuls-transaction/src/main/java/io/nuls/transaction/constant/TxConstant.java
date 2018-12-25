@@ -97,4 +97,7 @@ public interface TxConstant {
      * 打包交易，预留模块统一验证的时间 毫秒
      */
     long VERIFY_OFFSET = 500L;
+
+    //网络消息对应的RPC命令
+    String NEW_HASH_CMD = "newHash";
 }

@@ -20,7 +20,7 @@ import java.util.Map;
  * 2018/12/1
  * */
 public class ConsensusTest {
-    private  int chainId = 9861;
+    private  int chainId = 1;
     private  String success = "1";
 
     @BeforeClass
@@ -57,6 +57,7 @@ public class ConsensusTest {
     public void updateAgentStatus()throws Exception{
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
+        params.put("status", 1);
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params);
         System.out.println(cmdResp.getResponseData());
     }
