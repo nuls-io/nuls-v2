@@ -12,6 +12,9 @@ import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.utils.enumeration.PunishType;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.data.StringUtils;
@@ -21,6 +24,7 @@ import io.nuls.tools.thread.TimeService;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -355,11 +359,19 @@ public class RoundManager {
         round.setIndex(index);
         round.setStartTime(startTime);
         setMemberList(chain,round, startBlockHeader);
-        //todo 调用账户管理模块获取本地非加密账户地址列表
         List<byte[]> packingAddressList = new ArrayList<>();
-        /*Address packingAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
-        packingAddressList.add(packingAddress.getAddressBytes());*/
-        packingAddressList.add(AddressTool.getAddress("WsqeNFVMM2bWcGMfDi2VaaWe9RosH0100"));
+        try {
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr,"ac_getUnencryptedAddressList", null);
+            List<String> accountAddressList =  (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList");
+            if(accountAddressList != null && accountAddressList.size()>0){
+                for (String address:accountAddressList) {
+                    packingAddressList.add(AddressTool.getAddress(address));
+                }
+            }
+        }catch (Exception e){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            return null;
+        }
         round.calcLocalPacker(packingAddressList);
         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).debug("\ncalculation||index:{},startTime:{},startHeight:{},hash:{}\n" + round.toString() + "\n\n", index, startTime, startBlockHeader.getHeight(), startBlockHeader.getHash());
         return round;
