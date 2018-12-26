@@ -20,38 +20,26 @@
  *
  */
 
-package io.nuls.block.utils;
+package io.nuls.block.model;
 
-import io.nuls.block.manager.ConfigManager;
-import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.parse.config.ConfigItem;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsException;
+import org.junit.Assert;
+import org.junit.Test;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
 
-import static io.nuls.block.constant.Constant.CHAIN_ID;
-import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
+import static org.junit.Assert.*;
 
-/**
- * 配置加载器
- * @author captain
- * @date 18-11-8 下午1:37
- * @version 1.0
- */
-public class ConfigLoader {
+public class ChainParametersTest {
 
-    public static void load() throws Exception {
-
+    @Test
+    public void name() throws IOException, NulsException {
+        ChainParameters p1 = new ChainParameters("ss",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+        String s = HexUtil.encode(p1.serialize());
+        ChainParameters p2 = new ChainParameters();
+        p2.parse(new NulsByteBuffer(HexUtil.decode(s)));
+        Assert.assertArrayEquals(p1.serialize(), p2.serialize());
     }
-
-    private static void loadDefault() throws Exception {
-        String configJson = IoUtils.read(MODULES_CONFIG_FILE);
-        List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
-        Map<String, ConfigItem> map = new HashMap<>(configItems.size());
-        configItems.forEach(e -> map.put(e.getName(), e));
-        ConfigManager.add(CHAIN_ID, map);
-    }
-
 }

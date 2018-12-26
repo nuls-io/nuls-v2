@@ -26,7 +26,6 @@ import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.monitor.ChainsDbSizeMonitor;
@@ -34,6 +33,7 @@ import io.nuls.block.thread.monitor.ForkChainsMonitor;
 import io.nuls.block.thread.monitor.OrphanChainsMaintainer;
 import io.nuls.block.thread.monitor.OrphanChainsMonitor;
 import io.nuls.block.utils.ConfigLoader;
+import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
@@ -48,7 +48,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static io.nuls.block.constant.Constant.CHAIN_ID;
-import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
 
 /**
  * 区块管理模块启动类
@@ -60,6 +59,12 @@ import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
  */
 public class BlockBootstrap {
 
+    /**
+     * 初始化流程
+     *  读取数据库,获得链ID列表,如果数据库没有配置项,加载默认配置文件
+     *
+     * @param args
+     */
     public static void main(String[] args) {
         Thread.currentThread().setName("block-main");
         init();
@@ -103,7 +108,7 @@ public class BlockBootstrap {
             //rpc服务初始化
             rpcInit();
             //加载配置
-            ConfigLoader.load(MODULES_CONFIG_FILE);
+            ConfigLoader.load();
             //加载Context
             ContextManager.init(CHAIN_ID);
             //服务初始化
@@ -127,8 +132,9 @@ public class BlockBootstrap {
             while (!ServerRuntime.isReady()) {
                 Thread.sleep(100L);
             }
+            NetworkUtil.register();
             Log.error("service start");
-            onlyRunWhenTest();
+//            onlyRunWhenTest();
             //开启后台工作线程
             startDaemonThreads();
         } catch (Exception e) {
@@ -140,8 +146,8 @@ public class BlockBootstrap {
      * todo 正式版本删除
      */
     private static void onlyRunWhenTest() {
-        ChainContext chainContext = ContextManager.getContext(CHAIN_ID);
-        chainContext.setStatus(RunningStatusEnum.RUNNING);
+//        ChainContext chainContext = ContextManager.getContext(CHAIN_ID);
+//        chainContext.setStatus(RunningStatusEnum.RUNNING);
 //        Block latestBlock = chainContext.getLatestBlock();
 //        new Miner("1", latestBlock).start();
 //        new Miner("2", latestBlock).start();

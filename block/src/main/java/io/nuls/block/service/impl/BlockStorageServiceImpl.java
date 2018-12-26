@@ -26,6 +26,7 @@ import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockStorageService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 
@@ -125,17 +126,15 @@ public class BlockStorageServiceImpl implements BlockStorageService {
 
     @Override
     public long queryLatestHeight(int chainId) {
-        String key = LATEST_BLOCK_HEIGHT + chainId;
-        byte[] bytes = RocksDBService.get(CHAIN_LATEST_HEIGHT, key.getBytes());
+        byte[] bytes = RocksDBService.get(CHAIN_LATEST_HEIGHT, ByteUtils.intToBytes(chainId));
         return SerializeUtils.readUint64(bytes, 0);
     }
 
     @Override
     public boolean setLatestHeight(int chainId, long height) {
-        String key = LATEST_BLOCK_HEIGHT + chainId;
         try {
             byte[] bytes = SerializeUtils.uint64ToByteArray(height);
-            return RocksDBService.put(CHAIN_LATEST_HEIGHT, key.getBytes(), bytes);
+            return RocksDBService.put(CHAIN_LATEST_HEIGHT, ByteUtils.intToBytes(chainId), bytes);
         } catch (Exception e) {
             Log.error(e);
             return false;

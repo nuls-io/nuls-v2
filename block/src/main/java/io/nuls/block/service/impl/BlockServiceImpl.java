@@ -404,6 +404,9 @@ public class BlockServiceImpl implements BlockService {
             if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
                 RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
             }
+            if (!RocksDBService.existTable(CHAIN_CONTEXT)) {
+                RocksDBService.createTable(CHAIN_CONTEXT);
+            }
             if (!RocksDBService.existTable(BLOCK_HEADER + chainId)) {
                 RocksDBService.createTable(BLOCK_HEADER + chainId);
             }
