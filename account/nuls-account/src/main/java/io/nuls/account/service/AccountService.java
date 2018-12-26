@@ -28,6 +28,8 @@ import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.AccountKeyStore;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.base.data.NulsSignData;
+import io.nuls.base.signture.BlockSignature;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.tools.exception.NulsException;
 
 import java.math.BigInteger;
@@ -225,6 +227,18 @@ public interface AccountService {
      * @return the signData byte[].
      * @throws NulsException nulsException
      */
-    byte[] signDigest(byte[] digest, int chainId, String address, String password) throws NulsException;
+    P2PHKSignature signDigest(byte[] digest, int chainId, String address, String password) throws NulsException;
 
+    /**
+     * 区块数据摘要签名
+     * block sign digest data
+     *
+     * @param digest   data digest.
+     * @param chainId
+     * @param address  address of account.
+     * @param password password of account.
+     * @return the signData byte[].
+     * @throws NulsException nulsException
+     */
+    BlockSignature signBlockDigest(byte[] digest, int chainId, String address, String password) throws NulsException;
 }

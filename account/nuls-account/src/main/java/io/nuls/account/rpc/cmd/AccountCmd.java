@@ -18,6 +18,8 @@ import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.log.LogUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Page;
+import io.nuls.base.signture.BlockSignature;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -830,11 +832,15 @@ public class AccountCmd extends BaseCmd {
             //数据解码为字节数组
             byte[] data = HexUtil.decode(dataHex);
             //sign digest data
-            byte[] signBytes = accountService.signDigest(data, chainId, address, password);
-            if (null == signBytes || signBytes.length == 0) {
+            P2PHKSignature signature = accountService.signDigest(data, chainId, address, password);
+            if (null == signature || signature.getSignData() == null) {
                 throw new NulsRuntimeException(AccountErrorCode.SIGNATURE_ERROR);
             }
-            map.put(RpcConstant.SIGNATURE_HEX, HexUtil.encode(signBytes));
+            try {
+                map.put(RpcConstant.SIGNATURE_HEX, HexUtil.encode(signature.serialize()));
+            } catch (IOException e) {
+                throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
+            }
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         } catch (NulsException e) {
@@ -844,6 +850,56 @@ public class AccountCmd extends BaseCmd {
         return success(map);
     }
 
+    /**
+     * 区块数据摘要签名
+     * block data digest signature
+     *
+     * @param params [chainId,address,password,digestHex]
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_signBlockDigest", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "block data digest signature")
+    public Object signBlockDigest(Map params) {
+        LogUtil.debug("ac_signDigest start");
+        Map<String, String> map = new HashMap<>(1);
+        try {
+            // check parameters
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+            Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
+            if (params == null || chainIdObj == null || addressObj == null || dataHexObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+
+            // parse params
+            //链ID
+            int chainId = (int) chainIdObj;
+            //账户地址
+            String address = (String) addressObj;
+            //账户密码
+            String password = (String) passwordObj;
+            //待签名的数据
+            String dataHex = (String) dataHexObj;
+            //数据解码为字节数组
+            byte[] data = HexUtil.decode(dataHex);
+            //sign digest data
+            BlockSignature signature = accountService.signBlockDigest(data, chainId, address, password);
+            if (null == signature || signature.getSignData() == null) {
+                throw new NulsRuntimeException(AccountErrorCode.SIGNATURE_ERROR);
+            }
+            try {
+                map.put(RpcConstant.SIGNATURE_HEX, HexUtil.encode(signature.serialize()));
+            } catch (IOException e) {
+                throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
+            }
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        }
+        LogUtil.debug("ac_signDigest end");
+        return success(map);
+    }
 
     /**
      * 创建多账户转账交易

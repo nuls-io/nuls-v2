@@ -47,54 +47,54 @@ public interface TxCmd {
     String TX_RUNCHAIN = "tx_runChain";
     String TX_STOPCHAIN = "tx_stopChain";
 
-    String NEWTX = "newTx";
+    String TX_NEWTX = "tx_newTx";
+
+    //网络消息对应的RPC命令
+    /**
+     * 接收广播的新交易hash
+     */
+    String NW_NEW_HASH = "newHash";
+    /**
+     * 接收其他节点发送的完整交易
+     */
+    String NW_RECEIVE_TX = "receiveTx";
+    /**
+     * 索取完整交易
+     */
+    String NW_ASK_TX = "askTx";
+    /**
+     * 接收主网新的完整跨链交易
+     */
+    String NW_NEW_MN_TX = "newMnTx";
+    /**
+     * 根据原始交易和跨链交易hash向友链节点验证该交易是否被确认
+     */
+    String NW_VERIFY_FC = "verifyFc";
+    /**
+     * 根据跨链交易hash向主网验证该交易是否被确认
+     */
+    String NW_VERIFY_MN = "verifyMn";
+
+    /**
+     * 接收跨链验证结果
+     */
+    String NW_CROSS_NODE_RS = "crossNodeRs";
     /**
      * 接收本地新的主网协议的跨链交易 ??????
      * todo
      */
-    String NEWCROSSTX = "newCrossTx";
-    /**
-     * 接收新交易hash
-     */
-    String NEWHASH = "newHash";
-    /**
-     * 索取完整交易
-     */
-    String ASKTX = "askTx";
-
+    String NW_NEW_CROSS_TX = "newCrossTx";
     /**
      * 接收新的跨链交易hash
      */
-    String NEWCROSSHASH = "newCrossHash";
-    /**
-     * 接收主网新的完整跨链交易
-     */
-    String newMnTx = "newMnTx";
-
+    String NW_NEW_CROSS_HASH = "newCrossHash";
     /**
      * 索取完整跨链交易
      */
-    String ASKCROSSTX = "askCrossTx";
-
-    /**
-     * 根据原始交易和跨链交易hash向友链节点验证该交易是否被确认
-     */
-    String VERIFYFC = "verifyFc";
-
-    /**
-     * 根据跨链交易hash向主网验证该交易是否被确认
-     */
-    String VERIFYMN = "verifyMn";
-
+    String NW_ASK_CROSS_TX = "askCrossTx";
     /**
      * 接收跨链验证结果
      */
-    String VERIFYRESULT = "verifyResult";
-    /**
-     * 接收跨链验证结果
-     */
-    String CROSSNODERS = "crossNodeRs";
-
-
+    String NW_VERIFYR_ESULT = "verifyResult";
 
 }

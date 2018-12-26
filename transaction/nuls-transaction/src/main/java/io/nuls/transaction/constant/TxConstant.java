@@ -98,6 +98,9 @@ public interface TxConstant {
      */
     long VERIFY_OFFSET = 500L;
 
-    //网络消息对应的RPC命令
-    String NEW_HASH_CMD = "newHash";
+    /**
+     * 参数key
+     */
+    String KEY_CHAINI_D="chainId";
+    String KEY_MESSAGE_BODY="messageBody";
 }
