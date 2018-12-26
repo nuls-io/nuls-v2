@@ -27,10 +27,13 @@ import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
+import io.nuls.block.model.ChainContext;
 import io.nuls.tools.log.Log;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static io.nuls.block.constant.RunningStatusEnum.EXCEPTION;
 import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_CHAINS;
@@ -64,45 +67,44 @@ public class OrphanChainsMonitor implements Runnable {
     public void run() {
 
         for (Integer chainId : ContextManager.chainIds) {
+            ChainContext context = ContextManager.getContext(chainId);
             try {
                 //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
-                RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
+                RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RUNNING)) {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
-                    return;
+                    continue;
                 }
-                Chain masterChain = ChainManager.getMasterChain(chainId);
-                SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
-                if (orphanChains.size() < 1) {
-                    return;
-                }
-                //1.清理链起始高度位于主链最新高度增减30(可配置)范围外的孤儿链
-                long latestHeight = masterChain.getEndHeight();
-                int heightRange = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.HEIGHT_RANGE));
-                ContextManager.getContext(chainId).setStatus(MAINTAIN_CHAINS);
-                for (Chain orphanChain : orphanChains) {
-                    if (Math.abs(orphanChain.getStartHeight() - latestHeight) > heightRange) {
-                        //清理orphanChain,并递归清理orphanChain的所有子链
-                        ChainManager.deleteOrphanChain(chainId, orphanChain, true);
+                ReentrantReadWriteLock.ReadLock readLock = context.getReadLock();
+                if (readLock.tryLock(1, TimeUnit.SECONDS)) {
+                    Chain masterChain = ChainManager.getMasterChain(chainId);
+                    SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+                    if (orphanChains.size() < 1) {
+                        readLock.unlock();
+                        continue;
+                    }
+                    readLock.unlock();
+                    ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
+                    if (writeLock.tryLock(1, TimeUnit.SECONDS)) {
+                        SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
+                        //标记、变更链属性阶段
+                        for (Chain orphanChain : orphanChains) {
+                            mark(orphanChain, masterChain, forkChains, orphanChains);
+                        }
+                        //复制、清除阶段
+                        SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
+                        for (Chain orphanChain : orphanChains) {
+                            copy(chainId, maintainedOrphanChains, orphanChain);
+                        }
+                        ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
+                        forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
+                        maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
+                        context.setStatus(RUNNING);
+                        writeLock.unlock();
                     }
                 }
-
-                SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
-                //2.标记、变更链属性阶段
-                for (Chain orphanChain : orphanChains) {
-                    mark(orphanChain, masterChain, forkChains, orphanChains);
-                }
-                //3.复制、清除阶段
-                SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
-                for (Chain orphanChain : orphanChains) {
-                    copy(chainId, maintainedOrphanChains, orphanChain);
-                }
-                ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
-                forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
-                maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
-                ContextManager.getContext(chainId).setStatus(RUNNING);
             } catch (Exception e) {
-                ContextManager.getContext(chainId).setStatus(EXCEPTION);
+                context.setStatus(EXCEPTION);
                 Log.error("chainId-{},maintain OrphanChains fail!error msg is:{}", chainId, e.getMessage());
             }
         }

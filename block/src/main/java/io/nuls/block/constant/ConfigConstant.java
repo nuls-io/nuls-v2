@@ -97,4 +97,8 @@ public interface ConfigConstant {
      * 系统正常运行时最多缓存多少个从别的节点接收到的小区块
      */
     String SMALL_BLOCK_CACHE = "smallBlockCache";
+    /**
+     * 孤儿链最大年龄
+     */
+    String ORPHAN_CHAIN_MAX_AGE = "orphanChainMaxAge";
 }
