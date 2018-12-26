@@ -17,12 +17,6 @@ import java.io.IOException;
  * @date: 2018/12/18
  */
 public class SendCrossTxMessage extends BaseMessage {
-    /**
-     * 链ID
-     */
-    @Getter
-    @Setter
-    private int chainId;
 
     /**
      * 交易类型
@@ -69,8 +63,6 @@ public class SendCrossTxMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        //chainId
-        size += SerializeUtils.sizeOfUint16();
         //type
         size += SerializeUtils.sizeOfUint16();
         //time
@@ -84,7 +76,6 @@ public class SendCrossTxMessage extends BaseMessage {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(chainId);
         stream.writeUint16(type);
         stream.writeUint48(time);
         stream.writeBytesWithLength(txData);
@@ -95,7 +86,6 @@ public class SendCrossTxMessage extends BaseMessage {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readUint16();
         this.type = byteBuffer.readUint16();
         this.time = byteBuffer.readUint48();
         this.txData = byteBuffer.readByLengthByte();

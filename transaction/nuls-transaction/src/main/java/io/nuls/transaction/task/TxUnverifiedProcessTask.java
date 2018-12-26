@@ -14,6 +14,7 @@ import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.rpc.call.LegerCall;
+import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.utils.TxUtil;
 import io.nuls.transaction.utils.TransactionTimeComparator;
@@ -104,7 +105,8 @@ public class TxUnverifiedProcessTask implements Runnable {
                 transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
                 //todo 调账本记录未确认交易
                 LegerCall.sendTx(chain.getChainId(), tx, false);
-                //todo 转发
+                //广播交易hash
+                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
             }
         } catch (Exception e) {
             Log.error(e);
