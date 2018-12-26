@@ -2,7 +2,8 @@ package io.nuls.transaction.message;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Block;
+import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.message.base.BaseMessage;
@@ -12,34 +13,35 @@ import lombok.Setter;
 import java.io.IOException;
 
 /**
- * 请求获取完整的跨链交易的消息
+ * 向链内其他节点发送的完整交易
  *
  * @author: qinyifeng
- * @date: 2018/12/17
+ * @date: 2018/12/18
  */
-public class ReceiveCrossTxMessage extends BaseMessage {
+public class TransactionMessage extends BaseMessage {
 
     /**
-     * 交易hash
+     * 交易
      */
     @Getter
     @Setter
-    private NulsDigestData requestHash;
+    private Transaction tx;
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfNulsData(requestHash);
+        //tx
+        size += SerializeUtils.sizeOfNulsData(tx);
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestHash);
+        stream.writeNulsData(tx);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.requestHash = byteBuffer.readHash();
+        this.tx = byteBuffer.readNulsData(new Transaction());
     }
 }
