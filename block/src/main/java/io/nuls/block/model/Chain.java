@@ -31,6 +31,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 链对象
@@ -123,6 +124,12 @@ public class Chain {
      */
     @Getter @Setter
     private ChainTypeEnum type;
+
+    /**
+     * 标记该链的年龄，适用于孤儿链
+     */
+    @Getter @Setter
+    private AtomicInteger age;
 
     /**
      * 获取链的结束hash

@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 /**
+ * Constants used in EventBus module
  * @author naveen
  */
 public class EbConstants {

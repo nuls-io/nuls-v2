@@ -11,18 +11,27 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
+import static io.nuls.eventbus.util.EbLog.Log;
 
 import java.util.Map;
 import java.util.Set;
 
 /**
+ * Collection of RPC commands for other modules/roles to interact with event bus
+ *
  * @author naveen
  */
 public class EventBusCmd extends BaseCmd {
 
     private final EventBus eventBus = EventBus.getInstance();
 
+    /**
+     * subscription command for modules to subscribe given topic
+     * It adds subscribed role to the client sync queue to get connection info from kernel
+     *
+     * @param params required parameters for the subscription
+     * @return success response when subscription is success, failure response when required parameters are missing or topic is not found
+     */
     @CmdAnnotation(cmd = EbConstants.EB_SUBSCRIBE, version = 1.0, description = "Subscribe to specific topic")
     @Parameter(parameterName = EbConstants.CMD_PARAM_ROLE, parameterType = "String")
     @Parameter(parameterName = EbConstants.CMD_PARAM_ROLE_NAME, parameterType = "String")
@@ -49,6 +58,12 @@ public class EventBusCmd extends BaseCmd {
         return success();
     }
 
+    /**
+     * Un subscription command for modules to unscubscribe from a topic
+     *
+     * @param params parameters required for the operation
+     * @return success/failure response
+     */
     @CmdAnnotation(cmd = EbConstants.EB_UNSUBSCRIBE, version = 1.0, description = "UnSubscribe to specific topic")
     @Parameter(parameterName = EbConstants.CMD_PARAM_TOPIC, parameterType = "String")
     @Parameter(parameterName = EbConstants.CMD_PARAM_ROLE, parameterType = "String")
@@ -71,6 +86,13 @@ public class EventBusCmd extends BaseCmd {
         return success();
     }
 
+    /**
+     * Command to publish/send the event to a topic
+     * If given topic is noot found at Event Bus, it creates new one
+     * Adds event and subscribers to event dispatch Queue to handle separate thread
+     * @param params required parameters for the command
+     * @return success/failure response
+     */
     @CmdAnnotation(cmd = EbConstants.EB_SEND, version = 1.0, description = "Publish the event data to subscribers")
     @Parameter(parameterName = EbConstants.CMD_PARAM_TOPIC, parameterType = "String")
     @Parameter(parameterName = EbConstants.CMD_PARAM_ROLE, parameterType = "String")

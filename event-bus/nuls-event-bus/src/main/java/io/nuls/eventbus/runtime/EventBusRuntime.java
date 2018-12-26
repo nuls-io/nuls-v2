@@ -4,6 +4,8 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
+ * Holds run time data for Event bus
+ *
  * @author naveen
  */
 public class EventBusRuntime {

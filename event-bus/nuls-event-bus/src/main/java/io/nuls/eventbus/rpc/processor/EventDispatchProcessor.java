@@ -4,18 +4,23 @@ import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.model.Subscriber;
 import io.nuls.eventbus.runtime.EventBusRuntime;
 
-import io.nuls.tools.log.Log;
+import static io.nuls.eventbus.util.EbLog.Log;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 /**
+ * Queue  for all the published events.
+ * <p>Dispatch of the event is handled by separate thread.And separate thread for handling send,retry process for each subscriber</p>
  * @author naveen
  */
 @SuppressWarnings("unused")
 public class EventDispatchProcessor implements Runnable {
 
+    /**
+     * Event dispatch thread
+     */
     @Override
     public void run() {
         try{

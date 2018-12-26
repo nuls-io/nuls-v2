@@ -8,6 +8,10 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
+ * Represents a topic in event bus
+ * Modules/roles subscribes/unsubscribes to topic
+ * Event is published to topic
+ *
  * @author naveen
  */
 @ToString
@@ -44,6 +48,12 @@ public class Topic implements Serializable {
     @Setter
     private Set<Subscriber> subscribers;
 
+    /**
+     * @param topicId name of the topic
+     * @param abbr module/role code who creates the topic
+     * @param name name of the module/role who creates the topic
+     * @param domain domain of the module/role who creates the topic
+     */
     public Topic(String topicId, String abbr,String name,String domain) {
         this.topicId = topicId;
         this.moduleAbbr = abbr;
@@ -53,11 +63,22 @@ public class Topic implements Serializable {
         subscribers = new CopyOnWriteArraySet<>();
     }
 
+    /**
+     * adds subscriber to the topic
+     * @param subscriber
+     * @return Topic
+     */
     public Topic addSubscriber(Subscriber subscriber){
         subscribers.add(subscriber);
         return this;
     }
 
+    /**
+     * unsubscribes the role from the topic
+     *
+     * @param subscriber
+     * @return
+     */
     public Topic removeSubscriber(Subscriber subscriber){
         for(Subscriber sub : subscribers){
             if(sub.equals(subscriber)){
@@ -67,6 +88,11 @@ public class Topic implements Serializable {
         return this;
     }
 
+    /**
+     *
+     * @param o
+     * @return
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o) {return true;}
@@ -75,6 +101,10 @@ public class Topic implements Serializable {
         return Objects.equals(this.topicId, topic.topicId);
     }
 
+    /**
+     *
+     * @return
+     */
     @Override
     public int hashCode() {
         return Objects.hash(this.topicId);

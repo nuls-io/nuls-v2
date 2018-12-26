@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 区块工具类
@@ -299,6 +300,7 @@ public class BlockUtil {
                 if (orphanChainStartHeight <= blockHeight && blockHeight <= orphanChainEndHeight && orphanChain.getHashList().contains(blockPreviousHash)) {
                     chainStorageService.save(chainId, block);
                     Chain forkOrphanChain = ChainGenerator.generate(chainId, block, orphanChain, ChainTypeEnum.ORPHAN);
+                    forkOrphanChain.setAge(new AtomicInteger(0));
                     ChainManager.addOrphanChain(chainId, forkOrphanChain);
                     Log.debug("chainId:{}, received fork blocks of orphanChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
@@ -307,6 +309,7 @@ public class BlockUtil {
             //4.与主链、分叉链、孤儿链都无关,形成一个新的孤儿链
             chainStorageService.save(chainId, block);
             Chain newOrphanChain = ChainGenerator.generate(chainId, block, null, ChainTypeEnum.ORPHAN);
+            newOrphanChain.setAge(new AtomicInteger(0));
             ChainManager.addOrphanChain(chainId, newOrphanChain);
             return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
         } catch (Exception e) {

@@ -18,12 +18,6 @@ import java.io.IOException;
  * @date: 2018/12/18
  */
 public class BroadcastCrossNodeRsMessage extends BaseMessage {
-    /**
-     * 链ID
-     */
-    @Getter
-    @Setter
-    private int chainId;
 
     /**
      * 转换NULS主网协议后交易hash
@@ -49,7 +43,6 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfNulsData(requestHash);
         size += SerializeUtils.sizeOfBytes(transactionSignature);
         size += SerializeUtils.sizeOfBoolean();
@@ -58,7 +51,6 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(chainId);
         stream.writeNulsData(requestHash);
         stream.writeBytesWithLength(transactionSignature);
         stream.writeBoolean(result);
@@ -66,7 +58,6 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readUint16();
         this.requestHash = byteBuffer.readHash();
         this.transactionSignature = byteBuffer.readByLengthByte();
         this.result = byteBuffer.readBoolean();

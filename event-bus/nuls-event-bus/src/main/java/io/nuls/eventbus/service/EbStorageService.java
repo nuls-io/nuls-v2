@@ -5,6 +5,7 @@ import io.nuls.eventbus.model.Topic;
 import java.util.concurrent.ConcurrentMap;
 
 /**
+ * Service to handle all DB operations for event bus
  * @author naveen
  */
 public interface EbStorageService {
