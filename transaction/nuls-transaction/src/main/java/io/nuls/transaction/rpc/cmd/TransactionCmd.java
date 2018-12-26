@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Page;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -18,6 +19,7 @@ import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.message.BroadcastTxMessage;
@@ -26,6 +28,7 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
+import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.TransactionService;
 import io.nuls.transaction.utils.TxUtil;
@@ -54,6 +57,8 @@ public class TransactionCmd extends BaseCmd {
     private ChainManager chainManager;
     @Autowired
     private TransactionManager transactionManager;
+    @Autowired
+    private TransactionH2Service transactionH2Service;
 
 
     /**
@@ -320,10 +325,11 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
+     * 分页查询交易记录
      * Query the transaction list based on conditions such as account, chain, asset, and paging information.
      *
      * @param params
-     * @return
+     * @return Response
      */
     @CmdAnnotation(cmd = TxCmd.TX_GETTXS, version = 1.0, description = "Get transaction record")
     @Parameter(parameterName = "chainId", parameterType = "int")
@@ -334,16 +340,16 @@ public class TransactionCmd extends BaseCmd {
             if(null == chain){
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
+            Integer assetChainId = null == params.get("assetChainId") ? null : Integer.parseInt(params.get("assetChainId").toString());
+            Integer assetId = null == params.get("assetId") ? null : Integer.parseInt(params.get("assetId").toString());
+            Integer type = null == params.get("type") ? null : Integer.parseInt(params.get("type").toString());
+            Integer pageSize = null == params.get("pageSize") ? TxConstant.PAGESIZE : Integer.parseInt(params.get("pageSize").toString());
+            Integer pageNumber = null == params.get("pageNumber") ? 1 : Integer.parseInt(params.get("pageNumber").toString());
+            String address = (String) params.get("address");
 
-            String txHash = (String) params.get("txHash");
-            if (!NulsDigestData.validHash(txHash)) {
-                throw new NulsException(TxErrorCode.HASH_ERROR);
-            }
-            Transaction tx = confirmedTransactionService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
-            if(tx == null){
-                throw new NulsException(TxErrorCode.TX_NOT_EXIST);
-            }
-            return success(tx);
+            Page<TransactionPO> list = transactionH2Service.getTxs(address, assetChainId, assetId, type, pageNumber, pageSize);
+
+            return success(list);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         }
@@ -382,64 +388,4 @@ public class TransactionCmd extends BaseCmd {
         return success(result);
     }
 
-     /**
-     * 接收广播的新交易hash
-     * receive new transaction hash
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = TxCmd.NW_NEW_HASH, version = 1.0, description = "receive new transaction hash")
-    @Parameter(parameterName = KEY_CHAINI_D, parameterType = "int")
-    public Response newHash(Map params) {
-        Map<String, Boolean> map = new HashMap<>();
-        boolean result = false;
-        try {
-            Integer chainId = Integer.parseInt(map.get(KEY_CHAINI_D).toString());
-            BroadcastTxMessage message = new BroadcastTxMessage();
-            byte[] decode = HexUtil.decode(map.get(KEY_MESSAGE_BODY).toString());
-            message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
-        } catch (NulsException e) {
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-        map.put("value", result);
-        return success(map);
-    }
-
-    /**
-     * 接收其他节点的新交易
-     * receive new transactions from other nodes
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = TxCmd.NW_RECEIVE_TX, version = 1.0, description = "receive new transactions from other nodes")
-    @Parameter(parameterName = KEY_CHAINI_D, parameterType = "int")
-    public Response receiveTx(Map params) {
-        Map<String, Boolean> map = new HashMap<>();
-        boolean result = false;
-        try {
-            Integer chainId = Integer.parseInt(map.get(KEY_CHAINI_D).toString());
-            TransactionMessage message = new TransactionMessage();
-            byte[] decode = HexUtil.decode(map.get(KEY_MESSAGE_BODY).toString());
-            message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                return failed(TxErrorCode.PARAMETER_ERROR);
-            }
-            Transaction transaction = message.getTx();
-            //将交易放入待验证本地交易队列中
-            result = transactionService.newTx(chainManager.getChain(chainId), transaction);
-        } catch (NulsException e) {
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-        map.put("value", result);
-        return success(map);
-    }
 }
