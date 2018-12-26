@@ -22,10 +22,9 @@
 
 package io.nuls.block.service;
 
-import io.nuls.block.model.po.ChainContextPo;
+import io.nuls.block.model.ChainParameters;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 配置信息存储管理类
@@ -34,7 +33,7 @@ import java.util.Map;
  * @author tag
  * 2018/11/8
  */
-public interface ContextStorageService {
+public interface ParametersStorageService {
     /**
      * 保存指定链的配置信息
      * Save configuration information for the specified chain
@@ -44,7 +43,7 @@ public interface ContextStorageService {
      * @return 保存是否成功/Is preservation successful?
      * @throws
      */
-    boolean save(ChainContextPo chainContextPo, int chainID);
+    boolean save(ChainParameters chainContextPo, int chainID);
 
     /**
      * 查询某条链的配置信息
@@ -53,7 +52,7 @@ public interface ContextStorageService {
      * @param chainID 链ID/chain id
      * @return 配置信息类/config bean
      */
-    ChainContextPo get(int chainID);
+    ChainParameters get(int chainID);
 
     /**
      * 删除某条链的配置信息
@@ -70,5 +69,5 @@ public interface ContextStorageService {
      *
      * @return 节点信息列表/Node information list
      */
-    List<ChainContextPo> getList();
+    List<ChainParameters> getList();
 }

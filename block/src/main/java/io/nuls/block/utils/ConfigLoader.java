@@ -22,16 +22,16 @@
 
 package io.nuls.block.utils;
 
-import io.nuls.block.manager.ConfigManager;
+import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.ChainParameters;
+import io.nuls.block.service.ParametersStorageService;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.config.ConfigItem;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static io.nuls.block.constant.Constant.CHAIN_ID;
 import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
 
 /**
@@ -42,16 +42,32 @@ import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
  */
 public class ConfigLoader {
 
+    /**
+     * 加载配置文件
+     *
+     * @throws Exception
+     */
     public static void load() throws Exception {
-
+        ParametersStorageService service = SpringLiteContext.getBean(ParametersStorageService.class);
+        List<ChainParameters> list = service.getList();
+        if (list.size() == 0) {
+            loadDefault();
+        } else {
+            list.forEach(e -> ContextManager.init(e));
+        }
     }
 
+    /**
+     * 加载默认配置文件
+     *
+     * @throws Exception
+     */
     private static void loadDefault() throws Exception {
         String configJson = IoUtils.read(MODULES_CONFIG_FILE);
         List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
-        Map<String, ConfigItem> map = new HashMap<>(configItems.size());
-        configItems.forEach(e -> map.put(e.getName(), e));
-        ConfigManager.add(CHAIN_ID, map);
+        ChainParameters po = new ChainParameters();
+        po.init(configItems);
+        ContextManager.init(po);
     }
 
 }

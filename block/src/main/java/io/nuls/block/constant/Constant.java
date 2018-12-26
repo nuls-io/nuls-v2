@@ -28,35 +28,19 @@ package io.nuls.block.constant;
 public interface Constant {
 
     /**
-     * 空值占位符
-     * Null placeholder.
-     */
-    byte[] PLACE_HOLDER = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
-
-    /**
      * 模块配置文件名称
      * Module configuration file name.
      */
     String MODULES_CONFIG_FILE = "modules.json";
 
     /**
-     * 模块配置文件名称
-     * Module configuration file name.
+     * db文件存放目录
      */
-    int CHAIN_ID = 1;
-
-    /**
-     * 系统使用的编码方式
-     * The encoding used by the nuls system.
-     */
-    String DEFAULT_ENCODING = "UTF-8";
-
-
     String DATA_PATH = "../../data";
     /**
-     * 存储每条链的最新高度
+     * 存储每条链的配置信息
      */
-    String CHAIN_CONTEXT = "ChainContext";
+    String CHAIN_PARAMETERS = "ChainParameters";
     /**
      * 存储每条链的最新高度
      */
@@ -64,18 +48,27 @@ public interface Constant {
     /**
      * 存储区块头数据
      */
-    String BLOCK_HEADER = "BlockHeader-";
+    String BLOCK_HEADER = "BlockHeader";
     /**
      * 存储区块头高度与hash的键值对
      */
-    String BLOCK_HEADER_INDEX = "BlockHeaderIndex-";
+    String BLOCK_HEADER_INDEX = "BlockHeaderIndex";
     /**
      * 分叉链、孤儿链区块数据库前缀
      */
-    String FORK_CHAINS = "ForkChains-";
+    String CACHED_BLOCK = "CachedBlock";
 
     /**
      * 每次清理几分之一
      */
     int CLEAN_PARAM = 2;
+
+    /**
+     * 默认扫描包路径
+     */
+    String DEFAULT_SCAN_PACKAGE = "io.nuls.block";
+    /**
+     * RPC默认扫描包路径
+     */
+    String RPC_DEFAULT_SCAN_PACKAGE = "io.nuls.block.rpc";
 }

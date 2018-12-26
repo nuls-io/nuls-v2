@@ -27,11 +27,14 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
+import io.nuls.tools.parse.config.ConfigItem;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -41,113 +44,119 @@ public class ChainParameters extends BaseNulsData {
     /**
      * 链名
      */
-    private String CHAIN_NAME;
+    private String chainName;
     /**
      * 链ID
      */
-    private int CHAIN_ID;
+    private int chainId;
     /**
      * 区块大小阈值
      */
-    private int BLOCK_MAX_SIZE;
+    private int blockMaxSize;
     /**
      * 网络重置阈值
      */
-    private int RESET_TIME;
+    private int resetTime;
     /**
      * 分叉链比主链高几个区块就进行链切换
      */
-    private int CHAIN_SWTICH_THRESHOLD;
+    private int chainSwtichThreshold;
     /**
      * 分叉链、孤儿链区块最大缓存数量
      */
-    private int CACHE_SIZE;
+    private int cacheSize;
     /**
      * 接收新区块的范围
      */
-    private int HEIGHT_RANGE;
+    private int heightRange;
     /**
      * 每次回滚区块最大值
      */
-    private int MAX_ROLLBACK;
+    private int maxRollback;
     /**
      * 一致节点比例
      */
-    private int CONSISTENCY_NODE_PERCENT;
+    private int consistencyNodePercent;
     /**
      * 系统运行最小节点数
      */
-    private int MIN_NODE_AMOUNT;
+    private int minNodeAmount;
     /**
      * 每次从一个节点下载多少区块
      */
-    private int DOWNLOAD_NUMBER;
+    private int downloadNumber;
     /**
      * 区块头中扩展字段的最大长度
      */
-    private int EXTEND_MAX_SIZE;
+    private int extendMaxSize;
     /**
      * 为阻止恶意节点提前出块,设置此参数
      * 区块时间戳大于当前时间多少就丢弃该区块
      */
-    private int VALID_BLOCK_INTERVAL;
+    private int validBlockInterval;
     /**
      * 同步区块时最多缓存多少个区块
      */
-    private int BLOCK_CACHE;
+    private int blockCache;
     /**
      * 系统正常运行时最多缓存多少个从别的节点接收到的小区块
      */
-    private int SMALL_BLOCK_CACHE;
+    private int smallBlockCache;
     /**
      * 孤儿链最大年龄
      */
-    private int ORPHAN_CHAIN_MAX_AGE;
+    private int orphanChainMaxAge;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(CHAIN_NAME);
-        stream.writeUint16(CHAIN_ID);
-        stream.writeUint16(BLOCK_MAX_SIZE);
-        stream.writeUint16(RESET_TIME);
-        stream.writeUint16(CHAIN_SWTICH_THRESHOLD);
-        stream.writeUint16(CACHE_SIZE);
-        stream.writeUint16(HEIGHT_RANGE);
-        stream.writeUint16(MAX_ROLLBACK);
-        stream.writeUint16(CONSISTENCY_NODE_PERCENT);
-        stream.writeUint16(MIN_NODE_AMOUNT);
-        stream.writeUint16(DOWNLOAD_NUMBER);
-        stream.writeUint16(EXTEND_MAX_SIZE);
-        stream.writeUint16(VALID_BLOCK_INTERVAL);
-        stream.writeUint16(BLOCK_CACHE);
-        stream.writeUint16(SMALL_BLOCK_CACHE);
-        stream.writeUint16(ORPHAN_CHAIN_MAX_AGE);
+        stream.writeString(chainName);
+        stream.writeUint16(chainId);
+        stream.writeUint16(blockMaxSize);
+        stream.writeUint16(resetTime);
+        stream.writeUint16(chainSwtichThreshold);
+        stream.writeUint16(cacheSize);
+        stream.writeUint16(heightRange);
+        stream.writeUint16(maxRollback);
+        stream.writeUint16(consistencyNodePercent);
+        stream.writeUint16(minNodeAmount);
+        stream.writeUint16(downloadNumber);
+        stream.writeUint16(extendMaxSize);
+        stream.writeUint16(validBlockInterval);
+        stream.writeUint16(blockCache);
+        stream.writeUint16(smallBlockCache);
+        stream.writeUint16(orphanChainMaxAge);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.CHAIN_NAME = byteBuffer.readString();
-        this.CHAIN_ID = byteBuffer.readUint16();
-        this.BLOCK_MAX_SIZE = byteBuffer.readUint16();
-        this.RESET_TIME = byteBuffer.readUint16();
-        this.CHAIN_SWTICH_THRESHOLD = byteBuffer.readUint16();
-        this.CACHE_SIZE = byteBuffer.readUint16();
-        this.HEIGHT_RANGE = byteBuffer.readUint16();
-        this.MAX_ROLLBACK = byteBuffer.readUint16();
-        this.CONSISTENCY_NODE_PERCENT = byteBuffer.readUint16();
-        this.MIN_NODE_AMOUNT = byteBuffer.readUint16();
-        this.DOWNLOAD_NUMBER = byteBuffer.readUint16();
-        this.EXTEND_MAX_SIZE = byteBuffer.readUint16();
-        this.VALID_BLOCK_INTERVAL = byteBuffer.readUint16();
-        this.BLOCK_CACHE = byteBuffer.readUint16();
-        this.SMALL_BLOCK_CACHE = byteBuffer.readUint16();
+        this.chainName = byteBuffer.readString();
+        this.chainId = byteBuffer.readUint16();
+        this.blockMaxSize = byteBuffer.readUint16();
+        this.resetTime = byteBuffer.readUint16();
+        this.chainSwtichThreshold = byteBuffer.readUint16();
+        this.cacheSize = byteBuffer.readUint16();
+        this.heightRange = byteBuffer.readUint16();
+        this.maxRollback = byteBuffer.readUint16();
+        this.consistencyNodePercent = byteBuffer.readUint16();
+        this.minNodeAmount = byteBuffer.readUint16();
+        this.downloadNumber = byteBuffer.readUint16();
+        this.extendMaxSize = byteBuffer.readUint16();
+        this.validBlockInterval = byteBuffer.readUint16();
+        this.blockCache = byteBuffer.readUint16();
+        this.smallBlockCache = byteBuffer.readUint16();
     }
 
     @Override
     public int size() {
         int size = 0;
         size += (15 * SerializeUtils.sizeOfUint16());
-        size += SerializeUtils.sizeOfString(CHAIN_NAME);
+        size += SerializeUtils.sizeOfString(chainName);
         return size;
+    }
+
+    public void init(List<ConfigItem> list) {
+        for (ConfigItem configItem : list) {
+            //todo 待完善
+        }
     }
 }

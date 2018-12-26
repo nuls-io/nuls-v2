@@ -24,8 +24,8 @@ package io.nuls.block.service.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.block.constant.Constant;
-import io.nuls.block.model.po.ChainContextPo;
-import io.nuls.block.service.ContextStorageService;
+import io.nuls.block.model.ChainParameters;
+import io.nuls.block.service.ParametersStorageService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.log.Log;
@@ -33,13 +33,13 @@ import io.nuls.tools.log.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContextStorageServiceImpl implements ContextStorageService {
+public class ParametersStorageServiceImpl implements ParametersStorageService {
     @Override
-    public boolean save(ChainContextPo chainContextPo, int chainID) {
+    public boolean save(ChainParameters chainParameters, int chainID) {
         byte[] bytes;
         try {
-            bytes = chainContextPo.serialize();
-            return RocksDBService.put(Constant.CHAIN_CONTEXT, ByteUtils.intToBytes(chainID), bytes);
+            bytes = chainParameters.serialize();
+            return RocksDBService.put(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainID), bytes);
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -47,10 +47,10 @@ public class ContextStorageServiceImpl implements ContextStorageService {
     }
 
     @Override
-    public ChainContextPo get(int chainID) {
+    public ChainParameters get(int chainID) {
         try {
-            ChainContextPo po = new ChainContextPo();
-            byte[] bytes = RocksDBService.get(Constant.CHAIN_CONTEXT, ByteUtils.intToBytes(chainID));
+            ChainParameters po = new ChainParameters();
+            byte[] bytes = RocksDBService.get(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainID));
             po.parse(new NulsByteBuffer(bytes));
             return po;
         }catch (Exception e){
@@ -62,7 +62,7 @@ public class ContextStorageServiceImpl implements ContextStorageService {
     @Override
     public boolean delete(int chainID) {
         try {
-            return RocksDBService.delete(Constant.CHAIN_CONTEXT, ByteUtils.intToBytes(chainID));
+            return RocksDBService.delete(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainID));
         }catch (Exception e){
             Log.error(e);
             return false;
@@ -70,12 +70,12 @@ public class ContextStorageServiceImpl implements ContextStorageService {
     }
 
     @Override
-    public List<ChainContextPo> getList() {
+    public List<ChainParameters> getList() {
         try {
-            var pos = new ArrayList<ChainContextPo>();
-            List<byte[]> valueList = RocksDBService.valueList(Constant.CHAIN_CONTEXT);
+            var pos = new ArrayList<ChainParameters>();
+            List<byte[]> valueList = RocksDBService.valueList(Constant.CHAIN_PARAMETERS);
             for (byte[] bytes : valueList) {
-                var po = new ChainContextPo();
+                var po = new ChainParameters();
                 po.parse(new NulsByteBuffer(bytes));
                 pos.add(po);
             }

@@ -21,12 +21,9 @@
 package io.nuls.block;
 
 import io.nuls.base.data.BlockHeader;
-import io.nuls.block.cache.CacheHandler;
-import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.block.service.BlockService;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.thread.BlockSynchronizer;
 import io.nuls.block.thread.monitor.ChainsDbSizeMonitor;
 import io.nuls.block.thread.monitor.ForkChainsMonitor;
@@ -34,6 +31,7 @@ import io.nuls.block.thread.monitor.OrphanChainsMaintainer;
 import io.nuls.block.thread.monitor.OrphanChainsMonitor;
 import io.nuls.block.utils.ConfigLoader;
 import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
@@ -47,7 +45,8 @@ import io.nuls.tools.thread.commom.NulsThreadFactory;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static io.nuls.block.constant.Constant.CHAIN_ID;
+import static io.nuls.block.constant.Constant.*;
+import static io.nuls.block.constant.Constant.CHAIN_PARAMETERS;
 
 /**
  * 区块管理模块启动类
@@ -75,10 +74,11 @@ public class BlockBootstrap {
     private static void loop() {
         while (true) {
             for (Integer chainId : ContextManager.chainIds) {
-                if (RunningStatusEnum.STOPPING.equals(ContextManager.getContext(chainId).getStatus())) {
+                ChainContext context = ContextManager.getContext(chainId);
+                if (RunningStatusEnum.STOPPING.equals(context.getStatus())) {
                     System.exit(0);
                 }
-                BlockHeader header = ContextManager.getContext(chainId).getLatestBlock().getHeader();
+                BlockHeader header = context.getLatestBlock().getHeader();
                 Log.info("chainId:{}, latestHeight:{}, txCount:{}, hash:{}", chainId, header.getHeight(), header.getTxCount(), header.getHash());
                 try {
                     Thread.sleep(10000L);
@@ -104,20 +104,19 @@ public class BlockBootstrap {
     private static void init() {
         try {
             //扫描包路径io.nuls.block,初始化bean
-            SpringLiteContext.init("io.nuls.block", new ModularServiceMethodInterceptor());
+            SpringLiteContext.init(DEFAULT_SCAN_PACKAGE, new ModularServiceMethodInterceptor());
             //rpc服务初始化
             rpcInit();
             //加载配置
             ConfigLoader.load();
-            //加载Context
-            ContextManager.init(CHAIN_ID);
-            //服务初始化
-            BlockService service = SpringLiteContext.getBean(BlockService.class);
-            service.init(CHAIN_ID);
-            //各类缓存初始化
-            SmallBlockCacher.init(CHAIN_ID);
-            CacheHandler.init(CHAIN_ID);
-            ChainManager.init(CHAIN_ID);
+
+            RocksDBService.init(DATA_PATH);
+            if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
+                RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
+            }
+            if (!RocksDBService.existTable(CHAIN_PARAMETERS)) {
+                RocksDBService.createTable(CHAIN_PARAMETERS);
+            }
         } catch (Exception e) {
             Log.error("error occur when init, {}", e.getMessage());
         }
@@ -146,7 +145,7 @@ public class BlockBootstrap {
      * todo 正式版本删除
      */
     private static void onlyRunWhenTest() {
-//        ChainContext chainContext = ContextManager.getContext(CHAIN_ID);
+//        ChainContext chainContext = ContextManager.getContext(chainId);
 //        chainContext.setStatus(RunningStatusEnum.RUNNING);
 //        Block latestBlock = chainContext.getLatestBlock();
 //        new Miner("1", latestBlock).start();
@@ -160,7 +159,7 @@ public class BlockBootstrap {
                 .moduleVersion("1.0")
                 .dependencies(ModuleE.KE.abbr, "1.0")
                 .dependencies(ModuleE.NW.abbr, "1.0")
-                .scanPackage("io.nuls.block.rpc")
+                .scanPackage(RPC_DEFAULT_SCAN_PACKAGE)
                 .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
