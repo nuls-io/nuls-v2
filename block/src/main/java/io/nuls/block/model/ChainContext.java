@@ -28,9 +28,12 @@ import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.model.Chain;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.List;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * 每个链ID对应一个{@link ChainContext},维护一些链运行期间的信息,并负责链的初始化、启动、停止、销毁操作
@@ -39,47 +42,63 @@ import java.util.List;
  * @version 1.0
  * @date 18-11-20 上午10:46
  */
-@Data
 @NoArgsConstructor
 public class ChainContext {
     /**
      * 代表该链的运行状态
      */
+    @Getter @Setter
     private RunningStatusEnum status;
 
     /**
      * 链ID
      */
+    @Getter @Setter
     private int chainId;
 
     /**
      * 该链的系统交易类型
      */
+    @Getter @Setter
     private List<Integer> systemTransactionType;
 
     /**
-     * 最新区快
+     * 最新区块
      */
+    @Getter @Setter
     private Block latestBlock;
 
     /**
      * 创世区块
      */
+    @Getter @Setter
     private Block genesisBlock;
 
     /**
      * 主链
      */
+    @Getter @Setter
     private Chain masterChain;
 
     /**
-     * 分叉链集合
+     * 清理数据库,区块同步,分叉链维护,孤儿链维护获取该锁
+     *
+     * @return
      */
-    private List<Chain> forkChains;
-
-    public void setGenesisBlock(Block block) {
-        this.genesisBlock = block;
+    public ReentrantReadWriteLock.ReadLock getReadLock() {
+        return lock.readLock();
     }
+
+    /**
+     * 进行状态变更时,获取该锁
+     *
+     * @return
+     */
+    public ReentrantReadWriteLock.WriteLock getWriteLock() {
+        return lock.writeLock();
+    }
+
+    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     public synchronized void setStatus(RunningStatusEnum status) {
         this.status = status;

@@ -140,10 +140,11 @@ public class BlockValidator {
       chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug(currentRound.toString());
       // 验证打包人是否正确
       MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
-      if (!Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
+      //todo 签名加上后把注释去掉
+      /*if (!Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
-      }
+      }*/
       if (member.getPackEndTime() != blockHeader.getTime()) {
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);

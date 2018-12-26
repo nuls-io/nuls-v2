@@ -90,7 +90,7 @@ public class ConsensusUtil {
     }
 
     /**
-     * 同步完成时通知共识模块
+     * 收到分叉区块时通知共识模块
      *
      * @param chainId
      * @return

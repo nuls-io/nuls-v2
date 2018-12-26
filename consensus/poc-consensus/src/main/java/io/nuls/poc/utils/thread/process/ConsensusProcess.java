@@ -1,9 +1,6 @@
 package io.nuls.poc.utils.thread.process;
 
-import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockExtendsData;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.BlockData;
@@ -140,13 +137,13 @@ public class ConsensusProcess {
                 }
                 packing(chain, member, round);
             } catch (Exception e) {
-                consensusLogger.error(e.getMessage());
+                consensusLogger.error(e);
             }
             while (member.getPackEndTime() > TimeService.currentTimeMillis()) {
                 try {
                     Thread.sleep(500L);
                 } catch (InterruptedException e) {
-                    consensusLogger.error(e.getMessage());
+                    consensusLogger.error(e);
                 }
             }
             hasPacking = false;
