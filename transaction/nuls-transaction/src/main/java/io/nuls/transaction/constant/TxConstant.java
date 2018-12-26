@@ -12,6 +12,13 @@ public interface TxConstant {
     int NULS_CHAIN_ASSETID = 1;
 
     /**
+     * Map初始值
+     */
+    int INIT_CAPACITY = 16;
+
+    int PAGESIZE = 20;
+
+    /**
      * context path
      */
     String CONTEXT_PATH = "io.nuls.transaction";
@@ -82,11 +89,6 @@ public interface TxConstant {
      */
     String MULTI_TX_HASH = "txHash";
     String MULTI_TX_HEX = "txHex";
-
-    /**
-     * Map初始值
-     */
-    int INIT_CAPACITY = 16;
 
     /**
      * config file path

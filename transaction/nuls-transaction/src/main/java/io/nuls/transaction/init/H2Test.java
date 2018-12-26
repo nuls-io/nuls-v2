@@ -101,7 +101,7 @@ public class H2Test {
         TransactionH2Service ts = new TransactionH2ServiceImpl();
         String addr = StringUtils.isNullOrEmpty(address) ? ranAddress() : address;
 //        Page<TransactionPO> page =  ts.getTxs(addr, null, null, 1540138501L, System.currentTimeMillis(), 1,15);
-        Page<TransactionPO> page =  ts.getTxs(addr, 1, null, null, null, 1,15);
+        Page<TransactionPO> page =  ts.getTxs(addr,1,1, 1, null, null, null, 1,15);
         try {
             System.out.println(JSONUtils.obj2json(page));
         } catch (JsonProcessingException e) {
@@ -110,6 +110,7 @@ public class H2Test {
     }
 
     public static void before() throws Exception{
+
         String resource = "mybatis/mybatis-config.xml";
         InputStream in = Resources.getResourceAsStream(resource);
         BaseService.sqlSessionFactory = new SqlSessionFactoryBuilder().build(in);
