@@ -25,15 +25,23 @@ import java.util.Map;
 @Service
 public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> implements TransactionH2Service {
 
-
+    @Override
+    public Page<TransactionPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type, int pageNumber, int pageSize) {
+        return getTxs(address, assetChainId, assetId, type, null, null, null, pageNumber, pageSize);
+    }
 
     @Override
-    public Page<TransactionPO> getTxs(String address, Integer type, Integer state, Long startTime, Long endTime, int pageNumber, int pageSize) {
-        //数据库交易查询结果集
-        List<TransactionPO> transactionList = new ArrayList<>();
+    public Page<TransactionPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type, Integer state, Long startTime, Long endTime, int pageNumber, int pageSize) {
+
         Searchable searchable = new Searchable();
         if(!StringUtils.isNullOrEmpty(address)){
             searchable.addCondition("address", SearchOperator.eq, address);
+        }
+        if (null != assetChainId) {
+            searchable.addCondition("assetChainId", SearchOperator.eq, assetChainId);
+        }
+        if (null != assetId) {
+            searchable.addCondition("assetId", SearchOperator.eq, assetId);
         }
         if (null != startTime) {
             searchable.addCondition("time", SearchOperator.gte, startTime);

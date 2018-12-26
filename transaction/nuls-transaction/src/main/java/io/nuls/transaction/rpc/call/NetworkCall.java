@@ -26,7 +26,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
-import io.nuls.transaction.constant.TxCmd;
+
 import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.message.TransactionMessage;
 import io.nuls.transaction.message.base.BaseMessage;
@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.transaction.constant.TxCmd.*;
 
 /**
  * 调用网络模块接口的工具
@@ -115,7 +117,7 @@ public class NetworkCall {
             List<Map<String, String>> cmds = new ArrayList<>();
             map.put("role", ModuleE.TX.abbr);
             //TODO 模块启动时向网络模块注册网络协议处理器
-            List<String> list = List.of(TxCmd.NW_NEW_HASH, TxCmd.NW_RECEIVE_TX);
+            List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX, NW_NEW_CROSS_HASH, NW_ASK_CROSS_TX, NW_NEW_MN_TX);
             for (String s : list) {
                 Map<String, String> cmd = new HashMap<>();
                 cmd.put("protocolCmd", s);
@@ -140,14 +142,15 @@ public class NetworkCall {
      */
     public static boolean broadcastTxHash(int chainId, NulsDigestData hash) {
         BroadcastTxMessage message = new BroadcastTxMessage();
-        message.setHash(hash);
-        message.setCommand(TxCmd.NW_NEW_HASH);
+        message.setCommand(NW_NEW_HASH);
+        message.setRequestHash(hash);
         return NetworkCall.broadcast(chainId, message);
     }
 
     /**
      * 发送完整交易到指定节点
      * Send the complete transaction to the specified node
+     *
      * @param chainId
      * @param nodeId
      * @param tx
@@ -155,8 +158,7 @@ public class NetworkCall {
      */
     public static boolean sendTxToNode(int chainId, String nodeId, Transaction tx) {
         TransactionMessage message = new TransactionMessage();
-        message.setHash(tx.getHash());
-        message.setCommand(TxCmd.NW_RECEIVE_TX);
+        message.setCommand(NW_RECEIVE_TX);
         message.setTx(tx);
         return NetworkCall.sendToNode(chainId, message, nodeId);
     }

@@ -215,6 +215,35 @@ public class AccountCmd extends BaseCmd {
     }
 
     /**
+     * 获取本地未加密账户列表
+     * Get a list of local unencrypted accounts
+     *
+     * @param params []
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_getUnencryptedAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "query all account collections and put them in cache")
+    public Object getUnencryptedAddressList(Map params) {
+        LogUtil.debug("getUnencryptedAddressList start");
+        List<String> unencryptedAddressList = new ArrayList<>();
+        try {
+            //query all accounts
+            List<Account> accountList = accountService.getAccountList();
+            if (null == accountList) {
+                return success(null);
+            }
+            for (Account account:accountList) {
+                if(!account.isEncrypted()){
+                    unencryptedAddressList.add(account.getAddress().getBase58());
+                }
+            }
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
+        }
+        LogUtil.debug("getUnencryptedAddressList end");
+        return success(unencryptedAddressList);
+    }
+
+    /**
      * 分页查询账户地址列表
      * paging query account address list
      *
