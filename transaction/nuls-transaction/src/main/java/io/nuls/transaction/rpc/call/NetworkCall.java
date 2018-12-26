@@ -140,8 +140,8 @@ public class NetworkCall {
      */
     public static boolean broadcastTxHash(int chainId, NulsDigestData hash) {
         BroadcastTxMessage message = new BroadcastTxMessage();
-        message.setHash(hash);
         message.setCommand(TxCmd.NW_NEW_HASH);
+        message.setRequestHash(hash);
         return NetworkCall.broadcast(chainId, message);
     }
 
@@ -155,7 +155,6 @@ public class NetworkCall {
      */
     public static boolean sendTxToNode(int chainId, String nodeId, Transaction tx) {
         TransactionMessage message = new TransactionMessage();
-        message.setHash(tx.getHash());
         message.setCommand(TxCmd.NW_RECEIVE_TX);
         message.setTx(tx);
         return NetworkCall.sendToNode(chainId, message, nodeId);
