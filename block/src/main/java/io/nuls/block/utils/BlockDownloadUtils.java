@@ -61,7 +61,7 @@ public class BlockDownloadUtils {
             return null;
         }
         try {
-            return future.get(15L, TimeUnit.SECONDS);
+            return future.get(10L, TimeUnit.SECONDS);
         } catch (Exception e) {
             Log.error(node.getId(), e);
             return null;
