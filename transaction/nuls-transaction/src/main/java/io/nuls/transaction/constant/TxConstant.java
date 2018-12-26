@@ -101,6 +101,7 @@ public interface TxConstant {
     /**
      * 参数key
      */
-    String KEY_CHAINI_D="chainId";
+    String KEY_CHAIN_ID ="chainId";
+    String KEY_NODE_ID="nodeId";
     String KEY_MESSAGE_BODY="messageBody";
 }

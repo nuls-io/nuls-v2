@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.transaction.constant.TxConstant.KEY_CHAINI_D;
+import static io.nuls.transaction.constant.TxConstant.KEY_CHAIN_ID;
 import static io.nuls.transaction.constant.TxConstant.KEY_MESSAGE_BODY;
 
 /**
@@ -390,12 +390,12 @@ public class TransactionCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = TxCmd.NW_NEW_HASH, version = 1.0, description = "receive new transaction hash")
-    @Parameter(parameterName = KEY_CHAINI_D, parameterType = "int")
+    @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     public Response newHash(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
         try {
-            Integer chainId = Integer.parseInt(map.get(KEY_CHAINI_D).toString());
+            Integer chainId = Integer.parseInt(map.get(KEY_CHAIN_ID).toString());
             BroadcastTxMessage message = new BroadcastTxMessage();
             byte[] decode = HexUtil.decode(map.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
@@ -419,12 +419,12 @@ public class TransactionCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = TxCmd.NW_RECEIVE_TX, version = 1.0, description = "receive new transactions from other nodes")
-    @Parameter(parameterName = KEY_CHAINI_D, parameterType = "int")
+    @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     public Response receiveTx(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result = false;
         try {
-            Integer chainId = Integer.parseInt(map.get(KEY_CHAINI_D).toString());
+            Integer chainId = Integer.parseInt(map.get(KEY_CHAIN_ID).toString());
             TransactionMessage message = new TransactionMessage();
             byte[] decode = HexUtil.decode(map.get(KEY_MESSAGE_BODY).toString());
             message.parse(new NulsByteBuffer(decode));
