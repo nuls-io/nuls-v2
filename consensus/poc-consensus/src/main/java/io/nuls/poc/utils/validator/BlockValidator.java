@@ -140,11 +140,10 @@ public class BlockValidator {
       chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug(currentRound.toString());
       // 验证打包人是否正确
       MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
-      //todo 签名加上后把注释去掉
-      /*if (!Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
+      if (!Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " packager error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
-      }*/
+      }
       if (member.getPackEndTime() != blockHeader.getTime()) {
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " time error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
@@ -173,7 +172,7 @@ public class BlockValidator {
       检查区块交中是否存在多个黄牌交易
       Check whether there are multiple yellow trades in block handover
       */
-      for(int index = 1;index < txs.size() - 1; index++){
+      for(int index = 1;index < txs.size(); index++){
          tx = txs.get(index);
          if(tx.getType() == ConsensusConstant.TX_TYPE_COINBASE){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());

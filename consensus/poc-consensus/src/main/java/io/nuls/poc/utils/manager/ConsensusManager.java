@@ -2,8 +2,6 @@ package io.nuls.poc.utils.manager;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.base.signture.BlockSignature;
-import io.nuls.base.signture.SignatureUtil;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.Chain;
@@ -11,9 +9,9 @@ import io.nuls.poc.model.bo.ChargeResultData;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
+import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
@@ -298,8 +296,12 @@ public class ConsensusManager {
      * @return Block
      */
     public Block createBlock(Chain chain,BlockData blockData, byte[] packingAddress){
-        //todo 调账户模块接口验证账户正确性+获取账户EcKey
-        ECKey eckey = new ECKey();
+        try {
+            CallMethodUtils.accountValid(chain.getConfig().getChainId(),AddressTool.getStringAddressByBytes(packingAddress),null);
+        }catch (NulsException e){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            return null;
+        }
         Block block = new Block();
         block.setTxs(blockData.getTxList());
         BlockHeader header = new BlockHeader();
@@ -322,13 +324,12 @@ public class ConsensusManager {
         }
         header.setMerkleHash(NulsDigestData.calcMerkleDigestData(txHashList));
         header.setHash(NulsDigestData.calcDigestData(block.getHeader()));
-        BlockSignature scriptSig = new BlockSignature();
-        NulsSignData signData = SignatureUtil.signDigest(header.getHash().getDigestBytes(), eckey);
-        scriptSig.setSignData(signData);
-        scriptSig.setPublicKey(eckey.getPubKey());
-        header.setBlockSignature(scriptSig);
-        //todo 设置了签名后可以去掉
-        header.setPackingAddress(packingAddress);
+        try {
+            CallMethodUtils.blockSignature(chain.getConfig().getChainId(),AddressTool.getStringAddressByBytes(packingAddress),header);
+        }catch (NulsException e){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            return null;
+        }
         return block;
     }
 
