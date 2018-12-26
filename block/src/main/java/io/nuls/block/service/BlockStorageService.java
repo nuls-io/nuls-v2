@@ -35,13 +35,6 @@ import java.util.List;
 public interface BlockStorageService {
 
     /**
-     * 区块存储初始化
-     * @param chainId
-     * @throws Exception
-     */
-    void init(int chainId);
-
-    /**
      * 存储一个{@link BlockHeaderPo}
      * @param chainId
      * @param blockHeader

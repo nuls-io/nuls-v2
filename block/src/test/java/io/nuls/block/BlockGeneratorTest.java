@@ -22,7 +22,7 @@ package io.nuls.block;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.config.GenesisBlock;
+import io.nuls.block.model.GenesisBlock;
 import io.nuls.block.test.BlockGenerator;
 import org.junit.Assert;
 import org.junit.Test;

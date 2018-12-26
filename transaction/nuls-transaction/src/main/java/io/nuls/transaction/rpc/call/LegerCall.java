@@ -97,4 +97,24 @@ public class LegerCall {
         return new BigInteger("0");
     }
 
+    /**
+     * 发送交易给账本
+     * @param chainId
+     * @param tx
+     * @param comfirmed 是否是已确认的交易
+     */
+    public static boolean sendTx(int chainId, Transaction tx, boolean comfirmed){
+        return true;
+    }
+
+    /**
+     * 根据交易回滚数据
+     * @param chainId
+     * @param tx
+     * @param comfirmed 是否是已确认的交易
+     */
+    public static boolean rollbackTxLeger(int chainId, Transaction tx, boolean comfirmed){
+        return true;
+    }
+
 }

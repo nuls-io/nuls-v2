@@ -1,13 +1,13 @@
 [
   {
-    "name": "xxx",
-    "remark": "xxx",
+    "name": "orphanChainMaxAge",
+    "remark": "孤儿链最大年龄",
     "readOnly": "true",
-    "value": "xxx"
+    "value": "5"
   },
   {
     "name": "validBlockInterval",
-    "remark": "为阻止恶意节点提前出块，设置此参数，区块时间戳大于当前时间多少就丢弃该区块",
+    "remark": "为阻止恶意节点提前出块,设置此参数,区块时间戳大于当前时间多少就丢弃该区块",
     "readOnly": "true",
     "value": "1000"
   },
@@ -55,7 +55,7 @@
   },
   {
     "name": "resetTime",
-    "remark": "持续多长时间区块高度没有更新时，就重新获取可用节点",
+    "remark": "持续多长时间区块高度没有更新时,就重新获取可用节点",
     "readOnly": "true",
     "value": "180"
   },
@@ -79,19 +79,19 @@
   },
   {
     "name": "consistencyNodePercent",
-    "remark": "一致可用节点最低比例，低于此数不同步区块",
+    "remark": "一致可用节点最低比例,低于此数不同步区块",
     "readOnly": "false",
     "value": "80"
   },
   {
     "name": "minNodeAmount",
-    "remark": "最小可用节点个数，低于此数不同步区块",
+    "remark": "最小可用节点个数,低于此数不同步区块",
     "readOnly": "false",
     "value": "1"
   },
   {
     "name": "downloadNumber",
-    "remark": "同步时，每次从一个节点下载多少区块",
+    "remark": "同步时,每次从一个节点下载多少区块",
     "readOnly": "true",
     "value": "20"
   },

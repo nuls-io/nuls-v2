@@ -27,17 +27,20 @@ import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
+import io.nuls.block.model.ChainContext;
 import io.nuls.tools.log.Log;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static io.nuls.block.constant.RunningStatusEnum.EXCEPTION;
 import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_CHAINS;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
 
 /**
- * 孤儿链的形成原因分析：因为网络问题，在没有收到Block(100)的情况下，已经收到了Block(101)，此时Block(101)不能连接到主链上，形成孤儿链
+ * 孤儿链的形成原因分析：因为网络问题,在没有收到Block(100)的情况下,已经收到了Block(101),此时Block(101)不能连接到主链上,形成孤儿链
  * 孤儿链定时处理器
  * 孤儿链处理大致流程：
  * 1.清理无效数据
@@ -64,87 +67,86 @@ public class OrphanChainsMonitor implements Runnable {
     public void run() {
 
         for (Integer chainId : ContextManager.chainIds) {
+            ChainContext context = ContextManager.getContext(chainId);
             try {
-                //判断该链的运行状态，只有正常运行时才会有孤儿链的处理
-                RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
+                //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
+                RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RUNNING)) {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
-                    return;
+                    continue;
                 }
-                Chain masterChain = ChainManager.getMasterChain(chainId);
-                SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
-                if (orphanChains.size() < 1) {
-                    return;
-                }
-                //1.清理链起始高度位于主链最新高度增减30(可配置)范围外的孤儿链
-                long latestHeight = masterChain.getEndHeight();
-                int heightRange = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.HEIGHT_RANGE));
-                ContextManager.getContext(chainId).setStatus(MAINTAIN_CHAINS);
-                for (Chain orphanChain : orphanChains) {
-                    if (Math.abs(orphanChain.getStartHeight() - latestHeight) > heightRange) {
-                        //清理orphanChain，并递归清理orphanChain的所有子链
-                        ChainManager.deleteOrphanChain(chainId, orphanChain, true);
+                ReentrantReadWriteLock.ReadLock readLock = context.getReadLock();
+                if (readLock.tryLock(1, TimeUnit.SECONDS)) {
+                    Chain masterChain = ChainManager.getMasterChain(chainId);
+                    SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+                    if (orphanChains.size() < 1) {
+                        readLock.unlock();
+                        continue;
+                    }
+                    readLock.unlock();
+                    ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
+                    if (writeLock.tryLock(1, TimeUnit.SECONDS)) {
+                        SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
+                        //标记、变更链属性阶段
+                        for (Chain orphanChain : orphanChains) {
+                            mark(orphanChain, masterChain, forkChains, orphanChains);
+                        }
+                        //复制、清除阶段
+                        SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
+                        for (Chain orphanChain : orphanChains) {
+                            copy(chainId, maintainedOrphanChains, orphanChain);
+                        }
+                        ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
+                        forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
+                        maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
+                        context.setStatus(RUNNING);
+                        writeLock.unlock();
                     }
                 }
-
-                SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
-                //2.标记、变更链属性阶段
-                for (Chain orphanChain : orphanChains) {
-                    mark(orphanChain, masterChain, forkChains, orphanChains);
-                }
-                //3.复制、清除阶段
-                SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
-                for (Chain orphanChain : orphanChains) {
-                    copy(chainId, maintainedOrphanChains, orphanChain);
-                }
-                ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
-                forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
-                maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
-                ContextManager.getContext(chainId).setStatus(RUNNING);
             } catch (Exception e) {
-                ContextManager.getContext(chainId).setStatus(EXCEPTION);
+                context.setStatus(EXCEPTION);
                 Log.error("chainId-{},maintain OrphanChains fail!error msg is:{}", chainId, e.getMessage());
             }
         }
     }
 
     private void copy(Integer chainId, SortedSet<Chain> maintainedOrphanChains, Chain orphanChain) {
-        //如果标记为与主链相连，orphanChain不会复制到新的孤儿链集合，也不会进入分叉链集合，但是所有orphanChain的直接子链标记为ChainTypeEnum.MASTER_FORK
+        //如果标记为与主链相连,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,但是所有orphanChain的直接子链标记为ChainTypeEnum.MASTER_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.MASTER_APPEND)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.MASTER_FORK));
             return;
         }
-        //如果标记为从主链分叉，orphanChain不会复制到新的孤儿链集合，但是会进入分叉链集合，所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        //如果标记为从主链分叉,orphanChain不会复制到新的孤儿链集合,但是会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.MASTER_FORK)) {
             ChainManager.addForkChain(chainId, orphanChain);
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
 
-        //如果标记为与分叉链相连，orphanChain不会复制到新的孤儿链集合，也不会进入分叉链集合，但是所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        //如果标记为与分叉链相连,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,但是所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.FORK_APPEND)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
-        //如果标记为从分叉链分叉，orphanChain不会复制到新的孤儿链集合，但是会进入分叉链集合，所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
+        //如果标记为从分叉链分叉,orphanChain不会复制到新的孤儿链集合,但是会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.FORK_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.FORK_FORK)) {
             ChainManager.addForkChain(chainId, orphanChain);
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.FORK_FORK));
             return;
         }
 
-        //如果标记为与孤儿链相连，不会复制到新的孤儿链集合，所有orphanChain的直接子链会复制到新的孤儿链集合，类型不变
+        //如果标记为与孤儿链相连,不会复制到新的孤儿链集合,所有orphanChain的直接子链会复制到新的孤儿链集合,类型不变
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_APPEND)) {
             return;
         }
 
-        //如果标记为与孤儿链分叉，会复制到新的孤儿链集合，所有orphanChain的直接子链会复制到新的孤儿链集合，类型不变
+        //如果标记为与孤儿链分叉,会复制到新的孤儿链集合,所有orphanChain的直接子链会复制到新的孤儿链集合,类型不变
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN_FORK)) {
             maintainedOrphanChains.add(orphanChain);
             return;
         }
 
-        //如果标记为孤儿链(未变化)，或者从孤儿链分叉，复制到新的孤儿链集合
+        //如果标记为孤儿链(未变化),或者从孤儿链分叉,复制到新的孤儿链集合
         if (orphanChain.getType().equals(ChainTypeEnum.ORPHAN)) {
             maintainedOrphanChains.add(orphanChain);
         }
@@ -203,8 +205,8 @@ public class OrphanChainsMonitor implements Runnable {
     }
 
     /**
-     * 尝试把subChain链接到mainChain的末尾，形成mainChain-subChain的结构
-     * 两个链相连成功，需要从孤儿链集合中删除subChain
+     * 尝试把subChain链接到mainChain的末尾,形成mainChain-subChain的结构
+     * 两个链相连成功,需要从孤儿链集合中删除subChain
      *
      * @param mainChain
      * @param subChain

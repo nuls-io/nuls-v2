@@ -46,7 +46,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
 
 /**
- * 处理收到的{@link TxGroupMessage}，用于区块的广播与转发
+ * 处理收到的{@link TxGroupMessage},用于区块的广播与转发
  *
  * @author captain
  * @version 1.0
@@ -84,12 +84,12 @@ public class TxGroupHandler extends BaseCmd {
 
         NulsDigestData blockHash = message.getBlockHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        //1.已收到完整区块，丢弃
+        //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
             return success();
         }
 
-        //2.已收到部分区块，还缺失交易信息，收到的应该就是缺失的交易信息
+        //2.已收到部分区块,还缺失交易信息,收到的应该就是缺失的交易信息
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash).getSmallBlock();
             if (null == smallBlock) {

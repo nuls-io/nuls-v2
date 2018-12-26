@@ -59,7 +59,7 @@ public class RequestLoopProcessor implements Runnable {
 
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
-                Log.error(e.getMessage());
+                Log.error(e);
             }
         }
     }

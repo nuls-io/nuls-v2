@@ -46,14 +46,6 @@ public abstract class BaseMessage extends BaseNulsData {
     @Getter @Setter
     protected String command;
 
-    public BaseMessage() {
-
-    }
-
-    public BaseMessage(String command) {
-        this.command = command;
-    }
-
     @Override
     public int size() {
         return 4;

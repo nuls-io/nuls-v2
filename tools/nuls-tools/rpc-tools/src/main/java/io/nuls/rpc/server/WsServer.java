@@ -88,7 +88,7 @@ public class WsServer extends WebSocketServer {
         if (!CmdDispatcher.handshakeKernel()) {
             throw new Exception("Handshake kernel failed");
         } else {
-            Log.info("Connect manager success." + ServerRuntime.LOCAL.getModuleName() + " ready!");
+            Log.debug("Connect manager success." + ServerRuntime.LOCAL.getModuleName() + " ready!");
         }
     }
 
@@ -123,7 +123,7 @@ public class WsServer extends WebSocketServer {
                     /*
                     取消订阅，直接响应
                      */
-                    Log.info("UnsubscribeFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
+                    Log.debug("UnsubscribeFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
                     CmdHandler.unsubscribe(webSocket, message);
                     break;
                 case Request:
@@ -131,7 +131,7 @@ public class WsServer extends WebSocketServer {
                     如果不能提供服务，则直接返回
                     If no service is available, return directly
                      */
-                    if (!ServerRuntime.startService) {
+                    if (!ServerRuntime.isReady()) {
                         CmdHandler.serviceNotStarted(webSocket, message.getMessageId());
                         break;
                     }
@@ -140,7 +140,7 @@ public class WsServer extends WebSocketServer {
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing
                      */
-                    Log.info("RequestFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
+                    Log.debug("RequestFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
                     Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
 
                     if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
@@ -169,7 +169,7 @@ public class WsServer extends WebSocketServer {
             }
 
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
         }
     }
 
@@ -185,7 +185,7 @@ public class WsServer extends WebSocketServer {
         Constants.THREAD_POOL.execute(new RequestSingleProcessor());
         Constants.THREAD_POOL.execute(new RequestLoopProcessor());
 //        Constants.THREAD_POOL.execute(new HeartbeatProcessor());
-        Log.info("Server<" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
+        Log.debug("Server<" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
     }
 
     /**

@@ -52,7 +52,7 @@ public class BlockDownLoadResult {
      */
     private Node node;
     /**
-     * 标志从node节点批量下载区块是否成功，要全部下载完成才算成功
+     * 标志从node节点批量下载区块是否成功,要全部下载完成才算成功
      */
     private boolean success;
     /**

@@ -24,6 +24,8 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
+import io.nuls.block.thread.BlockDownloader;
+import io.nuls.block.thread.BlockWorker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 
 /**
- * 主要缓存区块同步过程中收到的区块，还有孤儿链维护线程请求的单个区块
+ * 主要缓存区块同步过程中收到的区块,还有孤儿链维护线程请求的单个区块
  *
  * @author captain
  * @version 1.0
@@ -42,11 +44,12 @@ import java.util.concurrent.Future;
 public class CacheHandler {
 
     /**
-     * 批量下载区块请求-hash缓存
+     * 批量下载区块请求-缓存下载完成消息
      */
-    private static Map<Integer, DataCacher<CompleteMessage>> batchBlockHashCacher = new ConcurrentHashMap<>();
+    private static Map<Integer, DataCacher<CompleteMessage>> completeCacher = new ConcurrentHashMap<>();
+
     /**
-     * 批量下载区块请求-排序前的区块缓存队列，由BlockDownloader放入队列，供BlockCollector使用
+     * 批量下载区块请求-排序前的区块缓存队列,由BlockDownloader放入队列,供BlockCollector取出排序后放入共享队列
      */
     private static Map<Integer, Map<NulsDigestData, List<Block>>> workerBlockCacher = new ConcurrentHashMap<>();
 
@@ -63,20 +66,34 @@ public class CacheHandler {
     public static void init(int chainId){
         workerBlockCacher.put(chainId, new ConcurrentHashMap<>());
         singleBlockCacher.put(chainId, new DataCacher<>());
-        batchBlockHashCacher.put(chainId, new DataCacher<>());
+        completeCacher.put(chainId, new DataCacher<>());
     }
 
+    /**
+     * 下载单个区块任务开始时,添加缓存
+     *
+     * @param chainId
+     * @param requestHash
+     * @return
+     */
     public static CompletableFuture<Block> addSingleBlockRequest(int chainId, NulsDigestData requestHash) {
         return singleBlockCacher.get(chainId).addFuture(requestHash);
     }
 
+    /**
+     * 一个{@link BlockWorker}开始工作时,进行缓存初始化
+     *
+     * @param chainId
+     * @param hash
+     * @return
+     */
     public static Future<CompleteMessage> addBatchBlockRequest(int chainId, NulsDigestData hash) {
         workerBlockCacher.get(chainId).put(hash, new ArrayList<>());
-        return batchBlockHashCacher.get(chainId).addFuture(hash);
+        return completeCacher.get(chainId).addFuture(hash);
     }
 
     /**
-     * 根据requestHash判断该区块是同步区块过程中收到的区块，还是孤儿链维护过程收到的区块，还是恶意区块
+     * 根据requestHash判断该区块是同步区块过程中收到的区块,还是孤儿链维护过程收到的区块,还是恶意区块,分别放入不同的缓存
      *
      * @param chainId
      * @param message
@@ -92,19 +109,44 @@ public class CacheHandler {
         singleBlockCacher.get(chainId).complete(block.getHeader().getHash(), block);
     }
 
+    /**
+     * 获取{@link BlockWorker}下载到的区块
+     *
+     * @param chainId
+     * @param requestHash
+     * @return
+     */
     public static List<Block> getBlockList(int chainId, NulsDigestData requestHash) {
         return workerBlockCacher.get(chainId).get(requestHash);
     }
 
+    /**
+     *
+     * 标记一个{@link BlockWorker}的下载任务结束
+     * @param chainId
+     * @param message
+     */
     public static void batchComplete(int chainId, CompleteMessage message) {
-        batchBlockHashCacher.get(chainId).complete(message.getRequestHash(), message);
+        completeCacher.get(chainId).complete(message.getRequestHash(), message);
     }
 
+    /**
+     * 移除缓存
+     *
+     * @param chainId
+     * @param hash
+     */
     public static void removeBlockByHashFuture(int chainId, NulsDigestData hash) {
         singleBlockCacher.get(chainId).removeFuture(hash);
     }
 
+    /**
+     * 移除缓存
+     *
+     * @param chainId
+     * @param hash
+     */
     public static void removeRequest(int chainId, NulsDigestData hash) {
-        batchBlockHashCacher.get(chainId).removeFuture(hash);
+        completeCacher.get(chainId).removeFuture(hash);
     }
 }

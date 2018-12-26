@@ -1,15 +1,19 @@
 package io.nuls.test.rpc;
 
 import io.nuls.base.data.Address;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.parse.SerializeUtils;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -57,6 +61,7 @@ public class ConsensusTest {
     public void updateAgentStatus()throws Exception{
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
+        params.put("status", 1);
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params);
         System.out.println(cmdResp.getResponseData());
     }
@@ -98,5 +103,84 @@ public class ConsensusTest {
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getPublishList", params);
         System.out.println(cmdResp.getResponseData());
         //"fb8017b246114784749d46eebff4c34f446b500521f0cb19f66118O2ea8c942f7688180141c5a4feb65e24aedb5b529d";
+    }
+
+    /**
+     * 节点创建到打包数据准备
+     * */
+    @Test
+    public void packing(){
+        //1.创建账户
+        List<String> accountList = null;
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", 1);
+            params.put("count", 4);
+            params.put("password", null);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            if (!cmdResp.isSuccess()) {
+                return;
+            }
+            accountList = (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount");
+            if(accountList == null || accountList.size() == 0){
+                return;
+            }
+            System.out.println("accountList:"+accountList);
+
+            //2.创建节点交易创建
+            String packingAddress = accountList.get(0);
+            String agentAddress = accountList.get(1);
+            String rewardAddress = accountList.get(2);
+            Map<String,Object> caParams = new HashMap<>();
+            caParams.put("agentAddress",agentAddress);
+            caParams.put("chainId",1);
+            caParams.put("deposit",20000);
+            caParams.put("commissionRate",10);
+            caParams.put("packingAddress",packingAddress);
+            caParams.put("password","");
+            caParams.put("rewardAddress",rewardAddress);
+            Response caResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", caParams);
+            HashMap caResult = (HashMap)((HashMap) caResp.getResponseData()).get("cs_createAgent");
+            String caTxHex = (String)caResult.get("txHex");
+            System.out.println("createAgent:"+caResp.getResponseData());
+
+            //3.创建节点交易提交
+            Map<String,Object>caTxCommit = new HashMap<>();
+            caTxCommit.put("chainId",1);
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.setHeight(10);
+            caTxCommit.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
+            caTxCommit.put("tx",caTxHex);
+            Response caCommitResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentCommit", caTxCommit);
+            HashMap caCommitResult = (HashMap)((HashMap) caCommitResp.getResponseData()).get("cs_createAgentCommit");
+            String agentHash = (String)caCommitResult.get("agentHash");
+            System.out.println("createAgentCommit:"+caCommitResp.getResponseData());
+
+
+            //4.委托节点交易创建
+            String depositAddress = accountList.get(3);
+            Map<String,Object> dpParams = new HashMap<>();
+            dpParams.put("chainId",1);
+            dpParams.put("address",depositAddress);
+            dpParams.put("agentHash",agentHash);
+            dpParams.put("deposit","300000");
+            Response dpResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
+            HashMap dpResult = (HashMap)((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
+            String dpTxHex = (String)dpResult.get("txHex");
+            System.out.println("createDeposit"+cmdResp.getResponseData());
+
+            //5.委托交易提交
+            Map<String,Object>dpTxCommitParams = new HashMap<>();
+            dpTxCommitParams.put("chainId",1);
+            BlockHeader blockHeader1 = new BlockHeader();
+            blockHeader.setHeight(2);
+            dpTxCommitParams.put("blockHeader", HexUtil.encode(blockHeader1.serialize()));
+            dpTxCommitParams.put("tx",dpTxHex);
+            Response dpCommitResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositCommit", dpTxCommitParams);
+            System.out.println("deposit transaction commit:"+dpCommitResp.getResponseData());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

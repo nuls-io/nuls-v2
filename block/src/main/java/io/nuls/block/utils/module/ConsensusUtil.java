@@ -22,7 +22,6 @@ package io.nuls.block.utils.module;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.SmallBlock;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
@@ -41,31 +40,70 @@ import java.util.Map;
  */
 public class ConsensusUtil {
 
-    public static boolean verify(int chainId, Block block) {
-//        try {
-//            Map<String, Object> params = new HashMap<>(5);
+    /**
+     * 共识验证
+     *
+     * @param chainId
+     * @param block
+     * @param download
+     * @return
+     */
+    public static boolean verify(int chainId, Block block, int download) {
+        try {
+            Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-//            params.put("chainId", chainId);
-//
-//            params.put("download", true);
-//            params.put("block", HexUtil.byteToHex(block.serialize()));
-//
-//            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
-//        } catch (Exception e) {
-//            Log.error(e);
-//            return false;
-//        }
-        return true;
+            params.put("chainId", chainId);
+            params.put("download", download);
+            params.put("block", HexUtil.encode(block.serialize()));
+
+            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
     }
 
-    public static boolean sendBlockHeader(int chainId, BlockHeader blockHeader) {
+    /**
+     * 同步完成时通知共识模块
+     *
+     * @param chainId
+     * @param status        1-正常,0-等待
+     * @return
+     */
+    public static boolean notice(int chainId, int status) {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            params.put("blockHeader", blockHeader);
+            params.put("status", status);
 
-            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();
+            boolean success = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
+            while (!success) {
+                Thread.sleep(500L);
+               return notice(chainId, status);
+            }
+            return success;
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 收到分叉区块时通知共识模块
+     *
+     * @param chainId
+     * @return
+     */
+    public static boolean fork(int chainId, BlockHeader masterHeader, BlockHeader forkHeader) {
+        try {
+            Map<String, Object> params = new HashMap<>(5);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("blockHeader", HexUtil.encode(masterHeader.serialize()));
+            params.put("evidenceHeader", HexUtil.encode(forkHeader.serialize()));
+
+            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_addEvidenceRecord", params).isSuccess();
         } catch (Exception e) {
             Log.error(e);
             return false;

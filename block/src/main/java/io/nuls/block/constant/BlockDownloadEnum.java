@@ -38,7 +38,7 @@ public enum BlockDownloadEnum {
     DOWNLOADING,
 
     /**
-     * 收到部分区块，主要是缺失一部分交易
+     * 收到部分区块,主要是缺失一部分交易
      * Running exception
      */
     SUCCESS,

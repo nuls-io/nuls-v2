@@ -126,7 +126,7 @@ public class CmdHandler {
 
         String key = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
         if (ServerRuntime.UNSUBSCRIBE_LIST.contains(key)) {
-            Log.info("取消订阅responseWithPeriod：" + key);
+            Log.debug("取消订阅responseWithPeriod：" + key);
             return false;
         }
 
@@ -160,7 +160,7 @@ public class CmdHandler {
             Log.error("Socket disconnected, remove");
             return false;
         } catch (Exception e) {
-            Log.error(e.getMessage());
+            Log.error(e);
             return false;
         }
     }
@@ -266,7 +266,7 @@ public class CmdHandler {
     public static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request, String cmd) {
         String unsubscribeKey = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
         if (ServerRuntime.UNSUBSCRIBE_LIST.contains(unsubscribeKey)) {
-            Log.info("取消订阅responseWithEventCount：" + unsubscribeKey);
+            Log.debug("取消订阅responseWithEventCount：" + unsubscribeKey);
             return false;
         }
 
@@ -288,7 +288,6 @@ public class CmdHandler {
                     continue;
                 }
 
-
                 /*
                 这段代码非常不优雅，可以改进下（我没时间了，怕改出BUG），代码的业务逻辑如下：
                 用户的cmd会返回一个对象，RPC会自动把这个对象替换为Map，Key是调用的方法名，Value是内容（Berzeck强烈要求）
@@ -303,18 +302,17 @@ public class CmdHandler {
 
                 Map<String, Object> responseData = new HashMap<>(1);
                 responseData.put((String) method, response.getResponseData());
-                response.setResponseData(responseData);
                 realResponse.setResponseData(responseData);
 
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
-                rspMessage.setMessageData(response);
+                rspMessage.setMessageData(realResponse);
                 try {
-                    Log.info("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
+                    Log.debug("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
                     webSocket.send(JSONUtils.obj2json(rspMessage));
                 } catch (WebsocketNotConnectedException e) {
                     Log.error("Socket disconnected, remove");
                 } catch (JsonProcessingException e) {
-                    Log.error(e.getMessage());
+                    Log.error(e);
                 }
 
                 ServerRuntime.CMD_LAST_RESPONSE_BE_USED.put(eventCountKey, true);

@@ -54,7 +54,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 
 /**
- * 处理收到的{@link SmallBlockMessage}，用于区块的广播与转发
+ * 处理收到的{@link SmallBlockMessage},用于区块的广播与转发
  *
  * @author captain
  * @version 1.0
@@ -92,19 +92,19 @@ public class SmallBlockHandler extends BaseCmd {
 
         BlockHeader header = smallBlock.getHeader();
         NulsDigestData blockHash = header.getHash();
-        //阻止恶意节点提前出块，拒绝接收未来一定时间外的区块
+        //阻止恶意节点提前出块,拒绝接收未来一定时间外的区块
         int validBlockInterval = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.VALID_BLOCK_INTERVAL));
         if (header.getTime() > (NetworkUtil.currentTime() + validBlockInterval)) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        //1.已收到完整区块，丢弃
+        //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
             return success();
         }
 
-        //2.已收到部分区块，还缺失交易信息，发送HashListMessage到源节点
+        //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
             HashListMessage request = new HashListMessage();
@@ -124,8 +124,8 @@ public class SmallBlockHandler extends BaseCmd {
             }
             Log.debug("recieve SmallBlockMessage from(" + nodeId + "), tx count : " + header.getTxCount() + " , header height:" + header.getHeight() + ", preHash:" + header.getPreHash() + " , hash:" + blockHash);
             NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
-            //共识节点打包的交易包括两种交易，一种是在网络上已经广播的普通交易，一种是共识节点生成的特殊交易(如共识奖励、红黄牌)，后面一种交易其他节点的未确认交易池中不可能有，所以都放在SubTxList中
-            //还有一种场景时收到smallBlock时，有一些普通交易还没有缓存在未确认交易池中，此时要再从源节点请求
+            //共识节点打包的交易包括两种交易,一种是在网络上已经广播的普通交易,一种是共识节点生成的特殊交易(如共识奖励、红黄牌),后面一种交易其他节点的未确认交易池中不可能有,所以都放在SubTxList中
+            //还有一种场景时收到smallBlock时,有一些普通交易还没有缓存在未确认交易池中,此时要再从源节点请求
             Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());
             List<Transaction> subTxList = smallBlock.getSubTxList();
             for (Transaction tx : subTxList) {
@@ -153,7 +153,7 @@ public class SmallBlockHandler extends BaseCmd {
                 request.setTxHashList(needHashList);
                 request.setCommand(CommandConstant.GET_TXGROUP_MESSAGE);
                 NetworkUtil.sendToNode(chainId, request, nodeId);
-                //这里的smallBlock的subTxList中包含一些非系统交易，用于跟TxGroup组合成完整区块
+                //这里的smallBlock的subTxList中包含一些非系统交易,用于跟TxGroup组合成完整区块
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(needHashList, smallBlock);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.INCOMPLETE);

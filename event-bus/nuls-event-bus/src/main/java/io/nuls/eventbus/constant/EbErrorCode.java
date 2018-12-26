@@ -3,6 +3,7 @@ package io.nuls.eventbus.constant;
 import io.nuls.tools.constant.ErrorCode;
 
 /**
+ * Error codes for event bus
  * @author naveen
  */
 public interface EbErrorCode {

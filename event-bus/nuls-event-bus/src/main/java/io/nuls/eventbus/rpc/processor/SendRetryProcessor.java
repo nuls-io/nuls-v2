@@ -3,17 +3,18 @@ package io.nuls.eventbus.rpc.processor;
 import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.model.Subscriber;
 import io.nuls.eventbus.rpc.invoke.EventAuditInvoke;
+import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
-import io.nuls.tools.log.Log;
+import static io.nuls.eventbus.util.EbLog.Log;
 
 import java.util.Map;
 
-/** Separate thread for each subscriber to perform retry process in case event data is not sent successfully.
+/** Separate thread for each subscriber to perform send & retry process in case event data is not sent successfully.
  *  subscriber has to send acknowledgement for the retry process.
  * @author naveen
  */
-public class SendRetryProcessor implements Runnable {
+class SendRetryProcessor implements Runnable {
 
     private final Object[] subscriberEvent;
 
@@ -21,6 +22,9 @@ public class SendRetryProcessor implements Runnable {
         this.subscriberEvent = obj;
     }
 
+    /**
+     * Separate thread for send & retry process for each subscriber
+     */
     @Override
     public void run() {
         try{
@@ -31,7 +35,7 @@ public class SendRetryProcessor implements Runnable {
                 String messageId = sendEvent(subscriber,params);
                 int retryAttempt = 0;
                 Log.debug("Acknowledgement for send event messageId: "+messageId +" received");
-                while (retryAttempt <= EbConstants.EVENT_DISPATCH_RETRY_COUNT && messageId == null){
+                while (retryAttempt < EbConstants.EVENT_DISPATCH_RETRY_COUNT && messageId == null){
                     Thread.sleep(EbConstants.EVENT_RETRY_WAIT_TIME);
                     retryAttempt = retryAttempt + 1;
                     Log.debug("Retry for Subscriber : "+subscriber.getModuleAbbr() +" --> "+"Retry Attempt:"+retryAttempt);
@@ -48,6 +52,8 @@ public class SendRetryProcessor implements Runnable {
             return CmdDispatcher.requestAndInvokeWithAck(subscriber.getModuleAbbr(),subscriber.getCallBackCmd(),params,Constants.ZERO,Constants.ZERO,new EventAuditInvoke());
         }catch (Exception e){
             Log.error("Exception in sending event to subscriber :"+subscriber.getModuleAbbr()+" ->"+e.getMessage());
+            //get latest connection info from Kernel for the role
+            EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{subscriber.getModuleAbbr(), EbConstants.SUBSCRIBE});
         }
         return null;
     }

@@ -24,6 +24,7 @@
  */
 package io.nuls.base.data;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.constant.TxStatusEnum;
@@ -37,32 +38,37 @@ import io.nuls.tools.thread.TimeService;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Charlie
  */
 public class Transaction extends BaseNulsData implements Cloneable {
 
-    protected int type;
+    private int type;
 
-    protected byte[] coinData;
+    private byte[] coinData;
 
-    protected byte[] txData;
+    private byte[] txData;
 
-    protected long time;
+    private long time;
 
     private byte[] transactionSignature;
 
-    protected byte[] remark;
+    private byte[] remark;
 
-    protected transient NulsDigestData hash;
+    private transient NulsDigestData hash;
 
-    protected long blockHeight = -1L;
+    private long blockHeight = -1L;
 
-    protected transient TxStatusEnum status = TxStatusEnum.UNCONFIRM;
+    private transient TxStatusEnum status = TxStatusEnum.UNCONFIRM;
 
-    protected transient int size;
+    private transient int size;
+
+    /**
+     * 在区块中的顺序，存储在rocksDB中是无序的，保存区块时赋值，取出后根据此值排序
+     */
+    private int inBlockIndex;
 
     public Transaction() {
 
@@ -209,6 +215,14 @@ public class Transaction extends BaseNulsData implements Cloneable {
         return coinData;
     }
 
+    public int getInBlockIndex() {
+        return inBlockIndex;
+    }
+
+    public void setInBlockIndex(int inBlockIndex) {
+        this.inBlockIndex = inBlockIndex;
+    }
+
     public CoinData getCoinDataInstance() throws NulsException {
         CoinData coinData = new CoinData();
         coinData.parse(new NulsByteBuffer(this.coinData));
@@ -252,6 +266,26 @@ public class Transaction extends BaseNulsData implements Cloneable {
             fee = cData.getFee();
         }
         return fee;
+    }
+
+    /**
+     * 判断交易是否为多签交易
+     * Judging whether a transaction is a multi-signature transaction
+     * */
+    public boolean isMultiSignTx()throws NulsException {
+        if(null == coinData){
+            return false;
+        }
+        CoinData cData = getCoinDataInstance();
+        List<CoinFrom> from = cData.getFrom();
+        if(from == null || from.size() == 0){
+            return false;
+        }
+        CoinFrom coinFrom = from.get(0);
+        if(AddressTool.isMultiSignAddress(coinFrom.getAddress())){
+            return true;
+        }
+        return false;
     }
 
     @Override

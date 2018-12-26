@@ -33,6 +33,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
@@ -43,12 +44,12 @@ import io.nuls.tools.thread.TimeService;
 import io.nuls.transaction.cache.TxVerifiedPool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.AccountSignDTO;
-import io.nuls.transaction.model.dto.BlockHeaderDigestDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.ChainCall;
@@ -87,6 +88,9 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private ConfirmedTransactionService confirmedTransactionService;
+
+    @Autowired
+    private TransactionH2Service transactionH2Service;
 
     @Override
     public boolean register(Chain chain, TxRegister txRegister) {
@@ -265,6 +269,9 @@ public class TransactionServiceImpl implements TransactionService {
                     }
                     byte[] fromAddress = coinFromList.get(0).getAddress();
                     MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(fromAddress);
+                    if(null == multiSigAccount){
+                        throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
+                    }
                     multiSignTxSignature.setM(multiSigAccount.getM());
                     multiSignTxSignature.setPubKeyList(multiSigAccount.getPubKeyList());
                 }
@@ -575,7 +582,7 @@ public class TransactionServiceImpl implements TransactionService {
         }
         //验证txData发起链id和from地址链id是否一致
         int fromChainId = getCrossTxFromsOriginChainId(tx);
-        CrossTxData crossTxData = TxUtil.getCrossTxData(tx);
+        CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
         if (fromChainId != crossTxData.getChainId()) {
             throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
         }
@@ -639,13 +646,13 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public boolean crossTransactionCommit(Chain chain, Transaction tx, BlockHeaderDigestDTO blockHeader) {
+    public boolean crossTransactionCommit(Chain chain, Transaction tx, BlockHeaderDigest blockHeaderDigest) {
         //todo 调账本记账
         return true;
     }
 
     @Override
-    public boolean crossTransactionRollback(Chain chain, Transaction tx, BlockHeaderDigestDTO blockHeader) {
+    public boolean crossTransactionRollback(Chain chain, Transaction tx, BlockHeaderDigest blockHeaderDigest) {
         //todo 调账本回滚？
         return true;
     }
@@ -827,9 +834,14 @@ public class TransactionServiceImpl implements TransactionService {
         for (String txHex : txHexList) {
             //将txHex转换为Transaction对象
             Transaction tx = TxUtil.getTransaction(txHex);
+            Transaction transaction = confirmedTransactionService.getTransaction(chain, tx.getHash());
+            if(null != transaction){
+                //交易已存在于已确认块中
+                return false;
+            }
             txList.add(tx);
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-                CrossTxData crossTxData = TxUtil.getCrossTxData(tx);
+                CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
                 if (crossTxData.getChainId() != chain.getConfig().getAssetsId()) {
                     //如果是跨链交易，发起链不是当前链，则核对(跨链验证的结果)
                     CrossChainTx crossChainTx = crossChainTxStorageService.getTx(crossTxData.getChainId(), tx.getHash());
@@ -837,6 +849,7 @@ public class TransactionServiceImpl implements TransactionService {
                     /**
                      * 核对(跨链验证的结果)
                      */
+                    return false;
                 }
             }
             //验证单个交易
@@ -858,7 +871,17 @@ public class TransactionServiceImpl implements TransactionService {
             }
         }
         //统一验证
-        TransactionCall.txsModuleValidators(chain, moduleVerifyMap);
+        boolean rs = TransactionCall.txsModuleValidators(chain, moduleVerifyMap);
+        if(rs){
+            for(Transaction tx : txList){
+                //如果该交易不在交易管理待打包库中，则进行保存
+                if(null == txVerifiedStorageService.getTx(chain.getChainId(), tx.getHash())){
+                    txVerifiedStorageService.putTx(chain.getChainId(), tx);
+                    //保存到h2数据库
+                    transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
+                }
+            }
+        }
         return true;
     }
 

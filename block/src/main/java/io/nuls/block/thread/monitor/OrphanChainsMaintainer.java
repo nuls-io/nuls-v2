@@ -22,10 +22,13 @@ package io.nuls.block.thread.monitor;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ChainManager;
+import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.Node;
 import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.block.utils.module.NetworkUtil;
@@ -33,13 +36,16 @@ import io.nuls.tools.log.Log;
 
 import java.util.List;
 import java.util.SortedSet;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static io.nuls.block.constant.RunningStatusEnum.EXCEPTION;
 import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_CHAINS;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
 
 /**
- * 孤儿链的形成原因分析：因为网络问题，在没有收到Block(100)的情况下，已经收到了Block(101)，此时Block(101)不能连接到主链上，形成孤儿链
+ * 孤儿链的形成原因分析：因为网络问题,在没有收到Block(100)的情况下,已经收到了Block(101),此时Block(101)不能连接到主链上,形成孤儿链
  * 孤儿链定时维护处理器
  * 孤儿链处理大致流程：
  *      1.清理无效数据
@@ -66,39 +72,54 @@ public class OrphanChainsMaintainer implements Runnable {
     public void run() {
 
         for (Integer chainId : ContextManager.chainIds) {
+            ChainContext context = ContextManager.getContext(chainId);
             try {
-                //判断该链的运行状态，只有正常运行时才会有孤儿链的处理
-                RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
+                //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
+                RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RUNNING)) {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
                     return;
                 }
-                SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
-                if (orphanChains.size() < 1) {
-                    return;
+                int orphanChainMaxAge = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.ORPHAN_CHAIN_MAX_AGE));
+                ReentrantReadWriteLock.ReadLock readLock = context.getReadLock();
+                if (readLock.tryLock(1, TimeUnit.SECONDS)) {
+                    SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+                    if (orphanChains.size() < 1) {
+                        readLock.unlock();
+                        return;
+                    }
+                    readLock.unlock();
+                    ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
+                    if (writeLock.tryLock(1, TimeUnit.SECONDS)) {
+                        List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
+                        //维护现有孤儿链,尝试在链首增加区块
+                        context.setStatus(MAINTAIN_CHAINS);
+                        for (Chain orphanChain : orphanChains) {
+                            maintainOrphanChain(chainId, orphanChain, availableNodes, orphanChainMaxAge);
+                        }
+                        context.setStatus(RUNNING);
+                        writeLock.unlock();
+                    }
                 }
-                List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
-                //维护现有孤儿链，尝试在链首增加区块
-                ContextManager.getContext(chainId).setStatus(MAINTAIN_CHAINS);
-                for (Chain orphanChain : orphanChains) {
-                    maintainOrphanChain(chainId, orphanChain, availableNodes);
-                }
-                ContextManager.getContext(chainId).setStatus(RUNNING);
             } catch (Exception e) {
-                ContextManager.getContext(chainId).setStatus(EXCEPTION);
+                context.setStatus(EXCEPTION);
                 Log.error("chainId-{},maintain OrphanChains fail!error msg is:{}", chainId, e.getMessage());
             }
         }
     }
 
     /**
-     * 维护孤儿链，向其他节点请求孤儿链起始区块的上一个区块，仅限于没有父链的孤儿链
-     *
-     * @param chainId
+     * 维护孤儿链,向其他节点请求孤儿链起始区块的上一个区块,仅限于没有父链的孤儿链
+     *  @param chainId
      * @param orphanChain
+     * @param orphanChainMaxAge
      */
-    private void maintainOrphanChain(int chainId, Chain orphanChain, List<Node> availableNodes) {
+    private void maintainOrphanChain(int chainId, Chain orphanChain, List<Node> availableNodes, int orphanChainMaxAge) {
         if (orphanChain.getParent() != null) {
+            return;
+        }
+        AtomicInteger age = orphanChain.getAge();
+        if (age.get() > orphanChainMaxAge) {
             return;
         }
         NulsDigestData previousHash = orphanChain.getPreviousHash();
@@ -114,6 +135,7 @@ public class OrphanChainsMaintainer implements Runnable {
                 orphanChain.getHashList().addFirst(block.getHeader().getHash());
                 return;
             }
+            age.incrementAndGet();
         }
     }
 

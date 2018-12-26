@@ -1,8 +1,10 @@
 package io.nuls.transaction.service;
 
+import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.Result;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.model.bo.Chain;
 
 import java.util.List;
@@ -40,7 +42,7 @@ public interface ConfirmedTransactionService {
      * @param txHashList
      * @return
      */
-    boolean saveTxList(Chain chain, List<byte[]> txHashList);
+    boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeaderDigest blockHeaderDigest) throws NulsException;
 
     /**
      * 批量回滚已确认交易
@@ -48,5 +50,5 @@ public interface ConfirmedTransactionService {
      * @param txHashList
      * @return
      */
-    boolean rollbackTxList(Chain chain, List<byte[]> txHashList);
+    boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeaderDigest blockHeaderDigest) throws NulsException;
 }

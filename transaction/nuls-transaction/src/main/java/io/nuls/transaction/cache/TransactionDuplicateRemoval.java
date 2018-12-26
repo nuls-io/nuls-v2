@@ -1,9 +1,8 @@
-/*-
- * ⁣⁣
+/*
  * MIT License
- * ⁣⁣
- * Copyright (C) 2017 - 2018 nuls.io
- * ⁣⁣
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -11,37 +10,39 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- * ⁣⁣
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  */
-package io.nuls.eventbus.test;
 
-import io.nuls.rpc.info.NoUse;
-import org.junit.Before;
-import org.junit.Test;
+package io.nuls.transaction.cache;
 
-public class AppTest {
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.transaction.utils.InventoryFilter;
 
-    @Before
-    public void before() {
+/**
+ * 用于接收交易去重
+ *
+ * @author: qinyifeng
+ * @date: 2018/12/26
+ */
+public class TransactionDuplicateRemoval {
 
+    private static InventoryFilter FILTER = new InventoryFilter( 1000000);
+
+    public static boolean mightContain(NulsDigestData hash) {
+        return FILTER.contains(hash.getDigestBytes());
     }
 
-    @Test
-    public void test() {
-        try {
-            NoUse.mockKernel();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public static void insert(NulsDigestData hash) {
+        FILTER.insert(hash.getDigestBytes());
     }
 }

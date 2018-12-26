@@ -45,7 +45,7 @@ public interface TxVerifiedStorageService {
      * 根据交易hash批量查询已验证交易数据
      *
      * @param chainId
-     * @param hashList
+     * @param hashList NulsDigestData serialize data
      * @return 交易数据列表
      */
     List<Transaction> getTxList(int chainId, List<byte[]> hashList);
@@ -53,7 +53,7 @@ public interface TxVerifiedStorageService {
     /**
      * 根据交易hash批量删除已验证交易数据
      * @param chainId
-     * @param hashList
+     * @param hashList NulsDigestData serialize data
      * @return 删除是否成功
      */
     boolean removeTxList(int chainId, List<byte[]> hashList);

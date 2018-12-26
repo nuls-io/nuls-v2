@@ -40,7 +40,11 @@ import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.log.LogUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.NulsSignData;
+import io.nuls.base.signture.BlockSignature;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -52,8 +56,10 @@ import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.CryptoException;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -650,7 +656,7 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
     }
 
     @Override
-    public byte[] signDigest(byte[] digest, int chainId, String address, String password) throws NulsException {
+    public P2PHKSignature signDigest(byte[] digest, int chainId, String address, String password) throws NulsException {
         if (null == digest || digest.length == 0) {
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
@@ -661,7 +667,32 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         }
         //根据密码获得ECKey get ECKey from Password
         ECKey ecKey = account.getEcKey(password);
-        return SignatureUtil.signDigest(digest, ecKey).getSignBytes();
+        try {
+            byte[] signBytes = SignatureUtil.signDigest(digest, ecKey).serialize();
+            return new P2PHKSignature(signBytes, ecKey.getPubKey());
+        } catch (IOException e) {
+            Log.error(e.getMessage());
+            throw new NulsRuntimeException(AccountErrorCode.IO_ERROR);
+        }
+    }
+
+    @Override
+    public BlockSignature signBlockDigest(byte[] digest, int chainId, String address, String password) throws NulsException {
+        if (null == digest || digest.length == 0) {
+            throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
+        }
+        //check whether the account exists
+        Account account = this.getAccountByAddress(chainId, address);
+        if (null == account) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        //根据密码获得ECKey get ECKey from Password
+        ECKey ecKey = account.getEcKey(password);
+        NulsSignData signData = SignatureUtil.signDigest(digest, ecKey);
+        BlockSignature blockSign = new BlockSignature();
+        blockSign.setSignData(signData);
+        blockSign.setPublicKey(ecKey.getPubKey());
+        return blockSign;
     }
 
 }

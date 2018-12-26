@@ -18,12 +18,6 @@ import java.io.IOException;
  * @date: 2018/12/17
  */
 public class VerifyCrossWithFCMessage extends BaseMessage {
-    /**
-     * 链ID
-     */
-    @Getter
-    @Setter
-    private int chainId;
 
     /**
      * 转换NULS主网协议后交易hash
@@ -42,7 +36,6 @@ public class VerifyCrossWithFCMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfNulsData(requestHash);
         size += SerializeUtils.sizeOfNulsData(originalHash);
         return size;
@@ -50,14 +43,12 @@ public class VerifyCrossWithFCMessage extends BaseMessage {
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(chainId);
         stream.writeNulsData(requestHash);
         stream.writeNulsData(originalHash);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readUint16();
         this.requestHash = byteBuffer.readHash();
         this.originalHash = byteBuffer.readHash();
     }

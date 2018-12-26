@@ -19,13 +19,6 @@ import java.io.IOException;
  */
 public class BroadcastCrossTxHashMessage extends BaseMessage {
     /**
-     * 链ID
-     */
-    @Getter
-    @Setter
-    private int chainId;
-
-    /**
      * 交易hash
      */
     @Getter
@@ -35,20 +28,17 @@ public class BroadcastCrossTxHashMessage extends BaseMessage {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfNulsData(requestHash);
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(chainId);
         stream.writeNulsData(requestHash);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readUint16();
         this.requestHash = byteBuffer.readHash();
     }
 }

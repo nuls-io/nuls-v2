@@ -1,9 +1,6 @@
 package io.nuls.poc.utils.thread.process;
 
-import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockExtendsData;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.BlockData;
@@ -11,6 +8,7 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
+import io.nuls.poc.utils.manager.BlockManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.RoundManager;
@@ -38,6 +36,8 @@ public class ConsensusProcess {
     private RoundManager roundManager = SpringLiteContext.getBean(RoundManager.class);
 
     private ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
+
+    private BlockManager blockManager = SpringLiteContext.getBean(BlockManager.class);
 
     private NulsLogger consensusLogger;
 
@@ -137,13 +137,13 @@ public class ConsensusProcess {
                 }
                 packing(chain, member, round);
             } catch (Exception e) {
-                consensusLogger.error(e.getMessage());
+                consensusLogger.error(e);
             }
             while (member.getPackEndTime() > TimeService.currentTimeMillis()) {
                 try {
                     Thread.sleep(500L);
                 } catch (InterruptedException e) {
-                    consensusLogger.error(e.getMessage());
+                    consensusLogger.error(e);
                 }
             }
             hasPacking = false;
@@ -183,7 +183,9 @@ public class ConsensusProcess {
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr,"receivePackingBlock", params);
             if(!cmdResp.isSuccess()){
                 consensusLogger.info("add block interface call failed!");
+                return;
             }
+            blockManager.addNewBlock(chain,block.getHeader());
         }catch (Exception e){
             consensusLogger.error(e);
         }

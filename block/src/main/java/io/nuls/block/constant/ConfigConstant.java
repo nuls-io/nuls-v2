@@ -85,7 +85,7 @@ public interface ConfigConstant {
      */
     String EXTEND_MAX_SIZE = "extendMaxSize";
     /**
-     * 为阻止恶意节点提前出块，设置此参数
+     * 为阻止恶意节点提前出块,设置此参数
      * 区块时间戳大于当前时间多少就丢弃该区块
      */
     String VALID_BLOCK_INTERVAL = "validBlockInterval";
@@ -97,4 +97,8 @@ public interface ConfigConstant {
      * 系统正常运行时最多缓存多少个从别的节点接收到的小区块
      */
     String SMALL_BLOCK_CACHE = "smallBlockCache";
+    /**
+     * 孤儿链最大年龄
+     */
+    String ORPHAN_CHAIN_MAX_AGE = "orphanChainMaxAge";
 }

@@ -13,6 +13,8 @@ import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.rpc.call.LegerCall;
+import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.utils.TxUtil;
 import io.nuls.transaction.utils.TransactionTimeComparator;
@@ -36,7 +38,7 @@ public class TxUnverifiedProcessTask implements Runnable {
     private TxVerifiedStorageService txVerifiedStorageService = SpringLiteContext.getBean(TxVerifiedStorageService.class);
     private TransactionH2Service transactionH2Service = SpringLiteContext.getBean(TransactionH2Service.class);
 
-    private TransactionTimeComparator txComparator = TransactionTimeComparator.getInstance();
+    private TransactionTimeComparator txComparator = SpringLiteContext.getBean(TransactionTimeComparator.class);
     private List<Transaction> orphanTxList = new ArrayList<>();
 
     //private static final int MAX_ORPHAN_SIZE = 200000;
@@ -102,7 +104,9 @@ public class TxUnverifiedProcessTask implements Runnable {
                 //保存到h2数据库
                 transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
                 //todo 调账本记录未确认交易
-                //todo 转发
+                LegerCall.sendTx(chain.getChainId(), tx, false);
+                //广播交易hash
+                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
             }
         } catch (Exception e) {
             Log.error(e);

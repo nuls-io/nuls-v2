@@ -48,18 +48,6 @@ import static io.nuls.block.constant.Constant.FORK_CHAINS;
 public class ChainStorageServiceImpl implements ChainStorageService {
 
     @Override
-    public void init(int chainId) {
-        try {
-            if (RocksDBService.existTable(FORK_CHAINS + chainId)) {
-                RocksDBService.destroyTable(FORK_CHAINS + chainId);
-            }
-            RocksDBService.createTable(FORK_CHAINS + chainId);
-        } catch (Exception e) {
-            Log.error(e);
-        }
-    }
-
-    @Override
     public boolean save(int chainId, List<Block> blocks) {
         Map<byte[], byte[]> map = new HashMap<>(blocks.size());
         try {

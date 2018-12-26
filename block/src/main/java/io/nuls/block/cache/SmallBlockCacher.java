@@ -42,12 +42,18 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class SmallBlockCacher {
 
+    /**
+     * 缓存区块转发、广播过程中收到的{@link SmallBlock},可以用来排除重复消息,
+     */
     private static Map<Integer, Map<NulsDigestData, CachedSmallBlock>> smallBlockCacheMap = new ConcurrentHashMap<>();
 
+    /**
+     * 记录每一个区块的传播状态
+     */
     private static Map<Integer, Map<NulsDigestData, BlockForwardEnum>> statusCacheMap = new ConcurrentHashMap<>();
 
     /**
-     * 将一个SmallBlock放入内存中，若不主动删除，则在缓存存满或者存在时间超过1000秒时，自动清理
+     * 将一个SmallBlock放入内存中,若不主动删除,则在缓存存满或者存在时间超过1000秒时,自动清理
      *
      * @param chainId
      * @param cachedSmallBlock

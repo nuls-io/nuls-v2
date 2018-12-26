@@ -12,6 +12,13 @@ public interface TxConstant {
     int NULS_CHAIN_ASSETID = 1;
 
     /**
+     * Map初始值
+     */
+    int INIT_CAPACITY = 16;
+
+    int PAGESIZE = 20;
+
+    /**
      * context path
      */
     String CONTEXT_PATH = "io.nuls.transaction";
@@ -61,7 +68,7 @@ public interface TxConstant {
      * 跨链交易
      */
     int TX_TYPE_CROSS_CHAIN_TRANSFER = 10;
-    String TX_MODULE_VALIDATOR = "txValidator";
+    String TX_MODULE_VALIDATOR = "txProcess";
     String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
     String CROSS_TRANSFER_COMMIT = "crossTxCommit";
     String CROSS_TRANSFER_ROLLBACK = "crossTxCommit";
@@ -84,11 +91,6 @@ public interface TxConstant {
     String MULTI_TX_HEX = "txHex";
 
     /**
-     * Map初始值
-     */
-    int INIT_CAPACITY = 16;
-
-    /**
      * config file path
      */
     String CONFIG_FILE_PATH = "transaction-config.json";
@@ -97,4 +99,11 @@ public interface TxConstant {
      * 打包交易，预留模块统一验证的时间 毫秒
      */
     long VERIFY_OFFSET = 500L;
+
+    /**
+     * 参数key
+     */
+    String KEY_CHAIN_ID ="chainId";
+    String KEY_NODE_ID="nodeId";
+    String KEY_MESSAGE_BODY="messageBody";
 }

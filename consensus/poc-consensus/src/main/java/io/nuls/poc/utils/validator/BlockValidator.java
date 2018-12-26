@@ -172,7 +172,7 @@ public class BlockValidator {
       检查区块交中是否存在多个黄牌交易
       Check whether there are multiple yellow trades in block handover
       */
-      for(int index = 1;index < txs.size() - 1; index++){
+      for(int index = 1;index < txs.size(); index++){
          tx = txs.get(index);
          if(tx.getType() == ConsensusConstant.TX_TYPE_COINBASE){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("Coinbase transaction more than one! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
@@ -294,7 +294,6 @@ public class BlockValidator {
             return false;
          }
          //todo 账本模块验证双花
-
       }
       /*
       红牌交易类型为连续分叉

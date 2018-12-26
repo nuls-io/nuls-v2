@@ -28,12 +28,6 @@ package io.nuls.block.constant;
 public interface Constant {
 
     /**
-     * 共识奖励交易的类型
-     * A consensus award for the type of trade.
-     */
-    int TX_TYPE_COINBASE = 1;
-
-    /**
      * 空值占位符
      * Null placeholder.
      */
@@ -52,7 +46,7 @@ public interface Constant {
     int CHAIN_ID = 1;
 
     /**
-     * 最新区块高度，缓存到数据库中，以便重启时恢复本地最新高度
+     * 最新区块高度,缓存到数据库中,以便重启时恢复本地最新高度
      * Module configuration file name.
      */
     String LATEST_BLOCK_HEIGHT = "latest_block_height";

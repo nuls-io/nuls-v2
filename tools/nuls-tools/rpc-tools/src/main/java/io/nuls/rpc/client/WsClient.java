@@ -88,14 +88,14 @@ public class WsClient extends WebSocketClient {
                     } else {
                         ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);
                     }
-                    Log.info("ResponseFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
+                    Log.debug("ResponseFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
                     break;
                 default:
                     break;
             }
 
         } catch (IOException e) {
-            Log.error(e.getMessage());
+            Log.error(e);
         }
     }
 
@@ -105,6 +105,6 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onError(Exception e) {
-        Log.error(e.getMessage());
+        Log.error(e);
     }
 }
