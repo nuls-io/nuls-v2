@@ -10,6 +10,7 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -254,8 +255,8 @@ public class AccountServiceTest {
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
 
             //测试密码正确
-            String signatureHex = HexUtil.encode(accountService.signDigest(tx.getHash().getDigestBytes(), chainId, address, password));
-            assertNotNull(signatureHex);
+            P2PHKSignature signature=accountService.signDigest(tx.getHash().getDigestBytes(), chainId, address, password);
+            assertNotNull(signature);
 
             //测试密码不正确
             try {
