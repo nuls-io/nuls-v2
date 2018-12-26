@@ -81,26 +81,7 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
                 if (null == tx) {
                     throw new NulsException(TxErrorCode.TX_NOT_EXIST);
                 }
-                //保存交易
-//                boolean rs = transactionStorageService.saveTx(chainId, tx);
-//                if (rs) {
-//                    //执行交易commit
-//                    TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-//                    rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
-//                    if (!rs) {
-//                        //提交失败，之前删除当前交易
-//                        transactionStorageService.removeTx(chainId, tx.getHash());
-//                        chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
-//                    }else {
-//                        //发送给账本模块
-//                        rs = LegerCall.sendTx(chain.getChainId(), tx, true);
-//                        if (!rs) {
-//                            transactionStorageService.removeTx(chainId, tx.getHash());
-//                            chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
-//                        }
-//                    }
-//
-//                }
+                //将交易保存、提交、发送至账本
                 boolean rs = saveCommitTx(chain, tx);
                 if (rs) {
                     savedList.add(tx);
@@ -139,22 +120,6 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
             chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
         }
         return rs;
-
-
-       /* if (rs) {
-            //执行交易commit
-            TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-            rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
-            if (!rs) {
-                //提交失败，之前删除当前交易
-                transactionStorageService.removeTx(chain.getChainId(), tx.getHash());
-                chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
-            }else {
-                //发送给账本模块
-
-            }
-
-        }*/
     }
 
     private boolean rollbackTxList(Chain chain, List<Transaction> savedList, BlockHeaderDigest blockHeaderDigest, boolean atomicity) throws NulsException {
@@ -165,9 +130,13 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
             List<Transaction> rollbackedList = new ArrayList<>();
             for (int i = savedList.size() - 1; i >= 0; i--) {
                 Transaction tx = savedList.get(i);
+                boolean rs = LegerCall.rollbackTxLeger(chain.getChainId(), tx, true);
+                if(atomicity && !rs){
+                    break;
+                }
                 //执行交易rollback
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                boolean rs = TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx.hex());
+                rs = TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx.hex());
                 if (atomicity) {
                     if (!rs) {
                         break;

@@ -104,16 +104,16 @@ public class BlockSynchronizer implements Runnable {
             int size = params.getNodes().size();
             if (size == 0) {
                 if (!synStatus.equals(BlockSynStatusEnum.FAIL)) {
-                    statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
                     ConsensusUtil.notice(chainId, 0);
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
                 }
                 return;
             }
             //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
-                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                     ConsensusUtil.notice(chainId, 1);
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                 }
                 return;
             }
@@ -122,8 +122,8 @@ public class BlockSynchronizer implements Runnable {
 
             if (!checkLocalBlock(chainId, params)) {
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
-                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                     ConsensusUtil.notice(chainId, 1);
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                 }
                 return;
             }
@@ -157,8 +157,8 @@ public class BlockSynchronizer implements Runnable {
             if (success) {
                 Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
                 if (checkIsNewest(chainId, params)) {
-                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                     ConsensusUtil.notice(chainId, 1);
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                 } else {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
                 }

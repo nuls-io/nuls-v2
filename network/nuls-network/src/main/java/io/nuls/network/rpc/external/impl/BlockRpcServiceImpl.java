@@ -24,6 +24,8 @@
  */
 package io.nuls.network.rpc.external.impl;
 
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.model.dto.BestBlockInfo;
 import io.nuls.network.rpc.external.BlockRpcService;
@@ -31,6 +33,7 @@ import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.crypto.HexUtil;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,8 +62,11 @@ public class BlockRpcServiceImpl implements BlockRpcService {
             Log.info("used Time :{}",endTime-startTime);
             if(null != response && response.isSuccess()){
                 Map responseData = (Map)response.getResponseData();
-                bestBlockInfo.setHash(String.valueOf(responseData.get("hash")));
-                bestBlockInfo.setBlockHeight(Long.valueOf(responseData.get("height").toString()));
+                String hex = (String) responseData.get("bestBlockHeader");
+                BlockHeader header = new BlockHeader();
+                header.parse(new NulsByteBuffer(HexUtil.decode(hex)));
+                bestBlockInfo.setHash(header.getHash().getDigestHex());
+                bestBlockInfo.setBlockHeight(header.getHeight());
             }
         } catch (Exception e) {
             e.printStackTrace();
