@@ -116,13 +116,15 @@ public class ConsensusManager {
         Calculating intra-chain and cross-chain handling fees for transactions in blocks
         */
         for (Transaction tx : txList) {
-            CoinData coinData = new CoinData();
-            coinData.parse(tx.getCoinData(), 0);
-            ChargeResultData resultData = getFee(tx,chain);
-            if(resultData.getChainId() == chainId){
-                totalFee = totalFee.add(resultData.getFee());
-            }else{
-                crossFee = crossFee.add(resultData.getFee());
+            if(tx.getType() != ConsensusConstant.TX_TYPE_COINBASE){
+                CoinData coinData = new CoinData();
+                coinData.parse(tx.getCoinData(), 0);
+                ChargeResultData resultData = getFee(tx,chain);
+                if(resultData.getChainId() == chainId){
+                    totalFee = totalFee.add(resultData.getFee());
+                }else{
+                    crossFee = crossFee.add(resultData.getFee());
+                }
             }
         }
 

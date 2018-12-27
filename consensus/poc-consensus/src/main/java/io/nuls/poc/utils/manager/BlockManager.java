@@ -68,4 +68,25 @@ public class BlockManager {
         }
         chain.setNewestHeader(blockHeader);
     }
+
+    /**
+     * 链分叉，区块回滚
+     * Chain bifurcation, block rollback
+     *
+     * @param chain            chain info
+     * @param height           block height
+     * */
+    public void chainRollBack(Chain chain,int height){
+        List<BlockHeader> headerList = chain.getBlockHeaderList();
+        Collections.sort(headerList,new BlockHeaderComparator());
+        for(int index = headerList.size()-1;index>=0;index--){
+            if(headerList.get(index).getHeight()>=height){
+                headerList.remove(index);
+            }else{
+                break;
+            }
+        }
+        chain.setBlockHeaderList(headerList);
+        chain.setNewestHeader(headerList.get(headerList.size()-1));
+    }
 }

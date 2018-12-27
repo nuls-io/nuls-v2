@@ -149,7 +149,7 @@ public class ConsensusTest {
             Map<String,Object>caTxCommit = new HashMap<>();
             caTxCommit.put("chainId",1);
             BlockHeader blockHeader = new BlockHeader();
-            blockHeader.setHeight(10);
+            blockHeader.setHeight(0);
             caTxCommit.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             caTxCommit.put("tx",caTxHex);
             Response caCommitResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentCommit", caTxCommit);
@@ -174,7 +174,7 @@ public class ConsensusTest {
             Map<String,Object>dpTxCommitParams = new HashMap<>();
             dpTxCommitParams.put("chainId",1);
             BlockHeader blockHeader1 = new BlockHeader();
-            blockHeader.setHeight(2);
+            blockHeader.setHeight(0);
             dpTxCommitParams.put("blockHeader", HexUtil.encode(blockHeader1.serialize()));
             dpTxCommitParams.put("tx",dpTxHex);
             Response dpCommitResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositCommit", dpTxCommitParams);

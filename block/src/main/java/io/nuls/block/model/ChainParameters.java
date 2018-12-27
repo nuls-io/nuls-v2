@@ -112,7 +112,7 @@ public class ChainParameters extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(chainName);
         stream.writeUint16(chainId);
-        stream.writeUint16(blockMaxSize);
+        stream.writeUint32(blockMaxSize);
         stream.writeUint16(resetTime);
         stream.writeUint16(chainSwtichThreshold);
         stream.writeUint16(cacheSize);
@@ -132,7 +132,7 @@ public class ChainParameters extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainName = byteBuffer.readString();
         this.chainId = byteBuffer.readUint16();
-        this.blockMaxSize = byteBuffer.readUint16();
+        this.blockMaxSize = (int) byteBuffer.readUint32();
         this.resetTime = byteBuffer.readUint16();
         this.chainSwtichThreshold = byteBuffer.readUint16();
         this.cacheSize = byteBuffer.readUint16();
@@ -151,7 +151,7 @@ public class ChainParameters extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += (15 * SerializeUtils.sizeOfUint16());
+        size += (16 * SerializeUtils.sizeOfUint16());
         size += SerializeUtils.sizeOfString(chainName);
         return size;
     }

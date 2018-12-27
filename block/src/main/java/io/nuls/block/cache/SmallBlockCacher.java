@@ -25,7 +25,9 @@ import io.nuls.base.data.SmallBlock;
 import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ConfigManager;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.CachedSmallBlock;
+import io.nuls.block.model.ChainParameters;
 import io.nuls.tools.data.CollectionUtils;
 
 import java.util.Map;
@@ -110,7 +112,8 @@ public class SmallBlockCacher {
      * @param chainId
      */
     public static void init(int chainId) {
-        int config = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.SMALL_BLOCK_CACHE));
+        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        int config = parameters.getSmallBlockCache();
         Map<NulsDigestData, CachedSmallBlock> map = CollectionUtils.getSizedMap(config);
         smallBlockCacheMap.put(chainId, map);
         Map<NulsDigestData, BlockForwardEnum> statusMap = CollectionUtils.getSizedMap(config);

@@ -24,6 +24,7 @@ import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.ChainParameters;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
@@ -57,7 +58,8 @@ public class NetworkResetMonitor implements Runnable {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
                     return;
                 }
-                int reset = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.RESET_TIME));
+                ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+                int reset = parameters.getResetTime();
                 long time = ContextManager.getContext(chainId).getLatestBlock().getHeader().getTime();
                 //如果(当前时间戳-最新区块时间戳)>重置网络阈值,通知网络模块重置可用节点
                 if (NetworkUtil.currentTime() - time > reset) {

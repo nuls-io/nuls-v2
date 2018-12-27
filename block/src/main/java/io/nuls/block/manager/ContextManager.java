@@ -51,12 +51,13 @@ public class ContextManager {
     public static void init(ChainParameters chainParameters) {
         ChainContext chainContext = new ChainContext();
         int chainId = chainParameters.getChainId();
+        ContextManager.contextMap.put(chainId, chainContext);
         chainContext.setChainId(chainId);
         chainContext.setParameters(chainParameters);
         chainContext.setStatus(RunningStatusEnum.INITIALIZING);
         chainContext.setSystemTransactionType(TransactionUtil.getSystemTypes(chainId));
+        chainContext.init();
         chainIds.add(chainId);
-        ContextManager.contextMap.put(chainId, chainContext);
         Log.info("new chainContext add! chainId-{}", chainId);
     }
 
