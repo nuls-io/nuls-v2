@@ -43,7 +43,6 @@ public class ConsensusManager {
      * @param round     latest local round/本地最新轮次信息
      */
     public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
-        int assetsId =chain.getConfig().getAssetsId();
         Transaction coinBaseTransaction = createCoinBaseTx(chain,self, txList, round, bestBlock.getHeight() + 1 + chain.getConfig().getCoinbaseUnlockHeight());
         txList.add(0, coinBaseTransaction);
         punishManager.punishTx(chain, bestBlock, txList, self, round);
