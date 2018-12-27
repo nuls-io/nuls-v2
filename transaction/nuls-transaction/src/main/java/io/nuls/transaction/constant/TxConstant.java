@@ -72,6 +72,23 @@ public interface TxConstant {
     String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
     String CROSS_TRANSFER_COMMIT = "crossTxCommit";
     String CROSS_TRANSFER_ROLLBACK = "crossTxCommit";
+
+    /**
+     * 跨链交易验证过程
+     */
+    /** 已发送请求跨链验证消息 */
+    int CTX_UNPROCESSED_0 = 0;
+    /** 已发送请求跨链验证消息 */
+    int CTX_VERIFY_REQUEST_1 = 1;
+    /** 已接收到跨链验证结果 */
+    int CTX_VERIFY_RESULT_2 = 2;
+    /** 已广播本节点验证结果给本链其他节点进行统计 */
+    int CTX_NODE_STATISTICS_REQUEST_3 = 3;
+    /** 接收到其他节点发送的验证结果，并已统计出结果，放入待打包 */
+    int CTX_NODE_STATISTICS_RESULT_4 = 4;
+    /** 已进入区块并确认 */
+    int CTX_COMFIRM_5 = 5;
+
     /**
      * 跨链交易固定为非解锁交易
      */

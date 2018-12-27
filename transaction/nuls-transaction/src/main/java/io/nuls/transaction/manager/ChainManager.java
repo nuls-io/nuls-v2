@@ -24,7 +24,6 @@
  */
 package io.nuls.transaction.manager;
 
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
@@ -38,7 +37,7 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.db.rocksdb.storage.ConfigStorageService;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.bo.config.ConfigItem;
 
@@ -63,6 +62,9 @@ public class ChainManager {
 
     @Autowired
     private CrossTxVerifyingManager crossTxVerifyingManager;
+
+    @Autowired
+    private TransactionManager transactionManager;
 
     private Map<Integer, Chain> chainMap = new ConcurrentHashMap<>();
 
@@ -90,6 +92,7 @@ public class ChainManager {
             */
             initTable(chain);
             initCache(chain);
+            initTx(chain);
             schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chainId, chain);
         }
@@ -162,10 +165,16 @@ public class ChainManager {
             RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId);
 
             /*
-            创建跨链交易表
+            创建未处理的跨链交易表
             Create cross chain transaction able
             */
-            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_CROSSCHAIN + chainId);
+            RocksDBService.createTable(TxDBConstant.DB_UNPROCESSED_CROSSCHAIN + chainId);
+
+            /*
+            创建处理中跨链交易表
+            Create cross chain transaction able
+            */
+            RocksDBService.createTable(TxDBConstant.DB_PROGRESS_CROSSCHAIN + chainId);
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 logger.error(e.getMessage());
@@ -194,6 +203,20 @@ public class ChainManager {
          * */
         NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.MODULE_CODE);
         chain.setLogger(txLogger);
+    }
+
+    private void initTx(Chain chain){
+        TxRegister txRegister = new TxRegister();
+        txRegister.setModuleCode(TxConstant.MODULE_CODE);
+        txRegister.setModuleValidator(TxConstant.TX_MODULE_VALIDATOR);
+        txRegister.setTxType(TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER);
+        txRegister.setValidator(TxConstant.CROSS_TRANSFER_VALIDATOR);
+        txRegister.setCommit(TxConstant.CROSS_TRANSFER_COMMIT);
+        txRegister.setRollback(TxConstant.CROSS_TRANSFER_ROLLBACK);
+        txRegister.setSystemTx(true);
+        txRegister.setUnlockTx(false);
+        txRegister.setVerifySignature(true);
+        transactionManager.register(chain, txRegister);
     }
 
     public Map<Integer, Chain> getChainMap() {

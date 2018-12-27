@@ -55,20 +55,6 @@ import java.util.Map;
  */
 @Service
 public class TransactionManager {
-    /**
-     * 交易注册信息
-     */
-//    private static final Map<Integer, TxRegister> TX_REGISTER_MAP = new HashMap<>();
-
-//    private static final TransactionManager INSTANCE = new TransactionManager();
-//
-//    public static TransactionManager getInstance(){
-//        return INSTANCE;
-//    }
-//
-//    public Map<Integer, TxRegister> getTxRegisterMap(){
-//        return TX_REGISTER_MAP;
-//    }
 
     @Autowired
     private TransactionService transactionService;
@@ -77,21 +63,6 @@ public class TransactionManager {
     private ChainManager chainManager;
 
     public TransactionManager() {
-    }
-
-    public TransactionManager(Chain chain) {
-        //TODO 需要改地方注册跨链交易
-        TxRegister txRegister = new TxRegister();
-        txRegister.setModuleCode(TxConstant.MODULE_CODE);
-        txRegister.setModuleValidator(TxConstant.TX_MODULE_VALIDATOR);
-        txRegister.setTxType(TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER);
-        txRegister.setValidator(TxConstant.CROSS_TRANSFER_VALIDATOR);
-        txRegister.setCommit(TxConstant.CROSS_TRANSFER_COMMIT);
-        txRegister.setRollback(TxConstant.CROSS_TRANSFER_ROLLBACK);
-        txRegister.setSystemTx(true);
-        txRegister.setUnlockTx(false);
-        txRegister.setVerifySignature(true);
-        register(chain, txRegister);
     }
 
     /**
@@ -168,7 +139,6 @@ public class TransactionManager {
                 transactionService.crossTransactionValidator(chain, tx);
             }
             TxRegister txRegister = this.getTxRegister(chain, tx.getType());
-
             //调验证器
             return TransactionCall.txProcess(chain, txRegister.getValidator(), txRegister.getModuleCode(), tx.hex());
         } catch (NulsException e) {
