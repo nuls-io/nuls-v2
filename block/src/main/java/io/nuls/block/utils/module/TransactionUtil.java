@@ -24,8 +24,11 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.Constant;
 import io.nuls.block.test.BlockGenerator;
+import io.nuls.block.test.TransactionStorageService;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,6 +39,8 @@ import java.util.List;
  * @date 18-11-9 上午10:44
  */
 public class TransactionUtil {
+
+    private static TransactionStorageService service = SpringLiteContext.getBean(TransactionStorageService.class);
 
     /**
      * 获取系统交易类型
@@ -55,6 +60,7 @@ public class TransactionUtil {
      * @return
      */
     public static boolean verify(int chainId, List<Transaction> transactions) {
+        transactions.forEach(e -> service.save(chainId, e));
         return true;
     }
 
@@ -73,10 +79,11 @@ public class TransactionUtil {
      * 批量回滚交易
      *
      * @param chainId
-     * @param transactions
+     * @param hashList
      * @return
      */
-    public static boolean rollback(int chainId, List<NulsDigestData> transactions) {
+    public static boolean rollback(int chainId, List<NulsDigestData> hashList) {
+        hashList.forEach(e -> service.remove(chainId, e));
         return true;
     }
 
@@ -88,8 +95,10 @@ public class TransactionUtil {
      * @return
      * @throws IOException
      */
-    public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList) throws IOException {
-        return BlockGenerator.getTransactions(hashList.size());
+    public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList) {
+        List<Transaction> transactions = new ArrayList<>();
+        hashList.forEach(e -> transactions.add(service.query(chainId, e)));
+        return transactions;
     }
 
     /**
@@ -100,11 +109,6 @@ public class TransactionUtil {
      * @return
      */
     public static Transaction getTransaction(int chainId, NulsDigestData hash) {
-        try {
-            return BlockGenerator.getTransactions(1).get(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return service.query(chainId, hash);
     }
 }
