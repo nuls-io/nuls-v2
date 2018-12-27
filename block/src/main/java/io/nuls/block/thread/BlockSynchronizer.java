@@ -108,6 +108,7 @@ public class BlockSynchronizer implements Runnable {
             int size = params.getNodes().size();
             //网络上没有可用节点
             if (size == 0) {
+                Log.info("no useful net nodes");
                 if (!synStatus.equals(BlockSynStatusEnum.FAIL)) {
                     if (ConsensusUtil.notice(chainId, 0)) {
                         statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
@@ -119,6 +120,7 @@ public class BlockSynchronizer implements Runnable {
             }
             //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
+                Log.info("chain-{} first start");
                 context.setStatus(RunningStatusEnum.RUNNING);
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
                     if (ConsensusUtil.notice(chainId, 1)) {
@@ -132,62 +134,61 @@ public class BlockSynchronizer implements Runnable {
             //4.更新下载状态为“下载中”
             statusEnumMap.put(chainId, BlockSynStatusEnum.RUNNING);
             //检查本地区块状态
-            ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
-            if (writeLock.tryLock(1, TimeUnit.SECONDS)) {
-                if (!checkLocalBlock(chainId, params)) {
-                    context.setStatus(RunningStatusEnum.RUNNING);
-                    if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
-                        if (ConsensusUtil.notice(chainId, 1)) {
-                            statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
-                        } else {
-                            statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
-                        }
+            if (!checkLocalBlock(chainId, params)) {
+                Log.info("local blocks is newest");
+                context.setStatus(RunningStatusEnum.RUNNING);
+                if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
+                    if (ConsensusUtil.notice(chainId, 1)) {
+                        statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    } else {
+                        statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
                     }
-                    return;
                 }
-                params.setLocalLatestHeight(context.getLatestHeight());
+                return;
+            }
+            params.setLocalLatestHeight(context.getLatestHeight());
 
-                PriorityBlockingQueue<Node> nodes = params.getNodes();
-                int nodeCount = nodes.size();
-                ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount, 0, new NulsThreadFactory("worker-" + chainId));
-                BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
-                BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
-                long netLatestHeight = params.getNetLatestHeight();
-                long startHeight = context.getLatestHeight() + 1;
-                long total = netLatestHeight - startHeight + 1;
-                long start = System.currentTimeMillis();
-                //5.开启区块下载器BlockDownloader
-                BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params);
-                Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
+            PriorityBlockingQueue<Node> nodes = params.getNodes();
+            int nodeCount = nodes.size();
+            ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount, 0, new NulsThreadFactory("worker-" + chainId));
+            BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
+            BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
+            long netLatestHeight = params.getNetLatestHeight();
+            long startHeight = context.getLatestHeight() + 1;
+            long total = netLatestHeight - startHeight + 1;
+            long start = System.currentTimeMillis();
+            //5.开启区块下载器BlockDownloader
+            BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params);
+            Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
 
-                //6.开启区块收集线程BlockCollector,收集BlockDownloader下载的区块
-                BlockCollector collector = new BlockCollector(chainId, futures, executor, params, queue);
-                ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
+            //6.开启区块收集线程BlockCollector,收集BlockDownloader下载的区块
+            BlockCollector collector = new BlockCollector(chainId, futures, executor, params, queue);
+            ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
 
-                //7.开启区块消费线程BlockConsumer,与上面的BlockDownloader共用一个队列blockQueue
-                BlockConsumer consumer = new BlockConsumer(chainId, queue, params);
-                Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
+            //7.开启区块消费线程BlockConsumer,与上面的BlockDownloader共用一个队列blockQueue
+            BlockConsumer consumer = new BlockConsumer(chainId, queue, params);
+            Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
 
-                Boolean downResult = downloadFutrue.get();
-                Boolean storageResult = consumerFuture.get();
-                boolean success = downResult != null && downResult && storageResult != null && storageResult;
-                long end = System.currentTimeMillis();
-                if (success) {
-                    Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
-                    if (checkIsNewest(chainId, params)) {
-                        context.setStatus(RunningStatusEnum.RUNNING);
-                        if (ConsensusUtil.notice(chainId, 1)) {
-                            statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
-                        } else {
-                            statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
-                        }
+            Boolean downResult = downloadFutrue.get();
+            Boolean storageResult = consumerFuture.get();
+            boolean success = downResult != null && downResult && storageResult != null && storageResult;
+            long end = System.currentTimeMillis();
+            if (success) {
+                Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
+                if (checkIsNewest(chainId, params)) {
+                    Log.info("block syn complete successfully");
+                    context.setStatus(RunningStatusEnum.RUNNING);
+                    if (ConsensusUtil.notice(chainId, 1)) {
+                        statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                     } else {
                         statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
                     }
                 } else {
-                    statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
+                    Log.info("block syn complete but is not newest");
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
                 }
-                writeLock.unlock();
+            } else {
+                statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
             }
         }
     }
