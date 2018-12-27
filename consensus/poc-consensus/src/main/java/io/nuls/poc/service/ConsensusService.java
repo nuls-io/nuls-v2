@@ -169,6 +169,11 @@ public interface ConsensusService {
     Result addBlock(Map<String,Object> params);
 
     /**
+     * 连分叉区块回滚
+     * */
+    Result chainRollBack(Map<String,Object> params);
+
+    /**
      * 缓存最新区块
      * */
     Result addEvidenceRecord(Map<String,Object> params);

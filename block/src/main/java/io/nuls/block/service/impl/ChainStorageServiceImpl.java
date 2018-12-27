@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.nuls.block.constant.Constant.FORK_CHAINS;
+import static io.nuls.block.constant.Constant.CACHED_BLOCK;
 
 /**
  * 链存储实现类
@@ -54,7 +54,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             for (Block block : blocks) {
                 map.put(block.getHeader().getHash().getDigestBytes(), block.serialize());
             }
-            return RocksDBService.batchPut(FORK_CHAINS + chainId, map);
+            return RocksDBService.batchPut(CACHED_BLOCK + chainId, map);
         } catch (Exception e) {
             Log.error(e);
         }
@@ -67,7 +67,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         byte[] key = hash.getDigestBytes();
         Log.debug("save block, hash:{}", hash);
         try {
-            return RocksDBService.put(FORK_CHAINS + chainId, key, block.serialize());
+            return RocksDBService.put(CACHED_BLOCK + chainId, key, block.serialize());
         } catch (Exception e) {
             throw new DbRuntimeException("save block error!");
         }
@@ -75,7 +75,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
 
     @Override
     public Block query(int chainId, NulsDigestData hash) {
-        byte[] bytes = RocksDBService.get(FORK_CHAINS + chainId, hash.getDigestBytes());
+        byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, hash.getDigestBytes());
         Block block = new Block();
         try {
             block.parse(new NulsByteBuffer(bytes));
@@ -89,7 +89,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     @Override
     public List<Block> query(int chainId, List<NulsDigestData> hashList) {
         List<byte[]> keys = hashList.stream().map(e -> e.getDigestBytes()).collect(Collectors.toList());
-        List<byte[]> valueList = RocksDBService.multiGetValueList(FORK_CHAINS + chainId, keys);
+        List<byte[]> valueList = RocksDBService.multiGetValueList(CACHED_BLOCK + chainId, keys);
         List<Block> blockList = new ArrayList<>();
         for (byte[] bytes : valueList) {
             Block block = new Block();
@@ -109,7 +109,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         List<byte[]> keys = hashList.stream().map(e -> e.getDigestBytes()).collect(Collectors.toList());
         Log.debug("delete block, hash:{}", hashList.toString());
         try {
-            return RocksDBService.deleteKeys(FORK_CHAINS + chainId, keys);
+            return RocksDBService.deleteKeys(CACHED_BLOCK + chainId, keys);
         } catch (Exception e) {
             Log.error(e);
             throw new DbRuntimeException("remove blocks error!");
@@ -119,7 +119,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     @Override
     public boolean remove(int chainId, NulsDigestData hash) {
         try {
-            return RocksDBService.delete(FORK_CHAINS + chainId, hash.getDigestBytes());
+            return RocksDBService.delete(CACHED_BLOCK + chainId, hash.getDigestBytes());
         } catch (Exception e) {
             Log.error(e);
             throw new DbRuntimeException("remove block error!");
@@ -130,7 +130,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     @Override
     public boolean destroy(int chainId) {
         try {
-            return RocksDBService.destroyTable(FORK_CHAINS + chainId);
+            return RocksDBService.destroyTable(CACHED_BLOCK + chainId);
         } catch (Exception e) {
             Log.error(e);
             throw new DbRuntimeException("destroy table error!");

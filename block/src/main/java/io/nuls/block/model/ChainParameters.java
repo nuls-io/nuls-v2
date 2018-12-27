@@ -25,6 +25,7 @@ package io.nuls.block.model;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.block.constant.ConfigConstant;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.tools.parse.config.ConfigItem;
@@ -111,7 +112,7 @@ public class ChainParameters extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(chainName);
         stream.writeUint16(chainId);
-        stream.writeUint16(blockMaxSize);
+        stream.writeUint32(blockMaxSize);
         stream.writeUint16(resetTime);
         stream.writeUint16(chainSwtichThreshold);
         stream.writeUint16(cacheSize);
@@ -131,7 +132,7 @@ public class ChainParameters extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainName = byteBuffer.readString();
         this.chainId = byteBuffer.readUint16();
-        this.blockMaxSize = byteBuffer.readUint16();
+        this.blockMaxSize = (int) byteBuffer.readUint32();
         this.resetTime = byteBuffer.readUint16();
         this.chainSwtichThreshold = byteBuffer.readUint16();
         this.cacheSize = byteBuffer.readUint16();
@@ -144,19 +145,33 @@ public class ChainParameters extends BaseNulsData {
         this.validBlockInterval = byteBuffer.readUint16();
         this.blockCache = byteBuffer.readUint16();
         this.smallBlockCache = byteBuffer.readUint16();
+        this.orphanChainMaxAge = byteBuffer.readUint16();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += (15 * SerializeUtils.sizeOfUint16());
+        size += (16 * SerializeUtils.sizeOfUint16());
         size += SerializeUtils.sizeOfString(chainName);
         return size;
     }
 
-    public void init(List<ConfigItem> list) {
-        for (ConfigItem configItem : list) {
-            //todo 待完善
-        }
+    public void init(Map<String, ConfigItem> map) {
+        this.chainName = map.get(ConfigConstant.CHAIN_NAME).getValue();
+        this.chainId = Integer.parseInt(map.get(ConfigConstant.CHAIN_ID).getValue());
+        this.blockMaxSize = Integer.parseInt(map.get(ConfigConstant.BLOCK_MAX_SIZE).getValue());
+        this.resetTime = Integer.parseInt(map.get(ConfigConstant.RESET_TIME).getValue());
+        this.chainSwtichThreshold = Integer.parseInt(map.get(ConfigConstant.CHAIN_SWTICH_THRESHOLD).getValue());
+        this.cacheSize = Integer.parseInt(map.get(ConfigConstant.CACHE_SIZE).getValue());
+        this.heightRange = Integer.parseInt(map.get(ConfigConstant.HEIGHT_RANGE).getValue());
+        this.maxRollback = Integer.parseInt(map.get(ConfigConstant.MAX_ROLLBACK).getValue());
+        this.consistencyNodePercent = Integer.parseInt(map.get(ConfigConstant.CONSISTENCY_NODE_PERCENT).getValue());
+        this.minNodeAmount = Integer.parseInt(map.get(ConfigConstant.MIN_NODE_AMOUNT).getValue());
+        this.downloadNumber = Integer.parseInt(map.get(ConfigConstant.DOWNLOAD_NUMBER).getValue());
+        this.extendMaxSize = Integer.parseInt(map.get(ConfigConstant.EXTEND_MAX_SIZE).getValue());
+        this.validBlockInterval = Integer.parseInt(map.get(ConfigConstant.VALID_BLOCK_INTERVAL).getValue());
+        this.blockCache = Integer.parseInt(map.get(ConfigConstant.BLOCK_CACHE).getValue());
+        this.smallBlockCache = Integer.parseInt(map.get(ConfigConstant.SMALL_BLOCK_CACHE).getValue());
+        this.orphanChainMaxAge = Integer.parseInt(map.get(ConfigConstant.ORPHAN_CHAIN_MAX_AGE).getValue());
     }
 }

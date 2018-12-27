@@ -43,7 +43,6 @@ public class ConsensusManager {
      * @param round     latest local round/本地最新轮次信息
      */
     public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
-        int assetsId =chain.getConfig().getAssetsId();
         Transaction coinBaseTransaction = createCoinBaseTx(chain,self, txList, round, bestBlock.getHeight() + 1 + chain.getConfig().getCoinbaseUnlockHeight());
         txList.add(0, coinBaseTransaction);
         punishManager.punishTx(chain, bestBlock, txList, self, round);
@@ -116,13 +115,15 @@ public class ConsensusManager {
         Calculating intra-chain and cross-chain handling fees for transactions in blocks
         */
         for (Transaction tx : txList) {
-            CoinData coinData = new CoinData();
-            coinData.parse(tx.getCoinData(), 0);
-            ChargeResultData resultData = getFee(tx,chain);
-            if(resultData.getChainId() == chainId){
-                totalFee = totalFee.add(resultData.getFee());
-            }else{
-                crossFee = crossFee.add(resultData.getFee());
+            if(tx.getType() != ConsensusConstant.TX_TYPE_COINBASE){
+                CoinData coinData = new CoinData();
+                coinData.parse(tx.getCoinData(), 0);
+                ChargeResultData resultData = getFee(tx,chain);
+                if(resultData.getChainId() == chainId){
+                    totalFee = totalFee.add(resultData.getFee());
+                }else{
+                    crossFee = crossFee.add(resultData.getFee());
+                }
             }
         }
 

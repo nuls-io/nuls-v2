@@ -33,19 +33,13 @@
     "name": "chainName",
     "remark": "链名称",
     "readOnly": "true",
-    "value": "nuls"
+    "value": "nuls2.0"
   },
   {
-    "name": "serverIp",
-    "remark": "服务ip",
+    "name": "chainId",
+    "remark": "链ID",
     "readOnly": "true",
-    "value": "127.0.0.1"
-  },
-  {
-    "name": "serverPort",
-    "remark": "服务端口",
-    "readOnly": "true",
-    "value": ""
+    "value": "1"
   },
   {
     "name": "blockMaxSize",

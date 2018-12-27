@@ -243,7 +243,7 @@ public class BlockServiceImpl implements BlockService {
                 context.setLatestBlock(block);
                 Chain masterChain = ChainManager.getMasterChain(chainId);
                 masterChain.setEndHeight(masterChain.getEndHeight() + 1);
-                int heightRange = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.HEIGHT_RANGE));
+                int heightRange = context.getParameters().getHeightRange();
                 LinkedList<NulsDigestData> hashList = masterChain.getHashList();
                 if (hashList.size() > heightRange) {
                     hashList.removeFirst();
@@ -326,7 +326,11 @@ public class BlockServiceImpl implements BlockService {
         SmallBlockMessage message = new SmallBlockMessage();
         message.setSmallBlock(BlockUtil.getSmallBlock(chainId, block));
         message.setCommand(CommandConstant.SMALL_BLOCK_MESSAGE);
-        return NetworkUtil.broadcast(chainId, message);
+        boolean broadcast = NetworkUtil.broadcast(chainId, message);
+        if (broadcast) {
+            rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block));
+        }
+        return broadcast;
     }
 
     @Override

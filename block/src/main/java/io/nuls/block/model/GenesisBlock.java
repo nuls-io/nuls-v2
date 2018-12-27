@@ -121,7 +121,7 @@ public final class GenesisBlock extends Block {
             CoinTo coin = new CoinTo();
             coin.setAddress(ads.getAddressBytes());
             coin.setAmount(new BigInteger(amount));
-            coin.setAssetsChainId(CHAIN_ID);
+            coin.setAssetsChainId(1);
             coin.setAssetsId(1);
             coin.setLockTime(lockTime == null ? 0 : lockTime.longValue());
 
@@ -143,7 +143,7 @@ public final class GenesisBlock extends Block {
     }
 
 
-    private void fillHeader(Map<String, Object> jsonMap) throws NulsException {
+    private void fillHeader(Map<String, Object> jsonMap) {
         Integer height = (Integer) jsonMap.get(CONFIG_FILED_HEIGHT);
         String extend = (String) jsonMap.get(CONFIG_FILED_EXTEND);
         BlockHeader header = new BlockHeader();

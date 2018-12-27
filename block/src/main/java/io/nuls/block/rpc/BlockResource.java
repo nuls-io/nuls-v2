@@ -28,12 +28,9 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.utils.BlockUtil;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
@@ -43,7 +40,6 @@ import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,6 +56,19 @@ import static io.nuls.block.constant.CommandConstant.*;
 public class BlockResource extends BaseCmd {
     @Autowired
     private BlockService service;
+
+    /**
+     * 获取最新主链高度
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = BEST_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Object bestHeight(Map map) {
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        return success(ContextManager.getContext(chainId).getLatestHeight());
+    }
 
     /**
      * 获取最新区块头
@@ -227,11 +236,7 @@ public class BlockResource extends BaseCmd {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = new Block();
             block.parse(new NulsByteBuffer(HexUtil.decode((String) map.get("block"))));
-            if (service.saveBlock(chainId, block, 1)) {
-                Map params = new HashMap();
-                params.put("chainId",chainId );
-                params.put("blockHeader",HexUtil.encode(block.getHeader().serialize()));
-                CmdDispatcher.requestAndResponse(ModuleE.CS.abbr,"cs_addBlock", params);
+            if (service.saveBlock(chainId, block, 1) && service.broadcastBlock(chainId, block)) {
                 return success();
             } else {
                 return failed(BlockErrorCode.PARAMETER_ERROR);

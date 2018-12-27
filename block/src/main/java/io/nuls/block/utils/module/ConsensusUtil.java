@@ -76,13 +76,7 @@ public class ConsensusUtil {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("status", status);
-
-            boolean success = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
-            while (!success) {
-                Thread.sleep(500L);
-               return notice(chainId, status);
-            }
-            return success;
+            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
         } catch (Exception e) {
             Log.error(e);
             return false;
@@ -95,7 +89,7 @@ public class ConsensusUtil {
      * @param chainId
      * @return
      */
-    public static boolean fork(int chainId, BlockHeader masterHeader, BlockHeader forkHeader) {
+    public static boolean evidence(int chainId, BlockHeader masterHeader, BlockHeader forkHeader) {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -104,6 +98,26 @@ public class ConsensusUtil {
             params.put("evidenceHeader", HexUtil.encode(forkHeader.serialize()));
 
             return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_addEvidenceRecord", params).isSuccess();
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 回滚到分叉点时通知共识模块
+     *
+     * @param chainId
+     * @return
+     */
+    public static boolean forkNotice(int chainId, long height) {
+        try {
+            Map<String, Object> params = new HashMap<>(5);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("height", height);
+
+            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_chainRollBack", params).isSuccess();
         } catch (Exception e) {
             Log.error(e);
             return false;

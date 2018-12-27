@@ -42,6 +42,7 @@ public interface CommandConstant {
     String TXGROUP_MESSAGE = "txs";
 
     //普通服务对应的RPC命令
+    String BEST_HEIGHT = "bestHeight";
     String BEST_BLOCK_HEADER = "bestBlockHeader";
     String BEST_BLOCK = "bestBlock";
     String GET_BLOCK_HEADER_BY_HEIGHT = "getBlockHeaderByHeight";

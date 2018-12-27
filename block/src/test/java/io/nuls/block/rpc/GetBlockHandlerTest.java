@@ -26,7 +26,6 @@ import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.Test;
 
@@ -34,7 +33,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
-import static io.nuls.block.constant.Constant.CHAIN_ID;
 
 public class GetBlockHandlerTest {
 
@@ -42,7 +40,7 @@ public class GetBlockHandlerTest {
     public void process() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", CHAIN_ID);
+        params.put("chainId", 1);
         params.put("nodes", "192.168.1.191:8003");
         HashMessage message = new HashMessage();
         message.setRequestHash(NulsDigestData.fromDigestHex("00208d10744a059e403b100866f65d96ce33aedbcf498d1faa7d9f2eff041195d5aa"));

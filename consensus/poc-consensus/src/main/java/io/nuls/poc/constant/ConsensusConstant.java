@@ -198,6 +198,7 @@ public interface ConsensusConstant {
     String PARAM_CHAIN_ID = "chainId";
     String PARAM_ADDRESS = "address";
     String PARAM_TX = "tx";
+    String PARAM_HEIGHT = "height";
     String PARAM_BLOCK_HEADER ="blockHeader";
     String PARAM_EVIDENCE_HEADER ="evidenceHeader";
     String VALID_RESULT ="valid";
