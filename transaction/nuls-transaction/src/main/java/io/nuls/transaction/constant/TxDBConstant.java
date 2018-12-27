@@ -25,6 +25,8 @@
 
 package io.nuls.transaction.constant;
 
+import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
+
 /**
  * 交易数据存储常量
  * Transaction data storage constants
@@ -43,10 +45,17 @@ public interface TxDBConstant {
      */
     String DB_MODULE_CONGIF = "config";
     /**
-     * 验证过程中的跨链交易表名
+     * 接收到其他链发送的未处理的跨链交易，接收后直接储存
      * Cross-chain transaction in verification table name
      */
-    String DB_TRANSACTION_CROSSCHAIN = "transaction_crosschain";
+    String DB_UNPROCESSED_CROSSCHAIN = "transaction_unprocessed_crosschain";
+
+    /**
+     * 接收到其他链发送的跨链交易，已经在验证过程中，储存表名
+     * Cross-chain transaction in verification table name
+     */
+    String DB_PROGRESS_CROSSCHAIN = "transaction_progress_crosschain";
+
     /**
      * 已验证交易表名
      * verified transaction (unpackaged) table name
