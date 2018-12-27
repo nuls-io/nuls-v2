@@ -62,6 +62,19 @@ public class BlockResource extends BaseCmd {
     private BlockService service;
 
     /**
+     * 获取最新主链高度
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = BEST_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Object bestHeight(Map map) {
+        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        return success(ContextManager.getContext(chainId).getLatestHeight());
+    }
+
+    /**
      * 获取最新区块头
      *
      * @param map

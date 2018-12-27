@@ -106,10 +106,14 @@ public class BlockSynchronizer implements Runnable {
             //3.统计网络中可用节点的一致区块高度、区块hash
             BlockDownloaderParams params = statistics(availableNodes, chainId);
             int size = params.getNodes().size();
+            //网络上没有可用节点
             if (size == 0) {
-                if (!synStatus.equals(BlockSynStatusEnum.WAITING)) {
-                    ConsensusUtil.notice(chainId, 0);
-                    statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
+                if (!synStatus.equals(BlockSynStatusEnum.FAIL)) {
+                    if (ConsensusUtil.notice(chainId, 0)) {
+                        statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
+                    } else {
+                        statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
+                    }
                 }
                 return;
             }
@@ -117,19 +121,25 @@ public class BlockSynchronizer implements Runnable {
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
                 context.setStatus(RunningStatusEnum.RUNNING);
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
-                    ConsensusUtil.notice(chainId, 1);
-                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    if (ConsensusUtil.notice(chainId, 1)) {
+                        statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    } else {
+                        statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
+                    }
                 }
                 return;
             }
             //4.更新下载状态为“下载中”
             statusEnumMap.put(chainId, BlockSynStatusEnum.RUNNING);
-
+            //
             if (!checkLocalBlock(chainId, params)) {
                 context.setStatus(RunningStatusEnum.RUNNING);
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
-                    ConsensusUtil.notice(chainId, 1);
-                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    if (ConsensusUtil.notice(chainId, 1)) {
+                        statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    } else {
+                        statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
+                    }
                 }
                 return;
             }
@@ -164,8 +174,11 @@ public class BlockSynchronizer implements Runnable {
                 Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
                 if (checkIsNewest(chainId, params)) {
                     context.setStatus(RunningStatusEnum.RUNNING);
-                    ConsensusUtil.notice(chainId, 1);
-                    statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    if (ConsensusUtil.notice(chainId, 1)) {
+                        statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
+                    } else {
+                        statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
+                    }
                 } else {
                     statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
                 }

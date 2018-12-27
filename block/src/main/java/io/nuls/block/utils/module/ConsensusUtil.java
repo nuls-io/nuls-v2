@@ -76,13 +76,7 @@ public class ConsensusUtil {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("status", status);
-
-            boolean success = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
-            while (!success) {
-                Thread.sleep(500L);
-               return notice(chainId, status);
-            }
-            return success;
+            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
         } catch (Exception e) {
             Log.error(e);
             return false;
