@@ -73,6 +73,7 @@ public class BlockBootstrap {
                     .moduleRoles(new String[]{"1.0"})
                     .moduleVersion("1.0")
                     .dependencies(ModuleE.KE.abbr, "1.0")
+                    .dependencies(ModuleE.CS.abbr, "1.0")
                     .dependencies(ModuleE.NW.abbr, "1.0")
                     .scanPackage(RPC_DEFAULT_SCAN_PACKAGE)
                     .connect("ws://127.0.0.1:8887");
@@ -101,7 +102,7 @@ public class BlockBootstrap {
             }
             NetworkUtil.register();
             Log.info("service start");
-//            onlyRunWhenTest();
+            onlyRunWhenTest();
 
             //开启区块同步线程
             ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronizer"));
@@ -148,6 +149,15 @@ public class BlockBootstrap {
      * todo 正式版本删除
      */
     private static void onlyRunWhenTest() {
+        ContextManager.chainIds.forEach(e -> {
+            if (!RocksDBService.existTable("tx" + e)) {
+                try {
+                    RocksDBService.createTable("tx" + e);
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
 //        ChainContext chainContext = ContextManager.getContext(chainId);
 //        chainContext.setStatus(RunningStatusEnum.RUNNING);
 //        Block latestBlock = chainContext.getLatestBlock();
