@@ -31,14 +31,13 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.block.constant.Constant.CHAIN_ID;
-import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
-
 public class BlockSynchronizerTest {
+
+    private static final int CHAIN_ID = 1;
 
     @Before
     public void setUp() throws Exception {
-        ConfigLoader.load(MODULES_CONFIG_FILE);
+        ConfigLoader.load();
     }
 
     @After

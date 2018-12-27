@@ -39,6 +39,7 @@ import static org.junit.Assert.assertNull;
 public class BlockStorageServiceImplTest {
 
     private static BlockHeaderPo header;
+    private static final int CHAIN_ID = 1;
     private static BlockStorageService service;
 
     @BeforeClass

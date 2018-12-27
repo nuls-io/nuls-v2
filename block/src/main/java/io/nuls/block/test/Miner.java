@@ -31,8 +31,6 @@ import lombok.Data;
 
 import java.util.Random;
 
-import static io.nuls.block.constant.Constant.CHAIN_ID;
-
 /**
  * 测试用生产区块的矿工
  *
@@ -44,6 +42,7 @@ import static io.nuls.block.constant.Constant.CHAIN_ID;
 public class Miner extends Thread {
 
     private static final long TOTAL = Long.MAX_VALUE;
+    private static final int CHAIN_ID = 1;
     private String symbol;
     private Block startBlock;
     private Block previousBlock;

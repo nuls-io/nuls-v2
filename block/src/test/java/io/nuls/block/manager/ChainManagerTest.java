@@ -37,7 +37,6 @@ import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
-import static io.nuls.block.constant.Constant.CHAIN_ID;
 import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -46,6 +45,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 @PrepareForTest(RocksDBService.class)
 @PowerMockIgnore({"com.sun.org.apache.xerces.*", "javax.xml.*", "org.xml.*", "org.w3c.*", "javax.management.*"})
 public class ChainManagerTest {
+
+    private static final int CHAIN_ID = 1;
 
     @BeforeClass
     public static void set() throws Exception {
@@ -66,8 +67,7 @@ public class ChainManagerTest {
 
     @Test
     public void testForkOrphanChains() throws Exception {
-        ConfigLoader.load(MODULES_CONFIG_FILE);
-        ContextManager.init(CHAIN_ID);
+        ConfigLoader.load();
         ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
         Chain masterChain = ChainGenerator.newMasterChain(999L, "M", CHAIN_ID);
         ChainManager.setMasterChain(CHAIN_ID, masterChain);
@@ -102,8 +102,7 @@ public class ChainManagerTest {
         PowerMockito.when(RocksDBService.deleteKeys(anyString(), anyList())).thenReturn(true);
         Assert.assertTrue(RocksDBService.deleteKeys("aaa", Lists.newArrayList()));
 
-        ConfigLoader.load(MODULES_CONFIG_FILE);
-        ContextManager.init(CHAIN_ID);
+        ConfigLoader.load();
         ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
         Chain masterChain = ChainGenerator.newMasterChain(999L, "M", CHAIN_ID);
         ChainManager.setMasterChain(CHAIN_ID, masterChain);
@@ -143,8 +142,7 @@ public class ChainManagerTest {
         PowerMockito.when(RocksDBService.deleteKeys(anyString(), anyList())).thenReturn(true);
         Assert.assertTrue(RocksDBService.deleteKeys("aaa", Lists.newArrayList()));
 
-        ConfigLoader.load(MODULES_CONFIG_FILE);
-        ContextManager.init(CHAIN_ID);
+        ConfigLoader.load();
         ContextManager.getContext(CHAIN_ID).setStatus(RunningStatusEnum.RUNNING);
         Chain masterChain = ChainGenerator.newMasterChain(999L, "A", CHAIN_ID);
 //        masterChain.setEndHash(NulsDigestData.calcDigestData(("A" + (999)).getBytes()));

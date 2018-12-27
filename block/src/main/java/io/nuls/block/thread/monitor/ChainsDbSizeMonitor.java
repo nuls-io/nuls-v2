@@ -102,7 +102,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                                     Chain chain = forkChains.first();
                                     boolean b = ChainManager.removeForkChain(chainId, chain);
                                     if (!b) {
-                                        Log.error("remove fork chain fail, chain:", chain);
+                                        Log.error("remove evidence chain fail, chain:", chain);
                                     } else {
                                         actualSize -= chain.getHashList().size();
                                     }

@@ -46,7 +46,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static io.nuls.block.constant.Constant.*;
-import static io.nuls.block.constant.Constant.CHAIN_PARAMETERS;
 
 /**
  * 区块管理模块启动类
@@ -58,17 +57,73 @@ import static io.nuls.block.constant.Constant.CHAIN_PARAMETERS;
  */
 public class BlockBootstrap {
 
-    /**
-     * 初始化流程
-     *  读取数据库,获得链ID列表,如果数据库没有配置项,加载默认配置文件
-     *
-     * @param args
-     */
     public static void main(String[] args) {
         Thread.currentThread().setName("block-main");
         init();
         start();
         loop();
+    }
+
+    private static void init() {
+        try {
+            //扫描包路径io.nuls.block,初始化bean
+            SpringLiteContext.init(DEFAULT_SCAN_PACKAGE, new ModularServiceMethodInterceptor());
+            //rpc服务初始化
+            WsServer.getInstance(ModuleE.BL)
+                    .moduleRoles(new String[]{"1.0"})
+                    .moduleVersion("1.0")
+                    .dependencies(ModuleE.KE.abbr, "1.0")
+                    .dependencies(ModuleE.NW.abbr, "1.0")
+                    .scanPackage(RPC_DEFAULT_SCAN_PACKAGE)
+                    .connect("ws://127.0.0.1:8887");
+            // Get information from kernel
+            CmdDispatcher.syncKernel();
+            //加载配置
+            ConfigLoader.load();
+            //加载通用数据库
+            RocksDBService.init(DATA_PATH);
+            if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
+                RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
+            }
+            if (!RocksDBService.existTable(CHAIN_PARAMETERS)) {
+                RocksDBService.createTable(CHAIN_PARAMETERS);
+            }
+        } catch (Exception e) {
+            Log.error("error occur when init, {}", e.getMessage());
+        }
+    }
+
+    private static void start() {
+        try {
+            while (!ServerRuntime.isReady()) {
+                Log.info("wait depend modules ready");
+                Thread.sleep(1000L);
+            }
+            NetworkUtil.register();
+            Log.info("service start");
+//            onlyRunWhenTest();
+
+            //开启区块同步线程
+            ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronizer"));
+            synExecutor.scheduleWithFixedDelay(BlockSynchronizer.getInstance(), 0, 10, TimeUnit.SECONDS);
+//        //开启区块监控线程
+//        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
+//        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+            //开启分叉链处理线程
+            ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("evidence-chains-monitor"));
+            forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+            //开启孤儿链处理线程
+            ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
+            orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+            //开启孤儿链维护线程
+            ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
+            maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 10, TimeUnit.SECONDS);
+            //开启数据库大小监控线程
+            ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
+            dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            Log.error("error occur when start, {}", e.getMessage());
+        }
     }
 
     private static void loop() {
@@ -90,58 +145,6 @@ public class BlockBootstrap {
     }
 
     /**
-     * 系统初始化
-     * 1.加载配置信息
-     * 2.初始化context
-     * 3.初始化bean
-     * 4.初始化数据库
-     * 5.初始化缓存
-     * 6.初始化rpc
-     * 7.初始化本地区块
-     *
-     * @throws Exception
-     */
-    private static void init() {
-        try {
-            //扫描包路径io.nuls.block,初始化bean
-            SpringLiteContext.init(DEFAULT_SCAN_PACKAGE, new ModularServiceMethodInterceptor());
-            //rpc服务初始化
-            rpcInit();
-            //加载配置
-            ConfigLoader.load();
-
-            RocksDBService.init(DATA_PATH);
-            if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
-                RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
-            }
-            if (!RocksDBService.existTable(CHAIN_PARAMETERS)) {
-                RocksDBService.createTable(CHAIN_PARAMETERS);
-            }
-        } catch (Exception e) {
-            Log.error("error occur when init, {}", e.getMessage());
-        }
-    }
-
-    /**
-     * 系统正式运行
-     */
-    private static void start() {
-        try {
-            Log.info("wait depend modules ready");
-            while (!ServerRuntime.isReady()) {
-                Thread.sleep(100L);
-            }
-            NetworkUtil.register();
-            Log.error("service start");
-//            onlyRunWhenTest();
-            //开启后台工作线程
-            startDaemonThreads();
-        } catch (Exception e) {
-            Log.error("error occur when start, {}", e.getMessage());
-        }
-    }
-
-    /**
      * todo 正式版本删除
      */
     private static void onlyRunWhenTest() {
@@ -151,41 +154,4 @@ public class BlockBootstrap {
 //        new Miner("1", latestBlock).start();
 //        new Miner("2", latestBlock).start();
     }
-
-    private static void rpcInit() throws Exception {
-        // Start server instance
-        WsServer.getInstance(ModuleE.BL)
-                .moduleRoles(new String[]{"1.0"})
-                .moduleVersion("1.0")
-                .dependencies(ModuleE.KE.abbr, "1.0")
-                .dependencies(ModuleE.NW.abbr, "1.0")
-                .scanPackage(RPC_DEFAULT_SCAN_PACKAGE)
-                .connect("ws://127.0.0.1:8887");
-
-        // Get information from kernel
-        CmdDispatcher.syncKernel();
-
-    }
-
-    private static void startDaemonThreads() {
-        //开启区块同步线程
-        ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronizer"));
-        synExecutor.scheduleWithFixedDelay(BlockSynchronizer.getInstance(), 0, 10, TimeUnit.SECONDS);
-//        //开启区块监控线程
-//        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
-//        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
-        //开启分叉链处理线程
-        ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
-        forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
-        //开启孤儿链处理线程
-        ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
-        orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
-        //开启孤儿链维护线程
-        ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
-        maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 10, TimeUnit.SECONDS);
-        //开启数据库大小监控线程
-        ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
-        dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
-    }
-
 }
