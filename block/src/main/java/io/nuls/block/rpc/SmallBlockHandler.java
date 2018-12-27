@@ -28,9 +28,11 @@ import io.nuls.block.constant.BlockForwardEnum;
 import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ConfigManager;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.CachedSmallBlock;
+import io.nuls.block.model.ChainParameters;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.module.NetworkUtil;
@@ -93,7 +95,8 @@ public class SmallBlockHandler extends BaseCmd {
         BlockHeader header = smallBlock.getHeader();
         NulsDigestData blockHash = header.getHash();
         //阻止恶意节点提前出块,拒绝接收未来一定时间外的区块
-        int validBlockInterval = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.VALID_BLOCK_INTERVAL));
+        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        int validBlockInterval = parameters.getValidBlockInterval();
         if (header.getTime() > (NetworkUtil.currentTime() + validBlockInterval)) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }

@@ -29,6 +29,7 @@ import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
+import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
@@ -88,8 +89,8 @@ public class BlockUtil {
             return false;
         }
 
-        int value = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.BLOCK_MAX_SIZE));
-        if (block.size() > value) {
+        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        if (block.size() > parameters.getBlockMaxSize()) {
             Log.warn("basicVerify fail, blockMaxSize! chainId-{}, height-{}, hash-{}", chainId, block.getHeader().getHeight(), block.getHeader().getHash());
             return false;
         }
@@ -113,9 +114,8 @@ public class BlockUtil {
             Log.warn("headerVerify fail, block packingAddress can not be null! chainId-{}, height-{}, hash-{}", chainId, header.getHeight(), header.getHash());
             return false;
         }
-
-        int value = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.EXTEND_MAX_SIZE));
-        if (header.getExtend() != null && header.getExtend().length > value) {
+        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        if (header.getExtend() != null && header.getExtend().length > parameters.getExtendMaxSize()) {
             Log.warn("headerVerify fail, block extend too long! chainId-{}, height-{}, hash-{}", chainId, header.getHeight(), header.getHash());
             return false;
         }
@@ -181,8 +181,8 @@ public class BlockUtil {
         NulsDigestData masterChainEndHash = masterChain.getEndHash();
 
         //1.收到的区块与主链最新高度差大于1000(可配置),丢弃
-        int value = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.HEIGHT_RANGE));
-        if (Math.abs(blockHeight - masterChainEndHeight) > value) {
+        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        if (Math.abs(blockHeight - masterChainEndHeight) > parameters.getHeightRange()) {
             Log.debug("chainId:{}, received out of range blocks, height:{}, hash:{}", chainId, blockHeight, blockHash);
             return Result.getFailed(BlockErrorCode.OUT_OF_RANGE);
         }

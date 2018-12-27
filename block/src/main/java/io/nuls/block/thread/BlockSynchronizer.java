@@ -28,6 +28,8 @@ import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.ChainContext;
+import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockDownloadUtils;
@@ -97,20 +99,23 @@ public class BlockSynchronizer implements Runnable {
         List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
 
         //2.判断可用节点数是否满足最小配置
-        String config = ConfigManager.getValue(chainId, ConfigConstant.MIN_NODE_AMOUNT);
-        if (availableNodes.size() >= Integer.parseInt(config)) {
+        ChainContext context = ContextManager.getContext(chainId);
+        ChainParameters parameters = context.getParameters();
+        int config = parameters.getMinNodeAmount();
+        if (availableNodes.size() >= config) {
             //3.统计网络中可用节点的一致区块高度、区块hash
             BlockDownloaderParams params = statistics(availableNodes, chainId);
             int size = params.getNodes().size();
             if (size == 0) {
-                if (!synStatus.equals(BlockSynStatusEnum.FAIL)) {
+                if (!synStatus.equals(BlockSynStatusEnum.WAITING)) {
                     ConsensusUtil.notice(chainId, 0);
-                    statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
+                    statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
                 }
                 return;
             }
             //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
+                context.setStatus(RunningStatusEnum.RUNNING);
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
                     ConsensusUtil.notice(chainId, 1);
                     statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
@@ -121,13 +126,14 @@ public class BlockSynchronizer implements Runnable {
             statusEnumMap.put(chainId, BlockSynStatusEnum.RUNNING);
 
             if (!checkLocalBlock(chainId, params)) {
+                context.setStatus(RunningStatusEnum.RUNNING);
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
                     ConsensusUtil.notice(chainId, 1);
                     statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                 }
                 return;
             }
-            params.setLocalLatestHeight(ContextManager.getContext(chainId).getLatestHeight());
+            params.setLocalLatestHeight(context.getLatestHeight());
 
             PriorityBlockingQueue<Node> nodes = params.getNodes();
             int nodeCount = nodes.size();
@@ -135,7 +141,7 @@ public class BlockSynchronizer implements Runnable {
             BlockingQueue<Block> queue = new LinkedBlockingQueue<>();
             BlockingQueue<Future<BlockDownLoadResult>> futures = new LinkedBlockingQueue<>();
             long netLatestHeight = params.getNetLatestHeight();
-            long startHeight = ContextManager.getContext(chainId).getLatestHeight() + 1;
+            long startHeight = context.getLatestHeight() + 1;
             long total = netLatestHeight - startHeight + 1;
             long start = System.currentTimeMillis();
             //5.开启区块下载器BlockDownloader
@@ -157,6 +163,7 @@ public class BlockSynchronizer implements Runnable {
             if (success) {
                 Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
                 if (checkIsNewest(chainId, params)) {
+                    context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, 1);
                     statusEnumMap.put(chainId, BlockSynStatusEnum.SUCCESS);
                 } else {
@@ -254,7 +261,8 @@ public class BlockSynchronizer implements Runnable {
             }
         }
 
-        int config = availableNodes.size() * Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.CONSISTENCY_NODE_PERCENT)) / 100;
+        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        int config = availableNodes.size() * parameters.getConsistencyNodePercent() / 100;
         if (count >= config) {
             nodeQueue.addAll(nodeMap.get(key));
             Node node = nodeQueue.peek();
@@ -284,8 +292,9 @@ public class BlockSynchronizer implements Runnable {
             }
         } else {
             //需要回滚的场景,要满足可用节点数(10个)>配置,一致可用节点数(6个)占比超80%两个条件
-            if (params.getNodes().size() >= Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.MIN_NODE_AMOUNT))
-                    && DoubleUtils.div(params.getNodes().size(), params.getAvailableNodesCount(), 2) >= Double.parseDouble(ConfigManager.getValue(chainId, ConfigConstant.CONSISTENCY_NODE_PERCENT)) * 100
+            ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+            if (params.getNodes().size() >= parameters.getMinNodeAmount()
+                    && params.getAvailableNodesCount() >= params.getNodes().size() * parameters.getConsistencyNodePercent() / 100
             ) {
                 return checkRollback(localBlock, 0, chainId, params);
             }
@@ -295,7 +304,8 @@ public class BlockSynchronizer implements Runnable {
 
     private boolean checkRollback(Block localBestBlock, int rollbackCount, int chainId, BlockDownloaderParams params) {
         //每次最多回滚10个区块,等待下次同步,这样可以避免被恶意节点攻击,大量回滚正常区块.
-        if (rollbackCount >= Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.MAX_ROLLBACK))) {
+        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        if (rollbackCount >= parameters.getMaxRollback()) {
             return false;
         }
 

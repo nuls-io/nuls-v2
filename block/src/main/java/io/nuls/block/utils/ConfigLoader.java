@@ -46,15 +46,16 @@ import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
  */
 public class ConfigLoader {
 
+    private static ParametersStorageService service = SpringLiteContext.getBean(ParametersStorageService.class);
+
     /**
      * 加载配置文件
      *
      * @throws Exception
      */
     public static void load() throws Exception {
-        ParametersStorageService service = SpringLiteContext.getBean(ParametersStorageService.class);
         List<ChainParameters> list = service.getList();
-        if (list.size() == 0) {
+        if (list == null || list.size() == 0) {
             loadDefault();
         } else {
             list.forEach(e -> ContextManager.init(e));
@@ -76,6 +77,7 @@ public class ConfigLoader {
         ChainParameters po = new ChainParameters();
         po.init(map);
         ContextManager.init(po);
+        service.save(po, chainId);
     }
 
 }

@@ -27,6 +27,7 @@ import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
+import io.nuls.block.model.ChainParameters;
 import io.nuls.tools.log.Log;
 
 import java.util.SortedSet;
@@ -76,7 +77,8 @@ public class ForkChainsMonitor implements Runnable {
                         continue;
                     }
                     //遍历当前分叉链,与主链进行比对,找出最大高度差,与默认参数chainSwtichThreshold对比,确定要切换的分叉链
-                    int chainSwtichThreshold = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.CHAIN_SWTICH_THRESHOLD));
+                    ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+                    int chainSwtichThreshold = parameters.getChainSwtichThreshold();
                     Chain switchChain = new Chain();
                     int maxHeightDifference = 0;
                     for (Chain forkChain : forkChains) {

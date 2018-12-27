@@ -78,8 +78,6 @@ public class BlockBootstrap {
                     .connect("ws://127.0.0.1:8887");
             // Get information from kernel
             CmdDispatcher.syncKernel();
-            //加载配置
-            ConfigLoader.load();
             //加载通用数据库
             RocksDBService.init(DATA_PATH);
             if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
@@ -88,6 +86,8 @@ public class BlockBootstrap {
             if (!RocksDBService.existTable(CHAIN_PARAMETERS)) {
                 RocksDBService.createTable(CHAIN_PARAMETERS);
             }
+            //加载配置
+            ConfigLoader.load();
         } catch (Exception e) {
             Log.error("error occur when init, {}", e.getMessage());
         }
