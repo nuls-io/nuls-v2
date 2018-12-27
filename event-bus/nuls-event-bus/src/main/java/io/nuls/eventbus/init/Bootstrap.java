@@ -6,7 +6,6 @@ import io.nuls.eventbus.EventBus;
 import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.model.Topic;
 import io.nuls.eventbus.rpc.processor.ClientSyncProcessor;
-import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.eventbus.service.EbStorageService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
@@ -52,7 +51,7 @@ public class Bootstrap {
             initDB();
             startRpc();
             // TODO register Event Bus commands
-            startProcessors();
+            syncClientConnectionInfo();
         }catch (Exception e){
             Log.error("Event Bus module Bootstrap failed..exiting the system");
             System.exit(1);
@@ -89,12 +88,11 @@ public class Bootstrap {
         }
     }
 
-    private static void startProcessors(){
+    private static void syncClientConnectionInfo(){
         Set<String> roles = EventBus.getInstance().getAllSubscribers();
         if(roles != null){
-            roles.stream().map(role -> EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{role, EbConstants.SUBSCRIBE}));
+            roles.stream().map(role -> EbConstants.CLIENT_SYNC_POOL.submit(new ClientSyncProcessor(new Object[]{role, EbConstants.SUBSCRIBE})));
         }
-        EbConstants.EB_THREAD_POOL.execute(new ClientSyncProcessor());
     }
 
     private static void initDB(){
