@@ -250,7 +250,7 @@ public class BlockServiceImpl implements BlockService {
                 }
                 hashList.addLast(hash);
             }
-            Log.debug("save block success, height-{}, hash-{}, preHash-{}", height, hash, block.getHeader().getPreHash());
+            Log.info("save block success, height-{}, hash-{}, preHash-{}", height, hash, block.getHeader().getPreHash());
             writeLock.unlock();
             return true;
         } else {
@@ -327,7 +327,7 @@ public class BlockServiceImpl implements BlockService {
         message.setSmallBlock(BlockUtil.getSmallBlock(chainId, block));
         message.setCommand(CommandConstant.SMALL_BLOCK_MESSAGE);
         boolean broadcast = NetworkUtil.broadcast(chainId, message);
-        if (broadcast) {
+        if (!broadcast) {
             rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block));
         }
         return broadcast;
