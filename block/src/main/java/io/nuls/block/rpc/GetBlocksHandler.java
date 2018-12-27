@@ -78,7 +78,7 @@ public class GetBlocksHandler extends BaseCmd {
             requestHash = NulsDigestData.calcDigestData(message.serialize());
             Block block;
             do {
-                block = service.getBlock(chainId, endHeight--);
+                block = service.getBlock(chainId, startHeight++);
                 if(block == null) {
                     NetworkUtil.sendFail(chainId, requestHash, nodeId);
                     return failed(BlockErrorCode.PARAMETER_ERROR);
