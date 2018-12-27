@@ -63,10 +63,6 @@ public interface TxCmd {
      */
     String NW_ASK_TX = "askTx";
     /**
-     * 接收主网新的完整跨链交易
-     */
-    String NW_NEW_MN_TX = "newMnTx";
-    /**
      * 根据原始交易和跨链交易hash向友链节点验证该交易是否被确认
      */
     String NW_VERIFY_FC = "verifyFc";
@@ -76,15 +72,6 @@ public interface TxCmd {
     String NW_VERIFY_MN = "verifyMn";
 
     /**
-     * 接收跨链验证结果
-     */
-    String NW_CROSS_NODE_RS = "crossNodeRs";
-    /**
-     * 接收本地新的主网协议的跨链交易 ??????
-     * todo
-     */
-    String NW_NEW_CROSS_TX = "newCrossTx";
-    /**
      * 接收新的跨链交易hash
      */
     String NW_NEW_CROSS_HASH = "newCrossHash";
@@ -93,8 +80,21 @@ public interface TxCmd {
      */
     String NW_ASK_CROSS_TX = "askCrossTx";
     /**
+     * 接收主网新的完整跨链交易
+     */
+    String NW_NEW_MN_TX = "newMnTx";
+    /**
      * 接收跨链验证结果
      */
     String NW_VERIFYR_ESULT = "verifyResult";
+    /**
+     * 接收跨链验证结果
+     */
+    String NW_CROSS_NODE_RS = "crossNodeRs";
+    /**
+     * 接收本地新的主网协议的跨链交易 ??????
+     * todo
+     */
+    String NW_NEW_CROSS_TX = "newCrossTx";
 
 }

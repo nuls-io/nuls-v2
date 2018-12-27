@@ -24,8 +24,14 @@ package io.nuls.block.model;
 
 import ch.qos.logback.classic.Logger;
 import io.nuls.base.data.Block;
+import io.nuls.block.cache.CacheHandler;
+import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
+import io.nuls.block.manager.ChainManager;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
+import io.nuls.block.service.BlockService;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import lombok.Data;
 import lombok.Getter;
@@ -81,6 +87,12 @@ public class ChainContext {
     private Chain masterChain;
 
     /**
+     * 链的运行时参数
+     */
+    @Getter @Setter
+    private ChainParameters parameters;
+
+    /**
      * 清理数据库,区块同步,分叉链维护,孤儿链维护获取该锁
      *
      * @return
@@ -109,7 +121,13 @@ public class ChainContext {
     }
 
     public void init() {
-
+        //服务初始化
+        BlockService service = SpringLiteContext.getBean(BlockService.class);
+        service.init(chainId);
+        //各类缓存初始化
+        SmallBlockCacher.init(chainId);
+        CacheHandler.init(chainId);
+        ChainManager.init(chainId);
     }
 
     public void start() {

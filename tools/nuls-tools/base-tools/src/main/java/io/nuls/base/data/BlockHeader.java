@@ -177,7 +177,7 @@ public class BlockHeader extends BaseNulsData {
     }
 
     public byte[] getPackingAddress(int chainID) {
-        if (null == packingAddress && this.blockSignature != null) {
+        if (this.blockSignature != null) {
             this.packingAddress = AddressTool.getAddress(blockSignature.getPublicKey(), chainID);
         }
         return packingAddress;

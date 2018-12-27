@@ -20,54 +20,54 @@
  *
  */
 
-package io.nuls.block.utils;
+package io.nuls.block.service;
 
-import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.block.service.ParametersStorageService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.parse.config.ConfigItem;
 
 import java.util.List;
 
-import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
-
 /**
- * 配置加载器
- * @author captain
- * @date 18-11-8 下午1:37
- * @version 1.0
+ * 配置信息存储管理类
+ * Configuration Information Storage Management Class
+ *
+ * @author tag
+ * 2018/11/8
  */
-public class ConfigLoader {
+public interface ParametersStorageService {
+    /**
+     * 保存指定链的配置信息
+     * Save configuration information for the specified chain
+     *
+     * @param chainContextPo    配置类/config bean
+     * @param chainID 链ID/chain id
+     * @return 保存是否成功/Is preservation successful?
+     * @throws
+     */
+    boolean save(ChainParameters chainContextPo, int chainID);
 
     /**
-     * 加载配置文件
+     * 查询某条链的配置信息
+     * Query the configuration information of a chain
      *
-     * @throws Exception
+     * @param chainID 链ID/chain id
+     * @return 配置信息类/config bean
      */
-    public static void load() throws Exception {
-        ParametersStorageService service = SpringLiteContext.getBean(ParametersStorageService.class);
-        List<ChainParameters> list = service.getList();
-        if (list.size() == 0) {
-            loadDefault();
-        } else {
-            list.forEach(e -> ContextManager.init(e));
-        }
-    }
+    ChainParameters get(int chainID);
 
     /**
-     * 加载默认配置文件
+     * 删除某条链的配置信息
+     * Delete configuration information for a chain
      *
-     * @throws Exception
+     * @param chainID 链ID/chain id
+     * @return 删除是否成功/Delete success
      */
-    private static void loadDefault() throws Exception {
-        String configJson = IoUtils.read(MODULES_CONFIG_FILE);
-        List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
-        ChainParameters po = new ChainParameters();
-        po.init(configItems);
-        ContextManager.init(po);
-    }
+    boolean delete(int chainID);
 
+    /**
+     * 获取当前节点所有的链信息
+     * Get all the chain information of the current node
+     *
+     * @return 节点信息列表/Node information list
+     */
+    List<ChainParameters> getList();
 }

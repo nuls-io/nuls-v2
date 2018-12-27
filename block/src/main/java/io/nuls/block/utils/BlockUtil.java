@@ -90,7 +90,7 @@ public class BlockUtil {
 
         int value = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.BLOCK_MAX_SIZE));
         if (block.size() > value) {
-            Log.warn("basicVerify fail, BLOCK_MAX_SIZE! chainId-{}, height-{}, hash-{}", chainId, block.getHeader().getHeight(), block.getHeader().getHash());
+            Log.warn("basicVerify fail, blockMaxSize! chainId-{}, height-{}, hash-{}", chainId, block.getHeader().getHeight(), block.getHeader().getHash());
             return false;
         }
 

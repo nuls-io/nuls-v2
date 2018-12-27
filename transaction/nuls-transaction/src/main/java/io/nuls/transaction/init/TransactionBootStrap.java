@@ -10,10 +10,14 @@ import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.TimeService;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.db.h2.dao.impl.BaseService;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.util.Properties;
@@ -28,14 +32,6 @@ public class TransactionBootStrap {
 
     public static void main(String[] args) {
         try {
-            init();
-        }catch (Exception e){
-            Log.error("Transaction startup error!");
-            Log.error(e);
-        }
-    }
-    public static void init(){
-        try{
             //初始化系统参数
             initSys();
             //初始化数据库配置文件
@@ -50,6 +46,7 @@ public class TransactionBootStrap {
             initServer();
             TimeService.getInstance().start();
         }catch (Exception e){
+            Log.error("Transaction startup error!");
             Log.error(e);
         }
     }
@@ -78,6 +75,11 @@ public class TransactionBootStrap {
             String path = properties.getProperty(TxConstant.DB_DATA_PATH,
                     TransactionBootStrap.class.getClassLoader().getResource("").getPath() + "data");
             RocksDBService.init(path);
+
+            //todo 单个节点跑多链的时候 h2是否需要通过chain来区分数据库(如何分？)，待确认！！
+            String resource = "mybatis/mybatis-config.xml";
+            InputStream in = Resources.getResourceAsStream(resource);
+            BaseService.sqlSessionFactory = new SqlSessionFactoryBuilder().build(in);
         }catch (Exception e){
             Log.error(e);
         }
@@ -121,7 +123,4 @@ public class TransactionBootStrap {
             e.printStackTrace();
         }
     }
-
-
-
 }

@@ -22,8 +22,8 @@ package io.nuls.block.manager;
 
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.model.ChainContext;
+import io.nuls.block.model.ChainParameters;
 import io.nuls.block.utils.module.TransactionUtil;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import lombok.Data;
 
@@ -48,9 +48,11 @@ public class ContextManager {
     private ContextManager() {
     }
 
-    public static void init(int chainId) {
+    public static void init(ChainParameters chainParameters) {
         ChainContext chainContext = new ChainContext();
+        int chainId = chainParameters.getChainId();
         chainContext.setChainId(chainId);
+        chainContext.setParameters(chainParameters);
         chainContext.setStatus(RunningStatusEnum.INITIALIZING);
         chainContext.setSystemTransactionType(TransactionUtil.getSystemTypes(chainId));
         chainIds.add(chainId);
