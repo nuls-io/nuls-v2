@@ -26,7 +26,7 @@ public class CrossTxVerifyingManager {
 
     public void initCrossTxVerifyingMap(Chain chain) {
         //初始化跨链交易到缓存中
-        List<CrossChainTx> txList = crossChainTxService.getTxList(chain.getChainId());
+        List<CrossChainTx> txList = crossChainTxService.getTxList(chain);
         if (txList != null) {
             txList.forEach(tx -> chain.getCrossTxVerifyingMap().put(tx.getTx().getHash(), tx));
         }

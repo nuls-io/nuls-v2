@@ -28,9 +28,7 @@ import java.util.*;
  */
 public class TxUnverifiedProcessTask implements Runnable {
 
-    //todo
     private TxVerifiedPool txVerifiedPool = SpringLiteContext.getBean(TxVerifiedPool.class);
-    //todo
     private TransactionManager transactionManager = SpringLiteContext.getBean(TransactionManager.class);
 
     private TxUnverifiedStorageService txUnverifiedStorageService = SpringLiteContext.getBean(TxUnverifiedStorageService.class);
@@ -56,12 +54,12 @@ public class TxUnverifiedProcessTask implements Runnable {
         try {
             doTask(chain);
         } catch (Exception e) {
-            Log.error(e);
+            chain.getLogger().error(e);
         }
         try {
             doOrphanTxTask(chain);
         } catch (Exception e) {
-            Log.error(e);
+            chain.getLogger().error(e);
         }
         System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
     }

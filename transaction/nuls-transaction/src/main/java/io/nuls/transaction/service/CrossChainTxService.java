@@ -1,6 +1,8 @@
 package io.nuls.transaction.service;
 
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
+import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossChainTx;
 
 import java.util.List;
@@ -15,39 +17,48 @@ import java.util.List;
 public interface CrossChainTxService {
 
     /**
-     * 新增或修改跨链交易数据
+     * 接收其他链新的跨链交易
      *
-     * @param chainId
-     * @param ctx
+     * @param chain
+     * @param tx
      * @return
      */
-    boolean putTx(int chainId, CrossChainTx ctx);
+    boolean newCrossTx(Chain chain, int nodeId, Transaction tx);
 
     /**
      * 删除跨链交易
      *
-     * @param chainId
+     * @param chain
      * @param hash
      * @return
      */
-    boolean removeTx(int chainId, NulsDigestData hash);
+    boolean removeTx(Chain chain, NulsDigestData hash);
 
     /**
      * 根据交易哈希查询跨链交易
      *
-     * @param chainId
+     * @param chain
      * @param hash
      * @return
      */
-    CrossChainTx getTx(int chainId, NulsDigestData hash);
+    CrossChainTx getTx(Chain chain, NulsDigestData hash);
 
     /**
      * 查询指定链下所有跨链交易
      * Query all cross-chain transactions in the specified chain
      *
-     * @param chainId
+     * @param chain
      * @return
      */
-    List<CrossChainTx> getTxList(int chainId);
+    List<CrossChainTx> getTxList(Chain chain);
+
+    /**
+     * 更新跨链交易在跨链过程中的验证状态
+     * @param chain
+     * @param hash
+     * @param state
+     * @return
+     */
+    boolean updateCrossTxState(Chain chain, NulsDigestData hash, int state);
 
 }

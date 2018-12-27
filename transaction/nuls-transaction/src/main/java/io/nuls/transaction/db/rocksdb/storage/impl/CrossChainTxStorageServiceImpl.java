@@ -43,7 +43,7 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
         }
         boolean result = false;
         try {
-            result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_CROSSCHAIN + chainId, txHashBytes, ctx.serialize());
+            result = RocksDBService.put(TxDBConstant.DB_PROGRESS_CROSSCHAIN + chainId, txHashBytes, ctx.serialize());
         } catch (Exception e) {
             Log.error(e);
         }
@@ -57,7 +57,7 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
             return false;
         }
         try {
-            return RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CROSSCHAIN + chainId, hash.serialize());
+            return RocksDBService.delete(TxDBConstant.DB_PROGRESS_CROSSCHAIN + chainId, hash.serialize());
         } catch (IOException e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -80,7 +80,7 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CROSSCHAIN + chainId, hashBytes);
+        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_PROGRESS_CROSSCHAIN + chainId, hashBytes);
 
         if (null == txBytes) {
             return null;
@@ -98,7 +98,7 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
     public List<CrossChainTx> getTxList(int chainId) {
         List<CrossChainTx> ccTxPoList = new ArrayList<>();
         try {
-            List<byte[]> list = RocksDBService.valueList(TxDBConstant.DB_TRANSACTION_CROSSCHAIN + chainId);
+            List<byte[]> list = RocksDBService.valueList(TxDBConstant.DB_PROGRESS_CROSSCHAIN + chainId);
             if (list != null) {
                 for (byte[] value : list) {
                     CrossChainTx ccTx = new CrossChainTx();
