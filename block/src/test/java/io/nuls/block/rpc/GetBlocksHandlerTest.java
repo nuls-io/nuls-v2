@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
-import static io.nuls.block.constant.Constant.CHAIN_ID;
 
 public class GetBlocksHandlerTest {
 
@@ -40,7 +39,7 @@ public class GetBlocksHandlerTest {
     public void process() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", CHAIN_ID);
+        params.put("chainId", 1);
         params.put("nodes", "192.168.1.191:8003");
         HeightRangeMessage message = new HeightRangeMessage();
         message.setStartHeight(1000);

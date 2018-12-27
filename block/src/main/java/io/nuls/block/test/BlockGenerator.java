@@ -37,8 +37,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.block.constant.Constant.CHAIN_ID;
-
 /**
  * 区块生成器
  *
@@ -127,7 +125,7 @@ public final class BlockGenerator extends Thread {
         CoinTo coin = new CoinTo();
         coin.setAddress(ads.getAddressBytes());
         coin.setAmount(new BigInteger(amount));
-        coin.setAssetsChainId(CHAIN_ID);
+        coin.setAssetsChainId(1);
         coin.setAssetsId(1);
         coin.setLockTime(0);
         coinData.addTo(coin);

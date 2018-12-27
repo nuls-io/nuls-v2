@@ -205,8 +205,8 @@ public class BlockUtil {
                 chainStorageService.save(chainId, block);
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 ChainManager.addForkChain(chainId, forkChain);
-                ConsensusUtil.fork(chainId, ContextManager.getContext(chainId).getLatestBlock().getHeader(), header);
-                Log.debug("chainId:{}, received fork blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
+                ConsensusUtil.evidence(chainId, ContextManager.getContext(chainId).getLatestBlock().getHeader(), header);
+                Log.debug("chainId:{}, received evidence blocks of masterChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
             }
         }
@@ -249,7 +249,7 @@ public class BlockUtil {
                     chainStorageService.save(chainId, block);
                     Chain newForkChain = ChainGenerator.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
                     ChainManager.addForkChain(chainId, newForkChain);
-                    Log.debug("chainId:{}, received fork blocks of forkChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
+                    Log.debug("chainId:{}, received evidence blocks of forkChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
             }
@@ -302,7 +302,7 @@ public class BlockUtil {
                     Chain forkOrphanChain = ChainGenerator.generate(chainId, block, orphanChain, ChainTypeEnum.ORPHAN);
                     forkOrphanChain.setAge(new AtomicInteger(0));
                     ChainManager.addOrphanChain(chainId, forkOrphanChain);
-                    Log.debug("chainId:{}, received fork blocks of orphanChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
+                    Log.debug("chainId:{}, received evidence blocks of orphanChain, height:{}, hash:{}", chainId, blockHeight, blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
             }

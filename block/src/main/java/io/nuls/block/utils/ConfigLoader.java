@@ -22,6 +22,8 @@
 
 package io.nuls.block.utils;
 
+import io.nuls.block.constant.ConfigConstant;
+import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.service.ParametersStorageService;
@@ -30,7 +32,9 @@ import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.config.ConfigItem;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
 
@@ -65,8 +69,12 @@ public class ConfigLoader {
     private static void loadDefault() throws Exception {
         String configJson = IoUtils.read(MODULES_CONFIG_FILE);
         List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
+        Map<String, ConfigItem> map = new HashMap<>(configItems.size());
+        configItems.forEach(e -> map.put(e.getName(), e));
+        int chainId = Integer.parseInt(map.get(ConfigConstant.CHAIN_ID).getValue());
+        ConfigManager.add(chainId, map);
         ChainParameters po = new ChainParameters();
-        po.init(configItems);
+        po.init(map);
         ContextManager.init(po);
     }
 
