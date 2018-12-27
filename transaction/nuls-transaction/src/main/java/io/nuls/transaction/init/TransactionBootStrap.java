@@ -14,6 +14,7 @@ import io.nuls.transaction.db.h2.dao.impl.BaseService;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
+import io.nuls.transaction.rpc.call.NetworkCall;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
@@ -44,6 +45,8 @@ public class TransactionBootStrap {
             initLanguage();
             //启动WebSocket服务,向外提供RPC接口
             initServer();
+            //注册网络消息协议
+            NetworkCall.registerProtocol();
             TimeService.getInstance().start();
         }catch (Exception e){
             Log.error("Transaction startup error!");
@@ -113,6 +116,7 @@ public class TransactionBootStrap {
                     .moduleRoles(new String[]{"1.0"})
                     .moduleVersion("1.0")
                     //.dependencies(ModuleE.LG.abbr, "1.0")
+                    //.dependencies(ModuleE.NW.abbr, "1.0")
                     .scanPackage("io.nuls.transaction.rpc.cmd")
                     .connect("ws://127.0.0.1:8887");
 
