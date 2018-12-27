@@ -47,7 +47,7 @@ public class CrossChainTx extends BaseNulsData {
     /**
      * 可能为空？如果是同链节点转发？
      */
-    private int nodeId;
+    private String nodeId;
 
     /**
      * 跨链交易在当前链生效的高度(交易确认的高度 + 阈值高度)
@@ -97,11 +97,11 @@ public class CrossChainTx extends BaseNulsData {
         this.state = state;
     }
 
-    public int getNodeId() {
+    public String getNodeId() {
         return nodeId;
     }
 
-    public void setNodeId(int nodeId) {
+    public void setNodeId(String nodeId) {
         this.nodeId = nodeId;
     }
 

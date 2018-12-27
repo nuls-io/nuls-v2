@@ -34,7 +34,7 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
     private CrossChainTxUnprocessedStorageService crossChainTxUnprocessedStorageService;
 
     @Override
-    public boolean newCrossTx(Chain chain, int nodeId, Transaction tx) {
+    public boolean newCrossTx(Chain chain, String nodeId, Transaction tx) {
         if (tx == null) {
             return false;
         }

@@ -24,6 +24,15 @@ public interface CrossChainTxStorageService {
     boolean putTx(int chainId, CrossChainTx ctx);
 
     /**
+     * 批量新增跨链交易数据
+     *
+     * @param chainId
+     * @param ctxList
+     * @return
+     */
+    boolean putTxs(int chainId, List<CrossChainTx> ctxList);
+
+    /**
      * 删除跨链交易
      *
      * @param chainId

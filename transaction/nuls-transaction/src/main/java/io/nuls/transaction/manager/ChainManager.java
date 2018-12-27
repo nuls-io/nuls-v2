@@ -172,9 +172,19 @@ public class ChainManager {
 
             /*
             创建处理中跨链交易表
-            Create cross chain transaction able
+             cross chain transaction progress
             */
             RocksDBService.createTable(TxDBConstant.DB_PROGRESS_CROSSCHAIN + chainId);
+
+            /*
+            已验证未打包交易
+            Verified transaction
+            */
+            String area = TxDBConstant.DB_TRANSACTION_CACHE + chainId;
+            if(RocksDBService.existTable(area)){
+                RocksDBService.destroyTable(area);
+            }
+            RocksDBService.createTable(area);
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 logger.error(e.getMessage());

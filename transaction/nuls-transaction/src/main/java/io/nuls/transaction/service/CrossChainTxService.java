@@ -23,7 +23,7 @@ public interface CrossChainTxService {
      * @param tx
      * @return
      */
-    boolean newCrossTx(Chain chain, int nodeId, Transaction tx);
+    boolean newCrossTx(Chain chain, String nodeId, Transaction tx);
 
     /**
      * 删除跨链交易
