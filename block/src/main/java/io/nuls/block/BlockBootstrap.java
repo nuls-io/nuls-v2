@@ -111,7 +111,7 @@ public class BlockBootstrap {
 //        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
 //        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
             //开启分叉链处理线程
-            ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("evidence-chains-monitor"));
+            ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
             forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
             //开启孤儿链处理线程
             ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
