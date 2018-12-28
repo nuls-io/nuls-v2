@@ -85,7 +85,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         Channel channel = ctx.channel();
         //already exist peer ip （In or Out）
         if( ConnectionManager.getInstance().isPeerConnectExceedMax(remoteIP,magicNumber,1,Node.OUT)){
-            Log.info("dup connect,close channel");
+//            Log.info("dup connect,close channel");
             channel.close();
             return false;
         }
@@ -138,7 +138,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         if(null != node) {
             node.setIdle(true);
             //移除连接
-            Log.info("Client Node is Inactive:" + node.getIp() + ":" + node.getRemotePort());
+//            Log.info("Client Node is Inactive:" + node.getIp() + ":" + node.getRemotePort());
             ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),Node.OUT);
         }
     }
@@ -159,7 +159,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
                 SocketChannel socketChannel = (SocketChannel) ctx.channel();
                 String remoteIP = socketChannel.remoteAddress().getHostString();
                 int port = socketChannel.remoteAddress().getPort();
-                Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
+//                Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -169,7 +169,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
-        Log.info("-----------------client channelInactive  node is channelUnregistered -----------------");
+//        Log.info("-----------------client channelInactive  node is channelUnregistered -----------------");
 
     }
     @Override

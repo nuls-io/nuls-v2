@@ -334,7 +334,7 @@ public class CmdDispatcher {
             获取队列中的第一个对象，如果非空，则说明握手成功
             Get the first item of the queue, If not empty, the handshake is successful.
              */
-            Message message = ClientRuntime.firstMessageInNegotiateResponseQueue();
+            Message message = ClientRuntime.NEGOTIATE_RESPONSE_QUEUE.poll();
             if (message != null) {
                 return true;
             }
@@ -365,7 +365,7 @@ public class CmdDispatcher {
             获取队列中的第一个对象
             Get the first item of the queue
              */
-            Message message = ClientRuntime.firstMessageInResponseManualQueue();
+            Message message = ClientRuntime.RESPONSE_MANUAL_QUEUE.poll();
             if (message == null) {
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                 continue;
@@ -412,7 +412,7 @@ public class CmdDispatcher {
             获取队列中的第一个对象，如果是空，舍弃
             Get the first item of the queue, If it is an empty object, discard
              */
-            Message message = ClientRuntime.firstMessageInAckQueue();
+            Message message = ClientRuntime.ACK_QUEUE.poll();
             if (message == null) {
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                 continue;

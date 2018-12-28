@@ -55,11 +55,11 @@ public class BlockRpcServiceImpl implements BlockRpcService {
         map.put("chainId",chainId);
         try {
             long startTime = System.currentTimeMillis();
-            Log.info("start RPC Time :{}",startTime);
+//            Log.info("start RPC Time :{}",startTime);
             Response response =  CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER,map,500 );
             long endTime = System.currentTimeMillis();
-            Log.info("end RPC Time :{}",System.currentTimeMillis());
-            Log.info("used Time :{}",endTime-startTime);
+//            Log.info("end RPC Time :{}",System.currentTimeMillis());
+//            Log.info("used Time :{}",endTime-startTime);
             if(null != response && response.isSuccess()){
                 Map responseData = (Map)response.getResponseData();
                 String hex = (String) responseData.get("bestBlockHeader");

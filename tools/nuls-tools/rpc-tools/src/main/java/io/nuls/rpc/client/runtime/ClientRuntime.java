@@ -115,47 +115,6 @@ public class ClientRuntime {
     }
 
     /**
-     * @return 第一条握手确认消息，The first handshake confirmed message
-     */
-    public static Message firstMessageInNegotiateResponseQueue() {
-        return firstMessageInQueue(NEGOTIATE_RESPONSE_QUEUE);
-    }
-
-    /**
-     * @return 第一条确认消息，The first ack message
-     */
-    public static Message firstMessageInAckQueue() {
-        return firstMessageInQueue(ACK_QUEUE);
-    }
-
-    /**
-     * @return 第一条需要手动处理的Response消息，The first Response message that needs to be handled manually
-     */
-    public static Message firstMessageInResponseManualQueue() {
-        return firstMessageInQueue(RESPONSE_MANUAL_QUEUE);
-    }
-
-    /**
-     * @return 第一条需要自动处理的Response消息，The first Response message that needs to be handled automatically
-     */
-    public static Message firstMessageInResponseAutoQueue() {
-        return firstMessageInQueue(RESPONSE_AUTO_QUEUE);
-    }
-
-    /**
-     * 获取队列中的第一个元素，然后从队列中移除
-     * Get the first item and remove
-     *
-     * @return 队列的第一个元素. The first item in queue.
-     */
-    private static synchronized Message firstMessageInQueue(Queue<Message> messageQueue) {
-        Message message = messageQueue.peek();
-        messageQueue.poll();
-        return message;
-    }
-
-
-    /**
      * @param url 连接字符串，Connection Url
      * @return 与url对应的客户端对象，WsClient object corresponding to URL
      * @throws Exception 连接失败，Connect failed

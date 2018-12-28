@@ -47,10 +47,10 @@ public class DataShowMonitorTest implements Runnable  {
     @Override
     public void run() {
         //test
-        printlnCachePeer();
+//        printlnCachePeer();
         printlnPeer();
-        printlnMem();
-        printlnProtocolMap();
+//        printlnMem();
+//        printlnProtocolMap();
     }
 
     private void printlnProtocolMap(){
@@ -83,24 +83,9 @@ public class DataShowMonitorTest implements Runnable  {
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for(NodeGroup nodeGroup:nodeGroupList){
             Collection<Node> c1=nodeGroup.getConnectNodes();
-            Log.info("============================printlnPeer c1============="+c1.size());
+            Log.info("=============printlnPeer c1============="+c1.size());
             for(Node n:c1){
-                Log.info("*************connect:"+n.getId());
-            }
-            Collection<Node> c2=nodeGroup.getDisConnectNodes();
-            Log.info("============================printlnPeer c2============="+c2.size());
-            for(Node n:c2){
-                Log.info("***********disconnect:"+n.getId());
-            }
-            Collection<Node> c3=nodeGroup.getConnectCrossNodes();
-            Log.info("============================printlnPeer c3============="+c3.size());
-            for(Node n:c3){
-                Log.info("************cross connect:"+n.getId());
-            }
-            Collection<Node> c4=nodeGroup.getDisConnectCrossNodes();
-            Log.info("============================printlnPeer c4============="+c4.size());
-            for(Node n:c4){
-                Log.info("*************cross disconnect:"+n.getId());
+                Log.info("*******connect:{},height:{},hash:{}", n.getId(),n.getFirstNodeGroupConnector().getBlockHeight(), n.getFirstNodeGroupConnector().getBlockHash());
             }
         }
     }

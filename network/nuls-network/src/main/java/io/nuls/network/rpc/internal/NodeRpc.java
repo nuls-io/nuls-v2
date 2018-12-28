@@ -37,6 +37,8 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.log.Log;
+
 import static io.nuls.network.utils.LoggerUtil.Log;
 
 
@@ -139,7 +141,6 @@ public class NodeRpc extends BaseCmd {
         int isCross = Integer.valueOf(String.valueOf(params.get("isCross")));
         int startPage = Integer.valueOf(String.valueOf(params.get("startPage")));
         int pageSize = Integer.valueOf(String.valueOf(params.get("pageSize")));
-        Log.info("chainId:"+chainId+"==state:"+state+"==isCross:"+isCross+"==startPage："+startPage+"==pageSize:"+pageSize);
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
         List<Node> nodes=new ArrayList<>();
         /*
@@ -238,6 +239,7 @@ public class NodeRpc extends BaseCmd {
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(nodeGroup.getMagicNumber());
+        Log.info("update nodeinfo:{}, chainId:{}, height:{}, hash:{}", nodeId, chainId, blockHeight, blockHash);
         if(null != nodeGroupConnector){
             nodeGroupConnector.setBlockHash(blockHash);
             nodeGroupConnector.setBlockHeight(blockHeight);

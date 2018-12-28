@@ -171,8 +171,8 @@ public class MessageManager extends BaseManager{
         byte [] bodyHash=Sha256Hash.hashTwice(data);
         byte []get4Byte=ByteUtils.subBytes(bodyHash,0,4);
         long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
-        Log.debug("==================local checksum:"+checksum);
-        Log.debug("==================peer checksum:"+pChecksum);
+//        Log.debug("==================local checksum:"+checksum);
+//        Log.debug("==================peer checksum:"+pChecksum);
         return checksum == pChecksum;
     }
     public void receiveMessage(ByteBuf buffer,String nodeKey,boolean isServer) throws NulsException {
@@ -186,17 +186,17 @@ public class MessageManager extends BaseManager{
             byte []payLoad = byteBuffer.getPayload();
             byte []payLoadBody = ByteUtils.subBytes(payLoad,headerSize,payLoad.length-headerSize);
             byte []headerByte = ByteUtils.copyOf(payLoad,headerSize);
-            Log.info("=================payLoad length"+payLoadBody.length);
+//            Log.info("=================payLoad length"+payLoadBody.length);
 
             header.parse(headerByte,0);
-            Log.info("================CMD="+header.getCommandStr());
+//            Log.info("================CMD="+header.getCommandStr());
             if (!validate(payLoadBody,header.getChecksum())) {
                 Log.error("validate  false ======================");
                 return;
             }
             byteBuffer.setCursor(0);
             while (!byteBuffer.isFinished()) {
-                Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
+//                Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
                 BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());
                 if(null != message) {
                     BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(message);
@@ -247,7 +247,7 @@ public class MessageManager extends BaseManager{
                     List<IpAddress> addressesList=new ArrayList<>();
                     addressesList.add(LocalInfoManager.getInstance().getExternalAddress());
                     AddrMessage addrMessage= MessageFactory.getInstance().buildAddrMessage(addressesList,nodeGroupConnector.getMagicNumber());
-                    Log.info("broadcastSelfAddrToAllNode================"+addrMessage.getMsgBody().size()+"==getIpAddressList()=="+addrMessage.getMsgBody().getIpAddressList().size());
+//                    Log.info("broadcastSelfAddrToAllNode================"+addrMessage.getMsgBody().size()+"==getIpAddressList()=="+addrMessage.getMsgBody().getIpAddressList().size());
                     this.sendToNode(addrMessage,connectNode,asyn);
                 }
 
