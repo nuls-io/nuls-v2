@@ -75,6 +75,8 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
+            CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
+            NetworkUtil.setHashAndHeight(chainId, blockHash, block.getSmallBlock().getHeader().getHeight(), nodeId);
             return success();
         }
 
@@ -86,6 +88,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             request.setTxHashList(block.getMissingTransactions());
             request.setCommand(CommandConstant.GET_TXGROUP_MESSAGE);
             NetworkUtil.sendToNode(chainId, request, nodeId);
+            NetworkUtil.setHashAndHeight(chainId, blockHash, block.getSmallBlock().getHeader().getHeight(), nodeId);
             return success();
         }
 

@@ -185,8 +185,9 @@ public class BlockServiceImpl implements BlockService {
     }
 
     private boolean saveBlock(int chainId, Block block, boolean localInit, int download) {
-        long height = block.getHeader().getHeight();
-        NulsDigestData hash = block.getHeader().getHash();
+        BlockHeader header = block.getHeader();
+        long height = header.getHeight();
+        NulsDigestData hash = header.getHash();
         ChainContext context = ContextManager.getContext(chainId);
         ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
         boolean lock;
@@ -223,7 +224,7 @@ public class BlockServiceImpl implements BlockService {
             }
             //4.保存区块头,完全保存,更新标记
             blockHeaderPo.setComplete(true);
-            if (!blockStorageService.save(chainId, blockHeaderPo)) {
+            if (!ConsensusUtil.newBlock(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo)) {
                 Log.error("update blockheader fail!chainId-{},height-{}", chainId, height);
                 if (!TransactionUtil.rollback(chainId, block.getTxHashList())) {
                     throw new DbRuntimeException("remove transactions error!");
@@ -248,7 +249,7 @@ public class BlockServiceImpl implements BlockService {
                 }
                 hashList.addLast(hash);
             }
-            Log.info("save block success, height-{}, hash-{}, preHash-{}", height, hash, block.getHeader().getPreHash());
+            Log.info("save block success, height-{}, hash-{}, preHash-{}", height, hash, header.getPreHash());
             writeLock.unlock();
             return true;
         } else {
