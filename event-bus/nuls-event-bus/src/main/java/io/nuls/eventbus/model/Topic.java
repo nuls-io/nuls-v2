@@ -74,7 +74,7 @@ public class Topic implements Serializable {
     }
 
     /**
-     * unsubscribes the role from the topic
+     * unsubscribe the role from the topic
      *
      * @param subscriber
      * @return

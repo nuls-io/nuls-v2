@@ -55,15 +55,14 @@ public class EventBus {
      */
     public void subscribe(Map<String,Object> params) throws NulsRuntimeException {
         String topicId = (String)params.get(EbConstants.CMD_PARAM_TOPIC);
-        Subscriber subscriber = buildSubscriber(params);
-        synchronized (this){
-            if(topicMap.containsKey(topicId)){
-                Topic topic = topicMap.get(topicId);
-                topicMap.put(topicId,topic.addSubscriber(subscriber));
+        Topic topic;
+        if((topic = topicMap.get(topicId)) != null){
+            synchronized (this){
+                topicMap.put(topicId,topic.addSubscriber(buildSubscriber(params)));
                 ebStorageService.putTopic(topic);
-            }else{
-                throw new NulsRuntimeException(EbErrorCode.TOPIC_NOT_FOUND);
             }
+        }else{
+            throw new NulsRuntimeException(EbErrorCode.TOPIC_NOT_FOUND);
         }
     }
 
@@ -74,15 +73,14 @@ public class EventBus {
      */
     public void unsubscribe(Map<String,Object> params) throws NulsRuntimeException{
         String topicId = (String)params.get(EbConstants.CMD_PARAM_TOPIC);
-        Subscriber subscriber = buildSubscriber(params);
-        synchronized (this){
-            if(topicMap.containsKey(topicId)){
-                Topic topic = topicMap.get(topicId);
-                topicMap.put(topicId,topic.removeSubscriber(subscriber));
+        Topic topic;
+        if((topic = topicMap.get(topicId)) != null){
+            synchronized (this){
+                topicMap.put(topicId,topic.removeSubscriber(buildSubscriber(params)));
                 ebStorageService.putTopic(topic);
-            }else{
-                throw new NulsRuntimeException(EbErrorCode.TOPIC_NOT_FOUND);
             }
+        }else{
+            throw new NulsRuntimeException(EbErrorCode.TOPIC_NOT_FOUND);
         }
     }
 
@@ -98,16 +96,16 @@ public class EventBus {
         String moduleName = (String)params.get(EbConstants.CMD_PARAM_ROLE_NAME);
         String domain = (String)params.get(EbConstants.CMD_PARAM_DOMAIN);
         Topic topic;
-        synchronized (this){
-            if(topicMap.containsKey(topicId)){
-                topic = topicMap.get(topicId);
-            }else{
-                topic = new Topic(topicId,abbr,moduleName,domain);
-                topicMap.put(topicId,topic);
-                ebStorageService.putTopic(topic);
+        if((topic = topicMap.get(topicId)) == null){
+            synchronized (this){
+                if((topic = topicMap.get(topicId)) == null){
+                    topic = new Topic(topicId,abbr,moduleName,domain);
+                    topicMap.put(topicId,topic);
+                    ebStorageService.putTopic(topic);
+                }
             }
-            return topic.getSubscribers();
         }
+        return topic.getSubscribers();
     }
 
     private Subscriber buildSubscriber(Map<String,Object> params){
