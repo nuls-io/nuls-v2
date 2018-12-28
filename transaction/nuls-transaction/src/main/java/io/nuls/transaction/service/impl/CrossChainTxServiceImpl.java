@@ -38,9 +38,11 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         if (tx == null) {
             return false;
         }
+        //todo 判断是否存在
         CrossChainTx ctx = new CrossChainTx();
         ctx.setTx(tx);
-        ctx.setNodeId(nodeId);
+        ctx.setSenderChainId(chain.getChainId());
+        ctx.setSenderNodeId(nodeId);
         ctx.setState(TxConstant.CTX_UNPROCESSED_0);
         return crossChainTxUnprocessedStorageService.putTx(chain.getChainId(), ctx);
     }

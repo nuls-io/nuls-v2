@@ -87,8 +87,9 @@ public class CrossTxUnverifiedProcessTask implements Runnable {
                 VerifyCrossWithFCMessage verifyCrossWithFCMessage = new VerifyCrossWithFCMessage();
                 verifyCrossWithFCMessage.setOriginalTxHash(crossTxData.getOriginalTxHash());
                 verifyCrossWithFCMessage.setRequestHash(tx.getHash());
+                //todo 获取节点组 放CrossChainTx
                 //发送跨链验证msg，除去发送者节点
-                boolean rs = NetworkCall.broadcast(chainId, verifyCrossWithFCMessage, ctx.getNodeId());
+                boolean rs = NetworkCall.broadcast(ctx.getSenderChainId(), verifyCrossWithFCMessage, ctx.getSenderNodeId());
                 if(!rs){
                     break;
                 }
