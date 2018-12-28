@@ -82,11 +82,7 @@ public class BlockSynchronizer implements Runnable {
                 if (synStatus == null) {
                     statusEnumMap.put(chainId, synStatus = BlockSynStatusEnum.WAITING);
                 }
-                if (!synStatus.equals(BlockSynStatusEnum.RUNNING)) {
-                    synchronize(chainId, synStatus);
-                } else {
-                    Log.info("skip Block Synchronize, SynStatus:{}", synStatus);
-                }
+                synchronize(chainId, synStatus);
             } catch (Exception e) {
                 Log.error(e);
                 statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);

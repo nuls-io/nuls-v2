@@ -224,7 +224,7 @@ public class BlockServiceImpl implements BlockService {
             }
             //4.保存区块头,完全保存,更新标记
             blockHeaderPo.setComplete(true);
-            if (!ConsensusUtil.newBlock(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo)) {
+            if (!ConsensusUtil.newBlock(chainId, header, localInit) || !blockStorageService.save(chainId, blockHeaderPo)) {
                 Log.error("update blockheader fail!chainId-{},height-{}", chainId, height);
                 if (!TransactionUtil.rollback(chainId, block.getTxHashList())) {
                     throw new DbRuntimeException("remove transactions error!");
