@@ -375,7 +375,7 @@ public class PunishManager {
         int yellowCount = 0;
 
         /*
-        如果当前轮次与本地最新区块是同一轮次，则当前节点在本轮次中的出块下标与最新区块之间的差值减一即为需要生成的光拍交易数
+        如果当前轮次与本地最新区块是同一轮次，则当前节点在本轮次中的出块下标与最新区块之间的差值减一即为需要生成的黄牌交易数
         If the current round is the same as the latest local block, then the difference between the block subscript of the current node and the latest block in this round is reduced by one,
         that is, the number of optical beat transactions that need to be generated.
         */
