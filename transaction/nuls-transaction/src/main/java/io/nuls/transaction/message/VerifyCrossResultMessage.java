@@ -45,7 +45,7 @@ public class VerifyCrossResultMessage extends BaseMessage {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(requestHash);
         size += SerializeUtils.sizeOfInt64();
-//        size += SerializeUtils.sizeOfBytes(transactionSignature);
+        //size += SerializeUtils.sizeOfBytes(transactionSignature);
         return size;
     }
 
@@ -53,13 +53,13 @@ public class VerifyCrossResultMessage extends BaseMessage {
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(requestHash);
         stream.writeInt64(height);
-//        stream.writeBytesWithLength(transactionSignature);
+        //stream.writeBytesWithLength(transactionSignature);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.requestHash = byteBuffer.readHash();
         this.height = byteBuffer.readInt64();
-//        this.transactionSignature = byteBuffer.readByLengthByte();
+        //this.transactionSignature = byteBuffer.readByLengthByte();
     }
 }
