@@ -32,6 +32,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -67,6 +68,7 @@ public class CrossChainTx extends BaseNulsData {
      * 2.收到的本链节点验证结果(签名？)
      *
      */
+    List<CrossTxVerifyResult> ctxVerifyResultList;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer nulsOutputStreamBuffer) throws IOException {
@@ -121,5 +123,13 @@ public class CrossChainTx extends BaseNulsData {
 
     public void setHeight(long height) {
         this.height = height;
+    }
+
+    public List<CrossTxVerifyResult> getCtxVerifyResultList() {
+        return ctxVerifyResultList;
+    }
+
+    public void setCtxVerifyResultList(List<CrossTxVerifyResult> ctxVerifyResultList) {
+        this.ctxVerifyResultList = ctxVerifyResultList;
     }
 }

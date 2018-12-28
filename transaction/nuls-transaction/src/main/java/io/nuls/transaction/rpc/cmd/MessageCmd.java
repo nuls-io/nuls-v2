@@ -24,12 +24,15 @@ import io.nuls.transaction.message.VerifyCrossResultMessage;
 import io.nuls.transaction.message.VerifyCrossWithFCMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.CrossTxVerifyResult;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.CrossChainTxService;
 import io.nuls.transaction.service.TransactionService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.nuls.transaction.constant.TxCmd.NW_NEW_MN_TX;
@@ -382,12 +385,24 @@ public class MessageCmd extends BaseCmd {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
             //查询处理中的跨链交易
-            CrossChainTx ctx = crossChainTxStorageService.getTx(chainId,message.getRequestHash());
+            CrossChainTx ctx = crossChainTxStorageService.getTx(chainId, message.getRequestHash());
             if (ctx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            //发送跨链交易验证结果到指定节点
-            result=crossChainTxStorageService.putTx(chainId, ctx);
+            //获取跨链交易验证结果
+            List<CrossTxVerifyResult> verifyResultList = ctx.getCtxVerifyResultList();
+            if (verifyResultList == null) {
+                verifyResultList = new ArrayList<>();
+            }
+            //添加新的跨链验证结果
+            CrossTxVerifyResult verifyResult = new CrossTxVerifyResult();
+            verifyResult.setChainId(chainId);
+            verifyResult.setNodeId(nodeId);
+            verifyResult.setHeight(message.getHeight());
+            verifyResultList.add(verifyResult);
+            ctx.setCtxVerifyResultList(verifyResultList);
+            //保存跨链交易验证结果
+            result = crossChainTxStorageService.putTx(chainId, ctx);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {

@@ -2,10 +2,9 @@ package io.nuls.transaction.model.bo;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import io.nuls.transaction.message.base.BaseMessage;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,14 +16,20 @@ import java.io.IOException;
  * @author: qinyifeng
  * @date: 2018/12/28
  */
-public class CrossTxVerifyResult extends BaseMessage {
+public class CrossTxVerifyResult extends BaseNulsData {
 
     /**
-     * 交易hash
+     * 链ID
      */
     @Getter
     @Setter
-    private NulsDigestData requestHash;
+    private int chainId;
+    /**
+     * 节点ID
+     */
+    @Getter
+    @Setter
+    private String nodeId;
 
     /**
      * 确认高度
@@ -34,25 +39,25 @@ public class CrossTxVerifyResult extends BaseMessage {
     private long height;
 
     @Override
-    public int size() {
-        int size = 0;
-        size += SerializeUtils.sizeOfNulsData(requestHash);
-        size += SerializeUtils.sizeOfInt64();
-        //size += SerializeUtils.sizeOfBytes(transactionSignature);
-        return size;
-    }
-
-    @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestHash);
-        stream.writeInt64(height);
-        //stream.writeBytesWithLength(transactionSignature);
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.write(chainId);
+        stream.writeString(nodeId);
+        stream.writeVarInt(height);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.requestHash = byteBuffer.readHash();
-        this.height = byteBuffer.readInt64();
-        //this.transactionSignature = byteBuffer.readByLengthByte();
+        this.chainId = byteBuffer.readUint16();
+        this.nodeId = byteBuffer.readString();
+        this.height = byteBuffer.readVarInt();
+    }
+
+    @Override
+    public int size() {
+        int size = 0;
+        size += SerializeUtils.sizeOfUint16();
+        size += SerializeUtils.sizeOfString(nodeId);
+        size += SerializeUtils.sizeOfVarInt(height);
+        return size;
     }
 }
