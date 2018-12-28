@@ -20,6 +20,7 @@
 
 package io.nuls.block.manager;
 
+import io.nuls.block.BlockBootstrap;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
@@ -51,13 +52,14 @@ public class ContextManager {
     public static void init(ChainParameters chainParameters) {
         ChainContext chainContext = new ChainContext();
         int chainId = chainParameters.getChainId();
+        chainIds.add(chainId);
+        BlockBootstrap.onlyRunWhenTest();
         ContextManager.contextMap.put(chainId, chainContext);
         chainContext.setChainId(chainId);
         chainContext.setParameters(chainParameters);
         chainContext.setStatus(RunningStatusEnum.INITIALIZING);
         chainContext.setSystemTransactionType(TransactionUtil.getSystemTypes(chainId));
         chainContext.init();
-        chainIds.add(chainId);
         Log.info("new chainContext add! chainId-{}", chainId);
     }
 
