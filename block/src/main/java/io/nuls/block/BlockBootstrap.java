@@ -102,7 +102,7 @@ public class BlockBootstrap {
             }
             NetworkUtil.register();
             Log.info("service start");
-            onlyRunWhenTest();
+//            onlyRunWhenTest();
 
             //开启区块同步线程
             ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronizer"));
@@ -148,7 +148,7 @@ public class BlockBootstrap {
     /**
      * todo 正式版本删除
      */
-    private static void onlyRunWhenTest() {
+    public static void onlyRunWhenTest() {
         ContextManager.chainIds.forEach(e -> {
             if (!RocksDBService.existTable("tx" + e)) {
                 try {
