@@ -52,7 +52,7 @@ public class CrossChainTx extends BaseNulsData {
     /**
      * 跨链交易在当前链生效的高度(交易确认的高度 + 阈值高度)
      */
-    private long hight = -1L;
+    private long height = -1L;
 
     /**
      * 该跨链交易在本链中的验证状态
@@ -105,11 +105,11 @@ public class CrossChainTx extends BaseNulsData {
         this.nodeId = nodeId;
     }
 
-    public long getHight() {
-        return hight;
+    public long getHeight() {
+        return height;
     }
 
-    public void setHight(long hight) {
-        this.hight = hight;
+    public void setHeight(long height) {
+        this.height = height;
     }
 }

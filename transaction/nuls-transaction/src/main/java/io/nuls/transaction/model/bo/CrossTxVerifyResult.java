@@ -1,4 +1,4 @@
-package io.nuls.transaction.message;
+package io.nuls.transaction.model.bo;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -12,12 +12,12 @@ import lombok.Setter;
 import java.io.IOException;
 
 /**
- * 节点收到跨链验证请求后，将验证结果发送回去
+ * 跨链交易验证结果
  *
  * @author: qinyifeng
- * @date: 2018/12/18
+ * @date: 2018/12/28
  */
-public class VerifyCrossResultMessage extends BaseMessage {
+public class CrossTxVerifyResult extends BaseMessage {
 
     /**
      * 交易hash
@@ -32,13 +32,6 @@ public class VerifyCrossResultMessage extends BaseMessage {
     @Getter
     @Setter
     private long height;
-
-    /**
-     * 交易签名
-     */
-//    @Getter
-//    @Setter
-//    private byte[] transactionSignature;
 
     @Override
     public int size() {
