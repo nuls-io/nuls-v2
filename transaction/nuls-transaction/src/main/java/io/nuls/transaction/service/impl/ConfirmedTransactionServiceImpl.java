@@ -9,10 +9,13 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TransactionStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.rpc.call.LegerCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
@@ -45,6 +48,9 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
 
     @Autowired
     private TransactionIndexComparator txIndexComparator;
+
+    @Autowired
+    private CrossChainTxStorageService crossChainTxStorageService;
 
     @Override
     public Transaction getTransaction(Chain chain, NulsDigestData hash) {
@@ -88,6 +94,20 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
                 } else {
                     this.rollbackTxList(chain, savedList, blockHeaderDigest, false);
                     throw new NulsException(TxErrorCode.SAVE_TX_ERROR);
+                }
+            }
+            //处理跨链交易
+            for(Transaction tx : savedList){
+                if(tx.getType() != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER){
+                    //todo 处理跨链交易
+                    CrossChainTx crossChainTx = crossChainTxStorageService.getTx(chain.getChainId(), tx.getHash());
+                    if(null != crossChainTx){
+                        throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+                    }
+                    crossChainTx.setState(TxConstant.CTX_COMFIRM_4);
+                    crossChainTxStorageService.putTx(chain.getChainId(),crossChainTx);
+                    //todo 存数据库
+                    //失败回滚 ?
                 }
             }
             //如果确认交易成功，则从未打包交易库中删除交易

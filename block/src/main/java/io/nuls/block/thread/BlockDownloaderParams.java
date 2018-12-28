@@ -50,6 +50,10 @@ public class BlockDownloaderParams {
      */
     private long localLatestHeight;
     /**
+     * 本地最新区块hash
+     */
+    private NulsDigestData localLatestHash;
+    /**
      * 网络上一致可用的节点
      */
     private PriorityBlockingQueue<Node> nodes;

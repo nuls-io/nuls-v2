@@ -191,7 +191,9 @@ public class NetworkUtil {
     }
 
     /**
-     * 设置节点最新高度与hash
+     * 更新网络节点最新高度与hash
+     *  1.收到smallblock时更新
+     *  2.收到转发请求并且本地确定有这个hash的区块时更新
      *
      * @param chainId
      * @param hash

@@ -24,7 +24,7 @@ import java.util.List;
 @Data
 public class BlockHeaderPo extends BaseNulsData {
 
-    private transient NulsDigestData hash;
+    private NulsDigestData hash;
     private boolean complete;
     private NulsDigestData preHash;
     private NulsDigestData merkleHash;
@@ -34,13 +34,13 @@ public class BlockHeaderPo extends BaseNulsData {
     private BlockSignature blockSignature;
     private byte[] extend;
     private transient int size;
-    private transient byte[] packingAddress;
     private List<NulsDigestData> txHashList;
 
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfBoolean();
+        size += SerializeUtils.sizeOfNulsData(hash);
         size += SerializeUtils.sizeOfNulsData(preHash);
         size += SerializeUtils.sizeOfNulsData(merkleHash);
         size += SerializeUtils.sizeOfUint48();
@@ -57,6 +57,7 @@ public class BlockHeaderPo extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeBoolean(complete);
+        stream.writeNulsData(hash);
         stream.writeNulsData(preHash);
         stream.writeNulsData(merkleHash);
         stream.writeUint48(time);
@@ -72,6 +73,7 @@ public class BlockHeaderPo extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.complete = byteBuffer.readBoolean();
+        this.hash = byteBuffer.readHash();
         this.preHash = byteBuffer.readHash();
         this.merkleHash = byteBuffer.readHash();
         this.time = byteBuffer.readUint48();

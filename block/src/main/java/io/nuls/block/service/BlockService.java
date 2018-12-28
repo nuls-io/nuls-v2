@@ -148,6 +148,15 @@ public interface BlockService {
     boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo);
 
     /**
+     * 回滚区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
+     *
+     * @param chainId       链ID
+     * @param height        待回滚区块高度
+     * @return
+     */
+    boolean rollbackBlock(int chainId, long height);
+
+    /**
      * 转发区块给连接的其他对等节点,允许一个例外（不转发给它）
      *
      * @param chainId
@@ -191,5 +200,14 @@ public interface BlockService {
      * @param chainId
      */
     void init(int chainId);
+
+    /**
+     * 根据高度获取区块hash
+     *
+     * @param chainId 链ID
+     * @return
+     */
+    NulsDigestData getBlockHash(int chainId, long height);
+
 
 }

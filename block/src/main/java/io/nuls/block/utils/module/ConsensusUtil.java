@@ -124,4 +124,28 @@ public class ConsensusUtil {
         }
     }
 
+    /**
+     * 新增区块时通知共识模块
+     *
+     * @param chainId
+     * @param localInit
+     * @return
+     */
+    public static boolean newBlock(int chainId, BlockHeader blockHeader, boolean localInit) {
+        if (localInit) {
+            return true;
+        }
+        try {
+            Map<String, Object> params = new HashMap<>(3);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
+
+            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
+        }
+    }
+
 }

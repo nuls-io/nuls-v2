@@ -20,16 +20,15 @@
 
 package io.nuls.block.service.impl;
 
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.exception.DbRuntimeException;
 import io.nuls.block.manager.ChainManager;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
@@ -49,6 +48,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.SerializeUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -187,8 +187,9 @@ public class BlockServiceImpl implements BlockService {
     }
 
     private boolean saveBlock(int chainId, Block block, boolean localInit, int download) {
-        long height = block.getHeader().getHeight();
-        NulsDigestData hash = block.getHeader().getHash();
+        BlockHeader header = block.getHeader();
+        long height = header.getHeight();
+        NulsDigestData hash = header.getHash();
         ChainContext context = ContextManager.getContext(chainId);
         ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
         boolean lock;
@@ -225,7 +226,7 @@ public class BlockServiceImpl implements BlockService {
             }
             //4.保存区块头,完全保存,更新标记
             blockHeaderPo.setComplete(true);
-            if (!blockStorageService.save(chainId, blockHeaderPo)) {
+            if (!ConsensusUtil.newBlock(chainId, header, localInit) || !blockStorageService.save(chainId, blockHeaderPo)) {
                 Log.error("update blockheader fail!chainId-{},height-{}", chainId, height);
                 if (!TransactionUtil.rollback(chainId, block.getTxHashList())) {
                     throw new DbRuntimeException("remove transactions error!");
@@ -250,7 +251,7 @@ public class BlockServiceImpl implements BlockService {
                 }
                 hashList.addLast(hash);
             }
-            Log.info("save block success, height-{}, hash-{}, preHash-{}", height, hash, block.getHeader().getPreHash());
+            Log.info("save block success, height-{}, hash-{}, preHash-{}", height, hash, header.getPreHash());
             writeLock.unlock();
             return true;
         } else {
@@ -260,6 +261,12 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo) {
+        return rollbackBlock(chainId, blockHeaderPo, false);
+    }
+
+    @Override
+    public boolean rollbackBlock(int chainId, long height) {
+        BlockHeaderPo blockHeaderPo = getBlockHeader(chainId, height);
         return rollbackBlock(chainId, blockHeaderPo, false);
     }
 
@@ -351,7 +358,7 @@ public class BlockServiceImpl implements BlockService {
         }
 
         if (localInit) {
-            return basicVerify;
+            return TransactionUtil.verify(chainId, block.getTxs());
         }
 
         //分叉验证
@@ -417,6 +424,23 @@ public class BlockServiceImpl implements BlockService {
             initLocalBlocks(chainId);
         } catch (Exception e) {
             Log.error(e);
+        }
+    }
+
+    @Override
+    public NulsDigestData getBlockHash(int chainId, long height) {
+        try {
+            byte[] key = SerializeUtils.uint64ToByteArray(height);
+            byte[] value = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, key);
+            if (value == null) {
+                return null;
+            }
+            NulsDigestData hash = new NulsDigestData();
+            hash.parse(new NulsByteBuffer(value));
+            return hash;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
         }
     }
 }

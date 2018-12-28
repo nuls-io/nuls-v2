@@ -32,6 +32,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
+import java.util.List;
 
 
 /**
@@ -44,15 +45,17 @@ public class CrossChainTx extends BaseNulsData {
 
     private Transaction tx;
 
+    private int senderChainId;
+
     /**
      * 可能为空？如果是同链节点转发？
      */
-    private String nodeId;
+    private String senderNodeId;
 
     /**
      * 跨链交易在当前链生效的高度(交易确认的高度 + 阈值高度)
      */
-    private long hight = -1L;
+    private long height = -1L;
 
     /**
      * 该跨链交易在本链中的验证状态
@@ -65,6 +68,7 @@ public class CrossChainTx extends BaseNulsData {
      * 2.收到的本链节点验证结果(签名？)
      *
      */
+    List<CrossTxVerifyResult> ctxVerifyResultList;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer nulsOutputStreamBuffer) throws IOException {
@@ -97,19 +101,35 @@ public class CrossChainTx extends BaseNulsData {
         this.state = state;
     }
 
-    public String getNodeId() {
-        return nodeId;
+    public int getSenderChainId() {
+        return senderChainId;
     }
 
-    public void setNodeId(String nodeId) {
-        this.nodeId = nodeId;
+    public void setSenderChainId(int senderChainId) {
+        this.senderChainId = senderChainId;
     }
 
-    public long getHight() {
-        return hight;
+    public String getSenderNodeId() {
+        return senderNodeId;
     }
 
-    public void setHight(long hight) {
-        this.hight = hight;
+    public void setSenderNodeId(String senderNodeId) {
+        this.senderNodeId = senderNodeId;
+    }
+
+    public long getHeight() {
+        return height;
+    }
+
+    public void setHeight(long height) {
+        this.height = height;
+    }
+
+    public List<CrossTxVerifyResult> getCtxVerifyResultList() {
+        return ctxVerifyResultList;
+    }
+
+    public void setCtxVerifyResultList(List<CrossTxVerifyResult> ctxVerifyResultList) {
+        this.ctxVerifyResultList = ctxVerifyResultList;
     }
 }
