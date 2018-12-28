@@ -149,4 +149,20 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
         }
         return txList;
     }
+
+    @Override
+    public boolean saveCrossTxEffectList(int chainId, int height, List<NulsDigestData> hashList) {
+        //todo
+        return false;
+    }
+
+    @Override
+    public boolean getCrossTxEffectList(int chainId, int height) {
+        return false;
+    }
+
+    @Override
+    public boolean removeCrossTxEffectList(int chainId, int height) {
+        return false;
+    }
 }
