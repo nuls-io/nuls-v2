@@ -24,15 +24,22 @@
 
 package io.nuls.transaction.task;
 
+import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxUnprocessedStorageService;
 import io.nuls.transaction.manager.TransactionManager;
+import io.nuls.transaction.message.VerifyCrossWithFCMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.CrossTxData;
+import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.CrossChainTxService;
+import io.nuls.transaction.utils.TxUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -67,20 +74,33 @@ public class CrossTxUnverifiedProcessTask implements Runnable {
      *
      * @param chain
      */
-    private void doTask(Chain chain) {
-        int chainId = chain.getChainId();
-        List<CrossChainTx> unprocessedList = crossChainTxUnprocessedStorageService.getTxList(chainId);
-        for(CrossChainTx ctx : unprocessedList){
-            //交易验证
-            transactionManager.verify(chain, ctx.getTx());
-            //todo 发送跨链验证消息
-
-
-            ctx.setState(TxConstant.CTX_VERIFY_REQUEST_1);
+    private void doTask(Chain chain) throws NulsException {
+        try {
+            int chainId = chain.getChainId();
+            List<CrossChainTx> unprocessedList = crossChainTxUnprocessedStorageService.getTxList(chainId);
+            List<CrossChainTx> processedList = new ArrayList<>();
+            for(CrossChainTx ctx : unprocessedList){
+                Transaction tx = ctx.getTx();
+                //交易验证
+                transactionManager.verify(chain, tx);
+                CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
+                VerifyCrossWithFCMessage verifyCrossWithFCMessage = new VerifyCrossWithFCMessage();
+                verifyCrossWithFCMessage.setOriginalTxHash(crossTxData.getOriginalTxHash());
+                verifyCrossWithFCMessage.setRequestHash(tx.getHash());
+                //发送跨链验证msg，除去发送者节点
+                boolean rs = NetworkCall.broadcast(chainId, verifyCrossWithFCMessage, ctx.getNodeId());
+                if(!rs){
+                    break;
+                }
+                ctx.setState(TxConstant.CTX_VERIFY_REQUEST_1);
+                processedList.add(ctx);
+            }
             //添加到处理中
-            crossChainTxStorageService.putTx(chainId, ctx);
+            crossChainTxStorageService.putTxs(chainId, processedList);
+            //从未处理DB表中清除
+            crossChainTxUnprocessedStorageService.removeTxList(chainId, processedList);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
         }
-        //从未处理DB表中清除
-        crossChainTxUnprocessedStorageService.removeTxList(chainId, unprocessedList);
     }
 }

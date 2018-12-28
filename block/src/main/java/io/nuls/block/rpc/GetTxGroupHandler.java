@@ -36,7 +36,6 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -70,16 +69,11 @@ public class GetTxGroupHandler extends BaseCmd {
         }
 
         TxGroupMessage request = new TxGroupMessage();
-        try {
-            List<Transaction> transactions = TransactionUtil.getTransactions(chainId, message.getTxHashList());
-            request.setBlockHash(message.getBlockHash());
-            request.setTransactions(transactions);
-            request.setCommand(CommandConstant.TXGROUP_MESSAGE);
-            NetworkUtil.sendToNode(chainId, request, nodeId);
-        } catch (IOException e) {
-            Log.error(e);
-        }
-
+        List<Transaction> transactions = TransactionUtil.getTransactions(chainId, message.getTxHashList());
+        request.setBlockHash(message.getBlockHash());
+        request.setTransactions(transactions);
+        request.setCommand(CommandConstant.TXGROUP_MESSAGE);
+        NetworkUtil.sendToNode(chainId, request, nodeId);
         return success();
     }
 

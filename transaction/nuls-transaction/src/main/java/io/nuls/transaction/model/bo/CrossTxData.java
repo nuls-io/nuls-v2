@@ -62,7 +62,7 @@ public class CrossTxData extends TransactionLogicData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.write(chainId);
-        stream.write(originalTxHash);
+        stream.writeBytesWithLength(originalTxHash);
     }
 
     @Override

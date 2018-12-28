@@ -25,8 +25,6 @@
 
 package io.nuls.transaction.constant;
 
-import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
-
 /**
  * 交易数据存储常量
  * Transaction data storage constants
@@ -35,7 +33,7 @@ import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 public interface TxDBConstant {
 
     /**
-     * 系统语言表名
+     * 系统语言表名 一个节点共用，不区分chain
      * system language table name
      */
     String DB_TX_LANGUAGE = "language";
@@ -57,14 +55,14 @@ public interface TxDBConstant {
     String DB_PROGRESS_CROSSCHAIN = "transaction_progress_crosschain";
 
     /**
-     * 已验证交易表名
-     * verified transaction (unpackaged) table name
-     */
-    String DB_TRANSACTION_VERIFIED = "transactions_verified";
-    /**
      * 已确认交易表名
      * Confirmed transaction table name
      */
     String DB_TRANSACTION_CONFIRMED = "transaction_confirmed";
+
+    /**
+     * 验证通过但未打包的交易
+     */
+     String DB_TRANSACTION_CACHE = "transactions_cache";
 
 }

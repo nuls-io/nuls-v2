@@ -26,15 +26,12 @@
 package io.nuls.transaction.db.rocksdb.storage.impl;
 
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.utils.TxUtil;
-import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
 import java.io.IOException;
 
@@ -46,11 +43,6 @@ import java.io.IOException;
  */
 @Service
 public class TxUnverifiedStorageServiceImpl implements TxUnverifiedStorageService {
-
-//    private PersistentQueue queue = new PersistentQueue(TxConstant.TX_UNVERIFIED_QUEUE, TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE);
-
-//    public TxUnverifiedStorageServiceImpl() throws Exception {
-//    }
 
     @Override
     public boolean putTx(Chain chain, Transaction tx) {

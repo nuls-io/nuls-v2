@@ -153,12 +153,6 @@ public class ChainManager {
         int chainId = chain.getConfig().getChainId();
         try {
             /*
-            创建已验证交易表
-            Create verified transaction table
-            */
-            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_VERIFIED + chainId);
-
-            /*
             创建已确认交易表
             Create confirmed transaction table
             */
@@ -172,9 +166,19 @@ public class ChainManager {
 
             /*
             创建处理中跨链交易表
-            Create cross chain transaction able
+             cross chain transaction progress
             */
             RocksDBService.createTable(TxDBConstant.DB_PROGRESS_CROSSCHAIN + chainId);
+
+            /*
+            已验证未打包交易
+            Verified transaction
+            */
+            String area = TxDBConstant.DB_TRANSACTION_CACHE + chainId;
+            if(RocksDBService.existTable(area)){
+                RocksDBService.destroyTable(area);
+            }
+            RocksDBService.createTable(area);
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 logger.error(e.getMessage());

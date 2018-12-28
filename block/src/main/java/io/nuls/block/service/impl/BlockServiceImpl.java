@@ -364,7 +364,7 @@ public class BlockServiceImpl implements BlockService {
 
     private boolean initLocalBlocks(int chainId) {
         Block block = null;
-        Block genesisBlock = null;
+        Block genesisBlock;
         try {
             genesisBlock = getGenesisBlock(chainId);
             //1.判断有没有创世块,如果没有就初始化创世块并保存

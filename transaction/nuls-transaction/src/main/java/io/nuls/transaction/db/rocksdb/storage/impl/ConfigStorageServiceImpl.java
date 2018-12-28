@@ -33,6 +33,7 @@ import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.db.rocksdb.storage.ConfigStorageService;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.utils.DBUtil;
@@ -50,11 +51,13 @@ import java.util.Map;
  * */
 @Service
 public class ConfigStorageServiceImpl implements ConfigStorageService, InitializingBean {
-    private static final String MODULE_CONGIF = "config";
 
     @Override
     public void afterPropertiesSet() throws NulsException {
-        DBUtil.createTable(MODULE_CONGIF);
+        /**
+         * 一个节点共用，不区分chain
+         */
+        DBUtil.createTable(TxDBConstant.DB_MODULE_CONGIF);
     }
 
     @Override
@@ -62,13 +65,13 @@ public class ConfigStorageServiceImpl implements ConfigStorageService, Initializ
         if(bean == null){
             return  false;
         }
-        return RocksDBService.put(MODULE_CONGIF, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(bean));
+        return RocksDBService.put(TxDBConstant.DB_MODULE_CONGIF, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(bean));
     }
 
     @Override
     public ConfigBean get(int chainID) {
         try {
-            byte[] value = RocksDBService.get(MODULE_CONGIF,ByteUtils.intToBytes(chainID));
+            byte[] value = RocksDBService.get(TxDBConstant.DB_MODULE_CONGIF,ByteUtils.intToBytes(chainID));
             return ObjectUtils.bytesToObject(value);
         }catch (Exception e){
             Log.error(e);
@@ -79,7 +82,7 @@ public class ConfigStorageServiceImpl implements ConfigStorageService, Initializ
     @Override
     public boolean delete(int chainID) {
         try {
-            return RocksDBService.delete(MODULE_CONGIF,ByteUtils.intToBytes(chainID));
+            return RocksDBService.delete(TxDBConstant.DB_MODULE_CONGIF,ByteUtils.intToBytes(chainID));
         }catch (Exception e){
             Log.error(e);
             return  false;
@@ -89,7 +92,7 @@ public class ConfigStorageServiceImpl implements ConfigStorageService, Initializ
     @Override
     public Map<Integer, ConfigBean> getList() {
         try {
-            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(MODULE_CONGIF);
+            List<Entry<byte[], byte[]>> list = RocksDBService.entryList(TxDBConstant.DB_MODULE_CONGIF);
             Map<Integer, ConfigBean> configBeanMap = new HashMap<>(TxConstant.INIT_CAPACITY);
             for (Entry<byte[], byte[]>entry:list) {
                 int key = ByteUtils.bytesToInt(entry.getKey());
