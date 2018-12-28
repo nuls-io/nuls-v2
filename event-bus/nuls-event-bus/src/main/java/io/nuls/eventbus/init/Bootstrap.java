@@ -91,7 +91,9 @@ public class Bootstrap {
     private static void syncClientConnectionInfo(){
         Set<String> roles = EventBus.getInstance().getAllSubscribers();
         if(roles != null){
-            roles.stream().map(role -> EbConstants.CLIENT_SYNC_POOL.submit(new ClientSyncProcessor(new Object[]{role, EbConstants.SUBSCRIBE})));
+            for(String role : roles){
+                EbConstants.CLIENT_SYNC_POOL.submit(new ClientSyncProcessor(new Object[]{role, EbConstants.SUBSCRIBE}));
+            }
         }
     }
 
