@@ -153,12 +153,6 @@ public class ChainManager {
         int chainId = chain.getConfig().getChainId();
         try {
             /*
-            创建已验证交易表
-            Create verified transaction table
-            */
-            RocksDBService.createTable(TxDBConstant.DB_TRANSACTION_VERIFIED + chainId);
-
-            /*
             创建已确认交易表
             Create confirmed transaction table
             */

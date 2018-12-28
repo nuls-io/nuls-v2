@@ -55,11 +55,6 @@ public interface TxDBConstant {
     String DB_PROGRESS_CROSSCHAIN = "transaction_progress_crosschain";
 
     /**
-     * 已验证交易表名
-     * verified transaction (unpackaged) table name
-     */
-    String DB_TRANSACTION_VERIFIED = "transactions_verified";
-    /**
      * 已确认交易表名
      * Confirmed transaction table name
      */
