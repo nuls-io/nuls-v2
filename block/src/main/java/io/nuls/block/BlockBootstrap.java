@@ -76,7 +76,7 @@ public class BlockBootstrap {
                     .dependencies(ModuleE.CS.abbr, "1.0")
                     .dependencies(ModuleE.NW.abbr, "1.0")
                     .scanPackage(RPC_DEFAULT_SCAN_PACKAGE)
-                    .connect("ws://127.0.0.1:8887");
+                    .connect("ws://localhost:8887");
             // Get information from kernel
             CmdDispatcher.syncKernel();
             //加载通用数据库

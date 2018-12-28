@@ -25,11 +25,9 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.exception.DbRuntimeException;
 import io.nuls.block.manager.ChainManager;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
@@ -351,7 +349,7 @@ public class BlockServiceImpl implements BlockService {
         }
 
         if (localInit) {
-            return basicVerify;
+            return TransactionUtil.verify(chainId, block.getTxs());
         }
 
         //分叉验证
