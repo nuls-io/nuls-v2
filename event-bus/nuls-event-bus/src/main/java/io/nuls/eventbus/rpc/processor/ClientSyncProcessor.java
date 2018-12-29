@@ -3,7 +3,6 @@ package io.nuls.eventbus.rpc.processor;
 
 import io.nuls.eventbus.EventBus;
 import io.nuls.eventbus.constant.EbConstants;
-import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.ModuleE;
@@ -25,38 +24,36 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class ClientSyncProcessor implements Runnable {
 
+    private Object[] objects;
+
+    public ClientSyncProcessor(Object[] objects) {
+        this.objects = objects;
+    }
+
     /**
-     * Runnable thread to sync role connection information from kernel
+     * Thread to sync role connection information from kernel
      */
     @Override
     public void run() {
-        while (true){
-            try{
-                Object[] objects = EventBusRuntime.firstObjArrInClientSyncQueue();
-                if(null == objects){
-                    Thread.sleep(200L);
-                }else{
-                    String moduleAbbr = (String)objects[0];
-                    String cmd = (String)objects[1];
-                    Log.info("Sync process started for Subscriber :"+moduleAbbr +" for the operation:"+cmd);
-                    switch (cmd){
-                        case EbConstants.SUBSCRIBE:
-                            syncRoleConnectionInfo(moduleAbbr);
-                            break;
-                        case EbConstants.UNSUBSCRIBE:
-                            Set<String> roles = EventBus.getInstance().getAllSubscribers();
-                            if(roles != null && !roles.contains(moduleAbbr)){
-                                ClientRuntime.WS_CLIENT_MAP.remove(ClientRuntime.getRemoteUri(moduleAbbr));
-                                ClientRuntime.ROLE_MAP.remove(moduleAbbr);
-                            }
-                            break;
-                         default:
+        try{
+            String moduleAbbr = (String)objects[0];
+            String cmd = (String)objects[1];
+            Log.info("Sync process started for Subscriber :"+moduleAbbr +" for the operation:"+cmd);
+            switch (cmd){
+                case EbConstants.SUBSCRIBE:
+                    syncRoleConnectionInfo(moduleAbbr);
+                    break;
+                case EbConstants.UNSUBSCRIBE:
+                    Set<String> roles = EventBus.getInstance().getAllSubscribers();
+                    if(roles != null && !roles.contains(moduleAbbr)){
+                        ClientRuntime.WS_CLIENT_MAP.remove(ClientRuntime.getRemoteUri(moduleAbbr));
+                        ClientRuntime.ROLE_MAP.remove(moduleAbbr);
                     }
-                    Thread.sleep(200L);
-                }
-            }catch (Exception e){
-                Log.error(e);
+                    break;
+                 default:
             }
+        }catch (Exception e){
+            Log.error(e);
         }
     }
 
@@ -69,8 +66,9 @@ public class ClientSyncProcessor implements Runnable {
             if(response.isSuccess()){
                 ConcurrentMap<String,String> connectionInfoMap = new ConcurrentHashMap<>(2);
                 Object data = response.getResponseData();
-                //parse data to get connection information
+                //TODO parse data to get connection information
                 ClientRuntime.ROLE_MAP.put(subscriber,connectionInfoMap);
+                ClientRuntime.WS_CLIENT_MAP.remove(ClientRuntime.getRemoteUri(subscriber));
                 ClientRuntime.getWsClient(ClientRuntime.getRemoteUri(subscriber));
             }else{
                 Log.error(response.getResponseComment());

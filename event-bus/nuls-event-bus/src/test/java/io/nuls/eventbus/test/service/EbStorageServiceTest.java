@@ -19,6 +19,7 @@ public class EbStorageServiceTest {
 
     @Before
     public void before(){
+        EbConstants.MODULE_CONFIG_MAP.put(EbConstants.ENCODING,"UTF-8");
         RocksDBService.init("../../eventbus");
         if(!RocksDBService.existTable(EbConstants.TB_EB_TOPIC)){
             try {

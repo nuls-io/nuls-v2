@@ -704,7 +704,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             //验证coinData
-            if (!LegerCall.verifyCoinData(chain, txHex)) {
+            if (!LegerCall.verifyCoinData(chain, txHex, false)) {
                 continue;
             }
             packingTxList.add(tx);
@@ -783,8 +783,9 @@ public class TransactionServiceImpl implements TransactionService {
                     continue;
                 }
                 //向账本模块发送要批量验证coinData的标识
+                LegerCall.coinDataBatchNotify(chain);
                 //验证coinData
-                if (!LegerCall.verifyCoinData(chain, txHex)) {
+                if (!LegerCall.verifyCoinData(chain, txHex, true)) {
                     filterList.add(tx);
                     iterator.remove();
                     continue;
@@ -857,7 +858,7 @@ public class TransactionServiceImpl implements TransactionService {
                 return false;
             }
             //验证coinData
-            if (!LegerCall.verifyCoinData(chain, tx)) {
+            if (!LegerCall.verifyCoinData(chain, tx, false)) {
                 return false;
             }
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
@@ -870,6 +871,14 @@ public class TransactionServiceImpl implements TransactionService {
                 moduleVerifyMap.put(txRegister, txHexs);
             }
         }
+        LegerCall.coinDataBatchNotify(chain);
+        //todo 批量验证coinData，接口和单个的区别？
+        for(Transaction tx : txList) {
+            if (!LegerCall.verifyCoinData(chain, tx, true)) {
+                return false;
+            }
+        }
+
         //统一验证
         boolean rs = TransactionCall.txsModuleValidators(chain, moduleVerifyMap);
         if(rs){

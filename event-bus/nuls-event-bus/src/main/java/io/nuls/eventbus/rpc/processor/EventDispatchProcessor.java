@@ -2,7 +2,6 @@ package io.nuls.eventbus.rpc.processor;
 
 import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.model.Subscriber;
-import io.nuls.eventbus.runtime.EventBusRuntime;
 
 import static io.nuls.eventbus.util.EbLog.Log;
 
@@ -18,13 +17,17 @@ import java.util.Set;
 @SuppressWarnings("unused")
 public class EventDispatchProcessor implements Runnable {
 
+    private Object[] objects;
+
+    public EventDispatchProcessor(Object[] objects){
+        this.objects = objects;
+    }
     /**
      * Event dispatch thread
      */
     @Override
     public void run() {
         try{
-            Object[] objects = EventBusRuntime.firstObjArrInEventDispatchQueue();
             if(null != objects){
                 Log.info("Processing the published event starts..");
                 Object data = objects[0];

@@ -4,8 +4,8 @@ import io.nuls.eventbus.EventBus;
 import io.nuls.eventbus.constant.EbConstants;
 import io.nuls.eventbus.constant.EbErrorCode;
 import io.nuls.eventbus.model.Subscriber;
+import io.nuls.eventbus.rpc.processor.ClientSyncProcessor;
 import io.nuls.eventbus.rpc.processor.EventDispatchProcessor;
-import io.nuls.eventbus.runtime.EventBusRuntime;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -54,12 +54,12 @@ public class EventBusCmd extends BaseCmd {
             Log.error("Subscription is failed");
             return failed(nre.getErrorCode());
         }
-        EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{moduleAbbr, EbConstants.SUBSCRIBE});
+        EbConstants.CLIENT_SYNC_POOL.submit(new ClientSyncProcessor(new Object[]{moduleAbbr,EbConstants.SUBSCRIBE}));
         return success();
     }
 
     /**
-     * Un subscription command for modules to unscubscribe from a topic
+     * Un subscription command for modules to unsubscribe from a topic
      *
      * @param params parameters required for the operation
      * @return success/failure response
@@ -82,13 +82,13 @@ public class EventBusCmd extends BaseCmd {
             Log.error("UnSubscribe is failed");
             return failed(nre.getErrorCode());
         }
-        EventBusRuntime.CLIENT_SYNC_QUEUE.offer(new Object[]{moduleAbbr, EbConstants.UNSUBSCRIBE});
+        EbConstants.CLIENT_SYNC_POOL.submit(new ClientSyncProcessor(new Object[]{moduleAbbr,EbConstants.UNSUBSCRIBE}));
         return success();
     }
 
     /**
      * Command to publish/send the event to a topic
-     * If given topic is noot found at Event Bus, it creates new one
+     * If given topic is not found at Event Bus, it creates new one
      * Adds event and subscribers to event dispatch Queue to handle separate thread
      * @param params required parameters for the command
      * @return success/failure response
@@ -109,9 +109,8 @@ public class EventBusCmd extends BaseCmd {
             return failed(EbErrorCode.PARAMS_MISSING);
         }
         Set<Subscriber> subscribers = eventBus.publish(params);
-        if(!subscribers.isEmpty()){
-            EventBusRuntime.EVENT_DISPATCH_QUEUE.offer(new Object[]{data,subscribers});
-            EbConstants.EB_THREAD_POOL.execute(new EventDispatchProcessor());
+        if(null != subscribers && !subscribers.isEmpty()){
+            EbConstants.EB_THREAD_POOL.execute(new EventDispatchProcessor(new Object[]{data,subscribers}));
         }
         return success();
     }

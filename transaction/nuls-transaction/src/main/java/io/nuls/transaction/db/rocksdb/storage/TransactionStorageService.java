@@ -61,4 +61,29 @@ public interface TransactionStorageService {
      * @return 交易数据列表
      */
     List<Transaction> getTxList(int chainId, List<byte[]> hashList);
+
+    /**
+     * 保存跨链交易的生效高度和交易hash
+     * @param chainId
+     * @param height
+     * @param hashList
+     * @return boolean
+     */
+    boolean saveCrossTxEffectList(int chainId, int height, List<NulsDigestData> hashList);
+
+    /**
+     * 获取跨链交易的生效高度和交易hash
+     * @param chainId
+     * @param height
+     * @return boolean
+     */
+    boolean getCrossTxEffectList(int chainId, int height);
+
+    /**
+     * 删除跨链交易的生效高度和交易hash
+     * @param chainId
+     * @param height
+     * @return boolean
+     */
+    boolean removeCrossTxEffectList(int chainId, int height);
 }
