@@ -1390,6 +1390,27 @@ public class ConsensusServiceImpl implements ConsensusService {
     }
 
     /**
+     * 连分叉区块回滚
+     * */
+    @Override
+    public Result chainRollBack(Map<String,Object> params){
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_HEIGHT) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        int height = (Integer) params.get(ConsensusConstant.PARAM_HEIGHT);
+        blockManager.chainRollBack(chain,height);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+    }
+
+    /**
      * 区块分叉记录
      */
     @Override

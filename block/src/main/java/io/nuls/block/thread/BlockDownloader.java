@@ -24,6 +24,7 @@ package io.nuls.block.thread;
 
 import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ConfigManager;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -62,7 +63,7 @@ public class BlockDownloader implements Callable<Boolean> {
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
-        int maxDowncount = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.DOWNLOAD_NUMBER));
+        int maxDowncount = ContextManager.getContext(chainId).getParameters().getDownloadNumber();
         try {
             Log.info("BlockDownloader start work from {} to {}", startHeight, netLatestHeight);
             while (startHeight <= netLatestHeight) {

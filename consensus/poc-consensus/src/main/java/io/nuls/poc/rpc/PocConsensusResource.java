@@ -498,6 +498,20 @@ public class PocConsensusResource extends BaseCmd{
     }
 
     /**
+     * 区块回滚
+     * */
+    @CmdAnnotation(cmd = "cs_chainRollBack", version = 1.0, description = "chain roll back 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "height", parameterType = "int")
+    public Response chainRollBack(Map<String,Object> params){
+        Result result = service.chainRollBack(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
      * 区块分叉记录
      * */
     @CmdAnnotation(cmd = "cs_addEvidenceRecord", version = 1.0, description = "add evidence record 1.0")

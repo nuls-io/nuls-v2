@@ -24,7 +24,6 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.block.constant.BlockErrorCode;
-import io.nuls.block.constant.Constant;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
@@ -39,8 +38,6 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.block.constant.Constant.CHAIN_ID;
 
 /**
  * todo 链工厂的链创世块
@@ -124,7 +121,7 @@ public final class GenesisBlock extends Block {
             CoinTo coin = new CoinTo();
             coin.setAddress(ads.getAddressBytes());
             coin.setAmount(new BigInteger(amount));
-            coin.setAssetsChainId(CHAIN_ID);
+            coin.setAssetsChainId(1);
             coin.setAssetsId(1);
             coin.setLockTime(lockTime == null ? 0 : lockTime.longValue());
 
@@ -146,7 +143,7 @@ public final class GenesisBlock extends Block {
     }
 
 
-    private void fillHeader(Map<String, Object> jsonMap) throws NulsException {
+    private void fillHeader(Map<String, Object> jsonMap) {
         Integer height = (Integer) jsonMap.get(CONFIG_FILED_HEIGHT);
         String extend = (String) jsonMap.get(CONFIG_FILED_EXTEND);
         BlockHeader header = new BlockHeader();

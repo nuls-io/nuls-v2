@@ -18,57 +18,31 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.constant;
+package io.nuls.transaction.model.bo;
+
+import io.nuls.base.data.NulsDigestData;
+import lombok.Data;
 
 /**
- * 配置常量
- * @author lan
+ * 节点信息
  *
+ * @author qinyifeng
+ * @date 2018/12/28
  */
-public interface Constant {
+@Data
+public class Node {
 
     /**
-     * 模块配置文件名称
-     * Module configuration file name.
+     * ip+port
      */
-    String MODULES_CONFIG_FILE = "modules.json";
+    private String id;
+    /**
+     * 最新区块高度
+     */
+    private long height;
+    /**
+     * 最新区块hash
+     */
+    private NulsDigestData hash;
 
-    /**
-     * db文件存放目录
-     */
-    String DATA_PATH = "../../data";
-    /**
-     * 存储每条链的配置信息
-     */
-    String CHAIN_PARAMETERS = "ChainParameters";
-    /**
-     * 存储每条链的最新高度
-     */
-    String CHAIN_LATEST_HEIGHT = "ChainLatestHeight";
-    /**
-     * 存储区块头数据
-     */
-    String BLOCK_HEADER = "BlockHeader";
-    /**
-     * 存储区块头高度与hash的键值对
-     */
-    String BLOCK_HEADER_INDEX = "BlockHeaderIndex";
-    /**
-     * 分叉链、孤儿链区块数据库前缀
-     */
-    String CACHED_BLOCK = "CachedBlock";
-
-    /**
-     * 每次清理几分之一
-     */
-    int CLEAN_PARAM = 2;
-
-    /**
-     * 默认扫描包路径
-     */
-    String DEFAULT_SCAN_PACKAGE = "io.nuls.block";
-    /**
-     * RPC默认扫描包路径
-     */
-    String RPC_DEFAULT_SCAN_PACKAGE = "io.nuls.block.rpc";
 }

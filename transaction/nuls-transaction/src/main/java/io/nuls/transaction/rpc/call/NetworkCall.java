@@ -24,12 +24,14 @@ import io.nuls.base.data.Transaction;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
 
 import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.message.TransactionMessage;
 import io.nuls.transaction.message.base.BaseMessage;
+import io.nuls.transaction.model.bo.Node;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -46,6 +48,41 @@ import static io.nuls.transaction.constant.TxCmd.*;
  */
 public class NetworkCall {
 
+    /**
+     * 根据链ID获取可用节点
+     *
+     * @param chainId
+     * @param isCross 是否跨链
+     * @return
+     */
+    public static List<Node> getAvailableNodes(int chainId, int isCross) {
+        try {
+            Map<String, Object> params = new HashMap<>(6);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("state", 1);
+            params.put("isCross", isCross);
+            params.put("startPage", 0);
+            params.put("pageSize", 0);
+
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
+            Map responseData = (Map) response.getResponseData();
+            List list = (List) responseData.get("nw_getNodes");
+            List nodes = new ArrayList();
+            for (Object o : list) {
+                Map map = (Map) o;
+                Node node = new Node();
+                node.setId((String) map.get("nodeId"));
+                node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
+                node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
+                nodes.add(node);
+            }
+            return nodes;
+        } catch (Exception e) {
+            Log.error(e);
+            return List.of();
+        }
+    }
 
     /**
      * 给网络上节点广播消息
@@ -107,17 +144,17 @@ public class NetworkCall {
     }
 
     /**
-     * 注册消息处理器
-     *
+     * 向网络模块注册网络消息协议
+     * register Network Message Protocol with Network Module
      * @return
      */
-    public static boolean register() {
+    public static boolean registerProtocol() {
         try {
             Map<String, Object> map = new HashMap<>();
             List<Map<String, String>> cmds = new ArrayList<>();
             map.put("role", ModuleE.TX.abbr);
-            //TODO 模块启动时向网络模块注册网络协议处理器
-            List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX, NW_NEW_CROSS_HASH, NW_ASK_CROSS_TX, NW_NEW_MN_TX);
+            //模块启动时向网络模块注册网络协议处理器
+            List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX, NW_NEW_CROSS_HASH, NW_ASK_CROSS_TX, NW_NEW_MN_TX, NW_VERIFY_FC, NW_VERIFY_MN, NW_VERIFYR_ESULT, NW_CROSS_NODE_RS);
             for (String s : list) {
                 Map<String, String> cmd = new HashMap<>();
                 cmd.put("protocolCmd", s);

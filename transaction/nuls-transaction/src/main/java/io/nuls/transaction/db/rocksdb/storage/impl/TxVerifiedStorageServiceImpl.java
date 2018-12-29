@@ -10,6 +10,7 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.model.bo.Chain;
 
@@ -27,24 +28,8 @@ import java.util.List;
 @Service
 public class TxVerifiedStorageServiceImpl implements TxVerifiedStorageService, InitializingBean {
 
-    private final static String TRANSACTION_CACHE_KEY_NAME = "transactions_cache";
-
     @Override
     public void afterPropertiesSet() throws NulsException {
-//        if (RocksDBService.existTable(TRANSACTION_CACHE_KEY_NAME)) {
-//            try {
-//                RocksDBService.destroyTable(TRANSACTION_CACHE_KEY_NAME);
-//            } catch (Exception e) {
-//                Log.error(e);
-//                throw new NulsRuntimeException(TxErrorCode.DB_DELETE_ERROR);
-//            }
-//        }
-//        try {
-//            RocksDBService.createTable(TRANSACTION_CACHE_KEY_NAME);
-//        } catch (Exception e) {
-//            Log.error(e);
-//            throw new NulsRuntimeException(TxErrorCode.DB_TABLE_CREATE_ERROR);
-//        }
     }
 
     @Override
@@ -61,7 +46,7 @@ public class TxVerifiedStorageServiceImpl implements TxVerifiedStorageService, I
         }
         boolean result = false;
         try {
-            result = RocksDBService.put(TRANSACTION_CACHE_KEY_NAME + chainId, txHashBytes, tx.serialize());
+            result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_CACHE + chainId, txHashBytes, tx.serialize());
         } catch (Exception e) {
             Log.error(e);
         }
@@ -81,7 +66,7 @@ public class TxVerifiedStorageServiceImpl implements TxVerifiedStorageService, I
             Log.error(e);
             throw new NulsRuntimeException(e);
         }
-        byte[] txBytes = RocksDBService.get(TRANSACTION_CACHE_KEY_NAME + chainId, hashBytes);
+        byte[] txBytes = RocksDBService.get(TxDBConstant.DB_TRANSACTION_CACHE + chainId, hashBytes);
         Transaction tx = null;
         if (null != txBytes) {
             try {
@@ -101,7 +86,7 @@ public class TxVerifiedStorageServiceImpl implements TxVerifiedStorageService, I
         }
         boolean result = false;
         try {
-            result = RocksDBService.delete(TRANSACTION_CACHE_KEY_NAME + chainId, hash.serialize());
+            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CACHE + chainId, hash.serialize());
         } catch (Exception e) {
             Log.error(e);
         }
@@ -116,7 +101,7 @@ public class TxVerifiedStorageServiceImpl implements TxVerifiedStorageService, I
         }
         List<Transaction> txList = new ArrayList<>();
         //根据交易hash批量查询交易数据
-        List<byte[]> list = RocksDBService.multiGetValueList(TRANSACTION_CACHE_KEY_NAME + chainId, hashList);
+        List<byte[]> list = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_CACHE + chainId, hashList);
         if (list != null) {
             for (byte[] value : list) {
                 Transaction transaction = new Transaction();
@@ -140,7 +125,7 @@ public class TxVerifiedStorageServiceImpl implements TxVerifiedStorageService, I
 
         try {
             //delete transaction
-            return RocksDBService.deleteKeys(TRANSACTION_CACHE_KEY_NAME + chainId, hashList);
+            return RocksDBService.deleteKeys(TxDBConstant.DB_TRANSACTION_CACHE + chainId, hashList);
         } catch (Exception e) {
             Log.error(e);
         }

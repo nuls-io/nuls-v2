@@ -31,25 +31,25 @@ public class VerifyCrossWithFCMessage extends BaseMessage {
      */
     @Getter
     @Setter
-    private NulsDigestData originalHash;
+    private byte[] originalTxHash;
 
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(requestHash);
-        size += SerializeUtils.sizeOfNulsData(originalHash);
+        size += SerializeUtils.sizeOfBytes(originalTxHash);
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(requestHash);
-        stream.writeNulsData(originalHash);
+        stream.writeBytesWithLength(originalTxHash);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.requestHash = byteBuffer.readHash();
-        this.originalHash = byteBuffer.readHash();
+        this.originalTxHash = byteBuffer.readByLengthByte();
     }
 }

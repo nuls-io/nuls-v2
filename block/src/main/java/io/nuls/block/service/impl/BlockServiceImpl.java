@@ -25,11 +25,9 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.exception.DbRuntimeException;
 import io.nuls.block.manager.ChainManager;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
@@ -187,8 +185,9 @@ public class BlockServiceImpl implements BlockService {
     }
 
     private boolean saveBlock(int chainId, Block block, boolean localInit, int download) {
-        long height = block.getHeader().getHeight();
-        NulsDigestData hash = block.getHeader().getHash();
+        BlockHeader header = block.getHeader();
+        long height = header.getHeight();
+        NulsDigestData hash = header.getHash();
         ChainContext context = ContextManager.getContext(chainId);
         ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
         boolean lock;
@@ -225,7 +224,7 @@ public class BlockServiceImpl implements BlockService {
             }
             //4.保存区块头,完全保存,更新标记
             blockHeaderPo.setComplete(true);
-            if (!blockStorageService.save(chainId, blockHeaderPo)) {
+            if (!ConsensusUtil.newBlock(chainId, header, localInit) || !blockStorageService.save(chainId, blockHeaderPo)) {
                 Log.error("update blockheader fail!chainId-{},height-{}", chainId, height);
                 if (!TransactionUtil.rollback(chainId, block.getTxHashList())) {
                     throw new DbRuntimeException("remove transactions error!");
@@ -243,14 +242,14 @@ public class BlockServiceImpl implements BlockService {
                 context.setLatestBlock(block);
                 Chain masterChain = ChainManager.getMasterChain(chainId);
                 masterChain.setEndHeight(masterChain.getEndHeight() + 1);
-                int heightRange = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.HEIGHT_RANGE));
+                int heightRange = context.getParameters().getHeightRange();
                 LinkedList<NulsDigestData> hashList = masterChain.getHashList();
                 if (hashList.size() > heightRange) {
                     hashList.removeFirst();
                 }
                 hashList.addLast(hash);
             }
-            Log.debug("save block success, height-{}, hash-{}, preHash-{}", height, hash, block.getHeader().getPreHash());
+            Log.info("save block success, height-{}, hash-{}, preHash-{}", height, hash, header.getPreHash());
             writeLock.unlock();
             return true;
         } else {
@@ -326,7 +325,11 @@ public class BlockServiceImpl implements BlockService {
         SmallBlockMessage message = new SmallBlockMessage();
         message.setSmallBlock(BlockUtil.getSmallBlock(chainId, block));
         message.setCommand(CommandConstant.SMALL_BLOCK_MESSAGE);
-        return NetworkUtil.broadcast(chainId, message);
+        boolean broadcast = NetworkUtil.broadcast(chainId, message);
+        if (!broadcast) {
+            rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block));
+        }
+        return broadcast;
     }
 
     @Override
@@ -347,7 +350,7 @@ public class BlockServiceImpl implements BlockService {
         }
 
         if (localInit) {
-            return basicVerify;
+            return TransactionUtil.verify(chainId, block.getTxs());
         }
 
         //分叉验证
@@ -360,7 +363,7 @@ public class BlockServiceImpl implements BlockService {
 
     private boolean initLocalBlocks(int chainId) {
         Block block = null;
-        Block genesisBlock = null;
+        Block genesisBlock;
         try {
             genesisBlock = getGenesisBlock(chainId);
             //1.判断有没有创世块,如果没有就初始化创世块并保存
@@ -400,20 +403,16 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public void init(int chainId) {
         try {
-            RocksDBService.init(DATA_PATH);
-            if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
-                RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
-            }
             if (!RocksDBService.existTable(BLOCK_HEADER + chainId)) {
                 RocksDBService.createTable(BLOCK_HEADER + chainId);
             }
             if (!RocksDBService.existTable(BLOCK_HEADER_INDEX + chainId)) {
                 RocksDBService.createTable(BLOCK_HEADER_INDEX + chainId);
             }
-            if (RocksDBService.existTable(FORK_CHAINS + chainId)) {
-                RocksDBService.destroyTable(FORK_CHAINS + chainId);
+            if (RocksDBService.existTable(CACHED_BLOCK + chainId)) {
+                RocksDBService.destroyTable(CACHED_BLOCK + chainId);
             }
-            RocksDBService.createTable(FORK_CHAINS + chainId);
+            RocksDBService.createTable(CACHED_BLOCK + chainId);
             initLocalBlocks(chainId);
         } catch (Exception e) {
             Log.error(e);

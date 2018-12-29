@@ -5,6 +5,7 @@ import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 import io.nuls.transaction.utils.DBUtil;
 
@@ -15,21 +16,22 @@ import io.nuls.transaction.utils.DBUtil;
 @Service
 public class LanguageStorageServiceImpl implements LanguageStorageService, InitializingBean {
 
-    private static final String DB_NAME_TX_LANGUAGE = "language";
-
     @Override
     public void afterPropertiesSet() throws NulsException {
-        DBUtil.createTable(DB_NAME_TX_LANGUAGE);
+        /**
+         * 一个节点共用，不区分chain
+         */
+        DBUtil.createTable(TxDBConstant.DB_TX_LANGUAGE);
     }
 
     @Override
     public boolean saveLanguage(String language) throws Exception {
-        return RocksDBService.put(DB_NAME_TX_LANGUAGE, DB_NAME_TX_LANGUAGE.getBytes(), language.getBytes());
+        return RocksDBService.put(TxDBConstant.DB_TX_LANGUAGE, TxDBConstant.DB_TX_LANGUAGE.getBytes(), language.getBytes());
     }
 
     @Override
     public String getLanguage() {
-        byte[] languageByte = RocksDBService.get(DB_NAME_TX_LANGUAGE, DB_NAME_TX_LANGUAGE.getBytes());
+        byte[] languageByte = RocksDBService.get(TxDBConstant.DB_TX_LANGUAGE, TxDBConstant.DB_TX_LANGUAGE.getBytes());
         if (languageByte == null) {
             return null;
         }

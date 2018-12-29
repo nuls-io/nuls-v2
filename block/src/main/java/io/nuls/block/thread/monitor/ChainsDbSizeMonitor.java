@@ -27,6 +27,7 @@ import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
+import io.nuls.block.model.ChainParameters;
 import io.nuls.tools.log.Log;
 
 import java.util.SortedSet;
@@ -70,9 +71,10 @@ public class ChainsDbSizeMonitor implements Runnable {
                     continue;
                 }
                 //获取配置项
-                int cacheSize = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.CACHE_SIZE));
-                int heightRange = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.HEIGHT_RANGE));
-                int orphanChainMaxAge = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.ORPHAN_CHAIN_MAX_AGE));
+                ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+                int cacheSize = parameters.getCacheSize();
+                int heightRange = parameters.getHeightRange();
+                int orphanChainMaxAge = parameters.getOrphanChainMaxAge();
                 forkChainsCleaner(chainId, heightRange, context);
                 orphanChainsCleaner(chainId, heightRange, context, orphanChainMaxAge);
                 //1.获取某链ID的数据库缓存的所有区块数量
@@ -102,7 +104,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                                     Chain chain = forkChains.first();
                                     boolean b = ChainManager.removeForkChain(chainId, chain);
                                     if (!b) {
-                                        Log.error("remove fork chain fail, chain:", chain);
+                                        Log.error("remove evidence chain fail, chain:", chain);
                                     } else {
                                         actualSize -= chain.getHashList().size();
                                     }

@@ -29,6 +29,7 @@ import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
+import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
 import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.block.utils.module.NetworkUtil;
@@ -80,7 +81,8 @@ public class OrphanChainsMaintainer implements Runnable {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
                     return;
                 }
-                int orphanChainMaxAge = Integer.parseInt(ConfigManager.getValue(chainId, ConfigConstant.ORPHAN_CHAIN_MAX_AGE));
+                ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+                int orphanChainMaxAge = parameters.getOrphanChainMaxAge();
                 ReentrantReadWriteLock.ReadLock readLock = context.getReadLock();
                 if (readLock.tryLock(1, TimeUnit.SECONDS)) {
                     SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);

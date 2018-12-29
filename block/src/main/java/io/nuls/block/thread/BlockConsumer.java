@@ -70,6 +70,7 @@ public class BlockConsumer implements Callable<Boolean> {
                 block = queue.take();
                 boolean saveBlock = blockService.saveBlock(chainId, block);
                 if (!saveBlock) {
+                    Log.error("error occur when save syn blocks");
                     return false;
                 }
                 startHeight++;

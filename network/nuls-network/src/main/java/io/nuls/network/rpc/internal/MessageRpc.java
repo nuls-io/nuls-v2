@@ -24,6 +24,7 @@
  */
 package io.nuls.network.rpc.internal;
 
+import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
@@ -124,14 +125,14 @@ public class MessageRpc extends BaseCmd{
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
             Collection<Node> nodesCollection=nodeGroup.getConnectNodes();
-                excludeNodes=","+excludeNodes+",";
-                List<Node> nodes = new ArrayList<>();
-                for(Node node:nodesCollection){
-                    if(!excludeNodes.contains(node.getId())){
+            excludeNodes=NetworkConstant.COMMA +excludeNodes+NetworkConstant.COMMA;
+            List<Node> nodes = new ArrayList<>();
+            for(Node node:nodesCollection){
+                if(!excludeNodes.contains(NetworkConstant.COMMA+node.getId()+NetworkConstant.COMMA)){
                     nodes.add(node);
-                    }
                 }
-               messageManager.broadcastToNodes(message,nodes,true);
+            }
+            messageManager.broadcastToNodes(message,nodes,true);
         } catch (Exception e) {
             e.printStackTrace();
             return failed(NetworkErrorCode.PARAMETER_ERROR);

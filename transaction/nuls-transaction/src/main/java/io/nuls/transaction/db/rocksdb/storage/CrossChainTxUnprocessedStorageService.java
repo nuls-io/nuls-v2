@@ -1,14 +1,18 @@
-/*
+/**
  * MIT License
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,57 +22,42 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.constant;
+package io.nuls.transaction.db.rocksdb.storage;
+
+import io.nuls.transaction.model.bo.CrossChainTx;
+
+import java.util.List;
 
 /**
- * 配置常量
- * @author lan
- *
+ * @author: Charlie
+ * @date: 2018-12-27
  */
-public interface Constant {
+public interface CrossChainTxUnprocessedStorageService {
 
     /**
-     * 模块配置文件名称
-     * Module configuration file name.
+     * 新增或修改跨链交易数据
+     *
+     * @param chainId
+     * @param ctx
+     * @return
      */
-    String MODULES_CONFIG_FILE = "modules.json";
+    boolean putTx(int chainId, CrossChainTx ctx);
 
     /**
-     * db文件存放目录
+     * 根据交易hash批量删除
+     * @param chainId
+     * @param ctxList
+     * @return 删除是否成功
      */
-    String DATA_PATH = "../../data";
-    /**
-     * 存储每条链的配置信息
-     */
-    String CHAIN_PARAMETERS = "ChainParameters";
-    /**
-     * 存储每条链的最新高度
-     */
-    String CHAIN_LATEST_HEIGHT = "ChainLatestHeight";
-    /**
-     * 存储区块头数据
-     */
-    String BLOCK_HEADER = "BlockHeader";
-    /**
-     * 存储区块头高度与hash的键值对
-     */
-    String BLOCK_HEADER_INDEX = "BlockHeaderIndex";
-    /**
-     * 分叉链、孤儿链区块数据库前缀
-     */
-    String CACHED_BLOCK = "CachedBlock";
+    boolean removeTxList(int chainId, List<CrossChainTx> ctxList);
+
 
     /**
-     * 每次清理几分之一
+     * 查询指定链下所有跨链交易
+     * Query all cross-chain transactions in the specified chain
+     *
+     * @param chainId
+     * @return
      */
-    int CLEAN_PARAM = 2;
-
-    /**
-     * 默认扫描包路径
-     */
-    String DEFAULT_SCAN_PACKAGE = "io.nuls.block";
-    /**
-     * RPC默认扫描包路径
-     */
-    String RPC_DEFAULT_SCAN_PACKAGE = "io.nuls.block.rpc";
+    List<CrossChainTx> getTxList(int chainId);
 }
