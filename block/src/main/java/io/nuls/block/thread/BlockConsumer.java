@@ -75,10 +75,10 @@ public class BlockConsumer implements Callable<Boolean> {
                 }
                 startHeight++;
             }
-            Log.info("BlockConsumer stop work");
+            Log.info("BlockConsumer stop work normally");
             return true;
         } catch (Exception e) {
-            Log.error(e);
+            Log.error("BlockConsumer stop work abnormally");
             return false;
         }
     }

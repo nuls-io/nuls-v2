@@ -69,7 +69,7 @@ public class OrphanChainsMonitor implements Runnable {
             try {
                 //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
                 RunningStatusEnum status = context.getStatus();
-                if (!status.equals(RUNNING) || !status.equals(SYNCHRONIZING)) {
+                if (!status.equals(RUNNING) && !status.equals(SYNCHRONIZING)) {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
                     continue;
                 }
