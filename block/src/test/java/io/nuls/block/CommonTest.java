@@ -30,8 +30,6 @@ import io.nuls.rpc.model.message.Request;
 import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.data.CollectionUtils;
 import io.nuls.tools.parse.JSONUtils;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
@@ -123,5 +121,20 @@ public class CommonTest {
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
         client.send(JSONUtils.obj2json(message));
+    }
+
+    @Test
+    public void testLock() {
+        for (int i = 0; i < 10; i++) {
+            try {
+                if (true) {
+                    System.out.println("22222222222222");
+                    continue;
+                }
+                System.out.println("888888888");
+            } finally {
+                System.out.println("1111111111111");
+            }
+        }
     }
 }

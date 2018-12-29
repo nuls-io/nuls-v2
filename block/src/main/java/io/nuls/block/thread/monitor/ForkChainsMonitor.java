@@ -20,10 +20,8 @@
 
 package io.nuls.block.thread.monitor;
 
-import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ChainManager;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
@@ -31,11 +29,7 @@ import io.nuls.block.model.ChainParameters;
 import io.nuls.tools.log.Log;
 
 import java.util.SortedSet;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.StampedLock;
-
-import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_CHAINS;
 
 /**
  * 分叉链的形成原因分析:由于网络延迟,同时有两个矿工发布同一高度的区块,或者被恶意节点攻击
@@ -68,35 +62,45 @@ public class ForkChainsMonitor implements Runnable {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
                     continue;
                 }
-                ReentrantReadWriteLock.ReadLock readLock = context.getReadLock();
-                if (readLock.tryLock(1, TimeUnit.SECONDS)) {
-                    Chain masterChain = ChainManager.getMasterChain(chainId);
-                    SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
-                    if (forkChains.size() < 1) {
-                        readLock.unlock();
-                        continue;
-                    }
-                    //遍历当前分叉链,与主链进行比对,找出最大高度差,与默认参数chainSwtichThreshold对比,确定要切换的分叉链
-                    ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
-                    int chainSwtichThreshold = parameters.getChainSwtichThreshold();
-                    Chain switchChain = new Chain();
-                    int maxHeightDifference = 0;
-                    for (Chain forkChain : forkChains) {
-                        int temp = (int) (forkChain.getEndHeight() - masterChain.getEndHeight());
-                        if (temp > maxHeightDifference) {
-                            maxHeightDifference = temp;
-                            switchChain = forkChain;
+
+                StampedLock lock = context.getLock();
+                long stamp = lock.tryOptimisticRead();
+                try {
+                    for (;; stamp = lock.writeLock()) {
+                        if (stamp == 0L) {
+                            continue;
                         }
-                    }
-                    Log.debug("chainId-{}, maxHeightDifference:{}, chainSwtichThreshold:{}", chainId, maxHeightDifference, chainSwtichThreshold);
-                    //高度差不够
-                    if (maxHeightDifference < chainSwtichThreshold) {
-                        readLock.unlock();
-                        continue;
-                    }
-                    readLock.unlock();
-                    ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
-                    if (writeLock.tryLock(1, TimeUnit.SECONDS)) {
+                        // possibly racy reads
+                        Chain masterChain = ChainManager.getMasterChain(chainId);
+                        SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
+                        if (!lock.validate(stamp)) {
+                            continue;
+                        }
+                        if (forkChains.size() < 1) {
+                            break;
+                        }
+                        //遍历当前分叉链,与主链进行比对,找出最大高度差,与默认参数chainSwtichThreshold对比,确定要切换的分叉链
+                        ChainParameters parameters = context.getParameters();
+                        int chainSwtichThreshold = parameters.getChainSwtichThreshold();
+                        Chain switchChain = new Chain();
+                        int maxHeightDifference = 0;
+                        for (Chain forkChain : forkChains) {
+                            int temp = (int) (forkChain.getEndHeight() - masterChain.getEndHeight());
+                            if (temp > maxHeightDifference) {
+                                maxHeightDifference = temp;
+                                switchChain = forkChain;
+                            }
+                        }
+                        Log.debug("chainId-{}, maxHeightDifference:{}, chainSwtichThreshold:{}", chainId, maxHeightDifference, chainSwtichThreshold);
+                        //高度差不够
+                        if (maxHeightDifference < chainSwtichThreshold) {
+                            break;
+                        }
+                        stamp = lock.tryConvertToWriteLock(stamp);
+                        if (stamp == 0L) {
+                            continue;
+                        }
+                        // exclusive access
                         //进行切换,切换前变更模块运行状态
                         context.setStatus(RunningStatusEnum.SWITCHING);
                         if (ChainManager.switchChain(chainId, masterChain, switchChain)) {
@@ -105,7 +109,11 @@ public class ForkChainsMonitor implements Runnable {
                             Log.info("chainId-{}, switchChain fail, auto rollback success", chainId);
                         }
                         context.setStatus(RunningStatusEnum.RUNNING);
-                        writeLock.unlock();
+                        return;
+                    }
+                } finally {
+                    if (StampedLock.isWriteLockStamp(stamp)) {
+                        lock.unlockWrite(stamp);
                     }
                 }
             } catch (Exception e) {

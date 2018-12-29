@@ -21,10 +21,8 @@
 package io.nuls.block.thread.monitor;
 
 import io.nuls.block.constant.ChainTypeEnum;
-import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ChainManager;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
@@ -32,8 +30,7 @@ import io.nuls.tools.log.Log;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.RunningStatusEnum.*;
 
@@ -73,17 +70,28 @@ public class OrphanChainsMonitor implements Runnable {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
                     continue;
                 }
-                ReentrantReadWriteLock.ReadLock readLock = context.getReadLock();
-                if (readLock.tryLock(1, TimeUnit.SECONDS)) {
-                    Chain masterChain = ChainManager.getMasterChain(chainId);
-                    SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
-                    if (orphanChains.size() < 1) {
-                        readLock.unlock();
-                        continue;
-                    }
-                    readLock.unlock();
-                    ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
-                    if (writeLock.tryLock(1, TimeUnit.SECONDS)) {
+
+                StampedLock lock = context.getLock();
+                long stamp = lock.tryOptimisticRead();
+                try {
+                    for (;; stamp = lock.writeLock()) {
+                        if (stamp == 0L) {
+                            continue;
+                        }
+                        // possibly racy reads
+                        SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
+                        if (!lock.validate(stamp)) {
+                            continue;
+                        }
+                        if (orphanChains.size() < 1) {
+                            break;
+                        }
+                        stamp = lock.tryConvertToWriteLock(stamp);
+                        if (stamp == 0L) {
+                            continue;
+                        }
+                        // exclusive access
+                        Chain masterChain = ChainManager.getMasterChain(chainId);
                         SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                         //标记、变更链属性阶段
                         for (Chain orphanChain : orphanChains) {
@@ -98,7 +106,10 @@ public class OrphanChainsMonitor implements Runnable {
                         forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
                         maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
                         context.setStatus(RUNNING);
-                        writeLock.unlock();
+                    }
+                } finally {
+                    if (StampedLock.isWriteLockStamp(stamp)) {
+                        lock.unlockWrite(stamp);
                     }
                 }
             } catch (Exception e) {

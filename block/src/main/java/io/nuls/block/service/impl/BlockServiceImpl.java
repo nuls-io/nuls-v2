@@ -26,7 +26,6 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.exception.ChainRuntimeException;
 import io.nuls.block.exception.DbRuntimeException;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
@@ -53,8 +52,8 @@ import io.nuls.tools.parse.SerializeUtils;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.Constant.*;
 
@@ -191,8 +190,8 @@ public class BlockServiceImpl implements BlockService {
         long height = header.getHeight();
         NulsDigestData hash = header.getHash();
         ChainContext context = ContextManager.getContext(chainId);
-        ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
-        writeLock.lock();
+        StampedLock lock = context.getLock();
+        long l = lock.writeLock();
         try {
             //1.验证区块
             if (!verifyBlock(chainId, block, localInit, download)) {
@@ -249,7 +248,7 @@ public class BlockServiceImpl implements BlockService {
             Log.info("save block success, height-{}, hash-{}, preHash-{}", height, hash, header.getPreHash());
             return true;
         } finally {
-            writeLock.unlock();
+            lock.unlockWrite(l);
         }
     }
 
@@ -267,8 +266,8 @@ public class BlockServiceImpl implements BlockService {
     private boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean localInit) {
         long height = blockHeaderPo.getHeight();
         ChainContext context = ContextManager.getContext(chainId);
-        ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
-        writeLock.lock();
+        StampedLock lock = context.getLock();
+        long l = lock.writeLock();
         try {
             if (!TransactionUtil.rollback(chainId, blockHeaderPo.getTxHashList())) {
                 Log.error("rollback transactions fail!chainId-{},height-{}", chainId, height);
@@ -305,7 +304,7 @@ public class BlockServiceImpl implements BlockService {
             }
             return true;
         } finally {
-            writeLock.unlock();
+            lock.unlockWrite(l);
         }
     }
 
