@@ -72,6 +72,7 @@ public class BlockSynchronizer implements Runnable {
 
     @Override
     public void run() {
+        Log.info("---------BlockSynchronizer work----------");
         for (Integer chainId : ContextManager.chainIds) {
             try {
                 BlockSynStatusEnum synStatus = statusEnumMap.get(chainId);
@@ -142,7 +143,7 @@ public class BlockSynchronizer implements Runnable {
                 }
                 return;
             }
-
+            context.setStatus(RunningStatusEnum.SYNCHRONIZING);
             PriorityBlockingQueue<Node> nodes = params.getNodes();
             int nodeCount = nodes.size();
             ThreadPoolExecutor executor = ThreadUtils.createThreadPool(nodeCount, 0, new NulsThreadFactory("worker-" + chainId));
@@ -153,7 +154,7 @@ public class BlockSynchronizer implements Runnable {
             long total = netLatestHeight - startHeight + 1;
             long start = System.currentTimeMillis();
             //5.开启区块下载器BlockDownloader
-            BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params);
+            BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params, queue);
             Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
 
             //6.开启区块收集线程BlockCollector,收集BlockDownloader下载的区块
@@ -351,8 +352,10 @@ public class BlockSynchronizer implements Runnable {
         if (commonHeight < netHeight) {
             for (Node node : params.getNodes()) {
                 Block remoteBlock = BlockDownloadUtils.getBlockByHash(chainId, localHash, node);
-                netHash = remoteBlock.getHeader().getHash();
-                break;
+                if (remoteBlock != null) {
+                    netHash = remoteBlock.getHeader().getHash();
+                    break;
+                }
             }
         }
         if (commonHeight < localHeight) {

@@ -102,7 +102,7 @@ public class SmallBlockHandler extends BaseCmd {
         }
 
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        Log.info("recieve smallBlock from({}), chainId:{}, height:{}, hash:{}", chainId, nodeId, header.getHeight(), header.getHash());
+        Log.info("recieve smallBlock from({}), chainId:{}, height:{}, hash:{}", nodeId, chainId, header.getHeight(), header.getHash());
         NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
