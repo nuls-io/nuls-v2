@@ -58,15 +58,15 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author: EdwardChan
- *
+ * <p>
  * Dec.20th 2018
- *
  */
 @Service
 public class MultiSigAccountServiceImpl implements MultiSignAccountService {
@@ -86,27 +86,84 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
     private AccountCacheService accountCacheService = AccountCacheService.getInstance();
 
     @Override
-    public MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int m) {
+    public MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int minSigns) {
         MultiSigAccount multiSigAccount = null;
         try {
             //Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubKeys);
-            Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId,m,pubKeys)));
-            MultiSigAccountPo multiSigAccountPo = new MultiSigAccountPo();
-            multiSigAccountPo.setChainId(chainId);
-            multiSigAccountPo.setAddress(address);
-            List<byte[]> list = new ArrayList<>();
-            for (String pubKey : pubKeys) {
-                list.add(HexUtil.decode(pubKey));
-            }
-            multiSigAccountPo.setPubKeyList(list);
-            multiSigAccountPo.setM((byte) m);
-            boolean result = this.multiSigAccountStorageService.saveAccount(multiSigAccountPo);
-            if (result) {
-                multiSigAccount = multiSigAccountPo.toAccount();
-            }
+            Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
+            multiSigAccount = this.saveMultiSigAccount(chainId,address,pubKeys,minSigns);
         } catch (Exception e) {
             LogUtil.error(e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
+        }
+        return multiSigAccount;
+    }
+
+    @Override
+    public MultiSigAccount getMultiSigAccountByAddress(int chainId, String address) {
+        MultiSigAccountPo multiSigAccountPo;
+        MultiSigAccount multiSigAccount = null;
+        try {
+            multiSigAccountPo = multiSigAccountStorageService.getAccount(AddressTool.getAddress(address));
+            if (multiSigAccountPo != null) {
+                multiSigAccount = multiSigAccountPo.toAccount();
+            }
+        } catch (Exception e) {
+            LogUtil.error("",e);
+            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+        }
+        return multiSigAccount;
+    }
+
+    @Override
+    public MultiSigAccount importMultiSigAccount(int chainId, String address, List<String> pubKeys, int minSigns) {
+        //TODO 查询是否存在，如果存在则不能再次导入
+        MultiSigAccount multiSigAccount;
+        try {
+            Address addressObj = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
+            if (!AddressTool.getStringAddressByBytes(addressObj.getAddressBytes()).equals(address)) {
+                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+            }
+            multiSigAccount = this.saveMultiSigAccount(chainId,addressObj,pubKeys,minSigns);
+        } catch (Exception e) {
+            LogUtil.error("",e);
+            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+        }
+        return multiSigAccount;
+    }
+
+    @Override
+    public boolean removeMultiSigAccount(int chainId, String address) {
+        boolean result;
+        try {
+            byte[] addressBytes = AddressTool.getAddress(address);
+            MultiSigAccountPo multiSigAccountPo = this.multiSigAccountStorageService.getAccount(addressBytes);
+            if (multiSigAccountPo == null) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            Address addressObj = new Address(address);
+            result = multiSigAccountStorageService.removeAccount(addressObj);
+        } catch (Exception e) {
+            LogUtil.error("",e);
+            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+        }
+        return result;
+    }
+
+    private MultiSigAccount saveMultiSigAccount(int chainId, Address addressObj, List<String> pubKeys, int minSigns) {
+        MultiSigAccount multiSigAccount = null;
+        MultiSigAccountPo multiSigAccountPo = new MultiSigAccountPo();
+        multiSigAccountPo.setChainId(chainId);
+        multiSigAccountPo.setAddress(addressObj);
+        List<byte[]> list = new ArrayList<>();
+        for (String pubKey : pubKeys) {
+            list.add(HexUtil.decode(pubKey));
+        }
+        multiSigAccountPo.setPubKeyList(list);
+        multiSigAccountPo.setM((byte) minSigns);
+        boolean result = this.multiSigAccountStorageService.saveAccount(multiSigAccountPo);
+        if (result) {
+            multiSigAccount = multiSigAccountPo.toAccount();
         }
         return multiSigAccount;
     }

@@ -80,7 +80,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
             throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
         }
         try {
-            return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT, address.getAddressBytes());
+            return RocksDBService.delete(AccountStorageConstant.DB_NAME_MULTI_SIG_ACCOUNT, address.getAddressBytes());
         } catch (Exception e) {
             LogUtil.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_ERROR);
