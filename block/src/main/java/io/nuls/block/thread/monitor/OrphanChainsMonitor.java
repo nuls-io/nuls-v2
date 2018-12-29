@@ -35,9 +35,7 @@ import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import static io.nuls.block.constant.RunningStatusEnum.EXCEPTION;
-import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_CHAINS;
-import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
+import static io.nuls.block.constant.RunningStatusEnum.*;
 
 /**
  * 孤儿链的形成原因分析：因为网络问题,在没有收到Block(100)的情况下,已经收到了Block(101),此时Block(101)不能连接到主链上,形成孤儿链
@@ -71,7 +69,7 @@ public class OrphanChainsMonitor implements Runnable {
             try {
                 //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
                 RunningStatusEnum status = context.getStatus();
-                if (!status.equals(RUNNING)) {
+                if (!status.equals(RUNNING) || !status.equals(SYNCHRONIZING)) {
                     Log.info("skip process, status is {}, chainId-{}", status, chainId);
                     continue;
                 }
