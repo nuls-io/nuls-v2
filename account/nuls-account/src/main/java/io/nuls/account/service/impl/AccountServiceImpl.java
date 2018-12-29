@@ -168,14 +168,12 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         } else {
             //Query all accounts list
             List<AccountPo> poList = accountStorageService.getAccountList();
-            Set<String> addressList = new HashSet<>();
             if (null == poList || poList.isEmpty()) {
                 return list;
             }
             for (AccountPo po : poList) {
                 Account account = po.toAccount();
                 list.add(account);
-                addressList.add(account.getAddress().getBase58());
             }
             //put the account in local cache.
             for (Account account : list) {
@@ -202,7 +200,10 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (accountCacheService.localAccountMaps == null || accountCacheService.localAccountMaps.size() == 0) {
             getAccountList();
         }
-        return accountCacheService.localAccountMaps.get(address);
+        if (accountCacheService.localAccountMaps != null) {
+            return accountCacheService.localAccountMaps.get(address);
+        }
+        return null;
     }
 
     /**

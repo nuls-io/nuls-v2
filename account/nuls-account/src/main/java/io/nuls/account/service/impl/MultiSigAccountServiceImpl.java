@@ -74,17 +74,6 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
     @Autowired
     private MultiSigAccountStorageService multiSigAccountStorageService;
 
-    @Autowired
-    private AccountStorageService accountStorageService;
-
-    @Autowired
-    private AliasService aliasService;
-
-    @Autowired
-    private AccountKeyStoreService keyStoreService;
-
-    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
-
     @Override
     public MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int m) {
         MultiSigAccount multiSigAccount = null;

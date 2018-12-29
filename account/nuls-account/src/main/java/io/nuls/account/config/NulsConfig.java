@@ -47,7 +47,7 @@ public class NulsConfig {
      * 模块配置文件名称
      * Module configuration file name.
      */
-    public static String MODULES_CONFIG_FILE = "modules.ini";
+    public final static String MODULES_CONFIG_FILE = "modules.ini";
 
     /**
      * 系统使用的编码方式
@@ -69,7 +69,7 @@ public class NulsConfig {
     /**
      * config file path
      */
-    public static String CONFIG_FILE_PATH = "account-config.json";
+    public final static String CONFIG_FILE_PATH = "account-config.json";
 
     /**
      * 主网链ID（卫星链ID）

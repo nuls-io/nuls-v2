@@ -67,10 +67,6 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
     @Autowired
     private AliasService aliasService;
 
-    private AccountCacheService accountCacheService = AccountCacheService.getInstance();
-
-
-
     @Override
     public String backupAccountToKeyStore(String path, int chainId, String address, String password) {
         //export account to keystore
