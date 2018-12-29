@@ -192,13 +192,8 @@ public class BlockServiceImpl implements BlockService {
         NulsDigestData hash = header.getHash();
         ChainContext context = ContextManager.getContext(chainId);
         ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
-        boolean lock;
+        writeLock.lock();
         try {
-            lock = writeLock.tryLock(1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new ChainRuntimeException(e.getMessage());
-        }
-        if (lock) {
             //1.验证区块
             if (!verifyBlock(chainId, block, localInit, download)) {
                 Log.error("verify block fail!chainId-{},height-{}", chainId, height);
@@ -252,10 +247,9 @@ public class BlockServiceImpl implements BlockService {
                 hashList.addLast(hash);
             }
             Log.info("save block success, height-{}, hash-{}, preHash-{}", height, hash, header.getPreHash());
-            writeLock.unlock();
             return true;
-        } else {
-            return saveBlock(chainId, block, localInit, download);
+        } finally {
+            writeLock.unlock();
         }
     }
 
@@ -274,13 +268,8 @@ public class BlockServiceImpl implements BlockService {
         long height = blockHeaderPo.getHeight();
         ChainContext context = ContextManager.getContext(chainId);
         ReentrantReadWriteLock.WriteLock writeLock = context.getWriteLock();
-        boolean lock;
+        writeLock.lock();
         try {
-            lock = writeLock.tryLock(1, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new ChainRuntimeException(e.getMessage());
-        }
-        if (lock) {
             if (!TransactionUtil.rollback(chainId, blockHeaderPo.getTxHashList())) {
                 Log.error("rollback transactions fail!chainId-{},height-{}", chainId, height);
                 return false;
@@ -314,10 +303,9 @@ public class BlockServiceImpl implements BlockService {
                 masterChain.setEndHeight(height - 1);
                 masterChain.getHashList().pollLast();
             }
-            writeLock.unlock();
             return true;
-        } else {
-            return rollbackBlock(chainId, blockHeaderPo, localInit);
+        } finally {
+            writeLock.unlock();
         }
     }
 
