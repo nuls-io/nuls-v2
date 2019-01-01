@@ -176,22 +176,30 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
+    public boolean saveBlock(int chainId, Block block, boolean needLock) {
+        return saveBlock(chainId, block, false, 0, needLock);
+    }
+
+    @Override
     public boolean saveBlock(int chainId, Block block) {
-        return saveBlock(chainId, block, false, 0);
+        return saveBlock(chainId, block, false, 0, false);
     }
 
     @Override
     public boolean saveBlock(int chainId, Block block, int download) {
-        return saveBlock(chainId, block, false, download);
+        return saveBlock(chainId, block, false, download, true);
     }
 
-    private boolean saveBlock(int chainId, Block block, boolean localInit, int download) {
+    private boolean saveBlock(int chainId, Block block, boolean localInit, int download, boolean needLock) {
         BlockHeader header = block.getHeader();
         long height = header.getHeight();
         NulsDigestData hash = header.getHash();
         ChainContext context = ContextManager.getContext(chainId);
         StampedLock lock = context.getLock();
-        long l = lock.writeLock();
+        long l = 0;
+        if (needLock) {
+            l = lock.writeLock();
+        }
         try {
             //1.验证区块
             if (!verifyBlock(chainId, block, localInit, download)) {
@@ -248,26 +256,31 @@ public class BlockServiceImpl implements BlockService {
             Log.info("save block success, height-{}, hash-{}, preHash-{}", height, hash, header.getPreHash());
             return true;
         } finally {
-            lock.unlockWrite(l);
+            if (needLock) {
+                lock.unlockWrite(l);
+            }
         }
     }
 
     @Override
     public boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo) {
-        return rollbackBlock(chainId, blockHeaderPo, false);
+        return rollbackBlock(chainId, blockHeaderPo, false, false);
     }
 
     @Override
     public boolean rollbackBlock(int chainId, long height) {
         BlockHeaderPo blockHeaderPo = getBlockHeader(chainId, height);
-        return rollbackBlock(chainId, blockHeaderPo, false);
+        return rollbackBlock(chainId, blockHeaderPo, false, false);
     }
 
-    private boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean localInit) {
+    private boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean localInit, boolean needLock) {
         long height = blockHeaderPo.getHeight();
         ChainContext context = ContextManager.getContext(chainId);
         StampedLock lock = context.getLock();
-        long l = lock.writeLock();
+        long l = 0;
+        if (needLock) {
+            l = lock.writeLock();
+        }
         try {
             if (!TransactionUtil.rollback(chainId, blockHeaderPo.getTxHashList())) {
                 Log.error("rollback transactions fail!chainId-{},height-{}", chainId, height);
@@ -364,7 +377,7 @@ public class BlockServiceImpl implements BlockService {
             //1.判断有没有创世块,如果没有就初始化创世块并保存
             if (null == genesisBlock) {
                 genesisBlock = GenesisBlock.getInstance();
-                saveBlock(chainId, genesisBlock, true, 0);
+                saveBlock(chainId, genesisBlock, true, 0, false);
             }
 
             //2.获取缓存的最新区块高度（缓存的最新高度与实际的最新高度最多相差1,理论上不会有相差多个高度的情况,所以异常场景也只考虑了高度相差1）

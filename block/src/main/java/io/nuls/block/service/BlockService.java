@@ -124,6 +124,16 @@ public interface BlockService {
      *
      * @param chainId 链ID
      * @param block   待保存区块
+     * @param needLock   是否需要加锁
+     * @return
+     */
+    boolean saveBlock(int chainId, Block block, boolean needLock);
+
+    /**
+     * 保存区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
+     *
+     * @param chainId 链ID
+     * @param block   待保存区块
      * @return
      */
     boolean saveBlock(int chainId, Block block);

@@ -68,7 +68,7 @@ public class BlockConsumer implements Callable<Boolean> {
             Log.info("BlockConsumer start work");
             while (startHeight <= netLatestHeight) {
                 block = queue.take();
-                boolean saveBlock = blockService.saveBlock(chainId, block);
+                boolean saveBlock = blockService.saveBlock(chainId, block, true);
                 if (!saveBlock) {
                     Log.error("error occur when save syn blocks");
                     return false;
