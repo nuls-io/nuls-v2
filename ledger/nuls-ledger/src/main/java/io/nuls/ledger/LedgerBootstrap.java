@@ -76,9 +76,8 @@ public class LedgerBootstrap {
                     //.supportedAPIVersions(new String[]{"1.1", "1.2"})
                     .moduleRoles(ModuleE.LG.abbr, new String[]{"1.1", "1.2"})
                     .moduleVersion("1.2")
-                    .dependencies(ModuleE.NW.abbr, "1.1")
                     .scanPackage(packageC)
-                    .connect(kernelUrl);
+                    .connect("ws://127.0.0.1:8887");
 
             CmdDispatcher.syncKernel();
         } catch (Exception e) {

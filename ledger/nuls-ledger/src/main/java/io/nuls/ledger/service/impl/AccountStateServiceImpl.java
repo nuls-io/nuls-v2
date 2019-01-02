@@ -25,16 +25,17 @@
  */
 package io.nuls.ledger.service.impl;
 
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.AccountState;
 import io.nuls.ledger.model.FreezeLockTimeState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.crypto.HexUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.List;
 
@@ -243,6 +244,11 @@ public class AccountStateServiceImpl implements AccountStateService {
      */
     private byte[] getKey(String address, int chainId, int assetId) {
         String key = address + "-" + chainId + "-" + assetId;
-        return HexUtil.decode(key);
+        try {
+            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

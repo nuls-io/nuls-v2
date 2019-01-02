@@ -61,8 +61,11 @@ public class AccountStateCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "getBalance",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            version = 1.0,
             description = "test getHeight 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "address", parameterType = "String")
+    @Parameter(parameterName = "assetId", parameterType = "int")
     public Response getBalance(Map params) {
         //TODO.. 验证参数个数和格式
         Integer chainId = (Integer) params.get("chainId");
@@ -88,6 +91,9 @@ public class AccountStateCmd extends BaseCmd {
     @CmdAnnotation(cmd = "getNonce",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "test getHeight 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "address", parameterType = "String")
+    @Parameter(parameterName = "assetId", parameterType = "int")
     public Response getNonce(Map params) {
         //TODO.. 验证参数个数和格式
         Integer chainId = (Integer) params.get("chainId");
