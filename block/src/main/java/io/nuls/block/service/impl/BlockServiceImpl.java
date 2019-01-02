@@ -128,6 +128,7 @@ public class BlockServiceImpl implements BlockService {
             Block block = new Block();
             BlockHeaderPo blockHeaderPo = blockStorageService.query(chainId, hash);
             if (blockHeaderPo == null) {
+                Log.warn("hash-{} block not exists");
                 return null;
             }
             block.setHeader(BlockUtil.fromBlockHeaderPo(blockHeaderPo));
@@ -336,8 +337,10 @@ public class BlockServiceImpl implements BlockService {
         message.setCommand(CommandConstant.SMALL_BLOCK_MESSAGE);
         boolean broadcast = NetworkUtil.broadcast(chainId, message);
         if (!broadcast) {
+            Log.error("broadcastBlock error, hash-{}, height-{}", block.getHeader().getHash(), block.getHeader().getHeight());
             rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), true);
         }
+        Log.info("broadcastBlock success, hash-{}, height-{}", block.getHeader().getHash(), block.getHeader().getHeight());
         return broadcast;
     }
 
