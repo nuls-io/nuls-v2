@@ -14,6 +14,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
@@ -47,7 +48,7 @@ public class AliasCmd extends BaseCmd {
      * @return txhash
      */
     @CmdAnnotation(cmd = "ac_setAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set the alias of account")
-    public Object setAlias(Map params) {
+    public Response setAlias(Map params) {
         LogUtil.debug("ac_setAlias start,params size:{}", params == null ? 0 : params.size());
         int chainId;
         String address, password, alias, txHash = null;
@@ -88,7 +89,7 @@ public class AliasCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_getAliasFee", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Gets to set the alias transaction fee")
-    public Object getAliasFee(Map params) {
+    public Response getAliasFee(Map params) {
         LogUtil.debug("ac_getAliasFee start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
         String address, alias;
@@ -129,7 +130,7 @@ public class AliasCmd extends BaseCmd {
      * Nov.20th 2018
      */
     @CmdAnnotation(cmd = "ac_getAliasByAddress", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "get the alias by address")
-    public Object getAliasByAddress(Map params) {
+    public Response getAliasByAddress(Map params) {
         LogUtil.debug("ac_getAliasByAddress start,params size:{}", params == null ? 0 : params.size());
         String alias;
         int chainId = 0;
@@ -164,7 +165,7 @@ public class AliasCmd extends BaseCmd {
      * @return CmdResponse
      */
     @CmdAnnotation(cmd = "ac_isAliasUsable", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "check whether the account is usable")
-    public Object isAliasUsable(Map params) {
+    public Response isAliasUsable(Map params) {
         LogUtil.debug("ac_isAliasUsable start,params size:{}", params == null ? 0 : params.size());
         boolean isAliasUsable = false;
         int chainId;
@@ -199,7 +200,7 @@ public class AliasCmd extends BaseCmd {
      * @return
      **/
     @CmdAnnotation(cmd = "ac_setMultiSigAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set multi sign alias")
-    public Object setMultiSigAlias(Map params) {
+    public Response setMultiSigAlias(Map params) {
         return null;
     }
 
@@ -210,7 +211,7 @@ public class AliasCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_accountTxValidate", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "validate the transaction")
-    public Object accountTxValidate(Map params) {
+    public Response accountTxValidate(Map params) {
         LogUtil.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
         List<String> txHexList;
@@ -261,7 +262,7 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_aliasTxValidate", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "validate the transaction of alias")
     @ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.VALID, methodName = "ac_aliasTxValidate")
-    public Object aliasTxValidate(Map params) {
+    public Response aliasTxValidate(Map params) {
         LogUtil.debug("ac_aliasTxValidate start,params size:{}", params == null ? 0 : params.size());
         boolean result;
         int chainId;
@@ -295,7 +296,7 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_aliasTxCommit", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "commit the alias transaction")
     @ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.COMMIT, methodName = "ac_aliasTxCommit")
-    public Object aliasTxCommit(Map params) throws NulsException {
+    public Response aliasTxCommit(Map params) throws NulsException {
         LogUtil.debug("ac_aliasTxCommit start,params size:{}", params == null ? 0 : params.size());
         boolean result = false;
         int chainId = 0;
@@ -337,7 +338,7 @@ public class AliasCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_aliasTxRollback", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "rollback the alias info which saved in the db")
     @ResisterTx(txType = AccountConstant.TX_TYPE_ACCOUNT_ALIAS, methodType = TxMethodType.ROLLBACK, methodName = "ac_aliasTxRollback")
-    public Object rollbackAlias(Map params) throws NulsException {
+    public Response rollbackAlias(Map params) throws NulsException {
         LogUtil.debug("ac_aliasTxRollback start,params size:{}", params == null ? 0 : params.size());
         boolean result = false;
         int chainId = 0;
