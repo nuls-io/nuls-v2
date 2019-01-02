@@ -166,7 +166,6 @@ public class ChainsDbSizeMonitor implements Runnable {
                 }
                 // possibly racy reads
                 //1.清理链起始高度位于主链最新高度增减30(可配置)范围外的分叉链
-                Chain masterChain = ChainManager.getMasterChain(chainId);
                 SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                 if (!lock.validate(stamp)) {
                     continue;
@@ -179,6 +178,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                     continue;
                 }
                 // exclusive access
+                Chain masterChain = ChainManager.getMasterChain(chainId);
                 long latestHeight = masterChain.getEndHeight();
                 ContextManager.getContext(chainId).setStatus(MAINTAIN_CHAINS);
                 for (Chain forkChain : forkChains) {
@@ -205,7 +205,6 @@ public class ChainsDbSizeMonitor implements Runnable {
                 }
                 // possibly racy reads
                 //1.清理链起始高度位于主链最新高度增减30(可配置)范围外的孤儿链
-                Chain masterChain = ChainManager.getMasterChain(chainId);
                 SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
                 if (!lock.validate(stamp)) {
                     continue;
@@ -218,6 +217,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                     continue;
                 }
                 // exclusive access
+                Chain masterChain = ChainManager.getMasterChain(chainId);
                 long latestHeight = masterChain.getEndHeight();
                 ContextManager.getContext(chainId).setStatus(MAINTAIN_CHAINS);
                 for (Chain orphanChain : orphanChains) {

@@ -28,6 +28,7 @@ import io.nuls.block.service.BlockService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -48,7 +49,7 @@ import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 public class BlockHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Object process(Map map) {
+    public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
         BlockMessage message = new BlockMessage();
         try {

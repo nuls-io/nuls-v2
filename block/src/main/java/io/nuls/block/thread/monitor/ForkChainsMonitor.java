@@ -71,7 +71,6 @@ public class ForkChainsMonitor implements Runnable {
                             continue;
                         }
                         // possibly racy reads
-                        Chain masterChain = ChainManager.getMasterChain(chainId);
                         SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                         if (!lock.validate(stamp)) {
                             continue;
@@ -80,6 +79,7 @@ public class ForkChainsMonitor implements Runnable {
                             break;
                         }
                         //遍历当前分叉链,与主链进行比对,找出最大高度差,与默认参数chainSwtichThreshold对比,确定要切换的分叉链
+                        Chain masterChain = ChainManager.getMasterChain(chainId);
                         ChainParameters parameters = context.getParameters();
                         int chainSwtichThreshold = parameters.getChainSwtichThreshold();
                         Chain switchChain = new Chain();

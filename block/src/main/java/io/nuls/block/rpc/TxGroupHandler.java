@@ -59,7 +59,7 @@ public class TxGroupHandler extends BaseCmd {
     private BlockService blockService;
 
     @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Object process(Map map) {
+    public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();
         TxGroupMessage message = new TxGroupMessage();
