@@ -344,7 +344,7 @@ public class BlockSynchronizer implements Runnable {
             return false;
         }
 
-        blockService.rollbackBlock(chainId, params.getLocalLatestHeight());
+        blockService.rollbackBlock(chainId, params.getLocalLatestHeight(), true);
         BlockHeader latestBlockHeader = blockService.getLatestBlockHeader(chainId);
         params.setLocalLatestHeight(latestBlockHeader.getHeight());
         params.setLocalLatestHash(latestBlockHeader.getHash());

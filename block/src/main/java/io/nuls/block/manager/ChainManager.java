@@ -99,7 +99,7 @@ public class ChainManager {
         long rollbackHeight = masterChainEndHeight;
         do {
             Block block = blockService.getBlock(chainId, rollbackHeight--);
-            if (blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block))) {
+            if (blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), false)) {
                 blockList.add(block);
                 hashList.addLast(block.getHeader().getHash());
             } else {
@@ -151,7 +151,7 @@ public class ChainManager {
     private static void saveBlockList(int chainId, List<Block> blockList) {
         //主链回滚中途失败,把前面回滚的区块再加回主链
         for (Block block : blockList) {
-            if (!blockService.saveBlock(chainId, block)) {
+            if (!blockService.saveBlock(chainId, block, false)) {
                 throw new ChainRuntimeException("switchChain fail");
             }
         }
@@ -182,7 +182,7 @@ public class ChainManager {
         while (target > count) {
             NulsDigestData hash = hashList.pop();
             Block block = chainStorageService.query(chainId, hash);
-            boolean saveBlock = blockService.saveBlock(chainId, block);
+            boolean saveBlock = blockService.saveBlock(chainId, block, false);
             if (saveBlock) {
                 count++;
             } else {
@@ -433,7 +433,7 @@ public class ChainManager {
         if (mainChain.isMaster()) {
             List<Block> blockList = chainStorageService.query(subChain.getChainId(), subChain.getHashList());
             for (Block block : blockList) {
-                if (!blockService.saveBlock(chainId, block)) {
+                if (!blockService.saveBlock(chainId, block, false)) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
             }

@@ -69,7 +69,7 @@ public class Miner extends Thread {
                     block = BlockGenerator.generate(previousBlock, i, symbol);
                 }
                 previousBlock = block;
-                blockService.saveBlock(CHAIN_ID, block);
+                blockService.saveBlock(CHAIN_ID, block, true);
                 blockService.broadcastBlock(CHAIN_ID, block);
                 Thread.sleep((long) (new Random().nextInt(10) * 1000));
             } catch (Exception e) {

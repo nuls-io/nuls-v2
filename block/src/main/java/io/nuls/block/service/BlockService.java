@@ -134,19 +134,10 @@ public interface BlockService {
      *
      * @param chainId 链ID
      * @param block   待保存区块
-     * @return
-     */
-    boolean saveBlock(int chainId, Block block);
-
-    /**
-     * 保存区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
-     *
-     * @param chainId 链ID
-     * @param block   待保存区块
      * @param download   是否最新区块,最新区块-1,非最新区块-0
      * @return
      */
-    boolean saveBlock(int chainId, Block block, int download);
+    boolean saveBlock(int chainId, Block block, int download, boolean needLock);
 
     /**
      * 回滚区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
@@ -155,7 +146,7 @@ public interface BlockService {
      * @param blockHeaderPo 待回滚区块头
      * @return
      */
-    boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo);
+    boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean needLock);
 
     /**
      * 回滚区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
@@ -164,7 +155,7 @@ public interface BlockService {
      * @param height        待回滚区块高度
      * @return
      */
-    boolean rollbackBlock(int chainId, long height);
+    boolean rollbackBlock(int chainId, long height, boolean needLock);
 
     /**
      * 转发区块给连接的其他对等节点,允许一个例外（不转发给它）

@@ -181,13 +181,8 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public boolean saveBlock(int chainId, Block block) {
-        return saveBlock(chainId, block, false, 0, false);
-    }
-
-    @Override
-    public boolean saveBlock(int chainId, Block block, int download) {
-        return saveBlock(chainId, block, false, download, true);
+    public boolean saveBlock(int chainId, Block block, int download, boolean needLock) {
+        return saveBlock(chainId, block, false, download, needLock);
     }
 
     private boolean saveBlock(int chainId, Block block, boolean localInit, int download, boolean needLock) {
@@ -263,14 +258,14 @@ public class BlockServiceImpl implements BlockService {
     }
 
     @Override
-    public boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo) {
-        return rollbackBlock(chainId, blockHeaderPo, false, false);
+    public boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean needLock) {
+        return rollbackBlock(chainId, blockHeaderPo, false, needLock);
     }
 
     @Override
-    public boolean rollbackBlock(int chainId, long height) {
+    public boolean rollbackBlock(int chainId, long height, boolean needLock) {
         BlockHeaderPo blockHeaderPo = getBlockHeader(chainId, height);
-        return rollbackBlock(chainId, blockHeaderPo, false, false);
+        return rollbackBlock(chainId, blockHeaderPo, false, needLock);
     }
 
     private boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean localInit, boolean needLock) {
@@ -317,7 +312,9 @@ public class BlockServiceImpl implements BlockService {
             }
             return true;
         } finally {
-            lock.unlockWrite(l);
+            if (needLock) {
+                lock.unlockWrite(l);
+            }
         }
     }
 
@@ -335,7 +332,7 @@ public class BlockServiceImpl implements BlockService {
         message.setCommand(CommandConstant.SMALL_BLOCK_MESSAGE);
         boolean broadcast = NetworkUtil.broadcast(chainId, message);
         if (!broadcast) {
-            rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block));
+            rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), true);
         }
         return broadcast;
     }

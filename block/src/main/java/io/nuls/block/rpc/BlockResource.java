@@ -236,7 +236,7 @@ public class BlockResource extends BaseCmd {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = new Block();
             block.parse(new NulsByteBuffer(HexUtil.decode((String) map.get("block"))));
-            if (service.saveBlock(chainId, block, 1) && service.broadcastBlock(chainId, block)) {
+            if (service.saveBlock(chainId, block, 1, true) && service.broadcastBlock(chainId, block)) {
                 return success();
             } else {
                 return failed(BlockErrorCode.PARAMETER_ERROR);
