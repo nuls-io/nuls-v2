@@ -340,7 +340,7 @@ public class BlockSynchronizer implements Runnable {
     private boolean checkRollback(int rollbackCount, int chainId, BlockDownloaderParams params) {
         //每次最多回滚10个区块,等待下次同步,这样可以避免被恶意节点攻击,大量回滚正常区块.
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
-        if (rollbackCount >= parameters.getMaxRollback()) {
+        if (params.getLocalLatestHeight() == 0 || rollbackCount >= parameters.getMaxRollback()) {
             return false;
         }
 

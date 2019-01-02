@@ -270,6 +270,10 @@ public class BlockServiceImpl implements BlockService {
 
     private boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean localInit, boolean needLock) {
         long height = blockHeaderPo.getHeight();
+        if (height == 0) {
+            Log.warn("can't rollback GenesisBlock!chainId-{}", chainId);
+            return true;
+        }
         ChainContext context = ContextManager.getContext(chainId);
         StampedLock lock = context.getLock();
         long l = 0;
