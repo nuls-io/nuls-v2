@@ -22,51 +22,39 @@
  * SOFTWARE.
  */
 
-package io.nuls.transaction.db.rocksdb.storage;
+package io.nuls.transaction.rpc.call;
 
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.log.Log;
+import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.rpc.call.callback.EventNewBlockHeightInvoke;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: Charlie
- * @date: 2018-12-27
+ * @date: 2019-01-02
  */
-public interface CrossChainTxUnprocessedStorageService {
+public class BlockCall {
 
-    /**
-     * 新增或修改跨链交易数据
-     *
-     * @param chainId
-     * @param ctx
-     * @return
-     */
-    boolean putTx(int chainId, CrossChainTx ctx);
+    public static boolean subscriptionNewBlockHeight(Chain chain) {
+        try {
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chain.getChainId());
+            String messageId = CmdDispatcher.requestAndInvoke(ModuleE.BL.abbr, "bestHeight",
+                    params, "0", "1", new EventNewBlockHeightInvoke(chain));
+            if(null != messageId){
+                return true;
+            }
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return false;
 
-    /**
-     * 是否已存在交易
-     * @param chainId
-     * @param hash
-     * @return
-     */
-    CrossChainTx getTx(int chainId, NulsDigestData hash);
-
-    /**
-     * 根据交易hash批量删除
-     * @param chainId
-     * @param ctxList
-     * @return 删除是否成功
-     */
-    boolean removeTxList(int chainId, List<CrossChainTx> ctxList);
-
-
-    /**
-     * 查询指定链下所有跨链交易
-     * Query all cross-chain transactions in the specified chain
-     *
-     * @param chainId
-     * @return
-     */
-    List<CrossChainTx> getTxList(int chainId);
+    }
 }

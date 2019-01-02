@@ -305,13 +305,13 @@ public class MessageCmd extends BaseCmd {
                 TransactionDuplicateRemoval.insert(transaction.getHash());
             }
             //保存未验证跨链交易
-            result = crossChainTxService.newCrossTx(chainManager.getChain(chainId), nodeId, transaction);
+            crossChainTxService.newCrossTx(chainManager.getChain(chainId), nodeId, transaction);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        map.put("value", result);
+        map.put("value", true);
         return success(map);
     }
 
