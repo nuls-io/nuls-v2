@@ -50,6 +50,12 @@ public class FreezeLockTimeState extends BaseNulsData {
     @Setter
     @Getter
     private String txHash;
+    /**
+     * 交易的nonce值
+     */
+    @Setter
+    @Getter
+    private String nonce;
 
     /**
      * 锁定金额
@@ -72,6 +78,7 @@ public class FreezeLockTimeState extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(txHash);
+        stream.writeString(nonce);
         stream.writeBigInteger(amount);
         stream.writeUint48(lockTime);
         stream.writeUint48(createTime);
@@ -80,6 +87,7 @@ public class FreezeLockTimeState extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.txHash = byteBuffer.readString();
+        this.nonce = byteBuffer.readString();
         this.amount = byteBuffer.readBigInteger();
         this.lockTime = byteBuffer.readUint48();
         this.createTime = byteBuffer.readUint48();
@@ -89,6 +97,7 @@ public class FreezeLockTimeState extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfString(txHash);
+        size += SerializeUtils.sizeOfString(nonce);
         size += SerializeUtils.sizeOfBigInteger();
         size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfUint48();
