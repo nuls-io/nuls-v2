@@ -962,14 +962,14 @@ public class AccountCmd extends BaseCmd {
                 if (!AddressTool.validAddress(from.getAssetsChainId(), from.getAddress())) {
                     throw new NulsException(AccountErrorCode.ADDRESS_ERROR);
                 }
-                fromTotal.add(from.getAmount());
+                fromTotal=fromTotal.add(from.getAmount());
             }
             BigInteger toTotal = BigInteger.ZERO;
             for (CoinDto to : outputList) {
                 if (!AddressTool.validAddress(to.getAssetsChainId(), to.getAddress())) {
                     throw new NulsException(AccountErrorCode.ADDRESS_ERROR);
                 }
-                toTotal.add(to.getAmount());
+                toTotal=toTotal.add(to.getAmount());
             }
 
             // check transfer amount

@@ -7,6 +7,7 @@ import io.nuls.account.util.log.LogUtil;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -37,7 +38,7 @@ public class MultiSignAccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_createMultiSigAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi sign account")
-    public Object createMultiSigAccount(Map params) {
+    public Response createMultiSigAccount(Map params) {
         LogUtil.debug("ac_createMultiSigAccount start");
         Map<String, Object> map = new HashMap<>();
         try {
@@ -76,7 +77,7 @@ public class MultiSignAccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_importMultiSigAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "inport a multi sign account")
-    public Object importMultiSigAccount(Map params) {
+    public Response importMultiSigAccount(Map params) {
         LogUtil.debug("ac_importMultiSigAccount start");
         Map<String, Object> map = new HashMap<>();
         try {
@@ -117,7 +118,7 @@ public class MultiSignAccountCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = "ac_removeMultiSigAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "remove the multi sign account")
-    public Object removeMultiSigAccount(Map params) {
+    public Response removeMultiSigAccount(Map params) {
         LogUtil.debug("ac_removeMultiSigAccount start");
         Map<String, Object> map = new HashMap<>();
         try {
