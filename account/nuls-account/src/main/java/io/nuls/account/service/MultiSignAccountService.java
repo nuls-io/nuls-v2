@@ -49,4 +49,37 @@ public interface MultiSignAccountService {
      */
      MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int m);
 
+    /**
+     * 查询多签账户
+     *
+     * get the multi sign account by address
+     *
+     * @param chainId  链ID
+     * @param address    address of account
+     * @return the MultiSigAccount which was created.
+     */
+    MultiSigAccount getMultiSigAccountByAddress(int chainId, String address);
+
+    /**
+     * 导入多签账户
+     *
+     * import a multi sign account
+     *
+     * @param chainId  链ID
+     * @param address  多签账户地址
+     * @param pubKeys    the public keys
+     * @param m    the min number of sign.
+     * @return the MultiSigAccount which was imported.
+     */
+    MultiSigAccount importMultiSigAccount(int chainId,String address,List<String> pubKeys, int m);
+
+    /**
+     * 移除多签账户
+     *
+     * remove the multiSigAccount
+     *
+     * @param address  地址
+     * @return the result of remove the multiSigAccount
+     */
+    boolean removeMultiSigAccount(int chainId,String address);
 }

@@ -44,7 +44,6 @@ import io.nuls.base.data.NulsSignData;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.base.signture.TransactionSignature;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -64,10 +63,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -106,8 +103,8 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
             throw new NulsRuntimeException(AccountErrorCode.PASSWORD_FORMAT_WRONG);
         }
         locker.lock();
-        List<Account> accounts = new ArrayList<>();
         try {
+            List<Account> accounts = new ArrayList<>();
             List<AccountPo> accountPos = new ArrayList<>();
             for (int i = 0; i < count; i++) {
                 //create account
@@ -135,13 +132,13 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
                     EventCmdCall.sendEvent(AccountConstant.EVENT_TOPIC_CREATE_ACCOUNT, JSONUtils.obj2json(eventData));
                 }
             }
+            return accounts;
         } catch (Exception e) {
             LogUtil.error(e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         } finally {
             locker.unlock();
         }
-        return accounts;
     }
 
     @Override
@@ -168,14 +165,12 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         } else {
             //Query all accounts list
             List<AccountPo> poList = accountStorageService.getAccountList();
-            Set<String> addressList = new HashSet<>();
             if (null == poList || poList.isEmpty()) {
                 return list;
             }
             for (AccountPo po : poList) {
                 Account account = po.toAccount();
                 list.add(account);
-                addressList.add(account.getAddress().getBase58());
             }
             //put the account in local cache.
             for (Account account : list) {
@@ -202,7 +197,10 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         if (accountCacheService.localAccountMaps == null || accountCacheService.localAccountMaps.size() == 0) {
             getAccountList();
         }
-        return accountCacheService.localAccountMaps.get(address);
+        if (accountCacheService.localAccountMaps != null) {
+            return accountCacheService.localAccountMaps.get(address);
+        }
+        return null;
     }
 
     /**
