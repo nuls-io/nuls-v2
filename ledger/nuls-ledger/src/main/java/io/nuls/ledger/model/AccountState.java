@@ -34,6 +34,8 @@ import lombok.*;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by wangkun23 on 2018/11/19.
@@ -55,14 +57,26 @@ public class AccountState extends BaseNulsData {
     @Getter
     private String nonce;
 
+    /**
+     * 账户冻结的资产(高度冻结)
+     */
     @Setter
     @Getter
-    private BigInteger balance = BigInteger.ZERO;
+    private List<String> unconfirmedNonces = new ArrayList<>();
+    /**
+     * 账户总金额入账
+     */
+    @Setter
+    @Getter
+    private BigInteger totalFromAmount = BigInteger.ZERO;
 
     /**
-     * 账户总金额
+     * 账户总金额出账
      */
-    private BigInteger totalAmount = BigInteger.ZERO;
+    @Setter
+    @Getter
+    private BigInteger totalToAmount = BigInteger.ZERO;
+
 
     /**
      * 账户冻结的资产
@@ -71,41 +85,76 @@ public class AccountState extends BaseNulsData {
     @Getter
     private FreezeState freezeState;
 
-    public AccountState(int chainId, int assetId, String nonce, BigInteger balance) {
+    public AccountState(int chainId, int assetId, String nonce) {
         this.chainId = chainId;
         this.assetId = assetId;
         this.nonce = nonce;
-        this.balance = balance;
         this.freezeState = new FreezeState();
     }
 
     /**
-     * 获取账户总金额
-     *
+     * 获取最近的未提交交易nonce
      * @return
      */
+    public String getUnconfirmedNonce(){
+        if(unconfirmedNonces.size() == 0){
+            return "";
+        }
+        return unconfirmedNonces.get(unconfirmedNonces.size()-1);
+    }
+    public void setUnconfirmedNonce(String nonce){
+        unconfirmedNonces.add(nonce);
+    }
+
+    public boolean updateConfirmedNonce(String nonce){
+        this.nonce = nonce;
+        if(unconfirmedNonces.size()>0) {
+            String unconfirmedNonce = unconfirmedNonces.get(0);
+            if (unconfirmedNonce.equalsIgnoreCase(nonce)) {
+                unconfirmedNonces.remove(0);
+            }else{
+                //分叉了，清空之前的未提交nonce
+                unconfirmedNonces.clear();
+            }
+            return true;
+        }else{
+           return false;
+        }
+    }
+    /**
+     * 获取账户可用金额（不含锁定金额）
+     *
+     * @return BigInteger
+     */
+    public BigInteger getAvailableAmount(){
+        return totalToAmount.subtract(totalFromAmount);
+    }
+    public void addTotalFromAmount(BigInteger value){
+        totalFromAmount = totalFromAmount.add(value);
+    }
+
+    public void addTotalToAmount(BigInteger value){
+        totalToAmount = totalToAmount.add(value);
+    }
+    /**
+     * 获取账户总金额（含锁定金额）
+     *
+     * @return BigInteger
+     */
     public BigInteger getTotalAmount() {
-        return balance.add(freezeState.getTotal());
+        return totalToAmount.subtract(totalFromAmount).add(freezeState.getTotal());
     }
 
-    public AccountState withNonce(String nonce) {
-        return new AccountState(chainId, assetId, nonce, balance);
-    }
-
-    public AccountState withIncrementedNonce() {
-        return new AccountState(chainId, assetId, nonce + 1, balance);
-    }
-
-    public AccountState withBalanceIncrement(BigInteger value) {
-        return new AccountState(chainId, assetId, nonce, balance.add(value));
-    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
         stream.writeUint16(assetId);
         stream.writeString(nonce);
-        stream.writeBigInteger(balance);
+        stream.writeUint16(unconfirmedNonces.size());
+        for (String unconfirmedNonce : unconfirmedNonces) {
+            stream.writeString(unconfirmedNonce);
+        }
         stream.writeNulsData(freezeState);
     }
 
@@ -114,7 +163,14 @@ public class AccountState extends BaseNulsData {
         this.chainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
         this.nonce = byteBuffer.readString();
-        this.balance = byteBuffer.readBigInteger();
+        int unconfirmNonceCount = byteBuffer.readUint16();
+        for (int i = 0; i < unconfirmNonceCount; i++) {
+            try {
+                this.unconfirmedNonces.add(byteBuffer.readString());
+            } catch (Exception e) {
+                throw new NulsException(e);
+            }
+        }
         this.freezeState = new FreezeState();
         byteBuffer.readNulsData(freezeState);
     }
@@ -127,9 +183,15 @@ public class AccountState extends BaseNulsData {
         //assetId
         size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfString(nonce);
+        size += SerializeUtils.sizeOfUint16();
+        for (String unconfirmedNonce : unconfirmedNonces) {
+            size += SerializeUtils.sizeOfString(unconfirmedNonce);
+        }
+        //totalFromAmount
+        size += SerializeUtils.sizeOfBigInteger();
+        //totalToAmount
         size += SerializeUtils.sizeOfBigInteger();
         size += SerializeUtils.sizeOfNulsData(freezeState);
-
         return size;
     }
 }

@@ -25,16 +25,21 @@
  */
 package io.nuls.ledger.rpc.cmd;
 
+import io.nuls.base.data.Transaction;
+import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.validator.CoinDataValidator;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -46,24 +51,59 @@ public class ValidatorCmd extends BaseCmd {
 
     @Autowired
     CoinDataValidator coinDataValidator;
-
     /**
      * validate coin data
+     *进行nonce-hash校验，进行可用余额校验
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "validateCoinData",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    public Response validateCoinData(Map params) {
+        //TODO.. 验证参数个数和格式
+        String txHex = (String) params.get("txHex");
+        Transaction tx = new Transaction();
+        try {
+            tx.parse(HexUtil.hexToByte(txHex),0);
+            ValidateResult validateResult = coinDataValidator.validateCoinData(tx);
+            return success(validateResult);
+        } catch (NulsException e) {
+            e.printStackTrace();
+            return failed(e.getErrorCode());
+        }
+//        Boolean result = coinDataValidator.validate(address, chainId, assetId, amount, nonce);
+
+    }
+    /**
+     * bathValidateBegin
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "lg_validateCoinData",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "test getHeight 1.0")
-    public Response validateCoinData(Map params) {
-        //TODO.. 验证参数个数和格式
-        String address = (String) params.get("address");
-        Integer chainId = (Integer) params.get("chainId");
-        Integer assetId = (Integer) params.get("assetId");
-        BigInteger amount = (BigInteger) params.get("amount");
-        String nonce = (String) params.get("nonce");
-        Boolean result = coinDataValidator.validate(address, chainId, assetId, amount, nonce);
-        return success(result);
+    @CmdAnnotation(cmd = "bathValidateBegin",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
+    public Response bathValidateBegin(Map params) {
+        coinDataValidator.beginBatchPerTxValidate();
+        Map<String,Object> rtData = new HashMap<>();
+        rtData.put("result",1);
+        return success(rtData);
+    }
+
+
+    /**
+     * bathValidatePerTx
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "bathValidatePerTx",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
+    public Response bathValidatePerTx(Map params) {
+
+        return success();
     }
 
 }
