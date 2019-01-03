@@ -171,4 +171,34 @@ public class TxUtil {
     }
 
 
+    /**
+     * 获取跨链交易tx中froms里面地址的链id
+     *
+     * @param tx
+     * @return
+     */
+    public static int getCrossTxFromsOriginChainId(Transaction tx) throws NulsException {
+        CoinData coinData = TxUtil.getCoinData(tx);
+        if (null == coinData.getFrom() || coinData.getFrom().size() == 0) {
+            throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
+        }
+        return AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
+
+    }
+
+    /**
+     * 获取跨链交易tx中tos里面地址的链id
+     *
+     * @param tx
+     * @return
+     */
+    public static int getCrossTxTosOriginChainId(Transaction tx) throws NulsException {
+        CoinData coinData = TxUtil.getCoinData(tx);
+        if (null == coinData.getTo() || coinData.getTo().size() == 0) {
+            throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
+        }
+        return AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
+
+    }
+
 }

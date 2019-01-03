@@ -25,20 +25,27 @@ import java.util.Map;
  */
 public class LegerCall {
 
+
+    public static void coinDataBatchNotify(Chain chain) {
+        //todo 发送给账本，coinData统一验证的通知
+
+    }
+
     /**
      * 验证CoinData
      * @param chain
      * @param txHex
      * @return
      */
-    public static boolean verifyCoinData(Chain chain, String txHex) {
+    public static boolean verifyCoinData(Chain chain, String txHex, boolean batch) {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chain.getChainId());
         params.put("txHex", txHex);
         try {
-            //todo 验证CoinData
-            HashMap result = (HashMap) TransactionCall.request("lg_validateCoinData", ModuleE.LG.abbr, params);
+            //单个or批量
+            String cmd = batch ? "lg_validateCoinData": "lg_validateCoinData";
+            HashMap result = (HashMap) TransactionCall.request(cmd, ModuleE.LG.abbr, params);
             return (Boolean) result.get("value");
         } catch (Exception e) {
             chain.getLogger().info(e.getMessage(), e.fillInStackTrace());
@@ -52,10 +59,10 @@ public class LegerCall {
      * @param tx
      * @return
      */
-    public static boolean verifyCoinData(Chain chain, Transaction tx) {
+    public static boolean verifyCoinData(Chain chain, Transaction tx, boolean batch) {
         //todo 验证CoinData
         try {
-            return verifyCoinData(chain, tx.hex());
+            return verifyCoinData(chain, tx.hex(), batch);
         } catch (Exception e) {
             chain.getLogger().error(e);
             return false;

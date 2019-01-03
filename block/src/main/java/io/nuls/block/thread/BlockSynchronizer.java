@@ -22,22 +22,19 @@ package io.nuls.block.thread;
 
 import com.google.common.collect.Lists;
 import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockSynStatusEnum;
-import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockDownloadUtils;
-import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
@@ -46,7 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * 区块同步主线程,管理多条链的区块同步
@@ -100,7 +96,11 @@ public class BlockSynchronizer implements Runnable {
         int minNodeAmount = parameters.getMinNodeAmount();
         if (availableNodes.size() >= minNodeAmount) {
             //3.统计网络中可用节点的一致区块高度、区块hash
+            context.getReadLock().lock();
             BlockDownloaderParams params = statistics(availableNodes, chainId);
+            params.setLocalLatestHeight(context.getLatestHeight());
+            params.setLocalLatestHash(context.getLatestBlock().getHeader().getHash());
+            context.getReadLock().unlock();
             int size = params.getNodes().size();
             //网络上没有可用节点
             if (size == 0) {
@@ -116,7 +116,7 @@ public class BlockSynchronizer implements Runnable {
             }
             //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
-                Log.info("chain-{} first start");
+                Log.info("chain-{} first start", chainId);
                 context.setStatus(RunningStatusEnum.RUNNING);
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
                     if (ConsensusUtil.notice(chainId, 1)) {
@@ -142,7 +142,6 @@ public class BlockSynchronizer implements Runnable {
                 }
                 return;
             }
-            params.setLocalLatestHeight(context.getLatestHeight());
 
             PriorityBlockingQueue<Node> nodes = params.getNodes();
             int nodeCount = nodes.size();
@@ -294,14 +293,14 @@ public class BlockSynchronizer implements Runnable {
      * @param params
      */
     private boolean checkLocalBlock(int chainId, BlockDownloaderParams params) {
-        Block localBlock = blockService.getLatestBlock(chainId);
-        long localHeight = localBlock.getHeader().getHeight();
+        long localHeight = params.getLocalLatestHeight();
         long netHeight = params.getNetLatestHeight();
         //得到共同高度
         long commonHeight = Math.min(localHeight, netHeight);
-        if (checkHashEquality(localBlock, chainId, params)) {
+        if (checkHashEquality(chainId, params)) {
             if (commonHeight < netHeight) {
                 //commonHeight区块的hash一致,正常,比远程节点落后,下载区块
+                Log.info("localHeight:{}, netHeight:{}", localHeight, netHeight);
                 return true;
             }
         } else {
@@ -310,26 +309,28 @@ public class BlockSynchronizer implements Runnable {
             if (params.getNodes().size() >= parameters.getMinNodeAmount()
                     && params.getAvailableNodesCount() >= params.getNodes().size() * parameters.getConsistencyNodePercent() / 100
             ) {
-                return checkRollback(localBlock, 0, chainId, params);
+                return checkRollback( 0, chainId, params);
             }
         }
         return false;
     }
 
-    private boolean checkRollback(Block localBestBlock, int rollbackCount, int chainId, BlockDownloaderParams params) {
+    private boolean checkRollback(int rollbackCount, int chainId, BlockDownloaderParams params) {
         //每次最多回滚10个区块,等待下次同步,这样可以避免被恶意节点攻击,大量回滚正常区块.
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         if (rollbackCount >= parameters.getMaxRollback()) {
             return false;
         }
 
-        blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(localBestBlock));
-        localBestBlock = blockService.getLatestBlock(chainId);
-        if (checkHashEquality(localBestBlock, chainId, params)) {
+        blockService.rollbackBlock(chainId, params.getLocalLatestHeight());
+        BlockHeader latestBlockHeader = blockService.getLatestBlockHeader(chainId);
+        params.setLocalLatestHeight(latestBlockHeader.getHeight());
+        params.setLocalLatestHash(latestBlockHeader.getHash());
+        if (checkHashEquality(chainId, params)) {
             return true;
         }
 
-        return checkRollback(localBestBlock, rollbackCount + 1, chainId, params);
+        return checkRollback( rollbackCount + 1, chainId, params);
     }
 
     /**
@@ -339,21 +340,24 @@ public class BlockSynchronizer implements Runnable {
      * @date 18-11-9 下午6:13
      * @version 1.0
      */
-    private boolean checkHashEquality(Block localBlock, int chainId, BlockDownloaderParams params) {
-        NulsDigestData localHash = localBlock.getHeader().getHash();
-        long localHeight = localBlock.getHeader().getHeight();
+    private boolean checkHashEquality(int chainId, BlockDownloaderParams params) {
+        NulsDigestData localHash = params.getLocalLatestHash();
+        long localHeight = params.getLocalLatestHeight();
         long netHeight = params.getNetLatestHeight();
+        NulsDigestData netHash = params.getNetLatestHash();
         //得到共同高度
         long commonHeight = Math.min(localHeight, netHeight);
-        NulsDigestData remoteHash = params.getNetLatestHash();
         //如果双方共同高度<网络高度,要进行hash判断,需要从网络上下载区块,因为params里只有最新的区块hash,没有旧的hash
         if (commonHeight < netHeight) {
             for (Node node : params.getNodes()) {
                 Block remoteBlock = BlockDownloadUtils.getBlockByHash(chainId, localHash, node);
-                remoteHash = remoteBlock.getHeader().getHash();
+                netHash = remoteBlock.getHeader().getHash();
                 break;
             }
         }
-        return localHash.equals(remoteHash);
+        if (commonHeight < localHeight) {
+            localHash = blockService.getBlockHash(chainId, commonHeight);
+        }
+        return localHash.equals(netHash);
     }
 }

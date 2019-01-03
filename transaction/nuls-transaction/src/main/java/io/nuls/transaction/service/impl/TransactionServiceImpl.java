@@ -33,7 +33,6 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
@@ -48,7 +47,11 @@ import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
-import io.nuls.transaction.model.bo.*;
+import io.nuls.transaction.manager.TransactionManager;
+import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.CrossTxData;
+import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.rpc.call.AccountCall;
@@ -57,7 +60,6 @@ import io.nuls.transaction.rpc.call.LegerCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.TransactionService;
-import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -108,12 +110,6 @@ public class TransactionServiceImpl implements TransactionService {
         return true;
     }
 
-
-    @Override
-    public Transaction getTransaction(NulsDigestData hash) throws NulsException {
-        //todo 是否需要
-        return new Transaction();
-    }
 
     @Override
     public Map<String, String> createCrossMultiTransaction(Chain chain, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) throws NulsException {
@@ -581,7 +577,7 @@ public class TransactionServiceImpl implements TransactionService {
             return false;
         }
         //验证txData发起链id和from地址链id是否一致
-        int fromChainId = getCrossTxFromsOriginChainId(tx);
+        int fromChainId = TxUtil.getCrossTxFromsOriginChainId(tx);
         CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
         if (fromChainId != crossTxData.getChainId()) {
             throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
@@ -629,21 +625,6 @@ public class TransactionServiceImpl implements TransactionService {
         return true;
     }
 
-
-    /**
-     * 获取跨链交易tx中froms里面地址的链id
-     *
-     * @param tx
-     * @return
-     */
-    private int getCrossTxFromsOriginChainId(Transaction tx) throws NulsException {
-        CoinData coinData = TxUtil.getCoinData(tx);
-        if (null == coinData.getFrom() || coinData.getFrom().size() == 0) {
-            throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
-        }
-        return AddressTool.getChainIdByAddress(coinData.getFrom().get(0).getAddress());
-
-    }
 
     @Override
     public boolean crossTransactionCommit(Chain chain, Transaction tx, BlockHeaderDigest blockHeaderDigest) {
@@ -704,7 +685,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             //验证coinData
-            if (!LegerCall.verifyCoinData(chain, txHex)) {
+            if (!LegerCall.verifyCoinData(chain, txHex, false)) {
                 continue;
             }
             packingTxList.add(tx);
@@ -783,8 +764,9 @@ public class TransactionServiceImpl implements TransactionService {
                     continue;
                 }
                 //向账本模块发送要批量验证coinData的标识
+                LegerCall.coinDataBatchNotify(chain);
                 //验证coinData
-                if (!LegerCall.verifyCoinData(chain, txHex)) {
+                if (!LegerCall.verifyCoinData(chain, txHex, true)) {
                     filterList.add(tx);
                     iterator.remove();
                     continue;
@@ -857,7 +839,7 @@ public class TransactionServiceImpl implements TransactionService {
                 return false;
             }
             //验证coinData
-            if (!LegerCall.verifyCoinData(chain, tx)) {
+            if (!LegerCall.verifyCoinData(chain, tx, false)) {
                 return false;
             }
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
@@ -870,6 +852,14 @@ public class TransactionServiceImpl implements TransactionService {
                 moduleVerifyMap.put(txRegister, txHexs);
             }
         }
+        LegerCall.coinDataBatchNotify(chain);
+        //todo 批量验证coinData，接口和单个的区别？
+        for(Transaction tx : txList) {
+            if (!LegerCall.verifyCoinData(chain, tx, true)) {
+                return false;
+            }
+        }
+
         //统一验证
         boolean rs = TransactionCall.txsModuleValidators(chain, moduleVerifyMap);
         if(rs){

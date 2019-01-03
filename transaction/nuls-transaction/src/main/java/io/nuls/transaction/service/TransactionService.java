@@ -1,7 +1,6 @@
 package io.nuls.transaction.service;
 
 import io.nuls.base.data.BlockHeaderDigest;
-import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.tools.crypto.ECKey;
@@ -39,17 +38,6 @@ public interface TransactionService {
      * @throws NulsException NulsException
      */
     boolean newTx(Chain chain, Transaction transaction) throws NulsException;
-
-    /**
-     * 获取一笔交易
-     * get a transaction
-     *
-     * @param hash
-     * @return Transaction
-     * @throws NulsException NulsException
-     */
-    Transaction getTransaction(NulsDigestData hash) throws NulsException;
-
 
     /**
      * 创建不包含多签地址跨链交易，支持多普通地址

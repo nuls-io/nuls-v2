@@ -26,6 +26,7 @@
 package io.nuls.ledger.db;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.model.AccountState;
 import io.nuls.tools.core.annotation.Service;
@@ -74,5 +75,22 @@ public class RepositoryImpl implements Repository {
             logger.error("getAccountState serialize error.", e);
         }
         return accountState;
+    }
+
+    @Override
+    public void putBatchValidateTx(byte[] key, Transaction tx) {
+        //TODO:
+    }
+
+    @Override
+    public Transaction getBatchValidateTx(byte[] key) {
+        //TODO:
+        return null;
+    }
+
+    @Override
+    public void clearBatchValidateTx() {
+        //TODO:
+
     }
 }

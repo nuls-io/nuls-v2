@@ -55,7 +55,7 @@ public class Account implements Serializable {
      * 账户地址
      */
 
-    private Address address;
+    private transient Address address;
 
     /**
      * 账户别名
@@ -100,7 +100,7 @@ public class Account implements Serializable {
      * local field
      */
 
-    private ECKey ecKey;
+    private transient ECKey ecKey;
 
 
     private String remark;

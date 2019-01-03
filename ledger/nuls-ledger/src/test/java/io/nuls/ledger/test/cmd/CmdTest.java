@@ -30,8 +30,6 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.server.WsServer;
-import io.nuls.tools.parse.JSONUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -62,6 +60,18 @@ public class CmdTest {
         params.put("chainId", 8096);
         params.put("address", "123");
         Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "lg_getBalance", params);
+        logger.info("response {}", response);
+    }
+    @Test
+    public void getBalance() throws Exception {
+        double version = 1.0;
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        params.put("chainId", 8096);
+        params.put("address", "256");
+        params.put("assetId", 222);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
         logger.info("response {}", response);
     }
 }

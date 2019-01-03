@@ -53,7 +53,7 @@ public class MultiSigAccountPo extends BaseNulsData {
 
     private int chainId;
 
-    private Address address;
+    private transient Address address;
 
     private List<byte[]> pubKeyList;
 

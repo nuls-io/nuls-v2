@@ -39,12 +39,10 @@ public interface AccountStateService {
     boolean isExist(String address, int chainId, int assetId);
 
     AccountState getAccountState(String address, int chainId, int assetId);
+    void updateAccountState(String address, int chainId, int assetId,AccountState accountState);
 
     String setNonce(String address, int chainId, int assetId, String nonce);
-
-    String getNonce(String address, int chainId, int assetId);
-
-    BigInteger getBalance(String address, int chainId, int assetId);
+    String setUnconfirmNonce(String address, int chainId, int assetId, String nonce);
 
     BigInteger addBalance(String address, int chainId, int assetId, BigInteger value);
 
@@ -87,5 +85,5 @@ public interface AccountStateService {
      */
     BigInteger freezeByLockTime(String address, int chainId, int assetId, String txHash, BigInteger amount, long lockTime);
 
-    BigInteger unfreezeLockTime(String addressess, int chainId, int assetId, long latestBlockTime);
+    void unfreezeLockTime(AccountState accountState, long latestBlockTime);
 }

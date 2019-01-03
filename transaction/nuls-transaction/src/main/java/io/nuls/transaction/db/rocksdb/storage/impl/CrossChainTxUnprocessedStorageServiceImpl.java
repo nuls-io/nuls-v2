@@ -24,6 +24,7 @@
 
 package io.nuls.transaction.db.rocksdb.storage.impl;
 
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxDBConstant;
@@ -96,5 +97,28 @@ public class CrossChainTxUnprocessedStorageServiceImpl implements CrossChainTxUn
             Log.error(e);
         }
         return ccTxPoList;
+    }
+
+    @Override
+    public CrossChainTx getTx(int chainId, NulsDigestData hash) {
+        if (null == hash) {
+            return null;
+        }
+        byte[] txHashBytes = null;
+        try {
+            txHashBytes = hash.serialize();
+        } catch (IOException e) {
+            Log.error(e);
+            return null;
+        }
+        try {
+            byte[] bytes = RocksDBService.get(TxDBConstant.DB_UNPROCESSED_CROSSCHAIN + chainId, txHashBytes);
+            CrossChainTx ccTx = new CrossChainTx();
+            ccTx.parse(bytes, 0);
+            return ccTx;
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
     }
 }

@@ -27,6 +27,7 @@ package io.nuls.transaction.task;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxUnprocessedStorageService;
@@ -87,6 +88,7 @@ public class CrossTxUnverifiedProcessTask implements Runnable {
                 VerifyCrossWithFCMessage verifyCrossWithFCMessage = new VerifyCrossWithFCMessage();
                 verifyCrossWithFCMessage.setOriginalTxHash(crossTxData.getOriginalTxHash());
                 verifyCrossWithFCMessage.setRequestHash(tx.getHash());
+                verifyCrossWithFCMessage.setCommand(TxCmd.NW_VERIFY_FC);
                 //todo 获取节点组 放CrossChainTx
                 //发送跨链验证msg，除去发送者节点
                 boolean rs = NetworkCall.broadcast(ctx.getSenderChainId(), verifyCrossWithFCMessage, ctx.getSenderNodeId());

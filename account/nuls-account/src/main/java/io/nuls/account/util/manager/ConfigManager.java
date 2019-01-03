@@ -47,7 +47,7 @@ public class ConfigManager {
      * 配置参数是否可修改
      * param_name  -  是否可修改标识
      */
-    public static Map<String, Boolean> param_modify = new HashMap<>();
+    private static Map<String, Boolean> param_modify = new HashMap<>();
 
     /**
      * 初始化配置信息

@@ -22,12 +22,8 @@
 
 package io.nuls.block.thread;
 
-import io.nuls.block.constant.ConfigConstant;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Node;
-import io.nuls.block.service.BlockService;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 
 import java.util.concurrent.*;
@@ -48,14 +44,12 @@ public class BlockDownloader implements Callable<Boolean> {
     private ThreadPoolExecutor executor;
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
-    private BlockService blockService;
 
     public BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params) {
         this.params = params;
         this.executor = executor;
         this.futures = futures;
         this.chainId = chainId;
-        this.blockService = SpringLiteContext.getBean(BlockService.class);
     }
 
     @Override
