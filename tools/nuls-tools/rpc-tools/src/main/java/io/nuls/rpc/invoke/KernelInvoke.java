@@ -26,6 +26,7 @@ package io.nuls.rpc.invoke;
 
 import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.log.Log;
 
 import java.util.Map;
@@ -54,6 +55,17 @@ public class KernelInvoke extends BaseInvoke {
             logInfo.append("注入：[key=").append(entry.getKey()).append(",value=").append(entry.getValue()).append("]\n");
             ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
         }
+        for (String role : ServerRuntime.LOCAL.getDependencies().keySet()) {
+            String url = ClientRuntime.getRemoteUri(role);
+            try {
+                ClientRuntime.getWsClient(url);
+            } catch (Exception e) {
+                Log.error("Dependent modules cannot be connected: " + role);
+                ServerRuntime.startService = false;
+                return;
+            }
+        }
+        ServerRuntime.startService = true;
         Log.info(logInfo.toString());
     }
 }
