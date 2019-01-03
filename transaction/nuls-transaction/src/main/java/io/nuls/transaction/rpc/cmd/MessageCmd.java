@@ -13,6 +13,7 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.TransactionDuplicateRemoval;
 import io.nuls.transaction.constant.TxCmd;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.manager.ChainManager;
@@ -346,6 +347,10 @@ public class MessageCmd extends BaseCmd {
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
+            //TODO 验证该交易所在的区块已经被确认n个区块高度
+
+            //TODO 将atx交易进行协议转换生成新的Anode2_atx_trans，再验证接收到的atx_trans_hash与Anode2_atx_trans_hash一致
+
             //发送跨链交易验证结果到指定节点
             VerifyCrossResultMessage verifyResultMessage = new VerifyCrossResultMessage();
             verifyResultMessage.setCommand(NW_VERIFYR_ESULT);
@@ -401,6 +406,7 @@ public class MessageCmd extends BaseCmd {
             verifyResult.setHeight(message.getHeight());
             verifyResultList.add(verifyResult);
             ctx.setCtxVerifyResultList(verifyResultList);
+            ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
             //保存跨链交易验证结果
             result = crossChainTxStorageService.putTx(chainId, ctx);
         } catch (NulsException e) {
