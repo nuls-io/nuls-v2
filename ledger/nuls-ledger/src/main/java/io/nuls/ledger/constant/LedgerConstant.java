@@ -41,4 +41,15 @@ public interface LedgerConstant {
      * The encoding used by the nuls system.
      */
     public static String DEFAULT_ENCODING = "UTF-8";
+
+    public static int  UNCONFIRMED_NONCE = 0;
+    public static int  CONFIRMED_NONCE = 1;
+    /**
+     * 普通交易处理
+     */
+    public static int COMMONT_TX = 1;
+    /**
+     * 解锁交易处理
+     */
+    public static int  UNLOCK_TX = 2;
 }

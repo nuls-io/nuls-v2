@@ -30,6 +30,8 @@ import io.nuls.base.data.Transaction;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -38,9 +40,11 @@ import io.nuls.tools.exception.NulsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 未确认交易提交，提交失败直接返回错误信息
  * Created by wangkun23 on 2018/11/20.
  */
 @Component
@@ -52,16 +56,47 @@ public class TransactionCmd extends BaseCmd {
     private TransactionService transactionService;
 
     /**
+     * 未确认交易提交
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "commitUnconfirmedTx",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    public Response commitUnconfirmedTx(Map params) {
+        Map<String,Object> rtData = new HashMap<>();
+
+        String txHex = (String) params.get("txHex");
+        if (StringUtils.isNotBlank(txHex)) {
+            return failed("txHex not blank");
+        }
+        byte[] txStream = HexUtil.decode(txHex);
+        Transaction tx = new Transaction();
+        try {
+            tx.parse(new NulsByteBuffer(txStream));
+        } catch (NulsException e) {
+            logger.error("transaction parse error", e);
+            rtData.put("result",0);
+            return success(rtData);
+        }
+        rtData.put("result",1);
+        transactionService.unConfirmTxProcess(tx);
+        return success(rtData);
+    }
+    /**
      * save transaction
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "lg_tx",
+    @CmdAnnotation(cmd = "commitConfirmTx",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "test lg_tx 1.0")
-    public Object saveTx(Map params) {
-        String txHex = (String) params.get("value");
+            description = "")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    public Response commitConfirmTx(Map params) {
+        Map<String,Object> rtData = new HashMap<>();
+        String txHex = (String) params.get("txHex");
         if (StringUtils.isNotBlank(txHex)) {
             return failed("txHex not blank");
         }
@@ -72,7 +107,13 @@ public class TransactionCmd extends BaseCmd {
         } catch (NulsException e) {
             logger.error("transaction parse error", e);
         }
-        transactionService.txProcess(tx);
+        rtData.put("result",1);
+        transactionService.confirmTxProcess(tx);
         return success();
     }
+
+
+
+
+
 }

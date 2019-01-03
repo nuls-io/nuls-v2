@@ -25,18 +25,12 @@
  */
 package io.nuls.ledger.test;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.ledger.model.AccountState;
-import io.nuls.ledger.model.FreezeHeightState;
-import io.nuls.ledger.model.FreezeLockTimeState;
-import io.nuls.ledger.model.FreezeState;
 import io.nuls.tools.exception.NulsException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.math.BigInteger;
 
 /**
  * Created by wangkun23 on 2018/11/30.
@@ -49,47 +43,6 @@ public class AccountStateSerializerTest extends BaseTest {
     @Test
     public void test() throws IOException, NulsException {
 
-        Integer chainId = 1;
-        String address = "NsdzTe4czMVA5Ccc1p9tgiGrKWx7WLNV";
-        Integer assetId = 1;
-        FreezeState freezeState = new FreezeState();
-        freezeState.setAmount(BigInteger.valueOf(100));
 
-        FreezeLockTimeState state = new FreezeLockTimeState();
-        state.setTxHash("dfdf");
-        state.setLockTime(System.currentTimeMillis());
-        state.setAmount(BigInteger.valueOf(100));
-        state.setCreateTime(System.currentTimeMillis());
-        freezeState.getFreezeLockTimeStates().add(state);
-
-
-        FreezeLockTimeState state2 = new FreezeLockTimeState();
-        state2.setTxHash("dfdf22222");
-        state2.setLockTime(System.currentTimeMillis());
-        state2.setAmount(BigInteger.valueOf(100));
-        state2.setCreateTime(System.currentTimeMillis());
-
-        freezeState.getFreezeLockTimeStates().add(state2);
-
-        logger.info("rlp {}", freezeState);
-
-
-        FreezeHeightState heightState = new FreezeHeightState();
-        heightState.setTxHash("dfdf");
-        heightState.setHeight(BigInteger.valueOf(100L));
-        heightState.setAmount(BigInteger.valueOf(900));
-        heightState.setCreateTime(System.currentTimeMillis());
-        freezeState.getFreezeHeightStates().add(heightState);
-
-
-        AccountState accountState = new AccountState(chainId, assetId, "", BigInteger.valueOf(100));
-        accountState.setFreezeState(freezeState);
-
-
-        byte[] stream = accountState.serialize();
-        logger.info("accountState {}", accountState);
-        AccountState accountState2 = new AccountState();
-        accountState2.parse(new NulsByteBuffer(stream));
-        logger.info("accountState2 {}", accountState2);
     }
 }
