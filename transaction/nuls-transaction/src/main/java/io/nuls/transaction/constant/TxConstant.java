@@ -74,6 +74,11 @@ public interface TxConstant {
     String CROSS_TRANSFER_ROLLBACK = "crossTxCommit";
 
     /**
+     * 跨链交易打包确认后需要达到的最低阈值高度才生效
+     */
+    long CTX_EFFECT_THRESHOLD = 30;
+
+    /**
      * 跨链交易验证过程
      */
     /** 已发送请求跨链验证消息 */

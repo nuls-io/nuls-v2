@@ -65,7 +65,9 @@ public class EbConstants {
     /**
      * Thread pool for retry mechanism
      */
-    public static final ExecutorService SEND_RETRY_THREAD_POOL = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("SendRetryProcessor"));
+    public static final ExecutorService SEND_RETRY_THREAD_POOL = ThreadUtils.createThreadPool(2, 500, new NulsThreadFactory("SendRetryProcessor"));
 
-    public static final ExecutorService EB_THREAD_POOL = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("eventBus"));
+    public static final ExecutorService EB_THREAD_POOL = ThreadUtils.createThreadPool(2, 500, new NulsThreadFactory("eventBus"));
+
+    public static final ExecutorService CLIENT_SYNC_POOL = ThreadUtils.createThreadPool(2, 500, new NulsThreadFactory("eventBus_client_sync"));
 }

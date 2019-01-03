@@ -25,20 +25,28 @@
  */
 package io.nuls.ledger.service.impl;
 
-import io.nuls.base.constant.TxStatusEnum;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
-import io.nuls.ledger.constant.TransactionType;
+import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.TransactionService;
-import io.nuls.ledger.service.processor.AccountAliasProcessor;
-import io.nuls.ledger.service.processor.CoinBaseProcessor;
-import io.nuls.ledger.service.processor.TransferProcessor;
+import io.nuls.ledger.service.processor.CommontTransactionProcessor;
+import io.nuls.ledger.service.processor.LockedTransactionProcessor;
+import io.nuls.ledger.utils.CoinDataUtils;
+import io.nuls.ledger.validator.CoinDataValidator;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.data.ByteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+
 /**
  * Created by wangkun23 on 2018/11/28.
+ * update by lanjinsheng on 2019/01/02
  */
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -46,13 +54,41 @@ public class TransactionServiceImpl implements TransactionService {
     final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
-    CoinBaseProcessor coinBaseProcessor;
-
+    AccountStateService accountStateService;
     @Autowired
-    TransferProcessor transferProcessor;
-
+    CoinDataValidator coinDataValidator;
     @Autowired
-    AccountAliasProcessor accountAliasProcessor;
+    LockedTransactionProcessor lockedTransactionProcessor;
+    @Autowired
+    CommontTransactionProcessor commontTransactionProcessor;
+    /**
+     * 未确认交易数据处理
+     *
+     * @param transaction
+     */
+
+    @Override
+    public boolean unConfirmTxProcess(Transaction transaction) {
+        //直接更新未确认交易
+        //TODO:要按用户账户来锁定处理(待处理)
+        CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
+        byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
+        String nonce8BytesStr =  ByteUtils.bytesToString(nonce8Bytes);
+        List<CoinFrom> froms = coinData.getFrom();
+        for (CoinFrom from : froms) {
+            String address = AddressTool.getStringAddressByBytes(from.getAddress());
+            int assetChainId = from.getAssetsChainId();
+            int assetId = from.getAssetsId();
+            if(from.getLocked()>0){
+                //解锁交易处理
+
+            }else {
+                //非解锁交易处理
+                accountStateService.setUnconfirmNonce(address, from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr);
+            }
+        }
+        return true;
+    }
 
     /**
      * 已确认交易数据处理
@@ -60,55 +96,51 @@ public class TransactionServiceImpl implements TransactionService {
      * @param transaction
      */
     @Override
-    public void txProcess(Transaction transaction) {
-        if (transaction == null) {
-            return;
-        }
-        logger.info("tx status is {}", transaction.getStatus());
-        if (transaction.getStatus().equals(TxStatusEnum.CONFIRMED)) {
-            //transaction CONFIRMED
-            confirmTxProcess(transaction);
-        } else {
-            // transaction pendingState
-            unConfirmTxProcess(transaction);
-        }
+    public boolean confirmTxProcess(Transaction transaction) {
+        //从缓存校验交易
+        if(coinDataValidator.hadValidateTx(transaction)){
+            //提交交易：1.交易存库（最近100区块交易） 2.更新账户
+            //TODO:存库
 
+            //更新账户状态
+            CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
+            byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
+            String nonce8BytesStr = ByteUtils.bytesToString(nonce8Bytes);
+            List<CoinFrom> froms = coinData.getFrom();
+            for (CoinFrom from : froms) {
+
+                if(from.getLocked() > 0){
+                    lockedTransactionProcessor.processFromCoinData(from,nonce8BytesStr,transaction.getHash().toString());
+                }else {
+                    //非解锁交易处理
+                    commontTransactionProcessor.processFromCoinData(from,nonce8BytesStr,transaction.getHash().toString());
+                }
+            }
+
+            List<CoinTo> tos = coinData.getTo();
+            for (CoinTo to : tos) {
+                String address = AddressTool.getStringAddressByBytes(to.getAddress());
+                int assetChainId = to.getAssetsChainId();
+                int assetId = to.getAssetsId();
+                if(to.getLockTime() > 0){
+                    //锁定交易处理
+                    lockedTransactionProcessor.processToCoinData(to,nonce8BytesStr,transaction.getHash().toString());
+                }else {
+                    //非锁定交易处理
+                    commontTransactionProcessor.processToCoinData(to,nonce8BytesStr,transaction.getHash().toString());
+                }
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
-     * process confirmed Tx
-     *
+     * 交易回滚
      * @param transaction
      */
-    private void confirmTxProcess(Transaction transaction) {
-        TransactionType txType = TransactionType.valueOf(transaction.getType());
-        //先判断对应的交易类型
-        switch (txType) {
-            case TX_TYPE_COINBASE:
-                //TX_TYPE_COIN_BASE 直接累加账户余额
-                coinBaseProcessor.process(transaction);
-                break;
-            case TX_TYPE_TRANSFER:
-                //TX_TYPE_TRANSFER 减去发送者账户余额，增加to方的余额
-                transferProcessor.process(transaction);
-                break;
-            case TX_TYPE_ACCOUNT_ALIAS:
-                accountAliasProcessor.process(transaction);
-                break;
-            case TX_TYPE_REGISTER_AGENT:
-
-                break;
-            default:
-                logger.info("tx type incorrect: {}", transaction.getType());
-        }
-    }
-
-    /**
-     * process unConfirmed Tx
-     *
-     * @param transaction
-     */
-    private void unConfirmTxProcess(Transaction transaction) {
-
+    @Override
+    public void rollBackConfirmTx(Transaction transaction) {
+        //TODO:
     }
 }

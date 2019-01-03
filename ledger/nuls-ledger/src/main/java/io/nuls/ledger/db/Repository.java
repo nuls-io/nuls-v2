@@ -25,9 +25,8 @@
  */
 package io.nuls.ledger.db;
 
+import io.nuls.base.data.Transaction;
 import io.nuls.ledger.model.AccountState;
-
-import java.math.BigInteger;
 
 public interface Repository {
 
@@ -47,4 +46,23 @@ public interface Repository {
      * @return
      */
     AccountState getAccountState(byte[] key);
+
+    /**
+     * 缓存批量校验的交易
+     * @param key
+     * @param tx
+     */
+    void putBatchValidateTx(byte[] key, Transaction tx);
+
+    /**
+     * 获取批量校验交易的缓存值
+     * @param key
+     * @return
+     */
+    Transaction getBatchValidateTx(byte[] key);
+
+    /**
+     * 清空批量交易的缓存值
+     */
+    void clearBatchValidateTx();
 }

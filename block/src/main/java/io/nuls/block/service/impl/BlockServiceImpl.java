@@ -20,6 +20,7 @@
 
 package io.nuls.block.service.impl;
 
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
@@ -47,6 +48,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.SerializeUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -262,6 +264,12 @@ public class BlockServiceImpl implements BlockService {
         return rollbackBlock(chainId, blockHeaderPo, false);
     }
 
+    @Override
+    public boolean rollbackBlock(int chainId, long height) {
+        BlockHeaderPo blockHeaderPo = getBlockHeader(chainId, height);
+        return rollbackBlock(chainId, blockHeaderPo, false);
+    }
+
     private boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean localInit) {
         long height = blockHeaderPo.getHeight();
         ChainContext context = ContextManager.getContext(chainId);
@@ -416,6 +424,23 @@ public class BlockServiceImpl implements BlockService {
             initLocalBlocks(chainId);
         } catch (Exception e) {
             Log.error(e);
+        }
+    }
+
+    @Override
+    public NulsDigestData getBlockHash(int chainId, long height) {
+        try {
+            byte[] key = SerializeUtils.uint64ToByteArray(height);
+            byte[] value = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, key);
+            if (value == null) {
+                return null;
+            }
+            NulsDigestData hash = new NulsDigestData();
+            hash.parse(new NulsByteBuffer(value));
+            return hash;
+        } catch (Exception e) {
+            Log.error(e);
+            return null;
         }
     }
 }

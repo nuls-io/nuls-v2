@@ -89,10 +89,10 @@ public class FreezeState extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(freezeHeightStates.size());
-        stream.writeUint16(freezeLockTimeStates.size());
         for (FreezeHeightState heightState : freezeHeightStates) {
             stream.writeNulsData(heightState);
         }
+        stream.writeUint16(freezeLockTimeStates.size());
         for (FreezeLockTimeState lockTimeState : freezeLockTimeStates) {
             stream.writeNulsData(lockTimeState);
         }
@@ -101,9 +101,7 @@ public class FreezeState extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         int freezeHeightCount = byteBuffer.readUint16();
-        int freezeLockTimeCount = byteBuffer.readUint16();
         this.freezeHeightStates = new ArrayList<>(freezeHeightCount);
-        this.freezeLockTimeStates = new ArrayList<>(freezeLockTimeCount);
         for (int i = 0; i < freezeHeightCount; i++) {
             try {
                 FreezeHeightState heightState = new FreezeHeightState();
@@ -113,6 +111,8 @@ public class FreezeState extends BaseNulsData {
                 throw new NulsException(e);
             }
         }
+        int freezeLockTimeCount = byteBuffer.readUint16();
+        this.freezeLockTimeStates = new ArrayList<>(freezeLockTimeCount);
         for (int i = 0; i < freezeLockTimeCount; i++) {
             try {
                 FreezeLockTimeState lockTimeState = new FreezeLockTimeState();
@@ -128,10 +128,10 @@ public class FreezeState extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfUint16();
-        size += SerializeUtils.sizeOfUint16();
         for (FreezeHeightState heightState : freezeHeightStates) {
             size += SerializeUtils.sizeOfNulsData(heightState);
         }
+        size += SerializeUtils.sizeOfUint16();
         for (FreezeLockTimeState lockTimeState : freezeLockTimeStates) {
             size += SerializeUtils.sizeOfNulsData(lockTimeState);
         }
