@@ -73,7 +73,6 @@ public class BlockSynchronizer implements Runnable {
 
     @Override
     public void run() {
-        Log.info("---------BlockSynchronizer work----------");
         for (Integer chainId : ContextManager.chainIds) {
             try {
                 BlockSynStatusEnum synStatus = statusEnumMap.get(chainId);

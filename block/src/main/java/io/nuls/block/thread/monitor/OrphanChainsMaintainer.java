@@ -106,6 +106,7 @@ public class OrphanChainsMaintainer implements Runnable {
                             maintainOrphanChain(chainId, orphanChain, availableNodes, orphanChainMaxAge);
                         }
                         context.setStatus(RUNNING);
+                        break;
                     }
                 } finally {
                     if (StampedLock.isWriteLockStamp(stamp)) {

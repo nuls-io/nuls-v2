@@ -109,7 +109,7 @@ public class ForkChainsMonitor implements Runnable {
                             Log.info("chainId-{}, switchChain fail, auto rollback success", chainId);
                         }
                         context.setStatus(RunningStatusEnum.RUNNING);
-                        return;
+                        break;
                     }
                 } finally {
                     if (StampedLock.isWriteLockStamp(stamp)) {

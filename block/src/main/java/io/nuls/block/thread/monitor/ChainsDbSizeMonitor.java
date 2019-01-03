@@ -148,6 +148,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                     Log.info("after clear, chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
                     context.setStatus(RUNNING);
                 }
+                break;
             }
         } finally {
             if (StampedLock.isWriteLockStamp(stamp)) {
@@ -187,6 +188,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                         ChainManager.deleteForkChain(chainId, forkChain, true);
                     }
                 }
+                break;
             }
         } finally {
             if (StampedLock.isWriteLockStamp(stamp)) {
@@ -226,6 +228,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                         ChainManager.deleteOrphanChain(chainId, orphanChain, true);
                     }
                 }
+                break;
             }
         } finally {
             if (StampedLock.isWriteLockStamp(stamp)) {

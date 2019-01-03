@@ -91,24 +91,29 @@ public class OrphanChainsMonitor implements Runnable {
                             continue;
                         }
                         // exclusive access
+                        Log.info("-----------------------lock start, stamp-{}", stamp);
                         Chain masterChain = ChainManager.getMasterChain(chainId);
                         SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                         //标记、变更链属性阶段
                         for (Chain orphanChain : orphanChains) {
                             mark(orphanChain, masterChain, forkChains, orphanChains);
                         }
+                        Log.info("------------------mark-----stamp-{}", stamp);
                         //复制、清除阶段
                         SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
                         for (Chain orphanChain : orphanChains) {
                             copy(chainId, maintainedOrphanChains, orphanChain);
                         }
+                        Log.info("------------------copy-----stamp-{}", stamp);
                         ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
                         forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
                         maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
                         context.setStatus(RUNNING);
+                        break;
                     }
                 } finally {
                     if (StampedLock.isWriteLockStamp(stamp)) {
+                        Log.info("-----------------------lock end, stamp-{}", stamp);
                         lock.unlockWrite(stamp);
                     }
                 }
