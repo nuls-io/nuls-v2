@@ -678,22 +678,26 @@ public class TransactionServiceImpl implements TransactionService {
             //从已确认的交易中进行重复交易判断
             Transaction repeatTx = confirmedTransactionService.getConfirmedTransaction(chain, tx.getHash());
             if (repeatTx != null) {
+                clearInvalidTx(chain, tx);
                 continue;
             }
             String txHex = null;
             try {
                 txHex = tx.hex();
             } catch (Exception e) {
+                clearInvalidTx(chain, tx);
                 chain.getLogger().warn(e.getMessage(), e);
                 continue;
             }
             //验证tx
             if (!transactionManager.verify(chain, tx)) {
+                clearInvalidTx(chain, tx);
                 continue;
             }
 
             //验证coinData
             if (!LegerCall.verifyCoinData(chain, txHex, false)) {
+                clearInvalidTx(chain, tx);
                 continue;
             }
             packingTxList.add(tx);
@@ -713,6 +717,8 @@ public class TransactionServiceImpl implements TransactionService {
         txModuleValidatorPackable(chain, moduleVerifyMap, filterList);
         //过滤要未通过验证的交易
         filterTx(packingTxList, filterList);
+        //清除被过滤掉的交易
+        clearInvalidTx(chain, filterList);
         List<String> packableTxs = new ArrayList<>();
         for (Transaction tx : packingTxList) {
             try {
@@ -721,6 +727,7 @@ public class TransactionServiceImpl implements TransactionService {
                 chain.getLogger().error(e);
             }
         }
+
         return packableTxs;
     }
 
@@ -846,10 +853,10 @@ public class TransactionServiceImpl implements TransactionService {
             if (!transactionManager.verify(chain, tx)) {
                 return false;
             }
-            //验证coinData
-            if (!LegerCall.verifyCoinData(chain, tx, false)) {
+            // todo 暂时取消单个验证coinData
+          /*  if (!LegerCall.verifyCoinData(chain, tx, false)) {
                 return false;
-            }
+            }*/
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
             if (moduleVerifyMap.containsKey(txRegister)) {
@@ -883,17 +890,19 @@ public class TransactionServiceImpl implements TransactionService {
         return true;
     }
 
+    @Override
+    public void clearInvalidTx(Chain chain, List<Transaction> txList) {
+        for (Transaction tx : txList) {
+            clearInvalidTx(chain, tx);
+        }
+    }
 
     @Override
-    public boolean clearInvalidTxFromVerifiedStorage(Chain chain, List<String> txHashList) {
-        for (String txHash : txHashList) {
-            try {
-                txVerifiedStorageService.removeTx(chain.getChainId(), NulsDigestData.fromDigestHex(txHash));
-            } catch (NulsException e) {
-                chain.getLogger().error(e);
-            }
-        }
-        return true;
+    public void clearInvalidTx(Chain chain, Transaction tx) {
+        txVerifiedStorageService.removeTx(chain.getChainId(), tx.getHash());
+        //通知账本回滚nonce
+        LegerCall.rollbackTxLeger(chain.getChainId(), tx, false);
+
     }
 
 }
