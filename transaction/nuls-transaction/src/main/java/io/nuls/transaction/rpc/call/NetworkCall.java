@@ -26,6 +26,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 
 import io.nuls.transaction.message.BroadcastTxMessage;
@@ -55,7 +56,7 @@ public class NetworkCall {
      * @param isCross 是否跨链
      * @return
      */
-    public static List<Node> getAvailableNodes(int chainId, int isCross) {
+    public static List<Node> getAvailableNodes(int chainId, int isCross, String excludeNodes) {
         try {
             Map<String, Object> params = new HashMap<>(6);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -75,7 +76,10 @@ public class NetworkCall {
                 node.setId((String) map.get("nodeId"));
                 node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
                 node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
-                nodes.add(node);
+                //排除指定节点
+                if (StringUtils.isBlank(excludeNodes) || !node.getId().equals(excludeNodes)) {
+                    nodes.add(node);
+                }
             }
             return nodes;
         } catch (Exception e) {
@@ -146,6 +150,7 @@ public class NetworkCall {
     /**
      * 向网络模块注册网络消息协议
      * register Network Message Protocol with Network Module
+     *
      * @return
      */
     public static boolean registerProtocol() {

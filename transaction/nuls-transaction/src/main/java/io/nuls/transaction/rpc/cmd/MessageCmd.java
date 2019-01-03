@@ -26,6 +26,7 @@ import io.nuls.transaction.message.VerifyCrossWithFCMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.model.bo.CrossTxVerifyResult;
+import io.nuls.transaction.rpc.call.ConsensusCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.CrossChainTxService;
@@ -317,13 +318,13 @@ public class MessageCmd extends BaseCmd {
     }
 
     /**
-     * 友链节点验证跨链交易
-     * friendly chain nodes verify cross-chain transactions
+     * 主网节点向友链节点验证跨链交易
+     * verification of cross-chain transactions from home network node to friend chain node
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = TxCmd.NW_VERIFY_FC, version = 1.0, description = "friendly chain nodes verify cross-chain transactions")
+    @CmdAnnotation(cmd = TxCmd.NW_VERIFY_FC, version = 1.0, description = "verification of cross-chain transactions from home network node to friend chain node")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
     public Response verifyFc(Map params) {
@@ -367,13 +368,13 @@ public class MessageCmd extends BaseCmd {
     }
 
     /**
-     * 接收友链发送的跨链验证结果
-     * receive cross-chain verify results sent by friend chain
+     * 主网节点接收友链节点发送的跨链验证结果
+     * home network node receive cross-chain verify results sent by friend chain node
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = TxCmd.NW_VERIFYR_ESULT, version = 1.0, description = "receive cross-chain verify results sent by friend chain")
+    @CmdAnnotation(cmd = TxCmd.NW_VERIFYR_ESULT, version = 1.0, description = "home network node receive cross-chain verify results sent by friend chain node")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
     public Response verifyResult(Map params) {
@@ -407,6 +408,119 @@ public class MessageCmd extends BaseCmd {
             verifyResultList.add(verifyResult);
             ctx.setCtxVerifyResultList(verifyResultList);
             ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
+            //判断当前节点是共识节点还是普通节点
+            if(ConsensusCall.isConsensusNode())
+            {
+                //共识节点
+
+            }else
+            {
+                //普通节点
+
+            }
+
+            //保存跨链交易验证结果
+            result = crossChainTxStorageService.putTx(chainId, ctx);
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        map.put("value", result);
+        return success(map);
+    }
+
+    /**
+     * 友链节点向主网节点验证跨链交易
+     * verification of cross-chain transactions from friend chain node to home network node
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = TxCmd.NW_VERIFY_MN, version = 1.0, description = "verification of cross-chain transactions from friend chain node to home network node")
+    @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
+    @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    public Response verifyMn(Map params) {
+        Map<String, Boolean> map = new HashMap<>();
+        boolean result;
+        try {
+            Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
+            String nodeId = params.get(KEY_NODE_ID).toString();
+            //解析跨链交易验证消息
+            VerifyCrossWithFCMessage message = new VerifyCrossWithFCMessage();
+            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            message.parse(new NulsByteBuffer(decode));
+            if (message == null) {
+                return failed(TxErrorCode.PARAMETER_ERROR);
+            }
+            //解析原始交易hash
+            byte[] origTxHashByte = message.getOriginalTxHash();
+            NulsDigestData originalTxHash = NulsDigestData.fromDigestHex(HexUtil.encode(origTxHashByte));
+            //查询已确认跨链交易
+            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
+            if (tx == null) {
+                throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+            }
+            //TODO 验证该交易所在的区块已经被确认n个区块高度
+
+            //TODO 将atx交易进行协议转换生成新的Anode2_atx_trans，再验证接收到的atx_trans_hash与Anode2_atx_trans_hash一致
+
+            //发送跨链交易验证结果到指定节点
+            VerifyCrossResultMessage verifyResultMessage = new VerifyCrossResultMessage();
+            verifyResultMessage.setCommand(NW_VERIFYR_ESULT);
+            verifyResultMessage.setRequestHash(message.getRequestHash());
+            verifyResultMessage.setHeight(tx.getBlockHeight());
+            result = NetworkCall.sendToNode(chainId, verifyResultMessage, nodeId);
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        map.put("value", result);
+        return success(map);
+    }
+
+    /**
+     * 友链节点接收主网节点发送的跨链验证结果
+     * friend chain node receive cross-chain verify results sent by home network node
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = TxCmd.NW_CROSS_NODE_RS, version = 1.0, description = "friend chain node receive cross-chain verify results sent by home network node")
+    @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
+    @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    public Response crossNodeRs(Map params) {
+        Map<String, Boolean> map = new HashMap<>();
+        boolean result;
+        try {
+            Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
+            String nodeId = params.get(KEY_NODE_ID).toString();
+            //解析跨链交易验证结果消息
+            VerifyCrossResultMessage message = new VerifyCrossResultMessage();
+            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            message.parse(new NulsByteBuffer(decode));
+            if (message == null) {
+                return failed(TxErrorCode.PARAMETER_ERROR);
+            }
+            //查询处理中的跨链交易
+            CrossChainTx ctx = crossChainTxStorageService.getTx(chainId, message.getRequestHash());
+            if (ctx == null) {
+                throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+            }
+            //获取跨链交易验证结果
+            List<CrossTxVerifyResult> verifyResultList = ctx.getCtxVerifyResultList();
+            if (verifyResultList == null) {
+                verifyResultList = new ArrayList<>();
+            }
+            //添加新的跨链验证结果
+//            CrossTxVerifyResult verifyResult = new CrossTxVerifyResult();
+//            verifyResult.setChainId(chainId);
+//            verifyResult.setNodeId(nodeId);
+//            verifyResult.setHeight(message.getHeight());
+//            verifyResultList.add(verifyResult);
+//            ctx.setCtxVerifyResultList(verifyResultList);
+//            ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
             //保存跨链交易验证结果
             result = crossChainTxStorageService.putTx(chainId, ctx);
         } catch (NulsException e) {

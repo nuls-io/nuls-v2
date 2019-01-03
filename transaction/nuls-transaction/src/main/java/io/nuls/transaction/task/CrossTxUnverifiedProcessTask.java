@@ -36,12 +36,15 @@ import io.nuls.transaction.message.VerifyCrossWithFCMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.model.bo.CrossTxData;
+import io.nuls.transaction.model.bo.Node;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.CrossChainTxService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -80,6 +83,7 @@ public class CrossTxUnverifiedProcessTask implements Runnable {
             int chainId = chain.getChainId();
             List<CrossChainTx> unprocessedList = crossChainTxUnprocessedStorageService.getTxList(chainId);
             List<CrossChainTx> processedList = new ArrayList<>();
+            //Map<String,List<Node>> nodeMap=new HashMap<>();
             for(CrossChainTx ctx : unprocessedList){
                 Transaction tx = ctx.getTx();
                 //交易验证
@@ -89,14 +93,24 @@ public class CrossTxUnverifiedProcessTask implements Runnable {
                 verifyCrossWithFCMessage.setOriginalTxHash(crossTxData.getOriginalTxHash());
                 verifyCrossWithFCMessage.setRequestHash(tx.getHash());
                 verifyCrossWithFCMessage.setCommand(TxCmd.NW_VERIFY_FC);
-                //todo 获取节点组 放CrossChainTx
-                //发送跨链验证msg，除去发送者节点
-                boolean rs = NetworkCall.broadcast(ctx.getSenderChainId(), verifyCrossWithFCMessage, ctx.getSenderNodeId());
-                if(!rs){
-                    break;
+                //获取节点组 放CrossChainTx
+                if(ctx.getConnectedNodeList()==null || ctx.getConnectedNodeList().size()==0)
+                {
+                    List<Node> nodeList=NetworkCall.getAvailableNodes(ctx.getSenderChainId(),1,ctx.getSenderNodeId());
+                    ctx.setConnectedNodeList(nodeList);
                 }
-                ctx.setState(TxConstant.CTX_VERIFY_REQUEST_1);
-                processedList.add(ctx);
+                //发送跨链验证msg，除去发送者节点
+                if(ctx.getConnectedNodeList()!=null) {
+                    for(Node node:ctx.getConnectedNodeList()) {
+                        //TODO 是通过广播发送还是点对点发送
+                        boolean rs = NetworkCall.sendToNode(ctx.getSenderChainId(), verifyCrossWithFCMessage, node.getId());
+                        if (!rs) {
+                            break;
+                        }
+                        ctx.setState(TxConstant.CTX_VERIFY_REQUEST_1);
+                        processedList.add(ctx);
+                    }
+                }
             }
             //添加到处理中
             crossChainTxStorageService.putTxs(chainId, processedList);
