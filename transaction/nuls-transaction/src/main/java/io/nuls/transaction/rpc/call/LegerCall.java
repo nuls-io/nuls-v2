@@ -111,6 +111,7 @@ public class LegerCall {
      * @param comfirmed 是否是已确认的交易
      */
     public static boolean sendTx(int chainId, Transaction tx, boolean comfirmed){
+        //todo
         return true;
     }
 
@@ -121,6 +122,7 @@ public class LegerCall {
      * @param comfirmed 是否是已确认的交易
      */
     public static boolean rollbackTxLeger(int chainId, Transaction tx, boolean comfirmed){
+        //todo
         return true;
     }
 

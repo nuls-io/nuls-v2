@@ -110,6 +110,14 @@ public class TransactionServiceImpl implements TransactionService {
         return true;
     }
 
+    @Override
+    public Transaction getTransaction(Chain chain, NulsDigestData hash) {
+        Transaction tx = txVerifiedStorageService.getTx(chain.getChainId(), hash);
+        if(null == tx){
+            tx = confirmedTransactionService.getConfirmedTransaction(chain, hash);
+        }
+        return tx;
+    }
 
     @Override
     public Map<String, String> createCrossMultiTransaction(Chain chain, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) throws NulsException {
@@ -668,7 +676,7 @@ public class TransactionServiceImpl implements TransactionService {
                 break;
             }
             //从已确认的交易中进行重复交易判断
-            Transaction repeatTx = confirmedTransactionService.getTransaction(chain, tx.getHash());
+            Transaction repeatTx = confirmedTransactionService.getConfirmedTransaction(chain, tx.getHash());
             if (repeatTx != null) {
                 continue;
             }
@@ -816,7 +824,7 @@ public class TransactionServiceImpl implements TransactionService {
         for (String txHex : txHexList) {
             //将txHex转换为Transaction对象
             Transaction tx = TxUtil.getTransaction(txHex);
-            Transaction transaction = confirmedTransactionService.getTransaction(chain, tx.getHash());
+            Transaction transaction = confirmedTransactionService.getConfirmedTransaction(chain, tx.getHash());
             if(null != transaction){
                 //交易已存在于已确认块中
                 return false;

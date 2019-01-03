@@ -16,18 +16,18 @@ import java.util.List;
 public interface ConfirmedTransactionService {
 
     /**
-     * get a transaction
+     * Get a confirmed transaction
      *
-     * 获取一笔交易
+     * 获取一笔已打包进区块并且确认的交易
      * @param chain
      * @param hash
      * @return Transaction
      */
-    Transaction getTransaction(Chain chain, NulsDigestData hash);
+    Transaction getConfirmedTransaction(Chain chain, NulsDigestData hash);
 
     /**
      * 保存已确认交易
-     * save confirmed transactions
+     * Save confirmed transactions
      *
      * @param chain
      * @param transaction

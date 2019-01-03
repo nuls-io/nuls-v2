@@ -131,7 +131,7 @@ public class MessageCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             NulsDigestData txHash = message.getRequestHash();
-            Transaction tx = confirmedTransactionService.getTransaction(chain, txHash);
+            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -256,7 +256,7 @@ public class MessageCmd extends BaseCmd {
             }
             //查询已确认跨链交易
             NulsDigestData txHash = message.getRequestHash();
-            Transaction tx = confirmedTransactionService.getTransaction(chain, txHash);
+            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -342,7 +342,7 @@ public class MessageCmd extends BaseCmd {
             byte[] origTxHashByte = message.getOriginalTxHash();
             NulsDigestData originalTxHash = NulsDigestData.fromDigestHex(HexUtil.encode(origTxHashByte));
             //查询已确认跨链交易
-            Transaction tx = confirmedTransactionService.getTransaction(chainManager.getChain(chainId), originalTxHash);
+            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }

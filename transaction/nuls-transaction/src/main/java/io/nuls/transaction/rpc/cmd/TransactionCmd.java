@@ -307,7 +307,7 @@ public class TransactionCmd extends BaseCmd {
             if (!NulsDigestData.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            Transaction tx = confirmedTransactionService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             if(tx == null){
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }

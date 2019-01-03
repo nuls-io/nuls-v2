@@ -60,7 +60,7 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
     private CrossChainTxService crossChainTxService;
 
     @Override
-    public Transaction getTransaction(Chain chain, NulsDigestData hash) {
+    public Transaction getConfirmedTransaction(Chain chain, NulsDigestData hash) {
         if (null == hash) {
             return null;
         }
