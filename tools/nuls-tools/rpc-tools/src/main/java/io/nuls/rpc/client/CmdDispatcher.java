@@ -271,9 +271,9 @@ public class CmdDispatcher {
             throw new Exception("Cannot find url based on role: " + role);
         }
         WsClient wsClient = ClientRuntime.getWsClient(url);
-        Log.debug("SendRequest to "
-                + wsClient.getRemoteSocketAddress().getHostString() + ":" + wsClient.getRemoteSocketAddress().getPort() + "->"
-                + JSONUtils.obj2json(message));
+//        Log.debug("SendRequest to "
+//                + wsClient.getRemoteSocketAddress().getHostString() + ":" + wsClient.getRemoteSocketAddress().getPort() + "->"
+//                + JSONUtils.obj2json(message));
         wsClient.send(JSONUtils.obj2json(message));
 
         if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())

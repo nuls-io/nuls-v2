@@ -63,8 +63,6 @@ public class RequestSingleProcessor implements Runnable {
                 WebSocket webSocket = (WebSocket) objects[0];
                 String msg = (String) objects[1];
                 Message message = JSONUtils.json2pojo(msg, Message.class);
-
-
                 Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
 
                 /*
@@ -72,8 +70,6 @@ public class RequestSingleProcessor implements Runnable {
                 If it is Request, call the local method
                  */
                 CmdHandler.callCommandsWithPeriod(webSocket, request.getRequestMethods(), message.getMessageId());
-
-                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
                 Log.error(e);
             }

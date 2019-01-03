@@ -112,7 +112,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         node.setIdle(false);
         boolean success = ConnectionManager.getInstance().processConnectNode(node);
         if(!success){
-            Log.debug("dup connect,close channel");
+//            Log.debug("dup connect,close channel");
             channel.close();
             return;
         }
@@ -121,7 +121,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         VersionMessage versionMessage=MessageFactory.getInstance().buildVersionMessage(node,nodeGroupConnector.getMagicNumber());
         if(null == versionMessage){
             //exception
-            Log.error("build version error");
+//            Log.error("build version error");
             channel.close();
             return;
         }
@@ -178,7 +178,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         if (!(cause instanceof IOException)) {
             cause.printStackTrace();
             Log.error(cause.getMessage());
-            Log.error("===========exceptionCaught===========");
+//            Log.error("===========exceptionCaught===========");
         }
         ctx.channel().close();
     }

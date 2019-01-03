@@ -224,7 +224,7 @@ public class CmdHandler {
             }
 
             Message rspMessage = execute(cmdDetail, params, messageId);
-            Log.debug("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
+//            Log.debug("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
             webSocket.send(JSONUtils.obj2json(rspMessage));
         }
     }

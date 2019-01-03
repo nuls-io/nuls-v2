@@ -123,7 +123,7 @@ public class WsServer extends WebSocketServer {
                     /*
                     取消订阅，直接响应
                      */
-                    Log.debug("UnsubscribeFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
+//                    Log.debug("UnsubscribeFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
                     CmdHandler.unsubscribe(webSocket, message);
                     break;
                 case Request:
@@ -140,7 +140,7 @@ public class WsServer extends WebSocketServer {
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing
                      */
-                    Log.debug("RequestFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
+//                    Log.debug("RequestFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
                     Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
 
                     if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
@@ -155,7 +155,6 @@ public class WsServer extends WebSocketServer {
                         }
                     }
 
-
                     /*
                     如果需要一个Ack，则发送
                     Send Ack if needed
@@ -163,6 +162,7 @@ public class WsServer extends WebSocketServer {
                     if (Constants.BOOLEAN_TRUE.equals(request.getRequestAck())) {
                         CmdHandler.ack(webSocket, message.getMessageId());
                     }
+                    System.out.println("--------ServerRuntime.REQUEST_SINGLE_QUEUE size-" + ServerRuntime.REQUEST_SINGLE_QUEUE.size());
                     break;
                 default:
                     break;

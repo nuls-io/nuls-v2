@@ -249,7 +249,7 @@ public class BlockServiceImpl implements BlockService {
                 }
                 hashList.addLast(hash);
             }
-            Log.info("save block success, height-{}, hash-{}, preHash-{}", height, hash, header.getPreHash());
+//            Log.info("save block success, height-{}, hash-{}, preHash-{}", height, hash, header.getPreHash());
             return true;
         } finally {
             if (needLock) {

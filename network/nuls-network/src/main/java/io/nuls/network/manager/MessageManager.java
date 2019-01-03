@@ -191,7 +191,7 @@ public class MessageManager extends BaseManager{
             header.parse(headerByte,0);
 //            Log.info("================CMD="+header.getCommandStr());
             if (!validate(payLoadBody,header.getChecksum())) {
-                Log.error("validate  false ======================");
+//                Log.error("validate  false ======================");
                 return;
             }
             byteBuffer.setCursor(0);
@@ -203,7 +203,7 @@ public class MessageManager extends BaseManager{
                     message = byteBuffer.readNulsData(message);
                     NetworkEventResult result = handler.recieve(message, nodeKey, isServer);
                     if(!result.isSuccess()){
-                        Log.error("receiveMessage fail:"+result.getErrorCode().getMsg());
+//                        Log.error("receiveMessage fail:"+result.getErrorCode().getMsg());
                     }
                 }else{
                     //外部消息，转外部接口
@@ -215,11 +215,11 @@ public class MessageManager extends BaseManager{
                     paramMap.put("messageBody",HexUtil.byteToHex(payLoadBody));
                     Collection<ProtocolRoleHandler> protocolRoleHandlers =  getProtocolRoleHandlerMap(header.getCommandStr());
                     if(null == protocolRoleHandlers){
-                        Log.error("unknown mssages. cmd={},may be handle had not be registered to network.",header.getCommandStr());
+//                        Log.error("unknown mssages. cmd={},may be handle had not be registered to network.",header.getCommandStr());
                     }else{
                         for(ProtocolRoleHandler protocolRoleHandler:protocolRoleHandlers) {
                             Log.debug("request：{}=={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
-                            Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap,1000);
+                            Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
                             Log.debug("response：" + response);
                         }
                     }

@@ -150,12 +150,6 @@ public class ServerRuntime {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
-        /*
-        根据version排序
-        Sort according to version
-         */
-        LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
-
         CmdDetail find = null;
         for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
             /*
@@ -204,9 +198,6 @@ public class ServerRuntime {
      * @return CmdDetail
      */
     public static CmdDetail getLocalInvokeCmd(String cmd) {
-
-        LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
-
         CmdDetail find = null;
         for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
@@ -262,6 +253,7 @@ public class ServerRuntime {
                 }
             }
         }
+        LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
     }
 
 
