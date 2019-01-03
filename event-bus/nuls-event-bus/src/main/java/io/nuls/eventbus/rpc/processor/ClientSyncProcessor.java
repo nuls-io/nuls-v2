@@ -89,15 +89,12 @@ public class ClientSyncProcessor implements Runnable {
                 Map responseData = (Map)response.getResponseData();
                 Map methodMap = (Map)responseData.get("registerAPI");
                 Map dependMap = (Map)methodMap.get("Dependencies");
-                for(Object obj : dependMap.entrySet()){
-                    Map.Entry<String,Map> entry = (Map.Entry<String,Map>)obj;
-                    if(entry.getKey().equals(subscriber)){
-                        ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
-                        //connect to the role with latest connection info
-                        ClientRuntime.WS_CLIENT_MAP.remove(ClientRuntime.getRemoteUri(subscriber));
-                        ClientRuntime.getWsClient(ClientRuntime.getRemoteUri(subscriber));
-                        break;
-                    }
+                Map<String,Map> map = (Map<String,Map>)dependMap.get(subscriber);
+                if(null != map){
+                    Log.info("Connection Info for Role:"+subscriber +" -> "+map.toString());
+                    ClientRuntime.ROLE_MAP.put(subscriber, map);
+                    ClientRuntime.WS_CLIENT_MAP.remove(ClientRuntime.getRemoteUri(subscriber));
+                    ClientRuntime.getWsClient(ClientRuntime.getRemoteUri(subscriber));
                 }
             }
         }catch (Exception e){
