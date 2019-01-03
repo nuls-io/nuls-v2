@@ -5,6 +5,7 @@ import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.util.log.LogUtil;
 import io.nuls.base.data.MultiSigAccount;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.tools.core.annotation.Autowired;
@@ -138,6 +139,48 @@ public class MultiSignAccountCmd extends BaseCmd {
         }
         LogUtil.debug("ac_removeMultiSigAccount end");
         return success(map);
+    }
+
+    /**
+     * set the alias of multi sign account
+     *
+     * @param params
+     * @return txhash
+     */
+    @CmdAnnotation(cmd = "ac_setMultiSigAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set the alias of multi sign account")
+    public Object setMultiAlias(Map params) {
+        LogUtil.debug("ac_setMultiSigAlias start,params size:{}", params == null ? 0 : params.size());
+        int chainId;
+        String address, password, alias, signAddress,txHash = null;
+        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
+        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
+        try {
+            // check parameters
+            if (params == null || chainIdObj == null || addressObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            chainId = (Integer) chainIdObj;
+            address = (String) addressObj;
+            password = (String) passwordObj;
+            alias = (String) aliasObj;
+            Transaction transaction = aliasService.setAlias(chainId, address, password, alias);
+            if (transaction != null && transaction.getHash() != null) {
+                txHash = transaction.getHash().getDigestHex();
+            }
+        } catch (NulsRuntimeException e) {
+            LogUtil.info("", e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            LogUtil.error("", e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        Map<String, String> result = new HashMap<>();
+        result.put("txHash", txHash);
+        LogUtil.debug("ac_getAliasByAddress end");
+        return success(result);
     }
 
 }
