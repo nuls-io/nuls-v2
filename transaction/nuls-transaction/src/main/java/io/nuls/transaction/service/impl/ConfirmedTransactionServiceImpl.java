@@ -141,7 +141,7 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
                 chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
                 return false;
             }
-            rs = LegerCall.sendTx(chain.getChainId(), tx, true);
+            rs = LegerCall.commitTxLeger(chain.getChainId(), tx, true);
             if (!rs) {
                 return false;
             }

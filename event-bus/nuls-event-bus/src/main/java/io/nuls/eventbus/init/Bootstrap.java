@@ -50,7 +50,6 @@ public class Bootstrap {
             TimeService.getInstance().start();
             initDB();
             startRpc();
-            // TODO register Event Bus commands
             syncClientConnectionInfo();
         }catch (Exception e){
             Log.error("Event Bus module Bootstrap failed..exiting the system");

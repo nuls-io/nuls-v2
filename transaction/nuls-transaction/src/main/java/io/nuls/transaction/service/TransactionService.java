@@ -166,11 +166,20 @@ public interface TransactionService {
 
 
     /**
-     * 从已验证未打包交易中删除无效的交易或已经确认的交易
+     * 从已验证未打包交易中删除无效的交易集合, 并回滚账本
      *
      * @param chain
-     * @param txHashList
+     * @param txList
      * @return
      */
-    boolean clearInvalidTxFromVerifiedStorage(Chain chain, List<String> txHashList);
+    void clearInvalidTx(Chain chain, List<Transaction> txList);
+
+    /**
+     * 从已验证未打包交易中删除单个无效的交易, 并回滚账本
+     *
+     * @param chain
+     * @param tx
+     * @return
+     */
+    void clearInvalidTx(Chain chain, Transaction tx);
 }

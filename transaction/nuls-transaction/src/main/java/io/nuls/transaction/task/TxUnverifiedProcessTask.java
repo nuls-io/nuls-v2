@@ -104,7 +104,7 @@ public class TxUnverifiedProcessTask implements Runnable {
                 //保存到h2数据库
                 transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
                 //调账本记录未确认交易
-                LegerCall.sendTx(chain.getChainId(), tx, false);
+                LegerCall.commitTxLeger(chain.getChainId(), tx, false);
                 //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
                 return true;

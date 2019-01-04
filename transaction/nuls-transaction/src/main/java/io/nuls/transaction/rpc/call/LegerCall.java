@@ -110,7 +110,7 @@ public class LegerCall {
      * @param tx
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean sendTx(int chainId, Transaction tx, boolean comfirmed){
+    public static boolean commitTxLeger(int chainId, Transaction tx, boolean comfirmed){
         //todo
         return true;
     }
