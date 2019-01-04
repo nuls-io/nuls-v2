@@ -155,7 +155,7 @@ public interface TransactionService {
     List<String> getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize) throws NulsException;
 
     /**
-     * 收到新区快时，验证共识发过来的待验证完整交易列表
+     * 收到新区快时，验证完整交易列表
      *
      * @param chain
      * @param list
