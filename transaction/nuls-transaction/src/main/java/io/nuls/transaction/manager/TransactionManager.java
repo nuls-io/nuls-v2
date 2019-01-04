@@ -43,9 +43,7 @@ import io.nuls.transaction.service.TransactionService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 交易管理类，存储管理交易注册的基本信息
@@ -187,7 +185,7 @@ public class TransactionManager {
         if (!SignatureUtil.validateTransactionSignture(tx)) {
             throw new NulsException(TxErrorCode.SIGNATURE_ERROR);
         }
-        //如果有coinData, 则进行验证
+        //如果有coinData, 则进行验证,有一些交易没有coinData数据
         if (null != tx.getCoinData() && tx.getCoinData().length > 0) {
             //coinData基础验证以及手续费 (from中所有的nuls资产-to中所有nuls资产)
             CoinData coinData = TxUtil.getCoinData(tx);
@@ -222,9 +220,12 @@ public class TransactionManager {
             throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
         }
         int chainId = chain.getConfig().getChainId();
+        Set<String> uniqueCoin = new HashSet<>();
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
             int addrChainId = AddressTool.getChainIdByAddress(addrBytes);
+            int assetsChainId =  coinFrom.getAssetsChainId();
+            int assetsId =  coinFrom.getAssetsId();
 
             //如果不是跨链交易，from中地址对应的链id必须发起链id，跨链交易在验证器中验证
             if (type != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
@@ -235,14 +236,14 @@ public class TransactionManager {
             }
             //当交易不是转账以及跨链转账时，from的资产必须是该链主资产。(转账以及跨链交易，在验证器中验证资产)
             if (type != TxConstant.TX_TYPE_TRANSFER && type != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-                if (chain.getConfig().getAssetsId() != coinFrom.getAssetsId()) {
+                if (chain.getConfig().getAssetsId() != assetsId) {
                     throw new NulsException(TxErrorCode.ASSETID_ERROR);
                 }
             }
 
             if (chainId == TxConstant.NULS_CHAINID) {
                 //如果chainId是主网则通过连管理验证资产是否存在
-                if (!ChainCall.verifyAssetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
+                if (!ChainCall.verifyAssetExist(assetsChainId, assetsId)) {
                     throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
                 }
             }/*else{
@@ -250,6 +251,11 @@ public class TransactionManager {
                    //todo 普通交易如果资产不是该链资产，还需通过主网验证 是否需要？
                }
             }*/
+            //验证账户地址,资产链id,资产id的组合唯一性
+            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(addrBytes) + "-" + assetsChainId + "-" + assetsId);
+            if(!rs){
+                throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
+            }
             /* 1.没有进行链内转账交易的资产合法性验证(因为可能出现链外资产)，
                2.跨链交易(非主网发起)from地址与发起链匹配的验证，需各验证器进行验证
              */
@@ -270,13 +276,21 @@ public class TransactionManager {
         }
         //验证收款方是不是属于同一条链
         Integer addressChainId = null;
+        Set<String> uniqueCoin = new HashSet<>();
         for (CoinTo coinTo : listTo) {
             int chainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
+            int assetsChainId =  coinTo.getAssetsChainId();
+            int assetsId =  coinTo.getAssetsId();
             if (null == addressChainId) {
                 addressChainId = chainId;
                 continue;
             } else if (addressChainId != chainId) {
                 throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
+            }
+            //验证账户地址,资产链id,资产id的组合唯一性
+            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinTo.getAddress()) + "-" + assetsChainId + "-" + assetsId);
+            if(!rs){
+                throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
         }
         return true;
