@@ -32,7 +32,6 @@ import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.CmdParameter;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -40,11 +39,12 @@ import io.nuls.tools.thread.TimeService;
 import org.java_websocket.WebSocket;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.rpc.info.Constants.CMD_NOT_FOUND;
 
 /**
  * 解析从客户端收到的消息，调用正确的方法
@@ -55,6 +55,7 @@ import java.util.Map;
  */
 public class CmdHandler {
 
+    public static final Map<String, Object> handlerMap = new HashMap<>();
 
     /**
      * 确认握手成功
@@ -203,7 +204,7 @@ public class CmdHandler {
             If the local method cannot be found, the "CMD_NOT_FOUND" error is returned
              */
             if (cmdDetail == null) {
-                response.setResponseComment(Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""));
+                response.setResponseComment(CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""));
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
                 webSocket.send(JSONUtils.obj2json(rspMessage));
@@ -510,15 +511,10 @@ public class CmdHandler {
     private static Response invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
         Class clz = Class.forName(invokeClass);
         Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
-
-        BaseCmd cmd;
-        if (SpringLiteContext.getBeanByClass(invokeClass) == null) {
-            Constructor constructor = clz.getConstructor();
-            cmd = (BaseCmd) constructor.newInstance();
-        } else {
-            cmd = (BaseCmd) SpringLiteContext.getBeanByClass(invokeClass);
+        BaseCmd cmd = (BaseCmd) handlerMap.get(invokeClass);
+        if (cmd == null) {
+            return MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, CMD_NOT_FOUND);
         }
-
         return (Response) method.invoke(cmd, params);
     }
 }

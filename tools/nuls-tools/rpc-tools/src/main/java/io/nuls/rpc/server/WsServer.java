@@ -162,7 +162,6 @@ public class WsServer extends WebSocketServer {
                     if (Constants.BOOLEAN_TRUE.equals(request.getRequestAck())) {
                         CmdHandler.ack(webSocket, message.getMessageId());
                     }
-//                    System.out.println("--------ServerRuntime.REQUEST_SINGLE_QUEUE size-" + ServerRuntime.REQUEST_SINGLE_QUEUE.size());
                     break;
                 default:
                     break;

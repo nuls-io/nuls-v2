@@ -31,6 +31,7 @@ import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.handler.CmdHandler;
 import io.nuls.tools.core.ioc.ScanUtil;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
@@ -248,6 +249,7 @@ public class ServerRuntime {
                  */
                 if (!isRegister(cmdDetail)) {
                     LOCAL.getApiMethods().add(cmdDetail);
+                    CmdHandler.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
