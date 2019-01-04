@@ -31,7 +31,7 @@ public class Asset extends BaseNulsData {
 
     private int assetId;
     private String symbol;
-    private String name;
+    private String assetName;
     private int depositNuls;
     private BigInteger initNumber;
     private short decimalPlaces;
@@ -56,7 +56,7 @@ public class Asset extends BaseNulsData {
         stream.writeUint16(chainId);
         stream.writeUint48(assetId);
         stream.writeString(symbol);
-        stream.writeString(name);
+        stream.writeString(assetName);
         stream.writeUint32(depositNuls);
         stream.writeBigInteger(initNumber);
         stream.writeShort(decimalPlaces);
@@ -79,7 +79,7 @@ public class Asset extends BaseNulsData {
         this.chainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
         this.symbol = byteBuffer.readString();
-        this.name = byteBuffer.readString();
+        this.assetName = byteBuffer.readString();
         this.depositNuls = byteBuffer.readInt32();
         this.initNumber = byteBuffer.readBigInteger();
         this.decimalPlaces = byteBuffer.readShort();
@@ -106,7 +106,7 @@ public class Asset extends BaseNulsData {
         // assetId
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(symbol);
-        size += SerializeUtils.sizeOfString(name);
+        size += SerializeUtils.sizeOfString(assetName);
         // depositNuls
         size += SerializeUtils.sizeOfInt32();
         // initNumber
@@ -136,7 +136,7 @@ public class Asset extends BaseNulsData {
         txChain.setDecimalPlaces(this.getDecimalPlaces());
         txChain.setDepositNuls(this.getDepositNuls());
         txChain.setInitNumber(this.getInitNumber());
-        txChain.setName(this.getName());
+        txChain.setName(this.getAssetName());
         txChain.setSymbol(this.getSymbol());
         return txChain.serialize();
     }
@@ -153,7 +153,7 @@ public class Asset extends BaseNulsData {
         this.depositNuls = tx.getDepositNuls();
         this.initNumber = tx.getInitNumber();
         this.symbol = tx.getSymbol();
-        this.name = tx.getName();
+        this.assetName = tx.getName();
     }
 
     public Asset(TxAsset tx) {
@@ -164,7 +164,7 @@ public class Asset extends BaseNulsData {
         this.depositNuls = tx.getDepositNuls();
         this.initNumber = tx.getInitNumber();
         this.symbol = tx.getSymbol();
-        this.name = tx.getName();
+        this.assetName = tx.getName();
     }
 
     public Asset() {
