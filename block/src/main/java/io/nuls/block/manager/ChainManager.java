@@ -80,7 +80,9 @@ public class ChainManager {
      * @return
      */
     public static boolean switchChain(int chainId, Chain masterChain, Chain forkChain) {
-
+        Log.info("0.switch chain start");
+        Log.info("1.masterChain-" + masterChain);
+        Log.info("2.forkChain-" + forkChain);
         //1.获取主链与最长分叉链的分叉点,并记录从分叉点开始的最长分叉链路径
         Stack<Chain> switchChainPath = new Stack<>();
         while (forkChain.getParent() != null) {
@@ -90,7 +92,7 @@ public class ChainManager {
         Chain topForkChain = switchChainPath.peek();
         long forkHeight = topForkChain.getStartHeight();
         long masterChainEndHeight = masterChain.getEndHeight();
-        Log.info("calculate evidence point complete");
+        Log.info("calculate fork point complete");
 
         //2.回滚主链
         //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库

@@ -59,7 +59,7 @@ public class ForkChainsMonitor implements Runnable {
                 //判断该链的运行状态,只有正常运行时才会有分叉链的处理
                 RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RunningStatusEnum.RUNNING)) {
-                    Log.info("skip process, status is "+status+", chainId-"+chainId);
+                    Log.debug("skip process, status is "+status+", chainId-"+chainId);
                     continue;
                 }
 
@@ -108,18 +108,16 @@ public class ForkChainsMonitor implements Runnable {
                         } else {
                             Log.info("chainId-"+chainId+", switchChain fail, auto rollback success");
                         }
-                        context.setStatus(RunningStatusEnum.RUNNING);
                         break;
                     }
                 } finally {
+                    context.setStatus(RunningStatusEnum.RUNNING);
                     if (StampedLock.isWriteLockStamp(stamp)) {
                         lock.unlockWrite(stamp);
                     }
                 }
             } catch (Exception e) {
-                Log.info("chainId-" +chainId+", switchChain fail, , auto rollback fail");
-                Log.error(e);
-                context.setStatus(RunningStatusEnum.EXCEPTION);
+                Log.error("chainId-" +chainId+", switchChain fail, auto rollback fail");
             }
         }
     }

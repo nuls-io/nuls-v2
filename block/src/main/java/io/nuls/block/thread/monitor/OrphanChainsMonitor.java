@@ -66,8 +66,8 @@ public class OrphanChainsMonitor implements Runnable {
             try {
                 //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
                 RunningStatusEnum status = context.getStatus();
-                if (!status.equals(RUNNING) && !status.equals(SYNCHRONIZING)) {
-                    Log.info("skip process, status is "+status+", chainId-" + chainId);
+                if (!status.equals(RUNNING)) {
+                    Log.debug("skip process, status is "+status+", chainId-" + chainId);
                     continue;
                 }
 
@@ -91,6 +91,7 @@ public class OrphanChainsMonitor implements Runnable {
                             continue;
                         }
                         // exclusive access
+                        context.setStatus(MAINTAIN_CHAINS);
                         Chain masterChain = ChainManager.getMasterChain(chainId);
                         SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                         //标记、变更链属性阶段
@@ -105,10 +106,10 @@ public class OrphanChainsMonitor implements Runnable {
                         ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
                         forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
                         maintainedOrphanChains.forEach(e -> e.setType(ChainTypeEnum.ORPHAN));
-                        context.setStatus(RUNNING);
                         break;
                     }
                 } finally {
+                    context.setStatus(RUNNING);
                     if (StampedLock.isWriteLockStamp(stamp)) {
                         lock.unlockWrite(stamp);
                     }
