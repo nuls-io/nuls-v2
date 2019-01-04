@@ -1,6 +1,7 @@
 package io.nuls.transaction.db.h2.dao;
 
 import io.nuls.base.data.Page;
+import io.nuls.base.data.Transaction;
 import io.nuls.transaction.model.po.TransactionPO;
 
 import java.util.List;
@@ -33,6 +34,8 @@ public interface TransactionH2Service {
     int saveTxsTables(List<TransactionPO> txPoList);
 
     int deleteTx(String address, String txhash);
+
+    int deleteTx(Transaction tx);
 
     /**
      * 初始化创建存储账户交易的表
