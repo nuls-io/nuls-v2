@@ -73,7 +73,7 @@ public class OrphanChainsMaintainer implements Runnable {
                 //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
                 RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RUNNING)) {
-                    Log.info("skip process, status is {}, chainId-{}", status, chainId);
+                    Log.info("skip process, status is "+status+", chainId-"+ chainId);
                     return;
                 }
                 ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
@@ -115,7 +115,7 @@ public class OrphanChainsMaintainer implements Runnable {
                 }
             } catch (Exception e) {
                 context.setStatus(EXCEPTION);
-                Log.error("chainId-{},maintain OrphanChains fail!error msg is:{}", chainId, e.getMessage());
+                Log.error("chainId-"+chainId+",maintain OrphanChains fail!error msg is:"+ e.getMessage());
             }
         }
     }

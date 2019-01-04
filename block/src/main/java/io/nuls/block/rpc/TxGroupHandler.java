@@ -68,11 +68,11 @@ public class TxGroupHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            Log.warn(e.getMessage());
+            Log.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        if (message == null || nodeId == null) {
+        if (nodeId == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
@@ -114,7 +114,7 @@ public class TxGroupHandler extends BaseCmd {
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
                 blockService.forwardBlock(chainId, headerHash, nodeId);
             } else {
-                Log.error("save fail! chainId:{}, height:{}, hash:{}", chainId, header.getHeight(), headerHash);
+                Log.error("save fail! chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + headerHash);
             }
             return success();
         }

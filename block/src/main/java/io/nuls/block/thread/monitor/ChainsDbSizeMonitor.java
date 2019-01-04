@@ -64,7 +64,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                 //判断该链的运行状态,只有正常运行时才会有数据库的处理
                 RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RUNNING)) {
-                    Log.debug("skip process, status is {}, chainId-{}", status, chainId);
+                    Log.debug("skip process, status is " + status + ", chainId-" + chainId);
                     continue;
                 }
                 //获取配置项
@@ -95,7 +95,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                 //1.获取某链ID的数据库缓存的所有区块数量
                 int actualSize = ChainManager.getForkChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
                 actualSize += ChainManager.getOrphanChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
-                Log.debug("chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
+                Log.debug("chainId:" +chainId+", cacheSize:"+cacheSize+", actualSize:"+actualSize);
                 if (!lock.validate(stamp)) {
                     continue;
                 }
@@ -109,7 +109,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                 // exclusive access
                 //与阈值比较
                 while (actualSize > cacheSize) {
-                    Log.info("before clear, chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
+                    Log.debug("before clear, chainId:" +chainId+", cacheSize:"+cacheSize+", actualSize:"+actualSize);
                     context.setStatus(RunningStatusEnum.DATABASE_CLEANING);
                     //2.按顺序清理分叉链和孤儿链
                     SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
@@ -145,7 +145,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                             }
                         }
                     }
-                    Log.info("after clear, chainId:{}, cacheSize:{}, actualSize:{}", chainId, cacheSize, actualSize);
+                    Log.debug("after clear, chainId:" +chainId+", cacheSize:"+cacheSize+", actualSize:"+actualSize);
                     context.setStatus(RUNNING);
                 }
                 break;

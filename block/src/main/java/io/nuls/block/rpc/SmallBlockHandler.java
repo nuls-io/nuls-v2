@@ -78,7 +78,7 @@ public class SmallBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            Log.warn(e.getMessage());
+            Log.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
@@ -102,7 +102,7 @@ public class SmallBlockHandler extends BaseCmd {
         }
 
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        Log.info("recieve smallBlock from({}), chainId:{}, height:{}, hash:{}", nodeId, chainId, header.getHeight(), header.getHash());
+        Log.info("recieve smallBlock from " + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
         NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
@@ -170,7 +170,7 @@ public class SmallBlockHandler extends BaseCmd {
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
                 blockService.forwardBlock(chainId, blockHash, nodeId);
             } else {
-                Log.error("save fail! chainId:{}, height:{}, hash:{}", chainId, header.getHeight(), blockHash);
+                Log.error("save fail! chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + blockHash);
             }
         }
         return success();

@@ -59,7 +59,7 @@ public class ForkChainsMonitor implements Runnable {
                 //判断该链的运行状态,只有正常运行时才会有分叉链的处理
                 RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RunningStatusEnum.RUNNING)) {
-                    Log.info("skip process, status is {}, chainId-{}", status, chainId);
+                    Log.info("skip process, status is "+status+", chainId-"+chainId);
                     continue;
                 }
 
@@ -91,7 +91,7 @@ public class ForkChainsMonitor implements Runnable {
                                 switchChain = forkChain;
                             }
                         }
-                        Log.debug("chainId-{}, maxHeightDifference:{}, chainSwtichThreshold:{}", chainId, maxHeightDifference, chainSwtichThreshold);
+                        Log.debug("chainId-"+chainId+", maxHeightDifference:"+maxHeightDifference+", chainSwtichThreshold:"+ chainSwtichThreshold);
                         //高度差不够
                         if (maxHeightDifference < chainSwtichThreshold) {
                             break;
@@ -104,9 +104,9 @@ public class ForkChainsMonitor implements Runnable {
                         //进行切换,切换前变更模块运行状态
                         context.setStatus(RunningStatusEnum.SWITCHING);
                         if (ChainManager.switchChain(chainId, masterChain, switchChain)) {
-                            Log.info("chainId-{}, switchChain success", chainId);
+                            Log.info("chainId-"+chainId+", switchChain success");
                         } else {
-                            Log.info("chainId-{}, switchChain fail, auto rollback success", chainId);
+                            Log.info("chainId-"+chainId+", switchChain fail, auto rollback success");
                         }
                         context.setStatus(RunningStatusEnum.RUNNING);
                         break;
@@ -117,7 +117,7 @@ public class ForkChainsMonitor implements Runnable {
                     }
                 }
             } catch (Exception e) {
-                Log.info("chainId-{}, switchChain fail, , auto rollback fail", chainId);
+                Log.info("chainId-" +chainId+", switchChain fail, , auto rollback fail");
                 Log.error(e);
                 context.setStatus(RunningStatusEnum.EXCEPTION);
             }

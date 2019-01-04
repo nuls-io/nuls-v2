@@ -101,7 +101,7 @@ public class BlockSynchronizer implements Runnable {
             int size = params.getNodes().size();
             //网络上没有可用节点
             if (size == 0) {
-                Log.info("no useful net nodes");
+                Log.debug("no useful net nodes");
                 if (!synStatus.equals(BlockSynStatusEnum.FAIL)) {
                     if (ConsensusUtil.notice(chainId, 0)) {
                         statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
@@ -113,7 +113,7 @@ public class BlockSynchronizer implements Runnable {
             }
             //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
-                Log.info("chain-{} first start", chainId);
+                Log.debug("chain-" + chainId + " first start");
                 context.setStatus(RunningStatusEnum.RUNNING);
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
                     if (ConsensusUtil.notice(chainId, 1)) {
@@ -128,7 +128,7 @@ public class BlockSynchronizer implements Runnable {
             statusEnumMap.put(chainId, BlockSynStatusEnum.RUNNING);
             //检查本地区块状态
             if (!checkLocalBlock(chainId, params)) {
-                Log.info("local blocks is newest");
+                Log.debug("local blocks is newest");
                 context.setStatus(RunningStatusEnum.RUNNING);
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
                     if (ConsensusUtil.notice(chainId, 1)) {
@@ -165,7 +165,7 @@ public class BlockSynchronizer implements Runnable {
             Boolean storageResult = consumerFuture.get();
             boolean success = downResult != null && downResult && storageResult != null && storageResult;
             long end = System.currentTimeMillis();
-            Log.info("block syn complete, total download:{}, total time:{}, average time:{}", total, end - start, (end - start) / total);
+            Log.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
             if (success) {
                 if (checkIsNewest(chainId, params, context)) {
                     Log.info("block syn complete successfully");
@@ -321,7 +321,6 @@ public class BlockSynchronizer implements Runnable {
         if (checkHashEquality(chainId, params)) {
             if (commonHeight < netHeight) {
                 //commonHeight区块的hash一致,正常,比远程节点落后,下载区块
-                Log.info("localHeight:{}, netHeight:{}", localHeight, netHeight);
                 return true;
             }
         } else {
@@ -342,7 +341,6 @@ public class BlockSynchronizer implements Runnable {
         if (params.getLocalLatestHeight() == 0 || rollbackCount >= parameters.getMaxRollback()) {
             return false;
         }
-
         blockService.rollbackBlock(chainId, params.getLocalLatestHeight(), true);
         BlockHeader latestBlockHeader = blockService.getLatestBlockHeader(chainId);
         params.setLocalLatestHeight(latestBlockHeader.getHeight());
@@ -350,7 +348,6 @@ public class BlockSynchronizer implements Runnable {
         if (checkHashEquality(chainId, params)) {
             return true;
         }
-
         return checkRollback( rollbackCount + 1, chainId, params);
     }
 

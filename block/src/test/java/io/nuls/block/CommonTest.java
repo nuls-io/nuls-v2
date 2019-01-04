@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.locks.StampedLock;
 
 public class CommonTest {
 
@@ -129,12 +130,25 @@ public class CommonTest {
             try {
                 if (true) {
                     System.out.println("22222222222222");
-                    continue;
+                    throw new RuntimeException();
                 }
                 System.out.println("888888888");
             } finally {
                 System.out.println("1111111111111");
             }
         }
+    }
+
+    @Test
+    public void testLock1() {
+        StampedLock lock = new StampedLock();
+        long lock1 = lock.writeLock();
+        lock.unlockWrite(lock1);
+
+        long lock2 = lock.writeLock();
+        lock.unlockWrite(lock2);
+
+        long lock3 = lock.writeLock();
+        lock.unlockWrite(lock3);
     }
 }

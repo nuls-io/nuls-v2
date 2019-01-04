@@ -65,7 +65,7 @@ public class BlockDownloader implements Callable<Boolean> {
         int maxDowncount = chainParameters.getDownloadNumber();
         int blockCache = chainParameters.getBlockCache();
         try {
-            Log.info("BlockDownloader start work from {} to {}", startHeight, netLatestHeight);
+            Log.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight);
             while (startHeight <= netLatestHeight) {
                 while (queue.size() > blockCache) {
                     Log.info("BlockDownloader wait！ cached queue size:" + queue.size());

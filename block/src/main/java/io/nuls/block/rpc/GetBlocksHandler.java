@@ -98,7 +98,7 @@ public class GetBlocksHandler extends BaseCmd {
         blockMessage.setCommand(CommandConstant.BLOCK_MESSAGE);
         boolean result = NetworkUtil.sendToNode(chainId, blockMessage, nodeId);
         if (!result) {
-            Log.warn("send block failed:{},height:{}", nodeId, block.getHeader().getHeight());
+            Log.warn("send block failed:" + nodeId + ",height:" + block.getHeader().getHeight());
         }
     }
 
