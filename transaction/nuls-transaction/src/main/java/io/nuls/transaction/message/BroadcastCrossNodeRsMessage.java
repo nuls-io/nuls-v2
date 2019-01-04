@@ -33,19 +33,11 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
     @Setter
     private byte[] transactionSignature;
 
-    /**
-     * 验证结果
-     */
-    @Getter
-    @Setter
-    private boolean result;
-
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(requestHash);
         size += SerializeUtils.sizeOfBytes(transactionSignature);
-        size += SerializeUtils.sizeOfBoolean();
         return size;
     }
 
@@ -53,13 +45,11 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(requestHash);
         stream.writeBytesWithLength(transactionSignature);
-        stream.writeBoolean(result);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.requestHash = byteBuffer.readHash();
         this.transactionSignature = byteBuffer.readByLengthByte();
-        this.result = byteBuffer.readBoolean();
     }
 }
