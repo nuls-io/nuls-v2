@@ -17,6 +17,7 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.manager.ChainManager;
+import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
 import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.message.CrossTxMessage;
 import io.nuls.transaction.message.GetTxMessage;
@@ -407,16 +408,29 @@ public class MessageCmd extends BaseCmd {
             verifyResult.setHeight(message.getHeight());
             verifyResultList.add(verifyResult);
             ctx.setCtxVerifyResultList(verifyResultList);
-            ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
             //判断当前节点是共识节点还是普通节点
-            if(ConsensusCall.isConsensusNode())
-            {
+            if (ConsensusCall.isConsensusNode()) {
                 //共识节点
+                double percent =ctx.getCtxVerifyResultList().size() / ctx.getConnectedNodeList().size() * 100;
+                if(percent>=51) {
+                    //TODO 获取共识节点的打包地址
 
-            }else
-            {
+                    //TODO 使用该地址到账户模块对跨链交易atx_trans_hash签名
+                    BroadcastCrossNodeRsMessage rsMessage=new BroadcastCrossNodeRsMessage();
+                    rsMessage.setRequestHash(message.getRequestHash());
+                    rsMessage.setResult(true);
+                    //rsMessage.setTransactionSignature();
+                    //广播交易hash
+                    NetworkCall.broadcast(chainId, rsMessage);
+                    ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
+                }
+            } else {
                 //普通节点
-
+                if (verifyResultList.size() >= 3) {
+                    //广播交易hash
+                    NetworkCall.broadcastTxHash(chainId, message.getRequestHash());
+                    ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
+                }
             }
 
             //保存跨链交易验证结果
