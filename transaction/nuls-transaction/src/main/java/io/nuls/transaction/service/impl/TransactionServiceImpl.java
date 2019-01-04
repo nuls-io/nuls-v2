@@ -141,7 +141,7 @@ public class TransactionServiceImpl implements TransactionService {
             MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(fromAddress);
             int txSize = tx.size();
             txSize += getMultiSignAddressSignatureSize(multiSigAccount.getM());
-            CoinData coinData = getCoinData(coinFromList, coinToList, txSize);
+            CoinData coinData = getCoinData(chain,  coinFromList, coinToList, txSize);
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             //如果发起者没有发送自己的数据则不用签名
@@ -199,7 +199,7 @@ public class TransactionServiceImpl implements TransactionService {
             valiCoin(coinFromList, coinToList);
             int txSize = tx.size();
             txSize += getSignatureSize(coinFromList);
-            CoinData coinData = getCoinData(coinFromList, coinToList, txSize);
+            CoinData coinData = getCoinData(chain, coinFromList, coinToList, txSize);
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             //签名
@@ -382,7 +382,7 @@ public class TransactionServiceImpl implements TransactionService {
             if (BigIntegerUtils.isLessThan(balance, amount)) {
                 throw new NulsException(TxErrorCode.INSUFFICIENT_BALANCE);
             }
-            byte[] nonce = LegerCall.getNonce(address, assetChainId, assetId);
+            byte[] nonce = LegerCall.getNonce(chain, addr, assetChainId, assetId);
             CoinFrom coinFrom = new CoinFrom(address, assetChainId, assetId, amount, nonce, TxConstant.CORSS_TX_LOCKED);
             coinFroms.add(coinFrom);
         }
@@ -435,7 +435,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      * @throws NulsException
      */
-    private CoinData getCoinData(List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException {
+    private CoinData getCoinData(Chain chain, List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException {
         BigInteger feeTotalFrom = BigInteger.ZERO;
         for (CoinFrom coinFrom : listFrom) {
             txSize += coinFrom.size();
@@ -462,7 +462,7 @@ public class TransactionServiceImpl implements TransactionService {
             actualFee = getFeeDirect(listFrom, targetFee, actualFee);
             if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
                 //如果没收到足够的手续费，则从CoinFrom中资产不是nuls的coin账户中查找nuls余额，并组装新的coinfrom来收取手续费
-                if (!getFeeIndirect(listFrom, txSize, targetFee, actualFee)) {
+                if (!getFeeIndirect(chain, listFrom, txSize, targetFee, actualFee)) {
                     //所有from中账户的nuls余额总和都不够支付手续费
                     throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
                 }
@@ -516,7 +516,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return boolean
      * @throws NulsException
      */
-    private boolean getFeeIndirect(List<CoinFrom> listFrom, int txSize, BigInteger targetFee, BigInteger actualFee) throws NulsException {
+    private boolean getFeeIndirect(Chain chain, List<CoinFrom> listFrom, int txSize, BigInteger targetFee, BigInteger actualFee) throws NulsException {
         ListIterator<CoinFrom> iterator = listFrom.listIterator();
         while (iterator.hasNext()) {
             CoinFrom coinFrom = iterator.next();
@@ -528,7 +528,7 @@ public class TransactionServiceImpl implements TransactionService {
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
-                feeCoinFrom.setNonce(LegerCall.getNonce(address, TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID));
+                feeCoinFrom.setNonce(LegerCall.getNonce(chain, AddressTool.getStringAddressByBytes(address), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID));
                 txSize += feeCoinFrom.size();
                 //新增coinfrom，重新计算本交易预计收取的手续费
                 targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
