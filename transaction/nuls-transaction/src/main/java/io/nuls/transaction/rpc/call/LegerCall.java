@@ -120,22 +120,22 @@ public class LegerCall {
 
     /**
      * 发送交易给账本
-     * @param chainId
+     * @param chain
      * @param tx
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean commitTxLeger(int chainId, Transaction tx, boolean comfirmed){
+    public static boolean commitTxLeger(Chain chain, Transaction tx, boolean comfirmed){
         //todo
         return true;
     }
 
     /**
      * 根据交易回滚数据
-     * @param chainId
+     * @param chain
      * @param tx
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean rollbackTxLeger(int chainId, Transaction tx, boolean comfirmed){
+    public static boolean rollbackTxLeger(Chain chain, Transaction tx, boolean comfirmed){
         //todo
         return true;
     }

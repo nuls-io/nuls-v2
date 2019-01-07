@@ -902,7 +902,7 @@ public class TransactionServiceImpl implements TransactionService {
     public void clearInvalidTx(Chain chain, Transaction tx) {
         txVerifiedStorageService.removeTx(chain.getChainId(), tx.getHash());
         //通知账本回滚nonce
-        LegerCall.rollbackTxLeger(chain.getChainId(), tx, false);
+        LegerCall.rollbackTxLeger(chain, tx, false);
         //移除H2交易记录
         transactionH2Service.deleteTx(tx);
 

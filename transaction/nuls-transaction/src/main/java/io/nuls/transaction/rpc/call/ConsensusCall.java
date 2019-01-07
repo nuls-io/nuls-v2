@@ -30,6 +30,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.model.bo.Chain;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,11 +46,12 @@ public class ConsensusCall {
      * @param agentAddress 节点地址
      * @return
      */
-    public static boolean isConsensusNode(String agentAddress) {
+    public static boolean isConsensusNode(Chain chain, String agentAddress) {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             //TODO
+            params.put("chainId", chain.getChainId());
             params.put("agentAddress", agentAddress);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "isConsensusNode", params);
             if (cmdResp.isSuccess()) {
