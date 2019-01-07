@@ -1,7 +1,6 @@
 package io.nuls.transaction.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Page;
@@ -12,7 +11,6 @@ import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.JSONUtils;
@@ -22,8 +20,6 @@ import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
-import io.nuls.transaction.message.BroadcastTxMessage;
-import io.nuls.transaction.message.TransactionMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
@@ -38,9 +34,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static io.nuls.transaction.constant.TxConstant.KEY_CHAIN_ID;
-import static io.nuls.transaction.constant.TxConstant.KEY_MESSAGE_BODY;
 
 /**
  * @author: Charlie
@@ -314,7 +307,7 @@ public class TransactionCmd extends BaseCmd {
             if (!NulsDigestData.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            Transaction tx = confirmedTransactionService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             if(tx == null){
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -387,5 +380,6 @@ public class TransactionCmd extends BaseCmd {
         resultMap.put("value", result);
         return success(result);
     }
+
 
 }

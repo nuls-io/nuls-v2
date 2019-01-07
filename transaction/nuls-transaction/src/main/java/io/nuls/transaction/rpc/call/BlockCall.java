@@ -22,28 +22,39 @@
  * SOFTWARE.
  */
 
-package io.nuls.transaction.utils;
+package io.nuls.transaction.rpc.call;
 
-import io.nuls.base.data.Transaction;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.log.Log;
+import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.rpc.call.callback.EventNewBlockHeightInvoke;
 
-import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author: Charlie
- * @date: 2018-12-21
+ * @date: 2019-01-02
  */
-@Service
-public class TransactionIndexComparator implements Comparator<Transaction> {
+public class BlockCall {
 
-    @Override
-    public int compare(Transaction o1, Transaction o2) {
-        if(o1.getInBlockIndex() < o2.getInBlockIndex()){
-            return -1;
-        }else if(o1.getInBlockIndex() > o2.getInBlockIndex()){
-            return 1;
-        }else {
-            return 0;
+    public static boolean subscriptionNewBlockHeight(Chain chain) {
+        try {
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chain.getChainId());
+            String messageId = CmdDispatcher.requestAndInvoke(ModuleE.BL.abbr, "bestHeight",
+                    params, "0", "1", new EventNewBlockHeightInvoke(chain));
+            if(null != messageId){
+                return true;
+            }
+        } catch (Exception e) {
+            Log.error(e);
         }
+        return false;
+
     }
 }

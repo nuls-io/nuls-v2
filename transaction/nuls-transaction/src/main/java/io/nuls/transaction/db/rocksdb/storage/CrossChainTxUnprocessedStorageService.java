@@ -24,6 +24,7 @@
 
 package io.nuls.transaction.db.rocksdb.storage;
 
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.transaction.model.bo.CrossChainTx;
 
 import java.util.List;
@@ -42,6 +43,14 @@ public interface CrossChainTxUnprocessedStorageService {
      * @return
      */
     boolean putTx(int chainId, CrossChainTx ctx);
+
+    /**
+     * 是否已存在交易
+     * @param chainId
+     * @param hash
+     * @return
+     */
+    CrossChainTx getTx(int chainId, NulsDigestData hash);
 
     /**
      * 根据交易hash批量删除

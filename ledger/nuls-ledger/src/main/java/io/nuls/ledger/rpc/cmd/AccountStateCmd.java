@@ -25,21 +25,24 @@
  */
 package io.nuls.ledger.rpc.cmd;
 
-import io.nuls.ledger.db.Repository;
+import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.data.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * 用于获取账户余额及账户nonce值
  * Created by wangkun23 on 2018/11/19.
  */
 @Component
@@ -51,14 +54,18 @@ public class AccountStateCmd extends BaseCmd {
     private AccountStateService accountStateService;
 
     /**
+     * 获取账户资产余额
      * get user account balance
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "lg_getBalance",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+    @CmdAnnotation(cmd = "getBalance",
+            version = 1.0,
             description = "test getHeight 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "address", parameterType = "String")
+    @Parameter(parameterName = "assetId", parameterType = "int")
     public Response getBalance(Map params) {
         //TODO.. 验证参数个数和格式
         Integer chainId = (Integer) params.get("chainId");
@@ -66,26 +73,61 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetId = (Integer) params.get("assetId");
         logger.info("chainId {}", chainId);
         logger.info("address {}", address);
-
-        BigInteger balance = accountStateService.getBalance(address, chainId, assetId);
-        return success(balance);
+        AccountState accountState = accountStateService.getAccountState(address, chainId, assetId);
+        Map<String,Object> rtMap = new HashMap<>();
+        rtMap.put("freeze",accountState.getFreezeState().getTotal());
+        rtMap.put("total",accountState.getTotalAmount());
+        rtMap.put("available",accountState.getAvailableAmount());
+        return success(rtMap);
     }
 
     /**
+     * 获取账户nonce值
      * get user account nonce
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "lg_getNonce",
+    @CmdAnnotation(cmd = "getNonce",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "test getHeight 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "address", parameterType = "String")
+    @Parameter(parameterName = "assetId", parameterType = "int")
     public Response getNonce(Map params) {
         //TODO.. 验证参数个数和格式
         Integer chainId = (Integer) params.get("chainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        String nonce = accountStateService.getNonce(address, chainId, assetId);
-        return success(nonce);
+        AccountState accountState = accountStateService.getAccountState(address, chainId, assetId);
+        Map<String,Object> rtMap = new HashMap<>();
+        if(StringUtils.isNotBlank(accountState.getUnconfirmedNonce())){
+            rtMap.put("nonce",accountState.getUnconfirmedNonce());
+            rtMap.put("nonceType",LedgerConstant.UNCONFIRMED_NONCE);
+        }else{
+            rtMap.put("nonce",accountState.getNonce());
+            rtMap.put("nonceType",LedgerConstant.CONFIRMED_NONCE);
+        }
+
+        return success(rtMap);
     }
+
+    @CmdAnnotation(cmd = "getBalanceNonce",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "test getHeight 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "address", parameterType = "String")
+    @Parameter(parameterName = "assetId", parameterType = "int")
+    public Response getBalanceNonce(Map params) {
+        //TODO.. 验证参数个数和格式
+        Integer chainId = (Integer) params.get("chainId");
+        String address = (String) params.get("address");
+        Integer assetId = (Integer) params.get("assetId");
+        AccountState accountState = accountStateService.getAccountState(address, chainId, assetId);
+        Map<String,Object> rtMap = new HashMap<>();
+        rtMap.put("nonce",accountState.getNonce());
+        rtMap.put("available",accountState.getAvailableAmount());
+        return success(rtMap);
+    }
+
 }

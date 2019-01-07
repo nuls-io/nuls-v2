@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.model;
+package io.nuls.ledger.model.po;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by wangkun23 on 2018/11/28.
@@ -59,14 +58,14 @@ public class FreezeState extends BaseNulsData {
      */
     @Setter
     @Getter
-    private List<FreezeHeightState> freezeHeightStates = new CopyOnWriteArrayList<>();
+    private List<FreezeHeightState> freezeHeightStates = new ArrayList<>();
 
     /**
      * 账户冻结的资产(时间冻结)
      */
     @Setter
     @Getter
-    private List<FreezeLockTimeState> freezeLockTimeStates = new CopyOnWriteArrayList<>();
+    private List<FreezeLockTimeState> freezeLockTimeStates = new ArrayList<>();
 
 
     /**
@@ -89,10 +88,10 @@ public class FreezeState extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(freezeHeightStates.size());
-        stream.writeUint16(freezeLockTimeStates.size());
         for (FreezeHeightState heightState : freezeHeightStates) {
             stream.writeNulsData(heightState);
         }
+        stream.writeUint16(freezeLockTimeStates.size());
         for (FreezeLockTimeState lockTimeState : freezeLockTimeStates) {
             stream.writeNulsData(lockTimeState);
         }
@@ -101,9 +100,7 @@ public class FreezeState extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         int freezeHeightCount = byteBuffer.readUint16();
-        int freezeLockTimeCount = byteBuffer.readUint16();
         this.freezeHeightStates = new ArrayList<>(freezeHeightCount);
-        this.freezeLockTimeStates = new ArrayList<>(freezeLockTimeCount);
         for (int i = 0; i < freezeHeightCount; i++) {
             try {
                 FreezeHeightState heightState = new FreezeHeightState();
@@ -113,6 +110,8 @@ public class FreezeState extends BaseNulsData {
                 throw new NulsException(e);
             }
         }
+        int freezeLockTimeCount = byteBuffer.readUint16();
+        this.freezeLockTimeStates = new ArrayList<>(freezeLockTimeCount);
         for (int i = 0; i < freezeLockTimeCount; i++) {
             try {
                 FreezeLockTimeState lockTimeState = new FreezeLockTimeState();
@@ -128,10 +127,10 @@ public class FreezeState extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfUint16();
-        size += SerializeUtils.sizeOfUint16();
         for (FreezeHeightState heightState : freezeHeightStates) {
             size += SerializeUtils.sizeOfNulsData(heightState);
         }
+        size += SerializeUtils.sizeOfUint16();
         for (FreezeLockTimeState lockTimeState : freezeLockTimeStates) {
             size += SerializeUtils.sizeOfNulsData(lockTimeState);
         }

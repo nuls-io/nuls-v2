@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.model;
+package io.nuls.ledger.model.po;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -53,7 +53,12 @@ public class FreezeHeightState extends BaseNulsData {
     @Setter
     @Getter
     private String txHash;
-
+    /**
+     * 交易的nonce值
+     */
+    @Setter
+    @Getter
+    private String nonce;
     /**
      * 锁定金额
      */
@@ -62,11 +67,11 @@ public class FreezeHeightState extends BaseNulsData {
     private BigInteger amount;
 
     /**
-     * 锁定时间
+     * 锁定高度
      */
     @Setter
     @Getter
-    private BigInteger height;
+    private long height;
 
     @Setter
     @Getter
@@ -85,16 +90,18 @@ public class FreezeHeightState extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(txHash);
+        stream.writeString(nonce);
         stream.writeBigInteger(amount);
-        stream.writeBigInteger(height);
+        stream.writeUint32(height);
         stream.writeUint48(createTime);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.txHash = byteBuffer.readString();
+        this.nonce = byteBuffer.readString();
         this.amount = byteBuffer.readBigInteger();
-        this.height = byteBuffer.readBigInteger();
+        this.height = byteBuffer.readUint32();
         this.createTime = byteBuffer.readUint48();
     }
 
@@ -102,8 +109,9 @@ public class FreezeHeightState extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfString(txHash);
+        size += SerializeUtils.sizeOfString(nonce);
         size += SerializeUtils.sizeOfBigInteger();
-        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint48();
         return size;
     }

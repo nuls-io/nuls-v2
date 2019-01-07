@@ -1,9 +1,14 @@
 package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.MultiSigAccount;
+import io.nuls.base.signture.P2PHKSignature;
+import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -60,6 +65,29 @@ public class AccountCall {
             Log.error(e);
         }
         return multiSigAccount;
+    }
+
+    public static P2PHKSignature signDigest(String address, String password, String dataHex) {
+        int chainId = AddressTool.getChainIdByAddress(address);
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("chainId", chainId);
+        params.put("address", address);
+        params.put("password", password);
+        params.put("dataHex", dataHex);
+        try {
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
+            if (cmdResp.isSuccess()) {
+                HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_signDigest"));
+                byte[] signatureByte = HexUtil.decode((String) result.get("signatureHex"));
+                P2PHKSignature signature = new P2PHKSignature();
+                signature.parse(new NulsByteBuffer(signatureByte));
+                return signature;
+            }
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
     }
 
 }

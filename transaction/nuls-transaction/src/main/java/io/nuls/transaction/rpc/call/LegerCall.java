@@ -1,11 +1,13 @@
 package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Address;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -72,16 +74,28 @@ public class LegerCall {
     /**
      * 查询nonce值
      *
+     * @param chain
      * @param address
-     * @param chainId
+     * @param assetChainId
      * @param assetId
      * @return
      * @throws NulsException
      */
-    public static byte[] getNonce(byte[] address, int chainId, int assetId) throws NulsException {
-        //todo 查nonce
-        byte[] nonce = new byte[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-        return nonce;
+    public static byte[] getNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("chainId", chain.getChainId());
+        params.put("address", address);
+        params.put("assetChainId", assetChainId);
+        params.put("assetId", assetId);
+        try {
+            HashMap result = (HashMap) TransactionCall.request("getNonce", ModuleE.LG.abbr, params);
+            String nonce = (String) result.get("nonce");
+            return HexUtil.decode(nonce);
+        } catch (Exception e) {
+            chain.getLogger().info(e.getMessage(), e.fillInStackTrace());
+            return null;
+        }
     }
 
     /**
@@ -106,21 +120,23 @@ public class LegerCall {
 
     /**
      * 发送交易给账本
-     * @param chainId
+     * @param chain
      * @param tx
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean sendTx(int chainId, Transaction tx, boolean comfirmed){
+    public static boolean commitTxLeger(Chain chain, Transaction tx, boolean comfirmed){
+        //todo
         return true;
     }
 
     /**
      * 根据交易回滚数据
-     * @param chainId
+     * @param chain
      * @param tx
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean rollbackTxLeger(int chainId, Transaction tx, boolean comfirmed){
+    public static boolean rollbackTxLeger(Chain chain, Transaction tx, boolean comfirmed){
+        //todo
         return true;
     }
 

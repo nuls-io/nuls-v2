@@ -30,11 +30,23 @@ import io.nuls.base.data.Transaction;
 
 /**
  * Created by wangkun23 on 2018/11/28.
+ * update by lanjinsheng on 2018/12/31
  */
 public interface TransactionService {
+
+
+
+    /**
+     * 未确认交易数据处理
+     */
+    boolean unConfirmTxProcess(Transaction transaction);
 
     /**
      * 已确认交易数据处理
      */
-    public void txProcess(Transaction transaction);
+    boolean confirmTxProcess(Transaction transaction);
+    /**
+     * 交易回滚处理
+     */
+    void rollBackConfirmTx(Transaction transaction);
 }

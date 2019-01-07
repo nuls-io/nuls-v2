@@ -2,23 +2,21 @@ package io.nuls.transaction.service.impl;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.constant.TxDBConstant;
+import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxUnprocessedStorageService;
+import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
+import io.nuls.transaction.message.VerifyCrossResultMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.CrossTxSignResult;
+import io.nuls.transaction.rpc.call.ConsensusCall;
 import io.nuls.transaction.service.CrossChainTxService;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,17 +32,26 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
     private CrossChainTxUnprocessedStorageService crossChainTxUnprocessedStorageService;
 
     @Override
-    public boolean newCrossTx(Chain chain, String nodeId, Transaction tx) {
+    public void newCrossTx(Chain chain, String nodeId, Transaction tx) {
         if (tx == null) {
-            return false;
+            return;
         }
-        //todo 判断是否存在
+        int chainId = chain.getChainId();
+        //判断是否存在
+        CrossChainTx ctxExist = crossChainTxUnprocessedStorageService.getTx(chainId, tx.getHash());
+        if(null != ctxExist){
+            return;
+        }
+        ctxExist = crossChainTxStorageService.getTx(chainId, tx.getHash());
+        if(null != ctxExist){
+            return;
+        }
         CrossChainTx ctx = new CrossChainTx();
         ctx.setTx(tx);
-        ctx.setSenderChainId(chain.getChainId());
+        ctx.setSenderChainId(chainId);
         ctx.setSenderNodeId(nodeId);
         ctx.setState(TxConstant.CTX_UNPROCESSED_0);
-        return crossChainTxUnprocessedStorageService.putTx(chain.getChainId(), ctx);
+        crossChainTxUnprocessedStorageService.putTx(chain.getChainId(), ctx);
     }
 
     @Override
@@ -70,6 +77,37 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
 
     @Override
     public boolean updateCrossTxState(Chain chain, NulsDigestData hash, int state) {
-        return false;
+        CrossChainTx crossChainTx = crossChainTxStorageService.getTx(chain.getChainId(), hash);
+        if(null != crossChainTx){
+            chain.getLogger().error(hash.getDigestHex() + TxErrorCode.TX_NOT_EXIST.getMsg());
+            return false;
+        }
+        crossChainTx.setState(state);
+        return crossChainTxStorageService.putTx(chain.getChainId(), crossChainTx);
+    }
+
+    /**
+     * 1.是否存在
+     * 2.是否共识节点
+     * 3.验证签名
+     * 4.统计结果是否满足打包条件
+     */
+    @Override
+    public void crossNodeResultProcess(Chain chain, BroadcastCrossNodeRsMessage message) throws NulsException {
+        CrossChainTx ctx = getTx(chain, message.getRequestHash());
+        if (ctx == null) {
+            throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+        }
+        //该节点的结果是否已经收到过, 收到过则忽略
+        List<CrossTxSignResult> signRsList = ctx.getSignRsList();
+        for(CrossTxSignResult crossTxSignResult : signRsList){
+            if(crossTxSignResult.getAgentAddress().equals(message.getAgentAddress())){
+                //已收到过
+                return;
+            }
+        }
+        String agentAddress = message.getAgentAddress();
+        //todo 验证是否是共识节点.
+        ConsensusCall.isConsensusNode(chain,agentAddress);
     }
 }

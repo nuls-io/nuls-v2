@@ -7,7 +7,6 @@ import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.transaction.service.ChainService;
-import io.nuls.transaction.service.ConfirmedTransactionService;
 
 import java.util.Map;
 

@@ -4,10 +4,14 @@ import io.nuls.base.data.Transaction;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.thread.TimeService;
 import io.nuls.transaction.cache.TxVerifiedPool;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
@@ -39,7 +43,6 @@ public class TxUnverifiedProcessTask implements Runnable {
     private TransactionTimeComparator txComparator = SpringLiteContext.getBean(TransactionTimeComparator.class);
     private List<Transaction> orphanTxList = new ArrayList<>();
 
-    //private static final int MAX_ORPHAN_SIZE = 200000;
     private Chain chain;
 
     public  TxUnverifiedProcessTask(Chain chain){
@@ -57,6 +60,7 @@ public class TxUnverifiedProcessTask implements Runnable {
             chain.getLogger().error(e);
         }
         try {
+            //处理孤儿交易
             doOrphanTxTask(chain);
         } catch (Exception e) {
             chain.getLogger().error(e);
@@ -81,17 +85,15 @@ public class TxUnverifiedProcessTask implements Runnable {
             int chainId = chain.getChainId();
             boolean rs = transactionManager.verify(chain, tx);
             //todo 跨链交易单独处理, 是否需要进行跨链验证？
-
+            //只会有本地创建的跨链交易才会进入这里, 其他链广播到跨链交易, 由其他逻辑处理
             if (!rs) {
                 return false;
             }
             //获取一笔交易(从已确认交易库中获取？)
-            Transaction transaction = confirmedTransactionService.getTransaction(chain,tx.getHash());
+            Transaction transaction = confirmedTransactionService.getConfirmedTransaction(chain, tx.getHash());
             if(null != transaction){
                 return isOrphanTx;
             }
-            //todo 验证coinData
-
             Map<String, String> params = new HashMap<>();
             params.put("tx", tx.hex());
             Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "verifyCoinData",params);
@@ -101,22 +103,29 @@ public class TxUnverifiedProcessTask implements Runnable {
                 txVerifiedStorageService.putTx(chainId, tx);
                 //保存到h2数据库
                 transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
-                //todo 调账本记录未确认交易
-                LegerCall.sendTx(chain.getChainId(), tx, false);
+                //调账本记录未确认交易
+                LegerCall.commitTxLeger(chain, tx, false);
                 //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
+                return true;
+            }
+            Map map = (Map)response.getResponseData();
+            ErrorCode errorCode = (ErrorCode)map.get("ErrorCode");
+            if(errorCode.equals(TxErrorCode.ORPHAN_TX) && !isOrphanTx){
+                processOrphanTx(tx);
+            }else if(isOrphanTx){
+                //todo 孤儿交易还是10分钟删, 如何处理nonce值??
+                return tx.getTime() < (TimeService.currentTimeMillis() - 3600000L);
             }
         } catch (Exception e) {
             Log.error(e);
             e.printStackTrace();
-
         }
         return false;
     }
 
 
     private void doOrphanTxTask(Chain chain){
-        //todo
         //时间排序TransactionTimeComparator
         orphanTxList.sort(txComparator);
 
@@ -125,9 +134,14 @@ public class TxUnverifiedProcessTask implements Runnable {
             Transaction tx = it.next();
             boolean success = processTx(chain, tx, true);
             if (success) {
+                LegerCall.rollbackTxLeger(chain, tx, false);
                 it.remove();
             }
         }
+    }
+
+    private void processOrphanTx(Transaction tx) throws NulsException {
+        orphanTxList.add(tx);
     }
 
 }

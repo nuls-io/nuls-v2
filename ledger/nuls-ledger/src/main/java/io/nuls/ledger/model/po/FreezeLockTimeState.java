@@ -23,113 +23,84 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.model;
+package io.nuls.ledger.model.po;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.IOException;
 import java.math.BigInteger;
 
 /**
- * Created by wangkun23 on 2018/11/19.
+ * Created by wangkun23 on 2018/11/28.
  */
 @ToString
 @NoArgsConstructor
-@AllArgsConstructor
-public class AccountState extends BaseNulsData {
-
+public class FreezeLockTimeState extends BaseNulsData {
+    /**
+     * 交易的hash值
+     */
     @Setter
     @Getter
-    private int chainId;
-
-    @Setter
-    @Getter
-    private int assetId;
-
+    private String txHash;
+    /**
+     * 交易的nonce值
+     */
     @Setter
     @Getter
     private String nonce;
 
-    @Setter
-    @Getter
-    private BigInteger balance = BigInteger.ZERO;
-
     /**
-     * 账户总金额
-     */
-    private BigInteger totalAmount = BigInteger.ZERO;
-
-    /**
-     * 账户冻结的资产
+     * 锁定金额
      */
     @Setter
     @Getter
-    private FreezeState freezeState;
-
-    public AccountState(int chainId, int assetId, String nonce, BigInteger balance) {
-        this.chainId = chainId;
-        this.assetId = assetId;
-        this.nonce = nonce;
-        this.balance = balance;
-        this.freezeState = new FreezeState();
-    }
+    private BigInteger amount;
 
     /**
-     * 获取账户总金额
-     *
-     * @return
+     * 锁定时间
      */
-    public BigInteger getTotalAmount() {
-        return balance.add(freezeState.getTotal());
-    }
+    @Setter
+    @Getter
+    private long lockTime;
 
-    public AccountState withNonce(String nonce) {
-        return new AccountState(chainId, assetId, nonce, balance);
-    }
-
-    public AccountState withIncrementedNonce() {
-        return new AccountState(chainId, assetId, nonce + 1, balance);
-    }
-
-    public AccountState withBalanceIncrement(BigInteger value) {
-        return new AccountState(chainId, assetId, nonce, balance.add(value));
-    }
+    @Setter
+    @Getter
+    private long createTime;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(chainId);
-        stream.writeUint16(assetId);
+        stream.writeString(txHash);
         stream.writeString(nonce);
-        stream.writeBigInteger(balance);
-        stream.writeNulsData(freezeState);
+        stream.writeBigInteger(amount);
+        stream.writeUint48(lockTime);
+        stream.writeUint48(createTime);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readUint16();
-        this.assetId = byteBuffer.readUint16();
+        this.txHash = byteBuffer.readString();
         this.nonce = byteBuffer.readString();
-        this.balance = byteBuffer.readBigInteger();
-        this.freezeState = new FreezeState();
-        byteBuffer.readNulsData(freezeState);
+        this.amount = byteBuffer.readBigInteger();
+        this.lockTime = byteBuffer.readUint48();
+        this.createTime = byteBuffer.readUint48();
     }
 
     @Override
     public int size() {
         int size = 0;
-        //chainId
-        size += SerializeUtils.sizeOfInt16();
-        //assetId
-        size += SerializeUtils.sizeOfInt16();
+        size += SerializeUtils.sizeOfString(txHash);
         size += SerializeUtils.sizeOfString(nonce);
         size += SerializeUtils.sizeOfBigInteger();
-        size += SerializeUtils.sizeOfNulsData(freezeState);
-
+        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfUint48();
         return size;
     }
 }

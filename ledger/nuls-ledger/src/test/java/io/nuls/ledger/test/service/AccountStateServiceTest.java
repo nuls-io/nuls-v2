@@ -25,7 +25,7 @@
  */
 package io.nuls.ledger.test.service;
 
-import io.nuls.ledger.model.AccountState;
+import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.test.BaseTest;
 import io.nuls.tools.core.ioc.SpringLiteContext;

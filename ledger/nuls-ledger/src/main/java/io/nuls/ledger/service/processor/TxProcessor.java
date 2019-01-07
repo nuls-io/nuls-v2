@@ -25,12 +25,15 @@
  */
 package io.nuls.ledger.service.processor;
 
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.ledger.model.po.AccountState;
 
 /**
  * Created by wangkun23 on 2018/11/29.
  */
 public interface TxProcessor {
 
-    public void process(Transaction transaction);
+      void processFromCoinData(CoinFrom coin, String nonce, String hash, AccountState accountState);
+      void processToCoinData(CoinTo coin,String nonce,String hash, AccountState accountState);
 }

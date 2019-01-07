@@ -25,9 +25,7 @@
  */
 package io.nuls.ledger.db;
 
-import io.nuls.ledger.model.AccountState;
-
-import java.math.BigInteger;
+import io.nuls.ledger.model.po.AccountState;
 
 public interface Repository {
 
@@ -38,13 +36,47 @@ public interface Repository {
      * @param key
      * @param accountState
      */
-    void putAccountState(byte[] key, AccountState accountState);
+    void createAccountState(byte[] key, AccountState accountState);
+
+    /**
+     * update accountState to rocksdb
+     * @param key
+     * @param preAccountState
+     * @param nowAccountState
+     */
+    void updateAccountStateAndSnapshot(String key,AccountState preAccountState,AccountState nowAccountState);
 
     /**
      * get accountState from rocksdb
      *
      * @param key
-     * @return
+     * @return      * @return
      */
     AccountState getAccountState(byte[] key);
+
+    /**
+     *
+     * @param key
+     * @param nowAccountState
+     */
+    void updateAccountState(byte[] key,AccountState nowAccountState);
+
+    /**
+     * get accountState from rocksdb
+     *
+     * @param key
+     * @return      * @return
+     */
+    AccountState getSnapshotAccountState(byte[] key);
+
+    /**
+     *
+     * @param key
+     */
+    void delSnapshotAccountState(byte[] key);
+    /**
+     *
+     * @return long
+     */
+      long  getBlockHeight();
 }

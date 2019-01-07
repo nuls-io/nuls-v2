@@ -1,9 +1,8 @@
-/*-
- * ⁣⁣
+/*
  * MIT License
- * ⁣⁣
- * Copyright (C) 2017 - 2018 nuls.io
- * ⁣⁣
+ *
+ * Copyright (c) 2018-2019 nuls.io
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -11,87 +10,80 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- * ⁣⁣
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
  */
-package io.nuls.ledger.model;
+package io.nuls.transaction.model.bo;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.io.IOException;
-import java.math.BigInteger;
 
 /**
- * Created by wangkun23 on 2018/11/28.
+ * 跨链交易验证结果
+ *
+ * @author: qinyifeng
+ * @date: 2019/01/07
  */
-@ToString
-@NoArgsConstructor
-public class FreezeLockTimeState extends BaseNulsData {
-    /**
-     * 交易的hash值
-     */
-    @Setter
-    @Getter
-    private String txHash;
+public class CrossTxSignResult extends BaseNulsData {
 
     /**
-     * 锁定金额
+     * 节点ID
      */
-    @Setter
     @Getter
-    private BigInteger amount;
+    @Setter
+    private String nodeId;
 
     /**
-     * 锁定时间
+     * 验证的节点对交易的签名
      */
-    @Setter
     @Getter
-    private long lockTime;
+    @Setter
+    private P2PHKSignature signature;
 
-    @Setter
+    /**
+     * 节点地址
+     */
     @Getter
-    private long createTime;
+    @Setter
+    private String agentAddress;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeString(txHash);
-        stream.writeBigInteger(amount);
-        stream.writeUint48(lockTime);
-        stream.writeUint48(createTime);
+        stream.writeString(nodeId);
+        stream.writeNulsData(signature);
+        stream.writeString(agentAddress);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.txHash = byteBuffer.readString();
-        this.amount = byteBuffer.readBigInteger();
-        this.lockTime = byteBuffer.readUint48();
-        this.createTime = byteBuffer.readUint48();
+        this.nodeId = byteBuffer.readString();
+        this.signature = byteBuffer.readNulsData(new P2PHKSignature());
+        this.agentAddress = byteBuffer.readString();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfString(txHash);
-        size += SerializeUtils.sizeOfBigInteger();
-        size += SerializeUtils.sizeOfUint48();
-        size += SerializeUtils.sizeOfUint48();
+        size += SerializeUtils.sizeOfString(nodeId);
+        size += SerializeUtils.sizeOfNulsData(signature);
+        size += SerializeUtils.sizeOfString(agentAddress);
         return size;
     }
 }

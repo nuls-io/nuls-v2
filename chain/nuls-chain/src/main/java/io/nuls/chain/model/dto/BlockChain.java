@@ -31,7 +31,7 @@ public class BlockChain extends BaseNulsData {
      * 链名称
      * Chain name
      */
-    private String name;
+    private String chainName;
 
     /**
      * 地址类型（Nuls生态，其他）
@@ -155,7 +155,7 @@ public class BlockChain extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
-        stream.writeString(name);
+        stream.writeString(chainName);
         stream.writeString(addressType);
         stream.writeUint32(magicNumber);
         stream.writeBoolean(supportInflowAsset);
@@ -184,7 +184,7 @@ public class BlockChain extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
-        this.name = byteBuffer.readString();
+        this.chainName = byteBuffer.readString();
         this.addressType = byteBuffer.readString();
         this.magicNumber = byteBuffer.readInt32();
         this.supportInflowAsset = byteBuffer.readBoolean();
@@ -215,7 +215,7 @@ public class BlockChain extends BaseNulsData {
         int size = 0;
         // chainId;
         size += SerializeUtils.sizeOfUint16();
-        size += SerializeUtils.sizeOfString(name);
+        size += SerializeUtils.sizeOfString(chainName);
         size += SerializeUtils.sizeOfString(addressType);
         // magicNumber;
         size += SerializeUtils.sizeOfInt32();
@@ -266,7 +266,7 @@ public class BlockChain extends BaseNulsData {
         this.chainId = txChain.getChainId();
         this.magicNumber = txChain.getMagicNumber();
         this.minAvailableNodeNum = txChain.getMinAvailableNodeNum();
-        this.name = txChain.getName();
+        this.chainName = txChain.getName();
         this.singleNodeMinConnectionNum = txChain.getSingleNodeMinConnectionNum();
         this.supportInflowAsset = txChain.isSupportInflowAsset();
     }
@@ -278,14 +278,14 @@ public class BlockChain extends BaseNulsData {
         txChain.setChainId(this.chainId);
         txChain.setMagicNumber(this.magicNumber);
         txChain.setMinAvailableNodeNum(this.minAvailableNodeNum);
-        txChain.setName(this.name);
+        txChain.setName(this.chainName);
         txChain.setSingleNodeMinConnectionNum(this.singleNodeMinConnectionNum);
         txChain.setSupportInflowAsset(this.supportInflowAsset);
         txChain.setAddress(asset.getAddress());
 
         txChain.setAssetId(asset.getAssetId());
         txChain.setSymbol(asset.getSymbol());
-        txChain.setAssetName(asset.getName());
+        txChain.setAssetName(asset.getAssetName());
         txChain.setDepositNuls(asset.getDepositNuls());
         txChain.setInitNumber(asset.getInitNumber());
         txChain.setDecimalPlaces(asset.getDecimalPlaces());

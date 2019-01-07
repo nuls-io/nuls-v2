@@ -41,4 +41,26 @@ public interface LedgerConstant {
      * The encoding used by the nuls system.
      */
     public static String DEFAULT_ENCODING = "UTF-8";
+
+    public static int  UNCONFIRMED_NONCE = 0;
+    public static int  CONFIRMED_NONCE = 1;
+    /**
+     * 普通交易处理
+     */
+    public static int COMMONT_TX = 1;
+    /**
+     * 解锁交易处理
+     */
+    public static int  UNLOCK_TX = 2;
+
+    /**
+     * 高度解锁的阈值，大于这个值就是时间
+     */
+    public static final int MAX_HEIGHT_VALUE = 10000000;
+    /**
+     * 重新统计锁定的时间
+     */
+    public static final int TIME_RECALCULATE_FREEZE = 1000;
+
+    public static final int PERMANENT_LOCK = -1;
 }
