@@ -239,6 +239,7 @@ public class BlockResource extends BaseCmd {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = new Block();
             block.parse(new NulsByteBuffer(HexUtil.decode((String) map.get("block"))));
+            Log.info("recieve smallBlock from local node, chainId:" + chainId + ", height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
             if (service.saveBlock(chainId, block, 1, true) && service.broadcastBlock(chainId, block)) {
                 return success();
             } else {
