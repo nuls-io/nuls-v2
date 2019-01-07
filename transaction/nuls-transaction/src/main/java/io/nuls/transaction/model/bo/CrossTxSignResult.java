@@ -27,7 +27,7 @@ package io.nuls.transaction.model.bo;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
-import io.nuls.base.signture.TransactionSignature;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Getter;
@@ -55,7 +55,7 @@ public class CrossTxSignResult extends BaseNulsData {
      */
     @Getter
     @Setter
-    private TransactionSignature transactionSignature;
+    private P2PHKSignature signature;
 
     /**
      * 节点地址
@@ -67,14 +67,14 @@ public class CrossTxSignResult extends BaseNulsData {
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(nodeId);
-        stream.writeNulsData(transactionSignature);
+        stream.writeNulsData(signature);
         stream.writeString(agentAddress);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.nodeId = byteBuffer.readString();
-        this.transactionSignature = byteBuffer.readNulsData(new TransactionSignature());
+        this.signature = byteBuffer.readNulsData(new P2PHKSignature());
         this.agentAddress = byteBuffer.readString();
     }
 
@@ -82,7 +82,7 @@ public class CrossTxSignResult extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfString(nodeId);
-        size += SerializeUtils.sizeOfNulsData(transactionSignature);
+        size += SerializeUtils.sizeOfNulsData(signature);
         size += SerializeUtils.sizeOfString(agentAddress);
         return size;
     }

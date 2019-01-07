@@ -3,6 +3,7 @@ package io.nuls.transaction.rpc.cmd;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -411,20 +412,20 @@ public class MessageCmd extends BaseCmd {
             verifyResult.setHeight(message.getHeight());
             verifyResultList.add(verifyResult);
             ctx.setCtxVerifyResultList(verifyResultList);
+            //TODO 获取共识节点的节点地址
+            String agentAddress = "";
             //判断当前节点是共识节点还是普通节点
-            if (ConsensusCall.isConsensusNode()) {
+            if (ConsensusCall.isConsensusNode(chainManager.getChain(chainId),agentAddress)) {
                 //共识节点
                 double percent = ctx.getCtxVerifyResultList().size() / ctx.getVerifyNodeList().size() * 100;
                 //超过全部链接节点51%的节点验证通过,则节点判定交易的验证通过
                 if (percent >= 51) {
-                    //TODO 获取共识节点的节点地址
-                    String agentAddress = "";
                     //TODO 使用该地址到账户模块对跨链交易atx_trans_hash签名
-                    byte[] signature = AccountCall.signDigest(agentAddress, null, message.getRequestHash().getDigestHex());
+                    P2PHKSignature signature = AccountCall.signDigest(agentAddress, null, message.getRequestHash().getDigestHex());
                     BroadcastCrossNodeRsMessage rsMessage = new BroadcastCrossNodeRsMessage();
                     rsMessage.setCommand(TxCmd.NW_CROSS_NODE_RS);
                     rsMessage.setRequestHash(message.getRequestHash());
-                    rsMessage.setTransactionSignature(signature);
+                    rsMessage.setSignature(signature);
                     rsMessage.setAgentAddress(agentAddress);
                     //广播交易hash
                     NetworkCall.broadcast(chainId, rsMessage);
