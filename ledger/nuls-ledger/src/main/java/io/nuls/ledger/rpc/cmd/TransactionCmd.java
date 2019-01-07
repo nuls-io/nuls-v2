@@ -112,8 +112,31 @@ public class TransactionCmd extends BaseCmd {
         return success();
     }
 
-
-
-
-
+    /**
+     * 逐笔回滚交易
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "rollBackConfirmTx",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    public Response rollBackConfirmTx(Map params) {
+        Map<String,Object> rtData = new HashMap<>();
+        String txHex = (String) params.get("txHex");
+        if (StringUtils.isNotBlank(txHex)) {
+            return failed("txHex not blank");
+        }
+        byte[] txStream = HexUtil.decode(txHex);
+        Transaction tx = new Transaction();
+        try {
+            tx.parse(new NulsByteBuffer(txStream));
+        } catch (NulsException e) {
+            logger.error("transaction parse error", e);
+        }
+        rtData.put("result",1);
+        transactionService.rollBackConfirmTx(tx);
+        return success();
+    }
 }

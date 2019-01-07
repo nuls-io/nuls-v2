@@ -1,9 +1,10 @@
 package io.nuls.ledger.utils;
 
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.constant.TransactionType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.UnsupportedEncodingException;
 
 /**
  * Created by lanjinsheng on 2019/01/02
@@ -18,25 +19,43 @@ public class LedgerUtils {
      * @param assetId
      * @return
      */
-    public static String getKey(String address, int chainId, int assetId) {
+    public static String getKeyStr(String address, int chainId, int assetId) {
        return  address + "-" + chainId + "-" + assetId;
 
     }
-
-    public static int getCoinDataType(int txType){
-        //TODO:进行类型的判断
-        if(txType == TransactionType.TX_TYPE_CANCEL_DEPOSIT.getValue()){
-            return LedgerConstant.UNLOCK_TX;
+    /**
+     * rockdb key
+     *
+     * @param address
+     * @param assetId
+     * @return
+     */
+    public static byte[] getKey(String address, int chainId, int assetId) {
+        String key = address + "-" + chainId + "-" + assetId;
+        try {
+            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
         }
-        if(txType == TransactionType.TX_TYPE_STOP_AGENT.getValue()){
-            return LedgerConstant.UNLOCK_TX;
-        }
-        if(txType == TransactionType.TX_TYPE_DESTROY_ASSET_AND_CHAIN.getValue()){
-            return LedgerConstant.UNLOCK_TX;
-        }
-        if(txType == TransactionType.TX_TYPE_REMOVE_ASSET_FROM_CHAIN.getValue()){
-            return LedgerConstant.UNLOCK_TX;
-        }
-        return LedgerConstant.COMMONT_TX;
+        return null;
     }
+
+    /**
+     * 获取账户缓存快照的key值，key值组成 = 资产key-txHash-区块高度
+     * @param assetKey
+     * @param txHash
+     * @param height
+     * @return
+     */
+    public static byte[] getSnapshotKey(String assetKey,String txHash,long height) {
+        String key = assetKey+ "-"+txHash+"-"+height;
+        try {
+            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+
 }

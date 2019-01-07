@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.model;
+package io.nuls.ledger.model.po;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;

@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.model;
+package io.nuls.ledger.model.po;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -39,7 +39,6 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by wangkun23 on 2018/11/28.
@@ -59,14 +58,14 @@ public class FreezeState extends BaseNulsData {
      */
     @Setter
     @Getter
-    private List<FreezeHeightState> freezeHeightStates = new CopyOnWriteArrayList<>();
+    private List<FreezeHeightState> freezeHeightStates = new ArrayList<>();
 
     /**
      * 账户冻结的资产(时间冻结)
      */
     @Setter
     @Getter
-    private List<FreezeLockTimeState> freezeLockTimeStates = new CopyOnWriteArrayList<>();
+    private List<FreezeLockTimeState> freezeLockTimeStates = new ArrayList<>();
 
 
     /**

@@ -52,4 +52,15 @@ public interface LedgerConstant {
      * 解锁交易处理
      */
     public static int  UNLOCK_TX = 2;
+
+    /**
+     * 高度解锁的阈值，大于这个值就是时间
+     */
+    public static final int MAX_HEIGHT_VALUE = 10000000;
+    /**
+     * 重新统计锁定的时间
+     */
+    public static final int TIME_RECALCULATE_FREEZE = 1000;
+
+    public static final int PERMANENT_LOCK = -1;
 }

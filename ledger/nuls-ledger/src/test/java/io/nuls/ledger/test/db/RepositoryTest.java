@@ -30,10 +30,8 @@ import io.nuls.ledger.config.AppConfig;
 import io.nuls.ledger.db.DataBaseArea;
 import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.db.RepositoryImpl;
-import io.nuls.ledger.model.AccountState;
 import io.nuls.tools.log.Log;
 import org.junit.Before;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
