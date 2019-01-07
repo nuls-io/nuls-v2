@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
 public class CommonTest {
@@ -150,5 +151,16 @@ public class CommonTest {
 
         long lock3 = lock.writeLock();
         lock.unlockWrite(lock3);
+    }
+
+    @Test
+    public void atomicInteger() {
+        AtomicInteger max = new AtomicInteger(Integer.MAX_VALUE);
+        System.out.println(max);
+        System.out.println(max.incrementAndGet());
+        System.out.println("--------------------");
+        AtomicInteger min = new AtomicInteger(Integer.MIN_VALUE);
+        System.out.println(min);
+        System.out.println(min.decrementAndGet());
     }
 }

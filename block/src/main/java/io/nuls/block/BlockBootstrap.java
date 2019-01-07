@@ -81,12 +81,8 @@ public class BlockBootstrap {
             CmdDispatcher.syncKernel();
             //加载通用数据库
             RocksDBService.init(DATA_PATH);
-            if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
-                RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
-            }
-            if (!RocksDBService.existTable(CHAIN_PARAMETERS)) {
-                RocksDBService.createTable(CHAIN_PARAMETERS);
-            }
+            RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
+            RocksDBService.createTable(CHAIN_PARAMETERS);
             //加载配置
             ConfigLoader.load();
         } catch (Exception e) {
