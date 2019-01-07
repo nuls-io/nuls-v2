@@ -248,7 +248,7 @@ public class BlockServiceImpl implements BlockService {
                 }
                 hashList.addLast(hash);
             }
-            Log.info("save block success, height-" + height + ", hash-" + hash);
+            Log.debug("save block success, height-" + height + ", hash-" + hash);
             return true;
         } finally {
             if (needLock) {

@@ -91,6 +91,10 @@ public class OrphanChainsMonitor implements Runnable {
                             continue;
                         }
                         // exclusive access
+                        Log.info("####################################orphan chains######################################");
+                        for (Chain orphanChain : orphanChains) {
+                            Log.info("#" + orphanChain);
+                        }
                         context.setStatus(MAINTAIN_CHAINS);
                         Chain masterChain = ChainManager.getMasterChain(chainId);
                         SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
@@ -115,7 +119,7 @@ public class OrphanChainsMonitor implements Runnable {
                     }
                 }
             } catch (Exception e) {
-                context.setStatus(EXCEPTION);
+                context.setStatus(RUNNING);
                 Log.error("chainId-"+chainId+",maintain OrphanChains fail!error msg is:"+ e.getMessage());
             }
         }

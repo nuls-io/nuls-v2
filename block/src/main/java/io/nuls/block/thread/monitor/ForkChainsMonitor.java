@@ -78,6 +78,10 @@ public class ForkChainsMonitor implements Runnable {
                         if (forkChains.size() < 1) {
                             break;
                         }
+                        Log.info("####################################fork chains######################################");
+                        for (Chain forkChain : forkChains) {
+                            Log.info("#" + forkChain);
+                        }
                         //遍历当前分叉链,与主链进行比对,找出最大高度差,与默认参数chainSwtichThreshold对比,确定要切换的分叉链
                         Chain masterChain = ChainManager.getMasterChain(chainId);
                         ChainParameters parameters = context.getParameters();
@@ -117,6 +121,7 @@ public class ForkChainsMonitor implements Runnable {
                     }
                 }
             } catch (Exception e) {
+                context.setStatus(RunningStatusEnum.RUNNING);
                 Log.error("chainId-" +chainId+", switchChain fail, auto rollback fail");
             }
         }

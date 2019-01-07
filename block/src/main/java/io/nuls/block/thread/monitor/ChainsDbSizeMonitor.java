@@ -75,10 +75,10 @@ public class ChainsDbSizeMonitor implements Runnable {
                 orphanChainsCleaner(chainId, heightRange, context, orphanChainMaxAge);
                 int cacheSize = parameters.getCacheSize();
                 dbSizeCleaner(chainId, context, cacheSize);
-            } catch (Exception e) {
-                Log.error(e);
-            } finally {
                 context.setStatus(RunningStatusEnum.RUNNING);
+            } catch (Exception e) {
+                context.setStatus(RunningStatusEnum.RUNNING);
+                Log.error(e);
             }
         }
     }

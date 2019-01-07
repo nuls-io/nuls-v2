@@ -114,6 +114,7 @@ public class OrphanChainsMaintainer implements Runnable {
                     }
                 }
             } catch (Exception e) {
+                context.setStatus(RUNNING);
                 Log.error("chainId-"+chainId+",maintain OrphanChains fail!error msg is:"+ e.getMessage());
             }
         }
@@ -140,10 +141,10 @@ public class OrphanChainsMaintainer implements Runnable {
             Node availableNode = availableNodes.get(i);
             block = BlockDownloadUtils.getBlockByHash(chainId, previousHash, availableNode);
             if (block != null) {
+                Log.info("maintain success! before orphanChain-"+orphanChain);
+                Log.info("get block from "+availableNode.getId());
                 orphanChain.addFirst(block);
-                orphanChain.setStartHeight(orphanChain.getStartHeight() - 1);
-                orphanChain.setPreviousHash(block.getHeader().getPreHash());
-                orphanChain.getHashList().addFirst(block.getHeader().getHash());
+                Log.info("maintain success! after orphanChain-"+orphanChain);
                 return;
             }
             age.incrementAndGet();

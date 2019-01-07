@@ -25,8 +25,10 @@ import io.nuls.base.data.*;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.BlockForwardEnum;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.TxGroupMessage;
 import io.nuls.block.model.CachedSmallBlock;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -44,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
+import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
 
 /**
  * 处理收到的{@link TxGroupMessage},用于区块的广播与转发
@@ -61,6 +64,10 @@ public class TxGroupHandler extends BaseCmd {
     @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        ChainContext context = ContextManager.getContext(chainId);
+        if (!context.getStatus().equals(RUNNING)) {
+            return success();
+        }
         String nodeId = map.get("nodeId").toString();
         TxGroupMessage message = new TxGroupMessage();
 

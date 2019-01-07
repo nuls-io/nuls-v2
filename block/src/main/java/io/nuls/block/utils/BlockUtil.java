@@ -207,7 +207,7 @@ public class BlockUtil {
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 ChainManager.addForkChain(chainId, forkChain);
                 ConsensusUtil.evidence(chainId, ContextManager.getContext(chainId).getLatestBlock().getHeader(), header);
-                Log.debug("chainId:" + chainId + ", received fork blocks of masterChain, height:" + blockHeight + ", hash:" + blockHash);
+                Log.info("chainId:" + chainId + ", received fork blocks of masterChain, height:" + blockHeight + ", hash:" + blockHash);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
             }
         }
@@ -237,7 +237,7 @@ public class BlockUtil {
                 if (blockHeight == forkChainEndHeight + 1 && blockPreviousHash.equals(forkChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     forkChain.addLast(block);
-                    Log.debug("chainId:" + chainId + ", received continuous blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    Log.info("chainId:" + chainId + ", received continuous blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
                 //2.重复,丢弃
@@ -283,13 +283,13 @@ public class BlockUtil {
                 if (blockHeight == orphanChainEndHeight + 1 && blockPreviousHash.equals(orphanChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     orphanChain.addLast(block);
-                    Log.debug("chainId:" + chainId + ", received continuous blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    Log.info("chainId:" + chainId + ", received continuous blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
                 if (blockHeight == orphanChainStartHeight - 1 && blockHash.equals(orphanChainPreviousHash)) {
                     chainStorageService.save(chainId, block);
                     orphanChain.addFirst(block);
-                    Log.debug("chainId:" + chainId + ", received continuous blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    Log.info("chainId:" + chainId + ", received continuous blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
                 //2.重复,丢弃
@@ -303,7 +303,7 @@ public class BlockUtil {
                     Chain forkOrphanChain = ChainGenerator.generate(chainId, block, orphanChain, ChainTypeEnum.ORPHAN);
                     forkOrphanChain.setAge(new AtomicInteger(0));
                     ChainManager.addOrphanChain(chainId, forkOrphanChain);
-                    Log.debug("chainId:" + chainId + ", received fork blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    Log.info("chainId:" + chainId + ", received fork blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
             }
@@ -312,6 +312,7 @@ public class BlockUtil {
             Chain newOrphanChain = ChainGenerator.generate(chainId, block, null, ChainTypeEnum.ORPHAN);
             newOrphanChain.setAge(new AtomicInteger(0));
             ChainManager.addOrphanChain(chainId, newOrphanChain);
+            Log.info("chainId:" + chainId + ", received orphan block, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
         } catch (Exception e) {
             Log.error(e);

@@ -113,7 +113,7 @@ public class BlockSynchronizer implements Runnable {
             }
             //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
-                Log.debug("chain-" + chainId + " first start");
+                Log.info("chain-" + chainId + " first start");
                 context.setStatus(RunningStatusEnum.RUNNING);
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
                     if (ConsensusUtil.notice(chainId, 1)) {
@@ -128,7 +128,7 @@ public class BlockSynchronizer implements Runnable {
             statusEnumMap.put(chainId, BlockSynStatusEnum.RUNNING);
             //检查本地区块状态
             if (!checkLocalBlock(chainId, params)) {
-                Log.debug("local blocks is newest");
+                Log.info("local blocks is newest");
                 context.setStatus(RunningStatusEnum.RUNNING);
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
                     if (ConsensusUtil.notice(chainId, 1)) {
@@ -371,9 +371,10 @@ public class BlockSynchronizer implements Runnable {
                 Block remoteBlock = BlockDownloadUtils.getBlockByHash(chainId, localHash, node);
                 if (remoteBlock != null) {
                     netHash = remoteBlock.getHeader().getHash();
-                    break;
+                    return localHash.equals(netHash);
                 }
             }
+            return false;
         }
         if (commonHeight < localHeight) {
             localHash = blockService.getBlockHash(chainId, commonHeight);

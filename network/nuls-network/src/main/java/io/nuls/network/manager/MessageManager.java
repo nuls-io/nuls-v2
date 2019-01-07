@@ -218,9 +218,9 @@ public class MessageManager extends BaseManager{
 //                        Log.error("unknown mssages. cmd={},may be handle had not be registered to network.",header.getCommandStr());
                     }else{
                         for(ProtocolRoleHandler protocolRoleHandler:protocolRoleHandlers) {
-                            Log.debug("request：{}=={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
-                            Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
-                            Log.debug("response：" + response);
+//                            Log.debug("request：{}=={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
+                            CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
+//                            Log.debug("response：" + response);
                         }
                     }
                     byteBuffer.setCursor(payLoad.length);
