@@ -64,7 +64,7 @@ public class EventNewBlockHeightInvoke extends BaseInvoke {
             }
             if (!response.isSuccess()) {
                 HashMap result = ((HashMap) response.getResponseData());
-                long blockHeight = (long) result.get("priKey");
+                long blockHeight = (long) result.get("height");
                 confirmedTransactionService.processEffectCrossTx(chain, blockHeight);
             }
         } catch (NulsException e) {

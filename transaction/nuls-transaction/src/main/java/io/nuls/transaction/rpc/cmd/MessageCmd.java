@@ -10,7 +10,9 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.transaction.cache.TransactionDuplicateRemoval;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
@@ -495,7 +497,7 @@ public class MessageCmd extends BaseCmd {
     }
 
     /**
-     * 接收链内其他节点广播的跨链验证结果
+     * 接收链内其他节点广播的跨链验证结果, 并保存.
      * 1.如果接收者是主网 当一个交易的签名者超过共识节点总数的80%，则通过
      * 2.如果接受者是友链 如果交易的签名者是友链最近x块的出块者
      * @param params
@@ -508,20 +510,26 @@ public class MessageCmd extends BaseCmd {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
         try {
-            Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
-            String nodeId = params.get(KEY_NODE_ID).toString();
-            //解析跨链交易验证结果消息
-            VerifyCrossResultMessage message = new VerifyCrossResultMessage();
-            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
-            message.parse(new NulsByteBuffer(decode));
-            if (message == null) {
-                return failed(TxErrorCode.PARAMETER_ERROR);
+            ObjectUtils.canNotEmpty(params.get(KEY_CHAIN_ID), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get(KEY_NODE_ID), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get(KEY_MESSAGE_BODY), TxErrorCode.PARAMETER_ERROR.getMsg());
+
+            Chain chain = chainManager.getChain((int) params.get(KEY_CHAIN_ID));
+            if(null == chain){
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
+
+            String nodeId = (String)params.get(KEY_NODE_ID);
+            //解析验证结果消息
+            BroadcastCrossNodeRsMessage message = new BroadcastCrossNodeRsMessage();
+            byte[] decode = HexUtil.decode((String)params.get(KEY_MESSAGE_BODY));
+            message.parse(new NulsByteBuffer(decode));
             //查询处理中的跨链交易
-            CrossChainTx ctx = crossChainTxStorageService.getTx(chainId, message.getRequestHash());
+ /*           CrossChainTx ctx = crossChainTxStorageService.getTx(chain.getChainId(), message.getRequestHash());
             if (ctx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
+
             //获取跨链交易验证结果
             List<CrossTxVerifyResult> verifyResultList = ctx.getCtxVerifyResultList();
             if (verifyResultList == null) {
@@ -536,10 +544,12 @@ public class MessageCmd extends BaseCmd {
 //            ctx.setCtxVerifyResultList(verifyResultList);
 //            ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
             //保存跨链交易验证结果
-            result = crossChainTxStorageService.putTx(chainId, ctx);
+            result = crossChainTxStorageService.putTx(chainId, ctx);*/
         } catch (NulsException e) {
+            Log.error(e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            Log.error(e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", result);
