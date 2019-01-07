@@ -94,14 +94,14 @@ public class CrossTxUnverifiedProcessTask implements Runnable {
                 verifyCrossWithFCMessage.setRequestHash(tx.getHash());
                 verifyCrossWithFCMessage.setCommand(TxCmd.NW_VERIFY_FC);
                 //获取节点组 放CrossChainTx
-                if(ctx.getConnectedNodeList()==null || ctx.getConnectedNodeList().size()==0)
+                if(ctx.getVerifyNodeList()==null || ctx.getVerifyNodeList().size()==0)
                 {
                     List<Node> nodeList=NetworkCall.getAvailableNodes(ctx.getSenderChainId(),1,ctx.getSenderNodeId());
-                    ctx.setConnectedNodeList(nodeList);
+                    ctx.setVerifyNodeList(nodeList);
                 }
                 //发送跨链验证msg，除去发送者节点
-                if(ctx.getConnectedNodeList()!=null) {
-                    for(Node node:ctx.getConnectedNodeList()) {
+                if(ctx.getVerifyNodeList()!=null) {
+                    for(Node node:ctx.getVerifyNodeList()) {
                         //TODO 是通过广播发送还是点对点发送
                         boolean rs = NetworkCall.sendToNode(ctx.getSenderChainId(), verifyCrossWithFCMessage, node.getId());
                         if (!rs) {

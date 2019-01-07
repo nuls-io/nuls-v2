@@ -4,10 +4,13 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxUnprocessedStorageService;
+import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
+import io.nuls.transaction.message.VerifyCrossResultMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.service.CrossChainTxService;
@@ -78,6 +81,16 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
             return false;
         }
         crossChainTx.setState(state);
-        return crossChainTxStorageService.putTx(chain.getChainId(),crossChainTx);
+        return crossChainTxStorageService.putTx(chain.getChainId(), crossChainTx);
+    }
+
+    @Override
+    public void crossNodeResultProcess(Chain chain, BroadcastCrossNodeRsMessage message) throws NulsException {
+        CrossChainTx crossChainTx = getTx(chain, message.getRequestHash());
+        if (crossChainTx == null) {
+            throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+        }
+        //该节点的结果是否已经收到过, 收到过则忽略
+
     }
 }
