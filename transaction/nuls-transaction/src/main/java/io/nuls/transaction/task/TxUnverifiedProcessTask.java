@@ -134,7 +134,6 @@ public class TxUnverifiedProcessTask implements Runnable {
             Transaction tx = it.next();
             boolean success = processTx(chain, tx, true);
             if (success) {
-                //todo 调账本回滚nonce
                 LegerCall.rollbackTxLeger(chain.getChainId(), tx, false);
                 it.remove();
             }

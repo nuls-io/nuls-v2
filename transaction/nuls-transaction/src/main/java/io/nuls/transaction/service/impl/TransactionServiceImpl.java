@@ -54,6 +54,7 @@ import io.nuls.transaction.model.bo.CrossTxData;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
+import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.ChainCall;
 import io.nuls.transaction.rpc.call.LegerCall;
@@ -101,7 +102,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public boolean newTx(Chain chain, Transaction tx) throws NulsException {
-        //todo 判断已验证未打包的交易里面是否有此交易；已确认的交易中是否有此交易
         Transaction txExist = txVerifiedStorageService.getTx(chain.getChainId(), tx.getHash());
         if (null != txExist) {
             throw new NulsException(TxErrorCode.TRANSACTION_ALREADY_EXISTS);
@@ -839,7 +839,7 @@ public class TransactionServiceImpl implements TransactionService {
             txList.add(tx);
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
                 CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
-                if (crossTxData.getChainId() != chain.getConfig().getAssetsId()) {
+                if (crossTxData.getChainId() != chain.getChainId()) {
                     //如果是跨链交易，发起链不是当前链，则核对(跨链验证的结果)
                     CrossChainTx crossChainTx = crossChainTxStorageService.getTx(crossTxData.getChainId(), tx.getHash());
                     //todo
@@ -853,10 +853,11 @@ public class TransactionServiceImpl implements TransactionService {
             if (!transactionManager.verify(chain, tx)) {
                 return false;
             }
-            // todo 暂时取消单个验证coinData
-          /*  if (!LegerCall.verifyCoinData(chain, tx, false)) {
+            /* 暂时取消单个验证coinData
+            if (!LegerCall.verifyCoinData(chain, tx, false)) {
                 return false;
-            }*/
+            }
+            */
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
             if (moduleVerifyMap.containsKey(txRegister)) {
@@ -902,6 +903,8 @@ public class TransactionServiceImpl implements TransactionService {
         txVerifiedStorageService.removeTx(chain.getChainId(), tx.getHash());
         //通知账本回滚nonce
         LegerCall.rollbackTxLeger(chain.getChainId(), tx, false);
+        //移除H2交易记录
+        transactionH2Service.deleteTx(tx);
 
     }
 
