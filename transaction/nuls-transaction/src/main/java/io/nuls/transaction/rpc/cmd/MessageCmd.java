@@ -64,7 +64,7 @@ public class MessageCmd extends BaseCmd {
     private ChainManager chainManager;
 
     /**
-     * 接收广播的新交易hash
+     * 接收链内广播的新交易hash
      * receive new transaction hash
      *
      * @param params
@@ -109,7 +109,7 @@ public class MessageCmd extends BaseCmd {
     }
 
     /**
-     * 获取完整交易数据
+     * 获取完整链内交易数据,包含还未开始跨链处理的跨链交易
      * get complete transaction data
      *
      * @param params
@@ -149,7 +149,7 @@ public class MessageCmd extends BaseCmd {
     }
 
     /**
-     * 接收其他节点的新交易
+     * 接收链内其他节点的新的完整交易
      * receive new transactions from other nodes
      *
      * @param params
@@ -188,7 +188,7 @@ public class MessageCmd extends BaseCmd {
     }
 
     /**
-     * 接收广播的新跨链交易hash
+     * (主网,友链都要处理)接收广播的新跨链交易hash
      * receive new cross transaction hash
      *
      * @param params
@@ -233,7 +233,7 @@ public class MessageCmd extends BaseCmd {
     }
 
     /**
-     * 获取完整跨链交易数据
+     * 获取完整开始跨链处理的跨链交易数据
      * get complete cross transaction data
      *
      * @param params
@@ -242,7 +242,7 @@ public class MessageCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.NW_ASK_CROSS_TX, version = 1.0, description = "get complete cross transaction data")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
-    public Response askCrossTxaskTx(Map params) {
+    public Response askCrossTx(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
         try {
@@ -278,7 +278,7 @@ public class MessageCmd extends BaseCmd {
     }
 
     /**
-     * 接收其他节点的新跨链交易
+     * 接收友链节点发送的新的完整跨链交易
      * receive new cross transactions from other nodes
      *
      * @param params
@@ -319,7 +319,7 @@ public class MessageCmd extends BaseCmd {
     }
 
     /**
-     * 主网节点向友链节点验证跨链交易
+     * (友链处理)主网节点向友链节点验证跨链交易
      * verification of cross-chain transactions from home network node to friend chain node
      *
      * @param params
@@ -369,7 +369,7 @@ public class MessageCmd extends BaseCmd {
     }
 
     /**
-     * 主网节点接收友链节点发送的跨链验证结果
+     * (主网和友链都要处理)节点接收其他链节点发送的跨链验证结果
      * home network node receive cross-chain verify results sent by friend chain node
      *
      * @param params
@@ -495,9 +495,9 @@ public class MessageCmd extends BaseCmd {
     }
 
     /**
-     * 友链节点接收主网节点发送的跨链验证结果
-     * friend chain node receive cross-chain verify results sent by home network node
-     *
+     * 接收链内其他节点广播的跨链验证结果
+     * 1.如果接收者是主网 当一个交易的签名者超过共识节点总数的80%，则通过
+     * 2.如果接受者是友链 如果交易的签名者是友链最近x块的出块者
      * @param params
      * @return
      */
