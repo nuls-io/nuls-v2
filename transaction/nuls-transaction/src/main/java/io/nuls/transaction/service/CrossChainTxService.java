@@ -2,6 +2,8 @@ package io.nuls.transaction.service;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossChainTx;
 
@@ -60,5 +62,16 @@ public interface CrossChainTxService {
      * @return
      */
     boolean updateCrossTxState(Chain chain, NulsDigestData hash, int state);
+
+
+    /**
+     * 接收链内其他节点广播的跨链验证结果, 并保存.
+     * 1.如果接收者是主网 当一个交易的签名者超过共识节点总数的80%，则通过
+     * 2.如果接受者是友链 如果交易的签名者是友链最近x块的出块者
+     * @param chain
+     * @param message
+     * @throws NulsException
+     */
+    void crossNodeResultProcess(Chain chain, BroadcastCrossNodeRsMessage message) throws NulsException;
 
 }

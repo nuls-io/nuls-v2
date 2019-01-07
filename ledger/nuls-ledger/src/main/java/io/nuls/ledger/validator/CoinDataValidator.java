@@ -39,6 +39,7 @@ import io.nuls.ledger.utils.CoinDataUtils;
 import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.StringUtils;
 import org.slf4j.Logger;
@@ -118,11 +119,11 @@ public class CoinDataValidator {
         CoinData coinData =  CoinDataUtils.parseCoinData(tx.getCoinData());
         List<CoinFrom> coinFroms = coinData.getFrom();
         byte [] nonce8Bytes = ByteUtils.copyOf(tx.getHash().getDigestBytes(), 8);
-        String nonce8BytesStr =  ByteUtils.bytesToString(nonce8Bytes);
+        String nonce8BytesStr = HexUtil.encode(nonce8Bytes);
         for(CoinFrom coinFrom:coinFroms) {
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
             String assetKey = LedgerUtils.getKey(address,coinFrom.getAssetsChainId(),coinFrom.getAssetsId());
-            String nonce = ByteUtils.bytesToString(coinFrom.getNonce());
+            String nonce =HexUtil.encode(coinFrom.getNonce());
             //判断是否是解锁from
             if(coinFrom.getLocked() == 0 ) {
                 List<TempAccountState> list = accountBalanceValidateTxMap.get(assetKey);
@@ -173,14 +174,14 @@ public class CoinDataValidator {
     public ValidateResult validateCoinData(Transaction tx) {
         CoinData coinData =  CoinDataUtils.parseCoinData(tx.getCoinData());
         byte [] nonce8Bytes = ByteUtils.copyOf(tx.getHash().getDigestBytes(), 8);
-        String nonce8BytesStr =  ByteUtils.bytesToString(nonce8Bytes);
+        String nonce8BytesStr =  HexUtil.encode(nonce8Bytes);
         /*
          * 先校验nonce值是否正常
          */
         List<CoinFrom> coinFroms = coinData.getFrom();
         for(CoinFrom coinFrom:coinFroms){
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
-            String nonce = ByteUtils.bytesToString(coinFrom.getNonce());
+            String nonce = HexUtil.encode(coinFrom.getNonce());
             AccountState accountState = accountStateService.getAccountState(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             if(accountState == null){
                 ValidateResult validateResult = new ValidateResult(VALIDATE_FAIL_CODE,String.format(VALIDATE_FAIL_DESC,address,nonce));

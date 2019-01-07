@@ -54,6 +54,7 @@ import io.nuls.transaction.model.bo.CrossTxData;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
+import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.ChainCall;
 import io.nuls.transaction.rpc.call.LegerCall;
@@ -101,7 +102,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public boolean newTx(Chain chain, Transaction tx) throws NulsException {
-        //todo 判断已验证未打包的交易里面是否有此交易；已确认的交易中是否有此交易
         Transaction txExist = txVerifiedStorageService.getTx(chain.getChainId(), tx.getHash());
         if (null != txExist) {
             throw new NulsException(TxErrorCode.TRANSACTION_ALREADY_EXISTS);
@@ -110,6 +110,14 @@ public class TransactionServiceImpl implements TransactionService {
         return true;
     }
 
+    @Override
+    public Transaction getTransaction(Chain chain, NulsDigestData hash) {
+        Transaction tx = txVerifiedStorageService.getTx(chain.getChainId(), hash);
+        if(null == tx){
+            tx = confirmedTransactionService.getConfirmedTransaction(chain, hash);
+        }
+        return tx;
+    }
 
     @Override
     public Map<String, String> createCrossMultiTransaction(Chain chain, List<CoinDTO> listFrom, List<CoinDTO> listTo, String remark) throws NulsException {
@@ -133,7 +141,7 @@ public class TransactionServiceImpl implements TransactionService {
             MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(fromAddress);
             int txSize = tx.size();
             txSize += getMultiSignAddressSignatureSize(multiSigAccount.getM());
-            CoinData coinData = getCoinData(coinFromList, coinToList, txSize);
+            CoinData coinData = getCoinData(chain,  coinFromList, coinToList, txSize);
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             //如果发起者没有发送自己的数据则不用签名
@@ -191,7 +199,7 @@ public class TransactionServiceImpl implements TransactionService {
             valiCoin(coinFromList, coinToList);
             int txSize = tx.size();
             txSize += getSignatureSize(coinFromList);
-            CoinData coinData = getCoinData(coinFromList, coinToList, txSize);
+            CoinData coinData = getCoinData(chain, coinFromList, coinToList, txSize);
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             //签名
@@ -374,7 +382,7 @@ public class TransactionServiceImpl implements TransactionService {
             if (BigIntegerUtils.isLessThan(balance, amount)) {
                 throw new NulsException(TxErrorCode.INSUFFICIENT_BALANCE);
             }
-            byte[] nonce = LegerCall.getNonce(address, assetChainId, assetId);
+            byte[] nonce = LegerCall.getNonce(chain, addr, assetChainId, assetId);
             CoinFrom coinFrom = new CoinFrom(address, assetChainId, assetId, amount, nonce, TxConstant.CORSS_TX_LOCKED);
             coinFroms.add(coinFrom);
         }
@@ -427,7 +435,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      * @throws NulsException
      */
-    private CoinData getCoinData(List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException {
+    private CoinData getCoinData(Chain chain, List<CoinFrom> listFrom, List<CoinTo> listTo, int txSize) throws NulsException {
         BigInteger feeTotalFrom = BigInteger.ZERO;
         for (CoinFrom coinFrom : listFrom) {
             txSize += coinFrom.size();
@@ -454,7 +462,7 @@ public class TransactionServiceImpl implements TransactionService {
             actualFee = getFeeDirect(listFrom, targetFee, actualFee);
             if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
                 //如果没收到足够的手续费，则从CoinFrom中资产不是nuls的coin账户中查找nuls余额，并组装新的coinfrom来收取手续费
-                if (!getFeeIndirect(listFrom, txSize, targetFee, actualFee)) {
+                if (!getFeeIndirect(chain, listFrom, txSize, targetFee, actualFee)) {
                     //所有from中账户的nuls余额总和都不够支付手续费
                     throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
                 }
@@ -508,7 +516,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return boolean
      * @throws NulsException
      */
-    private boolean getFeeIndirect(List<CoinFrom> listFrom, int txSize, BigInteger targetFee, BigInteger actualFee) throws NulsException {
+    private boolean getFeeIndirect(Chain chain, List<CoinFrom> listFrom, int txSize, BigInteger targetFee, BigInteger actualFee) throws NulsException {
         ListIterator<CoinFrom> iterator = listFrom.listIterator();
         while (iterator.hasNext()) {
             CoinFrom coinFrom = iterator.next();
@@ -520,7 +528,7 @@ public class TransactionServiceImpl implements TransactionService {
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
-                feeCoinFrom.setNonce(LegerCall.getNonce(address, TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID));
+                feeCoinFrom.setNonce(LegerCall.getNonce(chain, AddressTool.getStringAddressByBytes(address), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID));
                 txSize += feeCoinFrom.size();
                 //新增coinfrom，重新计算本交易预计收取的手续费
                 targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
@@ -668,24 +676,28 @@ public class TransactionServiceImpl implements TransactionService {
                 break;
             }
             //从已确认的交易中进行重复交易判断
-            Transaction repeatTx = confirmedTransactionService.getTransaction(chain, tx.getHash());
+            Transaction repeatTx = confirmedTransactionService.getConfirmedTransaction(chain, tx.getHash());
             if (repeatTx != null) {
+                clearInvalidTx(chain, tx);
                 continue;
             }
             String txHex = null;
             try {
                 txHex = tx.hex();
             } catch (Exception e) {
+                clearInvalidTx(chain, tx);
                 chain.getLogger().warn(e.getMessage(), e);
                 continue;
             }
             //验证tx
             if (!transactionManager.verify(chain, tx)) {
+                clearInvalidTx(chain, tx);
                 continue;
             }
 
             //验证coinData
             if (!LegerCall.verifyCoinData(chain, txHex, false)) {
+                clearInvalidTx(chain, tx);
                 continue;
             }
             packingTxList.add(tx);
@@ -705,6 +717,8 @@ public class TransactionServiceImpl implements TransactionService {
         txModuleValidatorPackable(chain, moduleVerifyMap, filterList);
         //过滤要未通过验证的交易
         filterTx(packingTxList, filterList);
+        //清除被过滤掉的交易
+        clearInvalidTx(chain, filterList);
         List<String> packableTxs = new ArrayList<>();
         for (Transaction tx : packingTxList) {
             try {
@@ -713,6 +727,7 @@ public class TransactionServiceImpl implements TransactionService {
                 chain.getLogger().error(e);
             }
         }
+
         return packableTxs;
     }
 
@@ -816,7 +831,7 @@ public class TransactionServiceImpl implements TransactionService {
         for (String txHex : txHexList) {
             //将txHex转换为Transaction对象
             Transaction tx = TxUtil.getTransaction(txHex);
-            Transaction transaction = confirmedTransactionService.getTransaction(chain, tx.getHash());
+            Transaction transaction = confirmedTransactionService.getConfirmedTransaction(chain, tx.getHash());
             if(null != transaction){
                 //交易已存在于已确认块中
                 return false;
@@ -824,7 +839,7 @@ public class TransactionServiceImpl implements TransactionService {
             txList.add(tx);
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
                 CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
-                if (crossTxData.getChainId() != chain.getConfig().getAssetsId()) {
+                if (crossTxData.getChainId() != chain.getChainId()) {
                     //如果是跨链交易，发起链不是当前链，则核对(跨链验证的结果)
                     CrossChainTx crossChainTx = crossChainTxStorageService.getTx(crossTxData.getChainId(), tx.getHash());
                     //todo
@@ -838,10 +853,11 @@ public class TransactionServiceImpl implements TransactionService {
             if (!transactionManager.verify(chain, tx)) {
                 return false;
             }
-            //验证coinData
+            /* 暂时取消单个验证coinData
             if (!LegerCall.verifyCoinData(chain, tx, false)) {
                 return false;
             }
+            */
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
             if (moduleVerifyMap.containsKey(txRegister)) {
@@ -875,17 +891,21 @@ public class TransactionServiceImpl implements TransactionService {
         return true;
     }
 
+    @Override
+    public void clearInvalidTx(Chain chain, List<Transaction> txList) {
+        for (Transaction tx : txList) {
+            clearInvalidTx(chain, tx);
+        }
+    }
 
     @Override
-    public boolean clearInvalidTxFromVerifiedStorage(Chain chain, List<String> txHashList) {
-        for (String txHash : txHashList) {
-            try {
-                txVerifiedStorageService.removeTx(chain.getChainId(), NulsDigestData.fromDigestHex(txHash));
-            } catch (NulsException e) {
-                chain.getLogger().error(e);
-            }
-        }
-        return true;
+    public void clearInvalidTx(Chain chain, Transaction tx) {
+        txVerifiedStorageService.removeTx(chain.getChainId(), tx.getHash());
+        //通知账本回滚nonce
+        LegerCall.rollbackTxLeger(chain, tx, false);
+        //移除H2交易记录
+        transactionH2Service.deleteTx(tx);
+
     }
 
 }

@@ -2,14 +2,17 @@ package io.nuls.transaction.db.h2.dao.impl;
 
 import com.github.pagehelper.PageHelper;
 import io.nuls.base.data.Page;
+import io.nuls.base.data.Transaction;
 import io.nuls.h2.utils.SearchOperator;
 import io.nuls.h2.utils.Searchable;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.h2.dao.impl.mapper.TransactionMapper;
 import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.model.split.TxTable;
+import io.nuls.transaction.utils.TxUtil;
 import org.apache.ibatis.session.SqlSession;
 import org.h2.util.StringUtils;
 
@@ -156,6 +159,20 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
         sqlSession.commit();
         sqlSession.close();
         return rs;
+    }
+
+    @Override
+    public int deleteTx(Transaction tx) {
+        int count = 0;
+        try {
+            List<TransactionPO> list = TxUtil.tx2PO(tx);
+            for (TransactionPO transactionPO : list){
+                count += deleteTx(transactionPO.getAddress(), transactionPO.getHash());
+            }
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
+        return count;
     }
 
     @Override

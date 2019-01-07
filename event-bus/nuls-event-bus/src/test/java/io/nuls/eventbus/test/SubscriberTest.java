@@ -32,7 +32,7 @@ public class SubscriberTest {
     @Test
     public void subscribe(){
         Map<String,Object> params = new HashMap<>();
-        params.put("role",ModuleE.LG);
+        params.put("role",ModuleE.LG.abbr);
         params.put("topic","ac_create");
         params.put("callBackCmd","receiveEvent");
         try {
