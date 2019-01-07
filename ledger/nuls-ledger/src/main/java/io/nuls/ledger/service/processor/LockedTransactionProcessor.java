@@ -35,7 +35,7 @@ import io.nuls.ledger.model.FreezeLockTimeState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.crypto.HexUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,7 @@ public class LockedTransactionProcessor implements TxProcessor {
         AccountState accountState  = accountStateService.getAccountState(address,assetChainId,assetId);
         List<FreezeLockTimeState> list = accountState.getFreezeState().getFreezeLockTimeStates();
         for(FreezeLockTimeState freezeLockTimeState: list){
-            if(freezeLockTimeState.getNonce().equalsIgnoreCase(ByteUtils.bytesToString(coin.getNonce()))){
+            if(freezeLockTimeState.getNonce().equalsIgnoreCase(HexUtil.encode(coin.getNonce()))){
                 list.remove(freezeLockTimeState);
             }
         }

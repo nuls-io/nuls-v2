@@ -43,7 +43,6 @@ public class TxUnverifiedProcessTask implements Runnable {
     private TransactionTimeComparator txComparator = SpringLiteContext.getBean(TransactionTimeComparator.class);
     private List<Transaction> orphanTxList = new ArrayList<>();
 
-    //private static final int MAX_ORPHAN_SIZE = 200000;
     private Chain chain;
 
     public  TxUnverifiedProcessTask(Chain chain){
@@ -91,7 +90,7 @@ public class TxUnverifiedProcessTask implements Runnable {
                 return false;
             }
             //获取一笔交易(从已确认交易库中获取？)
-            Transaction transaction = confirmedTransactionService.getTransaction(chain, tx.getHash());
+            Transaction transaction = confirmedTransactionService.getConfirmedTransaction(chain, tx.getHash());
             if(null != transaction){
                 return isOrphanTx;
             }
@@ -104,8 +103,8 @@ public class TxUnverifiedProcessTask implements Runnable {
                 txVerifiedStorageService.putTx(chainId, tx);
                 //保存到h2数据库
                 transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
-                //todo 调账本记录未确认交易
-                LegerCall.sendTx(chain.getChainId(), tx, false);
+                //调账本记录未确认交易
+                LegerCall.commitTxLeger(chain, tx, false);
                 //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
                 return true;
@@ -127,7 +126,6 @@ public class TxUnverifiedProcessTask implements Runnable {
 
 
     private void doOrphanTxTask(Chain chain){
-        //todo
         //时间排序TransactionTimeComparator
         orphanTxList.sort(txComparator);
 
@@ -136,7 +134,7 @@ public class TxUnverifiedProcessTask implements Runnable {
             Transaction tx = it.next();
             boolean success = processTx(chain, tx, true);
             if (success) {
-                //todo 如何处理nonce值得问题, 需和账本讨论
+                LegerCall.rollbackTxLeger(chain, tx, false);
                 it.remove();
             }
         }

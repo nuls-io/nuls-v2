@@ -66,6 +66,8 @@ public interface TxErrorCode {
     ErrorCode TX_ROLLBACK_FAIL = ErrorCode.init("10055");
     ErrorCode TX_VERIFY_FAIL = ErrorCode.init("10056");
     ErrorCode COINDATA_VERIFY_FAIL = ErrorCode.init("10057");
+    ErrorCode COINFROM_HAS_DUPLICATE_COIN = ErrorCode.init("10058");
+    ErrorCode COINTO_HAS_DUPLICATE_COIN = ErrorCode.init("10059");
 
 
 

@@ -38,6 +38,7 @@ import io.nuls.ledger.utils.CoinDataUtils;
 import io.nuls.ledger.validator.CoinDataValidator;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ByteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +74,7 @@ public class TransactionServiceImpl implements TransactionService {
         //TODO:要按用户账户来锁定处理(待处理)
         CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
         byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
-        String nonce8BytesStr =  ByteUtils.bytesToString(nonce8Bytes);
+        String nonce8BytesStr =  HexUtil.encode(nonce8Bytes);
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
             String address = AddressTool.getStringAddressByBytes(from.getAddress());
@@ -105,7 +106,7 @@ public class TransactionServiceImpl implements TransactionService {
             //更新账户状态
             CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
             byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
-            String nonce8BytesStr = ByteUtils.bytesToString(nonce8Bytes);
+            String nonce8BytesStr = HexUtil.encode(nonce8Bytes);
             List<CoinFrom> froms = coinData.getFrom();
             for (CoinFrom from : froms) {
 

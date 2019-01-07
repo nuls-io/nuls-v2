@@ -36,17 +36,6 @@ import java.util.Comparator;
 @Service
 public class TransactionIndexComparator implements Comparator<Transaction> {
 
-   /* private TransactionIndexComparator() {
-
-    }
-
-    private static final TransactionIndexComparator INSTANCE = new TransactionIndexComparator();
-
-    public static TransactionIndexComparator getInstance(){
-        return INSTANCE;
-    }
-*/
-
     @Override
     public int compare(Transaction o1, Transaction o2) {
         if(o1.getInBlockIndex() < o2.getInBlockIndex()){

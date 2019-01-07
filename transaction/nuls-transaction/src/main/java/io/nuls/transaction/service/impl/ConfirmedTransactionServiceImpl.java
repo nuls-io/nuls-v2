@@ -60,7 +60,7 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
     private CrossChainTxService crossChainTxService;
 
     @Override
-    public Transaction getTransaction(Chain chain, NulsDigestData hash) {
+    public Transaction getConfirmedTransaction(Chain chain, NulsDigestData hash) {
         if (null == hash) {
             return null;
         }
@@ -141,7 +141,7 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
                 chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
                 return false;
             }
-            rs = LegerCall.sendTx(chain.getChainId(), tx, true);
+            rs = LegerCall.commitTxLeger(chain, tx, true);
             if (!rs) {
                 return false;
             }
@@ -185,7 +185,7 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
                     }
                 }
 
-                rs = LegerCall.rollbackTxLeger(chain.getChainId(), tx, true);
+                rs = LegerCall.rollbackTxLeger(chain, tx, true);
                 if (atomicity && !rs) {
                     //如果为原子操作并且账本回滚失败,则直接结束回滚,并重新commit已回滚成功的交易,并返回失败
                     break;

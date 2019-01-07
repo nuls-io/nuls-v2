@@ -59,7 +59,7 @@ public class ChainCmd extends BaseChainCmd {
 
     @CmdAnnotation(cmd = "cm_chainReg", version = 1.0, description = "chainReg")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "name", parameterType = "String")
+    @Parameter(parameterName = "chainName", parameterType = "String")
     @Parameter(parameterName = "addressType", parameterType = "String")
     @Parameter(parameterName = "magicNumber", parameterType = "long", parameterValidRange = "[1,4294967295]")
     @Parameter(parameterName = "supportInflowAsset", parameterType = "String")
@@ -68,7 +68,7 @@ public class ChainCmd extends BaseChainCmd {
     @Parameter(parameterName = "txConfirmedBlockNum", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "symbol", parameterType = "array")
-    @Parameter(parameterName = "name", parameterType = "String")
+    @Parameter(parameterName = "assetName", parameterType = "String")
     @Parameter(parameterName = "initNumber", parameterType = "String")
     @Parameter(parameterName = "decimalPlaces", parameterType = "short", parameterValidRange = "[1,128]")
     @Parameter(parameterName = "password", parameterType = "String")
