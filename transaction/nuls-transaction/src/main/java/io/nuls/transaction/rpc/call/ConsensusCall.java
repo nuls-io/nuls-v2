@@ -30,8 +30,6 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.rpc.call.callback.EventNewBlockHeightInvoke;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -42,15 +40,21 @@ import java.util.Map;
  */
 public class ConsensusCall {
 
-    public static boolean isConsensusNode() {
-        Object result = new Object();
+    /**
+     * 验证是否是共识节点
+     * @param agentAddress 节点地址
+     * @return
+     */
+    public static boolean isConsensusNode(String agentAddress) {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             //TODO
+            params.put("agentAddress", agentAddress);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "isConsensusNode", params);
             if (cmdResp.isSuccess()) {
-                result = ((HashMap) cmdResp.getResponseData()).get("isConsensusNode");
+                HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_isConsensusNode"));
+                return (Boolean) result.get("value");
             }
         } catch (Exception e) {
             Log.error(e);
