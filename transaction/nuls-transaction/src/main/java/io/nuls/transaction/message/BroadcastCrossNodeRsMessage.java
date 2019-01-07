@@ -33,11 +33,19 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
     @Setter
     private byte[] transactionSignature;
 
+    /**
+     * 节点地址
+     */
+    @Getter
+    @Setter
+    private String agentAddress;
+
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(requestHash);
         size += SerializeUtils.sizeOfBytes(transactionSignature);
+        size += SerializeUtils.sizeOfString(agentAddress);
         return size;
     }
 
@@ -45,11 +53,13 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(requestHash);
         stream.writeBytesWithLength(transactionSignature);
+        stream.writeString(agentAddress);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.requestHash = byteBuffer.readHash();
         this.transactionSignature = byteBuffer.readByLengthByte();
+        this.agentAddress = byteBuffer.readString();
     }
 }

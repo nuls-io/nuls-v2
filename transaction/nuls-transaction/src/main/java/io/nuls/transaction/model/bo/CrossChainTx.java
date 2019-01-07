@@ -76,9 +76,9 @@ public class CrossChainTx extends BaseNulsData {
     private List<Node> verifyNodeList;
 
     /**
-     * 收到的本链节点验证结果(签名)TODO
+     * 收到的本链节点验证结果(签名)
      */
-    private List<CrossTxVerifyResult> verifyRsList;
+    private List<CrossTxSignResult> signRsList;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer nulsOutputStreamBuffer) throws IOException {
@@ -149,5 +149,13 @@ public class CrossChainTx extends BaseNulsData {
 
     public void setVerifyNodeList(List<Node> verifyNodeList) {
         this.verifyNodeList = verifyNodeList;
+    }
+
+    public List<CrossTxSignResult> getSignRsList() {
+        return signRsList;
+    }
+
+    public void setSignRsList(List<CrossTxSignResult> signRsList) {
+        this.signRsList = signRsList;
     }
 }

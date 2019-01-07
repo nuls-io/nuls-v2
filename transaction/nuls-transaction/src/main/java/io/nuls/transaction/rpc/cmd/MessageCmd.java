@@ -415,14 +415,15 @@ public class MessageCmd extends BaseCmd {
                 double percent = ctx.getCtxVerifyResultList().size() / ctx.getVerifyNodeList().size() * 100;
                 //超过全部链接节点51%的节点验证通过,则节点判定交易的验证通过
                 if (percent >= 51) {
-                    //TODO 获取共识节点的打包地址
-                    String pakageAddress = "";
+                    //TODO 获取共识节点的节点地址
+                    String agentAddress = "";
                     //TODO 使用该地址到账户模块对跨链交易atx_trans_hash签名
-                    byte[] signature = AccountCall.signDigest(pakageAddress, null, message.getRequestHash().getDigestHex());
+                    byte[] signature = AccountCall.signDigest(agentAddress, null, message.getRequestHash().getDigestHex());
                     BroadcastCrossNodeRsMessage rsMessage = new BroadcastCrossNodeRsMessage();
                     rsMessage.setCommand(TxCmd.NW_CROSS_NODE_RS);
                     rsMessage.setRequestHash(message.getRequestHash());
                     rsMessage.setTransactionSignature(signature);
+                    rsMessage.setAgentAddress(agentAddress);
                     //广播交易hash
                     NetworkCall.broadcast(chainId, rsMessage);
                     ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);

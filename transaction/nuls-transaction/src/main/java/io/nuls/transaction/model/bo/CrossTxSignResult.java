@@ -27,6 +27,7 @@ package io.nuls.transaction.model.bo;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Getter;
@@ -38,16 +39,10 @@ import java.io.IOException;
  * 跨链交易验证结果
  *
  * @author: qinyifeng
- * @date: 2018/12/28
+ * @date: 2019/01/07
  */
-public class CrossTxVerifyResult extends BaseNulsData {
+public class CrossTxSignResult extends BaseNulsData {
 
-    /**
-     * 链ID
-     */
-    @Getter
-    @Setter
-    private int chainId;
     /**
      * 节点ID
      */
@@ -56,32 +51,39 @@ public class CrossTxVerifyResult extends BaseNulsData {
     private String nodeId;
 
     /**
-     * 确认高度
+     * 验证的节点对交易的签名
      */
     @Getter
     @Setter
-    private long height;
+    private TransactionSignature transactionSignature;
+
+    /**
+     * 节点地址
+     */
+    @Getter
+    @Setter
+    private String agentAddress;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(chainId);
         stream.writeString(nodeId);
-        stream.writeVarInt(height);
+        stream.writeNulsData(transactionSignature);
+        stream.writeString(agentAddress);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readUint16();
         this.nodeId = byteBuffer.readString();
-        this.height = byteBuffer.readVarInt();
+        this.transactionSignature = byteBuffer.readNulsData(new TransactionSignature());
+        this.agentAddress = byteBuffer.readString();
     }
 
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(nodeId);
-        size += SerializeUtils.sizeOfVarInt(height);
+        size += SerializeUtils.sizeOfNulsData(transactionSignature);
+        size += SerializeUtils.sizeOfString(agentAddress);
         return size;
     }
 }
