@@ -129,7 +129,20 @@ public interface RpcParameterNameConstant {
      */
     String MIN_SIGNS = "minSigns";
 
+    /**
+     * signAddress
+     */
+    String SIGN_ADDREESS = "signAddress";
 
+    /**
+     * the public key hex string
+     */
+    String PUB_KEY_HEX = "pubKeyHex";
+
+    /**
+     * the sig hex
+     */
+    String SIG_HEX = "sigHex";
 
 
 }

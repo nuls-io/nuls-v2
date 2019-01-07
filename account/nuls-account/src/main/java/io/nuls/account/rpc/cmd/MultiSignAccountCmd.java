@@ -2,8 +2,10 @@ package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
+import io.nuls.account.service.AliasService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.util.log.LogUtil;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -11,6 +13,8 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.data.FormatValidUtils;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
 import java.util.HashMap;
 import java.util.List;
@@ -29,6 +33,9 @@ public class MultiSignAccountCmd extends BaseCmd {
 
     @Autowired
     private MultiSignAccountService multiSignAccountService;
+
+    @Autowired
+    private AliasService aliasService;
 
     /**
      * 创建多签账户
@@ -157,17 +164,33 @@ public class MultiSignAccountCmd extends BaseCmd {
         Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
         Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
-        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
+        Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
         try {
             // check parameters
-            if (params == null || chainIdObj == null || addressObj == null) {
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || aliasObj == null
+                || signAddressObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             chainId = (Integer) chainIdObj;
             address = (String) addressObj;
             password = (String) passwordObj;
             alias = (String) aliasObj;
-            Transaction transaction = aliasService.setAlias(chainId, address, password, alias);
+            signAddress = (String) signAddressObj;
+
+
+            if (!AddressTool.validAddress(chainId,signAddress) || !AddressTool.validAddress(chainId,address)) {
+                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+            }
+            if (StringUtils.isBlank(alias)) {
+                throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
+            }
+            if (!FormatValidUtils.validAlias(alias)) {
+                throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
+            }
+            if (!aliasService.isAliasUsable(chainId,alias)) {
+                throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
+            }
+            Transaction transaction = multiSignAccountService.setMultiAlias(chainId, address, password, alias, signAddress);
             if (transaction != null && transaction.getHash() != null) {
                 txHash = transaction.getHash().getDigestHex();
             }
@@ -180,7 +203,7 @@ public class MultiSignAccountCmd extends BaseCmd {
         }
         Map<String, String> result = new HashMap<>();
         result.put("txHash", txHash);
-        LogUtil.debug("ac_getAliasByAddress end");
+        LogUtil.debug("ac_setMultiSigAlias end");
         return success(result);
     }
 

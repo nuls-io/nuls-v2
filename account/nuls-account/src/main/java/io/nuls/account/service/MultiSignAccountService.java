@@ -25,6 +25,7 @@
 package io.nuls.account.service;
 
 import io.nuls.base.data.MultiSigAccount;
+import io.nuls.base.data.Transaction;
 
 import java.util.List;
 
@@ -82,4 +83,7 @@ public interface MultiSignAccountService {
      * @return the result of remove the multiSigAccount
      */
     boolean removeMultiSigAccount(int chainId,String address);
+
+
+    Transaction setMultiAlias(int chainId, String address, String password, String aliasName, String signAddr);
 }
