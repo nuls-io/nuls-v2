@@ -29,6 +29,7 @@ import io.nuls.transaction.message.VerifyCrossWithFCMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.model.bo.CrossTxVerifyResult;
+import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.ConsensusCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
@@ -413,15 +414,18 @@ public class MessageCmd extends BaseCmd {
             //判断当前节点是共识节点还是普通节点
             if (ConsensusCall.isConsensusNode()) {
                 //共识节点
-                double percent =ctx.getCtxVerifyResultList().size() / ctx.getConnectedNodeList().size() * 100;
-                if(percent>=51) {
-                    //TODO 获取共识节点的打包地址
-
+                double percent = ctx.getCtxVerifyResultList().size() / ctx.getVerifyNodeList().size() * 100;
+                //超过全部链接节点51%的节点验证通过,则节点判定交易的验证通过
+                if (percent >= 51) {
+                    //TODO 获取共识节点的节点地址
+                    String agentAddress = "";
                     //TODO 使用该地址到账户模块对跨链交易atx_trans_hash签名
-                    BroadcastCrossNodeRsMessage rsMessage=new BroadcastCrossNodeRsMessage();
+                    byte[] signature = AccountCall.signDigest(agentAddress, null, message.getRequestHash().getDigestHex());
+                    BroadcastCrossNodeRsMessage rsMessage = new BroadcastCrossNodeRsMessage();
+                    rsMessage.setCommand(TxCmd.NW_CROSS_NODE_RS);
                     rsMessage.setRequestHash(message.getRequestHash());
-                    rsMessage.setResult(true);
-                    //rsMessage.setTransactionSignature();
+                    rsMessage.setTransactionSignature(signature);
+                    rsMessage.setAgentAddress(agentAddress);
                     //广播交易hash
                     NetworkCall.broadcast(chainId, rsMessage);
                     ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
@@ -526,6 +530,7 @@ public class MessageCmd extends BaseCmd {
             message.parse(new NulsByteBuffer(decode));
             //查询处理中的跨链交易
  /*           CrossChainTx ctx = crossChainTxStorageService.getTx(chain.getChainId(), message.getRequestHash());
+
             if (ctx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -552,7 +557,7 @@ public class MessageCmd extends BaseCmd {
             Log.error(e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        map.put("value", result);
+        //map.put("value", result);
         return success(map);
     }
 
