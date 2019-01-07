@@ -108,6 +108,6 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         }
         String agentAddress = message.getAgentAddress();
         //todo 验证是否是共识节点.
-        ConsensusCall.isConsensusNode(agentAddress);
+        ConsensusCall.isConsensusNode(chain,agentAddress);
     }
 }

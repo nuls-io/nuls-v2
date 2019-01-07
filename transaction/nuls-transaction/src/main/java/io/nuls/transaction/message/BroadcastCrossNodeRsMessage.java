@@ -3,6 +3,7 @@ package io.nuls.transaction.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.message.base.BaseMessage;
@@ -31,7 +32,7 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
      */
     @Getter
     @Setter
-    private byte[] transactionSignature;
+    private P2PHKSignature signature;
 
     /**
      * 节点地址
@@ -44,7 +45,7 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(requestHash);
-        size += SerializeUtils.sizeOfBytes(transactionSignature);
+        size += SerializeUtils.sizeOfNulsData(signature);
         size += SerializeUtils.sizeOfString(agentAddress);
         return size;
     }
@@ -52,14 +53,14 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(requestHash);
-        stream.writeBytesWithLength(transactionSignature);
+        stream.writeNulsData(signature);
         stream.writeString(agentAddress);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.requestHash = byteBuffer.readHash();
-        this.transactionSignature = byteBuffer.readByLengthByte();
+        this.signature = byteBuffer.readNulsData(new P2PHKSignature());
         this.agentAddress = byteBuffer.readString();
     }
 }
