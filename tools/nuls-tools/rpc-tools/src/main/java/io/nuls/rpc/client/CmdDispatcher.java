@@ -358,7 +358,7 @@ public class CmdDispatcher {
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
     private static Response receiveResponse(String messageId, long timeOut) throws Exception {
-
+        int count = 0;
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= timeOut) {
             /*
@@ -377,6 +377,7 @@ public class CmdDispatcher {
                 messageId匹配，说明就是需要的结果，返回
                 If messageId is the same, then the response is needed
                  */
+                System.out.println("###############success extra loop count " + count);
                 return response;
             }
 
@@ -385,13 +386,14 @@ public class CmdDispatcher {
             Add back to the queue
              */
             ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);
-
+            count++;
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
 
         /*
         Timeout Error
          */
+        System.out.println("###############timeout extra loop count " + count);
         return MessageUtil.newResponse(messageId, Constants.BOOLEAN_FALSE, Constants.RESPONSE_TIMEOUT);
     }
 

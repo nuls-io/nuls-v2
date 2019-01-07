@@ -21,6 +21,8 @@
 package io.nuls.mykernel;
 
 import io.nuls.rpc.info.NoUse;
+import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 /**
  * 区块管理模块启动类
@@ -34,6 +36,7 @@ public class MyKernelBootstrap {
 
     public static void main(String[] args) {
         try {
+            SpringLiteContext.init("io.nuls.rpc.cmd.kernel", new ModularServiceMethodInterceptor());
             NoUse.mockKernel();
         } catch (Exception e) {
             System.exit(0);

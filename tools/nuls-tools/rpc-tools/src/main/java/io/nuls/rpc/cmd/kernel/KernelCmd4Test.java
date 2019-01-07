@@ -30,6 +30,7 @@ import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -43,6 +44,7 @@ import java.util.Map;
  * @date 2018/10/17
  * @description
  */
+@Component
 public class KernelCmd4Test extends BaseCmd {
 
 
