@@ -19,8 +19,8 @@ public class LedgerUtils {
      * @param assetId
      * @return
      */
-    public static String getKeyStr(String address, int chainId, int assetId) {
-       return  address + "-" + chainId + "-" + assetId;
+    public static String getKeyStr(String address, int assetChainId, int assetId) {
+       return  address + "-" + assetChainId + "-" + assetId;
 
     }
     /**
@@ -30,8 +30,8 @@ public class LedgerUtils {
      * @param assetId
      * @return
      */
-    public static byte[] getKey(String address, int chainId, int assetId) {
-        String key = address + "-" + chainId + "-" + assetId;
+    public static byte[] getKey(String address, int assetChainId, int assetId) {
+        String key = address + "-" + assetChainId + "-" + assetId;
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
         } catch (UnsupportedEncodingException e) {

@@ -49,14 +49,12 @@ public class CommontTransactionProcessor implements TxProcessor {
 
     @Override
     public void processFromCoinData(CoinFrom coin,String nonce,String hash,  AccountState accountState) {
-        //TODO:账户更新锁未使用
         accountState.addTotalFromAmount(coin.getAmount());
         accountState.updateConfirmedNonce(nonce);
     }
 
     @Override
     public void processToCoinData(CoinTo coin,String nonce,String hash,  AccountState accountState) {
-        //TODO:账户更新锁未使用
         accountState.addTotalToAmount(coin.getAmount());
     }
 }

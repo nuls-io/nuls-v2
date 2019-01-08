@@ -61,9 +61,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CoinDataValidator {
     final Logger logger = LoggerFactory.getLogger(getClass());
     /**
-     * key是交易hash  value是欲提交交易
+     * key int:chainId
+     * value:Map<key是交易hash  value是欲提交交易>
+     *
      */
-    private Map<String,Transaction> batchValidateTxMap = new ConcurrentHashMap<>();
+    private Map<int,Map<String,Transaction>> chainsBatchValidateTxMap = new ConcurrentHashMap<int,Map<String,Transaction>>();
     /**
      * key是账号资产 value是待确认支出列表
      */
@@ -84,10 +86,10 @@ public class CoinDataValidator {
     @Autowired
     private Repository repository;
 
-    public boolean hadValidateTx(Transaction tx){
+    public boolean hadValidateTx(int addressChainId,Transaction tx){
         //TODO:hash 值校验
-
-        if(null == batchValidateTxMap.get(tx.getHash().toString())){
+        Map<String,Transaction> batchValidateTxMap = chainsBatchValidateTxMap.get(addressChainId);
+        if(null == batchValidateTxMap  || null == batchValidateTxMap.get(tx.getHash().toString())){
             return false;
         }
         return true;
@@ -95,22 +97,27 @@ public class CoinDataValidator {
     /**
      * 开始批量校验
      */
-    public void beginBatchPerTxValidate(){
-
-        batchValidateTxMap.clear();
+    public boolean beginBatchPerTxValidate(int chainId){
+        Map<String,Transaction> batchValidateTxMap = chainsBatchValidateTxMap.get(chainId);
+        if(null == batchValidateTxMap.get(chainId)){
+            chainsBatchValidateTxMap.put(chainId,new ConcurrentHashMap<>());
+        }else{
+            batchValidateTxMap.clear();
+        }
         accountBalanceValidateTxMap.clear();
-        //清空缓存
-//        repository.clearBatchValidateTx();
+        return true;
+
     }
 
     /**
      * 批量逐笔校验
+     * @param chainId
      * @param tx
      * @return boolean
      */
-    public boolean bathValidatePerTx(Transaction tx){
+    public boolean bathValidatePerTx(int chainId,Transaction tx){
         //TODO:交易Hash值校验
-
+        Map<String,Transaction> batchValidateTxMap = chainsBatchValidateTxMap.get(chainId);
         //先校验，再逐笔放入缓存
         //交易的 hash值如果已存在，返回false，交易的from coin nonce 如果不连续，则存在双花。
         String txHash = tx.getHash().toString();
@@ -132,7 +139,7 @@ public class CoinDataValidator {
                 List<TempAccountState> list = accountBalanceValidateTxMap.get(assetKey);
                 if (null == list) {
                     //从头开始处理
-                    AccountState accountState = accountStateService.getAccountState(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+                    AccountState accountState = accountStateService.getAccountState(address, chainId,coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
                     if (!accountState.getNonce().equalsIgnoreCase(nonce)) {
                         logger.info("{}=={}=={}==nonce is error!{}!={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(),accountState.getNonce(),nonce);
                         return false;
@@ -164,9 +171,9 @@ public class CoinDataValidator {
             }else{
                 //T解锁交易，需要从from 里去获取需要的高度数据或时间数据，进行校验
                 //解锁交易只需要从已确认的数据中去获取数据进行校验
-                AccountState accountState = accountStateService.getAccountState(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+                AccountState accountState = accountStateService.getAccountState(address, chainId,coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
                 if(coinFrom.getLocked() > LedgerConstant.MAX_HEIGHT_VALUE ||  coinFrom.getLocked() == -1) {
-                    List<FreezeLockTimeState> list = accountState.getFreezeState().getFreezeLockTimeStates();
+                    List<FreezeLockTimeState> list = accountState.getFreezeLockTimeStates();
                     for (FreezeLockTimeState freezeLockTimeState : list) {
                         if (freezeLockTimeState.getTxHash().equalsIgnoreCase(txHash)) {
                             logger.info("{}=={}=={}=={} unlocked txHash is match", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(),txHash);
@@ -191,10 +198,11 @@ public class CoinDataValidator {
     /**
      * 进行coinData值的校验,在本地交易产生时候进行的校验
      * 未进行全文的nonce检索,所以不排除双花被当成孤儿交易返回。
+     * @param addressChainId
      * @param tx
      * @return
      */
-    public ValidateResult validateCoinData(Transaction tx) {
+    public ValidateResult validateCoinData(int addressChainId,Transaction tx) {
         CoinData coinData =  CoinDataUtils.parseCoinData(tx.getCoinData());
         byte [] nonce8Bytes = ByteUtils.copyOf(tx.getHash().getDigestBytes(), 8);
         String nonce8BytesStr =  HexUtil.encode(nonce8Bytes);
@@ -205,7 +213,7 @@ public class CoinDataValidator {
         for(CoinFrom coinFrom:coinFroms){
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
             String nonce = HexUtil.encode(coinFrom.getNonce());
-            AccountState accountState = accountStateService.getAccountState(address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
+            AccountState accountState = accountStateService.getAccountState(address,addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             if(accountState == null){
                 ValidateResult validateResult = new ValidateResult(VALIDATE_FAIL_CODE,String.format(VALIDATE_FAIL_DESC,address,nonce));
                 return validateResult;
@@ -246,7 +254,7 @@ public class CoinDataValidator {
                 boolean  inValid = true;
                 //解锁交易，校验是否存在该笔交易
                 //获取交易号
-                  List<FreezeLockTimeState> list =  accountState.getFreezeState().getFreezeLockTimeStates();
+                  List<FreezeLockTimeState> list =  accountState.getFreezeLockTimeStates();
                   for(FreezeLockTimeState freezeLockTimeState:list){
                       if(freezeLockTimeState.getNonce().equalsIgnoreCase(nonce) && freezeLockTimeState.getAmount().compareTo(coinFrom.getAmount())== 0){
                           //找到交易

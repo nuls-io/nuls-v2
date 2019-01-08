@@ -47,12 +47,12 @@ public interface Repository {
     void updateAccountStateAndSnapshot(String key,AccountState preAccountState,AccountState nowAccountState);
 
     /**
-     * get accountState from rocksdb
      *
+     * @param chainId
      * @param key
-     * @return      * @return
+     * @return AccountState
      */
-    AccountState getAccountState(byte[] key);
+    AccountState getAccountState(int chainId,byte[] key);
 
     /**
      *
@@ -62,21 +62,24 @@ public interface Repository {
     void updateAccountState(byte[] key,AccountState nowAccountState);
 
     /**
-     * get accountState from rocksdb
      *
+     * @param chainId
      * @param key
-     * @return      * @return
+     * @return AccountState
      */
-    AccountState getSnapshotAccountState(byte[] key);
+    AccountState getSnapshotAccountState(int chainId,byte[] key);
 
     /**
      *
+     * @param chainId
      * @param key
      */
-    void delSnapshotAccountState(byte[] key);
+    void delSnapshotAccountState(int chainId,byte[] key);
+
     /**
      *
-     * @return long
+     * @param chainId
+     * @return
      */
-      long  getBlockHeight();
+      long  getBlockHeight(int chainId);
 }

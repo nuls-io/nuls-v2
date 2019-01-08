@@ -44,14 +44,7 @@ public interface LedgerConstant {
 
     public static int  UNCONFIRMED_NONCE = 0;
     public static int  CONFIRMED_NONCE = 1;
-    /**
-     * 普通交易处理
-     */
-    public static int COMMONT_TX = 1;
-    /**
-     * 解锁交易处理
-     */
-    public static int  UNLOCK_TX = 2;
+
 
     /**
      * 高度解锁的阈值，大于这个值就是时间
@@ -61,6 +54,13 @@ public interface LedgerConstant {
      * 重新统计锁定的时间
      */
     public static final int TIME_RECALCULATE_FREEZE = 1000;
-
+    /**
+     * 永久锁定lockTime值
+     */
     public static final int PERMANENT_LOCK = -1;
+    /**
+     * 缓存的账户区块数量
+     */
+    public static final int CACHE_ACCOUNT_BLOCK = 100;
+
 }

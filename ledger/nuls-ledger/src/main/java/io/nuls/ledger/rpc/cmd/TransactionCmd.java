@@ -63,10 +63,11 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = "commitUnconfirmedTx",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHex", parameterType = "String")
     public Response commitUnconfirmedTx(Map params) {
         Map<String,Object> rtData = new HashMap<>();
-
+        Integer chainId = (Integer) params.get("chainId");
         String txHex = (String) params.get("txHex");
         if (StringUtils.isNotBlank(txHex)) {
             return failed("txHex not blank");
@@ -77,11 +78,11 @@ public class TransactionCmd extends BaseCmd {
             tx.parse(new NulsByteBuffer(txStream));
         } catch (NulsException e) {
             logger.error("transaction parse error", e);
-            rtData.put("result",0);
+            rtData.put("value",0);
             return success(rtData);
         }
-        rtData.put("result",1);
-        transactionService.unConfirmTxProcess(tx);
+        rtData.put("value",1);
+        transactionService.unConfirmTxProcess(chainId,tx);
         return success(rtData);
     }
     /**
@@ -93,12 +94,14 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = "commitConfirmTx",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHex", parameterType = "String")
     public Response commitConfirmTx(Map params) {
+        Integer chainId = (Integer) params.get("chainId");
         Map<String,Object> rtData = new HashMap<>();
         String txHex = (String) params.get("txHex");
-        if (StringUtils.isNotBlank(txHex)) {
-            return failed("txHex not blank");
+        if (StringUtils.isBlank(txHex)) {
+            return failed("txHex blank");
         }
         byte[] txStream = HexUtil.decode(txHex);
         Transaction tx = new Transaction();
@@ -107,8 +110,12 @@ public class TransactionCmd extends BaseCmd {
         } catch (NulsException e) {
             logger.error("transaction parse error", e);
         }
-        rtData.put("result",1);
-        transactionService.confirmTxProcess(tx);
+
+        if(transactionService.confirmTxProcess(chainId,tx)){
+            rtData.put("value",1);
+        }else{
+            rtData.put("value",0);
+        }
         return success();
     }
 
@@ -124,6 +131,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "txHex", parameterType = "String")
     public Response rollBackConfirmTx(Map params) {
         Map<String,Object> rtData = new HashMap<>();
+        Integer chainId = (Integer) params.get("chainId");
         String txHex = (String) params.get("txHex");
         if (StringUtils.isNotBlank(txHex)) {
             return failed("txHex not blank");
@@ -135,8 +143,8 @@ public class TransactionCmd extends BaseCmd {
         } catch (NulsException e) {
             logger.error("transaction parse error", e);
         }
-        rtData.put("result",1);
-        transactionService.rollBackConfirmTx(tx);
+        rtData.put("value",1);
+        transactionService.rollBackConfirmTx(chainId,tx);
         return success();
     }
 }

@@ -34,29 +34,21 @@ public interface AccountStateService {
     /**
      *
      * @param address
-     * @param chainId
+     * @param addressChainId
+     * @param assetChainId
      * @param assetId
      * @return
      */
-    AccountState createAccount(String address, int chainId, int assetId);
+    AccountState createAccount(String address,int addressChainId, int assetChainId, int assetId);
 
     /**
      *
      * @param address
-     * @param chainId
+     * @param assetChainId
      * @param assetId
      * @return
      */
-    boolean isExist(String address, int chainId, int assetId);
-
-    /**
-     *
-     * @param address
-     * @param chainId
-     * @param assetId
-     * @return
-     */
-    AccountState getAccountState(String address, int chainId, int assetId);
+    AccountState getAccountState(String address,int addressChainId, int assetChainId, int assetId);
 
     /**
      *存储新的账户信息时，进行快照存储
@@ -71,17 +63,17 @@ public interface AccountStateService {
      * @param txHash
      * @param height
      */
-    void rollAccountStateByTx(String assetKey,String txHash,long height);
+    void rollAccountStateByTx(int addressChainId,String assetKey,String txHash,long height);
 
     /**
      *
      * @param address
-     * @param chainId
+     * @param assetChainId
      * @param assetId
      * @param nonce
      * @return
      */
-    String setUnconfirmNonce(String address, int chainId, int assetId, String nonce);
+    String setUnconfirmNonce(String address,int addressChainId, int assetChainId, int assetId, String nonce);
 
 
 

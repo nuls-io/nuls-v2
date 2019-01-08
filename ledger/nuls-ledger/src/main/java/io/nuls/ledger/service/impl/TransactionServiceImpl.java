@@ -74,9 +74,8 @@ public class TransactionServiceImpl implements TransactionService {
      */
 
     @Override
-    public boolean unConfirmTxProcess(Transaction transaction) {
+    public boolean unConfirmTxProcess(int addressChainId,Transaction transaction) {
         //直接更新未确认交易
-        //TODO:要按用户账户来锁定处理(待处理)
         CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
         byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
         String nonce8BytesStr =  HexUtil.encode(nonce8Bytes);
@@ -90,7 +89,7 @@ public class TransactionServiceImpl implements TransactionService {
 
             }else {
                 //非解锁交易处理
-                accountStateService.setUnconfirmNonce(address, from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr);
+                accountStateService.setUnconfirmNonce(address, addressChainId,from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr);
             }
         }
         return true;
@@ -102,9 +101,9 @@ public class TransactionServiceImpl implements TransactionService {
      * @param transaction
      */
     @Override
-    public boolean confirmTxProcess(Transaction transaction) {
+    public synchronized boolean  confirmTxProcess(int addressChainId,Transaction transaction) {
         //从缓存校验交易
-        if(coinDataValidator.hadValidateTx(transaction)){
+        if(coinDataValidator.hadValidateTx(addressChainId,transaction)){
             //提交交易：1.交易存库（最近100区块交易） 2.更新账户
             //批量校验数据不需要存库
             Map<String,AccountBalance> updateAccounts = new HashMap<>();
@@ -121,7 +120,7 @@ public class TransactionServiceImpl implements TransactionService {
                 AccountBalance accountBalance = updateAccounts.get(key);
                 if(null == accountBalance){
                     //解锁交易处理,去除账号中的锁定记录
-                    AccountState accountState  = accountStateService.getAccountState(address,assetChainId,assetId);
+                    AccountState accountState  = accountStateService.getAccountState(address, addressChainId,assetChainId,assetId);
                     AccountState orgAccountState = (AccountState)accountState.deepClone();
                     updateAccounts.put(key,new AccountBalance(accountState,orgAccountState));
                 }
@@ -142,7 +141,7 @@ public class TransactionServiceImpl implements TransactionService {
                 AccountBalance accountBalance = updateAccounts.get(key);
                 if(null == accountBalance){
                     //解锁交易处理,去除账号中的锁定记录
-                    AccountState accountState  = accountStateService.getAccountState(address,assetChainId,assetId);
+                    AccountState accountState  = accountStateService.getAccountState(address,addressChainId,assetChainId,assetId);
                     AccountState orgAccountState = (AccountState)accountState.deepClone();
                     updateAccounts.put(key,new AccountBalance(accountState,orgAccountState));
                 }
@@ -162,7 +161,7 @@ public class TransactionServiceImpl implements TransactionService {
             }catch(Exception e){
                 e.printStackTrace();
                 //回滚
-                rollBackConfirmTx(transaction);
+                rollBackConfirmTx(addressChainId,transaction);
             }
             return true;
         }
@@ -177,7 +176,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @param transaction
      */
     @Override
-    public void rollBackConfirmTx(Transaction transaction) {
+    public synchronized void rollBackConfirmTx(int addressChainId,Transaction transaction) {
         //更新账户状态
         CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
         String txHash = transaction.getHash().toString();
@@ -190,14 +189,14 @@ public class TransactionServiceImpl implements TransactionService {
             int assetChainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
             String key = LedgerUtils.getKeyStr(address,assetChainId,assetId);
-            accountStateService.rollAccountStateByTx(key,txHash,height);
+            accountStateService.rollAccountStateByTx(addressChainId,key,txHash,height);
         }
         for (CoinTo to : tos) {
             String address = AddressTool.getStringAddressByBytes(to.getAddress());
             int assetChainId = to.getAssetsChainId();
             int assetId = to.getAssetsId();
             String key = LedgerUtils.getKeyStr(address,assetChainId,assetId);
-            accountStateService.rollAccountStateByTx(key,txHash,height);
+            accountStateService.rollAccountStateByTx(addressChainId,key,txHash,height);
         }
     }
 }

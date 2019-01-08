@@ -27,7 +27,7 @@ package io.nuls.ledger;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.config.AppConfig;
-import io.nuls.ledger.db.DataBaseArea;
+import io.nuls.ledger.model.ModuleConfig;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
@@ -70,7 +70,7 @@ public class LedgerBootstrap {
     public static void initServer() {
         try {
             String packageC = "io.nuls.ledger.rpc.cmd";
-            String kernelUrl = AppConfig.loadModuleConfig().getKernelHost() + ":" + AppConfig.loadModuleConfig().getKernelPort();
+            String kernelUrl = ModuleConfig.getInstance().getKernelHost() + ":" + ModuleConfig.getInstance().getKernelPort();
             logger.info("kernel start info {}", kernelUrl);
             WsServer.getInstance(ModuleE.LG)
                     //.supportedAPIVersions(new String[]{"1.1", "1.2"})
@@ -78,7 +78,6 @@ public class LedgerBootstrap {
                     .moduleVersion("1.2")
                     .scanPackage(packageC)
                     .connect("ws://127.0.0.1:8887");
-
             CmdDispatcher.syncKernel();
         } catch (Exception e) {
             Log.error("ledger initServer failed", e);
@@ -91,12 +90,7 @@ public class LedgerBootstrap {
      */
     public static void initRocksDb() {
         try {
-            RocksDBService.init(AppConfig.loadModuleConfig().getDatabaseDir());
-            if (!RocksDBService.existTable(DataBaseArea.TB_LEDGER_ACCOUNT)) {
-                RocksDBService.createTable(DataBaseArea.TB_LEDGER_ACCOUNT);
-            } else {
-                Log.info("table {} exist.", DataBaseArea.TB_LEDGER_ACCOUNT);
-            }
+            RocksDBService.init(ModuleConfig.getInstance().getDatabaseDir());
         } catch (Exception e) {
             Log.error(e);
         }
