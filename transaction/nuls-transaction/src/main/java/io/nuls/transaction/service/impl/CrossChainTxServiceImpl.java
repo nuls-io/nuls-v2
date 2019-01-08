@@ -7,16 +7,17 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.crypto.ECKey;
-import io.nuls.tools.data.LongUtils;
-import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.transaction.cache.TxVerifiedPool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxUnprocessedStorageService;
+import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
+import io.nuls.transaction.message.BroadcastCrossTxHashMessage;
 import io.nuls.transaction.message.VerifyCrossResultMessage;
 import io.nuls.transaction.message.base.BaseMessage;
 import io.nuls.transaction.model.bo.Chain;
@@ -25,16 +26,15 @@ import io.nuls.transaction.model.bo.CrossTxSignResult;
 import io.nuls.transaction.model.bo.CrossTxVerifyResult;
 import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.ConsensusCall;
+import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.CrossChainTxService;
+import io.nuls.transaction.utils.TxUtil;
 
-import javax.ws.rs.HEAD;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author: qinyifeng
@@ -47,6 +47,16 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
     private CrossChainTxStorageService crossChainTxStorageService;
     @Autowired
     private CrossChainTxUnprocessedStorageService crossChainTxUnprocessedStorageService;
+
+
+    @Autowired
+    private TxVerifiedPool txVerifiedPool;
+
+    @Autowired
+    private TxVerifiedStorageService txVerifiedStorageService;
+
+    @Autowired
+    private TransactionH2Service transactionH2Service;
 
     @Override
     public void newCrossTx(Chain chain, String nodeId, Transaction tx) {
@@ -103,8 +113,16 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         return crossChainTxStorageService.putTx(chain.getChainId(), crossChainTx);
     }
 
-    @Override
-    public void crossNodeResultProcess(Chain chain, String nodeId, BroadcastCrossNodeRsMessage message) throws NulsException {
+    /**
+     * 接收链内其他节点广播的跨链验证结果, 并保存.
+     * 1.如果是主网 当一个交易的签名者超过共识节点总数的80%，则通过
+     * 2.如果是友链 如果交易的签名者是友链最近x块的出块者
+     * @param chain
+     * @param nodeId
+     * @param message
+     * @throws NulsException
+     */
+    private void crossNodeResultProcess(Chain chain, String nodeId, BroadcastCrossNodeRsMessage message) throws NulsException {
         CrossChainTx ctx = getTx(chain, message.getRequestHash());
         if (ctx == null) {
             throw new NulsException(TxErrorCode.TX_NOT_EXIST);
@@ -149,8 +167,21 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         if(!isPass){
             return;
         }
+        Transaction tx = ctx.getTx();
         //加入待打包
+        txVerifiedPool.add(chain, tx,false);
+        //保存到rocksdb
+        txVerifiedStorageService.putTx(chain.getChainId(),tx);
+        //保存到h2数据库
+        transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
+        //调账本记录未确认交易
+        LedgerCall.commitTxLedger(chain, tx, false);
+        //广播交易hash
+        BroadcastCrossTxHashMessage ctxHashMessage = new BroadcastCrossTxHashMessage();
+        ctxHashMessage.setRequestHash(tx.getHash());
+        NetworkCall.broadcast(chain.getChainId(), ctxHashMessage);
     }
+
 
     /**
      * 根据总数, 通过数, 达成通过条件百分比,验证结果是否应达成通过条件
