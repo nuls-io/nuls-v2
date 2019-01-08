@@ -68,8 +68,8 @@ public class GetSmallBlockHandler extends BaseCmd {
         if(message == null || nodeId == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
         NulsDigestData blockHash = message.getRequestHash();
+        Log.info("recieve HashMessage from network node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash).getSmallBlock();
         if (smallBlock != null) {
             SmallBlockMessage smallBlockMessage = new SmallBlockMessage();

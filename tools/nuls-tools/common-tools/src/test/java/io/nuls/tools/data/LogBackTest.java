@@ -8,6 +8,7 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.rolling.RollingFileAppender;
 import ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP;
 import ch.qos.logback.core.rolling.TimeBasedRollingPolicy;
+import ch.qos.logback.core.util.FileSize;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -57,7 +58,7 @@ public class LogBackTest {
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 
         SizeAndTimeBasedFNATP triggeringPolicy = new SizeAndTimeBasedFNATP<ILoggingEvent>();
-        triggeringPolicy.setMaxFileSize(String.valueOf(maxFileSize_));
+        triggeringPolicy.setMaxFileSize(FileSize.valueOf(String.valueOf(maxFileSize_)));
 
         TimeBasedRollingPolicy<ILoggingEvent> rollingPolicy = new TimeBasedRollingPolicy<ILoggingEvent>();
         rollingPolicy.setContext(context);

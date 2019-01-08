@@ -88,7 +88,7 @@ public class TxGroupHandler extends BaseCmd {
             Log.warn("recieved a null txGroup form " + nodeId);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
+        Log.info("recieve TxGroupMessage from network node-" + nodeId + ", chainId:" + chainId + ", txcount:" + transactions.size());
         NulsDigestData blockHash = message.getBlockHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         //1.已收到完整区块,丢弃

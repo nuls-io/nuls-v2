@@ -70,6 +70,10 @@ public class SmallBlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        ChainContext context = ContextManager.getContext(chainId);
+        if (!context.getStatus().equals(RUNNING)) {
+            return success();
+        }
         String nodeId = map.get("nodeId").toString();
         SmallBlockMessage message = new SmallBlockMessage();
 
@@ -94,7 +98,6 @@ public class SmallBlockHandler extends BaseCmd {
         BlockHeader header = smallBlock.getHeader();
         NulsDigestData blockHash = header.getHash();
         //阻止恶意节点提前出块,拒绝接收未来一定时间外的区块
-        ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
         int validBlockInterval = parameters.getValidBlockInterval();
         if (header.getTime() > (NetworkUtil.currentTime() + validBlockInterval)) {
@@ -102,19 +105,16 @@ public class SmallBlockHandler extends BaseCmd {
         }
 
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        Log.info("recieve smallBlock from network node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
         NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
-
-        if (!context.getStatus().equals(RUNNING)) {
-            return success();
-        }
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
+            Log.info("COMPLETE, recieve smallBlockMessage from network node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
             return success();
         }
 
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
+            Log.info("INCOMPLETE, recieve smallBlockMessage from network node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
@@ -126,6 +126,7 @@ public class SmallBlockHandler extends BaseCmd {
 
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
+            Log.info("EMPTY, recieve smallBlockMessage from network node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
             if (!BlockUtil.headerVerify(chainId, header)) {
                 Log.debug("recieve error SmallBlockMessage from(" + nodeId + "), header height:" + header.getHeight() + ", preHash:" + header.getPreHash());
                 return success();
@@ -163,6 +164,7 @@ public class SmallBlockHandler extends BaseCmd {
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(needHashList, smallBlock);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.INCOMPLETE);
+                Log.info("INCOMPLETE, update smallBlockMessage from network node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
                 return success();
             }
 
@@ -172,6 +174,7 @@ public class SmallBlockHandler extends BaseCmd {
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
+                Log.info("COMPLETE, update smallBlockMessage from network node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
                 blockService.forwardBlock(chainId, blockHash, nodeId);
             }
         }

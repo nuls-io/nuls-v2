@@ -50,6 +50,7 @@ public class CompleteHandler extends BaseCmd {
     @CmdAnnotation(cmd = COMPLETE_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        String nodeId = map.get("nodeId").toString();
         CompleteMessage message = new CompleteMessage();
         try {
             byte[] decode = HexUtil.decode(map.get("messageBody").toString());
@@ -62,6 +63,7 @@ public class CompleteHandler extends BaseCmd {
         if (message == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
+        Log.debug("recieve CompleteMessage from network node-" + nodeId + ", chainId:" + chainId);
         CacheHandler.batchComplete(chainId, message);
         return success();
     }

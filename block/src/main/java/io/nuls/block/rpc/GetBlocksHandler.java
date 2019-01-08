@@ -73,7 +73,7 @@ public class GetBlocksHandler extends BaseCmd {
         if(startHeight < 0L || startHeight > endHeight || endHeight - startHeight > MAX_SIZE) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
+        Log.info("recieve HeightRangeMessage from network node-" + nodeId + ", chainId:" + chainId + ", start:" + startHeight + ", end:" + endHeight);
         NulsDigestData requestHash;
         try {
             requestHash = NulsDigestData.calcDigestData(message.serialize());

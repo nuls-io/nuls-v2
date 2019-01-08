@@ -33,6 +33,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 
 import java.util.Map;
 
@@ -51,6 +52,7 @@ public class BlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        String nodeId = map.get("nodeId").toString();
         BlockMessage message = new BlockMessage();
         try {
             byte[] decode = HexUtil.decode(map.get("messageBody").toString());
@@ -62,7 +64,7 @@ public class BlockHandler extends BaseCmd {
         if (message == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
+        Log.debug("recieve BlockMessage from network node-" + nodeId + ", chainId:" + chainId + ", height:" + message.getBlock().getHeader().getHeight());
         CacheHandler.receiveBlock(chainId, message);
         return success();
     }

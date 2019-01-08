@@ -57,7 +57,7 @@ public class Constants {
      * 循环暂停时间
      * Loop pause time
      */
-    public static final long INTERVAL_TIMEMILLIS = 10L;
+    public static final long INTERVAL_TIMEMILLIS = 1L;
 
     /**
      * 超时毫秒数(1分钟)
