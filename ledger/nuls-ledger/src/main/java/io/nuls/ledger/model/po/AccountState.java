@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  * ⁣⁣
  */
-package io.nuls.ledger.model;
+package io.nuls.ledger.model.po;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -32,7 +32,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.*;
 
-import java.io.IOException;
+import java.io.*;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +57,18 @@ public class AccountState extends BaseNulsData {
     @Getter
     private String nonce;
 
+    @Setter
+    @Getter
+    private String txHash;
+    @Setter
+    @Getter
+    private long height = 0;
+    /**
+     * 最近一次的解冻处理时间,存储毫秒
+     */
+    @Setter
+    @Getter
+    private long latestUnFreezeTime = 0;
     /**
      * 账户冻结的资产(高度冻结)
      */
@@ -151,6 +163,9 @@ public class AccountState extends BaseNulsData {
         stream.writeUint16(chainId);
         stream.writeUint16(assetId);
         stream.writeString(nonce);
+        stream.writeString(txHash);
+        stream.writeUint32(height);
+        stream.writeUint32(latestUnFreezeTime);
         stream.writeUint16(unconfirmedNonces.size());
         for (String unconfirmedNonce : unconfirmedNonces) {
             stream.writeString(unconfirmedNonce);
@@ -163,6 +178,9 @@ public class AccountState extends BaseNulsData {
         this.chainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
         this.nonce = byteBuffer.readString();
+        this.txHash = byteBuffer.readString();
+        this.height = byteBuffer.readUint32();
+        this.latestUnFreezeTime = byteBuffer.readUint32();
         int unconfirmNonceCount = byteBuffer.readUint16();
         for (int i = 0; i < unconfirmNonceCount; i++) {
             try {
@@ -183,6 +201,9 @@ public class AccountState extends BaseNulsData {
         //assetId
         size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfString(nonce);
+        size += SerializeUtils.sizeOfString(txHash);
+        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint16();
         for (String unconfirmedNonce : unconfirmedNonces) {
             size += SerializeUtils.sizeOfString(unconfirmedNonce);
@@ -193,5 +214,25 @@ public class AccountState extends BaseNulsData {
         size += SerializeUtils.sizeOfBigInteger();
         size += SerializeUtils.sizeOfNulsData(freezeState);
         return size;
+    }
+    public AccountState deepClone()  {
+                 // 将对象写到流里
+        try {
+                 ByteArrayOutputStream bo = new ByteArrayOutputStream();
+                ObjectOutputStream oo = null;
+
+                    oo = new ObjectOutputStream(bo);
+
+                oo.writeObject(this);
+                        // 从流里读出来
+                ByteArrayInputStream bi = new ByteArrayInputStream(bo.toByteArray());
+                ObjectInputStream oi = new ObjectInputStream(bi);
+                return ((AccountState)oi.readObject());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

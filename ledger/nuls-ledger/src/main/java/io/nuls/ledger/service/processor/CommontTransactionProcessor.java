@@ -25,10 +25,9 @@
  */
 package io.nuls.ledger.service.processor;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
-import io.nuls.ledger.model.AccountState;
+import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -49,27 +48,15 @@ public class CommontTransactionProcessor implements TxProcessor {
 
 
     @Override
-    public void processFromCoinData(CoinFrom coin,String nonce,String hash) {
+    public void processFromCoinData(CoinFrom coin,String nonce,String hash,  AccountState accountState) {
         //TODO:账户更新锁未使用
-        String address = AddressTool.getStringAddressByBytes(coin.getAddress());
-        int assetChainId = coin.getAssetsChainId();
-        int assetId = coin.getAssetsId();
-        AccountState accountState  = accountStateService.getAccountState(address,assetChainId,assetId);
         accountState.addTotalFromAmount(coin.getAmount());
         accountState.updateConfirmedNonce(nonce);
-        //提交账号记录
-        accountStateService.updateAccountState(address,assetChainId,assetId,accountState);
     }
 
     @Override
-    public void processToCoinData(CoinTo coin,String nonce,String hash) {
+    public void processToCoinData(CoinTo coin,String nonce,String hash,  AccountState accountState) {
         //TODO:账户更新锁未使用
-        String address = AddressTool.getStringAddressByBytes(coin.getAddress());
-        int assetChainId = coin.getAssetsChainId();
-        int assetId = coin.getAssetsId();
-        AccountState accountState  = accountStateService.getAccountState(address,assetChainId,assetId);
         accountState.addTotalToAmount(coin.getAmount());
-        //提交账号记录
-        accountStateService.updateAccountState(address,assetChainId,assetId,accountState);
     }
 }

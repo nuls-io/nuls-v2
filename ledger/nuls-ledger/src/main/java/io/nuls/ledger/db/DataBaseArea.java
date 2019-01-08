@@ -31,4 +31,6 @@ package io.nuls.ledger.db;
  */
 public interface DataBaseArea {
     String TB_LEDGER_ACCOUNT = "account";
+
+    String TB_LEDGER_ACCOUNT_SNAPSHOT = "accountSnapshot";
 }

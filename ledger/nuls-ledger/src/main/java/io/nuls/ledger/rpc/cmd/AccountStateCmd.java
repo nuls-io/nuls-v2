@@ -26,7 +26,7 @@
 package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.model.AccountState;
+import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;

@@ -26,9 +26,10 @@
 package io.nuls.ledger.db;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.ledger.model.AccountState;
+import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import org.slf4j.Logger;
@@ -42,17 +43,75 @@ public class RepositoryImpl implements Repository {
     final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
-     * put accountState to rocksdb
+     * create accountState to rocksdb
      *
      * @param key
      * @param accountState
      */
     @Override
-    public void putAccountState(byte[] key, AccountState accountState) {
+    public void createAccountState(byte[] key, AccountState accountState) {
         try {
             RocksDBService.put(DataBaseArea.TB_LEDGER_ACCOUNT, key, accountState.serialize());
         } catch (Exception e) {
-            logger.error("putAccountState serialize error.", e);
+            logger.error("createAccountState serialize error.", e);
+        }
+    }
+
+    /**
+     * update accountState to rocksdb
+     * @param key
+     * @param preAccountState
+     * @param nowAccountState
+     */
+    @Override
+    public void updateAccountStateAndSnapshot(String key,AccountState preAccountState,AccountState nowAccountState){
+        try {
+            //bak  account Snapshot
+            RocksDBService.put(DataBaseArea.TB_LEDGER_ACCOUNT_SNAPSHOT, LedgerUtils.getSnapshotKey(key,nowAccountState.getTxHash(),nowAccountState.getHeight()), preAccountState.serialize());
+            //清除过期的snapshot数据,height = height - 100以前的数据
+            RocksDBService.delete(DataBaseArea.TB_LEDGER_ACCOUNT_SNAPSHOT, LedgerUtils.getSnapshotKey(key,nowAccountState.getTxHash(),nowAccountState.getHeight()-100));
+            //update account
+            RocksDBService.put(DataBaseArea.TB_LEDGER_ACCOUNT, key.getBytes(LedgerConstant.DEFAULT_ENCODING), nowAccountState.serialize());
+        } catch (Exception e) {
+            logger.error("updateAccountState serialize error.", e);
+        }
+    }
+    /**
+     * update accountState to rocksdb
+     * @param key
+     * @param nowAccountState
+     */
+    @Override
+    public void updateAccountState(byte[] key,AccountState nowAccountState){
+        try {
+            //update account
+            RocksDBService.put(DataBaseArea.TB_LEDGER_ACCOUNT, key, nowAccountState.serialize());
+        } catch (Exception e) {
+            logger.error("updateAccountState serialize error.", e);
+        }
+    }
+
+    @Override
+    public AccountState getSnapshotAccountState(byte[] key) {
+        byte[] stream = RocksDBService.get(DataBaseArea.TB_LEDGER_ACCOUNT_SNAPSHOT, key);
+        if (stream == null) {
+            return null;
+        }
+        AccountState accountState = new AccountState();
+        try {
+            accountState.parse(new NulsByteBuffer(stream));
+        } catch (NulsException e) {
+            logger.error("getAccountState serialize error.", e);
+        }
+        return accountState;
+    }
+
+    @Override
+    public void delSnapshotAccountState(byte[] key) {
+        try {
+        RocksDBService.delete(DataBaseArea.TB_LEDGER_ACCOUNT_SNAPSHOT,key);
+        } catch (Exception e) {
+            logger.error("delSnapshotAccountState error.", e);
         }
     }
 
@@ -78,19 +137,9 @@ public class RepositoryImpl implements Repository {
     }
 
     @Override
-    public void putBatchValidateTx(byte[] key, Transaction tx) {
+    public long getBlockHeight() {
         //TODO:
+        return 0;
     }
 
-    @Override
-    public Transaction getBatchValidateTx(byte[] key) {
-        //TODO:
-        return null;
-    }
-
-    @Override
-    public void clearBatchValidateTx() {
-        //TODO:
-
-    }
 }

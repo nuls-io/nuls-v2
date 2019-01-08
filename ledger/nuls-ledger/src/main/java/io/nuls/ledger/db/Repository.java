@@ -25,8 +25,7 @@
  */
 package io.nuls.ledger.db;
 
-import io.nuls.base.data.Transaction;
-import io.nuls.ledger.model.AccountState;
+import io.nuls.ledger.model.po.AccountState;
 
 public interface Repository {
 
@@ -37,32 +36,47 @@ public interface Repository {
      * @param key
      * @param accountState
      */
-    void putAccountState(byte[] key, AccountState accountState);
+    void createAccountState(byte[] key, AccountState accountState);
+
+    /**
+     * update accountState to rocksdb
+     * @param key
+     * @param preAccountState
+     * @param nowAccountState
+     */
+    void updateAccountStateAndSnapshot(String key,AccountState preAccountState,AccountState nowAccountState);
 
     /**
      * get accountState from rocksdb
      *
      * @param key
-     * @return
+     * @return      * @return
      */
     AccountState getAccountState(byte[] key);
 
     /**
-     * 缓存批量校验的交易
+     *
      * @param key
-     * @param tx
+     * @param nowAccountState
      */
-    void putBatchValidateTx(byte[] key, Transaction tx);
+    void updateAccountState(byte[] key,AccountState nowAccountState);
 
     /**
-     * 获取批量校验交易的缓存值
+     * get accountState from rocksdb
+     *
      * @param key
-     * @return
+     * @return      * @return
      */
-    Transaction getBatchValidateTx(byte[] key);
+    AccountState getSnapshotAccountState(byte[] key);
 
     /**
-     * 清空批量交易的缓存值
+     *
+     * @param key
      */
-    void clearBatchValidateTx();
+    void delSnapshotAccountState(byte[] key);
+    /**
+     *
+     * @return long
+     */
+      long  getBlockHeight();
 }

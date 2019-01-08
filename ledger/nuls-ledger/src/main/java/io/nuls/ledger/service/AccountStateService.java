@@ -25,65 +25,64 @@
  */
 package io.nuls.ledger.service;
 
-import io.nuls.ledger.model.AccountState;
-
-import java.math.BigInteger;
+import io.nuls.ledger.model.po.AccountState;
 
 /**
  * Created by wangkun23 on 2018/11/29.
  */
 public interface AccountStateService {
-
-    AccountState createAccount(String address, int chainId, int assetId);
-
-    boolean isExist(String address, int chainId, int assetId);
-
-    AccountState getAccountState(String address, int chainId, int assetId);
-    void updateAccountState(String address, int chainId, int assetId,AccountState accountState);
-
-    String setNonce(String address, int chainId, int assetId, String nonce);
-    String setUnconfirmNonce(String address, int chainId, int assetId, String nonce);
-
-    BigInteger addBalance(String address, int chainId, int assetId, BigInteger value);
-
     /**
-     * 从from转账到to
      *
-     * @param fromAddress
-     * @param toAddress
+     * @param address
      * @param chainId
      * @param assetId
-     * @param value
+     * @return
      */
-    void transfer(String fromAddress,
-                  String toAddress,
-                  int chainId,
-                  int assetId,
-                  BigInteger value);
+    AccountState createAccount(String address, int chainId, int assetId);
 
     /**
-     * 根据高度冻结用户的余额
      *
      * @param address
+     * @param chainId
+     * @param assetId
+     * @return
+     */
+    boolean isExist(String address, int chainId, int assetId);
+
+    /**
+     *
+     * @param address
+     * @param chainId
+     * @param assetId
+     * @return
+     */
+    AccountState getAccountState(String address, int chainId, int assetId);
+
+    /**
+     *存储新的账户信息时，进行快照存储
+     * @param assetKey
+     * @param accountState
+     */
+    void updateAccountStateByTx(String assetKey,AccountState orgAccountState,AccountState accountState);
+
+    /**
+     *
+     * @param assetKey
      * @param txHash
-     * @param amount
      * @param height
-     * @return
      */
-    BigInteger freezeByHeight(String address, int chainId, int assetId, String txHash, BigInteger amount, BigInteger height);
-
-    BigInteger unfreezeByHeight(String addressess, int chainId, int assetId, BigInteger latestHeight);
+    void rollAccountStateByTx(String assetKey,String txHash,long height);
 
     /**
-     * 根据时间冻结用户的余额
      *
      * @param address
-     * @param txHash
-     * @param amount
-     * @param lockTime
+     * @param chainId
+     * @param assetId
+     * @param nonce
      * @return
      */
-    BigInteger freezeByLockTime(String address, int chainId, int assetId, String txHash, BigInteger amount, long lockTime);
+    String setUnconfirmNonce(String address, int chainId, int assetId, String nonce);
 
-    void unfreezeLockTime(AccountState accountState, long latestBlockTime);
+
+
 }
