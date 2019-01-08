@@ -11,21 +11,30 @@ import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.data.LongUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxUnprocessedStorageService;
 import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
 import io.nuls.transaction.message.VerifyCrossResultMessage;
+import io.nuls.transaction.message.base.BaseMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.model.bo.CrossTxSignResult;
+import io.nuls.transaction.model.bo.CrossTxVerifyResult;
+import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.ConsensusCall;
+import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.CrossChainTxService;
 
+import javax.ws.rs.HEAD;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: qinyifeng
@@ -47,11 +56,11 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         int chainId = chain.getChainId();
         //判断是否存在
         CrossChainTx ctxExist = crossChainTxUnprocessedStorageService.getTx(chainId, tx.getHash());
-        if(null != ctxExist){
+        if (null != ctxExist) {
             return;
         }
         ctxExist = crossChainTxStorageService.getTx(chainId, tx.getHash());
-        if(null != ctxExist){
+        if (null != ctxExist) {
             return;
         }
         CrossChainTx ctx = new CrossChainTx();
@@ -86,7 +95,7 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
     @Override
     public boolean updateCrossTxState(Chain chain, NulsDigestData hash, int state) {
         CrossChainTx crossChainTx = crossChainTxStorageService.getTx(chain.getChainId(), hash);
-        if(null != crossChainTx){
+        if (null != crossChainTx) {
             chain.getLogger().error(hash.getDigestHex() + TxErrorCode.TX_NOT_EXIST.getMsg());
             return false;
         }
@@ -168,6 +177,19 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         return false;
     }
 
+
+    @Override
+    public synchronized boolean ctxResultProcess(Chain chain, BaseMessage message, String nodeId) throws NulsException {
+        if (message instanceof VerifyCrossResultMessage) {
+            //处理跨链节点验证结果
+            return verifyCrossResultProcess(chain, nodeId, (VerifyCrossResultMessage) message);
+        } else if (message instanceof BroadcastCrossNodeRsMessage) {
+            //处理链内节点验证结果
+            crossNodeResultProcess(chain, nodeId, (BroadcastCrossNodeRsMessage) message);
+        }
+        return false;
+    }
+
     /**
      * 验证主网共识节点签名结果的正确性
      * 包括发送结果的是否是有效共识节点, 签名数据和节点地址匹配, 签名正确性
@@ -175,15 +197,15 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
      * @param message
      * @return
      */
-    private boolean verifyNodeResult(Chain chain, BroadcastCrossNodeRsMessage message, CrossChainTx ctx){
+    private boolean verifyNodeResult(Chain chain, BroadcastCrossNodeRsMessage message, CrossChainTx ctx) {
         String agentAddress = message.getPackingAddress();
-        if(chain.getChainId() == TxConstant.NULS_CHAINID && !ConsensusCall.isConsensusNode(chain, agentAddress)){
+        if (chain.getChainId() == TxConstant.NULS_CHAINID && !ConsensusCall.isConsensusNode(chain, agentAddress)) {
             return false;
         }
         P2PHKSignature signature = message.getSignature();
         int addrChainId = AddressTool.getChainIdByAddress(agentAddress);
         byte[] addrbytes = AddressTool.getAddress(signature.getPublicKey(), addrChainId);
-        if(!Arrays.equals(addrbytes, AddressTool.getAddress(agentAddress))){
+        if (!Arrays.equals(addrbytes, AddressTool.getAddress(agentAddress))) {
             return false;
         }
         boolean verifySignature = false;
@@ -194,6 +216,64 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
             return false;
         }
         return verifySignature;
+    }
 
+    /**
+     * 处理跨链节点验证结果
+     * @param chain
+     * @param nodeId
+     * @param message
+     * @return
+     * @throws NulsException
+     */
+    private boolean verifyCrossResultProcess(Chain chain, String nodeId,  VerifyCrossResultMessage message) throws NulsException {
+        //查询处理中的跨链交易
+        CrossChainTx ctx = getTx(chain, message.getRequestHash());
+        if (ctx == null) {
+            throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+        }
+        //获取跨链交易验证结果
+        List<CrossTxVerifyResult> verifyResultList = ctx.getCtxVerifyResultList();
+        if (verifyResultList == null) {
+            verifyResultList = new ArrayList<>();
+        }
+        //添加新的跨链验证结果
+        CrossTxVerifyResult verifyResult = new CrossTxVerifyResult();
+        verifyResult.setChainId(chain.getChainId());
+        verifyResult.setNodeId(nodeId);
+        verifyResult.setHeight(message.getHeight());
+        verifyResultList.add(verifyResult);
+        ctx.setCtxVerifyResultList(verifyResultList);
+        //TODO 获取共识节点的节点地址
+        String packingAddress = "";
+        //判断当前节点是共识节点还是普通节点
+        if (ConsensusCall.isConsensusNode(chain, packingAddress)) {
+            //共识节点
+            double percent = ctx.getCtxVerifyResultList().size() / ctx.getVerifyNodeList().size() * 100;
+            //超过全部链接节点51%的节点验证通过,则节点判定交易的验证通过
+            if (percent >= 51) {
+                //TODO 使用该地址到账户模块对跨链交易atx_trans_hash签名
+                P2PHKSignature signature = AccountCall.signDigest(packingAddress, null, message.getRequestHash().getDigestHex());
+                BroadcastCrossNodeRsMessage rsMessage = new BroadcastCrossNodeRsMessage();
+                rsMessage.setCommand(TxCmd.NW_CROSS_NODE_RS);
+                rsMessage.setRequestHash(message.getRequestHash());
+                rsMessage.setSignature(signature);
+                rsMessage.setPackingAddress(packingAddress);
+                //广播交易hash
+                NetworkCall.broadcast(chain.getChainId(), rsMessage);
+                ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
+            }
+        } else {
+            //普通节点
+            if (verifyResultList.size() >= 3) {
+                //广播交易hash
+                NetworkCall.broadcastTxHash(chain.getChainId(), message.getRequestHash());
+                ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
+            }
+        }
+
+        //保存跨链交易验证结果
+        crossChainTxStorageService.putTx(chain.getChainId(), ctx);
+        return true;
     }
 }

@@ -4,6 +4,8 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
+import io.nuls.transaction.message.VerifyCrossResultMessage;
+import io.nuls.transaction.message.base.BaseMessage;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossChainTx;
 
@@ -56,6 +58,7 @@ public interface CrossChainTxService {
 
     /**
      * 更新跨链交易在跨链过程中的验证状态
+     *
      * @param chain
      * @param hash
      * @param state
@@ -73,5 +76,16 @@ public interface CrossChainTxService {
      * @throws NulsException
      */
     void crossNodeResultProcess(Chain chain, String nodeId, BroadcastCrossNodeRsMessage message) throws NulsException;
+
+    /**
+     * 接收跨链和链内其他节点广播的跨链验证结果, 接收跨链和链内结果时互斥，并保存.
+     * 1.VerifyCrossResultMessage：接收跨链节点验证结果
+     * 2.BroadcastCrossNodeRsMessage：接收链内节点验证结果
+     *
+     * @param chain
+     * @param message
+     * @param nodeId
+     */
+    boolean ctxResultProcess(Chain chain, BaseMessage message, String nodeId) throws NulsException;
 
 }
