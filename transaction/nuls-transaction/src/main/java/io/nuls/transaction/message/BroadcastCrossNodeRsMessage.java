@@ -39,14 +39,14 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
      */
     @Getter
     @Setter
-    private String agentAddress;
+    private String packingAddress;
 
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfNulsData(requestHash);
         size += SerializeUtils.sizeOfNulsData(signature);
-        size += SerializeUtils.sizeOfString(agentAddress);
+        size += SerializeUtils.sizeOfString(packingAddress);
         return size;
     }
 
@@ -54,13 +54,13 @@ public class BroadcastCrossNodeRsMessage extends BaseMessage {
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeNulsData(requestHash);
         stream.writeNulsData(signature);
-        stream.writeString(agentAddress);
+        stream.writeString(packingAddress);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.requestHash = byteBuffer.readHash();
         this.signature = byteBuffer.readNulsData(new P2PHKSignature());
-        this.agentAddress = byteBuffer.readString();
+        this.packingAddress = byteBuffer.readString();
     }
 }

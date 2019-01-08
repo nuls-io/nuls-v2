@@ -126,4 +126,13 @@ public interface TxConstant {
     String KEY_CHAIN_ID ="chainId";
     String KEY_NODE_ID="nodeId";
     String KEY_MESSAGE_BODY="messageBody";
+
+    /** 跨链验证通过率百分比, 跨链通过率 */
+    String CROSS_VERIFY_RESULT_PASS_RATE = "0.51";
+
+    /** 链内通过率 */
+    String CHAIN_NODES_RESULT_PASS_RATE = "0.8";
+
+    /** 友链链内最近N个出块者阈值*/
+    int RECENT_PACKAGER_THRESHOLD = 30;
 }

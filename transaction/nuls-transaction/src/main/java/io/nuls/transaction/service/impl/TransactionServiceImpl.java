@@ -54,10 +54,9 @@ import io.nuls.transaction.model.bo.CrossTxData;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.ChainCall;
-import io.nuls.transaction.rpc.call.LegerCall;
+import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.TransactionService;
@@ -378,11 +377,11 @@ public class TransactionServiceImpl implements TransactionService {
             }
             //检查对应资产余额 是否足够
             BigInteger amount = coinDTO.getAmount();
-            BigInteger balance = LegerCall.getBalance(address, assetChainId, assetId);
+            BigInteger balance = LedgerCall.getBalance(chain, address, assetChainId, assetId);
             if (BigIntegerUtils.isLessThan(balance, amount)) {
                 throw new NulsException(TxErrorCode.INSUFFICIENT_BALANCE);
             }
-            byte[] nonce = LegerCall.getNonce(chain, addr, assetChainId, assetId);
+            byte[] nonce = LedgerCall.getNonce(chain, addr, assetChainId, assetId);
             CoinFrom coinFrom = new CoinFrom(address, assetChainId, assetId, amount, nonce, TxConstant.CORSS_TX_LOCKED);
             coinFroms.add(coinFrom);
         }
@@ -459,7 +458,7 @@ public class TransactionServiceImpl implements TransactionService {
             throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
         } else if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
             //只从资产为nuls的coinfrom中收取手续费
-            actualFee = getFeeDirect(listFrom, targetFee, actualFee);
+            actualFee = getFeeDirect(chain, listFrom, targetFee, actualFee);
             if (BigIntegerUtils.isLessThan(actualFee, targetFee)) {
                 //如果没收到足够的手续费，则从CoinFrom中资产不是nuls的coin账户中查找nuls余额，并组装新的coinfrom来收取手续费
                 if (!getFeeIndirect(chain, listFrom, txSize, targetFee, actualFee)) {
@@ -484,10 +483,10 @@ public class TransactionServiceImpl implements TransactionService {
      * @return BigInteger The amount of the fee actually charged 实际收取的手续费数额
      * @throws NulsException
      */
-    private BigInteger getFeeDirect(List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee) throws NulsException {
+    private BigInteger getFeeDirect(Chain chain, List<CoinFrom> listFrom, BigInteger targetFee, BigInteger actualFee) throws NulsException {
         for (CoinFrom coinFrom : listFrom) {
             if (TxUtil.isNulsAsset(coinFrom)) {
-                BigInteger mainAsset = LegerCall.getBalance(coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
+                BigInteger mainAsset = LedgerCall.getBalance(chain, coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
                 //当前还差的手续费
                 BigInteger current = targetFee.subtract(actualFee);
                 //如果余额大于等于目标手续费，则直接收取全额手续费
@@ -521,14 +520,14 @@ public class TransactionServiceImpl implements TransactionService {
         while (iterator.hasNext()) {
             CoinFrom coinFrom = iterator.next();
             if (!TxUtil.isNulsAsset(coinFrom)) {
-                BigInteger mainAsset = LegerCall.getBalance(coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
+                BigInteger mainAsset = LedgerCall.getBalance(chain, coinFrom.getAddress(), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID);
                 if (BigIntegerUtils.isEqualOrLessThan(mainAsset, BigInteger.ZERO)) {
                     continue;
                 }
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
-                feeCoinFrom.setNonce(LegerCall.getNonce(chain, AddressTool.getStringAddressByBytes(address), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID));
+                feeCoinFrom.setNonce(LedgerCall.getNonce(chain, AddressTool.getStringAddressByBytes(address), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID));
                 txSize += feeCoinFrom.size();
                 //新增coinfrom，重新计算本交易预计收取的手续费
                 targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
@@ -696,7 +695,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             //验证coinData
-            if (!LegerCall.verifyCoinData(chain, txHex, false)) {
+            if (!LedgerCall.verifyCoinData(chain, txHex, false)) {
                 clearInvalidTx(chain, tx);
                 continue;
             }
@@ -779,9 +778,9 @@ public class TransactionServiceImpl implements TransactionService {
                     continue;
                 }
                 //向账本模块发送要批量验证coinData的标识
-                LegerCall.coinDataBatchNotify(chain);
+                LedgerCall.coinDataBatchNotify(chain);
                 //验证coinData
-                if (!LegerCall.verifyCoinData(chain, txHex, true)) {
+                if (!LedgerCall.verifyCoinData(chain, txHex, true)) {
                     filterList.add(tx);
                     iterator.remove();
                     continue;
@@ -854,7 +853,7 @@ public class TransactionServiceImpl implements TransactionService {
                 return false;
             }
             /* 暂时取消单个验证coinData
-            if (!LegerCall.verifyCoinData(chain, tx, false)) {
+            if (!LedgerCall.verifyCoinData(chain, tx, false)) {
                 return false;
             }
             */
@@ -868,10 +867,10 @@ public class TransactionServiceImpl implements TransactionService {
                 moduleVerifyMap.put(txRegister, txHexs);
             }
         }
-        LegerCall.coinDataBatchNotify(chain);
+        LedgerCall.coinDataBatchNotify(chain);
         //todo 批量验证coinData，接口和单个的区别？
         for(Transaction tx : txList) {
-            if (!LegerCall.verifyCoinData(chain, tx, true)) {
+            if (!LedgerCall.verifyCoinData(chain, tx, true)) {
                 return false;
             }
         }
@@ -902,7 +901,7 @@ public class TransactionServiceImpl implements TransactionService {
     public void clearInvalidTx(Chain chain, Transaction tx) {
         txVerifiedStorageService.removeTx(chain.getChainId(), tx.getHash());
         //通知账本回滚nonce
-        LegerCall.rollbackTxLeger(chain, tx, false);
+        LedgerCall.rollbackTxLedger(chain, tx, false);
         //移除H2交易记录
         transactionH2Service.deleteTx(tx);
 
