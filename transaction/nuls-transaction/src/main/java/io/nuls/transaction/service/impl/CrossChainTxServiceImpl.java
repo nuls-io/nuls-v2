@@ -310,6 +310,5 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
 
         //保存跨链交易验证结果
         crossChainTxStorageService.putTx(chain.getChainId(), ctx);
-        return true;
     }
 }
