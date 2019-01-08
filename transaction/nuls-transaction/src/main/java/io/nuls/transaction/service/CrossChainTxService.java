@@ -86,6 +86,6 @@ public interface CrossChainTxService {
      * @param message
      * @param nodeId
      */
-    boolean ctxResultProcess(Chain chain, BaseMessage message, String nodeId) throws NulsException;
+    void ctxResultProcess(Chain chain, BaseMessage message, String nodeId) throws NulsException;
 
 }

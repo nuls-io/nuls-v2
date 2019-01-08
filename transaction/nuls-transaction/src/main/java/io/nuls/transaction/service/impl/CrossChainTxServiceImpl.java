@@ -7,8 +7,6 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.crypto.ECKey;
-import io.nuls.tools.data.LongUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxCmd;
@@ -28,13 +26,10 @@ import io.nuls.transaction.rpc.call.ConsensusCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.CrossChainTxService;
 
-import javax.ws.rs.HEAD;
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author: qinyifeng
@@ -116,14 +111,14 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
          * 4.统计结果是否满足打包条件
          */
         List<CrossTxSignResult> signRsList = ctx.getSignRsList();
-        for(CrossTxSignResult crossTxSignResult : signRsList){
-            if(crossTxSignResult.getPackingAddress().equals(message.getPackingAddress())){
+        for (CrossTxSignResult crossTxSignResult : signRsList) {
+            if (crossTxSignResult.getPackingAddress().equals(message.getPackingAddress())) {
                 //已收到过该结果,不再处理
                 return;
             }
         }
         //验证结果签名正确性
-        if(!verifyNodeResult(chain, message, ctx)){
+        if (!verifyNodeResult(chain, message, ctx)) {
             return;
         }
 
@@ -141,12 +136,12 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         if (chain.getChainId() == TxConstant.NULS_CHAINID) {
             //主网
             agentAddrs = ConsensusCall.getAgentAddressList(chain);
-        }else{
+        } else {
             //如果是友链,需满足签名者达到了最近N块的出块者的M%时则通过
-            agentAddrs =  ConsensusCall.getRecentPackagerAddress(chain, TxConstant.RECENT_PACKAGER_THRESHOLD);
+            agentAddrs = ConsensusCall.getRecentPackagerAddress(chain, TxConstant.RECENT_PACKAGER_THRESHOLD);
         }
         boolean isPass = isNodePass(agentAddrs, signRsList);
-        if(!isPass){
+        if (!isPass) {
             return;
         }
         //加入待打包
@@ -154,15 +149,16 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
 
     /**
      * 根据总数, 通过数, 达成通过条件百分比,验证结果是否应达成通过条件
+     *
      * @param agentAddrs 总数
      * @param signRsList 收到的结果
      * @return boolean
      */
-    private boolean isNodePass(List<String> agentAddrs, List<CrossTxSignResult> signRsList){
+    private boolean isNodePass(List<String> agentAddrs, List<CrossTxSignResult> signRsList) {
         int signRsCount = 0;
         //从收到结果中提取出在当前的共识节点出块地址集合中的地址,加入通过率计算
-        for(String agentAddr : agentAddrs){
-            for(CrossTxSignResult ctxRs : signRsList) {
+        for (String agentAddr : agentAddrs) {
+            for (CrossTxSignResult ctxRs : signRsList) {
                 if (ctxRs.equals(agentAddr)) {
                     signRsCount++;
                 }
@@ -179,20 +175,20 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
 
 
     @Override
-    public synchronized boolean ctxResultProcess(Chain chain, BaseMessage message, String nodeId) throws NulsException {
+    public synchronized void ctxResultProcess(Chain chain, BaseMessage message, String nodeId) throws NulsException {
         if (message instanceof VerifyCrossResultMessage) {
             //处理跨链节点验证结果
-            return verifyCrossResultProcess(chain, nodeId, (VerifyCrossResultMessage) message);
+            verifyCrossResultProcess(chain, nodeId, (VerifyCrossResultMessage) message);
         } else if (message instanceof BroadcastCrossNodeRsMessage) {
             //处理链内节点验证结果
             crossNodeResultProcess(chain, nodeId, (BroadcastCrossNodeRsMessage) message);
         }
-        return false;
     }
 
     /**
      * 验证主网共识节点签名结果的正确性
      * 包括发送结果的是否是有效共识节点, 签名数据和节点地址匹配, 签名正确性
+     *
      * @param chain
      * @param message
      * @return
@@ -220,13 +216,14 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
 
     /**
      * 处理跨链节点验证结果
+     *
      * @param chain
      * @param nodeId
      * @param message
      * @return
      * @throws NulsException
      */
-    private boolean verifyCrossResultProcess(Chain chain, String nodeId,  VerifyCrossResultMessage message) throws NulsException {
+    private void verifyCrossResultProcess(Chain chain, String nodeId, VerifyCrossResultMessage message) throws NulsException {
         //查询处理中的跨链交易
         CrossChainTx ctx = getTx(chain, message.getRequestHash());
         if (ctx == null) {
@@ -245,14 +242,16 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         verifyResultList.add(verifyResult);
         ctx.setCtxVerifyResultList(verifyResultList);
         //TODO 获取共识节点的节点地址
-        String packingAddress = "";
+        String packingAddress = ConsensusCall.getNodePackagerAddress(chain);
         //判断当前节点是共识节点还是普通节点
-        if (ConsensusCall.isConsensusNode(chain, packingAddress)) {
+        if (StringUtils.isNotBlank(packingAddress)) {
             //共识节点
-            double percent = ctx.getCtxVerifyResultList().size() / ctx.getVerifyNodeList().size() * 100;
+            BigDecimal rs = new BigDecimal(Integer.toString(ctx.getCtxVerifyResultList().size()));
+            BigDecimal agents = new BigDecimal(Integer.toString(ctx.getVerifyNodeList().size()));
+            BigDecimal passRate = new BigDecimal(TxConstant.CROSS_VERIFY_RESULT_PASS_RATE);
             //超过全部链接节点51%的节点验证通过,则节点判定交易的验证通过
-            if (percent >= 51) {
-                //TODO 使用该地址到账户模块对跨链交易atx_trans_hash签名
+            if (rs.compareTo(agents.multiply(passRate)) >= 0) {
+                //使用该地址到账户模块对跨链交易atx_trans_hash签名
                 P2PHKSignature signature = AccountCall.signDigest(packingAddress, null, message.getRequestHash().getDigestHex());
                 BroadcastCrossNodeRsMessage rsMessage = new BroadcastCrossNodeRsMessage();
                 rsMessage.setCommand(TxCmd.NW_CROSS_NODE_RS);
@@ -274,6 +273,5 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
 
         //保存跨链交易验证结果
         crossChainTxStorageService.putTx(chain.getChainId(), ctx);
-        return true;
     }
 }

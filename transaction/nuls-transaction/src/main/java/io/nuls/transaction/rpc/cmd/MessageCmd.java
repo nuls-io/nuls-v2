@@ -388,13 +388,13 @@ public class MessageCmd extends BaseCmd {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
             //处理跨链节点验证结果
-            result = crossChainTxService.ctxResultProcess(chainManager.getChain(chainId), message, nodeId);
+            crossChainTxService.ctxResultProcess(chainManager.getChain(chainId), message, nodeId);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        map.put("value", result);
+        map.put("value", true);
         return success(map);
     }
 
