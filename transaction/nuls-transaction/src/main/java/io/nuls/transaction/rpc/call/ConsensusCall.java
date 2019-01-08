@@ -45,9 +45,11 @@ public class ConsensusCall {
 
     /**
      * 验证是否是共识节点
+     *
      * @param agentAddress 节点地址
      * @return
      */
+    @Deprecated
     public static boolean isConsensusNode(Chain chain, String agentAddress) {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
@@ -55,7 +57,7 @@ public class ConsensusCall {
             //TODO cmd名称 返回值key
             params.put("chainId", chain.getChainId());
             params.put("agentAddress", agentAddress);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "isConsensusNode", params);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_isConsensusNode", params);
             if (cmdResp.isSuccess()) {
                 HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_isConsensusNode"));
                 return (Boolean) result.get("value");
@@ -67,16 +69,41 @@ public class ConsensusCall {
     }
 
     /**
+     * 获取节点打包地址
+     *
+     * @param chain
+     * @return
+     */
+    public static String getNodePackagerAddress(Chain chain) {
+        try {
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            //TODO cmd名称 返回值key
+            params.put("chainId", chain.getChainId());
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getNodePackagerAddress", params);
+            if (cmdResp.isSuccess()) {
+                HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_getNodePackagerAddress"));
+                return (String) result.get("value");
+            }
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
+    }
+
+    /**
      * 获取当前所有节点的出块地址, 主要用于主网
+     *
      * @param chain
      * @return
      */
     public static List<String> getAgentAddressList(Chain chain) {
-       return getRecentPackagerAddress(chain, 0L);
+        return getRecentPackagerAddress(chain, 0L);
     }
 
     /**
      * 获取最近height个出块者的出块地址
+     *
      * @param chain
      * @param height
      * @return
@@ -92,7 +119,7 @@ public class ConsensusCall {
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "getAgentAddressList", params);
             if (cmdResp.isSuccess()) {
                 HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_getAgentAddressList"));
-                if(null != result.get("address")) {
+                if (null != result.get("address")) {
                     address = (List<String>) result.get("address");
                 }
             }
