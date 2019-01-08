@@ -146,12 +146,10 @@ public class BlockBootstrap {
      */
     public static void onlyRunWhenTest() {
         ContextManager.chainIds.forEach(e -> {
-            if (!RocksDBService.existTable("tx" + e)) {
-                try {
-                    RocksDBService.createTable("tx" + e);
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                RocksDBService.createTable("tx" + e);
+            } catch (Exception e1) {
+                e1.printStackTrace();
             }
         });
 //        ChainContext chainContext = ContextManager.getContext(chainId);

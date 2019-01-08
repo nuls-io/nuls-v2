@@ -101,7 +101,7 @@ public class BlockSynchronizer implements Runnable {
             int size = params.getNodes().size();
             //网络上没有可用节点
             if (size == 0) {
-                Log.debug("no useful net nodes");
+                Log.warn("chain-" + chainId + ", no consistent nodes");
                 if (!synStatus.equals(BlockSynStatusEnum.FAIL)) {
                     if (ConsensusUtil.notice(chainId, 0)) {
                         statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
@@ -113,7 +113,7 @@ public class BlockSynchronizer implements Runnable {
             }
             //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
-                Log.info("chain-" + chainId + " first start");
+                Log.warn("chain-" + chainId + ", first start");
                 context.setStatus(RunningStatusEnum.RUNNING);
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
                     if (ConsensusUtil.notice(chainId, 1)) {
@@ -128,7 +128,7 @@ public class BlockSynchronizer implements Runnable {
             statusEnumMap.put(chainId, BlockSynStatusEnum.RUNNING);
             //检查本地区块状态
             if (!checkLocalBlock(chainId, params)) {
-                Log.info("local blocks is newest");
+                Log.warn("chain-" + chainId + ", local blocks is newest");
                 context.setStatus(RunningStatusEnum.RUNNING);
                 if (!synStatus.equals(BlockSynStatusEnum.SUCCESS)) {
                     if (ConsensusUtil.notice(chainId, 1)) {
@@ -182,6 +182,8 @@ public class BlockSynchronizer implements Runnable {
             } else {
                 statusEnumMap.put(chainId, BlockSynStatusEnum.FAIL);
             }
+        } else {
+            Log.warn("chain-" + chainId + ", available nodes not enough");
         }
     }
 

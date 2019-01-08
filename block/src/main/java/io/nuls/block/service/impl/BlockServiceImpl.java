@@ -412,12 +412,8 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public void init(int chainId) {
         try {
-            if (!RocksDBService.existTable(BLOCK_HEADER + chainId)) {
-                RocksDBService.createTable(BLOCK_HEADER + chainId);
-            }
-            if (!RocksDBService.existTable(BLOCK_HEADER_INDEX + chainId)) {
-                RocksDBService.createTable(BLOCK_HEADER_INDEX + chainId);
-            }
+            RocksDBService.createTable(BLOCK_HEADER + chainId);
+            RocksDBService.createTable(BLOCK_HEADER_INDEX + chainId);
             if (RocksDBService.existTable(CACHED_BLOCK + chainId)) {
                 RocksDBService.destroyTable(CACHED_BLOCK + chainId);
             }
