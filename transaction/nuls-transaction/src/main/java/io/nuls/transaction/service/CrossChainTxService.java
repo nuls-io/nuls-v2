@@ -79,7 +79,7 @@ public interface CrossChainTxService {
     boolean crossNodeResultProcess(Chain chain, BroadcastCrossNodeRsMessage message) throws NulsException;
 
     /**
-     * 接收跨链和链内其他节点广播的跨链验证结果, 并保存.
+     * 接收跨链和链内其他节点广播的跨链验证结果, 接收跨链和链内结果时互斥，并保存.
      * 1.VerifyCrossResultMessage：接收跨链节点验证结果
      * 2.BroadcastCrossNodeRsMessage：接收链内节点验证结果
      *
