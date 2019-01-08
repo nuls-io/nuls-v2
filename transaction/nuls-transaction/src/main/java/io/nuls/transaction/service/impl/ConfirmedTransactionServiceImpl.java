@@ -17,7 +17,7 @@ import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
-import io.nuls.transaction.rpc.call.LegerCall;
+import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
@@ -141,7 +141,7 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
                 chain.getLogger().error(tx.getHash().getDigestHex() + TxErrorCode.TX_COMMIT_FAIL);
                 return false;
             }
-            rs = LegerCall.commitTxLeger(chain, tx, true);
+            rs = LedgerCall.commitTxLedger(chain, tx, true);
             if (!rs) {
                 return false;
             }
@@ -185,7 +185,7 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
                     }
                 }
 
-                rs = LegerCall.rollbackTxLeger(chain, tx, true);
+                rs = LedgerCall.rollbackTxLedger(chain, tx, true);
                 if (atomicity && !rs) {
                     //如果为原子操作并且账本回滚失败,则直接结束回滚,并重新commit已回滚成功的交易,并返回失败
                     break;

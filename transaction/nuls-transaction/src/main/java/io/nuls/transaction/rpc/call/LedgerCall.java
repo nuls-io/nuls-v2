@@ -25,7 +25,7 @@ import java.util.Map;
  * @author: qinyifeng
  * @date: 2018/12/20
  */
-public class LegerCall {
+public class LedgerCall {
 
 
     public static void coinDataBatchNotify(Chain chain) {
@@ -102,11 +102,12 @@ public class LegerCall {
      * 查询账户特定资产的余额
      * Check the balance of an account-specific asset
      */
-    public static BigInteger getBalance(byte[] address, int chainId, int assetId) {
+    public static BigInteger getBalance(Chain chain, byte[] address, int assetChainId, int assetId) {
         String addressString = AddressTool.getStringAddressByBytes(address);
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chainId);
+        params.put("chainId", chain.getChainId());
+        params.put("assetChainId", assetChainId);
         params.put("assetId", assetId);
         params.put("address", addressString);
         try {
@@ -124,7 +125,7 @@ public class LegerCall {
      * @param tx
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean commitTxLeger(Chain chain, Transaction tx, boolean comfirmed){
+    public static boolean commitTxLedger(Chain chain, Transaction tx, boolean comfirmed){
         //todo
         return true;
     }
@@ -135,7 +136,7 @@ public class LegerCall {
      * @param tx
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean rollbackTxLeger(Chain chain, Transaction tx, boolean comfirmed){
+    public static boolean rollbackTxLedger(Chain chain, Transaction tx, boolean comfirmed){
         //todo
         return true;
     }

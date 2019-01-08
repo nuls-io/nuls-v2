@@ -32,7 +32,9 @@ import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,7 +52,7 @@ public class ConsensusCall {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            //TODO
+            //TODO cmd名称 返回值key
             params.put("chainId", chain.getChainId());
             params.put("agentAddress", agentAddress);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "isConsensusNode", params);
@@ -62,5 +64,41 @@ public class ConsensusCall {
             Log.error(e);
         }
         return true;
+    }
+
+    /**
+     * 获取当前所有节点的出块地址, 主要用于主网
+     * @param chain
+     * @return
+     */
+    public static List<String> getAgentAddressList(Chain chain) {
+       return getRecentPackagerAddress(chain, 0L);
+    }
+
+    /**
+     * 获取最近height个出块者的出块地址
+     * @param chain
+     * @param height
+     * @return
+     */
+    public static List<String> getRecentPackagerAddress(Chain chain, long height) {
+        List<String> address = new ArrayList<>();
+        try {
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            //TODO cmd名称 返回值key
+            params.put("chainId", chain.getChainId());
+            params.put("height", height);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "getAgentAddressList", params);
+            if (cmdResp.isSuccess()) {
+                HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_getAgentAddressList"));
+                if(null != result.get("address")) {
+                    address = (List<String>) result.get("address");
+                }
+            }
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return address;
     }
 }
