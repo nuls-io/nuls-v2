@@ -122,7 +122,7 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
     }
 
     @Override
-    public boolean ctxResultProcess(Chain chain, BaseMessage message, String nodeId) throws NulsException {
+    public synchronized boolean ctxResultProcess(Chain chain, BaseMessage message, String nodeId) throws NulsException {
         if (message instanceof VerifyCrossResultMessage) {
             //处理跨链节点验证结果
             return verifyCrossResultProcess(chain, (VerifyCrossResultMessage) message, nodeId);
