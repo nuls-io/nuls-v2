@@ -216,7 +216,7 @@ public class MessageCmd extends BaseCmd {
             TransactionDuplicateRemoval.insert(hash);
             //去该节点查询完整跨链交易
             GetTxMessage getTxMessage = new GetTxMessage();
-            getTxMessage.setCommand(TxCmd.NW_ASK_CROSS_TX);
+            getTxMessage.setCommand(TxCmd.NW_ASK_CROSS_TX_M_FC);
             getTxMessage.setRequestHash(hash);
             result = NetworkCall.sendToNode(chainId, getTxMessage, nodeId);
         } catch (NulsException e) {
@@ -229,16 +229,106 @@ public class MessageCmd extends BaseCmd {
     }
 
     /**
-     * 获取完整开始跨链处理的跨链交易数据
-     * get complete cross transaction data
+     * 主网向友链索取完整跨链交易
+     * The main network asks for complete cross-chain transactions from the Friends Chain
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = TxCmd.NW_ASK_CROSS_TX, version = 1.0, description = "get complete cross transaction data")
+    @CmdAnnotation(cmd = TxCmd.NW_ASK_CROSS_TX_M_FC, version = 1.0, description = "The main network asks for complete cross-chain transactions from the Friends Chain")
     @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
-    public Response askCrossTx(Map params) {
+    public Response askCrossTxM2Fc(Map params) {
+        Map<String, Boolean> map = new HashMap<>();
+        boolean result;
+        try {
+            Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
+            String nodeId = params.get(KEY_NODE_ID).toString();
+            //解析获取完整跨链交易消息
+            GetTxMessage message = new GetTxMessage();
+            if (message == null) {
+                return failed(TxErrorCode.PARAMETER_ERROR);
+            }
+            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            //查询已确认跨链交易
+            NulsDigestData txHash = message.getRequestHash();
+            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, txHash);
+            if (tx == null) {
+                throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+            }
+            //发送跨链交易到指定节点
+            CrossTxMessage crossTxMessage = new CrossTxMessage();
+            crossTxMessage.setCommand(NW_NEW_MN_TX);
+            crossTxMessage.setTx(tx);
+            result = NetworkCall.sendToNode(chainId, crossTxMessage, nodeId);
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        map.put("value", result);
+        return success(map);
+    }
+
+    /**
+     * 主网链内节点索取完整跨链交易
+     * Complete Cross-Chain Transaction Required by Nodes in the Main Network Chain
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = TxCmd.NW_ASK_CROSS_TX_M_M, version = 1.0, description = "Complete Cross-Chain Transaction Required by Nodes in the Main Network Chain")
+    @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
+    @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    public Response askCrossTxM2M(Map params) {
+        Map<String, Boolean> map = new HashMap<>();
+        boolean result;
+        try {
+            Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
+            String nodeId = params.get(KEY_NODE_ID).toString();
+            //解析获取完整跨链交易消息
+            GetTxMessage message = new GetTxMessage();
+            if (message == null) {
+                return failed(TxErrorCode.PARAMETER_ERROR);
+            }
+            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            //查询已确认跨链交易
+            NulsDigestData txHash = message.getRequestHash();
+            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, txHash);
+            if (tx == null) {
+                throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+            }
+            //发送跨链交易到指定节点
+            CrossTxMessage crossTxMessage = new CrossTxMessage();
+            crossTxMessage.setCommand(NW_NEW_MN_TX);
+            crossTxMessage.setTx(tx);
+            result = NetworkCall.sendToNode(chainId, crossTxMessage, nodeId);
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        map.put("value", result);
+        return success(map);
+    }
+
+    /**
+     * 友链向主网索取完整跨链交易
+     * Friend Chain Requests Complete Cross-Chain Transactions from Main Network
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = TxCmd.NW_ASK_CROSS_TX_FC_M, version = 1.0, description = "Friend Chain Requests Complete Cross-Chain Transactions from Main Network")
+    @Parameter(parameterName = KEY_CHAIN_ID, parameterType = "int")
+    @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
+    public Response askCrossTxFc2M(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
         try {
