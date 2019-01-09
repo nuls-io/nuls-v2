@@ -152,6 +152,9 @@ public class TransactionStorageServiceImpl implements TransactionStorageService,
         return txList;
     }
 
+    /**
+     * 处理跨链交易生效高度
+     */
     private class CrossTxEffectList extends BaseNulsData{
         List<NulsDigestData> hashList;
         @Override

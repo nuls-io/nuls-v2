@@ -39,12 +39,12 @@ public class TransactionBootStrap {
             initDB();
             //初始化上下文
             SpringLiteContext.init(TxConstant.CONTEXT_PATH);
-            //启动链
-            SpringLiteContext.getBean(ChainManager.class).runChain();
             //初始化国际资源文件语言
             initLanguage();
             //启动WebSocket服务,向外提供RPC接口
             initServer();
+            //启动链
+            SpringLiteContext.getBean(ChainManager.class).runChain();
             //注册网络消息协议
             NetworkCall.registerProtocol();
             TimeService.getInstance().start();

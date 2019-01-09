@@ -1,7 +1,9 @@
 package io.nuls.tools.log.logback;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
+import ch.qos.logback.classic.filter.ThresholdFilter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
@@ -10,8 +12,6 @@ import ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy;
 import ch.qos.logback.core.util.FileSize;
 import ch.qos.logback.core.util.OptionHelper;
 import org.slf4j.LoggerFactory;
-
-import java.text.SimpleDateFormat;
 
 /**
  * 日志打印管理类，日志文件创建，日志文件大小，保存时间，日志输出格式等设置管理
@@ -26,14 +26,19 @@ public class LogAppender {
      * 通过传入的名字和级别，动态设置appender
      *
      * @param fileName
+     * @param level
      * @return
      */
-    public static RollingFileAppender getAppender(String fileName){
+    public static RollingFileAppender getAppender(String fileName, Level level){
         String rootPath = System.getProperty(PROJECT_PATH);
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        //SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         RollingFileAppender appender = new RollingFileAppender();
-
+        //这里设置级别过滤器
+        LogFilter levelController = new LogFilter();
+        ThresholdFilter levelFilter = levelController.getThresholdFilter(level);
+        levelFilter.start();
+        appender.addFilter(levelFilter);
         //设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
         //但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
         appender.setContext(context);

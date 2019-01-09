@@ -119,6 +119,8 @@ public class CrossChainTx extends BaseNulsData {
 
     @Override
     public int size() {
+        // todo
+        int size = 0;
         return 0;
     }
 
