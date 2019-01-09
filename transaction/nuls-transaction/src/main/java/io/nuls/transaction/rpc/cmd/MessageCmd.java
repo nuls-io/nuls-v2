@@ -15,6 +15,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.cache.TransactionDuplicateRemoval;
 import io.nuls.transaction.constant.TxCmd;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.manager.ChainManager;
@@ -26,6 +27,7 @@ import io.nuls.transaction.message.TransactionMessage;
 import io.nuls.transaction.message.VerifyCrossResultMessage;
 import io.nuls.transaction.message.VerifyCrossWithFCMessage;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.CrossChainTxService;
@@ -249,7 +251,7 @@ public class MessageCmd extends BaseCmd {
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
-            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            Chain chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -258,6 +260,10 @@ public class MessageCmd extends BaseCmd {
             Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+            }
+            //交易是否被确认超过指定高度
+            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + TxConstant.CTX_EFFECT_THRESHOLD)) {
+                throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE_HEIGHT);
             }
             //发送跨链交易到指定节点
             CrossTxMessage crossTxMessage = new CrossTxMessage();
@@ -298,11 +304,19 @@ public class MessageCmd extends BaseCmd {
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            //查询已确认跨链交易
             NulsDigestData txHash = message.getRequestHash();
-            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, txHash);
-            if (tx == null) {
+            //查询处理中的跨链交易
+            CrossChainTx ctx = crossChainTxStorageService.getTx(chain.getChainId(), message.getRequestHash());
+            if (ctx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+            }
+            Transaction tx = ctx.getTx();
+            if (tx == null) {
+                //查询已确认跨链交易
+                tx = confirmedTransactionService.getConfirmedTransaction(chain, txHash);
+                if (tx == null) {
+                    throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+                }
             }
             //发送跨链交易到指定节点
             CrossTxMessage crossTxMessage = new CrossTxMessage();
@@ -339,7 +353,7 @@ public class MessageCmd extends BaseCmd {
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
-            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            Chain chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -348,6 +362,10 @@ public class MessageCmd extends BaseCmd {
             Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+            }
+            //交易是否被确认超过指定高度
+            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + TxConstant.CTX_EFFECT_THRESHOLD)) {
+                throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE_HEIGHT);
             }
             //发送跨链交易到指定节点
             CrossTxMessage crossTxMessage = new CrossTxMessage();
@@ -427,6 +445,10 @@ public class MessageCmd extends BaseCmd {
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
+            Chain chain = chainManager.getChain(chainId);
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
             //解析原始交易hash
             byte[] origTxHashByte = message.getOriginalTxHash();
             NulsDigestData originalTxHash = NulsDigestData.fromDigestHex(HexUtil.encode(origTxHashByte));
@@ -435,7 +457,10 @@ public class MessageCmd extends BaseCmd {
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            //TODO 验证该交易所在的区块已经被确认n个区块高度
+            //验证该交易所在的区块是否被确认超过指定高度
+            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + TxConstant.CTX_EFFECT_THRESHOLD)) {
+                throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE_HEIGHT);
+            }
 
             //TODO 将atx交易进行协议转换生成新的Anode2_atx_trans，再验证接收到的atx_trans_hash与Anode2_atx_trans_hash一致
 
@@ -511,6 +536,10 @@ public class MessageCmd extends BaseCmd {
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
+            Chain chain = chainManager.getChain(chainId);
+            if (null == chain) {
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
             //解析原始交易hash
             byte[] origTxHashByte = message.getOriginalTxHash();
             NulsDigestData originalTxHash = NulsDigestData.fromDigestHex(HexUtil.encode(origTxHashByte));
@@ -519,7 +548,10 @@ public class MessageCmd extends BaseCmd {
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            //TODO 验证该交易所在的区块已经被确认n个区块高度
+            //验证该交易所在的区块是否被确认超过指定高度
+            if (chain.getBestBlockHeight() < (tx.getBlockHeight() + TxConstant.CTX_EFFECT_THRESHOLD)) {
+                throw new NulsException(TxErrorCode.TX_NOT_EFFECTIVE_HEIGHT);
+            }
 
             //TODO 将atx交易进行协议转换生成新的Anode2_atx_trans，再验证接收到的atx_trans_hash与Anode2_atx_trans_hash一致
 

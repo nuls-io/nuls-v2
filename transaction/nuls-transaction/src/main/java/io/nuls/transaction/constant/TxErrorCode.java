@@ -98,4 +98,5 @@ public interface TxErrorCode {
     ErrorCode COINDATA_NOT_FOUND = ErrorCode.init("31016");
     ErrorCode TX_TYPE_ERROR = ErrorCode.init("31017");
     ErrorCode TX_NOT_EFFECTIVE = ErrorCode.init("31018");
+    ErrorCode TX_NOT_EFFECTIVE_HEIGHT = ErrorCode.init("31019");
 }
