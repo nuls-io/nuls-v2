@@ -25,17 +25,25 @@
  */
 package io.nuls.ledger.test.cmd;
 
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.crypto.HexUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,7 +55,7 @@ public class CmdTest {
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-        //CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+//        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
     }
 
     @Test
@@ -69,9 +77,109 @@ public class CmdTest {
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
         params.put("chainId", 8096);
+        params.put("assetChainId", 445);
+        params.put("address", "256");
+        params.put("assetId", 222);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
+        logger.info("response {}", response);
+    }
+    @Test
+    public void getBalanceNonce() throws Exception {
+        double version = 1.0;
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        params.put("chainId", 8096);
+        params.put("assetChainId", 445);
         params.put("address", "256");
         params.put("assetId", 222);
         Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
         logger.info("response {}", response);
     }
+    @Test
+    public void getNonce() throws Exception {
+        double version = 1.0;
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        params.put("chainId", 8096);
+        params.put("assetChainId", 445);
+        params.put("address", "256");
+        params.put("assetId", 222);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
+        logger.info("response {}", response);
+    }
+    @Test
+    public void validateCoinData() throws Exception {
+        double version = 1.0;
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        int chainId = 8096;
+        int assetChainId = 445;
+        String address = "256";
+        int assetId = 222;
+//        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
+//        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
+        //封装交易执行
+        Transaction tx = new Transaction();
+        CoinData coinData = new CoinData();
+        CoinFrom coinFrom = new CoinFrom();
+        CoinTo coinTo = new CoinTo();
+        coinTo.setAddress(address.getBytes());
+        coinTo.setAmount(BigInteger.valueOf(100));
+        coinTo.setAssetsChainId(assetChainId);
+        coinTo.setAssetsId(assetId);
+        coinTo.setLockTime(0);
+        List<CoinFrom> coinFroms =new ArrayList<>();
+//        coinFroms.add(coinFrom);
+        List<CoinTo> coinTos =new ArrayList<>();
+        coinTos.add(coinTo);
+        coinData.setFrom(coinFroms);
+        coinData.setTo(coinTos);
+        tx.setCoinData(coinData.serialize());
+        params.put("chainId", chainId);
+        params.put("txHex",HexUtil.encode(tx.serialize()));
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        logger.info("response {}", response);
+    }
+    @Test
+    public void commitConfirmTx() throws Exception {
+        double version = 1.0;
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        int chainId = 8096;
+        int assetChainId = 445;
+        String address = "256";
+        int assetId = 222;
+        params.put("assetChainId", 445);
+        params.put("address", address);
+        params.put("assetId", 222);
+        params.put("chainId", chainId);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
+        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
+        //封装交易执行
+        Transaction tx = new Transaction();
+        CoinData coinData = new CoinData();
+        CoinFrom coinFrom = new CoinFrom();
+        CoinTo coinTo = new CoinTo();
+        coinTo.setAddress(address.getBytes());
+        coinTo.setAmount(BigInteger.valueOf(100));
+        coinTo.setAssetsChainId(assetChainId);
+        coinTo.setAssetsId(assetId);
+        coinTo.setLockTime(0);
+        List<CoinFrom> coinFroms =new ArrayList<>();
+//        coinFroms.add(coinFrom);
+        List<CoinTo> coinTos =new ArrayList<>();
+        coinTos.add(coinTo);
+        coinData.setFrom(coinFroms);
+        coinData.setTo(coinTos);
+        tx.setCoinData(coinData.serialize());
+        params.put("chainId", chainId);
+        params.put("txHex",HexUtil.encode(tx.serialize()));
+        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitConfirmTx", params);
+        logger.info("response {}", response);
+    }
+
 }

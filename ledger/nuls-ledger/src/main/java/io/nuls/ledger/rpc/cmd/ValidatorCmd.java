@@ -89,7 +89,7 @@ public class ValidatorCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response bathValidateBegin(Map params) {
         Integer chainId = (Integer) params.get("chainId");
-        coinDataValidator.beginBatchPerTxValidate();
+        coinDataValidator.beginBatchPerTxValidate(chainId);
         Map<String,Object> rtData = new HashMap<>();
         rtData.put("value",1);
         return success(rtData);
