@@ -65,7 +65,6 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     @Override
     public boolean save(int chainId, Block block) {
         NulsDigestData hash = block.getHeader().getHash();
-        Log.debug("save block, hash:{}", hash);
         try {
             byte[] key = hash.serialize();
             return RocksDBService.put(CACHED_BLOCK + chainId, key, block.serialize());
@@ -114,7 +113,6 @@ public class ChainStorageServiceImpl implements ChainStorageService {
 
     @Override
     public boolean remove(int chainId, List<NulsDigestData> hashList) {
-        Log.debug("delete block, hash:{}", hashList.toString());
         try {
             List<byte[]> keys = new ArrayList<>();
             for (NulsDigestData hash : hashList) {

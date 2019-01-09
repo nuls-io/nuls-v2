@@ -60,7 +60,7 @@ public class ContextManager {
         chainContext.setStatus(RunningStatusEnum.INITIALIZING);
         chainContext.setSystemTransactionType(TransactionUtil.getSystemTypes(chainId));
         chainContext.init();
-        Log.info("new chainContext add! chainId-{}", chainId);
+        Log.info("new chainContext add! chainId-" + chainId);
     }
 
     public static ChainContext getContext(int chainId) {

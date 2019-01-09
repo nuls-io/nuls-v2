@@ -84,7 +84,7 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
         }else {
             data = msgBody.serialize();
         }
-        Log.info("=================getCheckSum:"+data.length);
+//        Log.info("=================getCheckSum:"+data.length);
         byte [] bodyHash=Sha256Hash.hashTwice(data);
         byte []get4Byte=ByteUtils.subBytes(bodyHash,0,4);
         long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();

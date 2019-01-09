@@ -1,5 +1,6 @@
 package io.nuls.tools.log.logback;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.core.Appender;
@@ -22,40 +23,32 @@ public class LoggerBuilder {
 
     public static NulsLogger getLogger(String folderName,String fileName) {
         String realKey = folderName+"/"+fileName;
-        NulsLogger logger = container.get(realKey);
-        if(logger != null) {
-            return logger;
-        }
-        synchronized (LoggerBuilder.class) {
-            logger = container.get(realKey);
-            if(logger != null) {
-                return logger;
-            }
-            logger = build(realKey);
-            container.put(realKey,logger);
-        }
-        return logger;
+        return getLogger(realKey);
+    }
+
+    public static NulsLogger getLogger(String folderName,String fileName,Level level) {
+        String realKey = folderName+"/"+fileName;
+        return getLogger(realKey,level);
     }
 
     public static NulsLogger getLogger(String fileName) {
+        return getLogger(fileName,Level.ALL);
+    }
+
+    public static NulsLogger getLogger(String fileName,Level level) {
         NulsLogger logger = container.get(fileName);
         if(logger != null) {
             return logger;
         }
         synchronized (LoggerBuilder.class) {
-            logger = container.get(fileName);
-            if(logger != null) {
-                return logger;
-            }
-            logger = build(fileName);
+            logger = build(fileName,level);
             container.put(fileName,logger);
         }
         return logger;
     }
 
-
-    private static NulsLogger build(String fileName) {
-        RollingFileAppender fileAppender = LogAppender.getAppender(fileName);
+    private static NulsLogger build(String fileName, Level level) {
+        RollingFileAppender fileAppender = LogAppender.getAppender(fileName,level);
         Appender consoleAppender = LogAppender.createConsoleAppender();
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger logger = context.getLogger(fileAppender.getEncoder().toString());

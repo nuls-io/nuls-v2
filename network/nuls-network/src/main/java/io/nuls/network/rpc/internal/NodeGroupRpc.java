@@ -38,6 +38,7 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.StringUtils;
 
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  * @author  lan
  * @date  2018/11/07
  **/
+@Component
 public class NodeGroupRpc extends BaseCmd {
     private NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
     private DbService dbService=StorageManager.getInstance().getDbService();

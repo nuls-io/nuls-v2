@@ -73,9 +73,17 @@ public interface TxCmd {
      */
     String NW_NEW_CROSS_HASH = "newCrossHash";
     /**
-     * 索取完整跨链交易
+     * 主网向友链索取完整跨链交易
      */
-    String NW_ASK_CROSS_TX = "askCrossTx";
+    String NW_ASK_CROSS_TX_M_FC = "askCrossTxM2Fc";
+    /**
+     * 主网链内节点索取完整跨链交易
+     */
+    String NW_ASK_CROSS_TX_M_M = "askCrossTxM2M";
+    /**
+     * 友链向主网索取完整跨链交易
+     */
+    String NW_ASK_CROSS_TX_FC_M = "askCrossTxFc2M";
     /**
      * 接收主网新的完整跨链交易
      */

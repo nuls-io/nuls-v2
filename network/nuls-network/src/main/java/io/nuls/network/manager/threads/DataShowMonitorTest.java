@@ -47,10 +47,10 @@ public class DataShowMonitorTest implements Runnable  {
     @Override
     public void run() {
         //test
-        printlnCachePeer();
+//        printlnCachePeer();
         printlnPeer();
-        printlnMem();
-        printlnProtocolMap();
+//        printlnMem();
+//        printlnProtocolMap();
     }
 
     private void printlnProtocolMap(){
@@ -66,11 +66,10 @@ public class DataShowMonitorTest implements Runnable  {
 
    private void printlnCachePeer(){
       List<Node> list= ConnectionManager.getInstance().getCacheAllNodeList();
-      Log.info("begin============================printlnCachePeer:"+list.size());
+      Log.info("============================printlnCachePeer:"+list.size());
       for(Node node:list){
-          Log.info("************cache connect:"+node.getId());
+          Log.info("============================cache connect:"+node.getId());
       }
-       Log.info("end============================printlnCachePeer:"+list.size());
    }
    private void printlnMem(){
 //       byte[] bys = new byte[1024*1024];//申请1M内存
@@ -84,29 +83,10 @@ public class DataShowMonitorTest implements Runnable  {
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for(NodeGroup nodeGroup:nodeGroupList){
             Collection<Node> c1=nodeGroup.getConnectNodes();
-            Log.info("begin============================printlnPeer c1:SelfConnectNodes============="+c1.size());
+            Log.info("=============printlnPeer c1============="+c1.size());
             for(Node n:c1){
-                Log.info("*************connect:"+n.getId());
+                Log.info("*******connect:{},height:{},hash:{}", n.getId(),n.getFirstNodeGroupConnector().getBlockHeight(), n.getFirstNodeGroupConnector().getBlockHash());
             }
-            Log.info("end============================printlnPeer c1:SelfConnectNodes============="+c1.size());
-            Collection<Node> c2=nodeGroup.getDisConnectNodes();
-            Log.info("begin============================printlnPeer c2:SelfDisConnectNodes============="+c2.size());
-            for(Node n:c2){
-                Log.info("***********disconnect:"+n.getId());
-            }
-            Log.info("end============================printlnPeer c2:SelfDisConnectNodes============="+c2.size());
-            Collection<Node> c3=nodeGroup.getConnectCrossNodes();
-            Log.info("begin============================printlnPeer c3:crossConnectNodes============="+c3.size());
-            for(Node n:c3){
-                Log.info("************cross connect:"+n.getId());
-            }
-            Log.info("end============================printlnPeer c2:SelfDisConnectNodes============="+c2.size());
-            Collection<Node> c4=nodeGroup.getDisConnectCrossNodes();
-            Log.info("begin============================printlnPeer c4:crossDisConnectNodes============="+c4.size());
-            for(Node n:c4){
-                Log.info("*************cross disconnect:"+n.getId());
-            }
-            Log.info("end============================printlnPeer c2:SelfDisConnectNodes============="+c2.size());
         }
     }
 }

@@ -81,7 +81,7 @@ public class HeartbeatProcessor implements Runnable {
                     如果握手失败，则重新连接
                     If the handshake fails, reconnect
                      */
-                    if (!CmdDispatcher.receiveNegotiateConnectionResponse()) {
+                    if (!CmdDispatcher.receiveNegotiateConnectionResponse(wsClient)) {
                         ClientRuntime.WS_CLIENT_MAP.remove(entry.getKey());
                         ClientRuntime.getWsClient(entry.getKey());
                     }

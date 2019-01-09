@@ -49,6 +49,7 @@ public class MultiSignTxSignature extends TransactionSignature {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         super.serializeToStream(stream);
         stream.write(m);
+        stream.writeVarInt(pubKeyList.size());
         for (int i = 0; i < pubKeyList.size(); i++) {
             stream.writeBytesWithLength(pubKeyList.get(i));
         }
@@ -60,7 +61,7 @@ public class MultiSignTxSignature extends TransactionSignature {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         super.parse(byteBuffer);
         this.m = byteBuffer.readByte();
-        long count = byteBuffer.readUint32();
+        long count = byteBuffer.readVarInt();
         for (int i = 0; i < count; i++) {
             pubKeyList.add(byteBuffer.readByLengthByte());
         }

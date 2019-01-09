@@ -80,7 +80,9 @@ public class ChainManager {
      * @return
      */
     public static boolean switchChain(int chainId, Chain masterChain, Chain forkChain) {
-
+        Log.info("0.switch chain start");
+        Log.info("1.masterChain-" + masterChain);
+        Log.info("2.forkChain-" + forkChain);
         //1.获取主链与最长分叉链的分叉点,并记录从分叉点开始的最长分叉链路径
         Stack<Chain> switchChainPath = new Stack<>();
         while (forkChain.getParent() != null) {
@@ -90,7 +92,7 @@ public class ChainManager {
         Chain topForkChain = switchChainPath.peek();
         long forkHeight = topForkChain.getStartHeight();
         long masterChainEndHeight = masterChain.getEndHeight();
-        Log.info("calculate evidence point complete");
+        Log.info("calculate fork point complete");
 
         //2.回滚主链
         //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库
@@ -99,7 +101,7 @@ public class ChainManager {
         long rollbackHeight = masterChainEndHeight;
         do {
             Block block = blockService.getBlock(chainId, rollbackHeight--);
-            if (blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block))) {
+            if (blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), false)) {
                 blockList.add(block);
                 hashList.addLast(block.getHeader().getHash());
             } else {
@@ -151,7 +153,7 @@ public class ChainManager {
     private static void saveBlockList(int chainId, List<Block> blockList) {
         //主链回滚中途失败,把前面回滚的区块再加回主链
         for (Block block : blockList) {
-            if (!blockService.saveBlock(chainId, block)) {
+            if (!blockService.saveBlock(chainId, block, false)) {
                 throw new ChainRuntimeException("switchChain fail");
             }
         }
@@ -182,7 +184,7 @@ public class ChainManager {
         while (target > count) {
             NulsDigestData hash = hashList.pop();
             Block block = chainStorageService.query(chainId, hash);
-            boolean saveBlock = blockService.saveBlock(chainId, block);
+            boolean saveBlock = blockService.saveBlock(chainId, block, false);
             if (saveBlock) {
                 count++;
             } else {
@@ -433,7 +435,7 @@ public class ChainManager {
         if (mainChain.isMaster()) {
             List<Block> blockList = chainStorageService.query(subChain.getChainId(), subChain.getHashList());
             for (Block block : blockList) {
-                if (!blockService.saveBlock(chainId, block)) {
+                if (!blockService.saveBlock(chainId, block, false)) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
             }

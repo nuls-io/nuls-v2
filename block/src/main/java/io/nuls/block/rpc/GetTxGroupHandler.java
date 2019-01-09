@@ -21,6 +21,7 @@
 package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.CommandConstant;
@@ -31,6 +32,7 @@ import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
@@ -51,7 +53,7 @@ import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 public class GetTxGroupHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = GET_TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Object process(Map map){
+    public Response process(Map map){
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();
         HashListMessage  message = new HashListMessage ();
@@ -60,16 +62,17 @@ public class GetTxGroupHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            Log.warn(e.getMessage());
+            Log.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         if(message == null || nodeId == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
+        List<NulsDigestData> hashList = message.getTxHashList();
+        Log.info("recieve HashListMessage from network node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size());
         TxGroupMessage request = new TxGroupMessage();
-        List<Transaction> transactions = TransactionUtil.getTransactions(chainId, message.getTxHashList());
+        List<Transaction> transactions = TransactionUtil.getTransactions(chainId, hashList);
         request.setBlockHash(message.getBlockHash());
         request.setTransactions(transactions);
         request.setCommand(CommandConstant.TXGROUP_MESSAGE);

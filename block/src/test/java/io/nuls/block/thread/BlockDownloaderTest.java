@@ -44,7 +44,7 @@ public class BlockDownloaderTest {
             if (startHeight + size > netLatestHeight) {
                 size = (int) (netLatestHeight - startHeight + 1);
             }
-            Log.info("get blocks {}->{}", startHeight, startHeight + size - 1);
+            Log.info("get blocks "+startHeight+"->"+(startHeight + size - 1));
             startHeight += size;
         }
     }

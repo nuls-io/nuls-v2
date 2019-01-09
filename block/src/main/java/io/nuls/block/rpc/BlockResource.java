@@ -40,6 +40,7 @@ import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -65,9 +66,11 @@ public class BlockResource extends BaseCmd {
      */
     @CmdAnnotation(cmd = BEST_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    public Object bestHeight(Map map) {
+    public Response bestHeight(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
-        return success(ContextManager.getContext(chainId).getLatestHeight());
+        Map<String, Long> responseData = new HashMap<>();
+        responseData.put("height", ContextManager.getContext(chainId).getLatestHeight());
+        return success(responseData);
     }
 
     /**
@@ -78,7 +81,7 @@ public class BlockResource extends BaseCmd {
      */
     @CmdAnnotation(cmd = BEST_BLOCK_HEADER, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    public Object bestBlockHeader(Map map) {
+    public Response bestBlockHeader(Map map) {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             BlockHeader blockHeader = service.getLatestBlockHeader(chainId);
@@ -97,7 +100,7 @@ public class BlockResource extends BaseCmd {
      */
     @CmdAnnotation(cmd = BEST_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    public Object bestBlock(Map map) {
+    public Response bestBlock(Map map) {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = service.getLatestBlock(chainId);
@@ -117,7 +120,7 @@ public class BlockResource extends BaseCmd {
     @CmdAnnotation(cmd = GET_BLOCK_HEADER_BY_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "height", parameterType = "long")
-    public Object getBlockHeaderByHeight(Map map) {
+    public Response getBlockHeaderByHeight(Map map) {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Long height = Long.parseLong(map.get("height").toString());
@@ -138,7 +141,7 @@ public class BlockResource extends BaseCmd {
     @CmdAnnotation(cmd = GET_LATEST_BLOCK_HEADERS, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "size", parameterType = "int")
-    public Object getLatestBlockHeaders(Map map) {
+    public Response getLatestBlockHeaders(Map map) {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Integer size = Integer.parseInt(map.get("size").toString());
@@ -166,7 +169,7 @@ public class BlockResource extends BaseCmd {
     @CmdAnnotation(cmd = GET_BLOCK_BY_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "height", parameterType = "long")
-    public Object getBlockByHeight(Map map) {
+    public Response getBlockByHeight(Map map) {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Long height = Long.parseLong(map.get("height").toString());
@@ -187,7 +190,7 @@ public class BlockResource extends BaseCmd {
     @CmdAnnotation(cmd = GET_BLOCK_HEADER_BY_HASH, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "hash", parameterType = "string")
-    public Object getBlockHeaderByHash(Map map) {
+    public Response getBlockHeaderByHash(Map map) {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
@@ -208,7 +211,7 @@ public class BlockResource extends BaseCmd {
     @CmdAnnotation(cmd = GET_BLOCK_BY_HASH, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "hash", parameterType = "string")
-    public Object getBlockByHash(Map map) {
+    public Response getBlockByHash(Map map) {
         try {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
@@ -236,7 +239,8 @@ public class BlockResource extends BaseCmd {
             Integer chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = new Block();
             block.parse(new NulsByteBuffer(HexUtil.decode((String) map.get("block"))));
-            if (service.saveBlock(chainId, block, 1) && service.broadcastBlock(chainId, block)) {
+            Log.info("recieve smallBlock from local node, chainId:" + chainId + ", height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
+            if (service.saveBlock(chainId, block, 1, true) && service.broadcastBlock(chainId, block)) {
                 return success();
             } else {
                 return failed(BlockErrorCode.PARAMETER_ERROR);

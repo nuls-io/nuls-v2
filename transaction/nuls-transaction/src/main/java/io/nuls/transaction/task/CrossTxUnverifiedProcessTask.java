@@ -84,7 +84,7 @@ public class CrossTxUnverifiedProcessTask implements Runnable {
             List<CrossChainTx> unprocessedList = crossChainTxUnprocessedStorageService.getTxList(chainId);
             List<CrossChainTx> processedList = new ArrayList<>();
             //Map<String,List<Node>> nodeMap=new HashMap<>();
-            for(CrossChainTx ctx : unprocessedList){
+            for (CrossChainTx ctx : unprocessedList) {
                 Transaction tx = ctx.getTx();
                 //交易验证
                 transactionManager.verify(chain, tx);
@@ -94,14 +94,13 @@ public class CrossTxUnverifiedProcessTask implements Runnable {
                 verifyCrossWithFCMessage.setRequestHash(tx.getHash());
                 verifyCrossWithFCMessage.setCommand(TxCmd.NW_VERIFY_FC);
                 //获取节点组 放CrossChainTx
-                if(ctx.getVerifyNodeList()==null || ctx.getVerifyNodeList().size()==0)
-                {
-                    List<Node> nodeList=NetworkCall.getAvailableNodes(ctx.getSenderChainId(),1,ctx.getSenderNodeId());
+                if (ctx.getVerifyNodeList() == null || ctx.getVerifyNodeList().size() == 0) {
+                    List<Node> nodeList = NetworkCall.getAvailableNodes(ctx.getSenderChainId(), 1, ctx.getSenderNodeId());
                     ctx.setVerifyNodeList(nodeList);
                 }
                 //发送跨链验证msg，除去发送者节点
-                if(ctx.getVerifyNodeList()!=null) {
-                    for(Node node:ctx.getVerifyNodeList()) {
+                if (ctx.getVerifyNodeList() != null) {
+                    for (Node node : ctx.getVerifyNodeList()) {
                         //TODO 是通过广播发送还是点对点发送
                         boolean rs = NetworkCall.sendToNode(ctx.getSenderChainId(), verifyCrossWithFCMessage, node.getId());
                         if (!rs) {
@@ -112,10 +111,12 @@ public class CrossTxUnverifiedProcessTask implements Runnable {
                     }
                 }
             }
-            //添加到处理中
-            crossChainTxStorageService.putTxs(chainId, processedList);
-            //从未处理DB表中清除
-            crossChainTxUnprocessedStorageService.removeTxList(chainId, processedList);
+            if (processedList != null && processedList.size() > 0) {
+                //添加到处理中
+                crossChainTxStorageService.putTxs(chainId, processedList);
+                //从未处理DB表中清除
+                crossChainTxUnprocessedStorageService.removeTxList(chainId, processedList);
+            }
         } catch (NulsException e) {
             chain.getLogger().error(e);
         }

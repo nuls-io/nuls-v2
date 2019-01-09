@@ -27,24 +27,33 @@ package io.nuls.transaction.model.bo;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.CoinData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 
 /**
- * 记录由非NULS主网发起的跨链交易验证过程中的状态和数据的模型
+ * 封装进入跨链过程后的跨链交易,同时保存验证过程中的状态和数据的模型
  * @author: Charlie
  * @date: 2018/11/13
  */
 public class CrossChainTx extends BaseNulsData {
 
+    /** 跨链交易在当前链生效的高度(交易的block高度 + 阈值高度)*/
+    private long height = -1L;
 
+    /** 该跨链交易在本链中的验证状态 */
+    private int state;
+
+    /** 该跨链交易在本链中的验证状态 */
     private Transaction tx;
 
+    /** 交易的来源节点, 用于经跨链验证时需要排除的节点*/
     private int senderChainId;
 
     /**
@@ -53,45 +62,65 @@ public class CrossChainTx extends BaseNulsData {
     private String senderNodeId;
 
     /**
-     * 跨链交易在当前链生效的高度(交易确认的高度 + 阈值高度)
-     */
-    private long height = -1L;
-
-    /**
-     * 该跨链交易在本链中的验证状态
-     */
-    private int state;
-
-    //TODO
-    /**
-     * 1.收到的跨链节点验证结果(数量？)
-     * 2.收到的本链节点验证结果(签名？)
-     *
-     */
-    private List<CrossTxVerifyResult> ctxVerifyResultList;
-
-    /**
      * 跨链验证节点列表
      */
-    private List<Node> verifyNodeList;
+    private List<Node> verifyNodeList = new ArrayList<>();
+
+    /**
+     * 收到的跨链节点验证结果
+     */
+    private List<CrossTxVerifyResult> ctxVerifyResultList = new ArrayList<>();
 
     /**
      * 收到的本链节点验证结果(签名)
      */
-    private List<CrossTxSignResult> signRsList;
+    private List<CrossTxSignResult> signRsList = new ArrayList<>();
 
     @Override
-    protected void serializeToStream(NulsOutputStreamBuffer nulsOutputStreamBuffer) throws IOException {
-
+    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint32(height);
+        stream.writeUint16(state);
+        stream.writeUint16(senderChainId);
+        stream.writeString(senderNodeId);
+        stream.writeNulsData(tx);
+        stream.writeVarInt(verifyNodeList.size());
+        for(Node node : verifyNodeList){
+            stream.writeNulsData(node);
+        }
+        stream.writeVarInt(ctxVerifyResultList.size());
+        for(CrossTxVerifyResult ctxResult : ctxVerifyResultList){
+            stream.writeNulsData(ctxResult);
+        }
+        stream.writeVarInt(signRsList.size());
+        for(CrossTxSignResult crossTxSignResult : signRsList){
+            stream.writeNulsData(crossTxSignResult);
+        }
     }
 
     @Override
-    public void parse(NulsByteBuffer nulsByteBuffer) throws NulsException {
-
+    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.height = byteBuffer.readUint32();
+        this.state = byteBuffer.readUint16();
+        this.senderChainId = byteBuffer.readUint16();
+        this.senderNodeId = byteBuffer.readString();
+        long verifyNodeListSize = byteBuffer.readVarInt();
+        for(int i=0;i<verifyNodeListSize;i++){
+            verifyNodeList.add(byteBuffer.readNulsData(new Node()));
+        }
+        long ctxVerifyResultListSize = byteBuffer.readVarInt();
+        for(int i=0;i<ctxVerifyResultListSize;i++){
+            ctxVerifyResultList.add(byteBuffer.readNulsData(new CrossTxVerifyResult()));
+        }
+        long signRsListSize = byteBuffer.readVarInt();
+        for(int i=0;i<signRsListSize;i++){
+            signRsList.add(byteBuffer.readNulsData(new CrossTxSignResult()));
+        }
     }
 
     @Override
     public int size() {
+        // todo
+        int size = 0;
         return 0;
     }
 

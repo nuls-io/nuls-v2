@@ -26,6 +26,7 @@ import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.FormatValidUtils;
@@ -33,6 +34,7 @@ import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -962,14 +964,14 @@ public class AccountCmd extends BaseCmd {
                 if (!AddressTool.validAddress(from.getAssetsChainId(), from.getAddress())) {
                     throw new NulsException(AccountErrorCode.ADDRESS_ERROR);
                 }
-                fromTotal=fromTotal.add(from.getAmount());
+                fromTotal = fromTotal.add(from.getAmount());
             }
             BigInteger toTotal = BigInteger.ZERO;
             for (CoinDto to : outputList) {
                 if (!AddressTool.validAddress(to.getAssetsChainId(), to.getAddress())) {
                     throw new NulsException(AccountErrorCode.ADDRESS_ERROR);
                 }
-                toTotal=toTotal.add(to.getAmount());
+                toTotal = toTotal.add(to.getAmount());
             }
 
             // check transfer amount
@@ -988,6 +990,48 @@ public class AccountCmd extends BaseCmd {
             return failed(e.getErrorCode());
         } catch (IOException e) {
             return failed(e.getMessage());
+        } catch (Exception e) {
+            return failed(e.getMessage());
+        }
+        LogUtil.debug("ac_multipleAddressTransfer end");
+        return success(map);
+    }
+
+
+    /**
+     * 验证数据签名接口
+     * verify sign
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_verifySignData", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi-account transfer transaction")
+    public Response verifySignData(Map params) {
+        LogUtil.debug("ac_verifySignData start");
+        Map<String, Boolean> map = new HashMap<>(1);
+        try {
+            // check parameters
+            if (params == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+            Object pubKeyHexObj = params == null ? null : params.get(RpcParameterNameConstant.PUB_KEY_HEX);
+            Object sigHexObj = params == null ? null : params.get(RpcParameterNameConstant.SIG_HEX);
+            Object dataHexObj = params == null ? null : params.get(RpcParameterNameConstant.DATA_HEX);
+            if (params == null || addressObj == null || pubKeyHexObj == null || sigHexObj == null || dataHexObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            String address = addressObj.toString();
+            byte[] pubKey = Hex.decode(pubKeyHexObj.toString());
+            byte[] sig = Hex.decode(sigHexObj.toString());
+            byte[] data = Hex.decode(dataHexObj.toString());
+            boolean result = true;
+            if (!ECKey.verify(data, sig, pubKey)) {
+                result = false;
+            }
+            map.put("value", result);
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
         } catch (Exception e) {
             return failed(e.getMessage());
         }
