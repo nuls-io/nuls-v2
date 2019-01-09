@@ -32,6 +32,7 @@ import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
@@ -51,7 +52,7 @@ import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 public class GetSmallBlockHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = GET_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Object process(Map map){
+    public Response process(Map map){
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();
         HashMessage  message = new HashMessage ();
@@ -60,15 +61,15 @@ public class GetSmallBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            Log.warn(e.getMessage());
+            Log.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         if(message == null || nodeId == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
         NulsDigestData blockHash = message.getRequestHash();
+        Log.info("recieve HashMessage from network node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash).getSmallBlock();
         if (smallBlock != null) {
             SmallBlockMessage smallBlockMessage = new SmallBlockMessage();

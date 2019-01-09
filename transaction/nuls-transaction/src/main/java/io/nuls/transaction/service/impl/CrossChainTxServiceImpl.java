@@ -19,6 +19,7 @@ import io.nuls.transaction.db.rocksdb.storage.CrossChainTxUnprocessedStorageServ
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
 import io.nuls.transaction.message.BroadcastCrossTxHashMessage;
+import io.nuls.transaction.message.GetTxMessage;
 import io.nuls.transaction.message.VerifyCrossResultMessage;
 import io.nuls.transaction.message.base.BaseMessage;
 import io.nuls.transaction.model.bo.Chain;
@@ -82,6 +83,7 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         ctx.setTx(tx);
         ctx.setSenderChainId(chainId);
         ctx.setSenderNodeId(nodeId);
+        ctx.setSenderNodeId(null);
         ctx.setState(TxConstant.CTX_UNPROCESSED_0);
         crossChainTxUnprocessedStorageService.putTx(chain.getChainId(), ctx);
     }
@@ -130,7 +132,13 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
     private void crossNodeResultProcess(Chain chain, String nodeId, BroadcastCrossNodeRsMessage message) throws NulsException {
         CrossChainTx ctx = getTx(chain, message.getRequestHash());
         if (ctx == null) {
-            throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+            //去要交易
+            GetTxMessage getTxMessage = new GetTxMessage();
+            getTxMessage.setRequestHash(message.getRequestHash());
+            // todo
+            getTxMessage.setCommand(TxCmd.NW_ASK_CROSS_TX_M_M);
+            NetworkCall.sendToNode(chain.getChainId(), getTxMessage, nodeId);
+            return;
         }
         /*
          * 1.结果是否已收到过
@@ -183,6 +191,7 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         LedgerCall.commitTxLedger(chain, tx, false);
         //广播交易hash
         BroadcastCrossTxHashMessage ctxHashMessage = new BroadcastCrossTxHashMessage();
+        ctxHashMessage.setCommand(TxCmd.NW_NEW_CROSS_HASH);
         ctxHashMessage.setRequestHash(tx.getHash());
         NetworkCall.broadcast(chain.getChainId(), ctxHashMessage);
     }

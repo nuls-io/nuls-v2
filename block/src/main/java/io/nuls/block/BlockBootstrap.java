@@ -81,16 +81,12 @@ public class BlockBootstrap {
             CmdDispatcher.syncKernel();
             //加载通用数据库
             RocksDBService.init(DATA_PATH);
-            if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
-                RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
-            }
-            if (!RocksDBService.existTable(CHAIN_PARAMETERS)) {
-                RocksDBService.createTable(CHAIN_PARAMETERS);
-            }
+            RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
+            RocksDBService.createTable(CHAIN_PARAMETERS);
             //加载配置
             ConfigLoader.load();
         } catch (Exception e) {
-            Log.error("error occur when init, {}", e.getMessage());
+            Log.error("error occur when init, " + e.getMessage());
         }
     }
 
@@ -98,7 +94,7 @@ public class BlockBootstrap {
         try {
             while (!ServerRuntime.isReady()) {
                 Log.info("wait depend modules ready");
-                Thread.sleep(1000L);
+                Thread.sleep(2000L);
             }
             NetworkUtil.register();
             Log.info("service start");
@@ -123,7 +119,7 @@ public class BlockBootstrap {
             ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
             dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
         } catch (Exception e) {
-            Log.error("error occur when start, {}", e.getMessage());
+            Log.error("error occur when start, " + e.getMessage());
         }
     }
 
@@ -135,7 +131,7 @@ public class BlockBootstrap {
                     System.exit(0);
                 }
                 BlockHeader header = context.getLatestBlock().getHeader();
-                Log.info("chainId:{}, latestHeight:{}, txCount:{}, hash:{}", chainId, header.getHeight(), header.getTxCount(), header.getHash());
+                Log.info("chainId:" + chainId  + ", latestHeight:" + header.getHeight() + ", txCount:"+ header.getTxCount() + ", hash:" + header.getHash());
                 try {
                     Thread.sleep(10000L);
                 } catch (InterruptedException e) {
@@ -150,12 +146,10 @@ public class BlockBootstrap {
      */
     public static void onlyRunWhenTest() {
         ContextManager.chainIds.forEach(e -> {
-            if (!RocksDBService.existTable("tx" + e)) {
-                try {
-                    RocksDBService.createTable("tx" + e);
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                RocksDBService.createTable("tx" + e);
+            } catch (Exception e1) {
+                e1.printStackTrace();
             }
         });
 //        ChainContext chainContext = ContextManager.getContext(chainId);

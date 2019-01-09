@@ -28,6 +28,7 @@ package io.nuls.ledger.model.po;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.*;
@@ -47,15 +48,17 @@ public class AccountState extends BaseNulsData {
 
     @Setter
     @Getter
-    private int chainId;
-
+    private int addressChainId;
+    @Setter
+    @Getter
+    private int assetChainId;
     @Setter
     @Getter
     private int assetId;
 
     @Setter
     @Getter
-    private String nonce;
+    private String nonce = LedgerConstant.INIT_NONCE;
 
     @Setter
     @Getter
@@ -91,17 +94,24 @@ public class AccountState extends BaseNulsData {
 
 
     /**
-     * 账户冻结的资产
+     * 账户冻结的资产(高度冻结)
      */
     @Setter
     @Getter
-    private FreezeState freezeState;
+    private List<FreezeHeightState> freezeHeightStates = new ArrayList<>();
 
-    public AccountState(int chainId, int assetId, String nonce) {
-        this.chainId = chainId;
+    /**
+     * 账户冻结的资产(时间冻结)
+     */
+    @Setter
+    @Getter
+    private List<FreezeLockTimeState> freezeLockTimeStates = new ArrayList<>();
+
+    public AccountState(int addressChainId,int assetChainId, int assetId, String nonce) {
+        this.addressChainId = addressChainId;
+        this.assetChainId = assetChainId;
         this.assetId = assetId;
         this.nonce = nonce;
-        this.freezeState = new FreezeState();
     }
 
     /**
@@ -154,13 +164,14 @@ public class AccountState extends BaseNulsData {
      * @return BigInteger
      */
     public BigInteger getTotalAmount() {
-        return totalToAmount.subtract(totalFromAmount).add(freezeState.getTotal());
+        return totalToAmount.subtract(totalFromAmount).add(getFreezeTotal());
     }
 
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(chainId);
+        stream.writeUint16(addressChainId);
+        stream.writeUint16(assetChainId);
         stream.writeUint16(assetId);
         stream.writeString(nonce);
         stream.writeString(txHash);
@@ -170,12 +181,22 @@ public class AccountState extends BaseNulsData {
         for (String unconfirmedNonce : unconfirmedNonces) {
             stream.writeString(unconfirmedNonce);
         }
-        stream.writeNulsData(freezeState);
+        stream.writeBigInteger(totalFromAmount);
+        stream.writeBigInteger(totalToAmount);
+        stream.writeUint16(freezeHeightStates.size());
+        for (FreezeHeightState heightState : freezeHeightStates) {
+            stream.writeNulsData(heightState);
+        }
+        stream.writeUint16(freezeLockTimeStates.size());
+        for (FreezeLockTimeState lockTimeState : freezeLockTimeStates) {
+            stream.writeNulsData(lockTimeState);
+        }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readUint16();
+        this.addressChainId = byteBuffer.readUint16();
+        this.assetChainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
         this.nonce = byteBuffer.readString();
         this.txHash = byteBuffer.readString();
@@ -189,14 +210,37 @@ public class AccountState extends BaseNulsData {
                 throw new NulsException(e);
             }
         }
-        this.freezeState = new FreezeState();
-        byteBuffer.readNulsData(freezeState);
+        this.totalFromAmount = byteBuffer.readBigInteger();
+        this.totalToAmount = byteBuffer.readBigInteger();
+        int freezeHeightCount = byteBuffer.readUint16();
+        this.freezeHeightStates = new ArrayList<>(freezeHeightCount);
+        for (int i = 0; i < freezeHeightCount; i++) {
+            try {
+                FreezeHeightState heightState = new FreezeHeightState();
+                byteBuffer.readNulsData(heightState);
+                this.freezeHeightStates.add(heightState);
+            } catch (Exception e) {
+                throw new NulsException(e);
+            }
+        }
+        int freezeLockTimeCount = byteBuffer.readUint16();
+        this.freezeLockTimeStates = new ArrayList<>(freezeLockTimeCount);
+        for (int i = 0; i < freezeLockTimeCount; i++) {
+            try {
+                FreezeLockTimeState lockTimeState = new FreezeLockTimeState();
+                byteBuffer.readNulsData(lockTimeState);
+                this.freezeLockTimeStates.add(lockTimeState);
+            } catch (Exception e) {
+                throw new NulsException(e);
+            }
+        }
     }
 
     @Override
     public int size() {
         int size = 0;
         //chainId
+        size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfInt16();
         //assetId
         size += SerializeUtils.sizeOfInt16();
@@ -212,9 +256,35 @@ public class AccountState extends BaseNulsData {
         size += SerializeUtils.sizeOfBigInteger();
         //totalToAmount
         size += SerializeUtils.sizeOfBigInteger();
-        size += SerializeUtils.sizeOfNulsData(freezeState);
+        size += SerializeUtils.sizeOfUint16();
+        for (FreezeHeightState heightState : freezeHeightStates) {
+            size += SerializeUtils.sizeOfNulsData(heightState);
+        }
+        size += SerializeUtils.sizeOfUint16();
+        for (FreezeLockTimeState lockTimeState : freezeLockTimeStates) {
+            size += SerializeUtils.sizeOfNulsData(lockTimeState);
+        }
         return size;
     }
+
+    /**
+     * 查询用户所有可用金额
+     *
+     * @return
+     */
+    public BigInteger getFreezeTotal() {
+        BigInteger freeze = BigInteger.ZERO;
+        for (FreezeHeightState heightState : freezeHeightStates) {
+            freeze = freeze.add(heightState.getAmount());
+        }
+
+        for (FreezeLockTimeState lockTimeState : freezeLockTimeStates) {
+            freeze = freeze.add(lockTimeState.getAmount());
+        }
+        return freeze;
+    }
+
+
     public AccountState deepClone()  {
                  // 将对象写到流里
         try {

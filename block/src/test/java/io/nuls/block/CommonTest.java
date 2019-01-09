@@ -30,8 +30,6 @@ import io.nuls.rpc.model.message.Request;
 import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.data.CollectionUtils;
 import io.nuls.tools.parse.JSONUtils;
-import org.java_websocket.client.WebSocketClient;
-import org.java_websocket.handshake.ServerHandshake;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
@@ -40,6 +38,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.StampedLock;
 
 public class CommonTest {
 
@@ -123,5 +123,44 @@ public class CommonTest {
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
         client.send(JSONUtils.obj2json(message));
+    }
+
+    @Test
+    public void testLock() {
+        for (int i = 0; i < 10; i++) {
+            try {
+                if (true) {
+                    System.out.println("22222222222222");
+                    throw new RuntimeException();
+                }
+                System.out.println("888888888");
+            } finally {
+                System.out.println("1111111111111");
+            }
+        }
+    }
+
+    @Test
+    public void testLock1() {
+        StampedLock lock = new StampedLock();
+        long lock1 = lock.writeLock();
+        lock.unlockWrite(lock1);
+
+        long lock2 = lock.writeLock();
+        lock.unlockWrite(lock2);
+
+        long lock3 = lock.writeLock();
+        lock.unlockWrite(lock3);
+    }
+
+    @Test
+    public void atomicInteger() {
+        AtomicInteger max = new AtomicInteger(Integer.MAX_VALUE);
+        System.out.println(max);
+        System.out.println(max.incrementAndGet());
+        System.out.println("--------------------");
+        AtomicInteger min = new AtomicInteger(Integer.MIN_VALUE);
+        System.out.println(min);
+        System.out.println(min.decrementAndGet());
     }
 }

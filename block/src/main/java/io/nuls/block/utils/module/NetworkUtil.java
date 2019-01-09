@@ -173,10 +173,7 @@ public class NetworkUtil {
         message.setRequestHash(hash);
         message.setSuccess(false);
         message.setCommand(COMPLETE_MESSAGE);
-        boolean result = sendToNode(chainId, message, nodeId);
-        if (!result) {
-            Log.warn("send fail message failed:{}, hash:{}", nodeId, hash);
-        }
+        sendToNode(chainId, message, nodeId);
     }
 
     public static void sendSuccess(int chainId, NulsDigestData hash, String nodeId) {
@@ -184,10 +181,7 @@ public class NetworkUtil {
         message.setRequestHash(hash);
         message.setSuccess(true);
         message.setCommand(COMPLETE_MESSAGE);
-        boolean result = sendToNode(chainId, message, nodeId);
-        if (!result) {
-            Log.warn("send success message failed:{}, hash:{}", nodeId, hash);
-        }
+        sendToNode(chainId, message, nodeId);
     }
 
     /**

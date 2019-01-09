@@ -34,7 +34,7 @@ import io.nuls.ledger.model.po.FreezeHeightState;
 import io.nuls.ledger.model.po.FreezeLockTimeState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ import java.util.List;
  * 解锁交易处理
  * Created by lanjinsheng on 2018/12/29.
  */
-@Service
+@Component
 public class LockedTransactionProcessor implements TxProcessor {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
@@ -66,7 +66,7 @@ public class LockedTransactionProcessor implements TxProcessor {
 
         if(coin.getLocked() < LedgerConstant.MAX_HEIGHT_VALUE  && coin.getLocked() != -1) {
             //按高度移除锁定
-            List<FreezeHeightState> list = accountState.getFreezeState().getFreezeHeightStates();
+            List<FreezeHeightState> list = accountState.getFreezeHeightStates();
             for(FreezeHeightState freezeHeightState : list){
                 if(freezeHeightState.getNonce().equalsIgnoreCase(HexUtil.encode(coin.getNonce()))){
                     if(0 == freezeHeightState.getAmount().compareTo(coin.getAmount())){
@@ -77,7 +77,7 @@ public class LockedTransactionProcessor implements TxProcessor {
             }
         }else {
             //按时间移除锁定
-            List<FreezeLockTimeState> list = accountState.getFreezeState().getFreezeLockTimeStates();
+            List<FreezeLockTimeState> list = accountState.getFreezeLockTimeStates();
             for (FreezeLockTimeState freezeLockTimeState : list) {
                 if (freezeLockTimeState.getNonce().equalsIgnoreCase(HexUtil.encode(coin.getNonce()))) {
                     if(0 == freezeLockTimeState.getAmount().compareTo(coin.getAmount())) {
@@ -106,7 +106,7 @@ public class LockedTransactionProcessor implements TxProcessor {
             freezeHeightState.setHeight(coin.getLockTime());
             freezeHeightState.setNonce(nonce);
             freezeHeightState.setTxHash(hash);
-            accountState.getFreezeState().getFreezeHeightStates().add(freezeHeightState);
+            accountState.getFreezeHeightStates().add(freezeHeightState);
         }else{
             //按时间锁定
             FreezeLockTimeState freezeLockTimeState = new FreezeLockTimeState();
@@ -115,7 +115,7 @@ public class LockedTransactionProcessor implements TxProcessor {
             freezeLockTimeState.setLockTime(coin.getLockTime());
             freezeLockTimeState.setNonce(nonce);
             freezeLockTimeState.setTxHash(hash);
-            accountState.getFreezeState().getFreezeLockTimeStates().add(freezeLockTimeState);
+            accountState.getFreezeLockTimeStates().add(freezeLockTimeState);
         }
     }
 }

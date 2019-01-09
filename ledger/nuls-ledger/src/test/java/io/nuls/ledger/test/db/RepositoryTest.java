@@ -30,6 +30,7 @@ import io.nuls.ledger.config.AppConfig;
 import io.nuls.ledger.db.DataBaseArea;
 import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.db.RepositoryImpl;
+import io.nuls.ledger.model.ModuleConfig;
 import io.nuls.tools.log.Log;
 import org.junit.Before;
 import org.slf4j.Logger;
@@ -48,7 +49,7 @@ public class RepositoryTest {
     public void before() {
         try {
             AppConfig.loadModuleConfig();
-            RocksDBService.init(AppConfig.loadModuleConfig().getDatabaseDir());
+            RocksDBService.init(ModuleConfig.getInstance().getDatabaseDir());
             if (!RocksDBService.existTable(DataBaseArea.TB_LEDGER_ACCOUNT)) {
                 RocksDBService.createTable(DataBaseArea.TB_LEDGER_ACCOUNT);
             }

@@ -22,6 +22,7 @@ package io.nuls.block.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.BlockMessage;
@@ -31,6 +32,7 @@ import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -55,7 +57,7 @@ public class GetBlockHandler extends BaseCmd {
     private BlockService service;
 
     @CmdAnnotation(cmd = GET_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "Handling received request block messages")
-    public Object process(Map map) {
+    public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
@@ -71,17 +73,22 @@ public class GetBlockHandler extends BaseCmd {
         if (message == null || nodeId == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
-        sendBlock(chainId, service.getBlock(chainId, message.getRequestHash()), nodeId);
+        NulsDigestData requestHash = message.getRequestHash();
+        Log.info("recieve HashMessage from network node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
+        sendBlock(chainId, service.getBlock(chainId, requestHash), nodeId, requestHash);
         return success();
     }
 
-    private void sendBlock(int chainId, Block block, String nodeId) {
-        BlockMessage message = new BlockMessage(block.getHeader().getHash(), block);
+    private void sendBlock(int chainId, Block block, String nodeId, NulsDigestData requestHash) {
+        BlockMessage message = new BlockMessage();
+        message.setRequestHash(requestHash);
+        if (block != null) {
+            message.setBlock(block);
+        }
         message.setCommand(CommandConstant.BLOCK_MESSAGE);
         boolean result = NetworkUtil.sendToNode(chainId, message, nodeId);
         if (!result) {
-            Log.warn("send block failed:{},height:{}", nodeId, block.getHeader().getHeight());
+            Log.warn("send block failed:" + nodeId + ",height:" + block.getHeader().getHeight());
         }
     }
 

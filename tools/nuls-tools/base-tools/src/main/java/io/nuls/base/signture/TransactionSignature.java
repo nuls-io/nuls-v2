@@ -26,16 +26,14 @@
 package io.nuls.base.signture;
 
 
-import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.script.Script;
-import io.nuls.tools.constant.ToolsConstant;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
+
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class TransactionSignature extends BaseNulsData {

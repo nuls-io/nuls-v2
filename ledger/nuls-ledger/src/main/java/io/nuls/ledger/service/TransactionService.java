@@ -39,14 +39,14 @@ public interface TransactionService {
     /**
      * 未确认交易数据处理
      */
-    boolean unConfirmTxProcess(Transaction transaction);
+    boolean unConfirmTxProcess(int addressChainId,Transaction transaction);
 
     /**
      * 已确认交易数据处理
      */
-    boolean confirmTxProcess(Transaction transaction);
+    boolean confirmTxProcess(int addressChainId,Transaction transaction);
     /**
      * 交易回滚处理
      */
-    void rollBackConfirmTx(Transaction transaction);
+    void rollBackConfirmTx(int addressChainId,Transaction transaction);
 }

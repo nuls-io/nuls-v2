@@ -27,11 +27,10 @@ package io.nuls.rpc.server.thread;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
+import io.nuls.rpc.server.runtime.WsData;
 import io.nuls.rpc.server.handler.CmdHandler;
-import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
-import org.java_websocket.WebSocket;
 
 import java.util.Map;
 
@@ -43,6 +42,11 @@ import java.util.Map;
  * @date 2018/11/7
  */
 public class RequestSingleProcessor implements Runnable {
+    private WsData wsData;
+
+    public RequestSingleProcessor(WsData wsData){
+        this.wsData = wsData;
+    }
 
     /**
      * 发送只响应一次的消息
@@ -51,28 +55,21 @@ public class RequestSingleProcessor implements Runnable {
     @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {
-
-        while (true) {
+        while (wsData.isConnected()) {
             try {
                 /*
                 获取队列中的第一个对象
                 Get the first item of the queue
                  */
-                Object[] objects = ServerRuntime.REQUEST_SINGLE_QUEUE.take();
-
-                WebSocket webSocket = (WebSocket) objects[0];
-                String msg = (String) objects[1];
-                Message message = JSONUtils.json2pojo(msg, Message.class);
-
-
-                Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-
+                if(!wsData.getRequestSingleQueue().isEmpty()){
+                    Message message = wsData.getRequestSingleQueue().poll();
+                    Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
                 /*
                 Request，调用本地方法
                 If it is Request, call the local method
                  */
-                CmdHandler.callCommandsWithPeriod(webSocket, request.getRequestMethods(), message.getMessageId());
-
+                    CmdHandler.callCommandsWithPeriod(wsData.getWebSocket(), request.getRequestMethods(), message.getMessageId());
+                }
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
                 Log.error(e);

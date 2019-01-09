@@ -1,79 +1,30 @@
-/*
- * MIT License
- *
- * Copyright (c) 2017-2018 nuls.io
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- */
 package io.nuls.rpc.client.runtime;
 
-import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Message;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.thread.TimeService;
 import org.java_websocket.WebSocket;
-
-import java.util.*;
+import io.nuls.rpc.client.WsClient;
+import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 
 /**
  * 客户端运行时所需要的变量和方法
  * Variables and static methods required by client runtime
  *
- * @author tangyi
- * @date 2018/11/23
- */
+ * @author tag
+ * 2018/12/29
+ * */
 public class ClientRuntime {
-
     /**
      * Key: 角色，Value：角色的连接信息
      * Key: role, Value: Connection information of the role
      */
     public static final Map<String, Map> ROLE_MAP = new ConcurrentHashMap<>();
-
-    /**
-     * 从服务端得到的握手确认
-     * Handshake confirmation(NegotiateConnectionResponse) from the server
-     */
-    public static final Queue<Message> NEGOTIATE_RESPONSE_QUEUE = new ConcurrentLinkedQueue<>();
-
-    /**
-     * 从服务端得到的请求确认
-     * Request confirmation(Ack) from the server
-     */
-    public static final Queue<Message> ACK_QUEUE = new ConcurrentLinkedQueue<>();
-
-    /**
-     * 从服务端得到的需要手动处理的应答消息
-     * Response that need to be handled manually from the server
-     */
-    public static final Queue<Message> RESPONSE_MANUAL_QUEUE = new ConcurrentLinkedQueue<>();
-
-    /**
-     * 从服务端得到的自动处理的应答消息
-     * Response that need to be handled Automatically from the server
-     */
-    public static final Queue<Message> RESPONSE_AUTO_QUEUE = new ConcurrentLinkedQueue<>();
 
     /**
      * 调用远程方法时，可以设置自动回调的本地方法。
@@ -102,7 +53,6 @@ public class ClientRuntime {
      */
     public static final ConcurrentMap<String, WsClient> MSG_ID_KEY_WS_CLIENT_MAP = new ConcurrentHashMap<>();
 
-
     /**
      * 根据角色返回角色的连接信息
      * Return the role's connection information based on the role
@@ -115,40 +65,12 @@ public class ClientRuntime {
     }
 
     /**
-     * @return 第一条握手确认消息，The first handshake confirmed message
-     */
-    public static Message firstMessageInNegotiateResponseQueue() {
-        return firstMessageInQueue(NEGOTIATE_RESPONSE_QUEUE);
-    }
-
-    /**
-     * @return 第一条确认消息，The first ack message
-     */
-    public static Message firstMessageInAckQueue() {
-        return firstMessageInQueue(ACK_QUEUE);
-    }
-
-    /**
-     * @return 第一条需要手动处理的Response消息，The first Response message that needs to be handled manually
-     */
-    public static Message firstMessageInResponseManualQueue() {
-        return firstMessageInQueue(RESPONSE_MANUAL_QUEUE);
-    }
-
-    /**
-     * @return 第一条需要自动处理的Response消息，The first Response message that needs to be handled automatically
-     */
-    public static Message firstMessageInResponseAutoQueue() {
-        return firstMessageInQueue(RESPONSE_AUTO_QUEUE);
-    }
-
-    /**
      * 获取队列中的第一个元素，然后从队列中移除
      * Get the first item and remove
      *
      * @return 队列的第一个元素. The first item in queue.
      */
-    private static synchronized Message firstMessageInQueue(Queue<Message> messageQueue) {
+    public static synchronized Message firstMessageInQueue(Queue<Message> messageQueue) {
         Message message = messageQueue.peek();
         messageQueue.poll();
         return message;
@@ -161,28 +83,77 @@ public class ClientRuntime {
      * @throws Exception 连接失败，Connect failed
      */
     public static WsClient getWsClient(String url) throws Exception {
-        if (!WS_CLIENT_MAP.containsKey(url)) {
-            /*
-            如果是第一次连接，则先放入集合
-            If it's the first connection, put it in the collection first
-             */
-            WsClient wsClient = new WsClient(url);
-            wsClient.connect();
-            long start = TimeService.currentTimeMillis();
-            while (!wsClient.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
-                if (TimeService.currentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
-                    throw new Exception("Failed to connect " + url);
-                }
-                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+        /*
+        如果连接已存在，直接返回
+        If the connection already exists, return directly
+         */
+        if(WS_CLIENT_MAP.containsKey(url) ){
+            return WS_CLIENT_MAP.get(url);
+        }
+        /*
+        如果是第一次连接，则先放入集合
+        If it's the first connection, put it in the collection first
+         */
+        WsClient wsClient = new WsClient(url);
+        wsClient.connect();
+        long start = TimeService.currentTimeMillis();
+        while (!wsClient.getReadyState().equals(WebSocket.READYSTATE.OPEN)) {
+            if (TimeService.currentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
+                throw new Exception("Failed to connect " + url);
             }
-            WS_CLIENT_MAP.put(url, wsClient);
+            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+        }
+        /*
+        创建并启动客户端需要的线程
+        Create and start the threads needed by the client
+         */
+        wsClient.getResponseAutoThread().start();
+        WS_CLIENT_MAP.put(url, wsClient);
+        return wsClient;
+    }
+
+    /**
+     * @param   role
+     * @return 与url对应的客户端对象，WsClient object corresponding to URL
+     * @throws Exception 连接失败，Connect failed
+     */
+    public static WsClient getWsClientByRole(String role) throws Exception {
+        String url = getRemoteUri(role);
+        if(StringUtils.isBlank(url)){
+            throw new Exception("Connection module not started");
+        }
+        return getWsClient(url);
+    }
+
+    /**
+     * 停止或断开一个连接,清除该连接相关信息
+     * Stop or disconnect a connection
+     * */
+    public static void stopWsClient(WsClient client){
+        String wsClientKey = null;
+        for (Map.Entry<String,WsClient> entry:WS_CLIENT_MAP.entrySet()) {
+            if(client.equals(entry.getValue())){
+                wsClientKey = entry.getKey();
+                WS_CLIENT_MAP.remove(wsClientKey);
+                break;
+            }
+        }
+        if(StringUtils.isBlank(wsClientKey)){
+            return;
         }
 
-        /*
-        从Map中返回客户端对象
-        Return WsClient objects from Map
-         */
-        return WS_CLIENT_MAP.get(url);
+        for (String role : ROLE_MAP.keySet()) {
+            if(wsClientKey.equals(getRemoteUri(role))){
+                ROLE_MAP.remove(role);
+                break;
+            }
+        }
+
+        for (Map.Entry<String,WsClient> entry:MSG_ID_KEY_WS_CLIENT_MAP.entrySet()) {
+            if(client.equals(entry.getValue())){
+                MSG_ID_KEY_WS_CLIENT_MAP.remove(entry.getKey());
+            }
+        }
     }
 
     /**

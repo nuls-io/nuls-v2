@@ -83,7 +83,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         return addFromAmount;
     }
     private BigInteger unFreezeLockHeightState(List<FreezeHeightState> heightList,AccountState accountState){
-        long nowHeight = repository.getBlockHeight();
+        long nowHeight = repository.getBlockHeight(accountState.getAddressChainId());
         //可移除的高度锁列表
         List<FreezeHeightState>  heightRemove =  new ArrayList<>();
         heightList.sort((x, y) -> Long.compare(x.getHeight(),y.getHeight()));
@@ -103,11 +103,17 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         }
         return addFromAmount;
     }
+
+    /**
+     * 释放账户的锁定记录
+     * @param accountState
+     * @return
+     */
     @Override
     public boolean recalculateFreeze(AccountState accountState) {
         if (timeAllow(accountState.getLatestUnFreezeTime())) {
-            List<FreezeLockTimeState> timeList = accountState.getFreezeState().getFreezeLockTimeStates();
-            List<FreezeHeightState> heightList = accountState.getFreezeState().getFreezeHeightStates();
+            List<FreezeLockTimeState> timeList = accountState.getFreezeLockTimeStates();
+            List<FreezeHeightState> heightList = accountState.getFreezeHeightStates();
             if (timeList.size() == 0 && heightList.size() == 0) {
                 accountState.setLatestUnFreezeTime(TimeUtils.getCurrentTime());
                 return true;

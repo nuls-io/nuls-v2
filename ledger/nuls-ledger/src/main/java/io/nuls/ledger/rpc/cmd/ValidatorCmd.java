@@ -59,14 +59,16 @@ public class ValidatorCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "validateCoinData",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHex", parameterType = "String")
     public Response validateCoinData(Map params) {
         //TODO.. 验证参数个数和格式
+        Integer chainId = (Integer) params.get("chainId");
         String txHex = (String) params.get("txHex");
         Transaction tx = new Transaction();
         try {
             tx.parse(HexUtil.hexToByte(txHex),0);
-            ValidateResult validateResult = coinDataValidator.validateCoinData(tx);
+            ValidateResult validateResult = coinDataValidator.validateCoinData(chainId,tx);
             return success(validateResult);
         } catch (NulsException e) {
             e.printStackTrace();
@@ -84,26 +86,44 @@ public class ValidatorCmd extends BaseCmd {
     @CmdAnnotation(cmd = "bathValidateBegin",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
     public Response bathValidateBegin(Map params) {
-        coinDataValidator.beginBatchPerTxValidate();
+        Integer chainId = (Integer) params.get("chainId");
+        coinDataValidator.beginBatchPerTxValidate(chainId);
         Map<String,Object> rtData = new HashMap<>();
-        rtData.put("result",1);
+        rtData.put("value",1);
         return success(rtData);
     }
 
 
     /**
      * bathValidatePerTx
-     *
+     * 进行批量校验，校验双花以及交易的连贯性
      * @param params
      * @return
      */
     @CmdAnnotation(cmd = "bathValidatePerTx",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHex", parameterType = "String")
     public Response bathValidatePerTx(Map params) {
-
-        return success();
+        Integer chainId = (Integer) params.get("chainId");
+        String txHex = (String) params.get("txHex");
+        Transaction tx = new Transaction();
+        try {
+            tx.parse(HexUtil.hexToByte(txHex),0);
+        } catch (NulsException e) {
+            e.printStackTrace();
+            return failed(e.getErrorCode());
+        }
+        Map<String,Object> rtData = new HashMap<>();
+        if(coinDataValidator.bathValidatePerTx(chainId,tx)){
+            rtData.put("value",1);
+        }else{
+            rtData.put("value",0);
+        }
+        return success(rtData);
     }
 
 }

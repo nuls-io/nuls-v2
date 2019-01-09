@@ -81,7 +81,7 @@ public interface TxConstant {
     /**
      * 跨链交易验证过程
      */
-    /** 已发送请求跨链验证消息 */
+    /** 接收新的跨链交易创建 */
     int CTX_UNPROCESSED_0 = 0;
     /** 已发送请求跨链验证消息 */
     int CTX_VERIFY_REQUEST_1 = 1;

@@ -1,6 +1,7 @@
 package io.nuls.rpc.info;
 
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.rpc.server.runtime.ServerRuntime;
@@ -29,12 +30,15 @@ public class NoUse {
         ServerRuntime.LOCAL.setModuleName(ModuleE.KE.name);
         ServerRuntime.LOCAL.setModuleDomain(ModuleE.KE.domain);
         Map<String, String> connectionInformation = new HashMap<>(2);
-        connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
+        connectionInformation.put(Constants.KEY_IP, "127.0.0.1");
         connectionInformation.put(Constants.KEY_PORT, wsServer.getPort() + "");
         ServerRuntime.LOCAL.setConnectionInformation(connectionInformation);
+        wsServer.scanPackage("io.nuls.rpc.cmd.kernel").connect("ws://127.0.0.1:8887");
 
-        wsServer.scanPackage("io.nuls.rpc.cmd.kernel").connect("ws://localhost:8887");
-
+        Map<String, String> kernelLinkMap = new HashMap<>(2);
+        kernelLinkMap.put(Constants.KEY_IP, "127.0.0.1");
+        kernelLinkMap.put(Constants.KEY_PORT, wsServer.getPort() + "");
+        ClientRuntime.ROLE_MAP.put(ModuleE.KE.abbr,kernelLinkMap);
         // Get information from kernel
         CmdDispatcher.syncKernel();
 
@@ -50,7 +54,7 @@ public class NoUse {
                 .moduleRoles("test_role", new String[]{"1.0"})
                 .moduleVersion("1.0")
 //                .dependencies(ModuleE.CM.abbr, "1.1")
-                .connect("ws://localhost:8887");
+                .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
         CmdDispatcher.syncKernel();

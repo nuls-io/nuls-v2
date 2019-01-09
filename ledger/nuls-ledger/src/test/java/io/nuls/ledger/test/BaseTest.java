@@ -28,6 +28,7 @@ package io.nuls.ledger.test;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.config.AppConfig;
 import io.nuls.ledger.db.DataBaseArea;
+import io.nuls.ledger.model.ModuleConfig;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
@@ -43,7 +44,7 @@ public class BaseTest {
     public void before() {
         try {
             AppConfig.loadModuleConfig();
-            RocksDBService.init(AppConfig.loadModuleConfig().getDatabaseDir());
+            RocksDBService.init(ModuleConfig.getInstance().getDatabaseDir());
             if (!RocksDBService.existTable(DataBaseArea.TB_LEDGER_ACCOUNT)) {
                 RocksDBService.createTable(DataBaseArea.TB_LEDGER_ACCOUNT);
             }

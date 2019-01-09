@@ -1,5 +1,6 @@
 package io.nuls.tools.log.logback;
 
+import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
 /**
@@ -14,6 +15,7 @@ public class NulsLogger {
     private Logger logger;
 
     public NulsLogger(Logger logger){
+        logger.setLevel(Level.INFO);
         this.logger = logger;
     }
 

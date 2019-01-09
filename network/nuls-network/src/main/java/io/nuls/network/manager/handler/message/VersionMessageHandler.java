@@ -68,7 +68,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
     private void serverRecieveHandler(BaseMessage message, String nodeKey){
         VersionMessageBody versionBody=(VersionMessageBody)message.getMsgBody();
         Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
-        Log.debug("VersionMessageHandler Recieve:"+"Server"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+//        Log.debug("VersionMessageHandler Recieve:"+"Server"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
         String peerIp = versionBody.getAddrYou().getIp().getHostAddress();
         int peerPort = versionBody.getAddrYou().getPort();
@@ -85,13 +85,13 @@ public class VersionMessageHandler extends BaseMessageHandler {
          */
         if(LocalInfoManager.getInstance().isSelfIp(node.getIp())  || ConnectionManager.getInstance().isPeerConnectExceedMax(node.getIp(),nodeGroup.getMagicNumber(),maxIn,Node.IN)){
             if(node.getNodeGroupConnectors().size() == 0){
-                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===close connection.");
+//                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===close connection.");
                 node.getChannel().close();
                 node.setIdle(true);
                 return;
             }else{
                 //client 回复过载消息--reply over maxIn
-                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===-reply over maxIn.");
+//                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===-reply over maxIn.");
                 VerackMessage verackMessage=MessageFactory.getInstance().buildVerackMessage(node,message.getHeader().getMagicNumber(), VerackMessageBody.VER_CONNECT_MAX);
                 MessageManager.getInstance().sendToNode(verackMessage,node,true);
                 return;
@@ -127,7 +127,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         */
        Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.OUT);
       //client发出version后获得，得到server回复，建立握手
-       Log.debug("VersionMessageHandler Recieve:Client"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+//       Log.debug("VersionMessageHandler Recieve:Client"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
        NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(message.getHeader().getMagicNumber());
        nodeGroupConnector.setStatus(NodeGroupConnector.HANDSHAKE);
        //node加入到Group的连接中
@@ -168,7 +168,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
 
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
-        Log.debug("VersionMessageHandler send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+//        Log.debug("VersionMessageHandler send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
         int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
         BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(chainId);
