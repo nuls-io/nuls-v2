@@ -29,12 +29,15 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.AccountStatesSnapshotKeys;
 import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * Created by wangkun23 on 2018/11/19.
@@ -68,14 +71,49 @@ public class RepositoryImpl implements Repository {
     @Override
     public void updateAccountStateAndSnapshot(String key,AccountState preAccountState,AccountState nowAccountState){
         try {
-            //bak  account Snapshot
-            RocksDBService.put(getSnapshotTableName(nowAccountState.getAddressChainId()), LedgerUtils.getSnapshotKey(key,nowAccountState.getTxHash(),nowAccountState.getHeight()), preAccountState.serialize());
-            //清除过期的snapshot数据,height = height - 100以前的数据
-            RocksDBService.delete(getSnapshotTableName(nowAccountState.getAddressChainId()), LedgerUtils.getSnapshotKey(key,nowAccountState.getTxHash(),nowAccountState.getHeight()-LedgerConstant.CACHE_ACCOUNT_BLOCK));
+            addSnapshot(key,preAccountState,nowAccountState);
             //update account
             RocksDBService.put(getLedgerAccountTableName(nowAccountState.getAddressChainId()), key.getBytes(LedgerConstant.DEFAULT_ENCODING), nowAccountState.serialize());
         } catch (Exception e) {
+             e.printStackTrace();
             logger.error("updateAccountState serialize error.", e);
+        }
+    }
+
+    /**
+     * 增加快照交易
+     * @param key
+     * @param preAccountState
+     * @param nowAccountState
+     * @throws Exception
+     */
+    private void addSnapshot(String key,AccountState preAccountState,AccountState nowAccountState) throws Exception {
+        //bak  account Snapshot,备份账户老状态
+        //生成 备份 key:账户-交易-高度 ，value:AccountState
+        String snapshotTxKeyStr =LedgerUtils.getSnapshotTxKeyStr(key,nowAccountState.getTxHash(),nowAccountState.getHeight());
+        RocksDBService.put(getSnapshotTableName(nowAccountState.getAddressChainId()), snapshotTxKeyStr.getBytes(LedgerConstant.DEFAULT_ENCODING), preAccountState.serialize());
+        //存储 key到 keys列表中。 列表  key:账户-高度， value = list(账户-交易-高度);
+        String snapshotHeightKeyStr = LedgerUtils.getSnapshotHeightKeyStr(key,nowAccountState.getHeight());
+        byte[] stream =  RocksDBService.get(getSnapshotTableName(nowAccountState.getAddressChainId()),snapshotHeightKeyStr.getBytes(LedgerConstant.DEFAULT_ENCODING));
+        AccountStatesSnapshotKeys accountStatesSnapshotKeys = new AccountStatesSnapshotKeys();
+        if (stream != null) {
+                accountStatesSnapshotKeys.parse(new NulsByteBuffer(stream));
+        }
+        accountStatesSnapshotKeys.addSnapshotKey(snapshotTxKeyStr);
+        RocksDBService.put(getSnapshotTableName(nowAccountState.getAddressChainId()),snapshotHeightKeyStr.getBytes(LedgerConstant.DEFAULT_ENCODING), accountStatesSnapshotKeys.serialize());
+
+        //清除过期的snapshot数据,height = height - CACHE_ACCOUNT_BLOCK以前的数据
+        //get 对应高度的所有索引，进行删除，再删除高度索引本身
+        String snapshotHeightKeyStrDel =LedgerUtils.getSnapshotHeightKeyStr(key,(nowAccountState.getHeight()-LedgerConstant.CACHE_ACCOUNT_BLOCK));
+        byte[] delStream =  RocksDBService.get(getSnapshotTableName(nowAccountState.getAddressChainId()),snapshotHeightKeyStrDel.getBytes(LedgerConstant.DEFAULT_ENCODING));
+        AccountStatesSnapshotKeys accountStatesSnapshotKeysDel = new AccountStatesSnapshotKeys();
+        if (delStream != null) {
+                accountStatesSnapshotKeysDel.parse(new NulsByteBuffer(delStream));
+                List<String> snapshotKeys = accountStatesSnapshotKeysDel.getSnapshotKeys();
+                for(String snapshotKey: snapshotKeys){
+                    RocksDBService.delete(getSnapshotTableName(nowAccountState.getAddressChainId()),snapshotKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
+                }
+                RocksDBService.delete(getSnapshotTableName(nowAccountState.getAddressChainId()), snapshotHeightKeyStrDel.getBytes(LedgerConstant.DEFAULT_ENCODING));
         }
     }
     /**

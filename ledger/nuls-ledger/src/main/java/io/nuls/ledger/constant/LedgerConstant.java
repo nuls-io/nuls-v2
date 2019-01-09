@@ -34,7 +34,7 @@ public interface LedgerConstant {
      * 模块配置文件名称
      * Module configuration file name.
      */
-    public static String MODULES_CONFIG_FILE = "modules.ini";
+    public static String MODULES_CONFIG_FILE = "modules.json";
 
     /**
      * 系统使用的编码方式
@@ -62,5 +62,8 @@ public interface LedgerConstant {
      * 缓存的账户区块数量
      */
     public static final int CACHE_ACCOUNT_BLOCK = 100;
-
+    /**
+     * 缓存的账户初始化nonce
+     */
+    public static final String INIT_NONCE = "ffffffff";
 }

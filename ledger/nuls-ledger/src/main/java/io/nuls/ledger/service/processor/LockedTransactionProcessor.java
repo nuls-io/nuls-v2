@@ -34,7 +34,7 @@ import io.nuls.ledger.model.po.FreezeHeightState;
 import io.nuls.ledger.model.po.FreezeLockTimeState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +45,7 @@ import java.util.List;
  * 解锁交易处理
  * Created by lanjinsheng on 2018/12/29.
  */
-@Service
+@Component
 public class LockedTransactionProcessor implements TxProcessor {
 
     final Logger logger = LoggerFactory.getLogger(getClass());

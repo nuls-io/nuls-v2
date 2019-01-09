@@ -61,11 +61,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CoinDataValidator {
     final Logger logger = LoggerFactory.getLogger(getClass());
     /**
-     * key int:chainId
+     * key String:chainId
      * value:Map<key是交易hash  value是欲提交交易>
      *
      */
-    private Map<int,Map<String,Transaction>> chainsBatchValidateTxMap = new ConcurrentHashMap<int,Map<String,Transaction>>();
+    private Map<String,Map<String,Transaction>> chainsBatchValidateTxMap = new ConcurrentHashMap<String,Map<String,Transaction>>();
     /**
      * key是账号资产 value是待确认支出列表
      */
@@ -88,7 +88,7 @@ public class CoinDataValidator {
 
     public boolean hadValidateTx(int addressChainId,Transaction tx){
         //TODO:hash 值校验
-        Map<String,Transaction> batchValidateTxMap = chainsBatchValidateTxMap.get(addressChainId);
+        Map<String,Transaction> batchValidateTxMap = chainsBatchValidateTxMap.get(String.valueOf(addressChainId));
         if(null == batchValidateTxMap  || null == batchValidateTxMap.get(tx.getHash().toString())){
             return false;
         }
@@ -98,12 +98,12 @@ public class CoinDataValidator {
      * 开始批量校验
      */
     public boolean beginBatchPerTxValidate(int chainId){
-        Map<String,Transaction> batchValidateTxMap = chainsBatchValidateTxMap.get(chainId);
-        if(null == batchValidateTxMap.get(chainId)){
-            chainsBatchValidateTxMap.put(chainId,new ConcurrentHashMap<>());
-        }else{
-            batchValidateTxMap.clear();
+        Map<String,Transaction> batchValidateTxMap = chainsBatchValidateTxMap.get(String.valueOf(chainId));
+        if(null == batchValidateTxMap){
+            batchValidateTxMap = new ConcurrentHashMap<>();
+            chainsBatchValidateTxMap.put(String.valueOf(chainId),batchValidateTxMap);
         }
+        batchValidateTxMap.clear();
         accountBalanceValidateTxMap.clear();
         return true;
 
@@ -117,11 +117,11 @@ public class CoinDataValidator {
      */
     public boolean bathValidatePerTx(int chainId,Transaction tx){
         //TODO:交易Hash值校验
-        Map<String,Transaction> batchValidateTxMap = chainsBatchValidateTxMap.get(chainId);
+        Map<String,Transaction> batchValidateTxMap = chainsBatchValidateTxMap.get(String.valueOf(chainId));
         //先校验，再逐笔放入缓存
         //交易的 hash值如果已存在，返回false，交易的from coin nonce 如果不连续，则存在双花。
         String txHash = tx.getHash().toString();
-        if(null != batchValidateTxMap.get(txHash)){
+        if(null == batchValidateTxMap || null != batchValidateTxMap.get(txHash)){
             return false;
         }
         CoinData coinData =  CoinDataUtils.parseCoinData(tx.getCoinData());

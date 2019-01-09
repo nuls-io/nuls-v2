@@ -123,7 +123,7 @@ public class ValidatorCmd extends BaseCmd {
         }else{
             rtData.put("value",0);
         }
-        return success();
+        return success(rtData);
     }
 
 }

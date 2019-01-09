@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 
 /**
  * Created by wangkun23 on 2018/11/29.
@@ -56,8 +55,7 @@ public class AccountStateServiceImpl implements AccountStateService {
 
     @Override
     public AccountState createAccount(String address, int addressChainId, int assetChainId, int assetId) {
-        String initialNonce = BigInteger.ZERO.toString();
-        AccountState accountState = new AccountState(addressChainId,assetChainId, assetId, initialNonce);
+        AccountState accountState = new AccountState(addressChainId,assetChainId, assetId, LedgerConstant.INIT_NONCE);
         byte[] key = LedgerUtils.getKey(address, assetChainId, assetId);
         repository.createAccountState(key, accountState);
         return accountState;
@@ -71,10 +69,14 @@ public class AccountStateServiceImpl implements AccountStateService {
     public void rollAccountStateByTx(int addressChainId,String assetKey, String txHash, long height) {
         //账户处理锁
         synchronized (LockerUtils.getAccountLocker(assetKey)) {
-            byte[] snapshotKeyBytes = LedgerUtils.getSnapshotKey(assetKey, txHash, height);
+            byte[] snapshotKeyBytes = LedgerUtils.getSnapshotTxKey(assetKey, txHash, height);
             AccountState accountState = repository.getSnapshotAccountState(addressChainId,snapshotKeyBytes);
             try {
                 if (null != accountState) {
+                    if(!accountState.getTxHash().equalsIgnoreCase(txHash)){
+                        //当前的hash不在回滚里，错误的回滚顺序
+                        logger.error("TxHash not validate{}={}",accountState.getTxHash(),txHash);
+                    }
                     repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
                     repository.delSnapshotAccountState(addressChainId,snapshotKeyBytes);
                 }
@@ -98,7 +100,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             byte[] key = LedgerUtils.getKey(address, assetChainId, assetId);
             AccountState accountState = repository.getAccountState(addressChainId,key);
             if (null == accountState) {
-                accountState = new AccountState(addressChainId,assetChainId, assetId, "0");
+                accountState = new AccountState(addressChainId,assetChainId, assetId, LedgerConstant.INIT_NONCE);
                 repository.createAccountState(key, accountState);
             } else {
                 //解冻时间锁

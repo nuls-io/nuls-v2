@@ -28,6 +28,7 @@ package io.nuls.ledger.model.po;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.*;
@@ -57,7 +58,7 @@ public class AccountState extends BaseNulsData {
 
     @Setter
     @Getter
-    private String nonce;
+    private String nonce = LedgerConstant.INIT_NONCE;
 
     @Setter
     @Getter
@@ -177,11 +178,11 @@ public class AccountState extends BaseNulsData {
         stream.writeUint32(height);
         stream.writeUint32(latestUnFreezeTime);
         stream.writeUint16(unconfirmedNonces.size());
-        stream.writeBigInteger(totalFromAmount);
-        stream.writeBigInteger(totalToAmount);
         for (String unconfirmedNonce : unconfirmedNonces) {
             stream.writeString(unconfirmedNonce);
         }
+        stream.writeBigInteger(totalFromAmount);
+        stream.writeBigInteger(totalToAmount);
         stream.writeUint16(freezeHeightStates.size());
         for (FreezeHeightState heightState : freezeHeightStates) {
             stream.writeNulsData(heightState);
@@ -209,6 +210,8 @@ public class AccountState extends BaseNulsData {
                 throw new NulsException(e);
             }
         }
+        this.totalFromAmount = byteBuffer.readBigInteger();
+        this.totalToAmount = byteBuffer.readBigInteger();
         int freezeHeightCount = byteBuffer.readUint16();
         this.freezeHeightStates = new ArrayList<>(freezeHeightCount);
         for (int i = 0; i < freezeHeightCount; i++) {

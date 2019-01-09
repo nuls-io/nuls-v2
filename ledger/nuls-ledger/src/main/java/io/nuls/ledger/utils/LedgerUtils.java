@@ -47,7 +47,7 @@ public class LedgerUtils {
      * @param height
      * @return
      */
-    public static byte[] getSnapshotKey(String assetKey,String txHash,long height) {
+    public static byte[] getSnapshotTxKey(String assetKey,String txHash,long height) {
         String key = assetKey+ "-"+txHash+"-"+height;
         try {
             return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
@@ -56,6 +56,27 @@ public class LedgerUtils {
         }
         return null;
     }
-
+    public static String getSnapshotTxKeyStr(String assetKey,String txHash,long height) {
+       return assetKey+ "-"+txHash+"-"+height;
+    }
+    /**
+     * 获取账户缓存快照的key值索引，key值组成 = 资产key-区块高度
+     * 存储的value值是 List<accountstates>
+     * @param assetKey
+     * @param height
+     * @return
+     */
+    public static byte[] getSnapshotHeightKey(String assetKey,long height) {
+        String key = assetKey+ "-"+height;
+        try {
+            return (key.getBytes(LedgerConstant.DEFAULT_ENCODING));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static String getSnapshotHeightKeyStr(String assetKey,long height) {
+        return assetKey+ "-"+height;
+    }
 
 }

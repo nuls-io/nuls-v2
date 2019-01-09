@@ -116,7 +116,7 @@ public class TransactionCmd extends BaseCmd {
         }else{
             rtData.put("value",0);
         }
-        return success();
+        return success(rtData);
     }
 
     /**

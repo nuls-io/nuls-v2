@@ -26,10 +26,7 @@
 package io.nuls.ledger.service.impl;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.service.AccountStateService;
@@ -106,24 +103,16 @@ public class TransactionServiceImpl implements TransactionService {
         if(coinDataValidator.hadValidateTx(addressChainId,transaction)){
             //提交交易：1.交易存库（最近100区块交易） 2.更新账户
             //批量校验数据不需要存库
+            //批量交易按交易进行账户的金额处理，再按交易为原子性进行提交,updateAccounts用于一笔交易的账户缓存
             Map<String,AccountBalance> updateAccounts = new HashMap<>();
             //更新账户状态
             CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
             byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
+            String txHash =  transaction.getHash().toString();
             String nonce8BytesStr = HexUtil.encode(nonce8Bytes);
             List<CoinFrom> froms = coinData.getFrom();
             for (CoinFrom from : froms) {
-                String address = AddressTool.getStringAddressByBytes(from.getAddress());
-                int assetChainId = from.getAssetsChainId();
-                int assetId = from.getAssetsId();
-                String key = LedgerUtils.getKeyStr(address,assetChainId,assetId);
-                AccountBalance accountBalance = updateAccounts.get(key);
-                if(null == accountBalance){
-                    //解锁交易处理,去除账号中的锁定记录
-                    AccountState accountState  = accountStateService.getAccountState(address, addressChainId,assetChainId,assetId);
-                    AccountState orgAccountState = (AccountState)accountState.deepClone();
-                    updateAccounts.put(key,new AccountBalance(accountState,orgAccountState));
-                }
+                AccountBalance accountBalance = getAccountBalance(addressChainId,from,txHash,transaction.getBlockHeight(),updateAccounts);
                 if(from.getLocked() > 0){
                     lockedTransactionProcessor.processFromCoinData(from,nonce8BytesStr,transaction.getHash().toString(),  accountBalance.getNowAccountState());
                 }else {
@@ -131,20 +120,9 @@ public class TransactionServiceImpl implements TransactionService {
                     commontTransactionProcessor.processFromCoinData(from,nonce8BytesStr,transaction.getHash().toString(),  accountBalance.getNowAccountState());
                 }
             }
-
             List<CoinTo> tos = coinData.getTo();
             for (CoinTo to : tos) {
-                String address = AddressTool.getStringAddressByBytes(to.getAddress());
-                int assetChainId = to.getAssetsChainId();
-                int assetId = to.getAssetsId();
-                String key = LedgerUtils.getKeyStr(address,assetChainId,assetId);
-                AccountBalance accountBalance = updateAccounts.get(key);
-                if(null == accountBalance){
-                    //解锁交易处理,去除账号中的锁定记录
-                    AccountState accountState  = accountStateService.getAccountState(address,addressChainId,assetChainId,assetId);
-                    AccountState orgAccountState = (AccountState)accountState.deepClone();
-                    updateAccounts.put(key,new AccountBalance(accountState,orgAccountState));
-                }
+                AccountBalance accountBalance = getAccountBalance(addressChainId,to,txHash,transaction.getBlockHeight(),updateAccounts);
                 if(to.getLockTime() > 0){
                     //锁定交易处理
                     lockedTransactionProcessor.processToCoinData(to,nonce8BytesStr,transaction.getHash().toString(), accountBalance.getNowAccountState());
@@ -167,7 +145,23 @@ public class TransactionServiceImpl implements TransactionService {
         }
         return false;
     }
-
+    private AccountBalance getAccountBalance(int addressChainId,Coin coin,String txHash,long height, Map<String,AccountBalance> updateAccounts){
+        String address = AddressTool.getStringAddressByBytes(coin.getAddress());
+        int assetChainId = coin.getAssetsChainId();
+        int assetId = coin.getAssetsId();
+        String key = LedgerUtils.getKeyStr(address,assetChainId,assetId);
+        AccountBalance accountBalance = updateAccounts.get(key);
+        if(null == accountBalance){
+            //交易里的账户处理缓存AccountBalance
+            AccountState accountState  = accountStateService.getAccountState(address,addressChainId,assetChainId,assetId);
+            AccountState orgAccountState = (AccountState)accountState.deepClone();
+            accountState.setTxHash(txHash);
+            accountState.setHeight(height);
+            accountBalance = new AccountBalance(accountState,orgAccountState);
+            updateAccounts.put(key,accountBalance);
+        }
+        return accountBalance;
+    }
     /**
      * 交易回滚，获取交易的的区块高度，hash值，
      * 从快照里去获取对应的账户高度，hash值的存储，进行回复账户信息
