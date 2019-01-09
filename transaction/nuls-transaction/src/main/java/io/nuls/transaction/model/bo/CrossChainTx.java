@@ -62,11 +62,8 @@ public class CrossChainTx extends BaseNulsData {
      */
     private int state;
 
-    //TODO
     /**
-     * 1.收到的跨链节点验证结果(数量？)
-     * 2.收到的本链节点验证结果(签名？)
-     *
+     * 1.收到的跨链节点验证结果
      */
     private List<CrossTxVerifyResult> ctxVerifyResultList;
 

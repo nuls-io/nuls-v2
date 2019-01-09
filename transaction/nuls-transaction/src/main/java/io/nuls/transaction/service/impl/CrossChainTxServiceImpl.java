@@ -36,6 +36,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author: qinyifeng
@@ -44,11 +46,13 @@ import java.util.List;
 @Service
 public class CrossChainTxServiceImpl implements CrossChainTxService {
 
+    private final Lock CTX_LOCK = new ReentrantLock();
+
     @Autowired
     private CrossChainTxStorageService crossChainTxStorageService;
+
     @Autowired
     private CrossChainTxUnprocessedStorageService crossChainTxUnprocessedStorageService;
-
 
     @Autowired
     private TxVerifiedPool txVerifiedPool;
@@ -212,7 +216,8 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
 
 
     @Override
-    public synchronized void ctxResultProcess(Chain chain, BaseMessage message, String nodeId) throws NulsException {
+    public void ctxResultProcess(Chain chain, BaseMessage message, String nodeId) throws NulsException {
+        CTX_LOCK.lock();
         if (message instanceof VerifyCrossResultMessage) {
             //处理跨链节点验证结果
             verifyCrossResultProcess(chain, nodeId, (VerifyCrossResultMessage) message);
@@ -220,6 +225,7 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
             //处理链内节点验证结果
             crossNodeResultProcess(chain, nodeId, (BroadcastCrossNodeRsMessage) message);
         }
+        CTX_LOCK.unlock();
     }
 
     /**

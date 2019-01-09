@@ -26,6 +26,7 @@ package io.nuls.transaction.db.rocksdb.storage.impl;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.db.rocksdb.storage.CrossChainTxUnprocessedStorageService;
@@ -39,6 +40,7 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018-12-27
  */
+@Service
 public class CrossChainTxUnprocessedStorageServiceImpl implements CrossChainTxUnprocessedStorageService {
 
     @Override
