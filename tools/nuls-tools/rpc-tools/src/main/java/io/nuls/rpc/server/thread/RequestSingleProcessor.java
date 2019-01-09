@@ -59,17 +59,14 @@ public class RequestSingleProcessor implements Runnable {
                 Get the first item of the queue
                  */
                 Object[] objects = ServerRuntime.REQUEST_SINGLE_QUEUE.take();
-
                 WebSocket webSocket = (WebSocket) objects[0];
-                String msg = (String) objects[1];
-                Message message = JSONUtils.json2pojo(msg, Message.class);
-                Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-
+                String messageId = (String) objects[1];
+                Request request = (Request) objects[2];
                 /*
                 Request，调用本地方法
                 If it is Request, call the local method
                  */
-                CmdHandler.callCommandsWithPeriod(webSocket, request.getRequestMethods(), message.getMessageId());
+                CmdHandler.callCommandsWithPeriod(webSocket, request.getRequestMethods(), messageId);
             } catch (Exception e) {
                 Log.error(e);
             }

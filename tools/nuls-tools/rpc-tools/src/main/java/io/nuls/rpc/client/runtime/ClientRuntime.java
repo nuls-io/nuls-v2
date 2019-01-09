@@ -27,7 +27,9 @@ package io.nuls.rpc.client.runtime;
 import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
+import io.nuls.rpc.model.message.Ack;
 import io.nuls.rpc.model.message.Message;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.thread.TimeService;
 import org.java_websocket.WebSocket;
 
@@ -61,13 +63,13 @@ public class ClientRuntime {
      * 从服务端得到的请求确认
      * Request confirmation(Ack) from the server
      */
-    public static final Queue<Message> ACK_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Ack> ACK_QUEUE = new ConcurrentLinkedQueue<>();
 
     /**
      * 从服务端得到的需要手动处理的应答消息
      * Response that need to be handled manually from the server
      */
-    public static final Queue<Message> RESPONSE_MANUAL_QUEUE = new ConcurrentLinkedQueue<>();
+    public static final Queue<Response> RESPONSE_MANUAL_QUEUE = new ConcurrentLinkedQueue<>();
 
     /**
      * 从服务端得到的自动处理的应答消息

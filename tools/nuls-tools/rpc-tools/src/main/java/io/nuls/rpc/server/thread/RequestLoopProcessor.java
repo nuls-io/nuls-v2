@@ -78,18 +78,15 @@ public class RequestLoopProcessor implements Runnable {
         Object[] objects = ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.take();
 
         WebSocket webSocket = (WebSocket) objects[0];
-        String msg = (String) objects[1];
-
-        Message message = JSONUtils.json2pojo(msg, Message.class);
-        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-
+        String messageId = (String) objects[1];
+        Request request = (Request) objects[2];
         /*
         需要继续发送，添加回队列
         Need to continue sending, add back to queue
          */
-        boolean isContinue = CmdHandler.responseWithPeriod(webSocket, message.getMessageId(), request);
+        boolean isContinue = CmdHandler.responseWithPeriod(webSocket, messageId, request);
         if (isContinue) {
-            ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, JSONUtils.obj2json(message)});
+            ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, messageId, request});
         }
     }
 }

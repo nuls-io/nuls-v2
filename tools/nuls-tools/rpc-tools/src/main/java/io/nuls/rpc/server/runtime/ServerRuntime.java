@@ -356,16 +356,13 @@ public class ServerRuntime {
          */
         for (Object[] objects : ServerRuntime.REQUEST_EVENT_COUNT_LOOP_LIST) {
             WebSocket webSocket = (WebSocket) objects[0];
-            String msg = (String) objects[1];
-
-            Message message = JSONUtils.json2pojo(msg, Message.class);
-            Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-
+            String messageId = (String) objects[1];
+            Request request = (Request) objects[2];
             /*
             需要继续发送，添加回队列
             Need to continue sending, add back to queue
              */
-            if (!CmdHandler.responseWithEventCount(webSocket, message.getMessageId(), request, cmd)) {
+            if (!CmdHandler.responseWithEventCount(webSocket, messageId, request, cmd)) {
                 ServerRuntime.REQUEST_EVENT_COUNT_LOOP_LIST.remove(objects);
             }
         }

@@ -365,20 +365,14 @@ public class CmdDispatcher {
             获取队列中的第一个对象
             Get the first item of the queue
              */
-            Message message = ClientRuntime.RESPONSE_MANUAL_QUEUE.poll();
-            if (message == null) {
-                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-                continue;
-            }
-
-            Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
-            if (response.getRequestId().equals(messageId)) {
+            Response response = ClientRuntime.RESPONSE_MANUAL_QUEUE.poll();
+            if (messageId.equals(response.getRequestId())) {
                 /*
                 messageId匹配，说明就是需要的结果，返回
                 If messageId is the same, then the response is needed
                  */
                 if (count > 0) {
-                    System.out.println("###############success extra loop count " + count);
+                    System.out.println("#########receiveResponse######success extra loop count " + count);
                 }
                 return response;
             }
@@ -387,7 +381,7 @@ public class CmdDispatcher {
             messageId不匹配，放回队列
             Add back to the queue
              */
-            ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);
+            ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(response);
             count++;
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
@@ -396,7 +390,7 @@ public class CmdDispatcher {
         Timeout Error
          */
         if (count > 0) {
-            System.out.println("###############timeout extra loop count " + count);
+            System.out.println("########receiveResponse#######timeout extra loop count " + count);
         }
         return MessageUtil.newResponse(messageId, Constants.BOOLEAN_FALSE, Constants.RESPONSE_TIMEOUT);
     }
@@ -418,13 +412,7 @@ public class CmdDispatcher {
             获取队列中的第一个对象，如果是空，舍弃
             Get the first item of the queue, If it is an empty object, discard
              */
-            Message message = ClientRuntime.ACK_QUEUE.poll();
-            if (message == null) {
-                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
-                continue;
-            }
-
-            Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
+            Ack ack = ClientRuntime.ACK_QUEUE.poll();
             if (ack.getRequestId().equals(messageId)) {
                 /*
                 messageId匹配，说明就是需要的结果，返回
@@ -437,8 +425,7 @@ public class CmdDispatcher {
             messageId不匹配，放回队列
             Add back to the queue
              */
-            ClientRuntime.ACK_QUEUE.offer(message);
-
+            ClientRuntime.ACK_QUEUE.offer(ack);
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
 

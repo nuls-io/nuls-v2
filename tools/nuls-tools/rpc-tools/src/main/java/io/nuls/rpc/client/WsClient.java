@@ -26,6 +26,7 @@
 package io.nuls.rpc.client;
 
 import io.nuls.rpc.client.runtime.ClientRuntime;
+import io.nuls.rpc.model.message.Ack;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Response;
@@ -75,7 +76,8 @@ public class WsClient extends WebSocketClient {
                     ClientRuntime.NEGOTIATE_RESPONSE_QUEUE.offer(message);
                     break;
                 case Ack:
-                    ClientRuntime.ACK_QUEUE.offer(message);
+                    Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
+                    ClientRuntime.ACK_QUEUE.offer(ack);
                     break;
                 case Response:
                     Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
@@ -86,7 +88,7 @@ public class WsClient extends WebSocketClient {
                     if (ClientRuntime.INVOKE_MAP.containsKey(response.getRequestId())) {
                         ClientRuntime.RESPONSE_AUTO_QUEUE.offer(message);
                     } else {
-                        ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);
+                        ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(response);
                     }
 //                    Log.debug("ResponseFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
                     break;

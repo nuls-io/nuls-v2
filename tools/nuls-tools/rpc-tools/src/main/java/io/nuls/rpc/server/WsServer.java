@@ -131,8 +131,9 @@ public class WsServer extends WebSocketServer {
                     如果不能提供服务，则直接返回
                     If no service is available, return directly
                      */
+                    String messageId = message.getMessageId();
                     if (!ServerRuntime.isReady()) {
-                        CmdHandler.serviceNotStarted(webSocket, message.getMessageId());
+                        CmdHandler.serviceNotStarted(webSocket, messageId);
                         break;
                     }
 
@@ -142,16 +143,15 @@ public class WsServer extends WebSocketServer {
                      */
 //                    Log.debug("RequestFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
                     Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-
                     if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
                             && !ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
-                        ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, msg});
+                        ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, messageId, request});
                     } else {
                         if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
-                            ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
+                            ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, messageId, request});
                         }
                         if (ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
-                            ServerRuntime.REQUEST_EVENT_COUNT_LOOP_LIST.add(new Object[]{webSocket, msg});
+                            ServerRuntime.REQUEST_EVENT_COUNT_LOOP_LIST.add(new Object[]{webSocket, messageId, request});
                         }
                     }
 
@@ -160,7 +160,7 @@ public class WsServer extends WebSocketServer {
                     Send Ack if needed
                      */
                     if (Constants.BOOLEAN_TRUE.equals(request.getRequestAck())) {
-                        CmdHandler.ack(webSocket, message.getMessageId());
+                        CmdHandler.ack(webSocket, messageId);
                     }
                     break;
                 default:
