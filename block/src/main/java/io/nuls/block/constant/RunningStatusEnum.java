@@ -30,12 +30,6 @@ package io.nuls.block.constant;
 public enum RunningStatusEnum {
 
     /**
-     * 已停止
-     * stoped
-     */
-    STOPED,
-
-    /**
      * 正在初始化
      * initializing
      */

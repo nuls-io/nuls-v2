@@ -32,6 +32,7 @@ import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -55,7 +56,7 @@ public class GetBlocksHandler extends BaseCmd {
     private BlockService service;
 
     @CmdAnnotation(cmd = GET_BLOCKS_BY_HEIGHT_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Object process(Map map){
+    public Response process(Map map){
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();
         HeightRangeMessage message = new HeightRangeMessage();
@@ -72,7 +73,7 @@ public class GetBlocksHandler extends BaseCmd {
         if(startHeight < 0L || startHeight > endHeight || endHeight - startHeight > MAX_SIZE) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
+        Log.info("recieve HeightRangeMessage from network node-" + nodeId + ", chainId:" + chainId + ", start:" + startHeight + ", end:" + endHeight);
         NulsDigestData requestHash;
         try {
             requestHash = NulsDigestData.calcDigestData(message.serialize());
@@ -97,7 +98,7 @@ public class GetBlocksHandler extends BaseCmd {
         blockMessage.setCommand(CommandConstant.BLOCK_MESSAGE);
         boolean result = NetworkUtil.sendToNode(chainId, blockMessage, nodeId);
         if (!result) {
-            Log.warn("send block failed:{},height:{}", nodeId, block.getHeader().getHeight());
+            Log.warn("send block failed:" + nodeId + ",height:" + block.getHeader().getHeight());
         }
     }
 

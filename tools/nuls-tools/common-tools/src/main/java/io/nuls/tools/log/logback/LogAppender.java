@@ -47,7 +47,7 @@ public class LogAppender {
         //文件名格式
         String fp = OptionHelper.substVars(rootPath+"/logs/"+"/"+ fileName + ".%d{yyyy-MM-dd}.%i.zip",context);
         //最大日志文件大小
-        policy.setMaxFileSize("100MB");
+        policy.setMaxFileSize(FileSize.valueOf("100 MB"));
         //设置文件名模式
         policy.setFileNamePattern(fp);
         //设置最大历史记录为15条

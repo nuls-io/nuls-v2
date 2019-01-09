@@ -213,7 +213,7 @@ public class WsServer extends WebSocketServer {
         connectionInformation.put(Constants.KEY_PORT, wsServer.getPort() + "");
         ServerRuntime.LOCAL.setConnectionInformation(connectionInformation);
         ServerRuntime.LOCAL.setApiMethods(new ArrayList<>());
-        ServerRuntime.LOCAL.setDependencies(new HashMap<>(16));
+        ServerRuntime.LOCAL.setDependencies(new HashMap<>(8));
         ServerRuntime.LOCAL.setModuleRoles(new HashMap<>(1));
         return wsServer;
     }

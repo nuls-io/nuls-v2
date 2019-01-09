@@ -1,19 +1,15 @@
 /*
  *
  *  * MIT License
- *  *
  *  * Copyright (c) 2017-2018 nuls.io
- *  *
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
  *  * in the Software without restriction, including without limitation the rights
  *  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  *  * copies of the Software, and to permit persons to whom the Software is
  *  * furnished to do so, subject to the following conditions:
- *  *
  *  * The above copyright notice and this permission notice shall be included in all
  *  * copies or substantial portions of the Software.
- *  *
  *  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  *  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  *  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,7 +17,6 @@
  *  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  * SOFTWARE.
- *  *
  *
  */
 
@@ -34,6 +29,8 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
@@ -47,6 +44,7 @@ import java.util.Map;
  * @date 2018/10/17
  * @description
  */
+@Component
 public class KernelCmd4Test extends BaseCmd {
 
 
@@ -64,18 +62,12 @@ public class KernelCmd4Test extends BaseCmd {
             }
             Map<String, Object> dependMap = new HashMap<>(1);
             dependMap.put("Dependencies", ClientRuntime.ROLE_MAP);
+            ServerRuntime.eventCount("registerAPI", success(dependMap));
             return success(dependMap);
         } catch (Exception e) {
             Log.error(e);
             return failed(e.getMessage());
         }
-    }
-
-    @CmdAnnotation(cmd = "method1", version = 1.0, minEvent = 1,
-            description = "Test method1")
-    @Parameter(parameterName = "param1", parameterType = "string")
-    public Response method1(Map<String, Object> map) {
-        return success();
     }
 
 }

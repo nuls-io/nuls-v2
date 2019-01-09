@@ -18,46 +18,29 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.cache;
+package io.nuls.mykernel;
 
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.tools.log.Log;
-import lombok.NoArgsConstructor;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import io.nuls.rpc.info.NoUse;
+import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 /**
- * 异步请求响应结果缓存类
+ * 区块管理模块启动类
+ * Block module startup class
  *
  * @author captain
  * @version 1.0
- * @date 18-11-12 下午2:35
+ * @date 18-11-8 上午10:20
  */
-@NoArgsConstructor
-public class DataCacher<T> {
+public class MyKernelBootstrap {
 
-    private Map<NulsDigestData, CompletableFuture<T>> cacher = new HashMap<>();
-
-    CompletableFuture<T> addFuture(NulsDigestData hash) {
-        var future = new CompletableFuture<T>();
-        cacher.put(hash, future);
-        return future;
-    }
-
-    public boolean complete(NulsDigestData hash, T t) {
-        CompletableFuture<T> future = cacher.get(hash);
-        if (future == null) {
-            Log.debug("DataCacher Time out:" + hash.getDigestHex());
-            return false;
+    public static void main(String[] args) {
+        try {
+            SpringLiteContext.init("io.nuls.rpc.cmd.kernel", new ModularServiceMethodInterceptor());
+            NoUse.mockKernel();
+        } catch (Exception e) {
+            System.exit(0);
         }
-        future.complete(t);
-        cacher.remove(hash);
-        return true;
     }
 
-    void removeFuture(NulsDigestData hash) {
-        cacher.remove(hash);
-    }
 }

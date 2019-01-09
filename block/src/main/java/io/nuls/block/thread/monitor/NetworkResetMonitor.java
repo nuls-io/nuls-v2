@@ -55,7 +55,7 @@ public class NetworkResetMonitor implements Runnable {
                 //判断该链的运行状态,只有正常运行时才会有区块高度监控
                 RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
                 if (!status.equals(RunningStatusEnum.RUNNING)){
-                    Log.info("skip process, status is {}, chainId-{}", status, chainId);
+                    Log.info("skip process, status is " + status + ", chainId-" + chainId);
                     return;
                 }
                 ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
@@ -63,11 +63,11 @@ public class NetworkResetMonitor implements Runnable {
                 long time = ContextManager.getContext(chainId).getLatestBlock().getHeader().getTime();
                 //如果(当前时间戳-最新区块时间戳)>重置网络阈值,通知网络模块重置可用节点
                 if (NetworkUtil.currentTime() - time > reset) {
-                    Log.info("chainId-{},NetworkReset!", chainId);
+                    Log.info("chainId-" + chainId + ",NetworkReset!");
                     NetworkUtil.resetNetwork(chainId);
                 }
             } catch (Exception e) {
-                Log.error("chainId-{},NetworkReset error!", chainId);
+                Log.error("chainId-" + chainId + ",NetworkReset error!");
             }
         }
 

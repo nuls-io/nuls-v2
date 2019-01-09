@@ -28,6 +28,7 @@ import io.nuls.network.manager.threads.TimeService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.core.annotation.Component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +38,7 @@ import java.util.Map;
  * @author  lan
  * @date 2018/12/05
  **/
+@Component
 public class TimeServiceRpc  extends BaseCmd {
     @CmdAnnotation(cmd = "nw_currentTimeMillis", version = 1.0,
             description = "currentTimeMillis")

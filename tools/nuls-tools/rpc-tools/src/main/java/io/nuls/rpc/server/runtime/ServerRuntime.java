@@ -10,6 +10,7 @@ import io.nuls.rpc.server.thread.RequestByCountProcessor;
 import io.nuls.rpc.server.thread.RequestByPeriodProcessor;
 import io.nuls.rpc.server.thread.RequestSingleProcessor;
 import io.nuls.tools.core.ioc.ScanUtil;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -110,12 +111,6 @@ public class ServerRuntime {
      */
     public static CmdDetail getLocalInvokeCmd(String cmd, double minVersion) {
 
-        /*
-        根据version排序
-        Sort according to version
-         */
-        LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
-
         CmdDetail find = null;
         for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
             /*
@@ -164,9 +159,6 @@ public class ServerRuntime {
      * @return CmdDetail
      */
     public static CmdDetail getLocalInvokeCmd(String cmd) {
-
-        LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
-
         CmdDetail find = null;
         for (CmdDetail cmdDetail : LOCAL.getApiMethods()) {
             if (!cmdDetail.getMethodName().equals(cmd)) {
@@ -204,7 +196,7 @@ public class ServerRuntime {
 
         List<Class> classList = ScanUtil.scan(packageName);
         for (Class clz : classList) {
-            Method[] methods = clz.getMethods();
+            Method[] methods = clz.getDeclaredMethods();
             for (Method method : methods) {
                 CmdDetail cmdDetail = annotation2CmdDetail(method);
                 if (cmdDetail == null) {
@@ -217,11 +209,13 @@ public class ServerRuntime {
                  */
                 if (!isRegister(cmdDetail)) {
                     LOCAL.getApiMethods().add(cmdDetail);
+                    CmdHandler.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
             }
         }
+        LOCAL.getApiMethods().sort(Comparator.comparingDouble(CmdDetail::getVersion));
     }
 
 
@@ -241,7 +235,7 @@ public class ServerRuntime {
             CmdAnnotation中包含了接口的必要信息
             The CmdAnnotation contains the necessary information for the interface
              */
-            if (CmdAnnotation.class.getName().equals(annotation.annotationType().getName())) {
+            if (annotation instanceof CmdAnnotation) {
                 CmdAnnotation cmdAnnotation = (CmdAnnotation) annotation;
                 cmdDetail = new CmdDetail();
                 cmdDetail.setMethodName(cmdAnnotation.cmd());
@@ -252,19 +246,21 @@ public class ServerRuntime {
                 cmdDetail.setVersion(cmdAnnotation.version());
                 cmdDetail.setInvokeClass(method.getDeclaringClass().getName());
                 cmdDetail.setInvokeMethod(method.getName());
+                continue;
             }
 
             /*
             参数详细说明
             Detailed description of parameters
              */
-            if (Parameter.class.getName().equals(annotation.annotationType().getName())) {
+            if (annotation instanceof Parameter) {
                 Parameter parameter = (Parameter) annotation;
                 CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());
                 cmdParameters.add(cmdParameter);
+                continue;
             }
 
-            if (Parameters.class.getName().equals(annotation.annotationType().getName())) {
+            if (annotation instanceof Parameters) {
                 Parameters parameters = (Parameters) annotation;
                 for (Parameter parameter : parameters.value()) {
                     CmdParameter cmdParameter = new CmdParameter(parameter.parameterName(), parameter.parameterType(), parameter.parameterValidRange(), parameter.parameterValidRegExp());

@@ -57,7 +57,7 @@ public class Constants {
      * 循环暂停时间
      * Loop pause time
      */
-    public static final long INTERVAL_TIMEMILLIS = 10L;
+    public static final long INTERVAL_TIMEMILLIS = 1L;
 
     /**
      * 超时毫秒数(1分钟)
@@ -182,7 +182,7 @@ public class Constants {
      * 处理待处理消息的线程池
      * Thread pool for processing messages to be processed
      */
-    public static final ExecutorService THREAD_POOL = ThreadUtils.createThreadPool(5, 500, new NulsThreadFactory("Processor"));
+    public static final ExecutorService THREAD_POOL = ThreadUtils.createThreadPool(3, 500, new NulsThreadFactory("Processor"));
 
     public static final String RESPONSE_TIMEOUT = "Response timeout";
     public static final String CMD_NOT_FOUND = "Cmd not found";
