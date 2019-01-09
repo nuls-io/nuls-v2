@@ -97,7 +97,7 @@ public class BlockSynchronizer implements Runnable {
         int minNodeAmount = parameters.getMinNodeAmount();
         if (availableNodes.size() >= minNodeAmount) {
             //3.统计网络中可用节点的一致区块高度、区块hash
-            BlockDownloaderParams params = statistics(availableNodes, chainId, context);
+            BlockDownloaderParams params = statistics(availableNodes, context);
             int size = params.getNodes().size();
             //网络上没有可用节点
             if (size == 0) {
@@ -218,7 +218,7 @@ public class BlockSynchronizer implements Runnable {
             Thread.sleep(100L);
         }
 
-        BlockDownloaderParams newestParams = statistics(NetworkUtil.getAvailableNodes(chainId), chainId, context);
+        BlockDownloaderParams newestParams = statistics(NetworkUtil.getAvailableNodes(chainId), context);
         if (newestParams.getNetLatestHeight() > blockService.getLatestBlock(chainId).getHeader().getHeight()) {
             statusEnumMap.put(chainId, BlockSynStatusEnum.WAITING);
             return false;
@@ -234,7 +234,7 @@ public class BlockSynchronizer implements Runnable {
      * @return
      * @date 18-11-8 下午4:55
      */
-    public BlockDownloaderParams statistics(List<Node> availableNodes, int chainId, ChainContext context) {
+    public BlockDownloaderParams statistics(List<Node> availableNodes, ChainContext context) {
         BlockDownloaderParams params = new BlockDownloaderParams();
         params.setAvailableNodesCount(availableNodes.size());
         PriorityBlockingQueue<Node> nodeQueue = new PriorityBlockingQueue<>(availableNodes.size(), Node.COMPARATOR);
