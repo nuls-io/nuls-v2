@@ -159,7 +159,7 @@ public class NetworkCall {
             List<Map<String, String>> cmds = new ArrayList<>();
             map.put("role", ModuleE.TX.abbr);
             //模块启动时向网络模块注册网络协议处理器
-            List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX, NW_NEW_CROSS_HASH, NW_ASK_CROSS_TX, NW_NEW_MN_TX, NW_VERIFY_FC, NW_VERIFY_MN, NW_VERIFYR_ESULT, NW_CROSS_NODE_RS);
+            List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX, NW_NEW_CROSS_HASH, NW_ASK_CROSS_TX_M_FC, NW_ASK_CROSS_TX_M_M, NW_ASK_CROSS_TX_FC_M, NW_NEW_MN_TX, NW_VERIFY_FC, NW_VERIFY_MN, NW_VERIFYR_ESULT, NW_CROSS_NODE_RS);
             for (String s : list) {
                 Map<String, String> cmd = new HashMap<>();
                 cmd.put("protocolCmd", s);
