@@ -62,7 +62,7 @@ public class KernelCmd4Test extends BaseCmd {
             }
             Map<String, Object> dependMap = new HashMap<>(1);
             dependMap.put("Dependencies", ClientRuntime.ROLE_MAP);
-            ServerRuntime.eventCount("registerAPI", success(dependMap));
+//            ServerRuntime.eventCount("registerAPI", success(dependMap));
             return success(dependMap);
         } catch (Exception e) {
             Log.error(e);

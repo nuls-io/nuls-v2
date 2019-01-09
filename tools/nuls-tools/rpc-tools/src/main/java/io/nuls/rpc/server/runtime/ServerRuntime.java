@@ -209,7 +209,6 @@ public class ServerRuntime {
                  */
                 if (!isRegister(cmdDetail)) {
                     LOCAL.getApiMethods().add(cmdDetail);
-                    CmdHandler.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
