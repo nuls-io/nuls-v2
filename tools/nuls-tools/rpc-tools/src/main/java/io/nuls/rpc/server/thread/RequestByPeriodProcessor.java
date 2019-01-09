@@ -27,11 +27,10 @@ package io.nuls.rpc.server.thread;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
+import io.nuls.rpc.server.runtime.WsData;
 import io.nuls.rpc.server.handler.CmdHandler;
-import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
-import org.java_websocket.WebSocket;
 
 import java.util.Map;
 
@@ -42,7 +41,13 @@ import java.util.Map;
  * @author tangyi
  * @date 2018/11/7
  */
-public class RequestLoopProcessor implements Runnable {
+public class RequestByPeriodProcessor implements Runnable {
+
+    private WsData wsData;
+
+    public  RequestByPeriodProcessor(WsData wsData){
+        this.wsData = wsData;
+    }
 
     /**
      * 轮流根据Period和EventCount定时推送消息
@@ -51,12 +56,11 @@ public class RequestLoopProcessor implements Runnable {
     @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {
-
-        while (true) {
+        while (wsData.isConnected()) {
             try {
-
-                sendPeriodQueue();
-
+                if(!wsData.getRequestPeriodLoopQueue().isEmpty()){
+                    sendPeriodQueue();
+                }
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
                 Log.error(e);
@@ -70,26 +74,21 @@ public class RequestLoopProcessor implements Runnable {
      *
      * @throws Exception 抛出任何异常 / Throw any exception
      */
-    private void sendPeriodQueue() throws Exception {
+    private void sendPeriodQueue(){
         /*
         获取队列中的第一个对象
         Get the first item of the queue
          */
-        Object[] objects = ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.take();
-
-        WebSocket webSocket = (WebSocket) objects[0];
-        String msg = (String) objects[1];
-
-        Message message = JSONUtils.json2pojo(msg, Message.class);
+        Message message = wsData.getRequestPeriodLoopQueue().poll();
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
 
         /*
         需要继续发送，添加回队列
         Need to continue sending, add back to queue
          */
-        boolean isContinue = CmdHandler.responseWithPeriod(webSocket, message.getMessageId(), request);
+        boolean isContinue = CmdHandler.responseWithPeriod(wsData, message, request);
         if (isContinue) {
-            ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, JSONUtils.obj2json(message)});
+            wsData.getRequestPeriodLoopQueue().offer(message);
         }
     }
 }

@@ -28,7 +28,6 @@
 package io.nuls.test;
 
 import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.invoke.test.EventCounterInvoke;
@@ -44,7 +43,9 @@ import org.junit.Test;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -159,7 +160,6 @@ public class WsM1 {
         单元测试专用结束
          */
 
-
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
@@ -200,10 +200,10 @@ public class WsM1 {
 
         Thread.sleep(5000);
         System.out.println("最后队列的数量：");
-        System.out.println("RESPONSE_MANUAL_QUEUE：" + ClientRuntime.RESPONSE_MANUAL_QUEUE.size());
+        /*System.out.println("RESPONSE_MANUAL_QUEUE：" + ClientRuntime.RESPONSE_MANUAL_QUEUE.size());
         System.out.println("RESPONSE_AUTO_QUEUE：" + ClientRuntime.RESPONSE_AUTO_QUEUE.size());
         System.out.println("NEGOTIATE_RESPONSE_QUEUE：" + ClientRuntime.NEGOTIATE_RESPONSE_QUEUE.size());
-        System.out.println("ACK_QUEUE：" + ClientRuntime.ACK_QUEUE.size());
+        System.out.println("ACK_QUEUE：" + ClientRuntime.ACK_QUEUE.size());*/
 
     }
 }
