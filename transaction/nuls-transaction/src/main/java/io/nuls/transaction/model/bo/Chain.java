@@ -68,6 +68,11 @@ public class Chain {
     private PersistentQueue unverifiedQueue;
 
     /**
+     * 当前最新高度
+     */
+    private long bestBlockHeight;
+
+    /**
      * 任务线程池
      * Schedule thread pool
      */
@@ -155,5 +160,13 @@ public class Chain {
 
     public void setUnverifiedQueue(PersistentQueue unverifiedQueue) {
         this.unverifiedQueue = unverifiedQueue;
+    }
+
+    public long getBestBlockHeight() {
+        return bestBlockHeight;
+    }
+
+    public void setBestBlockHeight(long bestBlockHeight) {
+        this.bestBlockHeight = bestBlockHeight;
     }
 }
