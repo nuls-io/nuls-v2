@@ -64,16 +64,16 @@ public class CrossTxVerifyResult extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(chainId);
+        stream.writeUint16(chainId);
         stream.writeString(nodeId);
-        stream.writeVarInt(height);
+        stream.writeUint32(height);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
         this.nodeId = byteBuffer.readString();
-        this.height = byteBuffer.readVarInt();
+        this.height = byteBuffer.readUint32();
     }
 
     @Override
@@ -81,7 +81,7 @@ public class CrossTxVerifyResult extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(nodeId);
-        size += SerializeUtils.sizeOfVarInt(height);
+        size += SerializeUtils.sizeOfUint32();
         return size;
     }
 }
