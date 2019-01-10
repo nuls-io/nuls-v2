@@ -182,6 +182,14 @@ public class AccountServiceImpl implements AccountService, InitializingBean {
         return list;
     }
 
+    @Override
+    public List<Account> getAccountListByChain(int chainId) {
+        List<Account> accountList = new ArrayList<>();
+        List<Account> accounts = getAccountList();
+        accounts.stream().filter(acc -> acc.getChainId() == chainId).forEach(account -> accountList.add(account));
+        return accountList;
+    }
+
     /**
      * 根据账户地址字符串,获取账户对象(内部调用)
      * Get account object based on account address string

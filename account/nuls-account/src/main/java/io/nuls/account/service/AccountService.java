@@ -76,6 +76,14 @@ public interface AccountService {
     List<Account> getAccountList();
 
     /**
+     * 获取指定链所有账户集合
+     * Gets all account sets in the specified chain
+     * @param chainId
+     * @return
+     */
+    List<Account> getAccountListByChain(int chainId);
+
+    /**
      * 设置账户密码
      * set the password for exist account
      *
