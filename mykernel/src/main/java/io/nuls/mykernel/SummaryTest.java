@@ -44,7 +44,7 @@ public class SummaryTest {
     public static void main(String[] args) throws Exception {
         NoUse.mockModule();
         long total = 0;
-        int round = 20;
+        int round = 500;
         int loop = 1000;
         for (int j = 0; j < round; j++) {
             long start = System.currentTimeMillis();

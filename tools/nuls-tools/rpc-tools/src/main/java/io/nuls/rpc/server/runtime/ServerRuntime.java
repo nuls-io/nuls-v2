@@ -6,6 +6,7 @@ import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.server.handler.CmdHandler;
 import io.nuls.rpc.server.thread.RequestByCountProcessor;
 import io.nuls.rpc.server.thread.RequestByPeriodProcessor;
 import io.nuls.rpc.server.thread.RequestSingleProcessor;
@@ -209,6 +210,7 @@ public class ServerRuntime {
                  */
                 if (!isRegister(cmdDetail)) {
                     LOCAL.getApiMethods().add(cmdDetail);
+                    CmdHandler.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }

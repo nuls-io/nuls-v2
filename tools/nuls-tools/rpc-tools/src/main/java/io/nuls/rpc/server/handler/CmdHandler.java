@@ -47,6 +47,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.rpc.info.Constants.CMD_NOT_FOUND;
+
 /**
  * 解析从客户端收到的消息，调用正确的方法
  * Resolve the message received from the client and invoke the correct method
@@ -55,6 +57,8 @@ import java.util.Map;
  * @date 2018/10/30
  */
 public class CmdHandler {
+
+    public static final Map<String, Object> handlerMap = new HashMap<>();
 
     /**
      * 确认握手成功
@@ -472,15 +476,10 @@ public class CmdHandler {
     private static Response invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
         Class clz = Class.forName(invokeClass);
         Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
-
-        BaseCmd cmd;
-        if (SpringLiteContext.getBeanByClass(invokeClass) == null) {
-            Constructor constructor = clz.getConstructor();
-            cmd = (BaseCmd) constructor.newInstance();
-        } else {
-            cmd = (BaseCmd) SpringLiteContext.getBeanByClass(invokeClass);
+        BaseCmd cmd = (BaseCmd) handlerMap.get(invokeClass);
+        if (cmd == null) {
+            return MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, CMD_NOT_FOUND);
         }
-
         return (Response) method.invoke(cmd, params);
     }
 }
