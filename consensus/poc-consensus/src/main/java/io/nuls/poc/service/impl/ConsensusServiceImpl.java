@@ -29,6 +29,9 @@ import io.nuls.poc.utils.manager.*;
 import io.nuls.poc.utils.validator.BatchValidator;
 import io.nuls.poc.utils.validator.BlockValidator;
 import io.nuls.poc.utils.validator.TxValidator;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -1439,6 +1442,56 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
     }
 
+    /**
+     * 获取当前节点出块地址
+     * @param params
+     * @return Result
+     * */
+    @Override
+    public Result getNodePackingAddress(Map<String, Object> params) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        try {
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr,"ac_getUnencryptedAddressList", params);
+            List<String> accountAddressList =  (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList");
+            List<Agent> workAgentList = chain.getWorkAgentList(chain.getNewestHeader().getHeight());
+            String packAddress = null;
+            for (Agent agent:workAgentList) {
+                String address = AddressTool.getStringAddressByBytes(agent.getPackingAddress());
+                if(accountAddressList.contains(address)){
+                    packAddress = address;
+                    break;
+                }
+            }
+            Map<String,Object> resultMap = new HashMap<>(2);
+            resultMap.put("packAddress",packAddress);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
+        }catch (Exception e){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
+        }
+    }
+
+    /**
+     * 获取所有节点出块地址/指定N个区块出块指定
+     * @param params
+     * @return Result
+     * */
+    @Override
+    public Result getAgentAddressList(Map<String, Object> params) {
+        
+        return null;
+    }
+
     private void fillAgentList(Chain chain, List<Agent> agentList, List<Deposit> depositList) throws NulsException {
         MeetingRound round = roundManager.getCurrentRound(chain);
         for (Agent agent : agentList) {
@@ -1481,5 +1534,4 @@ public class ConsensusServiceImpl implements ConsensusService {
         agent.setStatus(1);
         agent.setCreditVal(member.getAgent().getCreditVal());
     }
-
 }

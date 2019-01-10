@@ -525,4 +525,31 @@ public class PocConsensusResource extends BaseCmd{
         }
         return success(result.getData());
     }
+
+    /**
+     * 获取当前节点出块地址
+     * */
+    @CmdAnnotation(cmd = "cs_getNodePackingAddress", version = 1.0, description = "Get the current node's out-of-block address 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response getNodePackingAddress(Map<String,Object> params){
+        Result result = service.getNodePackingAddress(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
+     * 获取所有节点出块地址/指定N个区块出块指定
+     * */
+    @CmdAnnotation(cmd = "cs_getAgentAddressList", version = 1.0, description = "Get all node out-of-block addresses/specify N block out-of-block designations")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "height", parameterType = "int")
+    public Response getAgentAddressList(Map<String,Object> params){
+        Result result = service.getAgentAddressList(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
 }

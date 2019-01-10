@@ -1,7 +1,9 @@
 package io.nuls.poc.model.bo;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.round.MeetingRound;
@@ -11,6 +13,7 @@ import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.tools.log.logback.NulsLogger;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -120,6 +123,64 @@ public class Chain {
         this.roundList = new ArrayList<>();
         this.loggerMap = new HashMap<>();
     }
+
+    /**
+     * 获取达到出块要求的节点列表
+     * Get a list of nodes that meet block requirements
+     *
+     * @param height
+     * @return List<agent>
+     **/
+    public List<Agent> getWorkAgentList(long height){
+        List<Agent> workAgentList = new ArrayList<>();
+        for (Agent agent:agentList) {
+            if (agent.getDelHeight() != -1L && agent.getDelHeight() <= height) {
+                continue;
+            }
+            if (agent.getBlockHeight() > height || agent.getBlockHeight() < 0L) {
+                continue;
+            }
+            /*
+            获取节点委托信息，用于计算节点总的委托金额
+            Get the node delegation information for calculating the total amount of the node delegation
+            */
+            List<Deposit> cdList = getDepositListByAgentId(agent.getTxHash(), height);
+            BigInteger totalDeposit = BigInteger.ZERO;
+            for (Deposit dtx : cdList) {
+                totalDeposit = totalDeposit.add(dtx.getDeposit());
+            }
+            if(totalDeposit.compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)>=0){
+                workAgentList.add(agent);
+            }
+        }
+        return workAgentList;
+    }
+
+    /**
+     * 获取节点的委托信息
+     * Obtaining delegation information of nodes
+     *
+     * @param agentHash               节点ID/agent hash
+     * @param startBlockHeight        上一轮次的起始区块高度/Initial blocks of the last round
+     * @return  List<Deposit>
+     * */
+    private List<Deposit> getDepositListByAgentId(NulsDigestData agentHash, long startBlockHeight){
+        List<Deposit> resultList = new ArrayList<>();
+        for (int i = depositList.size() - 1; i >= 0; i--) {
+            Deposit deposit = depositList.get(i);
+            if (deposit.getDelHeight() != -1L && deposit.getDelHeight() <= startBlockHeight) {
+                continue;
+            }
+            if (deposit.getBlockHeight() > startBlockHeight || deposit.getBlockHeight() < 0L) {
+                continue;
+            }
+            if (deposit.getAgentHash().equals(agentHash)) {
+                resultList.add(deposit);
+            }
+        }
+        return resultList;
+    }
+
 
     public ConfigBean getConfig() {
         return config;
