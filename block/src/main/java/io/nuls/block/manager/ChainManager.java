@@ -118,7 +118,6 @@ public class ChainManager {
         masterForkChain.setPreviousHash(topForkChain.getPreviousHash());
         masterForkChain.setHashList(hashList);
         masterForkChain.setType(ChainTypeEnum.FORK);
-        ConsensusUtil.forkNotice(chainId, forkHeight);
 
         //2.3 主链上低于topForkChain的链不用变动
         //2.4 主链上高于topForkChain的链重新链接到新分叉链masterForkChain

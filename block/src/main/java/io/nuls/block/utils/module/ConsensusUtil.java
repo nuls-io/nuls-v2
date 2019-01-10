@@ -110,9 +110,9 @@ public class ConsensusUtil {
      * @param chainId
      * @return
      */
-    public static boolean forkNotice(int chainId, long height) {
+    public static boolean rollbackNotice(int chainId, long height) {
         try {
-            Map<String, Object> params = new HashMap<>(5);
+            Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("height", height);
