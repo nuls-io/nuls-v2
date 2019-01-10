@@ -125,7 +125,7 @@ public class TestConstant {
         coinTo.setAmount(new BigInteger("200"));
         coinTo.setAssetsChainId(1);
         coinTo.setAssetsId(1);
-        coinTo.setLockTime(TimeService.currentTimeMillis());
+        coinTo.setLockTime(System.currentTimeMillis());
         return coinTo;
     }
 
@@ -169,7 +169,7 @@ public class TestConstant {
         Transaction tx = new Transaction();
         tx.setCoinData(getCoinData1().serialize());
         tx.setType(10);
-        tx.setTime(TimeService.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis());
         tx.setBlockHeight(100);
         String remark = "这是一笔跨链转账交易";
         tx.setRemark(StringUtils.bytes(remark));
@@ -180,7 +180,7 @@ public class TestConstant {
         Transaction tx = new Transaction();
         tx.setCoinData(getCoinData2().serialize());
         tx.setType(2);
-        tx.setTime(TimeService.currentTimeMillis());
+        tx.setTime(System.currentTimeMillis());
         tx.setBlockHeight(100);
         String remark = "这是一笔普通转账交易";
         tx.setRemark(StringUtils.bytes(remark));

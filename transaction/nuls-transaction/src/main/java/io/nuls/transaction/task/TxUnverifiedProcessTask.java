@@ -115,7 +115,8 @@ public class TxUnverifiedProcessTask implements Runnable {
                 processOrphanTx(tx);
             }else if(isOrphanTx){
                 //todo 孤儿交易还是10分钟删, 如何处理nonce值??
-                return tx.getTime() < (TimeService.currentTimeMillis() - 3600000L);
+                long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+                return tx.getTime() < (currentTimeMillis - 3600000L);
             }
         } catch (Exception e) {
             Log.error(e);
