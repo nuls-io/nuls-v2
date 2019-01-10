@@ -47,13 +47,13 @@ public class WsData {
      * 单次响应队列，Message
      * Single called queue.Message.
      */
-    private final LinkedBlockingQueue<Message> requestSingleQueue = new LinkedBlockingQueue<>();
+    private final LinkedBlockingQueue<Object []> requestSingleQueue = new LinkedBlockingQueue<>();
 
     /**
      * 多次响应队列（根据时间间隔订阅/Period），Message
      * Multiply called queue (Period).Message.
      */
-    private final LinkedBlockingQueue<Message> requestPeriodLoopQueue = new LinkedBlockingQueue<>();
+    private final LinkedBlockingQueue<Object []> requestPeriodLoopQueue = new LinkedBlockingQueue<>();
 
     /**
      * 多次响应（根据时间触发次数订阅/Event count），Message
@@ -199,11 +199,11 @@ public class WsData {
         return cmdInvokeTime;
     }
 
-    public LinkedBlockingQueue<Message> getRequestSingleQueue() {
+    public LinkedBlockingQueue<Object []> getRequestSingleQueue() {
         return requestSingleQueue;
     }
 
-    public LinkedBlockingQueue<Message> getRequestPeriodLoopQueue() {
+    public LinkedBlockingQueue<Object []> getRequestPeriodLoopQueue() {
         return requestPeriodLoopQueue;
     }
 

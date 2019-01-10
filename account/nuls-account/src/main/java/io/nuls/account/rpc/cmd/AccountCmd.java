@@ -203,8 +203,17 @@ public class AccountCmd extends BaseCmd {
         Map<String, List<SimpleAccountDto>> map = new HashMap<>();
         List<SimpleAccountDto> simpleAccountList = new ArrayList<>();
         try {
-            //query all accounts
-            List<Account> accountList = accountService.getAccountList();
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            List<Account> accountList;
+            if (chainIdObj != null) {
+                int chainId = (int) chainIdObj;
+                //query all accounts in a chain
+                accountList = accountService.getAccountListByChain(chainId);
+            } else {
+                //query all accounts
+                accountList = accountService.getAccountList();
+            }
+
             if (null == accountList) {
                 return success(null);
             }
@@ -229,7 +238,16 @@ public class AccountCmd extends BaseCmd {
         List<String> unencryptedAddressList = new ArrayList<>();
         try {
             //query all accounts
-            List<Account> accountList = accountService.getAccountList();
+            Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+            List<Account> accountList;
+            if (chainIdObj != null) {
+                int chainId = (int) chainIdObj;
+                //query all accounts in a chain
+                accountList = accountService.getAccountListByChain(chainId);
+            } else {
+                //query all accounts
+                accountList = accountService.getAccountList();
+            }
             if (null == accountList) {
                 return success(null);
             }
@@ -276,8 +294,8 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
             }
 
-            //query all accounts
-            List<Account> accountList = accountService.getAccountList();
+            //query all accounts in a chain
+            List<Account> accountList = accountService.getAccountListByChain(chainId);
             if (null == accountList) {
                 return success(null);
             }

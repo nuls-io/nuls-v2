@@ -5,6 +5,7 @@ import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +34,7 @@ public class NoUse {
         connectionInformation.put(Constants.KEY_IP, "127.0.0.1");
         connectionInformation.put(Constants.KEY_PORT, wsServer.getPort() + "");
         ServerRuntime.LOCAL.setConnectionInformation(connectionInformation);
+        SpringLiteContext.init("io.nuls.rpc.cmd.kernel");
         wsServer.scanPackage("io.nuls.rpc.cmd.kernel").connect("ws://127.0.0.1:8887");
 
         Map<String, String> kernelLinkMap = new HashMap<>(2);

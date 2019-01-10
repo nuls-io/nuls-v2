@@ -127,12 +127,13 @@ public class WsServer extends WebSocketServer {
                     CmdHandler.unsubscribe(wsData, message);
                     break;
                 case Request:
+                    String messageId = message.getMessageId();
                     /*
                     如果不能提供服务，则直接返回
                     If no service is available, return directly
                      */
                     if (!ServerRuntime.isReady()) {
-                        CmdHandler.serviceNotStarted(webSocket, message.getMessageId());
+                        CmdHandler.serviceNotStarted(webSocket, messageId);
                         break;
                     }
 
@@ -144,11 +145,11 @@ public class WsServer extends WebSocketServer {
 
                     if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
                             && !ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
-                        wsData.getRequestSingleQueue().offer(message);
+                        wsData.getRequestSingleQueue().offer(new Object[]{messageId, request});
                     } else {
                         if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
-                            wsData.getRequestPeriodLoopQueue().offer(message);
-                            wsData.getIdToPeriodMessageMap().put(message.getMessageId(),message);
+                            wsData.getRequestPeriodLoopQueue().offer(new Object[]{message, request});
+                            wsData.getIdToPeriodMessageMap().put(messageId,message);
                         }
                         if (ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
                             wsData.subscribeByEvent(message);
@@ -160,7 +161,7 @@ public class WsServer extends WebSocketServer {
                     Send Ack if needed
                      */
                     if (Constants.BOOLEAN_TRUE.equals(request.getRequestAck())) {
-                        CmdHandler.ack(webSocket, message.getMessageId());
+                        CmdHandler.ack(webSocket, messageId);
                     }
                     break;
                 default:

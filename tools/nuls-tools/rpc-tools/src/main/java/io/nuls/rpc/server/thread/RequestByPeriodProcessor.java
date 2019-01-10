@@ -30,17 +30,14 @@ import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.server.runtime.WsData;
 import io.nuls.rpc.server.handler.CmdHandler;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
-
-import java.util.Map;
 
 /**
- * 处理客户端消息的线程
- * Threads handling client messages
+ * 订阅定时返回数据处理线程
+ * Subscription event processing threads
  *
- * @author tangyi
- * @date 2018/11/7
- */
+ * @author tag
+ * 2019/1/5
+ * */
 public class RequestByPeriodProcessor implements Runnable {
 
     private WsData wsData;
@@ -79,8 +76,9 @@ public class RequestByPeriodProcessor implements Runnable {
         获取队列中的第一个对象
         Get the first item of the queue
          */
-        Message message = wsData.getRequestPeriodLoopQueue().poll();
-        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+        Object[] objects = wsData.getRequestPeriodLoopQueue().poll();
+        Message message = (Message) objects[0];
+        Request request = (Request) objects[1];
 
         /*
         需要继续发送，添加回队列
@@ -88,7 +86,7 @@ public class RequestByPeriodProcessor implements Runnable {
          */
         boolean isContinue = CmdHandler.responseWithPeriod(wsData, message, request);
         if (isContinue) {
-            wsData.getRequestPeriodLoopQueue().offer(message);
+            wsData.getRequestPeriodLoopQueue().offer(objects);
         }
     }
 }

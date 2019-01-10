@@ -25,21 +25,17 @@
 package io.nuls.rpc.server.thread;
 
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
-import io.nuls.rpc.server.runtime.WsData;
 import io.nuls.rpc.server.handler.CmdHandler;
+import io.nuls.rpc.server.runtime.WsData;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
-
-import java.util.Map;
 
 /**
  * 处理客户端消息的线程
  * Threads handling client messages
  *
- * @author tangyi
- * @date 2018/11/7
+ * @author tag
+ * @date 2019/1/3
  */
 public class RequestSingleProcessor implements Runnable {
     private WsData wsData;
@@ -62,13 +58,14 @@ public class RequestSingleProcessor implements Runnable {
                 Get the first item of the queue
                  */
                 if(!wsData.getRequestSingleQueue().isEmpty()){
-                    Message message = wsData.getRequestSingleQueue().poll();
-                    Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
-                /*
-                Request，调用本地方法
-                If it is Request, call the local method
-                 */
-                    CmdHandler.callCommandsWithPeriod(wsData.getWebSocket(), request.getRequestMethods(), message.getMessageId());
+                    Object[] objects = wsData.getRequestSingleQueue().poll();
+                    String messageId = (String) objects[0];
+                    Request request = (Request) objects[1];
+                    /*
+                    Request，调用本地方法
+                    If it is Request, call the local method
+                    */
+                    CmdHandler.callCommandsWithPeriod(wsData.getWebSocket(), request.getRequestMethods(), messageId);
                 }
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {

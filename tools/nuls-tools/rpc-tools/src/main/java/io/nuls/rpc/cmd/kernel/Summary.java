@@ -22,49 +22,34 @@
 
 package io.nuls.rpc.cmd.kernel;
 
-import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.RegisterApi;
+import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
- * this class is only used by testing.
+ * 测试接口，测试rpc服务稳定性
  *
- * @author tangyi
- * @date 2018/10/17
- * @description
+ * @author captain
+ * @version 1.0
+ * @date 18-11-14 下午4:23
  */
 @Component
-public class KernelCmd4Test extends BaseCmd {
+public class Summary extends BaseCmd {
 
-
-    @CmdAnnotation(cmd = "registerAPI", version = 1.0, minEvent = 1,
-            description = "Register API")
-    public Response registerAPI(Map<String, Object> map) {
-        try {
-            RegisterApi registerApi = JSONUtils.map2pojo(map, RegisterApi.class);
-            Log.debug("注册的方法：" + JSONUtils.obj2json(registerApi));
-            if (registerApi != null) {
-                Map<String, Object> role = new HashMap<>(3);
-                role.put(Constants.KEY_IP, registerApi.getConnectionInformation().get(Constants.KEY_IP));
-                role.put(Constants.KEY_PORT, registerApi.getConnectionInformation().get(Constants.KEY_PORT));
-                ClientRuntime.ROLE_MAP.put(registerApi.getModuleAbbreviation(), role);
-            }
-            Map<String, Object> dependMap = new HashMap<>(1);
-            dependMap.put("Dependencies", ClientRuntime.ROLE_MAP);
-            return success(dependMap);
-        } catch (Exception e) {
-            Log.error(e);
-            return failed(e.getMessage());
+    @CmdAnnotation(cmd = "sum", version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "count", parameterType = "int")
+    public Response process(Map map) {
+        int count = Integer.parseInt(map.get("count").toString());
+        int sum = 0;
+        for (int i = 0; i < count; i++) {
+            sum += i;
         }
+        return success(sum);
     }
 
 }

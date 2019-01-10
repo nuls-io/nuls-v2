@@ -61,8 +61,8 @@ public class ResponseAutoProcessor implements Runnable {
                 获取队列中的第一个对象
                 Get the first item of the queue
                  */
-                Message message = client.firstMessageInResponseAutoQueue();
-                if (message == null) {
+                Response response = client.firstMessageInResponseAutoQueue();
+                if (response == null) {
                     Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                     continue;
                 }
@@ -71,7 +71,6 @@ public class ResponseAutoProcessor implements Runnable {
                 获取Response对象，这里得到的对象一定是需要自动调用本地方法
                 Get Response object, The object you get here must automatically call the local method
                  */
-                Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
                 String messageId = response.getRequestId();
 
                 /*
