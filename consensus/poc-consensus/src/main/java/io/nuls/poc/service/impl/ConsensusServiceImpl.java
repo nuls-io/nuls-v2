@@ -1488,8 +1488,20 @@ public class ConsensusServiceImpl implements ConsensusService {
      * */
     @Override
     public Result getAgentAddressList(Map<String, Object> params) {
-        
-        return null;
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        Map<String,Object> resultMap = new HashMap<>(2);
+        resultMap.put("packAddress",chain.getWorkAddressList(chain.getNewestHeader().getHeight()));
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
     }
 
     private void fillAgentList(Chain chain, List<Agent> agentList, List<Deposit> depositList) throws NulsException {

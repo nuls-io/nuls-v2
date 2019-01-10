@@ -1,5 +1,6 @@
 package io.nuls.poc.model.bo;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
@@ -14,10 +15,7 @@ import io.nuls.poc.utils.enumeration.ConsensusStatus;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 /**
@@ -154,6 +152,38 @@ public class Chain {
             }
         }
         return workAgentList;
+    }
+
+    /**
+     * 获取达到出块要求的节点地址列表
+     * Get a list of nodes that meet block requirements
+     *
+     * @param height
+     * @return List<agent>
+     **/
+    public Set<String> getWorkAddressList(long height){
+        Set<String> workAddressList = new HashSet<>();
+        for (Agent agent:agentList) {
+            if (agent.getDelHeight() != -1L && agent.getDelHeight() <= height) {
+                continue;
+            }
+            if (agent.getBlockHeight() > height || agent.getBlockHeight() < 0L) {
+                continue;
+            }
+            /*
+            获取节点委托信息，用于计算节点总的委托金额
+            Get the node delegation information for calculating the total amount of the node delegation
+            */
+            List<Deposit> cdList = getDepositListByAgentId(agent.getTxHash(), height);
+            BigInteger totalDeposit = BigInteger.ZERO;
+            for (Deposit dtx : cdList) {
+                totalDeposit = totalDeposit.add(dtx.getDeposit());
+            }
+            if(totalDeposit.compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)>=0){
+                workAddressList.add(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
+            }
+        }
+        return workAddressList;
     }
 
     /**

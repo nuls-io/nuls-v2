@@ -544,7 +544,6 @@ public class PocConsensusResource extends BaseCmd{
      * */
     @CmdAnnotation(cmd = "cs_getAgentAddressList", version = 1.0, description = "Get all node out-of-block addresses/specify N block out-of-block designations")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "height", parameterType = "int")
     public Response getAgentAddressList(Map<String,Object> params){
         Result result = service.getAgentAddressList(params);
         if(result.isFailed()){
