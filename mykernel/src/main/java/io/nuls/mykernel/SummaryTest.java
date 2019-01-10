@@ -36,23 +36,28 @@ public class SummaryTest {
 
     public static void main(String[] args) throws Exception {
         NoUse.mockModule();
-        long start = System.currentTimeMillis();
-        for (int i = 0; i < 10000; i++) {
-            try {
-                Map<String, Object> params = new HashMap<>(2);
-                params.put(Constants.VERSION_KEY_STR, "1.0");
-                params.put("count", 1);
-                Response response = CmdDispatcher.requestAndResponse(ModuleE.KE.abbr, "sum", params);
-                if (!response.isSuccess()) {
-                    System.out.println(response);
-                    throw new RuntimeException();
+        long total = 0;
+        int loop = 100;
+        for (int j = 0; j < loop; j++) {
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 1000; i++) {
+                try {
+                    Map<String, Object> params = new HashMap<>(2);
+                    params.put(Constants.VERSION_KEY_STR, "1.0");
+                    params.put("count", i);
+                    Response response = CmdDispatcher.requestAndResponse(ModuleE.KE.abbr, "sum", params);
+                    if (!response.isSuccess()) {
+                        System.out.println(response);
+                        throw new RuntimeException();
+                    }
+                } catch (Exception e) {
+                    Log.error(e);
                 }
-            } catch (Exception e) {
-                Log.error(e);
             }
-            Thread.sleep(1L);
+            long time = System.currentTimeMillis() - start;
+            total += time;
         }
-        System.out.println(System.currentTimeMillis() - start);
+        System.out.println("avg time:" + (total / loop));
     }
 
 }

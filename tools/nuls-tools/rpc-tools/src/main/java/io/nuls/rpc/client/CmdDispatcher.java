@@ -366,6 +366,10 @@ public class CmdDispatcher {
             Get the first item of the queue
              */
             Response response = ClientRuntime.RESPONSE_MANUAL_QUEUE.poll();
+            if (response == null) {
+                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+                continue;
+            }
             if (messageId.equals(response.getRequestId())) {
                 /*
                 messageId匹配，说明就是需要的结果，返回
@@ -413,6 +417,10 @@ public class CmdDispatcher {
             Get the first item of the queue, If it is an empty object, discard
              */
             Ack ack = ClientRuntime.ACK_QUEUE.poll();
+            if (ack == null) {
+                Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+                continue;
+            }
             if (ack.getRequestId().equals(messageId)) {
                 /*
                 messageId匹配，说明就是需要的结果，返回
