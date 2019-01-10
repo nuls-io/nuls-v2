@@ -74,15 +74,15 @@ public class ConsensusCall {
      * @param chain
      * @return
      */
-    public static String getNodePackagerAddress(Chain chain) {
+    public static String cs_getNodePackingAddress(Chain chain) {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             //TODO cmd名称 返回值key
             params.put("chainId", chain.getChainId());
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getNodePackagerAddress", params);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getNodePackingAddress", params);
             if (cmdResp.isSuccess()) {
-                HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_getNodePackagerAddress"));
+                HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_getNodePackingAddress"));
                 return (String) result.get("value");
             }
         } catch (Exception e) {

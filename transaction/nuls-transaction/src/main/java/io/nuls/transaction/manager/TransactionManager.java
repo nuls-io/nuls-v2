@@ -306,7 +306,7 @@ public class TransactionManager {
      * @return Result
      */
     private boolean validateFee(Chain chain, int type, int txSize, CoinData coinData) throws NulsException {
-        if (type == TxConstant.TX_TYPE_REDPUNISH) {
+        if (type == TxConstant.TX_TYPE_RED_PUNISH) {
             //红牌惩罚没有手续费
             return true;
         }

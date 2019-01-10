@@ -5,6 +5,13 @@ import io.nuls.rpc.server.handler.CmdHandler;
 import io.nuls.rpc.server.runtime.WsData;
 import io.nuls.tools.log.Log;
 
+/**
+ * 订阅事件处理线程
+ * Subscription event processing threads
+ *
+ * @author tag
+ * 2019/1/5
+ * */
 public class RequestByCountProcessor implements Runnable{
     private WsData wsData;
 

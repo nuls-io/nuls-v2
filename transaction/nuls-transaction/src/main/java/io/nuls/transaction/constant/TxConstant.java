@@ -8,7 +8,7 @@ public interface TxConstant {
 
     String MODULE_CODE = "tx";
 
-    int NULS_CHAINID = 12345;
+    int NULS_CHAINID = 8964;
     int NULS_CHAIN_ASSETID = 1;
 
     /**
@@ -59,15 +59,40 @@ public interface TxConstant {
     int ORPHAN_CONTAINER_MAX_SIZE = 200000;
 
 
+    /** coinbase交易*/
     int TX_TYPE_COINBASE = 1;
+    /** 转账交易*/
     int TX_TYPE_TRANSFER = 2;
+    /** 设置别名*/
+    int TX_TYPE_ALIAS = 3;
+    /** 创建共识节点交易*/
+    int TX_TYPE_REGISTER_AGENT = 4;
+    /** 委托交易(加入共识)*/
+    int TX_TYPE_JOIN_CONSENSUS = 5;
+    /** 取消委托交易(退出共识)*/
+    int TX_TYPE_CANCEL_DEPOSIT = 6;
+    /** 黄牌惩罚*/
+    int TX_TYPE_YELLOW_PUNISH = 7;
+    /** 红牌惩罚*/
+    int TX_TYPE_RED_PUNISH = 8;
+    /** 停止节点(删除共识节点)*/
+    int TX_TYPE_STOP_AGENT = 9;
+    /** 跨链转账交易*/
+    int TX_TYPE_CROSS_CHAIN_TRANSFER = 10;
+    /** 注册链交易*/
+    int TX_TYPE_REGISTER_CHAIN_AND_ASSET = 11;
+    /** 销毁链*/
+    int TX_TYPE_destroy_CHAIN_AND_ASSET = 12;
+    /** 为链新增一种资产*/
+    int TX_TYPE_ADD_ASSET_TO_CHAIN = 13;
+    /** 删除链上资产*/
+    int TX_TYPE_REMOVE_ASSET_FROM_CHAIN = 14;
 
-    int TX_TYPE_REDPUNISH = 8;
+
 
     /**
      * 跨链交易
      */
-    int TX_TYPE_CROSS_CHAIN_TRANSFER = 10;
     String TX_MODULE_VALIDATOR = "txProcess";
     String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
     String CROSS_TRANSFER_COMMIT = "crossTxCommit";

@@ -51,7 +51,7 @@ public class CrossTxData extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(chainId);
+        stream.writeUint16(chainId);
         stream.writeBytesWithLength(originalTxHash);
     }
 

@@ -22,10 +22,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.thread.TimeService;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -361,7 +358,9 @@ public class RoundManager {
         setMemberList(chain,round, startBlockHeader);
         List<byte[]> packingAddressList = new ArrayList<>();
         try {
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr,"ac_getUnencryptedAddressList", null);
+            Map<String,Object> params = new HashMap<>(2);
+            params.put(ConsensusConstant.PARAM_CHAIN_ID,chain.getConfig().getChainId());
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr,"ac_getUnencryptedAddressList", params);
             List<String> accountAddressList =  (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList");
             if(accountAddressList != null && accountAddressList.size()>0){
                 for (String address:accountAddressList) {
@@ -476,7 +475,7 @@ public class RoundManager {
      * @param startBlockHeight   上一轮次的起始区块高度/Initial blocks of the last round
      * @return List<Agent>
      * */
-    private List<Agent> getAliveAgentList(Chain chain,long startBlockHeight) throws NulsException{
+    private List<Agent> getAliveAgentList(Chain chain,long startBlockHeight){
         List<Agent> agentList = chain.getAgentList();
         List<Agent> resultList = new ArrayList<>();
         for (int i = agentList.size() - 1; i >= 0; i--) {
