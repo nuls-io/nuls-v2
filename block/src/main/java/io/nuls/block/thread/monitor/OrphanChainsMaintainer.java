@@ -141,10 +141,10 @@ public class OrphanChainsMaintainer implements Runnable {
             Node availableNode = availableNodes.get(i);
             block = BlockDownloadUtils.getBlockByHash(chainId, previousHash, availableNode);
             if (block != null) {
-                Log.info("maintain success! before orphanChain-"+orphanChain);
-                Log.info("get block from "+availableNode.getId());
+                Log.debug("maintain success! before orphanChain-"+orphanChain);
+                Log.debug("get block from "+availableNode.getId());
                 orphanChain.addFirst(block);
-                Log.info("maintain success! after orphanChain-"+orphanChain);
+                Log.debug("maintain success! after orphanChain-"+orphanChain);
                 return;
             }
             age.incrementAndGet();

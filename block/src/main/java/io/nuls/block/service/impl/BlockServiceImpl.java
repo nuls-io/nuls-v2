@@ -295,7 +295,7 @@ public class BlockServiceImpl implements BlockService {
                 }
                 return false;
             }
-            if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
+            if (!ConsensusUtil.rollbackNotice(chainId, height) || !blockStorageService.setLatestHeight(chainId, height - 1)) {
                 Log.error("rollback setLatestHeight fail!chainId-" + chainId + ",height-" + height);
                 if (!TransactionUtil.save(chainId, blockHeaderPo.getTxHashList())) {
                     throw new DbRuntimeException("rollback blockheader error!");
@@ -312,7 +312,10 @@ public class BlockServiceImpl implements BlockService {
                 ContextManager.getContext(chainId).setLatestBlock(getBlock(chainId, height - 1));
                 Chain masterChain = ChainManager.getMasterChain(chainId);
                 masterChain.setEndHeight(height - 1);
-                masterChain.getHashList().pollLast();
+                LinkedList<NulsDigestData> hashList = masterChain.getHashList();
+                hashList.pollLast();
+                int heightRange = context.getParameters().getHeightRange();
+                hashList.offerFirst(getBlockHash(chainId, height - heightRange));
             }
             return true;
         } finally {

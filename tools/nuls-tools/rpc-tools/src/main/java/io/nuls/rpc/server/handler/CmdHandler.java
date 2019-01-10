@@ -46,6 +46,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.rpc.info.Constants.CMD_NOT_FOUND;
 
@@ -59,6 +60,7 @@ import static io.nuls.rpc.info.Constants.CMD_NOT_FOUND;
 public class CmdHandler {
 
     public static final Map<String, Object> handlerMap = new HashMap<>();
+    public static final Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
 
     /**
      * 确认握手成功
@@ -474,7 +476,11 @@ public class CmdHandler {
      */
     @SuppressWarnings("unchecked")
     private static Response invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
-        Class clz = Class.forName(invokeClass);
+        Class<?> clz = classMap.get(invokeClass);
+        if (clz == null) {
+            clz = Class.forName(invokeClass);
+            classMap.put(invokeClass, clz);
+        }
         Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
         BaseCmd cmd = (BaseCmd) handlerMap.get(invokeClass);
         if (cmd == null) {
