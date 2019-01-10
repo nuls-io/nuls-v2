@@ -1,5 +1,6 @@
 package io.nuls.rpc.client;
 
+import io.nuls.rpc.model.message.Ack;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Response;
@@ -41,19 +42,19 @@ public class WsClient extends WebSocketClient {
      * 从服务端得到的请求确认
      * Request confirmation(Ack) from the server
      */
-    private final Queue<Message> ackQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Ack> ackQueue = new ConcurrentLinkedQueue<>();
 
     /**
      * 从服务端得到的需要手动处理的应答消息
      * Response that need to be handled manually from the server
      */
-    private final Queue<Message> responseManualQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Response> responseManualQueue = new ConcurrentLinkedQueue<>();
 
     /**
      * 从服务端得到的自动处理的应答消息
      * Response that need to be handled Automatically from the server
      */
-    private final Queue<Message> responseAutoQueue = new ConcurrentLinkedQueue<>();
+    private final Queue<Response> responseAutoQueue = new ConcurrentLinkedQueue<>();
 
     /**
      * 处理消息的线程池，现在只有一个处理线程暂时不需要线程池
@@ -89,7 +90,8 @@ public class WsClient extends WebSocketClient {
                     negotiateResponseQueue.offer(message);
                     break;
                 case Ack:
-                    ackQueue.offer(message);
+                    Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
+                    ackQueue.offer(ack);
                     break;
                 case Response:
                     Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
@@ -98,9 +100,9 @@ public class WsClient extends WebSocketClient {
                     Response: Determines whether automatic processing is required
                      */
                     if (ClientRuntime.INVOKE_MAP.containsKey(response.getRequestId())) {
-                        responseAutoQueue.offer(message);
+                        responseAutoQueue.offer(response);
                     } else {
-                        responseManualQueue.offer(message);
+                        responseManualQueue.offer(response);
                     }
                     break;
                 default:
@@ -128,44 +130,44 @@ public class WsClient extends WebSocketClient {
      * @return 第一条握手确认消息，The first handshake confirmed message
      */
     public Message firstMessageInNegotiateResponseQueue() {
-        return ClientRuntime.firstMessageInQueue(negotiateResponseQueue);
+        return negotiateResponseQueue.poll();
     }
 
     /**
      * @return 第一条确认消息，The first ack message
      */
-    public Message firstMessageInAckQueue() {
-        return ClientRuntime.firstMessageInQueue(ackQueue);
+    public Ack firstMessageInAckQueue() {
+        return ackQueue.poll();
     }
 
     /**
      * @return 第一条需要手动处理的Response消息，The first Response message that needs to be handled manually
      */
-    public Message firstMessageInResponseManualQueue() {
-        return ClientRuntime.firstMessageInQueue(responseManualQueue);
+    public Response firstMessageInResponseManualQueue() {
+        return responseManualQueue.poll();
     }
 
     /**
      * @return 第一条需要自动处理的Response消息，The first Response message that needs to be handled automatically
      */
-    public Message firstMessageInResponseAutoQueue() {
-        return ClientRuntime.firstMessageInQueue(responseAutoQueue);
+    public Response firstMessageInResponseAutoQueue() {
+        return responseAutoQueue.poll();
     }
 
     public Queue<Message> getNegotitateResponseQueue() {
         return negotiateResponseQueue;
     }
 
-    public Queue<Message> getAckQueue() {
+    public Queue<Ack> getAckQueue() {
         return ackQueue;
     }
 
-    public Queue<Message> getResponseManualQueue() {
+    public Queue<Response> getResponseManualQueue() {
         return responseManualQueue;
     }
 
 
-    public Queue<Message> getResponseAutoQueue() {
+    public Queue<Response> getResponseAutoQueue() {
         return responseAutoQueue;
     }
 

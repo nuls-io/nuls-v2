@@ -361,13 +361,12 @@ public class CmdDispatcher {
             获取队列中的第一个对象
             Get the first item of the queue
              */
-            Message message = client.firstMessageInResponseManualQueue();
-            if (message == null) {
+            Response response = client.firstMessageInResponseManualQueue();
+            if (response == null) {
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                 continue;
             }
 
-            Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
             if (response.getRequestId().equals(messageId)) {
                 /*
                 messageId匹配，说明就是需要的结果，返回
@@ -380,7 +379,7 @@ public class CmdDispatcher {
             messageId不匹配，放回队列
             Add back to the queue
              */
-            client.getResponseManualQueue().offer(message);
+            client.getResponseManualQueue().offer(response);
 
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
@@ -410,13 +409,12 @@ public class CmdDispatcher {
             获取队列中的第一个对象，如果是空，舍弃
             Get the first item of the queue, If it is an empty object, discard
              */
-            Message message = client.firstMessageInAckQueue();
-            if (message == null) {
+            Ack ack = client.firstMessageInAckQueue();
+            if (ack == null) {
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                 continue;
             }
 
-            Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
             if (ack.getRequestId().equals(messageId)) {
                 /*
                 messageId匹配，说明就是需要的结果，返回
@@ -429,7 +427,7 @@ public class CmdDispatcher {
             messageId不匹配，放回队列
             Add back to the queue
              */
-            client.getAckQueue().offer(message);
+            client.getAckQueue().offer(ack);
 
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }

@@ -62,13 +62,14 @@ public class RequestSingleProcessor implements Runnable {
                 Get the first item of the queue
                  */
                 if(!wsData.getRequestSingleQueue().isEmpty()){
-                    Message message = wsData.getRequestSingleQueue().poll();
-                    Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+                    Object[] objects = wsData.getRequestSingleQueue().poll();
+                    String messageId = (String) objects[0];
+                    Request request = (Request) objects[1];
                 /*
                 Request，调用本地方法
                 If it is Request, call the local method
                  */
-                    CmdHandler.callCommandsWithPeriod(wsData.getWebSocket(), request.getRequestMethods(), message.getMessageId());
+                    CmdHandler.callCommandsWithPeriod(wsData.getWebSocket(), request.getRequestMethods(), messageId);
                 }
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {

@@ -79,8 +79,9 @@ public class RequestByPeriodProcessor implements Runnable {
         获取队列中的第一个对象
         Get the first item of the queue
          */
-        Message message = wsData.getRequestPeriodLoopQueue().poll();
-        Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
+        Object[] objects = wsData.getRequestPeriodLoopQueue().poll();
+        Message message = (Message) objects[0];
+        Request request = (Request) objects[1];
 
         /*
         需要继续发送，添加回队列
@@ -88,7 +89,7 @@ public class RequestByPeriodProcessor implements Runnable {
          */
         boolean isContinue = CmdHandler.responseWithPeriod(wsData, message, request);
         if (isContinue) {
-            wsData.getRequestPeriodLoopQueue().offer(message);
+            wsData.getRequestPeriodLoopQueue().offer(objects);
         }
     }
 }
