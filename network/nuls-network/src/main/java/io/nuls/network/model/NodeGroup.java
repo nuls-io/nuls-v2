@@ -251,6 +251,7 @@ public class NodeGroup  implements Dto {
     }
     public Node getDisConnectNode(String nodeId){
         return  this.getDisConnectNode(nodeId);
+
     }
 
     public Node getConnectCrossNode(String nodeId){
