@@ -82,7 +82,13 @@ public enum RunningStatusEnum {
      * 维护孤儿链
      * Clean up the database
      */
-    MAINTAIN_CHAINS,
+    UPDATE_ORPHAN_CHAINS,
+
+    /**
+     * 维护孤儿链
+     * Clean up the database
+     */
+    MAINTAIN_ORPHAN_CHAINS,
 
     /**
      * 清理数据库中

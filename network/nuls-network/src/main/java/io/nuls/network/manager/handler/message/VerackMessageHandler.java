@@ -66,25 +66,30 @@ public class VerackMessageHandler extends BaseMessageHandler {
         long magicNumber = message.getHeader().getMagicNumber();
         Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
+        VerackMessage verackMessage = (VerackMessage)message;
         if(isServer){
-            /*
-             *server端能收到verack消息,接收消息并将连接状态跃迁为握手完成
-             *The server can receive the verack message, receive the message and transition the connection state to the handshake.
-             */
-            Log.debug("VerackMessageHandler Recieve:{}-{}",node.getIp()+":"+node.getRemotePort(),message.getHeader().getCommandStr());
-            nodeGroup.addConnetNode(node,true);
-            /*
-             *更新连接为握手完成状态
-             *Update connection to handshake completion status
-             */
-            node.getNodeGroupConnector(message.getHeader().getMagicNumber()).setStatus(NodeGroupConnector.HANDSHAKE);
+            if(VerackMessageBody.VER_CONNECT_MAX == verackMessage.getMsgBody().getAckCode()) {
+                 node.removeGroupConnector(magicNumber);
+            }else{
+                /*
+                 *server端能收到verack消息,接收消息并将连接状态跃迁为握手完成
+                 *The server can receive the verack message, receive the message and transition the connection state to the handshake.
+                 */
+                Log.debug("VerackMessageHandler Recieve:{}-{}",node.getIp()+":"+node.getRemotePort(),message.getHeader().getCommandStr());
+                nodeGroup.addConnetNode(node,true);
+                /*
+                 *更新连接为握手完成状态
+                 *Update connection to handshake completion status
+                 */
+                node.getNodeGroupConnector(message.getHeader().getMagicNumber()).setStatus(NodeGroupConnector.HANDSHAKE);
+            }
         }else{
             /*
              *client 端收到verack消息，判断ack状态,如果是对方连接数过大，则移除连接，并且CONNECT_FAIL_LOCK_MINUTE 分钟内不需要再次连接
              *The client receives the verack message and determines the ack status. If the number of connections is too large,
               *  the connection is removed and the connection does not need to be reconnected within CONNECT_FAIL_LOCK_MINUTE minutes.
              */
-            VerackMessage verackMessage = (VerackMessage)message;
+
             if(VerackMessageBody.VER_CONNECT_MAX == verackMessage.getMsgBody().getAckCode()){
                 node.removeGroupConnector(magicNumber);
                 nodeGroup.addFailConnect(node.getId(),NetworkConstant.CONNECT_FAIL_LOCK_MINUTE);

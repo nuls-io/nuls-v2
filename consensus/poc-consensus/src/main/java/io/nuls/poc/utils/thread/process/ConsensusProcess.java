@@ -185,7 +185,6 @@ public class ConsensusProcess {
                 consensusLogger.info("add block interface call failed!");
                 return;
             }
-            //blockManager.addNewBlock(chain,block.getHeader());
         }catch (Exception e){
             consensusLogger.error(e);
         }
