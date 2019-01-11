@@ -36,26 +36,27 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 处理收到的{@link HashMessage},用于区块的广播与转发
+ *
  * @author captain
- * @date 18-11-14 下午4:23
  * @version 1.0
+ * @date 18-11-14 下午4:23
  */
 @Component
 public class GetSmallBlockHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = GET_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Response process(Map map){
+    public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();
-        HashMessage  message = new HashMessage ();
+        HashMessage message = new HashMessage();
 
         byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
@@ -65,7 +66,7 @@ public class GetSmallBlockHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        if(message == null || nodeId == null) {
+        if (message == null || nodeId == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         NulsDigestData blockHash = message.getRequestHash();

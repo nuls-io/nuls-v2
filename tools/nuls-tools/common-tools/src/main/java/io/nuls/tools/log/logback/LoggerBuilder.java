@@ -20,6 +20,8 @@ import java.util.Map;
 public class LoggerBuilder {
 
     private static final Map<String, NulsLogger> container = new HashMap<>();
+    private static final Level DEFAULT_LEVEL = Level.ALL;
+    private static final boolean DEFAULT_CONSOLE_APPEND = true;
 
     public static NulsLogger getLogger(String folderName,String fileName) {
         String realKey = folderName+"/"+fileName;
@@ -28,34 +30,45 @@ public class LoggerBuilder {
 
     public static NulsLogger getLogger(String folderName,String fileName,Level level) {
         String realKey = folderName+"/"+fileName;
-        return getLogger(realKey,level);
+        return getLogger(realKey,level,DEFAULT_CONSOLE_APPEND);
+    }
+
+    public static NulsLogger getLogger(String folderName,String fileName,Level level,boolean consoleAppend) {
+        String realKey = folderName+"/"+fileName;
+        return getLogger(realKey,level,consoleAppend);
     }
 
     public static NulsLogger getLogger(String fileName) {
-        return getLogger(fileName,Level.ALL);
+        return getLogger(fileName,DEFAULT_LEVEL,DEFAULT_CONSOLE_APPEND);
     }
 
     public static NulsLogger getLogger(String fileName,Level level) {
+        return getLogger(fileName,level,DEFAULT_CONSOLE_APPEND);
+    }
+
+    public static NulsLogger getLogger(String fileName,Level level,boolean consoleAppend) {
         NulsLogger logger = container.get(fileName);
         if(logger != null) {
             return logger;
         }
         synchronized (LoggerBuilder.class) {
-            logger = build(fileName,level);
+            logger = build(fileName,level,consoleAppend);
             container.put(fileName,logger);
         }
         return logger;
     }
 
-    private static NulsLogger build(String fileName, Level level) {
+    private static NulsLogger build(String fileName, Level level,boolean consoleAppend) {
         RollingFileAppender fileAppender = LogAppender.getAppender(fileName,level);
-        Appender consoleAppender = LogAppender.createConsoleAppender();
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger logger = context.getLogger(fileAppender.getEncoder().toString());
         //设置不向上级打印信息
         logger.setAdditive(false);
         logger.addAppender(fileAppender);
-        logger.addAppender(consoleAppender);
+        if(consoleAppend){
+            Appender consoleAppender = LogAppender.createConsoleAppender();
+            logger.addAppender(consoleAppender);
+        }
         return new NulsLogger(logger);
     }
 }

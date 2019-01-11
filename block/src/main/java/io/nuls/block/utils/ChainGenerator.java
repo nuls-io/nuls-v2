@@ -32,24 +32,26 @@ import java.util.LinkedList;
 
 /**
  * 链生成器
+ *
  * @author captain
- * @date 18-11-29 下午2:52
  * @version 1.0
+ * @date 18-11-29 下午2:52
  */
 public class ChainGenerator {
 
     /**
      * 测试专用
      * 生成一条链
-     * @param startHeight       链起始高度(包括在链内)
-     * @param endHeight         链终止高度(包括在链内)
-     * @param symbol            链标志,生成的hashList与这个字段有关,便与判断测试结果
-     * @param parent            父链
-     * @param parentSymbol      父链标志
+     *
+     * @param startHeight  链起始高度(包括在链内)
+     * @param endHeight    链终止高度(包括在链内)
+     * @param symbol       链标志,生成的hashList与这个字段有关,便与判断测试结果
+     * @param parent       父链
+     * @param parentSymbol 父链标志
      * @param chainId
      * @return
      */
-    public static Chain newChain(long startHeight, long endHeight, String symbol, Chain parent, String parentSymbol, int chainId, ChainTypeEnum type){
+    public static Chain newChain(long startHeight, long endHeight, String symbol, Chain parent, String parentSymbol, int chainId, ChainTypeEnum type) {
         Chain chain = new Chain();
         chain.setType(type);
         chain.setChainId(chainId);
@@ -65,19 +67,20 @@ public class ChainGenerator {
             parent.getSons().add(chain);
         }
         chain.setStartHashCode(hashList.getFirst().hashCode());
-        chain.setPreviousHash(NulsDigestData.calcDigestData((parentSymbol + (startHeight-1)).getBytes()));
+        chain.setPreviousHash(NulsDigestData.calcDigestData((parentSymbol + (startHeight - 1)).getBytes()));
         return chain;
     }
 
     /**
      * 测试专用
      * 生成一条主链
-     * @param endHeight         链终止高度(包括在链内)
-     * @param symbol            链标志,生成的hashList与这个字段有关,便与判断测试结果
+     *
+     * @param endHeight 链终止高度(包括在链内)
+     * @param symbol    链标志,生成的hashList与这个字段有关,便与判断测试结果
      * @param chainId
      * @return
      */
-    public static Chain newMasterChain(long endHeight, String symbol, int chainId){
+    public static Chain newMasterChain(long endHeight, String symbol, int chainId) {
         Chain chain = new Chain();
         chain.setType(ChainTypeEnum.MASTER);
         chain.setChainId(chainId);
@@ -88,7 +91,7 @@ public class ChainGenerator {
         }
         chain.setHashList(hashList);
         chain.setStartHashCode(hashList.getFirst().hashCode());
-        chain.setPreviousHash(NulsDigestData.calcDigestData((symbol + (0-1)).getBytes()));
+        chain.setPreviousHash(NulsDigestData.calcDigestData((symbol + (0 - 1)).getBytes()));
         return chain;
     }
 

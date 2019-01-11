@@ -23,17 +23,19 @@ package io.nuls.block.message;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.block.message.base.BaseMessage;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Data;
 
 import java.io.IOException;
 
+import static io.nuls.block.utils.LoggerUtil.Log;
+
 /**
  * 异步请求处理完成响应消息
+ *
  * @author captain
- * @date 18-11-9 下午2:37
  * @version 1.0
+ * @date 18-11-9 下午2:37
  */
 @Data
 public class HeightRangeMessage extends BaseMessage {

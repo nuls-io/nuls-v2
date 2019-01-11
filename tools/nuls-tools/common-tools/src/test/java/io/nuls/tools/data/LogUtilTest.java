@@ -7,16 +7,16 @@ import io.nuls.tools.log.logback.NulsLogger;
 public class LogUtilTest {
     public static void main(String[] args){
         //logger.debug("test logger");
-        NulsLogger log = LoggerBuilder.getLogger("blockLog","test", Level.ERROR);
-        while(true){
-            log.debug("test block log debug");
+        NulsLogger log = LoggerBuilder.getLogger("blockLog","test", Level.INFO,true);
 
-            log.info("test block log info");
+        log.debug("test block log debug");
 
-            log.warn("test block log warn");
+        log.info("test block log info");
 
-            log.error("test block log error");
-        }
+        log.warn("test block log warn");
+
+        log.error("test block log error");
+
         /*Logger log = LoggerBuilder.getLogger("blockLog",LogUtilTest.class);
         int index = 0;
         while (index<10000){

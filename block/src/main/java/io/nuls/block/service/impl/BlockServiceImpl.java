@@ -46,22 +46,22 @@ import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.Constant.*;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 区块服务实现类
+ *
  * @author captain
- * @date 18-11-20 上午11:09
  * @version 1.0
+ * @date 18-11-20 上午11:09
  */
 @Service
 public class BlockServiceImpl implements BlockService {
@@ -224,7 +224,7 @@ public class BlockServiceImpl implements BlockService {
             //4.保存区块头,完全保存,更新标记
             blockHeaderPo.setComplete(true);
             if (!ConsensusUtil.newBlock(chainId, header, localInit) || !blockStorageService.save(chainId, blockHeaderPo)) {
-                Log.error("update blockheader fail!chainId-"+chainId+",height-"+ height);
+                Log.error("update blockheader fail!chainId-" + chainId + ",height-" + height);
                 if (!TransactionUtil.rollback(chainId, block.getTxHashList())) {
                     throw new DbRuntimeException("remove transactions error!");
                 }
@@ -391,12 +391,12 @@ public class BlockServiceImpl implements BlockService {
             BlockHeaderPo blockHeader = blockStorageService.query(chainId, latestHeight);
             //如果没有对应高度的header,说明缓存的本地高度错误,更新高度
             if (blockHeader == null) {
-                latestHeight = latestHeight -1;
+                latestHeight = latestHeight - 1;
                 blockStorageService.setLatestHeight(chainId, latestHeight);
             } else {
                 if (!blockHeader.isComplete()) {
                     blockStorageService.remove(chainId, latestHeight);
-                    latestHeight = latestHeight -1;
+                    latestHeight = latestHeight - 1;
                     blockStorageService.setLatestHeight(chainId, latestHeight);
                 }
             }

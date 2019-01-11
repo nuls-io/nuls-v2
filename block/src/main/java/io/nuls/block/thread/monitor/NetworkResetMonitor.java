@@ -20,22 +20,21 @@
 
 package io.nuls.block.thread.monitor;
 
-import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.constant.RunningStatusEnum;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.thread.TimeService;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 区块高度监控器
  * 每隔固定时间间隔启动
  * 如果发现区块高度没更新,通知网络模块重置可用节点
+ *
  * @author captain
- * @date 18-11-14 下午3:53
  * @version 1.0
+ * @date 18-11-14 下午3:53
  */
 public class NetworkResetMonitor implements Runnable {
 
@@ -54,7 +53,7 @@ public class NetworkResetMonitor implements Runnable {
             try {
                 //判断该链的运行状态,只有正常运行时才会有区块高度监控
                 RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
-                if (!status.equals(RunningStatusEnum.RUNNING)){
+                if (!status.equals(RunningStatusEnum.RUNNING)) {
                     Log.info("skip process, status is " + status + ", chainId-" + chainId);
                     return;
                 }

@@ -24,7 +24,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.Node;
 import lombok.Data;
 
-import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**

@@ -28,22 +28,22 @@ import io.nuls.block.service.ChainStorageService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static io.nuls.block.constant.Constant.CACHED_BLOCK;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 链存储实现类
+ *
  * @author captain
- * @date 18-11-20 上午11:09
  * @version 1.0
+ * @date 18-11-20 上午11:09
  */
 @Service
 public class ChainStorageServiceImpl implements ChainStorageService {

@@ -20,10 +20,12 @@ import java.util.List;
 @AllArgsConstructor
 public class CachedSmallBlock {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private List<NulsDigestData> missingTransactions;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private SmallBlock smallBlock;
 
 }

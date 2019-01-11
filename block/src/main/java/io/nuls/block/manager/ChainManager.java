@@ -29,13 +29,13 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 
 import java.util.*;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 分叉链管理器,维护主链、分叉链集合、孤儿链集合

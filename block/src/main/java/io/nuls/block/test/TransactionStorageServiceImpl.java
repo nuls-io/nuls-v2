@@ -27,7 +27,8 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
-import io.nuls.tools.log.Log;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 @Service
 public class TransactionStorageServiceImpl implements TransactionStorageService {
@@ -50,7 +51,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService 
             byte[] bytes = RocksDBService.get("tx" + chainId, hash.serialize());
             po.parse(new NulsByteBuffer(bytes));
             return po;
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
             return null;
         }
@@ -60,7 +61,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService 
     public boolean remove(int chainId, NulsDigestData hash) {
         try {
             return RocksDBService.delete("tx" + chainId, hash.serialize());
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
             return false;
         }

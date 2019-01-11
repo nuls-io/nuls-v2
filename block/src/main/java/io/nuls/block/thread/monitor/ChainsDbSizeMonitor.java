@@ -26,13 +26,13 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.tools.log.Log;
 
 import java.util.SortedSet;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.Constant.CLEAN_PARAM;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 分叉链、孤儿链数据库定时清理器
@@ -88,7 +88,7 @@ public class ChainsDbSizeMonitor implements Runnable {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
         try {
-            for (;; stamp = lock.writeLock()) {
+            for (; ; stamp = lock.writeLock()) {
                 if (stamp == 0L) {
                     continue;
                 }
@@ -96,7 +96,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                 //1.获取某链ID的数据库缓存的所有区块数量
                 int actualSize = ChainManager.getForkChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
                 actualSize += ChainManager.getOrphanChains(chainId).stream().mapToInt(e -> e.getHashList().size()).sum();
-                Log.debug("chainId:" +chainId+", cacheSize:"+cacheSize+", actualSize:"+actualSize);
+                Log.debug("chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
                 if (!lock.validate(stamp)) {
                     continue;
                 }
@@ -110,7 +110,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                 // exclusive access
                 //与阈值比较
                 while (actualSize > cacheSize) {
-                    Log.info("before clear, chainId:" +chainId+", cacheSize:"+cacheSize+", actualSize:"+actualSize);
+                    Log.info("before clear, chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
                     //2.按顺序清理分叉链和孤儿链
                     SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                     int forkSize = forkChains.size();
@@ -122,10 +122,10 @@ public class ChainsDbSizeMonitor implements Runnable {
                             Chain chain = forkChains.first();
                             boolean b = ChainManager.removeForkChain(chainId, chain);
                             if (!b) {
-                                Log.error("remove fork chain fail, chain:"+chain);
+                                Log.error("remove fork chain fail, chain:" + chain);
                                 return;
                             } else {
-                                Log.info("remove fork chain, chain:"+chain);
+                                Log.info("remove fork chain, chain:" + chain);
                                 actualSize -= chain.getHashList().size();
                             }
                         }
@@ -141,15 +141,15 @@ public class ChainsDbSizeMonitor implements Runnable {
                             Chain chain = orphanChains.first();
                             boolean b = ChainManager.removeOrphanChain(chainId, chain);
                             if (!b) {
-                                Log.error("remove orphan chain fail, chain:"+chain);
+                                Log.error("remove orphan chain fail, chain:" + chain);
                                 return;
                             } else {
-                                Log.info("remove orphan chain, chain:"+chain);
+                                Log.info("remove orphan chain, chain:" + chain);
                                 actualSize -= chain.getHashList().size();
                             }
                         }
                     }
-                    Log.info("after clear, chainId:" +chainId+", cacheSize:"+cacheSize+", actualSize:"+actualSize);
+                    Log.info("after clear, chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
                 }
                 break;
             }
@@ -164,7 +164,7 @@ public class ChainsDbSizeMonitor implements Runnable {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
         try {
-            for (;; stamp = lock.writeLock()) {
+            for (; ; stamp = lock.writeLock()) {
                 if (stamp == 0L) {
                     continue;
                 }
@@ -188,7 +188,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                     if (latestHeight - forkChain.getStartHeight() > heightRange) {
                         //清理orphanChain,并递归清理orphanChain的所有子链
                         ChainManager.deleteForkChain(chainId, forkChain, true);
-                        Log.info("remove fork chain, chain:"+forkChain);
+                        Log.info("remove fork chain, chain:" + forkChain);
                     }
                 }
                 break;
@@ -204,7 +204,7 @@ public class ChainsDbSizeMonitor implements Runnable {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
         try {
-            for (;; stamp = lock.writeLock()) {
+            for (; ; stamp = lock.writeLock()) {
                 if (stamp == 0L) {
                     continue;
                 }
@@ -228,7 +228,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                     if (Math.abs(orphanChain.getStartHeight() - latestHeight) > heightRange || orphanChain.getAge().get() > orphanChainMaxAge) {
                         //清理orphanChain,并递归清理orphanChain的所有子链
                         ChainManager.deleteOrphanChain(chainId, orphanChain, true);
-                        Log.info("remove orphan chain, chain:"+orphanChain);
+                        Log.info("remove orphan chain, chain:" + orphanChain);
                     }
                 }
                 break;

@@ -32,9 +32,10 @@ import java.io.IOException;
 
 /**
  * 异步请求处理完成响应消息
+ *
  * @author captain
- * @date 18-11-9 下午2:37
  * @version 1.0
+ * @date 18-11-9 下午2:37
  */
 @Data
 public class CompleteMessage extends BaseMessage {

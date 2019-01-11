@@ -24,6 +24,7 @@
  */
 package io.nuls.block.utils;
 
+import ch.qos.logback.classic.Level;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -34,9 +35,9 @@ import io.nuls.tools.log.logback.NulsLogger;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-   public static NulsLogger Log = LoggerBuilder.getLogger("/home/captain/logs", "bl.log");
+    public static NulsLogger Log = LoggerBuilder.getLogger("bl", Level.INFO);
 
-   public void init(ChainParameters parameters){
-      int chainId = parameters.getChainId();
-   }
+    public void init(ChainParameters parameters) {
+        int chainId = parameters.getChainId();
+    }
 }

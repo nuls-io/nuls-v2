@@ -27,9 +27,10 @@ import java.util.Map;
 
 /**
  * 配置管理器,维护所有本节点上运行的链的配置信息
+ *
  * @author captain
- * @date 18-11-8 下午1:37
  * @version 1.0
+ * @date 18-11-8 下午1:37
  */
 public class ConfigManager {
 
@@ -40,6 +41,7 @@ public class ConfigManager {
 
     /**
      * 获取某条链的参数
+     *
      * @param chainId
      * @param name
      * @return
@@ -51,6 +53,7 @@ public class ConfigManager {
 
     /**
      * 设置某条链的参数
+     *
      * @param chainId
      * @param name
      * @param value
@@ -68,6 +71,7 @@ public class ConfigManager {
 
     /**
      * 新增一条链的参数
+     *
      * @param chainId
      * @param map
      */

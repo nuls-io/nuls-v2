@@ -26,9 +26,10 @@ import io.nuls.base.data.Block;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
-import io.nuls.tools.log.Log;
 
 import java.util.concurrent.*;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 区块下载管理器

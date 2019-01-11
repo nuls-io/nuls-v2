@@ -35,7 +35,6 @@ import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -44,6 +43,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.StampedLock;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 区块同步主线程,管理多条链的区块同步
@@ -54,21 +55,19 @@ import java.util.concurrent.locks.StampedLock;
  */
 public class BlockSynchronizer implements Runnable {
 
+    private static final BlockSynchronizer INSTANCE = new BlockSynchronizer();
     /**
      * 保存多条链的区块同步状态
      */
     private Map<Integer, BlockSynStatusEnum> statusEnumMap = new ConcurrentHashMap<>();
-
-    private static final BlockSynchronizer INSTANCE = new BlockSynchronizer();
-
     private BlockService blockService;
-
-    public static BlockSynchronizer getInstance() {
-        return INSTANCE;
-    }
 
     private BlockSynchronizer() {
         this.blockService = SpringLiteContext.getBean(BlockService.class);
+    }
+
+    public static BlockSynchronizer getInstance() {
+        return INSTANCE;
     }
 
     @Override
@@ -289,7 +288,7 @@ public class BlockSynchronizer implements Runnable {
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
         try {
-            for (;; stamp = lock.readLock()) {
+            for (; ; stamp = lock.readLock()) {
                 if (stamp == 0L) {
                     continue;
                 }
@@ -311,9 +310,9 @@ public class BlockSynchronizer implements Runnable {
     /**
      * 区块同步前,与网络区块作对比,检查本地区块是否需要回滚
      *
-     * @return
      * @param chainId
      * @param params
+     * @return
      */
     private boolean checkLocalBlock(int chainId, BlockDownloaderParams params) {
         long localHeight = params.getLocalLatestHeight();
@@ -331,7 +330,7 @@ public class BlockSynchronizer implements Runnable {
             if (params.getNodes().size() >= parameters.getMinNodeAmount()
                     && params.getAvailableNodesCount() >= params.getNodes().size() * parameters.getConsistencyNodePercent() / 100
             ) {
-                return checkRollback( 0, chainId, params);
+                return checkRollback(0, chainId, params);
             }
         }
         return false;
@@ -350,7 +349,7 @@ public class BlockSynchronizer implements Runnable {
         if (checkHashEquality(chainId, params)) {
             return true;
         }
-        return checkRollback( rollbackCount + 1, chainId, params);
+        return checkRollback(rollbackCount + 1, chainId, params);
     }
 
     /**

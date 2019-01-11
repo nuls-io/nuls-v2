@@ -22,9 +22,10 @@ package io.nuls.block.constant;
 
 /**
  * 配置常量
+ *
  * @author captain
- * @date 18-11-21 下午3:41
  * @version 1.0
+ * @date 18-11-21 下午3:41
  */
 public interface ConfigConstant {
 
