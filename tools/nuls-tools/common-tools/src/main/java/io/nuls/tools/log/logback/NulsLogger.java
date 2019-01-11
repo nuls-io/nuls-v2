@@ -1,6 +1,5 @@
 package io.nuls.tools.log.logback;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 
 /**
@@ -15,7 +14,6 @@ public class NulsLogger {
     private Logger logger;
 
     public NulsLogger(Logger logger){
-        logger.setLevel(Level.INFO);
         this.logger = logger;
     }
 
@@ -25,14 +23,14 @@ public class NulsLogger {
      * @param msg 需要显示的消息
      */
     public void debug(String msg) {
-        if (logger.isDebugEnabled()) {
+        if(logger.isDebugEnabled()){
             String logContent = getLogTrace() + ":" + msg;
             logger.debug(logContent);
         }
     }
 
     public void debug(String msg, Object... objs) {
-        if (logger.isDebugEnabled()) {
+        if(logger.isDebugEnabled()){
             String logContent = getLogTrace() + ":" + msg;
             logger.debug(logContent, objs);
         }
@@ -45,7 +43,7 @@ public class NulsLogger {
      * @param throwable 异常信息
      */
     public void debug(String msg, Throwable throwable) {
-        if (logger.isDebugEnabled()) {
+        if(logger.isDebugEnabled()) {
             String logContent = getLogTrace() + ":" + msg;
             logger.debug(logContent, throwable);
         }
