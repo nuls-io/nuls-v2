@@ -62,7 +62,7 @@ public class AccountStateCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "getBalance",
             version = 1.0,
-            description = "test getHeight 1.0")
+            description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "assetChainId", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")
@@ -92,7 +92,7 @@ public class AccountStateCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "getNonce",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "test getHeight 1.0")
+            description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "assetChainId", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")
@@ -105,8 +105,9 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetId = (Integer) params.get("assetId");
         AccountState accountState = accountStateService.getAccountState(address, chainId,assetChainId, assetId);
         Map<String,Object> rtMap = new HashMap<>();
-        if(StringUtils.isNotBlank(accountState.getUnconfirmedNonce())){
-            rtMap.put("nonce",accountState.getUnconfirmedNonce());
+        String unconfirmedNonce = accountState.getLatestUnconfirmedNonce();
+        if(StringUtils.isNotBlank(unconfirmedNonce)){
+            rtMap.put("nonce",unconfirmedNonce);
             rtMap.put("nonceType",LedgerConstant.UNCONFIRMED_NONCE);
         }else{
             rtMap.put("nonce",accountState.getNonce());
@@ -118,7 +119,7 @@ public class AccountStateCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "getBalanceNonce",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "test getHeight 1.0")
+            description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "assetChainId", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")

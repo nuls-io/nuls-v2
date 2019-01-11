@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by wangkun23 on 2018/11/19.
+ * Created by ljs on 2019/01/06.
  */
 public class CmdTest {
     final Logger logger = LoggerFactory.getLogger(getClass());
@@ -136,6 +136,94 @@ public class CmdTest {
         Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
+    /**
+     * 测试只有coinTo的交易
+     * @throws Exception
+     */
+    @Test
+    public void commitUnConfirmTx() throws Exception {
+        double version = 1.0;
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        int chainId = 8096;
+        int assetChainId = 445;
+        String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
+        int assetId = 222;
+        params.put("assetChainId", 445);
+        params.put("address", address);
+        params.put("assetId", 222);
+        params.put("chainId", chainId);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
+        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
+        //封装交易执行
+        Transaction tx = new Transaction();
+        CoinData coinData = new CoinData();
+        CoinFrom coinFrom = new CoinFrom();
+        CoinTo coinTo = new CoinTo();
+        coinTo.setAddress(AddressTool.getAddress(address));
+        coinTo.setAmount(BigInteger.valueOf(100));
+        coinTo.setAssetsChainId(assetChainId);
+        coinTo.setAssetsId(assetId);
+        coinTo.setLockTime(0);
+        List<CoinFrom> coinFroms =new ArrayList<>();
+//        coinFroms.add(coinFrom);
+        List<CoinTo> coinTos =new ArrayList<>();
+        coinTos.add(coinTo);
+        coinData.setFrom(coinFroms);
+        coinData.setTo(coinTos);
+        tx.setBlockHeight(6L);
+        tx.setCoinData(coinData.serialize());
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        params.put("chainId", chainId);
+        params.put("txHex",HexUtil.encode(tx.serialize()));
+        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
+        logger.info("response {}", response);
+    }
+    /**
+     * 测试只有coinFrom的交易
+     * @throws Exception
+     */
+    @Test
+    public void commitUnConfirmTx2() throws Exception {
+        double version = 1.0;
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        int chainId = 8096;
+        int assetChainId = 445;
+        String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
+        int assetId = 222;
+        params.put("assetChainId", 445);
+        params.put("address", address);
+        params.put("assetId", 222);
+        params.put("chainId", chainId);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
+        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
+        //封装交易执行
+        Transaction tx = new Transaction();
+        CoinData coinData = new CoinData();
+        CoinFrom coinFrom = new CoinFrom();
+        CoinTo coinTo = new CoinTo();
+        coinFrom.setAddress(AddressTool.getAddress(address));
+        coinFrom.setAmount(BigInteger.valueOf(29));
+        coinFrom.setAssetsChainId(assetChainId);
+        coinFrom.setAssetsId(assetId);
+        coinFrom.setLocked((byte)0);
+        List<CoinFrom> coinFroms =new ArrayList<>();
+        coinFroms.add(coinFrom);
+        List<CoinTo> coinTos =new ArrayList<>();
+        coinData.setFrom(coinFroms);
+        coinData.setTo(coinTos);
+        tx.setBlockHeight(6L);
+        tx.setCoinData(coinData.serialize());
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        params.put("chainId", chainId);
+        params.put("txHex",HexUtil.encode(tx.serialize()));
+        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
+        logger.info("response {}", response);
+    }
+
 
     @Test
     public void bathValidateBegin() throws Exception {

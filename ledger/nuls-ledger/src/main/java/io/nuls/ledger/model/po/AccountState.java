@@ -77,7 +77,7 @@ public class AccountState extends BaseNulsData {
      */
     @Setter
     @Getter
-    private List<String> unconfirmedNonces = new ArrayList<>();
+    private List<UnconfirmedNonce> unconfirmedNonces = new ArrayList<>();
     /**
      * 账户总金额入账
      */
@@ -118,21 +118,23 @@ public class AccountState extends BaseNulsData {
      * 获取最近的未提交交易nonce
      * @return
      */
-    public String getUnconfirmedNonce(){
+    public String getLatestUnconfirmedNonce(){
         if(unconfirmedNonces.size() == 0){
-            return "";
+            return null;
         }
-        return unconfirmedNonces.get(unconfirmedNonces.size()-1);
+        return unconfirmedNonces.get(unconfirmedNonces.size()-1).getNonce();
     }
     public void setUnconfirmedNonce(String nonce){
-        unconfirmedNonces.add(nonce);
+        UnconfirmedNonce unconfirmedNonce = new UnconfirmedNonce(nonce);
+        unconfirmedNonces.add(unconfirmedNonce);
     }
 
     public boolean updateConfirmedNonce(String nonce){
         this.nonce = nonce;
         if(unconfirmedNonces.size()>0) {
-            String unconfirmedNonce = unconfirmedNonces.get(0);
-            if (unconfirmedNonce.equalsIgnoreCase(nonce)) {
+            UnconfirmedNonce unconfirmedNonce = unconfirmedNonces.get(0);
+            if (unconfirmedNonce.getNonce().equalsIgnoreCase(nonce)) {
+                //未确认的转为确认的，移除集合中的数据
                 unconfirmedNonces.remove(0);
             }else{
                 //分叉了，清空之前的未提交nonce
@@ -178,8 +180,8 @@ public class AccountState extends BaseNulsData {
         stream.writeUint32(height);
         stream.writeUint32(latestUnFreezeTime);
         stream.writeUint16(unconfirmedNonces.size());
-        for (String unconfirmedNonce : unconfirmedNonces) {
-            stream.writeString(unconfirmedNonce);
+        for (UnconfirmedNonce unconfirmedNonce : unconfirmedNonces) {
+            stream.writeNulsData(unconfirmedNonce);
         }
         stream.writeBigInteger(totalFromAmount);
         stream.writeBigInteger(totalToAmount);
@@ -205,7 +207,9 @@ public class AccountState extends BaseNulsData {
         int unconfirmNonceCount = byteBuffer.readUint16();
         for (int i = 0; i < unconfirmNonceCount; i++) {
             try {
-                this.unconfirmedNonces.add(byteBuffer.readString());
+                UnconfirmedNonce unconfirmedNonce = new UnconfirmedNonce();
+                byteBuffer.readNulsData(unconfirmedNonce);
+                this.unconfirmedNonces.add(unconfirmedNonce);
             } catch (Exception e) {
                 throw new NulsException(e);
             }
@@ -249,8 +253,8 @@ public class AccountState extends BaseNulsData {
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfUint16();
-        for (String unconfirmedNonce : unconfirmedNonces) {
-            size += SerializeUtils.sizeOfString(unconfirmedNonce);
+        for (UnconfirmedNonce unconfirmedNonce : unconfirmedNonces) {
+            size += SerializeUtils.sizeOfNulsData(unconfirmedNonce);
         }
         //totalFromAmount
         size += SerializeUtils.sizeOfBigInteger();

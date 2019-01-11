@@ -28,6 +28,7 @@ package io.nuls.ledger.service.impl;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.utils.LedgerUtils;
@@ -103,11 +104,16 @@ public class AccountStateServiceImpl implements AccountStateService {
                 accountState = new AccountState(addressChainId,assetChainId, assetId, LedgerConstant.INIT_NONCE);
                 repository.createAccountState(key, accountState);
             } else {
+                //清理未确认交易
+                if(accountState.getUnconfirmedNonces().size()>0){
+                    if(LedgerUtils.isExpiredNonce(accountState.getUnconfirmedNonces().get(0))){
+                        accountState.getUnconfirmedNonces().clear();
+                    }
+                }
                 //解冻时间锁
                 if (freezeStateService.recalculateFreeze(accountState)) {
                     repository.updateAccountState(key, accountState);
                 }
-
             }
             return accountState;
         }
@@ -124,7 +130,7 @@ public class AccountStateServiceImpl implements AccountStateService {
      * @return
      */
     @Override
-    public  String setUnconfirmNonce(String address, int addressChainId, int assetChainId, int assetId, String nonce) {
+    public void setUnconfirmNonce(String address, int addressChainId, int assetChainId, int assetId, String nonce) {
         //账户同步锁
         synchronized (LockerUtils.getAccountLocker(address, assetChainId, assetId)) {
             AccountState accountState = getAccountState(address,addressChainId,assetChainId, assetId);
@@ -132,7 +138,6 @@ public class AccountStateServiceImpl implements AccountStateService {
             byte[] key = LedgerUtils.getKey(address, assetChainId, assetId);
             //这个改变无需进行账户的snapshot
             repository.updateAccountState(key, accountState);
-            return accountState.getUnconfirmedNonce();
         }
 
     }

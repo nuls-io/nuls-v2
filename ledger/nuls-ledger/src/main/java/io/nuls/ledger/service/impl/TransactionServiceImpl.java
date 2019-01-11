@@ -75,18 +75,19 @@ public class TransactionServiceImpl implements TransactionService {
         //直接更新未确认交易
         CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
         byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
-        String nonce8BytesStr =  HexUtil.encode(nonce8Bytes);
+//        String currentTxNonce =  HexUtil.encode(nonce8Bytes);
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
             String address = AddressTool.getStringAddressByBytes(from.getAddress());
             int assetChainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
+            String nonce = HexUtil.encode(from.getNonce());
             if(from.getLocked()>0){
                 //解锁交易处理
 
             }else {
                 //非解锁交易处理
-                accountStateService.setUnconfirmNonce(address, addressChainId,from.getAssetsChainId(), from.getAssetsId(), nonce8BytesStr);
+                accountStateService.setUnconfirmNonce(address, addressChainId,assetChainId, assetId, nonce);
             }
         }
         return true;
@@ -170,7 +171,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @param transaction
      */
     @Override
-    public synchronized void rollBackConfirmTx(int addressChainId,Transaction transaction) {
+    public synchronized boolean rollBackConfirmTx(int addressChainId,Transaction transaction) {
         //更新账户状态
         CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
         String txHash = transaction.getHash().toString();
@@ -192,5 +193,11 @@ public class TransactionServiceImpl implements TransactionService {
             String key = LedgerUtils.getKeyStr(address,assetChainId,assetId);
             accountStateService.rollAccountStateByTx(addressChainId,key,txHash,height);
         }
+        return true;
+    }
+
+    @Override
+    public boolean rollBackUnconfirmTx(int addressChainId, Transaction transaction) {
+        return false;
     }
 }

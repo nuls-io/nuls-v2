@@ -46,7 +46,11 @@ public interface TransactionService {
      */
     boolean confirmTxProcess(int addressChainId,Transaction transaction);
     /**
-     * 交易回滚处理
+     * 确认交易回滚处理
      */
-    void rollBackConfirmTx(int addressChainId,Transaction transaction);
+    boolean rollBackConfirmTx(int addressChainId,Transaction transaction);
+    /**
+     * 未确认交易回滚处理
+     */
+    boolean rollBackUnconfirmTx(int addressChainId,Transaction transaction);
 }

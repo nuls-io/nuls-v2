@@ -66,4 +66,8 @@ public interface LedgerConstant {
      * 缓存的账户初始化nonce
      */
     public static final String INIT_NONCE = "ffffffff";
+    /**
+     * 未确认交易nonce的过期间隔时间，单位ms
+     */
+    public static final int UNCONFIRM_NONCE_EXPIRED_TIME =300000;
 }

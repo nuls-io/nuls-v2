@@ -60,48 +60,19 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "commitUnconfirmedTx",
+    @CmdAnnotation(cmd = "commitTx",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "isConfirmTx", parameterType = "boolean")
     public Response commitUnconfirmedTx(Map params) {
         Map<String,Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         String txHex = (String) params.get("txHex");
-        if (StringUtils.isNotBlank(txHex)) {
-            return failed("txHex not blank");
-        }
-        byte[] txStream = HexUtil.decode(txHex);
-        Transaction tx = new Transaction();
-        try {
-            tx.parse(new NulsByteBuffer(txStream));
-        } catch (NulsException e) {
-            logger.error("transaction parse error", e);
-            rtData.put("value",0);
-            return success(rtData);
-        }
-        rtData.put("value",1);
-        transactionService.unConfirmTxProcess(chainId,tx);
-        return success(rtData);
-    }
-    /**
-     * save transaction
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "commitConfirmTx",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHex", parameterType = "String")
-    public Response commitConfirmTx(Map params) {
-        Integer chainId = (Integer) params.get("chainId");
-        Map<String,Object> rtData = new HashMap<>();
-        String txHex = (String) params.get("txHex");
+        boolean isConfirmTx = Boolean.valueOf(params.get("isConfirmTx").toString());
         if (StringUtils.isBlank(txHex)) {
-            return failed("txHex blank");
+            return failed("txHex is blank");
         }
         byte[] txStream = HexUtil.decode(txHex);
         Transaction tx = new Transaction();
@@ -109,13 +80,19 @@ public class TransactionCmd extends BaseCmd {
             tx.parse(new NulsByteBuffer(txStream));
         } catch (NulsException e) {
             logger.error("transaction parse error", e);
+            return failed("transaction parse error");
         }
-
-        if(transactionService.confirmTxProcess(chainId,tx)){
-            rtData.put("value",1);
+        int value = 0;
+        if(isConfirmTx){
+            if(transactionService.unConfirmTxProcess(chainId,tx)){
+                value =1;
+            }
         }else{
-            rtData.put("value",0);
+            if(transactionService.confirmTxProcess(chainId,tx)){
+                value =1;
+            }
         }
+        rtData.put("value",value);
         return success(rtData);
     }
 
@@ -129,10 +106,12 @@ public class TransactionCmd extends BaseCmd {
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "isConfirmTx", parameterType = "boolean")
     public Response rollBackConfirmTx(Map params) {
         Map<String,Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         String txHex = (String) params.get("txHex");
+        boolean isConfirmTx = Boolean.valueOf(params.get("isConfirmTx").toString());
         if (StringUtils.isNotBlank(txHex)) {
             return failed("txHex not blank");
         }
@@ -142,9 +121,19 @@ public class TransactionCmd extends BaseCmd {
             tx.parse(new NulsByteBuffer(txStream));
         } catch (NulsException e) {
             logger.error("transaction parse error", e);
+            return failed("transaction parse error");
+        }
+        int  value = 0;
+        if(isConfirmTx){
+            if(transactionService.rollBackConfirmTx(chainId,tx)){
+                value = 1;
+            }
+        }else{
+            if(transactionService.rollBackUnconfirmTx(chainId,tx)){
+                value = 1;
+            }
         }
         rtData.put("value",1);
-        transactionService.rollBackConfirmTx(chainId,tx);
-        return success();
+        return success(rtData);
     }
 }

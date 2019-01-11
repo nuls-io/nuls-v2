@@ -22,25 +22,21 @@
  * SOFTWARE.
  *
  */
-package io.nuls.ledger.test;
+package io.nuls.ledger.test.cmd;
 
+import io.nuls.rpc.info.NoUse;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author lan
  * @description
- * @date 2019/01/07
+ * @date 2019/01/10
  **/
-public class LanTest {
+public class KernelTest {
     @Test
     public void test1(){
         try {
-            Map m = new HashMap();
-            m.put("b",true);
-          System.out.println(Boolean.valueOf(m.get("b").toString()));
+            NoUse.mockKernel();
         } catch (Exception e) {
             e.printStackTrace();
         }
