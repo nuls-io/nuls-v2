@@ -37,8 +37,8 @@ import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
-import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_CHAINS;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
+import static io.nuls.block.constant.RunningStatusEnum.UPDATE_ORPHAN_CHAINS;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
@@ -101,7 +101,7 @@ public class OrphanChainsMaintainer implements Runnable {
                         // exclusive access
                         List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
                         //维护现有孤儿链,尝试在链首增加区块
-                        context.setStatus(MAINTAIN_CHAINS);
+                        context.setStatus(UPDATE_ORPHAN_CHAINS);
                         for (Chain orphanChain : orphanChains) {
                             maintainOrphanChain(chainId, orphanChain, availableNodes, orphanChainMaxAge);
                         }
