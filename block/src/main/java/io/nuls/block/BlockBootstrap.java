@@ -38,7 +38,6 @@ import io.nuls.rpc.server.WsServer;
 import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -46,6 +45,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static io.nuls.block.constant.Constant.*;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 区块管理模块启动类
@@ -131,7 +131,7 @@ public class BlockBootstrap {
                     System.exit(0);
                 }
                 BlockHeader header = context.getLatestBlock().getHeader();
-                Log.info("chainId:" + chainId  + ", latestHeight:" + header.getHeight() + ", txCount:"+ header.getTxCount() + ", hash:" + header.getHash());
+                Log.info("chainId:" + chainId + ", latestHeight:" + header.getHeight() + ", txCount:" + header.getTxCount() + ", hash:" + header.getHash());
                 try {
                     Thread.sleep(10000L);
                 } catch (InterruptedException e) {

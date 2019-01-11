@@ -38,8 +38,8 @@ public interface ParametersStorageService {
      * 保存指定链的配置信息
      * Save configuration information for the specified chain
      *
-     * @param chainContextPo    配置类/config bean
-     * @param chainID 链ID/chain id
+     * @param chainContextPo 配置类/config bean
+     * @param chainID        链ID/chain id
      * @return 保存是否成功/Is preservation successful?
      * @throws
      */

@@ -23,10 +23,7 @@ package io.nuls.block.service;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.SmallBlock;
-import io.nuls.block.model.Node;
 import io.nuls.block.model.po.BlockHeaderPo;
-import io.nuls.tools.core.annotation.Service;
 
 import java.util.List;
 
@@ -122,9 +119,9 @@ public interface BlockService {
     /**
      * 保存区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
      *
-     * @param chainId 链ID
-     * @param block   待保存区块
-     * @param needLock   是否需要加锁
+     * @param chainId  链ID
+     * @param block    待保存区块
+     * @param needLock 是否需要加锁
      * @return
      */
     boolean saveBlock(int chainId, Block block, boolean needLock);
@@ -132,9 +129,9 @@ public interface BlockService {
     /**
      * 保存区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
      *
-     * @param chainId 链ID
-     * @param block   待保存区块
-     * @param download   是否最新区块,最新区块-1,非最新区块-0
+     * @param chainId  链ID
+     * @param block    待保存区块
+     * @param download 是否最新区块,最新区块-1,非最新区块-0
      * @return
      */
     boolean saveBlock(int chainId, Block block, int download, boolean needLock);
@@ -151,8 +148,8 @@ public interface BlockService {
     /**
      * 回滚区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
      *
-     * @param chainId       链ID
-     * @param height        待回滚区块高度
+     * @param chainId 链ID
+     * @param height  待回滚区块高度
      * @return
      */
     boolean rollbackBlock(int chainId, long height, boolean needLock);

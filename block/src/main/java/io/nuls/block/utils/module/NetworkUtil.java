@@ -28,7 +28,6 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.*;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 调用网络模块接口的工具
@@ -186,8 +186,8 @@ public class NetworkUtil {
 
     /**
      * 更新网络节点最新高度与hash
-     *  1.收到smallblock时更新
-     *  2.收到转发请求并且本地确定有这个hash的区块时更新
+     * 1.收到smallblock时更新
+     * 2.收到转发请求并且本地确定有这个hash的区块时更新
      *
      * @param chainId
      * @param hash

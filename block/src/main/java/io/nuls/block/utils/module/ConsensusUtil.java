@@ -26,10 +26,11 @@ import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.log.Log;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 调用共识模块接口的工具类
@@ -67,7 +68,7 @@ public class ConsensusUtil {
      * 同步完成时通知共识模块
      *
      * @param chainId
-     * @param status        1-正常,0-等待
+     * @param status  1-正常,0-等待
      * @return
      */
     public static boolean notice(int chainId, int status) {

@@ -22,20 +22,21 @@ package io.nuls.block.service;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.po.BlockHeaderPo;
-import io.nuls.tools.core.annotation.Service;
 
 import java.util.List;
 
 /**
  * 区块存储服务
+ *
  * @author captain
- * @date 18-11-14 上午10:08
  * @version 1.0
+ * @date 18-11-14 上午10:08
  */
 public interface BlockStorageService {
 
     /**
      * 存储一个{@link BlockHeaderPo}
+     *
      * @param chainId
      * @param blockHeader
      * @return
@@ -45,6 +46,7 @@ public interface BlockStorageService {
 
     /**
      * 根据链ID和区块高度查询一个{@link BlockHeaderPo}
+     *
      * @param chainId
      * @param height
      * @return
@@ -53,6 +55,7 @@ public interface BlockStorageService {
 
     /**
      * 根据链ID和区块hash查询一个{@link BlockHeaderPo}
+     *
      * @param chainId
      * @param hash
      * @return
@@ -61,6 +64,7 @@ public interface BlockStorageService {
 
     /**
      * 根据链ID和高度区间查询{@link BlockHeaderPo}列表
+     *
      * @param chainId
      * @param startHeight
      * @param endHeight
@@ -70,6 +74,7 @@ public interface BlockStorageService {
 
     /**
      * 根据链ID和高度区间移除{@link BlockHeaderPo}
+     *
      * @param chainId
      * @param height
      * @return
@@ -79,6 +84,7 @@ public interface BlockStorageService {
 
     /**
      * 根据链ID销毁数据库文件
+     *
      * @param chainId
      * @return
      * @throws Exception
@@ -87,6 +93,7 @@ public interface BlockStorageService {
 
     /**
      * 根据链ID查询该链的最新高度
+     *
      * @param chainId
      * @return
      */
@@ -94,6 +101,7 @@ public interface BlockStorageService {
 
     /**
      * 根据链ID设置该链的最新高度
+     *
      * @param chainId
      * @param height
      * @return

@@ -48,43 +48,50 @@ public class ChainContext {
     /**
      * 代表该链的运行状态
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private RunningStatusEnum status;
 
     /**
      * 链ID
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private int chainId;
 
     /**
      * 该链的系统交易类型
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private List<Integer> systemTransactionType;
 
     /**
      * 最新区块
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private Block latestBlock;
 
     /**
      * 创世区块
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private Block genesisBlock;
 
     /**
      * 主链
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private Chain masterChain;
 
     /**
      * 链的运行时参数
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private ChainParameters parameters;
 
     /**

@@ -24,8 +24,6 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.ChainTypeEnum;
-import io.nuls.block.manager.ContextManager;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -74,61 +72,71 @@ public class Chain {
     /**
      * 标记这个链是从哪个链分叉来的,一个链的parent不一定是主链
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private Chain parent;
 
     /**
      * 标记所有从本链直接分叉出去的链集合,默认按起始高度从低到高排序,起始高度相同时,按照起始区块hash转换成int从低到高排序,在移除链时有用
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private SortedSet<Chain> sons = new TreeSet<>(COMPARATOR);
 
     /**
      * 链ID
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private int chainId;
 
     /**
      * 链上起始区块的previousHash
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private NulsDigestData previousHash;
 
     /**
      * 链的起始高度(包含)
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private long startHeight;
 
     /**
      * 链的起始hash转换为int,排序时用
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private int startHashCode;
 
     /**
      * 链的结束高度(包含)
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private long endHeight;
 
     /**
      * 链上所有区块hash列表,分叉链、孤儿链维护所有区块的hash在内存中,主链只维护ConfigConstant.HEIGHT_RANGE个hash在内存中
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private LinkedList<NulsDigestData> hashList;
 
     /**
      * 标记该链的类型
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private ChainTypeEnum type;
 
     /**
      * 标记该链的年龄，适用于孤儿链
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private AtomicInteger age;
 
     /**
@@ -142,9 +150,10 @@ public class Chain {
 
     /**
      * 判断本链是否为主链
+     *
      * @return
      */
-    public boolean isMaster(){
+    public boolean isMaster() {
         return type.equals(ChainTypeEnum.MASTER);
     }
 

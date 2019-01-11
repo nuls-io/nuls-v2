@@ -37,9 +37,10 @@ import java.util.List;
 /**
  * 获取交易组消息
  * 收到其他节点转发的区块时,如果区块中包含的交易在本地没有,则发送此消息批量获取交易
+ *
  * @author captain
- * @date 18-11-9 下午2:37
  * @version 1.0
+ * @date 18-11-9 下午2:37
  */
 @Data
 public class TxGroupMessage extends BaseMessage {

@@ -27,21 +27,24 @@ import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.model.Node;
 import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.tools.log.Log;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static io.nuls.block.utils.LoggerUtil.Log;
+
 /**
  * 区块下载工具类
+ *
  * @author captain
- * @date 18-11-14 下午5:31
  * @version 1.0
+ * @date 18-11-14 下午5:31
  */
 public class BlockDownloadUtils {
 
     /**
      * 根据区块hash从节点下载区块
+     *
      * @param chainId
      * @param hash
      * @param node

@@ -7,12 +7,13 @@ import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.model.Node;
 import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.tools.log.Log;
 import lombok.AllArgsConstructor;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 区块下载器
