@@ -57,6 +57,7 @@ import io.nuls.transaction.rpc.call.*;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.TransactionService;
 import io.nuls.transaction.utils.TxUtil;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -96,13 +97,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public boolean newTx(Chain chain, Transaction tx) throws NulsException {
-        Transaction txExist = txVerifiedStorageService.getTx(chain.getChainId(), tx.getHash());
-        if (null != txExist) {
-            throw new NulsException(TxErrorCode.TRANSACTION_ALREADY_EXISTS);
+    public void newTx(Chain chain, Transaction tx) throws NulsException {
+        Transaction txExist = getTransaction(chain, tx.getHash());
+        if (null == txExist) {
+            txUnverifiedStorageService.putTx(chain, tx);
         }
-        txUnverifiedStorageService.putTx(chain, tx);
-        return true;
     }
 
     @Override

@@ -7,6 +7,7 @@ import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.cache.TxVerifiedPool;
@@ -26,10 +27,7 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.model.bo.CrossTxSignResult;
 import io.nuls.transaction.model.bo.CrossTxVerifyResult;
-import io.nuls.transaction.rpc.call.AccountCall;
-import io.nuls.transaction.rpc.call.ConsensusCall;
-import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.rpc.call.NetworkCall;
+import io.nuls.transaction.rpc.call.*;
 import io.nuls.transaction.service.CrossChainTxService;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -65,7 +63,7 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
     private TransactionH2Service transactionH2Service;
 
     @Override
-    public void newCrossTx(Chain chain, String nodeId, Transaction tx) {
+    public void newCrossTx(Chain chain, String nodeId, Transaction tx) throws NulsException {
         if (tx == null) {
             return;
         }
@@ -78,6 +76,17 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         ctxExist = crossChainTxStorageService.getTx(chainId, tx.getHash());
         if (null != ctxExist) {
             return;
+        }
+        if(chain.getChainId() == TxConstant.NULS_CHAINID){
+            String coinDataHex = HexUtil.encode(ctxExist.getTx().getCoinData());
+            //验证跨链交易coinData,链的账目等
+            if(!ChainCall.verifyCtxCoinData(coinDataHex)){
+                return;
+            }
+            //主网接收到一个友链跨链交易, 对转出者链进行账目金额扣除
+            if(!ChainCall.receiveInCtxTally(coinDataHex)){
+                return;
+            }
         }
         CrossChainTx ctx = new CrossChainTx();
         ctx.setTx(tx);

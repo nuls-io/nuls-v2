@@ -30,6 +30,7 @@ import io.nuls.transaction.model.bo.CrossChainTx;
 import java.util.List;
 
 /**
+ * 存储从其他链接收的跨链交易,还未进行跨链验证等处理的交易
  * @author: Charlie
  * @date: 2018-12-27
  */

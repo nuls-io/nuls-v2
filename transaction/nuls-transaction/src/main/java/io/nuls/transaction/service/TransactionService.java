@@ -38,7 +38,7 @@ public interface TransactionService {
      * @return boolean
      * @throws NulsException NulsException
      */
-    boolean newTx(Chain chain, Transaction transaction) throws NulsException;
+    void newTx(Chain chain, Transaction transaction) throws NulsException;
 
     /**
      * Get a transaction, first check the database from the confirmation transaction,

@@ -5,6 +5,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.transaction.cache.TxVerifiedPool;
@@ -17,6 +18,7 @@ import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.rpc.call.ChainCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
@@ -288,12 +290,31 @@ public class ConfirmedTransactionServiceImpl implements ConfirmedTransactionServ
                 chain.getLogger().error(TxErrorCode.TX_TYPE_ERROR.getMsg() + ": " + hash.toString());
                 continue;
             }
+            //跨链转账交易接收者链id
             int toChainId = TxUtil.getCrossTxTosOriginChainId(tx);
-            if (toChainId == chainId && toChainId == TxConstant.NULS_CHAINID) {
-                //todo 发送回执
-            } else {
-                //广播给 toChainId 链的节点
-                NetworkCall.broadcastTxHash(toChainId, tx.getHash());
+
+            /*
+                如果当前链是主网
+                    1.需要对接收者链进行账目金额增加
+                    2a.如果是交易收款方,则需要向发起链发送回执? todo
+                    2b.如果不是交易收款方广播给收款方链
+                如果当前链是交易发起链
+                    1.广播给主网
+             */
+            if (chainId == TxConstant.NULS_CHAINID) {
+                //对接收者链进行账目金额增加
+                if (!ChainCall.sendOutCtxTally(HexUtil.encode(tx.getCoinData()))) {
+                    return;
+                }
+                if (toChainId == chainId) {
+                    //todo 已到达目标链发送回执
+                }else {
+                    //广播给 toChainId 链的节点
+                    NetworkCall.broadcastTxHash(toChainId, tx.getHash());
+                }
+            }else{
+                //广播给 主网 链的节点
+                NetworkCall.broadcastTxHash(TxConstant.NULS_CHAINID, tx.getHash());
             }
         }
     }

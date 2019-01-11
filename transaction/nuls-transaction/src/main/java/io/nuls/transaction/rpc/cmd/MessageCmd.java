@@ -175,13 +175,13 @@ public class MessageCmd extends BaseCmd {
                 TransactionDuplicateRemoval.insert(transaction.getHash());
             }
             //将交易放入待验证本地交易队列中
-            result = transactionService.newTx(chainManager.getChain(chainId), transaction);
+            transactionService.newTx(chainManager.getChain(chainId), transaction);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        map.put("value", result);
+        map.put("value", true);
         return success(map);
     }
 

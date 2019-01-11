@@ -27,7 +27,7 @@ public interface CrossChainTxService {
      * @param tx
      * @return
      */
-    void newCrossTx(Chain chain, String nodeId, Transaction tx);
+    void newCrossTx(Chain chain, String nodeId, Transaction tx) throws NulsException;
 
     /**
      * 删除跨链交易

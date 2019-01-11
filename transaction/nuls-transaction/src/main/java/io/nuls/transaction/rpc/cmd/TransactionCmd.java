@@ -125,7 +125,6 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "txHex", parameterType = "String")
     public Response newTx(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
-        boolean result = false;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -137,13 +136,13 @@ public class TransactionCmd extends BaseCmd {
             //将txHex转换为Transaction对象
             Transaction transaction = TxUtil.getTransaction(txHex);
             //将交易放入待验证本地交易队列中
-            result = transactionService.newTx(chain, transaction);
+            transactionService.newTx(chain, transaction);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        map.put("value", result);
+        map.put("value", true);
         return success(map);
     }
 

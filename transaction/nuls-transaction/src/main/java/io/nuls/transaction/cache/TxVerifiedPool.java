@@ -17,21 +17,6 @@ import java.util.List;
 @Service
 public class TxVerifiedPool {
 
-   // private final static TxVerifiedPool INSTANCE = new TxVerifiedPool();
-
-//    private BlockingDeque<TxWrapper> txQueue;
-
-//    private LimitHashMap<NulsDigestData, TxWrapper> orphanContainer;
-
-   /* private TxVerifiedPool() {
-        this.txQueue = new LinkedBlockingDeque<>();
-        this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
-    }*/
-
-//    public static TxVerifiedPool getInstance() {
-//        return INSTANCE;
-//    }
-
     public boolean addInFirst(Chain chain, Transaction tx, boolean isOrphan) {
         try {
             if (tx == null) {
