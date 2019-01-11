@@ -36,7 +36,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Component
 public class RoundManager {
 
-    public final Lock ROUND_LOCK = new ReentrantLock();
+    private final Lock ROUND_LOCK = new ReentrantLock();
 
     /**
      * 添加轮次信息到轮次列表中
