@@ -54,10 +54,7 @@ import io.nuls.transaction.model.bo.CrossTxData;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.rpc.call.AccountCall;
-import io.nuls.transaction.rpc.call.ChainCall;
-import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.rpc.call.TransactionCall;
+import io.nuls.transaction.rpc.call.*;
 import io.nuls.transaction.service.ConfirmedTransactionService;
 import io.nuls.transaction.service.TransactionService;
 import io.nuls.transaction.utils.TxUtil;
@@ -657,7 +654,8 @@ public class TransactionServiceImpl implements TransactionService {
         List<Transaction> packingTxList = new ArrayList<>();
         long totalSize = 0L;
         while (true) {
-            if (endtimestamp - TimeService.currentTimeMillis() <= TxConstant.VERIFY_OFFSET) {
+            long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+            if (endtimestamp - currentTimeMillis <= TxConstant.VERIFY_OFFSET) {
                 break;
             }
             Transaction tx = txVerifiedPool.get(chain);

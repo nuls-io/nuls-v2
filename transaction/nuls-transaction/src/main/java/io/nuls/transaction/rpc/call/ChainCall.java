@@ -1,6 +1,7 @@
 package io.nuls.transaction.rpc.call;
 
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.exception.NulsException;
 
 import java.util.HashMap;
 
@@ -18,7 +19,7 @@ public class ChainCall {
      * @param assetId
      * @return
      */
-    public static boolean verifyAssetExist(int chainId, int assetId) {
+    public static boolean verifyAssetExist(int chainId, int assetId) throws NulsException {
         HashMap params = new HashMap();
         params.put("chianId", chainId);
         params.put("assetId", assetId);

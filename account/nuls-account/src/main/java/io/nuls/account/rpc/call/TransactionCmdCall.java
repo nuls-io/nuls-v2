@@ -2,7 +2,6 @@ package io.nuls.account.rpc.call;
 
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.RpcConstant;
-import io.nuls.account.model.bo.tx.ModuleTxRegister;
 import io.nuls.account.model.bo.tx.TxRegisterDetail;
 import io.nuls.account.util.annotation.ResisterTx;
 import io.nuls.account.util.annotation.TxMethodType;
@@ -11,7 +10,6 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.ScanUtil;
-import io.nuls.tools.parse.JSONUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -65,7 +63,7 @@ public class TransactionCmdCall {
             params.put(RpcConstant.TX_MODULE_CODE, ModuleE.AC.abbr);
             params.put(RpcConstant.TX_MODULE_VALIDATE_CMD, "ac_accountTxValidate");
             params.put("list", registerDetailMap);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_REGISTER_CMD, params);
+            //Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_REGISTER_CMD, params);
         } catch (Exception e) {
             e.printStackTrace();
         }
