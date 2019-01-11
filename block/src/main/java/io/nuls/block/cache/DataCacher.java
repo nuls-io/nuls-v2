@@ -21,12 +21,13 @@
 package io.nuls.block.cache;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.tools.log.Log;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 异步请求响应结果缓存类

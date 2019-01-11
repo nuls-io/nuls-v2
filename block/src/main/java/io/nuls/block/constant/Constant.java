@@ -22,8 +22,8 @@ package io.nuls.block.constant;
 
 /**
  * 配置常量
- * @author lan
  *
+ * @author lan
  */
 public interface Constant {
 

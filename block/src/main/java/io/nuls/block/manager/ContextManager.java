@@ -25,7 +25,6 @@ import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.utils.module.TransactionUtil;
-import io.nuls.tools.log.Log;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -33,11 +32,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import static io.nuls.block.utils.LoggerUtil.Log;
+
 /**
  * Context管理器
+ *
  * @author captain
- * @date 18-11-20 上午10:46
  * @version 1.0
+ * @date 18-11-20 上午10:46
  */
 @Data
 public class ContextManager {

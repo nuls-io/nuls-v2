@@ -60,7 +60,7 @@ public class Node {
     /**
      * 调整信用值
      */
-    public void adjustCredit(boolean success){
+    public void adjustCredit(boolean success) {
         if (success) {
             credit = Math.min(200, credit + 20);
         } else {

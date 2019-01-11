@@ -37,11 +37,11 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 处理收到的{@link HashMessage},用于孤儿链的维护

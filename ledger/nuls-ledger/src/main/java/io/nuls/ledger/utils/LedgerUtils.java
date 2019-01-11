@@ -1,6 +1,10 @@
 package io.nuls.ledger.utils;
 
+import io.nuls.base.data.Transaction;
 import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.model.po.UnconfirmedNonce;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.ByteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +30,9 @@ public class LedgerUtils {
     /**
      * rockdb key
      *
-     * @param address
-     * @param assetId
-     * @return
+     * @param address address
+     * @param assetId assetId
+     * @return byte[]
      */
     public static byte[] getKey(String address, int assetChainId, int assetId) {
         String key = address + "-" + assetChainId + "-" + assetId;
@@ -79,4 +83,17 @@ public class LedgerUtils {
         return assetKey+ "-"+height;
     }
 
+
+    public static String getNonceStrByTxHash(Transaction tx){
+        byte [] nonce8Bytes = ByteUtils.copyOf(tx.getHash().getDigestBytes(), 8);
+        String nonce8BytesStr = HexUtil.encode(nonce8Bytes);
+        return nonce8BytesStr;
+    }
+
+    public static boolean isExpiredNonce(UnconfirmedNonce unconfirmedNonce){
+        if(TimeUtils.getCurrentTime() - unconfirmedNonce.getTime() > LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME){
+            return true;
+        }
+        return false;
+    }
 }

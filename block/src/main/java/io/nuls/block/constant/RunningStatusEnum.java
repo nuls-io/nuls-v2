@@ -23,9 +23,10 @@ package io.nuls.block.constant;
 /**
  * 模块运行状态枚举
  * The module runs state enumeration.
+ *
  * @author captain
- * @date 18-11-28 下午5:58
  * @version 1.0
+ * @date 18-11-28 下午5:58
  */
 public enum RunningStatusEnum {
 

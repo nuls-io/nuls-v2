@@ -1,5 +1,6 @@
 package io.nuls.poc.utils.manager;
 
+import ch.qos.logback.classic.Level;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -120,7 +121,6 @@ public class ChainManager {
             读取数据库链信息配置
             Read database chain information configuration
              */
-            configService.delete(1);
             Map<Integer, ConfigBean> configMap = configService.getList();
             /*
             如果系统是第一次运行，则本地数据库没有存储链信息，此时需要从配置文件读取主链配置信息
@@ -183,8 +183,8 @@ public class ChainManager {
         * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
         * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
         * */
-        NulsLogger consensusLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.CONSENSUS_LOGGER_NAME);
-        NulsLogger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.BASIC_LOGGER_NAME);
+        NulsLogger consensusLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.CONSENSUS_LOGGER_NAME, Level.INFO);
+        NulsLogger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.BASIC_LOGGER_NAME,Level.INFO);
         chain.getLoggerMap().put(ConsensusConstant.CONSENSUS_LOGGER_NAME,consensusLogger);
         chain.getLoggerMap().put(ConsensusConstant.BASIC_LOGGER_NAME,rpcLogger);
     }

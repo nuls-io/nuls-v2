@@ -126,10 +126,9 @@ public class TxUnverifiedProcessTask implements Runnable {
     }
 
 
-    private void doOrphanTxTask(Chain chain){
+    private void doOrphanTxTask(Chain chain) throws NulsException{
         //时间排序TransactionTimeComparator
         orphanTxList.sort(txComparator);
-
         Iterator<Transaction> it = orphanTxList.iterator();
         while (it.hasNext()) {
             Transaction tx = it.next();

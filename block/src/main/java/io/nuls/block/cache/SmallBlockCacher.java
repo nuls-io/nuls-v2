@@ -23,8 +23,6 @@ package io.nuls.block.cache;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.block.constant.BlockForwardEnum;
-import io.nuls.block.constant.ConfigConstant;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.CachedSmallBlock;
 import io.nuls.block.model.ChainParameters;
@@ -35,8 +33,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 系统正常运行时缓存区块的广播、转发消息
- *  1.缓存收到的SmallBlock
- *  2.缓存状态标记
+ * 1.缓存收到的SmallBlock
+ * 2.缓存状态标记
  *
  * @author captain
  * @version 1.0

@@ -71,9 +71,9 @@ public interface AccountStateService {
      * @param assetChainId
      * @param assetId
      * @param nonce
-     * @return
+     * @return UnconfirmedNonce
      */
-    String setUnconfirmNonce(String address,int addressChainId, int assetChainId, int assetId, String nonce);
+    void setUnconfirmNonce(String address, int addressChainId, int assetChainId, int assetId, String nonce);
 
 
 

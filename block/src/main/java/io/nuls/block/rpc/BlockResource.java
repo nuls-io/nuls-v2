@@ -36,7 +36,6 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.*;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 区块管理模块的对外接口类

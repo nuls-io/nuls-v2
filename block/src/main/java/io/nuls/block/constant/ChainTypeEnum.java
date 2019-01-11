@@ -22,9 +22,10 @@ package io.nuls.block.constant;
 
 /**
  * 孤儿链经过处理线程处理后的状态标记
+ *
  * @author captain
- * @date 18-11-28 下午12:01
  * @version 1.0
+ * @date 18-11-28 下午12:01
  */
 public enum ChainTypeEnum {
 
@@ -80,8 +81,7 @@ public enum ChainTypeEnum {
      * 主链
      * Running exception
      */
-    MASTER
-    ;
+    MASTER;
 
     @Override
     public String toString() {

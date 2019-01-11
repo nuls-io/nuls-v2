@@ -11,8 +11,10 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.model.bo.VerifyCoinDataResult;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -27,31 +29,23 @@ import java.util.Map;
  */
 public class LedgerCall {
 
-
-    public static void coinDataBatchNotify(Chain chain) {
-        //todo 发送给账本，coinData统一验证的通知
-
-    }
-
     /**
      * 验证CoinData
      * @param chain
      * @param txHex
      * @return
      */
-    public static boolean verifyCoinData(Chain chain, String txHex, boolean batch) {
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chain.getChainId());
-        params.put("txHex", txHex);
+    public static VerifyCoinDataResult verifyCoinData(Chain chain, String txHex, boolean batch) throws NulsException {
         try {
-            //单个or批量
-            String cmd = batch ? "lg_validateCoinData": "lg_validateCoinData";
-            HashMap result = (HashMap) TransactionCall.request(cmd, ModuleE.LG.abbr, params);
-            return (Boolean) result.get("value");
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chain.getChainId());
+            params.put("txHex", txHex);
+            params.put("isBatchValidate", batch);
+            HashMap result = (HashMap) TransactionCall.request("validateCoinData", ModuleE.LG.abbr, params);
+            return new VerifyCoinDataResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
         } catch (Exception e) {
-            chain.getLogger().info(e.getMessage(), e.fillInStackTrace());
-            return false;
+            throw new NulsException(e);
         }
     }
 
@@ -61,15 +55,31 @@ public class LedgerCall {
      * @param tx
      * @return
      */
-    public static boolean verifyCoinData(Chain chain, Transaction tx, boolean batch) {
-        //todo 验证CoinData
+    public static VerifyCoinDataResult verifyCoinData(Chain chain, Transaction tx, boolean batch) throws NulsException {
         try {
             return verifyCoinData(chain, tx.hex(), batch);
         } catch (Exception e) {
-            chain.getLogger().error(e);
-            return false;
+            throw new NulsException(e);
         }
     }
+
+    /**
+     * 查资产是否存在
+     * @param chainId
+     * @param assetId
+     * @return
+     */
+  /*  public static boolean verifyAssetExist(int chainId, int assetId) throws NulsException {
+        try {
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put("chianId", chainId);
+            params.put("assetId", assetId);
+            HashMap result = (HashMap) TransactionCall.request("cm_asset", ModuleE.LG.abbr, params);
+            return null != result;
+        } catch (NulsException e) {
+            throw new NulsException(e);
+        }
+    }*/
 
     /**
      * 查询nonce值
@@ -82,19 +92,18 @@ public class LedgerCall {
      * @throws NulsException
      */
     public static byte[] getNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chain.getChainId());
-        params.put("address", address);
-        params.put("assetChainId", assetChainId);
-        params.put("assetId", assetId);
         try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chain.getChainId());
+            params.put("address", address);
+            params.put("assetChainId", assetChainId);
+            params.put("assetId", assetId);
             HashMap result = (HashMap) TransactionCall.request("getNonce", ModuleE.LG.abbr, params);
             String nonce = (String) result.get("nonce");
             return HexUtil.decode(nonce);
         } catch (Exception e) {
-            chain.getLogger().info(e.getMessage(), e.fillInStackTrace());
-            return null;
+            throw new NulsException(e);
         }
     }
 
@@ -102,21 +111,25 @@ public class LedgerCall {
      * 查询账户特定资产的余额
      * Check the balance of an account-specific asset
      */
-    public static BigInteger getBalance(Chain chain, byte[] address, int assetChainId, int assetId) {
-        String addressString = AddressTool.getStringAddressByBytes(address);
-        Map<String, Object> params = new HashMap<>();
-        params.put(Constants.VERSION_KEY_STR, "1.0");
-        params.put("chainId", chain.getChainId());
-        params.put("assetChainId", assetChainId);
-        params.put("assetId", assetId);
-        params.put("address", addressString);
+    public static BigInteger getBalance(Chain chain, byte[] address, int assetChainId, int assetId) throws NulsException {
         try {
+            String addressString = AddressTool.getStringAddressByBytes(address);
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chain.getChainId());
+            params.put("assetChainId", assetChainId);
+            params.put("assetId", assetId);
+            params.put("address", addressString);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.AC.abbr, "lg_getBalance", params);
             return BigIntegerUtils.stringToBigInteger((String) result.get("available"));
         } catch (Exception e) {
-            Log.error(e);
+            throw new NulsException(e);
         }
-        return new BigInteger("0");
+    }
+
+    public static void coinDataBatchNotify(Chain chain) throws NulsException {
+        //todo 发送给账本，coinData统一验证的通知
+
     }
 
     /**
@@ -125,7 +138,8 @@ public class LedgerCall {
      * @param tx
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean commitTxLedger(Chain chain, Transaction tx, boolean comfirmed){
+    public static boolean commitTxLedger(Chain chain, Transaction tx, boolean comfirmed) throws NulsException {
+
         //todo
         return true;
     }
@@ -136,7 +150,7 @@ public class LedgerCall {
      * @param tx
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean rollbackTxLedger(Chain chain, Transaction tx, boolean comfirmed){
+    public static boolean rollbackTxLedger(Chain chain, Transaction tx, boolean comfirmed) throws NulsException {
         //todo
         return true;
     }

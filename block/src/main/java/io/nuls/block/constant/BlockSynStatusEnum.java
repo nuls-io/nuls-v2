@@ -24,8 +24,8 @@ package io.nuls.block.constant;
  * 区块同步状态枚举
  *
  * @author captain
- * @date 18-12-6 下午7:02
  * @version 1.0
+ * @date 18-12-6 下午7:02
  */
 public enum BlockSynStatusEnum {
 

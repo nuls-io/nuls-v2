@@ -26,13 +26,14 @@ import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
-import io.nuls.tools.log.Log;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.locks.StampedLock;
 
-import static io.nuls.block.constant.RunningStatusEnum.*;
+import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_CHAINS;
+import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 孤儿链的形成原因分析：因为网络问题,在没有收到Block(100)的情况下,已经收到了Block(101),此时Block(101)不能连接到主链上,形成孤儿链
@@ -67,14 +68,14 @@ public class OrphanChainsMonitor implements Runnable {
                 //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
                 RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RUNNING)) {
-                    Log.debug("skip process, status is "+status+", chainId-" + chainId);
+                    Log.debug("skip process, status is " + status + ", chainId-" + chainId);
                     continue;
                 }
 
                 StampedLock lock = context.getLock();
                 long stamp = lock.tryOptimisticRead();
                 try {
-                    for (;; stamp = lock.writeLock()) {
+                    for (; ; stamp = lock.writeLock()) {
                         if (stamp == 0L) {
                             continue;
                         }
@@ -120,7 +121,7 @@ public class OrphanChainsMonitor implements Runnable {
                 }
             } catch (Exception e) {
                 context.setStatus(RUNNING);
-                Log.error("chainId-"+chainId+",maintain OrphanChains fail!error msg is:"+ e.getMessage());
+                Log.error("chainId-" + chainId + ",maintain OrphanChains fail!error msg is:" + e.getMessage());
             }
         }
     }
@@ -167,7 +168,7 @@ public class OrphanChainsMonitor implements Runnable {
         }
     }
 
-    private void mark(Chain orphanChain, Chain masterChain, SortedSet<Chain> forkChains, SortedSet<Chain> orphanChains)  {
+    private void mark(Chain orphanChain, Chain masterChain, SortedSet<Chain> forkChains, SortedSet<Chain> orphanChains) {
         //1.判断与主链是否相连
         if (orphanChain.getParent() == null && tryAppend(masterChain, orphanChain)) {
             orphanChain.setType(ChainTypeEnum.MASTER_APPEND);

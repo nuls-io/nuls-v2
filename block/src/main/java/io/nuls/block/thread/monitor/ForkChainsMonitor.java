@@ -26,10 +26,11 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
-import io.nuls.tools.log.Log;
 
 import java.util.SortedSet;
 import java.util.concurrent.locks.StampedLock;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 分叉链的形成原因分析:由于网络延迟,同时有两个矿工发布同一高度的区块,或者被恶意节点攻击
@@ -59,14 +60,14 @@ public class ForkChainsMonitor implements Runnable {
                 //判断该链的运行状态,只有正常运行时才会有分叉链的处理
                 RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RunningStatusEnum.RUNNING)) {
-                    Log.debug("skip process, status is "+status+", chainId-"+chainId);
+                    Log.debug("skip process, status is " + status + ", chainId-" + chainId);
                     continue;
                 }
 
                 StampedLock lock = context.getLock();
                 long stamp = lock.tryOptimisticRead();
                 try {
-                    for (;; stamp = lock.writeLock()) {
+                    for (; ; stamp = lock.writeLock()) {
                         if (stamp == 0L) {
                             continue;
                         }
@@ -95,7 +96,7 @@ public class ForkChainsMonitor implements Runnable {
                                 switchChain = forkChain;
                             }
                         }
-                        Log.debug("chainId-"+chainId+", maxHeightDifference:"+maxHeightDifference+", chainSwtichThreshold:"+ chainSwtichThreshold);
+                        Log.debug("chainId-" + chainId + ", maxHeightDifference:" + maxHeightDifference + ", chainSwtichThreshold:" + chainSwtichThreshold);
                         //高度差不够
                         if (maxHeightDifference < chainSwtichThreshold) {
                             break;
@@ -108,9 +109,9 @@ public class ForkChainsMonitor implements Runnable {
                         //进行切换,切换前变更模块运行状态
                         context.setStatus(RunningStatusEnum.SWITCHING);
                         if (ChainManager.switchChain(chainId, masterChain, switchChain)) {
-                            Log.info("chainId-"+chainId+", switchChain success");
+                            Log.info("chainId-" + chainId + ", switchChain success");
                         } else {
-                            Log.info("chainId-"+chainId+", switchChain fail, auto rollback success");
+                            Log.info("chainId-" + chainId + ", switchChain fail, auto rollback success");
                         }
                         break;
                     }
@@ -122,7 +123,7 @@ public class ForkChainsMonitor implements Runnable {
                 }
             } catch (Exception e) {
                 context.setStatus(RunningStatusEnum.RUNNING);
-                Log.error("chainId-" +chainId+", switchChain fail, auto rollback fail");
+                Log.error("chainId-" + chainId + ", switchChain fail, auto rollback fail");
             }
         }
     }

@@ -1,14 +1,18 @@
-/*
+/**
  * MIT License
+ * <p>
  * Copyright (c) 2017-2018 nuls.io
+ * <p>
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ * <p>
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ * <p>
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -18,52 +22,47 @@
  * SOFTWARE.
  */
 
-package io.nuls.block.message;
-
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.block.message.base.BaseMessage;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.SerializeUtils;
-import lombok.Data;
-
-import java.io.IOException;
+package io.nuls.transaction.model.bo;
 
 /**
- * 发送一个hash
- *
- * @author captain
- * @version 1.0
- * @date 18-11-9 下午2:37
+ * 验证CoinData 返回结果
+ * @author: Charlie
+ * @date: 2019-01-11
  */
-@Data
-public class HashMessage extends BaseMessage {
+public class VerifyCoinDataResult {
 
-    private NulsDigestData requestHash;
+    /** 1校验通过，2孤儿交易 3双花 4 其他异常*/
+    private int code;
+    /** 校验返回描述*/
+    private String desc;
 
-    public HashMessage() {
+    private final int SUCCESS = 1;
+    private final int ORPHAN = 2;
+    private final int DOUBLE_SPENDING = 3;
+    private final int OTHER_EXCEPTION = 4;
+
+    public VerifyCoinDataResult(int code, String desc) {
+        this.code = code;
+        this.desc = desc;
     }
 
-    public HashMessage(NulsDigestData hash) {
-        this.requestHash = hash;
+    public boolean success(){
+        return this.code == SUCCESS;
     }
 
-    @Override
-    public int size() {
-        int size = 0;
-        size += SerializeUtils.sizeOfNulsData(requestHash);
-        return size;
+    public int getCode() {
+        return code;
     }
 
-    @Override
-    public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeNulsData(requestHash);
+    public void setCode(int code) {
+        this.code = code;
     }
 
-    @Override
-    public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.requestHash = byteBuffer.readHash();
+    public String getDesc() {
+        return desc;
     }
 
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
 }

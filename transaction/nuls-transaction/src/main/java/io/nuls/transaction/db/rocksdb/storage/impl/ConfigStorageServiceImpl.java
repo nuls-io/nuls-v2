@@ -93,7 +93,7 @@ public class ConfigStorageServiceImpl implements ConfigStorageService, Initializ
     public Map<Integer, ConfigBean> getList() {
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(TxDBConstant.DB_MODULE_CONGIF);
-            Map<Integer, ConfigBean> configBeanMap = new HashMap<>(TxConstant.INIT_CAPACITY);
+            Map<Integer, ConfigBean> configBeanMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
             for (Entry<byte[], byte[]>entry:list) {
                 int key = ByteUtils.bytesToInt(entry.getKey());
                 ConfigBean value = ObjectUtils.bytesToObject(entry.getValue());

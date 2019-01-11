@@ -24,11 +24,10 @@
  */
 package io.nuls.ledger.test;
 
-import io.nuls.ledger.model.po.FreezeHeightState;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author lan
@@ -38,19 +37,12 @@ import java.util.List;
 public class LanTest {
     @Test
     public void test1(){
-        List<FreezeHeightState> a = new ArrayList<FreezeHeightState>();
-//        FreezeHeightState f1= new FreezeHeightState();
-//        f1.setHeight(BigInteger.valueOf(23));
-//        a.add(f1);
-//        FreezeHeightState f2= new FreezeHeightState();
-//        f2.setHeight(BigInteger.valueOf(24));
-//        a.add(f2);
-//        FreezeHeightState f3= new FreezeHeightState();
-//        f3.setHeight(BigInteger.valueOf(19));
-//        a.add(f3);
-        a.sort((x, y) -> Long.compare(x.getHeight(),y.getHeight()));
-       for(FreezeHeightState freezeHeightState:a){
-           System.out.println(freezeHeightState.getHeight());
-       }
+        try {
+            Map m = new HashMap();
+            m.put("b",true);
+          System.out.println(Boolean.valueOf(m.get("b").toString()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

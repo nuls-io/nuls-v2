@@ -23,9 +23,7 @@ package io.nuls.block.utils;
 import io.nuls.base.data.*;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
-import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ChainManager;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
@@ -39,13 +37,14 @@ import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 区块工具类

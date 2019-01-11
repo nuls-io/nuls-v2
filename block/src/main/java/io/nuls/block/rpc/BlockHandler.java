@@ -24,20 +24,18 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.message.BlockMessage;
-import io.nuls.block.service.BlockService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 处理收到的{@link BlockMessage},用于区块的同步

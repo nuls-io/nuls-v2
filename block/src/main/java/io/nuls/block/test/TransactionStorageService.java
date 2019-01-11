@@ -24,9 +24,6 @@ package io.nuls.block.test;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.block.model.ChainParameters;
-
-import java.util.List;
 
 /**
  * 测试用
