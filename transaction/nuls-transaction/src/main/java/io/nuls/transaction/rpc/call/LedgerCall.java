@@ -120,15 +120,29 @@ public class LedgerCall {
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", addressString);
-            HashMap result = (HashMap)TransactionCall.request(ModuleE.AC.abbr, "lg_getBalance", params);
+            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "lg_getBalance", params);
             return BigIntegerUtils.stringToBigInteger((String) result.get("available"));
         } catch (Exception e) {
             throw new NulsException(e);
         }
     }
 
-    public static void coinDataBatchNotify(Chain chain) throws NulsException {
-        //todo 发送给账本，coinData统一验证的通知
+    /**
+     * 开始批量验证coindata的通知
+     * @param chain
+     * @return
+     * @throws NulsException
+     */
+    public static boolean coinDataBatchNotify(Chain chain) throws NulsException {
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chain.getChainId());
+            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "bathValidateBegin", params);
+            return (int) result.get("value") == 1;
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
 
     }
 
@@ -139,9 +153,17 @@ public class LedgerCall {
      * @param comfirmed 是否是已确认的交易
      */
     public static boolean commitTxLedger(Chain chain, Transaction tx, boolean comfirmed) throws NulsException {
-
-        //todo
-        return true;
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chain.getChainId());
+            params.put("txHex", tx.hex());
+            params.put("isConfirmTx", comfirmed);
+            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitTx", params);
+            return (int) result.get("value") == 1;
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
     }
 
     /**
@@ -151,8 +173,17 @@ public class LedgerCall {
      * @param comfirmed 是否是已确认的交易
      */
     public static boolean rollbackTxLedger(Chain chain, Transaction tx, boolean comfirmed) throws NulsException {
-        //todo
-        return true;
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chain.getChainId());
+            params.put("txHex", tx.hex());
+            params.put("isConfirmTx", comfirmed);
+            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "rollBackTx", params);
+            return (int) result.get("value") == 1;
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
     }
 
 }
