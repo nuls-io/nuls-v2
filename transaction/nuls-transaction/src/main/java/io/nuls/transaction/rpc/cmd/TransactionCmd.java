@@ -67,7 +67,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "moduleValidator", parameterType = "String")
     @Parameter(parameterName = "list", parameterType = "List")
     public Response register(Map params) {
-        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY);
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = false;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -124,7 +124,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHex", parameterType = "String")
     public Response newTx(Map params) {
-        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY);
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = false;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -172,7 +172,7 @@ public class TransactionCmd extends BaseCmd {
             int maxTxDataSize = (int) params.get("maxTxDataSize");
 
             List<String> txHexlist = transactionService.getPackableTxs(chain, endTimestamp, maxTxDataSize);
-            Map<String, List<String>> map = new HashMap<>(TxConstant.INIT_CAPACITY);
+            Map<String, List<String>> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
             map.put("list", txHexlist);
             return success(map);
         } catch (NulsException e) {
@@ -192,7 +192,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "txHashList", parameterType = "List")
     @Parameter(parameterName = "secondaryDataHex", parameterType = "String")
     public Response txSave(Map params) {
-        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY);
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = false;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -217,7 +217,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY);
+        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         resultMap.put("value", result);
         return success(result);
     }
@@ -234,7 +234,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "txHashList", parameterType = "List")
     @Parameter(parameterName = "secondaryDataHex", parameterType = "String")
     public Response txRollback(Map params) {
-        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY);
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = false;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -259,7 +259,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY);
+        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         resultMap.put("value", result);
         return success(result);
     }
@@ -359,7 +359,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = TxCmd.TX_VERIFY, version = 1.0, description = "")
     public Response batchVerify(Map params){
-        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY);
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = false;
         try {
             Object chainIdObj = params == null ? null : params.get("chainId");
@@ -376,7 +376,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY);
+        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         resultMap.put("value", result);
         return success(result);
     }

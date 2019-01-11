@@ -28,7 +28,6 @@ public class TransactionCall {
      * Call other module interfaces
      */
     public static Object request(String cmd, String moduleCode, Map params) throws NulsException {
-        Object result = new Object();
         try {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             Response cmdResp = CmdDispatcher.requestAndResponse(moduleCode, cmd, params);
@@ -36,12 +35,11 @@ public class TransactionCall {
                 Log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", moduleCode, cmd, cmdResp.getResponseComment());
                 throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
             }
-            result = ((HashMap) cmdResp.getResponseData()).get(cmd);
+            return ((HashMap) cmdResp.getResponseData()).get(cmd);
         } catch (Exception e) {
             Log.error("Calling remote interface failed. module:{} - interface:{}", moduleCode, cmd);
             throw new NulsException(e);
         }
-        return result;
     }
 
     /**

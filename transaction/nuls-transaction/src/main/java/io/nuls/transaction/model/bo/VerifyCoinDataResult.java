@@ -22,39 +22,47 @@
  * SOFTWARE.
  */
 
-package io.nuls.transaction.rpc.call;
-
-import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
-import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.rpc.call.callback.EventNewBlockHeightInvoke;
-
-import java.util.HashMap;
-import java.util.Map;
+package io.nuls.transaction.model.bo;
 
 /**
+ * 验证CoinData 返回结果
  * @author: Charlie
- * @date: 2019-01-02
+ * @date: 2019-01-11
  */
-public class BlockCall {
+public class VerifyCoinDataResult {
 
-    public static boolean subscriptionNewBlockHeight(Chain chain) throws NulsException {
-        try {
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chain.getChainId());
-            String messageId = CmdDispatcher.requestAndInvoke(ModuleE.BL.abbr, "bestHeight",
-                    params, "0", "1", new EventNewBlockHeightInvoke(chain));
-            if(null != messageId){
-                return true;
-            }
-            return false;
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
+    /** 1校验通过，2孤儿交易 3双花 4 其他异常*/
+    private int code;
+    /** 校验返回描述*/
+    private String desc;
+
+    private final int SUCCESS = 1;
+    private final int ORPHAN = 2;
+    private final int DOUBLE_SPENDING = 3;
+    private final int OTHER_EXCEPTION = 4;
+
+    public VerifyCoinDataResult(int code, String desc) {
+        this.code = code;
+        this.desc = desc;
+    }
+
+    public boolean success(){
+        return this.code == SUCCESS;
+    }
+
+    public int getCode() {
+        return code;
+    }
+
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 }

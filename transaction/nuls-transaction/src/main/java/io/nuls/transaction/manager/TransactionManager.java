@@ -243,9 +243,10 @@ public class TransactionManager {
 
             if (chainId == TxConstant.NULS_CHAINID) {
                 //如果chainId是主网则通过连管理验证资产是否存在
-                if (!ChainCall.verifyAssetExist(assetsChainId, assetsId)) {
+                //todo
+               /* if (!ChainCall.verifyAssetExist(assetsChainId, assetsId)) {
                     throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
-                }
+                }*/
             }/*else{
                if(chain.getConfig().getAssetsId() != coinFrom.getAssetsId()){
                    //todo 普通交易如果资产不是该链资产，还需通过主网验证 是否需要？

@@ -14,7 +14,8 @@ public interface TxConstant {
     /**
      * Map初始值
      */
-    int INIT_CAPACITY = 16;
+    int INIT_CAPACITY_16 = 16;
+    int INIT_CAPACITY_8 = 8;
 
     int PAGESIZE = 20;
 

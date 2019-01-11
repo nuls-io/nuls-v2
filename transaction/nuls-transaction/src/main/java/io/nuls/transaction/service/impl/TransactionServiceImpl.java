@@ -39,7 +39,6 @@ import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.thread.TimeService;
 import io.nuls.transaction.cache.TxVerifiedPool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
@@ -369,9 +368,10 @@ public class TransactionServiceImpl implements TransactionService {
             }
             int assetChainId = coinDTO.getAssetsChainId();
             int assetId = coinDTO.getAssetsId();
-            if (!ChainCall.verifyAssetExist(assetChainId, assetId)) {
+            //todo 查询资产是否存在
+           /* if (!ChainCall.verifyAssetExist(assetChainId, assetId)) {
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
-            }
+            }*/
             //检查对应资产余额 是否足够
             BigInteger amount = coinDTO.getAmount();
             BigInteger balance = LedgerCall.getBalance(chain, address, assetChainId, assetId);
@@ -410,10 +410,11 @@ public class TransactionServiceImpl implements TransactionService {
             int chainId = coinDTO.getAssetsChainId();
             int assetId = coinDTO.getAssetsId();
             coinTo.setAmount(coinDTO.getAmount());
-            if (!ChainCall.verifyAssetExist(chainId, assetId)) {
+            //todo
+            /*if (!ChainCall.verifyAssetExist(chainId, assetId)) {
                 //资产不存在 chainId assetId
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
-            }
+            }*/
             coinTo.setAssetsChainId(chainId);
             coinTo.setAssetsId(assetId);
             coinTos.add(coinTo);
@@ -606,9 +607,10 @@ public class TransactionServiceImpl implements TransactionService {
                 hasNulsFrom = true;
             }
             //只有NULS主网节点才会进入跨链交易验证器，直接验证资产即可
-            if (!ChainCall.verifyAssetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
+            //todo
+            /*if (!ChainCall.verifyAssetExist(coinFrom.getAssetsChainId(), coinFrom.getAssetsId())) {
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
-            }
+            }*/
         }
         if (!hasNulsFrom) {
             throw new NulsException(TxErrorCode.INSUFFICIENT_FEE);
@@ -622,9 +624,10 @@ public class TransactionServiceImpl implements TransactionService {
         }
         //验证跨链交易的from和to的资产是否存在(有效)
         for (CoinTo coinTo : listTo) {
-            if (!ChainCall.verifyAssetExist(coinTo.getAssetsChainId(), coinTo.getAssetsId())) {
+            //todo
+           /* if (!ChainCall.verifyAssetExist(coinTo.getAssetsChainId(), coinTo.getAssetsId())) {
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
-            }
+            }*/
         }
         return true;
     }
@@ -650,7 +653,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public List<String> getPackableTxs(Chain chain, long endtimestamp, long maxTxDataSize) throws NulsException {
         //组装统一验证参数数据,key为各模块统一验证器cmd
-        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY);
+        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         List<Transaction> packingTxList = new ArrayList<>();
         long totalSize = 0L;
         while (true) {
@@ -693,7 +696,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
             //验证coinData
-            if (!LedgerCall.verifyCoinData(chain, txHex, false)) {
+            if (!LedgerCall.verifyCoinData(chain, txHex, false).success()) {
                 clearInvalidTx(chain, tx);
                 continue;
             }
@@ -778,7 +781,7 @@ public class TransactionServiceImpl implements TransactionService {
                 //向账本模块发送要批量验证coinData的标识
                 LedgerCall.coinDataBatchNotify(chain);
                 //验证coinData
-                if (!LedgerCall.verifyCoinData(chain, txHex, true)) {
+                if (!LedgerCall.verifyCoinData(chain, txHex, true).success()) {
                     filterList.add(tx);
                     iterator.remove();
                     continue;
@@ -868,7 +871,7 @@ public class TransactionServiceImpl implements TransactionService {
         LedgerCall.coinDataBatchNotify(chain);
         //todo 批量验证coinData，接口和单个的区别？
         for(Transaction tx : txList) {
-            if (!LedgerCall.verifyCoinData(chain, tx, true)) {
+            if (!LedgerCall.verifyCoinData(chain, tx, true).success()) {
                 return false;
             }
         }
@@ -897,11 +900,16 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void clearInvalidTx(Chain chain, Transaction tx) {
+
         txVerifiedStorageService.removeTx(chain.getChainId(), tx.getHash());
-        //通知账本回滚nonce
-        LedgerCall.rollbackTxLedger(chain, tx, false);
         //移除H2交易记录
         transactionH2Service.deleteTx(tx);
+        try {
+            //通知账本回滚nonce
+            LedgerCall.rollbackTxLedger(chain, tx, false);
+        } catch (NulsException e) {
+            e.printStackTrace();
+        }
 
     }
 
