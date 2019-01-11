@@ -107,6 +107,8 @@ public class BlockValidator {
          }
          if (isDownload && (extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval()) > TimeService.currentTimeMillis() + chain.getConfig().getPackingInterval()) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash());
+             Log.debug("round end time:"+ DateUtils.convertDate(new Date(extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval())));
+             Log.debug("TimeService.currentTimeMillis() + chain.getConfig().getPackingInterval() :"+ DateUtils.convertDate(new Date(TimeService.currentTimeMillis() + chain.getConfig().getPackingInterval())));
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
          if (extendsData.getRoundStartTime() < currentRound.getEndTime()) {
