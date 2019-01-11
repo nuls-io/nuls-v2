@@ -28,6 +28,7 @@ import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
@@ -49,23 +50,17 @@ public class ConsensusCall {
      * @param agentAddress 节点地址
      * @return
      */
-    @Deprecated
-    public static boolean isConsensusNode(Chain chain, String agentAddress) {
+    public static boolean isConsensusNode(Chain chain, String agentAddress) throws NulsException {
         try {
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            //TODO cmd名称 返回值key
             params.put("chainId", chain.getChainId());
             params.put("agentAddress", agentAddress);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_isConsensusNode", params);
-            if (cmdResp.isSuccess()) {
-                HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_isConsensusNode"));
-                return (Boolean) result.get("value");
-            }
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.CS.abbr, "cs_isConsensusNode", params);
+            return (boolean) result.get("value");
         } catch (Exception e) {
-            Log.error(e);
+            throw new NulsException(e);
         }
-        return true;
     }
 
     /**
@@ -74,21 +69,17 @@ public class ConsensusCall {
      * @param chain
      * @return
      */
-    public static String cs_getNodePackingAddress(Chain chain) {
+    public static String cs_getNodePackingAddress(Chain chain) throws NulsException {
         try {
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             //TODO cmd名称 返回值key
             params.put("chainId", chain.getChainId());
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getNodePackingAddress", params);
-            if (cmdResp.isSuccess()) {
-                HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_getNodePackingAddress"));
-                return (String) result.get("value");
-            }
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.CS.abbr, "cs_getNodePackingAddress", params);
+            return (String) result.get("value");
         } catch (Exception e) {
-            Log.error(e);
+            throw new NulsException(e);
         }
-        return null;
     }
 
     /**
@@ -97,7 +88,7 @@ public class ConsensusCall {
      * @param chain
      * @return
      */
-    public static List<String> getAgentAddressList(Chain chain) {
+    public static List<String> getAgentAddressList(Chain chain) throws NulsException {
         return getRecentPackagerAddress(chain, 0L);
     }
 
@@ -108,24 +99,22 @@ public class ConsensusCall {
      * @param height
      * @return
      */
-    public static List<String> getRecentPackagerAddress(Chain chain, long height) {
-        List<String> address = new ArrayList<>();
+    public static List<String> getRecentPackagerAddress(Chain chain, long height) throws NulsException {
+
         try {
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_16);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             //TODO cmd名称 返回值key
             params.put("chainId", chain.getChainId());
             params.put("height", height);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "getAgentAddressList", params);
-            if (cmdResp.isSuccess()) {
-                HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_getAgentAddressList"));
-                if (null != result.get("address")) {
-                    address = (List<String>) result.get("address");
-                }
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.CS.abbr, "getAgentAddressList", params);
+            List<String> address = new ArrayList<>();
+            if (null != result.get("address")) {
+                address = (List<String>) result.get("address");
             }
+            return address;
         } catch (Exception e) {
-            Log.error(e);
+            throw new NulsException(e);
         }
-        return address;
     }
 }

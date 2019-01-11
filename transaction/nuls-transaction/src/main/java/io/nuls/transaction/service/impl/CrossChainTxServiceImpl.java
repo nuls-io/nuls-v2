@@ -245,7 +245,7 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
      * @param message
      * @return
      */
-    private boolean verifyNodeResult(Chain chain, BroadcastCrossNodeRsMessage message, CrossChainTx ctx) {
+    private boolean verifyNodeResult(Chain chain, BroadcastCrossNodeRsMessage message, CrossChainTx ctx) throws NulsException {
         String agentAddress = message.getPackingAddress();
         if (chain.getChainId() == TxConstant.NULS_CHAINID && !ConsensusCall.isConsensusNode(chain, agentAddress)) {
             return false;
