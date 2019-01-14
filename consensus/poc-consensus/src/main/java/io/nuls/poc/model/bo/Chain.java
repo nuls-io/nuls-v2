@@ -17,6 +17,8 @@ import io.nuls.tools.log.logback.NulsLogger;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 链信息类
@@ -102,6 +104,8 @@ public class Chain {
     private List<BlockHeader> blockHeaderList;
 
     private Map<String, NulsLogger> loggerMap;
+
+    private final Lock round_lock = new ReentrantLock();
 
     /**
      * 任务线程池
@@ -322,5 +326,9 @@ public class Chain {
 
     public void setLoggerMap(Map<String, NulsLogger> loggerMap) {
         this.loggerMap = loggerMap;
+    }
+
+    public Lock getRound_lock() {
+        return round_lock;
     }
 }

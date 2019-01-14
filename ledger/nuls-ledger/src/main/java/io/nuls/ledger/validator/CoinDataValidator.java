@@ -129,6 +129,10 @@ public class CoinDataValidator {
         List<CoinFrom> coinFroms = coinData.getFrom();
         String nonce8BytesStr = LedgerUtils.getNonceStrByTxHash(tx);
         for(CoinFrom coinFrom:coinFroms) {
+            if(LedgerUtils.isNotLocalChainAccount(chainId,coinFrom.getAddress())){
+                //非本地网络账户地址,不进行处理
+                continue;
+            }
             AccountState accountState = accountStateService.getAccountState(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), chainId,coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
             //判断是否是解锁操作
             if(coinFrom.getLocked() == 0 ) {
@@ -288,6 +292,10 @@ public class CoinDataValidator {
          */
         List<CoinFrom> coinFroms = coinData.getFrom();
         for(CoinFrom coinFrom:coinFroms){
+            if(LedgerUtils.isNotLocalChainAccount(addressChainId,coinFrom.getAddress())){
+                //非本地网络账户地址,不进行处理
+                continue;
+            }
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
             String nonce = HexUtil.encode(coinFrom.getNonce());
             AccountState accountState = accountStateService.getAccountState(address,addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());

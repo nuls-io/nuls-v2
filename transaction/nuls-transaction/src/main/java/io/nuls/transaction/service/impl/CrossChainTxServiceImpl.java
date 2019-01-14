@@ -83,10 +83,14 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
             if(!ChainCall.verifyCtxCoinData(coinDataHex)){
                 return;
             }
-            //主网接收到一个友链跨链交易, 对转出者链进行账目金额扣除
+           /* //主网接收到一个友链跨链交易, 对转出者链进行账目金额扣除
             if(!ChainCall.receiveInCtxTally(coinDataHex)){
                 return;
             }
+            //对接收者链进行账目金额增加
+            if (!ChainCall.sendOutCtxTally(HexUtil.encode(tx.getCoinData()))) {
+                return;
+            }*/
         }
         CrossChainTx ctx = new CrossChainTx();
         ctx.setTx(tx);

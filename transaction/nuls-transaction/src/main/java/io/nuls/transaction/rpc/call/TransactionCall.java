@@ -43,7 +43,7 @@ public class TransactionCall {
     }
 
     /**
-     * txProcess
+     * txProcess 根据交易模块code向各模块提交交易
      * Single transaction txProcess
      * @param chain
      * @param cmd

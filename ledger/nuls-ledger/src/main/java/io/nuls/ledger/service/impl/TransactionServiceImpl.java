@@ -27,6 +27,7 @@ package io.nuls.ledger.service.impl;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
+import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.AccountBalance;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.service.AccountStateService;
@@ -64,6 +65,9 @@ public class TransactionServiceImpl implements TransactionService {
     LockedTransactionProcessor lockedTransactionProcessor;
     @Autowired
     CommontTransactionProcessor commontTransactionProcessor;
+
+    @Autowired
+    Repository repository;
     /**
      * 未确认交易数据处理
      *
@@ -78,6 +82,10 @@ public class TransactionServiceImpl implements TransactionService {
         String currentTxNonce =  HexUtil.encode(nonce8Bytes);
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
+            if(LedgerUtils.isNotLocalChainAccount(addressChainId,from.getAddress())){
+                //非本地网络账户地址,不进行处理
+                continue;
+            }
             String address = AddressTool.getStringAddressByBytes(from.getAddress());
             int assetChainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
@@ -114,6 +122,10 @@ public class TransactionServiceImpl implements TransactionService {
             String nonce8BytesStr = HexUtil.encode(nonce8Bytes);
             List<CoinFrom> froms = coinData.getFrom();
             for (CoinFrom from : froms) {
+                if(LedgerUtils.isNotLocalChainAccount(addressChainId,from.getAddress())){
+                    //非本地网络账户地址,不进行处理
+                    continue;
+                }
                 AccountBalance accountBalance = getAccountBalance(addressChainId,from,txHash,transaction.getBlockHeight(),updateAccounts);
                 if(from.getLocked() > 0){
                     lockedTransactionProcessor.processFromCoinData(from,nonce8BytesStr,transaction.getHash().toString(),  accountBalance.getNowAccountState());
@@ -124,6 +136,10 @@ public class TransactionServiceImpl implements TransactionService {
             }
             List<CoinTo> tos = coinData.getTo();
             for (CoinTo to : tos) {
+                if(LedgerUtils.isNotLocalChainAccount(addressChainId,to.getAddress())){
+                    //非本地网络账户地址,不进行处理
+                    continue;
+                }
                 AccountBalance accountBalance = getAccountBalance(addressChainId,to,txHash,transaction.getBlockHeight(),updateAccounts);
                 if(to.getLockTime() > 0){
                     //锁定交易处理
@@ -181,6 +197,10 @@ public class TransactionServiceImpl implements TransactionService {
         List<CoinTo> tos = coinData.getTo();
         //获取账号信息
         for (CoinFrom from : froms) {
+            if(LedgerUtils.isNotLocalChainAccount(addressChainId,from.getAddress())){
+                //非本地网络账户地址,不进行处理
+                continue;
+            }
             String address = AddressTool.getStringAddressByBytes(from.getAddress());
             int assetChainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
@@ -188,6 +208,10 @@ public class TransactionServiceImpl implements TransactionService {
             accountStateService.rollAccountStateByTx(addressChainId,key,txHash,height);
         }
         for (CoinTo to : tos) {
+            if(LedgerUtils.isNotLocalChainAccount(addressChainId,to.getAddress())){
+                //非本地网络账户地址,不进行处理
+                continue;
+            }
             String address = AddressTool.getStringAddressByBytes(to.getAddress());
             int assetChainId = to.getAssetsChainId();
             int assetId = to.getAssetsId();
@@ -199,6 +223,20 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public boolean rollBackUnconfirmTx(int addressChainId, Transaction transaction) {
-        return false;
+        //回滚未确认交易,就是回滚未确认nonce值
+        CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
+        List<CoinFrom> froms = coinData.getFrom();
+        for (CoinFrom from : froms) {
+            if(LedgerUtils.isNotLocalChainAccount(addressChainId,from.getAddress())){
+                //非本地网络账户地址,不进行处理
+                continue;
+            }
+            String address = AddressTool.getStringAddressByBytes(from.getAddress());
+            int assetChainId = from.getAssetsChainId();
+            int assetId = from.getAssetsId();
+            String assetKey = LedgerUtils.getKeyStr(address,assetChainId,assetId);
+            accountStateService.rollUnconfirmTx(addressChainId,assetKey,HexUtil.encode(from.getNonce()));
+        }
+        return true;
     }
 }

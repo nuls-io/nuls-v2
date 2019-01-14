@@ -23,8 +23,6 @@ import io.nuls.tools.thread.TimeService;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 轮次信息管理类
@@ -35,9 +33,6 @@ import java.util.concurrent.locks.ReentrantLock;
  * */
 @Component
 public class RoundManager {
-
-    private final Lock ROUND_LOCK = new ReentrantLock();
-
     /**
      * 添加轮次信息到轮次列表中
      * Add Round Information to Round List
@@ -49,6 +44,9 @@ public class RoundManager {
         List<MeetingRound> roundList = chain.getRoundList();
         if(roundList == null){
             roundList = new ArrayList<>();
+        }
+        if(roundList.size() > 0  &&  meetingRound.getPreRound() == null){
+            meetingRound.setPreRound(roundList.get(roundList.size()-1));
         }
         roundList.add(meetingRound);
     }
@@ -109,7 +107,7 @@ public class RoundManager {
         if(roundList == null || roundList.size() == 0){
             initRound(chain);
         }else{
-            ROUND_LOCK.lock();
+            chain.getRound_lock().lock();
             try {
                 MeetingRound lastRound = roundList.get(roundList.size() - 1);
                 BlockHeader blockHeader = chain.getNewestHeader();
@@ -119,7 +117,7 @@ public class RoundManager {
                     initRound(chain);
                 }
             } finally {
-                ROUND_LOCK.unlock();
+                chain.getRound_lock().unlock();
             }
         }
     }
@@ -131,20 +129,16 @@ public class RoundManager {
      * @param chain             chain info
      * @return MeetingRound
      * */
-    public MeetingRound getCurrentRound(Chain chain)throws NulsException{
-        ROUND_LOCK.lock();
+    public MeetingRound getCurrentRound(Chain chain){
+        chain.getRound_lock().lock();
         List<MeetingRound> roundList = chain.getRoundList();
         try {
             if (roundList == null || roundList.size() == 0) {
                 return null;
             }
-            MeetingRound round = roundList.get(roundList.size() - 1);
-            if (round.getPreRound() == null && roundList.size() >= 2) {
-                round.setPreRound(roundList.get(roundList.size() - 2));
-            }
-            return round;
+            return roundList.get(roundList.size() - 1);
         } finally {
-            ROUND_LOCK.unlock();
+            chain.getRound_lock().unlock();
         }
     }
 
@@ -177,17 +171,6 @@ public class RoundManager {
     }
 
     /**
-     * 获取最新轮次
-     * Get or reset the current round
-     * @param chain        chain info
-     * @param isRealTime   是否根据当前时间计算轮次/Whether to calculate rounds based on current time
-     * @return MeetingRound
-     * */
-    public MeetingRound getOrResetCurrentRound(Chain chain,boolean isRealTime)throws NulsException{
-        return  resetRound(chain,isRealTime);
-    }
-
-    /**
      * 重设最新轮次信息
      * Reset the latest round information
      *
@@ -196,7 +179,7 @@ public class RoundManager {
      * @return MeetingRound
      * */
     public MeetingRound resetRound(Chain chain,boolean isRealTime) throws NulsException{
-        ROUND_LOCK.lock();
+        chain.getRound_lock().lock();
         try {
             MeetingRound round = getCurrentRound(chain);
             if (isRealTime) {
@@ -238,7 +221,7 @@ public class RoundManager {
             addRound(chain,nextRound);
             return nextRound;
         } finally {
-            ROUND_LOCK.unlock();
+            chain.getRound_lock().unlock();
         }
     }
 
@@ -252,7 +235,7 @@ public class RoundManager {
      * @return MeetingRound
      * */
     public MeetingRound getRound(Chain chain, BlockExtendsData roundData, boolean isRealTime) throws NulsException{
-        ROUND_LOCK.lock();
+        chain.getRound_lock().lock();
         try {
             if (isRealTime && roundData == null) {
                 return getRoundByRealTime(chain);
@@ -262,7 +245,7 @@ public class RoundManager {
                 return getRoundByExpectedRound(chain,roundData);
             }
         } finally {
-            ROUND_LOCK.unlock();
+            chain.getRound_lock().unlock();
         }
     }
 
@@ -290,8 +273,8 @@ public class RoundManager {
             startBlockHeader = getFirstBlockOfPreRound(chain,roundIndex);
         }
         long nowTime = TimeService.currentTimeMillis();
-        long index = 0L;
-        long startTime = 0L;
+        long index;
+        long startTime;
         long packingInterval = chain.getConfig().getPackingInterval();
         /*
         找到需计算的轮次下标及轮次开始时间,如果当前时间<本地最新区块时间，则表示需计算轮次就是本地最新区块轮次
@@ -325,7 +308,7 @@ public class RoundManager {
     }
 
     /**
-     * 根据指定区块数据计算下一轮轮次信息
+     * 根据指定区块数据计算所在轮次信息
      * Calculate next round information based on the latest block data
      *
      * @param chain      chain info
@@ -610,7 +593,7 @@ public class RoundManager {
      * @param roundStart       起始轮次
      * @param roundEnd         结束轮次
      * */
-    private long getBlockCountByAddress(Chain chain,byte[] packingAddress, long roundStart, long roundEnd) throws NulsException{
+    private long getBlockCountByAddress(Chain chain,byte[] packingAddress, long roundStart, long roundEnd){
         long count = 0;
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
         for (int i = blockHeaderList.size() - 1; i >= 0; i--) {

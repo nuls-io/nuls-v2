@@ -28,6 +28,7 @@ package io.nuls.ledger.service.impl;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.utils.LedgerUtils;
@@ -38,6 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 /**
  * Created by wangkun23 on 2018/11/29.
@@ -76,6 +78,7 @@ public class AccountStateServiceImpl implements AccountStateService {
                     if(!accountState.getTxHash().equalsIgnoreCase(txHash)){
                         //当前的hash不在回滚里，错误的回滚顺序
                         logger.error("TxHash not validate{}={}",accountState.getTxHash(),txHash);
+                        return;
                     }
                     repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
                     repository.delSnapshotAccountState(addressChainId,snapshotKeyBytes);
@@ -85,7 +88,33 @@ public class AccountStateServiceImpl implements AccountStateService {
             }
         }
     }
-
+    @Override
+    public void rollUnconfirmTx(int addressChainId,String assetKey,String nonce) {
+        //账户处理锁
+        synchronized (LockerUtils.getAccountLocker(assetKey)) {
+               try {
+                   AccountState accountState = repository.getAccountState(addressChainId,assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
+                   List<UnconfirmedNonce> list =  accountState.getUnconfirmedNonces();
+                   int i = 0;
+                   for(UnconfirmedNonce unconfirmedNonce : list){
+                       i++;
+                       if(unconfirmedNonce.getNonce().equalsIgnoreCase(nonce)) {
+                           break;
+                       }
+                   }
+                   int size = list.size();
+                   //从第list的index=i-1起进行清空
+                   if(i>0) {
+                       for (int j = (i-1); j < size; j++) {
+                           list.remove(j);
+                       }
+                       repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
+                   }
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     /**
      *
      * @param address
