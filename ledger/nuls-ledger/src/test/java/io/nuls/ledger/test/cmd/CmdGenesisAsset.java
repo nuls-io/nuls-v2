@@ -54,6 +54,8 @@ public class CmdGenesisAsset {
 //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
     String address = "QWy1WqEzLC44ePY41CNyfjN9eG5TBa01f";
     int assetId = 222;
+    //入账金额
+    BigInteger amount = BigInteger.valueOf(1000);
 
     Transaction buildTransaction() throws IOException {
         //封装交易执行
@@ -61,7 +63,7 @@ public class CmdGenesisAsset {
         CoinData coinData = new CoinData();
         CoinTo coinTo = new CoinTo();
         coinTo.setAddress(AddressTool.getAddress(address));
-        coinTo.setAmount(BigInteger.valueOf(100));
+        coinTo.setAmount(amount);
         coinTo.setAssetsChainId(assetChainId);
         coinTo.setAssetsId(assetId);
         coinTo.setLockTime(0);
