@@ -36,7 +36,6 @@ public class MyKernelBootstrap {
 
     public static void main(String[] args) {
         try {
-            SpringLiteContext.init("io.nuls.rpc.cmd.kernel", new ModularServiceMethodInterceptor());
             NoUse.mockKernel();
         } catch (Exception e) {
             System.exit(0);

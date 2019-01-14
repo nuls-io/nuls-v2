@@ -44,9 +44,18 @@ public class BlockDownloader implements Callable<Boolean> {
      * 区块下载参数
      */
     private BlockDownloaderParams params;
+    /**
+     * 执行下载任务的线程池
+     */
     private ThreadPoolExecutor executor;
+    /**
+     * 缓存下载结果
+     */
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
+    /**
+     * 下载到的区块最终放入此队列，由消费线程取出进行保存
+     */
     private BlockingQueue<Block> queue;
 
     public BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
