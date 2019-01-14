@@ -46,8 +46,7 @@ public class TransactionBootStrap {
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
             //注册网络消息协议
-            NetworkCall.registerProtocol();
-            //TimeService.getInstance().start();
+            //NetworkCall.registerProtocol();
         }catch (Exception e){
             Log.error("Transaction startup error!");
             Log.error(e);
