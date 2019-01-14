@@ -61,7 +61,6 @@ public class AccountBootstrap {
                 I18nUtils.loadLanguage("languages", language);
                 I18nUtils.setLanguage(language);
                 //ACCOUNTKEYSTORE_FOLDER_NAME
-                //NulsConfig.DEFAULT_ENCODING = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER);
                 String keystoreFolder = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER);
                 if (StringUtils.isNotBlank(keystoreFolder)) {
                     NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = keystoreFolder;
