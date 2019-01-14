@@ -113,7 +113,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 throw new NulsRuntimeException(ConsensusErrorCode.ADDRESS_ERROR);
             }
             //2.账户验证
-            HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(),dto.getAgentAddress(),dto.getPassword());
+            HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAgentAddress(), dto.getPassword());
             //3.组装创建节点交易
             Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
             tx.setTime(TimeService.currentTimeMillis());
@@ -133,8 +133,8 @@ public class ConsensusServiceImpl implements ConsensusService {
             CoinData coinData = coinDataManager.getCoinData(agent.getAgentAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH);
             tx.setCoinData(coinData.serialize());
             //4.交易签名
-            String priKey =(String)callResult.get("priKey");
-            CallMethodUtils.transactionSignature(dto.getChainId(),dto.getAgentAddress(),dto.getPassword(),priKey,tx);
+            String priKey = (String) callResult.get("priKey");
+            CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAgentAddress(), dto.getPassword(), priKey, tx);
             //todo 5.将交易发送给交易管理模块
 
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
@@ -146,7 +146,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         } catch (NulsRuntimeException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
-        }catch (Exception e){
+        } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(ConsensusErrorCode.INTERFACE_CALL_FAILED);
         }
@@ -172,7 +172,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(),dto.getAddress(),dto.getPassword());
+            HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
             Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
             StopAgent stopAgent = new StopAgent();
             stopAgent.setAddress(AddressTool.getAddress(dto.getAddress()));
@@ -197,8 +197,8 @@ public class ConsensusServiceImpl implements ConsensusService {
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
             //交易签名
-            String priKey =(String)callResult.get("priKey");
-            CallMethodUtils.transactionSignature(dto.getChainId(),dto.getAddress(),dto.getPassword(),priKey,tx);
+            String priKey = (String) callResult.get("priKey");
+            CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
             //todo 将交易传递给交易管理模块
 
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
@@ -238,7 +238,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 throw new NulsException(ConsensusErrorCode.ADDRESS_ERROR);
             }
             //账户验证
-            HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(),dto.getAddress(),dto.getPassword());
+            HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
             Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
             Deposit deposit = new Deposit();
             deposit.setAddress(AddressTool.getAddress(dto.getAddress()));
@@ -248,8 +248,8 @@ public class ConsensusServiceImpl implements ConsensusService {
             CoinData coinData = coinDataManager.getCoinData(deposit.getAddress(), chain, new BigInteger(dto.getDeposit()), ConsensusConstant.CONSENSUS_LOCK_TIME, tx.size() + P2PHKSignature.SERIALIZE_LENGTH);
             tx.setCoinData(coinData.serialize());
             //交易签名
-            String priKey =(String)callResult.get("priKey");
-            CallMethodUtils.transactionSignature(dto.getChainId(),dto.getAddress(),dto.getPassword(),priKey,tx);
+            String priKey = (String) callResult.get("priKey");
+            CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
 
             //todo 将交易传递给交易管理模块
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
@@ -285,7 +285,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
             }
             //账户验证
-            HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(),dto.getAddress(),dto.getPassword());
+            HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
 
             //todo 从交易模块获取委托交易（交易模块）+ 返回数据处理
             NulsDigestData hash = NulsDigestData.fromDigestHex(dto.getTxHash());
@@ -316,8 +316,8 @@ public class ConsensusServiceImpl implements ConsensusService {
             coinData.getFrom().get(0).setNonce(hash.getDigestBytes());
             cancelDepositTransaction.setCoinData(coinData.serialize());
             //交易签名
-            String priKey =(String)callResult.get("priKey");
-            CallMethodUtils.transactionSignature(dto.getChainId(),dto.getAddress(),dto.getPassword(),priKey,cancelDepositTransaction);
+            String priKey = (String) callResult.get("priKey");
+            CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);
             //todo 将交易传递给交易管理模块
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHex", HexUtil.encode(cancelDepositTransaction.serialize()));
@@ -576,43 +576,38 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (chain == null) {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        try {
-            WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
-            List<Agent> agentList = chain.getAgentList();
-            if (agentList == null) {
-                return Result.getFailed(ConsensusErrorCode.DATA_NOT_EXIST);
-            }
-            List<Agent> handleList = new ArrayList<>();
-            //获取本地最新高度
-            long startBlockHeight = chain.getNewestHeader().getHeight();
-            for (Agent agent : agentList) {
-                if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
-                    continue;
-                } else if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
-                    continue;
-                }
-                handleList.add(agent);
-            }
-            MeetingRound round = roundManager.getCurrentRound(chain);
-            BigInteger totalDeposit = BigInteger.ZERO;
-            int packingAgentCount = 0;
-            if (null != round) {
-                for (MeetingMember member : round.getMemberList()) {
-                    totalDeposit = totalDeposit.add(member.getAgent().getDeposit().add(member.getAgent().getTotalDeposit()));
-                    if (member.getAgent() != null) {
-                        packingAgentCount++;
-                    }
-                }
-            }
-            dto.setAgentCount(handleList.size());
-            dto.setTotalDeposit(String.valueOf(totalDeposit));
-            dto.setConsensusAccountNumber(handleList.size());
-            dto.setPackingAgentCount(packingAgentCount);
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(dto);
-        } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
+        WholeNetConsensusInfoDTO dto = new WholeNetConsensusInfoDTO();
+        List<Agent> agentList = chain.getAgentList();
+        if (agentList == null) {
+            return Result.getFailed(ConsensusErrorCode.DATA_NOT_EXIST);
         }
+        List<Agent> handleList = new ArrayList<>();
+        //获取本地最新高度
+        long startBlockHeight = chain.getNewestHeader().getHeight();
+        for (Agent agent : agentList) {
+            if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
+                continue;
+            } else if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
+                continue;
+            }
+            handleList.add(agent);
+        }
+        MeetingRound round = roundManager.getCurrentRound(chain);
+        BigInteger totalDeposit = BigInteger.ZERO;
+        int packingAgentCount = 0;
+        if (null != round) {
+            for (MeetingMember member : round.getMemberList()) {
+                totalDeposit = totalDeposit.add(member.getAgent().getDeposit().add(member.getAgent().getTotalDeposit()));
+                if (member.getAgent() != null) {
+                    packingAgentCount++;
+                }
+            }
+        }
+        dto.setAgentCount(handleList.size());
+        dto.setTotalDeposit(String.valueOf(totalDeposit));
+        dto.setConsensusAccountNumber(handleList.size());
+        dto.setPackingAgentCount(packingAgentCount);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(dto);
     }
 
     /**
@@ -693,9 +688,9 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         int chainId = dto.getChainId();
         /*
-        * 0区块下载中，1接收到最新区块
-        * */
-        boolean isDownload = (dto.getDownload()==0);
+         * 0区块下载中，1接收到最新区块
+         * */
+        boolean isDownload = (dto.getDownload() == 0);
         String blockHex = dto.getBlock();
         Chain chain = chainManager.getChainMap().get(chainId);
         if (chain == null) {
@@ -767,7 +762,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            MeetingRound round = roundManager.getOrResetCurrentRound(chain, true);
+            MeetingRound round = roundManager.resetRound(chain, true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(round);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
@@ -833,24 +828,24 @@ public class ConsensusServiceImpl implements ConsensusService {
      */
     @Override
     public Result updateAgentStatus(Map<String, Object> params) {
-            if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_STATUS) == null) {
-                return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-            }
-            int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
-            int status = (Integer) params.get(ConsensusConstant.PARAM_STATUS);
-            if (chainId <= ConsensusConstant.MIN_VALUE) {
-                return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-            }
-            Chain chain = chainManager.getChainMap().get(chainId);
-            if (chain == null) {
-                return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
-            }
-            if(status == 1){
-                chain.setCanPacking(true);
-            }else{
-                chain.setCanPacking(false);
-            }
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_STATUS) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        int status = (Integer) params.get(ConsensusConstant.PARAM_STATUS);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        if (status == 1) {
+            chain.setCanPacking(true);
+        } else {
+            chain.setCanPacking(false);
+        }
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS);
 
     }
 
@@ -1368,7 +1363,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 缓存最新区块
      */
     @Override
-    public Result addBlock(Map<String,Object> params){
+    public Result addBlock(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
@@ -1383,10 +1378,10 @@ public class ConsensusServiceImpl implements ConsensusService {
         try {
             String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER);
             BlockHeader header = new BlockHeader();
-            header.parse(HexUtil.decode(headerHex),0);
-            blockManager.addNewBlock(chain,header);
+            header.parse(HexUtil.decode(headerHex), 0);
+            blockManager.addNewBlock(chain, header);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
-        }catch (NulsException e){
+        } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
         }
@@ -1394,9 +1389,9 @@ public class ConsensusServiceImpl implements ConsensusService {
 
     /**
      * 连分叉区块回滚
-     * */
+     */
     @Override
-    public Result chainRollBack(Map<String,Object> params){
+    public Result chainRollBack(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_HEIGHT) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
@@ -1409,7 +1404,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         int height = (Integer) params.get(ConsensusConstant.PARAM_HEIGHT);
-        blockManager.chainRollBack(chain,height);
+        blockManager.chainRollBack(chain, height);
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
     }
 
@@ -1431,12 +1426,12 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         try {
             BlockHeader header = new BlockHeader();
-            header.parse(HexUtil.decode((String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER)),0);
+            header.parse(HexUtil.decode((String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER)), 0);
             BlockHeader evidenceHeader = new BlockHeader();
-            evidenceHeader.parse(HexUtil.decode((String) params.get(ConsensusConstant.PARAM_EVIDENCE_HEADER)),0);
-            punishManager.addEvidenceRecord(chain,header,evidenceHeader);
+            evidenceHeader.parse(HexUtil.decode((String) params.get(ConsensusConstant.PARAM_EVIDENCE_HEADER)), 0);
+            punishManager.addEvidenceRecord(chain, header, evidenceHeader);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
-        }catch (NulsException e){
+        } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
         }
@@ -1444,9 +1439,10 @@ public class ConsensusServiceImpl implements ConsensusService {
 
     /**
      * 获取当前节点出块地址
+     *
      * @param params
      * @return Result
-     * */
+     */
     @Override
     public Result getNodePackingAddress(Map<String, Object> params) {
         if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
@@ -1461,21 +1457,21 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr,"ac_getUnencryptedAddressList", params);
-            List<String> accountAddressList =  (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList");
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getUnencryptedAddressList", params);
+            List<String> accountAddressList = (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList");
             List<Agent> workAgentList = chain.getWorkAgentList(chain.getNewestHeader().getHeight());
             String packAddress = null;
-            for (Agent agent:workAgentList) {
+            for (Agent agent : workAgentList) {
                 String address = AddressTool.getStringAddressByBytes(agent.getPackingAddress());
-                if(accountAddressList.contains(address)){
+                if (accountAddressList.contains(address)) {
                     packAddress = address;
                     break;
                 }
             }
-            Map<String,Object> resultMap = new HashMap<>(2);
-            resultMap.put("packAddress",packAddress);
+            Map<String, Object> resultMap = new HashMap<>(2);
+            resultMap.put("packAddress", packAddress);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
-        }catch (Exception e){
+        } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
         }
@@ -1483,9 +1479,10 @@ public class ConsensusServiceImpl implements ConsensusService {
 
     /**
      * 获取所有节点出块地址/指定N个区块出块指定
+     *
      * @param params
      * @return Result
-     * */
+     */
     @Override
     public Result getAgentAddressList(Map<String, Object> params) {
         if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
@@ -1499,8 +1496,8 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (chain == null) {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        Map<String,Object> resultMap = new HashMap<>(2);
-        resultMap.put("packAddress",chain.getWorkAddressList(chain.getNewestHeader().getHeight()));
+        Map<String, Object> resultMap = new HashMap<>(2);
+        resultMap.put("packAddress", chain.getWorkAddressList(chain.getNewestHeader().getHeight()));
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
     }
 

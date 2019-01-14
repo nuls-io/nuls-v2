@@ -109,7 +109,7 @@ public class ConsensusProcess {
         获取当前轮次信息并验证轮次信息
         Get current round information
          */
-        MeetingRound round = roundManager.getOrResetCurrentRound(chain,true);
+        MeetingRound round = roundManager.resetRound(chain,true);
         if (round == null) {
             return;
         }
