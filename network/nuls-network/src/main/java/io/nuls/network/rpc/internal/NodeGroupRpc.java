@@ -170,7 +170,6 @@ public class NodeGroupRpc extends BaseCmd {
         NodeGroupVo  nodeGroupVo=buildNodeGroupVo(nodeGroup);
         return success(nodeGroupVo );
     }
-
     private NodeGroupVo buildNodeGroupVo(NodeGroup nodeGroup){
         NodeGroupVo nodeGroupVo=new NodeGroupVo();
         nodeGroupVo.setChainId(nodeGroup.getChainId());
@@ -180,6 +179,10 @@ public class NodeGroupRpc extends BaseCmd {
             nodeGroupVo.setBlockHash(nodeGroupConnector.getBlockHash());
             nodeGroupVo.setBlockHeight(nodeGroupConnector.getBlockHeight());
         }
+        nodeGroupVo.setConnectCount(nodeGroup.getConnectNodeMap().size());
+        nodeGroupVo.setDisConnectCount( nodeGroup.getDisConnectNodes().size());
+        nodeGroupVo.setConnectCrossCount(nodeGroup.getConnectCrossNodeMap().size());
+        nodeGroupVo.setDisConnectCrossCount(nodeGroup.getDisConnectCrossNodeMap().size());
         nodeGroupVo.setInCount(nodeGroup.getHadConnectIn());
         nodeGroupVo.setOutCount(nodeGroup.getHadConnectOut());
         nodeGroupVo.setInCrossCount(nodeGroup.getHadCrossConnectIn());
