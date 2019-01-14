@@ -58,21 +58,21 @@ public class UnconfirmedNonce extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint32(time);
+        stream.writeUint48(time);
         stream.writeString(nonce);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.time = byteBuffer.readUint32();
+        this.time = byteBuffer.readUint48();
         this.nonce = byteBuffer.readString();
     }
 
     @Override
     public int size() {
         int size = 0;
+        size += SerializeUtils.sizeOfUint48();
         size += SerializeUtils.sizeOfString(nonce);
-        size += SerializeUtils.sizeOfUint32();
         return size;
     }
 }

@@ -95,6 +95,48 @@ public class CmdWrongDataTest {
         Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
+
+
+    /**
+     * 测试批量校验
+     * @throws Exception
+     */
+    @Test
+    public void validateCoinDataWrong2() throws Exception {
+        double version = 1.0;
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        int chainId = 8096;
+        int assetChainId = 445;
+        String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
+        int assetId = 222;
+//        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
+//        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
+        //封装交易执行
+        Transaction tx = new Transaction();
+        CoinData coinData = new CoinData();
+        CoinFrom coinFrom = new CoinFrom();
+        CoinTo coinTo = new CoinTo();
+        coinFrom.setAddress(AddressTool.getAddress(address));
+        coinFrom.setAmount(BigInteger.valueOf(50));
+        coinFrom.setAssetsChainId(assetChainId);
+        coinFrom.setAssetsId(assetId);
+        coinFrom.setNonce(HexUtil.decode("AAAAAAAA"));
+        coinFrom.setLocked((byte)0);
+        List<CoinFrom> coinFroms =new ArrayList<>();
+//        coinFroms.add(coinFrom);
+        List<CoinTo> coinTos =new ArrayList<>();
+        coinFroms.add(coinFrom);
+        coinData.setFrom(coinFroms);
+        coinData.setTo(coinTos);
+        tx.setCoinData(coinData.serialize());
+        params.put("chainId", chainId);
+        params.put("txHex",HexUtil.encode(tx.serialize()));
+        params.put("isBatchValidate",true);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        logger.info("response {}", response);
+    }
     @Test
    public void test2(){
        System.out.println(String.format("address %s,nonce %s","dfsfs","3333"));

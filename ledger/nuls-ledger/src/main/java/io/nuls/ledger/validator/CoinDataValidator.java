@@ -41,7 +41,6 @@ import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ByteUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -284,8 +283,6 @@ public class CoinDataValidator {
      */
     public ValidateResult validateCoinData(int addressChainId,Transaction tx) {
         CoinData coinData =  CoinDataUtils.parseCoinData(tx.getCoinData());
-        byte [] nonce8Bytes = ByteUtils.copyOf(tx.getHash().getDigestBytes(), 8);
-        String nonce8BytesStr =  HexUtil.encode(nonce8Bytes);
         /*
          * 先校验nonce值是否正常
          */
@@ -294,10 +291,10 @@ public class CoinDataValidator {
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
             String nonce = HexUtil.encode(coinFrom.getNonce());
             AccountState accountState = accountStateService.getAccountState(address,addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
-            if(accountState == null){
-                ValidateResult validateResult = new ValidateResult(VALIDATE_FAIL_CODE,String.format(VALIDATE_FAIL_DESC,address,nonce,"account not exist"));
-                return validateResult;
-            }
+//            if(accountState == null){
+//                ValidateResult validateResult = new ValidateResult(VALIDATE_FAIL_CODE,String.format(VALIDATE_FAIL_DESC,address,nonce,"account not exist"));
+//                return validateResult;
+//            }
             //初始花费交易,nonce为 fffffff;已兼容处理。
             //普通交易
             if(coinFrom.getLocked() == 0){
