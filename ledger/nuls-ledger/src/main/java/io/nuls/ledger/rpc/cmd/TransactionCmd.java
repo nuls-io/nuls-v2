@@ -66,7 +66,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "isConfirmTx", parameterType = "boolean")
-    public Response commitUnconfirmedTx(Map params) {
+    public Response commitTx(Map params) {
         Map<String,Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
         String txHex = (String) params.get("txHex");
@@ -84,11 +84,11 @@ public class TransactionCmd extends BaseCmd {
         }
         int value = 0;
         if(isConfirmTx){
-            if(transactionService.unConfirmTxProcess(chainId,tx)){
+            if(transactionService.confirmTxProcess(chainId,tx)){
                 value =1;
             }
         }else{
-            if(transactionService.confirmTxProcess(chainId,tx)){
+            if(transactionService.unConfirmTxProcess(chainId,tx)){
                 value =1;
             }
         }

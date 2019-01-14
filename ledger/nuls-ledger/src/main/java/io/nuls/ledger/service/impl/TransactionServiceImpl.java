@@ -75,7 +75,7 @@ public class TransactionServiceImpl implements TransactionService {
         //直接更新未确认交易
         CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
         byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
-//        String currentTxNonce =  HexUtil.encode(nonce8Bytes);
+        String currentTxNonce =  HexUtil.encode(nonce8Bytes);
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
             String address = AddressTool.getStringAddressByBytes(from.getAddress());
@@ -87,7 +87,8 @@ public class TransactionServiceImpl implements TransactionService {
 
             }else {
                 //非解锁交易处理
-                accountStateService.setUnconfirmNonce(address, addressChainId,assetChainId, assetId, nonce);
+
+                accountStateService.setUnconfirmNonce(address, addressChainId,assetChainId, assetId, nonce,currentTxNonce);
             }
         }
         return true;

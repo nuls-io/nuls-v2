@@ -26,13 +26,18 @@ package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.*;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.thread.TimeService;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.model.bo.CrossChainTx;
 import io.nuls.transaction.model.bo.CrossTxSignResult;
 import io.nuls.transaction.model.bo.CrossTxVerifyResult;
 import io.nuls.transaction.model.bo.Node;
@@ -44,6 +49,7 @@ import java.util.List;
 
 /**
  * 单元测试工具类, 造数据等
+ *
  * @author: Charlie
  * @date: 2019-01-09
  */
@@ -157,6 +163,7 @@ public class TestConstant {
         coinData.addTo(getCoinTo2());
         return coinData;
     }
+
     public static CoinData getCoinData2() {
         CoinData coinData = new CoinData();
         coinData.addFrom(getCoinFrom1());
@@ -185,6 +192,27 @@ public class TestConstant {
         String remark = "这是一笔普通转账交易";
         tx.setRemark(StringUtils.bytes(remark));
         return tx;
+    }
+
+    public static CrossChainTx createCrossChainTx() throws Exception {
+        CrossChainTx obj = new CrossChainTx();
+        obj.setState(4);
+        obj.setSenderChainId(324);
+        obj.setSenderNodeId("23");
+        obj.setVerifyNodeList(Arrays.asList(
+                TestConstant.getNode1(),
+                TestConstant.getNode2()
+        ));
+        obj.setCtxVerifyResultList(Arrays.asList(
+                TestConstant.getCrossTxVerifyResult1(),
+                TestConstant.getCrossTxVerifyResult1()
+        ));
+        obj.setSignRsList(Arrays.asList(
+                TestConstant.getCrossTxSignResult1(),
+                TestConstant.getCrossTxSignResult2()
+        ));
+        obj.setTx(TestConstant.getTransaction1());
+        return obj;
     }
 
     public static P2PHKSignature getP2PHKSignature() {
@@ -253,18 +281,18 @@ public class TestConstant {
      * 判断两个list中元素的序列化数据是否相等
      */
     public static boolean equals(List<? extends BaseNulsData> listA, List<? extends BaseNulsData> listB) {
-        if(null == listA && null == listB){
+        if (null == listA && null == listB) {
             return true;
         }
-        if(null == listA || null == listB){
+        if (null == listA || null == listB) {
             return false;
         }
-        if(listA.size() != listB.size()){
+        if (listA.size() != listB.size()) {
             return false;
         }
         try {
-            for(int i=0;i<listA.size();i++){
-                if(!Arrays.equals(listA.get(i).serialize(), listB.get(i).serialize())){
+            for (int i = 0; i < listA.size(); i++) {
+                if (!Arrays.equals(listA.get(i).serialize(), listB.get(i).serialize())) {
                     return false;
                 }
             }

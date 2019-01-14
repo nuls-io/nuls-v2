@@ -92,7 +92,6 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         ctx.setTx(tx);
         ctx.setSenderChainId(chainId);
         ctx.setSenderNodeId(nodeId);
-        ctx.setSenderNodeId(null);
         ctx.setState(TxConstant.CTX_UNPROCESSED_0);
         crossChainTxUnprocessedStorageService.putTx(chain.getChainId(), ctx);
     }

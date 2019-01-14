@@ -51,10 +51,9 @@ public class LedgerBootstrap {
         try {
             AppConfig.loadModuleConfig();
             initRocksDb();
-            initServer();
             //springLite容器初始化AppInitializing
             SpringLiteContext.init("io.nuls.ledger", new ModularServiceMethodInterceptor());
-
+            initServer();
         } catch (Exception e) {
             Log.error("ledger Bootstrap failed", e);
             System.exit(-1);

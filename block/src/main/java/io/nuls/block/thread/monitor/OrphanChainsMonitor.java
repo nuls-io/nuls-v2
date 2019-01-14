@@ -31,7 +31,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.locks.StampedLock;
 
-import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_CHAINS;
+import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_ORPHAN_CHAINS;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
@@ -96,7 +96,7 @@ public class OrphanChainsMonitor implements Runnable {
                         for (Chain orphanChain : orphanChains) {
                             Log.info("#" + orphanChain);
                         }
-                        context.setStatus(MAINTAIN_CHAINS);
+                        context.setStatus(MAINTAIN_ORPHAN_CHAINS);
                         Chain masterChain = ChainManager.getMasterChain(chainId);
                         SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                         //标记、变更链属性阶段

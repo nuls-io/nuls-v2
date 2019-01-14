@@ -177,7 +177,8 @@ public class CmdTest {
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
         params.put("txHex",HexUtil.encode(tx.serialize()));
-        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
+        params.put("isConfirmTx",false);
+        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
     }
     /**
@@ -210,6 +211,7 @@ public class CmdTest {
         coinFrom.setAssetsChainId(assetChainId);
         coinFrom.setAssetsId(assetId);
         coinFrom.setLocked((byte)0);
+        coinFrom.setNonce(HexUtil.decode(nonce));
         List<CoinFrom> coinFroms =new ArrayList<>();
         coinFroms.add(coinFrom);
         List<CoinTo> coinTos =new ArrayList<>();
@@ -220,7 +222,8 @@ public class CmdTest {
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
         params.put("txHex",HexUtil.encode(tx.serialize()));
-        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitUnconfirmedTx", params);
+        params.put("isConfirmTx",false);
+        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
     }
 

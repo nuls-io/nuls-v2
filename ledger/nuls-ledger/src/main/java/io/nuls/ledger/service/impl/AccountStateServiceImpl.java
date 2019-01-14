@@ -28,7 +28,6 @@ package io.nuls.ledger.service.impl;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.po.AccountState;
-import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.utils.LedgerUtils;
@@ -130,11 +129,11 @@ public class AccountStateServiceImpl implements AccountStateService {
      * @return
      */
     @Override
-    public void setUnconfirmNonce(String address, int addressChainId, int assetChainId, int assetId, String nonce) {
+    public void setUnconfirmNonce(String address, int addressChainId, int assetChainId, int assetId, String nonce,String newNonce) {
         //账户同步锁
         synchronized (LockerUtils.getAccountLocker(address, assetChainId, assetId)) {
             AccountState accountState = getAccountState(address,addressChainId,assetChainId, assetId);
-            accountState.setUnconfirmedNonce(nonce);
+            accountState.setUnconfirmedNonce(newNonce);
             byte[] key = LedgerUtils.getKey(address, assetChainId, assetId);
             //这个改变无需进行账户的snapshot
             repository.updateAccountState(key, accountState);
