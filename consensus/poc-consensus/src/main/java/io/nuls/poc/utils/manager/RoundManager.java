@@ -50,6 +50,9 @@ public class RoundManager {
         if(roundList == null){
             roundList = new ArrayList<>();
         }
+        if(roundList.size() > 0  &&  meetingRound.getPreRound() == null){
+            meetingRound.setPreRound(roundList.get(roundList.size()-1));
+        }
         roundList.add(meetingRound);
     }
 
@@ -131,18 +134,14 @@ public class RoundManager {
      * @param chain             chain info
      * @return MeetingRound
      * */
-    public MeetingRound getCurrentRound(Chain chain)throws NulsException{
+    public MeetingRound getCurrentRound(Chain chain){
         ROUND_LOCK.lock();
         List<MeetingRound> roundList = chain.getRoundList();
         try {
             if (roundList == null || roundList.size() == 0) {
                 return null;
             }
-            MeetingRound round = roundList.get(roundList.size() - 1);
-            if (round.getPreRound() == null && roundList.size() >= 2) {
-                round.setPreRound(roundList.get(roundList.size() - 2));
-            }
-            return round;
+            return roundList.get(roundList.size() - 1);
         } finally {
             ROUND_LOCK.unlock();
         }
@@ -610,7 +609,7 @@ public class RoundManager {
      * @param roundStart       起始轮次
      * @param roundEnd         结束轮次
      * */
-    private long getBlockCountByAddress(Chain chain,byte[] packingAddress, long roundStart, long roundEnd) throws NulsException{
+    private long getBlockCountByAddress(Chain chain,byte[] packingAddress, long roundStart, long roundEnd){
         long count = 0;
         List<BlockHeader> blockHeaderList = chain.getBlockHeaderList();
         for (int i = blockHeaderList.size() - 1; i >= 0; i--) {

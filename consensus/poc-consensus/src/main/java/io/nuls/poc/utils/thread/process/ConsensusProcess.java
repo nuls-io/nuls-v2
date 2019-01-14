@@ -1,5 +1,6 @@
 package io.nuls.poc.utils.thread.process;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
@@ -177,13 +178,12 @@ public class ConsensusProcess {
             return;
         }
         try {
-            Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
+            Map<String,Object> params = new HashMap(ConsensusConstant.INIT_CAPACITY);
             params.put("chainId",chain.getConfig().getChainId());
             params.put("block", HexUtil.encode(block.serialize()));
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr,"receivePackingBlock", params);
             if(!cmdResp.isSuccess()){
                 consensusLogger.info("add block interface call failed!");
-                return;
             }
         }catch (Exception e){
             consensusLogger.error(e);
@@ -281,9 +281,9 @@ public class ConsensusProcess {
         bd.setExtendsData(extendsData);
 
         StringBuilder str = new StringBuilder();
-        str.append(self.getAgent().getPackingAddress());
-        str.append(" ,order:" + self.getPackingIndexOfRound());
-        str.append(",packTime:" + new Date(self.getPackEndTime()));
+        str.append(AddressTool.getStringAddressByBytes(self.getAgent().getPackingAddress()));
+        str.append(" ,order:").append(self.getPackingIndexOfRound());
+        str.append(",packTime:").append(new Date(self.getPackEndTime()));
         str.append("\n");
         consensusLogger.debug("pack round:" + str);
         //todo 从交易管理模块获取打包交易
