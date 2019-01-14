@@ -275,7 +275,8 @@ public class CmdTest {
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
         params.put("txHex",HexUtil.encode(tx.serialize()));
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "bathValidatePerTx", params);
+        params.put("isBatchValidate",true);
+        Response  response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
 
@@ -320,7 +321,8 @@ public class CmdTest {
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
         params.put("txHex",HexUtil.encode(tx.serialize()));
-        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitConfirmTx", params);
+        params.put("isConfirmTx",true);
+        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
     }
 
@@ -370,7 +372,8 @@ public class CmdTest {
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
         params.put("txHex",HexUtil.encode(tx.serialize()));
-          response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "bathValidatePerTx", params);
+        params.put("isBatchValidate",true);
+          response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
     /**
@@ -421,7 +424,8 @@ public class CmdTest {
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
         params.put("txHex",HexUtil.encode(tx.serialize()));
-        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitConfirmTx", params);
+        params.put("isConfirmTx",true);
+        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
     }
 }
