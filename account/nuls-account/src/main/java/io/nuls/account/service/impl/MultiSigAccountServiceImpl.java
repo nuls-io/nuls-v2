@@ -101,7 +101,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
         try {
             //Script redeemScript = ScriptBuilder.createNulsRedeemScript(m, pubKeys);
             Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
-            multiSigAccount = this.saveMultiSigAccount(chainId,address,pubKeys,minSigns);
+            multiSigAccount = this.saveMultiSigAccount(chainId, address, pubKeys, minSigns);
         } catch (Exception e) {
             LogUtil.error(e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
@@ -119,7 +119,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
                 multiSigAccount = multiSigAccountPo.toAccount();
             }
         } catch (Exception e) {
-            LogUtil.error("",e);
+            LogUtil.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return multiSigAccount;
@@ -134,9 +134,9 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
             if (!AddressTool.getStringAddressByBytes(addressObj.getAddressBytes()).equals(address)) {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
-            multiSigAccount = this.saveMultiSigAccount(chainId,addressObj,pubKeys,minSigns);
+            multiSigAccount = this.saveMultiSigAccount(chainId, addressObj, pubKeys, minSigns);
         } catch (Exception e) {
-            LogUtil.error("",e);
+            LogUtil.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return multiSigAccount;
@@ -154,24 +154,22 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
             Address addressObj = new Address(address);
             result = multiSigAccountStorageService.removeAccount(addressObj);
         } catch (Exception e) {
-            LogUtil.error("",e);
+            LogUtil.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return result;
     }
 
     /**
-     * @param address 多签账户地址
-     *
+     * @param address  多签账户地址
      * @param signAddr 签名地址
-     *
-     * **/
+     **/
     @Override
     public Transaction setMultiAlias(int chainId, String address, String password, String aliasName, String signAddr) {
         AliasTransaction aliasTransaction;
         try {
             Account account = accountService.getAccount(chainId, signAddr);
-            MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId,address);
+            MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, address);
             if (null == account) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
@@ -191,18 +189,18 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
             Chain chain = chainManager.getChainMap().get(chainId);
             int assetsId = chain.getConfig().getAssetsId();
             //TODO 不同链设置别名是否都燃烧nuls?
-            CoinFrom coinFrom = new CoinFrom(addressBytes,chainId,assetsId);
+            CoinFrom coinFrom = new CoinFrom(addressBytes, chainId, assetsId);
             coinFrom.setAddress(addressBytes);
-            CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS,chainId,assetsId,BigInteger.ONE);
-            int txSize = aliasTransaction.size() + coinFrom.size() + coinTo.size() + ((int)multiSigAccount.getM())*72;
+            CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, chainId, assetsId, BigInteger.ONE);
+            int txSize = aliasTransaction.size() + coinFrom.size() + coinTo.size() + ((int) multiSigAccount.getM()) * 72;
             //计算手续费
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
             //总费用为
             BigInteger totalAmount = BigInteger.ONE.add(fee);
             coinFrom.setAmount(totalAmount);
             //检查余额是否充足
-            BigInteger mainAsset = TxUtil.getBalance(chainId, assetsId, coinFrom.getAddress());
-            if (BigIntegerUtils.isLessThan(mainAsset,totalAmount)) { //余额不足
+            BigInteger mainAsset = TxUtil.getBalance(chainId, chainId, assetsId, coinFrom.getAddress());
+            if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) { //余额不足
                 throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
             }
             CoinData coinData = new CoinData();
@@ -215,14 +213,14 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             ECKey eckey = account.getEcKey(password);
-            P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(aliasTransaction,eckey);
+            P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(aliasTransaction, eckey);
             p2PHKSignatures.add(p2PHKSignature);
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             aliasTransaction.setTransactionSignature(transactionSignature.serialize());
-            txMutilProcessing(multiSigAccount,aliasTransaction,transactionSignature);
+            txMutilProcessing(multiSigAccount, aliasTransaction, transactionSignature);
         } catch (Exception e) {
             LogUtil.error("", e);
-            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION,e);
+            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
         }
         return aliasTransaction;
     }
@@ -248,14 +246,11 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
 
     /**
      * 多签交易处理
-     *
-     *
-     *
-     * **/
-    public void txMutilProcessing(MultiSigAccount multiSigAccount,Transaction tx,TransactionSignature transactionSignature) throws NulsException,IOException {
+     **/
+    public void txMutilProcessing(MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws NulsException, IOException {
         //当已签名数等于M则自动广播该交易
-        if(multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
-            TransactionCmdCall.newTx(multiSigAccount.getChainId(),HexUtil.encode(tx.serialize()));
+        if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
+            TransactionCmdCall.newTx(multiSigAccount.getChainId(), HexUtil.encode(tx.serialize()));
             // Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
 //            if (saveResult.isFailed()) {
 //                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {

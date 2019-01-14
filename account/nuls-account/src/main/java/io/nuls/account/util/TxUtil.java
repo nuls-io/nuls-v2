@@ -25,6 +25,7 @@
 package io.nuls.account.util;
 
 import io.nuls.account.config.NulsConfig;
+import io.nuls.account.model.bo.Chain;
 import io.nuls.account.rpc.call.LegerCmdCall;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Coin;
@@ -39,13 +40,40 @@ import java.math.BigInteger;
  */
 public class TxUtil {
 
-    public static boolean isCurrentChainMainAsset2(Coin coin) {
-        return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
-    }
+//    public static boolean isCurrentChainMainAsset2(Coin coin) {
+//        return isCurrentChainMainAsset(coin.getAssetsChainId(), coin.getAssetsId());
+//    }
+//
+//    public static boolean isCurrentChainMainAsset(int chainId, int assetId) {
+//        if (chainId == NulsConfig.CURRENT_CHAIN_ID
+//                && assetId == NulsConfig.CURRENT_MAIN_ASSETS_ID) {
+//            return true;
+//        }
+//        return false;
+//    }
+//
+//    public static boolean isTheChainMainAsset(int chainId, Coin coin) {
+//        return isTheChainMainAsset(chainId, coin.getAssetsChainId(), coin.getAssetsId());
+//    }
+//
+//    public static boolean isTheChainMainAsset(int chainId, int assetChainId, int assetId) {
+//        if (assetChainId == chainId
+//                && assetId == NulsConfig.CURRENT_MAIN_ASSETS_ID) {
+//            return true;
+//        }
+//        return true;
+//    }
 
-    public static boolean isCurrentChainMainAsset(int chainId, int assetId) {
-        if (chainId == NulsConfig.CURRENT_CHAIN_ID
-                && assetId == NulsConfig.CURRENT_MAIN_ASSETS_ID) {
+    /**
+     * 是否主网资产
+     *
+     * @param chainId
+     * @param assetId
+     * @return
+     */
+    public static boolean isNulsAsset(int chainId, int assetId) {
+        if (chainId == NulsConfig.MAIN_CHAIN_ID
+                && assetId == NulsConfig.MAIN_ASSETS_ID) {
             return true;
         }
         return false;
@@ -55,56 +83,47 @@ public class TxUtil {
         return isNulsAsset(coin.getAssetsChainId(), coin.getAssetsId());
     }
 
-    public static boolean isNulsAsset(int chainId, int assetId) {
-        if (chainId == NulsConfig.MAIN_CHAIN_ID
-                && assetId == NulsConfig.MAIN_ASSETS_ID) {
+    /**
+     * 是否是指定链的资产
+     *
+     * @param chain
+     * @param coin
+     * @return
+     */
+    public static boolean isChainAssetExist(Chain chain, Coin coin) {
+        if (chain.getConfig().getChainId() == coin.getAssetsChainId() &&
+                chain.getConfig().getAssetsId() == coin.getAssetsId()) {
             return true;
         }
         return false;
     }
 
-    public static boolean isTheChainMainAsset(int chainId, Coin coin) {
-        return isTheChainMainAsset(chainId, coin.getAssetsChainId(), coin.getAssetsId());
-    }
-
-    public static boolean isTheChainMainAsset(int chainId, int assetChainId, int assetId) {
-        if (assetChainId == chainId
-                && assetId == NulsConfig.CURRENT_MAIN_ASSETS_ID) {
-            return true;
-        }
-        return true;
-    }
-
-    public static boolean assetExist2(int chainId, int assetId) {
-        //todo 查资产是否存在
-        return true;
-    }
-
     /**
-     * 查询用户账本nonce值
+     * 查询账户账本nonce值
      *
      * @param chainId
+     * @param assetChainId
      * @param assetId
      * @param addressByte
      * @return
      */
-    public static byte[] getNonce(int chainId, int assetId, byte[] addressByte) {
+    public static byte[] getNonce(int chainId, int assetChainId, int assetId, byte[] addressByte) {
         String address = AddressTool.getStringAddressByBytes(addressByte);
-        byte[] nonce = new byte[]{'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'};
-        return nonce;
+        return LegerCmdCall.getNonce(chainId, assetChainId, assetId, address);
     }
 
     /**
-     * 查询用户余额
+     * 查询账户余额
      *
      * @param chainId
+     * @param assetChainId
      * @param assetId
      * @param addressByte
      * @return
      */
-    public static BigInteger getBalance(int chainId, int assetId, byte[] addressByte) {
+    public static BigInteger getBalance(int chainId, int assetChainId, int assetId, byte[] addressByte) {
         String address = AddressTool.getStringAddressByBytes(addressByte);
-        return LegerCmdCall.getBalance(chainId, assetId, address);
+        return LegerCmdCall.getBalance(chainId, assetChainId, assetId, address);
     }
 
 }

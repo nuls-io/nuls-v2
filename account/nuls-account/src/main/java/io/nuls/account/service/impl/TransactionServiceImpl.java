@@ -154,12 +154,12 @@ public class TransactionServiceImpl implements TransactionService {
             }
             //检查对应资产余额是否足够
             BigInteger amount = coinDto.getAmount();
-            BigInteger balance = TxUtil.getBalance(assetChainId, assetId, addressByte);
+            BigInteger balance = TxUtil.getBalance(chainId, assetChainId, assetId, addressByte);
             if (BigIntegerUtils.isLessThan(balance, amount)) {
                 throw new NulsException(AccountErrorCode.INSUFFICIENT_BALANCE);
             }
             //查询账本获取nonce值
-            byte[] nonce = TxUtil.getNonce(assetChainId, assetId, addressByte);
+            byte[] nonce = TxUtil.getNonce(chainId, assetChainId, assetId, addressByte);
             CoinFrom coinFrom = new CoinFrom(addressByte, assetChainId, assetId, amount, nonce, AccountConstant.NORMAL_TX_LOCKED);
             coinFroms.add(coinFrom);
         }
@@ -286,8 +286,8 @@ public class TransactionServiceImpl implements TransactionService {
         int assetsId = chain.getConfig().getAssetsId();
         for (CoinFrom coinFrom : listFrom) {
             //必须为当前链主资产
-            if (this.assetExist(chainId, coinFrom.getAssetsId())) {
-                BigInteger mainAsset = TxUtil.getBalance(chainId, assetsId, coinFrom.getAddress());
+            if (TxUtil.isChainAssetExist(chain, coinFrom)) {
+                BigInteger mainAsset = TxUtil.getBalance(chainId, chainId, assetsId, coinFrom.getAddress());
                 //当前还差的手续费
                 BigInteger current = targetFee.subtract(actualFee);
                 //如果余额大于等于目标手续费，则直接收取全额手续费
@@ -323,9 +323,9 @@ public class TransactionServiceImpl implements TransactionService {
         while (iterator.hasNext()) {
             CoinFrom coinFrom = iterator.next();
             //如果不为当前链主资产
-            if (!this.assetExist(chainId, coinFrom.getAssetsId())) {
+            if (!TxUtil.isChainAssetExist(chain, coinFrom)) {
                 //查询该地址在当前链的主资产余额
-                BigInteger mainAsset = TxUtil.getBalance(chainId, assetsId, coinFrom.getAddress());
+                BigInteger mainAsset = TxUtil.getBalance(chainId, chainId, assetsId, coinFrom.getAddress());
                 if (BigIntegerUtils.isEqualOrLessThan(mainAsset, BigInteger.ZERO)) {
                     continue;
                 }
@@ -333,7 +333,7 @@ public class TransactionServiceImpl implements TransactionService {
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
-                feeCoinFrom.setNonce(TxUtil.getNonce(chainId, assetsId, address));
+                feeCoinFrom.setNonce(TxUtil.getNonce(chainId, chainId, assetsId, address));
                 txSize += feeCoinFrom.size();
                 //由于新增CoinFrom，需要重新计算本交易预计收取的手续费
                 targetFee = TransactionFeeCalculator.getNormalTxFee(txSize);

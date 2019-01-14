@@ -36,11 +36,9 @@ public class AccountBootstrap {
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
             //启动时间同步线程
-            TimeService.getInstance().start();
+            //TimeService.getInstance().start();
             //启动账户模块服务
             initServer();
-            //注册账户相关交易
-            TransactionCmdCall.registerTx();
         } catch (Exception e) {
             LogUtil.error("Account Bootstrap failed", e);
             System.exit(-1);
@@ -63,7 +61,7 @@ public class AccountBootstrap {
                 I18nUtils.loadLanguage("languages", language);
                 I18nUtils.setLanguage(language);
                 //ACCOUNTKEYSTORE_FOLDER_NAME
-                NulsConfig.DEFAULT_ENCODING = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER);
+                //NulsConfig.DEFAULT_ENCODING = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER);
                 String keystoreFolder = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.CFG_SYSTEM_TKEYSTORE_FOLDER);
                 if (StringUtils.isNotBlank(keystoreFolder)) {
                     NulsConfig.ACCOUNTKEYSTORE_FOLDER_NAME = keystoreFolder;

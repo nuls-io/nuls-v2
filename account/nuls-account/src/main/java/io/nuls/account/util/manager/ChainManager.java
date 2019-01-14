@@ -29,6 +29,7 @@ import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.model.bo.config.ConfigItem;
+import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.storage.ConfigService;
 import io.nuls.account.util.log.LogUtil;
 import io.nuls.db.constant.DBErrorCode;
@@ -78,8 +79,9 @@ public class ChainManager {
             初始化链数据库表
             Initialize linked database tables
             */
-            //initTable(chainId);
-
+            initTable(chainId);
+            //注册账户相关交易
+            TransactionCmdCall.registerTx(chainId);
             chainMap.put(chainId, chain);
         }
     }
@@ -145,6 +147,9 @@ public class ChainManager {
             */
             if (!RocksDBService.existTable(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId)) {
                 RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ALIAS + chainId);
+            }
+            if (!RocksDBService.existTable(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS + chainId)) {
+                RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT_ALIAS_KEY_ADRESS + chainId);
             }
         } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
