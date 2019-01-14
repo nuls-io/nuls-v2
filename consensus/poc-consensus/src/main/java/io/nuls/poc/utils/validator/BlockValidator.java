@@ -95,7 +95,7 @@ public class BlockValidator {
             currentRound = roundManager.getRound(chain,extendsData,false);
          }
       }
-      else if(extendsData.getRoundIndex() >currentRound.getIndex()){
+      else if(extendsData.getRoundIndex() > currentRound.getIndex()){
          if(extendsData.getRoundStartTime() < currentRound.getEndTime()){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
