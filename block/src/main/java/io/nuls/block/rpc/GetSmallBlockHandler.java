@@ -40,6 +40,7 @@ import io.nuls.tools.exception.NulsException;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
+import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
@@ -75,8 +76,7 @@ public class GetSmallBlockHandler extends BaseCmd {
         if (smallBlock != null) {
             SmallBlockMessage smallBlockMessage = new SmallBlockMessage();
             smallBlockMessage.setSmallBlock(smallBlock);
-            smallBlockMessage.setCommand(CommandConstant.SMALL_BLOCK_MESSAGE);
-            NetworkUtil.sendToNode(chainId, smallBlockMessage, nodeId);
+            NetworkUtil.sendToNode(chainId, smallBlockMessage, nodeId, SMALL_BLOCK_MESSAGE);
         }
         return success();
     }

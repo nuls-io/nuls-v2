@@ -38,7 +38,7 @@ import java.util.*;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
- * 分叉链管理器,维护主链、分叉链集合、孤儿链集合
+ * 链管理器,维护主链、分叉链集合、孤儿链集合
  *
  * @author captain
  * @version 1.0
@@ -92,7 +92,7 @@ public class ChainManager {
         Chain topForkChain = switchChainPath.peek();
         long forkHeight = topForkChain.getStartHeight();
         long masterChainEndHeight = masterChain.getEndHeight();
-        Log.info("calculate fork point complete");
+        Log.info("calculate fork point complete， forkHeight=" + forkHeight);
 
         //2.回滚主链
         //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库
@@ -355,7 +355,7 @@ public class ChainManager {
      * @param chain
      * @throws Exception
      */
-    public static boolean removeOrphanChain(int chainId, Chain chain) throws Exception {
+    public static boolean removeOrphanChain(int chainId, Chain chain) {
         boolean result = false;
         //无子链
         if (chain.getSons().size() == 0) {

@@ -30,6 +30,7 @@ import lombok.Data;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import static io.nuls.block.utils.LoggerUtil.Log;
@@ -46,7 +47,7 @@ public class ContextManager {
 
     public static List<Integer> chainIds = new CopyOnWriteArrayList<>();
 
-    private static Map<Integer, ChainContext> contextMap = new HashMap<>();
+    private static Map<Integer, ChainContext> contextMap = new ConcurrentHashMap<>();
 
     private ContextManager() {
     }

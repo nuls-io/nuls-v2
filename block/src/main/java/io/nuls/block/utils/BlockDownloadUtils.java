@@ -31,6 +31,7 @@ import io.nuls.block.utils.module.NetworkUtil;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
@@ -56,9 +57,8 @@ public class BlockDownloadUtils {
         }
         HashMessage message = new HashMessage();
         message.setRequestHash(hash);
-        message.setCommand(CommandConstant.GET_BLOCK_MESSAGE);
         Future<Block> future = CacheHandler.addSingleBlockRequest(chainId, hash);
-        boolean result = NetworkUtil.sendToNode(chainId, message, node.getId());
+        boolean result = NetworkUtil.sendToNode(chainId, message, node.getId(), GET_BLOCK_MESSAGE);
         if (!result) {
             CacheHandler.removeBlockByHashFuture(chainId, hash);
             return null;

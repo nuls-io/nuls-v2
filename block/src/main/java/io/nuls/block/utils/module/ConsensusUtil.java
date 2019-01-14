@@ -74,7 +74,7 @@ public class ConsensusUtil {
     public static boolean notice(int chainId, int status) {
         try {
             Map<String, Object> params = new HashMap<>(5);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("status", status);
             return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
@@ -93,7 +93,7 @@ public class ConsensusUtil {
     public static boolean evidence(int chainId, BlockHeader masterHeader, BlockHeader forkHeader) {
         try {
             Map<String, Object> params = new HashMap<>(5);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("blockHeader", HexUtil.encode(masterHeader.serialize()));
             params.put("evidenceHeader", HexUtil.encode(forkHeader.serialize()));
@@ -106,7 +106,7 @@ public class ConsensusUtil {
     }
 
     /**
-     * 回滚到分叉点时通知共识模块
+     * 回滚区块时通知共识模块
      *
      * @param chainId
      * @return
@@ -132,7 +132,8 @@ public class ConsensusUtil {
      * @param localInit
      * @return
      */
-    public static boolean newBlock(int chainId, BlockHeader blockHeader, boolean localInit) {
+    public static boolean saveNotice(int chainId, BlockHeader blockHeader, boolean localInit) {
+        //创世区块保存时不通知共识模块
         if (localInit) {
             return true;
         }

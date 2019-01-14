@@ -39,6 +39,7 @@ import io.nuls.tools.crypto.HexUtil;
 
 import java.util.Map;
 
+import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
@@ -96,8 +97,7 @@ public class GetBlocksHandler extends BaseCmd {
 
     private void sendBlock(int chainId, Block block, String nodeId, NulsDigestData requestHash) {
         BlockMessage blockMessage = new BlockMessage(requestHash, block);
-        blockMessage.setCommand(CommandConstant.BLOCK_MESSAGE);
-        boolean result = NetworkUtil.sendToNode(chainId, blockMessage, nodeId);
+        boolean result = NetworkUtil.sendToNode(chainId, blockMessage, nodeId, BLOCK_MESSAGE);
         if (!result) {
             Log.warn("send block failed:" + nodeId + ",height:" + block.getHeader().getHeight());
         }

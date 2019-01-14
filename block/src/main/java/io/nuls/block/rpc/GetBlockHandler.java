@@ -40,6 +40,7 @@ import io.nuls.tools.exception.NulsException;
 
 import java.util.Map;
 
+import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
@@ -85,8 +86,7 @@ public class GetBlockHandler extends BaseCmd {
         if (block != null) {
             message.setBlock(block);
         }
-        message.setCommand(CommandConstant.BLOCK_MESSAGE);
-        boolean result = NetworkUtil.sendToNode(chainId, message, nodeId);
+        boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, BLOCK_MESSAGE);
         if (!result) {
             Log.warn("send block failed:" + nodeId + ",height:" + block.getHeader().getHeight());
         }
