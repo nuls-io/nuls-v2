@@ -41,7 +41,7 @@ public class ChainCall {
      * @return
      * @throws NulsException
      */
-    public static boolean receiveInCtxTally(String coinDataHex) throws NulsException {
+    public static boolean ctxChainLedgerCommit(String coinDataHex) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -60,7 +60,7 @@ public class ChainCall {
      * @return
      * @throws NulsException
      */
-    public static boolean sendOutCtxTally(String coinDataHex) throws NulsException {
+    public static boolean ctxChainLedgerRollback(String coinDataHex) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
