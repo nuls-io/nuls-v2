@@ -1,5 +1,6 @@
 package io.nuls.ledger.utils;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.UnconfirmedNonce;
@@ -95,5 +96,21 @@ public class LedgerUtils {
             return true;
         }
         return false;
+    }
+
+    /**
+     * 判断资产是否属于本地节点账户
+     * @param chainId chainId
+     * @param address address
+     * @return boolean
+     */
+    public static boolean isNotLocalChainAccount(int chainId,byte [] address){
+        try {
+            int assetChainId = AddressTool.getChainIdByAddress(address);
+            return (chainId != assetChainId);
+        }catch(Exception e){
+            e.printStackTrace();
+            return false;
+        }
     }
 }

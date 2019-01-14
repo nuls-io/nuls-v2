@@ -43,7 +43,7 @@ public class ChainServiceImpl implements ChainService {
         }
 
         chain = new BlockChain();
-        chain.setName(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_NAME));
+        //chain.setName(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_NAME));
         int assetId = Integer.parseInt(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID));
         chain.setRegAssetId(assetId);
         chain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));

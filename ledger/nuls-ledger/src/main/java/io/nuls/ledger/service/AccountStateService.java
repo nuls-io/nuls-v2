@@ -67,6 +67,13 @@ public interface AccountStateService {
 
     /**
      *
+     * @param addressChainId
+     * @param assetKey
+     * @param nonce
+     */
+    void rollUnconfirmTx(int addressChainId,String assetKey,String nonce);
+    /**
+     *
      * @param address
      * @param assetChainId
      * @param assetId
