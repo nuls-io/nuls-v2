@@ -1388,7 +1388,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     }
 
     /**
-     * 连分叉区块回滚
+     * 链分叉区块回滚
      */
     @Override
     public Result chainRollBack(Map<String, Object> params) {

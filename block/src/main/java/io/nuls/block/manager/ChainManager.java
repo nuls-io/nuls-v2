@@ -80,9 +80,9 @@ public class ChainManager {
      * @return
      */
     public static boolean switchChain(int chainId, Chain masterChain, Chain forkChain) {
-        Log.info("0.switch chain start");
-        Log.info("1.masterChain-" + masterChain);
-        Log.info("2.forkChain-" + forkChain);
+        Log.info("*switch chain start");
+        Log.info("*masterChain-" + masterChain);
+        Log.info("*forkChain-" + forkChain);
         //1.获取主链与最长分叉链的分叉点,并记录从分叉点开始的最长分叉链路径
         Stack<Chain> switchChainPath = new Stack<>();
         while (forkChain.getParent() != null) {
@@ -92,7 +92,7 @@ public class ChainManager {
         Chain topForkChain = switchChainPath.peek();
         long forkHeight = topForkChain.getStartHeight();
         long masterChainEndHeight = masterChain.getEndHeight();
-        Log.info("calculate fork point complete， forkHeight=" + forkHeight);
+        Log.info("*calculate fork point complete, forkHeight=" + forkHeight);
 
         //2.回滚主链
         //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库
@@ -132,7 +132,7 @@ public class ChainManager {
             return false;
         }
         //至此,主链回滚完成
-        Log.info("masterChain rollback complete");
+        Log.info("*masterChain rollback complete");
 
         //3.依次添加最长分叉链路径上所有分叉链区块
         while (!switchChainPath.empty()) {
@@ -145,7 +145,7 @@ public class ChainManager {
                 return false;
             }
         }
-        Log.info("switch chain complete");
+        Log.info("*switch chain complete");
         return true;
     }
 
@@ -169,6 +169,9 @@ public class ChainManager {
      * @return
      */
     private static boolean switchChain0(int chainId, Chain masterChain, Chain forkChain, Chain subChain) {
+        Log.info("*switchChain0 masterChain=" +masterChain);
+        Log.info("*switchChain0 forkChain=" +forkChain);
+        Log.info("*switchChain0 subChain=" +subChain);
         //1.计算要从forkChain上添加到主链上多少个区块
         int target = 0;
         if (subChain != null) {
@@ -176,7 +179,7 @@ public class ChainManager {
         } else {
             target = (int) (forkChain.getEndHeight() - forkChain.getStartHeight()) + 1;
         }
-
+        Log.info("*switchChain0 target=" +target);
         //2.往主链上添加区块
         LinkedList<NulsDigestData> hashList = forkChain.getHashList();
         int count = 0;
@@ -187,6 +190,7 @@ public class ChainManager {
             if (saveBlock) {
                 count++;
             } else {
+                Log.info("*switchChain0 saveBlock fail, hash=" +hash);
                 return false;
             }
         }
