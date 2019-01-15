@@ -193,7 +193,7 @@ public class NodeGroupRpc extends BaseCmd {
         return nodeGroupVo;
     }
     /**
-     * nw_getConnectAccountByChainId
+     * nw_getChainConnectAmount
      * 查看指定网络组信息
      */
     @CmdAnnotation(cmd = "nw_getChainConnectAmount", version = 1.0,
