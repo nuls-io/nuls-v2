@@ -61,8 +61,4 @@ public abstract class BaseChannelHandler  extends ChannelInboundHandlerAdapter {
         int port=socketChannel.localAddress().getPort();
         return (getInstance().getCrossPort()==port);
     }
-
-
-
-
 }

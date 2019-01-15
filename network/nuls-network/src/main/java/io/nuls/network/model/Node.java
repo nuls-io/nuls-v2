@@ -298,7 +298,19 @@ public class Node  implements Dto {
         return isBad;
     }
 
-
+    /**
+     * node连接的业务信息
+     */
+    public String getNodeGroupConnectorsInfos(){
+        List<NodeGroupConnector> list=getNodeGroupConnectors();
+        StringBuilder stringBuilder= new StringBuilder();
+        for(NodeGroupConnector nodeGroupConnector:list){
+            stringBuilder.append("{magicNum:"+nodeGroupConnector.getMagicNumber());
+            stringBuilder.append("==blockHash:"+nodeGroupConnector.getBlockHash());
+            stringBuilder.append("==blockHeight:"+nodeGroupConnector.getBlockHeight()+"}");
+        }
+       return  stringBuilder.toString();
+    }
     @Override
     public BasePo parseToPo() {
         return  new NodePo(id, ip,remotePort,remoteCrossPort,isCrossConnect );

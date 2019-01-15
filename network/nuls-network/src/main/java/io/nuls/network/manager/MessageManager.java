@@ -35,6 +35,7 @@ import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.locker.Lockers;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
+import io.nuls.network.manager.handler.message.GetAddrMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -47,8 +48,6 @@ import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.model.po.ProtocolHandlerPo;
 import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.model.CmdAnnotation;
-import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
@@ -277,7 +276,7 @@ public class MessageManager extends BaseManager{
                 Node node = nodeGroup.getConnectCrossNode(seed);
                 if(null != node){
                      GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node,magicNumber);
-                     this.sendToNode(getAddrMessage,node,true);
+                     GetAddrMessageHandler.getInstance().send(getAddrMessage,node,false,true);
                      return true;
                 }
             }
@@ -289,7 +288,7 @@ public class MessageManager extends BaseManager{
                 Node node = nodeGroup.getConnectNode(seed);
                 if(null != node){
                     GetAddrMessage getAddrMessage = MessageFactory.getInstance().buildGetAddrMessage(node,magicNumber);
-                    this.sendToNode(getAddrMessage,node,true);
+                    GetAddrMessageHandler.getInstance().send(getAddrMessage,node,false,true);
                     return true;
                 }
             }

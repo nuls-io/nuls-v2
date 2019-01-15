@@ -83,30 +83,34 @@ public class DataShowMonitorTest implements Runnable  {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for(NodeGroup nodeGroup:nodeGroupList){
+
             Collection<Node> c1=nodeGroup.getConnectNodes();
             Log.info("begin============================printlnPeer c1:SelfConnectNodes============="+c1.size());
             for(Node n:c1){
-                Log.info("*************connect:"+n.getId());
+                Log.info("*************connect:{},info:{}",n.getId(),n.getNodeGroupConnectorsInfos());
             }
-            Log.info("end============================printlnPeer c1:SelfConnectNodes============="+c1.size());
+            Log.info("end============================printlnPeer c1:SelfConnectNodes=============");
+
             Collection<Node> c2=nodeGroup.getDisConnectNodes();
             Log.info("begin============================printlnPeer c2:SelfDisConnectNodes============="+c2.size());
             for(Node n:c2){
                 Log.info("***********disconnect:"+n.getId());
             }
-            Log.info("end============================printlnPeer c2:SelfDisConnectNodes============="+c2.size());
+            Log.info("end============================printlnPeer c2:SelfDisConnectNodes=============");
+
             Collection<Node> c3=nodeGroup.getConnectCrossNodes();
             Log.info("begin============================printlnPeer c3:crossConnectNodes============="+c3.size());
             for(Node n:c3){
                 Log.info("************cross connect:"+n.getId());
             }
-            Log.info("end============================printlnPeer c2:SelfDisConnectNodes============="+c2.size());
+            Log.info("end============================printlnPeer c3:crossConnectNodes=============");
+
             Collection<Node> c4=nodeGroup.getDisConnectCrossNodes();
             Log.info("begin============================printlnPeer c4:crossDisConnectNodes============="+c4.size());
             for(Node n:c4){
                 Log.info("*************cross disconnect:"+n.getId());
             }
-            Log.info("end============================printlnPeer c2:SelfDisConnectNodes============="+c2.size());
+            Log.info("end============================printlnPeer c4:crossDisConnectNodes=============");
         }
     }
 }

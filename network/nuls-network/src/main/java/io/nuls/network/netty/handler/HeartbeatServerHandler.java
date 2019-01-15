@@ -50,8 +50,7 @@ public class HeartbeatServerHandler extends BaseChannelHandler {
             if(null != node){
                 node.setBad(true);
             }
-            ctx.channel().close();
-
+            node.getChannel().close();
         } else {
             super.userEventTriggered(ctx, evt);
         }

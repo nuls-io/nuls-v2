@@ -41,6 +41,8 @@ import io.nuls.network.model.message.body.VersionMessageBody;
 import io.nuls.network.rpc.external.BlockRpcService;
 import io.nuls.network.rpc.external.impl.BlockRpcServiceImpl;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.Log;
+
 /**
  * version message handler
  * client 先发起version消息，server接收到后，
@@ -91,6 +93,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
 //                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===close connection.");
                 node.getChannel().close();
                 node.setIdle(true);
+                Log.error("*********************************peer = {} Server close",node.getId());
                 return;
             }else{
                 //client 回复过载消息--reply over maxIn
@@ -109,7 +112,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
         //node加入到Group的未连接中
         nodeGroupConnector.setStatus(NodeGroupConnector.CONNECTING);
         nodeGroup.addDisConnetNode(node,true);
-        //存储需要的信息
+        //存储需要的信息,协议版本信息，远程跨链端口信息
         node.setVersionProtocolInfos(message.getHeader().getMagicNumber(),versionBody.getProtocolVersion(),versionBody.getBlockHeight(),versionBody.getBlockHash());
         node.setRemoteCrossPort(versionBody.getPortMeCross());
         //回复version
@@ -147,6 +150,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
 //                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===close connection.");
                node.getChannel().close();
                node.setIdle(true);
+               Log.error("*********************************peer = {} Client close",node.getId());
                return;
            }else if(node.getNodeGroupConnectors().size()>1){
                //client 回复过载消息--reply over maxIn

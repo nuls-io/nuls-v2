@@ -159,7 +159,8 @@ public class ClientChannelHandler extends BaseChannelHandler {
                 SocketChannel socketChannel = (SocketChannel) ctx.channel();
                 String remoteIP = socketChannel.remoteAddress().getHostString();
                 int port = socketChannel.remoteAddress().getPort();
-//                Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
+                Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
+                ctx.channel().close();
             }
         } catch (Exception e) {
             e.printStackTrace();
