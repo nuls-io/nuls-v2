@@ -13,11 +13,11 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import io.nuls.transaction.cache.TransactionDuplicateRemoval;
+import io.nuls.transaction.cache.TxDuplicateRemoval;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
+import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
 import io.nuls.transaction.message.BroadcastTxMessage;
@@ -27,11 +27,11 @@ import io.nuls.transaction.message.TransactionMessage;
 import io.nuls.transaction.message.VerifyCrossResultMessage;
 import io.nuls.transaction.message.VerifyCrossWithFCMessage;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.CrossTx;
 import io.nuls.transaction.rpc.call.NetworkCall;
-import io.nuls.transaction.service.ConfirmedTransactionService;
-import io.nuls.transaction.service.CrossChainTxService;
-import io.nuls.transaction.service.TransactionService;
+import io.nuls.transaction.service.ConfirmedTxService;
+import io.nuls.transaction.service.CtxService;
+import io.nuls.transaction.service.TxService;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,13 +51,13 @@ import static io.nuls.transaction.constant.TxConstant.KEY_NODE_ID;
 @Component
 public class MessageCmd extends BaseCmd {
     @Autowired
-    private CrossChainTxService crossChainTxService;
+    private CtxService ctxService;
     @Autowired
-    private TransactionService transactionService;
+    private TxService txService;
     @Autowired
-    private ConfirmedTransactionService confirmedTransactionService;
+    private ConfirmedTxService confirmedTxService;
     @Autowired
-    private CrossChainTxStorageService crossChainTxStorageService;
+    private CtxStorageService ctxStorageService;
     @Autowired
     private ChainManager chainManager;
 
@@ -86,12 +86,12 @@ public class MessageCmd extends BaseCmd {
             }
             NulsDigestData hash = message.getRequestHash();
             //交易缓存中是否已存在该交易hash
-            boolean consains = TransactionDuplicateRemoval.mightContain(hash);
+            boolean consains = TxDuplicateRemoval.mightContain(hash);
             if (consains) {
                 return success();
             }
             //如果交易hash不存在，则添加到缓存中
-            TransactionDuplicateRemoval.insert(hash);
+            TxDuplicateRemoval.insert(hash);
             //去该节点查询完整交易
             GetTxMessage getTxMessage = new GetTxMessage();
             getTxMessage.setCommand(TxCmd.NW_ASK_TX);
@@ -132,7 +132,7 @@ public class MessageCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             NulsDigestData txHash = message.getRequestHash();
-            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, txHash);
+            Transaction tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -169,13 +169,13 @@ public class MessageCmd extends BaseCmd {
             }
             Transaction transaction = message.getTx();
             //交易缓存中是否已存在该交易hash
-            boolean consains = TransactionDuplicateRemoval.mightContain(transaction.getHash());
+            boolean consains = TxDuplicateRemoval.mightContain(transaction.getHash());
             if (!consains) {
                 //添加到交易缓存中
-                TransactionDuplicateRemoval.insert(transaction.getHash());
+                TxDuplicateRemoval.insert(transaction.getHash());
             }
             //将交易放入待验证本地交易队列中
-            transactionService.newTx(chainManager.getChain(chainId), transaction);
+            txService.newTx(chainManager.getChain(chainId), transaction);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -210,12 +210,12 @@ public class MessageCmd extends BaseCmd {
             }
             NulsDigestData hash = message.getRequestHash();
             //交易缓存中是否已存在该交易hash
-            boolean consains = TransactionDuplicateRemoval.mightContain(hash);
+            boolean consains = TxDuplicateRemoval.mightContain(hash);
             if (consains) {
                 return success();
             }
             //如果交易hash不存在，则添加到缓存中
-            TransactionDuplicateRemoval.insert(hash);
+            TxDuplicateRemoval.insert(hash);
             //去该节点查询完整跨链交易
             GetTxMessage getTxMessage = new GetTxMessage();
             getTxMessage.setCommand(TxCmd.NW_ASK_CROSS_TX_M_FC);
@@ -257,7 +257,7 @@ public class MessageCmd extends BaseCmd {
             }
             //查询已确认跨链交易
             NulsDigestData txHash = message.getRequestHash();
-            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, txHash);
+            Transaction tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -306,14 +306,14 @@ public class MessageCmd extends BaseCmd {
             }
             NulsDigestData txHash = message.getRequestHash();
             //查询处理中的跨链交易
-            CrossChainTx ctx = crossChainTxStorageService.getTx(chain.getChainId(), message.getRequestHash());
+            CrossTx ctx = ctxStorageService.getTx(chain.getChainId(), message.getRequestHash());
             if (ctx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
             Transaction tx = ctx.getTx();
             if (tx == null) {
                 //查询已确认跨链交易
-                tx = confirmedTransactionService.getConfirmedTransaction(chain, txHash);
+                tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
                 if (tx == null) {
                     throw new NulsException(TxErrorCode.TX_NOT_EXIST);
                 }
@@ -359,7 +359,7 @@ public class MessageCmd extends BaseCmd {
             }
             //查询已确认跨链交易
             NulsDigestData txHash = message.getRequestHash();
-            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, txHash);
+            Transaction tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -406,13 +406,13 @@ public class MessageCmd extends BaseCmd {
             }
             Transaction transaction = message.getTx();
             //交易缓存中是否已存在该交易hash
-            boolean consains = TransactionDuplicateRemoval.mightContain(transaction.getHash());
+            boolean consains = TxDuplicateRemoval.mightContain(transaction.getHash());
             if (!consains) {
                 //添加到交易缓存中
-                TransactionDuplicateRemoval.insert(transaction.getHash());
+                TxDuplicateRemoval.insert(transaction.getHash());
             }
             //保存未验证跨链交易
-            crossChainTxService.newCrossTx(chainManager.getChain(chainId), nodeId, transaction);
+            ctxService.newCrossTx(chainManager.getChain(chainId), nodeId, transaction);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -453,7 +453,7 @@ public class MessageCmd extends BaseCmd {
             byte[] origTxHashByte = message.getOriginalTxHash();
             NulsDigestData originalTxHash = NulsDigestData.fromDigestHex(HexUtil.encode(origTxHashByte));
             //查询已确认跨链交易
-            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
+            Transaction tx = confirmedTxService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -503,7 +503,7 @@ public class MessageCmd extends BaseCmd {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
             //处理跨链节点验证结果
-            crossChainTxService.ctxResultProcess(chainManager.getChain(chainId), message, nodeId);
+            ctxService.ctxResultProcess(chainManager.getChain(chainId), message, nodeId);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -544,7 +544,7 @@ public class MessageCmd extends BaseCmd {
             byte[] origTxHashByte = message.getOriginalTxHash();
             NulsDigestData originalTxHash = NulsDigestData.fromDigestHex(HexUtil.encode(origTxHashByte));
             //查询已确认跨链交易
-            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
+            Transaction tx = confirmedTxService.getConfirmedTransaction(chainManager.getChain(chainId), originalTxHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -600,7 +600,7 @@ public class MessageCmd extends BaseCmd {
             byte[] decode = HexUtil.decode((String) params.get(KEY_MESSAGE_BODY));
             message.parse(new NulsByteBuffer(decode));
             //查询处理中的跨链交易
- /*           CrossChainTx ctx = crossChainTxStorageService.getTx(chain.getChainId(), message.getRequestHash());
+ /*           CrossTx ctx = ctxStorageService.getTx(chain.getChainId(), message.getRequestHash());
 
             if (ctx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
@@ -620,7 +620,7 @@ public class MessageCmd extends BaseCmd {
 //            ctx.setCtxVerifyResultList(verifyResultList);
 //            ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
             //保存跨链交易验证结果
-            result = crossChainTxStorageService.putTx(chainId, ctx);*/
+            result = ctxStorageService.putTx(chainId, ctx);*/
         } catch (NulsException e) {
             Log.error(e);
             return failed(e.getErrorCode());

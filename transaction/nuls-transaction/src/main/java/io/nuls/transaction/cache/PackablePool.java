@@ -15,7 +15,7 @@ import java.util.List;
  * @date: 2018/11/13
  */
 @Service
-public class TxVerifiedPool {
+public class PackablePool {
 
     public boolean addInFirst(Chain chain, Transaction tx, boolean isOrphan) {
         try {

@@ -7,17 +7,14 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.init.TransactionBootStrap;
 import io.nuls.transaction.manager.ChainManager;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+public class UnconfirmedTxStorageServiceTest {
 
-public class TxVerifiedStorageServiceTest {
-
-    protected static TxVerifiedStorageService txVerifiedStorageService;
+    protected static UnconfirmedTxStorageService unconfirmedTxStorageService;
     protected int chainId = 12345;
 
     @BeforeClass
@@ -26,7 +23,7 @@ public class TxVerifiedStorageServiceTest {
         TransactionBootStrap.initDB();
         //初始化上下文
         SpringLiteContext.init(TxConstant.CONTEXT_PATH);
-        txVerifiedStorageService = SpringLiteContext.getBean(TxVerifiedStorageService.class);
+        unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
         //启动链
         SpringLiteContext.getBean(ChainManager.class).runChain();
     }
@@ -34,40 +31,40 @@ public class TxVerifiedStorageServiceTest {
     @Test
     public void putTx() throws Exception {
         Transaction tx = TestConstant.getTransaction2();
-        boolean result = txVerifiedStorageService.putTx(chainId, tx);
+        boolean result = unconfirmedTxStorageService.putTx(chainId, tx);
         Assert.assertTrue(result);
     }
 
     @Test
     public void removeTx() throws Exception {
         Transaction tx = TestConstant.getTransaction2();
-        boolean result = txVerifiedStorageService.putTx(chainId, tx);
+        boolean result = unconfirmedTxStorageService.putTx(chainId, tx);
         Assert.assertTrue(result);
 
-        Transaction txResult = txVerifiedStorageService.getTx(chainId, tx.getHash());
+        Transaction txResult = unconfirmedTxStorageService.getTx(chainId, tx.getHash());
         Assert.assertEquals(tx.getHash(), txResult.getHash());
 
-        txVerifiedStorageService.removeTx(chainId, txResult.getHash());
+        unconfirmedTxStorageService.removeTx(chainId, txResult.getHash());
 
-        txResult = txVerifiedStorageService.getTx(chainId, tx.getHash());
+        txResult = unconfirmedTxStorageService.getTx(chainId, tx.getHash());
         Assert.assertNull(txResult);
     }
 
     @Test
     public void removeListTx() throws Exception {
         Transaction tx = TestConstant.getTransaction2();
-        boolean result = txVerifiedStorageService.putTx(chainId, tx);
+        boolean result = unconfirmedTxStorageService.putTx(chainId, tx);
         Assert.assertTrue(result);
 
         //test getTxList
         List<byte[]> hashList = List.of(tx.getHash().serialize());
-        List<Transaction> txList = txVerifiedStorageService.getTxList(chainId, hashList);
+        List<Transaction> txList = unconfirmedTxStorageService.getTxList(chainId, hashList);
         Assert.assertEquals(hashList.size(), txList.size());
 
-        result = txVerifiedStorageService.removeTxList(chainId, hashList);
+        result = unconfirmedTxStorageService.removeTxList(chainId, hashList);
         Assert.assertTrue(result);
 
-        txList = txVerifiedStorageService.getTxList(chainId, hashList);
+        txList = unconfirmedTxStorageService.getTxList(chainId, hashList);
         Assert.assertTrue(txList.size() == 0);
     }
 

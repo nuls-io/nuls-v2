@@ -1,26 +1,22 @@
 package io.nuls.transaction.db.rocksdb.storage;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.data.StringUtils;
 import io.nuls.transaction.TestConstant;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.init.TransactionBootStrap;
 import io.nuls.transaction.manager.ChainManager;
-import io.nuls.transaction.model.bo.CrossChainTx;
-import io.nuls.transaction.model.bo.CrossTxData;
+import io.nuls.transaction.model.bo.CrossTx;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CrossChainTxStorageServiceTest {
+public class CtxStorageServiceTest {
 
-    protected static CrossChainTxStorageService crossChainTxStorageService;
+    protected static CtxStorageService ctxStorageService;
     protected int chainId = 12345;
     protected String nodeId = "1001";
 
@@ -30,14 +26,14 @@ public class CrossChainTxStorageServiceTest {
         TransactionBootStrap.initDB();
         //初始化上下文
         SpringLiteContext.init(TxConstant.CONTEXT_PATH);
-        crossChainTxStorageService = SpringLiteContext.getBean(CrossChainTxStorageService.class);
+        ctxStorageService = SpringLiteContext.getBean(CtxStorageService.class);
         //启动链
         SpringLiteContext.getBean(ChainManager.class).runChain();
     }
 
     @Test
     public void putTx() throws Exception {
-//        CrossChainTx ctx = new CrossChainTx();
+//        CrossTx ctx = new CrossTx();
 //        Transaction tx = new Transaction(TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER);
 //        CrossTxData txData = new CrossTxData();
 //        txData.setChainId(chainId);
@@ -50,34 +46,34 @@ public class CrossChainTxStorageServiceTest {
 //        ctx.setSenderChainId(chainId);
 //        ctx.setSenderNodeId(nodeId);
 //        ctx.setState(TxConstant.CTX_UNPROCESSED_0);
-        CrossChainTx ctx = TestConstant.createCrossChainTx();
-        boolean result = crossChainTxStorageService.putTx(chainId, ctx);
+        CrossTx ctx = TestConstant.createCrossChainTx();
+        boolean result = ctxStorageService.putTx(chainId, ctx);
         Assert.assertTrue(result);
     }
 
     @Test
     public void putTxs() throws Exception {
-        List<CrossChainTx> list = new ArrayList<>();
+        List<CrossTx> list = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            CrossChainTx ctx = TestConstant.createCrossChainTx();
+            CrossTx ctx = TestConstant.createCrossChainTx();
             list.add(ctx);
         }
-        boolean result = crossChainTxStorageService.putTxs(chainId, list);
+        boolean result = ctxStorageService.putTxs(chainId, list);
         Assert.assertTrue(result);
     }
 
     @Test
     public void getTxList() {
         //test getTxList
-        List<CrossChainTx> list = crossChainTxStorageService.getTxList(chainId);
+        List<CrossTx> list = ctxStorageService.getTxList(chainId);
         if (list != null) {
             NulsDigestData hash = list.get(0).getTx().getHash();
             //test getTx
-            CrossChainTx tx = crossChainTxStorageService.getTx(chainId, hash);
+            CrossTx tx = ctxStorageService.getTx(chainId, hash);
             Assert.assertEquals(hash, tx.getTx().getHash());
             //test removeTx
-            crossChainTxStorageService.removeTx(chainId, hash);
-            tx = crossChainTxStorageService.getTx(chainId, hash);
+            ctxStorageService.removeTx(chainId, hash);
+            tx = ctxStorageService.getTx(chainId, hash);
             Assert.assertNull(tx);
         }
     }

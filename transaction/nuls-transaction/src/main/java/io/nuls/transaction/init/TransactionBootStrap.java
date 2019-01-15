@@ -45,6 +45,7 @@ public class TransactionBootStrap {
             //启动WebSocket服务,向外提供RPC接口
             initServer();
             while (!ServerRuntime.isReady()) {
+                Log.debug("wait depend modules ready");
                 Log.info("wait depend modules ready");
                 Thread.sleep(2000L);
             }

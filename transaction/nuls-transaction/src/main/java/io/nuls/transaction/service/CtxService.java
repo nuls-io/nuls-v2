@@ -3,11 +3,9 @@ package io.nuls.transaction.service;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
-import io.nuls.transaction.message.VerifyCrossResultMessage;
 import io.nuls.transaction.message.base.BaseMessage;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.CrossTx;
 
 import java.util.List;
 
@@ -18,7 +16,7 @@ import java.util.List;
  * @author: qinyifeng
  * @date: 2018/12/19
  */
-public interface CrossChainTxService {
+public interface CtxService {
 
     /**
      * 接收其他链新的跨链交易
@@ -45,7 +43,7 @@ public interface CrossChainTxService {
      * @param hash
      * @return
      */
-    CrossChainTx getTx(Chain chain, NulsDigestData hash);
+    CrossTx getTx(Chain chain, NulsDigestData hash);
 
     /**
      * 查询指定链下所有跨链交易
@@ -54,7 +52,7 @@ public interface CrossChainTxService {
      * @param chain
      * @return
      */
-    List<CrossChainTx> getTxList(Chain chain);
+    List<CrossTx> getTxList(Chain chain);
 
     /**
      * 更新跨链交易在跨链过程中的验证状态

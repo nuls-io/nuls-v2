@@ -34,7 +34,7 @@ import io.nuls.transaction.utils.InventoryFilter;
  * @author: qinyifeng
  * @date: 2018/12/26
  */
-public class TransactionDuplicateRemoval {
+public class TxDuplicateRemoval {
 
     private static InventoryFilter FILTER = new InventoryFilter( 1000000);
 

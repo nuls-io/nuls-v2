@@ -39,22 +39,21 @@ import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import io.nuls.transaction.cache.TxVerifiedPool;
+import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
-import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
-import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
-import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
+import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
+import io.nuls.transaction.db.rocksdb.storage.UnverifiedTxStorageService;
+import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.rpc.call.*;
-import io.nuls.transaction.service.ConfirmedTransactionService;
-import io.nuls.transaction.service.TransactionService;
+import io.nuls.transaction.service.ConfirmedTxService;
+import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
-import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -65,25 +64,25 @@ import java.util.*;
  * @date: 2018/11/22
  */
 @Service
-public class TransactionServiceImpl implements TransactionService {
+public class TxServiceImpl implements TxService {
 
     @Autowired
     private TransactionManager transactionManager;
 
     @Autowired
-    private TxVerifiedPool txVerifiedPool;
+    private PackablePool packablePool;
 
     @Autowired
-    private TxUnverifiedStorageService txUnverifiedStorageService;
+    private UnverifiedTxStorageService unverifiedTxStorageService;
 
     @Autowired
-    private TxVerifiedStorageService txVerifiedStorageService;
+    private UnconfirmedTxStorageService unconfirmedTxStorageService;
 
     @Autowired
-    private CrossChainTxStorageService crossChainTxStorageService;
+    private CtxStorageService ctxStorageService;
 
     @Autowired
-    private ConfirmedTransactionService confirmedTransactionService;
+    private ConfirmedTxService confirmedTxService;
 
     @Autowired
     private TransactionH2Service transactionH2Service;
@@ -97,15 +96,15 @@ public class TransactionServiceImpl implements TransactionService {
     public void newTx(Chain chain, Transaction tx) throws NulsException {
         Transaction txExist = getTransaction(chain, tx.getHash());
         if (null == txExist) {
-            txUnverifiedStorageService.putTx(chain, tx);
+            unverifiedTxStorageService.putTx(chain, tx);
         }
     }
 
     @Override
     public Transaction getTransaction(Chain chain, NulsDigestData hash) {
-        Transaction tx = txVerifiedStorageService.getTx(chain.getChainId(), hash);
+        Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
         if(null == tx){
-            tx = confirmedTransactionService.getConfirmedTransaction(chain, hash);
+            tx = confirmedTxService.getConfirmedTransaction(chain, hash);
         }
         return tx;
     }
@@ -660,7 +659,7 @@ public class TransactionServiceImpl implements TransactionService {
                 if (endtimestamp - currentTimeMillis <= TxConstant.VERIFY_OFFSET) {
                     break;
                 }
-                Transaction tx = txVerifiedPool.get(chain);
+                Transaction tx = packablePool.get(chain);
                 if (tx == null) {
                     try {
                         Thread.sleep(100L);
@@ -671,11 +670,11 @@ public class TransactionServiceImpl implements TransactionService {
                 }
                 long txSize = tx.size();
                 if ((totalSize + txSize) > maxTxDataSize) {
-                    txVerifiedPool.addInFirst(chain, tx, false);
+                    packablePool.addInFirst(chain, tx, false);
                     break;
                 }
                 //从已确认的交易中进行重复交易判断
-                Transaction repeatTx = confirmedTransactionService.getConfirmedTransaction(chain, tx.getHash());
+                Transaction repeatTx = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
                 if (repeatTx != null) {
                     clearInvalidTx(chain, tx);
                     continue;
@@ -734,7 +733,7 @@ public class TransactionServiceImpl implements TransactionService {
         } catch (NulsException e) {
             //可打包交易,全加回去
             for(Transaction tx : packingTxList){
-                txVerifiedPool.addInFirst(chain, tx, false);
+                packablePool.addInFirst(chain, tx, false);
             }
             chain.getLogger().error(e);
             throw new NulsException(e);
@@ -848,7 +847,7 @@ public class TransactionServiceImpl implements TransactionService {
         for (String txHex : txHexList) {
             //将txHex转换为Transaction对象
             Transaction tx = TxUtil.getTransaction(txHex);
-            Transaction transaction = confirmedTransactionService.getConfirmedTransaction(chain, tx.getHash());
+            Transaction transaction = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
             if(null != transaction){
                 //交易已存在于已确认块中
                 return verifyTxResult;
@@ -858,7 +857,7 @@ public class TransactionServiceImpl implements TransactionService {
                 CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
                 if (crossTxData.getChainId() != chain.getChainId()) {
                     //如果是跨链交易，发起链不是当前链，则核对(跨链验证的结果)
-                    CrossChainTx crossChainTx = crossChainTxStorageService.getTx(crossTxData.getChainId(), tx.getHash());
+                    CrossTx crossTx = ctxStorageService.getTx(crossTxData.getChainId(), tx.getHash());
                     //todo
                     /**
                      * 核对(跨链验证的结果)
@@ -899,8 +898,8 @@ public class TransactionServiceImpl implements TransactionService {
         if(rs){
             for(Transaction tx : txList){
                 //如果该交易不在交易管理待打包库中，则进行保存
-                if(null == txVerifiedStorageService.getTx(chain.getChainId(), tx.getHash())){
-                    txVerifiedStorageService.putTx(chain.getChainId(), tx);
+                if(null == unconfirmedTxStorageService.getTx(chain.getChainId(), tx.getHash())){
+                    unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
                     //保存到h2数据库
                     transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
                 }
@@ -920,7 +919,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public void clearInvalidTx(Chain chain, Transaction tx) {
 
-        txVerifiedStorageService.removeTx(chain.getChainId(), tx.getHash());
+        unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
         //移除H2交易记录
         transactionH2Service.deleteTx(tx);
         try {

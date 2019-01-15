@@ -1,18 +1,18 @@
 package io.nuls.transaction.db.rocksdb.storage;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.CrossTx;
 
 import java.util.List;
 
 /**
- * 验证过程中的跨链交易
+ * 其他链发送过来的跨链交易,从开始跨链验证时就进行存储
  * Cross-chain transaction in verification
  *
  * @author: Charlie
  * @date: 2018/11/13
  */
-public interface CrossChainTxStorageService {
+public interface CtxStorageService {
 
     /**
      * 新增或修改跨链交易数据
@@ -21,7 +21,7 @@ public interface CrossChainTxStorageService {
      * @param ctx
      * @return
      */
-    boolean putTx(int chainId, CrossChainTx ctx);
+    boolean putTx(int chainId, CrossTx ctx);
 
     /**
      * 批量新增跨链交易数据
@@ -30,7 +30,7 @@ public interface CrossChainTxStorageService {
      * @param ctxList
      * @return
      */
-    boolean putTxs(int chainId, List<CrossChainTx> ctxList);
+    boolean putTxs(int chainId, List<CrossTx> ctxList);
 
     /**
      * 删除跨链交易
@@ -48,7 +48,7 @@ public interface CrossChainTxStorageService {
      * @param hash
      * @return
      */
-    CrossChainTx getTx(int chainId, NulsDigestData hash);
+    CrossTx getTx(int chainId, NulsDigestData hash);
 
     /**
      * 查询指定链下所有跨链交易
@@ -57,6 +57,6 @@ public interface CrossChainTxStorageService {
      * @param chainId
      * @return
      */
-    List<CrossChainTx> getTxList(int chainId);
+    List<CrossTx> getTxList(int chainId);
 
 }

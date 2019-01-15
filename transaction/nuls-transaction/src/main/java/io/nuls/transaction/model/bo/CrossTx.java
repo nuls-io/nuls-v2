@@ -43,7 +43,7 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018/11/13
  */
-public class CrossChainTx extends BaseNulsData {
+public class CrossTx extends BaseNulsData {
 
     /** 该跨链交易在本链中的验证状态 */
     private int state;

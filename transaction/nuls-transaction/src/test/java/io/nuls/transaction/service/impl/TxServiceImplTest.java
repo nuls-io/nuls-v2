@@ -2,18 +2,8 @@ package io.nuls.transaction.service.impl;
 
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.I18nUtils;
-import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
-import io.nuls.transaction.db.rocksdb.storage.impl.LanguageStorageServiceImpl;
-import io.nuls.transaction.init.TransactionBootStrap;
 import io.nuls.transaction.model.dto.CoinDTO;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +11,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TransactionServiceImplTest {
+public class TxServiceImplTest {
 
     /**
      * RsPSmnARhBFh3ueSnv3wJDisbvxC83930
@@ -44,7 +34,7 @@ public class TransactionServiceImplTest {
     static List<CoinTo> coinTos = new ArrayList<>();
 
     @Autowired
-    TransactionServiceImpl transactionServiceImpl = new TransactionServiceImpl();
+    TxServiceImpl transactionServiceImpl = new TxServiceImpl();
     @Before
     public void setUp() throws Exception {
         //初始化上下文
@@ -109,7 +99,7 @@ public class TransactionServiceImplTest {
 
         tos.add(coin5);
         tos.add(coin6);
-        //transactionService = SpringLiteContext.getBean(TransactionService.class);
+        //transactionService = SpringLiteContext.getBean(TxService.class);
     }
 
 

@@ -19,7 +19,7 @@ import java.util.Map;
  * @author: Charlie
  * @date: 2018/11/22
  */
-public interface TransactionService {
+public interface TxService {
 
     /**
      * 注册交易

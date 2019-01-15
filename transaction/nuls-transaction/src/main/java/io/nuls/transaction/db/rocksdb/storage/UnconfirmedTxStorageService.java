@@ -6,13 +6,13 @@ import io.nuls.base.data.Transaction;
 import java.util.List;
 
 /**
- * 验证通过但未打包的交易
+ * 验证通过但未打包的交易(未确认交易)
  * Save verified transaction (unpackaged)
  *
  * @author: Charlie
  * @date: 2018/11/13
  */
-public interface TxVerifiedStorageService {
+public interface UnconfirmedTxStorageService {
 
     /**
      * 保存已验证交易

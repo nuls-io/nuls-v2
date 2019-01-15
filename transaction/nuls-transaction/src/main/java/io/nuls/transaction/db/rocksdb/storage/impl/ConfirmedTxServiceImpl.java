@@ -14,9 +14,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.db.rocksdb.storage.TransactionStorageService;
-import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.utils.DBUtil;
+import io.nuls.transaction.db.rocksdb.storage.ConfirmedTxStorageService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,7 +27,7 @@ import java.util.Map;
  * @date: 2018/11/13
  */
 @Service
-public class TransactionStorageServiceImpl implements TransactionStorageService, InitializingBean {
+public class ConfirmedTxServiceImpl implements ConfirmedTxStorageService, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws NulsException {

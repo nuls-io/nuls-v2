@@ -1,7 +1,6 @@
 package io.nuls.transaction.db.rocksdb.storage.impl;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Service;
@@ -10,10 +9,8 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.constant.TxErrorCode;
-import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
-import io.nuls.transaction.model.bo.CrossChainTx;
-import io.nuls.transaction.utils.DBUtil;
-import io.nuls.transaction.utils.TxUtil;
+import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
+import io.nuls.transaction.model.bo.CrossTx;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,14 +23,14 @@ import java.util.Map;
  * @date: 2018/11/13
  */
 @Service
-public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageService, InitializingBean {
+public class CtxStorageServiceImpl implements CtxStorageService, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws NulsException {
     }
 
     @Override
-    public boolean putTx(int chainId, CrossChainTx ctx) {
+    public boolean putTx(int chainId, CrossTx ctx) {
         if (null == ctx) {
             return false;
         }
@@ -54,13 +51,13 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
     }
 
     @Override
-    public boolean putTxs(int chainId, List<CrossChainTx> ctxList) {
+    public boolean putTxs(int chainId, List<CrossTx> ctxList) {
         if (null == ctxList || ctxList.size() == 0) {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
         }
         Map<byte[], byte[]> ctxMap = new HashMap<>();
         try {
-            for (CrossChainTx ctx : ctxList) {
+            for (CrossTx ctx : ctxList) {
                 //序列化对象为byte数组存储
                 ctxMap.put(ctx.getTx().getHash().serialize(), ctx.serialize());
             }
@@ -89,7 +86,7 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
     }
 
     @Override
-    public CrossChainTx getTx(int chainId, NulsDigestData hash) {
+    public CrossTx getTx(int chainId, NulsDigestData hash) {
         if (hash == null) {
             return null;
         }
@@ -105,7 +102,7 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
         if (null == txBytes) {
             return null;
         }
-        CrossChainTx tx = new CrossChainTx();
+        CrossTx tx = new CrossTx();
         try {
             tx.parse(txBytes, 0);
         } catch (NulsException e) {
@@ -115,13 +112,13 @@ public class CrossChainTxStorageServiceImpl implements CrossChainTxStorageServic
     }
 
     @Override
-    public List<CrossChainTx> getTxList(int chainId) {
-        List<CrossChainTx> ccTxPoList = new ArrayList<>();
+    public List<CrossTx> getTxList(int chainId) {
+        List<CrossTx> ccTxPoList = new ArrayList<>();
         try {
             List<byte[]> list = RocksDBService.valueList(TxDBConstant.DB_PROGRESS_CROSSCHAIN + chainId);
             if (list != null) {
                 for (byte[] value : list) {
-                    CrossChainTx ccTx = new CrossChainTx();
+                    CrossTx ccTx = new CrossTx();
                     //将byte数组反序列化为Object返回
                     ccTx.parse(value, 0);
                     ccTxPoList.add(ccTx);

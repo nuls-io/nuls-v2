@@ -6,12 +6,12 @@ import io.nuls.base.data.Transaction;
 import java.util.List;
 
 /**
- * 已打包进区块确认的交易
+ * 已打包进区块确认的交易(已确认交易)
  *
  * @author: Charlie
  * @date: 2018/11/13
  */
-public interface TransactionStorageService {
+public interface ConfirmedTxStorageService {
 
     /**
      * 保存交易数据

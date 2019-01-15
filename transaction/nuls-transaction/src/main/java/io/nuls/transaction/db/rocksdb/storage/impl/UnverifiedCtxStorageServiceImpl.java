@@ -29,8 +29,8 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxDBConstant;
-import io.nuls.transaction.db.rocksdb.storage.CrossChainTxUnprocessedStorageService;
-import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.db.rocksdb.storage.UnverifiedCtxStorageService;
+import io.nuls.transaction.model.bo.CrossTx;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,10 +41,10 @@ import java.util.List;
  * @date: 2018-12-27
  */
 @Service
-public class CrossChainTxUnprocessedStorageServiceImpl implements CrossChainTxUnprocessedStorageService {
+public class UnverifiedCtxStorageServiceImpl implements UnverifiedCtxStorageService {
 
     @Override
-    public boolean putTx(int chainId, CrossChainTx ctx) {
+    public boolean putTx(int chainId, CrossTx ctx) {
         if (null == ctx) {
             return false;
         }
@@ -65,15 +65,15 @@ public class CrossChainTxUnprocessedStorageServiceImpl implements CrossChainTxUn
     }
 
     @Override
-    public boolean removeTxList(int chainId, List<CrossChainTx> ctxList) {
+    public boolean removeTxList(int chainId, List<CrossTx> ctxList) {
         //check params
         if (ctxList == null || ctxList.size() == 0) {
             return false;
         }
         try {
             List<byte[]> hashList = new ArrayList<>();
-            for (CrossChainTx crossChainTx : ctxList) {
-                hashList.add(crossChainTx.getTx().getHash().serialize());
+            for (CrossTx crossTx : ctxList) {
+                hashList.add(crossTx.getTx().getHash().serialize());
             }
             return RocksDBService.deleteKeys(TxDBConstant.DB_UNPROCESSED_CROSSCHAIN + chainId, hashList);
         } catch (Exception e) {
@@ -83,13 +83,13 @@ public class CrossChainTxUnprocessedStorageServiceImpl implements CrossChainTxUn
     }
 
     @Override
-    public List<CrossChainTx> getTxList(int chainId) {
-        List<CrossChainTx> ccTxPoList = new ArrayList<>();
+    public List<CrossTx> getTxList(int chainId) {
+        List<CrossTx> ccTxPoList = new ArrayList<>();
         try {
             List<byte[]> list = RocksDBService.valueList(TxDBConstant.DB_UNPROCESSED_CROSSCHAIN + chainId);
             if (list != null) {
                 for (byte[] value : list) {
-                    CrossChainTx ccTx = new CrossChainTx();
+                    CrossTx ccTx = new CrossTx();
                     //将byte数组反序列化为Object返回
                     ccTx.parse(value, 0);
                     ccTxPoList.add(ccTx);
@@ -102,7 +102,7 @@ public class CrossChainTxUnprocessedStorageServiceImpl implements CrossChainTxUn
     }
 
     @Override
-    public CrossChainTx getTx(int chainId, NulsDigestData hash) {
+    public CrossTx getTx(int chainId, NulsDigestData hash) {
         if (null == hash) {
             return null;
         }
@@ -116,7 +116,7 @@ public class CrossChainTxUnprocessedStorageServiceImpl implements CrossChainTxUn
         try {
             byte[] bytes = RocksDBService.get(TxDBConstant.DB_UNPROCESSED_CROSSCHAIN + chainId, txHashBytes);
             if (bytes != null) {
-                CrossChainTx ccTx = new CrossChainTx();
+                CrossTx ccTx = new CrossTx();
                 ccTx.parse(bytes, 0);
                 return ccTx;
             }

@@ -25,17 +25,18 @@
 package io.nuls.transaction.db.rocksdb.storage;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.CrossTx;
 
 import java.util.List;
 
 /**
- * 存储从其他链接收的跨链交易,还未进行跨链验证等处理的交易
+ * 存储从其他链接收的跨链交易,还未进行跨链验证等处理的交易,
+ * 先统一存储,再通过task来处理.
  * @author: Charlie
  * @date: 2018-12-27
  */
 
-public interface CrossChainTxUnprocessedStorageService {
+public interface UnverifiedCtxStorageService {
 
     /**
      * 新增或修改跨链交易数据
@@ -44,7 +45,7 @@ public interface CrossChainTxUnprocessedStorageService {
      * @param ctx
      * @return
      */
-    boolean putTx(int chainId, CrossChainTx ctx);
+    boolean putTx(int chainId, CrossTx ctx);
 
     /**
      * 是否已存在交易
@@ -52,7 +53,7 @@ public interface CrossChainTxUnprocessedStorageService {
      * @param hash
      * @return
      */
-    CrossChainTx getTx(int chainId, NulsDigestData hash);
+    CrossTx getTx(int chainId, NulsDigestData hash);
 
     /**
      * 根据交易hash批量删除
@@ -60,7 +61,7 @@ public interface CrossChainTxUnprocessedStorageService {
      * @param ctxList
      * @return 删除是否成功
      */
-    boolean removeTxList(int chainId, List<CrossChainTx> ctxList);
+    boolean removeTxList(int chainId, List<CrossTx> ctxList);
 
 
     /**
@@ -70,5 +71,5 @@ public interface CrossChainTxUnprocessedStorageService {
      * @param chainId
      * @return
      */
-    List<CrossChainTx> getTxList(int chainId);
+    List<CrossTx> getTxList(int chainId);
 }
