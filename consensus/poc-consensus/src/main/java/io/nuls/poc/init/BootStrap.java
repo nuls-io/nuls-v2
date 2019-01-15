@@ -117,7 +117,7 @@ public class BootStrap {
         if (classList == null || classList.size() == 0) {
             return;
         }
-        Map<Integer, TxRegisterDetail> registerDetailMap = new HashMap<>(16);
+        Map<Integer, TxRegisterDetail> registerDetailMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
         for (Class clz : classList) {
             Method[] methods = clz.getMethods();
             for (Method method : methods) {
