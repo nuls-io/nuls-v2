@@ -41,7 +41,6 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.bo.config.ConfigItem;
-import io.nuls.transaction.rpc.call.BlockCall;
 
 import java.util.List;
 import java.util.Map;
@@ -62,8 +61,8 @@ public class ChainManager {
     @Autowired
     private SchedulerManager schedulerManager;
 
-    @Autowired
-    private CrossTxVerifyingManager crossTxVerifyingManager;
+   /* @Autowired
+    private VerifyCtxManager verifyCtxManager;*/
 
     @Autowired
     private TransactionManager transactionManager;
@@ -100,7 +99,7 @@ public class ChainManager {
             //todo 订阅Block模块接口
             //BlockCall.subscriptionNewBlockHeight(chain);
 
-            //Log.debug(JSONUtils.obj2json(chain));
+            Log.debug("\nchain = " +JSONUtils.obj2PrettyJson(chain));
         }
     }
 
@@ -203,7 +202,7 @@ public class ChainManager {
          * 管理接收的其他链创建的跨链交易(如果有), 暂存验证中的跨链交易.
          *  TODO 初始化时需查数据库
          */
-        crossTxVerifyingManager.initCrossTxVerifyingMap(chain);
+//        verifyCtxManager.initCrossTxVerifyingMap(chain);
     }
 
     private void initLogger(Chain chain) {

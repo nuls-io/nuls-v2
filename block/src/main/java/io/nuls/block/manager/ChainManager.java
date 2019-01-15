@@ -25,6 +25,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.exception.ChainRuntimeException;
+import io.nuls.block.message.BlockMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
@@ -223,7 +224,7 @@ public class ChainManager {
         }
 
         //6.收尾工作
-        deleteForkChain(chainId, forkChain, false);
+        deleteForkChain(chainId, forkChain);
         return true;
     }
 
@@ -258,19 +259,14 @@ public class ChainManager {
     }
 
     /**
-     * 直接从集合中删除分叉链,与removeForkChain的应用场景不一样
+     * 删除分叉链，与removeOrphanChain方法的差别在于本方法直接删除对象，不维护引用状态
      *
      * @param chainId
      * @return
      */
-    public static void deleteForkChain(int chainId, Chain chain, boolean recursively) {
+    public static void deleteForkChain(int chainId, Chain chain) {
         forkChains.get(chainId).remove(chain);
         chainStorageService.remove(chainId, chain.getHashList());
-        if (recursively) {
-            for (Chain son : chain.getSons()) {
-                deleteForkChain(chainId, son, true);
-            }
-        }
     }
 
     /**
@@ -279,7 +275,7 @@ public class ChainManager {
      * @param chainId
      * @return
      */
-    public static boolean removeForkChain(int chainId, Chain chain) {
+    public static int removeForkChain(int chainId, Chain chain) {
         boolean result = false;
         //无子链
         if (chain.getSons().size() == 0) {
@@ -290,6 +286,7 @@ public class ChainManager {
             //移除内存中对象
             boolean r3 = forkChains.get(chainId).remove(chain);
             result = r1 && r2 && r3;
+            return result ? chain.getHashList().size() : -1;
         }
         //有子链
         if (chain.getSons().size() > 0) {
@@ -316,8 +313,9 @@ public class ChainManager {
             //移除内存中对象
             boolean r2 = forkChains.get(chainId).remove(lastSon);
             result = r1 && r2;
+            return result ? (int) remove : -1;
         }
-        return result;
+        return -1;
     }
 
     /**
@@ -359,20 +357,21 @@ public class ChainManager {
      * @param chain
      * @throws Exception
      */
-    public static boolean removeOrphanChain(int chainId, Chain chain) {
+    public static int removeOrphanChain(int chainId, Chain chain) {
         boolean result = false;
         //无子链
         if (chain.getSons().size() == 0) {
+            boolean r1 = true;
             if (chain.getParent() != null) {
                 //更新父链的引用
-                boolean r1 = chain.getParent().getSons().remove(chain);
-                result = r1;
+                r1 = chain.getParent().getSons().remove(chain);
             }
             //移除区块存储
             boolean r2 = chainStorageService.remove(chainId, chain.getHashList());
             //移除内存中对象
             boolean r3 = orphanChains.get(chainId).remove(chain);
-            result = r2 && r3;
+            result = r1 && r2 && r3;
+            return result ? chain.getHashList().size() : -1;
         }
         //有子链
         if (chain.getSons().size() > 0) {
@@ -399,8 +398,9 @@ public class ChainManager {
             //移除内存中对象
             boolean r2 = orphanChains.get(chainId).remove(lastSon);
             result = r1 && r2;
+            return result ? (int) remove : -1;
         }
-        return result;
+        return -1;
     }
 
     /**
@@ -467,19 +467,14 @@ public class ChainManager {
     }
 
     /**
-     * 清理孤儿链
+     * 删除孤儿链，与removeOrphanChain方法的差别在于本方法直接删除对象，不维护引用状态
      *
      * @param chainId
      * @param orphanChain
      */
-    public static void deleteOrphanChain(Integer chainId, Chain orphanChain, boolean recursively) {
+    public static void deleteOrphanChain(Integer chainId, Chain orphanChain) {
         orphanChains.get(chainId).remove(orphanChain);
         chainStorageService.remove(chainId, orphanChain.getHashList());
-        if (recursively) {
-            for (Chain son : orphanChain.getSons()) {
-                deleteOrphanChain(chainId, son, true);
-            }
-        }
     }
 
     /**

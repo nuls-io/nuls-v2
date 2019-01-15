@@ -26,8 +26,8 @@ import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionPO;
-import io.nuls.transaction.service.ConfirmedTransactionService;
-import io.nuls.transaction.service.TransactionService;
+import io.nuls.transaction.service.ConfirmedTxService;
+import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.io.IOException;
@@ -44,9 +44,9 @@ import java.util.Map;
 public class TransactionCmd extends BaseCmd {
 
     @Autowired
-    private TransactionService transactionService;
+    private TxService txService;
     @Autowired
-    private ConfirmedTransactionService confirmedTransactionService;
+    private ConfirmedTxService confirmedTxService;
     @Autowired
     private ChainManager chainManager;
     @Autowired
@@ -93,14 +93,14 @@ public class TransactionCmd extends BaseCmd {
                 txRegister.setModuleCode(moduleTxRegisterDto.getModuleCode());
                 txRegister.setModuleValidator(moduleTxRegisterDto.getModuleValidator());
                 txRegister.setTxType(txRegisterDto.getTxType());
-                txRegister.setValidator(txRegisterDto.getValidator());
-                txRegister.setCommit(txRegisterDto.getCommit());
-                txRegister.setRollback(txRegisterDto.getRollback());
+                txRegister.setValidator(txRegisterDto.getValidateCmd());
+                txRegister.setCommit(txRegisterDto.getCommitCmd());
+                txRegister.setRollback(txRegisterDto.getRollbackCmd());
                 txRegister.setSystemTx(txRegisterDto.isSystemTx());
                 txRegister.setUnlockTx(txRegisterDto.isUnlockTx());
                 txRegister.setVerifySignature(txRegisterDto.isVerifySignature());
 
-                result = transactionService.register(chain, txRegister);
+                result = txService.register(chain, txRegister);
             }
 
         } catch (IOException e) {
@@ -137,7 +137,7 @@ public class TransactionCmd extends BaseCmd {
             //将txHex转换为Transaction对象
             Transaction transaction = TxUtil.getTransaction(txHex);
             //将交易放入待验证本地交易队列中
-            transactionService.newTx(chain, transaction);
+            txService.newTx(chain, transaction);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -171,7 +171,7 @@ public class TransactionCmd extends BaseCmd {
             //交易数据最大容量值
             int maxTxDataSize = (int) params.get("maxTxDataSize");
 
-            List<String> txHexlist = transactionService.getPackableTxs(chain, endTimestamp, maxTxDataSize);
+            List<String> txHexlist = txService.getPackableTxs(chain, endTimestamp, maxTxDataSize);
             Map<String, List<String>> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
             map.put("list", txHexlist);
             return success(map);
@@ -211,7 +211,7 @@ public class TransactionCmd extends BaseCmd {
             }
             //批量保存已确认交易
             BlockHeaderDigest blockHeaderDigest = TxUtil.getInstance((String)params.get("secondaryDataHex"), BlockHeaderDigest.class);
-            result = confirmedTransactionService.saveTxList(chain, txHashList, blockHeaderDigest);
+            result = confirmedTxService.saveTxList(chain, txHashList, blockHeaderDigest);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
@@ -252,7 +252,7 @@ public class TransactionCmd extends BaseCmd {
             }
             //批量回滚已确认交易
             BlockHeaderDigest blockHeaderDigest = TxUtil.getInstance((String)params.get("secondaryDataHex"), BlockHeaderDigest.class);
-            result = confirmedTransactionService.rollbackTxList(chain, txHashList, blockHeaderDigest);
+            result = confirmedTxService.rollbackTxList(chain, txHashList, blockHeaderDigest);
 
         } catch (NulsException e) {
             return failed(e.getErrorCode());
@@ -307,7 +307,7 @@ public class TransactionCmd extends BaseCmd {
             if (!NulsDigestData.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
-            Transaction tx = confirmedTransactionService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            Transaction tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             if(tx == null){
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -370,7 +370,7 @@ public class TransactionCmd extends BaseCmd {
             }
             int chainId = (Integer) chainIdObj;
             List<String> txHexList = (List<String>) txHexListObj;
-            verifyTxResult = transactionService.batchVerify(chainManager.getChain(chainId), txHexList);
+            verifyTxResult = txService.batchVerify(chainManager.getChain(chainId), txHexList);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {

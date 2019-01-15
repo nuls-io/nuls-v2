@@ -22,27 +22,27 @@
  * SOFTWARE.
  *
  */
-package io.nuls.transaction.model.bo;
+
+package io.nuls.transaction.cache;
+
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.transaction.utils.InventoryFilter;
 
 /**
- * 模块运行状态枚举类
- * Module Running Status Enumeration Class
+ * 用于接收交易去重
  *
- * @author qinyifeng
- * @date 2018/12/11
+ * @author: qinyifeng
+ * @date: 2018/12/26
  */
-/*
-public enum RunningStatus {
+public class TxDuplicateRemoval {
 
-    */
-/*
-    警告，以下顺序不能调整，否则某些地方的判断会出错
-    Warning, the following order cannot be adjusted, otherwise the judgment in some places may go wrong
-    *//*
+    private static InventoryFilter FILTER = new InventoryFilter( 1000000);
 
-    INITING,
-    LOADING_CACHE,
-    WAIT_RUNNING,
-    RUNNING,
+    public static boolean mightContain(NulsDigestData hash) {
+        return FILTER.contains(hash.getDigestBytes());
+    }
+
+    public static void insert(NulsDigestData hash) {
+        FILTER.insert(hash.getDigestBytes());
+    }
 }
-*/

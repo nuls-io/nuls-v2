@@ -22,27 +22,30 @@
  * SOFTWARE.
  *
  */
-package io.nuls.transaction.model.bo;
+package io.nuls.transaction.db.rocksdb.storage;
+
+import io.nuls.base.data.Transaction;
+import io.nuls.transaction.model.bo.Chain;
 
 /**
- * 模块运行状态枚举类
- * Module Running Status Enumeration Class
+ * 本链内发起的所有未验证的交易，包括普通交易和跨链交易
  *
- * @author qinyifeng
- * @date 2018/12/11
+ * @author: qinyifeng
+ * @date: 2018/11/29
  */
-/*
-public enum RunningStatus {
+public interface UnverifiedTxStorageService {
 
-    */
-/*
-    警告，以下顺序不能调整，否则某些地方的判断会出错
-    Warning, the following order cannot be adjusted, otherwise the judgment in some places may go wrong
-    *//*
+    /**
+     * 保存未验证交易数据到FS队列中
+     * @param chain
+     * @param tx
+     * @return
+     */
+    boolean putTx(Chain chain, Transaction tx);
 
-    INITING,
-    LOADING_CACHE,
-    WAIT_RUNNING,
-    RUNNING,
+    /**
+     * 从FS队列中获取未验证交易数据
+     * @return
+     */
+    Transaction pollTx(Chain chain);
 }
-*/

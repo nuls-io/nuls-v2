@@ -22,51 +22,45 @@
 
 package io.nuls.block.test;
 
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.ioc.SpringLiteContext;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.constant.Constant.DATA_PATH;
+import static org.junit.Assert.assertEquals;
 
-@Service
-public class TransactionStorageServiceImpl implements TransactionStorageService {
-    @Override
-    public boolean save(int chainId, Transaction transaction) {
-        byte[] bytes;
-        try {
-            bytes = transaction.serialize();
-            return RocksDBService.put("tx" + chainId, transaction.getHash().serialize(), bytes);
-        } catch (Exception e) {
-            Log.error(e);
-            return false;
-        }
+public class TransactionStorageServiceImplTest {
+
+    private static TransactionStorageService service;
+    private static Transaction transaction;
+
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        SpringLiteContext.init("io.nuls.block");
+        RocksDBService.init(DATA_PATH);
+        service = SpringLiteContext.getBean(TransactionStorageService.class);
+        transaction = BlockGenerator.generate(null).getTxs().get(0);
     }
 
-    @Override
-    public Transaction query(int chainId, NulsDigestData hash) {
-        try {
-            byte[] bytes = RocksDBService.get("tx" + chainId, hash.serialize());
-            if (bytes == null) {
-                return null;
-            }
-            Transaction po = new Transaction();
-            po.parse(new NulsByteBuffer(bytes));
-            return po;
-        } catch (Exception e) {
-            Log.error(e);
-            return null;
-        }
+    @Test
+    public void save() {
+        NulsDigestData hash = transaction.getHash();
+        service.save(1, transaction);
+        Transaction transaction = service.query(1, hash);
+        NulsDigestData hash1 = transaction.getHash();
+        System.out.println(hash);
+        assertEquals(hash, hash1);
     }
 
-    @Override
-    public boolean remove(int chainId, NulsDigestData hash) {
-        try {
-            return RocksDBService.delete("tx" + chainId, hash.serialize());
-        } catch (Exception e) {
-            Log.error(e);
-            return false;
-        }
+    @Test
+    public void remove() {
+        NulsDigestData hash = transaction.getHash();
+        service.save(1, transaction);
+        service.remove(1, hash);
+        Transaction tx = service.query(1, hash);
+        assertEquals(null, tx);
     }
 }

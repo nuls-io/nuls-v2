@@ -37,7 +37,7 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.CrossTx;
 import io.nuls.transaction.model.bo.CrossTxSignResult;
 import io.nuls.transaction.model.bo.CrossTxVerifyResult;
 import io.nuls.transaction.model.bo.Node;
@@ -194,8 +194,8 @@ public class TestConstant {
         return tx;
     }
 
-    public static CrossChainTx createCrossChainTx() throws Exception {
-        CrossChainTx obj = new CrossChainTx();
+    public static CrossTx createCrossChainTx() throws Exception {
+        CrossTx obj = new CrossTx();
         obj.setState(4);
         obj.setSenderChainId(324);
         obj.setSenderNodeId("23");

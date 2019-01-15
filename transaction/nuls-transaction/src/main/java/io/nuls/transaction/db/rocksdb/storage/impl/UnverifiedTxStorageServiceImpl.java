@@ -22,27 +22,50 @@
  * SOFTWARE.
  *
  */
-package io.nuls.transaction.model.bo;
+
+package io.nuls.transaction.db.rocksdb.storage.impl;
+
+
+import io.nuls.base.data.Transaction;
+import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.log.Log;
+import io.nuls.transaction.db.rocksdb.storage.UnverifiedTxStorageService;
+import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.utils.TxUtil;
+
+import java.io.IOException;
 
 /**
- * 模块运行状态枚举类
- * Module Running Status Enumeration Class
+ * 未验证交易存储
  *
- * @author qinyifeng
- * @date 2018/12/11
+ * @author: qinyifeng
+ * @date: 2018/11/29
  */
-/*
-public enum RunningStatus {
+@Service
+public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageService {
 
-    */
-/*
-    警告，以下顺序不能调整，否则某些地方的判断会出错
-    Warning, the following order cannot be adjusted, otherwise the judgment in some places may go wrong
-    *//*
+    @Override
+    public boolean putTx(Chain chain, Transaction tx) {
+        try {
+            chain.getUnverifiedQueue().offer(tx.serialize());
+            return true;
+        } catch (IOException e) {
+            Log.error(e);
+        }
+        return false;
+    }
 
-    INITING,
-    LOADING_CACHE,
-    WAIT_RUNNING,
-    RUNNING,
+    @Override
+    public Transaction pollTx(Chain chain) {
+        byte[] bytes = chain.getUnverifiedQueue().poll();
+        if (null == bytes) {
+            return null;
+        }
+        try {
+            return TxUtil.getTransaction(bytes);
+        } catch (Exception e) {
+            Log.error(e);
+        }
+        return null;
+    }
 }
-*/
