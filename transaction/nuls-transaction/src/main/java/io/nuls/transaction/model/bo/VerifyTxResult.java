@@ -25,25 +25,28 @@
 package io.nuls.transaction.model.bo;
 
 /**
- * 验证CoinData 返回结果
+ * 验证交易结果组合封装 返回结果
  * @author: Charlie
  * @date: 2019-01-11
  */
-public class VerifyCoinDataResult {
+public class VerifyTxResult {
 
     /** 1校验通过，2孤儿交易 3双花 4 其他异常*/
     private int code;
     /** 校验返回描述*/
     private String desc;
 
-    private final int SUCCESS = 1;
-    private final int ORPHAN = 2;
-    private final int DOUBLE_SPENDING = 3;
-    private final int OTHER_EXCEPTION = 4;
+    public static final int SUCCESS = 1;
+    public static final int ORPHAN = 2;
+    public static final int DOUBLE_SPENDING = 3;
+    public static final int OTHER_EXCEPTION = 4;
 
-    public VerifyCoinDataResult(int code, String desc) {
+    public VerifyTxResult(int code, String desc) {
         this.code = code;
         this.desc = desc;
+    }
+    public VerifyTxResult(int code) {
+        this.code = code;
     }
 
     public boolean success(){

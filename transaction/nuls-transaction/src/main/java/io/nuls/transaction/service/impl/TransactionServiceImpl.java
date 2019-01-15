@@ -47,10 +47,7 @@ import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
 import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
 import io.nuls.transaction.manager.TransactionManager;
-import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.CrossChainTx;
-import io.nuls.transaction.model.bo.CrossTxData;
-import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.rpc.call.*;
@@ -843,7 +840,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public boolean batchVerify(Chain chain, List<String> txHexList) throws NulsException {
+    public VerifyTxResult batchVerify(Chain chain, List<String> txHexList) throws NulsException {
+        VerifyTxResult verifyTxResult = new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION);
         List<Transaction> txList = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>();
@@ -853,7 +851,7 @@ public class TransactionServiceImpl implements TransactionService {
             Transaction transaction = confirmedTransactionService.getConfirmedTransaction(chain, tx.getHash());
             if(null != transaction){
                 //交易已存在于已确认块中
-                return false;
+                return verifyTxResult;
             }
             txList.add(tx);
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
@@ -865,12 +863,12 @@ public class TransactionServiceImpl implements TransactionService {
                     /**
                      * 核对(跨链验证的结果)
                      */
-                    return false;
+                    return verifyTxResult;
                 }
             }
             //验证单个交易
             if (!transactionManager.verify(chain, tx)) {
-                return false;
+                return verifyTxResult;
             }
             /* 暂时取消单个验证coinData
             if (!LedgerCall.verifyCoinData(chain, tx, false)) {
@@ -890,8 +888,9 @@ public class TransactionServiceImpl implements TransactionService {
         LedgerCall.coinDataBatchNotify(chain);
         //todo 批量验证coinData，接口和单个的区别？
         for(Transaction tx : txList) {
-            if (!LedgerCall.verifyCoinData(chain, tx, true).success()) {
-                return false;
+            verifyTxResult = LedgerCall.verifyCoinData(chain, tx, true);
+            if (!verifyTxResult.success()) {
+                return verifyTxResult;
             }
         }
 
@@ -907,7 +906,8 @@ public class TransactionServiceImpl implements TransactionService {
                 }
             }
         }
-        return true;
+        verifyTxResult.setCode(VerifyTxResult.SUCCESS);
+        return verifyTxResult;
     }
 
     @Override
