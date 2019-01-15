@@ -196,6 +196,28 @@ public class NodeGroupRpc extends BaseCmd {
         return nodeGroupVo;
     }
     /**
+     * nw_getConnectAccountByChainId
+     * 查看指定网络组信息
+     */
+    @CmdAnnotation(cmd = "nw_getConnectAccount", version = 1.0,
+            description = "nw_getConnectAccount")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "isCross", parameterType = "boolean")
+    public Response getConnectAccount(Map  params) {
+        int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+        NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
+        boolean isCross = Boolean.valueOf(String.valueOf(params.get("isCross")));
+        if(isCross){
+            return success(nodeGroup.getConnectCrossNodeMap().size());
+        }else{
+            return success(nodeGroup.getConnectNodeMap().size());
+        }
+
+    }
+
+
+
+    /**
      * nw_delNodeGroup
      * 注销指定网络组信息
      */
