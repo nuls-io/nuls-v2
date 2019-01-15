@@ -46,17 +46,6 @@ import static io.nuls.block.utils.LoggerUtil.Log;
  */
 public class NetworkUtil {
 
-    static {
-        /*
-         * 从kernel获取所有接口列表（实际使用中不需要每次都调用这句话,同步一次即可）
-         */
-        try {
-            CmdDispatcher.syncKernel();
-        } catch (Exception e) {
-            Log.error(e);
-        }
-    }
-
     /**
      * 根据链ID获取可用节点
      *
@@ -117,14 +106,14 @@ public class NetworkUtil {
      * @param excludeNodes 排除的节点
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes) {
+    public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes, String command) {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", HexUtil.encode(message.serialize()));
-            params.put("command", message.getCommand());
+            params.put("command", command);
 
             return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
         } catch (Exception e) {
@@ -141,14 +130,14 @@ public class NetworkUtil {
      * @param nodeId
      * @return
      */
-    public static boolean sendToNode(int chainId, BaseMessage message, String nodeId) {
+    public static boolean sendToNode(int chainId, BaseMessage message, String nodeId, String command) {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("nodes", nodeId);
             params.put("messageBody", HexUtil.encode(message.serialize()));
-            params.put("command", message.getCommand());
+            params.put("command", command);
 
             return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
         } catch (Exception e) {
@@ -164,24 +153,36 @@ public class NetworkUtil {
      * @param message
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message) {
-        return broadcast(chainId, message, null);
+    public static boolean broadcast(int chainId, BaseMessage message, String command) {
+        return broadcast(chainId, message, null, command);
     }
 
+    /**
+     * 针对某个异步消息返回执行结果
+     *
+     * @param chainId
+     * @param hash
+     * @param nodeId
+     */
     public static void sendFail(int chainId, NulsDigestData hash, String nodeId) {
         CompleteMessage message = new CompleteMessage();
         message.setRequestHash(hash);
         message.setSuccess(false);
-        message.setCommand(COMPLETE_MESSAGE);
-        sendToNode(chainId, message, nodeId);
+        sendToNode(chainId, message, nodeId, COMPLETE_MESSAGE);
     }
 
+    /**
+     * 针对某个异步消息返回执行结果
+     *
+     * @param chainId
+     * @param hash
+     * @param nodeId
+     */
     public static void sendSuccess(int chainId, NulsDigestData hash, String nodeId) {
         CompleteMessage message = new CompleteMessage();
         message.setRequestHash(hash);
         message.setSuccess(true);
-        message.setCommand(COMPLETE_MESSAGE);
-        sendToNode(chainId, message, nodeId);
+        sendToNode(chainId, message, nodeId, COMPLETE_MESSAGE);
     }
 
     /**
@@ -197,7 +198,7 @@ public class NetworkUtil {
     public static void setHashAndHeight(int chainId, NulsDigestData hash, long height, String nodeId) {
         try {
             Map<String, Object> params = new HashMap<>(5);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("nodeId", nodeId);
             params.put("blockHeight", height);
@@ -216,9 +217,9 @@ public class NetworkUtil {
      */
     public static long currentTime() {
         try {
-            Map<String, Object> params = new HashMap<>(1);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
+//            Map<String, Object> params = new HashMap<>(1);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
             Map responseData = (Map) response.getResponseData();
             Map result = (Map) responseData.get("nw_currentTimeMillis");
             return (Long) result.get("currentTimeMillis");

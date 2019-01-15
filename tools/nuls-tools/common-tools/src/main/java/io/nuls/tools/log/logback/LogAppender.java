@@ -1,9 +1,7 @@
 package io.nuls.tools.log.logback;
 
-import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
-import ch.qos.logback.classic.filter.ThresholdFilter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.ConsoleAppender;
@@ -26,21 +24,14 @@ public class LogAppender {
      * 通过传入的名字和级别，动态设置appender
      *
      * @param fileName
-     * @param level
      * @return
      */
-    public static RollingFileAppender getAppender(String fileName, Level level){
+    public static RollingFileAppender getAppender(String fileName){
         String rootPath = System.getProperty(PROJECT_PATH);
-        //SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         RollingFileAppender appender = new RollingFileAppender();
-        //这里设置级别过滤器
-        LogFilter levelController = new LogFilter();
-        ThresholdFilter levelFilter = levelController.getThresholdFilter(level);
-        levelFilter.start();
-        appender.addFilter(levelFilter);
-        //设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-        //但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
+        /*设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
+        但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。*/
         appender.setContext(context);
         //设置文件名
         appender.setFile(OptionHelper.substVars(rootPath+"/logs/"+"/"+fileName + ".log",context));

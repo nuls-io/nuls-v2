@@ -33,8 +33,7 @@ import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -44,6 +43,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.StampedLock;
 
+import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
@@ -53,17 +53,15 @@ import static io.nuls.block.utils.LoggerUtil.Log;
  * @version 1.0
  * @date 18-11-8 下午5:49
  */
-@Component
 public class BlockSynchronizer implements Runnable {
 
     private static final BlockSynchronizer INSTANCE = new BlockSynchronizer();
     /**
      * 保存多条链的区块同步状态
      */
-    @Autowired
     private BlockService blockService;
 
-    private BlockSynchronizer() {}
+    private BlockSynchronizer() {this.blockService = SpringLiteContext.getBean(BlockService.class);}
 
     public static BlockSynchronizer getInstance() {
         return INSTANCE;
@@ -106,14 +104,14 @@ public class BlockSynchronizer implements Runnable {
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
                 Log.warn("chain-" + chainId + ", first start");
                 context.setStatus(RunningStatusEnum.RUNNING);
-                ConsensusUtil.notice(chainId, 1);
+                ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                 return true;
             }
             //检查本地区块状态
             if (!checkLocalBlock(chainId, params)) {
                 Log.warn("chain-" + chainId + ", local blocks is newest");
                 context.setStatus(RunningStatusEnum.RUNNING);
-                ConsensusUtil.notice(chainId, 1);
+                ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                 return true;
             }
             context.setStatus(RunningStatusEnum.SYNCHRONIZING);
@@ -147,7 +145,7 @@ public class BlockSynchronizer implements Runnable {
                 if (checkIsNewest(chainId, params, context)) {
                     Log.info("block syn complete successfully");
                     context.setStatus(RunningStatusEnum.RUNNING);
-                    ConsensusUtil.notice(chainId, 1);
+                    ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                     return true;
                 } else {
                     Log.info("block syn complete but is not newest");

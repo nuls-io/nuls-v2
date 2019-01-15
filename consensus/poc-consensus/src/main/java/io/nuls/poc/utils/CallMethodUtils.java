@@ -40,7 +40,7 @@ public class CallMethodUtils {
      * */
     public static HashMap accountValid(int chainId, String address, String password)throws NulsException {
         try {
-            Map<String,Object> callParams = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+            Map<String,Object> callParams = new HashMap<>(4);
             callParams.put("chainId",chainId);
             callParams.put("address",address);
             callParams.put("password",password);
@@ -76,7 +76,7 @@ public class CallMethodUtils {
                 p2PHKSignature = SignatureUtil.createSignatureByPriKey(tx,priKey);
             }
             else{
-                Map<String,Object> callParams = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+                Map<String,Object> callParams = new HashMap<>(4);
                 callParams.put("chainId",chainId);
                 callParams.put("address",address);
                 callParams.put("password",password);
@@ -110,7 +110,7 @@ public class CallMethodUtils {
      * */
     public static void blockSignature(int chainId, String address, BlockHeader header)throws NulsException{
         try {
-            Map<String,Object> callParams = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+            Map<String,Object> callParams = new HashMap<>(4);
             callParams.put("chainId",chainId);
             callParams.put("address",address);
             callParams.put("password",null);
@@ -126,6 +126,46 @@ public class CallMethodUtils {
         }catch (NulsException e){
             throw e;
         } catch (Exception e){
+            throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 获取网络节点连接数
+     * @param chainId  chain ID
+     * @param isCross  是否获取跨链节点连接数/Whether to Get the Number of Connections across Chains
+     * @return  int    连接节点数/Number of Connecting Nodes
+     * */
+    public static int getAvailableNodeAmount(int chainId,boolean isCross)throws Exception{
+        Map<String,Object> callParams = new HashMap<>(4);
+        callParams.put("chainId",chainId);
+        callParams.put("isCross",isCross);
+        try{
+            Response callResp = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr,"nw_getChainConnectAmount", callParams);
+            if(!callResp.isSuccess()){
+                throw new NulsException(ConsensusErrorCode.INTERFACE_CALL_FAILED);
+            }
+            HashMap callResult = (HashMap)((HashMap) callResp.getResponseData()).get("nw_getChainConnectAmount");
+            return (Integer) callResult.get("connectAmount");
+        }catch (Exception e){
+            throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 将打包的新区块发送给区块管理模块
+     * @param chainId  chain ID
+     * @param block    new block Info
+     * @return         Successful Sending
+     * */
+    public static boolean receivePackingBlock(int chainId,String block)throws Exception{
+        Map<String,Object> params = new HashMap(ConsensusConstant.INIT_CAPACITY);
+        params.put("chainId",chainId);
+        params.put("block", block);
+        try {
+            Response callResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr,"receivePackingBlock", params);
+            return callResp.isSuccess();
+        }catch (Exception e){
             throw new NulsException(e);
         }
     }

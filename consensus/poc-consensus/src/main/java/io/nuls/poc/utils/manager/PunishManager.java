@@ -133,7 +133,6 @@ public class PunishManager {
      * @param chain
      * @param txs
      * @param block
-     * @deprecated
      * */
     public void addDoubleSpendRecord(Chain chain, List<Transaction> txs,Block block)throws NulsException {
         /*
@@ -184,7 +183,7 @@ public class PunishManager {
 
     /**
      * todo
-     * 跟新惩罚证据列表并验证节点是否应该给红牌惩罚
+     * 更新惩罚证据列表并验证节点是否应该给红牌惩罚
      * Follow the new penalty evidence list and verify whether the node should give a red card penalty
      *
      * @param chain

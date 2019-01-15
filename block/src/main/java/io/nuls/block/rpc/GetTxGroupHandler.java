@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
+import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
@@ -76,8 +77,7 @@ public class GetTxGroupHandler extends BaseCmd {
         List<Transaction> transactions = TransactionUtil.getTransactions(chainId, hashList);
         request.setBlockHash(message.getBlockHash());
         request.setTransactions(transactions);
-        request.setCommand(CommandConstant.TXGROUP_MESSAGE);
-        NetworkUtil.sendToNode(chainId, request, nodeId);
+        NetworkUtil.sendToNode(chainId, request, nodeId, TXGROUP_MESSAGE);
         return success();
     }
 

@@ -21,7 +21,7 @@
 package io.nuls.block.constant;
 
 /**
- * 孤儿链经过处理线程处理后的状态标记
+ * 链的类别
  *
  * @author captain
  * @version 1.0

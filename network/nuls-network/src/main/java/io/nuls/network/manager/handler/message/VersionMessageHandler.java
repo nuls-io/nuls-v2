@@ -143,12 +143,12 @@ public class VersionMessageHandler extends BaseMessageHandler {
        }
        if(ConnectionManager.getInstance().isPeerConnectExceedMax(node.getIp(),nodeGroup.getMagicNumber(),1,Node.OUT)) {
             //执行断开业务处理
-           if(node.getNodeGroupConnectors().size() == 0){
+           if(node.getNodeGroupConnectors().size() == 1 && null != node.getNodeGroupConnector(magicNumber)){
 //                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===close connection.");
                node.getChannel().close();
                node.setIdle(true);
                return;
-           }else{
+           }else if(node.getNodeGroupConnectors().size()>1){
                //client 回复过载消息--reply over maxIn
 //             Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===-reply over maxIn.");
                node.removeGroupConnector(magicNumber);

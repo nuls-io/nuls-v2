@@ -48,7 +48,7 @@ public class BootStrap {
             initLanguage();
             initServer();
             while (!ServerRuntime.isReady()) {
-                Log.info("wait depend modules ready");
+                Log.debug("wait depend modules ready");
                 Thread.sleep(2000L);
             }
             SpringLiteContext.getBean(ChainManager.class).runChain();

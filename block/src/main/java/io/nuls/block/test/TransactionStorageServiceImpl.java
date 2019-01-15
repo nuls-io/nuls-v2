@@ -47,8 +47,11 @@ public class TransactionStorageServiceImpl implements TransactionStorageService 
     @Override
     public Transaction query(int chainId, NulsDigestData hash) {
         try {
-            Transaction po = new Transaction();
             byte[] bytes = RocksDBService.get("tx" + chainId, hash.serialize());
+            if (bytes == null) {
+                return null;
+            }
+            Transaction po = new Transaction();
             po.parse(new NulsByteBuffer(bytes));
             return po;
         } catch (Exception e) {

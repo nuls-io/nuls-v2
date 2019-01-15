@@ -25,6 +25,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.exception.ChainRuntimeException;
+import io.nuls.block.message.BlockMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
@@ -38,7 +39,7 @@ import java.util.*;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
- * 分叉链管理器,维护主链、分叉链集合、孤儿链集合
+ * 链管理器,维护主链、分叉链集合、孤儿链集合
  *
  * @author captain
  * @version 1.0
@@ -80,9 +81,9 @@ public class ChainManager {
      * @return
      */
     public static boolean switchChain(int chainId, Chain masterChain, Chain forkChain) {
-        Log.info("0.switch chain start");
-        Log.info("1.masterChain-" + masterChain);
-        Log.info("2.forkChain-" + forkChain);
+        Log.info("*switch chain start");
+        Log.info("*masterChain-" + masterChain);
+        Log.info("*forkChain-" + forkChain);
         //1.获取主链与最长分叉链的分叉点,并记录从分叉点开始的最长分叉链路径
         Stack<Chain> switchChainPath = new Stack<>();
         while (forkChain.getParent() != null) {
@@ -92,7 +93,7 @@ public class ChainManager {
         Chain topForkChain = switchChainPath.peek();
         long forkHeight = topForkChain.getStartHeight();
         long masterChainEndHeight = masterChain.getEndHeight();
-        Log.info("calculate fork point complete");
+        Log.info("*calculate fork point complete, forkHeight=" + forkHeight);
 
         //2.回滚主链
         //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库
@@ -132,7 +133,7 @@ public class ChainManager {
             return false;
         }
         //至此,主链回滚完成
-        Log.info("masterChain rollback complete");
+        Log.info("*masterChain rollback complete");
 
         //3.依次添加最长分叉链路径上所有分叉链区块
         while (!switchChainPath.empty()) {
@@ -145,7 +146,7 @@ public class ChainManager {
                 return false;
             }
         }
-        Log.info("switch chain complete");
+        Log.info("*switch chain complete");
         return true;
     }
 
@@ -169,6 +170,9 @@ public class ChainManager {
      * @return
      */
     private static boolean switchChain0(int chainId, Chain masterChain, Chain forkChain, Chain subChain) {
+        Log.info("*switchChain0 masterChain=" +masterChain);
+        Log.info("*switchChain0 forkChain=" +forkChain);
+        Log.info("*switchChain0 subChain=" +subChain);
         //1.计算要从forkChain上添加到主链上多少个区块
         int target = 0;
         if (subChain != null) {
@@ -176,7 +180,7 @@ public class ChainManager {
         } else {
             target = (int) (forkChain.getEndHeight() - forkChain.getStartHeight()) + 1;
         }
-
+        Log.info("*switchChain0 target=" +target);
         //2.往主链上添加区块
         LinkedList<NulsDigestData> hashList = forkChain.getHashList();
         int count = 0;
@@ -187,6 +191,7 @@ public class ChainManager {
             if (saveBlock) {
                 count++;
             } else {
+                Log.info("*switchChain0 saveBlock fail, hash=" +hash);
                 return false;
             }
         }
@@ -219,7 +224,7 @@ public class ChainManager {
         }
 
         //6.收尾工作
-        deleteForkChain(chainId, forkChain, false);
+        deleteForkChain(chainId, forkChain);
         return true;
     }
 
@@ -254,19 +259,14 @@ public class ChainManager {
     }
 
     /**
-     * 直接从集合中删除分叉链,与removeForkChain的应用场景不一样
+     * 删除分叉链，与removeOrphanChain方法的差别在于本方法直接删除对象，不维护引用状态
      *
      * @param chainId
      * @return
      */
-    public static void deleteForkChain(int chainId, Chain chain, boolean recursively) {
+    public static void deleteForkChain(int chainId, Chain chain) {
         forkChains.get(chainId).remove(chain);
         chainStorageService.remove(chainId, chain.getHashList());
-        if (recursively) {
-            for (Chain son : chain.getSons()) {
-                deleteForkChain(chainId, son, true);
-            }
-        }
     }
 
     /**
@@ -275,7 +275,7 @@ public class ChainManager {
      * @param chainId
      * @return
      */
-    public static boolean removeForkChain(int chainId, Chain chain) {
+    public static int removeForkChain(int chainId, Chain chain) {
         boolean result = false;
         //无子链
         if (chain.getSons().size() == 0) {
@@ -286,6 +286,7 @@ public class ChainManager {
             //移除内存中对象
             boolean r3 = forkChains.get(chainId).remove(chain);
             result = r1 && r2 && r3;
+            return result ? chain.getHashList().size() : -1;
         }
         //有子链
         if (chain.getSons().size() > 0) {
@@ -312,8 +313,9 @@ public class ChainManager {
             //移除内存中对象
             boolean r2 = forkChains.get(chainId).remove(lastSon);
             result = r1 && r2;
+            return result ? (int) remove : -1;
         }
-        return result;
+        return -1;
     }
 
     /**
@@ -355,20 +357,21 @@ public class ChainManager {
      * @param chain
      * @throws Exception
      */
-    public static boolean removeOrphanChain(int chainId, Chain chain) throws Exception {
+    public static int removeOrphanChain(int chainId, Chain chain) {
         boolean result = false;
         //无子链
         if (chain.getSons().size() == 0) {
+            boolean r1 = true;
             if (chain.getParent() != null) {
                 //更新父链的引用
-                boolean r1 = chain.getParent().getSons().remove(chain);
-                result = r1;
+                r1 = chain.getParent().getSons().remove(chain);
             }
             //移除区块存储
             boolean r2 = chainStorageService.remove(chainId, chain.getHashList());
             //移除内存中对象
             boolean r3 = orphanChains.get(chainId).remove(chain);
-            result = r2 && r3;
+            result = r1 && r2 && r3;
+            return result ? chain.getHashList().size() : -1;
         }
         //有子链
         if (chain.getSons().size() > 0) {
@@ -395,8 +398,9 @@ public class ChainManager {
             //移除内存中对象
             boolean r2 = orphanChains.get(chainId).remove(lastSon);
             result = r1 && r2;
+            return result ? (int) remove : -1;
         }
-        return result;
+        return -1;
     }
 
     /**
@@ -463,19 +467,14 @@ public class ChainManager {
     }
 
     /**
-     * 清理孤儿链
+     * 删除孤儿链，与removeOrphanChain方法的差别在于本方法直接删除对象，不维护引用状态
      *
      * @param chainId
      * @param orphanChain
      */
-    public static void deleteOrphanChain(Integer chainId, Chain orphanChain, boolean recursively) {
+    public static void deleteOrphanChain(Integer chainId, Chain orphanChain) {
         orphanChains.get(chainId).remove(orphanChain);
         chainStorageService.remove(chainId, orphanChain.getHashList());
-        if (recursively) {
-            for (Chain son : orphanChain.getSons()) {
-                deleteOrphanChain(chainId, son, true);
-            }
-        }
     }
 
     /**

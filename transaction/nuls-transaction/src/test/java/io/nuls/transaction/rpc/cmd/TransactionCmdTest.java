@@ -44,9 +44,9 @@ public class TransactionCmdTest {
         List<Map> txRegisterList=new ArrayList<>();
         Map<String, Object> txParams = new HashMap<>();
         txParams.put("txType", "3");
-        txParams.put("validator", "ac_aliasTxValidate");
-        txParams.put("commit", "ac_aliasTxCommit");
-        txParams.put("rollback", "ac_rollbackAlias");
+        txParams.put("validateCmd", "ac_aliasTxValidate");
+        txParams.put("commitCmd", "ac_aliasTxCommit");
+        txParams.put("rollbackCmd", "ac_rollbackAlias");
         txParams.put("systemTx", false);
         txParams.put("unlockTx", false);
         txParams.put("verifySignature", true);

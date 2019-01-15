@@ -25,7 +25,6 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.exception.DbRuntimeException;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
@@ -53,6 +52,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.locks.StampedLock;
 
+import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE;
+import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 import static io.nuls.block.constant.Constant.*;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
@@ -223,7 +224,7 @@ public class BlockServiceImpl implements BlockService {
             }
             //4.保存区块头,完全保存,更新标记
             blockHeaderPo.setComplete(true);
-            if (!ConsensusUtil.newBlock(chainId, header, localInit) || !blockStorageService.save(chainId, blockHeaderPo)) {
+            if (!ConsensusUtil.saveNotice(chainId, header, localInit) || !blockStorageService.save(chainId, blockHeaderPo)) {
                 Log.error("update blockheader fail!chainId-" + chainId + ",height-" + height);
                 if (!TransactionUtil.rollback(chainId, block.getTxHashList())) {
                     throw new DbRuntimeException("remove transactions error!");
@@ -298,7 +299,7 @@ public class BlockServiceImpl implements BlockService {
             if (!ConsensusUtil.rollbackNotice(chainId, height) || !blockStorageService.setLatestHeight(chainId, height - 1)) {
                 Log.error("rollback setLatestHeight fail!chainId-" + chainId + ",height-" + height);
                 if (!TransactionUtil.save(chainId, blockHeaderPo.getTxHashList())) {
-                    throw new DbRuntimeException("rollback blockheader error!");
+                    throw new DbRuntimeException("rollback transaction error!");
                 }
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new DbRuntimeException("rollback blockheader error!");
@@ -328,16 +329,14 @@ public class BlockServiceImpl implements BlockService {
     @Override
     public boolean forwardBlock(int chainId, NulsDigestData hash, String excludeNode) {
         HashMessage message = new HashMessage(hash);
-        message.setCommand(CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE);
-        return NetworkUtil.broadcast(chainId, message, excludeNode);
+        return NetworkUtil.broadcast(chainId, message, excludeNode, FORWARD_SMALL_BLOCK_MESSAGE);
     }
 
     @Override
     public boolean broadcastBlock(int chainId, Block block) {
         SmallBlockMessage message = new SmallBlockMessage();
         message.setSmallBlock(BlockUtil.getSmallBlock(chainId, block));
-        message.setCommand(CommandConstant.SMALL_BLOCK_MESSAGE);
-        boolean broadcast = NetworkUtil.broadcast(chainId, message);
+        boolean broadcast = NetworkUtil.broadcast(chainId, message, SMALL_BLOCK_MESSAGE);
         if (!broadcast) {
             rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), true);
         }

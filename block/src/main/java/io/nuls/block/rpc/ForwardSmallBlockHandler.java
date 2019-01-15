@@ -42,7 +42,7 @@ import io.nuls.tools.exception.NulsException;
 
 import java.util.Map;
 
-import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE;
+import static io.nuls.block.constant.CommandConstant.*;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
@@ -94,8 +94,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
             request.setTxHashList(block.getMissingTransactions());
-            request.setCommand(CommandConstant.GET_TXGROUP_MESSAGE);
-            NetworkUtil.sendToNode(chainId, request, nodeId);
+            NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
             NetworkUtil.setHashAndHeight(chainId, blockHash, block.getSmallBlock().getHeader().getHeight(), nodeId);
             return success();
         }
@@ -105,8 +104,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             Log.info("EMPTY, recieve HashMessage from network node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
             HashMessage request = new HashMessage();
             request.setRequestHash(blockHash);
-            request.setCommand(CommandConstant.GET_SMALL_BLOCK_MESSAGE);
-            NetworkUtil.sendToNode(chainId, request, nodeId);
+            NetworkUtil.sendToNode(chainId, request, nodeId, GET_SMALL_BLOCK_MESSAGE);
             return success();
         }
 

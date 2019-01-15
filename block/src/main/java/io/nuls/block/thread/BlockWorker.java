@@ -13,6 +13,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
+import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
@@ -36,21 +37,17 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
         long endHeight = startHeight + size - 1;
         //组装批量获取区块消息
         HeightRangeMessage message = new HeightRangeMessage(startHeight, endHeight);
-        message.setCommand(CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE);
         //计算本次请求hash,用来跟踪本次异步请求
         NulsDigestData messageHash = message.getHash();
         try {
             Future<CompleteMessage> future = CacheHandler.addBatchBlockRequest(chainId, messageHash);
-
             //发送消息给目标节点
-            boolean result = NetworkUtil.sendToNode(chainId, message, node.getId());
-
+            boolean result = NetworkUtil.sendToNode(chainId, message, node.getId(), GET_BLOCKS_BY_HEIGHT_MESSAGE);
             //发送失败清空数据
             if (!result) {
                 CacheHandler.removeRequest(chainId, messageHash);
                 return new BlockDownLoadResult(messageHash, startHeight, size, node, false);
             }
-
             CompleteMessage completeMessage = future.get(60L, TimeUnit.SECONDS);
             b = completeMessage.isSuccess();
         } catch (Exception e) {

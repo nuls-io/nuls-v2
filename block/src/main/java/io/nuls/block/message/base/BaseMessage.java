@@ -42,9 +42,6 @@ import static io.nuls.block.utils.LoggerUtil.Log;
  */
 public abstract class BaseMessage extends BaseNulsData {
 
-    @Getter
-    @Setter
-    protected String command;
     private transient NulsDigestData hash;
 
     @Override
