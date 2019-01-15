@@ -724,18 +724,19 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            List<String> txHexs = JSONUtils.json2list((String) params.get(ConsensusConstant.PARAM_TX), String.class);
+            List<String> txHexList = JSONUtils.json2list((String) params.get(ConsensusConstant.PARAM_TX), String.class);
             List<Transaction> txList = new ArrayList<>();
-            for (String txHex : txHexs) {
+            for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
                 tx.parse(HexUtil.decode(txHex), 0);
+                txList.add(tx);
             }
             batchValidator.batchValid(txList, chain);
-            List<String> resultTxHexs = new ArrayList<>();
+            List<String> resultTxHexList = new ArrayList<>();
             for (Transaction tx : txList) {
-                resultTxHexs.add(HexUtil.encode(tx.serialize()));
+                resultTxHexList.add(HexUtil.encode(tx.serialize()));
             }
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultTxHexs);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultTxHexList);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
@@ -1434,6 +1435,46 @@ public class ConsensusServiceImpl implements ConsensusService {
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
+        }
+    }
+
+    /**
+     * 双花交易记录
+     * @param params
+     * @return Result
+     * */
+    @Override
+    public Result doubleSpendRecord(Map<String, Object> params) {
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_BLOCK) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
+        if (chainId <= ConsensusConstant.MIN_VALUE) {
+            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
+        }
+        Chain chain = chainManager.getChainMap().get(chainId);
+        if (chain == null) {
+            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
+        }
+        try {
+            Block block = new Block();
+            block.parse(HexUtil.decode((String) params.get(ConsensusConstant.PARAM_BLOCK)), 0);
+            List<String> txHexList = JSONUtils.json2list((String) params.get(ConsensusConstant.PARAM_TX), String.class);
+            List<Transaction> txList = new ArrayList<>();
+            for (String txHex : txHexList) {
+                Transaction tx = new Transaction();
+                tx.parse(HexUtil.decode(txHex), 0);
+                txList.add(tx);
+            }
+            punishManager.addDoubleSpendRecord(chain,txList,block);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+        } catch (NulsException e) {
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            return Result.getFailed(e.getErrorCode());
+        }
+        catch (IOException e) {
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
+            return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
 
