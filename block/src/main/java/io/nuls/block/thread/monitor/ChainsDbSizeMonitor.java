@@ -28,6 +28,7 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 
 import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.Constant.CLEAN_PARAM;
@@ -83,7 +84,7 @@ public class ChainsDbSizeMonitor implements Runnable {
         }
     }
 
-    private void dbSizeCleaner(Integer chainId, ChainContext context, int cacheSize) throws Exception {
+    private void dbSizeCleaner(Integer chainId, ChainContext context, int cacheSize) {
 
         StampedLock lock = context.getLock();
         long stamp = lock.tryOptimisticRead();
@@ -111,26 +112,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                 //与阈值比较
                 while (actualSize > cacheSize) {
                     Log.info("before clear, chainId:" + chainId + ", cacheSize:" + cacheSize + ", actualSize:" + actualSize);
-                    //2.按顺序清理分叉链和孤儿链
-                    SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
-                    int forkSize = forkChains.size();
-                    if (forkSize > 0) {
-                        int i = forkSize / CLEAN_PARAM;
-                        //最少清理一个链
-                        i = i == 0 ? 1 : i;
-                        for (int j = 0; j < i; j++) {
-                            Chain chain = forkChains.first();
-                            boolean b = ChainManager.removeForkChain(chainId, chain);
-                            if (!b) {
-                                Log.error("remove fork chain fail, chain:" + chain);
-                                return;
-                            } else {
-                                Log.info("remove fork chain, chain:" + chain);
-                                actualSize -= chain.getHashList().size();
-                            }
-                        }
-                    }
-
+                    //2.清理孤儿链
                     SortedSet<Chain> orphanChains = ChainManager.getOrphanChains(chainId);
                     int orphanSize = orphanChains.size();
                     if (orphanSize > 0) {
@@ -139,13 +121,32 @@ public class ChainsDbSizeMonitor implements Runnable {
                         i = i == 0 ? 1 : i;
                         for (int j = 0; j < i; j++) {
                             Chain chain = orphanChains.first();
-                            boolean b = ChainManager.removeOrphanChain(chainId, chain);
-                            if (!b) {
+                            int count = ChainManager.removeOrphanChain(chainId, chain);
+                            if (count < 0) {
                                 Log.error("remove orphan chain fail, chain:" + chain);
                                 return;
                             } else {
                                 Log.info("remove orphan chain, chain:" + chain);
-                                actualSize -= chain.getHashList().size();
+                                actualSize -= count;
+                            }
+                        }
+                    }
+                    //3.清理分叉链
+                    SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
+                    int forkSize = forkChains.size();
+                    if (forkSize > 0) {
+                        int i = forkSize / CLEAN_PARAM;
+                        //最少清理一个链
+                        i = i == 0 ? 1 : i;
+                        for (int j = 0; j < i; j++) {
+                            Chain chain = forkChains.first();
+                            int count = ChainManager.removeForkChain(chainId, chain);
+                            if (count < 0) {
+                                Log.error("remove fork chain fail, chain:" + chain);
+                                return;
+                            } else {
+                                Log.info("remove fork chain, chain:" + chain);
+                                actualSize -= count;
                             }
                         }
                     }
@@ -184,12 +185,19 @@ public class ChainsDbSizeMonitor implements Runnable {
                 // exclusive access
                 Chain masterChain = ChainManager.getMasterChain(chainId);
                 long latestHeight = masterChain.getEndHeight();
+                SortedSet<Chain> deleteSet = new TreeSet<>(Chain.COMPARATOR);
+                //1.标记
                 for (Chain forkChain : forkChains) {
                     if (latestHeight - forkChain.getStartHeight() > heightRange) {
                         //清理orphanChain,并递归清理orphanChain的所有子链
-                        ChainManager.deleteForkChain(chainId, forkChain, true);
-                        Log.info("remove fork chain, chain:" + forkChain);
+                        deleteSet.add(forkChain);
+                        deleteSet.addAll(forkChain.getSons());
                     }
+                }
+                //2.清理
+                for (Chain chain : deleteSet) {
+                    ChainManager.deleteForkChain(chainId, chain);
+                    Log.info("remove fork chain, chain:" + chain);
                 }
                 break;
             }
@@ -224,12 +232,19 @@ public class ChainsDbSizeMonitor implements Runnable {
                 // exclusive access
                 Chain masterChain = ChainManager.getMasterChain(chainId);
                 long latestHeight = masterChain.getEndHeight();
+                SortedSet<Chain> deleteSet = new TreeSet<>(Chain.COMPARATOR);
+                //1.标记
                 for (Chain orphanChain : orphanChains) {
                     if (Math.abs(orphanChain.getStartHeight() - latestHeight) > heightRange || orphanChain.getAge().get() > orphanChainMaxAge) {
                         //清理orphanChain,并递归清理orphanChain的所有子链
-                        ChainManager.deleteOrphanChain(chainId, orphanChain, true);
-                        Log.info("remove orphan chain, chain:" + orphanChain);
+                        deleteSet.add(orphanChain);
+                        deleteSet.addAll(orphanChain.getSons());
                     }
+                }
+                //2.清理
+                for (Chain chain : deleteSet) {
+                    ChainManager.deleteOrphanChain(chainId, chain);
+                    Log.info("remove orphan chain, chain:" + chain);
                 }
                 break;
             }

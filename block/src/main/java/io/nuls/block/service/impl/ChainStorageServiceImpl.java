@@ -76,8 +76,11 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     @Override
     public Block query(int chainId, NulsDigestData hash) {
         try {
-            Block block = new Block();
             byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, hash.serialize());
+            if (bytes == null) {
+                return null;
+            }
+            Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
             return block;
         } catch (Exception e) {
