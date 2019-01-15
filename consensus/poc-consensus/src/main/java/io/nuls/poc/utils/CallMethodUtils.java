@@ -169,4 +169,14 @@ public class CallMethodUtils {
             throw new NulsException(e);
         }
     }
+
+    /**
+     * 获取可用余额和nonce
+     * Get the available balance and nonce
+     * */
+
+    /**
+     * 获取账户锁定金额
+     * Get the amount locked in the account
+     * */
 }
