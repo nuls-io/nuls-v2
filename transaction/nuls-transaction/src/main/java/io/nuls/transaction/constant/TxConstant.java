@@ -8,7 +8,7 @@ public interface TxConstant {
 
     String MODULE_CODE = "tx";
 
-    int NULS_CHAINID = 8964;
+    int NULS_CHAINID = 12345;
     int NULS_CHAIN_ASSETID = 1;
 
     /**

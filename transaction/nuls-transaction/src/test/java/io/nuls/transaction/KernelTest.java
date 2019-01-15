@@ -24,9 +24,17 @@
 
 package io.nuls.transaction;
 
+import io.nuls.rpc.info.NoUse;
+import org.junit.Test;
+
 /**
  * @author: Charlie
  * @date: 2019-01-15
  */
-public class TxFlowTest {
+public class KernelTest {
+
+    @Test
+    public void kernelStartTest() throws Exception{
+        NoUse.mockKernel();
+    }
 }

@@ -19,6 +19,9 @@ public class CoinDataUtils {
      * @return
      */
     public static CoinData parseCoinData(byte[] stream) {
+        if(null == stream){
+            return null;
+        }
         CoinData coinData = new CoinData();
         try {
             coinData.parse(new NulsByteBuffer(stream));

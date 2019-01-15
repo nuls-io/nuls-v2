@@ -78,6 +78,10 @@ public class TransactionServiceImpl implements TransactionService {
     public boolean unConfirmTxProcess(int addressChainId,Transaction transaction) {
         //直接更新未确认交易
         CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
+        if(null == coinData){
+            //例如黄牌交易，直接返回
+            return  true;
+        }
         byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
         String currentTxNonce =  HexUtil.encode(nonce8Bytes);
         List<CoinFrom> froms = coinData.getFrom();
@@ -111,12 +115,15 @@ public class TransactionServiceImpl implements TransactionService {
     public synchronized boolean  confirmTxProcess(int addressChainId,Transaction transaction) {
         //从缓存校验交易
         if(coinDataValidator.hadValidateTx(addressChainId,transaction)){
-            //提交交易：1.交易存库（最近100区块交易） 2.更新账户
-            //批量校验数据不需要存库
-            //批量交易按交易进行账户的金额处理，再按交易为原子性进行提交,updateAccounts用于一笔交易的账户缓存
+            CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
+            if(null == coinData){
+                //例如黄牌交易，直接返回
+                return  true;
+            }
+            //提交交易：1.交易存库（上一个账户状态进行镜像,存储账户最近100区块以内交易） 2.更新账户
+            //批量交易按交易进行账户的金额处理，再按交易为原子性进行提交,updateAccounts用于一笔交易的账户缓存，最后统一处理
             Map<String,AccountBalance> updateAccounts = new HashMap<>();
             //更新账户状态
-            CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
             byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
             String txHash =  transaction.getHash().toString();
             String nonce8BytesStr = HexUtil.encode(nonce8Bytes);
@@ -191,6 +198,10 @@ public class TransactionServiceImpl implements TransactionService {
     public synchronized boolean rollBackConfirmTx(int addressChainId,Transaction transaction) {
         //更新账户状态
         CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
+        if(null == coinData){
+            //例如黄牌交易，直接返回
+            return  true;
+        }
         String txHash = transaction.getHash().toString();
         long height = transaction.getBlockHeight();
         List<CoinFrom> froms = coinData.getFrom();
@@ -201,10 +212,7 @@ public class TransactionServiceImpl implements TransactionService {
                 //非本地网络账户地址,不进行处理
                 continue;
             }
-            String address = AddressTool.getStringAddressByBytes(from.getAddress());
-            int assetChainId = from.getAssetsChainId();
-            int assetId = from.getAssetsId();
-            String key = LedgerUtils.getKeyStr(address,assetChainId,assetId);
+            String key = LedgerUtils.getKeyStr(AddressTool.getStringAddressByBytes(from.getAddress()), from.getAssetsChainId(), from.getAssetsId());
             accountStateService.rollAccountStateByTx(addressChainId,key,txHash,height);
         }
         for (CoinTo to : tos) {
@@ -212,10 +220,7 @@ public class TransactionServiceImpl implements TransactionService {
                 //非本地网络账户地址,不进行处理
                 continue;
             }
-            String address = AddressTool.getStringAddressByBytes(to.getAddress());
-            int assetChainId = to.getAssetsChainId();
-            int assetId = to.getAssetsId();
-            String key = LedgerUtils.getKeyStr(address,assetChainId,assetId);
+            String key = LedgerUtils.getKeyStr(AddressTool.getStringAddressByBytes(to.getAddress()),to.getAssetsChainId(),to.getAssetsId());
             accountStateService.rollAccountStateByTx(addressChainId,key,txHash,height);
         }
         return true;
@@ -225,6 +230,10 @@ public class TransactionServiceImpl implements TransactionService {
     public boolean rollBackUnconfirmTx(int addressChainId, Transaction transaction) {
         //回滚未确认交易,就是回滚未确认nonce值
         CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
+        if(null == coinData){
+            //例如黄牌交易，直接返回
+            return  true;
+        }
         List<CoinFrom> froms = coinData.getFrom();
         for (CoinFrom from : froms) {
             if(LedgerUtils.isNotLocalChainAccount(addressChainId,from.getAddress())){

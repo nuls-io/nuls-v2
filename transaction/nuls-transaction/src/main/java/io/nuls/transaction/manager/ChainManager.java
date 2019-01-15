@@ -99,7 +99,7 @@ public class ChainManager {
             //todo 订阅Block模块接口
             //BlockCall.subscriptionNewBlockHeight(chain);
 
-            //Log.debug(JSONUtils.obj2json(chain));
+            Log.debug("\nchain = " +JSONUtils.obj2PrettyJson(chain));
         }
     }
 
