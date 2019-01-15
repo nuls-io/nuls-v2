@@ -56,6 +56,7 @@ import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -115,12 +116,16 @@ public class TransactionServiceImpl implements TransactionService {
             //交易签名
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
             //发起新交易
-            TransactionCmdCall.newTx(chainId, tx.getHash().getDigestHex());
+            TransactionCmdCall.newTx(chainId, tx.hex());
         } catch (NulsException e) {
+            Log.error("assemblyTransaction exception.", e);
             throw new NulsRuntimeException(e.getErrorCode());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.error("assemblyTransaction io exception.", e);
             throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
+        } catch (Exception e) {
+            Log.error("assemblyTransaction error.", e);
+            throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return tx;
     }
