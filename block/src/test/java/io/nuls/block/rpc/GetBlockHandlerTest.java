@@ -44,7 +44,6 @@ public class GetBlockHandlerTest {
         params.put("nodes", "192.168.1.191:8003");
         HashMessage message = new HashMessage();
         message.setRequestHash(NulsDigestData.fromDigestHex("00208d10744a059e403b100866f65d96ce33aedbcf498d1faa7d9f2eff041195d5aa"));
-        message.setCommand(GET_BLOCK_MESSAGE);
         params.put("messageBody", HexUtil.encode(message.serialize()));
         params.put("command", GET_BLOCK_MESSAGE);
         Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_MESSAGE, params);

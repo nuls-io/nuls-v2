@@ -71,4 +71,13 @@ public interface Constant {
      * RPC默认扫描包路径
      */
     String RPC_DEFAULT_SCAN_PACKAGE = "io.nuls.block.rpc";
+
+    /**
+     * 共识工作状态
+     */
+    int CONSENSUS_WORKING = 1;
+    /**
+     * 共识等待状态
+     */
+    int CONSENSUS_WAITING = 0;
 }
