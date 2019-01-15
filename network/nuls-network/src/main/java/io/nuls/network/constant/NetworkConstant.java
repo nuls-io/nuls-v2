@@ -43,7 +43,7 @@ public interface NetworkConstant {
      * 读写都不存在情况下，100秒超时，单位s
      * 20 seconds timeout, unit s when there is no reading or writing
      */
-    int ALL_IDEL_TIME_OUT = 20;
+    int ALL_IDEL_TIME_OUT = 100;
     /**
      * 记录该帧数据长度
      * MAX FRAME LENGTH
