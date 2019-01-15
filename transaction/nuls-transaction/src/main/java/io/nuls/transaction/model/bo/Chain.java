@@ -1,12 +1,12 @@
 package io.nuls.transaction.model.bo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
-import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
 import java.util.HashMap;
@@ -34,11 +34,12 @@ public class Chain {
      * 运行状态
      * Chain running state
      */
-    private RunningStatus accountStatus;
+//    private RunningStatus runningStatus;
 
     /**
      * 日志
      */
+    @JsonIgnore
     private NulsLogger logger;
 
     /**
@@ -65,6 +66,7 @@ public class Chain {
     /**
      * 未进行验证的交易队列
      */
+    @JsonIgnore
     private PersistentQueue unverifiedQueue;
 
     /**
@@ -76,10 +78,11 @@ public class Chain {
      * 任务线程池
      * Schedule thread pool
      */
+    @JsonIgnore
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
     public Chain() throws Exception {
-        this.accountStatus = RunningStatus.INITING;
+//        this.runningStatus = RunningStatus.INITING;
 //        this.crossTxVerifyingMap = new HashMap<>();
         this.txRegisterMap = new HashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
@@ -98,13 +101,13 @@ public class Chain {
         this.config = config;
     }
 
-    public RunningStatus getAccountStatus() {
-        return accountStatus;
-    }
-
-    public void setAccountStatus(RunningStatus accountStatus) {
-        this.accountStatus = accountStatus;
-    }
+//    public RunningStatus getRunningStatus() {
+//        return runningStatus;
+//    }
+//
+//    public void setRunningStatus(RunningStatus runningStatus) {
+//        this.runningStatus = runningStatus;
+//    }
 
     public ScheduledThreadPoolExecutor getScheduledThreadPoolExecutor() {
         return scheduledThreadPoolExecutor;

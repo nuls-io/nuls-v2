@@ -24,6 +24,7 @@
  */
 package io.nuls.transaction.manager;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
@@ -33,6 +34,8 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
@@ -72,6 +75,12 @@ public class TransactionManager {
         boolean rs = false;
         if (!chain.getTxRegisterMap().containsKey(txRegister.getTxType())) {
             chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
+
+            try {
+                Log.debug("\nTxRegisterMap = " + JSONUtils.obj2PrettyJson(chain.getTxRegisterMap()));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
             rs = true;
         }
         return rs;

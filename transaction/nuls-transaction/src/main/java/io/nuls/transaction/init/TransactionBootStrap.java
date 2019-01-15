@@ -53,7 +53,7 @@ public class TransactionBootStrap {
             SpringLiteContext.getBean(ChainManager.class).runChain();
             //注册网络消息协议
             //NetworkCall.registerProtocol();
-            Log.debug("已启动");
+            Log.debug("START-SUCCESS");
         }catch (Exception e){
             Log.error("Transaction startup error!");
             Log.error(e);
@@ -121,7 +121,7 @@ public class TransactionBootStrap {
             WsServer.getInstance(ModuleE.TX)
                     .moduleRoles(new String[]{"1.0"})
                     .moduleVersion("1.0")
-                    .dependencies(ModuleE.LG.abbr, "1.0")
+                    //.dependencies(ModuleE.LG.abbr, "1.0")
                     //.dependencies(ModuleE.NW.abbr, "1.0")
                     .scanPackage("io.nuls.transaction.rpc.cmd")
                     .connect("ws://127.0.0.1:8887");
