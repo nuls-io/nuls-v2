@@ -18,7 +18,7 @@ public class UnverifiedTxStorageServiceTest {
     protected int chainId = 12345;
 
     @Before
-    public static void beforeTest() throws Exception {
+    public void beforeTest() throws Exception {
         //初始化数据库配置文件
         TransactionBootStrap.initDB();
         //初始化上下文
