@@ -42,6 +42,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
 import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.messageLog;
 
 /**
  * 处理收到的{@link HeightRangeMessage},用于区块的同步
@@ -75,7 +76,7 @@ public class GetBlocksHandler extends BaseCmd {
         if (startHeight < 0L || startHeight > endHeight || endHeight - startHeight > MAX_SIZE) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        Log.info("recieve HeightRangeMessage from network node-" + nodeId + ", chainId:" + chainId + ", start:" + startHeight + ", end:" + endHeight);
+        messageLog.info("recieve HeightRangeMessage from node-" + nodeId + ", chainId:" + chainId + ", start:" + startHeight + ", end:" + endHeight);
         NulsDigestData requestHash;
         try {
             requestHash = NulsDigestData.calcDigestData(message.serialize());
@@ -97,10 +98,7 @@ public class GetBlocksHandler extends BaseCmd {
 
     private void sendBlock(int chainId, Block block, String nodeId, NulsDigestData requestHash) {
         BlockMessage blockMessage = new BlockMessage(requestHash, block);
-        boolean result = NetworkUtil.sendToNode(chainId, blockMessage, nodeId, BLOCK_MESSAGE);
-        if (!result) {
-            Log.warn("send block failed:" + nodeId + ",height:" + block.getHeader().getHeight());
-        }
+        NetworkUtil.sendToNode(chainId, blockMessage, nodeId, BLOCK_MESSAGE);
     }
 
 }

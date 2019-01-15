@@ -35,7 +35,7 @@ import io.nuls.tools.exception.NulsException;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.messageLog;
 
 /**
  * 处理收到的{@link BlockMessage},用于区块的同步
@@ -62,7 +62,7 @@ public class BlockHandler extends BaseCmd {
         if (message == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        Log.debug("recieve BlockMessage from network node-" + nodeId + ", chainId:" + chainId + ", height:" + message.getBlock().getHeader().getHeight());
+        messageLog.info("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + message.getBlock().getHeader().getHeight());
         CacheHandler.receiveBlock(chainId, message);
         return success();
     }

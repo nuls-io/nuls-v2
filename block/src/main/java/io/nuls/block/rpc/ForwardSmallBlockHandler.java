@@ -25,7 +25,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.BlockForwardEnum;
-import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.HashMessage;
@@ -44,7 +43,7 @@ import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.*;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.messageLog;
 
 /**
  * 处理收到的{@link HashMessage},用于区块的广播与转发
@@ -70,7 +69,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            Log.error(e);
+            messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
@@ -79,9 +78,9 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         }
         NulsDigestData blockHash = message.getRequestHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
+        messageLog.info("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
-            Log.info("COMPLETE, recieve HashMessage from network node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
             NetworkUtil.setHashAndHeight(chainId, blockHash, block.getSmallBlock().getHeader().getHeight(), nodeId);
             return success();
@@ -89,7 +88,6 @@ public class ForwardSmallBlockHandler extends BaseCmd {
 
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
-            Log.info("INCOMPLETE, recieve HashMessage from network node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
@@ -101,13 +99,11 @@ public class ForwardSmallBlockHandler extends BaseCmd {
 
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
-            Log.info("EMPTY, recieve HashMessage from network node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
             HashMessage request = new HashMessage();
             request.setRequestHash(blockHash);
             NetworkUtil.sendToNode(chainId, request, nodeId, GET_SMALL_BLOCK_MESSAGE);
             return success();
         }
-
         return success();
     }
 

@@ -24,7 +24,6 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
-import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.service.BlockService;
@@ -42,7 +41,7 @@ import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.messageLog;
 
 /**
  * 处理收到的{@link HashMessage},用于孤儿链的维护
@@ -67,7 +66,7 @@ public class GetBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            Log.error(e);
+            messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
@@ -75,7 +74,7 @@ public class GetBlockHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         NulsDigestData requestHash = message.getRequestHash();
-        Log.info("recieve HashMessage from network node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
+        messageLog.info("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + requestHash);
         sendBlock(chainId, service.getBlock(chainId, requestHash), nodeId, requestHash);
         return success();
     }
@@ -86,10 +85,7 @@ public class GetBlockHandler extends BaseCmd {
         if (block != null) {
             message.setBlock(block);
         }
-        boolean result = NetworkUtil.sendToNode(chainId, message, nodeId, BLOCK_MESSAGE);
-        if (!result) {
-            Log.warn("send block failed:" + nodeId + ",height:" + block.getHeader().getHeight());
-        }
+        NetworkUtil.sendToNode(chainId, message, nodeId, BLOCK_MESSAGE);
     }
 
 }
