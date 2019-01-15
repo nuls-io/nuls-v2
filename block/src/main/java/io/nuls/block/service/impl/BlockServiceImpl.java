@@ -299,7 +299,7 @@ public class BlockServiceImpl implements BlockService {
             if (!ConsensusUtil.rollbackNotice(chainId, height) || !blockStorageService.setLatestHeight(chainId, height - 1)) {
                 Log.error("rollback setLatestHeight fail!chainId-" + chainId + ",height-" + height);
                 if (!TransactionUtil.save(chainId, blockHeaderPo.getTxHashList())) {
-                    throw new DbRuntimeException("rollback blockheader error!");
+                    throw new DbRuntimeException("rollback transaction error!");
                 }
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
                     throw new DbRuntimeException("rollback blockheader error!");
