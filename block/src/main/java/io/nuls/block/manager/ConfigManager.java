@@ -24,6 +24,7 @@ import io.nuls.tools.parse.config.ConfigItem;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 配置管理器,维护所有本节点上运行的链的配置信息
@@ -37,7 +38,7 @@ public class ConfigManager {
     /**
      * 链配置信息
      */
-    private static Map<Integer, Map<String, ConfigItem>> configItemsMap = new HashMap<>();
+    private static Map<Integer, Map<String, ConfigItem>> configItemsMap = new ConcurrentHashMap<>();
 
     /**
      * 获取某条链的参数

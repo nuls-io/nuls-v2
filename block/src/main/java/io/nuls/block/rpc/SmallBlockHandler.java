@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
 import static io.nuls.block.utils.LoggerUtil.Log;
@@ -118,8 +119,7 @@ public class SmallBlockHandler extends BaseCmd {
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
             request.setTxHashList(block.getMissingTransactions());
-            request.setCommand(CommandConstant.GET_TXGROUP_MESSAGE);
-            NetworkUtil.sendToNode(chainId, request, nodeId);
+            NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
             return success();
         }
 
@@ -156,8 +156,7 @@ public class SmallBlockHandler extends BaseCmd {
                 HashListMessage request = new HashListMessage();
                 request.setBlockHash(blockHash);
                 request.setTxHashList(needHashList);
-                request.setCommand(CommandConstant.GET_TXGROUP_MESSAGE);
-                NetworkUtil.sendToNode(chainId, request, nodeId);
+                NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
                 //这里的smallBlock的subTxList中包含一些非系统交易,用于跟TxGroup组合成完整区块
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(needHashList, smallBlock);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);

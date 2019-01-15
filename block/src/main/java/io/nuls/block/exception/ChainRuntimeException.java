@@ -23,7 +23,7 @@
 package io.nuls.block.exception;
 
 /**
- * 链操作异常
+ * 链操作异常，孤儿链维护、分叉链切换过程中抛出
  *
  * @author captain
  * @version 1.0

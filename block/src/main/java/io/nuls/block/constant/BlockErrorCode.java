@@ -33,6 +33,9 @@ import io.nuls.tools.constant.ErrorCode;
  */
 public interface BlockErrorCode {
     ErrorCode SUCCESS = ErrorCode.init("0");
+    /**
+     * RPC请求参数错误
+     */
     ErrorCode PARAMETER_ERROR = ErrorCode.init("10001");
     ErrorCode SERIALIZE_ERROR = ErrorCode.init("10002");
     ErrorCode DATA_ERROR = ErrorCode.init("10003");
@@ -41,6 +44,9 @@ public interface BlockErrorCode {
      */
     ErrorCode CHAIN_MERGE_ERROR = ErrorCode.init("20001");
     ErrorCode DATA_PARSE_ERROR = ErrorCode.init("20002");
+    /**
+     * 未定义错误
+     */
     ErrorCode UNDEFINED_ERROR = ErrorCode.init("20003");
 
 
