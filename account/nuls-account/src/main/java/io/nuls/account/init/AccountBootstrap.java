@@ -10,8 +10,10 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.TimeService;
@@ -33,12 +35,17 @@ public class AccountBootstrap {
             RocksDBService.init(AccountParam.getInstance().getDataPath());
             //springLite容器初始化
             SpringLiteContext.init(AccountConstant.ACCOUNT_ROOT_PATH);
+            //启动账户模块服务
+            initServer();
+            while (!ServerRuntime.isReady()) {
+                Log.info("wait depend modules ready");
+                Thread.sleep(2000L);
+            }
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
             //启动时间同步线程
             //TimeService.getInstance().start();
-            //启动账户模块服务
-            initServer();
+            Log.debug("START-SUCCESS");
         } catch (Exception e) {
             LogUtil.error("Account Bootstrap failed", e);
             System.exit(-1);
@@ -88,7 +95,8 @@ public class AccountBootstrap {
             WsServer.getInstance(ModuleE.AC)
                     .moduleRoles(new String[]{"1.0"})
                     .moduleVersion("1.0")
-                    //.dependencies(ModuleE.LG.abbr, "1.0")
+                    .dependencies(ModuleE.LG.abbr, "1.0")
+                    .dependencies(ModuleE.TX.abbr, "1.0")
                     .scanPackage("io.nuls.account.rpc.cmd")
                     .connect(NulsConfig.KERNEL_MODULE_URL);
 

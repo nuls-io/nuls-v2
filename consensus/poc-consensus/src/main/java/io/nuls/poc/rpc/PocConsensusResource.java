@@ -527,6 +527,21 @@ public class PocConsensusResource extends BaseCmd{
     }
 
     /**
+     * 双花交易记录
+     * */
+    @CmdAnnotation(cmd = "cs_doubleSpendRecord", version = 1.0, description = "double spend transaction record 1.0")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "block", parameterType = "String")
+    @Parameter(parameterName = "tx", parameterType = "String")
+    public Response doubleSpendRecord(Map<String,Object> params){
+        Result result = service.doubleSpendRecord(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
      * 获取当前节点出块地址
      * */
     @CmdAnnotation(cmd = "cs_getNodePackingAddress", version = 1.0, description = "Get the current node's out-of-block address 1.0")

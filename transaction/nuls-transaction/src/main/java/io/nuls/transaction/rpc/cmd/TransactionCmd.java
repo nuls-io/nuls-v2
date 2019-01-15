@@ -22,6 +22,7 @@ import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionPO;
@@ -218,7 +219,7 @@ public class TransactionCmd extends BaseCmd {
         }
         Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         resultMap.put("value", result);
-        return success(result);
+        return success(resultMap);
     }
 
     /**
@@ -260,7 +261,7 @@ public class TransactionCmd extends BaseCmd {
         }
         Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         resultMap.put("value", result);
-        return success(result);
+        return success(resultMap);
     }
 
     /**
@@ -358,8 +359,8 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = TxCmd.TX_VERIFY, version = 1.0, description = "")
     public Response batchVerify(Map params){
-        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = false;
+        VerifyTxResult verifyTxResult = null;
         try {
             Object chainIdObj = params == null ? null : params.get("chainId");
             Object txHexListObj = params == null ? null : params.get("txList");
@@ -369,15 +370,17 @@ public class TransactionCmd extends BaseCmd {
             }
             int chainId = (Integer) chainIdObj;
             List<String> txHexList = (List<String>) txHexListObj;
-            result = transactionService.batchVerify(chainManager.getChain(chainId), txHexList);
+            verifyTxResult = transactionService.batchVerify(chainManager.getChain(chainId), txHexList);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (Exception e) {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
-        resultMap.put("value", result);
-        return success(result);
+        Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        boolean rs = verifyTxResult.success();
+        resultMap.put("success", rs);
+        resultMap.put("code", verifyTxResult.getCode());
+        return success(resultMap);
     }
 
 

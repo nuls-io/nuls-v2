@@ -8,6 +8,7 @@ import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
 
@@ -162,7 +163,7 @@ public interface TransactionService {
      * @return
      * @throws NulsException
      */
-    boolean batchVerify(Chain chain, List<String> list) throws NulsException;
+    VerifyTxResult batchVerify(Chain chain, List<String> list) throws NulsException;
 
 
     /**

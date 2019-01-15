@@ -4,6 +4,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
@@ -43,10 +44,15 @@ public class TransactionBootStrap {
             initLanguage();
             //启动WebSocket服务,向外提供RPC接口
             initServer();
+            while (!ServerRuntime.isReady()) {
+                Log.info("wait depend modules ready");
+                Thread.sleep(2000L);
+            }
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
             //注册网络消息协议
             //NetworkCall.registerProtocol();
+            Log.debug("已启动");
         }catch (Exception e){
             Log.error("Transaction startup error!");
             Log.error(e);
@@ -110,11 +116,11 @@ public class TransactionBootStrap {
      * */
     public static void initServer(){
         try {
-            // Start server instance
+            // todo 依赖模块 Start server instance
             WsServer.getInstance(ModuleE.TX)
                     .moduleRoles(new String[]{"1.0"})
                     .moduleVersion("1.0")
-                    //.dependencies(ModuleE.LG.abbr, "1.0")
+                    .dependencies(ModuleE.LG.abbr, "1.0")
                     //.dependencies(ModuleE.NW.abbr, "1.0")
                     .scanPackage("io.nuls.transaction.rpc.cmd")
                     .connect("ws://127.0.0.1:8887");
