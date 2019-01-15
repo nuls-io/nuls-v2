@@ -35,7 +35,8 @@ import io.nuls.tools.log.logback.NulsLogger;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-    public static NulsLogger Log = LoggerBuilder.getLogger("bl", Level.INFO);
+    public static NulsLogger Log = LoggerBuilder.getLogger("block","common", Level.INFO);
+    public static NulsLogger messageLog = LoggerBuilder.getLogger("block","message", Level.INFO);
 
     public void init(ChainParameters parameters) {
         int chainId = parameters.getChainId();

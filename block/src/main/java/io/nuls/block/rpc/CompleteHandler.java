@@ -35,7 +35,7 @@ import io.nuls.tools.exception.NulsException;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.COMPLETE_MESSAGE;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.messageLog;
 
 /**
  * 处理收到的{@link CompleteMessage},用于区块的同步
@@ -56,14 +56,14 @@ public class CompleteHandler extends BaseCmd {
             byte[] decode = HexUtil.decode(map.get("messageBody").toString());
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            Log.error(e);
+            messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         if (message == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        Log.debug("recieve CompleteMessage from network node-" + nodeId + ", chainId:" + chainId);
+        messageLog.info("recieve CompleteMessage from node-" + nodeId + ", chainId:" + chainId);
         CacheHandler.batchComplete(chainId, message);
         return success();
     }

@@ -24,7 +24,6 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.constant.BlockErrorCode;
-import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.TxGroupMessage;
 import io.nuls.block.utils.module.NetworkUtil;
@@ -42,7 +41,7 @@ import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.messageLog;
 
 /**
  * 处理收到的{@link HashListMessage},用于区块的广播与转发
@@ -64,7 +63,7 @@ public class GetTxGroupHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            Log.error(e);
+            messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
@@ -72,7 +71,7 @@ public class GetTxGroupHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         List<NulsDigestData> hashList = message.getTxHashList();
-        Log.info("recieve HashListMessage from network node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size());
+        messageLog.info("recieve HashListMessage from node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size());
         TxGroupMessage request = new TxGroupMessage();
         List<Transaction> transactions = TransactionUtil.getTransactions(chainId, hashList);
         request.setBlockHash(message.getBlockHash());

@@ -111,6 +111,9 @@ public class CoinDataValidator {
      * 批量校验 非解锁交易，余额校验与coindata校验一致,从数据库获取金额校验。
      * nonce校验与coindata不一样，是从批量累计中获取，进行批量连贯性校验。
      * 解锁交易的验证与coidate一致。
+     *
+     * 批量校验的过程中所有错误按恶意双花来进行处理，
+     * 返回VALIDATE_DOUBLE_EXPENSES_CODE
      * @param chainId
      * @param tx
      * @return ValidateResult
@@ -123,9 +126,13 @@ public class CoinDataValidator {
         String txHash = tx.getHash().toString();
         if(null == batchValidateTxMap || null != batchValidateTxMap.get(txHash)){
             logger.error("{} tx exist!",txHash);
-            return new ValidateResult(VALIDATE_FAIL_CODE,String.format("%s tx exist!",txHash));
+            return new ValidateResult(VALIDATE_DOUBLE_EXPENSES_CODE,String.format("%s tx exist!",txHash));
         }
         CoinData coinData =  CoinDataUtils.parseCoinData(tx.getCoinData());
+        if(null == coinData){
+            //例如黄牌交易，直接返回
+            return new ValidateResult(VALIDATE_SUCCESS_CODE,VALIDATE_SUCCESS_DESC);
+        }
         List<CoinFrom> coinFroms = coinData.getFrom();
         String nonce8BytesStr = LedgerUtils.getNonceStrByTxHash(tx);
         for(CoinFrom coinFrom:coinFroms) {
@@ -137,13 +144,13 @@ public class CoinDataValidator {
             //判断是否是解锁操作
             if(coinFrom.getLocked() == 0 ) {
                if(!isValidateCommonTxBatch(accountState,coinFrom,nonce8BytesStr)){
-                   return new ValidateResult(VALIDATE_FAIL_CODE,String.format("validate fail"));
+                   return new ValidateResult(VALIDATE_DOUBLE_EXPENSES_CODE,String.format("validate fail"));
                }
             }else{
                 //解锁交易，需要从from 里去获取需要的高度数据或时间数据，进行校验
                 //解锁交易只需要从已确认的数据中去获取数据进行校验
                if (!isValidateFreezeTx(coinFrom.getLocked(),accountState,coinFrom.getAmount(),HexUtil.encode(coinFrom.getNonce()))){
-                   return new ValidateResult(VALIDATE_FAIL_CODE,String.format("validate fail"));
+                   return new ValidateResult(VALIDATE_DOUBLE_EXPENSES_CODE,String.format("validate fail"));
                }
             }
         }
@@ -280,13 +287,17 @@ public class CoinDataValidator {
     }
     /**
      * 进行coinData值的校验,在本地交易产生时候进行的校验
-     * 未进行全文的nonce检索,所以不排除双花被当成孤儿交易返回。
+     * 未进行全文的nonce检索,所以不排除历史区块中的双花被当成孤儿交易返回。
      * @param addressChainId
      * @param tx
      * @return
      */
     public ValidateResult validateCoinData(int addressChainId,Transaction tx) {
         CoinData coinData =  CoinDataUtils.parseCoinData(tx.getCoinData());
+        if(null == coinData){
+            //例如黄牌交易，直接返回
+            return new ValidateResult(VALIDATE_SUCCESS_CODE,VALIDATE_SUCCESS_DESC);
+        }
         /*
          * 先校验nonce值是否正常
          */

@@ -46,7 +46,7 @@ import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.TXGROUP_MESSAGE;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.messageLog;
 
 /**
  * 处理收到的{@link TxGroupMessage},用于区块的广播与转发
@@ -75,7 +75,7 @@ public class TxGroupHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            Log.error(e);
+            messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
@@ -85,10 +85,10 @@ public class TxGroupHandler extends BaseCmd {
 
         List<Transaction> transactions = message.getTransactions();
         if (null == transactions || transactions.size() == 0) {
-            Log.warn("recieved a null txGroup form " + nodeId);
+            messageLog.warn("recieved a null txGroup form " + nodeId);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        Log.info("recieve TxGroupMessage from network node-" + nodeId + ", chainId:" + chainId + ", txcount:" + transactions.size());
+        messageLog.info("recieve TxGroupMessage from network node-" + nodeId + ", chainId:" + chainId + ", txcount:" + transactions.size());
         NulsDigestData blockHash = message.getBlockHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         //1.已收到完整区块,丢弃
@@ -120,15 +120,13 @@ public class TxGroupHandler extends BaseCmd {
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
                 blockService.forwardBlock(chainId, headerHash, nodeId);
-            } else {
-                Log.error("save fail! chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + headerHash);
             }
             return success();
         }
 
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
-            Log.error("It is theoretically impossible to enter this branch");
+            messageLog.error("It is theoretically impossible to enter this branch");
         }
         return success();
     }

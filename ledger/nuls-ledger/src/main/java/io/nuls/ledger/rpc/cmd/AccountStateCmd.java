@@ -132,8 +132,15 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetId = (Integer) params.get("assetId");
         AccountState accountState = accountStateService.getAccountState(address, chainId,assetChainId, assetId);
         Map<String,Object> rtMap = new HashMap<>();
-        rtMap.put("nonce",accountState.getNonce());
         rtMap.put("available",accountState.getAvailableAmount());
+        String unconfirmedNonce = accountState.getLatestUnconfirmedNonce();
+        if(StringUtils.isNotBlank(unconfirmedNonce)){
+            rtMap.put("nonce",unconfirmedNonce);
+            rtMap.put("nonceType",LedgerConstant.UNCONFIRMED_NONCE);
+        }else{
+            rtMap.put("nonce",accountState.getNonce());
+            rtMap.put("nonceType",LedgerConstant.CONFIRMED_NONCE);
+        }
         return success(rtMap);
     }
 
