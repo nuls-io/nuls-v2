@@ -61,6 +61,7 @@ public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageServic
         if (null == bytes) {
             return null;
         }
+        System.out.println("==============================");
         try {
             return TxUtil.getTransaction(bytes);
         } catch (Exception e) {

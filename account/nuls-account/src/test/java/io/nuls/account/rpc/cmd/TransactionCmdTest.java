@@ -71,7 +71,7 @@ public class TransactionCmdTest {
         CoinDto inputCoin1=new CoinDto();
         inputCoin1.setAddress("LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930");
         inputCoin1.setPassword(password);
-        inputCoin1.setAssetsChainId(12345);
+        inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(1);
         inputCoin1.setAmount(new BigInteger("1"));
         inputs.add(inputCoin1);
@@ -79,7 +79,7 @@ public class TransactionCmdTest {
         CoinDto outputCoin1=new CoinDto();
         outputCoin1.setAddress("JcgbDRvBqQ67Uq4Tb52U22ieJdr3G3930");
         outputCoin1.setPassword(password);
-        outputCoin1.setAssetsChainId(12345);
+        outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(1);
         outputCoin1.setAmount(new BigInteger("1"));
         outputs.add(outputCoin1);
