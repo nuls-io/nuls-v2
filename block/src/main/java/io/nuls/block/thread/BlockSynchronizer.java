@@ -33,8 +33,7 @@ import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -54,17 +53,15 @@ import static io.nuls.block.utils.LoggerUtil.Log;
  * @version 1.0
  * @date 18-11-8 下午5:49
  */
-@Component
 public class BlockSynchronizer implements Runnable {
 
     private static final BlockSynchronizer INSTANCE = new BlockSynchronizer();
     /**
      * 保存多条链的区块同步状态
      */
-    @Autowired
     private BlockService blockService;
 
-    private BlockSynchronizer() {}
+    private BlockSynchronizer() {this.blockService = SpringLiteContext.getBean(BlockService.class);}
 
     public static BlockSynchronizer getInstance() {
         return INSTANCE;
