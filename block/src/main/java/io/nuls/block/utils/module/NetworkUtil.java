@@ -28,6 +28,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
+import org.spongycastle.asn1.cmc.CMCStatus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +38,7 @@ import java.util.Map;
 import static io.nuls.block.constant.CommandConstant.*;
 import static io.nuls.block.utils.LoggerUtil.Log;
 import static io.nuls.block.utils.LoggerUtil.messageLog;
+import static org.spongycastle.asn1.cmc.CMCStatus.success;
 
 /**
  * 调用网络模块接口的工具
@@ -115,8 +117,9 @@ public class NetworkUtil {
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", HexUtil.encode(message.serialize()));
             params.put("command", command);
-
-            return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
+            boolean success = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
+            messageLog.info("broadcast " + message.getClass().getName() +", chainId:" + chainId + ", success:" + success);
+            return success;
         } catch (Exception e) {
             Log.error(e);
             return false;
