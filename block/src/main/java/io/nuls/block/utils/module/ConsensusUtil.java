@@ -65,15 +65,15 @@ public class ConsensusUtil {
     }
 
     /**
-     * 同步完成时通知共识模块
+     * 通知共识模块进入工作状态或者进入等待状态
      *
      * @param chainId
-     * @param status  1-正常,0-等待
+     * @param status  1-工作,0-等待
      * @return
      */
     public static boolean notice(int chainId, int status) {
         try {
-            Map<String, Object> params = new HashMap<>(5);
+            Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("status", status);

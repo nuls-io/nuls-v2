@@ -26,10 +26,13 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
+import io.nuls.block.utils.module.ConsensusUtil;
 
 import java.util.SortedSet;
 import java.util.concurrent.locks.StampedLock;
 
+import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
+import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
@@ -108,11 +111,13 @@ public class ForkChainsMonitor implements Runnable {
                         // exclusive access
                         //进行切换,切换前变更模块运行状态
                         context.setStatus(RunningStatusEnum.SWITCHING);
+                        ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
                         if (ChainManager.switchChain(chainId, masterChain, switchChain)) {
                             Log.info("chainId-" + chainId + ", switchChain success");
                         } else {
                             Log.info("chainId-" + chainId + ", switchChain fail, auto rollback success");
                         }
+                        ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                         break;
                     }
                 } finally {
