@@ -48,7 +48,6 @@ public class LedgerBootstrap {
 
     public static void main(String[] args) {
         Log.info("ledger Bootstrap start...");
-        Log.debug("ledger Bootstrap start...");
         try {
             AppConfig.loadModuleConfig();
             initRocksDb();
