@@ -10,25 +10,25 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.transaction.cache.TxVerifiedPool;
+import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
-import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
-import io.nuls.transaction.db.rocksdb.storage.CrossChainTxUnprocessedStorageService;
-import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
+import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
+import io.nuls.transaction.db.rocksdb.storage.UnverifiedCtxStorageService;
+import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.message.BroadcastCrossNodeRsMessage;
 import io.nuls.transaction.message.BroadcastCrossTxHashMessage;
 import io.nuls.transaction.message.GetTxMessage;
 import io.nuls.transaction.message.VerifyCrossResultMessage;
 import io.nuls.transaction.message.base.BaseMessage;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.CrossTx;
 import io.nuls.transaction.model.bo.CrossTxSignResult;
 import io.nuls.transaction.model.bo.CrossTxVerifyResult;
 import io.nuls.transaction.rpc.call.*;
-import io.nuls.transaction.service.CrossChainTxService;
+import io.nuls.transaction.service.CtxService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.math.BigDecimal;
@@ -43,21 +43,21 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date: 2018/12/19
  */
 @Service
-public class CrossChainTxServiceImpl implements CrossChainTxService {
+public class CtxServiceImpl implements CtxService {
 
     private final Lock CTX_LOCK = new ReentrantLock();
 
     @Autowired
-    private CrossChainTxStorageService crossChainTxStorageService;
+    private CtxStorageService ctxStorageService;
 
     @Autowired
-    private CrossChainTxUnprocessedStorageService crossChainTxUnprocessedStorageService;
+    private UnverifiedCtxStorageService unverifiedCtxStorageService;
 
     @Autowired
-    private TxVerifiedPool txVerifiedPool;
+    private PackablePool packablePool;
 
     @Autowired
-    private TxVerifiedStorageService txVerifiedStorageService;
+    private UnconfirmedTxStorageService unconfirmedTxStorageService;
 
     @Autowired
     private TransactionH2Service transactionH2Service;
@@ -69,11 +69,11 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         }
         int chainId = chain.getChainId();
         //判断是否存在
-        CrossChainTx ctxExist = crossChainTxUnprocessedStorageService.getTx(chainId, tx.getHash());
+        CrossTx ctxExist = unverifiedCtxStorageService.getTx(chainId, tx.getHash());
         if (null != ctxExist) {
             return;
         }
-        ctxExist = crossChainTxStorageService.getTx(chainId, tx.getHash());
+        ctxExist = ctxStorageService.getTx(chainId, tx.getHash());
         if (null != ctxExist) {
             return;
         }
@@ -92,12 +92,12 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
                 return;
             }*/
         }
-        CrossChainTx ctx = new CrossChainTx();
+        CrossTx ctx = new CrossTx();
         ctx.setTx(tx);
         ctx.setSenderChainId(chainId);
         ctx.setSenderNodeId(nodeId);
         ctx.setState(TxConstant.CTX_UNPROCESSED_0);
-        crossChainTxUnprocessedStorageService.putTx(chain.getChainId(), ctx);
+        unverifiedCtxStorageService.putTx(chain.getChainId(), ctx);
     }
 
     @Override
@@ -105,31 +105,31 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         if (hash == null) {
             return false;
         }
-        return crossChainTxStorageService.removeTx(chain.getChainId(), hash);
+        return ctxStorageService.removeTx(chain.getChainId(), hash);
     }
 
     @Override
-    public CrossChainTx getTx(Chain chain, NulsDigestData hash) {
+    public CrossTx getTx(Chain chain, NulsDigestData hash) {
         if (hash == null) {
             return null;
         }
-        return crossChainTxStorageService.getTx(chain.getChainId(), hash);
+        return ctxStorageService.getTx(chain.getChainId(), hash);
     }
 
     @Override
-    public List<CrossChainTx> getTxList(Chain chain) {
-        return crossChainTxStorageService.getTxList(chain.getChainId());
+    public List<CrossTx> getTxList(Chain chain) {
+        return ctxStorageService.getTxList(chain.getChainId());
     }
 
     @Override
     public boolean updateCrossTxState(Chain chain, NulsDigestData hash, int state) {
-        CrossChainTx crossChainTx = crossChainTxStorageService.getTx(chain.getChainId(), hash);
-        if (null != crossChainTx) {
+        CrossTx crossTx = ctxStorageService.getTx(chain.getChainId(), hash);
+        if (null != crossTx) {
             chain.getLogger().error(hash.getDigestHex() + TxErrorCode.TX_NOT_EXIST.getMsg());
             return false;
         }
-        crossChainTx.setState(state);
-        return crossChainTxStorageService.putTx(chain.getChainId(), crossChainTx);
+        crossTx.setState(state);
+        return ctxStorageService.putTx(chain.getChainId(), crossTx);
     }
 
     /**
@@ -142,7 +142,7 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
      * @throws NulsException
      */
     private void crossNodeResultProcess(Chain chain, String nodeId, BroadcastCrossNodeRsMessage message) throws NulsException {
-        CrossChainTx ctx = getTx(chain, message.getRequestHash());
+        CrossTx ctx = getTx(chain, message.getRequestHash());
         if (ctx == null) {
             //去要交易
             GetTxMessage getTxMessage = new GetTxMessage();
@@ -175,7 +175,7 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         crossTxSignResult.setPackingAddress(message.getPackingAddress());
         crossTxSignResult.setSignature(message.getSignature());
         signRsList.add(crossTxSignResult);
-        crossChainTxStorageService.putTx(chain.getChainId(), ctx);
+        ctxStorageService.putTx(chain.getChainId(), ctx);
         /*
             1.如果是主网 当一个交易的签名者超过共识节点总数的80%，则通过
             2.如果是友链 如果交易的签名者是友链最近x块的出块者
@@ -194,9 +194,9 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         }
         Transaction tx = ctx.getTx();
         //加入待打包
-        txVerifiedPool.add(chain, tx,false);
+        packablePool.add(chain, tx,false);
         //保存到rocksdb
-        txVerifiedStorageService.putTx(chain.getChainId(),tx);
+        unconfirmedTxStorageService.putTx(chain.getChainId(),tx);
         //保存到h2数据库
         transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
         //调账本记录未确认交易
@@ -257,7 +257,7 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
      * @param message
      * @return
      */
-    private boolean verifyNodeResult(Chain chain, BroadcastCrossNodeRsMessage message, CrossChainTx ctx) throws NulsException {
+    private boolean verifyNodeResult(Chain chain, BroadcastCrossNodeRsMessage message, CrossTx ctx) throws NulsException {
         String agentAddress = message.getPackingAddress();
         if (chain.getChainId() == TxConstant.NULS_CHAINID && !ConsensusCall.isConsensusNode(chain, agentAddress)) {
             return false;
@@ -289,7 +289,7 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
      */
     private void verifyCrossResultProcess(Chain chain, String nodeId, VerifyCrossResultMessage message) throws NulsException {
         //查询处理中的跨链交易
-        CrossChainTx ctx = getTx(chain, message.getRequestHash());
+        CrossTx ctx = getTx(chain, message.getRequestHash());
         if (ctx == null) {
             throw new NulsException(TxErrorCode.TX_NOT_EXIST);
         }
@@ -336,6 +336,6 @@ public class CrossChainTxServiceImpl implements CrossChainTxService {
         }
 
         //保存跨链交易验证结果
-        crossChainTxStorageService.putTx(chain.getChainId(), ctx);
+        ctxStorageService.putTx(chain.getChainId(), ctx);
     }
 }

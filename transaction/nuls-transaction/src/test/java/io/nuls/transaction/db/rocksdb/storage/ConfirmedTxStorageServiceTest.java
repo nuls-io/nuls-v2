@@ -8,7 +8,7 @@ import io.nuls.transaction.TestConstant;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.init.TransactionBootStrap;
 import io.nuls.transaction.manager.ChainManager;
-import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.CrossTx;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -16,9 +16,9 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TransactionStorageServiceTest {
+public class ConfirmedTxStorageServiceTest {
 
-    protected static TransactionStorageService transactionStorageService;
+    protected static ConfirmedTxStorageService confirmedTxStorageService;
     protected int chainId = 12345;
     protected long height = 100;
 
@@ -28,7 +28,7 @@ public class TransactionStorageServiceTest {
         TransactionBootStrap.initDB();
         //初始化上下文
         SpringLiteContext.init(TxConstant.CONTEXT_PATH);
-        transactionStorageService = SpringLiteContext.getBean(TransactionStorageService.class);
+        confirmedTxStorageService = SpringLiteContext.getBean(ConfirmedTxStorageService.class);
         //启动链
         SpringLiteContext.getBean(ChainManager.class).runChain();
     }
@@ -36,7 +36,7 @@ public class TransactionStorageServiceTest {
     @Test
     public void saveTx() throws Exception {
         Transaction tx = TestConstant.getTransaction2();
-        boolean result = transactionStorageService.saveTx(chainId, tx);
+        boolean result = confirmedTxStorageService.saveTx(chainId, tx);
         Assert.assertTrue(result);
     }
 
@@ -48,7 +48,7 @@ public class TransactionStorageServiceTest {
             tx.setRemark(StringUtils.bytes("tx remark" + i));
             list.add(tx);
         }
-        boolean result = transactionStorageService.saveTxList(chainId, list);
+        boolean result = confirmedTxStorageService.saveTxList(chainId, list);
         Assert.assertTrue(result);
     }
 
@@ -68,44 +68,44 @@ public class TransactionStorageServiceTest {
             list.add(tx);
             hashList.add(tx.getHash().serialize());
         }
-        transactionStorageService.saveTxList(chainId, list);
+        confirmedTxStorageService.saveTxList(chainId, list);
 
         //test getTxList
-        List<Transaction> txList = transactionStorageService.getTxList(chainId, hashList);
+        List<Transaction> txList = confirmedTxStorageService.getTxList(chainId, hashList);
         Assert.assertEquals(hashList.size(), txList.size());
 
         NulsDigestData hash = list.get(0).getHash();
         //test getTx
-        Transaction tx = transactionStorageService.getTx(chainId, hash);
+        Transaction tx = confirmedTxStorageService.getTx(chainId, hash);
         Assert.assertEquals(hash, tx.getHash());
         //test removeTxList
         List<byte[]> removeList = List.of(hashList.get(0));
-        transactionStorageService.removeTxList(chainId, removeList);
-        tx = transactionStorageService.getTx(chainId, hash);
+        confirmedTxStorageService.removeTxList(chainId, removeList);
+        tx = confirmedTxStorageService.getTx(chainId, hash);
         Assert.assertNull(tx);
     }
 
     @Test
     public void saveCrossTxEffectList() throws Exception {
         //test saveCrossTxEffectList
-        List<CrossChainTx> list = new ArrayList<>();
+        List<CrossTx> list = new ArrayList<>();
         List<NulsDigestData> hashList = new ArrayList<>();
         List<byte[]> removeList = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
-            CrossChainTx ctx = TestConstant.createCrossChainTx();
+            CrossTx ctx = TestConstant.createCrossChainTx();
             list.add(ctx);
             hashList.add(ctx.getTx().getHash());
             removeList.add(ctx.getTx().getHash().serialize());
         }
-        boolean result = transactionStorageService.saveCrossTxEffectList(chainId, height, hashList);
+        boolean result = confirmedTxStorageService.saveCrossTxEffectList(chainId, height, hashList);
         Assert.assertTrue(result);
 
         //test getCrossTxEffectList
-        List<NulsDigestData> txList = transactionStorageService.getCrossTxEffectList(chainId, height);
+        List<NulsDigestData> txList = confirmedTxStorageService.getCrossTxEffectList(chainId, height);
         Assert.assertEquals(hashList.size(), txList.size());
 
         //test removeTxList
-        result = transactionStorageService.removeCrossTxEffectList(chainId, height);
+        result = confirmedTxStorageService.removeCrossTxEffectList(chainId, height);
         Assert.assertTrue(result);
     }
 }

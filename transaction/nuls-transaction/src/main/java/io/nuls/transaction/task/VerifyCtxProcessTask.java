@@ -29,37 +29,35 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.db.rocksdb.storage.CrossChainTxStorageService;
-import io.nuls.transaction.db.rocksdb.storage.CrossChainTxUnprocessedStorageService;
+import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
+import io.nuls.transaction.db.rocksdb.storage.UnverifiedCtxStorageService;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.message.VerifyCrossWithFCMessage;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.CrossChainTx;
+import io.nuls.transaction.model.bo.CrossTx;
 import io.nuls.transaction.model.bo.CrossTxData;
 import io.nuls.transaction.model.bo.Node;
 import io.nuls.transaction.rpc.call.NetworkCall;
-import io.nuls.transaction.service.CrossChainTxService;
+import io.nuls.transaction.service.CtxService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author: Charlie
  * @date: 2018-12-27
  */
-public class CrossTxUnverifiedProcessTask implements Runnable {
+public class VerifyCtxProcessTask implements Runnable {
 
 
-    private CrossChainTxService crossChainTxService = SpringLiteContext.getBean(CrossChainTxService.class);
-    private CrossChainTxStorageService crossChainTxStorageService = SpringLiteContext.getBean(CrossChainTxStorageService.class);
-    private CrossChainTxUnprocessedStorageService crossChainTxUnprocessedStorageService = SpringLiteContext.getBean(CrossChainTxUnprocessedStorageService.class);
+    private CtxService ctxService = SpringLiteContext.getBean(CtxService.class);
+    private CtxStorageService ctxStorageService = SpringLiteContext.getBean(CtxStorageService.class);
+    private UnverifiedCtxStorageService unverifiedCtxStorageService = SpringLiteContext.getBean(UnverifiedCtxStorageService.class);
     private TransactionManager transactionManager = SpringLiteContext.getBean(TransactionManager.class);
     private Chain chain;
 
-    public CrossTxUnverifiedProcessTask(Chain chain) {
+    public VerifyCtxProcessTask(Chain chain) {
         this.chain = chain;
     }
 
@@ -81,10 +79,10 @@ public class CrossTxUnverifiedProcessTask implements Runnable {
     private void doTask(Chain chain) throws NulsException {
         try {
             int chainId = chain.getChainId();
-            List<CrossChainTx> unprocessedList = crossChainTxUnprocessedStorageService.getTxList(chainId);
-            List<CrossChainTx> processedList = new ArrayList<>();
+            List<CrossTx> unprocessedList = unverifiedCtxStorageService.getTxList(chainId);
+            List<CrossTx> processedList = new ArrayList<>();
             //Map<String,List<Node>> nodeMap=new HashMap<>();
-            for (CrossChainTx ctx : unprocessedList) {
+            for (CrossTx ctx : unprocessedList) {
                 Transaction tx = ctx.getTx();
                 //交易验证
                 transactionManager.verify(chain, tx);
@@ -113,9 +111,9 @@ public class CrossTxUnverifiedProcessTask implements Runnable {
             }
             if (processedList != null && processedList.size() > 0) {
                 //添加到处理中
-                crossChainTxStorageService.putTxs(chainId, processedList);
+                ctxStorageService.putTxs(chainId, processedList);
                 //从未处理DB表中清除
-                crossChainTxUnprocessedStorageService.removeTxList(chainId, processedList);
+                unverifiedCtxStorageService.removeTxList(chainId, processedList);
             }
         } catch (NulsException e) {
             chain.getLogger().error(e);

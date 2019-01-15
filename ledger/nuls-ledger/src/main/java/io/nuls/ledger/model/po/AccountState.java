@@ -79,14 +79,16 @@ public class AccountState extends BaseNulsData {
     @Getter
     private List<UnconfirmedNonce> unconfirmedNonces = new ArrayList<>();
     /**
-     * 账户总金额入账
+     * 账户总金额出账
+     * 对应coindata里的coinfrom 累加值
      */
     @Setter
     @Getter
     private BigInteger totalFromAmount = BigInteger.ZERO;
 
     /**
-     * 账户总金额出账
+     * 账户总金额入账
+     * 对应coindata里的cointo 累加值
      */
     @Setter
     @Getter

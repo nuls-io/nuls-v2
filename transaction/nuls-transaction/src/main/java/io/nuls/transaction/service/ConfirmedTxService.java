@@ -13,7 +13,7 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018/11/30
  */
-public interface ConfirmedTransactionService {
+public interface ConfirmedTxService {
 
     /**
      * Get a confirmed transaction

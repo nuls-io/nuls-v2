@@ -45,7 +45,7 @@ public class Chain {
      * 管理接收的其他链创建的跨链交易(如果有), 暂存验证中的跨链交易.
      * //TODO 初始化时需查数据库
      */
-    private Map<NulsDigestData, CrossChainTx> crossTxVerifyingMap;
+//    private Map<NulsDigestData, CrossTx> crossTxVerifyingMap;
 
     /**
      * 交易注册信息
@@ -80,7 +80,7 @@ public class Chain {
 
     public Chain() throws Exception {
         this.accountStatus = RunningStatus.INITING;
-        this.crossTxVerifyingMap = new HashMap<>();
+//        this.crossTxVerifyingMap = new HashMap<>();
         this.txRegisterMap = new HashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
         this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
@@ -122,13 +122,13 @@ public class Chain {
         this.logger = logger;
     }
 
-    public Map<NulsDigestData, CrossChainTx> getCrossTxVerifyingMap() {
-        return crossTxVerifyingMap;
-    }
-
-    public void setCrossTxVerifyingMap(Map<NulsDigestData, CrossChainTx> crossTxVerifyingMap) {
-        this.crossTxVerifyingMap = crossTxVerifyingMap;
-    }
+//    public Map<NulsDigestData, CrossTx> getCrossTxVerifyingMap() {
+//        return crossTxVerifyingMap;
+//    }
+//
+//    public void setCrossTxVerifyingMap(Map<NulsDigestData, CrossTx> crossTxVerifyingMap) {
+//        this.crossTxVerifyingMap = crossTxVerifyingMap;
+//    }
 
     public Map<Integer, TxRegister> getTxRegisterMap() {
         return txRegisterMap;

@@ -59,9 +59,10 @@ public class LoggerBuilder {
     }
 
     private static NulsLogger build(String fileName, Level level,boolean consoleAppend) {
-        RollingFileAppender fileAppender = LogAppender.getAppender(fileName,level);
+        RollingFileAppender fileAppender = LogAppender.getAppender(fileName);
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         Logger logger = context.getLogger(fileAppender.getEncoder().toString());
+        logger.setLevel(level);
         //设置不向上级打印信息
         logger.setAdditive(false);
         logger.addAppender(fileAppender);

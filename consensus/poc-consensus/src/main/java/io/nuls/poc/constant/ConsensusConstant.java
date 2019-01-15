@@ -200,6 +200,7 @@ public interface ConsensusConstant {
     String PARAM_TX = "tx";
     String PARAM_HEIGHT = "height";
     String PARAM_BLOCK_HEADER ="blockHeader";
+    String PARAM_BLOCK="block";
     String PARAM_EVIDENCE_HEADER ="evidenceHeader";
     String VALID_RESULT ="valid";
     String PARAM_STATUS = "status";

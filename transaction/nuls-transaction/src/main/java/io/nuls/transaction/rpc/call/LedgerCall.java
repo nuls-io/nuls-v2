@@ -1,24 +1,17 @@
 package io.nuls.transaction.rpc.call;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Address;
 import io.nuls.base.data.Transaction;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
-import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.TxRegister;
-import io.nuls.transaction.model.bo.VerifyCoinDataResult;
+import io.nuls.transaction.model.bo.VerifyTxResult;
 
 import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,7 +28,7 @@ public class LedgerCall {
      * @param txHex
      * @return
      */
-    public static VerifyCoinDataResult verifyCoinData(Chain chain, String txHex, boolean batch) throws NulsException {
+    public static VerifyTxResult verifyCoinData(Chain chain, String txHex, boolean batch) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -43,7 +36,7 @@ public class LedgerCall {
             params.put("txHex", txHex);
             params.put("isBatchValidate", batch);
             HashMap result = (HashMap) TransactionCall.request("validateCoinData", ModuleE.LG.abbr, params);
-            return new VerifyCoinDataResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
+            return new VerifyTxResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -55,7 +48,7 @@ public class LedgerCall {
      * @param tx
      * @return
      */
-    public static VerifyCoinDataResult verifyCoinData(Chain chain, Transaction tx, boolean batch) throws NulsException {
+    public static VerifyTxResult verifyCoinData(Chain chain, Transaction tx, boolean batch) throws NulsException {
         try {
             return verifyCoinData(chain, tx.hex(), batch);
         } catch (Exception e) {

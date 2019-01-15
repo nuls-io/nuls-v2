@@ -29,7 +29,7 @@ package io.nuls.transaction.db.rocksdb.storage.impl;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.Log;
-import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
+import io.nuls.transaction.db.rocksdb.storage.UnverifiedTxStorageService;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -42,7 +42,7 @@ import java.io.IOException;
  * @date: 2018/11/29
  */
 @Service
-public class TxUnverifiedStorageServiceImpl implements TxUnverifiedStorageService {
+public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageService {
 
     @Override
     public boolean putTx(Chain chain, Transaction tx) {

@@ -11,8 +11,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxDBConstant;
-import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
-import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ import java.util.List;
  * @date: 2018/11/13
  */
 @Service
-public class TxVerifiedStorageServiceImpl implements TxVerifiedStorageService, InitializingBean {
+public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageService, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws NulsException {

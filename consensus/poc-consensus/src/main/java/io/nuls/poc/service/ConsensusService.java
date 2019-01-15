@@ -245,6 +245,13 @@ public interface ConsensusService {
     Result addEvidenceRecord(Map<String,Object> params);
 
     /**
+     * 双花交易记录
+     * @param params
+     * @return Result
+     * */
+    Result doubleSpendRecord(Map<String,Object> params);
+
+    /**
      * 获取当前节点出块地址
      * @param params
      * @return Result

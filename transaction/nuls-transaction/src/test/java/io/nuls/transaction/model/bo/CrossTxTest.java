@@ -1,27 +1,24 @@
 package io.nuls.transaction.model.bo;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.TestConstant;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertTrue;
 
-public class CrossChainTxTest {
+public class CrossTxTest {
 
-    private CrossChainTx obj ;
+    private CrossTx obj ;
     byte[] bytes = null;
 
     @Before
     public void setUp() throws Exception {
-        obj = new CrossChainTx();
+        obj = new CrossTx();
         obj.setState(3);
         obj.setSenderChainId(324);
         obj.setSenderNodeId("23");
@@ -54,7 +51,7 @@ public class CrossChainTxTest {
         if (null == bytes) {
             serializeToStream();
         }
-        CrossChainTx obj2 = new CrossChainTx();
+        CrossTx obj2 = new CrossTx();
         try {
             obj2.parse(new NulsByteBuffer(bytes));
             assertTrue(obj.getHeight()==obj2.getHeight());

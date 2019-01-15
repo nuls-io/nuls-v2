@@ -8,18 +8,17 @@ import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.thread.TimeService;
-import io.nuls.transaction.cache.TxVerifiedPool;
+import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
-import io.nuls.transaction.db.rocksdb.storage.TxUnverifiedStorageService;
-import io.nuls.transaction.db.rocksdb.storage.TxVerifiedStorageService;
+import io.nuls.transaction.db.rocksdb.storage.UnverifiedTxStorageService;
+import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
-import io.nuls.transaction.service.ConfirmedTransactionService;
+import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.utils.TxUtil;
 import io.nuls.transaction.utils.TransactionTimeComparator;
 
@@ -30,14 +29,14 @@ import java.util.*;
  * @author: Charlie
  * @date: 2018/11/28
  */
-public class TxUnverifiedProcessTask implements Runnable {
+public class VerifyTxProcessTask implements Runnable {
 
-    private TxVerifiedPool txVerifiedPool = SpringLiteContext.getBean(TxVerifiedPool.class);
+    private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
     private TransactionManager transactionManager = SpringLiteContext.getBean(TransactionManager.class);
 
-    private TxUnverifiedStorageService txUnverifiedStorageService = SpringLiteContext.getBean(TxUnverifiedStorageService.class);
-    private ConfirmedTransactionService confirmedTransactionService = SpringLiteContext.getBean(ConfirmedTransactionService.class);
-    private TxVerifiedStorageService txVerifiedStorageService = SpringLiteContext.getBean(TxVerifiedStorageService.class);
+    private UnverifiedTxStorageService unverifiedTxStorageService = SpringLiteContext.getBean(UnverifiedTxStorageService.class);
+    private ConfirmedTxService confirmedTxService = SpringLiteContext.getBean(ConfirmedTxService.class);
+    private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
     private TransactionH2Service transactionH2Service = SpringLiteContext.getBean(TransactionH2Service.class);
 
     private TransactionTimeComparator txComparator = SpringLiteContext.getBean(TransactionTimeComparator.class);
@@ -45,7 +44,7 @@ public class TxUnverifiedProcessTask implements Runnable {
 
     private Chain chain;
 
-    public  TxUnverifiedProcessTask(Chain chain){
+    public VerifyTxProcessTask(Chain chain){
         this.chain = chain;
     }
 
@@ -69,12 +68,12 @@ public class TxUnverifiedProcessTask implements Runnable {
     }
 
     private void doTask(Chain chain){
-        if (txVerifiedPool.getPoolSize(chain) >= TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE) {
+        if (packablePool.getPoolSize(chain) >= TxConstant.TX_UNVERIFIED_QUEUE_MAXSIZE) {
             return;
         }
 
         Transaction tx = null;
-        while ((tx = txUnverifiedStorageService.pollTx(chain)) != null && orphanTxList.size() < TxConstant.ORPHAN_CONTAINER_MAX_SIZE) {
+        while ((tx = unverifiedTxStorageService.pollTx(chain)) != null && orphanTxList.size() < TxConstant.ORPHAN_CONTAINER_MAX_SIZE) {
             size++;
             processTx(chain, tx, false);
         }
@@ -90,7 +89,7 @@ public class TxUnverifiedProcessTask implements Runnable {
                 return false;
             }
             //获取一笔交易(从已确认交易库中获取？)
-            Transaction transaction = confirmedTransactionService.getConfirmedTransaction(chain, tx.getHash());
+            Transaction transaction = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
             if(null != transaction){
                 return isOrphanTx;
             }
@@ -98,9 +97,9 @@ public class TxUnverifiedProcessTask implements Runnable {
             params.put("tx", tx.hex());
             Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "verifyCoinData",params);
             if(response.isSuccess()){
-                txVerifiedPool.add(chain, tx,false);
+                packablePool.add(chain, tx,false);
                 //保存到rocksdb
-                txVerifiedStorageService.putTx(chainId, tx);
+                unconfirmedTxStorageService.putTx(chainId, tx);
                 //保存到h2数据库
                 transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
                 //调账本记录未确认交易
