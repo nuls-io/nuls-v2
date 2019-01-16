@@ -21,6 +21,8 @@
 package io.nuls.block;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.block.constant.ChainTypeEnum;
+import io.nuls.block.model.Chain;
 import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
@@ -175,5 +177,13 @@ public class CommonTest {
         clone.pop();
         Assert.assertEquals(1, clone.size());
         Assert.assertEquals(4, list.size());
+    }
+
+    @Test
+    public void test4() {
+        TreeSet<Chain> chains = new TreeSet<>(Chain.COMPARATOR);
+        chains.forEach(e -> e.setType(ChainTypeEnum.FORK));
+        SortedSet<Chain> ss = Collections.emptySortedSet();
+        ss.forEach(e -> e.setType(ChainTypeEnum.FORK));
     }
 }
