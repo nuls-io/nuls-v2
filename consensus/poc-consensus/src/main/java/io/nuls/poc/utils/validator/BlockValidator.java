@@ -237,7 +237,6 @@ public class BlockValidator {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("There is a wrong red punish tx!" + block.getHeader().getHash());
             return false;
          }
-
       }
       return true;
    }

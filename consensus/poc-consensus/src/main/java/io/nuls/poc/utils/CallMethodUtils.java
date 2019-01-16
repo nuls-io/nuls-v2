@@ -8,12 +8,14 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
+import io.nuls.poc.model.bo.Chain;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,7 +138,7 @@ public class CallMethodUtils {
      * @param isCross  是否获取跨链节点连接数/Whether to Get the Number of Connections across Chains
      * @return  int    连接节点数/Number of Connecting Nodes
      * */
-    public static int getAvailableNodeAmount(int chainId,boolean isCross)throws Exception{
+    public static int getAvailableNodeAmount(int chainId,boolean isCross)throws NulsException{
         Map<String,Object> callParams = new HashMap<>(4);
         callParams.put("chainId",chainId);
         callParams.put("isCross",isCross);
@@ -158,8 +160,9 @@ public class CallMethodUtils {
      * @param block    new block Info
      * @return         Successful Sending
      * */
-    public static boolean receivePackingBlock(int chainId,String block)throws Exception{
-        Map<String,Object> params = new HashMap(ConsensusConstant.INIT_CAPACITY);
+    @SuppressWarnings("unchecked")
+    public static boolean receivePackingBlock(int chainId,String block)throws NulsException{
+        Map<String,Object> params = new HashMap(4);
         params.put("chainId",chainId);
         params.put("block", block);
         try {
@@ -173,10 +176,64 @@ public class CallMethodUtils {
     /**
      * 获取可用余额和nonce
      * Get the available balance and nonce
+     * @param chain
+     * @param address
      * */
+    @SuppressWarnings("unchecked")
+    public Map<String,Object> getBalanceAndNonce(Chain chain,String address)throws NulsException{
+        Map<String,Object> params = new HashMap(4);
+        params.put("chainId",chain.getConfig().getChainId());
+        params.put("assetChainId", chain.getConfig().getChainId());
+        params.put("address", address);
+        params.put("assetId", chain.getConfig().getAssetsId());
+        try {
+            Response callResp = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr,"getBalanceNonce", params);
+            if(!callResp.isSuccess()){
+                return null;
+            }
+            return (HashMap)((HashMap) callResp.getResponseData()).get("getBalanceNonce");
+        }catch (Exception e){
+            throw new NulsException(e);
+        }
+    }
 
     /**
-     * 获取账户锁定金额
-     * Get the amount locked in the account
+     * 获取账户锁定金额和可用余额
+     * Acquire account lock-in amount and available balance
+     * @param chain
+     * @param address
      * */
+    @SuppressWarnings("unchecked")
+    public Map<String,Object> getBalance(Chain chain,String address)throws NulsException{
+        Map<String,Object> params = new HashMap(4);
+        params.put("chainId",chain.getConfig().getChainId());
+        params.put("assetChainId", chain.getConfig().getChainId());
+        params.put("address", address);
+        params.put("assetId", chain.getConfig().getAssetsId());
+        try {
+            Response callResp = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr,"getBalance", params);
+            if(!callResp.isSuccess()){
+                return null;
+            }
+            return (HashMap)((HashMap) callResp.getResponseData()).get("getBalance");
+        }catch (Exception e){
+            throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 获取当前网络时间
+     * Get the current network time
+     * */
+    public static long currentTime() {
+        try {
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
+            Map responseData = (Map) response.getResponseData();
+            Map result = (Map) responseData.get("nw_currentTimeMillis");
+            return (Long) result.get("currentTimeMillis");
+        } catch (Exception e) {
+            Log.error("get nw_currentTimeMillis fail");
+        }
+        return System.currentTimeMillis();
+    }
 }

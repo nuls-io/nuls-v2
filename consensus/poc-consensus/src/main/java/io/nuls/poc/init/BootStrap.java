@@ -123,15 +123,15 @@ public class BootStrap {
             for (Method method : methods) {
                 ResisterTx annotation = getRegisterAnnotation(method);
                 if (annotation != null) {
-                    if (!registerDetailMap.containsKey(annotation.txType())) {
-                        registerDetailMap.put(annotation.txType(), new TxRegisterDetail(annotation.txType()));
+                    if (!registerDetailMap.containsKey(annotation.txType().txType)) {
+                        registerDetailMap.put(annotation.txType().txType, new TxRegisterDetail(annotation.txType()));
                     }
                     if (annotation.methodType().equals(TxMethodType.COMMIT)) {
-                        registerDetailMap.get(annotation.txType()).setCommitCmd(annotation.methodName());
+                        registerDetailMap.get(annotation.txType().txType).setCommitCmd(annotation.methodName());
                     } else if (annotation.methodType().equals(TxMethodType.VALID)) {
-                        registerDetailMap.get(annotation.txType()).setValidateCmd(annotation.methodName());
+                        registerDetailMap.get(annotation.txType().txType).setValidateCmd(annotation.methodName());
                     } else if (annotation.methodType().equals(TxMethodType.ROLLBACK)) {
-                        registerDetailMap.get(annotation.txType()).setRollbackCmd(annotation.methodName());
+                        registerDetailMap.get(annotation.txType().txType).setRollbackCmd(annotation.methodName());
                     }
                 }
             }
