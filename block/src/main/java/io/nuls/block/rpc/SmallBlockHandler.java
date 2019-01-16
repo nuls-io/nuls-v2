@@ -71,9 +71,9 @@ public class SmallBlockHandler extends BaseCmd {
     public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
         ChainContext context = ContextManager.getContext(chainId);
-        if (!context.getStatus().equals(RUNNING)) {
-            return success();
-        }
+//        if (!context.getStatus().equals(RUNNING)) {
+//            return success();
+//        }
         String nodeId = map.get("nodeId").toString();
         SmallBlockMessage message = new SmallBlockMessage();
 
@@ -82,10 +82,6 @@ public class SmallBlockHandler extends BaseCmd {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
             messageLog.error(e);
-            return failed(BlockErrorCode.PARAMETER_ERROR);
-        }
-
-        if (message == null || nodeId == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
@@ -100,7 +96,11 @@ public class SmallBlockHandler extends BaseCmd {
         //阻止恶意节点提前出块,拒绝接收未来一定时间外的区块
         ChainParameters parameters = context.getParameters();
         int validBlockInterval = parameters.getValidBlockInterval();
-        if (header.getTime() > (NetworkUtil.currentTime() + validBlockInterval)) {
+        long currentTime = NetworkUtil.currentTime();
+        if (header.getTime() > (currentTime + validBlockInterval)) {
+            messageLog.error("header.getTime()-" + header.getTime());
+            messageLog.error("currentTime-" + currentTime);
+            messageLog.error("validBlockInterval-" + validBlockInterval);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 

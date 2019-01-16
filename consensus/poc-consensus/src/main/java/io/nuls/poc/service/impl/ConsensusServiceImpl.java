@@ -116,7 +116,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAgentAddress(), dto.getPassword());
             //3.组装创建节点交易
             Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
-            tx.setTime(TimeService.currentTimeMillis());
+            tx.setTime(CallMethodUtils.currentTime());
             //3.1.组装共识节点信息
             Agent agent = new Agent();
             agent.setAgentAddress(AddressTool.getAddress(dto.getAgentAddress()));
@@ -192,7 +192,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTxData(stopAgent.serialize());
-            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeService.currentTimeMillis() + chain.getConfig().getStopAgentLockTime());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, CallMethodUtils.currentTime() + chain.getConfig().getStopAgentLockTime());
             tx.setCoinData(coinData.serialize());
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));

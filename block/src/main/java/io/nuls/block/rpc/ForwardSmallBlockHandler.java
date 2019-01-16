@@ -58,10 +58,10 @@ public class ForwardSmallBlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = FORWARD_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
-        ChainContext context = ContextManager.getContext(chainId);
-        if (!context.getStatus().equals(RUNNING)) {
-            return success();
-        }
+//        ChainContext context = ContextManager.getContext(chainId);
+//        if (!context.getStatus().equals(RUNNING)) {
+//            return success();
+//        }
         String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
 
@@ -73,9 +73,6 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        if (message == null || nodeId == null) {
-            return failed(BlockErrorCode.PARAMETER_ERROR);
-        }
         NulsDigestData blockHash = message.getRequestHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         messageLog.info("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);

@@ -244,7 +244,7 @@ public class BlockServiceImpl implements BlockService {
                 masterChain.setEndHeight(masterChain.getEndHeight() + 1);
                 int heightRange = context.getParameters().getHeightRange();
                 LinkedList<NulsDigestData> hashList = masterChain.getHashList();
-                if (hashList.size() > heightRange) {
+                if (hashList.size() >= heightRange) {
                     hashList.removeFirst();
                 }
                 hashList.addLast(hash);
@@ -310,13 +310,13 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
             if (!localInit) {
-                ContextManager.getContext(chainId).setLatestBlock(getBlock(chainId, height - 1));
+                context.setLatestBlock(getBlock(chainId, height - 1));
                 Chain masterChain = ChainManager.getMasterChain(chainId);
                 masterChain.setEndHeight(height - 1);
                 LinkedList<NulsDigestData> hashList = masterChain.getHashList();
-                hashList.pollLast();
+                hashList.removeLast();
                 int heightRange = context.getParameters().getHeightRange();
-                hashList.offerFirst(getBlockHash(chainId, height - heightRange));
+                hashList.addFirst(getBlockHash(chainId, height - heightRange + 1));
             }
             return true;
         } finally {
