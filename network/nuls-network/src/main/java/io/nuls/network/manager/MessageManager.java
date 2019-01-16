@@ -48,6 +48,7 @@ import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.model.po.ProtocolHandlerPo;
 import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
@@ -170,11 +171,9 @@ public class MessageManager extends BaseManager{
         byte [] bodyHash=Sha256Hash.hashTwice(data);
         byte []get4Byte=ByteUtils.subBytes(bodyHash,0,4);
         long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
-//        Log.debug("==================local checksum:"+checksum);
-//        Log.debug("==================peer checksum:"+pChecksum);
         return checksum == pChecksum;
     }
-    public void receiveMessage(ByteBuf buffer,String nodeKey,boolean isServer) throws NulsException {
+    public void receiveMessage(ByteBuf buffer,Node node,boolean isServer) throws NulsException {
         //统一接收消息处理
         try {
             byte[] bytes = new byte[buffer.readableBytes()];
@@ -185,24 +184,21 @@ public class MessageManager extends BaseManager{
             byte []payLoad = byteBuffer.getPayload();
             byte []payLoadBody = ByteUtils.subBytes(payLoad,headerSize,payLoad.length-headerSize);
             byte []headerByte = ByteUtils.copyOf(payLoad,headerSize);
-//            Log.info("=================payLoad length"+payLoadBody.length);
-
             header.parse(headerByte,0);
-//            Log.info("================CMD="+header.getCommandStr());
             if (!validate(payLoadBody,header.getChecksum())) {
-//                Log.error("validate  false ======================");
+                Log.error("validate  false ======================");
                 return;
             }
             byteBuffer.setCursor(0);
             while (!byteBuffer.isFinished()) {
-//                Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
+                Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
                 BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());
                 if(null != message) {
                     BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(message);
                     message = byteBuffer.readNulsData(message);
-                    NetworkEventResult result = handler.recieve(message, nodeKey, isServer);
+                    NetworkEventResult result = handler.recieve(message, node.getId(), isServer);
                     if(!result.isSuccess()){
-//                        Log.error("receiveMessage fail:"+result.getErrorCode().getMsg());
+                        Log.error("receiveMessage fail:"+result.getErrorCode().getMsg());
                     }
                 }else{
                     //外部消息，转外部接口
@@ -210,16 +206,16 @@ public class MessageManager extends BaseManager{
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
                     Map<String,Object> paramMap = new HashMap<>();
                     paramMap.put("chainId",chainId);
-                    paramMap.put("nodeId",nodeKey);
+                    paramMap.put("nodeId",node.getId());
                     paramMap.put("messageBody",HexUtil.byteToHex(payLoadBody));
                     Collection<ProtocolRoleHandler> protocolRoleHandlers =  getProtocolRoleHandlerMap(header.getCommandStr());
                     if(null == protocolRoleHandlers){
-//                        Log.error("unknown mssages. cmd={},may be handle had not be registered to network.",header.getCommandStr());
+                        Log.error("unknown mssages. cmd={},may be handle had not be registered to network.",header.getCommandStr());
                     }else{
                         for(ProtocolRoleHandler protocolRoleHandler:protocolRoleHandlers) {
-//                            Log.debug("request：{}=={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
-                            CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
-//                            Log.debug("response：" + response);
+                            Log.debug("request：{}=={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
+                           Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
+                            Log.debug("response：" + response);
                         }
                     }
                     byteBuffer.setCursor(payLoad.length);
@@ -267,6 +263,7 @@ public class MessageManager extends BaseManager{
      * @param asyn boolean
      */
     public boolean sendGetAddrMessage(long magicNumber,boolean isCross,boolean asyn) {
+
         NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
         if(isCross){
             //get Cross Seed
