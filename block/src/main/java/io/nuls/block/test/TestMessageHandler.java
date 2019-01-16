@@ -33,6 +33,7 @@ import io.nuls.tools.crypto.HexUtil;
 import java.util.Map;
 
 import static io.nuls.block.utils.LoggerUtil.messageLog;
+import static io.nuls.block.utils.LoggerUtil.sendLog;
 
 /**
  * 处理收到的{@link TestMessage},用测试消息收发的稳定性
@@ -61,7 +62,8 @@ public class TestMessageHandler extends BaseCmd {
         messageLog.info("recieve TestMessage from node-" + nodeId + ", chainId:" + chainId + ", index:" + index);
         try {
             Thread.sleep(1000L);
-            NetworkUtil.sendToNode(chainId, new TestMessage(index+1), nodeId, "test");
+            boolean b = NetworkUtil.sendToNode(chainId, new TestMessage(index + 1), nodeId, "test");
+            sendLog.info("send index:" + message.getIndex() + " to node-" + nodeId + ", chainId:" + chainId + ", success:" + b);
         } catch (Exception e) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
