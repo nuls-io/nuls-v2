@@ -34,6 +34,9 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static io.nuls.block.constant.Constant.DATA_PATH;
 import static org.junit.Assert.*;
 
@@ -51,7 +54,7 @@ public class ChainStorageServiceImplTest {
     }
 
     @Test
-    public void save() {
+    public void singleSave() {
         NulsDigestData hash = block.getHeader().getHash();
         service.save(1, block);
         Block block1 = service.query(1, hash);
@@ -61,11 +64,47 @@ public class ChainStorageServiceImplTest {
     }
 
     @Test
-    public void remove() {
+    public void singleRemove() {
         NulsDigestData hash = block.getHeader().getHash();
         service.save(1, block);
         service.remove(1, hash);
         Block block1 = service.query(1, hash);
         assertEquals(null, block1);
+    }
+
+    @Test
+    public void batchSave() throws Exception {
+        List<Block> list = new ArrayList<>();
+        Block block2 = BlockGenerator.generate(block);
+        NulsDigestData hash1 = block.getHeader().getHash();
+        NulsDigestData hash2 = block2.getHeader().getHash();
+        List<NulsDigestData> hashList = new ArrayList<>();
+        hashList.add(hash1);
+        hashList.add(hash2);
+        list.add(block);
+        list.add(block2);
+        service.save(1, list);
+        List<Block> blocks = service.query(1, hashList);
+        NulsDigestData hash1_ = blocks.get(0).getHeader().getHash();
+        NulsDigestData hash2_ = blocks.get(1).getHeader().getHash();
+        assertEquals(hash1, hash1_);
+        assertEquals(hash2, hash2_);
+    }
+
+    @Test
+    public void batchRemove() throws Exception {
+        List<Block> list = new ArrayList<>();
+        Block block2 = BlockGenerator.generate(block);
+        NulsDigestData hash1 = block.getHeader().getHash();
+        NulsDigestData hash2 = block2.getHeader().getHash();
+        List<NulsDigestData> hashList = new ArrayList<>();
+        hashList.add(hash1);
+        hashList.add(hash2);
+        list.add(block);
+        list.add(block2);
+        service.save(1, list);
+        service.remove(1, hashList);
+        List<Block> blocks = service.query(1, hashList);
+        assertEquals(null, blocks);
     }
 }

@@ -100,6 +100,9 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             }
         }
         List<byte[]> valueList = RocksDBService.multiGetValueList(CACHED_BLOCK + chainId, keys);
+        if (valueList == null) {
+            return null;
+        }
         List<Block> blockList = new ArrayList<>();
         for (byte[] bytes : valueList) {
             Block block = new Block();
