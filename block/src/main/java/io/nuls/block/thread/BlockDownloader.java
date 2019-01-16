@@ -22,11 +22,14 @@
 
 package io.nuls.block.thread;
 
+import io.nuls.base.data.Block;
 import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
-import io.nuls.tools.log.Log;
 
 import java.util.concurrent.*;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 区块下载管理器
@@ -41,15 +44,26 @@ public class BlockDownloader implements Callable<Boolean> {
      * 区块下载参数
      */
     private BlockDownloaderParams params;
+    /**
+     * 执行下载任务的线程池
+     */
     private ThreadPoolExecutor executor;
+    /**
+     * 缓存下载结果
+     */
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
+    /**
+     * 下载到的区块最终放入此队列，由消费线程取出进行保存
+     */
+    private BlockingQueue<Block> queue;
 
-    public BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params) {
+    public BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
         this.params = params;
         this.executor = executor;
         this.futures = futures;
         this.chainId = chainId;
+        this.queue = queue;
     }
 
     @Override
@@ -57,10 +71,16 @@ public class BlockDownloader implements Callable<Boolean> {
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
-        int maxDowncount = ContextManager.getContext(chainId).getParameters().getDownloadNumber();
+        ChainParameters chainParameters = ContextManager.getContext(chainId).getParameters();
+        int maxDowncount = chainParameters.getDownloadNumber();
+        int blockCache = chainParameters.getBlockCache();
         try {
-            Log.info("BlockDownloader start work from {} to {}", startHeight, netLatestHeight);
+            Log.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight);
             while (startHeight <= netLatestHeight) {
+                while (queue.size() > blockCache) {
+                    Log.info("BlockDownloader wait！ cached queue size:" + queue.size());
+                    Thread.sleep(1000L);
+                }
                 Node node = nodes.take();
                 int size = maxDowncount * node.getCredit() / 100;
                 if (startHeight + size > netLatestHeight) {

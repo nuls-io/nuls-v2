@@ -6,7 +6,6 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Data;
 
@@ -18,8 +17,8 @@ import java.util.List;
  * 区块头存储对象
  *
  * @author captain
- * @date 18-12-10 下午3:50
  * @version 1.0
+ * @date 18-12-10 下午3:50
  */
 @Data
 public class BlockHeaderPo extends BaseNulsData {

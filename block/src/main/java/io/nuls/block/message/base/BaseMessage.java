@@ -26,11 +26,12 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.IOException;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 通用消息体
@@ -42,9 +43,6 @@ import java.io.IOException;
 public abstract class BaseMessage extends BaseNulsData {
 
     private transient NulsDigestData hash;
-
-    @Getter @Setter
-    protected String command;
 
     @Override
     public int size() {

@@ -35,8 +35,8 @@ import static org.junit.Assert.*;
 public class AccountServiceTest {
 
     protected static AccountService accountService;
-    protected int chainId = 12345;
-    protected String password = "a12345678";
+    protected int chainId = 8964;
+    protected String password = "";
 
     @BeforeClass
     public static void beforeTest() {
@@ -101,12 +101,14 @@ public class AccountServiceTest {
      */
     @Test
     public void createAccountTest() throws Exception {
-        int count = 1;
+        int count = 5;
         //Test to create an account that is not empty.
         List<Account> accountList = accountService.createAccount(chainId, count, password);
         //Checking the number of accounts returned
         assertEquals(accountList.size(), count);
-
+        for(Account account : accountList){
+            System.out.println(account.getAddress().getBase58());
+        }
         //Test to create an empty password account
         accountList = accountService.createAccount(chainId, count, null);
         //Checking the number of accounts returned

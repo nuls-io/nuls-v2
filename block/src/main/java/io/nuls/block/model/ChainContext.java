@@ -22,24 +22,19 @@
 
 package io.nuls.block.model;
 
-import ch.qos.logback.classic.Logger;
 import io.nuls.base.data.Block;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ChainManager;
-import io.nuls.block.manager.ContextManager;
-import io.nuls.block.model.Chain;
 import io.nuls.block.service.BlockService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.logback.LoggerBuilder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.StampedLock;
 
 /**
  * 每个链ID对应一个{@link ChainContext},维护一些链运行期间的信息,并负责链的初始化、启动、停止、销毁操作
@@ -53,64 +48,58 @@ public class ChainContext {
     /**
      * 代表该链的运行状态
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private RunningStatusEnum status;
 
     /**
      * 链ID
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private int chainId;
 
     /**
      * 该链的系统交易类型
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private List<Integer> systemTransactionType;
 
     /**
      * 最新区块
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private Block latestBlock;
 
     /**
      * 创世区块
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private Block genesisBlock;
 
     /**
      * 主链
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private Chain masterChain;
 
     /**
      * 链的运行时参数
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private ChainParameters parameters;
 
     /**
+     * 获取锁对象
      * 清理数据库,区块同步,分叉链维护,孤儿链维护获取该锁
-     *
-     * @return
      */
-    public ReentrantReadWriteLock.ReadLock getReadLock() {
-        return lock.readLock();
-    }
-
-    /**
-     * 进行状态变更时,获取该锁
-     *
-     * @return
-     */
-    public ReentrantReadWriteLock.WriteLock getWriteLock() {
-        return lock.writeLock();
-    }
-
-    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    @Getter
+    private StampedLock lock;
 
     public synchronized void setStatus(RunningStatusEnum status) {
         this.status = status;
@@ -121,6 +110,7 @@ public class ChainContext {
     }
 
     public void init() {
+        lock = new StampedLock();
         //服务初始化
         BlockService service = SpringLiteContext.getBean(BlockService.class);
         service.init(chainId);

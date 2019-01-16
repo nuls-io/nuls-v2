@@ -33,9 +33,10 @@ import java.io.IOException;
 /**
  * 广播区块消息
  * 从共识模块接收到新打包区块后,先进行验证,验证通过后保存到数据库并广播到网络上
+ *
  * @author captain
- * @date 18-11-9 下午2:37
  * @version 1.0
+ * @date 18-11-9 下午2:37
  */
 @Data
 public class SmallBlockMessage extends BaseMessage {

@@ -38,7 +38,6 @@ import io.nuls.rpc.server.WsServer;
 import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -46,6 +45,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static io.nuls.block.constant.Constant.*;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 区块管理模块启动类
@@ -81,16 +81,12 @@ public class BlockBootstrap {
             CmdDispatcher.syncKernel();
             //加载通用数据库
             RocksDBService.init(DATA_PATH);
-            if (!RocksDBService.existTable(CHAIN_LATEST_HEIGHT)) {
-                RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
-            }
-            if (!RocksDBService.existTable(CHAIN_PARAMETERS)) {
-                RocksDBService.createTable(CHAIN_PARAMETERS);
-            }
+            RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
+            RocksDBService.createTable(CHAIN_PARAMETERS);
             //加载配置
             ConfigLoader.load();
         } catch (Exception e) {
-            Log.error("error occur when init, {}", e.getMessage());
+            Log.error("error occur when init, " + e.getMessage());
         }
     }
 
@@ -98,15 +94,14 @@ public class BlockBootstrap {
         try {
             while (!ServerRuntime.isReady()) {
                 Log.info("wait depend modules ready");
-                Thread.sleep(1000L);
+                Thread.sleep(2000L);
             }
             NetworkUtil.register();
             Log.info("service start");
 //            onlyRunWhenTest();
 
             //开启区块同步线程
-            ScheduledThreadPoolExecutor synExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-synchronizer"));
-            synExecutor.scheduleWithFixedDelay(BlockSynchronizer.getInstance(), 0, 10, TimeUnit.SECONDS);
+            ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
 //        //开启区块监控线程
 //        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
 //        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
@@ -123,7 +118,7 @@ public class BlockBootstrap {
             ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
             dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
         } catch (Exception e) {
-            Log.error("error occur when start, {}", e.getMessage());
+            Log.error("error occur when start, " + e.getMessage());
         }
     }
 
@@ -135,7 +130,7 @@ public class BlockBootstrap {
                     System.exit(0);
                 }
                 BlockHeader header = context.getLatestBlock().getHeader();
-                Log.info("chainId:{}, latestHeight:{}, txCount:{}, hash:{}", chainId, header.getHeight(), header.getTxCount(), header.getHash());
+                Log.info("chainId:" + chainId + ", latestHeight:" + header.getHeight() + ", txCount:" + header.getTxCount() + ", hash:" + header.getHash());
                 try {
                     Thread.sleep(10000L);
                 } catch (InterruptedException e) {
@@ -150,12 +145,10 @@ public class BlockBootstrap {
      */
     public static void onlyRunWhenTest() {
         ContextManager.chainIds.forEach(e -> {
-            if (!RocksDBService.existTable("tx" + e)) {
-                try {
-                    RocksDBService.createTable("tx" + e);
-                } catch (Exception e1) {
-                    e1.printStackTrace();
-                }
+            try {
+                RocksDBService.createTable("tx" + e);
+            } catch (Exception e1) {
+                e1.printStackTrace();
             }
         });
 //        ChainContext chainContext = ContextManager.getContext(chainId);

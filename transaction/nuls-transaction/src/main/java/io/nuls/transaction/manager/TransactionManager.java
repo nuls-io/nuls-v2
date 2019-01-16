@@ -24,6 +24,7 @@
  */
 package io.nuls.transaction.manager;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
@@ -33,13 +34,14 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
-import io.nuls.transaction.rpc.call.ChainCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
-import io.nuls.transaction.service.TransactionService;
+import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.math.BigInteger;
@@ -55,7 +57,7 @@ import java.util.*;
 public class TransactionManager {
 
     @Autowired
-    private TransactionService transactionService;
+    private TxService txService;
 
     @Autowired
     private ChainManager chainManager;
@@ -73,6 +75,12 @@ public class TransactionManager {
         boolean rs = false;
         if (!chain.getTxRegisterMap().containsKey(txRegister.getTxType())) {
             chain.getTxRegisterMap().put(txRegister.getTxType(), txRegister);
+
+            try {
+                Log.debug("\nTxRegisterMap = " + JSONUtils.obj2PrettyJson(chain.getTxRegisterMap()));
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            }
             rs = true;
         }
         return rs;
@@ -134,7 +142,7 @@ public class TransactionManager {
             baseTxValidate(chain, tx);
             //如果是跨链交易直接调模块内部验证器接口，不走cmd命令
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-                transactionService.crossTransactionValidator(chain, tx);
+                txService.crossTransactionValidator(chain, tx);
             }
             TxRegister txRegister = this.getTxRegister(chain, tx.getType());
             //调验证器
@@ -243,9 +251,10 @@ public class TransactionManager {
 
             if (chainId == TxConstant.NULS_CHAINID) {
                 //如果chainId是主网则通过连管理验证资产是否存在
-                if (!ChainCall.verifyAssetExist(assetsChainId, assetsId)) {
+                //todo
+               /* if (!ChainCall.verifyAssetExist(assetsChainId, assetsId)) {
                     throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
-                }
+                }*/
             }/*else{
                if(chain.getConfig().getAssetsId() != coinFrom.getAssetsId()){
                    //todo 普通交易如果资产不是该链资产，还需通过主网验证 是否需要？
@@ -306,7 +315,7 @@ public class TransactionManager {
      * @return Result
      */
     private boolean validateFee(Chain chain, int type, int txSize, CoinData coinData) throws NulsException {
-        if (type == TxConstant.TX_TYPE_REDPUNISH) {
+        if (type == TxConstant.TX_TYPE_RED_PUNISH) {
             //红牌惩罚没有手续费
             return true;
         }

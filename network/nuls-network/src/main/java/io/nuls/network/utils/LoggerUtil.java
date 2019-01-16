@@ -24,6 +24,7 @@
  */
 package io.nuls.network.utils;
 
+import ch.qos.logback.classic.Level;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -33,5 +34,5 @@ import io.nuls.tools.log.logback.NulsLogger;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-   public static NulsLogger Log = LoggerBuilder.getLogger("/home/captain/logs", "nw.log");
+   public static NulsLogger Log = LoggerBuilder.getLogger("/home/captain/logs", "nw.log",Level.ALL);
 }

@@ -1,34 +1,11 @@
-/*
- * MIT License
- *
- * Copyright (c) 2017-2018 nuls.io
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- */
-
 package io.nuls.rpc.client;
 
-import io.nuls.rpc.client.runtime.ClientRuntime;
+import io.nuls.rpc.model.message.Ack;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.client.runtime.ClientRuntime;
+import io.nuls.rpc.client.thread.ResponseAutoProcessor;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
@@ -38,15 +15,53 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Map;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * WebSocketClient的实现类
  * Implementation Class of WebSocketClient
  *
- * @author tangyi
- * @date 2018/10/30
- */
+ * @author tag
+ * 2018/12/29
+ * */
 public class WsClient extends WebSocketClient {
+    /**
+     * 链接关闭断开标识
+     * Link Close Disconnection Identification
+     * */
+    private boolean connected = true;
+
+    /**
+     * 从服务端得到的握手确认
+     * Handshake confirmation(NegotiateConnectionResponse) from the server
+     */
+    private final Queue<Message> negotiateResponseQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 从服务端得到的请求确认
+     * Request confirmation(Ack) from the server
+     */
+    private final Queue<Ack> ackQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 从服务端得到的需要手动处理的应答消息
+     * Response that need to be handled manually from the server
+     */
+    private final Queue<Response> responseManualQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 从服务端得到的自动处理的应答消息
+     * Response that need to be handled Automatically from the server
+     */
+    private final Queue<Response> responseAutoQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 处理消息的线程池，现在只有一个处理线程暂时不需要线程池
+     * Thread pool for message processing
+    private final ExecutorService threadPool = ThreadUtils.createThreadPool(1, 100, new NulsThreadFactory("Processor"));
+     * */
+    private final Thread responseAutoThread = new Thread(new ResponseAutoProcessor(this));
 
     public WsClient(String url) throws URISyntaxException {
         super(new URI(url));
@@ -72,10 +87,11 @@ public class WsClient extends WebSocketClient {
             Message message = JSONUtils.json2pojo(msg, Message.class);
             switch (MessageType.valueOf(message.getMessageType())) {
                 case NegotiateConnectionResponse:
-                    ClientRuntime.NEGOTIATE_RESPONSE_QUEUE.offer(message);
+                    negotiateResponseQueue.offer(message);
                     break;
                 case Ack:
-                    ClientRuntime.ACK_QUEUE.offer(message);
+                    Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
+                    ackQueue.offer(ack);
                     break;
                 case Response:
                     Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
@@ -84,11 +100,10 @@ public class WsClient extends WebSocketClient {
                     Response: Determines whether automatic processing is required
                      */
                     if (ClientRuntime.INVOKE_MAP.containsKey(response.getRequestId())) {
-                        ClientRuntime.RESPONSE_AUTO_QUEUE.offer(message);
+                        responseAutoQueue.offer(response);
                     } else {
-                        ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);
+                        responseManualQueue.offer(response);
                     }
-                    Log.debug("ResponseFrom<" + this.getRemoteSocketAddress().getHostString() + ":" + this.getRemoteSocketAddress().getPort() + ">: " + msg);
                     break;
                 default:
                     break;
@@ -99,12 +114,72 @@ public class WsClient extends WebSocketClient {
         }
     }
 
+
     @Override
     public void onClose(int paramInt, String paramString, boolean paramBoolean) {
+        connected = false;
+        ClientRuntime.stopWsClient(this);
     }
 
     @Override
     public void onError(Exception e) {
         Log.error(e);
+    }
+
+    /**
+     * @return 第一条握手确认消息，The first handshake confirmed message
+     */
+    public Message firstMessageInNegotiateResponseQueue() {
+        return negotiateResponseQueue.poll();
+    }
+
+    /**
+     * @return 第一条确认消息，The first ack message
+     */
+    public Ack firstMessageInAckQueue() {
+        return ackQueue.poll();
+    }
+
+    /**
+     * @return 第一条需要手动处理的Response消息，The first Response message that needs to be handled manually
+     */
+    public Response firstMessageInResponseManualQueue() {
+        return responseManualQueue.poll();
+    }
+
+    /**
+     * @return 第一条需要自动处理的Response消息，The first Response message that needs to be handled automatically
+     */
+    public Response firstMessageInResponseAutoQueue() {
+        return responseAutoQueue.poll();
+    }
+
+    public Queue<Message> getNegotitateResponseQueue() {
+        return negotiateResponseQueue;
+    }
+
+    public Queue<Ack> getAckQueue() {
+        return ackQueue;
+    }
+
+    public Queue<Response> getResponseManualQueue() {
+        return responseManualQueue;
+    }
+
+
+    public Queue<Response> getResponseAutoQueue() {
+        return responseAutoQueue;
+    }
+
+    public Queue<Message> getNegotiateResponseQueue() {
+        return negotiateResponseQueue;
+    }
+
+    public Thread getResponseAutoThread() {
+        return responseAutoThread;
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
 }

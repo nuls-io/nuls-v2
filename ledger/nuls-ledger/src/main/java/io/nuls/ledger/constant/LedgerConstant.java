@@ -34,7 +34,7 @@ public interface LedgerConstant {
      * 模块配置文件名称
      * Module configuration file name.
      */
-    public static String MODULES_CONFIG_FILE = "modules.ini";
+    public static String MODULES_CONFIG_FILE = "modules.json";
 
     /**
      * 系统使用的编码方式
@@ -44,12 +44,30 @@ public interface LedgerConstant {
 
     public static int  UNCONFIRMED_NONCE = 0;
     public static int  CONFIRMED_NONCE = 1;
+
+
     /**
-     * 普通交易处理
+     * 高度解锁的阈值，大于这个值就是时间
      */
-    public static int COMMONT_TX = 1;
+    public static final int MAX_HEIGHT_VALUE = 10000000;
     /**
-     * 解锁交易处理
+     * 重新统计锁定的时间
      */
-    public static int  UNLOCK_TX = 2;
+    public static final int TIME_RECALCULATE_FREEZE = 1000;
+    /**
+     * 永久锁定lockTime值
+     */
+    public static final int PERMANENT_LOCK = -1;
+    /**
+     * 缓存的账户区块数量
+     */
+    public static final int CACHE_ACCOUNT_BLOCK = 100;
+    /**
+     * 缓存的账户初始化nonce
+     */
+    public static final String INIT_NONCE = "ffffffff";
+    /**
+     * 未确认交易nonce的过期间隔时间，单位ms
+     */
+    public static final int UNCONFIRM_NONCE_EXPIRED_TIME =300000;
 }

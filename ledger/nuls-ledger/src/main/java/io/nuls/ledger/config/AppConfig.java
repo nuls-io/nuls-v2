@@ -25,9 +25,12 @@
  */
 package io.nuls.ledger.config;
 
-import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.ModuleConfig;
 import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.log.Log;
+import io.nuls.tools.parse.ConfigLoader;
+import io.nuls.tools.parse.I18nUtils;
+import io.nuls.tools.parse.config.ConfigManager;
 import io.nuls.tools.parse.config.IniEntity;
 import org.ini4j.Config;
 import org.ini4j.Ini;
@@ -43,50 +46,54 @@ import java.io.InputStream;
 public class AppConfig {
 
     static final Logger logger = LoggerFactory.getLogger(AppConfig.class);
-
+    public static  String MODULES_CONFIG_FILE = "modules.json";
     /**
      * load module ini config
      */
-    public static ModuleConfig loadModuleConfig() {
+    public static void loadModuleConfig() {
         logger.info("loadModuleConfig......");
-        IniEntity moduleIni = loadIni(LedgerConstant.MODULES_CONFIG_FILE);
-        ModuleConfig moduleConfig = new ModuleConfig();
+            jsonCfgInit();
 
+    }
+    private   static void jsonCfgInit(){
         try {
-            String section = "database";
-            String databaseDir = moduleIni.getCfgValue(section, "database.dir");
-            if (StringUtils.isNotBlank(databaseDir)) {
-                moduleConfig.setDatabaseDir(databaseDir);
-            }
-            String reset = moduleIni.getCfgValue(section, "database.reset");
-            if (StringUtils.isNotBlank(reset)) {
-                moduleConfig.setDatabaseReset(Boolean.valueOf(reset));
-            }
-            String dbVersion = moduleIni.getCfgValue(section, "database.version");
-            if (StringUtils.isNotBlank(dbVersion)) {
-                moduleConfig.setDatabaseVersion(Integer.valueOf(dbVersion));
-            }
+            ModuleConfig moduleConfig = ModuleConfig.getInstance();;
+            ConfigLoader.loadJsonCfg(MODULES_CONFIG_FILE);
+            // set system language
+            String databaseDir = ConfigManager.getValue("database.dir");
+            moduleConfig.setDatabaseDir(databaseDir);
+            String databaseReset = ConfigManager.getValue("database.reset");
+            moduleConfig.setDatabaseReset(Boolean.valueOf(databaseReset));
+            String databaseVersion = ConfigManager.getValue("database.version");
+            moduleConfig.setDatabaseVersion(Integer.valueOf(databaseVersion));
 
+            String language = ConfigManager.getValue("language");
+            I18nUtils.loadLanguage("languages", language);
+            I18nUtils.setLanguage(language);
+
+
+            //set encode
+            String encoding = ConfigManager.getValue("encoding");
+            moduleConfig.setEncoding(encoding);
             /**
              * kernel config
              */
             String kernelSection = "kernel";
-            String kernelHost = moduleIni.getCfgValue(kernelSection, "host");
+            String kernelHost = ConfigManager.getValue( "host");
             if (StringUtils.isNotBlank(kernelHost)) {
                 moduleConfig.setKernelHost(kernelHost);
             }
-            String kernelPort = moduleIni.getCfgValue(kernelSection, "port");
+            String kernelPort = ConfigManager.getValue("port");
             if (StringUtils.isNotBlank(kernelPort)) {
                 moduleConfig.setKernelPort(Integer.valueOf(kernelPort));
             }
-
-            logger.info("moduleConfig is {}", moduleConfig);
+        } catch (IOException e) {
+            Log.error("Bootstrap cfgInit failed", e);
+            throw new RuntimeException("Bootstrap cfgInit failed");
         } catch (Exception e) {
-            logger.error("load module ini failed.", e);
+            e.printStackTrace();
         }
-        return moduleConfig;
     }
-
     /**
      * load ini config file from class path
      *

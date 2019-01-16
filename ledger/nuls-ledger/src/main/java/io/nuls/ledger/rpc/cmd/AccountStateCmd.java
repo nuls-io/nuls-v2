@@ -26,7 +26,7 @@
 package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.ledger.constant.LedgerConstant;
-import io.nuls.ledger.model.AccountState;
+import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -62,20 +62,22 @@ public class AccountStateCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "getBalance",
             version = 1.0,
-            description = "test getHeight 1.0")
+            description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "assetChainId", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "assetId", parameterType = "int")
     public Response getBalance(Map params) {
         //TODO.. 验证参数个数和格式
         Integer chainId = (Integer) params.get("chainId");
+        Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
         logger.info("chainId {}", chainId);
         logger.info("address {}", address);
-        AccountState accountState = accountStateService.getAccountState(address, chainId, assetId);
+        AccountState accountState = accountStateService.getAccountState(address, chainId, assetChainId,assetId);
         Map<String,Object> rtMap = new HashMap<>();
-        rtMap.put("freeze",accountState.getFreezeState().getTotal());
+        rtMap.put("freeze",accountState.getFreezeTotal());
         rtMap.put("total",accountState.getTotalAmount());
         rtMap.put("available",accountState.getAvailableAmount());
         return success(rtMap);
@@ -90,19 +92,22 @@ public class AccountStateCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "getNonce",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "test getHeight 1.0")
+            description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "assetChainId", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "assetId", parameterType = "int")
     public Response getNonce(Map params) {
         //TODO.. 验证参数个数和格式
         Integer chainId = (Integer) params.get("chainId");
+        Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        AccountState accountState = accountStateService.getAccountState(address, chainId, assetId);
+        AccountState accountState = accountStateService.getAccountState(address, chainId,assetChainId, assetId);
         Map<String,Object> rtMap = new HashMap<>();
-        if(StringUtils.isNotBlank(accountState.getUnconfirmedNonce())){
-            rtMap.put("nonce",accountState.getUnconfirmedNonce());
+        String unconfirmedNonce = accountState.getLatestUnconfirmedNonce();
+        if(StringUtils.isNotBlank(unconfirmedNonce)){
+            rtMap.put("nonce",unconfirmedNonce);
             rtMap.put("nonceType",LedgerConstant.UNCONFIRMED_NONCE);
         }else{
             rtMap.put("nonce",accountState.getNonce());
@@ -114,19 +119,28 @@ public class AccountStateCmd extends BaseCmd {
 
     @CmdAnnotation(cmd = "getBalanceNonce",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "test getHeight 1.0")
+            description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "assetChainId", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "assetId", parameterType = "int")
     public Response getBalanceNonce(Map params) {
         //TODO.. 验证参数个数和格式
         Integer chainId = (Integer) params.get("chainId");
+        Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
         Integer assetId = (Integer) params.get("assetId");
-        AccountState accountState = accountStateService.getAccountState(address, chainId, assetId);
+        AccountState accountState = accountStateService.getAccountState(address, chainId,assetChainId, assetId);
         Map<String,Object> rtMap = new HashMap<>();
-        rtMap.put("nonce",accountState.getNonce());
         rtMap.put("available",accountState.getAvailableAmount());
+        String unconfirmedNonce = accountState.getLatestUnconfirmedNonce();
+        if(StringUtils.isNotBlank(unconfirmedNonce)){
+            rtMap.put("nonce",unconfirmedNonce);
+            rtMap.put("nonceType",LedgerConstant.UNCONFIRMED_NONCE);
+        }else{
+            rtMap.put("nonce",accountState.getNonce());
+            rtMap.put("nonceType",LedgerConstant.CONFIRMED_NONCE);
+        }
         return success(rtMap);
     }
 

@@ -38,12 +38,10 @@ import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
 
@@ -52,6 +50,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  * @author  lan
  * @date  2018/11/07
  **/
+@Component
 public class NodeGroupRpc extends BaseCmd {
     private NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
     private DbService dbService=StorageManager.getInstance().getDbService();
@@ -168,7 +167,6 @@ public class NodeGroupRpc extends BaseCmd {
         NodeGroupVo  nodeGroupVo=buildNodeGroupVo(nodeGroup);
         return success(nodeGroupVo );
     }
-
     private NodeGroupVo buildNodeGroupVo(NodeGroup nodeGroup){
         NodeGroupVo nodeGroupVo=new NodeGroupVo();
         nodeGroupVo.setChainId(nodeGroup.getChainId());
@@ -178,6 +176,10 @@ public class NodeGroupRpc extends BaseCmd {
             nodeGroupVo.setBlockHash(nodeGroupConnector.getBlockHash());
             nodeGroupVo.setBlockHeight(nodeGroupConnector.getBlockHeight());
         }
+        nodeGroupVo.setConnectCount(nodeGroup.getConnectNodeMap().size());
+        nodeGroupVo.setDisConnectCount( nodeGroup.getDisConnectNodes().size());
+        nodeGroupVo.setConnectCrossCount(nodeGroup.getConnectCrossNodeMap().size());
+        nodeGroupVo.setDisConnectCrossCount(nodeGroup.getDisConnectCrossNodeMap().size());
         nodeGroupVo.setInCount(nodeGroup.getHadConnectIn());
         nodeGroupVo.setOutCount(nodeGroup.getHadConnectOut());
         nodeGroupVo.setInCrossCount(nodeGroup.getHadCrossConnectIn());
@@ -190,6 +192,34 @@ public class NodeGroupRpc extends BaseCmd {
         nodeGroupVo.setTotalCount(nodeGroupVo.getInCount()+nodeGroupVo.getOutCount()+nodeGroupVo.getInCrossCount()+nodeGroupVo.getOutCrossCount());
         return nodeGroupVo;
     }
+    /**
+     * nw_getChainConnectAmount
+     * 查看指定网络组信息
+     */
+    @CmdAnnotation(cmd = "nw_getChainConnectAmount", version = 1.0,
+            description = "nw_getChainConnectAmount")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "isCross", parameterType = "boolean")
+    public Response getChainConnectAmount(Map  params) {
+       try {
+           int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
+           NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
+           boolean isCross = Boolean.valueOf(String.valueOf(params.get("isCross")));
+           Map<String, Object> rtMap = new HashMap<>();
+           if (isCross) {
+               rtMap.put("connectAmount", nodeGroup.getConnectCrossNodeMap().size());
+           } else {
+               rtMap.put("connectAmount", nodeGroup.getConnectNodeMap().size());
+           }
+           return success(rtMap);
+       }catch(Exception e){
+           e.printStackTrace();
+           return failed(e.getMessage());
+       }
+    }
+
+
+
     /**
      * nw_delNodeGroup
      * 注销指定网络组信息

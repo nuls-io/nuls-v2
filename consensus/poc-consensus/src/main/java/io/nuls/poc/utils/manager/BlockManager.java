@@ -67,6 +67,7 @@ public class BlockManager {
             chain.getBlockHeaderList().remove(0);
         }
         chain.setNewestHeader(blockHeader);
+        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("新区块保存成功，新区块高度为：" + blockHeader.getHeight() + ",本地最新区块高度为："+chain.getNewestHeader().getHeight());
     }
 
     /**
@@ -88,5 +89,6 @@ public class BlockManager {
         }
         chain.setBlockHeaderList(headerList);
         chain.setNewestHeader(headerList.get(headerList.size()-1));
+        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("区块回滚成功，回滚到的高度为：" + height + ",本地最新区块高度为：" + chain.getNewestHeader().getHeight());
     }
 }

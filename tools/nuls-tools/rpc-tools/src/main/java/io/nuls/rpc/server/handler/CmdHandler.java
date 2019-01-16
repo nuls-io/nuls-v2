@@ -32,19 +32,20 @@ import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.CmdParameter;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.rpc.server.runtime.WsData;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 import org.java_websocket.WebSocket;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
-
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static io.nuls.rpc.info.Constants.CMD_NOT_FOUND;
 
 /**
  * 解析从客户端收到的消息，调用正确的方法
@@ -55,6 +56,8 @@ import java.util.Map;
  */
 public class CmdHandler {
 
+    public static final Map<String, Object> handlerMap = new HashMap<>();
+    public static final Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
 
     /**
      * 确认握手成功
@@ -91,6 +94,13 @@ public class CmdHandler {
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 
+    /**
+     * 服务还未启动完成
+     * The service has not been started yet.
+     *
+     * @param webSocket 链接通道
+     * @param messageId 请求ID
+     * */
     public static void serviceNotStarted(WebSocket webSocket, String messageId) throws JsonProcessingException {
         Response response = MessageUtil.newResponse(messageId, Constants.BOOLEAN_FALSE, "Service not started!");
         Message rspMsg = MessageUtil.basicMessage(MessageType.Response);
@@ -98,17 +108,17 @@ public class CmdHandler {
         webSocket.send(JSONUtils.obj2json(rspMsg));
     }
 
-
     /**
      * 取消订阅
      * For Unsubscribe
      *
+     * @serialData   取消订阅的客户端连接信息/Unsubscribed client connection information
      * @param message 取消订阅的消息体 / Unsubscribe message
      */
-    public static synchronized void unsubscribe(WebSocket webSocket, Message message) {
+    public static synchronized void unsubscribe(WsData wsData, Message message) {
         Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
         for (String requestId : unsubscribe.getUnsubscribeMethods()) {
-            ServerRuntime.UNSUBSCRIBE_LIST.add(ServerRuntime.genUnsubscribeKey(webSocket, requestId));
+            wsData.unsubscribe(requestId);
         }
     }
 
@@ -117,24 +127,18 @@ public class CmdHandler {
      * After current processing, do need to keep the Request information and wait for the next processing?
      * True: keep, False: remove
      *
-     * @param webSocket 用于发送消息 / Used to send message
-     * @param messageId 原始消息ID / The origin message ID
-     * @param request   请求 / The request
+     * @param wsData     用于发送消息 / Used to send message
+     * @param message    原始消息 / The origin message
+     * @param request    请求 / The request
      * @return boolean
      */
-    public static boolean responseWithPeriod(WebSocket webSocket, String messageId, Request request) {
-
-        String key = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
-        if (ServerRuntime.UNSUBSCRIBE_LIST.contains(key)) {
-            Log.debug("取消订阅responseWithPeriod：" + key);
-            return false;
-        }
+    public static boolean responseWithPeriod(WsData wsData,Message message, Request request) {
 
         /*
         计算如何处理该Request
         Calculate how to handle the Request
          */
-        int nextProcess = nextProcess(key, Integer.parseInt(request.getSubscriptionPeriod()));
+        int nextProcess = nextProcess(wsData, message, Integer.parseInt(request.getSubscriptionPeriod()));
         try {
             /*
             nextProcess的具体含义参考"Constants.INVOKE_EXECUTE_KEEP"的注释
@@ -142,12 +146,12 @@ public class CmdHandler {
              */
             switch (nextProcess) {
                 case Constants.EXECUTE_AND_KEEP:
-                    callCommandsWithPeriod(webSocket, request.getRequestMethods(), messageId);
-                    ServerRuntime.CMD_INVOKE_TIME.put(key, TimeService.currentTimeMillis());
+                    callCommandsWithPeriod(wsData.getWebSocket(), request.getRequestMethods(), message.getMessageId());
+                    wsData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
                     return true;
                 case Constants.EXECUTE_AND_REMOVE:
-                    callCommandsWithPeriod(webSocket, request.getRequestMethods(), messageId);
-                    ServerRuntime.CMD_INVOKE_TIME.put(key, TimeService.currentTimeMillis());
+                    callCommandsWithPeriod(wsData.getWebSocket(), request.getRequestMethods(), message.getMessageId());
+                    wsData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
                     return false;
                 case Constants.SKIP_AND_KEEP:
                     return true;
@@ -226,6 +230,14 @@ public class CmdHandler {
             Message rspMessage = execute(cmdDetail, params, messageId);
             Log.debug("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
             webSocket.send(JSONUtils.obj2json(rspMessage));
+
+            /*
+            执行成功之后判断该接口是否被订阅过，如果被订阅则改变该接口触发次数
+            After successful execution, determine if the interface has been subscribed, and if subscribed, change the number of triggers for the interface
+             */
+            if(ServerRuntime.SUBSCRIBE_COUNT.containsKey(method)){
+                ServerRuntime.eventTrigger(method,(Response) rspMessage.getMessageData());
+            }
         }
     }
 
@@ -257,68 +269,20 @@ public class CmdHandler {
      * 处理Request，如果达到EventCount的发送条件，则发送
      * Processing Request, if EventCount's sending condition is met, then send
      *
-     * @param webSocket 用于发送消息 / Used to send message
-     * @param messageId 原始消息ID / The origin message ID
-     * @param request   请求 / The request
-     * @param cmd       触发EventCount的命令 / Command to trigger EventCount
-     * @return boolean
+     * @param webSocket     用于发送消息 / Used to send message
+     * @param realResponse  订阅事件触发，返回数据
      */
-    public static boolean responseWithEventCount(WebSocket webSocket, String messageId, Request request, String cmd) {
-        String unsubscribeKey = ServerRuntime.genUnsubscribeKey(webSocket, messageId);
-        if (ServerRuntime.UNSUBSCRIBE_LIST.contains(unsubscribeKey)) {
-            Log.debug("取消订阅responseWithEventCount：" + unsubscribeKey);
-            return false;
+    public static void responseWithEventCount(WebSocket webSocket, Response realResponse) {
+        Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
+        rspMessage.setMessageData(realResponse);
+        try {
+            Log.debug("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
+            webSocket.send(JSONUtils.obj2json(rspMessage));
+        } catch (WebsocketNotConnectedException e) {
+            Log.error("Socket disconnected, remove");
+        } catch (JsonProcessingException e) {
+            Log.error(e);
         }
-
-        for (Object method : request.getRequestMethods().keySet()) {
-            long changeCount = ServerRuntime.getCmdChangeCount((String) method);
-            long eventCount = Long.parseLong(request.getSubscriptionEventCounter());
-            if (changeCount == 0) {
-                continue;
-            }
-            if (!cmd.equals(method)) {
-                continue;
-            }
-
-            if (changeCount % eventCount == 0) {
-                Response response = ServerRuntime.getCmdLastValue((String) method);
-                String eventCountKey = ServerRuntime.genEventCountKey(webSocket, messageId, (String) method);
-                boolean hasSent = ServerRuntime.hasSent(eventCountKey);
-                if (hasSent) {
-                    continue;
-                }
-
-                /*
-                这段代码非常不优雅，可以改进下（我没时间了，怕改出BUG），代码的业务逻辑如下：
-                用户的cmd会返回一个对象，RPC会自动把这个对象替换为Map，Key是调用的方法名，Value是内容（Berzeck强烈要求）
-                因此在这里创建一个新对象
-                注意：如果不创建新对象，直接使用response对象的话，在大家都订阅了一个方法的时候会出现多重嵌套的问题（因为对象的引用被改变了）
-                 */
-                Response realResponse = new Response();
-                realResponse.setRequestId(messageId);
-                realResponse.setResponseStatus(response.getResponseStatus());
-                realResponse.setResponseComment(response.getResponseComment());
-                realResponse.setResponseMaxSize(response.getResponseMaxSize());
-
-                Map<String, Object> responseData = new HashMap<>(1);
-                responseData.put((String) method, response.getResponseData());
-                realResponse.setResponseData(responseData);
-
-                Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
-                rspMessage.setMessageData(realResponse);
-                try {
-                    Log.debug("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
-                    webSocket.send(JSONUtils.obj2json(rspMessage));
-                } catch (WebsocketNotConnectedException e) {
-                    Log.error("Socket disconnected, remove");
-                } catch (JsonProcessingException e) {
-                    Log.error(e);
-                }
-
-                ServerRuntime.CMD_LAST_RESPONSE_BE_USED.put(eventCountKey, true);
-            }
-        }
-        return true;
     }
 
 
@@ -326,11 +290,12 @@ public class CmdHandler {
      * 计算如何处理该Request
      * Calculate how to handle the Request
      *
-     * @param key                Key
+     * @param wsData             服务器端链接信息 / Server-side Link Information
+     * @param message            原始消息 / The origin message
      * @param subscriptionPeriod Unit: second
      * @return int
      */
-    private static int nextProcess(String key, int subscriptionPeriod) {
+    private static int nextProcess(WsData wsData, Message message, int subscriptionPeriod) {
         if (subscriptionPeriod == 0) {
             /*
             不需要重复执行，返回EXECUTE_AND_REMOVE（执行，然后丢弃）
@@ -339,16 +304,16 @@ public class CmdHandler {
             return Constants.EXECUTE_AND_REMOVE;
         }
 
-        if (!ServerRuntime.CMD_INVOKE_TIME.containsKey(key)) {
+        if (!wsData.getCmdInvokeTime().containsKey(message)) {
             /*
             第一次执行，设置当前时间为执行时间，返回EXECUTE_AND_KEEP（执行，然后保留）
             First execution, set the current time as execution time, return EXECUTE_AND_KEEP (execution, then keep)
              */
-            ServerRuntime.CMD_INVOKE_TIME.put(key, TimeService.currentTimeMillis());
+            wsData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
             return Constants.EXECUTE_AND_KEEP;
         }
 
-        if (TimeService.currentTimeMillis() - ServerRuntime.CMD_INVOKE_TIME.get(key) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
+        if (TimeService.currentTimeMillis() - wsData.getCmdInvokeTime().get(message) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
             /*
             没有达到执行条件，返回SKIP_AND_KEEP（不执行，然后保留）
             If the execution condition is not met, return SKIP_AND_KEEP (not executed, then keep)
@@ -508,17 +473,16 @@ public class CmdHandler {
      */
     @SuppressWarnings("unchecked")
     private static Response invoke(String invokeClass, String invokeMethod, Map params) throws Exception {
-        Class clz = Class.forName(invokeClass);
-        Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
-
-        BaseCmd cmd;
-        if (SpringLiteContext.getBeanByClass(invokeClass) == null) {
-            Constructor constructor = clz.getConstructor();
-            cmd = (BaseCmd) constructor.newInstance();
-        } else {
-            cmd = (BaseCmd) SpringLiteContext.getBeanByClass(invokeClass);
+        Class<?> clz = classMap.get(invokeClass);
+        if (clz == null) {
+            clz = Class.forName(invokeClass);
+            classMap.put(invokeClass, clz);
         }
-
+        Method method = clz.getDeclaredMethod(invokeMethod, Map.class);
+        BaseCmd cmd = (BaseCmd) handlerMap.get(invokeClass);
+        if (cmd == null) {
+            return MessageUtil.newResponse("", Constants.BOOLEAN_FALSE, CMD_NOT_FOUND);
+        }
         return (Response) method.invoke(cmd, params);
     }
 }

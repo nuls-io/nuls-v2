@@ -31,14 +31,18 @@ package io.nuls.transaction.model.bo;
  * @author qinyifeng
  * @date 2018/12/11
  */
+/*
 public enum RunningStatus {
 
-    /*
+    */
+/*
     警告，以下顺序不能调整，否则某些地方的判断会出错
     Warning, the following order cannot be adjusted, otherwise the judgment in some places may go wrong
-    */
+    *//*
+
     INITING,
     LOADING_CACHE,
     WAIT_RUNNING,
     RUNNING,
 }
+*/

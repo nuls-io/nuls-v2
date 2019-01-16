@@ -11,8 +11,6 @@ import ch.qos.logback.core.util.FileSize;
 import ch.qos.logback.core.util.OptionHelper;
 import org.slf4j.LoggerFactory;
 
-import java.text.SimpleDateFormat;
-
 /**
  * 日志打印管理类，日志文件创建，日志文件大小，保存时间，日志输出格式等设置管理
  * Log Printing Management Class, Log File Creation, Log File Size, Save Time, Log Output Format and other settings management
@@ -30,12 +28,10 @@ public class LogAppender {
      */
     public static RollingFileAppender getAppender(String fileName){
         String rootPath = System.getProperty(PROJECT_PATH);
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
         LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
         RollingFileAppender appender = new RollingFileAppender();
-
-        //设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
-        //但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
+        /*设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
+        但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。*/
         appender.setContext(context);
         //设置文件名
         appender.setFile(OptionHelper.substVars(rootPath+"/logs/"+"/"+fileName + ".log",context));
@@ -47,18 +43,18 @@ public class LogAppender {
         //文件名格式
         String fp = OptionHelper.substVars(rootPath+"/logs/"+"/"+ fileName + ".%d{yyyy-MM-dd}.%i.zip",context);
         //最大日志文件大小
-        policy.setMaxFileSize("100MB");
+        policy.setMaxFileSize(FileSize.valueOf("100 MB"));
         //设置文件名模式
         policy.setFileNamePattern(fp);
         //设置最大历史记录为15条
         policy.setMaxHistory(7);
         //总大小限制
+        policy.setContext(context);
         policy.setTotalSizeCap(FileSize.valueOf("2GB"));
         //设置父节点是appender
         policy.setParent(appender);
         //设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。
         //但可以使用<contextName>设置成其他名字，用于区分不同应用程序的记录。一旦设置，不能修改。
-        policy.setContext(context);
         policy.start();
         PatternLayoutEncoder encoder = new PatternLayoutEncoder();
         //设置上下文，每个logger都关联到logger上下文，默认上下文名称为default。

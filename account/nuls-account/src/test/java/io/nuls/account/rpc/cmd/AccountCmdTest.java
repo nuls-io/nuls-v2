@@ -1,5 +1,6 @@
 package io.nuls.account.rpc.cmd;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcConstant;
@@ -7,6 +8,8 @@ import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
+import io.nuls.account.model.dto.CoinDto;
+import io.nuls.account.model.dto.MulitpleAddressTransferDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
@@ -27,7 +30,9 @@ import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -251,7 +256,7 @@ public class AccountCmdTest {
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getPriKeyByAddress");
             assertNotNull(result.get("priKey"));
-            assertTrue((boolean)result.get("valid"));
+            assertTrue((boolean) result.get("valid"));
         } catch (NulsRuntimeException e) {
             e.printStackTrace();
         } catch (Exception e) {

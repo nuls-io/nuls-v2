@@ -25,22 +25,25 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.BlockForwardEnum;
-import io.nuls.block.constant.CommandConstant;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.model.CachedSmallBlock;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.util.Map;
 
-import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE;
+import static io.nuls.block.constant.CommandConstant.*;
+import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
+import static io.nuls.block.utils.LoggerUtil.messageLog;
 
 /**
  * 处理收到的{@link HashMessage},用于区块的广播与转发
@@ -53,9 +56,12 @@ import static io.nuls.block.constant.CommandConstant.FORWARD_SMALL_BLOCK_MESSAGE
 public class ForwardSmallBlockHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = FORWARD_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Object process(Map map) {
-
+    public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        ChainContext context = ContextManager.getContext(chainId);
+        if (!context.getStatus().equals(RUNNING)) {
+            return success();
+        }
         String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
 
@@ -63,16 +69,16 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            Log.error(e);
+            messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         if (message == null || nodeId == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
         NulsDigestData blockHash = message.getRequestHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
+        messageLog.info("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
@@ -86,8 +92,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
             request.setTxHashList(block.getMissingTransactions());
-            request.setCommand(CommandConstant.GET_TXGROUP_MESSAGE);
-            NetworkUtil.sendToNode(chainId, request, nodeId);
+            NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
             NetworkUtil.setHashAndHeight(chainId, blockHash, block.getSmallBlock().getHeader().getHeight(), nodeId);
             return success();
         }
@@ -96,11 +101,9 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         if (BlockForwardEnum.EMPTY.equals(status)) {
             HashMessage request = new HashMessage();
             request.setRequestHash(blockHash);
-            request.setCommand(CommandConstant.GET_SMALL_BLOCK_MESSAGE);
-            NetworkUtil.sendToNode(chainId, request, nodeId);
+            NetworkUtil.sendToNode(chainId, request, nodeId, GET_SMALL_BLOCK_MESSAGE);
             return success();
         }
-
         return success();
     }
 

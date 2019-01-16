@@ -28,6 +28,7 @@ package io.nuls.base.signture;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.NulsSignData;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.script.Script;
@@ -101,6 +102,23 @@ public class SignatureUtil {
             throw e;
         }
         return true;
+    }
+
+    /**
+     * 验证数据签名
+     * @param digestBytes
+     * @param p2PHKSignature
+     * @return
+     * @throws NulsException
+     */
+    public static boolean validateSignture(byte[] digestBytes, P2PHKSignature p2PHKSignature) throws NulsException {
+        if(null == p2PHKSignature){
+            throw new NulsException(new Exception("P2PHKSignature is null!"));
+        }
+        if (ECKey.verify(digestBytes, p2PHKSignature.getSignData().getSignBytes(), p2PHKSignature.getPublicKey())) {
+           return true;
+        }
+        return false;
     }
 
     /**

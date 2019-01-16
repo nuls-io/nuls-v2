@@ -10,6 +10,7 @@ import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
@@ -46,6 +47,10 @@ public class BootStrap {
             SpringLiteContext.init(ConsensusConstant.CONTEXT_PATH);
             initLanguage();
             initServer();
+            while (!ServerRuntime.isReady()) {
+                Log.debug("wait depend modules ready");
+                Thread.sleep(2000L);
+            }
             SpringLiteContext.getBean(ChainManager.class).runChain();
             registerTx();
         } catch (Exception e) {
@@ -112,7 +117,7 @@ public class BootStrap {
         if (classList == null || classList.size() == 0) {
             return;
         }
-        Map<Integer, TxRegisterDetail> registerDetailMap = new HashMap<>(16);
+        Map<Integer, TxRegisterDetail> registerDetailMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
         for (Class clz : classList) {
             Method[] methods = clz.getMethods();
             for (Method method : methods) {

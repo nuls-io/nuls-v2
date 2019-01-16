@@ -23,17 +23,12 @@ package io.nuls.block.constant;
 /**
  * 模块运行状态枚举
  * The module runs state enumeration.
+ *
  * @author captain
- * @date 18-11-28 下午5:58
  * @version 1.0
+ * @date 18-11-28 下午5:58
  */
 public enum RunningStatusEnum {
-
-    /**
-     * 已停止
-     * stoped
-     */
-    STOPED,
 
     /**
      * 正在初始化
@@ -87,7 +82,13 @@ public enum RunningStatusEnum {
      * 维护孤儿链
      * Clean up the database
      */
-    MAINTAIN_CHAINS,
+    UPDATE_ORPHAN_CHAINS,
+
+    /**
+     * 维护孤儿链
+     * Clean up the database
+     */
+    MAINTAIN_ORPHAN_CHAINS,
 
     /**
      * 清理数据库中

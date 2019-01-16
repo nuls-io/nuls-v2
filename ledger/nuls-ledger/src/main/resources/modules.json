@@ -1,0 +1,51 @@
+[
+  {
+    "name": "language",
+    "remark": "language",
+    "readOnly": "true",
+    "value": "en"
+  },
+  {
+    "name": "encoding",
+    "remark": "encoding",
+    "readOnly": "true",
+    "value": "UTF-8"
+  },
+
+  {
+    "name": "host",
+    "remark": "kernel host",
+    "readOnly": "true",
+    "value": "ws://127.0.0.1"
+  },
+  {
+    "name": "port",
+    "remark": "kernel port",
+    "readOnly": "true",
+    "value": "8887"
+  },
+  {
+    "name": "database.reset",
+    "remark": "数据库启动重置",
+    "readOnly": "true",
+    "value": "false"
+  },
+  {
+    "name": "database.dir",
+    "remark": "数据库路径",
+    "readOnly": "true",
+    "value": "../../ledger"
+  },
+  {
+    "name": "database.name",
+    "remark": "数据库名称",
+    "readOnly": "true",
+    "value": "database"
+  },
+  {
+    "name": "database.version",
+    "remark": "数据库版本",
+    "readOnly": "true",
+    "value": "6"
+  }
+]

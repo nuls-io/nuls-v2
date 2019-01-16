@@ -34,8 +34,12 @@ public class NodeGroupVo  implements  Ivo{
     private int chainId;
     private long magicNumber;
     private int totalCount;
+    private int connectCount;
+    private int disConnectCount;
     private int inCount;
     private int outCount;
+    private int connectCrossCount;
+    private int disConnectCrossCount;
     private int inCrossCount;
     private int outCrossCount;
 
@@ -139,5 +143,37 @@ public class NodeGroupVo  implements  Ivo{
 
     public void setOutCrossCount(int outCrossCount) {
         this.outCrossCount = outCrossCount;
+    }
+
+    public int getConnectCount() {
+        return connectCount;
+    }
+
+    public void setConnectCount(int connectCount) {
+        this.connectCount = connectCount;
+    }
+
+    public int getDisConnectCount() {
+        return disConnectCount;
+    }
+
+    public void setDisConnectCount(int disConnectCount) {
+        this.disConnectCount = disConnectCount;
+    }
+
+    public int getConnectCrossCount() {
+        return connectCrossCount;
+    }
+
+    public void setConnectCrossCount(int connectCrossCount) {
+        this.connectCrossCount = connectCrossCount;
+    }
+
+    public int getDisConnectCrossCount() {
+        return disConnectCrossCount;
+    }
+
+    public void setDisConnectCrossCount(int disConnectCrossCount) {
+        this.disConnectCrossCount = disConnectCrossCount;
     }
 }

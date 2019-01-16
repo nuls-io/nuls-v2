@@ -22,21 +22,22 @@ package io.nuls.block.service;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
 
 /**
  * 链存储服务
+ *
  * @author captain
- * @date 18-11-14 上午10:08
  * @version 1.0
+ * @date 18-11-14 上午10:08
  */
 public interface ChainStorageService {
 
     /**
      * 存储一条链
+     *
      * @param chainId
      * @param blocks
      * @return
@@ -46,6 +47,7 @@ public interface ChainStorageService {
 
     /**
      * 存储一个区块
+     *
      * @param chainId
      * @param block
      * @return
@@ -55,6 +57,7 @@ public interface ChainStorageService {
 
     /**
      * 查询一个区块
+     *
      * @param chainId
      * @param hash
      * @return
@@ -64,6 +67,7 @@ public interface ChainStorageService {
 
     /**
      * 查询一条链
+     *
      * @param chainId
      * @param hashList
      * @return
@@ -73,6 +77,7 @@ public interface ChainStorageService {
 
     /**
      * 移除一条链
+     *
      * @param chainId
      * @param hashList
      * @return
@@ -82,6 +87,7 @@ public interface ChainStorageService {
 
     /**
      * 移除一个区块
+     *
      * @param chainId
      * @param hash
      * @return
@@ -91,6 +97,7 @@ public interface ChainStorageService {
 
     /**
      * 销毁链存储
+     *
      * @param chainId
      * @return
      * @throws Exception

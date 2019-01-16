@@ -38,7 +38,7 @@ public class Node {
     /**
      * 节点比较器,默认按信用值排序
      */
-    public static final Comparator COMPARATOR = Comparator.comparingInt(Node::getCredit).reversed();
+    public static final Comparator<Node> COMPARATOR = Comparator.comparingInt(Node::getCredit).reversed();
 
     /**
      * ip+port
@@ -60,7 +60,7 @@ public class Node {
     /**
      * 调整信用值
      */
-    public void adjustCredit(boolean success){
+    public void adjustCredit(boolean success) {
         if (success) {
             credit = Math.min(200, credit + 20);
         } else {

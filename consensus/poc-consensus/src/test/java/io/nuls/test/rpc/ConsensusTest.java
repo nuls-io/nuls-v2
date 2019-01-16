@@ -2,6 +2,7 @@ package io.nuls.test.rpc;
 
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.BlockRoundData;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
@@ -111,7 +112,7 @@ public class ConsensusTest {
     @Test
     public void packing(){
         //1.创建账户
-        List<String> accountList = null;
+        List<String> accountList;
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -182,5 +183,14 @@ public class ConsensusTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args)throws Exception{
+        BlockRoundData roundData = new BlockRoundData();
+        roundData.setConsensusMemberCount(3);
+        roundData.setPackingIndexOfRound(1);
+        roundData.setRoundIndex(1);
+        roundData.setRoundStartTime(1L);
+        System.out.println(HexUtil.encode(roundData.serialize()));
     }
 }

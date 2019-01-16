@@ -21,12 +21,13 @@
 package io.nuls.block.cache;
 
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.tools.log.Log;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 异步请求响应结果缓存类
@@ -40,8 +41,8 @@ public class DataCacher<T> {
 
     private Map<NulsDigestData, CompletableFuture<T>> cacher = new HashMap<>();
 
-    public CompletableFuture<T> addFuture(NulsDigestData hash) {
-        CompletableFuture future = new CompletableFuture<>();
+    CompletableFuture<T> addFuture(NulsDigestData hash) {
+        var future = new CompletableFuture<T>();
         cacher.put(hash, future);
         return future;
     }
@@ -49,7 +50,7 @@ public class DataCacher<T> {
     public boolean complete(NulsDigestData hash, T t) {
         CompletableFuture<T> future = cacher.get(hash);
         if (future == null) {
-            Log.debug("DataCacher Time out:{}", hash.getDigestHex());
+            Log.debug("DataCacher Time out:" + hash.getDigestHex());
             return false;
         }
         future.complete(t);
@@ -57,7 +58,7 @@ public class DataCacher<T> {
         return true;
     }
 
-    public void removeFuture(NulsDigestData hash) {
+    void removeFuture(NulsDigestData hash) {
         cacher.remove(hash);
     }
 }

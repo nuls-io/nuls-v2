@@ -34,6 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * 消息测试类,测试各种类型的消息序列化与反序列化
@@ -90,6 +91,7 @@ public class MessageTest {
         message1.parse(new NulsByteBuffer(bytes));
 
         assertEquals(message1.getHash(), message.getHash());
+        assertNull(message1.getBlock());
     }
 
     @Test

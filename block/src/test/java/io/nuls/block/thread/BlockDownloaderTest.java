@@ -24,7 +24,7 @@ import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Node;
-import io.nuls.tools.log.Log;
+import static io.nuls.block.utils.LoggerUtil.Log;
 import org.junit.Test;
 
 import java.util.concurrent.Future;
@@ -44,7 +44,7 @@ public class BlockDownloaderTest {
             if (startHeight + size > netLatestHeight) {
                 size = (int) (netLatestHeight - startHeight + 1);
             }
-            Log.info("get blocks {}->{}", startHeight, startHeight + size - 1);
+            Log.info("get blocks "+startHeight+"->"+(startHeight + size - 1));
             startHeight += size;
         }
     }

@@ -3,7 +3,10 @@ package io.nuls.transaction.rpc.call;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.constant.ErrorCode;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 
@@ -24,22 +27,23 @@ public class TransactionCall {
      * 调用其他模块接口
      * Call other module interfaces
      */
-    public static Object request(String cmd, String moduleCode, Map params) {
-        Object result = new Object();
+    public static Object request(String cmd, String moduleCode, Map params) throws NulsException {
         try {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             Response cmdResp = CmdDispatcher.requestAndResponse(moduleCode, cmd, params);
-            if (cmdResp.isSuccess()) {
-                result = ((HashMap) cmdResp.getResponseData()).get(cmd);
+            if (!cmdResp.isSuccess()) {
+                Log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", moduleCode, cmd, cmdResp.getResponseComment());
+                throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
             }
+            return ((HashMap) cmdResp.getResponseData()).get(cmd);
         } catch (Exception e) {
-            Log.error(e);
+            Log.error("Calling remote interface failed. module:{} - interface:{}", moduleCode, cmd);
+            throw new NulsException(e);
         }
-        return result;
     }
 
     /**
-     * txProcess
+     * txProcess 根据交易模块code向各模块提交交易
      * Single transaction txProcess
      * @param chain
      * @param cmd
@@ -47,7 +51,7 @@ public class TransactionCall {
      * @param txHex
      * @return
      */
-    public static boolean txProcess(Chain chain, String cmd, String moduleCode, String txHex) {
+    public static boolean txProcess(Chain chain, String cmd, String moduleCode, String txHex) throws NulsException {
         //调用单个交易验证器
         HashMap params = new HashMap();
         params.put("chianId", chain.getChainId());
@@ -63,7 +67,7 @@ public class TransactionCall {
      * @param map
      * @return
      */
-    public static boolean txsModuleValidators(Chain chain, Map<TxRegister, List<String>> map) {
+    public static boolean txsModuleValidators(Chain chain, Map<TxRegister, List<String>> map) throws NulsException {
         //调用交易模块统一验证器 批量
         boolean rs = true;
         for (Map.Entry<TxRegister, List<String>> entry : map.entrySet()) {
@@ -83,7 +87,7 @@ public class TransactionCall {
      * @param txHexList
      * @return 返回未通过验证的交易hash / return unverified transaction hash
      */
-    public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txHexList) {
+    public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txHexList) throws NulsException {
         //调用交易模块统一验证器
         HashMap params = new HashMap();
         params.put("chianId", chain.getChainId());

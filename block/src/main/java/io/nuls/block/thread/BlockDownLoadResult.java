@@ -20,15 +20,9 @@
 
 package io.nuls.block.thread;
 
-import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.Node;
 import lombok.Data;
-
-import java.util.Deque;
-import java.util.List;
-import java.util.Queue;
-import java.util.SortedSet;
 
 /**
  * 一个区块下载线程的下载结果

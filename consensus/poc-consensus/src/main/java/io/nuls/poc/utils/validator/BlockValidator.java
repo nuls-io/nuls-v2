@@ -52,14 +52,9 @@ public class BlockValidator {
          throw new NulsException(ConsensusErrorCode.MERKEL_HASH_ERROR);
       }
       MeetingRound currentRound = roundValidate(isDownload,chain,blockHeader);
-      //todo 调用交易模块验证区块打包的交易
-      boolean validResult = true;
-      if(!validResult){
-         throw new NulsException(ConsensusErrorCode.BLOCK_TX_VALID_ERROR);
-      }
       BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
       MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
-      validResult = punishValidate(block,currentRound,member,chain);
+      boolean validResult = punishValidate(block,currentRound,member,chain);
       if(!validResult){
          throw new NulsException(ConsensusErrorCode.BLOCK_PUNISH_VALID_ERROR);
       }
@@ -74,7 +69,7 @@ public class BlockValidator {
     * 区块轮次验证
     * Block round validation
     *
-    * @param isDownload        block status
+    * @param isDownload        block status 0同步中  1接收最新区块
     * @param chain             chain info
     * @param blockHeader       block header info
     * */
@@ -82,35 +77,35 @@ public class BlockValidator {
       BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
       BlockHeader bestBlockHeader = chain.getNewestHeader();
       BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlockHeader.getExtend());
-      //该区块为本地最新区块之前的区块
-      if (extendsData.getRoundIndex() < bestExtendsData.getRoundIndex() || (extendsData.getRoundIndex() == bestExtendsData.getRoundIndex() && extendsData.getPackingIndexOfRound() <= bestExtendsData.getPackingIndexOfRound())) {
+      /*
+      该区块为本地最新区块之前的区块
+      * */
+      boolean isBeforeBlock = extendsData.getRoundIndex() < bestExtendsData.getRoundIndex() || (extendsData.getRoundIndex() == bestExtendsData.getRoundIndex() && extendsData.getPackingIndexOfRound() <= bestExtendsData.getPackingIndexOfRound());
+      if (isBeforeBlock) {
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("new block roundData error, block height : " + blockHeader.getHeight() + " , hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
       }
-
       MeetingRound currentRound = roundManager.getCurrentRound(chain);
-      //1.当前区块轮次 < 本地最新轮次 && 区块同步已完成
-      if (isDownload && extendsData.getRoundIndex() < currentRound.getIndex()) {
+      boolean hasChangeRound = false;
+      if(extendsData.getRoundIndex() < currentRound.getIndex()){
          MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
          if (round != null) {
             currentRound = round;
+         }else{
+            currentRound = roundManager.getRound(chain,extendsData,false);
          }
       }
-      //标志是否有轮次信息变化
-      boolean hasChangeRound = false;
-      //2.当前区块轮次 > 本地最新轮次
-      if (extendsData.getRoundIndex() > currentRound.getIndex()) {
-         //未来区块
-         if (extendsData.getRoundStartTime() > TimeService.currentTimeMillis() + chain.getConfig().getPackingInterval()) {
+      else if(extendsData.getRoundIndex() > currentRound.getIndex()){
+         if(extendsData.getRoundStartTime() < currentRound.getEndTime()){
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash());
+            throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
+         }
+         if(extendsData.getRoundStartTime() > TimeService.currentTimeMillis() + chain.getConfig().getPackingInterval()){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
-         if (!isDownload && (extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval()) > TimeService.currentTimeMillis() + chain.getConfig().getPackingInterval()) {
+         if(extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval() > TimeService.currentTimeMillis() + chain.getConfig().getPackingInterval()){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash());
-            throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
-         }
-         if (extendsData.getRoundStartTime() < currentRound.getEndTime()) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
          MeetingRound tempRound = roundManager.getRound(chain, extendsData, !isDownload);
@@ -119,15 +114,6 @@ public class BlockValidator {
             hasChangeRound = true;
          }
          currentRound = tempRound;
-      } else if (extendsData.getRoundIndex() < currentRound.getIndex()) {
-         MeetingRound preRound = currentRound.getPreRound();
-         while (preRound != null) {
-            if (extendsData.getRoundIndex() == preRound.getIndex()) {
-               currentRound = preRound;
-               break;
-            }
-            preRound = preRound.getPreRound();
-         }
       }
       if (extendsData.getRoundIndex() != currentRound.getIndex() || extendsData.getRoundStartTime() != currentRound.getStartTime()) {
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeader.getHash());
@@ -137,7 +123,6 @@ public class BlockValidator {
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " packager count is error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
       }
-      chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug(currentRound.toString());
       // 验证打包人是否正确
       MeetingMember member = currentRound.getMember(extendsData.getPackingIndexOfRound());
       if (!Arrays.equals(member.getAgent().getPackingAddress(), blockHeader.getPackingAddress(chain.getConfig().getChainId()))) {

@@ -163,6 +163,7 @@ public class CoinDataManager {
                     from.setAmount(to.getAmount());
                     from.setLocked((byte)-1);
                     from.setNonce(createTxHash.getDigestBytes());
+                    fromList.add(from);
                 }
             }
             if (fromList.isEmpty()) {
@@ -189,7 +190,7 @@ public class CoinDataManager {
                 Transaction depositTransaction = null;
                 CoinData depositCoinData = new CoinData();
                 depositCoinData.parse(depositTransaction.getCoinData(), 0);
-                CoinFrom from = null;
+                CoinFrom from;
                 for (CoinTo to:depositCoinData.getTo()) {
                     if (!BigIntegerUtils.isEqual(to.getAmount(),deposit.getDeposit()) || to.getLockTime() != -1L) {
                         continue;

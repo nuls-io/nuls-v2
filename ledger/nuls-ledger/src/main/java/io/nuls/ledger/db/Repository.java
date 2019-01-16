@@ -25,8 +25,7 @@
  */
 package io.nuls.ledger.db;
 
-import io.nuls.base.data.Transaction;
-import io.nuls.ledger.model.AccountState;
+import io.nuls.ledger.model.po.AccountState;
 
 public interface Repository {
 
@@ -37,32 +36,50 @@ public interface Repository {
      * @param key
      * @param accountState
      */
-    void putAccountState(byte[] key, AccountState accountState);
+    void createAccountState(byte[] key, AccountState accountState);
 
     /**
-     * get accountState from rocksdb
+     * update accountState to rocksdb
+     * @param key
+     * @param preAccountState
+     * @param nowAccountState
+     */
+    void updateAccountStateAndSnapshot(String key,AccountState preAccountState,AccountState nowAccountState);
+
+    /**
+     *
+     * @param chainId
+     * @param key
+     * @return AccountState
+     */
+    AccountState getAccountState(int chainId,byte[] key);
+
+    /**
      *
      * @param key
+     * @param nowAccountState
+     */
+    void updateAccountState(byte[] key,AccountState nowAccountState);
+
+    /**
+     *
+     * @param chainId
+     * @param key
+     * @return AccountState
+     */
+    AccountState getSnapshotAccountState(int chainId,byte[] key);
+
+    /**
+     *
+     * @param chainId
+     * @param key
+     */
+    void delSnapshotAccountState(int chainId,byte[] key);
+
+    /**
+     *
+     * @param chainId
      * @return
      */
-    AccountState getAccountState(byte[] key);
-
-    /**
-     * 缓存批量校验的交易
-     * @param key
-     * @param tx
-     */
-    void putBatchValidateTx(byte[] key, Transaction tx);
-
-    /**
-     * 获取批量校验交易的缓存值
-     * @param key
-     * @return
-     */
-    Transaction getBatchValidateTx(byte[] key);
-
-    /**
-     * 清空批量交易的缓存值
-     */
-    void clearBatchValidateTx();
+      long  getBlockHeight(int chainId);
 }

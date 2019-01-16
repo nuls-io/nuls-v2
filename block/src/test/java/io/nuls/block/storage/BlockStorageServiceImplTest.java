@@ -44,7 +44,7 @@ public class BlockStorageServiceImplTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        SpringLiteContext.init("io.nuls.block", new ModularServiceMethodInterceptor());
+        SpringLiteContext.init("io.nuls.block");
         service = SpringLiteContext.getBean(BlockStorageService.class);
 
         Block block = BlockGenerator.generate(null);

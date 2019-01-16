@@ -14,7 +14,8 @@ public interface TxConstant {
     /**
      * Map初始值
      */
-    int INIT_CAPACITY = 16;
+    int INIT_CAPACITY_16 = 16;
+    int INIT_CAPACITY_8 = 8;
 
     int PAGESIZE = 20;
 
@@ -59,15 +60,40 @@ public interface TxConstant {
     int ORPHAN_CONTAINER_MAX_SIZE = 200000;
 
 
+    /** coinbase交易*/
     int TX_TYPE_COINBASE = 1;
+    /** 转账交易*/
     int TX_TYPE_TRANSFER = 2;
+    /** 设置别名*/
+    int TX_TYPE_ALIAS = 3;
+    /** 创建共识节点交易*/
+    int TX_TYPE_REGISTER_AGENT = 4;
+    /** 委托交易(加入共识)*/
+    int TX_TYPE_JOIN_CONSENSUS = 5;
+    /** 取消委托交易(退出共识)*/
+    int TX_TYPE_CANCEL_DEPOSIT = 6;
+    /** 黄牌惩罚*/
+    int TX_TYPE_YELLOW_PUNISH = 7;
+    /** 红牌惩罚*/
+    int TX_TYPE_RED_PUNISH = 8;
+    /** 停止节点(删除共识节点)*/
+    int TX_TYPE_STOP_AGENT = 9;
+    /** 跨链转账交易*/
+    int TX_TYPE_CROSS_CHAIN_TRANSFER = 10;
+    /** 注册链交易*/
+    int TX_TYPE_REGISTER_CHAIN_AND_ASSET = 11;
+    /** 销毁链*/
+    int TX_TYPE_destroy_CHAIN_AND_ASSET = 12;
+    /** 为链新增一种资产*/
+    int TX_TYPE_ADD_ASSET_TO_CHAIN = 13;
+    /** 删除链上资产*/
+    int TX_TYPE_REMOVE_ASSET_FROM_CHAIN = 14;
 
-    int TX_TYPE_REDPUNISH = 8;
+
 
     /**
      * 跨链交易
      */
-    int TX_TYPE_CROSS_CHAIN_TRANSFER = 10;
     String TX_MODULE_VALIDATOR = "txProcess";
     String CROSS_TRANSFER_VALIDATOR = "crossTxValidator";
     String CROSS_TRANSFER_COMMIT = "crossTxCommit";
@@ -81,7 +107,7 @@ public interface TxConstant {
     /**
      * 跨链交易验证过程
      */
-    /** 已发送请求跨链验证消息 */
+    /** 接收新的跨链交易创建 */
     int CTX_UNPROCESSED_0 = 0;
     /** 已发送请求跨链验证消息 */
     int CTX_VERIFY_REQUEST_1 = 1;
@@ -126,4 +152,13 @@ public interface TxConstant {
     String KEY_CHAIN_ID ="chainId";
     String KEY_NODE_ID="nodeId";
     String KEY_MESSAGE_BODY="messageBody";
+
+    /** 跨链验证通过率百分比, 跨链通过率 */
+    String CROSS_VERIFY_RESULT_PASS_RATE = "0.51";
+
+    /** 链内通过率 */
+    String CHAIN_NODES_RESULT_PASS_RATE = "0.8";
+
+    /** 友链链内最近N个出块者阈值*/
+    int RECENT_PACKAGER_THRESHOLD = 30;
 }

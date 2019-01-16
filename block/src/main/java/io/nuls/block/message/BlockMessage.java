@@ -27,7 +27,10 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.message.base.BaseMessage;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.io.IOException;
 
@@ -45,11 +48,13 @@ public class BlockMessage extends BaseMessage {
      * 用来区分批量获取区块请求和单个区块请求,也可以用来过滤非法消息
      */
     @Getter
+    @Setter
     private NulsDigestData requestHash;
     /**
      * 区块数据
      */
-    @Getter @Setter
+    @Getter
+    @Setter
     private Block block;
 
     @Override

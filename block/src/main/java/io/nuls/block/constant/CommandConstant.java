@@ -20,13 +20,12 @@
 
 package io.nuls.block.constant;
 
-import io.nuls.tools.log.Log;
-
 /**
  * 存储对外提供的接口命令
+ *
  * @author captain
- * @date 18-11-9 下午2:15
  * @version 1.0
+ * @date 18-11-9 下午2:15
  */
 public interface CommandConstant {
 

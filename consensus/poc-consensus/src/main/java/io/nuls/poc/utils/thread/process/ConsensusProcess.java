@@ -1,20 +1,20 @@
 package io.nuls.poc.utils.thread.process;
 
-import io.nuls.base.data.*;
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockExtendsData;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.Transaction;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.BlockData;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
+import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.ConsensusStatus;
-import io.nuls.poc.utils.manager.BlockManager;
-import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.RoundManager;
-import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.DateUtils;
@@ -23,7 +23,10 @@ import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 共识处理器
@@ -34,10 +37,6 @@ import java.util.*;
  * */
 public class ConsensusProcess {
     private RoundManager roundManager = SpringLiteContext.getBean(RoundManager.class);
-
-    private ChainManager chainManager = SpringLiteContext.getBean(ChainManager.class);
-
-    private BlockManager blockManager = SpringLiteContext.getBean(BlockManager.class);
 
     private NulsLogger consensusLogger;
 
@@ -74,7 +73,7 @@ public class ConsensusProcess {
             return false;
         }
 
-        /*todo
+        /*
         检查网络状态是否正常（调用网络模块接口获取当前链接节点数）
         Check whether the network status is normal
          */
@@ -108,7 +107,7 @@ public class ConsensusProcess {
         获取当前轮次信息并验证轮次信息
         Get current round information
          */
-        MeetingRound round = roundManager.getOrResetCurrentRound(chain,true);
+        MeetingRound round = roundManager.resetRound(chain,true);
         if (round == null) {
             return;
         }
@@ -177,15 +176,10 @@ public class ConsensusProcess {
             return;
         }
         try {
-            Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
-            params.put("chainId",chain.getConfig().getChainId());
-            params.put("block", HexUtil.encode(block.serialize()));
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr,"receivePackingBlock", params);
-            if(!cmdResp.isSuccess()){
+            boolean receiveSuccess = CallMethodUtils.receivePackingBlock(chain.getConfig().getChainId(), HexUtil.encode(block.serialize()));
+            if(!receiveSuccess){
                 consensusLogger.info("add block interface call failed!");
-                return;
             }
-            //blockManager.addNewBlock(chain,block.getHeader());
         }catch (Exception e){
             consensusLogger.error(e);
         }
@@ -282,9 +276,9 @@ public class ConsensusProcess {
         bd.setExtendsData(extendsData);
 
         StringBuilder str = new StringBuilder();
-        str.append(self.getAgent().getPackingAddress());
-        str.append(" ,order:" + self.getPackingIndexOfRound());
-        str.append(",packTime:" + new Date(self.getPackEndTime()));
+        str.append(AddressTool.getStringAddressByBytes(self.getAgent().getPackingAddress()));
+        str.append(" ,order:").append(self.getPackingIndexOfRound());
+        str.append(",packTime:").append(new Date(self.getPackEndTime()));
         str.append("\n");
         consensusLogger.debug("pack round:" + str);
         //todo 从交易管理模块获取打包交易
