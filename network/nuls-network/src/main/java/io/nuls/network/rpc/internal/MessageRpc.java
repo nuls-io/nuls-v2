@@ -35,7 +35,6 @@ import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.model.po.ProtocolHandlerPo;
 import io.nuls.network.model.po.RoleProtocolPo;
-import io.nuls.network.storage.DbService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -61,7 +60,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 public class MessageRpc extends BaseCmd{
 
     private MessageManager messageManager =  MessageManager.getInstance();
-    private DbService dbService=StorageManager.getInstance().getDbService();
+
 
     @CmdAnnotation(cmd = "nw_protocolRegister", version = 1.0,
             description = "protocol cmd register")
@@ -91,7 +90,7 @@ public class MessageRpc extends BaseCmd{
             RoleProtocolPo roleProtocolPo = new RoleProtocolPo();
             roleProtocolPo.setRole(role);
             roleProtocolPo.setProtocolHandlerPos(protocolHandlerPos);
-            dbService.saveOrUpdateProtocolRegisterInfo(roleProtocolPo);
+            StorageManager.getInstance().getDbService().saveOrUpdateProtocolRegisterInfo(roleProtocolPo);
 
         } catch (Exception e) {
             e.printStackTrace();
