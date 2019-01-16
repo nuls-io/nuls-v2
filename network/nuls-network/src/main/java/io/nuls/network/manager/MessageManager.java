@@ -194,6 +194,7 @@ public class MessageManager extends BaseManager{
                 Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
                 BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());
                 if(null != message) {
+                    Log.debug("==============================Network module self message");
                     BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(message);
                     message = byteBuffer.readNulsData(message);
                     NetworkEventResult result = handler.recieve(message, node.getId(), isServer);
@@ -202,6 +203,7 @@ public class MessageManager extends BaseManager{
                     }
                 }else{
                     //外部消息，转外部接口
+                    Log.debug("==============================other module message");
                     long magicNum=header.getMagicNumber();
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
                     Map<String,Object> paramMap = new HashMap<>();
@@ -212,6 +214,7 @@ public class MessageManager extends BaseManager{
                     if(null == protocolRoleHandlers){
                         Log.error("unknown mssages. cmd={},may be handle had not be registered to network.",header.getCommandStr());
                     }else{
+                        Log.debug("==============================other module message protocolRoleHandlers-size:{}",protocolRoleHandlers.size());
                         for(ProtocolRoleHandler protocolRoleHandler:protocolRoleHandlers) {
                             Log.debug("request：{}=={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
                            Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
