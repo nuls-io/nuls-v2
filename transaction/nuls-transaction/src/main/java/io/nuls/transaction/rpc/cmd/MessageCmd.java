@@ -74,8 +74,10 @@ public class MessageCmd extends BaseCmd {
     public Response newHash(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
+        Chain chain = null;
         try {
             Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
+            chain = chainManager.getChain(chainId);
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析广播交易hash消息
             BroadcastTxMessage message = new BroadcastTxMessage();
@@ -98,8 +100,10 @@ public class MessageCmd extends BaseCmd {
             getTxMessage.setRequestHash(hash);
             result = NetworkCall.sendToNode(chainId, getTxMessage, nodeId);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", result);
@@ -119,6 +123,7 @@ public class MessageCmd extends BaseCmd {
     public Response askTx(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
+        Chain chain = null;
         try {
             Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
             String nodeId = params.get(KEY_NODE_ID).toString();
@@ -127,7 +132,7 @@ public class MessageCmd extends BaseCmd {
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
-            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -138,8 +143,10 @@ public class MessageCmd extends BaseCmd {
             }
             result = NetworkCall.sendTxToNode(chainId, nodeId, tx);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", result);
@@ -158,8 +165,10 @@ public class MessageCmd extends BaseCmd {
     public Response receiveTx(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
+        Chain chain = null;
         try {
             Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
+            chain = chainManager.getChain(chainId);
             //解析新的交易消息
             TransactionMessage message = new TransactionMessage();
             byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
@@ -177,8 +186,10 @@ public class MessageCmd extends BaseCmd {
             //将交易放入待验证本地交易队列中
             txService.newTx(chainManager.getChain(chainId), transaction);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", true);
@@ -198,8 +209,10 @@ public class MessageCmd extends BaseCmd {
     public Response newCrossHash(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
+        Chain chain = null;
         try {
             Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
+            chain = chainManager.getChain(chainId);
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析广播跨链交易hash消息
             BroadcastTxMessage message = new BroadcastTxMessage();
@@ -222,8 +235,10 @@ public class MessageCmd extends BaseCmd {
             getTxMessage.setRequestHash(hash);
             result = NetworkCall.sendToNode(chainId, getTxMessage, nodeId);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", result);
@@ -243,6 +258,7 @@ public class MessageCmd extends BaseCmd {
     public Response askCrossTxM2Fc(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
+        Chain chain = null;
         try {
             Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
             String nodeId = params.get(KEY_NODE_ID).toString();
@@ -251,7 +267,7 @@ public class MessageCmd extends BaseCmd {
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
-            Chain chain = chainManager.getChain(chainId);
+            chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -271,8 +287,10 @@ public class MessageCmd extends BaseCmd {
             crossTxMessage.setTx(tx);
             result = NetworkCall.sendToNode(chainId, crossTxMessage, nodeId);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", result);
@@ -292,6 +310,7 @@ public class MessageCmd extends BaseCmd {
     public Response askCrossTxM2M(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
+        Chain chain = null;
         try {
             Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
             String nodeId = params.get(KEY_NODE_ID).toString();
@@ -300,7 +319,7 @@ public class MessageCmd extends BaseCmd {
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
-            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -324,8 +343,10 @@ public class MessageCmd extends BaseCmd {
             crossTxMessage.setTx(tx);
             result = NetworkCall.sendToNode(chainId, crossTxMessage, nodeId);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", result);
@@ -345,6 +366,7 @@ public class MessageCmd extends BaseCmd {
     public Response askCrossTxFc2M(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
+        Chain chain = null;
         try {
             Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
             String nodeId = params.get(KEY_NODE_ID).toString();
@@ -353,7 +375,7 @@ public class MessageCmd extends BaseCmd {
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
-            Chain chain = chainManager.getChain(chainId);
+            chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -373,8 +395,10 @@ public class MessageCmd extends BaseCmd {
             crossTxMessage.setTx(tx);
             result = NetworkCall.sendToNode(chainId, crossTxMessage, nodeId);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", result);
@@ -394,8 +418,10 @@ public class MessageCmd extends BaseCmd {
     public Response newMnTx(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
+        Chain chain = null;
         try {
             Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
+            chain = chainManager.getChain(chainId);
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析新的跨链交易消息
             CrossTxMessage message = new CrossTxMessage();
@@ -412,10 +438,12 @@ public class MessageCmd extends BaseCmd {
                 TxDuplicateRemoval.insert(transaction.getHash());
             }
             //保存未验证跨链交易
-            ctxService.newCrossTx(chainManager.getChain(chainId), nodeId, transaction);
+            ctxService.newCrossTx(chain, nodeId, transaction);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", true);
@@ -435,6 +463,7 @@ public class MessageCmd extends BaseCmd {
     public Response verifyFc(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
+        Chain chain = null;
         try {
             Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
             String nodeId = params.get(KEY_NODE_ID).toString();
@@ -445,7 +474,7 @@ public class MessageCmd extends BaseCmd {
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
-            Chain chain = chainManager.getChain(chainId);
+            chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -471,8 +500,10 @@ public class MessageCmd extends BaseCmd {
             verifyResultMessage.setHeight(tx.getBlockHeight());
             result = NetworkCall.sendToNode(chainId, verifyResultMessage, nodeId);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", result);
@@ -491,9 +522,10 @@ public class MessageCmd extends BaseCmd {
     @Parameter(parameterName = KEY_NODE_ID, parameterType = "String")
     public Response verifyResult(Map params) {
         Map<String, Boolean> map = new HashMap<>();
-        boolean result;
+        Chain chain = null;
         try {
             Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
+            chain = chainManager.getChain(chainId);
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析跨链交易验证结果消息
             VerifyCrossResultMessage message = new VerifyCrossResultMessage();
@@ -503,10 +535,12 @@ public class MessageCmd extends BaseCmd {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
             //处理跨链节点验证结果
-            ctxService.ctxResultProcess(chainManager.getChain(chainId), message, nodeId);
+            ctxService.ctxResultProcess(chain, message, nodeId);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", true);
@@ -526,6 +560,7 @@ public class MessageCmd extends BaseCmd {
     public Response verifyMn(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
+        Chain chain = null;
         try {
             Integer chainId = Integer.parseInt(params.get(KEY_CHAIN_ID).toString());
             String nodeId = params.get(KEY_NODE_ID).toString();
@@ -536,7 +571,7 @@ public class MessageCmd extends BaseCmd {
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
-            Chain chain = chainManager.getChain(chainId);
+            chain = chainManager.getChain(chainId);
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -562,8 +597,10 @@ public class MessageCmd extends BaseCmd {
             verifyResultMessage.setHeight(tx.getBlockHeight());
             result = NetworkCall.sendToNode(chainId, verifyResultMessage, nodeId);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", result);
@@ -584,12 +621,13 @@ public class MessageCmd extends BaseCmd {
     public Response crossNodeRs(Map params) {
         Map<String, Boolean> map = new HashMap<>();
         boolean result;
+        Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get(KEY_CHAIN_ID), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get(KEY_NODE_ID), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get(KEY_MESSAGE_BODY), TxErrorCode.PARAMETER_ERROR.getMsg());
 
-            Chain chain = chainManager.getChain((int) params.get(KEY_CHAIN_ID));
+            chain = chainManager.getChain((int) params.get(KEY_CHAIN_ID));
             if (null == chain) {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -622,14 +660,22 @@ public class MessageCmd extends BaseCmd {
             //保存跨链交易验证结果
             result = ctxStorageService.putTx(chainId, ctx);*/
         } catch (NulsException e) {
-            Log.error(e);
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            Log.error(e);
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         //map.put("value", result);
         return success(map);
     }
 
+
+    private void errorLogProcess(Chain chain, Exception e){
+        if(chain == null){
+            Log.error(e);
+        }else{
+            chain.getLogger().error(e);
+        }
+    }
 }

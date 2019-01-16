@@ -14,6 +14,7 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
@@ -72,6 +73,7 @@ public class TransactionCmd extends BaseCmd {
     public Response register(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = false;
+        Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("moduleCode"), TxErrorCode.PARAMETER_ERROR.getMsg());
@@ -81,7 +83,7 @@ public class TransactionCmd extends BaseCmd {
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDTO.class);
 
-            Chain chain = chainManager.getChain(moduleTxRegisterDto.getChainId());
+            chain = chainManager.getChain(moduleTxRegisterDto.getChainId());
             if(null == chain){
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -106,10 +108,14 @@ public class TransactionCmd extends BaseCmd {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            errorLogProcess(chain, e);
             return failed(e.getMessage());
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
 
         map.put("value", result);
@@ -128,10 +134,11 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "txHex", parameterType = "String")
     public Response newTx(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            chain = chainManager.getChain((int) params.get("chainId"));
             if(null == chain){
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -141,8 +148,10 @@ public class TransactionCmd extends BaseCmd {
             //将交易放入待验证本地交易队列中
             txService.newTx(chain, transaction);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         map.put("value", true);
@@ -160,11 +169,12 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "endTimestamp", parameterType = "long")
     @Parameter(parameterName = "maxTxDataSize", parameterType = "int")
     public Response packableTxs(Map params) {
+        Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("endTimestamp"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("maxTxDataSize"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            chain = chainManager.getChain((int) params.get("chainId"));
             if(null == chain){
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -178,7 +188,11 @@ public class TransactionCmd extends BaseCmd {
             map.put("list", txHexlist);
             return success(map);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -196,12 +210,13 @@ public class TransactionCmd extends BaseCmd {
     public Response txSave(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = false;
+        Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txHashList"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("secondaryDataHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
 
-            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            chain = chainManager.getChain((int) params.get("chainId"));
             if(null == chain){
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -215,8 +230,10 @@ public class TransactionCmd extends BaseCmd {
             BlockHeaderDigest blockHeaderDigest = TxUtil.getInstance((String)params.get("secondaryDataHex"), BlockHeaderDigest.class);
             result = confirmedTxService.saveTxList(chain, txHashList, blockHeaderDigest);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
@@ -238,11 +255,12 @@ public class TransactionCmd extends BaseCmd {
     public Response txRollback(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = false;
+        Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txHashList"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("secondaryDataHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            chain = chainManager.getChain((int) params.get("chainId"));
             if(null == chain){
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -257,8 +275,10 @@ public class TransactionCmd extends BaseCmd {
             result = confirmedTxService.rollbackTxList(chain, txHashList, blockHeaderDigest);
 
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
@@ -274,16 +294,21 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.TX_GET_SYSTEM_TYPES, version = 1.0, description = "Get system transaction types")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getSystemTypes(Map params) {
+        Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            chain = chainManager.getChain((int) params.get("chainId"));
             if(null == chain){
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             List<Integer> list = transactionManager.getSysTypes(chain);
             return success(list);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -298,10 +323,11 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHash", parameterType = "String")
     public Response getTx(Map params) {
+        Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txHash"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            chain = chainManager.getChain((int) params.get("chainId"));
             if(null == chain){
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -315,7 +341,11 @@ public class TransactionCmd extends BaseCmd {
             }
             return success(tx);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -329,9 +359,10 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.TX_GETTXS, version = 1.0, description = "Get transaction record")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response getTxs(Map params) {
+        Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            Chain chain = chainManager.getChain((int) params.get("chainId"));
+            chain = chainManager.getChain((int) params.get("chainId"));
             if(null == chain){
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
@@ -343,10 +374,13 @@ public class TransactionCmd extends BaseCmd {
             String address = (String) params.get("address");
 
             Page<TransactionPO> list = transactionH2Service.getTxs(address, assetChainId, assetId, type, pageNumber, pageSize);
-
             return success(list);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
@@ -364,6 +398,7 @@ public class TransactionCmd extends BaseCmd {
     public Response batchVerify(Map params){
         boolean result = false;
         VerifyTxResult verifyTxResult = null;
+        Chain chain = null;
         try {
             Object chainIdObj = params == null ? null : params.get("chainId");
             Object txHexListObj = params == null ? null : params.get("txList");
@@ -372,11 +407,14 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             int chainId = (Integer) chainIdObj;
+            chain = chainManager.getChain(chainId);
             List<String> txHexList = (List<String>) txHexListObj;
             verifyTxResult = txService.batchVerify(chainManager.getChain(chainId), txHexList);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
@@ -393,7 +431,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = TxCmd.TX_CREATE_CROSS_TX, version = 1.0, description = "")
     public Response createCtx(Map params){
-
+        Chain chain = null;
         try {
             // check parameters
             if (params == null) {
@@ -403,16 +441,26 @@ public class TransactionCmd extends BaseCmd {
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             CrossTxTransferDTO crossTxTransferDTO = JSONUtils.json2pojo(JSONUtils.obj2json(params), CrossTxTransferDTO.class);
             int chainId = crossTxTransferDTO.getChainId();
+            chain = chainManager.getChain(chainId);
             String hash = txService.createCrossTransaction(chainManager.getChain(chainId),
                     crossTxTransferDTO.getListFrom(), crossTxTransferDTO.getListTo(), crossTxTransferDTO.getRemark());
             Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             resultMap.put("value", hash);
             return success(resultMap);
         } catch (NulsException e) {
+            errorLogProcess(chain, e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
+            errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 
+    private void errorLogProcess(Chain chain, Exception e){
+        if(chain == null){
+            Log.error(e);
+        }else{
+            chain.getLogger().error(e);
+        }
+    }
 }

@@ -32,18 +32,20 @@ public class TransactionCall {
         try {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             Response cmdResp = CmdDispatcher.requestAndResponse(moduleCode, cmd, params);
-            if (!cmdResp.isSuccess()) {
-                Log.error("Calling remote interface failed. module:{} - interface:{} - responseStatus:{} - ResponseComment:{}",
-                        moduleCode, cmd, cmdResp.getResponseStatus(), cmdResp.getResponseComment());
-                throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
-            }
             Map resData = (Map)cmdResp.getResponseData();
+            if (!cmdResp.isSuccess()) {
+                //msg code
+                Map map = (Map)resData.get(cmd);
+                String errorMsg = String.format("Remote call fail. msg: %s - code: %s - module: %s - interface: %s",
+                        map.get("msg"), map.get("code"), moduleCode, cmd);
+                //throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
+                throw new Exception(errorMsg);
+            }
             if (null == resData) {
                 return null;
             }
             return resData.get(cmd);
         } catch (Exception e) {
-            Log.error("Calling remote interface failed. module:{} - interface:{}", moduleCode, cmd);
             throw new NulsException(e);
         }
     }
