@@ -30,13 +30,11 @@ import io.nuls.rpc.model.message.Request;
 import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.data.CollectionUtils;
 import io.nuls.tools.parse.JSONUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
@@ -162,5 +160,20 @@ public class CommonTest {
         AtomicInteger min = new AtomicInteger(Integer.MIN_VALUE);
         System.out.println(min);
         System.out.println(min.decrementAndGet());
+    }
+
+    @Test
+    public void testLinkedListClone() {
+        LinkedList<String> list = new LinkedList<>();
+        list.add("a");
+        list.add("b");
+        list.add("c");
+        list.add("d");
+        LinkedList<String> clone = (LinkedList<String>) list.clone();
+        clone.pop();
+        clone.pop();
+        clone.pop();
+        Assert.assertEquals(1, clone.size());
+        Assert.assertEquals(4, list.size());
     }
 }

@@ -59,10 +59,6 @@ public class CompleteHandler extends BaseCmd {
             messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
-        if (message == null) {
-            return failed(BlockErrorCode.PARAMETER_ERROR);
-        }
         messageLog.info("recieve CompleteMessage from node-" + nodeId + ", chainId:" + chainId);
         CacheHandler.batchComplete(chainId, message);
         return success();

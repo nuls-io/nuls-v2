@@ -67,13 +67,10 @@ public class GetBlocksHandler extends BaseCmd {
         byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         message.parse(new NulsByteBuffer(decode));
 
-        if (message == null || nodeId == null) {
-            return failed(BlockErrorCode.PARAMETER_ERROR);
-        }
-
         long startHeight = message.getStartHeight();
         long endHeight = message.getEndHeight();
         if (startHeight < 0L || startHeight > endHeight || endHeight - startHeight > MAX_SIZE) {
+            messageLog.error("PARAMETER_ERROR");
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         messageLog.info("recieve HeightRangeMessage from node-" + nodeId + ", chainId:" + chainId + ", start:" + startHeight + ", end:" + endHeight);
@@ -91,6 +88,7 @@ public class GetBlocksHandler extends BaseCmd {
             } while (endHeight >= startHeight);
             NetworkUtil.sendSuccess(chainId, requestHash, nodeId);
         } catch (Exception e) {
+            messageLog.error("error occur when send block");
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
         return success();
