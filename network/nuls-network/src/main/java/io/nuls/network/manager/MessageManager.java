@@ -173,7 +173,7 @@ public class MessageManager extends BaseManager{
         long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
         return checksum == pChecksum;
     }
-    public void receiveMessage(ByteBuf buffer,String nodeKey,boolean isServer) throws NulsException {
+    public void receiveMessage(ByteBuf buffer,Node node,boolean isServer) throws NulsException {
         //统一接收消息处理
         try {
             byte[] bytes = new byte[buffer.readableBytes()];
@@ -196,7 +196,7 @@ public class MessageManager extends BaseManager{
                 if(null != message) {
                     BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(message);
                     message = byteBuffer.readNulsData(message);
-                    NetworkEventResult result = handler.recieve(message, nodeKey, isServer);
+                    NetworkEventResult result = handler.recieve(message, node.getId(), isServer);
                     if(!result.isSuccess()){
                         Log.error("receiveMessage fail:"+result.getErrorCode().getMsg());
                     }
@@ -206,7 +206,7 @@ public class MessageManager extends BaseManager{
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
                     Map<String,Object> paramMap = new HashMap<>();
                     paramMap.put("chainId",chainId);
-                    paramMap.put("nodeId",nodeKey);
+                    paramMap.put("nodeId",node.getId());
                     paramMap.put("messageBody",HexUtil.byteToHex(payLoadBody));
                     Collection<ProtocolRoleHandler> protocolRoleHandlers =  getProtocolRoleHandlerMap(header.getCommandStr());
                     if(null == protocolRoleHandlers){

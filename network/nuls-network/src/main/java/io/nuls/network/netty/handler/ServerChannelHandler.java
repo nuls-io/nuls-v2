@@ -112,9 +112,16 @@ public class ServerChannelHandler extends BaseChannelHandler {
         int port=channel.remoteAddress().getPort();
         String nodeKey=remoteIP+":"+port;
         try {
-            MessageManager.getInstance().receiveMessage(buf,nodeKey,true);
-        } catch (Exception e){
+            Node node=ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
+            if (node != null) {
+                MessageManager.getInstance().receiveMessage(buf,node,true);
+            } else {
+                Log.info("-----------------Server channelRead  node is null -----------------" + remoteIP + ":" + port);
+                ctx.channel().close();
+            }
+        } catch (Exception e) {
             e.printStackTrace();
+            throw e;
         }finally {
             buf.release();
         }
