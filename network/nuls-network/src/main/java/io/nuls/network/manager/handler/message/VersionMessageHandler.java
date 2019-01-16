@@ -41,9 +41,12 @@ import io.nuls.network.model.message.body.VersionMessageBody;
 import io.nuls.network.rpc.external.BlockRpcService;
 import io.nuls.network.rpc.external.impl.BlockRpcServiceImpl;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import static io.nuls.network.utils.LoggerUtil.Log;
 /**
  * version message handler
+ * client 先发起version消息，server接收到后，
+ * 1 是否自连接 2.校验业务连接重叠，连接过载
+ *
+ *
  * @author lan
  * @date 2018/10/20
  */
@@ -68,7 +71,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
     private void serverRecieveHandler(BaseMessage message, String nodeKey){
         VersionMessageBody versionBody=(VersionMessageBody)message.getMsgBody();
         Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
-        Log.debug("VersionMessageHandler Recieve:"+"Server"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+//        Log.debug("VersionMessageHandler Recieve:"+"Server"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
         String peerIp = versionBody.getAddrYou().getIp().getHostAddress();
         int peerPort = versionBody.getAddrYou().getPort();
@@ -85,13 +88,13 @@ public class VersionMessageHandler extends BaseMessageHandler {
          */
         if(LocalInfoManager.getInstance().isSelfIp(node.getIp())  || ConnectionManager.getInstance().isPeerConnectExceedMax(node.getIp(),nodeGroup.getMagicNumber(),maxIn,Node.IN)){
             if(node.getNodeGroupConnectors().size() == 0){
-                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===close connection.");
+//                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===close connection.");
                 node.getChannel().close();
                 node.setIdle(true);
                 return;
             }else{
                 //client 回复过载消息--reply over maxIn
-                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===-reply over maxIn.");
+//                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===-reply over maxIn.");
                 VerackMessage verackMessage=MessageFactory.getInstance().buildVerackMessage(node,message.getHeader().getMagicNumber(), VerackMessageBody.VER_CONNECT_MAX);
                 MessageManager.getInstance().sendToNode(verackMessage,node,true);
                 return;
@@ -122,16 +125,41 @@ public class VersionMessageHandler extends BaseMessageHandler {
    private  void clientRecieveHandler(BaseMessage message, String nodeKey){
         VersionMessageBody versionBody=(VersionMessageBody)message.getMsgBody();
         localInfoManager.updateExternalAddress(versionBody.getAddrYou().getIp().getHostAddress(),NetworkParam.getInstance().getPort());
+
        /*
         * node 不一定只存在disconnectNodeMap中，多链情况下，可以是已存业务的连接。
         */
        Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.OUT);
       //client发出version后获得，得到server回复，建立握手
-       Log.debug("VersionMessageHandler Recieve:Client"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+//       Log.debug("VersionMessageHandler Recieve:Client"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
        NodeGroupConnector nodeGroupConnector=node.getNodeGroupConnector(message.getHeader().getMagicNumber());
+       long magicNumber = message.getHeader().getMagicNumber();
+       NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(magicNumber);
+       int maxIn;
+       if(node.isCrossConnect()){
+           maxIn=nodeGroup.getMaxCrossIn();
+       }else{
+           maxIn=nodeGroup.getMaxIn();
+       }
+       if(ConnectionManager.getInstance().isPeerConnectExceedMax(node.getIp(),nodeGroup.getMagicNumber(),1,Node.OUT)) {
+            //执行断开业务处理
+           if(node.getNodeGroupConnectors().size() == 1 && null != node.getNodeGroupConnector(magicNumber)){
+//                Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===close connection.");
+               node.getChannel().close();
+               node.setIdle(true);
+               return;
+           }else if(node.getNodeGroupConnectors().size()>1){
+               //client 回复过载消息--reply over maxIn
+//             Log.debug("Self ip connection or Peer Connect Exceed MaxIn ===-reply over maxIn.");
+               node.removeGroupConnector(magicNumber);
+               VerackMessage verackMessage=MessageFactory.getInstance().buildVerackMessage(node,message.getHeader().getMagicNumber(), VerackMessageBody.VER_CONNECT_MAX);
+               MessageManager.getInstance().sendToNode(verackMessage,node,true);
+               return;
+           }
+       }
+       //建立握手
        nodeGroupConnector.setStatus(NodeGroupConnector.HANDSHAKE);
        //node加入到Group的连接中
-       NodeGroup nodeGroup=nodeGroupManager.getNodeGroupByMagic(message.getHeader().getMagicNumber());
        nodeGroup.addConnetNode(node,true);
        //存储需要的信息
        node.setVersionProtocolInfos(message.getHeader().getMagicNumber(),versionBody.getProtocolVersion(),versionBody.getBlockHeight(),versionBody.getBlockHash());
@@ -168,7 +196,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
 
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
-        Log.debug("VersionMessageHandler send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+//        Log.debug("VersionMessageHandler send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
         int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
         BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(chainId);

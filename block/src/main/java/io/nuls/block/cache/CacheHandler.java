@@ -24,7 +24,6 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
-import io.nuls.block.thread.BlockDownloader;
 import io.nuls.block.thread.BlockWorker;
 
 import java.util.ArrayList;
@@ -63,7 +62,7 @@ public class CacheHandler {
      *
      * @param chainId
      */
-    public static void init(int chainId){
+    public static void init(int chainId) {
         workerBlockCacher.put(chainId, new ConcurrentHashMap<>());
         singleBlockCacher.put(chainId, new DataCacher<>());
         completeCacher.put(chainId, new DataCacher<>());
@@ -121,8 +120,8 @@ public class CacheHandler {
     }
 
     /**
-     *
      * 标记一个{@link BlockWorker}的下载任务结束
+     *
      * @param chainId
      * @param message
      */

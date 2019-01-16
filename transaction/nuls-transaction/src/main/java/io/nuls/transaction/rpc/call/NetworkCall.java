@@ -27,8 +27,8 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-
 import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.message.TransactionMessage;
 import io.nuls.transaction.message.base.BaseMessage;
@@ -56,36 +56,30 @@ public class NetworkCall {
      * @param isCross 是否跨链
      * @return
      */
-    public static List<Node> getAvailableNodes(int chainId, int isCross, String excludeNodes) {
-        try {
-            Map<String, Object> params = new HashMap<>(6);
-            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            params.put("state", 1);
-            params.put("isCross", isCross);
-            params.put("startPage", 0);
-            params.put("pageSize", 0);
-
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
-            Map responseData = (Map) response.getResponseData();
-            List list = (List) responseData.get("nw_getNodes");
-            List nodes = new ArrayList();
-            for (Object o : list) {
-                Map map = (Map) o;
-                Node node = new Node();
-                node.setId((String) map.get("nodeId"));
-                node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
-                node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
-                //排除指定节点
-                if (StringUtils.isBlank(excludeNodes) || !node.getId().equals(excludeNodes)) {
-                    nodes.add(node);
-                }
+    public static List<Node> getAvailableNodes(int chainId, int isCross, String excludeNodes) throws NulsException{
+        Map<String, Object> params = new HashMap<>(6);
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("chainId", chainId);
+        params.put("state", 1);
+        params.put("isCross", isCross);
+        params.put("startPage", 0);
+        params.put("pageSize", 0);
+        HashMap hashMap = (HashMap)TransactionCall.request(ModuleE.NW.abbr, "nw_getNodes", params);
+        List list = (List) hashMap.get("nw_getNodes");
+        List nodes = new ArrayList();
+        for (Object o : list) {
+            Map map = (Map) o;
+            Node node = new Node();
+            node.setId((String) map.get("nodeId"));
+            node.setHeight(Long.parseLong(map.get("blockHeight").toString()));
+            node.setHash(NulsDigestData.fromDigestHex((String) map.get("blockHash")));
+            //排除指定节点
+            if (StringUtils.isBlank(excludeNodes) || !node.getId().equals(excludeNodes)) {
+                nodes.add(node);
             }
-            return nodes;
-        } catch (Exception e) {
-            Log.error(e);
-            return List.of();
         }
+        return nodes;
+
     }
 
     /**
@@ -95,7 +89,7 @@ public class NetworkCall {
      * @param message
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message) {
+    public static boolean broadcast(int chainId, BaseMessage message) throws NulsException {
         return broadcast(chainId, message, null);
     }
 
@@ -107,7 +101,7 @@ public class NetworkCall {
      * @param excludeNodes 排除的节点
      * @return
      */
-    public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes) {
+    public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -115,11 +109,10 @@ public class NetworkCall {
             params.put("excludeNodes", excludeNodes);
             params.put("messageBody", HexUtil.byteToHex(message.serialize()));
             params.put("command", message.getCommand());
-
             return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
         } catch (Exception e) {
-            Log.error(e);
-            return false;
+            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_broadcast");
+            throw new NulsException(e);
         }
     }
 
@@ -131,7 +124,7 @@ public class NetworkCall {
      * @param nodeId
      * @return
      */
-    public static boolean sendToNode(int chainId, BaseMessage message, String nodeId) {
+    public static boolean sendToNode(int chainId, BaseMessage message, String nodeId) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -142,8 +135,8 @@ public class NetworkCall {
 
             return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
         } catch (Exception e) {
-            Log.error(e);
-            return false;
+            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_sendPeersMsg");
+            throw new NulsException(e);
         }
     }
 
@@ -153,13 +146,13 @@ public class NetworkCall {
      *
      * @return
      */
-    public static boolean registerProtocol() {
+    public static boolean registerProtocol() throws NulsException {
         try {
             Map<String, Object> map = new HashMap<>();
             List<Map<String, String>> cmds = new ArrayList<>();
             map.put("role", ModuleE.TX.abbr);
             //模块启动时向网络模块注册网络协议处理器
-            List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX, NW_NEW_CROSS_HASH, NW_ASK_CROSS_TX, NW_NEW_MN_TX, NW_VERIFY_FC, NW_VERIFY_MN, NW_VERIFYR_ESULT, NW_CROSS_NODE_RS);
+            List<String> list = List.of(NW_NEW_HASH, NW_ASK_TX, NW_RECEIVE_TX, NW_NEW_CROSS_HASH, NW_ASK_CROSS_TX_M_FC, NW_ASK_CROSS_TX_M_M, NW_ASK_CROSS_TX_FC_M, NW_NEW_MN_TX, NW_VERIFY_FC, NW_VERIFY_MN, NW_VERIFYR_ESULT, NW_CROSS_NODE_RS);
             for (String s : list) {
                 Map<String, String> cmd = new HashMap<>();
                 cmd.put("protocolCmd", s);
@@ -169,9 +162,9 @@ public class NetworkCall {
             map.put("protocolCmds", cmds);
             return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
         } catch (Exception e) {
-            Log.error("get nw_protocolRegister fail");
+            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_protocolRegister");
+            throw new NulsException(e);
         }
-        return false;
     }
 
     /**
@@ -182,7 +175,7 @@ public class NetworkCall {
      * @param hash
      * @return
      */
-    public static boolean broadcastTxHash(int chainId, NulsDigestData hash) {
+    public static boolean broadcastTxHash(int chainId, NulsDigestData hash) throws NulsException {
         BroadcastTxMessage message = new BroadcastTxMessage();
         message.setCommand(NW_NEW_HASH);
         message.setRequestHash(hash);
@@ -198,10 +191,24 @@ public class NetworkCall {
      * @param tx
      * @return
      */
-    public static boolean sendTxToNode(int chainId, String nodeId, Transaction tx) {
+    public static boolean sendTxToNode(int chainId, String nodeId, Transaction tx) throws NulsException {
         TransactionMessage message = new TransactionMessage();
         message.setCommand(NW_RECEIVE_TX);
         message.setTx(tx);
         return NetworkCall.sendToNode(chainId, message, nodeId);
     }
+
+    /**
+     * 获取当前网络时间
+     * @return
+     * @throws NulsException
+     */
+    public static long getCurrentTimeMillis() throws NulsException  {
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        HashMap hashMap = (HashMap)TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
+        return (long) hashMap.get("currentTimeMillis");
+    }
+
+
 }

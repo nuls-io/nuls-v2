@@ -62,20 +62,20 @@ public class CrossTxSignResult extends BaseNulsData {
      */
     @Getter
     @Setter
-    private String agentAddress;
+    private String packingAddress;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(nodeId);
         stream.writeNulsData(signature);
-        stream.writeString(agentAddress);
+        stream.writeString(packingAddress);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.nodeId = byteBuffer.readString();
         this.signature = byteBuffer.readNulsData(new P2PHKSignature());
-        this.agentAddress = byteBuffer.readString();
+        this.packingAddress = byteBuffer.readString();
     }
 
     @Override
@@ -83,7 +83,7 @@ public class CrossTxSignResult extends BaseNulsData {
         int size = 0;
         size += SerializeUtils.sizeOfString(nodeId);
         size += SerializeUtils.sizeOfNulsData(signature);
-        size += SerializeUtils.sizeOfString(agentAddress);
+        size += SerializeUtils.sizeOfString(packingAddress);
         return size;
     }
 }

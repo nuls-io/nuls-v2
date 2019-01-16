@@ -29,8 +29,8 @@ import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.task.CrossTxUnverifiedProcessTask;
-import io.nuls.transaction.task.TxUnverifiedProcessTask;
+import io.nuls.transaction.task.VerifyCtxProcessTask;
+import io.nuls.transaction.task.VerifyTxProcessTask;
 
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -45,13 +45,13 @@ public class SchedulerManager {
     public boolean createTransactionScheduler(Chain chain) {
         ScheduledThreadPoolExecutor localTxExecutor = ThreadUtils.createScheduledThreadPool(1,
                 new NulsThreadFactory(TxConstant.MODULE_CODE));
-        localTxExecutor.scheduleAtFixedRate(new TxUnverifiedProcessTask(chain), 5, 1, TimeUnit.SECONDS);
+        localTxExecutor.scheduleAtFixedRate(new VerifyTxProcessTask(chain), 5, 1, TimeUnit.SECONDS);
         chain.setScheduledThreadPoolExecutor(localTxExecutor);
 
         ScheduledThreadPoolExecutor crossTxExecutor = ThreadUtils.createScheduledThreadPool(1,
                 new NulsThreadFactory(TxConstant.MODULE_CODE));
         //固定延迟时间
-        crossTxExecutor.scheduleWithFixedDelay(new CrossTxUnverifiedProcessTask(chain), 5, 10, TimeUnit.SECONDS);
+        crossTxExecutor.scheduleWithFixedDelay(new VerifyCtxProcessTask(chain), 5, 10, TimeUnit.SECONDS);
         chain.setScheduledThreadPoolExecutor(crossTxExecutor);
 
         return true;

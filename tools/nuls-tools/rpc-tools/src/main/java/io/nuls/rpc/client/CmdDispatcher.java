@@ -23,8 +23,6 @@
  *
  */
 package io.nuls.rpc.client;
-
-import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.invoke.KernelInvoke;
@@ -34,7 +32,7 @@ import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
-
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import java.util.Map;
 
 /**
@@ -71,7 +69,7 @@ public class CmdDispatcher {
         是否收到正确的握手确认
         Whether received the correct handshake confirmation?
          */
-        return receiveNegotiateConnectionResponse();
+        return receiveNegotiateConnectionResponse(ClientRuntime.getWsClient(ServerRuntime.kernelUrl));
     }
 
     /**
@@ -115,7 +113,7 @@ public class CmdDispatcher {
         获取返回的数据，放入本地变量
         Get the returned data and place it in the local variable
          */
-        Response response = receiveResponse(message.getMessageId(), Constants.TIMEOUT_TIMEMILLIS);
+        Response response = receiveResponse(wsClient,message.getMessageId(), Constants.TIMEOUT_TIMEMILLIS);
         BaseInvoke baseInvoke = new KernelInvoke();
         baseInvoke.callBack(response);
 
@@ -179,7 +177,7 @@ public class CmdDispatcher {
     public static Response requestAndResponse(String role, String cmd, Map params, long timeOut) throws Exception {
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
         String messageId = sendRequest(role, request);
-        return receiveResponse(messageId, timeOut);
+        return receiveResponse(ClientRuntime.getWsClientByRole(role),messageId, timeOut);
     }
 
     /**
@@ -219,7 +217,7 @@ public class CmdDispatcher {
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_TRUE, subscriptionPeriod, subscriptionEventCounter);
         String messageId = sendRequest(role, request);
         ClientRuntime.INVOKE_MAP.put(messageId, baseInvoke);
-        return receiveAck(messageId) ? messageId : null;
+        return receiveAck(role,messageId) ? messageId : null;
     }
 
     /**
@@ -243,7 +241,7 @@ public class CmdDispatcher {
         if (Constants.BOOLEAN_FALSE.equals(request.getRequestAck())) {
             return messageId;
         } else {
-            return receiveAck(messageId) ? messageId : null;
+            return receiveAck(role,messageId) ? messageId : null;
         }
     }
 
@@ -271,9 +269,9 @@ public class CmdDispatcher {
             throw new Exception("Cannot find url based on role: " + role);
         }
         WsClient wsClient = ClientRuntime.getWsClient(url);
-        Log.debug("SendRequest to "
+        /*Log.debug("SendRequest to "
                 + wsClient.getRemoteSocketAddress().getHostString() + ":" + wsClient.getRemoteSocketAddress().getPort() + "->"
-                + JSONUtils.obj2json(message));
+                + JSONUtils.obj2json(message));*/
         wsClient.send(JSONUtils.obj2json(message));
 
         if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())
@@ -323,25 +321,23 @@ public class CmdDispatcher {
      * 是否握手成功
      * Whether shake hands successfully?
      *
+     * @param client                   被调用模块角色链接/Called module roles
      * @return boolean
-     * @throws InterruptedException 连接失败 / connection failure
+     * @throws InterruptedException    连接失败 / connection failure
      */
-    public static boolean receiveNegotiateConnectionResponse() throws InterruptedException {
-
+    public static boolean receiveNegotiateConnectionResponse(WsClient client) throws Exception {
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
             /*
             获取队列中的第一个对象，如果非空，则说明握手成功
             Get the first item of the queue, If not empty, the handshake is successful.
              */
-            Message message = ClientRuntime.firstMessageInNegotiateResponseQueue();
+            Message message = client.firstMessageInNegotiateResponseQueue();
             if (message != null) {
                 return true;
             }
-
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
-
         /*
         Timeout Error
          */
@@ -353,25 +349,24 @@ public class CmdDispatcher {
      * 根据messageId获取Response
      * Get response by messageId
      *
+     * @param client    被调用模块角色/Called module roles
      * @param messageId 订阅时的messageId / MessageId when do subscription
      * @return Response
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
-    private static Response receiveResponse(String messageId, long timeOut) throws Exception {
-
+    private static Response receiveResponse(WsClient client, String messageId, long timeOut) throws Exception {
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= timeOut) {
             /*
             获取队列中的第一个对象
             Get the first item of the queue
              */
-            Message message = ClientRuntime.firstMessageInResponseManualQueue();
-            if (message == null) {
+            Response response = client.firstMessageInResponseManualQueue();
+            if (response == null) {
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                 continue;
             }
 
-            Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
             if (response.getRequestId().equals(messageId)) {
                 /*
                 messageId匹配，说明就是需要的结果，返回
@@ -384,7 +379,7 @@ public class CmdDispatcher {
             messageId不匹配，放回队列
             Add back to the queue
              */
-            ClientRuntime.RESPONSE_MANUAL_QUEUE.offer(message);
+            client.getResponseManualQueue().offer(response);
 
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
@@ -400,25 +395,26 @@ public class CmdDispatcher {
      * 获取收到Request的确认
      * Get confirmation of receipt(Ack) of Request
      *
+     * @param role      被调用模块角色/Called module roles
      * @param messageId 订阅时的messageId / MessageId when do subscription
      * @return boolean
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
-    private static boolean receiveAck(String messageId) throws Exception {
+    private static boolean receiveAck(String role,String messageId) throws Exception {
 
         long timeMillis = TimeService.currentTimeMillis();
+        WsClient client = ClientRuntime.getWsClientByRole(role);
         while (TimeService.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
             /*
             获取队列中的第一个对象，如果是空，舍弃
             Get the first item of the queue, If it is an empty object, discard
              */
-            Message message = ClientRuntime.firstMessageInAckQueue();
-            if (message == null) {
+            Ack ack = client.firstMessageInAckQueue();
+            if (ack == null) {
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                 continue;
             }
 
-            Ack ack = JSONUtils.map2pojo((Map) message.getMessageData(), Ack.class);
             if (ack.getRequestId().equals(messageId)) {
                 /*
                 messageId匹配，说明就是需要的结果，返回
@@ -431,7 +427,7 @@ public class CmdDispatcher {
             messageId不匹配，放回队列
             Add back to the queue
              */
-            ClientRuntime.ACK_QUEUE.offer(message);
+            client.getAckQueue().offer(ack);
 
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }

@@ -194,17 +194,6 @@ public class AliasCmd extends BaseCmd {
     }
 
     /**
-     * set multi sign alias
-     *
-     * @param params
-     * @return
-     **/
-    @CmdAnnotation(cmd = "ac_setMultiSigAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set multi sign alias")
-    public Response setMultiSigAlias(Map params) {
-        return null;
-    }
-
-    /**
      * validate the transaction
      *
      * @param params

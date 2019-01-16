@@ -25,13 +25,12 @@
  */
 package io.nuls.ledger.service.processor;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
-import io.nuls.ledger.model.AccountState;
+import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.annotation.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * 普通交易处理
  * Created by lanjinsheng on 2018/12/29.
  */
-@Service
+@Component
 public class CommontTransactionProcessor implements TxProcessor {
 
     final Logger logger = LoggerFactory.getLogger(getClass());
@@ -49,27 +48,13 @@ public class CommontTransactionProcessor implements TxProcessor {
 
 
     @Override
-    public void processFromCoinData(CoinFrom coin,String nonce,String hash) {
-        //TODO:账户更新锁未使用
-        String address = AddressTool.getStringAddressByBytes(coin.getAddress());
-        int assetChainId = coin.getAssetsChainId();
-        int assetId = coin.getAssetsId();
-        AccountState accountState  = accountStateService.getAccountState(address,assetChainId,assetId);
+    public void processFromCoinData(CoinFrom coin,String nonce,String hash,  AccountState accountState) {
         accountState.addTotalFromAmount(coin.getAmount());
         accountState.updateConfirmedNonce(nonce);
-        //提交账号记录
-        accountStateService.updateAccountState(address,assetChainId,assetId,accountState);
     }
 
     @Override
-    public void processToCoinData(CoinTo coin,String nonce,String hash) {
-        //TODO:账户更新锁未使用
-        String address = AddressTool.getStringAddressByBytes(coin.getAddress());
-        int assetChainId = coin.getAssetsChainId();
-        int assetId = coin.getAssetsId();
-        AccountState accountState  = accountStateService.getAccountState(address,assetChainId,assetId);
+    public void processToCoinData(CoinTo coin,String nonce,String hash,  AccountState accountState) {
         accountState.addTotalToAmount(coin.getAmount());
-        //提交账号记录
-        accountStateService.updateAccountState(address,assetChainId,assetId,accountState);
     }
 }

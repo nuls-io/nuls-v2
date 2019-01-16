@@ -26,22 +26,18 @@ package io.nuls.transaction.model.bo;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.base.basic.TransactionLogicData;
-import io.nuls.base.data.CoinData;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
-import io.nuls.transaction.constant.TxErrorCode;
 
 import java.io.IOException;
-import java.util.Set;
 
 /**
  * 跨链交易的txData
  * @author: Charlie
  * @date: 2018/11/22
  */
-public class CrossTxData extends TransactionLogicData {
+public class CrossTxData extends BaseNulsData {
 
     /**
      * 发起链链id
@@ -53,15 +49,9 @@ public class CrossTxData extends TransactionLogicData {
      */
     private byte[] originalTxHash;
 
-
-    @Override
-    public Set<byte[]> getAddresses() {
-        return null;
-    }
-
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write(chainId);
+        stream.writeUint16(chainId);
         stream.writeBytesWithLength(originalTxHash);
     }
 

@@ -26,18 +26,16 @@
 package io.nuls.rpc.server;
 
 import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.client.runtime.ClientRuntime;
-import io.nuls.rpc.client.thread.ResponseAutoProcessor;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Request;
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.server.handler.CmdHandler;
 import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.rpc.server.thread.RequestLoopProcessor;
-import io.nuls.rpc.server.thread.RequestSingleProcessor;
+import io.nuls.rpc.server.runtime.WsData;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.WebSocket;
@@ -80,7 +78,6 @@ public class WsServer extends WebSocketServer {
         Setting the Connection URL of Core Module(Manager)
          */
         ServerRuntime.setKernelUrl(kernelUrl);
-
         /*
         与核心模块（Manager）握手
         Shake hands with the core module (Manager)
@@ -98,6 +95,8 @@ public class WsServer extends WebSocketServer {
 
     @Override
     public void onClose(WebSocket webSocket, int code, String reason, boolean remote) {
+        WsData wsData = ServerRuntime.getWsData(webSocket);
+        wsData.setConnected(false);
     }
 
     /**
@@ -109,8 +108,9 @@ public class WsServer extends WebSocketServer {
     @Override
     public void onMessage(WebSocket webSocket, String msg) {
         try {
-
             Message message = JSONUtils.json2pojo(msg, Message.class);
+
+            WsData wsData = ServerRuntime.getWsData(webSocket);
 
             switch (MessageType.valueOf(message.getMessageType())) {
                 case NegotiateConnection:
@@ -124,15 +124,16 @@ public class WsServer extends WebSocketServer {
                     取消订阅，直接响应
                      */
                     Log.debug("UnsubscribeFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
-                    CmdHandler.unsubscribe(webSocket, message);
+                    CmdHandler.unsubscribe(wsData, message);
                     break;
                 case Request:
+                    String messageId = message.getMessageId();
                     /*
                     如果不能提供服务，则直接返回
                     If no service is available, return directly
                      */
                     if (!ServerRuntime.isReady()) {
-                        CmdHandler.serviceNotStarted(webSocket, message.getMessageId());
+                        CmdHandler.serviceNotStarted(webSocket, messageId);
                         break;
                     }
 
@@ -140,28 +141,27 @@ public class WsServer extends WebSocketServer {
                     Request，根据是否需要定时推送放入不同队列，等待处理
                     Request, put in different queues according to the response mode. Wait for processing
                      */
-                    Log.debug("RequestFrom<" + webSocket.getRemoteSocketAddress().getHostString() + ":" + webSocket.getRemoteSocketAddress().getPort() + ">: " + msg);
                     Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
 
                     if (!ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())
                             && !ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
-                        ServerRuntime.REQUEST_SINGLE_QUEUE.offer(new Object[]{webSocket, msg});
+                        wsData.getRequestSingleQueue().offer(new Object[]{messageId, request});
                     } else {
                         if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())) {
-                            ServerRuntime.REQUEST_PERIOD_LOOP_QUEUE.offer(new Object[]{webSocket, msg});
+                            wsData.getRequestPeriodLoopQueue().offer(new Object[]{message, request});
+                            wsData.getIdToPeriodMessageMap().put(messageId,message);
                         }
                         if (ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
-                            ServerRuntime.REQUEST_EVENT_COUNT_LOOP_LIST.add(new Object[]{webSocket, msg});
+                            wsData.subscribeByEvent(message);
                         }
                     }
-
 
                     /*
                     如果需要一个Ack，则发送
                     Send Ack if needed
                      */
                     if (Constants.BOOLEAN_TRUE.equals(request.getRequestAck())) {
-                        CmdHandler.ack(webSocket, message.getMessageId());
+                        CmdHandler.ack(webSocket, messageId);
                     }
                     break;
                 default:
@@ -181,10 +181,6 @@ public class WsServer extends WebSocketServer {
 
     @Override
     public void onStart() {
-        Constants.THREAD_POOL.execute(new ResponseAutoProcessor());
-        Constants.THREAD_POOL.execute(new RequestSingleProcessor());
-        Constants.THREAD_POOL.execute(new RequestLoopProcessor());
-//        Constants.THREAD_POOL.execute(new HeartbeatProcessor());
         Log.debug("Server<" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_IP) + ":" + ServerRuntime.LOCAL.getConnectionInformation().get(Constants.KEY_PORT) + ">-> started.");
     }
 
@@ -218,9 +214,8 @@ public class WsServer extends WebSocketServer {
         connectionInformation.put(Constants.KEY_PORT, wsServer.getPort() + "");
         ServerRuntime.LOCAL.setConnectionInformation(connectionInformation);
         ServerRuntime.LOCAL.setApiMethods(new ArrayList<>());
-        ServerRuntime.LOCAL.setDependencies(new HashMap<>(16));
+        ServerRuntime.LOCAL.setDependencies(new HashMap<>(8));
         ServerRuntime.LOCAL.setModuleRoles(new HashMap<>(1));
-
         return wsServer;
     }
 

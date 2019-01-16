@@ -263,7 +263,7 @@ public class ConnectionManager extends BaseManager{
                 return cacheConnectGroupIpMap.get(key) >= maxInSameIp;
             }
         }else {
-            String tempKey =  peerIp+NetworkConstant.DOWN_LINE+macgicNumber+NetworkConstant.DOWN_LINE+macgicNumber+Node.IN;
+            String tempKey =  peerIp+NetworkConstant.DOWN_LINE+macgicNumber+NetworkConstant.DOWN_LINE+Node.IN;
             //判断是否已经有业务对应的被动连接 存在
             if (null != cacheConnectGroupIpMap.get(key) ||  null != cacheConnectGroupIpMap.get(tempKey)) {
                 return true;

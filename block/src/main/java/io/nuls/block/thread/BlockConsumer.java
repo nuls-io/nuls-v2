@@ -21,18 +21,13 @@
 package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
-import io.nuls.block.cache.CacheHandler;
-import io.nuls.block.manager.ContextManager;
-import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
-import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 消费共享队列中的区块
@@ -68,17 +63,17 @@ public class BlockConsumer implements Callable<Boolean> {
             Log.info("BlockConsumer start work");
             while (startHeight <= netLatestHeight) {
                 block = queue.take();
-                boolean saveBlock = blockService.saveBlock(chainId, block);
+                boolean saveBlock = blockService.saveBlock(chainId, block, true);
                 if (!saveBlock) {
                     Log.error("error occur when save syn blocks");
                     return false;
                 }
                 startHeight++;
             }
-            Log.info("BlockConsumer stop work");
+            Log.info("BlockConsumer stop work normally");
             return true;
         } catch (Exception e) {
-            Log.error(e);
+            Log.error("BlockConsumer stop work abnormally");
             return false;
         }
     }

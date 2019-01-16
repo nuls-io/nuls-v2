@@ -29,10 +29,11 @@ import io.nuls.block.service.ParametersStorageService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 @Service
 public class ParametersStorageServiceImpl implements ParametersStorageService {
@@ -55,7 +56,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             byte[] bytes = RocksDBService.get(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainID));
             po.parse(new NulsByteBuffer(bytes));
             return po;
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
             return null;
         }
@@ -65,7 +66,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
     public boolean delete(int chainID) {
         try {
             return RocksDBService.delete(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainID));
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
             return false;
         }
@@ -82,7 +83,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
                 pos.add(po);
             }
             return pos;
-        }catch (Exception e){
+        } catch (Exception e) {
             Log.error(e);
             return null;
         }

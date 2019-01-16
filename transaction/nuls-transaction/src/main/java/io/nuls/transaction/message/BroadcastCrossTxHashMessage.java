@@ -12,7 +12,7 @@ import lombok.Setter;
 import java.io.IOException;
 
 /**
- * 广播新的跨链交易hash
+ * 广播新的进入跨链流程的跨链交易hash
  *
  * @author: qinyifeng
  * @date: 2018/12/17

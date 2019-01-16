@@ -39,17 +39,17 @@ public class TxRegisterDTO {
     /**
      * Transaction validator cmd name
      */
-    private String validator;
+    private String validateCmd;
 
     /**
      * Transaction commit cmd name
      */
-    private String commit;
+    private String commitCmd;
 
     /**
      * Transaction rollback cmd name
      */
-    private String rollback;
+    private String rollbackCmd;
 
     /**
      * 是否是系统产生的交易（打包节点产生，用于出块奖励结算、红黄牌惩罚），该种类型的交易在验证块大小时不计算在内，该类型交易不需要手续费
@@ -84,28 +84,28 @@ public class TxRegisterDTO {
         this.txType = txType;
     }
 
-    public String getValidator() {
-        return validator;
+    public String getValidateCmd() {
+        return validateCmd;
     }
 
-    public void setValidator(String validator) {
-        this.validator = validator;
+    public void setValidateCmd(String validateCmd) {
+        this.validateCmd = validateCmd;
     }
 
-    public String getCommit() {
-        return commit;
+    public String getCommitCmd() {
+        return commitCmd;
     }
 
-    public void setCommit(String commit) {
-        this.commit = commit;
+    public void setCommitCmd(String commitCmd) {
+        this.commitCmd = commitCmd;
     }
 
-    public String getRollback() {
-        return rollback;
+    public String getRollbackCmd() {
+        return rollbackCmd;
     }
 
-    public void setRollback(String rollback) {
-        this.rollback = rollback;
+    public void setRollbackCmd(String rollbackCmd) {
+        this.rollbackCmd = rollbackCmd;
     }
 
     public boolean isSystemTx() {
@@ -136,9 +136,9 @@ public class TxRegisterDTO {
     public String toString() {
         return "TxRegisterDTO{" +
                 "txType=" + txType +
-                ", validator='" + validator + '\'' +
-                ", commit='" + commit + '\'' +
-                ", rollback='" + rollback + '\'' +
+                ", validateCmd='" + validateCmd + '\'' +
+                ", commitCmd='" + commitCmd + '\'' +
+                ", rollbackCmd='" + rollbackCmd + '\'' +
                 ", systemTx=" + systemTx +
                 ", unlockTx=" + unlockTx +
                 ", verifySignature=" + verifySignature +

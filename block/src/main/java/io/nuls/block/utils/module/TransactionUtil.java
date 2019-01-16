@@ -22,8 +22,6 @@ package io.nuls.block.utils.module;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
-import io.nuls.block.constant.Constant;
-import io.nuls.block.test.BlockGenerator;
 import io.nuls.block.test.TransactionStorageService;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 

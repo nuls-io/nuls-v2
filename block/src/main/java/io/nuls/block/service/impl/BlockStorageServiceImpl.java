@@ -27,18 +27,19 @@ import io.nuls.block.service.BlockStorageService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.util.List;
 
 import static io.nuls.block.constant.Constant.*;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 区块存储服务实现类
+ *
  * @author captain
- * @date 18-11-20 上午11:09
  * @version 1.0
+ * @date 18-11-20 上午11:09
  */
 @Service
 public class BlockStorageServiceImpl implements BlockStorageService {

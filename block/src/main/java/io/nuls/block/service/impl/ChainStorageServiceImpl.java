@@ -28,22 +28,22 @@ import io.nuls.block.service.ChainStorageService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static io.nuls.block.constant.Constant.CACHED_BLOCK;
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 链存储实现类
+ *
  * @author captain
- * @date 18-11-20 上午11:09
  * @version 1.0
+ * @date 18-11-20 上午11:09
  */
 @Service
 public class ChainStorageServiceImpl implements ChainStorageService {
@@ -65,7 +65,6 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     @Override
     public boolean save(int chainId, Block block) {
         NulsDigestData hash = block.getHeader().getHash();
-        Log.debug("save block, hash:{}", hash);
         try {
             byte[] key = hash.serialize();
             return RocksDBService.put(CACHED_BLOCK + chainId, key, block.serialize());
@@ -77,8 +76,11 @@ public class ChainStorageServiceImpl implements ChainStorageService {
     @Override
     public Block query(int chainId, NulsDigestData hash) {
         try {
-            Block block = new Block();
             byte[] bytes = RocksDBService.get(CACHED_BLOCK + chainId, hash.serialize());
+            if (bytes == null) {
+                return null;
+            }
+            Block block = new Block();
             block.parse(new NulsByteBuffer(bytes));
             return block;
         } catch (Exception e) {
@@ -114,7 +116,6 @@ public class ChainStorageServiceImpl implements ChainStorageService {
 
     @Override
     public boolean remove(int chainId, List<NulsDigestData> hashList) {
-        Log.debug("delete block, hash:{}", hashList.toString());
         try {
             List<byte[]> keys = new ArrayList<>();
             for (NulsDigestData hash : hashList) {

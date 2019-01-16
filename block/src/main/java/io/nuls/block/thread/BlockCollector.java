@@ -24,13 +24,7 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
 import io.nuls.block.cache.CacheHandler;
-import io.nuls.block.constant.ConfigConstant;
-import io.nuls.block.manager.ConfigManager;
-import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Node;
-import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
-import lombok.NoArgsConstructor;
 
 import java.util.Comparator;
 import java.util.List;
@@ -38,6 +32,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * 区块收集器,收集下载器下载到的区块,排序后放入共享队列
@@ -79,7 +75,7 @@ public class BlockCollector implements Runnable {
                 if (result.isSuccess()) {
                     Node node = result.getNode();
                     long endHeight = startHeight + size - 1;
-                    Log.info("get {} blocks:{}->{} ,from:{}, success", size, startHeight, endHeight, node.getId());
+                    Log.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
                     node.adjustCredit(true);
                     params.getNodes().offer(node);
                     List<Block> blockList = CacheHandler.getBlockList(chainId, result.getMessageHash());
@@ -108,7 +104,7 @@ public class BlockCollector implements Runnable {
         Node node = result.getNode();
         node.adjustCredit(false);
         params.getNodes().offer(node);
-        Log.info("retry download blocks, fail node:{}, start:{}", node, result.getStartHeight());
+        Log.info("retry download blocks, fail node:" + node + ", start:" + result.getStartHeight());
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         try {
             result.setNode(nodes.take());

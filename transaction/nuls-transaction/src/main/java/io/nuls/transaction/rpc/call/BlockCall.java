@@ -27,6 +27,7 @@ package io.nuls.transaction.rpc.call;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
@@ -41,9 +42,9 @@ import java.util.Map;
  */
 public class BlockCall {
 
-    public static boolean subscriptionNewBlockHeight(Chain chain) {
+    public static boolean subscriptionNewBlockHeight(Chain chain) throws NulsException {
         try {
-            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
             String messageId = CmdDispatcher.requestAndInvoke(ModuleE.BL.abbr, "bestHeight",
@@ -51,10 +52,9 @@ public class BlockCall {
             if(null != messageId){
                 return true;
             }
+            return false;
         } catch (Exception e) {
-            Log.error(e);
+            throw new NulsException(e);
         }
-        return false;
-
     }
 }

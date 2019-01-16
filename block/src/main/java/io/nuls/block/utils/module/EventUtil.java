@@ -22,14 +22,16 @@ package io.nuls.block.utils.module;
 
 /**
  * 与事件总线模块交互的工具类
+ *
  * @author captain
- * @date 18-11-20 上午10:45
  * @version 1.0
+ * @date 18-11-20 上午10:45
  */
 public class EventUtil {
 
     /**
      * 订阅事件
+     *
      * @param moduleId
      * @param topic
      * @return
@@ -42,6 +44,7 @@ public class EventUtil {
 
     /**
      * 发布事件
+     *
      * @param moduleId
      * @param topic
      * @return

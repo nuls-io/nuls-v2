@@ -1,12 +1,12 @@
 package io.nuls.transaction.model.bo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.config.ConfigBean;
-import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.utils.queue.entity.PersistentQueue;
 
 import java.util.HashMap;
@@ -34,18 +34,19 @@ public class Chain {
      * 运行状态
      * Chain running state
      */
-    private RunningStatus accountStatus;
+//    private RunningStatus runningStatus;
 
     /**
      * 日志
      */
+    @JsonIgnore
     private NulsLogger logger;
 
     /**
      * 管理接收的其他链创建的跨链交易(如果有), 暂存验证中的跨链交易.
      * //TODO 初始化时需查数据库
      */
-    private Map<NulsDigestData, CrossChainTx> crossTxVerifyingMap;
+//    private Map<NulsDigestData, CrossTx> crossTxVerifyingMap;
 
     /**
      * 交易注册信息
@@ -65,17 +66,24 @@ public class Chain {
     /**
      * 未进行验证的交易队列
      */
+    @JsonIgnore
     private PersistentQueue unverifiedQueue;
+
+    /**
+     * 当前最新高度
+     */
+    private long bestBlockHeight;
 
     /**
      * 任务线程池
      * Schedule thread pool
      */
+    @JsonIgnore
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
     public Chain() throws Exception {
-        this.accountStatus = RunningStatus.INITING;
-        this.crossTxVerifyingMap = new HashMap<>();
+//        this.runningStatus = RunningStatus.INITING;
+//        this.crossTxVerifyingMap = new HashMap<>();
         this.txRegisterMap = new HashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
         this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
@@ -93,13 +101,13 @@ public class Chain {
         this.config = config;
     }
 
-    public RunningStatus getAccountStatus() {
-        return accountStatus;
-    }
-
-    public void setAccountStatus(RunningStatus accountStatus) {
-        this.accountStatus = accountStatus;
-    }
+//    public RunningStatus getRunningStatus() {
+//        return runningStatus;
+//    }
+//
+//    public void setRunningStatus(RunningStatus runningStatus) {
+//        this.runningStatus = runningStatus;
+//    }
 
     public ScheduledThreadPoolExecutor getScheduledThreadPoolExecutor() {
         return scheduledThreadPoolExecutor;
@@ -117,13 +125,13 @@ public class Chain {
         this.logger = logger;
     }
 
-    public Map<NulsDigestData, CrossChainTx> getCrossTxVerifyingMap() {
-        return crossTxVerifyingMap;
-    }
-
-    public void setCrossTxVerifyingMap(Map<NulsDigestData, CrossChainTx> crossTxVerifyingMap) {
-        this.crossTxVerifyingMap = crossTxVerifyingMap;
-    }
+//    public Map<NulsDigestData, CrossTx> getCrossTxVerifyingMap() {
+//        return crossTxVerifyingMap;
+//    }
+//
+//    public void setCrossTxVerifyingMap(Map<NulsDigestData, CrossTx> crossTxVerifyingMap) {
+//        this.crossTxVerifyingMap = crossTxVerifyingMap;
+//    }
 
     public Map<Integer, TxRegister> getTxRegisterMap() {
         return txRegisterMap;
@@ -155,5 +163,13 @@ public class Chain {
 
     public void setUnverifiedQueue(PersistentQueue unverifiedQueue) {
         this.unverifiedQueue = unverifiedQueue;
+    }
+
+    public long getBestBlockHeight() {
+        return bestBlockHeight;
+    }
+
+    public void setBestBlockHeight(long bestBlockHeight) {
+        this.bestBlockHeight = bestBlockHeight;
     }
 }

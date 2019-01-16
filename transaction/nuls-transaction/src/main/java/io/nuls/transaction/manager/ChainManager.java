@@ -24,6 +24,7 @@
  */
 package io.nuls.transaction.manager;
 
+import ch.qos.logback.classic.Level;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
@@ -60,8 +61,8 @@ public class ChainManager {
     @Autowired
     private SchedulerManager schedulerManager;
 
-    @Autowired
-    private CrossTxVerifyingManager crossTxVerifyingManager;
+   /* @Autowired
+    private VerifyCtxManager verifyCtxManager;*/
 
     @Autowired
     private TransactionManager transactionManager;
@@ -95,6 +96,10 @@ public class ChainManager {
             initTx(chain);
             schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chainId, chain);
+            //todo 订阅Block模块接口
+            //BlockCall.subscriptionNewBlockHeight(chain);
+
+            Log.debug("\nchain = " +JSONUtils.obj2PrettyJson(chain));
         }
     }
 
@@ -197,7 +202,7 @@ public class ChainManager {
          * 管理接收的其他链创建的跨链交易(如果有), 暂存验证中的跨链交易.
          *  TODO 初始化时需查数据库
          */
-        crossTxVerifyingManager.initCrossTxVerifyingMap(chain);
+//        verifyCtxManager.initCrossTxVerifyingMap(chain);
     }
 
     private void initLogger(Chain chain) {
@@ -205,7 +210,7 @@ public class ChainManager {
          * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
          * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
          * */
-        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.MODULE_CODE);
+        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.MODULE_CODE, Level.ALL);
         chain.setLogger(txLogger);
     }
 

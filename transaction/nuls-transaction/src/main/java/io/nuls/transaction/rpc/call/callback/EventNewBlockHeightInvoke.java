@@ -33,7 +33,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.service.ConfirmedTransactionService;
+import io.nuls.transaction.service.ConfirmedTxService;
 
 import java.util.HashMap;
 
@@ -45,7 +45,7 @@ import java.util.HashMap;
 public class EventNewBlockHeightInvoke extends BaseInvoke {
 
     @Autowired
-    private ConfirmedTransactionService confirmedTransactionService;
+    private ConfirmedTxService confirmedTxService;
 
     private Chain chain;
 
@@ -65,7 +65,8 @@ public class EventNewBlockHeightInvoke extends BaseInvoke {
             if (!response.isSuccess()) {
                 HashMap result = ((HashMap) response.getResponseData());
                 long blockHeight = (long) result.get("height");
-                confirmedTransactionService.processEffectCrossTx(chain, blockHeight);
+                chain.setBestBlockHeight(blockHeight);
+                confirmedTxService.processEffectCrossTx(chain, blockHeight);
             }
         } catch (NulsException e) {
             chain.getLogger().error(e);

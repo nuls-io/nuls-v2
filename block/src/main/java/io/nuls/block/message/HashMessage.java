@@ -32,9 +32,10 @@ import java.io.IOException;
 
 /**
  * 发送一个hash
+ *
  * @author captain
- * @date 18-11-9 下午2:37
  * @version 1.0
+ * @date 18-11-9 下午2:37
  */
 @Data
 public class HashMessage extends BaseMessage {

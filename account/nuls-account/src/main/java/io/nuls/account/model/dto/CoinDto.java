@@ -50,7 +50,6 @@ public class CoinDto implements Cloneable {
     /**
      * address对应的密码，用于签名
      */
-    @JsonIgnore
     private String password;
 
     public CoinDto() {

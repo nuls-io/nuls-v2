@@ -59,20 +59,29 @@ public class ValidatorCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "validateCoinData",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "isBatchValidate", parameterType = "boolean")
     public Response validateCoinData(Map params) {
         //TODO.. 验证参数个数和格式
+        Integer chainId = (Integer) params.get("chainId");
         String txHex = (String) params.get("txHex");
+        boolean isBatchValidate = Boolean.valueOf(params.get("isBatchValidate").toString());
         Transaction tx = new Transaction();
         try {
             tx.parse(HexUtil.hexToByte(txHex),0);
-            ValidateResult validateResult = coinDataValidator.validateCoinData(tx);
-            return success(validateResult);
+            if(isBatchValidate){
+                ValidateResult validateResult = coinDataValidator.bathValidatePerTx(chainId, tx);
+                return success(validateResult);
+            }else {
+                ValidateResult validateResult = coinDataValidator.validateCoinData(chainId, tx);
+                return success(validateResult);
+            }
+
         } catch (NulsException e) {
             e.printStackTrace();
             return failed(e.getErrorCode());
         }
-//        Boolean result = coinDataValidator.validate(address, chainId, assetId, amount, nonce);
 
     }
     /**
@@ -84,26 +93,12 @@ public class ValidatorCmd extends BaseCmd {
     @CmdAnnotation(cmd = "bathValidateBegin",
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
     public Response bathValidateBegin(Map params) {
-        coinDataValidator.beginBatchPerTxValidate();
+        Integer chainId = (Integer) params.get("chainId");
+        coinDataValidator.beginBatchPerTxValidate(chainId);
         Map<String,Object> rtData = new HashMap<>();
-        rtData.put("result",1);
+        rtData.put("value",1);
         return success(rtData);
     }
-
-
-    /**
-     * bathValidatePerTx
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "bathValidatePerTx",
-            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
-            description = "")
-    public Response bathValidatePerTx(Map params) {
-
-        return success();
-    }
-
 }

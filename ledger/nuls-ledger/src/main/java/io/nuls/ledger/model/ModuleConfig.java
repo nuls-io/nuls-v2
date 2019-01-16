@@ -26,7 +26,6 @@
 package io.nuls.ledger.model;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -34,8 +33,16 @@ import lombok.ToString;
  * Created by wangkun23 on 2018/11/19.
  */
 @ToString
-@NoArgsConstructor
 public class ModuleConfig {
+
+    private static ModuleConfig instance = new ModuleConfig();
+
+    public static ModuleConfig getInstance() {
+        return instance;
+    }
+
+    private ModuleConfig() {
+    }
 
     @Setter
     @Getter
@@ -62,4 +69,7 @@ public class ModuleConfig {
     @Setter
     @Getter
     private Integer kernelPort;
+    @Setter
+    @Getter
+    private String encoding;
 }

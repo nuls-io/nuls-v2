@@ -68,6 +68,7 @@ public interface TxErrorCode {
     ErrorCode COINDATA_VERIFY_FAIL = ErrorCode.init("10057");
     ErrorCode COINFROM_HAS_DUPLICATE_COIN = ErrorCode.init("10058");
     ErrorCode COINTO_HAS_DUPLICATE_COIN = ErrorCode.init("10059");
+    ErrorCode CALLING_REMOTE_INTERFACE_FAILED = ErrorCode.init("10060");
 
 
 
@@ -98,4 +99,5 @@ public interface TxErrorCode {
     ErrorCode COINDATA_NOT_FOUND = ErrorCode.init("31016");
     ErrorCode TX_TYPE_ERROR = ErrorCode.init("31017");
     ErrorCode TX_NOT_EFFECTIVE = ErrorCode.init("31018");
+    ErrorCode TX_NOT_EFFECTIVE_HEIGHT = ErrorCode.init("31019");
 }

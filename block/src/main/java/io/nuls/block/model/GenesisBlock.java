@@ -30,7 +30,6 @@ import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.io.IoUtils;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.apache.http.util.Asserts;
 
@@ -38,6 +37,8 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
  * todo 链工厂的链创世块
@@ -66,6 +67,10 @@ public final class GenesisBlock extends Block {
 
     private transient int status = 0;
 
+    private GenesisBlock() {
+
+    }
+
     public static GenesisBlock getInstance() throws Exception {
         if (INSTANCE.status == 0) {
             String json = null;
@@ -77,10 +82,6 @@ public final class GenesisBlock extends Block {
             INSTANCE.init(json);
         }
         return INSTANCE;
-    }
-
-    private GenesisBlock() {
-
     }
 
     private void init(String json) throws Exception {

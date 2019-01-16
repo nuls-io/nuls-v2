@@ -40,9 +40,10 @@ import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
 
 /**
  * 配置加载器
+ *
  * @author captain
- * @date 18-11-8 下午1:37
  * @version 1.0
+ * @date 18-11-8 下午1:37
  */
 public class ConfigLoader {
 

@@ -25,13 +25,11 @@ import io.nuls.base.data.*;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.BlockForwardEnum;
-import io.nuls.block.constant.CommandConstant;
-import io.nuls.block.constant.ConfigConstant;
-import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashListMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.model.CachedSmallBlock;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.BlockUtil;
@@ -45,15 +43,16 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
-import io.nuls.tools.thread.TimeService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.block.constant.CommandConstant.GET_TXGROUP_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
+import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
+import static io.nuls.block.utils.LoggerUtil.messageLog;
 
 /**
  * 处理收到的{@link SmallBlockMessage},用于区块的广播与转发
@@ -69,8 +68,12 @@ public class SmallBlockHandler extends BaseCmd {
     private BlockService blockService;
 
     @CmdAnnotation(cmd = SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
-    public Object process(Map map) {
+    public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        ChainContext context = ContextManager.getContext(chainId);
+        if (!context.getStatus().equals(RUNNING)) {
+            return success();
+        }
         String nodeId = map.get("nodeId").toString();
         SmallBlockMessage message = new SmallBlockMessage();
 
@@ -78,7 +81,7 @@ public class SmallBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
-            Log.warn(e.getMessage());
+            messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
@@ -88,21 +91,21 @@ public class SmallBlockHandler extends BaseCmd {
 
         SmallBlock smallBlock = message.getSmallBlock();
         if (null == smallBlock) {
-            Log.warn("recieved a null smallBlock!");
+            messageLog.warn("recieved a null smallBlock!");
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         BlockHeader header = smallBlock.getHeader();
         NulsDigestData blockHash = header.getHash();
         //阻止恶意节点提前出块,拒绝接收未来一定时间外的区块
-        ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
+        ChainParameters parameters = context.getParameters();
         int validBlockInterval = parameters.getValidBlockInterval();
         if (header.getTime() > (NetworkUtil.currentTime() + validBlockInterval)) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        Log.info("recieve smallBlock from({}), chainId:{}, height:{}, hash:{}", chainId, nodeId, header.getHeight(), header.getHash());
+        messageLog.info("recieve smallBlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + header.getHeight() + ", hash:" + header.getHash());
         NetworkUtil.setHashAndHeight(chainId, blockHash, header.getHeight(), nodeId);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
@@ -115,15 +118,14 @@ public class SmallBlockHandler extends BaseCmd {
             HashListMessage request = new HashListMessage();
             request.setBlockHash(blockHash);
             request.setTxHashList(block.getMissingTransactions());
-            request.setCommand(CommandConstant.GET_TXGROUP_MESSAGE);
-            NetworkUtil.sendToNode(chainId, request, nodeId);
+            NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
             return success();
         }
 
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
             if (!BlockUtil.headerVerify(chainId, header)) {
-                Log.debug("recieve error SmallBlockMessage from(" + nodeId + "), header height:" + header.getHeight() + ", preHash:" + header.getPreHash());
+                messageLog.info("recieve error SmallBlockMessage from " + nodeId);
                 return success();
             }
             //共识节点打包的交易包括两种交易,一种是在网络上已经广播的普通交易,一种是共识节点生成的特殊交易(如共识奖励、红黄牌),后面一种交易其他节点的未确认交易池中不可能有,所以都放在SubTxList中
@@ -149,12 +151,11 @@ public class SmallBlockHandler extends BaseCmd {
             }
             //获取没有的交易
             if (!needHashList.isEmpty()) {
-                Log.debug("block height : " + header.getHeight() + ", tx count : " + header.getTxCount() + " , get group tx of " + needHashList.size());
+                messageLog.info("block height : " + header.getHeight() + ", tx count : " + header.getTxCount() + " , get group tx of " + needHashList.size());
                 HashListMessage request = new HashListMessage();
                 request.setBlockHash(blockHash);
                 request.setTxHashList(needHashList);
-                request.setCommand(CommandConstant.GET_TXGROUP_MESSAGE);
-                NetworkUtil.sendToNode(chainId, request, nodeId);
+                NetworkUtil.sendToNode(chainId, request, nodeId, GET_TXGROUP_MESSAGE);
                 //这里的smallBlock的subTxList中包含一些非系统交易,用于跟TxGroup组合成完整区块
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(needHashList, smallBlock);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
@@ -163,14 +164,12 @@ public class SmallBlockHandler extends BaseCmd {
             }
 
             Block block = BlockUtil.assemblyBlock(header, txMap, smallBlock.getTxHashList());
-            if (blockService.saveBlock(chainId, block, 1)) {
+            if (blockService.saveBlock(chainId, block, 1, true)) {
                 SmallBlock newSmallBlock = BlockUtil.getSmallBlock(chainId, block);
                 CachedSmallBlock cachedSmallBlock = new CachedSmallBlock(null, newSmallBlock);
                 SmallBlockCacher.cacheSmallBlock(chainId, cachedSmallBlock);
                 SmallBlockCacher.setStatus(chainId, blockHash, BlockForwardEnum.COMPLETE);
                 blockService.forwardBlock(chainId, blockHash, nodeId);
-            } else {
-                Log.error("save fail! chainId:{}, height:{}, hash:{}", chainId, header.getHeight(), blockHash);
             }
         }
         return success();
