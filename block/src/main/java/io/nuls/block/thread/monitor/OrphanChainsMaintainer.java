@@ -128,10 +128,13 @@ public class OrphanChainsMaintainer implements Runnable {
      * @param orphanChainMaxAge
      */
     private void maintainOrphanChain(int chainId, Chain orphanChain, List<Node> availableNodes, int orphanChainMaxAge) {
-        if (orphanChain.getParent() != null) {
+        //有父链的孤儿链，是从某孤儿链分叉得到的，不需要进行链首维护
+        //链首高度为1时，不需要进行链首维护
+        if (orphanChain.getParent() != null || orphanChain.getStartHeight() <= 1) {
             return;
         }
         AtomicInteger age = orphanChain.getAge();
+        //孤儿链年龄超过限制，不需要进行链首维护
         if (age.get() > orphanChainMaxAge) {
             return;
         }
@@ -148,6 +151,7 @@ public class OrphanChainsMaintainer implements Runnable {
                 Log.debug("maintain success! after orphanChain-" + orphanChain);
                 return;
             }
+            //请求区块失败，孤儿链年龄加一
             age.incrementAndGet();
         }
     }

@@ -72,7 +72,7 @@ public class CoinDataManager {
         CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
-        //todo 账本模块获取该账户锁定金额
+        //todo 账本模块获取该账户锁定金额和可用余额 可用余额是否够支付手续费，锁定金额是否大于等于锁定金额
         BigInteger available = new BigInteger("10000");
         //手续费
         CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,(byte)-1);

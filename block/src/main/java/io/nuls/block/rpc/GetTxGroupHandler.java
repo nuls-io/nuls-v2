@@ -67,9 +67,6 @@ public class GetTxGroupHandler extends BaseCmd {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        if (message == null || nodeId == null) {
-            return failed(BlockErrorCode.PARAMETER_ERROR);
-        }
         List<NulsDigestData> hashList = message.getTxHashList();
         messageLog.info("recieve HashListMessage from node-" + nodeId + ", chainId:" + chainId + ", txcount:" + hashList.size());
         TxGroupMessage request = new TxGroupMessage();

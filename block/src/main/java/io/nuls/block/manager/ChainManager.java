@@ -188,7 +188,7 @@ public class ChainManager {
         }
         Log.info("*switchChain0 target=" +target);
         //2.往主链上添加区块
-        LinkedList<NulsDigestData> hashList = forkChain.getHashList();
+        LinkedList<NulsDigestData> hashList = (LinkedList<NulsDigestData>) forkChain.getHashList().clone();
         int count = 0;
         while (target > count) {
             NulsDigestData hash = hashList.pop();
@@ -201,7 +201,7 @@ public class ChainManager {
                 return false;
             }
         }
-
+        Log.info("*switchChain0 add block to master chain success");
         //3.上一步结束后,如果forkChain中还有区块,组成新的分叉链,连接到主链上
         if (hashList.size() > 0) {
             Chain newForkChain = new Chain();

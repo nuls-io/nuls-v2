@@ -30,6 +30,21 @@
                     <target>11</target>
                 </configuration>
             </plugin>
+
+
+            <!-- source attach plugin 打包源码,开发测试环境勿删 Charlie-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
 
     </build>

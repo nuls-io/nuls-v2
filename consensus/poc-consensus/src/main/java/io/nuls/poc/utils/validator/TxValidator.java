@@ -20,6 +20,7 @@ import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
+import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
@@ -29,7 +30,6 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -319,7 +319,7 @@ public class TxValidator {
             throw new NulsException(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         Agent agent = agentManager.poToAgent(agentPo);
-        CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeService.currentTimeMillis() + chain.getConfig().getStopAgentLockTime());
+        CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, CallMethodUtils.currentTime() + chain.getConfig().getStopAgentLockTime());
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
         localCoinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
         if(!Arrays.equals(coinData.serialize(),localCoinData.serialize())){

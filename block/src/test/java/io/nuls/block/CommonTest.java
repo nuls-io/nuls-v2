@@ -21,6 +21,8 @@
 package io.nuls.block;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.block.constant.ChainTypeEnum;
+import io.nuls.block.model.Chain;
 import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
@@ -30,13 +32,11 @@ import io.nuls.rpc.model.message.Request;
 import io.nuls.tools.cache.LimitHashMap;
 import io.nuls.tools.data.CollectionUtils;
 import io.nuls.tools.parse.JSONUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.net.URISyntaxException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
@@ -162,5 +162,28 @@ public class CommonTest {
         AtomicInteger min = new AtomicInteger(Integer.MIN_VALUE);
         System.out.println(min);
         System.out.println(min.decrementAndGet());
+    }
+
+    @Test
+    public void testLinkedListClone() {
+        LinkedList<String> list = new LinkedList<>();
+        list.add("a");
+        list.add("b");
+        list.add("c");
+        list.add("d");
+        LinkedList<String> clone = (LinkedList<String>) list.clone();
+        clone.pop();
+        clone.pop();
+        clone.pop();
+        Assert.assertEquals(1, clone.size());
+        Assert.assertEquals(4, list.size());
+    }
+
+    @Test
+    public void test4() {
+        TreeSet<Chain> chains = new TreeSet<>(Chain.COMPARATOR);
+        chains.forEach(e -> e.setType(ChainTypeEnum.FORK));
+        SortedSet<Chain> ss = Collections.emptySortedSet();
+        ss.forEach(e -> e.setType(ChainTypeEnum.FORK));
     }
 }

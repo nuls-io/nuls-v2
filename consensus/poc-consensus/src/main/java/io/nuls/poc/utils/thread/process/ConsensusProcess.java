@@ -124,11 +124,11 @@ public class ConsensusProcess {
         1. Is the node packing?
         2. Is the current time between the start and end of the node packing?
         */
-        if(!hasPacking && member.getPackStartTime() < TimeService.currentTimeMillis() && member.getPackEndTime() > TimeService.currentTimeMillis()){
+        if(!hasPacking && member.getPackStartTime() < CallMethodUtils.currentTime() && member.getPackEndTime() > CallMethodUtils.currentTime()){
             hasPacking = true;
             try {
                 if (consensusLogger.getLogger().isDebugEnabled()) {
-                    consensusLogger.debug("当前网络时间： " + DateUtils.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
+                    consensusLogger.debug("当前网络时间： " + DateUtils.convertDate(new Date(CallMethodUtils.currentTime())) + " , 我的打包开始时间: " +
                             DateUtils.convertDate(new Date(member.getPackStartTime())) + " , 我的打包结束时间: " +
                             DateUtils.convertDate(new Date(member.getPackEndTime())) + " , 当前轮开始时间: " +
                             DateUtils.convertDate(new Date(round.getStartTime())) + " , 当前轮结束开始时间: " +
@@ -138,7 +138,7 @@ public class ConsensusProcess {
             } catch (Exception e) {
                 consensusLogger.error(e);
             }
-            while (member.getPackEndTime() > TimeService.currentTimeMillis()) {
+            while (member.getPackEndTime() > CallMethodUtils.currentTime()) {
                 try {
                     Thread.sleep(500L);
                 } catch (InterruptedException e) {
@@ -205,7 +205,7 @@ public class ConsensusProcess {
                     break;
                 }
                 Thread.sleep(100L);
-                if (TimeService.currentTimeMillis() >= endTime) {
+                if (CallMethodUtils.currentTime() >= endTime) {
                     break;
                 }
             }
