@@ -32,9 +32,12 @@ import org.junit.Test;
  * @date: 2019-01-15
  */
 public class KernelTest {
-
+    /**
+     * 单独启动核心
+     * @throws Exception
+     */
     @Test
-    public void kernelStartTest() throws Exception{
+    public void kernelStartTest() throws Exception {
         NoUse.mockKernel();
     }
 }
