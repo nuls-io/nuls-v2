@@ -153,6 +153,7 @@ public class MessageRpc extends BaseCmd{
     @Parameter(parameterName = "command", parameterType = "string")
     public Response sendPeersMsg(Map params) {
         try {
+            Log.debug("==================sendPeersMsg begin");
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String nodes = String.valueOf(params.get("nodes"));
             byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
@@ -179,6 +180,7 @@ public class MessageRpc extends BaseCmd{
             e.printStackTrace();
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
+        Log.debug("==================sendPeersMsg end");
         return success();
     }
 }

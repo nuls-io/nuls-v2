@@ -342,15 +342,19 @@ public class MessageManager extends BaseManager{
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
     public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
+        Log.debug("==================broadcastToNodes begin");
         for(Node node:nodes) {
+            Log.debug("==================node {}",node.getId());
             if (node.getChannel() == null || !node.getChannel().isActive()) {
                 Log.info(node.getId() + "is inActive");
             }
             try {
                 ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
+                Log.debug("==================writeAndFlush end");
                 if (!asyn) {
                     future.await();
                     boolean success = future.isSuccess();
+                    Log.debug("==================success?{}",success);
                     if (!success) {
                         Log.info(node.getId() + "is fail");
                     }
