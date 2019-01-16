@@ -27,6 +27,7 @@ import io.nuls.tools.parse.SerializeUtils;
 import lombok.Data;
 
 import java.io.IOException;
+import java.util.StringJoiner;
 
 import static io.nuls.block.utils.LoggerUtil.Log;
 
@@ -41,33 +42,45 @@ import static io.nuls.block.utils.LoggerUtil.Log;
 public class TestMessage extends BaseMessage {
 
     private int index;
+    private String type;
 
     public TestMessage() {
     }
 
-    public TestMessage(int index) {
+    public TestMessage(int index, String type) {
         this.index = index;
+        this.type = type;
     }
 
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfString(type);
         return size;
     }
 
     @Override
     public void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint32(index);
+        stream.writeString(type);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) {
         try {
             this.index = (int) byteBuffer.readUint32();
+            this.type = byteBuffer.readString();
         } catch (Exception e) {
             Log.error(e);
         }
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", TestMessage.class.getSimpleName() + "[", "]")
+                .add("index=" + index)
+                .add("type='" + type + "'")
+                .toString();
+    }
 }

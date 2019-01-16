@@ -25,6 +25,7 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Component;
@@ -59,11 +60,12 @@ public class TestMessageHandler extends BaseCmd {
         }
 
         int index = message.getIndex();
-        messageLog.info("recieve TestMessage from node-" + nodeId + ", chainId:" + chainId + ", index:" + index);
+        messageLog.info("recieve message(" + message.toString() + ") from " + nodeId);
         try {
             Thread.sleep(1000L);
-            boolean b = NetworkUtil.sendToNode(chainId, new TestMessage(index + 1), nodeId, "test");
-            sendLog.info("send index:" + message.getIndex() + " to node-" + nodeId + ", chainId:" + chainId + ", success:" + b);
+            TestMessage testMessage = new TestMessage(index + 1, HostInfo.getLocalIP());
+            boolean b = NetworkUtil.sendToNode(chainId, testMessage, nodeId, "test");
+            sendLog.info("send message(" + testMessage.toString() + ") to " + nodeId + ", " + b);
         } catch (Exception e) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
