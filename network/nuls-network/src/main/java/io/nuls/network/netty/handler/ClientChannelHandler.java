@@ -146,26 +146,24 @@ public class ClientChannelHandler extends BaseChannelHandler {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        SocketChannel socketChannel = (SocketChannel) ctx.channel();
+        String remoteIP = socketChannel.remoteAddress().getHostString();
+        int port = socketChannel.remoteAddress().getPort();
+        ByteBuf buf = (ByteBuf) msg;
         try {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
             if (node != null) {
-                ByteBuf buf = (ByteBuf) msg;
-                try {
-                    MessageManager.getInstance().receiveMessage(buf,node.getId(),false);
-                } finally {
-                    buf.release();
-                }
+                MessageManager.getInstance().receiveMessage(buf,node,false);
             } else {
-                SocketChannel socketChannel = (SocketChannel) ctx.channel();
-                String remoteIP = socketChannel.remoteAddress().getHostString();
-                int port = socketChannel.remoteAddress().getPort();
                 Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
                 ctx.channel().close();
             }
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
+        }finally {
+            buf.release();
         }
     }
 

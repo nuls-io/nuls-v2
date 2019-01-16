@@ -173,7 +173,7 @@ public class MessageManager extends BaseManager{
         long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
         return checksum == pChecksum;
     }
-    public void receiveMessage(ByteBuf buffer,String nodeKey,boolean isServer) throws NulsException {
+    public void receiveMessage(ByteBuf buffer,Node node,boolean isServer) throws NulsException {
         //统一接收消息处理
         try {
             byte[] bytes = new byte[buffer.readableBytes()];
@@ -194,24 +194,27 @@ public class MessageManager extends BaseManager{
                 Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
                 BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());
                 if(null != message) {
+                    Log.debug("==============================Network module self message");
                     BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(message);
                     message = byteBuffer.readNulsData(message);
-                    NetworkEventResult result = handler.recieve(message, nodeKey, isServer);
+                    NetworkEventResult result = handler.recieve(message, node.getId(), isServer);
                     if(!result.isSuccess()){
                         Log.error("receiveMessage fail:"+result.getErrorCode().getMsg());
                     }
                 }else{
                     //外部消息，转外部接口
+                    Log.debug("==============================other module message");
                     long magicNum=header.getMagicNumber();
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
                     Map<String,Object> paramMap = new HashMap<>();
                     paramMap.put("chainId",chainId);
-                    paramMap.put("nodeId",nodeKey);
+                    paramMap.put("nodeId",node.getId());
                     paramMap.put("messageBody",HexUtil.byteToHex(payLoadBody));
                     Collection<ProtocolRoleHandler> protocolRoleHandlers =  getProtocolRoleHandlerMap(header.getCommandStr());
                     if(null == protocolRoleHandlers){
                         Log.error("unknown mssages. cmd={},may be handle had not be registered to network.",header.getCommandStr());
                     }else{
+                        Log.debug("==============================other module message protocolRoleHandlers-size:{}",protocolRoleHandlers.size());
                         for(ProtocolRoleHandler protocolRoleHandler:protocolRoleHandlers) {
                             Log.debug("request：{}=={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
                            Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
@@ -342,15 +345,19 @@ public class MessageManager extends BaseManager{
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
     public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
+        Log.debug("==================broadcastToNodes begin");
         for(Node node:nodes) {
+            Log.debug("==================node {}",node.getId());
             if (node.getChannel() == null || !node.getChannel().isActive()) {
                 Log.info(node.getId() + "is inActive");
             }
             try {
                 ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
+                Log.debug("==================writeAndFlush end");
                 if (!asyn) {
                     future.await();
                     boolean success = future.isSuccess();
+                    Log.debug("==================success?{}",success);
                     if (!success) {
                         Log.info(node.getId() + "is fail");
                     }
