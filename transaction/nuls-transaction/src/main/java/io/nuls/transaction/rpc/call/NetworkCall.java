@@ -29,6 +29,7 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.message.BroadcastTxMessage;
 import io.nuls.transaction.message.TransactionMessage;
 import io.nuls.transaction.message.base.BaseMessage;
@@ -57,7 +58,7 @@ public class NetworkCall {
      * @return
      */
     public static List<Node> getAvailableNodes(int chainId, int isCross, String excludeNodes) throws NulsException{
-        Map<String, Object> params = new HashMap<>(6);
+        Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
         params.put("state", 1);
@@ -103,7 +104,7 @@ public class NetworkCall {
      */
     public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes) throws NulsException {
         try {
-            Map<String, Object> params = new HashMap<>(5);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("excludeNodes", excludeNodes);
@@ -126,7 +127,7 @@ public class NetworkCall {
      */
     public static boolean sendToNode(int chainId, BaseMessage message, String nodeId) throws NulsException {
         try {
-            Map<String, Object> params = new HashMap<>(5);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("nodes", nodeId);
@@ -148,7 +149,7 @@ public class NetworkCall {
      */
     public static boolean registerProtocol() throws NulsException {
         try {
-            Map<String, Object> map = new HashMap<>();
+            Map<String, Object> map = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             List<Map<String, String>> cmds = new ArrayList<>();
             map.put("role", ModuleE.TX.abbr);
             //模块启动时向网络模块注册网络协议处理器
@@ -204,7 +205,7 @@ public class NetworkCall {
      * @throws NulsException
      */
     public static long getCurrentTimeMillis() throws NulsException  {
-        Map<String, Object> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         params.put(Constants.VERSION_KEY_STR, "1.0");
         HashMap hashMap = (HashMap)TransactionCall.request(ModuleE.NW.abbr, "nw_currentTimeMillis", params);
         return (long) hashMap.get("currentTimeMillis");

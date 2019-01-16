@@ -139,7 +139,7 @@ public class TransactionManager {
      */
     public boolean verify(Chain chain, Transaction tx) {
         try {
-            baseTxValidate(chain, tx);
+            baseValidateTx(chain, tx);
             //如果是跨链交易直接调模块内部验证器接口，不走cmd命令
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
                 txService.crossTransactionValidator(chain, tx);
@@ -172,7 +172,7 @@ public class TransactionManager {
      * @param tx
      * @return Result
      */
-    private boolean baseTxValidate(Chain chain, Transaction tx) throws NulsException {
+    private boolean baseValidateTx(Chain chain, Transaction tx) throws NulsException {
 
         if (null == tx) {
             throw new NulsException(TxErrorCode.TX_NOT_EXIST);

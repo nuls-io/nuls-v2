@@ -13,6 +13,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxCmd;
 import io.nuls.transaction.constant.TxConstant;
@@ -23,6 +24,7 @@ import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.VerifyTxResult;
+import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
 import io.nuls.transaction.model.po.TransactionPO;
@@ -358,6 +360,7 @@ public class TransactionCmd extends BaseCmd {
      * @return
      */
     @CmdAnnotation(cmd = TxCmd.TX_VERIFY, version = 1.0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
     public Response batchVerify(Map params){
         boolean result = false;
         VerifyTxResult verifyTxResult = null;
@@ -383,5 +386,33 @@ public class TransactionCmd extends BaseCmd {
         return success(resultMap);
     }
 
+    /**
+     *  测试创建交易接口(该接口应该为外部客户端接口,本不应该写在此处)
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_CREATE_CROSS_TX, version = 1.0, description = "")
+    public Response createCtx(Map params){
+
+        try {
+            // check parameters
+            if (params == null) {
+                throw new NulsException(TxErrorCode.NULL_PARAMETER);
+            }
+            // parse params
+            JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            CrossTxTransferDTO crossTxTransferDTO = JSONUtils.json2pojo(JSONUtils.obj2json(params), CrossTxTransferDTO.class);
+            int chainId = crossTxTransferDTO.getChainId();
+            String hash = txService.createCrossTransaction(chainManager.getChain(chainId),
+                    crossTxTransferDTO.getListFrom(), crossTxTransferDTO.getListTo(), crossTxTransferDTO.getRemark());
+            Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            resultMap.put("value", hash);
+            return success(resultMap);
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
 
 }
