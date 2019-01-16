@@ -60,6 +60,7 @@ public class TestMessageHandler extends BaseCmd {
         int index = message.getIndex();
         messageLog.info("recieve TestMessage from node-" + nodeId + ", chainId:" + chainId + ", index:" + index);
         try {
+            Thread.sleep(1000L);
             NetworkUtil.sendToNode(chainId, new TestMessage(index+1), nodeId, "test");
         } catch (Exception e) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
