@@ -137,7 +137,7 @@ public class Bootstrap {
     }
     /**
      * 管理器初始化
-     *Manager initialization
+     * Manager initialization
      */
     private  void managerInit(){
         RocksDBService.init(NetworkParam.getInstance().getDbPath());

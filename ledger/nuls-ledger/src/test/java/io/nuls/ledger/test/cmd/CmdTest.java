@@ -32,6 +32,7 @@ import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.BigIntegerUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -73,6 +74,9 @@ public class CmdTest {
         params.put("assetId", 222);
         Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
         logger.info("response {}", response);
+        BigInteger bigInteger= BigIntegerUtils.stringToBigInteger(((Map)((Map)(response.getResponseData())).get("getBalance")).get("total").toString());
+        System.out.print(bigInteger.toString());
+
     }
     @Test
     public void getBalanceNonce() throws Exception {

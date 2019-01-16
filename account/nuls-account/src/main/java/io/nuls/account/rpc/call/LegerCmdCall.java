@@ -6,6 +6,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -39,8 +40,9 @@ public class LegerCmdCall {
                 throw new NulsException(AccountErrorCode.FAILED);
             }
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("getBalance");
-            return (BigInteger) result.get("available");
+            return BigIntegerUtils.stringToBigInteger(((Integer) result.get("available")).toString());
         } catch (Exception e) {
+            Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.LG.abbr, "getBalance");
             e.printStackTrace();
         }
         return new BigInteger("0");

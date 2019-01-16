@@ -119,7 +119,7 @@ public class TransactionCmdCall {
             params.put(Constants.VERSION_KEY_STR, RpcConstant.TX_NEW_VERSION);
             params.put(RpcConstant.TX_CHAIN_ID, chainId);
             params.put(RpcConstant.TX_DATA_HEX, txHex);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, RpcConstant.TX_NEW_CMD, params);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_NEW_CMD, params);
         } catch (Exception e) {
             e.printStackTrace();
         }
