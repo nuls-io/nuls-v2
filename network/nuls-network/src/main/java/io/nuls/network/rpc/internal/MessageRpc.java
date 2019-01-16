@@ -29,6 +29,7 @@ import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
+import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.ProtocolRoleHandler;
@@ -111,6 +112,7 @@ public class MessageRpc extends BaseCmd{
     @Parameter(parameterName = "command", parameterType = "string")
     public Response broadcast(Map params) {
         try {
+            Log.debug("==================broadcast begin");
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String excludeNodes = String.valueOf(params.get("excludeNodes"));
             byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
@@ -133,11 +135,13 @@ public class MessageRpc extends BaseCmd{
                     nodes.add(node);
                 }
             }
+            Log.debug("==================broadcast nodes==size={}",nodes.size());
             messageManager.broadcastToNodes(message,nodes,true);
         } catch (Exception e) {
             e.printStackTrace();
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
+        Log.debug("==================broadcast end");
         return success();
     }
     /**
@@ -174,7 +178,9 @@ public class MessageRpc extends BaseCmd{
                     nodesList.add(nodeGroup.getConnectNode(nodeId));
                 }
             }
-            messageManager.broadcastToNodes(message,nodesList,true);
+            Log.debug("==================sendPeersMsg nodesList size={}",nodesList.size());
+            NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message,nodesList,true);
+            Log.debug("=======================networkEventResult {}",networkEventResult.isSuccess());
         } catch (Exception e) {
             e.printStackTrace();
             return failed(NetworkErrorCode.PARAMETER_ERROR);
