@@ -114,6 +114,7 @@ public class OrphanChainsMaintainer implements Runnable {
                     }
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 context.setStatus(RUNNING);
                 Log.error("chainId-" + chainId + ",maintain OrphanChains fail!error msg is:" + e.getMessage());
             }

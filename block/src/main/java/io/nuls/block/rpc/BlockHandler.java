@@ -56,6 +56,7 @@ public class BlockHandler extends BaseCmd {
             byte[] decode = HexUtil.decode(map.get("messageBody").toString());
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
+            e.printStackTrace();
             messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }

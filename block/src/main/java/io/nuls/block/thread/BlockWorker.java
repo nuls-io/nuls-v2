@@ -51,6 +51,7 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
             CompleteMessage completeMessage = future.get(60L, TimeUnit.SECONDS);
             b = completeMessage.isSuccess();
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
         return new BlockDownLoadResult(messageHash, startHeight, size, node, b);

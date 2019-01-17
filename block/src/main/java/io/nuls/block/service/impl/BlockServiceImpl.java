@@ -92,6 +92,7 @@ public class BlockServiceImpl implements BlockService {
         try {
             return blockStorageService.query(chainId, height);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -112,6 +113,7 @@ public class BlockServiceImpl implements BlockService {
             }
             return list;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -137,6 +139,7 @@ public class BlockServiceImpl implements BlockService {
             block.setTxs(transactions);
             return block;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -154,6 +157,7 @@ public class BlockServiceImpl implements BlockService {
             block.setTxs(TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList()));
             return block;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -172,6 +176,7 @@ public class BlockServiceImpl implements BlockService {
             }
             return list;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -200,6 +205,7 @@ public class BlockServiceImpl implements BlockService {
         try {
             //1.验证区块
             if (!verifyBlock(chainId, block, localInit, download)) {
+                Log.error("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             //2.设置最新高度,如果失败则恢复上一个高度
@@ -406,6 +412,7 @@ public class BlockServiceImpl implements BlockService {
             ContextManager.getContext(chainId).setGenesisBlock(genesisBlock);
             ChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block));
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
         return null != block;
@@ -422,6 +429,7 @@ public class BlockServiceImpl implements BlockService {
             RocksDBService.createTable(CACHED_BLOCK + chainId);
             initLocalBlocks(chainId);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
     }
@@ -438,6 +446,7 @@ public class BlockServiceImpl implements BlockService {
             hash.parse(new NulsByteBuffer(value));
             return hash;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }

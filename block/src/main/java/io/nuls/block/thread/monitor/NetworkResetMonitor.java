@@ -66,6 +66,7 @@ public class NetworkResetMonitor implements Runnable {
                     NetworkUtil.resetNetwork(chainId);
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 Log.error("chainId-" + chainId + ",NetworkReset error!");
             }
         }

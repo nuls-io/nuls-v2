@@ -67,6 +67,7 @@ public class BlockDownloadUtils {
         try {
             return future.get(10L, TimeUnit.SECONDS);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error("get block-" + hash + " from " + node.getId() + "fail", e);
             return null;
         } finally {

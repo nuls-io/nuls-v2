@@ -88,6 +88,7 @@ public class BlockBootstrap {
             //加载配置
             ConfigLoader.load();
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error("error occur when init, " + e.getMessage());
         }
     }
@@ -120,6 +121,7 @@ public class BlockBootstrap {
             ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
             dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error("error occur when start, " + e.getMessage());
         }
     }
@@ -141,6 +143,7 @@ public class BlockBootstrap {
                 try {
                     Thread.sleep(10000L);
                 } catch (InterruptedException e) {
+                    e.printStackTrace();
                     Log.error(e);
                 }
             }

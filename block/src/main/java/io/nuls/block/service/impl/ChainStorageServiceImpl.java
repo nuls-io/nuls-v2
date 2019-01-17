@@ -57,6 +57,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             }
             return RocksDBService.batchPut(CACHED_BLOCK + chainId, map);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
         return false;
@@ -84,6 +85,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             block.parse(new NulsByteBuffer(bytes));
             return block;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -109,6 +111,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             try {
                 block.parse(new NulsByteBuffer(bytes));
             } catch (NulsException e) {
+                e.printStackTrace();
                 Log.error(e);
                 return null;
             }
@@ -126,6 +129,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             }
             return RocksDBService.deleteKeys(CACHED_BLOCK + chainId, keys);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             throw new DbRuntimeException("remove blocks error!");
         }
@@ -136,6 +140,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         try {
             return RocksDBService.delete(CACHED_BLOCK + chainId, hash.serialize());
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             throw new DbRuntimeException("remove block error!");
         }
@@ -147,6 +152,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
         try {
             return RocksDBService.destroyTable(CACHED_BLOCK + chainId);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             throw new DbRuntimeException("destroy table error!");
         }

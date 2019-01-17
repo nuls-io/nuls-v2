@@ -52,6 +52,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             RocksDBService.put(BLOCK_HEADER_INDEX + chainId, height, hash);
             RocksDBService.put(BLOCK_HEADER + chainId, hash, blockHeader.serialize());
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }
@@ -74,6 +75,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             blockHeader.parse(new NulsByteBuffer(bytes));
             return blockHeader;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -90,6 +92,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             blockHeader.parse(new NulsByteBuffer(bytes));
             return blockHeader;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -108,6 +111,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             RocksDBService.delete(BLOCK_HEADER + chainId, hash);
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }
@@ -120,6 +124,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             boolean b2 = RocksDBService.destroyTable(BLOCK_HEADER_INDEX + chainId);
             return b1 && b2;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }
@@ -137,6 +142,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             byte[] bytes = SerializeUtils.uint64ToByteArray(height);
             return RocksDBService.put(CHAIN_LATEST_HEIGHT, ByteUtils.intToBytes(chainId), bytes);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }
