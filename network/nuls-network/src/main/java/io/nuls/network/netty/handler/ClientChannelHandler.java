@@ -149,11 +149,13 @@ public class ClientChannelHandler extends BaseChannelHandler {
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         String remoteIP = socketChannel.remoteAddress().getHostString();
         int port = socketChannel.remoteAddress().getPort();
+        Log.info("-----------------client channelRead-----------------{}:{}",remoteIP,port);
         ByteBuf buf = (ByteBuf) msg;
         try {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
             if (node != null) {
+                Log.info("-----------------client channelRead  node={} -----------------", node.getId());
                 MessageManager.getInstance().receiveMessage(buf,node,false);
             } else {
                 Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
