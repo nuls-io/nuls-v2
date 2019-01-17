@@ -49,14 +49,14 @@ public class BlockStorageServiceImpl implements BlockStorageService {
         byte[] height = SerializeUtils.uint64ToByteArray(blockHeader.getHeight());
         try {
             byte[] hash = blockHeader.getHash().serialize();
-            RocksDBService.put(BLOCK_HEADER_INDEX + chainId, height, hash);
-            RocksDBService.put(BLOCK_HEADER + chainId, hash, blockHeader.serialize());
+            boolean b1 = RocksDBService.put(BLOCK_HEADER_INDEX + chainId, height, hash);
+            boolean b2 = RocksDBService.put(BLOCK_HEADER + chainId, hash, blockHeader.serialize());
+            return b1 && b2;
         } catch (Exception e) {
             e.printStackTrace();
             Log.error(e);
             return false;
         }
-        return true;
     }
 
     @Override
@@ -107,9 +107,9 @@ public class BlockStorageServiceImpl implements BlockStorageService {
     public boolean remove(int chainId, long height) {
         try {
             byte[] hash = RocksDBService.get(BLOCK_HEADER_INDEX + chainId, SerializeUtils.uint64ToByteArray(height));
-            RocksDBService.delete(BLOCK_HEADER_INDEX + chainId, SerializeUtils.uint64ToByteArray(height));
-            RocksDBService.delete(BLOCK_HEADER + chainId, hash);
-            return true;
+            boolean b1 = RocksDBService.delete(BLOCK_HEADER_INDEX + chainId, SerializeUtils.uint64ToByteArray(height));
+            boolean b2 = RocksDBService.delete(BLOCK_HEADER + chainId, hash);
+            return b1 && b2;
         } catch (Exception e) {
             e.printStackTrace();
             Log.error(e);

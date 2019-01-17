@@ -64,8 +64,8 @@ public class BlockHandler extends BaseCmd {
             messageLog.debug("recieve null BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + message.getRequestHash());
         } else {
             messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + message.getRequestHash());
-            CacheHandler.receiveBlock(chainId, message);
         }
+        CacheHandler.receiveBlock(chainId, message);
         return success();
     }
 

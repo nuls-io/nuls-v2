@@ -63,7 +63,7 @@
     "name": "heightRange",
     "remark": "缓存到分叉链的高度区间",
     "readOnly": "false",
-    "value": "100"
+    "value": "1000"
   },
   {
     "name": "maxRollback",
@@ -75,7 +75,7 @@
     "name": "consistencyNodePercent",
     "remark": "一致可用节点最低比例,低于此数不同步区块",
     "readOnly": "false",
-    "value": "80"
+    "value": "60"
   },
   {
     "name": "minNodeAmount",
