@@ -974,6 +974,9 @@ public class AccountCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             String address = addressObj.toString();
+            //根据地址查询账户
+            //TODO 如果需要验证账户是否存在，则需要chainId
+            //account = accountService.getAccount(chainId, address);
             byte[] pubKey = Hex.decode(pubKeyHexObj.toString());
             byte[] sig = Hex.decode(sigHexObj.toString());
             byte[] data = Hex.decode(dataHexObj.toString());
