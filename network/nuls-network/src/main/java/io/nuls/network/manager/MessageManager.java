@@ -222,6 +222,7 @@ public class MessageManager extends BaseManager{
                             Log.debug("response：" + response);
                         }
                     }
+                    Log.debug("{}==={}",byteBuffer.getPayload().length,byteBuffer.getCursor());
                     byteBuffer.setCursor(payLoad.length);
                 }
              }
