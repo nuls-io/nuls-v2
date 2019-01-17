@@ -83,13 +83,13 @@ public interface AccountConstant {
     String CFG_CHAIN_SECTION = "chain";
     /**
      * 主链ID（卫星链ID）
-     * */
+     */
     String MAIN_CHAIN_ID = "mainChainId";
 
     /**
      * 主链资产ID（卫星链资产ID）
-     * */
-    String MAIN_ASSETS_ID ="mainAssetsId";
+     */
+    String MAIN_ASSETS_ID = "mainAssetsId";
 
     /**
      * --------[account constant] -------
@@ -121,7 +121,7 @@ public interface AccountConstant {
      * 导出accountkeystore文件的后缀名
      * The suffix of the accountkeystore file
      */
-    String ACCOUNTKEYSTORE_FILE_SUFFIX=".keystore";
+    String ACCOUNTKEYSTORE_FILE_SUFFIX = ".keystore";
 
     /**
      * --------[RPC constant] -------
@@ -179,17 +179,17 @@ public interface AccountConstant {
      */
     /**
      * Map初始值
-     * */
-    int  INIT_CAPACITY =16;
+     */
+    int INIT_CAPACITY = 16;
 
     /**
      * account root path
-     * */
+     */
     String ACCOUNT_ROOT_PATH = "io.nuls.account";
 
     /**
      * rpc file path
-     * */
+     */
     String RPC_PATH = "io.nuls.account.rpc";
 
     /**
@@ -205,4 +205,12 @@ public interface AccountConstant {
             return comparator.compare(HexUtil.decode(k1), HexUtil.decode(k2));
         }
     };
+
+    /**
+     * 交易相关
+     */
+    int TX_REMARK_MAX_LEN = 100;
+    int TX_HASH_DIGEST_BYTE_MAX_LEN = 70;
+    int TX_MAX_BYTES = 300;
+    int TX_MAX_SIZE = TX_MAX_BYTES * 1024;
 }
