@@ -29,6 +29,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NetworkParam;
@@ -203,7 +204,7 @@ public class MessageManager extends BaseManager{
                     }
                 }else{
                     //外部消息，转外部接口
-                    Log.debug("==============================other module message");
+                    Log.debug("==============================other module message, hash-" +NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
                     long magicNum=header.getMagicNumber();
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
                     Map<String,Object> paramMap = new HashMap<>();

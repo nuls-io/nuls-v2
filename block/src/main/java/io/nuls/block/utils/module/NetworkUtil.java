@@ -252,7 +252,9 @@ public class NetworkUtil {
                 cmds.add(cmd);
             }
             map.put("protocolCmds", cmds);
-            return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
+            boolean success = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
+            Log.debug("get nw_protocolRegister " + success);
+            return success;
         } catch (Exception e) {
             Log.error("get nw_protocolRegister fail");
         }
