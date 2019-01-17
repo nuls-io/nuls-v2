@@ -218,9 +218,13 @@ public class MessageManager extends BaseManager{
                     }else{
                         Log.debug("==============================other module message protocolRoleHandlers-size:{}",protocolRoleHandlers.size());
                         for(ProtocolRoleHandler protocolRoleHandler:protocolRoleHandlers) {
-                            Log.debug("request：{}=={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
-                           Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
-                            Log.debug("response：" + response);
+                             try {
+                                 Log.debug("request：{}=={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
+                                  Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
+                                  Log.debug("response：" + response);
+                              }catch(Exception e){
+                                  e.printStackTrace();
+                              }
                         }
                     }
                     Log.debug("s=={}==={}",byteBuffer.getPayload().length,byteBuffer.getCursor());
