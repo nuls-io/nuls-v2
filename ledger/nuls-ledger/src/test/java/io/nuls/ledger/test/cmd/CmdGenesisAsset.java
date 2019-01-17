@@ -49,13 +49,13 @@ import java.util.Map;
  * @date 2019/01/14
  **/
 public class CmdGenesisAsset {
-    public int chainId = 8096;
-    int assetChainId = 445;
+    public int chainId = 12345;
+    int assetChainId = 12345;
 //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-    String address = "QWy1WqEzLC44ePY41CNyfjN9eG5TBa01f";
-    int assetId = 222;
+    String address = "LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";
+    int assetId = 1;
     //入账金额
-    BigInteger amount = BigInteger.valueOf(1000);
+    BigInteger amount = BigInteger.valueOf(100000000000L);
 
     Transaction buildTransaction() throws IOException {
         //封装交易执行

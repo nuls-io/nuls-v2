@@ -78,6 +78,7 @@ public class BlockSynchronizer implements Runnable {
                     Thread.sleep(1000L);
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 Log.error(e);
             }
         }

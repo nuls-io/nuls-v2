@@ -2,28 +2,19 @@ package io.nuls.poc.init;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
-import io.nuls.poc.model.bo.tx.TxRegisterDetail;
 import io.nuls.poc.storage.LanguageService;
-import io.nuls.poc.utils.annotation.ResisterTx;
-import io.nuls.poc.utils.enumeration.TxMethodType;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -52,7 +43,6 @@ public class BootStrap {
                 Thread.sleep(2000L);
             }
             SpringLiteContext.getBean(ChainManager.class).runChain();
-            registerTx();
         } catch (Exception e) {
             Log.error("consensus startup error！");
             Log.error(e);
@@ -106,47 +96,6 @@ public class BootStrap {
             Log.error(e);
             throw e;
         }
-    }
-
-    /**
-     * 向交易模块注册交易
-     * Register transactions with the transaction module
-     */
-    private static void registerTx() {
-        List<Class> classList = ScanUtil.scan(ConsensusConstant.RPC_PATH);
-        if (classList == null || classList.size() == 0) {
-            return;
-        }
-        Map<Integer, TxRegisterDetail> registerDetailMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-        for (Class clz : classList) {
-            Method[] methods = clz.getMethods();
-            for (Method method : methods) {
-                ResisterTx annotation = getRegisterAnnotation(method);
-                if (annotation != null) {
-                    if (!registerDetailMap.containsKey(annotation.txType())) {
-                        registerDetailMap.put(annotation.txType(), new TxRegisterDetail(annotation.txType()));
-                    }
-                    if (annotation.methodType().equals(TxMethodType.COMMIT)) {
-                        registerDetailMap.get(annotation.txType()).setCommitCmd(annotation.methodName());
-                    } else if (annotation.methodType().equals(TxMethodType.VALID)) {
-                        registerDetailMap.get(annotation.txType()).setValidateCmd(annotation.methodName());
-                    } else if (annotation.methodType().equals(TxMethodType.ROLLBACK)) {
-                        registerDetailMap.get(annotation.txType()).setRollbackCmd(annotation.methodName());
-                    }
-                }
-            }
-        }
-        //todo 向交易管理模块注册交易
-    }
-
-    private static ResisterTx getRegisterAnnotation(Method method) {
-        Annotation[] annotations = method.getDeclaredAnnotations();
-        for (Annotation annotation : annotations) {
-            if (ResisterTx.class.equals(annotation.annotationType())) {
-                return (ResisterTx) annotation;
-            }
-        }
-        return null;
     }
 
     /**

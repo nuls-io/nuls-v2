@@ -44,7 +44,6 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -116,7 +115,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAgentAddress(), dto.getPassword());
             //3.组装创建节点交易
             Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
-            tx.setTime(TimeService.currentTimeMillis());
+            tx.setTime(CallMethodUtils.currentTime());
             //3.1.组装共识节点信息
             Agent agent = new Agent();
             agent.setAgentAddress(AddressTool.getAddress(dto.getAgentAddress()));
@@ -192,7 +191,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTxData(stopAgent.serialize());
-            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, TimeService.currentTimeMillis() + chain.getConfig().getStopAgentLockTime());
+            CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, CallMethodUtils.currentTime() + chain.getConfig().getStopAgentLockTime());
             tx.setCoinData(coinData.serialize());
             BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
@@ -268,6 +267,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 退出共识
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result withdraw(Map<String, Object> params) {
         if (params == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -335,6 +335,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 获取节点列表信息
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result getAgentList(Map<String, Object> params) {
         if (params == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -356,63 +357,59 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (chain == null) {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
-        try {
-            List<Agent> agentList = chain.getAgentList();
-            List<Agent> handleList = new ArrayList<>();
-            String keyword = dto.getKeyWord();
-            long startBlockHeight = chain.getNewestHeader().getHeight();
-            for (Agent agent : agentList) {
-                if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
+        List<Agent> agentList = chain.getAgentList();
+        List<Agent> handleList = new ArrayList<>();
+        String keyword = dto.getKeyWord();
+        long startBlockHeight = chain.getNewestHeader().getHeight();
+        for (Agent agent : agentList) {
+            if (agent.getDelHeight() != -1L && agent.getDelHeight() <= startBlockHeight) {
+                continue;
+            }
+            if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
+                continue;
+            }
+            if (StringUtils.isNotBlank(keyword)) {
+                keyword = keyword.toUpperCase();
+                String agentAddress = AddressTool.getStringAddressByBytes(agent.getAgentAddress()).toUpperCase();
+                String packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress()).toUpperCase();
+                String agentId = agentManager.getAgentId(agent.getTxHash()).toUpperCase();
+                //todo
+                //从账户模块获取账户别名
+                String alias = "";
+                boolean b = agentId.indexOf(keyword) >= 0;
+                b = b || agentAddress.equals(keyword) || packingAddress.equals(keyword);
+                if (StringUtils.isNotBlank(alias)) {
+                    b = b || alias.toUpperCase().indexOf(keyword) >= 0;
+                    agent.setAlais(alias);
+                }
+                if (!b) {
                     continue;
                 }
-                if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
-                    continue;
-                }
-                if (StringUtils.isNotBlank(keyword)) {
-                    keyword = keyword.toUpperCase();
-                    String agentAddress = AddressTool.getStringAddressByBytes(agent.getAgentAddress()).toUpperCase();
-                    String packingAddress = AddressTool.getStringAddressByBytes(agent.getPackingAddress()).toUpperCase();
-                    String agentId = agentManager.getAgentId(agent.getTxHash()).toUpperCase();
-                    //todo
-                    //从账户模块获取账户别名
-                    String alias = "";
-                    boolean b = agentId.indexOf(keyword) >= 0;
-                    b = b || agentAddress.equals(keyword) || packingAddress.equals(keyword);
-                    if (StringUtils.isNotBlank(alias)) {
-                        b = b || alias.toUpperCase().indexOf(keyword) >= 0;
-                        agent.setAlais(alias);
-                    }
-                    if (!b) {
-                        continue;
-                    }
-                }
-                handleList.add(agent);
             }
-            int start = pageNumber * pageSize - pageSize;
-            Page<AgentDTO> page = new Page<>(pageNumber, pageSize, handleList.size());
-            //表示查询的起始位置大于数据总数即查询的该页不存在数据
-            if (start >= page.getTotal()) {
-                return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
-            }
-            fillAgentList(chain, handleList, null);
-            //todo 是否要添加排序功能
-            List<AgentDTO> resultList = new ArrayList<>();
-            for (int i = start; i < handleList.size() && i < (start + pageSize); i++) {
-                AgentDTO agentDTO = new AgentDTO(handleList.get(i));
-                resultList.add(agentDTO);
-            }
-            page.setList(resultList);
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
-        } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
+            handleList.add(agent);
         }
+        int start = pageNumber * pageSize - pageSize;
+        Page<AgentDTO> page = new Page<>(pageNumber, pageSize, handleList.size());
+        //表示查询的起始位置大于数据总数即查询的该页不存在数据
+        if (start >= page.getTotal()) {
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
+        }
+        fillAgentList(chain, handleList, null);
+        //todo 是否要添加排序功能
+        List<AgentDTO> resultList = new ArrayList<>();
+        for (int i = start; i < handleList.size() && i < (start + pageSize); i++) {
+            AgentDTO agentDTO = new AgentDTO(handleList.get(i));
+            resultList.add(agentDTO);
+        }
+        page.setList(resultList);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(page);
     }
 
     /**
      * 获取指定节点信息
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result getAgentInfo(Map<String, Object> params) {
         if (params == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -449,6 +446,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 获取惩罚信息
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result getPublishList(Map<String, Object> params) {
         if (params == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -494,6 +492,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 获取委托列表信息
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result getDepositList(Map<String, Object> params) {
         if (params == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -567,6 +566,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 获取全网信息
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result getWholeInfo(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -614,6 +614,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 获取指定账户信息
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result getInfo(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_ADDRESS) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -714,6 +715,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 批量验证共识模块交易
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result batchValid(Map<String, Object> params) {
         if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -750,6 +752,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 获取当前轮次信息
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result getCurrentRoundInfo(Map<String, Object> params) {
         if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -775,6 +778,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 获取指定节点状态
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result getAgentStatus(Map<String, Object> params) {
         if (params == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -891,7 +895,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         try {
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
             transaction.parse(HexUtil.decode(txHex), 0);
-            boolean result = validatorManager.validateTx(chainId, transaction);
+            boolean result = validatorManager.validateTx(chain, transaction);
             if (!result) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
@@ -908,6 +912,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     /**
      * 创建节点交易提交
      */
+    @SuppressWarnings("unchecked")
     @Override
     public Result createAgentCommit(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER) == null) {
@@ -998,7 +1003,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
             transaction.parse(HexUtil.decode(txHex), 0);
-            boolean result = validatorManager.validateTx(chainId, transaction);
+            boolean result = validatorManager.validateTx(chain, transaction);
             if (!result) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
@@ -1150,7 +1155,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
             transaction.parse(HexUtil.decode(txHex), 0);
-            boolean result = validatorManager.validateTx(chainId, transaction);
+            boolean result = validatorManager.validateTx(chain, transaction);
             if (!result) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
@@ -1258,7 +1263,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             transaction.parse(HexUtil.decode(txHex), 0);
-            boolean result = validatorManager.validateTx(chainId, transaction);
+            boolean result = validatorManager.validateTx(chain, transaction);
             if (!result) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
@@ -1440,9 +1445,10 @@ public class ConsensusServiceImpl implements ConsensusService {
 
     /**
      * 双花交易记录
+     *
      * @param params
      * @return Result
-     * */
+     */
     @Override
     public Result doubleSpendRecord(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_BLOCK) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
@@ -1466,13 +1472,12 @@ public class ConsensusServiceImpl implements ConsensusService {
                 tx.parse(HexUtil.decode(txHex), 0);
                 txList.add(tx);
             }
-            punishManager.addDoubleSpendRecord(chain,txList,block);
+            punishManager.addDoubleSpendRecord(chain, txList, block);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
@@ -1485,6 +1490,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * @return Result
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result getNodePackingAddress(Map<String, Object> params) {
         if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -1525,6 +1531,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * @return Result
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result getAgentAddressList(Map<String, Object> params) {
         if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -1542,7 +1549,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
     }
 
-    private void fillAgentList(Chain chain, List<Agent> agentList, List<Deposit> depositList) throws NulsException {
+    private void fillAgentList(Chain chain, List<Agent> agentList, List<Deposit> depositList) {
         MeetingRound round = roundManager.getCurrentRound(chain);
         for (Agent agent : agentList) {
             fillAgent(chain, agent, round, depositList);

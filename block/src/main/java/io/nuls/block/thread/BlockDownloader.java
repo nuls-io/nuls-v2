@@ -93,6 +93,7 @@ public class BlockDownloader implements Callable<Boolean> {
             }
             Log.info("BlockDownloader stop work");
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }

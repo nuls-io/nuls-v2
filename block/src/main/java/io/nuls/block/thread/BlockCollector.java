@@ -88,6 +88,7 @@ public class BlockCollector implements Runnable {
             }
             Log.info("BlockCollector stop work");
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
     }
@@ -109,6 +110,7 @@ public class BlockCollector implements Runnable {
         try {
             result.setNode(nodes.take());
         } catch (InterruptedException e) {
+            e.printStackTrace();
             Log.error(e);
         }
 
@@ -124,6 +126,7 @@ public class BlockCollector implements Runnable {
         try {
             return submit.get().isSuccess();
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
         return false;

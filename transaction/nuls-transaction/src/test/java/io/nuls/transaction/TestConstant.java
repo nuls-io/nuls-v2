@@ -54,11 +54,11 @@ import java.util.List;
  * @date: 2019-01-09
  */
 public class TestConstant {
-    public static String address1 = "LWadbPFx2FifbN9frA2SZmQG1YaP10423";
-    public static String address2 = "Nrd7K1CvgK3MCENkXVEKF6bqqPuhr0423";
-    public static String address3 = "GvfJBN1bXF5yNkxhrqHjG3rSFgcjs0423";
-    public static String address4 = "NfEqZHRQSYnydD1MGeaC8uBiM8tek0423";
-    public static String address5 = "JDtL1wzfrFzgiTkiaj9ePC1xEK48w0423";
+    public static String address1 = "LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";//pwd:nuls123456"
+    public static String address2 = "JcgbDRvBqQ67Uq4Tb52U22ieJdr3G3930";//pwd:nuls123456"
+    public static String address3 = "Vxb3xxatcFFTZZe3wynX6CfAsvzAx3930";
+    public static String address4 = "R9CxmNqtBDEm9iWX2Cod46QGCNE2M3930";
+    public static String address5 = "GmjB8o7sNiQSXZ6aNz5NBP6pdnNrv3930";
 
     public static String txhashA = "002073c70ba4f851f37bd9a43c51565ed4f988a2faa80d7b5cd378a1149ce1f5001c";
     public static String txhashB = "0020eca68ca82e78d8c22b8f129742e7b392b30a299ba620b308be39c8a2d61a2e03";

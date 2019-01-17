@@ -7,6 +7,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyTxResult;
 
@@ -30,12 +31,12 @@ public class LedgerCall {
      */
     public static VerifyTxResult verifyCoinData(Chain chain, String txHex, boolean batch) throws NulsException {
         try {
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
             params.put("txHex", txHex);
             params.put("isBatchValidate", batch);
-            HashMap result = (HashMap) TransactionCall.request("validateCoinData", ModuleE.LG.abbr, params);
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr,"validateCoinData", params);
             return new VerifyTxResult((int)result.get("validateCode"), (String)result.get("validateDesc"));
         } catch (Exception e) {
             throw new NulsException(e);
@@ -65,9 +66,9 @@ public class LedgerCall {
   /*  public static boolean verifyAssetExist(int chainId, int assetId) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-            params.put("chianId", chainId);
+            params.put("chainId", chainId);
             params.put("assetId", assetId);
-            HashMap result = (HashMap) TransactionCall.request("cm_asset", ModuleE.LG.abbr, params);
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr, "cm_asset", params);
             return null != result;
         } catch (NulsException e) {
             throw new NulsException(e);
@@ -86,13 +87,13 @@ public class LedgerCall {
      */
     public static byte[] getNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException {
         try {
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
             params.put("address", address);
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
-            HashMap result = (HashMap) TransactionCall.request("getNonce", ModuleE.LG.abbr, params);
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.LG.abbr, "getNonce", params);
             String nonce = (String) result.get("nonce");
             return HexUtil.decode(nonce);
         } catch (Exception e) {
@@ -107,14 +108,16 @@ public class LedgerCall {
     public static BigInteger getBalance(Chain chain, byte[] address, int assetChainId, int assetId) throws NulsException {
         try {
             String addressString = AddressTool.getStringAddressByBytes(address);
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", addressString);
-            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "lg_getBalance", params);
-            return BigIntegerUtils.stringToBigInteger((String) result.get("available"));
+            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "getBalance", params);
+//            return BigIntegerUtils.stringToBigInteger((String) result.get("available"));
+            Object available = result.get("available");
+            return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
         } catch (Exception e) {
             throw new NulsException(e);
         }
@@ -128,7 +131,7 @@ public class LedgerCall {
      */
     public static boolean coinDataBatchNotify(Chain chain) throws NulsException {
         try {
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "bathValidateBegin", params);
@@ -147,7 +150,7 @@ public class LedgerCall {
      */
     public static boolean commitTxLedger(Chain chain, Transaction tx, boolean comfirmed) throws NulsException {
         try {
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
             params.put("txHex", tx.hex());
@@ -167,7 +170,7 @@ public class LedgerCall {
      */
     public static boolean rollbackTxLedger(Chain chain, Transaction tx, boolean comfirmed) throws NulsException {
         try {
-            Map<String, Object> params = new HashMap<>();
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
             params.put("txHex", tx.hex());

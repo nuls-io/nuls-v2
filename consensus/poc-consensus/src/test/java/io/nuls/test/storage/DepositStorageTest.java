@@ -5,11 +5,11 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.DepositStorageService;
+import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.test.TestUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
-import io.nuls.tools.thread.TimeService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,7 +45,7 @@ public class DepositStorageTest {
         po.setDelHeight(-1);
         po.setAddress(new byte[23]);
         po.setDeposit(BigInteger.valueOf(20000));
-        po.setTime(TimeService.currentTimeMillis());
+        po.setTime(CallMethodUtils.currentTime());
         po.setBlockHeight(100);
         System.out.println(depositStorageService.save(po,1));
         getDepositList();

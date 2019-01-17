@@ -28,9 +28,9 @@ package io.nuls.poc.model.bo.round;
 import io.nuls.base.data.Address;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
-import io.nuls.tools.thread.TimeService;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -223,10 +223,10 @@ public class MeetingRound {
         }
         if (null == this.getPreRound()) {
             return ("round:index:" + this.getIndex() + " , start:" + new Date(this.getStartTime())
-                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , totalWeight : " + totalWeight + " ,members:\n :" + str);
+                    + ", netTime:(" + new Date(CallMethodUtils.currentTime()).toString() + ") , totalWeight : " + totalWeight + " ,members:\n :" + str);
         } else {
             return ("round:index:" + this.getIndex() + " ,preIndex:" + this.getPreRound().getIndex() + " , start:" + new Date(this.getStartTime())
-                    + ", netTime:(" + new Date(TimeService.currentTimeMillis()).toString() + ") , totalWeight : " + totalWeight + "  , members:\n :" + str);
+                    + ", netTime:(" + new Date(CallMethodUtils.currentTime()).toString() + ") , totalWeight : " + totalWeight + "  , members:\n :" + str);
         }
     }
 }

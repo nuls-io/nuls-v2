@@ -46,6 +46,7 @@ public interface TxCmd {
     String TX_GETTXPROCESSORS = "tx_getTxProcessors";
     String TX_RUNCHAIN = "tx_runChain";
     String TX_STOPCHAIN = "tx_stopChain";
+    String TX_CREATE_CROSS_TX = "tx_createCtx";
 
     String TX_NEWTX = "tx_newTx";
     /**

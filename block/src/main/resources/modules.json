@@ -3,7 +3,7 @@
     "name": "orphanChainMaxAge",
     "remark": "孤儿链最大年龄",
     "readOnly": "true",
-    "value": "3"
+    "value": "10"
   },
   {
     "name": "validBlockInterval",
@@ -63,7 +63,7 @@
     "name": "heightRange",
     "remark": "缓存到分叉链的高度区间",
     "readOnly": "false",
-    "value": "10"
+    "value": "100"
   },
   {
     "name": "maxRollback",

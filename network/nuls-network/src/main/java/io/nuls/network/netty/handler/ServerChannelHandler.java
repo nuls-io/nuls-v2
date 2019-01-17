@@ -114,7 +114,7 @@ public class ServerChannelHandler extends BaseChannelHandler {
         try {
             Node node=ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
             if (node != null) {
-                    MessageManager.getInstance().receiveMessage(buf,node,false);
+                MessageManager.getInstance().receiveMessage(buf,node,true);
             } else {
                 Log.info("-----------------Server channelRead  node is null -----------------" + remoteIP + ":" + port);
                 ctx.channel().close();

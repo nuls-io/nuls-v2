@@ -1,9 +1,9 @@
 package io.nuls.poc.rpc;
 
-import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.service.ConsensusService;
 import io.nuls.poc.utils.annotation.ResisterTx;
 import io.nuls.poc.utils.enumeration.TxMethodType;
+import io.nuls.poc.utils.enumeration.TxProperty;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -47,7 +47,7 @@ public class PocConsensusResource extends BaseCmd{
      * 节点验证
      * */
     @CmdAnnotation(cmd = "cs_createAgentValid", version = 1.0, description = "create agent transaction validate 1.0")
-    @ResisterTx(txType = ConsensusConstant.TX_TYPE_REGISTER_AGENT,methodType = TxMethodType.VALID,methodName = "cs_createAgentValid")
+    @ResisterTx(txType = TxProperty.CREATE_AGENT,methodType = TxMethodType.VALID,methodName = "cs_createAgentValid")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response createAgentValid(Map<String,Object> params){
@@ -62,7 +62,7 @@ public class PocConsensusResource extends BaseCmd{
      * 创建节点交易提交
      * */
     @CmdAnnotation(cmd = "cs_createAgentCommit", version = 1.0, description = "create agent transaction commit 1.0")
-    @ResisterTx(txType = ConsensusConstant.TX_TYPE_REGISTER_AGENT,methodType = TxMethodType.COMMIT,methodName = "cs_createAgentCommit")
+    @ResisterTx(txType = TxProperty.CREATE_AGENT,methodType = TxMethodType.COMMIT,methodName = "cs_createAgentCommit")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
@@ -78,7 +78,7 @@ public class PocConsensusResource extends BaseCmd{
      * 创建节点交易回滚
      * */
     @CmdAnnotation(cmd = "cs_createAgentRollBack", version = 1.0, description = "create agent transaction rollback 1.0")
-    @ResisterTx(txType = ConsensusConstant.TX_TYPE_REGISTER_AGENT,methodType = TxMethodType.ROLLBACK,methodName = "cs_createAgentRollBack")
+    @ResisterTx(txType = TxProperty.CREATE_AGENT,methodType = TxMethodType.ROLLBACK,methodName = "cs_createAgentRollBack")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response createAgentRollBack(Map<String,Object> params){
@@ -106,7 +106,7 @@ public class PocConsensusResource extends BaseCmd{
      * 注销节点交易验证
      * */
     @CmdAnnotation(cmd = "cs_stopAgentValid", version = 1.0, description = "stop agent transaction validate 1.0")
-    @ResisterTx(txType = ConsensusConstant.TX_TYPE_STOP_AGENT,methodType = TxMethodType.VALID,methodName = "cs_stopAgentValid")
+    @ResisterTx(txType = TxProperty.STOP_AGENT,methodType = TxMethodType.VALID,methodName = "cs_stopAgentValid")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response stopAgentValid(Map<String,Object> params){
@@ -121,7 +121,7 @@ public class PocConsensusResource extends BaseCmd{
      * 注销节点交易提交
      * */
     @CmdAnnotation(cmd = "cs_stopAgentCommit", version = 1.0, description = "stop agent transaction commit 1.0")
-    @ResisterTx(txType = ConsensusConstant.TX_TYPE_STOP_AGENT,methodType = TxMethodType.COMMIT,methodName = "cs_stopAgentCommit")
+    @ResisterTx(txType = TxProperty.STOP_AGENT,methodType = TxMethodType.COMMIT,methodName = "cs_stopAgentCommit")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
@@ -137,7 +137,7 @@ public class PocConsensusResource extends BaseCmd{
      * 注销节点交易回滚
      * */
     @CmdAnnotation(cmd = "cs_stopAgentRollBack", version = 1.0, description = "stop agent transaction rollback 1.0")
-    @ResisterTx(txType = ConsensusConstant.TX_TYPE_STOP_AGENT,methodType = TxMethodType.ROLLBACK,methodName = "cs_stopAgentRollBack")
+    @ResisterTx(txType = TxProperty.STOP_AGENT,methodType = TxMethodType.ROLLBACK,methodName = "cs_stopAgentRollBack")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response stopAgentRollBack(Map<String,Object> params){
@@ -169,7 +169,7 @@ public class PocConsensusResource extends BaseCmd{
      * 委托共识交易验证
      * */
     @CmdAnnotation(cmd = "cs_depositValid", version = 1.0, description = "deposit agent transaction validate 1.0")
-    @ResisterTx(txType = ConsensusConstant.TX_TYPE_JOIN_CONSENSUS,methodType = TxMethodType.VALID,methodName = "cs_depositValid")
+    @ResisterTx(txType = TxProperty.JOIN_DEPOSIT,methodType = TxMethodType.VALID,methodName = "cs_depositValid")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response depositValid(Map<String,Object> params){
@@ -184,7 +184,7 @@ public class PocConsensusResource extends BaseCmd{
      * 委托共识交易提交
      * */
     @CmdAnnotation(cmd = "cs_depositCommit", version = 1.0, description = "deposit agent transaction commit 1.0")
-    @ResisterTx(txType = ConsensusConstant.TX_TYPE_JOIN_CONSENSUS,methodType = TxMethodType.COMMIT,methodName = "cs_depositCommit")
+    @ResisterTx(txType = TxProperty.JOIN_DEPOSIT,methodType = TxMethodType.COMMIT,methodName = "cs_depositCommit")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     @Parameter(parameterName = "blockHeader", parameterType = "String")
@@ -200,7 +200,7 @@ public class PocConsensusResource extends BaseCmd{
      * 委托共识交易回滚
      * */
     @CmdAnnotation(cmd = "cs_depositRollBack", version = 1.0, description = "deposit agent transaction rollback 1.0")
-    @ResisterTx(txType = ConsensusConstant.TX_TYPE_JOIN_CONSENSUS,methodType = TxMethodType.ROLLBACK,methodName = "cs_depositRollBack")
+    @ResisterTx(txType = TxProperty.JOIN_DEPOSIT,methodType = TxMethodType.ROLLBACK,methodName = "cs_depositRollBack")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response depositRollBack(Map<String,Object> params){
@@ -231,7 +231,7 @@ public class PocConsensusResource extends BaseCmd{
      * 退出共识交易验证
      * */
     @CmdAnnotation(cmd = "cs_withdrawValid", version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
-    @ResisterTx(txType = ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT,methodType = TxMethodType.VALID,methodName = "cs_withdrawValid")
+    @ResisterTx(txType = TxProperty.CANCEL_DEPOSIT,methodType = TxMethodType.VALID,methodName = "cs_withdrawValid")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response withdrawValid(Map<String,Object> params){
@@ -246,7 +246,7 @@ public class PocConsensusResource extends BaseCmd{
      * 退出共识交易提交
      * */
     @CmdAnnotation(cmd = "cs_withdrawCommit", version = 1.0, description = "withdraw deposit agent transaction commit 1.0")
-    @ResisterTx(txType = ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT,methodType = TxMethodType.COMMIT,methodName = "cs_withdrawCommit")
+    @ResisterTx(txType = TxProperty.CANCEL_DEPOSIT,methodType = TxMethodType.COMMIT,methodName = "cs_withdrawCommit")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response withdrawCommit(Map<String,Object> params){
@@ -261,7 +261,7 @@ public class PocConsensusResource extends BaseCmd{
      * 退出共识交易回滚
      * */
     @CmdAnnotation(cmd = "cs_withdrawRollBack", version = 1.0, description = "withdraw deposit agent transaction rollback 1.0")
-    @ResisterTx(txType = ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT,methodType = TxMethodType.ROLLBACK,methodName = "cs_withdrawRollBack")
+    @ResisterTx(txType = TxProperty.CANCEL_DEPOSIT,methodType = TxMethodType.ROLLBACK,methodName = "cs_withdrawRollBack")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response withdrawRollBack(Map<String,Object> params){

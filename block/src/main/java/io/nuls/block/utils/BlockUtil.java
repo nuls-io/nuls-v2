@@ -158,6 +158,7 @@ public class BlockUtil {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
         return false;
@@ -254,6 +255,7 @@ public class BlockUtil {
                 }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
         //4.与分叉链没有关联,进入孤儿链判断流程
@@ -314,6 +316,7 @@ public class BlockUtil {
             Log.info("chainId:" + chainId + ", received orphan block, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
         return Result.getFailed(BlockErrorCode.UNDEFINED_ERROR);

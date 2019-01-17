@@ -10,14 +10,15 @@ import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
 import io.nuls.poc.model.bo.tx.txdata.YellowPunishData;
+import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishReasonEnum;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.PunishManager;
 import io.nuls.poc.utils.manager.RoundManager;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
 import java.util.*;
@@ -45,7 +46,7 @@ public class BlockValidator {
     * @param chain             chain info
     * @param block             block info
     * */
-   public boolean validate(boolean isDownload, Chain chain, Block block)throws NulsException,IOException{
+   public void validate(boolean isDownload, Chain chain, Block block)throws NulsException,IOException{
       BlockHeader blockHeader = block.getHeader();
       //验证梅克尔哈希
       if (!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))) {
@@ -62,7 +63,6 @@ public class BlockValidator {
       if(!validResult){
          throw new NulsException(ConsensusErrorCode.BLOCK_COINBASE_VALID_ERROR);
       }
-      return true;
    }
 
    /**
@@ -77,6 +77,10 @@ public class BlockValidator {
       BlockExtendsData extendsData = new BlockExtendsData(blockHeader.getExtend());
       BlockHeader bestBlockHeader = chain.getNewestHeader();
       BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlockHeader.getExtend());
+
+      chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("本地最新区块，轮次:"+bestExtendsData.getRoundIndex()+";打包下标:"+bestExtendsData.getPackingIndexOfRound()+";开始打包时间:"+ DateUtils.convertDate(new Date(bestExtendsData.getRoundStartTime())));
+      chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("接收的新区块，轮次:"+extendsData.getRoundIndex()+";打包下标:"+extendsData.getPackingIndexOfRound()+";开始打包时间:"+DateUtils.convertDate(new Date(extendsData.getRoundStartTime())));
+
       /*
       该区块为本地最新区块之前的区块
       * */
@@ -87,6 +91,7 @@ public class BlockValidator {
       }
       MeetingRound currentRound = roundManager.getCurrentRound(chain);
       boolean hasChangeRound = false;
+      chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("本地最新轮次，轮次："+currentRound.getIndex()+";当前网络时间:"+DateUtils.convertDate(new Date(CallMethodUtils.currentTime())));
       if(extendsData.getRoundIndex() < currentRound.getIndex()){
          MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
          if (round != null) {
@@ -100,11 +105,11 @@ public class BlockValidator {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round index and start time not match! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
-         if(extendsData.getRoundStartTime() > TimeService.currentTimeMillis() + chain.getConfig().getPackingInterval()){
+         if(extendsData.getRoundStartTime() > CallMethodUtils.currentTime() + chain.getConfig().getPackingInterval()){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round startTime is error, greater than current time! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
-         if(extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval() > TimeService.currentTimeMillis() + chain.getConfig().getPackingInterval()){
+         if(extendsData.getRoundStartTime() + (extendsData.getPackingIndexOfRound() - 1) * chain.getConfig().getPackingInterval() > CallMethodUtils.currentTime() + chain.getConfig().getPackingInterval()){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " is the block of the future and received in advance! hash :" + blockHeader.getHash());
             throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
          }
@@ -237,7 +242,6 @@ public class BlockValidator {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("There is a wrong red punish tx!" + block.getHeader().getHash());
             return false;
          }
-
       }
       return true;
    }
@@ -253,38 +257,10 @@ public class BlockValidator {
       RedPunishData punishData = new RedPunishData();
       punishData.parse(tx.getTxData(),0);
       /*
-      红牌交易类型为双花
-      The type of red card transaction is double flower.
-      */
-      if(punishData.getReasonCode() == PunishReasonEnum.DOUBLE_SPEND.getCode()){
-         SmallBlock smallBlock = new SmallBlock();
-         try {
-            smallBlock.parse(punishData.getEvidence(), 0);
-         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e.getMessage());
-            return false;
-         }
-         BlockHeader header = smallBlock.getHeader();
-         if (header.getTime() != tx.getTime()) {
-            return false;
-         }
-         List<NulsDigestData> txHashList = smallBlock.getTxHashList();
-         if (!header.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(txHashList))) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).warn(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR.getMsg());
-            return false;
-         }
-         List<Transaction> txList = smallBlock.getSubTxList();
-         if (null == txList || txList.size() < 2) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).warn(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR.getMsg());
-            return false;
-         }
-         //todo 账本模块验证双花
-      }
-      /*
       红牌交易类型为连续分叉
       The type of red card transaction is continuous bifurcation
       */
-      else if(punishData.getReasonCode() == PunishReasonEnum.BIFURCATION.getCode()){
+      if(punishData.getReasonCode() == PunishReasonEnum.BIFURCATION.getCode()){
          NulsByteBuffer byteBuffer = new NulsByteBuffer(punishData.getEvidence());
          long[] roundIndex = new long[ConsensusConstant.REDPUNISH_BIFURCATION];
          for (int i = 0; i < ConsensusConstant.REDPUNISH_BIFURCATION && !byteBuffer.isFinished(); i++) {

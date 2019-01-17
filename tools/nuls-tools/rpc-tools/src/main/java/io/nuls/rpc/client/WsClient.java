@@ -154,10 +154,6 @@ public class WsClient extends WebSocketClient {
         return responseAutoQueue.poll();
     }
 
-    public Queue<Message> getNegotitateResponseQueue() {
-        return negotiateResponseQueue;
-    }
-
     public Queue<Ack> getAckQueue() {
         return ackQueue;
     }

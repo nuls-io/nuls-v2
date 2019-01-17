@@ -25,7 +25,6 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.exception.ChainRuntimeException;
-import io.nuls.block.message.BlockMessage;
 import io.nuls.block.model.Chain;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
@@ -100,16 +99,21 @@ public class ChainManager {
         LinkedList<NulsDigestData> hashList = new LinkedList<>();
         List<Block> blockList = new ArrayList<>();
         long rollbackHeight = masterChainEndHeight;
+        Log.info("*rollback master chain begin, rollbackHeight=" + rollbackHeight);
         do {
             Block block = blockService.getBlock(chainId, rollbackHeight--);
+            NulsDigestData hash = block.getHeader().getHash();
             if (blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), false)) {
                 blockList.add(block);
-                hashList.addLast(block.getHeader().getHash());
+                hashList.offerFirst(hash);
+                Log.info("*rollback master chain doing, success hash=" + hash);
             } else {
-                saveBlockList(chainId, blockList);
+                Log.info("*rollback master chain doing, fail hash=" + hash);
+                saveBlockToMasterChain(chainId, blockList);
                 return false;
             }
         } while (rollbackHeight >= forkHeight);
+        Log.info("*rollback master chain end");
         //2.2 主链回滚所生成的新分叉链
         Chain masterForkChain = new Chain();
         masterForkChain.setParent(masterChain);
@@ -119,17 +123,19 @@ public class ChainManager {
         masterForkChain.setPreviousHash(topForkChain.getPreviousHash());
         masterForkChain.setHashList(hashList);
         masterForkChain.setType(ChainTypeEnum.FORK);
-
+        Log.info("*generate new masterForkChain chain-" + masterForkChain);
         //2.3 主链上低于topForkChain的链不用变动
         //2.4 主链上高于topForkChain的链重新链接到新分叉链masterForkChain
         SortedSet<Chain> higherChains = masterChain.getSons().tailSet(topForkChain);
         if (higherChains.size() > 1) {
+            Log.info("*higher than topForkChain-" + higherChains);
             higherChains.remove(topForkChain);
             masterForkChain.setSons(higherChains);
             higherChains.forEach(e -> e.setParent(masterForkChain));
         }
         if (!addForkChain(chainId, masterForkChain) || !chainStorageService.save(chainId, blockList)) {
-            saveBlockList(chainId, blockList);
+            Log.info("*error occur when rollback master chain");
+            saveBlockToMasterChain(chainId, blockList);
             return false;
         }
         //至此,主链回滚完成
@@ -142,7 +148,7 @@ public class ChainManager {
             boolean b = switchChain0(chainId, masterChain, chain, subChain);
             if (!b) {
                 removeForkChain(chainId, topForkChain);
-                saveBlockList(chainId, blockList);
+                saveBlockToMasterChain(chainId, blockList);
                 return false;
             }
         }
@@ -150,11 +156,11 @@ public class ChainManager {
         return true;
     }
 
-    private static void saveBlockList(int chainId, List<Block> blockList) {
+    private static void saveBlockToMasterChain(int chainId, List<Block> blockList) {
         //主链回滚中途失败,把前面回滚的区块再加回主链
         for (Block block : blockList) {
             if (!blockService.saveBlock(chainId, block, false)) {
-                throw new ChainRuntimeException("switchChain fail");
+                throw new ChainRuntimeException("*switch chain fail, auto saveBlockToMasterChain fail");
             }
         }
     }
@@ -182,7 +188,7 @@ public class ChainManager {
         }
         Log.info("*switchChain0 target=" +target);
         //2.往主链上添加区块
-        LinkedList<NulsDigestData> hashList = forkChain.getHashList();
+        LinkedList<NulsDigestData> hashList = (LinkedList<NulsDigestData>) forkChain.getHashList().clone();
         int count = 0;
         while (target > count) {
             NulsDigestData hash = hashList.pop();
@@ -195,7 +201,7 @@ public class ChainManager {
                 return false;
             }
         }
-
+        Log.info("*switchChain0 add block to master chain success");
         //3.上一步结束后,如果forkChain中还有区块,组成新的分叉链,连接到主链上
         if (hashList.size() > 0) {
             Chain newForkChain = new Chain();

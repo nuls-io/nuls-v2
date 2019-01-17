@@ -62,13 +62,11 @@ public class GetSmallBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
+            e.printStackTrace();
             messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        if (message == null || nodeId == null) {
-            return failed(BlockErrorCode.PARAMETER_ERROR);
-        }
         NulsDigestData blockHash = message.getRequestHash();
         messageLog.info("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         SmallBlock smallBlock = SmallBlockCacher.getSmallBlock(chainId, blockHash).getSmallBlock();

@@ -127,6 +127,7 @@ public class ForkChainsMonitor implements Runnable {
                     }
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 context.setStatus(RunningStatusEnum.RUNNING);
                 Log.error("chainId-" + chainId + ", switchChain fail, auto rollback fail");
             }

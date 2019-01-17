@@ -37,7 +37,7 @@ public interface PunishStorageService {
      *
      * @param chainID  链ID/chain id
      * @return List<PunishLogPo>
-     * @exception 
+     * @exception Exception 数据查询失败
      * */
     List<PunishLogPo> getPunishList(int chainID) throws Exception;
 }

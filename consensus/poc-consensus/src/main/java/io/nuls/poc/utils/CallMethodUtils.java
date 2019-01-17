@@ -8,12 +8,15 @@ import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
+import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.bo.tx.TxRegisterDetail;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -131,12 +134,31 @@ public class CallMethodUtils {
     }
 
     /**
+     * 将打包的新区块发送给区块管理模块
+     * @param chainId  chain ID
+     * @param block    new block Info
+     * @return         Successful Sending
+     * */
+    @SuppressWarnings("unchecked")
+    public static boolean receivePackingBlock(int chainId,String block)throws NulsException{
+        Map<String,Object> params = new HashMap(4);
+        params.put("chainId",chainId);
+        params.put("block", block);
+        try {
+            Response callResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr,"receivePackingBlock", params);
+            return callResp.isSuccess();
+        }catch (Exception e){
+            throw new NulsException(e);
+        }
+    }
+
+    /**
      * 获取网络节点连接数
      * @param chainId  chain ID
      * @param isCross  是否获取跨链节点连接数/Whether to Get the Number of Connections across Chains
      * @return  int    连接节点数/Number of Connecting Nodes
      * */
-    public static int getAvailableNodeAmount(int chainId,boolean isCross)throws Exception{
+    public static int getAvailableNodeAmount(int chainId,boolean isCross)throws NulsException{
         Map<String,Object> callParams = new HashMap<>(4);
         callParams.put("chainId",chainId);
         callParams.put("isCross",isCross);
@@ -153,30 +175,101 @@ public class CallMethodUtils {
     }
 
     /**
-     * 将打包的新区块发送给区块管理模块
-     * @param chainId  chain ID
-     * @param block    new block Info
-     * @return         Successful Sending
+     * 获取可用余额和nonce
+     * Get the available balance and nonce
+     * @param chain
+     * @param address
      * */
-    public static boolean receivePackingBlock(int chainId,String block)throws Exception{
-        Map<String,Object> params = new HashMap(ConsensusConstant.INIT_CAPACITY);
-        params.put("chainId",chainId);
-        params.put("block", block);
+    @SuppressWarnings("unchecked")
+    public Map<String,Object> getBalanceAndNonce(Chain chain,String address)throws NulsException{
+        Map<String,Object> params = new HashMap(4);
+        params.put("chainId",chain.getConfig().getChainId());
+        params.put("assetChainId", chain.getConfig().getChainId());
+        params.put("address", address);
+        params.put("assetId", chain.getConfig().getAssetsId());
         try {
-            Response callResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr,"receivePackingBlock", params);
-            return callResp.isSuccess();
+            Response callResp = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr,"getBalanceNonce", params);
+            if(!callResp.isSuccess()){
+                return null;
+            }
+            return (HashMap)((HashMap) callResp.getResponseData()).get("getBalanceNonce");
         }catch (Exception e){
             throw new NulsException(e);
         }
     }
 
     /**
-     * 获取可用余额和nonce
-     * Get the available balance and nonce
+     * 获取账户锁定金额和可用余额
+     * Acquire account lock-in amount and available balance
+     * @param chain
+     * @param address
+     * */
+    @SuppressWarnings("unchecked")
+    public Map<String,Object> getBalance(Chain chain,String address)throws NulsException{
+        Map<String,Object> params = new HashMap(4);
+        params.put("chainId",chain.getConfig().getChainId());
+        params.put("assetChainId", chain.getConfig().getChainId());
+        params.put("address", address);
+        params.put("assetId", chain.getConfig().getAssetsId());
+        try {
+            Response callResp = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr,"getBalance", params);
+            if(!callResp.isSuccess()){
+                return null;
+            }
+            return (HashMap)((HashMap) callResp.getResponseData()).get("getBalance");
+        }catch (Exception e){
+            throw new NulsException(e);
+        }
+    }
+
+    /**
+     * 获取当前网络时间
+     * Get the current network time
+     * */
+    public static long currentTime() {
+        try {
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
+            Map responseData = (Map) response.getResponseData();
+            Map result = (Map) responseData.get("nw_currentTimeMillis");
+            return (Long) result.get("currentTimeMillis");
+        } catch (Exception e) {
+            Log.error("get nw_currentTimeMillis fail");
+        }
+        return System.currentTimeMillis();
+    }
+
+    /**
+     * 交易注册
+     * @param chain                    chain
+     * @param txRegisterDetailList     注冊是交易信息/Registration is transaction information
+     * */
+    @SuppressWarnings("unchecked")
+    public static boolean registerTx(Chain chain, List<TxRegisterDetail> txRegisterDetailList){
+        try{
+            Map<String,Object> params = new HashMap(4);
+            params.put("chainId",chain.getConfig().getChainId());
+            params.put("list",txRegisterDetailList);
+            params.put("moduleCode",ModuleE.CS.abbr);
+            params.put("moduleValidator",ConsensusConstant.MODULE_VALIDATOR);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
+            if(!cmdResp.isSuccess()){
+                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).info("chain ："+ chain.getConfig().getChainId()+" Failure of transaction registration");
+                return false;
+            }
+            return true;
+        }catch (Exception e){
+            Log.error(e);
+            return false;
+        }
+    }
+
+    /**
+     * 获取打包交易
      * */
 
     /**
-     * 获取账户锁定金额
-     * Get the amount locked in the account
+     * 将新创建的交易发送给交易管理模块
      * */
+
+    
 }

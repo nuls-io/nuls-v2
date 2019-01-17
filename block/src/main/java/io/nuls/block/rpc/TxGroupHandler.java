@@ -64,10 +64,10 @@ public class TxGroupHandler extends BaseCmd {
     @CmdAnnotation(cmd = TXGROUP_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
-        ChainContext context = ContextManager.getContext(chainId);
-        if (!context.getStatus().equals(RUNNING)) {
-            return success();
-        }
+//        ChainContext context = ContextManager.getContext(chainId);
+//        if (!context.getStatus().equals(RUNNING)) {
+//            return success();
+//        }
         String nodeId = map.get("nodeId").toString();
         TxGroupMessage message = new TxGroupMessage();
 
@@ -75,11 +75,8 @@ public class TxGroupHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
+            e.printStackTrace();
             messageLog.error(e);
-            return failed(BlockErrorCode.PARAMETER_ERROR);
-        }
-
-        if (nodeId == null) {
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
