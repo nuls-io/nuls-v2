@@ -24,11 +24,15 @@
 
 package io.nuls.account.service;
 
+import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.CoinDto;
+import io.nuls.base.data.Transaction;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 账户相关交易接口定义
@@ -58,4 +62,5 @@ public interface TransactionService {
      * @return
      */
     boolean assetExist(int chainId, int assetId);
+
 }
