@@ -46,7 +46,7 @@ public class ConsensusUtil {
      *
      * @param chainId
      * @param block
-     * @param download
+     * @param download 0区块下载中，1接收到最新区块
      * @return
      */
     public static boolean verify(int chainId, Block block, int download) {

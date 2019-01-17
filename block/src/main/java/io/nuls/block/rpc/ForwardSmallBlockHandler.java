@@ -75,7 +75,7 @@ public class ForwardSmallBlockHandler extends BaseCmd {
 
         NulsDigestData blockHash = message.getRequestHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        messageLog.info("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
+        messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);

@@ -59,7 +59,7 @@ public class BlockHandler extends BaseCmd {
             messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        messageLog.info("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + message.getBlock().getHeader().getHeight());
+        messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + message.getBlock().getHeader().getHeight());
         CacheHandler.receiveBlock(chainId, message);
         return success();
     }

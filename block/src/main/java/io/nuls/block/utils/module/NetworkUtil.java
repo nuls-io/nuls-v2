@@ -118,7 +118,7 @@ public class NetworkUtil {
             params.put("messageBody", HexUtil.encode(message.serialize()));
             params.put("command", command);
             boolean success = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
-            messageLog.info("broadcast " + message.getClass().getName() +", chainId:" + chainId + ", success:" + success);
+            messageLog.debug("broadcast " + message.getClass().getName() +", chainId:" + chainId + ", success:" + success);
             return success;
         } catch (Exception e) {
             Log.error(e);
@@ -143,7 +143,7 @@ public class NetworkUtil {
             params.put("messageBody", HexUtil.encode(message.serialize()));
             params.put("command", command);
             boolean success = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params).isSuccess();
-            messageLog.info("send " + message.getClass().getName() + " to node-" + nodeId + ", chainId:" + chainId + ", success:" + success);
+            messageLog.debug("send " + message.getClass().getName() + " to node-" + nodeId + ", chainId:" + chainId + ", success:" + success);
             return success;
         } catch (Exception e) {
             Log.error(e);

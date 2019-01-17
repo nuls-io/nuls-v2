@@ -66,7 +66,7 @@ public class BlockDownloadUtils {
         try {
             return future.get(10L, TimeUnit.SECONDS);
         } catch (Exception e) {
-            Log.error(node.getId(), e);
+            Log.error("get block-" + hash + " from " + node.getId() + "fail", e);
             return null;
         } finally {
             CacheHandler.removeBlockByHashFuture(chainId, hash);
