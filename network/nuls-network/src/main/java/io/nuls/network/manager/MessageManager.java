@@ -350,6 +350,7 @@ public class MessageManager extends BaseManager{
             Log.debug("==================node {}",node.getId());
             if (node.getChannel() == null || !node.getChannel().isActive()) {
                 Log.info(node.getId() + "is inActive");
+                continue;
             }
             try {
                 ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
