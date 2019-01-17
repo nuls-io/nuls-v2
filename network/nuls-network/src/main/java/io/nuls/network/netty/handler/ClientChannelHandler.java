@@ -38,6 +38,7 @@ import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
+import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.message.VersionMessage;
@@ -149,7 +150,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         String remoteIP = socketChannel.remoteAddress().getHostString();
         int port = socketChannel.remoteAddress().getPort();
-        Log.info("-----------------client channelRead-----------------{}:{}",remoteIP,port);
+        Log.info("{}-----------------client channelRead-----------------{}:{}",TimeService.currentTimeMillis(), remoteIP,port);
         ByteBuf buf = (ByteBuf) msg;
         try {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);

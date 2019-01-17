@@ -30,6 +30,7 @@ import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
+import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -161,7 +162,7 @@ public class MessageRpc extends BaseCmd{
             String nodes = String.valueOf(params.get("nodes"));
             byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
             String cmd =String.valueOf(params.get("command"));
-            Log.debug("==================sendPeersMsg begin, cmd-{}", cmd);
+            Log.debug("{}==================sendPeersMsg begin, cmd-{}",TimeService.currentTimeMillis(), cmd);
             MessageManager messageManager=MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);

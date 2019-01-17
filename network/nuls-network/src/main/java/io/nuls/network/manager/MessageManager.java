@@ -37,6 +37,7 @@ import io.nuls.network.locker.Lockers;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.manager.handler.message.GetAddrMessageHandler;
+import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -251,7 +252,7 @@ public class MessageManager extends BaseManager{
                     List<IpAddress> addressesList=new ArrayList<>();
                     addressesList.add(LocalInfoManager.getInstance().getExternalAddress());
                     AddrMessage addrMessage= MessageFactory.getInstance().buildAddrMessage(addressesList,nodeGroupConnector.getMagicNumber());
-//                    Log.info("broadcastSelfAddrToAllNode================"+addrMessage.getMsgBody().size()+"==getIpAddressList()=="+addrMessage.getMsgBody().getIpAddressList().size());
+                    Log.debug("broadcastSelfAddrToAllNode================"+addrMessage.getMsgBody().size()+"==getIpAddressList()=="+addrMessage.getMsgBody().getIpAddressList().size());
                     this.sendToNode(addrMessage,connectNode,asyn);
                 }
 
@@ -340,6 +341,7 @@ public class MessageManager extends BaseManager{
         if(!isHandShakeMessage(message)) {
             NodeGroupConnector nodeGroupConnector = node.getNodeGroupConnector(message.getHeader().getMagicNumber());
             if (NodeGroupConnector.HANDSHAKE != nodeGroupConnector.getStatus()) {
+                Log.error("{} status is not handshake",node.getId());
                 return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_DEAD);
             }
         }
@@ -353,8 +355,7 @@ public class MessageManager extends BaseManager{
             ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
             if (!asyn) {
                 future.await();
-                boolean success = future.isSuccess();
-                if (!success) {
+                if (!future.isSuccess()) {
                     return new NetworkEventResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
                 }
             }
@@ -374,7 +375,7 @@ public class MessageManager extends BaseManager{
      * @return
      */
     public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
-        Log.debug("==================broadcastToNodes begin");
+        Log.debug("{}==================broadcastToNodes begin",TimeService.currentTimeMillis());
         for(Node node:nodes) {
             Log.debug("==================node {}",node.getId());
             if (node.getChannel() == null || !node.getChannel().isActive()) {
