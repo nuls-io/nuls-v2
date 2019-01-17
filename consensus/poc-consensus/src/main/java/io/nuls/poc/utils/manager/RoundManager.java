@@ -335,6 +335,7 @@ public class RoundManager {
      * @param index              轮次下标/round index
      * @param startTime          轮次开始打包时间/start time
      * */
+    @SuppressWarnings("unchecked")
     private MeetingRound calculationRound(Chain chain,BlockHeader startBlockHeader, long index, long startTime) throws NulsException{
         MeetingRound round = new MeetingRound();
         round.setIndex(index);
