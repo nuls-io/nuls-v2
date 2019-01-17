@@ -229,7 +229,7 @@ public class MessageManager extends BaseManager{
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
+//            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
         } finally {
             buffer.clear();
         }

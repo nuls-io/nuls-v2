@@ -163,7 +163,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw e;
+//            throw e;
         }finally {
             buf.release();
         }
