@@ -135,6 +135,7 @@ public class BlockBootstrap {
                 }
                 BlockHeader header = context.getLatestBlock().getHeader();
                 Log.info("chainId:" + chainId + ", latestHeight:" + header.getHeight() + ", txCount:" + header.getTxCount() + ", hash:" + header.getHash());
+
                 WsClient wsClient = ClientRuntime.WS_CLIENT_MAP.get(ClientRuntime.getRemoteUri(ModuleE.NW.abbr));
                 System.out.println("wsClient.getAckQueue().size()-" + wsClient.getAckQueue().size());
                 System.out.println("wsClient.getNegotiateResponseQueue().size()-" + wsClient.getNegotiateResponseQueue().size());
