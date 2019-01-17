@@ -24,6 +24,7 @@
  */
 package io.nuls.network.rpc.internal;
 
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
@@ -156,11 +157,11 @@ public class MessageRpc extends BaseCmd{
     @Parameter(parameterName = "command", parameterType = "string")
     public Response sendPeersMsg(Map params) {
         try {
-            Log.debug("==================sendPeersMsg begin");
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String nodes = String.valueOf(params.get("nodes"));
             byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
             String cmd =String.valueOf(params.get("command"));
+            Log.debug("==================sendPeersMsg begin, cmd-{}", cmd);
             MessageManager messageManager=MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
@@ -178,9 +179,9 @@ public class MessageRpc extends BaseCmd{
                     nodesList.add(nodeGroup.getConnectNode(nodeId));
                 }
             }
-            Log.debug("==================sendPeersMsg nodesList size={}",nodesList.size());
+            Log.debug("==================sendPeersMsg nodesList size={}, cmd-{}, hash-{}",nodesList.size(), cmd, NulsDigestData.calcDigestData(messageBody).getDigestHex());
             NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message,nodesList,true);
-            Log.debug("=======================networkEventResult {}",networkEventResult.isSuccess());
+            Log.debug("=======================networkEventResult {}, cmd-{}",networkEventResult.isSuccess(), cmd);
         } catch (Exception e) {
             e.printStackTrace();
             return failed(NetworkErrorCode.PARAMETER_ERROR);
