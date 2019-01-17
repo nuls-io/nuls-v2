@@ -175,8 +175,9 @@ public class MessageRpc extends BaseCmd{
             String []nodeIds=nodes.split(",");
             List<Node> nodesList = new ArrayList<>();
             for(String nodeId:nodeIds){
-                if(null != nodeGroup.getConnectNode(nodeId)){
-                    nodesList.add(nodeGroup.getConnectNode(nodeId));
+                Node connectNode = nodeGroup.getConnectNode(nodeId);
+                if(null != connectNode){
+                    nodesList.add(connectNode);
                 }
             }
             Log.debug("==================sendPeersMsg nodesList size={}, cmd-{}, hash-{}",nodesList.size(), cmd, NulsDigestData.calcDigestData(messageBody).getDigestHex());
