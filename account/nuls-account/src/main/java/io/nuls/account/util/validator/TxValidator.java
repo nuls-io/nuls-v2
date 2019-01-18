@@ -170,7 +170,7 @@ public class TxValidator {
         //如果是多签交易，验证签名地址是否正确
         if (tx.isMultiSignTx()) {
             for (CoinFrom coinFrom : coinData.getFrom()) {
-                if (!SignatureUtil.containsAddress(tx, coinFrom.getAddress())) {
+                if (!SignatureUtil.containsAddress(tx, coinFrom.getAddress(), chain.getConfig().getChainId())) {
                     return false;
                 }
             }
