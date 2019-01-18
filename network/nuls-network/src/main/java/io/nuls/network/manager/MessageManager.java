@@ -341,11 +341,12 @@ public class MessageManager extends BaseManager{
         if(!isHandShakeMessage(message)) {
             NodeGroupConnector nodeGroupConnector = node.getNodeGroupConnector(message.getHeader().getMagicNumber());
             if (NodeGroupConnector.HANDSHAKE != nodeGroupConnector.getStatus()) {
-                Log.error("{} status is not handshake",node.getId());
+                Log.error("============={} status is not handshake",node.getId());
                 return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_DEAD);
             }
         }
         if (node.getChannel() == null || !node.getChannel().isActive()) {
+            Log.error("============={} getChannel is not Active",node.getId());
             return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_MISS_CHANNEL);
         }
         try {
@@ -353,11 +354,13 @@ public class MessageManager extends BaseManager{
             BaseNulsData body = message.getMsgBody();
             header.setPayloadLength(body.size());
             ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
-            if (!asyn) {
+            if (asyn) {
                 future.await();
+                Log.debug("{}==================ChannelFuture1",TimeService.currentTimeMillis());
                 if (!future.isSuccess()) {
                     return new NetworkEventResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
                 }
+                Log.debug("{}==================ChannelFuture2",TimeService.currentTimeMillis());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -385,10 +388,11 @@ public class MessageManager extends BaseManager{
             try {
                 ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
                 Log.debug("==================writeAndFlush end");
-                if (!asyn) {
+                if (asyn) {
+                    Log.debug("{}==========B========ChannelFuture",TimeService.currentTimeMillis());
                     future.await();
                     boolean success = future.isSuccess();
-                    Log.debug("=================={}success?{}",node.getId(),success);
+                    Log.debug("==========B========{}success?{}",node.getId(),success);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

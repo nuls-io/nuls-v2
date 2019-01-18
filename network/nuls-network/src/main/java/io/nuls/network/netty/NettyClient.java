@@ -26,8 +26,10 @@
 package io.nuls.network.netty;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.PooledByteBufAllocator;
-import io.netty.channel.*;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -76,8 +78,8 @@ public class NettyClient {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.SO_SNDBUF, 128 * 1024)
                 .option(ChannelOption.SO_RCVBUF, 128 * 1024)
-                .option(ChannelOption.RCVBUF_ALLOCATOR, AdaptiveRecvByteBufAllocator.DEFAULT)
-                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
+//                .option(ChannelOption.RCVBUF_ALLOCATOR, AdaptiveRecvByteBufAllocator.DEFAULT)
+//                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNETCI_TIME_OUT)
                 .handler(new NulsChannelInitializer<>(new ClientChannelHandler()));
     }
