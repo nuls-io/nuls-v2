@@ -45,10 +45,8 @@ import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.GetAddrMessage;
-import io.nuls.network.model.message.OtherModuleMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
@@ -150,7 +148,6 @@ public class MessageManager extends BaseManager{
                 } else {
                     //外部消息，转外部接口
                     Log.debug("==============================receive other module message, hash-" + NulsDigestData.calcDigestData(payLoadBody).getDigestHex() + "node-" + node.getId());
-                    message = new  OtherModuleMessage(header,HexUtil.byteToHex(payLoadBody));
                     OtherModuleMessageHandler handler =MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody,node.getId(), isServer);
                     Log.debug("s=={}==={}", byteBuffer.getPayload().length, byteBuffer.getCursor());

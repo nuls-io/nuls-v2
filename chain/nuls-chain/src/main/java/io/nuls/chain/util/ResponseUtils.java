@@ -22,36 +22,25 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.model.message;
+package io.nuls.chain.util;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.model.message.base.MessageHeader;
-import io.nuls.network.model.message.body.MessageBody;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.rpc.model.message.Response;
+
+import java.util.Map;
 
 /**
  * @author lan
  * @description
- * @date 2019/01/18
+ * @date 2019/01/16
  **/
-public class OtherModuleMessage extends BaseMessage<MessageBody> {
-
-    private String messageHex;
-
-    public String getMessageHex() {
-        return messageHex;
-    }
-
-    public void setMessageHex(String messageHex) {
-        this.messageHex = messageHex;
-    }
-   public  OtherModuleMessage(MessageHeader header,String messageHex){
-        this.setHeader(header);
-        this.messageHex = messageHex;
-   }
-    @Override
-    protected MessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
+public class ResponseUtils {
+    public static Map<String,Object> getResultMap(Response response,String cmd){
+        if(response.isSuccess()){
+            Object o=((Map)response.getResponseData()).get(cmd);
+            if(null != o){
+                return (Map)o;
+            }
+        }
         return null;
     }
 }
