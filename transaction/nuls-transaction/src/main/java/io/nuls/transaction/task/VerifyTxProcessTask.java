@@ -16,6 +16,7 @@ import io.nuls.transaction.db.rocksdb.storage.UnverifiedTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
+import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
@@ -48,8 +49,8 @@ public class VerifyTxProcessTask implements Runnable {
         this.chain = chain;
     }
 
-    int count = 0;
-    int size = 0;
+//    int count = 0;
+//    int size = 0;
 
     @Override
     public void run() {
@@ -64,7 +65,6 @@ public class VerifyTxProcessTask implements Runnable {
         } catch (Exception e) {
             chain.getLogger().error(e);
         }
-        System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
     }
 
     private void doTask(Chain chain){
@@ -74,7 +74,6 @@ public class VerifyTxProcessTask implements Runnable {
 
         Transaction tx = null;
         while ((tx = unverifiedTxStorageService.pollTx(chain)) != null && orphanTxList.size() < TxConstant.ORPHAN_CONTAINER_MAX_SIZE) {
-            size++;
             processTx(chain, tx, false);
         }
     }
@@ -93,10 +92,8 @@ public class VerifyTxProcessTask implements Runnable {
             if(null != transaction){
                 return isOrphanTx;
             }
-            Map<String, String> params = new HashMap<>();
-            params.put("tx", tx.hex());
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "verifyCoinData",params);
-            if(response.isSuccess()){
+            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
+            if(verifyTxResult.success()){
                 packablePool.add(chain, tx,false);
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
@@ -105,12 +102,11 @@ public class VerifyTxProcessTask implements Runnable {
                 //调账本记录未确认交易
                 LedgerCall.commitTxLedger(chain, tx, false);
                 //广播交易hash
-                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
+                //todo 调试暂时注释
+//                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
                 return true;
             }
-            Map map = (Map)response.getResponseData();
-            ErrorCode errorCode = (ErrorCode)map.get("ErrorCode");
-            if(errorCode.equals(TxErrorCode.ORPHAN_TX) && !isOrphanTx){
+            if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){
                 //todo 孤儿交易还是10分钟删, 如何处理nonce值??

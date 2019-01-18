@@ -140,13 +140,14 @@ public class TransactionManager {
     public boolean verify(Chain chain, Transaction tx) {
         try {
             baseValidateTx(chain, tx);
-            //如果是跨链交易直接调模块内部验证器接口，不走cmd命令
+            //由于跨链交易直接调模块内部验证器接口，可不通过RPC接口
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-                txService.crossTransactionValidator(chain, tx);
+               return txService.crossTransactionValidator(chain, tx);
+            }else {
+                TxRegister txRegister = this.getTxRegister(chain, tx.getType());
+                //调验证器
+                return TransactionCall.txProcess(chain, txRegister.getValidator(), txRegister.getModuleCode(), tx.hex());
             }
-            TxRegister txRegister = this.getTxRegister(chain, tx.getType());
-            //调验证器
-            return TransactionCall.txProcess(chain, txRegister.getValidator(), txRegister.getModuleCode(), tx.hex());
         } catch (NulsException e) {
             chain.getLogger().error(e);
             return false;
@@ -191,7 +192,7 @@ public class TransactionManager {
         }
         TxRegister txRegister = getTxRegister(chain, tx.getType());
         //验证签名
-        validateTxSignature(tx, txRegister);
+        validateTxSignature(tx, txRegister, chain);
         //如果有coinData, 则进行验证,有一些交易没有coinData数据
         if (null != tx.getCoinData() && tx.getCoinData().length > 0) {
             //coinData基础验证以及手续费 (from中所有的nuls资产-to中所有nuls资产)
@@ -211,10 +212,10 @@ public class TransactionManager {
      * @return
      * @throws NulsException
      */
-    private void validateTxSignature(Transaction tx, TxRegister txRegister) throws NulsException{
+    private void validateTxSignature(Transaction tx, TxRegister txRegister, Chain chain) throws NulsException{
         //只需要验证,需要验证签名的交易(一些系统交易不用签名)
         if(txRegister.verifySignature) {
-            Set<String> addressSet = SignatureUtil.getAddressFromTX(tx);
+            Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chain.getChainId());
             CoinData coinData = TxUtil.getCoinData(tx);
             if(null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0){
                 throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
@@ -222,7 +223,7 @@ public class TransactionManager {
             //判断from中地址和签名的地址是否匹配
             for(CoinFrom coinFrom : coinData.getFrom()) {
                 if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))) {
-                    throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH);
+                    throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
                 }
             }
             if (!SignatureUtil.validateTransactionSignture(tx)) {

@@ -54,7 +54,7 @@ public class Address {
     /**
      * chain id
      */
-    private int chainId = BaseConstant.DEFAULT_CHAIN_ID;
+    private int chainId;
 
     /**
      * address type

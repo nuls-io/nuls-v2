@@ -48,6 +48,7 @@ public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageServic
     public boolean putTx(Chain chain, Transaction tx) {
         try {
             chain.getUnverifiedQueue().offer(tx.serialize());
+            chain.getLogger().debug("UnverifiedTx putTx - size: {}", chain.getUnverifiedQueue().size());
             return true;
         } catch (IOException e) {
             Log.error(e);
@@ -61,12 +62,17 @@ public class UnverifiedTxStorageServiceImpl implements UnverifiedTxStorageServic
         if (null == bytes) {
             return null;
         }
-        System.out.println("==============================");
+        chain.getLogger().debug("UnverifiedTx pollTx - size: {}", chain.getUnverifiedQueue().size());
         try {
             return TxUtil.getTransaction(bytes);
         } catch (Exception e) {
             Log.error(e);
         }
         return null;
+    }
+
+    @Override
+    public long size(Chain chain) {
+        return chain.getUnverifiedQueue().size();
     }
 }

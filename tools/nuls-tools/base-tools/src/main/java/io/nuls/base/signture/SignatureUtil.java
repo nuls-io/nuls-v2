@@ -126,8 +126,8 @@ public class SignatureUtil {
      *
      * @param tx 交易
      */
-    public static boolean containsAddress(Transaction tx, byte[] address) throws NulsException {
-        Set<String> addressSet = getAddressFromTX(tx);
+    public static boolean containsAddress(Transaction tx, byte[] address, int chainId) throws NulsException {
+        Set<String> addressSet = getAddressFromTX(tx, chainId);
         if (addressSet == null || addressSet.size() == 0) {
             return false;
         }
@@ -142,7 +142,7 @@ public class SignatureUtil {
      *
      * @param tx 交易
      */
-    public static Set<String> getAddressFromTX(Transaction tx) throws NulsException {
+    public static Set<String> getAddressFromTX(Transaction tx, int chainId) throws NulsException {
         Set<String> addressSet = new HashSet<>();
         if (tx.getTransactionSignature() == null && tx.getTransactionSignature().length == 0) {
             return null;
@@ -156,7 +156,7 @@ public class SignatureUtil {
             if (transactionSignature.getP2PHKSignatures() != null && transactionSignature.getP2PHKSignatures().size() > 0) {
                 for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
                     if (signature.getPublicKey() != null || signature.getPublicKey().length == 0) {
-                        addressSet.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(),BaseConstant.DEFAULT_CHAIN_ID)));
+                        addressSet.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chainId)));
                     }
                 }
             }
@@ -377,7 +377,7 @@ public class SignatureUtil {
     /**
      * 获取脚本中的公钥
      */
-    public static String getScriptAddress(List<ScriptChunk> chunks) {
+/*    public static String getScriptAddress(List<ScriptChunk> chunks) {
         if (chunks.get(0).opcode == ScriptOpCodes.OP_0) {
             byte[] redeemByte = chunks.get(chunks.size() - 1).data;
             Script redeemScript = new Script(redeemByte);
@@ -386,7 +386,7 @@ public class SignatureUtil {
         } else {
             return AddressTool.getStringAddressByBytes(AddressTool.getAddress(chunks.get(1).data,BaseConstant.DEFAULT_CHAIN_ID));
         }
-    }
+    }*/
 
     /**
      * 多重签名脚本签名验证
