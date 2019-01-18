@@ -133,7 +133,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             account.setChainId(chainId);
             account.setAlias(aliasName);
             tx = createAliasTrasactionWithoutSign(account);
-            signTransaction(tx,account,password);
+            signTransaction(tx, account, password);
             TransactionCmdCall.newTx(account.getChainId(), HexUtil.encode(tx.serialize()));
 
             //TODO how to save the chainId?EdwardChan
@@ -141,7 +141,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             //todo send the transaction to transaction manage module
         } catch (Exception e) {
             LogUtil.error("", e);
-            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION,e);
+            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
         }
         return tx;
     }
@@ -172,7 +172,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             //todo whether need to other operation if the fee is too big
         } catch (Exception e) {
             LogUtil.error("", e);
-            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION,e);
+            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
         }
         return fee;
     }
@@ -238,7 +238,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             }
         } catch (Exception e) {
             LogUtil.error("", e);
-            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION,e);
+            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
         }
         return new ArrayList<>(result);
     }
@@ -347,13 +347,13 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 }
             }
         } catch (Exception e) {
-            LogUtil.error("",e);
-            throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR,e);
+            LogUtil.error("", e);
+            throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR, e);
         }
         return result;
     }
 
-    private Transaction createAliasTrasactionWithoutSign(Account account) throws NulsException,IOException {
+    private Transaction createAliasTrasactionWithoutSign(Account account) throws NulsException, IOException {
         Transaction tx = null;
         //Second:build the transaction
         tx = new AliasTransaction();
@@ -365,9 +365,9 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Chain chain = chainManager.getChainMap().get(account.getChainId());
         int assetsId = chain.getConfig().getAssetsId();
         //TODO 不同链设置别名是否都燃烧nuls?
-        CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(),account.getChainId(),assetsId);
+        CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
-        CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS,account.getChainId(),assetsId,BigInteger.ONE);
+        CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, BigInteger.ONE);
         int txSize = tx.size() + coinFrom.size() + coinTo.size() + 72;
         //计算手续费
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
@@ -375,8 +375,8 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         BigInteger totalAmount = BigInteger.ONE.add(fee);
         coinFrom.setAmount(totalAmount);
         //检查余额是否充足
-        BigInteger mainAsset = TxUtil.getBalance(account.getChainId(), assetsId, coinFrom.getAddress());
-        if (BigIntegerUtils.isLessThan(mainAsset,totalAmount)) { //余额不足
+        BigInteger mainAsset = TxUtil.getBalance(account.getChainId(), account.getChainId(), assetsId, coinFrom.getAddress());
+        if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) { //余额不足
             throw new NulsRuntimeException(AccountErrorCode.INSUFFICIENT_FEE);
         }
         CoinData coinData = new CoinData();
@@ -388,11 +388,11 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         return tx;
     }
 
-    private Transaction signTransaction(Transaction transaction,Account account,String password) throws NulsException,IOException {
+    private Transaction signTransaction(Transaction transaction, Account account, String password) throws NulsException, IOException {
         TransactionSignature transactionSignature = new TransactionSignature();
         List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
         ECKey eckey = account.getEcKey(password);
-        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction,eckey);
+        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction, eckey);
         p2PHKSignatures.add(p2PHKSignature);
         transactionSignature.setP2PHKSignatures(p2PHKSignatures);
         transaction.setTransactionSignature(transactionSignature.serialize());
