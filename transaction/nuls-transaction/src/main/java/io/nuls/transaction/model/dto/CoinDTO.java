@@ -25,8 +25,6 @@
 
 package io.nuls.transaction.model.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.math.BigInteger;
 
 /**
@@ -49,7 +47,6 @@ public class CoinDTO implements Cloneable {
     /**
      * 当address为普通地址时，该对应的密码，用于签名
      */
-    @JsonIgnore
     private String password;
 
     public CoinDTO() {

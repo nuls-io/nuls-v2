@@ -48,4 +48,6 @@ public interface UnverifiedTxStorageService {
      * @return
      */
     Transaction pollTx(Chain chain);
+
+    long size(Chain chain);
 }

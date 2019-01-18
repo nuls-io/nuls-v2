@@ -61,8 +61,8 @@ public class TxFlowTest {
 
     static int chainId = 12345;
     static int assetChainId = 12345;
-    static String address1 = "LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";
-    static String address2 = "JcgbDRvBqQ67Uq4Tb52U22ieJdr3G3930";
+    static String address1 = "QXpkrbKqShZfopyck5jBQSFgbP9cD3930";
+    static String address2 = "KS3wfAPFAmY8EwMFz21EXhJMXf8DV3930";
     static String address3 = "Vxb3xxatcFFTZZe3wynX6CfAsvzAx3930";
     static String address4 = "R9CxmNqtBDEm9iWX2Cod46QGCNE2M3930";
     static int assetId = 1;
@@ -82,7 +82,7 @@ public class TxFlowTest {
 //        txService = SpringLiteContext.getBean(TxService.class);
 //        chainManager = SpringLiteContext.getBean(ChainManager.class);
         //初始化token
-//        addGenesisAsset();
+        addGenesisAsset();
 //        chain = chainManager.getChain(chainId);
     }
 
@@ -91,7 +91,7 @@ public class TxFlowTest {
     public void newCtx() throws Exception{
         chain = new Chain();
         chain.setConfig(new ConfigBean(12345, 1));
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address2), assetChainId, assetId);
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
         System.out.println(balance.longValue());
 
         CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
@@ -160,7 +160,7 @@ public class TxFlowTest {
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinTo coinTo = new CoinTo();
-        coinTo.setAddress(AddressTool.getAddress(address2));
+        coinTo.setAddress(AddressTool.getAddress(address1));
         coinTo.setAmount(amount);
         coinTo.setAssetsChainId(assetChainId);
         coinTo.setAssetsId(assetId);

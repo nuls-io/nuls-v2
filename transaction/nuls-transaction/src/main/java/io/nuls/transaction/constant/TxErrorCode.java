@@ -56,7 +56,7 @@ public interface TxErrorCode {
     ErrorCode COINDATA_IS_INCOMPLETE = ErrorCode.init("10045");
     ErrorCode PAYEE_AND_PAYER_IS_THE_SAME_CHAIN = ErrorCode.init("10046");
     ErrorCode TRANSACTION_ALREADY_EXISTS = ErrorCode.init("10047");
-    ErrorCode SIGN_ADDRESS_NOT_MATCH = ErrorCode.init("10048");
+    ErrorCode ADDRESS_NOT_BELONG_TO_MULTI_SIGN_ACCOUNT = ErrorCode.init("10048");
     ErrorCode DESERIALIZE_TX_ERROR = ErrorCode.init("10049");
     ErrorCode DESERIALIZE_COINDATA_ERROR = ErrorCode.init("10050");
     ErrorCode CHAIN_NOT_FOUND = ErrorCode.init("10051");
@@ -69,6 +69,7 @@ public interface TxErrorCode {
     ErrorCode COINFROM_HAS_DUPLICATE_COIN = ErrorCode.init("10058");
     ErrorCode COINTO_HAS_DUPLICATE_COIN = ErrorCode.init("10059");
     ErrorCode CALLING_REMOTE_INTERFACE_FAILED = ErrorCode.init("10060");
+    ErrorCode SIGN_ADDRESS_NOT_MATCH_COINFROM = ErrorCode.init("10061");
 
 
 

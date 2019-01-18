@@ -339,7 +339,7 @@ public class TransactionCmd extends BaseCmd {
             if(tx == null){
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
-            return success(tx);
+            return success(tx.hex());
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -425,7 +425,7 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
-     *  测试创建交易接口(该接口应该为外部客户端接口,本不应该写在此处)
+     *  创建交易接口(该接口应该为外部客户端接口,本不应该写在此处)
      * @param params
      * @return
      */

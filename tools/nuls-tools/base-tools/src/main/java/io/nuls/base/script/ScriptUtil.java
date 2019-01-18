@@ -81,9 +81,9 @@ public class ScriptUtil {
      * @param redeemScript 贖回腳本
      * @return Script  生成的锁定脚本
      */
-    public static Script createP2SHOutputScript(Script redeemScript) {
+/*    public static Script createP2SHOutputScript(Script redeemScript) {
         return ScriptBuilder.createP2SHOutputScript(redeemScript);
-    }
+    }*/
 
     /**
      * M-N多重签名模式下，根据输出地址生成锁定脚本
@@ -152,7 +152,7 @@ public class ScriptUtil {
             /**
              * 脚本创建测试代码
              * */
-            //P2PKHInput
+         /*   //P2PKHInput
             byte[] signbyte = "cVLwRLTvz3BxDAWkvS3yzT9pUcTCup7kQnfT2smRjvmmm1wAP6QT".getBytes();
             byte[] pubkeyByte = "public_key".getBytes();
             Script inputScript = createP2PKHInputScript(signbyte, pubkeyByte);
@@ -185,7 +185,7 @@ public class ScriptUtil {
             System.out.println("P2SH_OUTPUT:" + p2shOutput.getChunks());
 
             System.out.println(Arrays.toString(SerializeUtils.sha256hash160("03a690c7f3b07e320566162b0ff7d79c8c9f453c0a4a13305fcd90f4e4f4cf215c".getBytes())));
-
+*/
             /**
              * P2PKH脚本验证测试代码
              * */
