@@ -26,6 +26,9 @@ package io.nuls.network.manager;
 
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.manager.handler.MessageHandlerFactory;
+import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
+import io.nuls.network.manager.handler.message.*;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
@@ -52,24 +55,31 @@ public class MessageFactory {
     private  MessageFactory(){
 
     }
-
     public static MessageFactory getInstance(){
         return instance;
     }
-
+    void init(){
+        MessageFactory.putMessage(VersionMessage.class,VersionMessageHandler.getInstance());
+        MessageFactory.putMessage(VerackMessage.class,VerackMessageHandler.getInstance());
+        MessageFactory.putMessage(GetAddrMessage.class,GetAddrMessageHandler.getInstance());
+        MessageFactory.putMessage(AddrMessage.class,AddrMessageHandler.getInstance());
+        MessageFactory.putMessage(ByeMessage.class,ByeMessageHandler.getInstance());
+        MessageFactory.putMessage(GetTimeMessage.class,GetTimeMessageHandler.getInstance());
+        MessageFactory.putMessage(TimeMessage.class,TimeMessageHandler.getInstance());
+    }
     /**
      * putMessage
      * @param  msgClass BaseMessage
      */
-    static void putMessage(Class<? extends BaseMessage> msgClass) {
+    static void putMessage(Class<? extends BaseMessage> msgClass, BaseMeesageHandlerInf handlerInf) {
         try {
             BaseMessage message = msgClass.getDeclaredConstructor().newInstance();
             MESSAGE_MAP.put(message.getHeader().getCommandStr(), msgClass);
+            MessageHandlerFactory.addHandler(message.getHeader().getCommandStr(),handlerInf);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
     /**
      *
      * @param command String

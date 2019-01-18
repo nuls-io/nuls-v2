@@ -33,32 +33,30 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.locker.Lockers;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.manager.handler.message.GetAddrMessageHandler;
+import io.nuls.network.manager.handler.message.OtherModuleMessageHandler;
 import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.dto.IpAddress;
-import io.nuls.network.model.dto.ProtocolRoleHandler;
-import io.nuls.network.model.message.*;
+import io.nuls.network.model.message.AddrMessage;
+import io.nuls.network.model.message.GetAddrMessage;
+import io.nuls.network.model.message.OtherModuleMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
-import io.nuls.network.model.po.ProtocolHandlerPo;
-import io.nuls.network.model.po.RoleProtocolPo;
-import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
 
@@ -70,25 +68,16 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  *
  */
 public class MessageManager extends BaseManager{
-    /**
-     *key : protocol cmd, value : Map<role,ProtocolRoleHandler>
-     */
-    private static Map<String,Map<String,ProtocolRoleHandler>> protocolRoleHandlerMap = new ConcurrentHashMap<>();
+
     private static MessageManager instance = new MessageManager();
     public static MessageManager getInstance(){
         return instance;
     }
-    private  StorageManager storageManager=StorageManager.getInstance();
     public void  sendToNode(BaseMessage message, Node node, boolean aysn) {
         //向节点发送消息
         broadcastToANode(message,node,aysn);
 
     }
-
-    public  Map<String,Map<String,ProtocolRoleHandler>> getProtocolRoleHandlerMap() {
-        return protocolRoleHandlerMap;
-    }
-
     /**
      * protocol message  checkSum cal
      * @param msgBody msgBody
@@ -118,51 +107,7 @@ public class MessageManager extends BaseManager{
         return null;
     }
 
-    /**
-     * add handler Map data
-     * @param protocolCmd protocolCmd
-     * @param handler handler
-     */
-    public void addProtocolRoleHandlerMap(String protocolCmd,ProtocolRoleHandler handler){
-        Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.lock();
-        try {
-            Map<String,ProtocolRoleHandler> roleMap = protocolRoleHandlerMap.get(protocolCmd);
-            if (null == roleMap) {
-                roleMap = new HashMap<>();
-                roleMap.put(handler.getRole(),handler);
-                protocolRoleHandlerMap.put(protocolCmd,roleMap);
-            } else {
-                //replace
-                roleMap.put(handler.getRole(),handler);
 
-            }
-        }finally {
-            Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.unlock();
-        }
-    }
-    public void clearCacheProtocolRoleHandlerMap(String role){
-        Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.lock();
-        try {
-            Collection<Map<String,ProtocolRoleHandler>> values = protocolRoleHandlerMap.values();
-            for (Map<String,ProtocolRoleHandler> value : values) {
-                value.remove(role);
-            }
-        }finally {
-            Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.unlock();
-        }
-
-    }
-    /**
-     * get handler data
-     * @param protocolCmd protocolCmd
-     * @return Collection
-     */
-    public Collection<ProtocolRoleHandler> getProtocolRoleHandlerMap(String protocolCmd){
-        if(null != protocolRoleHandlerMap.get(protocolCmd)){
-            return protocolRoleHandlerMap.get(protocolCmd).values();
-        }
-        return null;
-    }
     /**
      * 验证消息
      * validate message checkSum
@@ -194,43 +139,25 @@ public class MessageManager extends BaseManager{
             BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());
             byteBuffer.setCursor(0);
             while (!byteBuffer.isFinished()) {
+                Log.debug((isServer ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
+                NetworkEventResult result = null;
                 if (null != message) {
-                    Log.debug((isServer ? "Server" : "Client") + ":----receive message-- magicNumber:" + header.getMagicNumber() + "==CMD:" + header.getCommandStr());
                     Log.debug("==============================Network module self message");
-                    BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(message);
+                    BaseMeesageHandlerInf  handler = MessageHandlerFactory.getInstance().getHandler(header.getCommandStr());
+                    result = handler.recieve(message,node.getId(), isServer);
                     message = byteBuffer.readNulsData(message);
-                    NetworkEventResult result = handler.recieve(message, node.getId(), isServer);
-                    if (!result.isSuccess()) {
-                        Log.error("receiveMessage fail:" + result.getErrorCode().getMsg());
-                    }
-
                 } else {
                     //外部消息，转外部接口
                     Log.debug("==============================receive other module message, hash-" + NulsDigestData.calcDigestData(payLoadBody).getDigestHex() + "node-" + node.getId());
-                    long magicNum = header.getMagicNumber();
-                    int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
-                    Map<String, Object> paramMap = new HashMap<>();
-                    paramMap.put("chainId", chainId);
-                    paramMap.put("nodeId", node.getId());
-                    paramMap.put("messageBody", HexUtil.byteToHex(payLoadBody));
-                    Collection<ProtocolRoleHandler> protocolRoleHandlers = getProtocolRoleHandlerMap(header.getCommandStr());
-                    if (null == protocolRoleHandlers) {
-                        Log.error("unknown mssages. cmd={},may be handle had not be registered to network.", header.getCommandStr());
-                    } else {
-                        Log.debug("==============================other module message protocolRoleHandlers-size:{}", protocolRoleHandlers.size());
-                        for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
-                            try {
-                                Log.debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
-                                Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
-                                Log.debug("response：" + response);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
+                    message = new  OtherModuleMessage(header,HexUtil.byteToHex(payLoadBody));
+                    OtherModuleMessageHandler handler =MessageHandlerFactory.getInstance().getOtherModuleHandler();
+                    result = handler.recieve(header, payLoadBody,node.getId(), isServer);
                     Log.debug("s=={}==={}", byteBuffer.getPayload().length, byteBuffer.getCursor());
                     byteBuffer.setCursor(payLoad.length);
                     Log.debug("e=={}==={}", byteBuffer.getPayload().length, byteBuffer.getCursor());
+                }
+                if (!result.isSuccess()) {
+                    Log.error("receiveMessage deal fail:" + result.getErrorCode().getMsg());
                 }
             }
         } catch (Exception e) {
@@ -408,28 +335,8 @@ public class MessageManager extends BaseManager{
 
     @Override
     public void init() {
+        MessageFactory.getInstance().init();
 
-        MessageFactory.putMessage(VersionMessage.class);
-        MessageFactory.putMessage(VerackMessage.class);
-        MessageFactory.putMessage(GetAddrMessage.class);
-        MessageFactory.putMessage(AddrMessage.class);
-        MessageFactory.putMessage(ByeMessage.class);
-        MessageFactory.putMessage(GetTimeMessage.class);
-        MessageFactory.putMessage(TimeMessage.class);
-
-        /*
-         * 加载协议注册信息
-         * load protocolRegister info
-         */
-        List<RoleProtocolPo> list = storageManager.getProtocolRegisterInfos();
-        for(RoleProtocolPo roleProtocolPo : list){
-            roleProtocolPo.getRole();
-            List<ProtocolHandlerPo>   protocolHandlerPos = roleProtocolPo.getProtocolHandlerPos();
-            for(ProtocolHandlerPo protocolHandlerPo : protocolHandlerPos){
-                ProtocolRoleHandler protocolRoleHandler = new ProtocolRoleHandler(roleProtocolPo.getRole(),protocolHandlerPo.getHandler());
-                addProtocolRoleHandlerMap(protocolHandlerPo.getProtocolCmd(),protocolRoleHandler);
-            }
-        }
     }
 
     @Override
