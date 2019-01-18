@@ -39,13 +39,11 @@ import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.TxService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.validation.constraints.AssertTrue;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -69,46 +67,36 @@ public class TxFlowTest {
     //入账金额
     static BigInteger amount = BigInteger.valueOf(100000000000L);
 
-    private TxService txService;
-    private ChainManager chainManager;
     private Chain chain;
     private Transaction tx;
     private CoinData coinData;
 
     @Before
     public void before() throws Exception{
-//        InitializerTest.init();
         NoUse.mockModule();
-//        txService = SpringLiteContext.getBean(TxService.class);
-//        chainManager = SpringLiteContext.getBean(ChainManager.class);
-        //初始化token
-        addGenesisAsset();
-//        chain = chainManager.getChain(chainId);
+        chain = new Chain();
+        chain.setConfig(new ConfigBean(12345, 1));
+//        初始化token
+//        addGenesisAsset();
     }
 
 
     @Test
     public void newCtx() throws Exception{
-        chain = new Chain();
-        chain.setConfig(new ConfigBean(12345, 1));
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
-        System.out.println(balance.longValue());
-
-        CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
-                createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-        //调接口
-        String json = JSONUtils.obj2json(ctxTransfer);
-
-        Map<String, Object> params = JSONUtils.json2map(json);
-//        Map map = (HashMap)TransactionCall.request("tx_createCtx", ModuleE.TX.abbr, params);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
-        Assert.assertTrue(null != response.getResponseData());
-        Map map = (HashMap)((HashMap) response.getResponseData()).get("tx_createCtx");
-        Assert.assertTrue(null != map);
-        Log.info("{}", map.get("value"));
-        /*String hash = txService.createCrossTransaction(chain,
-                createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-        System.out.println(hash);*/
+        for(int i = 0; i<2; i++) {
+            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
+            System.out.println(balance.longValue());
+            CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
+                    createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
+            //调接口
+            String json = JSONUtils.obj2json(ctxTransfer);
+            Map<String, Object> params = JSONUtils.json2map(json);
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
+            Assert.assertTrue(null != response.getResponseData());
+            Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
+            Assert.assertTrue(null != map);
+            Log.info("{}", map.get("value"));
+        }
 
     }
 
@@ -196,4 +184,5 @@ public class TxFlowTest {
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         Log.info("response {}", response);
     }
+
 }

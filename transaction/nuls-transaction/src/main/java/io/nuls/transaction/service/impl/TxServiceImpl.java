@@ -36,6 +36,7 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -264,7 +265,7 @@ public class TxServiceImpl implements TxService {
                     byte[] fromAddress = coinFromList.get(0).getAddress();
                     MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(fromAddress);
                     if(null == multiSigAccount){
-                        throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
+                        throw new NulsException(TxErrorCode.ACCOUNT_NOT_EXIST);
                     }
                     multiSignTxSignature.setM(multiSigAccount.getM());
                     multiSignTxSignature.setPubKeyList(multiSigAccount.getPubKeyList());
@@ -930,5 +931,4 @@ public class TxServiceImpl implements TxService {
         }
 
     }
-
 }

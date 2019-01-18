@@ -176,7 +176,7 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
     }
 
     @Override
-    public void createTxTables(String tableName, String indexName, String uniqueName, int number) {
+    public void createTxTablesIfNotExists(String tableName, String indexName, String uniqueName, int number) {
         SqlSession sqlSession = sqlSessionFactory.openSession();
         TransactionMapper mapper = sqlSession.getMapper(TransactionMapper.class);
         List<TxTable> list = new ArrayList<>();
