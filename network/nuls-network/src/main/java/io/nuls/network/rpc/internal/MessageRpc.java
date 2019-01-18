@@ -24,11 +24,13 @@
  */
 package io.nuls.network.rpc.internal;
 
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
+import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -156,11 +158,11 @@ public class MessageRpc extends BaseCmd{
     @Parameter(parameterName = "command", parameterType = "string")
     public Response sendPeersMsg(Map params) {
         try {
-            Log.debug("==================sendPeersMsg begin");
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String nodes = String.valueOf(params.get("nodes"));
             byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
             String cmd =String.valueOf(params.get("command"));
+            Log.debug("{}==================sendPeersMsg begin, cmd-{}",TimeService.currentTimeMillis(), cmd);
             MessageManager messageManager=MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
@@ -174,13 +176,14 @@ public class MessageRpc extends BaseCmd{
             String []nodeIds=nodes.split(",");
             List<Node> nodesList = new ArrayList<>();
             for(String nodeId:nodeIds){
-                if(null != nodeGroup.getConnectNode(nodeId)){
-                    nodesList.add(nodeGroup.getConnectNode(nodeId));
+                Node connectNode = nodeGroup.getConnectNode(nodeId);
+                if(null != connectNode){
+                    nodesList.add(connectNode);
                 }
             }
-            Log.debug("==================sendPeersMsg nodesList size={}",nodesList.size());
+            Log.debug("==================sendPeersMsg nodesList size={}, cmd-{}, hash-{}",nodesList.size(), cmd, NulsDigestData.calcDigestData(messageBody).getDigestHex());
             NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message,nodesList,true);
-            Log.debug("=======================networkEventResult {}",networkEventResult.isSuccess());
+            Log.debug("=======================networkEventResult {}, cmd-{}",networkEventResult.isSuccess(), cmd);
         } catch (Exception e) {
             e.printStackTrace();
             return failed(NetworkErrorCode.PARAMETER_ERROR);

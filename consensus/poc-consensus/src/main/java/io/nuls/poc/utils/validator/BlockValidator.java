@@ -46,7 +46,7 @@ public class BlockValidator {
     * @param chain             chain info
     * @param block             block info
     * */
-   public boolean validate(boolean isDownload, Chain chain, Block block)throws NulsException,IOException{
+   public void validate(boolean isDownload, Chain chain, Block block)throws NulsException,IOException{
       BlockHeader blockHeader = block.getHeader();
       //验证梅克尔哈希
       if (!blockHeader.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(block.getTxHashList()))) {
@@ -63,7 +63,6 @@ public class BlockValidator {
       if(!validResult){
          throw new NulsException(ConsensusErrorCode.BLOCK_COINBASE_VALID_ERROR);
       }
-      return true;
    }
 
    /**
@@ -258,38 +257,10 @@ public class BlockValidator {
       RedPunishData punishData = new RedPunishData();
       punishData.parse(tx.getTxData(),0);
       /*
-      红牌交易类型为双花
-      The type of red card transaction is double flower.
-      */
-      if(punishData.getReasonCode() == PunishReasonEnum.DOUBLE_SPEND.getCode()){
-         SmallBlock smallBlock = new SmallBlock();
-         try {
-            smallBlock.parse(punishData.getEvidence(), 0);
-         } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e.getMessage());
-            return false;
-         }
-         BlockHeader header = smallBlock.getHeader();
-         if (header.getTime() != tx.getTime()) {
-            return false;
-         }
-         List<NulsDigestData> txHashList = smallBlock.getTxHashList();
-         if (!header.getMerkleHash().equals(NulsDigestData.calcMerkleDigestData(txHashList))) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).warn(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR.getMsg());
-            return false;
-         }
-         List<Transaction> txList = smallBlock.getSubTxList();
-         if (null == txList || txList.size() < 2) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).warn(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR.getMsg());
-            return false;
-         }
-         //todo 账本模块验证双花
-      }
-      /*
       红牌交易类型为连续分叉
       The type of red card transaction is continuous bifurcation
       */
-      else if(punishData.getReasonCode() == PunishReasonEnum.BIFURCATION.getCode()){
+      if(punishData.getReasonCode() == PunishReasonEnum.BIFURCATION.getCode()){
          NulsByteBuffer byteBuffer = new NulsByteBuffer(punishData.getEvidence());
          long[] roundIndex = new long[ConsensusConstant.REDPUNISH_BIFURCATION];
          for (int i = 0; i < ConsensusConstant.REDPUNISH_BIFURCATION && !byteBuffer.isFinished(); i++) {

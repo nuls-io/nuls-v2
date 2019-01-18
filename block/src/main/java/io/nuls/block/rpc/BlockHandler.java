@@ -56,10 +56,15 @@ public class BlockHandler extends BaseCmd {
             byte[] decode = HexUtil.decode(map.get("messageBody").toString());
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
+            e.printStackTrace();
             messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        messageLog.info("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", height:" + message.getBlock().getHeader().getHeight());
+        if (message.getBlock() == null) {
+            messageLog.debug("recieve null BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + message.getRequestHash());
+        } else {
+            messageLog.debug("recieve BlockMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + message.getRequestHash());
+        }
         CacheHandler.receiveBlock(chainId, message);
         return success();
     }

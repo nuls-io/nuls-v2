@@ -56,10 +56,11 @@ public class CompleteHandler extends BaseCmd {
             byte[] decode = HexUtil.decode(map.get("messageBody").toString());
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
+            e.printStackTrace();
             messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-        messageLog.info("recieve CompleteMessage from node-" + nodeId + ", chainId:" + chainId);
+        messageLog.debug("recieve CompleteMessage from node-" + nodeId + ", chainId:" + chainId);
         CacheHandler.batchComplete(chainId, message);
         return success();
     }

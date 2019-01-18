@@ -78,6 +78,7 @@ public class BlockSynchronizer implements Runnable {
                     Thread.sleep(1000L);
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 Log.error(e);
             }
         }
@@ -143,7 +144,7 @@ public class BlockSynchronizer implements Runnable {
             Log.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
             if (success) {
                 if (checkIsNewest(chainId, params, context)) {
-                    Log.info("block syn complete successfully");
+                    Log.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                     return true;

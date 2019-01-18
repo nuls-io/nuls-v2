@@ -211,4 +211,6 @@ public interface ConsensusConstant {
      * */
     String CONSENSUS_LOGGER_NAME = "consensus/consensus";
     String BASIC_LOGGER_NAME = "rpc/rpc";
+
+    String MODULE_VALIDATOR = "cs_batchValid";
  }

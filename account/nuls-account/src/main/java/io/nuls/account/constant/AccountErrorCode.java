@@ -95,5 +95,14 @@ public interface AccountErrorCode {
     ErrorCode INSUFFICIENT_FEE = ErrorCode.init("30029");
     ErrorCode CHAIN_NOT_EXIST= ErrorCode.init("30030");
     ErrorCode COINDATA_IS_INCOMPLETE = ErrorCode.init("30031");
-
+    ErrorCode TX_NOT_EXIST = ErrorCode.init("30032");
+    ErrorCode TX_COINDATA_NOT_EXIST = ErrorCode.init("30033");
+    ErrorCode TX_DATA_VALIDATION_ERROR = ErrorCode.init("30034");
+    ErrorCode TX_TYPE_ERROR = ErrorCode.init("30035");
+    ErrorCode TX_NOT_EFFECTIVE = ErrorCode.init("30036");
+    ErrorCode TX_SIZE_TOO_LARGE = ErrorCode.init("30037");
+    ErrorCode TX_COINFROM_NOT_FOUND = ErrorCode.init("30038");
+    ErrorCode TX_COINTO_NOT_FOUND = ErrorCode.init("30039");
+    ErrorCode CHAINID_ERROR = ErrorCode.init("30040");
+    ErrorCode ASSETID_ERROR = ErrorCode.init("30041");
 }

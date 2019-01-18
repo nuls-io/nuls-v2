@@ -29,6 +29,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.NulsDigestData;
 import io.nuls.network.constant.NetworkConstant;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NetworkParam;
@@ -36,6 +37,7 @@ import io.nuls.network.locker.Lockers;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.manager.handler.message.GetAddrMessageHandler;
+import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -189,21 +191,22 @@ public class MessageManager extends BaseManager{
                 Log.error("validate  false ======================");
                 return;
             }
-            byteBuffer.setCursor(0);
-            while (!byteBuffer.isFinished()) {
-                Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
-                BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());
-                if(null != message) {
-                    Log.debug("==============================Network module self message");
-                    BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(message);
-                    message = byteBuffer.readNulsData(message);
-                    NetworkEventResult result = handler.recieve(message, node.getId(), isServer);
-                    if(!result.isSuccess()){
-                        Log.error("receiveMessage fail:"+result.getErrorCode().getMsg());
-                    }
-                }else{
+            BaseMessage message=MessageManager.getInstance().getMessageInstance(header.getCommandStr());
+            if(null != message) {
+                byteBuffer.setCursor(0);
+                while (!byteBuffer.isFinished()) {
+                    Log.debug((isServer?"Server":"Client")+":----receive message-- magicNumber:"+ header.getMagicNumber()+"==CMD:"+header.getCommandStr());
+                        Log.debug("==============================Network module self message");
+                        BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(message);
+                        message = byteBuffer.readNulsData(message);
+                        NetworkEventResult result = handler.recieve(message, node.getId(), isServer);
+                        if(!result.isSuccess()){
+                            Log.error("receiveMessage fail:"+result.getErrorCode().getMsg());
+                        }
+                }
+            } else{
                     //外部消息，转外部接口
-                    Log.debug("==============================other module message");
+                    Log.debug("==============================receive other module message, hash-" +NulsDigestData.calcDigestData(payLoadBody).getDigestHex() + "node-" + node.getId());
                     long magicNum=header.getMagicNumber();
                     int chainId=NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
                     Map<String,Object> paramMap = new HashMap<>();
@@ -216,18 +219,22 @@ public class MessageManager extends BaseManager{
                     }else{
                         Log.debug("==============================other module message protocolRoleHandlers-size:{}",protocolRoleHandlers.size());
                         for(ProtocolRoleHandler protocolRoleHandler:protocolRoleHandlers) {
-                            Log.debug("request：{}=={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
-                           Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
-                            Log.debug("response：" + response);
+                             try {
+                                 Log.debug("request：{}=={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
+                                  Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
+                                  Log.debug("response：" + response);
+                              }catch(Exception e){
+                                  e.printStackTrace();
+                              }
                         }
                     }
+                    Log.debug("s=={}==={}",byteBuffer.getPayload().length,byteBuffer.getCursor());
                     byteBuffer.setCursor(payLoad.length);
-                }
-             }
-
+                    Log.debug("e=={}==={}",byteBuffer.getPayload().length,byteBuffer.getCursor());
+            }
         } catch (Exception e) {
             e.printStackTrace();
-            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
+//            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
         } finally {
             buffer.clear();
         }
@@ -245,7 +252,7 @@ public class MessageManager extends BaseManager{
                     List<IpAddress> addressesList=new ArrayList<>();
                     addressesList.add(LocalInfoManager.getInstance().getExternalAddress());
                     AddrMessage addrMessage= MessageFactory.getInstance().buildAddrMessage(addressesList,nodeGroupConnector.getMagicNumber());
-//                    Log.info("broadcastSelfAddrToAllNode================"+addrMessage.getMsgBody().size()+"==getIpAddressList()=="+addrMessage.getMsgBody().getIpAddressList().size());
+                    Log.debug("broadcastSelfAddrToAllNode================"+addrMessage.getMsgBody().size()+"==getIpAddressList()=="+addrMessage.getMsgBody().getIpAddressList().size());
                     this.sendToNode(addrMessage,connectNode,asyn);
                 }
 
@@ -295,6 +302,14 @@ public class MessageManager extends BaseManager{
         }
         return false;
     }
+
+    /**
+     * 广播消息到所有节点，排除特定节点
+     * @param addrMessage
+     * @param excludeNode
+     * @param asyn
+     * @return
+     */
     public NetworkEventResult broadcastAddrToAllNode(BaseMessage addrMessage, Node excludeNode,boolean asyn) {
          NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByMagic(addrMessage.getHeader().getMagicNumber());
         Collection<Node> connectNodes=nodeGroup.getConnectNodes();
@@ -308,6 +323,13 @@ public class MessageManager extends BaseManager{
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
+
+    /**
+     * 判断是否是握手消息
+     * isHandShakeMessage?
+     * @param message
+     * @return
+     */
     private  boolean isHandShakeMessage(BaseMessage message){
         return (message.getHeader().getCommandStr().equals(NetworkConstant.CMD_MESSAGE_VERSION) || message.getHeader().getCommandStr().equals(NetworkConstant.CMD_MESSAGE_VERACK));
 
@@ -319,6 +341,7 @@ public class MessageManager extends BaseManager{
         if(!isHandShakeMessage(message)) {
             NodeGroupConnector nodeGroupConnector = node.getNodeGroupConnector(message.getHeader().getMagicNumber());
             if (NodeGroupConnector.HANDSHAKE != nodeGroupConnector.getStatus()) {
+                Log.error("{} status is not handshake",node.getId());
                 return new NetworkEventResult(false, NetworkErrorCode.NET_NODE_DEAD);
             }
         }
@@ -332,8 +355,7 @@ public class MessageManager extends BaseManager{
             ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
             if (!asyn) {
                 future.await();
-                boolean success = future.isSuccess();
-                if (!success) {
+                if (!future.isSuccess()) {
                     return new NetworkEventResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
                 }
             }
@@ -344,12 +366,21 @@ public class MessageManager extends BaseManager{
         }
         return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
+
+    /**
+     * broadcast message to nodes
+     * @param message
+     * @param nodes
+     * @param asyn
+     * @return
+     */
     public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
-        Log.debug("==================broadcastToNodes begin");
+        Log.debug("{}==================broadcastToNodes begin",TimeService.currentTimeMillis());
         for(Node node:nodes) {
             Log.debug("==================node {}",node.getId());
             if (node.getChannel() == null || !node.getChannel().isActive()) {
                 Log.info(node.getId() + "is inActive");
+                continue;
             }
             try {
                 ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
@@ -357,10 +388,7 @@ public class MessageManager extends BaseManager{
                 if (!asyn) {
                     future.await();
                     boolean success = future.isSuccess();
-                    Log.debug("==================success?{}",success);
-                    if (!success) {
-                        Log.info(node.getId() + "is fail");
-                    }
+                    Log.debug("=================={}success?{}",node.getId(),success);
                 }
             } catch (Exception e) {
                 e.printStackTrace();

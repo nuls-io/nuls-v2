@@ -39,6 +39,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService 
             bytes = transaction.serialize();
             return RocksDBService.put("tx" + chainId, transaction.getHash().serialize(), bytes);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }
@@ -55,6 +56,7 @@ public class TransactionStorageServiceImpl implements TransactionStorageService 
             po.parse(new NulsByteBuffer(bytes));
             return po;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
