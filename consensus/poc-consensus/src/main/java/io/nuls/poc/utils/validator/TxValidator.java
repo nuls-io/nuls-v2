@@ -113,7 +113,7 @@ public class TxValidator {
         if(agentPo == null || agentPo.getDelHeight() > 0){
             throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
         }
-        if(!validSignature(tx,agentPo.getAgentAddress())){
+        if(!validSignature(tx,agentPo.getAgentAddress(),chain.getConfig().getChainId())){
             return false;
         }
         CoinData coinData = new CoinData();
@@ -152,7 +152,7 @@ public class TxValidator {
         if (!isDepositOk(deposit.getDeposit(), coinData)) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_ERROR);
         }
-        if(!validSignature(tx,deposit.getAddress())){
+        if(!validSignature(tx,deposit.getAddress(),chain.getConfig().getChainId())){
             return false;
         }
         Set<String> addressSet = new HashSet<>();
@@ -184,7 +184,7 @@ public class TxValidator {
         if(depositPo == null || depositPo.getDelHeight() > 0){
             throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
         }
-        if(!validSignature(tx,depositPo.getAddress())){
+        if(!validSignature(tx,depositPo.getAddress(),chain.getConfig().getChainId())){
             return false;
         }
         return true;
@@ -225,7 +225,7 @@ public class TxValidator {
         if (!isDepositOk(agent.getDeposit(), coinData)) {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_ERROR);
         }
-        if(!validSignature(tx,agent.getAgentAddress())){
+        if(!validSignature(tx,agent.getAgentAddress(),chain.getConfig().getChainId())){
             return false;
         }
         Set<String> addressSet = new HashSet<>();
@@ -356,11 +356,11 @@ public class TxValidator {
      * @param address  签名账户/signature
      * @return boolean
      * */
-    private boolean validSignature(Transaction tx ,byte[] address) throws NulsException{
+    private boolean validSignature(Transaction tx ,byte[] address,int chainId) throws NulsException{
         TransactionSignature sig = new TransactionSignature();
         try {
             sig.parse(tx.getTransactionSignature(), 0);
-            if (!SignatureUtil.containsAddress(tx, address)){
+            if (!SignatureUtil.containsAddress(tx, address,chainId)){
                 return false;
             }
         }catch (NulsException e){

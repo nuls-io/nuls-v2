@@ -343,8 +343,15 @@ public class PunishManager {
                 CoinData coinData = coinDataManager.getStopAgentCoinData(chain, redPunishData.getAddress(), redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
                 redPunishTransaction.setCoinData(coinData.serialize());
                 redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
-                txList.add(redPunishTransaction);
+                chain.getRedPunishTransactionList().add(redPunishTransaction);
             }
+        }
+        /*
+        * 待打包交易与红牌交易冲突检测
+        * Conflict Detection of Unpackaged Trading and Red Card Trading
+        * */
+        if(chain.getRedPunishTransactionList().size() > 0){
+            conflictValid(chain,txList);
         }
     }
 
@@ -395,8 +402,8 @@ public class PunishManager {
             return null;
         }
         List<byte[]> addressList = new ArrayList<>();
-        MeetingMember member = null;
-        MeetingRound preRound = null;
+        MeetingMember member;
+        MeetingRound preRound;
         for (int i = 1; i <= yellowCount; i++) {
             int index = self.getPackingIndexOfRound() - i;
             /*
@@ -433,5 +440,18 @@ public class PunishManager {
         punishTx.setTime(self.getPackEndTime());
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx.serializeForHash()));
         return punishTx;
+    }
+
+    /**
+     * 待打包交易与红牌交易冲突检测
+     * Conflict Detection of Unpackaged Trading and Red Card Trading
+     * */
+    private void conflictValid(Chain chain,List<Transaction> txList){
+        //todo
+        for (Transaction tx:txList) {
+
+        }
+        txList.addAll(chain.getRedPunishTransactionList());
+        chain.getRedPunishTransactionList().clear();
     }
 }

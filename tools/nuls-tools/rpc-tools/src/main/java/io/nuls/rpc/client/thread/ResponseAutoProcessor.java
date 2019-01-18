@@ -23,16 +23,12 @@
  *
  */
 package io.nuls.rpc.client.thread;
+import io.nuls.rpc.client.WsClient;
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
-import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.client.runtime.ClientRuntime;
-import io.nuls.rpc.client.WsClient;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
-
-import java.util.Map;
 
 /**
  * 消费从服务端获取的消息
