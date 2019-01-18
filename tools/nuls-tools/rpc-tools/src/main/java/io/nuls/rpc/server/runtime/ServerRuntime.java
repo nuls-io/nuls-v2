@@ -471,8 +471,7 @@ public class ServerRuntime {
                 long eventCount = Long.parseLong(request.getSubscriptionEventCounter());
                 if((changeCount - initCount)%eventCount == 0){
                     try {
-                        response.setRequestId(message.getMessageId());
-                        wsData.getRequestEventResponseQueue().put(response);
+                        wsData.getRequestEventResponseQueue().put(getRealResponse(cmd,message.getMessageId(),response));
                     }catch (InterruptedException e){
                         Log.error(e);
                     }

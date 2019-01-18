@@ -103,13 +103,14 @@ public class WsClient extends WebSocketClient {
                     break;
                 case Response:
                     Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
-                    /**
-                     * 如果收到已请求超时的返回直接丢弃
-                     * Discard directly if you receive a return that has been requested for a timeout
-                     * */
+                    /*
+                    如果收到已请求超时的返回直接丢弃
+                    Discard directly if you receive a return that has been requested for a timeout
+                     */
                     if(timeOutMessageList.contains(response.getRequestId())){
                         break;
                     }
+
                     /*
                     Response：还要判断是否需要自动处理
                     Response: Determines whether automatic processing is required
