@@ -143,6 +143,7 @@ public class MessageManager extends BaseManager{
                 NetworkEventResult result = null;
                 if (null != message) {
                     Log.debug("==============================Network module self message");
+                    message = byteBuffer.readNulsData(message);
                     BaseMeesageHandlerInf  handler = MessageHandlerFactory.getInstance().getHandler(header.getCommandStr());
                     result = handler.recieve(message,node.getId(), isServer);
                     message = byteBuffer.readNulsData(message);
