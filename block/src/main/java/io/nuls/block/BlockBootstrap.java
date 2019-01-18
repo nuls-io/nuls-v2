@@ -110,13 +110,13 @@ public class BlockBootstrap {
 //        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
             //开启分叉链处理线程
             ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
-            forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+            forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 5, TimeUnit.SECONDS);
             //开启孤儿链处理线程
             ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
-            orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+            orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 2, TimeUnit.SECONDS);
             //开启孤儿链维护线程
             ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
-            maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 10, TimeUnit.SECONDS);
+            maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 2, TimeUnit.SECONDS);
             //开启数据库大小监控线程
             ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
             dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);

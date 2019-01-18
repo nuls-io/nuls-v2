@@ -30,10 +30,7 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.block.constant.Constant.CACHED_BLOCK;
 import static io.nuls.block.utils.LoggerUtil.Log;
@@ -47,6 +44,8 @@ import static io.nuls.block.utils.LoggerUtil.Log;
  */
 @Service
 public class ChainStorageServiceImpl implements ChainStorageService {
+
+    private static final Comparator<Block> blockComparator = Comparator.comparingLong(Block)
 
     @Override
     public boolean save(int chainId, List<Block> blocks) {
@@ -124,7 +123,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             }
             blockList.add(block);
         }
-        return blockList;
+        return blockList.sort();
     }
 
     @Override

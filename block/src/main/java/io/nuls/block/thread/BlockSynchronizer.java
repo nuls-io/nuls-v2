@@ -143,7 +143,7 @@ public class BlockSynchronizer implements Runnable {
             long end = System.currentTimeMillis();
             Log.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
             if (success) {
-                if (checkIsNewest(chainId, params, context)) {
+                if (true) {
                     Log.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
@@ -151,6 +151,8 @@ public class BlockSynchronizer implements Runnable {
                 } else {
                     Log.info("block syn complete but is not newest");
                 }
+            } else {
+                Log.info("block syn fail, downResult:" + downResult + ", storageResult:" + storageResult);
             }
         } else {
             Log.warn("chain-" + chainId + ", available nodes not enough");

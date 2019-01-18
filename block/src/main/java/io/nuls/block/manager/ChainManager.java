@@ -29,6 +29,7 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
+import io.nuls.block.utils.LoggerUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -443,6 +444,13 @@ public class ChainManager {
         int chainId = mainChain.getChainId();
         if (mainChain.isMaster()) {
             List<Block> blockList = chainStorageService.query(subChain.getChainId(), subChain.getHashList());
+            Log.info("subChain.getHashList().size-" + subChain.getHashList().size());
+            Log.info("blockList.size()-" + blockList.size());
+            Log.info("subChain-" + subChain);
+            Log.info("subChain.getHashList()-" + subChain.getHashList());
+            for (Block block : blockList) {
+                Log.info("blockList-" + block.getHeader().getHash());
+            }
             for (Block block : blockList) {
                 if (!blockService.saveBlock(chainId, block, false)) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
