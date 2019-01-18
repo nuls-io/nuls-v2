@@ -155,6 +155,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 停止节点
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result stopAgent(Map<String, Object> params) {
         if (params == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -216,6 +217,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 委托共识
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result depositToAgent(Map<String, Object> params) {
         if (params == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);

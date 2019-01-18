@@ -253,23 +253,95 @@ public class CallMethodUtils {
             params.put("moduleValidator",ConsensusConstant.MODULE_VALIDATOR);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
             if(!cmdResp.isSuccess()){
-                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).info("chain ："+ chain.getConfig().getChainId()+" Failure of transaction registration");
+                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("chain ："+ chain.getConfig().getChainId()+" Failure of transaction registration");
                 return false;
             }
             return true;
         }catch (Exception e){
-            Log.error(e);
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
             return false;
         }
     }
 
     /**
      * 获取打包交易
+     * Getting Packaged Transactions
+     * @param chain  chain info
      * */
+    @SuppressWarnings("unchecked")
+    public static List<Transaction> getPackingTxList(Chain chain){
+        try {
+            Map<String,Object> params = new HashMap(4);
+            params.put("chainId",chain.getConfig().getChainId());
+            params.put("endTimestamp",currentTime()+ConsensusConstant.GET_TX_MAX_WAIT_TIME);
+            params.put("maxTxDataSize",ConsensusConstant.PACK_TX_MAX_SIZE);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params);
+            if(!cmdResp.isSuccess()){
+                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Packaging transaction acquisition failure!");
+                return null;
+            }
+            HashMap signResult = (HashMap)((HashMap) cmdResp.getResponseData()).get("tx_packableTxs");
+            List<String> txHexList = (List)signResult.get("list");
+            List<Transaction> txList = new ArrayList<>();
+            for (String txHex:txHexList) {
+                Transaction tx = new Transaction();
+                tx.parse(HexUtil.decode(txHex),0);
+                txList.add(tx);
+            }
+            return txList;
+        }catch (Exception e){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            return null;
+        }
+    }
+
+    /**
+     * 获取指定交易
+     * Acquisition of transactions based on transactions Hash
+     * @param chain    chain info
+     * @param txHash   transaction hash
+     * */
+    @SuppressWarnings("unchecked")
+    public static Transaction getTransaction(Chain chain,String txHash){
+        try {
+            Map<String,Object> params = new HashMap(4);
+            params.put("chainId",chain.getConfig().getChainId());
+            params.put("txHash",txHash);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
+            if(!cmdResp.isSuccess()){
+                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Acquisition transaction failed！");
+                return null;
+            }
+            Map responseData = (Map) cmdResp.getResponseData();
+            Transaction tx = new Transaction();
+            tx.parse(HexUtil.decode((String)responseData.get("tx_getTx")),0);
+            return tx;
+        }catch (Exception e){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+            return null;
+        }
+    }
+
 
     /**
      * 将新创建的交易发送给交易管理模块
+     * The newly created transaction is sent to the transaction management module
+     *
+     * @param chain  chain info
+     * @param txHex  transaction hex
      * */
-
-    
+    @SuppressWarnings("unchecked")
+    public static void sendTx(Chain chain,String txHex){
+        try {
+            Map<String,Object> params = new HashMap(4);
+            params.put("chainId",chain.getConfig().getChainId());
+            params.put("txHex",txHex);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_newTx", params);
+            if(!cmdResp.isSuccess()){
+                chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Transaction failed to send!");
+            }
+        }catch (Exception e){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
+        }
+    }
 }

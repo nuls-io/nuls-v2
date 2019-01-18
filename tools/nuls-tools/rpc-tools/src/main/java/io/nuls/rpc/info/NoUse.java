@@ -37,10 +37,7 @@ public class NoUse {
         SpringLiteContext.init("io.nuls.rpc.cmd.kernel");
         wsServer.scanPackage("io.nuls.rpc.cmd.kernel").connect("ws://127.0.0.1:8887");
 
-        Map<String, String> kernelLinkMap = new HashMap<>(2);
-        kernelLinkMap.put(Constants.KEY_IP, "127.0.0.1");
-        kernelLinkMap.put(Constants.KEY_PORT, wsServer.getPort() + "");
-        ClientRuntime.ROLE_MAP.put(ModuleE.KE.abbr,kernelLinkMap);
+        ClientRuntime.ROLE_MAP.put(ModuleE.KE.abbr,connectionInformation);
         // Get information from kernel
         CmdDispatcher.syncKernel();
 

@@ -213,4 +213,16 @@ public interface ConsensusConstant {
     String BASIC_LOGGER_NAME = "rpc/rpc";
 
     String MODULE_VALIDATOR = "cs_batchValid";
+
+    /**
+     * 区块交易大小（字节）
+     * Block transaction size (bytes)
+     * */
+    int PACK_TX_MAX_SIZE = 30000;
+
+    /**
+     * 获取打包交易最长等待时间(毫秒)
+     * Get the longest waiting time for packaged transactions
+     * */
+    long GET_TX_MAX_WAIT_TIME = 2000;
  }
