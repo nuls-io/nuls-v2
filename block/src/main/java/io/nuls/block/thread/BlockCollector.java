@@ -26,13 +26,13 @@ import io.nuls.base.data.Block;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.model.Node;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import static io.nuls.block.constant.Constant.BLOCK_COMPARATOR;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
@@ -44,7 +44,6 @@ import static io.nuls.block.utils.LoggerUtil.Log;
  */
 public class BlockCollector implements Runnable {
 
-    public static final Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
     /**
      * 区块下载参数
      */

@@ -1,12 +1,14 @@
 package io.nuls.rpc.client.runtime;
 
+import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 import org.java_websocket.WebSocket;
-import io.nuls.rpc.client.WsClient;
+
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -145,6 +147,7 @@ public class ClientRuntime {
         for (String role : ROLE_MAP.keySet()) {
             if(wsClientKey.equals(getRemoteUri(role))){
                 ROLE_MAP.remove(role);
+                Log.debug("stopWsClient, role: " + role);
                 break;
             }
         }

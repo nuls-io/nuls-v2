@@ -76,19 +76,31 @@ public class ChainStorageServiceImplTest {
     public void batchSave() throws Exception {
         List<Block> list = new ArrayList<>();
         Block block2 = BlockGenerator.generate(block);
+        Block block3 = BlockGenerator.generate(block2);
+        Block block4 = BlockGenerator.generate(block3);
         NulsDigestData hash1 = block.getHeader().getHash();
         NulsDigestData hash2 = block2.getHeader().getHash();
+        NulsDigestData hash3 = block3.getHeader().getHash();
+        NulsDigestData hash4 = block4.getHeader().getHash();
         List<NulsDigestData> hashList = new ArrayList<>();
         hashList.add(hash1);
         hashList.add(hash2);
+        hashList.add(hash3);
+        hashList.add(hash4);
         list.add(block);
         list.add(block2);
+        list.add(block3);
+        list.add(block4);
         service.save(1, list);
         List<Block> blocks = service.query(1, hashList);
         NulsDigestData hash1_ = blocks.get(0).getHeader().getHash();
         NulsDigestData hash2_ = blocks.get(1).getHeader().getHash();
+        NulsDigestData hash3_ = blocks.get(2).getHeader().getHash();
+        NulsDigestData hash4_ = blocks.get(3).getHeader().getHash();
         assertEquals(hash1, hash1_);
         assertEquals(hash2, hash2_);
+        assertEquals(hash3, hash3_);
+        assertEquals(hash4, hash4_);
     }
 
     @Test
