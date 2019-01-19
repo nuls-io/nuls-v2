@@ -38,10 +38,7 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static io.nuls.block.constant.CommandConstant.*;
 import static io.nuls.block.utils.LoggerUtil.Log;
