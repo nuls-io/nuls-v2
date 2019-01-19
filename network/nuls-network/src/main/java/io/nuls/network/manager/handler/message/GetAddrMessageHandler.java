@@ -65,11 +65,11 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
     @Override
     public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
         Node node = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber()).getConnectNodeMap().get(nodeKey);
-//        Log.debug("GetAddrMessageHandler Recieve:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+        Log.debug("GetAddrMessageHandler Recieve:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         //发送addr消息
         AddrMessage addressMessage=MessageFactory.getInstance().buildAddrMessage(node,message.getHeader().getMagicNumber());
         if(0 == addressMessage.getMsgBody().getIpAddressList().size()){
-//            Log.info("No Address");
+            Log.info("No Address");
         }else {
             MessageManager.getInstance().sendToNode(addressMessage, node, true);
         }
@@ -78,7 +78,7 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
 
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
-//        Log.debug("GetAddrMessageHandler Send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+        Log.debug("GetAddrMessageHandler Send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         return super.send(message,node,isServer,asyn);
     }
 }

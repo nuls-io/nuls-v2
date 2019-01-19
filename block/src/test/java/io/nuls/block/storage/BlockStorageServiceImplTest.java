@@ -46,19 +46,19 @@ public class BlockStorageServiceImplTest {
     public static void beforeClass() throws Exception {
         SpringLiteContext.init("io.nuls.block");
         service = SpringLiteContext.getBean(BlockStorageService.class);
-
+        RocksDBService.init(DATA_PATH);
         Block block = BlockGenerator.generate(null);
         header = BlockUtil.toBlockHeaderPo(block);
     }
 
     @Test
-    public void save() throws Exception {
+    public void save() {
         service.save(CHAIN_ID, header);
         assertNotNull(service.query(CHAIN_ID, header.getHeight()));
     }
 
     @Test
-    public void remove() throws Exception {
+    public void remove() {
         service.save(CHAIN_ID, header);
         service.remove(CHAIN_ID, header.getHeight());
         assertNull(service.query(CHAIN_ID, header.getHeight()));

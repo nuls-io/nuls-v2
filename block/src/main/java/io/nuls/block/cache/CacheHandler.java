@@ -101,11 +101,11 @@ public class CacheHandler {
         NulsDigestData requestHash = message.getRequestHash();
         List<Block> blockList = workerBlockCacher.get(chainId).get(requestHash);
         Block block = message.getBlock();
-        if (blockList != null) {
+        if (blockList != null && block != null) {
             blockList.add(block);
             return;
         }
-        singleBlockCacher.get(chainId).complete(block.getHeader().getHash(), block);
+        singleBlockCacher.get(chainId).complete(message.getRequestHash(), block);
     }
 
     /**

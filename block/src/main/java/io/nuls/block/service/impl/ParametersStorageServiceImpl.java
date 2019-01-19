@@ -44,6 +44,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             bytes = chainParameters.serialize();
             return RocksDBService.put(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainID), bytes);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }
@@ -57,6 +58,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             po.parse(new NulsByteBuffer(bytes));
             return po;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -67,6 +69,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
         try {
             return RocksDBService.delete(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainID));
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }
@@ -84,6 +87,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             }
             return pos;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }

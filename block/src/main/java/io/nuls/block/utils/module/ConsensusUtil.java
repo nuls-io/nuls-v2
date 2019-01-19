@@ -46,7 +46,7 @@ public class ConsensusUtil {
      *
      * @param chainId
      * @param block
-     * @param download
+     * @param download 0区块下载中，1接收到最新区块
      * @return
      */
     public static boolean verify(int chainId, Block block, int download) {
@@ -59,6 +59,7 @@ public class ConsensusUtil {
 
             return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }
@@ -79,6 +80,7 @@ public class ConsensusUtil {
             params.put("status", status);
             return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }
@@ -100,6 +102,7 @@ public class ConsensusUtil {
 
             return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_addEvidenceRecord", params).isSuccess();
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }
@@ -120,6 +123,7 @@ public class ConsensusUtil {
 
             return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_chainRollBack", params).isSuccess();
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }
@@ -145,6 +149,7 @@ public class ConsensusUtil {
 
             return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_addBlock", params).isSuccess();
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return false;
         }

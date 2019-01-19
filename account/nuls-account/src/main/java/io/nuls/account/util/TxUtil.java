@@ -25,10 +25,19 @@
 package io.nuls.account.util;
 
 import io.nuls.account.config.NulsConfig;
+import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.rpc.call.LegerCmdCall;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.Coin;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.Transaction;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 
 import java.math.BigInteger;
 
@@ -124,6 +133,61 @@ public class TxUtil {
     public static BigInteger getBalance(int chainId, int assetChainId, int assetId, byte[] addressByte) {
         String address = AddressTool.getStringAddressByBytes(addressByte);
         return LegerCmdCall.getBalance(chainId, assetChainId, assetId, address);
+    }
+
+    public static CoinData getCoinData(Transaction tx) throws NulsException {
+        if (null == tx) {
+            throw new NulsException(AccountErrorCode.TX_NOT_EXIST);
+        }
+        try {
+            return tx.getCoinDataInstance();
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
+        }
+    }
+
+    public static Transaction getTransaction(byte[] txBytes) throws NulsException {
+        if (null == txBytes || txBytes.length == 0) {
+            throw new NulsException(AccountErrorCode.DATA_NOT_FOUND);
+        }
+        try {
+            return Transaction.getInstance(txBytes);
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
+        }
+    }
+
+    public static Transaction getTransaction(String hex) throws NulsException {
+        if (StringUtils.isBlank(hex)) {
+            throw new NulsException(AccountErrorCode.DATA_NOT_FOUND);
+        }
+        return getTransaction(HexUtil.decode(hex));
+    }
+
+    public static <T> T getInstance(byte[] bytes, Class<? extends BaseNulsData> clazz) throws NulsException {
+        if (null == bytes || bytes.length == 0) {
+            throw new NulsException(AccountErrorCode.DATA_NOT_FOUND);
+        }
+        try {
+            BaseNulsData baseNulsData = clazz.getDeclaredConstructor().newInstance();
+            baseNulsData.parse(new NulsByteBuffer(bytes));
+            return (T) baseNulsData;
+        } catch (NulsException e) {
+            Log.error(e);
+            throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsException(AccountErrorCode.DESERIALIZE_ERROR);
+        }
+    }
+
+    public static <T> T getInstance(String hex, Class<? extends BaseNulsData> clazz) throws NulsException {
+        if (StringUtils.isBlank(hex)) {
+            throw new NulsException(AccountErrorCode.DATA_NOT_FOUND);
+        }
+        return getInstance(HexUtil.decode(hex), clazz);
     }
 
 }

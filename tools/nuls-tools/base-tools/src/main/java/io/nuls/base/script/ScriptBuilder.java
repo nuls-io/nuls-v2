@@ -546,12 +546,12 @@ public class ScriptBuilder {
      * Creates a scriptPubKey for the given redeem script.
      * 根据赎回脚本创建P2SH的锁定脚本
      */
-    public static Script createP2SHOutputScript(Script redeemScript) {
+/*    public static Script createP2SHOutputScript(Script redeemScript) {
         Address address = new Address(BaseConstant.DEFAULT_CHAIN_ID, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(redeemScript.getProgram()));
         //byte[] hash = Utils.sha256hash160(redeemScript.getProgram());
         byte[] hash = address.getAddressBytes();
         return ScriptBuilder.createP2SHOutputScript(hash);
-    }
+    }*/
 
     /**
      * Creates a P2SH output script with given public keys and threshold. Given public keys will be placed in
@@ -559,10 +559,10 @@ public class ScriptBuilder {
      * <p>
      * 使用给定的公钥和阈值创建一个P2SH输出脚本。给定公共密钥将被放置在在字典排序顺序中赎回脚本
      */
-    public static Script createP2SHOutputScript(int threshold, List<ECKey> pubkeys) {
+/*    public static Script createP2SHOutputScript(int threshold, List<ECKey> pubkeys) {
         Script redeemScript = createRedeemScript(threshold, pubkeys);
         return createP2SHOutputScript(redeemScript);
-    }
+    }*/
 
     /**
      * Creates redeem script with given public keys and threshold. Given public keys will be placed in

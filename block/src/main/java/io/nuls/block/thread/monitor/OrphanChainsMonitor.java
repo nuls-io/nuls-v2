@@ -101,12 +101,16 @@ public class OrphanChainsMonitor implements Runnable {
                         SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                         //标记、变更链属性阶段
                         for (Chain orphanChain : orphanChains) {
+                            Log.info("OrphanChainsMonitor-mark-begin");
                             mark(orphanChain, masterChain, forkChains, orphanChains);
+                            Log.info("OrphanChainsMonitor-mark-end");
                         }
                         //复制、清除阶段
                         SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
                         for (Chain orphanChain : orphanChains) {
+                            Log.info("OrphanChainsMonitor-copy-begin");
                             copy(chainId, maintainedOrphanChains, orphanChain);
+                            Log.info("OrphanChainsMonitor-copy-end");
                         }
                         ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
                         forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
@@ -120,6 +124,7 @@ public class OrphanChainsMonitor implements Runnable {
                     }
                 }
             } catch (Exception e) {
+                e.printStackTrace();
                 context.setStatus(RUNNING);
                 Log.error("chainId-" + chainId + ",maintain OrphanChains fail!error msg is:" + e.getMessage());
             }

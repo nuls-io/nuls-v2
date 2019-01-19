@@ -58,10 +58,10 @@ public class ForwardSmallBlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = FORWARD_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         Integer chainId = Integer.parseInt(map.get("chainId").toString());
-        ChainContext context = ContextManager.getContext(chainId);
-        if (!context.getStatus().equals(RUNNING)) {
-            return success();
-        }
+//        ChainContext context = ContextManager.getContext(chainId);
+//        if (!context.getStatus().equals(RUNNING)) {
+//            return success();
+//        }
         String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
 
@@ -69,16 +69,14 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         try {
             message.parse(new NulsByteBuffer(decode));
         } catch (NulsException e) {
+            e.printStackTrace();
             messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
 
-        if (message == null || nodeId == null) {
-            return failed(BlockErrorCode.PARAMETER_ERROR);
-        }
         NulsDigestData blockHash = message.getRequestHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
-        messageLog.info("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
+        messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
         //1.已收到完整区块,丢弃
         if (BlockForwardEnum.COMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);

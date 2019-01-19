@@ -78,6 +78,8 @@ public class NettyClient {
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.SO_SNDBUF, 128 * 1024)
                 .option(ChannelOption.SO_RCVBUF, 128 * 1024)
+//                .option(ChannelOption.RCVBUF_ALLOCATOR, AdaptiveRecvByteBufAllocator.DEFAULT)
+//                .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, CONNETCI_TIME_OUT)
                 .handler(new NulsChannelInitializer<>(new ClientChannelHandler()));
     }

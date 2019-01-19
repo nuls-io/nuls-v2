@@ -1,6 +1,7 @@
 package io.nuls.poc.utils.annotation;
 
 import io.nuls.poc.utils.enumeration.TxMethodType;
+import io.nuls.poc.utils.enumeration.TxProperty;
 
 import java.lang.annotation.*;
 
@@ -14,7 +15,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface ResisterTx {
-    int txType();
+    TxProperty txType();
     TxMethodType methodType();
     String methodName();
 }

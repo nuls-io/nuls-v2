@@ -92,6 +92,7 @@ public class BlockServiceImpl implements BlockService {
         try {
             return blockStorageService.query(chainId, height);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -112,6 +113,7 @@ public class BlockServiceImpl implements BlockService {
             }
             return list;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -137,6 +139,7 @@ public class BlockServiceImpl implements BlockService {
             block.setTxs(transactions);
             return block;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -154,6 +157,7 @@ public class BlockServiceImpl implements BlockService {
             block.setTxs(TransactionUtil.getTransactions(chainId, blockHeaderPo.getTxHashList()));
             return block;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -172,6 +176,7 @@ public class BlockServiceImpl implements BlockService {
             }
             return list;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }
@@ -200,6 +205,7 @@ public class BlockServiceImpl implements BlockService {
         try {
             //1.验证区块
             if (!verifyBlock(chainId, block, localInit, download)) {
+                Log.error("verifyBlock fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             //2.设置最新高度,如果失败则恢复上一个高度
@@ -244,7 +250,7 @@ public class BlockServiceImpl implements BlockService {
                 masterChain.setEndHeight(masterChain.getEndHeight() + 1);
                 int heightRange = context.getParameters().getHeightRange();
                 LinkedList<NulsDigestData> hashList = masterChain.getHashList();
-                if (hashList.size() > heightRange) {
+                if (hashList.size() >= heightRange) {
                     hashList.removeFirst();
                 }
                 hashList.addLast(hash);
@@ -310,13 +316,13 @@ public class BlockServiceImpl implements BlockService {
                 return false;
             }
             if (!localInit) {
-                ContextManager.getContext(chainId).setLatestBlock(getBlock(chainId, height - 1));
+                context.setLatestBlock(getBlock(chainId, height - 1));
                 Chain masterChain = ChainManager.getMasterChain(chainId);
                 masterChain.setEndHeight(height - 1);
                 LinkedList<NulsDigestData> hashList = masterChain.getHashList();
-                hashList.pollLast();
+                hashList.removeLast();
                 int heightRange = context.getParameters().getHeightRange();
-                hashList.offerFirst(getBlockHash(chainId, height - heightRange));
+                hashList.addFirst(getBlockHash(chainId, height - heightRange + 1));
             }
             return true;
         } finally {
@@ -406,6 +412,7 @@ public class BlockServiceImpl implements BlockService {
             ContextManager.getContext(chainId).setGenesisBlock(genesisBlock);
             ChainManager.setMasterChain(chainId, ChainGenerator.generateMasterChain(chainId, block));
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
         return null != block;
@@ -422,6 +429,7 @@ public class BlockServiceImpl implements BlockService {
             RocksDBService.createTable(CACHED_BLOCK + chainId);
             initLocalBlocks(chainId);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
     }
@@ -438,6 +446,7 @@ public class BlockServiceImpl implements BlockService {
             hash.parse(new NulsByteBuffer(value));
             return hash;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
             return null;
         }

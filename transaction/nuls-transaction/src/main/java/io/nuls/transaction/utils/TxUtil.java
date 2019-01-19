@@ -144,6 +144,7 @@ public class TxUtil {
                     state = 3;
                 }
                 transactionPO.setState(state);
+                transactionPO.setTime(tx.getTime());
                 list.add(transactionPO);
             }
         }
@@ -164,6 +165,7 @@ public class TxUtil {
                     state = 2;
                 }
                 transactionPO.setState(state);
+                transactionPO.setTime(tx.getTime());
                 list.add(transactionPO);
             }
         }

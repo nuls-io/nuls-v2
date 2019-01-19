@@ -20,7 +20,6 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
-import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -124,11 +123,11 @@ public class ConsensusProcess {
         1. Is the node packing?
         2. Is the current time between the start and end of the node packing?
         */
-        if(!hasPacking && member.getPackStartTime() < TimeService.currentTimeMillis() && member.getPackEndTime() > TimeService.currentTimeMillis()){
+        if(!hasPacking && member.getPackStartTime() < CallMethodUtils.currentTime() && member.getPackEndTime() > CallMethodUtils.currentTime()){
             hasPacking = true;
             try {
                 if (consensusLogger.getLogger().isDebugEnabled()) {
-                    consensusLogger.debug("当前网络时间： " + DateUtils.convertDate(new Date(TimeService.currentTimeMillis())) + " , 我的打包开始时间: " +
+                    consensusLogger.debug("当前网络时间： " + DateUtils.convertDate(new Date(CallMethodUtils.currentTime())) + " , 我的打包开始时间: " +
                             DateUtils.convertDate(new Date(member.getPackStartTime())) + " , 我的打包结束时间: " +
                             DateUtils.convertDate(new Date(member.getPackEndTime())) + " , 当前轮开始时间: " +
                             DateUtils.convertDate(new Date(round.getStartTime())) + " , 当前轮结束开始时间: " +
@@ -138,7 +137,7 @@ public class ConsensusProcess {
             } catch (Exception e) {
                 consensusLogger.error(e);
             }
-            while (member.getPackEndTime() > TimeService.currentTimeMillis()) {
+            while (member.getPackEndTime() > CallMethodUtils.currentTime()) {
                 try {
                     Thread.sleep(500L);
                 } catch (InterruptedException e) {
@@ -190,12 +189,12 @@ public class ConsensusProcess {
      * Whether or not to arrive at the time point when the node is out of the block, if the latest local block is out of the previous node in this round, it will be packaged directly.
      * Otherwise, if the block from the previous node has not been received after waiting for a certain time, it will be packed directly.
      * */
-    private boolean waitReceiveNewestBlock(Chain chain,MeetingMember self, MeetingRound round){
+    private void waitReceiveNewestBlock(Chain chain,MeetingMember self, MeetingRound round){
         long timeout = chain.getConfig().getPackingInterval()/2;
         long endTime = self.getPackStartTime() + timeout;
-        boolean hasReceiveNewestBlock = false;
+        boolean hasReceiveNewestBlock;
         try {
-            while (!hasReceiveNewestBlock) {
+            while (true) {
                 /*
                 判断本地最新区块是否为轮次中上一个节点所出
                 Determine whether the latest local block is from the last node in the round
@@ -205,18 +204,17 @@ public class ConsensusProcess {
                     break;
                 }
                 Thread.sleep(100L);
-                if (TimeService.currentTimeMillis() >= endTime) {
+                if (CallMethodUtils.currentTime() >= endTime) {
                     break;
                 }
             }
         } catch (InterruptedException e) {
             consensusLogger.error(e.getMessage());
         }
-        return !hasReceiveNewestBlock;
     }
 
     /**
-     * 判断本地最新区块是否为本轮次上一个区块所出
+     * 判断本地最新区块是否为本轮次上一个出块节点所出
      * Judging whether the latest block in this region is from the last block in this round
      * */
     private boolean hasReceiveNewestBlock(Chain chain,MeetingMember self, MeetingRound round){

@@ -144,9 +144,9 @@ public class TxServiceImpl implements TxService {
                 //获多签交易发起者的eckey,进行第一个签名
                 String priKey = AccountCall.getPrikey(accountSignDTO.getAddress(), accountSignDTO.getPassword());
                 ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
-                //验证签名地址账户是否属于多签账户
+                //验证待签名地址账户是否属于多签账户
                 if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), ecKey.getPubKey())) {
-                    throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH);
+                    throw new NulsException(TxErrorCode.ADDRESS_NOT_BELONG_TO_MULTI_SIGN_ACCOUNT);
                 }
                 //组装多签地址信息
                 MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
@@ -236,9 +236,9 @@ public class TxServiceImpl implements TxService {
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
         MultiSignTxSignature multiSignTxSignature = new MultiSignTxSignature();
         multiSignTxSignature.parse(new NulsByteBuffer(transaction.getTransactionSignature()));
-        //验证签名地址账户是否属于多签账户
+        //验证该地址是否属于多签账户
         if (!AddressTool.validSignAddress(multiSignTxSignature.getPubKeyList(), ecKey.getPubKey())) {
-            throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH);
+            throw new NulsException(TxErrorCode.ADDRESS_NOT_BELONG_TO_MULTI_SIGN_ACCOUNT);
         }
         return txMultiSignProcess(chain, transaction, ecKey);
     }

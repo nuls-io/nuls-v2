@@ -4,13 +4,13 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.PunishStorageService;
+import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishReasonEnum;
 import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.test.TestUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
-import io.nuls.tools.thread.TimeService;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,7 +44,7 @@ public class PunishStorageTest {
         po.setIndex(10);
         po.setReasonCode(PunishReasonEnum.BIFURCATION.getCode());
         po.setRoundIndex(102);
-        po.setTime(TimeService.currentTimeMillis());
+        po.setTime(CallMethodUtils.currentTime());
         po.setType(PunishType.RED.getCode());
         System.out.println(punishStorageService.save(po,1));
         getPunishList();

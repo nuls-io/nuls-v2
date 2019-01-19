@@ -65,6 +65,7 @@ public abstract class BaseMessage extends BaseNulsData {
             try {
                 this.hash = NulsDigestData.calcDigestData(this.serialize());
             } catch (IOException e) {
+                e.printStackTrace();
                 Log.error(e);
             }
         }

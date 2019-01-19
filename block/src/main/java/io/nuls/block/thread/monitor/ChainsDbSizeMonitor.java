@@ -79,6 +79,7 @@ public class ChainsDbSizeMonitor implements Runnable {
                 context.setStatus(RunningStatusEnum.RUNNING);
             } catch (Exception e) {
                 context.setStatus(RunningStatusEnum.RUNNING);
+                e.printStackTrace();
                 Log.error(e);
             }
         }

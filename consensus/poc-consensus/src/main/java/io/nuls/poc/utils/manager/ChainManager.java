@@ -7,15 +7,24 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.config.ConfigItem;
+import io.nuls.poc.model.bo.tx.TxRegisterDetail;
 import io.nuls.poc.storage.ConfigService;
+import io.nuls.poc.utils.CallMethodUtils;
+import io.nuls.poc.utils.annotation.ResisterTx;
+import io.nuls.poc.utils.enumeration.TxMethodType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.parse.JSONUtils;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,6 +64,7 @@ public class ChainManager {
         if(configMap == null || configMap.size() == 0){
             return;
         }
+        List<TxRegisterDetail> txRegisterDetailList = getRegisterTxList();
         /*
         根据配置信息创建初始化链
         Initialize chains based on configuration information
@@ -69,6 +79,16 @@ public class ChainManager {
             * Initialization Chain Log Objects
             * */
             initLogger(chain);
+
+            /*
+            * 链交易注册
+            * Chain Trading Registration
+            * */
+            while (true){
+                if(CallMethodUtils.registerTx(chain,txRegisterDetailList)){
+                    break;
+                }
+            }
 
             /*
             初始化链数据库表
@@ -183,8 +203,8 @@ public class ChainManager {
         * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
         * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
         * */
-        NulsLogger consensusLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.CONSENSUS_LOGGER_NAME, Level.INFO);
-        NulsLogger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.BASIC_LOGGER_NAME,Level.INFO);
+        NulsLogger consensusLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.CONSENSUS_LOGGER_NAME, Level.DEBUG);
+        NulsLogger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.BASIC_LOGGER_NAME,Level.DEBUG);
         chain.getLoggerMap().put(ConsensusConstant.CONSENSUS_LOGGER_NAME,consensusLogger);
         chain.getLoggerMap().put(ConsensusConstant.BASIC_LOGGER_NAME,rpcLogger);
     }
@@ -213,5 +233,49 @@ public class ChainManager {
 
     public void setChainMap(Map<Integer, Chain> chainMap) {
         this.chainMap = chainMap;
+    }
+
+    /**
+     * 向交易模块注册交易
+     * Register transactions with the transaction module
+     */
+    private static List<TxRegisterDetail> getRegisterTxList() {
+        List<Class> classList = ScanUtil.scan(ConsensusConstant.RPC_PATH);
+        if (classList == null || classList.size() == 0) {
+            return null;
+        }
+        Map<Integer, TxRegisterDetail> registerDetailMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+        for (Class clz : classList) {
+            Method[] methods = clz.getMethods();
+            for (Method method : methods) {
+                ResisterTx annotation = getRegisterAnnotation(method);
+                if (annotation != null) {
+                    if (!registerDetailMap.containsKey(annotation.txType().txType)) {
+                        registerDetailMap.put(annotation.txType().txType, new TxRegisterDetail(annotation.txType()));
+                    }
+                    if (annotation.methodType().equals(TxMethodType.COMMIT)) {
+                        registerDetailMap.get(annotation.txType().txType).setCommitCmd(annotation.methodName());
+                    } else if (annotation.methodType().equals(TxMethodType.VALID)) {
+                        registerDetailMap.get(annotation.txType().txType).setValidateCmd(annotation.methodName());
+                    } else if (annotation.methodType().equals(TxMethodType.ROLLBACK)) {
+                        registerDetailMap.get(annotation.txType().txType).setRollbackCmd(annotation.methodName());
+                    }
+                }
+            }
+        }
+        if(registerDetailMap.size() == 0){
+            return null;
+        }
+        return new ArrayList<>(registerDetailMap.values());
+    }
+
+    private static ResisterTx getRegisterAnnotation(Method method) {
+        Annotation[] annotations = method.getDeclaredAnnotations();
+        for (Annotation annotation : annotations) {
+            if (ResisterTx.class.equals(annotation.annotationType())) {
+                return (ResisterTx) annotation;
+            }
+        }
+        return null;
     }
 }

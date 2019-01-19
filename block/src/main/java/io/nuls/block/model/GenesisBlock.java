@@ -77,6 +77,7 @@ public final class GenesisBlock extends Block {
             try {
                 json = IoUtils.read(GENESIS_BLOCK_FILE);
             } catch (NulsException e) {
+                e.printStackTrace();
                 Log.error(e);
             }
             INSTANCE.init(json);
@@ -92,6 +93,7 @@ public final class GenesisBlock extends Block {
         try {
             jsonMap = JSONUtils.json2map(json);
         } catch (Exception e) {
+            e.printStackTrace();
             Log.error(e);
         }
         String time = (String) jsonMap.get(CONFIG_FILED_TIME);

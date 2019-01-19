@@ -38,6 +38,7 @@ import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
+import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.message.VersionMessage;
@@ -110,9 +111,10 @@ public class ClientChannelHandler extends BaseChannelHandler {
         node.setIp(remoteIP);
         node.setRemotePort(socketChannel.remoteAddress().getPort());
         node.setIdle(false);
+        Log.info("Client Node is active:{}",node.getId());
         boolean success = ConnectionManager.getInstance().processConnectNode(node);
         if(!success){
-//            Log.debug("dup connect,close channel");
+            Log.error("Client Node processConnectNode fail:{}" ,node.getId());
             channel.close();
             return;
         }
@@ -121,7 +123,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         VersionMessage versionMessage=MessageFactory.getInstance().buildVersionMessage(node,nodeGroupConnector.getMagicNumber());
         if(null == versionMessage){
             //exception
-//            Log.error("build version error");
+            Log.error("build versionMessage error");
             channel.close();
             return;
         }
@@ -136,40 +138,42 @@ public class ClientChannelHandler extends BaseChannelHandler {
         super.channelInactive(ctx);
         Node node=ConnectionManager.getInstance().getNodeByCache(nodeId,Node.OUT);
         if(null != node) {
-            node.setIdle(true);
             //移除连接
-//            Log.info("Client Node is Inactive:" + node.getIp() + ":" + node.getRemotePort());
+            Log.info("Client Node is Inactive:" + node.getId());
+            node.setIdle(true);
             ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),Node.OUT);
         }
     }
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+        SocketChannel socketChannel = (SocketChannel) ctx.channel();
+        String remoteIP = socketChannel.remoteAddress().getHostString();
+        int port = socketChannel.remoteAddress().getPort();
+        Log.info("{}-----------------client channelRead-----------------{}:{}",TimeService.currentTimeMillis(), remoteIP,port);
+        ByteBuf buf = (ByteBuf) msg;
         try {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
             if (node != null) {
-                ByteBuf buf = (ByteBuf) msg;
-                try {
-                   MessageManager.getInstance().receiveMessage(buf,node.getId(),false);
-                } finally {
-                    buf.release();
-                }
+                Log.info("-----------------client channelRead  node={} -----------------", node.getId());
+                MessageManager.getInstance().receiveMessage(buf,node,false);
             } else {
-                SocketChannel socketChannel = (SocketChannel) ctx.channel();
-                String remoteIP = socketChannel.remoteAddress().getHostString();
-                int port = socketChannel.remoteAddress().getPort();
-//                Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
+                Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
+                ctx.channel().close();
             }
         } catch (Exception e) {
             e.printStackTrace();
-            throw e;
+//            throw e;
+        }finally {
+            buf.release();
         }
     }
+
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
-//        Log.info("-----------------client channelInactive  node is channelUnregistered -----------------");
+        Log.info("-----------------client channelInactive  node is channelUnregistered -----------------");
 
     }
     @Override
@@ -178,7 +182,6 @@ public class ClientChannelHandler extends BaseChannelHandler {
         if (!(cause instanceof IOException)) {
             cause.printStackTrace();
             Log.error(cause.getMessage());
-//            Log.error("===========exceptionCaught===========");
         }
         ctx.channel().close();
     }

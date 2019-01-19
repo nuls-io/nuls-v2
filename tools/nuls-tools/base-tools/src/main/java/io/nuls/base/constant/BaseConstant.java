@@ -49,7 +49,7 @@ public class BaseConstant {
      * The default chain id (nuls main chain), the chain id affects the generation of the address,
      * and the current address begins with "Ns".8964.
      */
-    public static short DEFAULT_CHAIN_ID = 261;
+//    public static short DEFAULT_CHAIN_ID = 261;
 
     /**
      * 出块间隔时间（秒）
