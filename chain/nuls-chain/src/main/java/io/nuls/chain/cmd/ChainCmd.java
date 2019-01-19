@@ -67,6 +67,7 @@ public class ChainCmd extends BaseChainCmd {
     @Parameter(parameterName = "singleNodeMinConnectionNum", parameterType = "int")
     @Parameter(parameterName = "txConfirmedBlockNum", parameterType = "int")
     @Parameter(parameterName = "address", parameterType = "String")
+    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "symbol", parameterType = "array")
     @Parameter(parameterName = "assetName", parameterType = "String")
     @Parameter(parameterName = "initNumber", parameterType = "String")
@@ -74,15 +75,18 @@ public class ChainCmd extends BaseChainCmd {
     @Parameter(parameterName = "password", parameterType = "String")
     public Response chainReg(Map params) {
         try {
+            /*TODO:入参校验*/
+
+            /*判断链与资产是否已经存在*/
+
             /* 组装BlockChain (BlockChain object) */
             BlockChain blockChain = JSONUtils.map2pojo(params, BlockChain.class);
             blockChain.setRegAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
             blockChain.setCreateTime(TimeService.currentTimeMillis());
 
             /* 组装Asset (Asset object) */
-            int assetId = seqService.createAssetId(blockChain.getChainId());
+            /* 取消int assetId = seqService.createAssetId(blockChain.getChainId());*/
             Asset asset = JSONUtils.map2pojo(params, Asset.class);
-            asset.setAssetId(assetId);
             asset.setChainId(blockChain.getChainId());
             asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS)));
             asset.setAvailable(true);
@@ -93,7 +97,7 @@ public class ChainCmd extends BaseChainCmd {
             Transaction tx = new RegisterChainAndAssetTransaction();
             tx.setTxData(blockChain.parseToTransaction(asset));
             tx.setTime(TimeService.currentTimeMillis());
-            AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(), asset.getAssetId(), String.valueOf(params.get("address")));
+            AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
             CoinData coinData = super.getRegCoinData(asset.getAddress(), asset.getChainId(),
                     asset.getAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance);
             tx.setCoinData(coinData.serialize());

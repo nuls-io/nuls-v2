@@ -36,4 +36,9 @@ import lombok.ToString;
 public class AccountBalance {
     private String available;
     private String nonce;
+
+    public AccountBalance(String available,String nonce){
+        this.available = available;
+        this.nonce = nonce;
+    }
 }

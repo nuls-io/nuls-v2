@@ -85,7 +85,7 @@ public class AssetCmd extends BaseChainCmd {
             Transaction tx = new AddAssetToChainTransaction();
 
             tx.setTxData(asset.parseToTransaction());
-            AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(), asset.getAssetId(), String.valueOf(params.get("address")));
+            AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
             CoinData coinData = this.getRegCoinData(asset.getAddress(), asset.getChainId(),
                     asset.getAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance);
             tx.setCoinData(coinData.serialize());
@@ -147,8 +147,7 @@ public class AssetCmd extends BaseChainCmd {
                     return failed("parseToTransaction fail");
                 }
             }
-
-            AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(), asset.getAssetId(), String.valueOf(params.get("address")));
+            AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
             if (null == accountBalance) {
                 return failed("get  rpc CoinData fail.");
             }

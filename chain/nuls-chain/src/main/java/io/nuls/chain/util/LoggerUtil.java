@@ -22,41 +22,17 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.service;
+package io.nuls.chain.util;
 
-import io.nuls.base.data.Transaction;
-import io.nuls.chain.model.dto.AccountBalance;
-import io.nuls.chain.model.dto.BlockChain;
+import ch.qos.logback.classic.Level;
+import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.logback.NulsLogger;
 
 /**
- * 调用外部接口
  * @author lan
- */
-public interface RpcService {
-    /**
-     * 跨链种子节点获取
-     * @return
-     */
-    String getCrossChainSeeds();
-
-    /**
-     * 注册交易验证器
-     * @return
-     */
-    boolean regTx();
-
-    boolean newTx(Transaction tx);
-
-    boolean createCrossGroup(BlockChain blockChain);
-
-    boolean destroyCrossGroup(BlockChain blockChain);
-
-
-    /**
-     *获取账户余额
-     * @param address
-     * @return
-     */
-    AccountBalance getCoinData(String address);
+ * @description
+ * @date 2018/12/17
+ **/
+public class LoggerUtil {
+   public static NulsLogger Log = LoggerBuilder.getLogger("/logs", "cm.log",Level.ALL);
 }
-

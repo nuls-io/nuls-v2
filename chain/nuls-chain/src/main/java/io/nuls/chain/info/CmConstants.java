@@ -79,24 +79,7 @@ public class CmConstants {
     public static final String NULS_ASSET_MAX = "nuls_asset_initNumber_max";
     public static final String NULS_ASSET_SYMBOL = "nuls_asset_symbol";
 
-    /**
-     * 交易注册
-     */
-    public static final String CMD_TX_REGISTER = "tx_register";
-    /**
-     * 创建交易
-     */
-    public static final String CMD_TX_NEW_TX = "newTx";
 
-    public static final String CMD_NW_CROSS_SEEDS = "nw_getSeeds";
-
-    public static final String CMD_NW_CREATE_NODEGROUP = "nw_createNodeGroup";
-
-    public static final String CMD_NW_DELETE_NODEGROUP = "nw_delNodeGroup";
-    /**
-     * 账本获取数据
-     */
-    public static final String CMD_LG_GET_COINDATA = "getCoinData";
 
 
     /**
