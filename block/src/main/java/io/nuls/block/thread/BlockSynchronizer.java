@@ -143,6 +143,7 @@ public class BlockSynchronizer implements Runnable {
             long end = System.currentTimeMillis();
             Log.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
             if (success) {
+                //todo 为了测试分叉链、孤儿链修改，正式版本改回
                 if (true) {
                     Log.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);

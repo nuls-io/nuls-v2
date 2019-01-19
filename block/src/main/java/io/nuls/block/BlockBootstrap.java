@@ -110,10 +110,10 @@ public class BlockBootstrap {
 //        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
             //开启分叉链处理线程
             ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
-            forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 5, TimeUnit.SECONDS);
+            forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
             //开启孤儿链处理线程
             ScheduledThreadPoolExecutor orphanExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-monitor"));
-            orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 2, TimeUnit.SECONDS);
+            orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
             //开启孤儿链维护线程
             ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
             maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 2, TimeUnit.SECONDS);
@@ -135,16 +135,9 @@ public class BlockBootstrap {
                 }
                 BlockHeader header = context.getLatestBlock().getHeader();
                 Log.info("chainId:" + chainId + ", latestHeight:" + header.getHeight() + ", txCount:" + header.getTxCount() + ", hash:" + header.getHash());
-
-                WsClient wsClient = ClientRuntime.WS_CLIENT_MAP.get(ClientRuntime.getRemoteUri(ModuleE.NW.abbr));
-                System.out.println("wsClient.getAckQueue().size()-" + wsClient.getAckQueue().size());
-                System.out.println("wsClient.getNegotiateResponseQueue().size()-" + wsClient.getNegotiateResponseQueue().size());
-                System.out.println("wsClient.getResponseAutoQueue().size()-" + wsClient.getResponseAutoQueue().size());
-                System.out.println("wsClient.getResponseManualQueue().size()-" + wsClient.getResponseManualQueue().size());
                 try {
                     Thread.sleep(10000L);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
                     Log.error(e);
                 }
             }
