@@ -134,7 +134,7 @@ public class WsClient extends WebSocketClient {
     @Override
     public void onClose(int paramInt, String paramString, boolean paramBoolean) {
         connected = false;
-        ClientRuntime.stopWsClient(this);
+        //ClientRuntime.stopWsClient(this);
     }
 
     @Override
@@ -145,21 +145,21 @@ public class WsClient extends WebSocketClient {
     /**
      * @return 第一条握手确认消息，The first handshake confirmed message
      */
-    public Message firstMessageInNegotiateResponseQueue() {
+    private Message firstMessageInNegotiateResponseQueue() {
         return negotiateResponseQueue.poll();
     }
 
     /**
      * @return 第一条确认消息，The first ack message
      */
-    public Ack firstMessageInAckQueue() {
+    private Ack firstMessageInAckQueue() {
         return ackQueue.poll();
     }
 
     /**
      * @return 第一条需要手动处理的Response消息，The first Response message that needs to be handled manually
      */
-    public Response firstMessageInResponseManualQueue() {
+    private Response firstMessageInResponseManualQueue() {
         return responseManualQueue.poll();
     }
 
@@ -170,11 +170,11 @@ public class WsClient extends WebSocketClient {
         return responseAutoQueue.poll();
     }
 
-    public Queue<Ack> getAckQueue() {
+    private Queue<Ack> getAckQueue() {
         return ackQueue;
     }
 
-    public Queue<Response> getResponseManualQueue() {
+    private Queue<Response> getResponseManualQueue() {
         return responseManualQueue;
     }
 
@@ -195,7 +195,7 @@ public class WsClient extends WebSocketClient {
         return connected;
     }
 
-    public List<String> getTimeOutMessageList() {
+    private List<String> getTimeOutMessageList() {
         return timeOutMessageList;
     }
 }
