@@ -30,7 +30,7 @@ package io.nuls.transaction.model.dto;
  * @author: qinyifeng
  * @date: 2018/11/30
  */
-public class TxRegisterDTO {
+public class TxRegistersDTO {
     /**
      * Transaction type
      */
@@ -72,7 +72,7 @@ public class TxRegisterDTO {
      */
     public boolean verifySignature;
 
-    public TxRegisterDTO() {
+    public TxRegistersDTO() {
 
     }
 
@@ -134,7 +134,7 @@ public class TxRegisterDTO {
 
     @Override
     public String toString() {
-        return "TxRegisterDTO{" +
+        return "TxRegistersDTO{" +
                 "txType=" + txType +
                 ", validateCmd='" + validateCmd + '\'' +
                 ", commitCmd='" + commitCmd + '\'' +

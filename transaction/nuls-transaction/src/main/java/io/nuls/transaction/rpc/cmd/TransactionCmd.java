@@ -13,7 +13,6 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxCmd;
@@ -26,8 +25,8 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
-import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
-import io.nuls.transaction.model.dto.TxRegisterDTO;
+import io.nuls.transaction.model.dto.ModuleTxRegistersDTO;
+import io.nuls.transaction.model.dto.TxRegistersDTO;
 import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
@@ -81,28 +80,28 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("list"), TxErrorCode.PARAMETER_ERROR.getMsg());
 
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            ModuleTxRegisterDTO moduleTxRegisterDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegisterDTO.class);
+            ModuleTxRegistersDTO moduleTxRegistersDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), ModuleTxRegistersDTO.class);
 
-            chain = chainManager.getChain(moduleTxRegisterDto.getChainId());
+            chain = chainManager.getChain(moduleTxRegistersDto.getChainId());
             if(null == chain){
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
-            List<TxRegisterDTO> txRegisterList = moduleTxRegisterDto.getList();
-            if (moduleTxRegisterDto == null || txRegisterList == null) {
+            List<TxRegistersDTO> txRegisterList = moduleTxRegistersDto.getList();
+            if (moduleTxRegistersDto == null || txRegisterList == null) {
                 throw new NulsException(TxErrorCode.NULL_PARAMETER);
             }
             //循环注册多种交易
-            for (TxRegisterDTO txRegisterDto : txRegisterList) {
+            for (TxRegistersDTO txRegistersDto : txRegisterList) {
                 TxRegister txRegister = new TxRegister();
-                txRegister.setModuleCode(moduleTxRegisterDto.getModuleCode());
-                txRegister.setModuleValidator(moduleTxRegisterDto.getModuleValidator());
-                txRegister.setTxType(txRegisterDto.getTxType());
-                txRegister.setValidator(txRegisterDto.getValidateCmd());
-                txRegister.setCommit(txRegisterDto.getCommitCmd());
-                txRegister.setRollback(txRegisterDto.getRollbackCmd());
-                txRegister.setSystemTx(txRegisterDto.isSystemTx());
-                txRegister.setUnlockTx(txRegisterDto.isUnlockTx());
-                txRegister.setVerifySignature(txRegisterDto.isVerifySignature());
+                txRegister.setModuleCode(moduleTxRegistersDto.getModuleCode());
+                txRegister.setModuleValidator(moduleTxRegistersDto.getModuleValidator());
+                txRegister.setTxType(txRegistersDto.getTxType());
+                txRegister.setValidator(txRegistersDto.getValidateCmd());
+                txRegister.setCommit(txRegistersDto.getCommitCmd());
+                txRegister.setRollback(txRegistersDto.getRollbackCmd());
+                txRegister.setSystemTx(txRegistersDto.isSystemTx());
+                txRegister.setUnlockTx(txRegistersDto.isUnlockTx());
+                txRegister.setVerifySignature(txRegistersDto.isVerifySignature());
 
                 result = txService.register(chain, txRegister);
             }

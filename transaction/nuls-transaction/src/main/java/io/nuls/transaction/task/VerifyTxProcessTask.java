@@ -50,8 +50,8 @@ public class VerifyTxProcessTask implements Runnable {
         this.chain = chain;
     }
 
-//    int count = 0;
-//    int size = 0;
+    int count = 0;
+    int size = 0;
 
     @Override
     public void run() {
@@ -66,6 +66,7 @@ public class VerifyTxProcessTask implements Runnable {
         } catch (Exception e) {
             chain.getLogger().error(e);
         }
+//        System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
     }
 
     private void doTask(Chain chain){
@@ -75,7 +76,9 @@ public class VerifyTxProcessTask implements Runnable {
 
         Transaction tx = null;
         while ((tx = unverifiedTxStorageService.pollTx(chain)) != null && orphanTxList.size() < TxConstant.ORPHAN_CONTAINER_MAX_SIZE) {
+            size++;
             processTx(chain, tx, false);
+            System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
         }
     }
 
@@ -107,6 +110,7 @@ public class VerifyTxProcessTask implements Runnable {
                 //广播交易hash
                 //todo 调试暂时注释
 //                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
+                count++;
                 return true;
             }
             chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " +
@@ -115,7 +119,8 @@ public class VerifyTxProcessTask implements Runnable {
                 processOrphanTx(tx);
             }else if(isOrphanTx){
                 //todo 孤儿交易还是10分钟删, 如何处理nonce值??
-                long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+                //todo long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+                long currentTimeMillis = System.currentTimeMillis();//todo 测试代码
                 return tx.getTime() < (currentTimeMillis - 3600000L);
             }
         } catch (Exception e) {
