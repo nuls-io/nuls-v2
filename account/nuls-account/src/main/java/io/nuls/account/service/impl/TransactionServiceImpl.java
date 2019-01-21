@@ -81,7 +81,7 @@ public class TransactionServiceImpl implements TransactionService {
     private ChainManager chainManager;
 
     @Override
-    public String multipleAddressTransfer(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
+    public String transfer(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
         Transaction tx = this.assemblyTransaction(chainId, fromList, toList, remark);
         return tx.getHash().getDigestHex();
     }
