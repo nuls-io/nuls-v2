@@ -26,8 +26,6 @@
 package io.nuls.chain.config;
 
 
-import io.nuls.tools.parse.config.IniEntity;
-
 /**
  * Management configuration item
  *
@@ -38,18 +36,15 @@ public class NulsConfig {
      * 模块配置文件名称
      * Module configuration file name.
      */
-    public static  String MODULES_CONFIG_FILE = "modules.ini";
+    public static  String MODULES_CONFIG_FILE = "modules.json";
 
     /**
      * 系统使用的编码方式
      * The encoding used by the nuls system.
      */
     public static String DEFAULT_ENCODING = "UTF-8";
-
-    /**
-     * 模块配置文件中加载的所有配置项
-     * All the configuration items that are loaded in the module configuration file.
-     */
-    public static IniEntity MODULES_CONFIG;
+    public static void setEncoding(String encoding){
+        DEFAULT_ENCODING = encoding;
+    }
 
 }

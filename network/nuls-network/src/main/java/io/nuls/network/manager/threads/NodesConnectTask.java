@@ -104,7 +104,7 @@ public class NodesConnectTask implements Runnable  {
                         if(null == nodeGroupConnector){
                             node.addGroupConnector(magicNumber);
                             VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(activeNode, magicNumber);
-                            BaseMeesageHandlerInf handler=MessageHandlerFactory.getInstance().getHandler(versionMessage);
+                            BaseMeesageHandlerInf handler=MessageHandlerFactory.getInstance().getHandler(versionMessage.getHeader().getCommandStr());
                             handler.send(versionMessage, node, false,true);
                         }
                     }else{

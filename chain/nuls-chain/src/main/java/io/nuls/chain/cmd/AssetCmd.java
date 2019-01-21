@@ -21,11 +21,12 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.io.IOException;
 import java.util.Map;
+
+import static io.nuls.chain.util.LoggerUtil.Log;
 
 /**
  * @author tangyi
@@ -85,7 +86,7 @@ public class AssetCmd extends BaseChainCmd {
             Transaction tx = new AddAssetToChainTransaction();
 
             tx.setTxData(asset.parseToTransaction());
-            AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(), asset.getAssetId(), String.valueOf(params.get("address")));
+            AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
             CoinData coinData = this.getRegCoinData(asset.getAddress(), asset.getChainId(),
                     asset.getAssetId(), String.valueOf(asset.getDepositNuls()), tx.size(), accountBalance);
             tx.setCoinData(coinData.serialize());
@@ -147,8 +148,7 @@ public class AssetCmd extends BaseChainCmd {
                     return failed("parseToTransaction fail");
                 }
             }
-
-            AccountBalance accountBalance = rpcService.getCoinData(asset.getChainId(), asset.getAssetId(), String.valueOf(params.get("address")));
+            AccountBalance accountBalance = rpcService.getCoinData(String.valueOf(params.get("address")));
             if (null == accountBalance) {
                 return failed("get  rpc CoinData fail.");
             }

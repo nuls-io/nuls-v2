@@ -35,7 +35,7 @@ public class ServerRuntime {
      * 本模块是否可以启动服务（所依赖模块是否可以连接）
      * Can this module start the service? (Can the dependent modules be connected?)
      */
-    public static boolean startService = true;
+    public static boolean startService = false;
 
     /**
      * 本模块所有对外提供的接口的详细信息
@@ -500,7 +500,7 @@ public class ServerRuntime {
 
     /**
      * 更新模块是否可启动状态
-     * Update module bootable status
+     * Update module bootAble status
      * */
     public static void updateStatus(){
         if(!startService){

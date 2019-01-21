@@ -47,8 +47,6 @@ import java.util.Map;
  */
 @Component
 public class ValidatorCmd extends BaseCmd {
-    final Logger logger = LoggerFactory.getLogger(getClass());
-
     @Autowired
     CoinDataValidator coinDataValidator;
     /**

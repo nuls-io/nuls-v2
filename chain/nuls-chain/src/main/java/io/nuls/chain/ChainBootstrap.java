@@ -4,19 +4,22 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.chain.config.NulsConfig;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.service.ChainService;
+import io.nuls.chain.service.RpcService;
+import io.nuls.chain.service.impl.RpcServiceImpl;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
+import io.nuls.tools.parse.config.ConfigManager;
 
 import java.util.Map;
+
+import static io.nuls.chain.util.LoggerUtil.Log;
 
 /**
  * 链管理模块启动类
@@ -82,12 +85,11 @@ public class ChainBootstrap {
             /* 把Nuls2.0主网信息存入数据库中 (Store the Nuls2.0 main network information into the database) */
             initMainChain();
 
-            /* Start time service */
-            TimeService.getInstance().start();
-
             /* 提供对外接口 (Provide external interface) */
             startRpcServer();
 
+            /*注册交易处理器*/
+            regTxRpc();
         } catch (Exception e) {
             Log.error(e);
         }
@@ -100,14 +102,13 @@ public class ChainBootstrap {
      * @throws Exception Any error will throw an exception
      */
     private void initCfg() throws Exception {
-        /* 读取resources/module.ini (Read resources/module.ini) */
-        NulsConfig.MODULES_CONFIG = ConfigLoader.loadIni(NulsConfig.MODULES_CONFIG_FILE);
-
+        /* 读取resources/module.ini (Read resources/module.json) */
+        ConfigLoader.loadJsonCfg(NulsConfig.MODULES_CONFIG_FILE);
         /* 设置系统编码 (Set system encoding) */
-        NulsConfig.DEFAULT_ENCODING = NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CFG_SYSTEM_SECTION, CmConstants.CFG_SYSTEM_DEFAULT_ENCODING);
-
+        String  encoding =  ConfigManager.getValue(CmConstants.CFG_SYSTEM_DEFAULT_ENCODING);
+        NulsConfig.setEncoding(encoding);
         /* 设置系统语言 (Set system language) */
-        String language = NulsConfig.MODULES_CONFIG.getCfgValue(CmConstants.CFG_SYSTEM_SECTION, CmConstants.CFG_SYSTEM_LANGUAGE);
+        String language =  ConfigManager.getValue(CmConstants.CFG_SYSTEM_LANGUAGE);
         I18nUtils.loadLanguage("languages", language);
         I18nUtils.setLanguage(language);
     }
@@ -118,21 +119,21 @@ public class ChainBootstrap {
      */
     private void initWithFile() {
         /* 基本配置信息 (Basic configuration) */
-        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_SYMBOL_MAX);
-        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_NAME_MAX);
-        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_DEPOSIT_NULS);
-        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_INIT_NUMBER_MIN);
-        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_INIT_NUMBER_MAX);
-        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_DECIMAL_PLACES_MIN);
-        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_DECIMAL_PLACES_MAX);
-        configToMap(CmConstants.PARAM_MAP, CmConstants.PARAM, CmConstants.ASSET_RECOVERY_RATE);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.ASSET_SYMBOL_MAX);
+        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_NAME_MAX);
+        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_DEPOSIT_NULS);
+        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_INIT_NUMBER_MIN);
+        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_INIT_NUMBER_MAX);
+        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_DECIMAL_PLACES_MIN);
+        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_DECIMAL_PLACES_MAX);
+        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_RECOVERY_RATE);
 
         /* 默认的跨链主资产 (Nuls) (Default cross-chain master asset) */
-        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.CHAIN_ASSET, CmConstants.NULS_CHAIN_ID);
-        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.CHAIN_ASSET, CmConstants.NULS_CHAIN_NAME);
-        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.CHAIN_ASSET, CmConstants.NULS_ASSET_ID);
-        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.CHAIN_ASSET, CmConstants.NULS_ASSET_MAX);
-        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.CHAIN_ASSET, CmConstants.NULS_ASSET_SYMBOL);
+        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.NULS_CHAIN_ID);
+        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.NULS_CHAIN_NAME);
+        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.NULS_ASSET_ID);
+        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.NULS_ASSET_MAX);
+        configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.NULS_ASSET_SYMBOL);
     }
 
     /**
@@ -160,8 +161,8 @@ public class ChainBootstrap {
         }
     }
 
-    private void configToMap(Map<String, String> toMap, String section, String key) {
-        toMap.put(key, NulsConfig.MODULES_CONFIG.getCfgValue(section, key, null));
+    private void configToMap(Map<String, String> toMap,  String key) {
+        toMap.put(key, ConfigManager.getValue(key));
     }
 
     /**
@@ -174,6 +175,11 @@ public class ChainBootstrap {
         SpringLiteContext.getBean(ChainService.class).initMainChain();
     }
 
+
+    private void regTxRpc()throws Exception {
+        RpcService rpcService=SpringLiteContext.getBean(RpcServiceImpl.class);
+        rpcService.regTx();
+    }
     /**
      *
      * @throws Exception Any error will throw an exception
@@ -182,14 +188,20 @@ public class ChainBootstrap {
         WsServer.getInstance(ModuleE.CM)
                 .moduleRoles(new String[]{"1.0"})
                 .moduleVersion("1.0")
-//                .dependencies(ModuleE.LG.abbr, "1.1")
-//                .dependencies(ModuleE.BL.abbr, "2.1")
+                .dependencies(ModuleE.LG.abbr, "1.1")
+                .dependencies(ModuleE.TX.abbr, "1.1")
                 .scanPackage("io.nuls.chain.cmd")
                 .connect("ws://127.0.0.1:8887");
 
         // Get information from kernel
         CmdDispatcher.syncKernel();
     }
+    /**
+     *
+     * @throws Exception Any error will throw an exception
+     */
+    private void regTxHandler() throws Exception {
 
+    }
 
 }

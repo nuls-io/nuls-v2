@@ -25,6 +25,7 @@ public class NoUse {
      */
     public static void mockKernel() throws Exception {
         WsServer wsServer = new WsServer(8887);
+        wsServer.setReuseAddr(true);
         // Start server instance
         ServerRuntime.LOCAL.setApiMethods(new ArrayList<>());
         ServerRuntime.LOCAL.setModuleAbbreviation(ModuleE.KE.abbr);
@@ -34,6 +35,7 @@ public class NoUse {
         connectionInformation.put(Constants.KEY_IP, "127.0.0.1");
         connectionInformation.put(Constants.KEY_PORT, wsServer.getPort() + "");
         ServerRuntime.LOCAL.setConnectionInformation(connectionInformation);
+        ServerRuntime.startService = true;
         SpringLiteContext.init("io.nuls.rpc.cmd.kernel");
         wsServer.scanPackage("io.nuls.rpc.cmd.kernel").connect("ws://127.0.0.1:8887");
 

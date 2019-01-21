@@ -25,8 +25,8 @@
 package io.nuls.network.manager.threads;
 
 import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.ProtocolRoleHandler;
@@ -54,7 +54,7 @@ public class DataShowMonitorTest implements Runnable  {
     }
 
     private void printlnProtocolMap(){
-        Collection<Map<String,ProtocolRoleHandler>> values =MessageManager.getInstance().getProtocolRoleHandlerMap().values();
+        Collection<Map<String,ProtocolRoleHandler>> values =MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap().values();
         for (Map<String,ProtocolRoleHandler> map : values) {
             Collection<ProtocolRoleHandler> list = map.values();
             for (ProtocolRoleHandler protocolRoleHandler : list) {
