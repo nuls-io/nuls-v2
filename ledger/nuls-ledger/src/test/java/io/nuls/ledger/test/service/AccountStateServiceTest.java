@@ -27,15 +27,11 @@ package io.nuls.ledger.test.service;
 
 import io.nuls.ledger.test.BaseTest;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by wangkun23 on 2018/11/29.
  */
 public class AccountStateServiceTest extends BaseTest {
-
-    final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Test
     public void test() {

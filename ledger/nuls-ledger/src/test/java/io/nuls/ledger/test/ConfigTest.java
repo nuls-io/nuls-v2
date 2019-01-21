@@ -29,18 +29,16 @@ import io.nuls.tools.parse.config.IniEntity;
 import org.ini4j.Config;
 import org.ini4j.Ini;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+
+import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * Created by wangkun23 on 2018/11/19.
  */
 public class ConfigTest {
-
-    final Logger logger = LoggerFactory.getLogger(ConfigTest.class);
 
     @Test
     public void load() throws Exception {

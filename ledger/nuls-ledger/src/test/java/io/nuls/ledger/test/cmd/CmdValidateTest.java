@@ -34,8 +34,6 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -43,12 +41,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.ledger.utils.LoggerUtil.logger;
+
 /**
  * Created by ljs on 2019/01/06.
  */
 public class CmdValidateTest {
-    final Logger logger = LoggerFactory.getLogger(getClass());
-
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
