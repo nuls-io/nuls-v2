@@ -90,6 +90,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 创建节点
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result createAgent(Map<String, Object> params) {
         if (params == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -134,8 +135,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             //4.交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAgentAddress(), dto.getPassword(), priKey, tx);
-            //todo 5.将交易发送给交易管理模块
-
+            CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHex", HexUtil.encode(tx.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
@@ -199,8 +199,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
-            //todo 将交易传递给交易管理模块
-
+            CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHex", HexUtil.encode(tx.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
@@ -251,8 +250,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
-
-            //todo 将交易传递给交易管理模块
+            CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHex", HexUtil.encode(tx.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
@@ -288,10 +286,8 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             //账户验证
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
-
-            //todo 从交易模块获取委托交易（交易模块）+ 返回数据处理
             NulsDigestData hash = NulsDigestData.fromDigestHex(dto.getTxHash());
-            Transaction depositTransaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
+            Transaction depositTransaction = CallMethodUtils.getTransaction(chain,dto.getTxHash());
             if (depositTransaction == null) {
                 return Result.getFailed(ConsensusErrorCode.TX_NOT_EXIST);
             }
@@ -320,7 +316,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);
-            //todo 将交易传递给交易管理模块
+            CallMethodUtils.sendTx(chain,HexUtil.encode(cancelDepositTransaction.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHex", HexUtil.encode(cancelDepositTransaction.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
@@ -484,7 +480,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 yellowPunishList.add(new PunishLogDTO(po));
             }
         }
-        Map<String, List<PunishLogDTO>> resultMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+        Map<String, List<PunishLogDTO>> resultMap = new HashMap<>(2);
         resultMap.put("redPunish", redPunishList);
         resultMap.put("yellowPunish", yellowPunishList);
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);

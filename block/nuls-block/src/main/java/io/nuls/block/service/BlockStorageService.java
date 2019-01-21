@@ -20,6 +20,7 @@
 
 package io.nuls.block.service;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.po.BlockHeaderPo;
 
@@ -70,7 +71,7 @@ public interface BlockStorageService {
      * @param endHeight
      * @return
      */
-    List<BlockHeaderPo> query(int chainId, long startHeight, long endHeight);
+    List<BlockHeader> query(int chainId, long startHeight, long endHeight);
 
     /**
      * 根据链ID和高度区间移除{@link BlockHeaderPo}

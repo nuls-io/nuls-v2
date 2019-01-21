@@ -21,6 +21,7 @@
 package io.nuls.block.constant;
 
 import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockHeader;
 
 import java.util.Comparator;
 
@@ -86,4 +87,6 @@ public interface Constant {
     int CONSENSUS_WAITING = 0;
 
     public static final Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
+
+    public static final Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
 }

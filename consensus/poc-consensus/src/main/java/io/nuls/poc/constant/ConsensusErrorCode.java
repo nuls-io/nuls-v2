@@ -53,4 +53,5 @@ public interface ConsensusErrorCode {
     ErrorCode INTERFACE_CALL_FAILED = ErrorCode.init("70039");
     ErrorCode ACCOUNT_VALID_ERROR = ErrorCode.init("70040");
     ErrorCode TX_SIGNTURE_ERROR = ErrorCode.init("70041");
+    ErrorCode AGENT_INVALID = ErrorCode.init("70042");
 }
