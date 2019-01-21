@@ -1,7 +1,7 @@
 package io.nuls.account.storage;
 
 import io.nuls.account.constant.AccountParam;
-import io.nuls.account.init.AccountBootstrap;
+import io.nuls.account.AccountBootstrap;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.po.AliasPo;
