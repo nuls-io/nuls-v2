@@ -105,7 +105,7 @@ public class AccountStateServiceImpl implements AccountStateService {
                    //从第list的index=i-1起进行清空
                    if(hadRoll) {
                        for (int j = size; j >=i; j--) {
-                           LoggerUtil.logger.debug("roll j={}",j);
+                           LoggerUtil.logger.debug("roll j={},nonce = {}",j,list.get(j-1).getNonce());
                            list.remove(j-1);
                        }
                        repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
