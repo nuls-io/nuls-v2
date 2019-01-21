@@ -20,6 +20,7 @@ import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
+import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
 import io.nuls.transaction.utils.TransactionTimeComparator;
 
@@ -36,7 +37,7 @@ public class VerifyTxProcessTask implements Runnable {
     private TransactionManager transactionManager = SpringLiteContext.getBean(TransactionManager.class);
 
     private UnverifiedTxStorageService unverifiedTxStorageService = SpringLiteContext.getBean(UnverifiedTxStorageService.class);
-    private ConfirmedTxService confirmedTxService = SpringLiteContext.getBean(ConfirmedTxService.class);
+    private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
     private TransactionH2Service transactionH2Service = SpringLiteContext.getBean(TransactionH2Service.class);
 
@@ -80,6 +81,7 @@ public class VerifyTxProcessTask implements Runnable {
 
     private boolean processTx(Chain chain, Transaction tx, boolean isOrphanTx){
         try {
+            chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] txhash:{}", tx.getHash());
             int chainId = chain.getChainId();
             boolean rs = transactionManager.verify(chain, tx);
             //todo 跨链交易单独处理, 是否需要进行跨链验证？
@@ -88,8 +90,9 @@ public class VerifyTxProcessTask implements Runnable {
                 return false;
             }
             //获取一笔交易(从已确认交易库中获取？)
-            Transaction transaction = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
-            if(null != transaction){
+            //Transaction transaction = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+            Transaction existTx = txService.getTransaction(chain, tx.getHash());
+            if(null != existTx){
                 return isOrphanTx;
             }
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
@@ -106,6 +109,8 @@ public class VerifyTxProcessTask implements Runnable {
 //                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
                 return true;
             }
+            chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " +
+                    "coinData not success - code: {}, - reason:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc());
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){
