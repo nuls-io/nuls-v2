@@ -33,9 +33,8 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * @author: Niels Wang
@@ -43,11 +42,8 @@ import org.slf4j.LoggerFactory;
  */
 public class LedgerBootstrap {
 
-    static final Logger logger = LoggerFactory.getLogger(LedgerBootstrap.class);
-
-
     public static void main(String[] args) {
-        Log.info("ledger Bootstrap start...");
+        logger.info("ledger Bootstrap start...");
         try {
             AppConfig.loadModuleConfig();
             initRocksDb();
@@ -55,7 +51,7 @@ public class LedgerBootstrap {
             SpringLiteContext.init("io.nuls.ledger", new ModularServiceMethodInterceptor());
             initServer();
         } catch (Exception e) {
-            Log.error("ledger Bootstrap failed", e);
+            logger.error("ledger Bootstrap failed", e);
             System.exit(-1);
         }
     }
@@ -79,8 +75,7 @@ public class LedgerBootstrap {
                     .connect("ws://127.0.0.1:8887");
             CmdDispatcher.syncKernel();
         } catch (Exception e) {
-            System.exit(-1);
-            Log.error("ledger initServer failed", e);
+            logger.error("ledger initServer failed", e);
         }
     }
 
@@ -92,7 +87,7 @@ public class LedgerBootstrap {
         try {
             RocksDBService.init(ModuleConfig.getInstance().getDatabaseDir());
         } catch (Exception e) {
-            Log.error(e);
+            logger.error(e);
         }
     }
 }

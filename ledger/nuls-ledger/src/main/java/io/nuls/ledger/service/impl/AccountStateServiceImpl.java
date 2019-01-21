@@ -48,8 +48,6 @@ import java.util.List;
 @Service
 public class AccountStateServiceImpl implements AccountStateService {
 
-    final Logger logger = LoggerFactory.getLogger(getClass());
-
     @Autowired
     private Repository repository;
     @Autowired

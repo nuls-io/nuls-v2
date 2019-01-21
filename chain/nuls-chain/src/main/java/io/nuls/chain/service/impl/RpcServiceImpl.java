@@ -38,12 +38,13 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.chain.util.LoggerUtil.Log;
 
 /**
  * @program: nuls2.0

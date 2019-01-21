@@ -28,8 +28,8 @@ package io.nuls.ledger.config;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * Created by wangkun23 on 2018/11/19.
@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 @Component
 public class AppInitializing implements InitializingBean {
 
-    final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Override
     public void afterPropertiesSet() throws NulsException {

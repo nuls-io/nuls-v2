@@ -34,17 +34,16 @@ import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
+
+import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * Created by wangkun23 on 2018/11/19.
  */
 @Service
 public class RepositoryImpl implements Repository {
-    final Logger logger = LoggerFactory.getLogger(getClass());
 
     /**
      * create accountState to rocksdb

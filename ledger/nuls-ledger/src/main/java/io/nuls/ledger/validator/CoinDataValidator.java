@@ -42,14 +42,14 @@ import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * validate Coin Data
@@ -58,7 +58,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Component
 public class CoinDataValidator {
-    final Logger logger = LoggerFactory.getLogger(getClass());
     /**
      * key String:chainId
      * value:Map<key是交易hash  value是欲提交交易>

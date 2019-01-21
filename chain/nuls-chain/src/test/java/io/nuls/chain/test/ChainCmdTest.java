@@ -6,6 +6,7 @@ import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.model.dto.Asset;
 import io.nuls.chain.model.dto.BlockChain;
 import io.nuls.chain.model.dto.Seed;
+import io.nuls.chain.util.LoggerUtil;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.parse.JSONUtils;
@@ -82,5 +83,9 @@ public class ChainCmdTest {
 //        System.out.println(CmdDispatcher.call("setChainAssetCurrentNumber", new Object[]{(short) 867, 1542092573248L, 147258300}, 1.0));
 //        System.out.println(CmdDispatcher.call("chain", new Object[]{(short) 867}));
 //        System.out.println(CmdDispatcher.call("asset", new Object[]{1542092573248L}));
+    }
+    @Test
+    public void logTest(){
+        LoggerUtil.Log.info("this chain log test");
     }
 }
