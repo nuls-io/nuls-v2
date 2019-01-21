@@ -732,11 +732,11 @@ public class ConsensusServiceImpl implements ConsensusService {
                 txList.add(tx);
             }
             batchValidator.batchValid(txList, chain);
-            List<String> resultTxHexList = new ArrayList<>();
+            List<String> resultTxHashList = new ArrayList<>();
             for (Transaction tx : txList) {
-                resultTxHexList.add(HexUtil.encode(tx.serialize()));
+                resultTxHashList.add(tx.getHash().getDigestHex());
             }
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultTxHexList);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultTxHashList);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
