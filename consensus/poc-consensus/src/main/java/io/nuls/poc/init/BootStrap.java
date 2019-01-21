@@ -54,14 +54,10 @@ public class BootStrap {
      * Initialization System Coding
      */
     private static void initSys() throws Exception{
-        try {
-            System.setProperty(ConsensusConstant.SYS_FILE_ENCODING, UTF_8.name());
-            Field charset = Charset.class.getDeclaredField("defaultCharset");
-            charset.setAccessible(true);
-            charset.set(null, UTF_8);
-        } catch (Exception e) {
-            throw e;
-        }
+        System.setProperty(ConsensusConstant.SYS_FILE_ENCODING, UTF_8.name());
+        Field charset = Charset.class.getDeclaredField("defaultCharset");
+        charset.setAccessible(true);
+        charset.set(null, UTF_8);
     }
 
     /**
@@ -69,13 +65,10 @@ public class BootStrap {
      * Initialization database
      */
     private static void initDB() throws Exception{
-        try {
-            Properties properties = ConfigLoader.loadProperties(ConsensusConstant.DB_CONFIG_NAME);
-            String path = properties.getProperty(ConsensusConstant.DB_DATA_PATH, ConsensusConstant.DB_DATA_DEFAULT_PATH);
-            RocksDBService.init(path);
-        } catch (Exception e) {
-            throw e;
-        }
+        Properties properties = ConfigLoader.loadProperties(ConsensusConstant.DB_CONFIG_NAME);
+        String path = properties.getProperty(ConsensusConstant.DB_DATA_PATH, ConsensusConstant.DB_DATA_DEFAULT_PATH);
+        RocksDBService.init(path);
+
     }
 
     /**
@@ -83,18 +76,13 @@ public class BootStrap {
      * Initialization of International Resource File Language
      */
     private static void initLanguage() throws Exception{
-        try {
-            LanguageService languageService = SpringLiteContext.getBean(LanguageService.class);
-            String languageDB = languageService.getLanguage();
-            I18nUtils.loadLanguage("", "");
-            String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
-            I18nUtils.setLanguage(language);
-            if (null == languageDB) {
-                languageService.saveLanguage(language);
-            }
-        } catch (Exception e) {
-            Log.error(e);
-            throw e;
+        LanguageService languageService = SpringLiteContext.getBean(LanguageService.class);
+        String languageDB = languageService.getLanguage();
+        I18nUtils.loadLanguage("", "");
+        String language = null == languageDB ? I18nUtils.getLanguage() : languageDB;
+        I18nUtils.setLanguage(language);
+        if (null == languageDB) {
+            languageService.saveLanguage(language);
         }
     }
 

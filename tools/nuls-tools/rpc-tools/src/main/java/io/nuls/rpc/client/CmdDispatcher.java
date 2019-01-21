@@ -31,6 +31,7 @@ import io.nuls.rpc.invoke.KernelInvoke;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
@@ -136,6 +137,10 @@ public class CmdDispatcher {
 
         for (String role : ServerRuntime.LOCAL.getDependencies().keySet()) {
             String url = ClientRuntime.getRemoteUri(role);
+            if(StringUtils.isBlank(url)){
+                Log.error("Dependent modules cannot be connected: " + role);
+                return;
+            }
             try {
                 ClientRuntime.getWsClient(url);
             } catch (Exception e) {
