@@ -1,6 +1,5 @@
 package io.nuls.account.rpc.cmd;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcConstant;
@@ -8,8 +7,6 @@ import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
-import io.nuls.account.model.dto.CoinDto;
-import io.nuls.account.model.dto.MulitpleAddressTransferDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
@@ -21,7 +18,6 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -30,9 +26,7 @@ import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

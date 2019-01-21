@@ -112,7 +112,7 @@ public class TransactionCmd extends BaseCmd {
         Integer chainId = (Integer) params.get("chainId");
         String txHex = (String) params.get("txHex");
         boolean isConfirmTx = Boolean.valueOf(params.get("isConfirmTx").toString());
-        if (StringUtils.isNotBlank(txHex)) {
+        if (StringUtils.isBlank(txHex)) {
             return failed("txHex not blank");
         }
         byte[] txStream = HexUtil.decode(txHex);

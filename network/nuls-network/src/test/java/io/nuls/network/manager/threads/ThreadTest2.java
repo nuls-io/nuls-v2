@@ -24,11 +24,19 @@
  */
 package io.nuls.network.manager.threads;
 
-import io.nuls.network.NetworkBootstrap;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.NoUse;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -37,20 +45,47 @@ import java.util.concurrent.TimeUnit;
  * @description
  * @date 2018/12/12
  **/
-public class ThreadTest {
-    private void start(){
-        NetworkBootstrap.getInstance().moduleStart();
+public class ThreadTest2 {
+    @Before
+    public void before() throws Exception {
+        NoUse.mockModule();
     }
     @Test
     public void clientConnectTest(){
-        start();
         ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
-        executor.scheduleAtFixedRate(new NodesConnectTaskTest(), 5, 1, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(new MessageSendTaskTest(), 5, 1, TimeUnit.SECONDS);
         try {
             Thread.sleep(1000000000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+    }
+    /**
+     * 注册消息处理器
+     *
+     * @return
+     */
+    public static boolean register() {
+        try {
+            Map<String, Object> map = new HashMap<>();
+            List<Map<String, String>> cmds = new ArrayList<>();
+            map.put("role", "test");
+            List<String> list = List.of("test");
+            for (String s : list) {
+                Map<String, String> cmd = new HashMap<>();
+                cmd.put("protocolCmd", s);
+                cmd.put("handler", s);
+                cmds.add(cmd);
+            }
+            map.put("protocolCmds", cmds);
+            boolean success = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
+            Log.debug("get nw_protocolRegister " + success);
+            return success;
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.error("get nw_protocolRegister fail");
+        }
+        return false;
     }
 
 }

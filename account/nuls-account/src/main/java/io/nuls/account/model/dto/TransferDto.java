@@ -28,11 +28,11 @@ package io.nuls.account.model.dto;
 import java.util.List;
 
 /**
- * 创建多账户转账交易
+ * 创建普通转账交易，包括多账户转账
  *
  * @author: qinyifeng
  */
-public class MulitpleAddressTransferDto {
+public class TransferDto {
 
     /**
      * 链ID

@@ -1,10 +1,9 @@
 package io.nuls.account.storage;
 
 import io.nuls.account.constant.AccountParam;
-import io.nuls.account.init.AccountBootstrap;
+import io.nuls.account.AccountBootstrap;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.po.AccountPo;
-import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
@@ -13,7 +12,6 @@ import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.ArrayList;

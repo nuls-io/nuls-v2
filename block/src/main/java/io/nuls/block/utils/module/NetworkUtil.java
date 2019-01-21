@@ -256,7 +256,7 @@ public class NetworkUtil {
             Map<String, Object> map = new HashMap<>();
             List<Map<String, String>> cmds = new ArrayList<>();
             map.put("role", ModuleE.BL.abbr);
-            List<String> list = List.of(COMPLETE_MESSAGE, BLOCK_MESSAGE, GET_BLOCK_MESSAGE, FORWARD_SMALL_BLOCK_MESSAGE, GET_BLOCKS_BY_HEIGHT_MESSAGE, GET_TXGROUP_MESSAGE, SMALL_BLOCK_MESSAGE, GET_SMALL_BLOCK_MESSAGE, TXGROUP_MESSAGE);
+            List<String> list = List.of(COMPLETE_MESSAGE, BLOCK_MESSAGE, GET_BLOCK_MESSAGE, FORWARD_SMALL_BLOCK_MESSAGE, GET_BLOCKS_BY_HEIGHT_MESSAGE, GET_TXGROUP_MESSAGE, SMALL_BLOCK_MESSAGE, GET_SMALL_BLOCK_MESSAGE, TXGROUP_MESSAGE, "test");
             for (String s : list) {
                 Map<String, String> cmd = new HashMap<>();
                 cmd.put("protocolCmd", s);

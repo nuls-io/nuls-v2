@@ -26,13 +26,19 @@
 package io.nuls.network.manager.handler;
 
 
+import io.nuls.network.locker.Lockers;
+import io.nuls.network.manager.StorageManager;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
-import io.nuls.network.manager.handler.message.*;
-import io.nuls.network.model.message.*;
-import io.nuls.network.model.message.base.BaseMessage;
+import io.nuls.network.manager.handler.message.OtherModuleMessageHandler;
+import io.nuls.network.model.dto.ProtocolRoleHandler;
+import io.nuls.network.model.po.ProtocolHandlerPo;
+import io.nuls.network.model.po.RoleProtocolPo;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 映射 message 与 message handler 的关系
@@ -43,8 +49,12 @@ import java.util.Map;
  *
  */
 public class MessageHandlerFactory {
-
-    private Map<String, BaseMeesageHandlerInf> handlerMap = new HashMap<>();
+    private StorageManager storageManager=StorageManager.getInstance();
+    private static Map<String, BaseMeesageHandlerInf> handlerMap = new HashMap<>();
+    /**
+     *key : protocol cmd, value : Map<role,ProtocolRoleHandler>
+     */
+    private static Map<String,Map<String,ProtocolRoleHandler>> protocolRoleHandlerMap = new ConcurrentHashMap<>();
 
     private static MessageHandlerFactory INSTANCE = new MessageHandlerFactory();
 
@@ -52,20 +62,82 @@ public class MessageHandlerFactory {
         return INSTANCE;
     }
 
-    /**
-     * add handlerMap in Constructor
-     */
-    private MessageHandlerFactory() {
-        handlerMap.put(VersionMessage.class.getName(),VersionMessageHandler.getInstance());
-        handlerMap.put(VerackMessage.class.getName(),VerackMessageHandler.getInstance());
-        handlerMap.put(GetAddrMessage.class.getName(),GetAddrMessageHandler.getInstance());
-        handlerMap.put(AddrMessage.class.getName(),AddrMessageHandler.getInstance());
-        handlerMap.put(ByeMessage.class.getName(),ByeMessageHandler.getInstance());
-        handlerMap.put(GetTimeMessage.class.getName(),GetTimeMessageHandler.getInstance());
-        handlerMap.put(TimeMessage.class.getName(),TimeMessageHandler.getInstance());
+    public  Map<String,Map<String,ProtocolRoleHandler>> getProtocolRoleHandlerMap() {
+        return protocolRoleHandlerMap;
     }
 
-    public BaseMeesageHandlerInf getHandler(BaseMessage message) {
-        return handlerMap.get(message.getClass().getName());
+    public static void addHandler(String messageCmd,BaseMeesageHandlerInf handler){
+        handlerMap.put(messageCmd,handler);
+    }
+
+    private MessageHandlerFactory() {
+
+    }
+
+    public BaseMeesageHandlerInf getHandler(String messageCmd) {
+        return handlerMap.get(messageCmd);
+    }
+    public OtherModuleMessageHandler getOtherModuleHandler() {
+        return OtherModuleMessageHandler.getInstance();
+    }
+    /**
+     * add handler Map data
+     * @param protocolCmd protocolCmd
+     * @param handler handler
+     */
+    public void addProtocolRoleHandlerMap(String protocolCmd,ProtocolRoleHandler handler){
+        Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.lock();
+        try {
+            Map<String,ProtocolRoleHandler> roleMap = protocolRoleHandlerMap.get(protocolCmd);
+            if (null == roleMap) {
+                roleMap = new HashMap<>();
+                roleMap.put(handler.getRole(),handler);
+                protocolRoleHandlerMap.put(protocolCmd,roleMap);
+            } else {
+                //replace
+                roleMap.put(handler.getRole(),handler);
+
+            }
+        }finally {
+            Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.unlock();
+        }
+    }
+    public void clearCacheProtocolRoleHandlerMap(String role){
+        Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.lock();
+        try {
+            Collection<Map<String,ProtocolRoleHandler>> values = protocolRoleHandlerMap.values();
+            for (Map<String,ProtocolRoleHandler> value : values) {
+                value.remove(role);
+            }
+        }finally {
+            Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.unlock();
+        }
+
+    }
+    /**
+     * get handler data
+     * @param protocolCmd protocolCmd
+     * @return Collection
+     */
+    public Collection<ProtocolRoleHandler> getProtocolRoleHandlerMap(String protocolCmd){
+        if(null != protocolRoleHandlerMap.get(protocolCmd)){
+            return protocolRoleHandlerMap.get(protocolCmd).values();
+        }
+        return null;
+    }
+    public void init(){
+        /*
+         * 加载协议注册信息
+         * load protocolRegister info
+         */
+        List<RoleProtocolPo> list = storageManager.getProtocolRegisterInfos();
+        for(RoleProtocolPo roleProtocolPo : list){
+            roleProtocolPo.getRole();
+            List<ProtocolHandlerPo>   protocolHandlerPos = roleProtocolPo.getProtocolHandlerPos();
+            for(ProtocolHandlerPo protocolHandlerPo : protocolHandlerPos){
+                ProtocolRoleHandler protocolRoleHandler = new ProtocolRoleHandler(roleProtocolPo.getRole(),protocolHandlerPo.getHandler());
+                addProtocolRoleHandlerMap(protocolHandlerPo.getProtocolCmd(),protocolRoleHandler);
+            }
+        }
     }
 }

@@ -56,7 +56,7 @@ public class ChainCmdTest {
     public void chainRegCommit() throws Exception {
         BlockChain blockChain = new BlockChain();
         blockChain.setChainId((short) 867);
-        blockChain.setName("ilovess");
+        blockChain.setChainName("ilovess");
         blockChain.setAddressType(CmConstants.ADDRESS_TYPE_NULS);
         blockChain.setMagicNumber(19870921);
         blockChain.setSupportInflowAsset(false);
