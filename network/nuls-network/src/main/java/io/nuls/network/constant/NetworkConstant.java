@@ -119,7 +119,7 @@ public interface NetworkConstant {
      * 外部指令
      *External instruction
      */
-    String CMD_BL_BEST_BLOCK_HEADER = "bestBlockHeader";
+    String CMD_BL_BEST_BLOCK_HEADER = "latestBlockHeader";
 
 
     /**
