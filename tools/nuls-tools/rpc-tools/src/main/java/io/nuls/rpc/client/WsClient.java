@@ -145,21 +145,21 @@ public class WsClient extends WebSocketClient {
     /**
      * @return 第一条握手确认消息，The first handshake confirmed message
      */
-    private Message firstMessageInNegotiateResponseQueue() {
+    public Message firstMessageInNegotiateResponseQueue() {
         return negotiateResponseQueue.poll();
     }
 
     /**
      * @return 第一条确认消息，The first ack message
      */
-    private Ack firstMessageInAckQueue() {
+    public Ack firstMessageInAckQueue() {
         return ackQueue.poll();
     }
 
     /**
      * @return 第一条需要手动处理的Response消息，The first Response message that needs to be handled manually
      */
-    private Response firstMessageInResponseManualQueue() {
+    public Response firstMessageInResponseManualQueue() {
         return responseManualQueue.poll();
     }
 
@@ -170,11 +170,11 @@ public class WsClient extends WebSocketClient {
         return responseAutoQueue.poll();
     }
 
-    private Queue<Ack> getAckQueue() {
+    public Queue<Ack> getAckQueue() {
         return ackQueue;
     }
 
-    private Queue<Response> getResponseManualQueue() {
+    public Queue<Response> getResponseManualQueue() {
         return responseManualQueue;
     }
 
@@ -195,7 +195,7 @@ public class WsClient extends WebSocketClient {
         return connected;
     }
 
-    private List<String> getTimeOutMessageList() {
+    public List<String> getTimeOutMessageList() {
         return timeOutMessageList;
     }
 }
