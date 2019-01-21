@@ -56,15 +56,15 @@ public interface RpcConstants {
     /**
      * 单个交易验证器接口
      */
-    String TX_VALIDATE_CMD = "validator";
+    String TX_VALIDATE_CMD = "validateCmd";
     /**
      * 交易提交接口
      */
-    String TX_COMMIT_CMD = "commit";
+    String TX_COMMIT_CMD = "commitCmd";
     /**
      * 交易回滚接口
      */
-    String TX_ROLLBACK_CMD = "rollback";
+    String TX_ROLLBACK_CMD = "rollbackCmd";
 
     /**
      * 是否是系统产生的交易（打包节点产生，用于出块奖励结算、红黄牌惩罚）
@@ -86,7 +86,7 @@ public interface RpcConstants {
     /**
      * 发起新交易接口
      */
-    String TX_NEW_CMD = "tx_newTx";
+    String CMD_TX_NEW ="tx_newTx";
     /**
      * 交易数据HEX编码
      */
@@ -104,8 +104,6 @@ public interface RpcConstants {
     /**
      * 创建交易
      */
-    public static final String CMD_TX_NEW_TX = "newTx";
-
     public static final String CMD_NW_CROSS_SEEDS = "nw_getSeeds";
 
     public static final String CMD_NW_CREATE_NODEGROUP = "nw_createNodeGroup";

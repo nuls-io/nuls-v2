@@ -58,5 +58,6 @@ public interface RpcService {
      * @return
      */
     AccountBalance getCoinData(String address);
+
 }
 
