@@ -25,6 +25,7 @@ public class NoUse {
      */
     public static void mockKernel() throws Exception {
         WsServer wsServer = new WsServer(8887);
+        wsServer.setReuseAddr(true);
         // Start server instance
         ServerRuntime.LOCAL.setApiMethods(new ArrayList<>());
         ServerRuntime.LOCAL.setModuleAbbreviation(ModuleE.KE.abbr);
