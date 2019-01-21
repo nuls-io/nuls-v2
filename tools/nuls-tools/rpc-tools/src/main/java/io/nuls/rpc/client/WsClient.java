@@ -134,7 +134,7 @@ public class WsClient extends WebSocketClient {
     @Override
     public void onClose(int paramInt, String paramString, boolean paramBoolean) {
         connected = false;
-        ClientRuntime.stopWsClient(this);
+        //ClientRuntime.stopWsClient(this);
     }
 
     @Override

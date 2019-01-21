@@ -29,8 +29,11 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
+import io.nuls.block.service.ChainStorageService;
 import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.List;
 import java.util.SortedSet;
@@ -54,10 +57,13 @@ import static io.nuls.block.utils.LoggerUtil.Log;
  */
 public class OrphanChainsMaintainer implements Runnable {
 
+    @Autowired
+    private static ChainStorageService chainStorageService;
+
     private static final OrphanChainsMaintainer INSTANCE = new OrphanChainsMaintainer();
 
     private OrphanChainsMaintainer() {
-
+        chainStorageService = SpringLiteContext.getBean(ChainStorageService.class);
     }
 
     public static OrphanChainsMaintainer getInstance() {
@@ -149,6 +155,7 @@ public class OrphanChainsMaintainer implements Runnable {
                 Log.debug("maintain success! before orphanChain-" + orphanChain);
                 Log.debug("get block from " + availableNode.getId());
                 orphanChain.addFirst(block);
+                chainStorageService.save(chainId, block);
                 Log.debug("maintain success! after orphanChain-" + orphanChain);
                 return;
             }

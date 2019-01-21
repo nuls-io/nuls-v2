@@ -363,19 +363,32 @@ public class BlockServiceImpl implements BlockService {
         //1.验证一些基本信息如区块大小限制、字段非空验证
         boolean basicVerify = BlockUtil.basicVerify(chainId, block);
         if (!basicVerify) {
+            Log.error("basicVerify-"+basicVerify);
             return false;
         }
 
         if (localInit) {
             return TransactionUtil.verify(chainId, block.getTxs());
         }
-
         //分叉验证
-        return BlockUtil.forkVerify(chainId, block)
-                //共识验证
-                && ConsensusUtil.verify(chainId, block, download)
-                //交易验证
-                && TransactionUtil.verify(chainId, block.getTxs());
+        boolean forkVerify = BlockUtil.forkVerify(chainId, block);
+        if (!forkVerify) {
+            Log.error("forkVerify-"+forkVerify);
+            return false;
+        }
+        //共识验证
+        boolean consensusVerify = ConsensusUtil.verify(chainId, block, download);
+        if (!consensusVerify) {
+            Log.error("consensusVerify-"+consensusVerify);
+            return false;
+        }
+        //交易验证
+        boolean transactionVerify = TransactionUtil.verify(chainId, block.getTxs());
+        if (!transactionVerify) {
+            Log.error("transactionVerify-"+transactionVerify);
+            return false;
+        }
+        return true;
     }
 
     private boolean initLocalBlocks(int chainId) {

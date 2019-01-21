@@ -20,6 +20,10 @@
 
 package io.nuls.block.constant;
 
+import io.nuls.base.data.Block;
+
+import java.util.Comparator;
+
 /**
  * 配置常量
  *
@@ -80,4 +84,6 @@ public interface Constant {
      * 共识等待状态
      */
     int CONSENSUS_WAITING = 0;
+
+    public static final Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
 }

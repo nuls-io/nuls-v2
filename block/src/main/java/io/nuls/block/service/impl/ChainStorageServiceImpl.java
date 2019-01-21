@@ -22,6 +22,7 @@ package io.nuls.block.service.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.exception.DbRuntimeException;
 import io.nuls.block.service.ChainStorageService;
@@ -30,11 +31,9 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import static io.nuls.block.constant.Constant.BLOCK_COMPARATOR;
 import static io.nuls.block.constant.Constant.CACHED_BLOCK;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
@@ -124,6 +123,7 @@ public class ChainStorageServiceImpl implements ChainStorageService {
             }
             blockList.add(block);
         }
+        blockList.sort(BLOCK_COMPARATOR);
         return blockList;
     }
 

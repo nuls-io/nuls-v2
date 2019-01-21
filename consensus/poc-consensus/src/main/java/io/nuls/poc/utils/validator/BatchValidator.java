@@ -24,7 +24,7 @@ import java.util.*;
 public class BatchValidator {
 
     /**
-     * 共识模块交易批量验证方法
+     * 共识模块交易批量验证方法,返回验证未通过的交易
      * Batch Verification Method for Consensus Module Transactions
      *
      * @param txList transaction list
@@ -51,7 +51,7 @@ public class BatchValidator {
                     break;
                 case ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT : withdrawTxs.add(tx);
                     break;
-                default:continue;
+                default:break;
             }
         }
         Set<String> redPunishAddressSet = new HashSet<>();
@@ -101,7 +101,10 @@ public class BatchValidator {
         while (iterator.hasNext()){
             tx = iterator.next();
             redPunishData.parse(tx.getTxData(),0);
-            String addressHex = HexUtil.encode(redPunishData.getAddress());
+            String addressHex = AddressTool.getStringAddressByBytes(redPunishData.getAddress());
+            /*
+            * 重复的红牌交易不打包
+            * */
             if(!addressHexSet.add(addressHex)){
                iterator.remove();
             }
@@ -146,8 +149,7 @@ public class BatchValidator {
      * @param redPunishAddressSet       red punish address list
      * */
     private void stopAgentValid(List<Transaction>stopAgentTxs,Set<String> redPunishAddressSet)throws NulsException{
-        Set<NulsDigestData> hashSet = new HashSet<>();
-        Iterator<Transaction> iterator = stopAgentTxs.iterator();
+        Set<NulsDigestData> hashSet = new HashSet<>();Iterator<Transaction> iterator = stopAgentTxs.iterator();
         StopAgent stopAgent = new StopAgent();
         while (iterator.hasNext()){
             stopAgent.parse(iterator.next().getTxData(),0);

@@ -64,7 +64,7 @@ public class TransactionCmdCall {
             params.put(RpcConstant.TX_MODULE_CODE, ModuleE.AC.abbr);
             params.put(RpcConstant.TX_MODULE_VALIDATE_CMD, "ac_accountTxValidate");
             params.put("list", txRegisterDetailList);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_REGISTER_CMD, params);
+            //Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_REGISTER_CMD, params);
         } catch (Exception e) {
             e.printStackTrace();
         }

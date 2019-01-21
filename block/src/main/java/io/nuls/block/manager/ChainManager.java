@@ -29,12 +29,15 @@ import io.nuls.block.model.Chain;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.service.ChainStorageService;
 import io.nuls.block.utils.BlockUtil;
+import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.util.*;
 
+import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
+import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
 import static io.nuls.block.utils.LoggerUtil.Log;
 
 /**
@@ -176,9 +179,9 @@ public class ChainManager {
      * @return
      */
     private static boolean switchChain0(int chainId, Chain masterChain, Chain forkChain, Chain subChain) {
-        Log.info("*switchChain0 masterChain=" +masterChain);
-        Log.info("*switchChain0 forkChain=" +forkChain);
-        Log.info("*switchChain0 subChain=" +subChain);
+        Log.info("*switchChain0 masterChain=" + masterChain);
+        Log.info("*switchChain0 forkChain=" + forkChain);
+        Log.info("*switchChain0 subChain=" + subChain);
         //1.计算要从forkChain上添加到主链上多少个区块
         int target = 0;
         if (subChain != null) {
@@ -186,7 +189,7 @@ public class ChainManager {
         } else {
             target = (int) (forkChain.getEndHeight() - forkChain.getStartHeight()) + 1;
         }
-        Log.info("*switchChain0 target=" +target);
+        Log.info("*switchChain0 target=" + target);
         //2.往主链上添加区块
         LinkedList<NulsDigestData> hashList = (LinkedList<NulsDigestData>) forkChain.getHashList().clone();
         int count = 0;
@@ -197,7 +200,7 @@ public class ChainManager {
             if (saveBlock) {
                 count++;
             } else {
-                Log.info("*switchChain0 saveBlock fail, hash=" +hash);
+                Log.info("*switchChain0 saveBlock fail, hash=" + hash);
                 return false;
             }
         }
@@ -442,12 +445,14 @@ public class ChainManager {
     public static boolean append(Chain mainChain, Chain subChain) {
         int chainId = mainChain.getChainId();
         if (mainChain.isMaster()) {
+            ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
             List<Block> blockList = chainStorageService.query(subChain.getChainId(), subChain.getHashList());
             for (Block block : blockList) {
                 if (!blockService.saveBlock(chainId, block, false)) {
                     throw new NulsRuntimeException(BlockErrorCode.CHAIN_MERGE_ERROR);
                 }
             }
+            ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
         }
         if (!mainChain.isMaster()) {
             mainChain.getHashList().addAll(subChain.getHashList());
