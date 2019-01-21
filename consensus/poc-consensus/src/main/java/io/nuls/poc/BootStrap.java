@@ -1,4 +1,4 @@
-package io.nuls.poc.init;
+package io.nuls.poc;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.poc.constant.ConsensusConstant;

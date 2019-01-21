@@ -16,6 +16,7 @@ import io.nuls.poc.utils.enumeration.PunishReasonEnum;
 import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
@@ -448,21 +449,24 @@ public class PunishManager {
         Iterator<Transaction> iterator = txList.iterator();
         Transaction tx;
         Set<String> redPunishAddressSet = redPunishAddressSet(chain);
+        Set<NulsDigestData> invalidAgentHash = new HashSet<>();
         while (iterator.hasNext()) {
             tx = iterator.next();
             switch (tx.getType()){
                 case ConsensusConstant.TX_TYPE_REGISTER_AGENT:
                     Agent agent = new Agent();
                     agent.parse(tx.getTxData(),0);
-                    if(redPunishAddressSet.contains(AddressTool.getStringAddressByBytes(agent.getPackingAddress()))){
+                    if(redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress()))){
+                        invalidAgentHash.add(agent.getTxHash());
                         iterator.remove();
                     }
                     break;
                 case ConsensusConstant.TX_TYPE_STOP_AGENT:
                     StopAgent stopAgent = new StopAgent();
-                    //todo 获取创建该节点的交易
-
                     stopAgent.parse(tx.getTxData(),0);
+                    if(invalidAgentHash.contains(stopAgent.getCreateTxHash())){
+                        iterator.remove();
+                    }
                     break;
                 case ConsensusConstant.TX_TYPE_JOIN_CONSENSUS:
                     Deposit deposit = new Deposit();
@@ -488,7 +492,7 @@ public class PunishManager {
         RedPunishData redPunishData = new RedPunishData();
         for (Transaction tx : chain.getRedPunishTransactionList()) {
             redPunishData.parse(tx.getTxData(),0);
-            String addressHex = AddressTool.getStringAddressByBytes(redPunishData.getAddress());
+            String addressHex = HexUtil.encode(redPunishData.getAddress());
             redPunishAddressSet.add(addressHex);
         }
         return  redPunishAddressSet;
