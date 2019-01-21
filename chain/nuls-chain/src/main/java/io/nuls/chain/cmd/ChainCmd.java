@@ -18,11 +18,12 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.util.Map;
+
+import static io.nuls.chain.util.LoggerUtil.Log;
 
 /**
  * @author tangyi

@@ -34,5 +34,5 @@ import io.nuls.tools.log.logback.NulsLogger;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-   public static NulsLogger Log = LoggerBuilder.getLogger("/logs", "cm.log",Level.ALL);
+   public static NulsLogger Log = LoggerBuilder.getLogger("/cm", "cm",Level.ALL);
 }
