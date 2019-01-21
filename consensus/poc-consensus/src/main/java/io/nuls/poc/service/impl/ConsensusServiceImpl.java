@@ -60,7 +60,6 @@ import java.util.*;
 public class ConsensusServiceImpl implements ConsensusService {
     @Autowired
     private AgentStorageService agentService;
-
     @Autowired
     private DepositStorageService depositService;
     @Autowired
