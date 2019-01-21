@@ -10,6 +10,7 @@ import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
+import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
@@ -74,7 +75,7 @@ public class BatchValidator {
         }
 
         if(!stopAgentTxs.isEmpty()){
-            stopAgentValid(stopAgentTxs,redPunishAddressSet);
+            stopAgentValid(stopAgentTxs,redPunishAddressSet,chain);
         }
 
         if(!depositTxs.isEmpty() || !withdrawTxs.isEmpty()){
@@ -165,7 +166,7 @@ public class BatchValidator {
      * @param stopAgentTxs              transaction list
      * @param redPunishAddressSet       red punish address list
      * */
-    private void stopAgentValid(List<Transaction>stopAgentTxs,Set<String> redPunishAddressSet)throws NulsException{
+    private void stopAgentValid(List<Transaction>stopAgentTxs,Set<String> redPunishAddressSet,Chain chain)throws NulsException{
         Set<NulsDigestData> hashSet = new HashSet<>();
         Iterator<Transaction> iterator = stopAgentTxs.iterator();
         StopAgent stopAgent = new StopAgent();
@@ -177,8 +178,7 @@ public class BatchValidator {
                 continue;
             }
             if(stopAgent.getAddress() == null){
-                //todo 从交易模块获取创建该节点的交易
-                Transaction createAgentTx = new Transaction();
+                Transaction createAgentTx = CallMethodUtils.getTransaction(chain,stopAgent.getCreateTxHash().getDigestHex());
                 if(createAgentTx == null){
                     iterator.remove();
                     continue;
