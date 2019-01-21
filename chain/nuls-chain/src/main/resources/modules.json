@@ -71,7 +71,7 @@
     "value": "4"
   },
   {
-    "name": "asset_decimalPlaces_min",
+    "name": "asset_decimalPlaces_max",
     "remark": "最大小数点位数",
     "readOnly": "true",
     "value": "8"
