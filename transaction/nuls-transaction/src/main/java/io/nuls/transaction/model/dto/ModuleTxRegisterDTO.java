@@ -32,7 +32,7 @@ import java.util.List;
  * @author: qinyifeng
  * @date: 2018/11/30
  */
-public class ModuleTxRegistersDTO {
+public class ModuleTxRegisterDTO {
 
     private int chainId;
     /**
@@ -46,9 +46,9 @@ public class ModuleTxRegistersDTO {
     /**
      * 交易验证器
      */
-    private List<TxRegistersDTO> list;
+    private List<TxRegisterDTO> list;
 
-    public ModuleTxRegistersDTO() {
+    public ModuleTxRegisterDTO() {
 
     }
 
@@ -76,17 +76,17 @@ public class ModuleTxRegistersDTO {
         this.moduleValidator = moduleValidator;
     }
 
-    public List<TxRegistersDTO> getList() {
+    public List<TxRegisterDTO> getList() {
         return list;
     }
 
-    public void setList(List<TxRegistersDTO> list) {
+    public void setList(List<TxRegisterDTO> list) {
         this.list = list;
     }
 
     @Override
     public String toString() {
-        return "ModuleTxRegistersDTO{" +
+        return "ModuleTxRegisterDTO{" +
                 "moduleCode='" + moduleCode + '\'' +
                 ", moduleValidator='" + moduleValidator + '\'' +
                 ", list=" + list +
