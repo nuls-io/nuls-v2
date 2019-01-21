@@ -80,7 +80,7 @@ public class TxFlowTest {
 
     @Test
     public void newCtx() throws Exception{
-        for(int i = 0; i<10; i++) {
+        for(int i = 0; i<5; i++) {
             BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
             System.out.println(balance.longValue());
             CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
@@ -99,7 +99,8 @@ public class TxFlowTest {
 
 
     }
-    @Test
+
+//    @Test
     public void packableTxs() throws Exception{
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);

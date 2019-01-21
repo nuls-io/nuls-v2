@@ -114,7 +114,7 @@ public class VerifyTxProcessTask implements Runnable {
                 return true;
             }
             chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " +
-                    "coinData not success - code: {}, - reason:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc());
+                    "coinData not success - code: {}, - reason:{}, - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getHash().getDigestHex());
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){

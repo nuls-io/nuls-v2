@@ -2,6 +2,7 @@ package io.nuls.transaction.rpc.call;
 
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.exception.NulsException;
@@ -105,6 +106,7 @@ public class TransactionCall {
      * @return 返回未通过验证的交易hash / return unverified transaction hash
      */
     public static List<String> txModuleValidator(Chain chain, String moduleValidator, String moduleCode, List<String> txHexList) throws NulsException {
+
         //调用交易模块统一验证器
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put("chainId", chain.getChainId());

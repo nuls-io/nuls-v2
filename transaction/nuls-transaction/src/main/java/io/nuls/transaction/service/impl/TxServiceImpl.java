@@ -31,6 +31,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
@@ -586,6 +587,27 @@ public class TxServiceImpl implements TxService {
         return true;
     }
 
+    @Override
+    public List<String> transactionModuleValidator(Chain chain, List<String> txHexList) throws NulsException {
+        Map<String, CrossTxData> map = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        List<String> list = new ArrayList<>();
+        //todo 有测试代码
+        int test = 0;
+        for(String hex : txHexList){
+            Transaction tx = TxUtil.getTransaction(hex);
+            CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
+            if(map.containsValue(crossTxData)){
+                list.add(tx.getHash().getDigestHex());
+            }
+            if(test == 2){
+                list.add(tx.getHash().getDigestHex());
+            }
+            test++;
+
+        }
+        return list;
+    }
+
     /**
      * 验证跨链交易的付款方数据
      *
@@ -689,17 +711,8 @@ public class TxServiceImpl implements TxService {
                     chain.getLogger().warn(e.getMessage(), e);
                     continue;
                 }
-                //验证tx
+                //交易业务验证tx
                 if (!transactionManager.verify(chain, tx)) {
-                    clearInvalidTx(chain, tx);
-                    continue;
-                }
-
-                //验证coinData
-                VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, false);
-                if (!verifyTxResult.success()) {
-                    chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " +
-                            "coinData not success - code: {}, - reason:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc());
                     clearInvalidTx(chain, tx);
                     continue;
                 }
@@ -715,6 +728,17 @@ public class TxServiceImpl implements TxService {
                     moduleVerifyMap.put(txRegister, txHexs);
                 }
             }
+            chain.getLogger().debug("packableTxs - Start:");
+            chain.getLogger().debug("-----------------------------------------");
+            try {
+                for(int i = 0; i < packingTxList.size();i++){
+                    chain.getLogger().debug(i + ": " + ((Transaction) packingTxList.get(i)).hex());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            chain.getLogger().debug("-----------------------------------------");
+            chain.getLogger().debug("");
             //统一验证以及之后的再次验证过滤掉的交易集合
             List<Transaction> filterList = new ArrayList<>();
             txModuleValidatorPackable(chain, moduleVerifyMap, filterList);
@@ -744,6 +768,13 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(e);
         }
 
+        Log.info("packableTxs - Rs:");
+        chain.getLogger().debug("-----------------------------------------");
+        for(int i = 0; i < packableTxs.size();i++){
+            chain.getLogger().debug(i + ": " + packableTxs.get(i));
+        }
+        chain.getLogger().debug("-----------------------------------------");
+        chain.getLogger().debug("");
         return packableTxs;
     }
 
@@ -760,7 +791,13 @@ public class TxServiceImpl implements TxService {
         Iterator<Map.Entry<TxRegister, List<String>>> it = moduleVerifyMap.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<TxRegister, List<String>> entry = it.next();
-            List<String> txhashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
+            List<String> txhashList = null;
+            if(entry.getKey().getModuleCode().equals(ModuleE.TX.abbr)){
+                //模块统一验证,交易模块,不用调RPC接口
+                txhashList = transactionModuleValidator(chain, entry.getValue());
+            }else {
+                txhashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
+            }
             if (null == txhashList || txhashList.size() == 0) {
                 //模块统一验证没有冲突的，从map中干掉
                 it.remove();
@@ -769,8 +806,18 @@ public class TxServiceImpl implements TxService {
             //记录冲突的交易，以及对应的索引
             int startIndex = filter(entry.getValue(), txhashList, filterList);
             if (startIndex >= 0) {
-                //从模块验证集合中，删除冲突交易以及之前的交易，以便重新验证之后的交易
-                entry.getValue().subList(0, startIndex + 1).clear();
+                //从模块验证集合中，删除冲突交易,以便重新验证剩下的交易
+                chain.getLogger().debug("=========过滤前==========");
+                for (String s : entry.getValue()){
+                    chain.getLogger().debug(s);
+                }
+                chain.getLogger().debug("=========过滤后==========");
+//                entry.getValue().subList(0, startIndex + 1).clear();
+                entry.getValue().remove(startIndex);
+                for (String s : entry.getValue()){
+                    chain.getLogger().debug(s);
+                }
+                chain.getLogger().debug("===================");
             }
         }
         if (moduleVerifyMap.isEmpty()) {
@@ -801,7 +848,10 @@ public class TxServiceImpl implements TxService {
                     continue;
                 }
                 //验证coinData
-                if (!LedgerCall.verifyCoinData(chain, txHex, true).success()) {
+                VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
+                if (!verifyTxResult.success()) {
+                    chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " +
+                            "coinData not success - code: {}, - reason:{}, - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getHash().getDigestHex());
                     filterList.add(tx);
                     iterator.remove();
                     continue;
@@ -813,8 +863,8 @@ public class TxServiceImpl implements TxService {
     private int filter(List<String> txHexList, List<String> txhashList, List<Transaction> filterList) throws NulsException {
         int startIndex = -1;
         for (int i = 0; i < txHexList.size(); i++) {
-            String txhex = txhashList.get(i);
-            Transaction tx = TxUtil.getTransaction(txhex);
+            String txHex = txHexList.get(i);
+            Transaction tx = TxUtil.getTransaction(txHex);
             for (String txHash : txhashList) {
                 if (tx.getHash().equals(NulsDigestData.fromDigestHex(txHash))) {
                     filterList.add(tx);
