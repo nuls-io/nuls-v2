@@ -1,6 +1,5 @@
 package io.nuls.poc.utils.manager;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -8,13 +7,16 @@ import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
+import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * CoinData操作工具类
@@ -132,16 +134,15 @@ public class CoinDataManager {
      * @param height      lock block height/锁定区块
      * @return CoinData
      */
-    public CoinData getStopAgentCoinData(Chain chain, Agent agent, long lockTime, Long height) throws NulsException{
+    private CoinData getStopAgentCoinData(Chain chain, Agent agent, long lockTime, Long height) throws NulsException{
         if (null == agent) {
             return null;
         }
         try {
             int chainId = chain.getConfig().getChainId();
             int assetsId = chain.getConfig().getAssetsId();
-            //todo 从交易模块获取创建该节点时的交易
             NulsDigestData createTxHash = agent.getTxHash();
-            Transaction createAgentTransaction = null;
+            Transaction createAgentTransaction = CallMethodUtils.getTransaction(chain,createTxHash.getDigestHex());
             if (null == createAgentTransaction) {
                 throw new NulsRuntimeException(ConsensusErrorCode.TX_NOT_EXIST);
             }
@@ -149,8 +150,6 @@ public class CoinDataManager {
             List<CoinTo> toList = new ArrayList<>();
             List<CoinFrom> fromList = new ArrayList<>();
             toList.add(new CoinTo(agent.getAgentAddress(),chainId,assetsId,agent.getDeposit(), lockTime));
-            coinData.setTo(toList);
-
             /*
             根据创建节点交易的CoinData中的输出 组装退出节点交易的输入
             Assemble the input to exit the node transaction based on the output in CoinData that creates the node transaction
@@ -170,14 +169,11 @@ public class CoinDataManager {
                 throw new NulsRuntimeException(ConsensusErrorCode.DATA_ERROR);
             }
             coinData.setFrom(fromList);
-
             /*
             获取该节点的委托信息，并将委托金额返回给委托人
             Obtain the delegation information of the node and return the amount of the delegation to the principal
             */
             List<Deposit> deposits = chain.getDepositList();
-            List<String> addressList = new ArrayList<>();
-            Map<String, CoinTo> toMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             long blockHeight = null == height ? -1 : height;
             for (Deposit deposit : deposits) {
                 if (deposit.getDelHeight() > 0 && (blockHeight <= 0 || deposit.getDelHeight() < blockHeight)) {
@@ -186,8 +182,7 @@ public class CoinDataManager {
                 if (!deposit.getAgentHash().equals(agent.getTxHash())) {
                     continue;
                 }
-                //todo  从交易管理模块获取委托交易 deposit.getTxHash()
-                Transaction depositTransaction = null;
+                Transaction depositTransaction = CallMethodUtils.getTransaction(chain,deposit.getTxHash().getDigestHex());
                 CoinData depositCoinData = new CoinData();
                 depositCoinData.parse(depositTransaction.getCoinData(), 0);
                 CoinFrom from;
@@ -200,19 +195,10 @@ public class CoinDataManager {
                     fromList.add(from);
                     break;
                 }
-                String address = AddressTool.getStringAddressByBytes(deposit.getAddress());
-                CoinTo coinTo = toMap.get(address);
-                if(coinTo == null){
-                    coinTo = new CoinTo(deposit.getAddress(),chainId,assetsId,deposit.getDeposit(),0);
-                    toMap.put(address,coinTo);
-                    addressList.add(address);
-                }else{
-                    coinTo.setAmount(coinTo.getAmount().add(deposit.getDeposit()));
-                }
+                CoinTo coinTo = new CoinTo(deposit.getAddress(),chainId,assetsId,deposit.getDeposit(),0);
+                toList.add(coinTo);
             }
-            for (String address : addressList) {
-                coinData.getTo().add(toMap.get(address));
-            }
+            coinData.setTo(toList);
             return coinData;
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());

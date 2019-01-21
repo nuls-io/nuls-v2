@@ -1,21 +1,17 @@
 package io.nuls.account.service;
 
 import io.nuls.account.constant.AccountParam;
-import io.nuls.account.init.AccountBootstrap;
+import io.nuls.account.AccountBootstrap;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.storage.AliasStorageServiceTest;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.thread.TimeService;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.List;
 
 import static org.junit.Assert.*;
 

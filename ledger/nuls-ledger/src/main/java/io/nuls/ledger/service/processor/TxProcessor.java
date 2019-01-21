@@ -30,7 +30,7 @@ import io.nuls.base.data.CoinTo;
 import io.nuls.ledger.model.po.AccountState;
 
 /**
- * Created by wangkun23 on 2018/11/29.
+ * Created by ljs on 2018/12/29.
  */
 public interface TxProcessor {
 
