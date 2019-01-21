@@ -1,7 +1,7 @@
 /*
  *
  *  * MIT License
- *  * Copyright (c) 2017-2018 nuls.io
+ *  * Copyright (c) 2017-2019 nuls.io
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
  *  * in the Software without restriction, including without limitation the rights
@@ -106,6 +106,10 @@ public class ChainParameters extends BaseNulsData {
      * 孤儿链最大年龄
      */
     private int orphanChainMaxAge;
+    /**
+     * 日志级别
+     */
+    private String logLevel;
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
@@ -125,6 +129,7 @@ public class ChainParameters extends BaseNulsData {
         stream.writeUint16(blockCache);
         stream.writeUint16(smallBlockCache);
         stream.writeUint16(orphanChainMaxAge);
+        stream.writeString(logLevel);
     }
 
     @Override
@@ -145,6 +150,7 @@ public class ChainParameters extends BaseNulsData {
         this.blockCache = byteBuffer.readUint16();
         this.smallBlockCache = byteBuffer.readUint16();
         this.orphanChainMaxAge = byteBuffer.readUint16();
+        this.logLevel = byteBuffer.readString();
     }
 
     @Override
@@ -152,6 +158,7 @@ public class ChainParameters extends BaseNulsData {
         int size = 0;
         size += (16 * SerializeUtils.sizeOfUint16());
         size += SerializeUtils.sizeOfString(chainName);
+        size += SerializeUtils.sizeOfString(logLevel);
         return size;
     }
 
@@ -172,5 +179,6 @@ public class ChainParameters extends BaseNulsData {
         this.blockCache = Integer.parseInt(map.get(ConfigConstant.BLOCK_CACHE).getValue());
         this.smallBlockCache = Integer.parseInt(map.get(ConfigConstant.SMALL_BLOCK_CACHE).getValue());
         this.orphanChainMaxAge = Integer.parseInt(map.get(ConfigConstant.ORPHAN_CHAIN_MAX_AGE).getValue());
+        this.logLevel = map.get(ConfigConstant.LOG_LEVEL).getValue();
     }
 }

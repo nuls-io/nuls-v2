@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -20,14 +20,10 @@
 
 package io.nuls.block.thread;
 
-import io.nuls.block.constant.ConfigConstant;
-import io.nuls.block.manager.ConfigManager;
-import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Node;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 import org.junit.Test;
 
-import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import static org.junit.Assert.assertEquals;
@@ -44,7 +40,7 @@ public class BlockDownloaderTest {
             if (startHeight + size > netLatestHeight) {
                 size = (int) (netLatestHeight - startHeight + 1);
             }
-            Log.info("get blocks "+startHeight+"->"+(startHeight + size - 1));
+            commonLog.info("get blocks "+startHeight+"->"+(startHeight + size - 1));
             startHeight += size;
         }
     }

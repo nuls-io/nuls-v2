@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -26,6 +26,7 @@ import io.nuls.block.manager.ChainManager;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Chain;
 import io.nuls.block.model.ChainContext;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -33,7 +34,7 @@ import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.RunningStatusEnum.MAINTAIN_ORPHAN_CHAINS;
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 孤儿链的形成原因分析：因为网络问题,在没有收到Block(100)的情况下,已经收到了Block(101),此时Block(101)不能连接到主链上,形成孤儿链
@@ -64,11 +65,12 @@ public class OrphanChainsMonitor implements Runnable {
 
         for (Integer chainId : ContextManager.chainIds) {
             ChainContext context = ContextManager.getContext(chainId);
+            NulsLogger commonLog = context.getCommonLog();
             try {
                 //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
                 RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RUNNING)) {
-                    Log.debug("skip process, status is " + status + ", chainId-" + chainId);
+                    commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
                     continue;
                 }
 
@@ -92,25 +94,25 @@ public class OrphanChainsMonitor implements Runnable {
                             continue;
                         }
                         // exclusive access
-                        Log.info("####################################orphan chains######################################");
+                        commonLog.info("####################################orphan chains######################################");
                         for (Chain orphanChain : orphanChains) {
-                            Log.info("#" + orphanChain);
+                            commonLog.info("#" + orphanChain);
                         }
                         context.setStatus(MAINTAIN_ORPHAN_CHAINS);
                         Chain masterChain = ChainManager.getMasterChain(chainId);
                         SortedSet<Chain> forkChains = ChainManager.getForkChains(chainId);
                         //标记、变更链属性阶段
                         for (Chain orphanChain : orphanChains) {
-                            Log.info("OrphanChainsMonitor-mark-begin");
+                            commonLog.info("OrphanChainsMonitor-mark-begin");
                             mark(orphanChain, masterChain, forkChains, orphanChains);
-                            Log.info("OrphanChainsMonitor-mark-end");
+                            commonLog.info("OrphanChainsMonitor-mark-end");
                         }
                         //复制、清除阶段
                         SortedSet<Chain> maintainedOrphanChains = new TreeSet<>(Chain.COMPARATOR);
                         for (Chain orphanChain : orphanChains) {
-                            Log.info("OrphanChainsMonitor-copy-begin");
+                            commonLog.info("OrphanChainsMonitor-copy-begin");
                             copy(chainId, maintainedOrphanChains, orphanChain);
-                            Log.info("OrphanChainsMonitor-copy-end");
+                            commonLog.info("OrphanChainsMonitor-copy-end");
                         }
                         ChainManager.setOrphanChains(chainId, maintainedOrphanChains);
                         forkChains.forEach(e -> e.setType(ChainTypeEnum.FORK));
@@ -126,7 +128,7 @@ public class OrphanChainsMonitor implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
                 context.setStatus(RUNNING);
-                Log.error("chainId-" + chainId + ",maintain OrphanChains fail!error msg is:" + e.getMessage());
+                commonLog.error("chainId-" + chainId + ",maintain OrphanChains fail!error msg is:" + e.getMessage());
             }
         }
     }

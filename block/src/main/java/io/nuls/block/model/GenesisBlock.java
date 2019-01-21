@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * todo 链工厂的链创世块
@@ -78,7 +78,7 @@ public final class GenesisBlock extends Block {
                 json = IoUtils.read(GENESIS_BLOCK_FILE);
             } catch (NulsException e) {
                 e.printStackTrace();
-                Log.error(e);
+                commonLog.error(e);
             }
             INSTANCE.init(json);
         }
@@ -94,7 +94,7 @@ public final class GenesisBlock extends Block {
             jsonMap = JSONUtils.json2map(json);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
         }
         String time = (String) jsonMap.get(CONFIG_FILED_TIME);
         Asserts.notEmpty(time, BlockErrorCode.DATA_ERROR.getCode());

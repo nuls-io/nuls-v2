@@ -1,7 +1,7 @@
 /*
  *
  *  * MIT License
- *  * Copyright (c) 2017-2018 nuls.io
+ *  * Copyright (c) 2017-2019 nuls.io
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
  *  * in the Software without restriction, including without limitation the rights
@@ -25,28 +25,32 @@ package io.nuls.block.test;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.log.logback.NulsLogger;
 
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 @Service
 public class TransactionStorageServiceImpl implements TransactionStorageService {
     @Override
     public boolean save(int chainId, Transaction transaction) {
         byte[] bytes;
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             bytes = transaction.serialize();
             return RocksDBService.put("tx" + chainId, transaction.getHash().serialize(), bytes);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return false;
         }
     }
 
     @Override
     public Transaction query(int chainId, NulsDigestData hash) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             byte[] bytes = RocksDBService.get("tx" + chainId, hash.serialize());
             if (bytes == null) {
@@ -57,17 +61,18 @@ public class TransactionStorageServiceImpl implements TransactionStorageService 
             return po;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return null;
         }
     }
 
     @Override
     public boolean remove(int chainId, NulsDigestData hash) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             return RocksDBService.delete("tx" + chainId, hash.serialize());
         } catch (Exception e) {
-            Log.error(e);
+            commonLog.error(e);
             return false;
         }
     }

@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -27,7 +27,7 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
 
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 消费共享队列中的区块
@@ -60,21 +60,21 @@ public class BlockConsumer implements Callable<Boolean> {
             long startHeight = params.getLocalLatestHeight() + 1;
 
             Block block;
-            Log.info("BlockConsumer start work");
+            commonLog.info("BlockConsumer start work");
             while (startHeight <= netLatestHeight) {
                 block = queue.take();
                 boolean saveBlock = blockService.saveBlock(chainId, block, true);
                 if (!saveBlock) {
-                    Log.error("error occur when save syn blocks");
+                    commonLog.error("error occur when save syn blocks");
                     return false;
                 }
                 startHeight++;
             }
-            Log.info("BlockConsumer stop work normally");
+            commonLog.info("BlockConsumer stop work normally");
             return true;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error("BlockConsumer stop work abnormally");
+            commonLog.error("BlockConsumer stop work abnormally");
             return false;
         }
     }

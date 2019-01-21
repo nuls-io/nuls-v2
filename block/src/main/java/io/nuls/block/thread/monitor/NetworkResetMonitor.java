@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -25,7 +25,7 @@ import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.utils.module.NetworkUtil;
 
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 区块高度监控器
@@ -54,7 +54,7 @@ public class NetworkResetMonitor implements Runnable {
                 //判断该链的运行状态,只有正常运行时才会有区块高度监控
                 RunningStatusEnum status = ContextManager.getContext(chainId).getStatus();
                 if (!status.equals(RunningStatusEnum.RUNNING)) {
-                    Log.info("skip process, status is " + status + ", chainId-" + chainId);
+                    commonLog.info("skip process, status is " + status + ", chainId-" + chainId);
                     return;
                 }
                 ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
@@ -62,12 +62,12 @@ public class NetworkResetMonitor implements Runnable {
                 long time = ContextManager.getContext(chainId).getLatestBlock().getHeader().getTime();
                 //如果(当前时间戳-最新区块时间戳)>重置网络阈值,通知网络模块重置可用节点
                 if (NetworkUtil.currentTime() - time > reset) {
-                    Log.info("chainId-" + chainId + ",NetworkReset!");
+                    commonLog.info("chainId-" + chainId + ",NetworkReset!");
                     NetworkUtil.resetNetwork(chainId);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.error("chainId-" + chainId + ",NetworkReset error!");
+                commonLog.error("chainId-" + chainId + ",NetworkReset error!");
             }
         }
 

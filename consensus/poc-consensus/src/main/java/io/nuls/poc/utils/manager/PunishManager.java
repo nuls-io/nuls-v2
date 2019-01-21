@@ -448,8 +448,20 @@ public class PunishManager {
     private void conflictValid(Chain chain,List<Transaction> txList)throws NulsException{
         Iterator<Transaction> iterator = txList.iterator();
         Transaction tx;
+        /*
+        * 红牌惩罚的地址
+        * */
         Set<String> redPunishAddressSet = redPunishAddressSet(chain);
-        Set<NulsDigestData> invalidAgentHash = new HashSet<>();
+
+        /*
+        * 无效的节点Hash
+        * */
+        Set<NulsDigestData> invalidAgentTxHash = new HashSet<>();
+
+        /*
+        * 无效的加入共识交易的交易Hash
+        * */
+        Set<NulsDigestData> invalidDepositTxHash = new HashSet<>();
         while (iterator.hasNext()) {
             tx = iterator.next();
             switch (tx.getType()){
@@ -457,24 +469,31 @@ public class PunishManager {
                     Agent agent = new Agent();
                     agent.parse(tx.getTxData(),0);
                     if(redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress()))){
-                        invalidAgentHash.add(agent.getTxHash());
+                        invalidAgentTxHash.add(agent.getTxHash());
                         iterator.remove();
                     }
                     break;
                 case ConsensusConstant.TX_TYPE_STOP_AGENT:
                     StopAgent stopAgent = new StopAgent();
                     stopAgent.parse(tx.getTxData(),0);
-                    if(invalidAgentHash.contains(stopAgent.getCreateTxHash())){
+                    if(invalidAgentTxHash.contains(stopAgent.getCreateTxHash())){
                         iterator.remove();
                     }
                     break;
                 case ConsensusConstant.TX_TYPE_JOIN_CONSENSUS:
                     Deposit deposit = new Deposit();
                     deposit.parse(tx.getTxData(),0);
+                    if(invalidAgentTxHash.contains(deposit.getAgentHash())){
+                        invalidDepositTxHash.add(deposit.getTxHash());
+                        iterator.remove();
+                    }
                     break;
                 case ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT:
                     CancelDeposit cancelDeposit = new CancelDeposit();
                     cancelDeposit.parse(tx.getTxData(),0);
+                    if(invalidDepositTxHash.contains(cancelDeposit.getJoinTxHash())){
+                        iterator.remove();
+                    }
                     break;
                 default:break;
             }

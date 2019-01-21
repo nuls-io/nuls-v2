@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  */
-package io.nuls;
+package io.nuls.network;
 
 
 import io.nuls.db.service.RocksDBService;
@@ -50,17 +50,17 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  * @date 2018/11/01
  *
  */
-public class Bootstrap {
-    private static Bootstrap bootstrap = null;
+public class NetworkBootstrap {
+    private static NetworkBootstrap bootstrap = null;
 
-    private Bootstrap() {
+    private NetworkBootstrap() {
     }
 
-    public static Bootstrap getInstance() {
+    public static NetworkBootstrap getInstance() {
         if (bootstrap == null) {
-            synchronized (Bootstrap.class) {
+            synchronized (NetworkBootstrap.class) {
                 if (bootstrap == null) {
-                    bootstrap = new Bootstrap();
+                    bootstrap = new NetworkBootstrap();
                 }
             }
         }
@@ -70,7 +70,7 @@ public class Bootstrap {
 
     public static void main(String[] args) {
 
-        Bootstrap.getInstance().moduleStart();
+        NetworkBootstrap.getInstance().moduleStart();
 
     }
 
@@ -83,7 +83,7 @@ public class Bootstrap {
             managerInit();
             managerStart();
         } catch (Exception e) {
-            Log.error("Network Bootstrap failed", e);
+            Log.error("Network NetworkBootstrap failed", e);
             System.exit(-1);
         }
     }
@@ -129,8 +129,8 @@ public class Bootstrap {
             Collections.addAll(ipMoonList, seedMoonIp.split(NetworkConstant.COMMA));
             networkParam.setMoonSeedIpList(ipMoonList);
         } catch (IOException e) {
-            Log.error("Network Bootstrap cfgInit failed", e);
-            throw new RuntimeException("Network Bootstrap cfgInit failed");
+            Log.error("Network NetworkBootstrap cfgInit failed", e);
+            throw new RuntimeException("Network NetworkBootstrap cfgInit failed");
         } catch (NulsException e) {
             e.printStackTrace();
         }

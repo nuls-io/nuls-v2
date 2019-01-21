@@ -26,7 +26,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
  * @author tag
  * 2018/11/7
  */
-public class BootStrap {
+public class ConsensusBootStrap {
     /**
      * 共识模块启动方法
      * Consensus module startup method

@@ -1,7 +1,7 @@
 /*
  *
  *  * MIT License
- *  * Copyright (c) 2017-2018 nuls.io
+ *  * Copyright (c) 2017-2019 nuls.io
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
  *  * in the Software without restriction, including without limitation the rights
@@ -29,7 +29,7 @@ import io.nuls.block.model.Node;
 
 import java.util.concurrent.*;
 
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 区块下载管理器
@@ -75,10 +75,10 @@ public class BlockDownloader implements Callable<Boolean> {
         int maxDowncount = chainParameters.getDownloadNumber();
         int blockCache = chainParameters.getBlockCache();
         try {
-            Log.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight);
+            commonLog.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight);
             while (startHeight <= netLatestHeight) {
                 while (queue.size() > blockCache) {
-                    Log.info("BlockDownloader wait！ cached queue size:" + queue.size());
+                    commonLog.info("BlockDownloader wait！ cached queue size:" + queue.size());
                     Thread.sleep(1000L);
                 }
                 Node node = nodes.take();
@@ -91,10 +91,10 @@ public class BlockDownloader implements Callable<Boolean> {
                 futures.offer(future);
                 startHeight += size;
             }
-            Log.info("BlockDownloader stop work");
+            commonLog.info("BlockDownloader stop work");
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return false;
         }
         executor.shutdown();

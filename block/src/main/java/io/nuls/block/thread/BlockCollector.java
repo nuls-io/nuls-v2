@@ -1,7 +1,7 @@
 /*
  *
  *  * MIT License
- *  * Copyright (c) 2017-2018 nuls.io
+ *  * Copyright (c) 2017-2019 nuls.io
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
  *  * in the Software without restriction, including without limitation the rights
@@ -24,7 +24,9 @@ package io.nuls.block.thread;
 
 import io.nuls.base.data.Block;
 import io.nuls.block.cache.CacheHandler;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.Node;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -33,7 +35,7 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static io.nuls.block.constant.Constant.BLOCK_COMPARATOR;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 区块收集器,收集下载器下载到的区块,排序后放入共享队列
@@ -52,6 +54,7 @@ public class BlockCollector implements Runnable {
     private ThreadPoolExecutor executor;
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
+    private NulsLogger commonLog;
 
     public BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
         this.params = params;
@@ -59,6 +62,7 @@ public class BlockCollector implements Runnable {
         this.futures = futures;
         this.chainId = chainId;
         this.queue = queue;
+        this.commonLog = ContextManager.getContext(chainId).getCommonLog();
     }
 
     @Override
@@ -67,14 +71,14 @@ public class BlockCollector implements Runnable {
         try {
             long netLatestHeight = params.getNetLatestHeight();
             long startHeight = params.getLocalLatestHeight() + 1;
-            Log.info("BlockCollector start work");
+            commonLog.info("BlockCollector start work");
             while (startHeight <= netLatestHeight) {
                 result = futures.take().get();
                 int size = result.getSize();
                 if (result.isSuccess()) {
                     Node node = result.getNode();
                     long endHeight = startHeight + size - 1;
-                    Log.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
+                    commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
                     node.adjustCredit(true);
                     params.getNodes().offer(node);
                     List<Block> blockList = CacheHandler.getBlockList(chainId, result.getMessageHash());
@@ -85,10 +89,10 @@ public class BlockCollector implements Runnable {
                 }
                 startHeight += size;
             }
-            Log.info("BlockCollector stop work");
+            commonLog.info("BlockCollector stop work");
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
         }
     }
 
@@ -104,13 +108,13 @@ public class BlockCollector implements Runnable {
         Node node = result.getNode();
         node.adjustCredit(false);
         params.getNodes().offer(node);
-        Log.info("retry download blocks, fail node:" + node + ", start:" + result.getStartHeight());
+        commonLog.info("retry download blocks, fail node:" + node + ", start:" + result.getStartHeight());
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         try {
             result.setNode(nodes.take());
         } catch (InterruptedException e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
         }
 
         if (downloadBlockFromNode(result)) {
@@ -126,7 +130,7 @@ public class BlockCollector implements Runnable {
             return submit.get().isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
         }
         return false;
     }
