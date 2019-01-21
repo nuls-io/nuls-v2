@@ -6,6 +6,12 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.*;
+import io.nuls.poc.model.po.AgentPo;
+import io.nuls.poc.model.po.DepositPo;
+import io.nuls.poc.storage.AgentStorageService;
+import io.nuls.poc.storage.DepositStorageService;
+import io.nuls.poc.utils.CallMethodUtils;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
@@ -21,6 +27,11 @@ import java.util.*;
  * */
 @Component
 public class BatchValidator {
+    @Autowired
+    private DepositStorageService depositStorageService;
+
+    @Autowired
+    private AgentStorageService agentStorageService;
 
     /**
      * 共识模块交易批量验证方法,返回验证未通过的交易
@@ -64,11 +75,13 @@ public class BatchValidator {
         }
 
         if(!stopAgentTxs.isEmpty()){
-            stopAgentValid(stopAgentTxs,redPunishAddressSet);
+            stopAgentValid(stopAgentTxs,redPunishAddressSet,chain);
         }
 
-        if(!redPunishAddressSet.isEmpty() || !stopAgentTxs.isEmpty()){
-            invalidAgentHash = getInvalidAgentHash(redPunishAddressSet,stopAgentTxs,chain);
+        if(!depositTxs.isEmpty() || !withdrawTxs.isEmpty()){
+            if(!redPunishAddressSet.isEmpty() || !stopAgentTxs.isEmpty()){
+                invalidAgentHash = getInvalidAgentHash(redPunishAddressSet,stopAgentTxs,chain);
+            }
         }
 
         if(!invalidAgentHash.isEmpty() && !depositTxs.isEmpty()){
@@ -76,7 +89,7 @@ public class BatchValidator {
         }
 
         if (!withdrawTxs.isEmpty()){
-            withdrawValid(withdrawTxs,invalidAgentHash);
+            withdrawValid(withdrawTxs,invalidAgentHash,chain);
         }
 
         txList.removeAll(redPunishTxs);
@@ -128,12 +141,18 @@ public class BatchValidator {
             agent.parse(iterator.next().getTxData(),0);
             agentAddressHex = HexUtil.encode(agent.getAgentAddress());
             packAddressHex = HexUtil.encode(agent.getPackingAddress());
+            /*
+            * 获得过红牌交易的地址不能创建节点
+            * */
             if(!redPunishAddressSet.isEmpty()){
                 if(redPunishAddressSet.contains(agentAddressHex) || redPunishAddressSet.contains(packAddressHex)){
                     iterator.remove();
                     continue;
                 }
             }
+            /*
+            * 重复创建节点
+            * */
             if(!createAgentAddressSet.add(agentAddressHex) || !createAgentAddressSet.add(packAddressHex)){
                 iterator.remove();
             }
@@ -147,8 +166,9 @@ public class BatchValidator {
      * @param stopAgentTxs              transaction list
      * @param redPunishAddressSet       red punish address list
      * */
-    private void stopAgentValid(List<Transaction>stopAgentTxs,Set<String> redPunishAddressSet)throws NulsException{
-        Set<NulsDigestData> hashSet = new HashSet<>();Iterator<Transaction> iterator = stopAgentTxs.iterator();
+    private void stopAgentValid(List<Transaction>stopAgentTxs,Set<String> redPunishAddressSet,Chain chain)throws NulsException{
+        Set<NulsDigestData> hashSet = new HashSet<>();
+        Iterator<Transaction> iterator = stopAgentTxs.iterator();
         StopAgent stopAgent = new StopAgent();
         Agent agent = new Agent();
         while (iterator.hasNext()){
@@ -158,16 +178,18 @@ public class BatchValidator {
                 continue;
             }
             if(stopAgent.getAddress() == null){
-                //todo 从交易模块获取创建该节点的交易
-                Transaction createAgentTx = new Transaction();
+                Transaction createAgentTx = CallMethodUtils.getTransaction(chain,stopAgent.getCreateTxHash().getDigestHex());
                 if(createAgentTx == null){
                     iterator.remove();
                     continue;
                 }
                 agent.parse(createAgentTx.getTxData(),0);
+                stopAgent.setAddress(agent.getAgentAddress());
             }
-            if(!redPunishAddressSet.isEmpty() && (redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress())))){
-                iterator.remove();
+            if(!redPunishAddressSet.isEmpty()){
+                if(redPunishAddressSet.contains(HexUtil.encode(stopAgent.getAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress()))){
+                    iterator.remove();
+                }
             }
         }
     }
@@ -196,18 +218,27 @@ public class BatchValidator {
      * @param withdrawTxs               withdraw  transaction list
      * @param invalidAgentHash          invalid agent hash
      * */
-    private void withdrawValid(List<Transaction>withdrawTxs,Set<NulsDigestData> invalidAgentHash)throws NulsException{
+    private void withdrawValid(List<Transaction>withdrawTxs,Set<NulsDigestData> invalidAgentHash,Chain chain)throws NulsException{
         Iterator<Transaction> iterator = withdrawTxs.iterator();
         CancelDeposit cancelDeposit = new CancelDeposit();
         Set<NulsDigestData> hashSet = new HashSet<>();
+        int chainId = chain.getConfig().getChainId();
         while(iterator.hasNext()){
             cancelDeposit.parse(iterator.next().getTxData(),0);
+            /*
+            * 重复退出节点
+            * */
             if (!hashSet.add(cancelDeposit.getJoinTxHash())) {
                 iterator.remove();
                 continue;
             }
-            if(!invalidAgentHash.isEmpty() && invalidAgentHash.contains(cancelDeposit.getJoinTxHash())){
-                iterator.remove();
+            DepositPo depositPo = depositStorageService.get(cancelDeposit.getJoinTxHash(),chainId);
+            AgentPo agentPo = agentStorageService.get(depositPo.getAgentHash(),chainId);
+            if (null == agentPo) {
+                throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
+            }
+            if(invalidAgentHash.contains(agentPo.getHash())){
+                throw new NulsException(ConsensusErrorCode.AGENT_INVALID);
             }
         }
     }
@@ -232,7 +263,7 @@ public class BatchValidator {
                 if (agent.getBlockHeight() > startBlockHeight || agent.getBlockHeight() < 0L) {
                     continue;
                 }
-                if(redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress()))){
+                if(redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress()))){
                     agentHashSet.add(agent.getTxHash());
                 }
             }

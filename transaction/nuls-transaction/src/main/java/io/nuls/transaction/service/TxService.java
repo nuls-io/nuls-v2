@@ -139,6 +139,15 @@ public interface TxService {
      */
     boolean crossTransactionValidator(Chain chain, Transaction transaction) throws NulsException;
 
+    /**
+     * 如果有txData相同的交易,则过滤掉后面一个
+     * @param chain
+     * @param txHexList
+     * @return List<String> txHex
+     * @throws NulsException
+     */
+    List<String> transactionModuleValidator(Chain chain, List<String> txHexList) throws NulsException;
+
     boolean crossTransactionCommit(Chain chain, Transaction transaction, BlockHeaderDigest blockHeader) throws NulsException;
 
     boolean crossTransactionRollback(Chain chain, Transaction transaction, BlockHeaderDigest blockHeader) throws NulsException;

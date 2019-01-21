@@ -115,7 +115,6 @@ public class BlockResourceTest {
         for (String hex : hexList) {
             BlockHeader block100 = new BlockHeader();
             block100.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-            System.out.println(block100.getHeight());
         }
     }
 

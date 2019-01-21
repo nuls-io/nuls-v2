@@ -31,6 +31,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * 跨链交易的txData
@@ -48,6 +49,22 @@ public class CrossTxData extends BaseNulsData {
      * 原始交易hash
      */
     private byte[] originalTxHash;
+
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (!(obj instanceof CrossTxData)) {
+            return false;
+        }
+        CrossTxData crossTxData = ((CrossTxData) obj);
+        if(this.chainId != crossTxData.getChainId()){
+            return false;
+        }
+        return Arrays.equals(this.originalTxHash, crossTxData.getOriginalTxHash());
+    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {

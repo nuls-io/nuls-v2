@@ -33,6 +33,7 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
@@ -63,6 +64,7 @@ public class TxFlowTest {
     static int assetId = 1;
     //入账金额
     static BigInteger amount = BigInteger.valueOf(100000000000L);
+    static String password="nuls123456";
 
     private Chain chain;
     private Transaction tx;
@@ -80,7 +82,7 @@ public class TxFlowTest {
 
     @Test
     public void newCtx() throws Exception{
-        for(int i = 0; i<10; i++) {
+        for(int i = 0; i<5; i++) {
             BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
             System.out.println(balance.longValue());
             CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
@@ -99,7 +101,8 @@ public class TxFlowTest {
 
 
     }
-    @Test
+
+//    @Test
     public void packableTxs() throws Exception{
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -201,6 +204,88 @@ public class TxFlowTest {
         params.put("isConfirmTx",true);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         Log.info("response {}", response);
+    }
+
+    //连续交易测试
+    @Test
+    public void contineCtx() throws Exception{
+        String address="LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";
+        for(int i = 0; i<3; i++) {
+            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address), assetChainId, assetId);
+            System.out.println(balance.longValue());
+            //组装普通转账交易
+            Map transferMap=this.createTransferTx();
+            //调用接口
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+            Assert.assertTrue(null != result);
+            Log.info("{}", result.get("value"));
+            System.out.println("transfer: "+result.get("value"));
+
+            //组装创建节点交易
+            Map agentTxMap=this.createAgentTx();
+            //调用接口
+//            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+//            result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_createAgent"));
+//            Assert.assertTrue(null != result);
+//            Log.info("{}", result.get("txHex"));
+//            System.out.println("transfer: "+result.get("txHex"));
+
+            //Thread.sleep(3000L);
+        }
+        //packableTxs();
+    }
+
+    /**
+     * 创建普通转账交易
+     * @return
+     */
+    private Map createTransferTx()
+    {
+        Map transferMap = new HashMap();
+        transferMap.put("chainId",chainId);
+        transferMap.put("remark","transfer test");
+        List<CoinDTO> inputs=new ArrayList<>();
+        List<CoinDTO> outputs=new ArrayList<>();
+        CoinDTO inputCoin1=new CoinDTO();
+        inputCoin1.setAddress("LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930");
+        inputCoin1.setPassword(password);
+        inputCoin1.setAssetsChainId(chainId);
+        inputCoin1.setAssetsId(1);
+        inputCoin1.setAmount(new BigInteger("10000000"));
+        inputs.add(inputCoin1);
+
+        CoinDTO outputCoin1=new CoinDTO();
+        outputCoin1.setAddress("JcgbDRvBqQ67Uq4Tb52U22ieJdr3G3930");
+        outputCoin1.setPassword(password);
+        outputCoin1.setAssetsChainId(chainId);
+        outputCoin1.setAssetsId(1);
+        outputCoin1.setAmount(new BigInteger("10000000"));
+        outputs.add(outputCoin1);
+
+        transferMap.put("inputs",inputs);
+        transferMap.put("outputs",outputs);
+        return transferMap;
+    }
+
+    /**
+     * 创建节点
+     * */
+    public Map createAgentTx()throws Exception{
+        Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
+        Address rewardAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
+        Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
+        Map<String,Object> params = new HashMap<>();
+        params.put("agentAddress",agentAddress.getBase58());
+        params.put("chainId",1);
+        params.put("deposit",20000);
+        params.put("commissionRate",10);
+        params.put("packingAddress",packingAddress.getBase58());
+        params.put("password","");
+        params.put("rewardAddress",rewardAddress.getBase58());
+        return params;
+//        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
+//        System.out.println(cmdResp.getResponseData());
     }
 
 }
