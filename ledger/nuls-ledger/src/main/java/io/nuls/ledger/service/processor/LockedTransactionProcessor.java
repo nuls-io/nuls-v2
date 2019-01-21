@@ -47,9 +47,6 @@ import java.util.List;
  */
 @Component
 public class LockedTransactionProcessor implements TxProcessor {
-
-    final Logger logger = LoggerFactory.getLogger(getClass());
-
     @Autowired
     AccountStateService accountStateService;
     @Autowired

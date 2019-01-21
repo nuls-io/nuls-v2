@@ -34,18 +34,17 @@ import io.nuls.tools.parse.config.ConfigManager;
 import io.nuls.tools.parse.config.IniEntity;
 import org.ini4j.Config;
 import org.ini4j.Ini;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+
+import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * Created by wangkun23 on 2018/11/19.
  */
 public class AppConfig {
 
-    static final Logger logger = LoggerFactory.getLogger(AppConfig.class);
     public static  String MODULES_CONFIG_FILE = "modules.json";
     /**
      * load module ini config

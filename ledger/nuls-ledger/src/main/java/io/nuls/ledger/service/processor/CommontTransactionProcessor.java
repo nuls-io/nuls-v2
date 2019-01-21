@@ -41,8 +41,6 @@ import org.slf4j.LoggerFactory;
 @Component
 public class CommontTransactionProcessor implements TxProcessor {
 
-    final Logger logger = LoggerFactory.getLogger(getClass());
-
     @Autowired
     AccountStateService accountStateService;
 

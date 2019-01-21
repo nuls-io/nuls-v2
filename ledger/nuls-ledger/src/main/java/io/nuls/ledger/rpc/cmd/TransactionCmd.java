@@ -37,11 +37,11 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * 未确认交易提交，提交失败直接返回错误信息
@@ -49,8 +49,6 @@ import java.util.Map;
  */
 @Component
 public class TransactionCmd extends BaseCmd {
-
-    final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private TransactionService transactionService;
