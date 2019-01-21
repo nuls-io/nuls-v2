@@ -42,7 +42,11 @@ public class ConfigManager {
      * @return String
      */
     public static String getValue(String name) {
-        return configItemsMap.get(name).getValue();
+        ConfigItem item = configItemsMap.get(name);
+        if (item == null) {
+            return null;
+        }
+        return item.getValue();
     }
 
     /**
