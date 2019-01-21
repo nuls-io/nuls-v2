@@ -24,7 +24,7 @@
  */
 package io.nuls.network.manager.threads;
 
-import io.nuls.Bootstrap;
+import io.nuls.network.NetworkBootstrap;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 import org.junit.Test;
@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
  **/
 public class ThreadTest {
     private void start(){
-        Bootstrap.getInstance().moduleStart();
+        NetworkBootstrap.getInstance().moduleStart();
     }
     @Test
     public void clientConnectTest(){
