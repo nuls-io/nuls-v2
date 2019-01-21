@@ -33,10 +33,9 @@ import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.ledger.utils.LockerUtils;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 import java.util.List;
@@ -94,17 +93,20 @@ public class AccountStateServiceImpl implements AccountStateService {
                    AccountState accountState = repository.getAccountState(addressChainId,assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
                    List<UnconfirmedNonce> list =  accountState.getUnconfirmedNonces();
                    int i = 0;
+                   boolean hadRoll = false;
                    for(UnconfirmedNonce unconfirmedNonce : list){
                        i++;
                        if(unconfirmedNonce.getNonce().equalsIgnoreCase(nonce)) {
+                           hadRoll=true;
                            break;
                        }
                    }
                    int size = list.size();
                    //从第list的index=i-1起进行清空
-                   if(i>0) {
-                       for (int j = (i-1); j < size; j++) {
-                           list.remove(j);
+                   if(hadRoll) {
+                       for (int j = size; j >=i; j--) {
+                           LoggerUtil.logger.debug("roll j={}",j);
+                           list.remove(j-1);
                        }
                        repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
                    }
