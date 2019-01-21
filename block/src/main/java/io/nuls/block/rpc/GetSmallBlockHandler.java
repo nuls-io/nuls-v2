@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -25,6 +25,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.SmallBlock;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.message.SmallBlockMessage;
 import io.nuls.block.utils.module.NetworkUtil;
@@ -35,12 +36,13 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.GET_SMALL_BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.SMALL_BLOCK_MESSAGE;
-import static io.nuls.block.utils.LoggerUtil.messageLog;
+
 
 /**
  * 处理收到的{@link HashMessage},用于区块的广播与转发
@@ -54,10 +56,10 @@ public class GetSmallBlockHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = GET_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
-        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
-
+        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
             message.parse(new NulsByteBuffer(decode));

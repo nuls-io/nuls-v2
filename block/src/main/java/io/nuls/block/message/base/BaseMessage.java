@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -26,12 +26,10 @@ import io.nuls.base.data.BaseNulsData;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.exception.NulsException;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.io.IOException;
 
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 通用消息体
@@ -66,7 +64,7 @@ public abstract class BaseMessage extends BaseNulsData {
                 this.hash = NulsDigestData.calcDigestData(this.serialize());
             } catch (IOException e) {
                 e.printStackTrace();
-                Log.error(e);
+                commonLog.error(e);
             }
         }
         return hash;

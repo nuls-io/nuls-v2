@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -31,9 +31,11 @@ import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.ChainStorageService;
 import io.nuls.block.utils.BlockDownloadUtils;
+import io.nuls.block.utils.LoggerUtil;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.List;
 import java.util.SortedSet;
@@ -42,7 +44,7 @@ import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.RunningStatusEnum.RUNNING;
 import static io.nuls.block.constant.RunningStatusEnum.UPDATE_ORPHAN_CHAINS;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 孤儿链的形成原因分析：因为网络问题,在没有收到Block(100)的情况下,已经收到了Block(101),此时Block(101)不能连接到主链上,形成孤儿链
@@ -75,11 +77,12 @@ public class OrphanChainsMaintainer implements Runnable {
 
         for (Integer chainId : ContextManager.chainIds) {
             ChainContext context = ContextManager.getContext(chainId);
+            NulsLogger commonLog = context.getCommonLog();
             try {
                 //判断该链的运行状态,只有正常运行时才会有孤儿链的处理
                 RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RUNNING)) {
-                    Log.debug("skip process, status is " + status + ", chainId-" + chainId);
+                    commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
                     return;
                 }
                 ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
@@ -122,7 +125,7 @@ public class OrphanChainsMaintainer implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
                 context.setStatus(RUNNING);
-                Log.error("chainId-" + chainId + ",maintain OrphanChains fail!error msg is:" + e.getMessage());
+                commonLog.error("chainId-" + chainId + ",maintain OrphanChains fail!error msg is:" + e.getMessage());
             }
         }
     }
@@ -152,11 +155,8 @@ public class OrphanChainsMaintainer implements Runnable {
             Node availableNode = availableNodes.get(i);
             block = BlockDownloadUtils.getBlockByHash(chainId, previousHash, availableNode);
             if (block != null) {
-                Log.debug("maintain success! before orphanChain-" + orphanChain);
-                Log.debug("get block from " + availableNode.getId());
                 orphanChain.addFirst(block);
                 chainStorageService.save(chainId, block);
-                Log.debug("maintain success! after orphanChain-" + orphanChain);
                 return;
             }
             //请求区块失败，孤儿链年龄加一

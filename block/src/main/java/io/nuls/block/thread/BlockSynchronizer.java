@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -34,6 +34,7 @@ import io.nuls.block.utils.BlockDownloadUtils;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.logback.NulsLogger;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
@@ -44,7 +45,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 区块同步主线程,管理多条链的区块同步
@@ -70,6 +71,7 @@ public class BlockSynchronizer implements Runnable {
     @Override
     public void run() {
         for (Integer chainId : ContextManager.chainIds) {
+            NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
             try {
                 while (true) {
                     if (synchronize(chainId)) {
@@ -79,12 +81,13 @@ public class BlockSynchronizer implements Runnable {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                Log.error(e);
+                commonLog.error(e);
             }
         }
     }
 
     private boolean synchronize(int chainId) throws Exception {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         //1.调用网络模块接口获取当前chainID网络的可用节点
         List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
 
@@ -98,19 +101,19 @@ public class BlockSynchronizer implements Runnable {
             int size = params.getNodes().size();
             //网络上没有可用节点
             if (size == 0) {
-                Log.warn("chain-" + chainId + ", no consistent nodes");
+                commonLog.warn("chain-" + chainId + ", no consistent nodes");
                 return false;
             }
             //网络上所有节点高度都是0,说明是该链第一次运行
             if (params.getNetLatestHeight() == 0 && size == availableNodes.size()) {
-                Log.warn("chain-" + chainId + ", first start");
+                commonLog.warn("chain-" + chainId + ", first start");
                 context.setStatus(RunningStatusEnum.RUNNING);
                 ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                 return true;
             }
             //检查本地区块状态
             if (!checkLocalBlock(chainId, params)) {
-                Log.warn("chain-" + chainId + ", local blocks is newest");
+                commonLog.warn("chain-" + chainId + ", local blocks is newest");
                 context.setStatus(RunningStatusEnum.RUNNING);
                 ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                 return true;
@@ -141,22 +144,22 @@ public class BlockSynchronizer implements Runnable {
             Boolean storageResult = consumerFuture.get();
             boolean success = downResult != null && downResult && storageResult != null && storageResult;
             long end = System.currentTimeMillis();
-            Log.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
+            commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
             if (success) {
                 //todo 为了测试分叉链、孤儿链修改，正式版本改回
                 if (true) {
-                    Log.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
+                    commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                     return true;
                 } else {
-                    Log.info("block syn complete but is not newest");
+                    commonLog.info("block syn complete but is not newest");
                 }
             } else {
-                Log.info("block syn fail, downResult:" + downResult + ", storageResult:" + storageResult);
+                commonLog.info("block syn fail, downResult:" + downResult + ", storageResult:" + storageResult);
             }
         } else {
-            Log.warn("chain-" + chainId + ", available nodes not enough");
+            commonLog.warn("chain-" + chainId + ", available nodes not enough");
         }
         return false;
     }

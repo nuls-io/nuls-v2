@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -27,13 +27,12 @@ import io.nuls.block.model.ChainParameters;
 import io.nuls.block.utils.module.TransactionUtil;
 import lombok.Data;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * Context管理器
@@ -60,10 +59,8 @@ public class ContextManager {
         ContextManager.contextMap.put(chainId, chainContext);
         chainContext.setChainId(chainId);
         chainContext.setParameters(chainParameters);
-        chainContext.setStatus(RunningStatusEnum.INITIALIZING);
-        chainContext.setSystemTransactionType(TransactionUtil.getSystemTypes(chainId));
         chainContext.init();
-        Log.info("new chainContext add! chainId-" + chainId);
+        commonLog.info("new chainContext add! chainId-" + chainId);
     }
 
     public static ChainContext getContext(int chainId) {

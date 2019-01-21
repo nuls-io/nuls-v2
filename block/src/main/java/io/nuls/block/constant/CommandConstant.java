@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -41,9 +41,9 @@ public interface CommandConstant {
     String TXGROUP_MESSAGE = "txs";
 
     //普通服务对应的RPC命令
-    String BEST_HEIGHT = "bestHeight";
-    String BEST_BLOCK_HEADER = "bestBlockHeader";
-    String BEST_BLOCK = "bestBlock";
+    String LATEST_HEIGHT = "latestHeight";
+    String LATEST_BLOCK_HEADER = "latestBlockHeader";
+    String LATEST_BLOCK = "latestBlock";
     String GET_BLOCK_HEADER_BY_HEIGHT = "getBlockHeaderByHeight";
     String GET_BLOCK_BY_HEIGHT = "getBlockByHeight";
     String GET_BLOCK_HEADER_BY_HASH = "getBlockHeaderByHash";

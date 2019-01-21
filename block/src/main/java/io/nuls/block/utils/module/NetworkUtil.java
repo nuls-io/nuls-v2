@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -20,6 +20,7 @@
 package io.nuls.block.utils.module;
 
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.message.base.BaseMessage;
 import io.nuls.block.model.Node;
@@ -28,7 +29,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
-import org.spongycastle.asn1.cmc.CMCStatus;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,9 +37,8 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.*;
-import static io.nuls.block.utils.LoggerUtil.Log;
-import static io.nuls.block.utils.LoggerUtil.messageLog;
-import static org.spongycastle.asn1.cmc.CMCStatus.success;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
+
 
 /**
  * 调用网络模块接口的工具
@@ -56,6 +56,7 @@ public class NetworkUtil {
      * @return
      */
     public static List<Node> getAvailableNodes(int chainId) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(6);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -80,7 +81,7 @@ public class NetworkUtil {
             return nodes;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return List.of();
         }
     }
@@ -91,6 +92,7 @@ public class NetworkUtil {
      * @param chainId
      */
     public static void resetNetwork(int chainId) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -99,7 +101,7 @@ public class NetworkUtil {
             CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_reconnect", params);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
         }
     }
 
@@ -112,6 +114,7 @@ public class NetworkUtil {
      * @return
      */
     public static boolean broadcast(int chainId, BaseMessage message, String excludeNodes, String command) {
+        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -120,11 +123,12 @@ public class NetworkUtil {
             params.put("messageBody", HexUtil.encode(message.serialize()));
             params.put("command", command);
             boolean success = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params).isSuccess();
+
             messageLog.debug("broadcast " + message.getClass().getName() +", chainId:" + chainId + ", success:" + success);
             return success;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            messageLog.error(e);
             return false;
         }
     }
@@ -138,6 +142,7 @@ public class NetworkUtil {
      * @return
      */
     public static boolean sendToNode(int chainId, BaseMessage message, String nodeId, String command) {
+        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         try {
             Map<String, Object> params = new HashMap<>(5);
             params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -150,7 +155,7 @@ public class NetworkUtil {
             return success;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            messageLog.error(e);
             return false;
         }
     }
@@ -205,6 +210,7 @@ public class NetworkUtil {
      * @param nodeId
      */
     public static void setHashAndHeight(int chainId, NulsDigestData hash, long height, String nodeId) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(5);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -216,7 +222,7 @@ public class NetworkUtil {
             CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_updateNodeInfo", params);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
         }
     }
 
@@ -235,7 +241,7 @@ public class NetworkUtil {
             return (Long) result.get("currentTimeMillis");
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error("get nw_currentTimeMillis fail");
+            commonLog.error("get nw_currentTimeMillis fail");
         }
         return System.currentTimeMillis();
     }
@@ -259,11 +265,11 @@ public class NetworkUtil {
             }
             map.put("protocolCmds", cmds);
             boolean success = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
-            Log.debug("get nw_protocolRegister " + success);
+            commonLog.debug("get nw_protocolRegister " + success);
             return success;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error("get nw_protocolRegister fail");
+            commonLog.error("get nw_protocolRegister fail");
         }
         return false;
     }

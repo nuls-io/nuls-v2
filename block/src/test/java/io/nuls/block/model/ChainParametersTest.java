@@ -1,7 +1,7 @@
 /*
  *
  *  * MIT License
- *  * Copyright (c) 2017-2018 nuls.io
+ *  * Copyright (c) 2017-2019 nuls.io
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
  *  * in the Software without restriction, including without limitation the rights
@@ -36,7 +36,7 @@ public class ChainParametersTest {
 
     @Test
     public void name() throws IOException, NulsException {
-        ChainParameters p1 = new ChainParameters("ss",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+        ChainParameters p1 = new ChainParameters("ss",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,"info");
         String s = HexUtil.encode(p1.serialize());
         ChainParameters p2 = new ChainParameters();
         p2.parse(new NulsByteBuffer(HexUtil.decode(s)));

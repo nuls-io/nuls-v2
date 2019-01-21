@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -32,7 +32,7 @@ import io.nuls.tools.parse.SerializeUtils;
 import java.util.List;
 
 import static io.nuls.block.constant.Constant.*;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 区块存储服务实现类
@@ -54,7 +54,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             return b1 && b2;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return false;
         }
     }
@@ -76,7 +76,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             return blockHeader;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return null;
         }
     }
@@ -93,7 +93,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             return blockHeader;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return null;
         }
     }
@@ -112,7 +112,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             return b1 && b2;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return false;
         }
     }
@@ -125,7 +125,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             return b1 && b2;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return false;
         }
     }
@@ -143,7 +143,7 @@ public class BlockStorageServiceImpl implements BlockStorageService {
             return RocksDBService.put(CHAIN_LATEST_HEIGHT, ByteUtils.intToBytes(chainId), bytes);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return false;
         }
     }

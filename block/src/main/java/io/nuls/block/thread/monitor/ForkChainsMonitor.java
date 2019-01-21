@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -33,7 +33,7 @@ import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
 import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 分叉链的形成原因分析:由于网络延迟,同时有两个矿工发布同一高度的区块,或者被恶意节点攻击
@@ -63,7 +63,7 @@ public class ForkChainsMonitor implements Runnable {
                 //判断该链的运行状态,只有正常运行时才会有分叉链的处理
                 RunningStatusEnum status = context.getStatus();
                 if (!status.equals(RunningStatusEnum.RUNNING)) {
-                    Log.debug("skip process, status is " + status + ", chainId-" + chainId);
+                    commonLog.debug("skip process, status is " + status + ", chainId-" + chainId);
                     continue;
                 }
 
@@ -82,9 +82,9 @@ public class ForkChainsMonitor implements Runnable {
                         if (forkChains.size() < 1) {
                             break;
                         }
-                        Log.info("####################################fork chains######################################");
+                        commonLog.info("####################################fork chains######################################");
                         for (Chain forkChain : forkChains) {
-                            Log.info("#" + forkChain);
+                            commonLog.info("#" + forkChain);
                         }
                         //遍历当前分叉链,与主链进行比对,找出最大高度差,与默认参数chainSwtichThreshold对比,确定要切换的分叉链
                         Chain masterChain = ChainManager.getMasterChain(chainId);
@@ -99,7 +99,7 @@ public class ForkChainsMonitor implements Runnable {
                                 switchChain = forkChain;
                             }
                         }
-                        Log.debug("chainId-" + chainId + ", maxHeightDifference:" + maxHeightDifference + ", chainSwtichThreshold:" + chainSwtichThreshold);
+                        commonLog.debug("chainId-" + chainId + ", maxHeightDifference:" + maxHeightDifference + ", chainSwtichThreshold:" + chainSwtichThreshold);
                         //高度差不够
                         if (maxHeightDifference < chainSwtichThreshold) {
                             break;
@@ -113,9 +113,9 @@ public class ForkChainsMonitor implements Runnable {
                         context.setStatus(RunningStatusEnum.SWITCHING);
                         ConsensusUtil.notice(chainId, CONSENSUS_WAITING);
                         if (ChainManager.switchChain(chainId, masterChain, switchChain)) {
-                            Log.info("chainId-" + chainId + ", switchChain success");
+                            commonLog.info("chainId-" + chainId + ", switchChain success");
                         } else {
-                            Log.info("chainId-" + chainId + ", switchChain fail, auto rollback success");
+                            commonLog.info("chainId-" + chainId + ", switchChain fail, auto rollback success");
                         }
                         ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                         break;
@@ -129,7 +129,7 @@ public class ForkChainsMonitor implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
                 context.setStatus(RunningStatusEnum.RUNNING);
-                Log.error("chainId-" + chainId + ", switchChain fail, auto rollback fail");
+                commonLog.error("chainId-" + chainId + ", switchChain fail, auto rollback fail");
             }
         }
     }

@@ -1,7 +1,7 @@
 /*
  *
  *  * MIT License
- *  * Copyright (c) 2017-2018 nuls.io
+ *  * Copyright (c) 2017-2019 nuls.io
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
  *  * in the Software without restriction, including without limitation the rights
@@ -28,12 +28,16 @@ import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.service.BlockService;
+import io.nuls.block.utils.LoggerUtil;
+import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.log.logback.NulsLogger;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.StampedLock;
 
 /**
@@ -49,7 +53,6 @@ public class ChainContext {
      * 代表该链的运行状态
      */
     @Getter
-    @Setter
     private RunningStatusEnum status;
 
     /**
@@ -63,7 +66,6 @@ public class ChainContext {
      * 该链的系统交易类型
      */
     @Getter
-    @Setter
     private List<Integer> systemTransactionType;
 
     /**
@@ -101,6 +103,20 @@ public class ChainContext {
     @Getter
     private StampedLock lock;
 
+    /**
+     * 记录通用日志
+     */
+    @Getter
+    @Setter
+    private NulsLogger commonLog;
+
+    /**
+     * 记录消息收发日志
+     */
+    @Getter
+    @Setter
+    private NulsLogger messageLog;
+
     public synchronized void setStatus(RunningStatusEnum status) {
         this.status = status;
     }
@@ -111,6 +127,8 @@ public class ChainContext {
 
     public void init() {
         lock = new StampedLock();
+        systemTransactionType = TransactionUtil.getSystemTypes(chainId);
+        this.setStatus(RunningStatusEnum.INITIALIZING);
         //服务初始化
         BlockService service = SpringLiteContext.getBean(BlockService.class);
         service.init(chainId);
@@ -118,6 +136,7 @@ public class ChainContext {
         SmallBlockCacher.init(chainId);
         CacheHandler.init(chainId);
         ChainManager.init(chainId);
+        LoggerUtil.init(chainId, parameters.getLogLevel());
     }
 
     public void start() {

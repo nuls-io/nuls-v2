@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,8 @@
 package io.nuls.block.utils;
 
 import ch.qos.logback.classic.Level;
+import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -35,10 +37,15 @@ import io.nuls.tools.log.logback.NulsLogger;
  * @date 2018/12/17
  **/
 public class LoggerUtil {
-    public static NulsLogger Log = LoggerBuilder.getLogger("block","common", Level.ALL);
-    public static NulsLogger messageLog = LoggerBuilder.getLogger("block","message", Level.ALL);
 
-    public void init(ChainParameters parameters) {
-        int chainId = parameters.getChainId();
+    public static NulsLogger commonLog = LoggerBuilder.getLogger("block","common", Level.DEBUG);
+
+    public static void init(int chainId, String levelString) {
+        Level level = Level.valueOf(levelString);
+        NulsLogger commonLog = LoggerBuilder.getLogger("block/chain-"+chainId+"/","common", level);
+        NulsLogger messageLog = LoggerBuilder.getLogger("block/chain-"+chainId+"/","message", level);
+        ChainContext context = ContextManager.getContext(chainId);
+        context.setCommonLog(commonLog);
+        context.setMessageLog(messageLog);
     }
 }

@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -28,7 +28,7 @@ import lombok.Data;
 
 import java.io.IOException;
 
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 异步请求处理完成响应消息
@@ -72,7 +72,7 @@ public class HeightRangeMessage extends BaseMessage {
             this.endHeight = byteBuffer.readInt64();
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
         }
     }
 

@@ -1,7 +1,7 @@
 /*
  *
  *  * MIT License
- *  * Copyright (c) 2017-2018 nuls.io
+ *  * Copyright (c) 2017-2019 nuls.io
  *  * Permission is hereby granted, free of charge, to any person obtaining a copy
  *  * of this software and associated documentation files (the "Software"), to deal
  *  * in the Software without restriction, including without limitation the rights
@@ -33,7 +33,7 @@ import io.nuls.tools.data.ByteUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 @Service
 public class ParametersStorageServiceImpl implements ParametersStorageService {
@@ -45,7 +45,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             return RocksDBService.put(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainID), bytes);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return false;
         }
     }
@@ -59,7 +59,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             return po;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return null;
         }
     }
@@ -70,7 +70,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             return RocksDBService.delete(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainID));
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return false;
         }
     }
@@ -88,7 +88,7 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             return pos;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return null;
         }
     }

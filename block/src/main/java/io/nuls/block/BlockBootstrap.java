@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -33,8 +33,6 @@ import io.nuls.block.utils.ConfigLoader;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.rpc.server.runtime.ServerRuntime;
@@ -47,7 +45,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static io.nuls.block.constant.Constant.*;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 区块管理模块启动类
@@ -89,18 +87,18 @@ public class BlockBootstrap {
             ConfigLoader.load();
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error("error occur when init, " + e.getMessage());
+            commonLog.error("error occur when init, " + e.getMessage());
         }
     }
 
     private static void start() {
         try {
             while (!ServerRuntime.isReady()) {
-                Log.info("wait depend modules ready");
+                commonLog.info("wait depend modules ready");
                 Thread.sleep(2000L);
             }
             NetworkUtil.register();
-            Log.info("service start");
+            commonLog.info("service start");
 //            onlyRunWhenTest();
 
             //开启区块同步线程
@@ -116,13 +114,13 @@ public class BlockBootstrap {
             orphanExecutor.scheduleWithFixedDelay(OrphanChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
             //开启孤儿链维护线程
             ScheduledThreadPoolExecutor maintainExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("orphan-chains-maintainer"));
-            maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 2, TimeUnit.SECONDS);
+            maintainExecutor.scheduleWithFixedDelay(OrphanChainsMaintainer.getInstance(), 0, 5, TimeUnit.SECONDS);
             //开启数据库大小监控线程
             ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
             dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error("error occur when start, " + e.getMessage());
+            commonLog.error("error occur when start, " + e.getMessage());
         }
     }
 
@@ -134,11 +132,11 @@ public class BlockBootstrap {
                     System.exit(0);
                 }
                 BlockHeader header = context.getLatestBlock().getHeader();
-                Log.info("chainId:" + chainId + ", latestHeight:" + header.getHeight() + ", txCount:" + header.getTxCount() + ", hash:" + header.getHash());
+                commonLog.info("chainId:" + chainId + ", latestHeight:" + header.getHeight() + ", txCount:" + header.getTxCount() + ", hash:" + header.getHash());
                 try {
                     Thread.sleep(10000L);
                 } catch (InterruptedException e) {
-                    Log.error(e);
+                    commonLog.error(e);
                 }
             }
         }

@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -24,7 +24,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
-import io.nuls.block.constant.CommandConstant;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HeightRangeMessage;
 import io.nuls.block.service.BlockService;
@@ -36,13 +36,13 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
-import static io.nuls.block.utils.LoggerUtil.Log;
-import static io.nuls.block.utils.LoggerUtil.messageLog;
+
 
 /**
  * 处理收到的{@link HeightRangeMessage},用于区块的同步
@@ -60,13 +60,13 @@ public class GetBlocksHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = GET_BLOCKS_BY_HEIGHT_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
-        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();
         HeightRangeMessage message = new HeightRangeMessage();
 
         byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         message.parse(new NulsByteBuffer(decode));
-
+        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         long startHeight = message.getStartHeight();
         long endHeight = message.getEndHeight();
         if (startHeight < 0L || startHeight > endHeight || endHeight - startHeight > MAX_SIZE) {

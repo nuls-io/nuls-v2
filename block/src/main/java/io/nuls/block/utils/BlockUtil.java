@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 区块工具类
@@ -64,34 +64,34 @@ public class BlockUtil {
     public static boolean basicVerify(int chainId, Block block) {
 
         if (block == null) {
-            Log.debug("basicVerify fail, block is null! chainId-" + chainId);
+            commonLog.debug("basicVerify fail, block is null! chainId-" + chainId);
             return false;
         }
 
         BlockHeader header = block.getHeader();
         if (header == null) {
-            Log.debug("basicVerify fail, blockHeader is null! chainId-" + chainId);
+            commonLog.debug("basicVerify fail, blockHeader is null! chainId-" + chainId);
             return false;
         }
 
         if (!headerVerify(chainId, header)) {
-            Log.debug("basicVerify fail, blockHeader error! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            commonLog.debug("basicVerify fail, blockHeader error! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (block.getTxs() == null || block.getTxs().isEmpty()) {
-            Log.debug("basicVerify fail, transaction is null! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            commonLog.debug("basicVerify fail, transaction is null! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (block.getTxs().size() != header.getTxCount()) {
-            Log.debug("basicVerify fail, transaction count not equals! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            commonLog.debug("basicVerify fail, transaction count not equals! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         if (block.size() > parameters.getBlockMaxSize()) {
-            Log.debug("basicVerify fail, beyond blockMaxSize! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            commonLog.debug("basicVerify fail, beyond blockMaxSize! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
@@ -101,27 +101,27 @@ public class BlockUtil {
     public static boolean headerVerify(int chainId, BlockHeader header) {
 
         if (header.getHash() == null) {
-            Log.debug("headerVerify fail, block hash can not be null! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            commonLog.debug("headerVerify fail, block hash can not be null! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (header.getHeight() < 0) {
-            Log.debug("headerVerify fail, block height can not be less than 0! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            commonLog.debug("headerVerify fail, block height can not be less than 0! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (null == header.getPackingAddress(chainId)) {
-            Log.debug("headerVerify fail, block packingAddress can not be null! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            commonLog.debug("headerVerify fail, block packingAddress can not be null! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         if (header.getExtend() != null && header.getExtend().length > parameters.getExtendMaxSize()) {
-            Log.debug("headerVerify fail, block extend too long! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            commonLog.debug("headerVerify fail, block extend too long! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
         if (header.getBlockSignature().verifySignature(header.getHash()).isFailed()) {
-            Log.debug("headerVerify fail, block signature error! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
+            commonLog.debug("headerVerify fail, block signature error! chainId-" + chainId + ", height-" + header.getHeight() + ", hash-" + header.getHash());
             return false;
         }
 
@@ -159,7 +159,7 @@ public class BlockUtil {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
         }
         return false;
     }
@@ -184,13 +184,13 @@ public class BlockUtil {
         //1.收到的区块与主链最新高度差大于1000(可配置),丢弃
         ChainParameters parameters = ContextManager.getContext(chainId).getParameters();
         if (Math.abs(blockHeight - masterChainEndHeight) > parameters.getHeightRange()) {
-            Log.debug("chainId:" + chainId + ", received out of range blocks, height:" + blockHeight + ", hash:" + blockHash);
+            commonLog.debug("chainId:" + chainId + ", received out of range blocks, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getFailed(BlockErrorCode.OUT_OF_RANGE);
         }
 
         //2.收到的区块可以连到主链,验证通过
         if (blockHeight == masterChainEndHeight + 1 && blockPreviousHash.equals(masterChainEndHash)) {
-            Log.debug("chainId:" + chainId + ", received continuous blocks of masterChain, height:" + blockHeight + ", hash:" + blockHash);
+            commonLog.debug("chainId:" + chainId + ", received continuous blocks of masterChain, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getSuccess(BlockErrorCode.SUCCESS);
         }
 
@@ -198,7 +198,7 @@ public class BlockUtil {
             //3.收到的区块是主链上的重复区块,丢弃
             BlockHeaderPo blockHeader = blockService.getBlockHeader(chainId, blockHeight);
             if (blockHash.equals(blockHeader.getHash())) {
-                Log.debug("chainId:" + chainId + ", received duplicate blocks of masterChain, height:" + blockHeight + ", hash:" + blockHash);
+                commonLog.debug("chainId:" + chainId + ", received duplicate blocks of masterChain, height:" + blockHeight + ", hash:" + blockHash);
                 return Result.getFailed(BlockErrorCode.DUPLICATE_MAIN_BLOCK);
             }
             //4.收到的区块是主链上的分叉区块,保存区块,并新增一条分叉链链接到主链
@@ -207,7 +207,7 @@ public class BlockUtil {
                 Chain forkChain = ChainGenerator.generate(chainId, block, masterChain, ChainTypeEnum.FORK);
                 ChainManager.addForkChain(chainId, forkChain);
                 ConsensusUtil.evidence(chainId, ContextManager.getContext(chainId).getLatestBlock().getHeader(), header);
-                Log.info("chainId:" + chainId + ", received fork blocks of masterChain, height:" + blockHeight + ", hash:" + blockHash);
+                commonLog.info("chainId:" + chainId + ", received fork blocks of masterChain, height:" + blockHeight + ", hash:" + blockHash);
                 return Result.getFailed(BlockErrorCode.FORK_BLOCK);
             }
         }
@@ -237,12 +237,12 @@ public class BlockUtil {
                 if (blockHeight == forkChainEndHeight + 1 && blockPreviousHash.equals(forkChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     forkChain.addLast(block);
-                    Log.info("chainId:" + chainId + ", received continuous blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    commonLog.info("chainId:" + chainId + ", received continuous blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
                 //2.重复,丢弃
                 if (forkChainStartHeight <= blockHeight && blockHeight <= forkChainEndHeight && forkChain.getHashList().contains(blockHash)) {
-                    Log.debug("chainId:" + chainId + ", received duplicate blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    commonLog.debug("chainId:" + chainId + ", received duplicate blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
                 //3.分叉
@@ -250,13 +250,13 @@ public class BlockUtil {
                     chainStorageService.save(chainId, block);
                     Chain newForkChain = ChainGenerator.generate(chainId, block, forkChain, ChainTypeEnum.FORK);
                     ChainManager.addForkChain(chainId, newForkChain);
-                    Log.debug("chainId:" + chainId + ", received fork blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
+                    commonLog.debug("chainId:" + chainId + ", received fork blocks of forkChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.FORK_BLOCK);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
         }
         //4.与分叉链没有关联,进入孤儿链判断流程
         return Result.getFailed(BlockErrorCode.IRRELEVANT_BLOCK);
@@ -284,18 +284,18 @@ public class BlockUtil {
                 if (blockHeight == orphanChainEndHeight + 1 && blockPreviousHash.equals(orphanChainEndHash)) {
                     chainStorageService.save(chainId, block);
                     orphanChain.addLast(block);
-                    Log.info("chainId:" + chainId + ", received continuous blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    commonLog.info("chainId:" + chainId + ", received continuous blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
                 if (blockHeight == orphanChainStartHeight - 1 && blockHash.equals(orphanChainPreviousHash)) {
                     chainStorageService.save(chainId, block);
                     orphanChain.addFirst(block);
-                    Log.info("chainId:" + chainId + ", received continuous blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    commonLog.info("chainId:" + chainId + ", received continuous blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
                 //2.重复,丢弃
                 if (orphanChainStartHeight <= blockHeight && blockHeight <= orphanChainEndHeight && orphanChain.getHashList().contains(blockHash)) {
-                    Log.debug("chainId:" + chainId + ", received duplicate blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    commonLog.debug("chainId:" + chainId + ", received duplicate blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
                 //3.分叉
@@ -304,7 +304,7 @@ public class BlockUtil {
                     Chain forkOrphanChain = ChainGenerator.generate(chainId, block, orphanChain, ChainTypeEnum.ORPHAN);
                     forkOrphanChain.setAge(new AtomicInteger(0));
                     ChainManager.addOrphanChain(chainId, forkOrphanChain);
-                    Log.info("chainId:" + chainId + ", received fork blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
+                    commonLog.info("chainId:" + chainId + ", received fork blocks of orphanChain, height:" + blockHeight + ", hash:" + blockHash);
                     return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
                 }
             }
@@ -313,11 +313,11 @@ public class BlockUtil {
             Chain newOrphanChain = ChainGenerator.generate(chainId, block, null, ChainTypeEnum.ORPHAN);
             newOrphanChain.setAge(new AtomicInteger(0));
             ChainManager.addOrphanChain(chainId, newOrphanChain);
-            Log.info("chainId:" + chainId + ", received orphan block, height:" + blockHeight + ", hash:" + blockHash);
+            commonLog.info("chainId:" + chainId + ", received orphan block, height:" + blockHeight + ", hash:" + blockHash);
             return Result.getFailed(BlockErrorCode.ORPHAN_BLOCK);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
         }
         return Result.getFailed(BlockErrorCode.UNDEFINED_ERROR);
     }

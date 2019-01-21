@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -38,7 +38,7 @@ import java.util.*;
 
 import static io.nuls.block.constant.Constant.CONSENSUS_WAITING;
 import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 链管理器,维护主链、分叉链集合、孤儿链集合
@@ -83,9 +83,9 @@ public class ChainManager {
      * @return
      */
     public static boolean switchChain(int chainId, Chain masterChain, Chain forkChain) {
-        Log.info("*switch chain start");
-        Log.info("*masterChain-" + masterChain);
-        Log.info("*forkChain-" + forkChain);
+        commonLog.info("*switch chain start");
+        commonLog.info("*masterChain-" + masterChain);
+        commonLog.info("*forkChain-" + forkChain);
         //1.获取主链与最长分叉链的分叉点,并记录从分叉点开始的最长分叉链路径
         Stack<Chain> switchChainPath = new Stack<>();
         while (forkChain.getParent() != null) {
@@ -95,28 +95,28 @@ public class ChainManager {
         Chain topForkChain = switchChainPath.peek();
         long forkHeight = topForkChain.getStartHeight();
         long masterChainEndHeight = masterChain.getEndHeight();
-        Log.info("*calculate fork point complete, forkHeight=" + forkHeight);
+        commonLog.info("*calculate fork point complete, forkHeight=" + forkHeight);
 
         //2.回滚主链
         //2.1 回滚主链到指定高度,回滚掉的区块收集起来放入分叉链数据库
         LinkedList<NulsDigestData> hashList = new LinkedList<>();
         List<Block> blockList = new ArrayList<>();
         long rollbackHeight = masterChainEndHeight;
-        Log.info("*rollback master chain begin, rollbackHeight=" + rollbackHeight);
+        commonLog.info("*rollback master chain begin, rollbackHeight=" + rollbackHeight);
         do {
             Block block = blockService.getBlock(chainId, rollbackHeight--);
             NulsDigestData hash = block.getHeader().getHash();
             if (blockService.rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), false)) {
                 blockList.add(block);
                 hashList.offerFirst(hash);
-                Log.info("*rollback master chain doing, success hash=" + hash);
+                commonLog.info("*rollback master chain doing, success hash=" + hash);
             } else {
-                Log.info("*rollback master chain doing, fail hash=" + hash);
+                commonLog.info("*rollback master chain doing, fail hash=" + hash);
                 saveBlockToMasterChain(chainId, blockList);
                 return false;
             }
         } while (rollbackHeight >= forkHeight);
-        Log.info("*rollback master chain end");
+        commonLog.info("*rollback master chain end");
         //2.2 主链回滚所生成的新分叉链
         Chain masterForkChain = new Chain();
         masterForkChain.setParent(masterChain);
@@ -126,23 +126,23 @@ public class ChainManager {
         masterForkChain.setPreviousHash(topForkChain.getPreviousHash());
         masterForkChain.setHashList(hashList);
         masterForkChain.setType(ChainTypeEnum.FORK);
-        Log.info("*generate new masterForkChain chain-" + masterForkChain);
+        commonLog.info("*generate new masterForkChain chain-" + masterForkChain);
         //2.3 主链上低于topForkChain的链不用变动
         //2.4 主链上高于topForkChain的链重新链接到新分叉链masterForkChain
         SortedSet<Chain> higherChains = masterChain.getSons().tailSet(topForkChain);
         if (higherChains.size() > 1) {
-            Log.info("*higher than topForkChain-" + higherChains);
+            commonLog.info("*higher than topForkChain-" + higherChains);
             higherChains.remove(topForkChain);
             masterForkChain.setSons(higherChains);
             higherChains.forEach(e -> e.setParent(masterForkChain));
         }
         if (!addForkChain(chainId, masterForkChain) || !chainStorageService.save(chainId, blockList)) {
-            Log.info("*error occur when rollback master chain");
+            commonLog.info("*error occur when rollback master chain");
             saveBlockToMasterChain(chainId, blockList);
             return false;
         }
         //至此,主链回滚完成
-        Log.info("*masterChain rollback complete");
+        commonLog.info("*masterChain rollback complete");
 
         //3.依次添加最长分叉链路径上所有分叉链区块
         while (!switchChainPath.empty()) {
@@ -155,7 +155,7 @@ public class ChainManager {
                 return false;
             }
         }
-        Log.info("*switch chain complete");
+        commonLog.info("*switch chain complete");
         return true;
     }
 
@@ -179,9 +179,9 @@ public class ChainManager {
      * @return
      */
     private static boolean switchChain0(int chainId, Chain masterChain, Chain forkChain, Chain subChain) {
-        Log.info("*switchChain0 masterChain=" + masterChain);
-        Log.info("*switchChain0 forkChain=" + forkChain);
-        Log.info("*switchChain0 subChain=" + subChain);
+        commonLog.info("*switchChain0 masterChain=" + masterChain);
+        commonLog.info("*switchChain0 forkChain=" + forkChain);
+        commonLog.info("*switchChain0 subChain=" + subChain);
         //1.计算要从forkChain上添加到主链上多少个区块
         int target = 0;
         if (subChain != null) {
@@ -189,7 +189,7 @@ public class ChainManager {
         } else {
             target = (int) (forkChain.getEndHeight() - forkChain.getStartHeight()) + 1;
         }
-        Log.info("*switchChain0 target=" + target);
+        commonLog.info("*switchChain0 target=" + target);
         //2.往主链上添加区块
         LinkedList<NulsDigestData> hashList = (LinkedList<NulsDigestData>) forkChain.getHashList().clone();
         int count = 0;
@@ -200,11 +200,11 @@ public class ChainManager {
             if (saveBlock) {
                 count++;
             } else {
-                Log.info("*switchChain0 saveBlock fail, hash=" + hash);
+                commonLog.info("*switchChain0 saveBlock fail, hash=" + hash);
                 return false;
             }
         }
-        Log.info("*switchChain0 add block to master chain success");
+        commonLog.info("*switchChain0 add block to master chain success");
         //3.上一步结束后,如果forkChain中还有区块,组成新的分叉链,连接到主链上
         if (hashList.size() > 0) {
             Chain newForkChain = new Chain();

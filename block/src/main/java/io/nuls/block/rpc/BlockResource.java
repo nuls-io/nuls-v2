@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -28,6 +28,7 @@ import io.nuls.block.constant.BlockErrorCode;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockService;
+import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -38,10 +39,13 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.*;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 区块管理模块的对外接口类
@@ -61,10 +65,10 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = BEST_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = LATEST_HEIGHT, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response bestHeight(Map map) {
-        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+    public Response latestHeight(Map map) {
+        int chainId = Integer.parseInt(map.get("chainId").toString());
         Map<String, Long> responseData = new HashMap<>();
         responseData.put("height", ContextManager.getContext(chainId).getLatestHeight());
         return success(responseData);
@@ -76,16 +80,16 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = BEST_BLOCK_HEADER, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = LATEST_BLOCK_HEADER, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response bestBlockHeader(Map map) {
+    public Response latestBlockHeader(Map map) {
         try {
-            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get("chainId").toString());
             BlockHeader blockHeader = service.getLatestBlockHeader(chainId);
             return success(HexUtil.encode(blockHeader.serialize()));
         } catch (IOException e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return failed(e.getMessage());
         }
     }
@@ -96,16 +100,16 @@ public class BlockResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = BEST_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = LATEST_BLOCK, version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response bestBlock(Map map) {
         try {
-            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = service.getLatestBlock(chainId);
             return success(HexUtil.encode(block.serialize()));
         } catch (IOException e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return failed(e.getMessage());
         }
     }
@@ -121,13 +125,14 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "height", parameterType = "long")
     public Response getBlockHeaderByHeight(Map map) {
         try {
-            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get("chainId").toString());
             Long height = Long.parseLong(map.get("height").toString());
-            BlockHeaderPo blockHeader = service.getBlockHeader(chainId, height);
+            BlockHeaderPo po = service.getBlockHeader(chainId, height);
+            BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(po);
             return success(HexUtil.encode(blockHeader.serialize()));
         } catch (IOException e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return failed(e.getMessage());
         }
     }
@@ -143,8 +148,8 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "size", parameterType = "int")
     public Response getLatestBlockHeaders(Map map) {
         try {
-            Integer chainId = Integer.parseInt(map.get("chainId").toString());
-            Integer size = Integer.parseInt(map.get("size").toString());
+            int chainId = Integer.parseInt(map.get("chainId").toString());
+            int size = Integer.parseInt(map.get("size").toString());
             long latestHeight = ContextManager.getContext(chainId).getLatestHeight();
             long startHeight = latestHeight - size + 1;
             startHeight = startHeight < 0 ? 0 : startHeight;
@@ -156,7 +161,7 @@ public class BlockResource extends BaseCmd {
             return success(hexList);
         } catch (IOException e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return failed(e.getMessage());
         }
     }
@@ -172,13 +177,13 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "height", parameterType = "long")
     public Response getBlockByHeight(Map map) {
         try {
-            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get("chainId").toString());
             Long height = Long.parseLong(map.get("height").toString());
             Block block = service.getBlock(chainId, height);
             return success(HexUtil.encode(block.serialize()));
         } catch (IOException e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return failed(e.getMessage());
         }
     }
@@ -194,13 +199,13 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "hash", parameterType = "string")
     public Response getBlockHeaderByHash(Map map) {
         try {
-            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get("chainId").toString());
             NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
             BlockHeader blockHeader = service.getBlockHeader(chainId, hash);
             return success(HexUtil.encode(blockHeader.serialize()));
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return failed(e.getMessage());
         }
     }
@@ -216,13 +221,13 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "hash", parameterType = "string")
     public Response getBlockByHash(Map map) {
         try {
-            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get("chainId").toString());
             NulsDigestData hash = NulsDigestData.fromDigestHex(map.get("hash").toString());
             Block block = service.getBlock(chainId, hash);
             return success(HexUtil.encode(block.serialize()));
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return failed(e.getMessage());
         }
     }
@@ -240,10 +245,10 @@ public class BlockResource extends BaseCmd {
     @Parameter(parameterName = "block", parameterType = "string")
     public Response receivePackingBlock(Map map) {
         try {
-            Integer chainId = Integer.parseInt(map.get("chainId").toString());
+            int chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = new Block();
             block.parse(new NulsByteBuffer(HexUtil.decode((String) map.get("block"))));
-            Log.info("recieve smallBlock from local node, chainId:" + chainId + ", height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
+            commonLog.info("recieve smallBlock from local node, chainId:" + chainId + ", height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
             if (service.saveBlock(chainId, block, 1, true) && service.broadcastBlock(chainId, block)) {
                 return success();
             } else {
@@ -251,7 +256,7 @@ public class BlockResource extends BaseCmd {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error(e);
+            commonLog.error(e);
             return failed(e.getMessage());
         }
     }

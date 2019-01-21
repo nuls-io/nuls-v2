@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -23,7 +23,6 @@ package io.nuls.block.utils;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.cache.CacheHandler;
-import io.nuls.block.constant.CommandConstant;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.model.Node;
 import io.nuls.block.utils.module.NetworkUtil;
@@ -32,7 +31,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 区块下载工具类
@@ -58,7 +57,7 @@ public class BlockDownloadUtils {
         HashMessage message = new HashMessage();
         message.setRequestHash(hash);
         Future<Block> future = CacheHandler.addSingleBlockRequest(chainId, hash);
-        Log.error("get block-" + hash + " from " + node.getId() + "begin");
+        commonLog.debug("get block-" + hash + " from " + node.getId() + "begin");
         boolean result = NetworkUtil.sendToNode(chainId, message, node.getId(), GET_BLOCK_MESSAGE);
         if (!result) {
             CacheHandler.removeBlockByHashFuture(chainId, hash);
@@ -68,7 +67,7 @@ public class BlockDownloadUtils {
             return future.get(1000L, TimeUnit.SECONDS);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.error("get block-" + hash + " from " + node.getId() + "fail", e);
+            commonLog.error("get block-" + hash + " from " + node.getId() + "fail", e);
             return null;
         } finally {
             CacheHandler.removeBlockByHashFuture(chainId, hash);

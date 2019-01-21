@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -24,6 +24,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.constant.BlockErrorCode;
+import io.nuls.block.manager.ContextManager;
 import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.HashMessage;
 import io.nuls.block.service.BlockService;
@@ -36,12 +37,13 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.BLOCK_MESSAGE;
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
-import static io.nuls.block.utils.LoggerUtil.messageLog;
+
 
 /**
  * 处理收到的{@link HashMessage},用于孤儿链的维护
@@ -58,10 +60,10 @@ public class GetBlockHandler extends BaseCmd {
 
     @CmdAnnotation(cmd = GET_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "Handling received request block messages")
     public Response process(Map map) {
-        Integer chainId = Integer.parseInt(map.get("chainId").toString());
+        int chainId = Integer.parseInt(map.get("chainId").toString());
         String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
-
+        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         byte[] decode = HexUtil.decode(map.get("messageBody").toString());
         try {
             message.parse(new NulsByteBuffer(decode));

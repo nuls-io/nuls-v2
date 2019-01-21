@@ -1,5 +1,11 @@
 [
   {
+    "name": "logLevel",
+    "remark": "日志级别",
+    "readOnly": "false",
+    "value": "DEBUG"
+  },
+  {
     "name": "orphanChainMaxAge",
     "remark": "孤儿链最大年龄",
     "readOnly": "true",
@@ -45,7 +51,7 @@
     "name": "blockMaxSize",
     "remark": "区块大小最大值",
     "readOnly": "false",
-    "value": "3145728"
+    "value": "2097152"
   },
   {
     "name": "resetTime",

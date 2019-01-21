@@ -1,6 +1,6 @@
 /*
  * MIT License
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import static io.nuls.block.utils.LoggerUtil.Log;
+import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
  * 异步请求响应结果缓存类
@@ -50,7 +50,7 @@ public class DataCacher<T> {
     public boolean complete(NulsDigestData hash, T t) {
         CompletableFuture<T> future = cacher.get(hash);
         if (future == null) {
-            Log.debug("DataCacher Time out:" + hash.getDigestHex());
+            commonLog.debug("DataCacher Time out:" + hash.getDigestHex());
             return false;
         }
         future.complete(t);
