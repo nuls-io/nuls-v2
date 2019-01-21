@@ -656,7 +656,8 @@ public class TxServiceImpl implements TxService {
         List<String> packableTxs = null;
         try {
             while (true) {
-                long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+                //todo long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+                long currentTimeMillis = System.currentTimeMillis();//todo 测试代码
                 if (endtimestamp - currentTimeMillis <= TxConstant.VERIFY_OFFSET) {
                     break;
                 }
@@ -695,7 +696,10 @@ public class TxServiceImpl implements TxService {
                 }
 
                 //验证coinData
-                if (!LedgerCall.verifyCoinData(chain, txHex, false).success()) {
+                VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, false);
+                if (!verifyTxResult.success()) {
+                    chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " +
+                            "coinData not success - code: {}, - reason:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc());
                     clearInvalidTx(chain, tx);
                     continue;
                 }

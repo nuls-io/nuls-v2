@@ -1,6 +1,5 @@
 package io.nuls.poc.utils.validator;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -101,7 +100,7 @@ public class BatchValidator {
         while (iterator.hasNext()){
             tx = iterator.next();
             redPunishData.parse(tx.getTxData(),0);
-            String addressHex = AddressTool.getStringAddressByBytes(redPunishData.getAddress());
+            String addressHex = HexUtil.encode(redPunishData.getAddress());
             /*
             * 重复的红牌交易不打包
             * */
@@ -151,6 +150,7 @@ public class BatchValidator {
     private void stopAgentValid(List<Transaction>stopAgentTxs,Set<String> redPunishAddressSet)throws NulsException{
         Set<NulsDigestData> hashSet = new HashSet<>();Iterator<Transaction> iterator = stopAgentTxs.iterator();
         StopAgent stopAgent = new StopAgent();
+        Agent agent = new Agent();
         while (iterator.hasNext()){
             stopAgent.parse(iterator.next().getTxData(),0);
             if(!hashSet.add(stopAgent.getCreateTxHash())){
@@ -164,11 +164,9 @@ public class BatchValidator {
                     iterator.remove();
                     continue;
                 }
-                Agent agent = new Agent();
                 agent.parse(createAgentTx.getTxData(),0);
-                stopAgent.setAddress(agent.getAgentAddress());
             }
-            if(!redPunishAddressSet.isEmpty() && redPunishAddressSet.contains(AddressTool.getStringAddressByBytes(stopAgent.getAddress()))){
+            if(!redPunishAddressSet.isEmpty() && (redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress())))){
                 iterator.remove();
             }
         }

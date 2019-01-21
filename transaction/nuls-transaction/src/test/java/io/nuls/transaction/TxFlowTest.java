@@ -46,10 +46,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: Charlie
@@ -83,7 +80,7 @@ public class TxFlowTest {
 
     @Test
     public void newCtx() throws Exception{
-        for(int i = 0; i<2; i++) {
+        for(int i = 0; i<10; i++) {
             BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
             System.out.println(balance.longValue());
             CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
@@ -96,8 +93,29 @@ public class TxFlowTest {
             Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
             Assert.assertTrue(null != map);
             Log.info("{}", map.get("value"));
+            Thread.sleep(3000L);
         }
+        packableTxs();
 
+
+    }
+    @Test
+    public void packableTxs() throws Exception{
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        long endTime = System.currentTimeMillis() + 10000L;
+        System.out.println("endTime: " + endTime);
+        params.put("endTimestamp", endTime);
+        params.put("maxTxDataSize",2 * 1024 * 1024L);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params);
+        Assert.assertTrue(null != response.getResponseData());
+        Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_packableTxs");
+        Assert.assertTrue(null != map);
+        List<String> list = (List)map.get("list");
+        Log.info("packableTxs:");
+        for(String s : list){
+            Log.info(s);
+        }
     }
 
     private List<CoinDTO> createFromCoinDTOList(){
@@ -105,14 +123,14 @@ public class TxFlowTest {
         coinDTO.setAssetsId(assetId);
         coinDTO.setAssetsChainId(assetChainId);
         coinDTO.setAddress(address1);
-        coinDTO.setAmount(new BigInteger("20000000000"));
+        coinDTO.setAmount(new BigInteger("200000000"));
         coinDTO.setPassword("nuls123456");
 
         CoinDTO coinDTO2 = new CoinDTO();
         coinDTO2.setAssetsId(assetId);
         coinDTO2.setAssetsChainId(assetChainId);
         coinDTO2.setAddress(address2);
-        coinDTO2.setAmount(new BigInteger("10000000000"));
+        coinDTO2.setAmount(new BigInteger("100000000"));
         coinDTO2.setPassword("nuls123456");
         List< CoinDTO > listFrom = new ArrayList<>();
         listFrom.add(coinDTO);
@@ -125,13 +143,13 @@ public class TxFlowTest {
         coinDTO.setAssetsId(assetId);
         coinDTO.setAssetsChainId(8964);
         coinDTO.setAddress("VatuPuZeEc1YJ21iasZH6SMAD2VNL0423");
-        coinDTO.setAmount(new BigInteger("20000000000"));
+        coinDTO.setAmount(new BigInteger("200000000"));
 
         CoinDTO coinDTO2 = new CoinDTO();
         coinDTO2.setAssetsId(assetId);
         coinDTO2.setAssetsChainId(8964);
         coinDTO2.setAddress("K7gb72AMXhymt8wBH3fwBUqSwf4EX0423");
-        coinDTO2.setAmount(new BigInteger("10000000000"));
+        coinDTO2.setAmount(new BigInteger("100000000"));
         List< CoinDTO > listTO = new ArrayList<>();
         listTO.add(coinDTO);
         listTO.add(coinDTO2);
