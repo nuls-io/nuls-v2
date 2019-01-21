@@ -6,7 +6,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.dto.CoinDto;
-import io.nuls.account.model.dto.MulitpleAddressTransferDto;
+import io.nuls.account.model.dto.TransferDto;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.annotation.ResisterTx;
@@ -109,9 +109,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_multipleAddressTransfer", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi-account transfer transaction")
-    public Response multipleAddressTransfer(Map params) {
-        LogUtil.debug("ac_multipleAddressTransfer start");
+    @CmdAnnotation(cmd = "ac_transfer", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi-account transfer transaction")
+    public Response transfer(Map params) {
+        LogUtil.debug("ac_transfer start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -121,7 +121,7 @@ public class TransactionCmd extends BaseCmd {
 
             // parse params
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            MulitpleAddressTransferDto transferDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), MulitpleAddressTransferDto.class);
+            TransferDto transferDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), TransferDto.class);
             List<CoinDto> inputList = transferDto.getInputs();
             List<CoinDto> outputList = transferDto.getOutputs();
             if (inputList == null || outputList == null) {
@@ -152,7 +152,7 @@ public class TransactionCmd extends BaseCmd {
             if (!validTxRemark(transferDto.getRemark())) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
-            String txDigestHex = transactionService.multipleAddressTransfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
+            String txDigestHex = transactionService.transfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
             map.put("value", txDigestHex);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
@@ -163,7 +163,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_multipleAddressTransfer end");
+        LogUtil.debug("ac_transfer end");
         return success(map);
     }
 

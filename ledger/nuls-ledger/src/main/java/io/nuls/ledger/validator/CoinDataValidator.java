@@ -35,6 +35,7 @@ import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.FreezeHeightState;
 import io.nuls.ledger.model.po.FreezeLockTimeState;
+import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.utils.CoinDataUtils;
 import io.nuls.ledger.utils.LedgerUtils;
@@ -180,6 +181,15 @@ public class CoinDataValidator {
                     ValidateResult validateResult = new ValidateResult(VALIDATE_DOUBLE_EXPENSES_CODE,String.format(VALIDATE_DOUBLE_EXPENSES_DESC,address,fromNonce));
                     return validateResult;
                 }else{
+                    //未确认交易中nonce重复了(最后一个已经被排除不会相等)
+                    if(accountState.getUnconfirmedNonces().size()>1){
+                        for(UnconfirmedNonce unconfirmedNonce:accountState.getUnconfirmedNonces()){
+                            if(unconfirmedNonce.getNonce().equalsIgnoreCase(fromNonce)){
+                                ValidateResult validateResult = new ValidateResult(VALIDATE_DOUBLE_EXPENSES_CODE,String.format(VALIDATE_DOUBLE_EXPENSES_DESC,address,fromNonce));
+                                return validateResult;
+                            }
+                        }
+                    }
                     //孤儿交易了
                     ValidateResult validateResult = new ValidateResult(VALIDATE_ORPHAN_CODE,String.format(VALIDATE_ORPHAN_DESC,address,fromNonce));
                     return validateResult;

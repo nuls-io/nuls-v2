@@ -22,29 +22,34 @@
  * SOFTWARE.
  *
  */
+package io.nuls.network.other;
 
-package io.nuls.chain.config;
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Management configuration item
- *
- * @author Niels Wang
- */
-public class NulsConfig {
-    /**
-     * 模块配置文件名称
-     * Module configuration file name.
-     */
-    public static  String MODULES_CONFIG_FILE = "modules.json";
-
-    /**
-     * 系统使用的编码方式
-     * The encoding used by the nuls system.
-     */
-    public static String DEFAULT_ENCODING = "UTF-8";
-    public static void setEncoding(String encoding){
-        DEFAULT_ENCODING = encoding;
+ * @description
+ * @author lan
+ * @date 2018/12/21
+ **/
+public class AtomicIntegerTest {
+    private static final AtomicInteger atomicInteger = new AtomicInteger();
+    public static void main(String[] args) throws InterruptedException
+    {
+        atomicIntegerTest();
+    Thread.sleep(3000);
+    System.out.println("最终结果是" + atomicInteger.get());
+    }
+    private static void atomicIntegerTest() {
+        ExecutorService executorService = Executors.newFixedThreadPool(10000);
+        for (int i = 0; i < 10000; i++) {
+            executorService.execute(() -> { for (int j = 0; j < 4; j++) {
+                System.out.println(atomicInteger.getAndDecrement());
+            }
+            });
+        }
+        executorService.shutdown();
     }
 
 }

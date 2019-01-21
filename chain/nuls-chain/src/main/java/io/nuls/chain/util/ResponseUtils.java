@@ -22,29 +22,25 @@
  * SOFTWARE.
  *
  */
+package io.nuls.chain.util;
 
-package io.nuls.chain.config;
+import io.nuls.rpc.model.message.Response;
 
+import java.util.Map;
 
 /**
- * Management configuration item
- *
- * @author Niels Wang
- */
-public class NulsConfig {
-    /**
-     * 模块配置文件名称
-     * Module configuration file name.
-     */
-    public static  String MODULES_CONFIG_FILE = "modules.json";
-
-    /**
-     * 系统使用的编码方式
-     * The encoding used by the nuls system.
-     */
-    public static String DEFAULT_ENCODING = "UTF-8";
-    public static void setEncoding(String encoding){
-        DEFAULT_ENCODING = encoding;
+ * @author lan
+ * @description
+ * @date 2019/01/16
+ **/
+public class ResponseUtils {
+    public static Map<String,Object> getResultMap(Response response,String cmd){
+        if(response.isSuccess()){
+            Object o=((Map)response.getResponseData()).get(cmd);
+            if(null != o){
+                return (Map)o;
+            }
+        }
+        return null;
     }
-
 }

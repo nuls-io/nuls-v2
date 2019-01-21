@@ -2,7 +2,7 @@ package io.nuls.account.service;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountParam;
-import io.nuls.account.init.AccountBootstrap;
+import io.nuls.account.AccountBootstrap;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;

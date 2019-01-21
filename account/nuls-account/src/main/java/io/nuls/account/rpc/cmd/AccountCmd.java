@@ -1,22 +1,17 @@
 package io.nuls.account.rpc.cmd;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
-import io.nuls.account.model.dto.CoinDto;
-import io.nuls.account.model.dto.MulitpleAddressTransferDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
 import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.log.LogUtil;
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Page;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
@@ -28,7 +23,6 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.FormatValidUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
@@ -37,8 +31,6 @@ import io.nuls.tools.parse.JSONUtils;
 import org.bouncycastle.util.encoders.Hex;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -990,7 +982,7 @@ public class AccountCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_multipleAddressTransfer end");
+        LogUtil.debug("ac_verifySignData end");
         return success(map);
     }
 

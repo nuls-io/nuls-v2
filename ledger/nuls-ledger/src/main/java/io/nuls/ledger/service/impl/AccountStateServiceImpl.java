@@ -75,11 +75,11 @@ public class AccountStateServiceImpl implements AccountStateService {
             AccountState accountState = repository.getSnapshotAccountState(addressChainId,snapshotKeyBytes);
             try {
                 if (null != accountState) {
-                    if(!accountState.getTxHash().equalsIgnoreCase(txHash)){
-                        //当前的hash不在回滚里，错误的回滚顺序
-                        logger.error("TxHash not validate{}={}",accountState.getTxHash(),txHash);
-                        return;
-                    }
+//                    if(!accountState.getTxHash().equalsIgnoreCase(txHash)){
+//                        //当前的hash不在回滚里，错误的回滚顺序
+//                        logger.error("TxHash not validate{}={}",accountState.getTxHash(),txHash);
+//                        return;
+//                    }
                     repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
                     repository.delSnapshotAccountState(addressChainId,snapshotKeyBytes);
                 }
