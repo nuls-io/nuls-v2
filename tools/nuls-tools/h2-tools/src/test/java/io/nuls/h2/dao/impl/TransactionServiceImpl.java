@@ -4,7 +4,7 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import io.nuls.h2.dao.TransactionService;
 import io.nuls.h2.dao.impl.mapper.TransactionMapper;
-import io.nuls.h2.entity.TransactionPo;
+import io.nuls.h2.entity.TransactionPO;
 import io.nuls.h2.entity.TxTable;
 import io.nuls.h2.utils.SearchOperator;
 import io.nuls.h2.utils.Searchable;
@@ -22,9 +22,9 @@ import java.util.List;
 public class TransactionServiceImpl extends BaseService<TransactionMapper> implements TransactionService {
 
     @Override
-    public Page<TransactionPo> getTxs(String address, Integer type, Integer state, Long startTime, Long endTime, int pageNumber, int pageSize, String orderBy) {
+    public Page<TransactionPO> getTxs(String address, Integer type, Integer state, Long startTime, Long endTime, int pageNumber, int pageSize, String orderBy) {
         //数据库交易查询结果集
-        List<TransactionPo> transactionList = new ArrayList<>();
+        List<TransactionPO> transactionList = new ArrayList<>();
         Searchable searchable = new Searchable();
         if (null != type) {
             searchable.addCondition("type", SearchOperator.eq, type);
@@ -41,7 +41,7 @@ public class TransactionServiceImpl extends BaseService<TransactionMapper> imple
     }
 
     @Override
-    public int saveTx(TransactionPo txPo) {
+    public int saveTx(TransactionPO txPo) {
         SqlSession sqlSession = sqlSessionFactory.openSession();
         int rs = sqlSession.getMapper(TransactionMapper.class).save(txPo);
         sqlSession.commit();
@@ -50,12 +50,12 @@ public class TransactionServiceImpl extends BaseService<TransactionMapper> imple
     }
 
     @Override
-    public int saveTxs(List<TransactionPo> txPoList) {
+    public int saveTxs(List<TransactionPO> txPoList) {
         return 0;
     }
 
     @Override
-    public int deleteTx(TransactionPo txPo) {
+    public int deleteTx(TransactionPO txPo) {
         return 0;
     }
 

@@ -1,7 +1,7 @@
 package io.nuls.h2.dao;
 
 import com.github.pagehelper.Page;
-import io.nuls.h2.entity.TransactionPo;
+import io.nuls.h2.entity.TransactionPO;
 
 import java.util.List;
 
@@ -11,14 +11,14 @@ import java.util.List;
  */
 public interface TransactionService {
 
-    Page<TransactionPo> getTxs(String address, Integer type, Integer state,
+    Page<TransactionPO> getTxs(String address, Integer type, Integer state,
                                Long startTime, Long endTime, int pageNum, int pageSize, String orderBy);
 
-    int saveTx(TransactionPo txPo);
+    int saveTx(TransactionPO txPo);
 
-    int saveTxs(List<TransactionPo> txPoList);
+    int saveTxs(List<TransactionPO> txPoList);
 
-    int deleteTx(TransactionPo txPo);
+    int deleteTx(TransactionPO txPo);
 
 
     /**

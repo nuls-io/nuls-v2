@@ -683,8 +683,8 @@ public class TxServiceImpl implements TxService {
                 throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
             }
             while (true) {
-                //todo long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
-                long currentTimeMillis = System.currentTimeMillis();//todo 测试代码
+                long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+                //long currentTimeMillis = System.currentTimeMillis();//todo 测试代码
                 if (endtimestamp - currentTimeMillis <= TxConstant.VERIFY_OFFSET) {
                     break;
                 }
