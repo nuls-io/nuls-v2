@@ -22,7 +22,6 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -279,8 +278,8 @@ public class ConsensusProcess {
         str.append(",packTime:").append(new Date(self.getPackEndTime()));
         str.append("\n");
         consensusLogger.debug("pack round:" + str);
-        //todo 从交易管理模块获取打包交易
-        List<Transaction> packingTxList = new ArrayList<>();
+
+        List<Transaction> packingTxList = CallMethodUtils.getPackingTxList(chain);
 
         /*
         组装系统交易（CoinBase/红牌/黄牌）+ 创建区块
