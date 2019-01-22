@@ -2,7 +2,7 @@ package io.nuls.transaction.db.h2.dao;
 
 import io.nuls.base.data.Page;
 import io.nuls.base.data.Transaction;
-import io.nuls.transaction.model.po.TransactionPO;
+import io.nuls.transaction.model.po.TransactionsPO;
 
 import java.util.List;
 
@@ -12,26 +12,26 @@ import java.util.List;
  */
 public interface TransactionH2Service {
 
-    Page<TransactionPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type, Integer state,
-                               Long startTime, Long endTime, int pageNumber, int pageSize);
+    Page<TransactionsPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type, Integer state,
+                                Long startTime, Long endTime, int pageNumber, int pageSize);
 
-    Page<TransactionPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type,  int pageNumber, int pageSize);
+    Page<TransactionsPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type, int pageNumber, int pageSize);
 
-    int saveTx(TransactionPO txPo);
+    int saveTx(TransactionsPO txPo);
 
     /**
      * 保存多个数据，组装单条插入语句，循环数据集合插入
      * @param txPoList
      * @return
      */
-    int saveTxs(List<TransactionPO> txPoList);
+    int saveTxs(List<TransactionsPO> txPoList);
 
     /**
      * 保存多个数据，按表组装批量插入语句，循环执行多个表的插入
      * @param txPoList
      * @return
      */
-    int saveTxsTables(List<TransactionPO> txPoList);
+    int saveTxsTables(List<TransactionsPO> txPoList);
 
     int deleteTx(String address, String txhash);
 

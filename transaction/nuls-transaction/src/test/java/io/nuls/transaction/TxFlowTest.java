@@ -78,7 +78,7 @@ public class TxFlowTest {
                 .moduleRoles("test_role", new String[]{"1.0"})
                 .moduleVersion("1.0")
 //                .dependencies(ModuleE.CM.abbr, "1.1")
-                .connect("ws://127.0.0.1:8887");
+                .connect("ws://192.168.1.57:8887");
 
         // Get information from kernel
         CmdDispatcher.syncKernel();

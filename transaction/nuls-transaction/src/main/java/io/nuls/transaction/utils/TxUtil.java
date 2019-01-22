@@ -34,7 +34,7 @@ import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.po.TransactionPO;
+import io.nuls.transaction.model.po.TransactionsPO;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,52 +121,52 @@ public class TxUtil {
         return false;
     }
 
-    public static List<TransactionPO> tx2PO(Transaction tx) throws NulsException{
-        List<TransactionPO> list = new ArrayList<>();
+    public static List<TransactionsPO> tx2PO(Transaction tx) throws NulsException{
+        List<TransactionsPO> list = new ArrayList<>();
         if(null == tx.getCoinData()){
             return list;
         }
         CoinData coinData = tx.getCoinDataInstance();
         if(coinData.getFrom() != null){
-            TransactionPO transactionPO = null;
+            TransactionsPO transactionsPO = null;
             for(CoinFrom coinFrom : coinData.getFrom()){
-                transactionPO = new TransactionPO();
-                transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
-                transactionPO.setHash(tx.getHash().getDigestHex());
-                transactionPO.setType(tx.getType());
-                transactionPO.setAssetChainId(coinFrom.getAssetsChainId());
-                transactionPO.setAssetId(coinFrom.getAssetsId());
-                transactionPO.setAmount(coinFrom.getAmount());
+                transactionsPO = new TransactionsPO();
+                transactionsPO.setAddress(AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                transactionsPO.setHash(tx.getHash().getDigestHex());
+                transactionsPO.setType(tx.getType());
+                transactionsPO.setAssetChainId(coinFrom.getAssetsChainId());
+                transactionsPO.setAssetId(coinFrom.getAssetsId());
+                transactionsPO.setAmount(coinFrom.getAmount());
                 // 0普通交易，-1解锁金额交易（退出共识，退出委托）
                 byte locked = coinFrom.getLocked();
                 int state = 0;
                 if(locked == -1){
                     state = 3;
                 }
-                transactionPO.setState(state);
-                transactionPO.setTime(tx.getTime());
-                list.add(transactionPO);
+                transactionsPO.setState(state);
+                transactionsPO.setTime(tx.getTime());
+                list.add(transactionsPO);
             }
         }
         if(coinData.getTo() != null){
-            TransactionPO transactionPO = null;
+            TransactionsPO transactionsPO = null;
             for(CoinTo coinTo : coinData.getTo()){
-                transactionPO = new TransactionPO();
-                transactionPO.setAddress(AddressTool.getStringAddressByBytes(coinTo.getAddress()));
-                transactionPO.setAssetChainId(coinTo.getAssetsChainId());
-                transactionPO.setAssetId(coinTo.getAssetsId());
-                transactionPO.setAmount(coinTo.getAmount());
-                transactionPO.setHash(tx.getHash().getDigestHex());
-                transactionPO.setType(tx.getType());
+                transactionsPO = new TransactionsPO();
+                transactionsPO.setAddress(AddressTool.getStringAddressByBytes(coinTo.getAddress()));
+                transactionsPO.setAssetChainId(coinTo.getAssetsChainId());
+                transactionsPO.setAssetId(coinTo.getAssetsId());
+                transactionsPO.setAmount(coinTo.getAmount());
+                transactionsPO.setHash(tx.getHash().getDigestHex());
+                transactionsPO.setType(tx.getType());
                 // 解锁高度或解锁时间，-1为永久锁定
                 Long lockTime = coinTo.getLockTime();
                 int state = 1;
                 if(lockTime != 0){
                     state = 2;
                 }
-                transactionPO.setState(state);
-                transactionPO.setTime(tx.getTime());
-                list.add(transactionPO);
+                transactionsPO.setState(state);
+                transactionsPO.setTime(tx.getTime());
+                list.add(transactionsPO);
             }
         }
         return list;
