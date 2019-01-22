@@ -40,7 +40,7 @@ public interface Constant {
      * 模块配置文件名称
      * Module configuration file name.
      */
-    String MODULES_CONFIG_FILE = "modules.json";
+    String MODULES_CONFIG_FILE = System.getProperty("user.home") + "/nuls_2.0/resources/nuls-block/modules.json";
 
     /**
      * db文件存放目录
