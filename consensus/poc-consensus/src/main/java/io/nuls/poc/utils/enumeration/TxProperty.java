@@ -31,7 +31,22 @@ public enum TxProperty {
      * 退出共识
      * Exit consensus
      * */
-    CANCEL_DEPOSIT(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT,false,true,true);
+    CANCEL_DEPOSIT(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT,false,true,true),
+
+    /**
+     * CoinBase
+     * */
+    COIN_BASE(ConsensusConstant.TX_TYPE_COINBASE,true,false,false),
+
+    /**
+     * 红牌
+     * */
+    RED_PUNISH(ConsensusConstant.TX_TYPE_RED_PUNISH,true,false,false),
+
+    /**
+     * 黄牌
+     * */
+    YELLOW_PUNISH(ConsensusConstant.TX_TYPE_YELLOW_PUNISH,true,false,false);
 
     public final int txType;
 

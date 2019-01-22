@@ -55,6 +55,9 @@ public class TxRegisterDetail {
         this.systemTx = txProperty.systemTx;
         this.unlockTx = txProperty.unlockTx;
         this.verifySignature = txProperty.verifySignature;
+        this.validateCmd = "";
+        this.validateCmd = "";
+        this.commitCmd = "";
     }
 
     public int getTxType() {
