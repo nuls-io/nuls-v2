@@ -36,11 +36,6 @@ import java.util.Comparator;
 public class Node {
 
     /**
-     * 节点比较器,默认按信用值排序
-     */
-    public static final Comparator<Node> COMPARATOR = Comparator.comparingInt(Node::getCredit).reversed();
-
-    /**
      * ip+port
      */
     private String id;
@@ -58,13 +53,21 @@ public class Node {
     private int credit = 100;
 
     /**
-     * 调整信用值
+     * 下载耗时，初始为0
      */
-    public void adjustCredit(boolean success) {
+    private int duration;
+
+    /**
+     * 根据下载是否成功、下载耗费时间调整信用值
+     */
+    public void adjustCredit(boolean success, long duration) {
         if (success) {
+            System.out.println("node-" + id + ", duration-" + duration);
+            //下载成功，信用值加20，上限为初始信用值的两倍
             credit = Math.min(200, credit + 20);
         } else {
-            credit = Math.max(20, credit - 20);
+            //下载失败，信用值减半，下限为0
+            credit /= 2;
         }
 
     }

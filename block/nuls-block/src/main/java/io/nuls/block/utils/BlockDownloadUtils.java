@@ -31,6 +31,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCK_MESSAGE;
+import static io.nuls.block.constant.Constant.SINGLE_DOWNLOAD_TIMEOUNT;
 import static io.nuls.block.utils.LoggerUtil.commonLog;
 
 /**
@@ -64,7 +65,7 @@ public class BlockDownloadUtils {
             return null;
         }
         try {
-            return future.get(1000L, TimeUnit.SECONDS);
+            return future.get(SINGLE_DOWNLOAD_TIMEOUNT, TimeUnit.SECONDS);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("get block-" + hash + " from " + node.getId() + "fail", e);

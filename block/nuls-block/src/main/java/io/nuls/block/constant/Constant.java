@@ -22,6 +22,7 @@ package io.nuls.block.constant;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.block.model.Node;
 
 import java.util.Comparator;
 
@@ -86,7 +87,28 @@ public interface Constant {
      */
     int CONSENSUS_WAITING = 0;
 
-    public static final Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
+    /**
+     * 区块排序器
+     */
+    Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
 
-    public static final Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
+    /**
+     * 区块头排序器
+     */
+    Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
+
+    /**
+     * 节点比较器,默认按信用值排序
+     */
+    Comparator<Node> NODE_COMPARATOR = Comparator.comparingInt(Node::getCredit).reversed();
+
+    /**
+     * 下载单个区块的超时时间
+     */
+    long SINGLE_DOWNLOAD_TIMEOUNT = 1000L;
+
+    /**
+     * 下载多个区块的超时时间
+     */
+    long BATCH_DOWNLOAD_TIMEOUNT = 30L;
 }

@@ -71,18 +71,24 @@ public class BlockDownloader implements Callable<Boolean> {
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         long netLatestHeight = params.getNetLatestHeight();
         long startHeight = params.getLocalLatestHeight() + 1;
-        ChainParameters chainParameters = ContextManager.getContext(chainId).getParameters();
-        int maxDowncount = chainParameters.getDownloadNumber();
-        int blockCache = chainParameters.getBlockCache();
         try {
             commonLog.info("BlockDownloader start work from " + startHeight + " to " + netLatestHeight);
+            ChainParameters chainParameters = ContextManager.getContext(chainId).getParameters();
+            int blockCache = chainParameters.getBlockCache();
+            int maxDowncount = chainParameters.getDownloadNumber();
             while (startHeight <= netLatestHeight) {
                 while (queue.size() > blockCache) {
                     commonLog.info("BlockDownloader wait！ cached queue size:" + queue.size());
                     Thread.sleep(1000L);
                 }
-                Node node = nodes.take();
-                int size = maxDowncount * node.getCredit() / 100;
+                int credit;
+                Node node;
+                do {
+                    node = nodes.take();
+                    credit = node.getCredit();
+                    commonLog.debug("nodes size-" + nodes.size());
+                } while (credit == 0);
+                int size = maxDowncount * credit / 100;
                 if (startHeight + size > netLatestHeight) {
                     size = (int) (netLatestHeight - startHeight + 1);
                 }

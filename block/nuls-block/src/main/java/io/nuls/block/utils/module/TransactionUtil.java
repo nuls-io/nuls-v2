@@ -20,14 +20,26 @@
 
 package io.nuls.block.utils.module;
 
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.block.manager.ContextManager;
+import io.nuls.block.model.Node;
+import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.test.TransactionStorageService;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.log.logback.NulsLogger;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 调用交易管理模块的工具类
@@ -47,7 +59,19 @@ public class TransactionUtil {
      * @return
      */
     public static List<Integer> getSystemTypes(int chainId) {
-        return List.of(1, 7);
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getSystemTypes", params);
+            Map responseData = (Map) response.getResponseData();
+            return (List<Integer>) responseData.get("tx_getSystemTypes");
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
     }
 
     /**
@@ -58,31 +82,74 @@ public class TransactionUtil {
      * @return
      */
     public static boolean verify(int chainId, List<Transaction> transactions) {
-        transactions.forEach(e -> service.save(chainId, e));
-        return true;
+//        transactions.forEach(e -> service.save(chainId, e));
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("txList", transactions);
+            return CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_verify", params).isSuccess();
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
     }
 
     /**
      * 批量保存交易
      *
      * @param chainId
-     * @param transactions
+     * @param blockHeaderPo
      * @return
      */
-    public static boolean save(int chainId, List<NulsDigestData> transactions) {
-        return true;
+    public static boolean save(int chainId, BlockHeaderPo blockHeaderPo) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("txHashList", blockHeaderPo.getTxHashList());
+            BlockHeaderDigest blockHeaderDigest = new BlockHeaderDigest();
+            blockHeaderDigest.setBlockHeaderHash(blockHeaderPo.getHash());
+            blockHeaderDigest.setHeight(blockHeaderPo.getHeight());
+            blockHeaderDigest.setTime(blockHeaderPo.getTime());
+            params.put("secondaryDataHex", HexUtil.encode(blockHeaderDigest.serialize()));
+            return CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_save", params).isSuccess();
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
     }
 
     /**
      * 批量回滚交易
      *
      * @param chainId
-     * @param hashList
+     * @param blockHeaderPo
      * @return
      */
-    public static boolean rollback(int chainId, List<NulsDigestData> hashList) {
-        hashList.forEach(e -> service.remove(chainId, e));
-        return true;
+    public static boolean rollback(int chainId, BlockHeaderPo blockHeaderPo) {
+//        hashList.forEach(e -> service.remove(chainId, e));
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("txHashList", blockHeaderPo.getTxHashList());
+            BlockHeaderDigest blockHeaderDigest = new BlockHeaderDigest();
+            blockHeaderDigest.setBlockHeaderHash(blockHeaderPo.getHash());
+            blockHeaderDigest.setHeight(blockHeaderPo.getHeight());
+            blockHeaderDigest.setTime(blockHeaderPo.getTime());
+            params.put("secondaryDataHex", HexUtil.encode(blockHeaderDigest.serialize()));
+            return CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params).isSuccess();
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
     }
 
     /**
@@ -95,8 +162,16 @@ public class TransactionUtil {
      */
     public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList) {
         List<Transaction> transactions = new ArrayList<>();
-        hashList.forEach(e -> transactions.add(service.query(chainId, e)));
-        return transactions;
+//        hashList.forEach(e -> transactions.add(service.query(chainId, e)));
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            hashList.forEach(e -> transactions.add(getTransaction(chainId, e)));
+            return transactions;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
     }
 
     /**
@@ -107,6 +182,23 @@ public class TransactionUtil {
      * @return
      */
     public static Transaction getTransaction(int chainId, NulsDigestData hash) {
-        return service.query(chainId, hash);
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("txHash", hash);
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
+            Map responseData = (Map) response.getResponseData();
+            String txHex = (String) responseData.get("tx_getTx");
+            Transaction transaction = new Transaction();
+            transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+            return transaction;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+//        return service.query(chainId, hash);
     }
 }

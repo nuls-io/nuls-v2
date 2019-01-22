@@ -37,6 +37,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import static io.nuls.block.constant.CommandConstant.GET_BLOCKS_BY_HEIGHT_MESSAGE;
+import static io.nuls.block.constant.Constant.BATCH_DOWNLOAD_TIMEOUNT;
 
 /**
  * 区块下载器
@@ -62,21 +63,25 @@ public class BlockWorker implements Callable<BlockDownLoadResult> {
         //计算本次请求hash,用来跟踪本次异步请求
         NulsDigestData messageHash = message.getHash();
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        long duration = 0;
         try {
             Future<CompleteMessage> future = CacheHandler.addBatchBlockRequest(chainId, messageHash);
             //发送消息给目标节点
+            long begin = System.nanoTime();
             boolean result = NetworkUtil.sendToNode(chainId, message, node.getId(), GET_BLOCKS_BY_HEIGHT_MESSAGE);
             //发送失败清空数据
             if (!result) {
                 CacheHandler.removeRequest(chainId, messageHash);
-                return new BlockDownLoadResult(messageHash, startHeight, size, node, false);
+                return new BlockDownLoadResult(messageHash, startHeight, size, node, false, 0);
             }
-            CompleteMessage completeMessage = future.get(60L, TimeUnit.SECONDS);
+            CompleteMessage completeMessage = future.get(BATCH_DOWNLOAD_TIMEOUNT, TimeUnit.SECONDS);
             b = completeMessage.isSuccess();
+            long end = System.nanoTime();
+            duration = end - begin;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
         }
-        return new BlockDownLoadResult(messageHash, startHeight, size, node, b);
+        return new BlockDownLoadResult(messageHash, startHeight, size, node, b, duration);
     }
 }
