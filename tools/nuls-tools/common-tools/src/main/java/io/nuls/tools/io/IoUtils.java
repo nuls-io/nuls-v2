@@ -55,36 +55,24 @@ public class IoUtils {
      */
     public static String read(String path) throws Exception {
         ObjectUtils.canNotEmpty(path, "null parameter");
-        String filePath = IoUtils.class.getClassLoader().getResource(path).getPath();
-        return readRealPath(filePath, false);
+        InputStream stream = IoUtils.class.getClassLoader().getResourceAsStream(path);
+        String string = readRealPath(stream);
+        return string;
     }
 
     /**
      * 读取本地指定绝对路径的文件信息
      *
-     * @param realPath 文件的绝对路径
-     * @param format   读取时是否换行
+     * @param stream 文件的绝对路径
      * @return 文件内容
      */
-    public static String readRealPath(String realPath, boolean format) throws Exception {
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new FileReader(realPath));
-        } catch (FileNotFoundException e) {
-            Log.error(e.getMessage());
-            throw new Exception(e);
-        }
+    private static String readRealPath(InputStream stream) throws Exception {
+        BufferedReader br = new BufferedReader(new InputStreamReader(stream));
         StringBuilder str = new StringBuilder();
         String line;
         try {
             while ((line = br.readLine()) != null) {
-
-                if (format) {
-                    str.append(line);
-                    str.append("\n");
-                } else {
-                    str.append(line.trim());
-                }
+                str.append(line.trim());
             }
         } catch (IOException e) {
             Log.error(e.getMessage());
