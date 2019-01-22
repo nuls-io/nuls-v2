@@ -364,7 +364,7 @@ public class H2Test {
     public static void initTestTable(){
         TransactionH2Service ts = new TransactionH2ServiceImpl();
         //ts.createTable("transaction", "transaction_index",128);
-        ts.createTxTables(TxConstant.H2_TX_TABLE_NAME_PREFIX,
+        ts.createTxTablesIfNotExists(TxConstant.H2_TX_TABLE_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
                 TxConstant.H2_TX_TABLE_NUMBER);

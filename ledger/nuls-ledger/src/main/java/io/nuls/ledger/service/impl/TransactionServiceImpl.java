@@ -55,8 +55,6 @@ import java.util.Map;
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
-    final Logger logger = LoggerFactory.getLogger(getClass());
-
     @Autowired
     AccountStateService accountStateService;
     @Autowired

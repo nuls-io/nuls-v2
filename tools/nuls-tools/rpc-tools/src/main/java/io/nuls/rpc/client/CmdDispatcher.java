@@ -23,16 +23,19 @@
  *
  */
 package io.nuls.rpc.client;
+
+import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.invoke.KernelInvoke;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.*;
 import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
-import io.nuls.rpc.client.runtime.ClientRuntime;
+
 import java.util.Map;
 
 /**
@@ -84,7 +87,6 @@ public class CmdDispatcher {
      * @throws Exception 核心模块（Manager）不可用，Core Module (Manager) Not Available
      */
     public static void syncKernel() throws Exception {
-
         /*
         打造用于同步的Request
         Create Request for Synchronization
@@ -135,6 +137,10 @@ public class CmdDispatcher {
 
         for (String role : ServerRuntime.LOCAL.getDependencies().keySet()) {
             String url = ClientRuntime.getRemoteUri(role);
+            if(StringUtils.isBlank(url)){
+                Log.error("Dependent modules cannot be connected: " + role);
+                return;
+            }
             try {
                 ClientRuntime.getWsClient(url);
             } catch (Exception e) {
@@ -384,6 +390,7 @@ public class CmdDispatcher {
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
 
+        client.getTimeOutMessageList().add(messageId);
         /*
         Timeout Error
          */

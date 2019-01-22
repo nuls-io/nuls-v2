@@ -7,9 +7,7 @@ import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.consensus.Evidence;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
-import io.nuls.poc.model.bo.tx.txdata.Agent;
-import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
-import io.nuls.poc.model.bo.tx.txdata.YellowPunishData;
+import io.nuls.poc.model.bo.tx.txdata.*;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.PunishStorageService;
 import io.nuls.poc.utils.compare.EvidenceComparator;
@@ -18,6 +16,7 @@ import io.nuls.poc.utils.enumeration.PunishReasonEnum;
 import io.nuls.poc.utils.enumeration.PunishType;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.DoubleUtils;
 import io.nuls.tools.exception.NulsException;
@@ -343,8 +342,15 @@ public class PunishManager {
                 CoinData coinData = coinDataManager.getStopAgentCoinData(chain, redPunishData.getAddress(), redPunishTransaction.getTime() + chain.getConfig().getRedPublishLockTime());
                 redPunishTransaction.setCoinData(coinData.serialize());
                 redPunishTransaction.setHash(NulsDigestData.calcDigestData(redPunishTransaction.serializeForHash()));
-                txList.add(redPunishTransaction);
+                chain.getRedPunishTransactionList().add(redPunishTransaction);
             }
+        }
+        /*
+        * 待打包交易与红牌交易冲突检测
+        * Conflict Detection of UnPackaged Trading and Red Card Trading
+        * */
+        if(chain.getRedPunishTransactionList().size() > 0){
+            conflictValid(chain,txList);
         }
     }
 
@@ -395,8 +401,8 @@ public class PunishManager {
             return null;
         }
         List<byte[]> addressList = new ArrayList<>();
-        MeetingMember member = null;
-        MeetingRound preRound = null;
+        MeetingMember member;
+        MeetingRound preRound;
         for (int i = 1; i <= yellowCount; i++) {
             int index = self.getPackingIndexOfRound() - i;
             /*
@@ -433,5 +439,81 @@ public class PunishManager {
         punishTx.setTime(self.getPackEndTime());
         punishTx.setHash(NulsDigestData.calcDigestData(punishTx.serializeForHash()));
         return punishTx;
+    }
+
+    /**
+     * 待打包交易与红牌交易冲突检测
+     * Conflict Detection of UnPackaged Trading and Red Card Trading
+     * */
+    private void conflictValid(Chain chain,List<Transaction> txList)throws NulsException{
+        Iterator<Transaction> iterator = txList.iterator();
+        Transaction tx;
+        /*
+        * 红牌惩罚的地址
+        * */
+        Set<String> redPunishAddressSet = redPunishAddressSet(chain);
+
+        /*
+        * 无效的节点Hash
+        * */
+        Set<NulsDigestData> invalidAgentTxHash = new HashSet<>();
+
+        /*
+        * 无效的加入共识交易的交易Hash
+        * */
+        Set<NulsDigestData> invalidDepositTxHash = new HashSet<>();
+        while (iterator.hasNext()) {
+            tx = iterator.next();
+            switch (tx.getType()){
+                case ConsensusConstant.TX_TYPE_REGISTER_AGENT:
+                    Agent agent = new Agent();
+                    agent.parse(tx.getTxData(),0);
+                    if(redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress()))){
+                        invalidAgentTxHash.add(agent.getTxHash());
+                        iterator.remove();
+                    }
+                    break;
+                case ConsensusConstant.TX_TYPE_STOP_AGENT:
+                    StopAgent stopAgent = new StopAgent();
+                    stopAgent.parse(tx.getTxData(),0);
+                    if(invalidAgentTxHash.contains(stopAgent.getCreateTxHash())){
+                        iterator.remove();
+                    }
+                    break;
+                case ConsensusConstant.TX_TYPE_JOIN_CONSENSUS:
+                    Deposit deposit = new Deposit();
+                    deposit.parse(tx.getTxData(),0);
+                    if(invalidAgentTxHash.contains(deposit.getAgentHash())){
+                        invalidDepositTxHash.add(deposit.getTxHash());
+                        iterator.remove();
+                    }
+                    break;
+                case ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT:
+                    CancelDeposit cancelDeposit = new CancelDeposit();
+                    cancelDeposit.parse(tx.getTxData(),0);
+                    if(invalidDepositTxHash.contains(cancelDeposit.getJoinTxHash())){
+                        iterator.remove();
+                    }
+                    break;
+                default:break;
+            }
+        }
+        txList.addAll(chain.getRedPunishTransactionList());
+        chain.getRedPunishTransactionList().clear();
+    }
+
+    /**
+     * 红牌惩罚列表
+     * Red Card Punishment List
+     * */
+    private Set<String> redPunishAddressSet(Chain chain)throws NulsException{
+        Set<String> redPunishAddressSet = new HashSet<>();
+        RedPunishData redPunishData = new RedPunishData();
+        for (Transaction tx : chain.getRedPunishTransactionList()) {
+            redPunishData.parse(tx.getTxData(),0);
+            String addressHex = HexUtil.encode(redPunishData.getAddress());
+            redPunishAddressSet.add(addressHex);
+        }
+        return  redPunishAddressSet;
     }
 }

@@ -30,7 +30,6 @@ import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
 
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +52,9 @@ public interface TransactionService {
      * @return transfer transaction hash
      * @throws NulsException
      */
-    String multipleAddressTransfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException, IOException, Exception;
+    String transfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
 
-    Transaction transferByAlias(int chainId, CoinDto from, CoinDto toList, String remark);
+    Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark);
 
     /**
      * 校验该链是否有该资产

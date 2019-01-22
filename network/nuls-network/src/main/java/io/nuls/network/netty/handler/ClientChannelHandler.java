@@ -127,7 +127,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
             channel.close();
             return;
         }
-        BaseMeesageHandlerInf handler=MessageHandlerFactory.getInstance().getHandler(versionMessage);
+        BaseMeesageHandlerInf handler=MessageHandlerFactory.getInstance().getHandler(versionMessage.getHeader().getCommandStr());
         handler.send(versionMessage, node, false,true);
 
     }

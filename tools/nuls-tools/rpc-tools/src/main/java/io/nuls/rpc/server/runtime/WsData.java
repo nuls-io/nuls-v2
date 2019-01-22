@@ -125,9 +125,9 @@ public class WsData {
      * */
     public void subscribeByEvent(Message message){
         ServerRuntime.subscribeByEvent(this,message);
-        requestEventCountLoopList.add(message);
         idToEventMessageMap.put(message.getMessageId(),message);
         addSubscribeInitCount(message);
+        requestEventCountLoopList.add(message);
     }
 
     /**

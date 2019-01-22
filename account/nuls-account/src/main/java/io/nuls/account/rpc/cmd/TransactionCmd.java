@@ -6,11 +6,9 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Chain;
-import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.CoinDto;
-import io.nuls.account.model.dto.MulitpleAddressTransferDto;
+import io.nuls.account.model.dto.TransferDto;
 import io.nuls.account.model.po.AliasPo;
-import io.nuls.account.service.AliasService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.TxUtil;
@@ -20,7 +18,6 @@ import io.nuls.account.util.log.LogUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.account.util.validator.TxValidator;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -37,7 +34,9 @@ import io.nuls.tools.parse.JSONUtils;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: qinyifeng
@@ -53,9 +52,9 @@ public class TransactionCmd extends BaseCmd {
     private ChainManager chainManager;
     @Autowired
     private TxValidator txValidator;
+
     @Autowired
     private AliasStorageService aliasStorageService;
-
 
     /**
      * 转账交易验证
@@ -116,9 +115,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_multipleAddressTransfer", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi-account transfer transaction")
-    public Response multipleAddressTransfer(Map params) {
-        LogUtil.debug("ac_multipleAddressTransfer start");
+    @CmdAnnotation(cmd = "ac_transfer", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi-account transfer transaction")
+    public Response transfer(Map params) {
+        LogUtil.debug("ac_transfer start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -128,7 +127,7 @@ public class TransactionCmd extends BaseCmd {
 
             // parse params
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            MulitpleAddressTransferDto transferDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), MulitpleAddressTransferDto.class);
+            TransferDto transferDto = JSONUtils.json2pojo(JSONUtils.obj2json(params), TransferDto.class);
             List<CoinDto> inputList = transferDto.getInputs();
             List<CoinDto> outputList = transferDto.getOutputs();
             if (inputList == null || outputList == null) {
@@ -140,11 +139,6 @@ public class TransactionCmd extends BaseCmd {
             for (CoinDto from : inputList) {
                 if (!AddressTool.validAddress(from.getAssetsChainId(), from.getAddress())) {
                     throw new NulsException(AccountErrorCode.ADDRESS_ERROR);
-                }
-                //转出账户列表中不能有多签账户
-                //from中不能有多签地址
-                if (AddressTool.isMultiSignAddress(from.getAddress())) {
-                    throw new NulsException(AccountErrorCode.IS_MULTI_SIGNATURE_ADDRESS);
                 }
                 fromTotal = fromTotal.add(from.getAmount());
             }
@@ -164,7 +158,7 @@ public class TransactionCmd extends BaseCmd {
             if (!validTxRemark(transferDto.getRemark())) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
-            String txDigestHex = transactionService.multipleAddressTransfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
+            String txDigestHex = transactionService.transfer(transferDto.getChainId(), inputList, outputList, transferDto.getRemark());
             map.put("value", txDigestHex);
         } catch (NulsException e) {
             return failed(e.getErrorCode());
@@ -175,7 +169,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_multipleAddressTransfer end");
+        LogUtil.debug("ac_transfer end");
         return success(map);
     }
 
@@ -238,6 +232,7 @@ public class TransactionCmd extends BaseCmd {
             fromCoinDto.setAssetsId(assetId);
             Transaction tx = transactionService.transferByAlias(chainId, fromCoinDto, toCoinDto, remark);
             map.put("txHash", tx.getHash().getDigestHex());
+            //TODO 判断转出账户是否是多签账户，如果为多签则返回16进制交易串，这一部份与多签账户转账交易完成后再补充 Edward
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
@@ -248,6 +243,8 @@ public class TransactionCmd extends BaseCmd {
         LogUtil.debug("ac_multipleAddressTransfer end");
         return success(map);
     }
+
+
 
     /**
      * 校验转账交易备注是否有效

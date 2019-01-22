@@ -1,7 +1,7 @@
 package io.nuls.account.service;
 
 import io.nuls.account.constant.AccountParam;
-import io.nuls.account.init.AccountBootstrap;
+import io.nuls.account.AccountBootstrap;
 import io.nuls.account.model.bo.Account;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;

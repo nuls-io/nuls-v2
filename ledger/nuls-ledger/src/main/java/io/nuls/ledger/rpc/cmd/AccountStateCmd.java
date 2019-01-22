@@ -35,11 +35,11 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static io.nuls.ledger.utils.LoggerUtil.logger;
 
 /**
  * 用于获取账户余额及账户nonce值
@@ -48,7 +48,6 @@ import java.util.Map;
 @Component
 public class AccountStateCmd extends BaseCmd {
 
-    final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Autowired
     private AccountStateService accountStateService;

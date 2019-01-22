@@ -1,12 +1,13 @@
 package io.nuls.rpc.client.runtime;
 
+import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.thread.TimeService;
 import org.java_websocket.WebSocket;
-import io.nuls.rpc.client.WsClient;
+
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -152,6 +153,7 @@ public class ClientRuntime {
         for (Map.Entry<String,WsClient> entry:MSG_ID_KEY_WS_CLIENT_MAP.entrySet()) {
             if(client.equals(entry.getValue())){
                 MSG_ID_KEY_WS_CLIENT_MAP.remove(entry.getKey());
+                INVOKE_MAP.remove(entry.getKey());
             }
         }
     }

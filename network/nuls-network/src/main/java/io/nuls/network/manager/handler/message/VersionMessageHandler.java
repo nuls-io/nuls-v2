@@ -71,6 +71,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
      * @param nodeKey nodeKey
      */
     private void serverRecieveHandler(BaseMessage message, String nodeKey){
+        //TODO:version的异常处理，需要回退处理
         VersionMessageBody versionBody=(VersionMessageBody)message.getMsgBody();
         Node node =ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
 //        Log.debug("VersionMessageHandler Recieve:"+"Server"+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());

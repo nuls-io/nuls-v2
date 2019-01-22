@@ -48,7 +48,6 @@ import java.util.List;
 public class FreezeStateServiceImpl implements FreezeStateService {
     @Autowired
     Repository repository;
-    final Logger logger = LoggerFactory.getLogger(getClass());
     private boolean timeAllow(long latestUnfreezeTime){
         //是否改为网络时间？
         long nowTime = TimeUtils.getCurrentTime();

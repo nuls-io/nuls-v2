@@ -40,6 +40,7 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.rpc.call.AccountCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
@@ -222,7 +223,18 @@ public class TransactionManager {
             }
             //判断from中地址和签名的地址是否匹配
             for(CoinFrom coinFrom : coinData.getFrom()) {
-                if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))) {
+                if(tx.isMultiSignTx()){
+                    MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(coinFrom.getAddress());
+                    if(null == multiSigAccount){
+                        throw new NulsException(TxErrorCode.ACCOUNT_NOT_EXIST);
+                    }
+                    for (byte[] bytes : multiSigAccount.getPubKeyList()) {
+                        String addr = AddressTool.getStringAddressByBytes(AddressTool.getAddress(bytes, chain.getChainId()));
+                        if (!addressSet.contains(addr)) {
+                            throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
+                        }
+                    }
+                }else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))) {
                     throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
                 }
             }

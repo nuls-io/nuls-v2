@@ -54,11 +54,10 @@ public interface RpcService {
 
     /**
      *获取账户余额
-     * @param chainId
-     * @param assetId
      * @param address
      * @return
      */
-    AccountBalance getCoinData(int chainId,int assetId,String address);
+    AccountBalance getCoinData(String address);
+
 }
 

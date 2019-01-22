@@ -36,6 +36,7 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -264,7 +265,7 @@ public class TxServiceImpl implements TxService {
                     byte[] fromAddress = coinFromList.get(0).getAddress();
                     MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(fromAddress);
                     if(null == multiSigAccount){
-                        throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
+                        throw new NulsException(TxErrorCode.ACCOUNT_NOT_EXIST);
                     }
                     multiSignTxSignature.setM(multiSigAccount.getM());
                     multiSignTxSignature.setPubKeyList(multiSigAccount.getPubKeyList());
@@ -655,7 +656,8 @@ public class TxServiceImpl implements TxService {
         List<String> packableTxs = null;
         try {
             while (true) {
-                long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+                //todo long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+                long currentTimeMillis = System.currentTimeMillis();//todo 测试代码
                 if (endtimestamp - currentTimeMillis <= TxConstant.VERIFY_OFFSET) {
                     break;
                 }
@@ -694,7 +696,10 @@ public class TxServiceImpl implements TxService {
                 }
 
                 //验证coinData
-                if (!LedgerCall.verifyCoinData(chain, txHex, false).success()) {
+                VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, false);
+                if (!verifyTxResult.success()) {
+                    chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " +
+                            "coinData not success - code: {}, - reason:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc());
                     clearInvalidTx(chain, tx);
                     continue;
                 }
@@ -930,5 +935,4 @@ public class TxServiceImpl implements TxService {
         }
 
     }
-
 }

@@ -64,13 +64,13 @@ public class TransactionServiceImpl implements TransactionService {
     private AccountService accountService;
     @Autowired
     private ChainManager chainManager;
+
     @Autowired
     private MultiSignAccountService multiSignAccountService;
 
     @Override
-    public String multipleAddressTransfer(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws Exception{
+    public String transfer(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
         Transaction tx = this.assemblyTransaction(chainId, fromList, toList, remark);
-        TransactionCmdCall.newTx(chainId, tx.hex()); //发起新交易
         return tx.getHash().getDigestHex();
     }
 
@@ -82,6 +82,8 @@ public class TransactionServiceImpl implements TransactionService {
         //TODO 如果是多签账户并且签名数量达到了最小值则广播交易,该功能待别名转账做完成后再补充  EdwardChan
         return tx;
     }
+
+
 
     private Transaction assemblyTransaction(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
         Transaction tx = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
@@ -114,6 +116,8 @@ public class TransactionServiceImpl implements TransactionService {
             }
             //交易签名
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
+            //发起新交易
+            TransactionCmdCall.newTx(chainId, tx.hex());
         } catch (NulsException e) {
             Log.error("assemblyTransaction exception.", e);
             throw new NulsRuntimeException(e.getErrorCode());
@@ -141,10 +145,9 @@ public class TransactionServiceImpl implements TransactionService {
             String address = coinDto.getAddress();
             byte[] addressByte = AddressTool.getAddress(address);
             //from中不能有多签地址
-            //Jan. 22th 2019 EdwardChan 对于多地址转账中转出方不能为多签账户的判断迁移到了CMD中进行判断
-            //if (AddressTool.isMultiSignAddress(address)) {
-            //    throw new NulsException(AccountErrorCode.IS_MULTI_SIGNATURE_ADDRESS);
-            //}
+            if (AddressTool.isMultiSignAddress(address)) {
+                throw new NulsException(AccountErrorCode.IS_MULTI_SIGNATURE_ADDRESS);
+            }
             //转账交易转出地址必须是本链地址
             if (!AddressTool.validAddress(chainId, address)) {
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);

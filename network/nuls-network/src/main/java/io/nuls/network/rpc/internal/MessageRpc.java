@@ -30,6 +30,7 @@ import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
+import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
@@ -62,7 +63,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 @Component
 public class MessageRpc extends BaseCmd{
 
-    private MessageManager messageManager =  MessageManager.getInstance();
+    private MessageHandlerFactory messageHandlerFactory =  MessageHandlerFactory.getInstance();
 
 
     @CmdAnnotation(cmd = "nw_protocolRegister", version = 1.0,
@@ -77,12 +78,12 @@ public class MessageRpc extends BaseCmd{
              * 如果外部模块修改了调用注册信息，进行重启，则清理缓存信息，并重新注册
              * clear cache protocolRoleHandler
              */
-            messageManager.clearCacheProtocolRoleHandlerMap(role);
+            messageHandlerFactory.clearCacheProtocolRoleHandlerMap(role);
             List<Map<String,String>> protocolCmds = (List<Map<String,String>>)params.get("protocolCmds");
             List<ProtocolHandlerPo> protocolHandlerPos = new ArrayList<>();
             for(Map map : protocolCmds){
                 ProtocolRoleHandler protocolRoleHandler = new ProtocolRoleHandler(role,map.get("handler").toString());
-                messageManager.addProtocolRoleHandlerMap(map.get("protocolCmd").toString(),protocolRoleHandler);
+                messageHandlerFactory.addProtocolRoleHandlerMap(map.get("protocolCmd").toString(),protocolRoleHandler);
                 ProtocolHandlerPo protocolHandlerPo = new ProtocolHandlerPo(map.get("protocolCmd").toString(),map.get("handler").toString());
                 protocolHandlerPos.add(protocolHandlerPo);
             }
