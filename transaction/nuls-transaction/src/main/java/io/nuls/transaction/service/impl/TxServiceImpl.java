@@ -677,6 +677,11 @@ public class TxServiceImpl implements TxService {
         long totalSize = 0L;
         List<String> packableTxs = null;
         try {
+            //向账本模块发送要批量验证coinData的标识
+            if(!LedgerCall.coinDataBatchNotify(chain)){
+                chain.getLogger().error("Call ledger bathValidateBegin interface failed");
+                throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
+            }
             while (true) {
                 //todo long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
                 long currentTimeMillis = System.currentTimeMillis();//todo 测试代码
@@ -714,6 +719,13 @@ public class TxServiceImpl implements TxService {
                 //交易业务验证tx
                 if (!transactionManager.verify(chain, tx)) {
                     clearInvalidTx(chain, tx);
+                    continue;
+                }
+                //批量验证coinData, 单个发送
+                VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
+                if (!verifyTxResult.success()) {
+                    chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " +
+                            "coinData not success - code: {}, - reason:{}, - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getHash().getDigestHex());
                     continue;
                 }
                 packingTxList.add(tx);
@@ -973,10 +985,13 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public void clearInvalidTx(Chain chain, Transaction tx) {
+        chain.getLogger().debug("\n---------------------- rollbackClear txHash: " + tx.getHash().getDigestHex());
 
         unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
         //移除H2交易记录
+        chain.getLogger().debug("\n---------------------- clear H2 -----------------------");
         transactionH2Service.deleteTx(tx);
+        chain.getLogger().debug("\n---------------------- rollbackTxLedger -----------------------");
         try {
             //通知账本回滚nonce
             LedgerCall.rollbackTxLedger(chain, tx, false);

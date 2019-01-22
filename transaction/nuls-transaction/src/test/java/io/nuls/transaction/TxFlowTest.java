@@ -76,17 +76,24 @@ public class TxFlowTest {
         chain = new Chain();
         chain.setConfig(new ConfigBean(12345, 1));
 //        初始化token
-//        addGenesisAsset();
+        addGenesisAsset();
     }
 
 
     @Test
     public void newCtx() throws Exception{
         for(int i = 0; i<5; i++) {
-            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
-            System.out.println(balance.longValue());
+            BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
+            BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address2), assetChainId, assetId);
+            BigInteger balance3 = LedgerCall.getBalance(chain, AddressTool.getAddress(address3), assetChainId, assetId);
+            BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address4), assetChainId, assetId);
+            System.out.println("address1: " + balance1.longValue());
+            System.out.println("address2: " + balance2.longValue());
+            System.out.println("address3: " + balance3.longValue());
+            System.out.println("address4: " + balance4.longValue());
             CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
                     createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
+            //普通转账
             //调接口
             String json = JSONUtils.obj2json(ctxTransfer);
             Map<String, Object> params = JSONUtils.json2map(json);
@@ -95,9 +102,16 @@ public class TxFlowTest {
             Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
             Assert.assertTrue(null != map);
             Log.info("{}", map.get("value"));
+
+            Map transferMap = this.createTransferTx();
+            //调用接口
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+            Assert.assertTrue(null != result);
+            Log.info("{}", result.get("value"));
             Thread.sleep(3000L);
         }
-        packableTxs();
+        //packableTxs();
 
 
     }
@@ -169,7 +183,7 @@ public class TxFlowTest {
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinTo coinTo = new CoinTo();
-        coinTo.setAddress(AddressTool.getAddress(address1));
+        coinTo.setAddress(AddressTool.getAddress(address3));
         coinTo.setAmount(amount);
         coinTo.setAssetsChainId(assetChainId);
         coinTo.setAssetsId(assetId);
@@ -214,7 +228,7 @@ public class TxFlowTest {
             BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address), assetChainId, assetId);
             System.out.println(balance.longValue());
             //组装普通转账交易
-            Map transferMap=this.createTransferTx();
+            Map transferMap = this.createTransferTx();
             //调用接口
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
             HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
@@ -248,18 +262,18 @@ public class TxFlowTest {
         List<CoinDTO> inputs=new ArrayList<>();
         List<CoinDTO> outputs=new ArrayList<>();
         CoinDTO inputCoin1=new CoinDTO();
-        inputCoin1.setAddress("LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930");
+        inputCoin1.setAddress(address1);
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
-        inputCoin1.setAssetsId(1);
+        inputCoin1.setAssetsId(assetId);
         inputCoin1.setAmount(new BigInteger("10000000"));
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1=new CoinDTO();
-        outputCoin1.setAddress("JcgbDRvBqQ67Uq4Tb52U22ieJdr3G3930");
+        outputCoin1.setAddress(address2);
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
-        outputCoin1.setAssetsId(1);
+        outputCoin1.setAssetsId(assetId);
         outputCoin1.setAmount(new BigInteger("10000000"));
         outputs.add(outputCoin1);
 
