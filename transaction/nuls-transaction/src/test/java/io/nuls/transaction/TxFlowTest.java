@@ -30,6 +30,7 @@ import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -72,7 +73,15 @@ public class TxFlowTest {
 
     @Before
     public void before() throws Exception{
-        NoUse.mockModule();
+//        NoUse.mockModule();
+        WsServer.getInstance("test", "TestModule", "test.com")
+                .moduleRoles("test_role", new String[]{"1.0"})
+                .moduleVersion("1.0")
+//                .dependencies(ModuleE.CM.abbr, "1.1")
+                .connect("ws://127.0.0.1:8887");
+
+        // Get information from kernel
+        CmdDispatcher.syncKernel();
         chain = new Chain();
         chain.setConfig(new ConfigBean(12345, 1));
 //        初始化token
@@ -102,6 +111,8 @@ public class TxFlowTest {
             Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
             Assert.assertTrue(null != map);
             Log.info("{}", map.get("value"));
+
+            Thread.sleep(3000L);
 
             Map transferMap = this.createTransferTx();
             //调用接口
@@ -225,7 +236,7 @@ public class TxFlowTest {
     public void contineCtx() throws Exception{
         String address="LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";
         for(int i = 0; i<3; i++) {
-            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address), assetChainId, assetId);
+            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
             System.out.println(balance.longValue());
             //组装普通转账交易
             Map transferMap = this.createTransferTx();

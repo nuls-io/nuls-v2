@@ -40,7 +40,8 @@ public class LegerCmdCall {
                 throw new NulsException(AccountErrorCode.FAILED);
             }
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("getBalance");
-            return BigIntegerUtils.stringToBigInteger(((Integer) result.get("available")).toString());
+            Object available = result.get("available");
+            return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
         } catch (Exception e) {
             Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.LG.abbr, "getBalance");
             e.printStackTrace();
