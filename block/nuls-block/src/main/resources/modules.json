@@ -45,7 +45,7 @@
     "name": "chainId",
     "remark": "链ID",
     "readOnly": "true",
-    "value": "1"
+    "value": "12345"
   },
   {
     "name": "blockMaxSize",

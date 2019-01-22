@@ -76,7 +76,7 @@
   },
   {
     "key":"chainId",
-    "value":1,
+    "value":12345,
     "readOnly":true
   },
   {

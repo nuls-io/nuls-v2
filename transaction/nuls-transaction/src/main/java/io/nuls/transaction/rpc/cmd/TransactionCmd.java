@@ -392,7 +392,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = TxCmd.TX_VERIFY, version = 1.0, description = "")
+    @CmdAnnotation(cmd = TxCmd.TX_BATCHVERIFY, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response batchVerify(Map params){
         boolean result = false;
