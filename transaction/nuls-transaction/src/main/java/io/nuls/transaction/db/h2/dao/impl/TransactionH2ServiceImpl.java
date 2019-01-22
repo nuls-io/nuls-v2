@@ -10,7 +10,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.h2.dao.impl.mapper.TransactionMapper;
-import io.nuls.transaction.model.po.TransactionsPO;
+import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.model.split.TxTable;
 import io.nuls.transaction.utils.TxUtil;
 import org.apache.ibatis.session.SqlSession;
@@ -29,12 +29,12 @@ import java.util.Map;
 public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> implements TransactionH2Service {
 
     @Override
-    public Page<TransactionsPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type, int pageNumber, int pageSize) {
+    public Page<TransactionPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type, int pageNumber, int pageSize) {
         return getTxs(address, assetChainId, assetId, type, null, null, null, pageNumber, pageSize);
     }
 
     @Override
-    public Page<TransactionsPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type, Integer state, Long startTime, Long endTime, int pageNumber, int pageSize) {
+    public Page<TransactionPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type, Integer state, Long startTime, Long endTime, int pageNumber, int pageSize) {
 
         Searchable searchable = new Searchable();
         if(!StringUtils.isNullOrEmpty(address)){
@@ -68,10 +68,10 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
         //开启分页
         PageHelper.startPage(pageNumber, pageSize);
         PageHelper.orderBy(" address asc, time desc, type asc ");
-        List<TransactionsPO> list = mapper.getTxs(searchable, tableName);
+        List<TransactionPO> list = mapper.getTxs(searchable, tableName);
         //sqlSession.commit();
         sqlSession.close();
-        Page<TransactionsPO> page = new Page<>();
+        Page<TransactionPO> page = new Page<>();
         if (pageSize > 0) {
             page.setPageNumber(pageNumber);
             page.setPageSize(pageSize);
@@ -97,7 +97,7 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
 
 
     @Override
-    public int saveTx(TransactionsPO txPo) {
+    public int saveTx(TransactionPO txPo) {
         SqlSession sqlSession = sqlSessionFactory.openSession();
         String tableName = TxConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
         int rs = sqlSession.getMapper(TransactionMapper.class).insert(txPo, tableName);
@@ -107,12 +107,12 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
     }
 
 
-    private Map<String, List<TransactionsPO>> assembleMap(List<TransactionsPO> txPoList){
-        Map<String, List<TransactionsPO>> map = new HashMap<>();
-        for (TransactionsPO txPo : txPoList) {
+    private Map<String, List<TransactionPO>> assembleMap(List<TransactionPO> txPoList){
+        Map<String, List<TransactionPO>> map = new HashMap<>();
+        for (TransactionPO txPo : txPoList) {
             String tableName = TxConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
             if(!map.containsKey(tableName)){
-                List<TransactionsPO> list = new ArrayList<>();
+                List<TransactionPO> list = new ArrayList<>();
                 list.add(txPo);
                 map.put(tableName,list);
             }else{
@@ -123,11 +123,11 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
     }
 
     @Override
-    public int saveTxsTables(List<TransactionsPO> txPoList) {
+    public int saveTxsTables(List<TransactionPO> txPoList) {
         SqlSession sqlSession = sqlSessionFactory.openSession();
-        Map<String, List<TransactionsPO>> map = assembleMap(txPoList);
+        Map<String, List<TransactionPO>> map = assembleMap(txPoList);
         int rs = 0;
-        for (Map.Entry<String, List<TransactionsPO>> entry : map.entrySet()){
+        for (Map.Entry<String, List<TransactionPO>> entry : map.entrySet()){
             if(sqlSession.getMapper(TransactionMapper.class).batchInsert(entry.getValue(), entry.getKey()) == 1){
                 rs+=entry.getValue().size();
             }
@@ -138,10 +138,10 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
     }
 
     @Override
-    public int saveTxs(List<TransactionsPO> txPoList) {
+    public int saveTxs(List<TransactionPO> txPoList) {
         SqlSession sqlSession = sqlSessionFactory.openSession();
         int rs = 0;
-        for (TransactionsPO txPo : txPoList){
+        for (TransactionPO txPo : txPoList){
             String tableName = TxConstant.H2_TX_TABLE_NAME_PREFIX + txPo.createTableIndex();
             if(sqlSession.getMapper(TransactionMapper.class).insert(txPo,tableName) == 1){
                 rs++;
@@ -165,9 +165,9 @@ public class TransactionH2ServiceImpl extends BaseService<TransactionMapper> imp
     public int deleteTx(Transaction tx) {
         int count = 0;
         try {
-            List<TransactionsPO> list = TxUtil.tx2PO(tx);
-            for (TransactionsPO transactionsPO : list){
-                count += deleteTx(transactionsPO.getAddress(), transactionsPO.getHash());
+            List<TransactionPO> list = TxUtil.tx2PO(tx);
+            for (TransactionPO transactionPO : list){
+                count += deleteTx(transactionPO.getAddress(), transactionPO.getHash());
             }
         } catch (NulsException e) {
             e.printStackTrace();

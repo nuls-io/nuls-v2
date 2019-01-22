@@ -27,7 +27,7 @@ import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.model.dto.ModuleTxRegisterDTO;
 import io.nuls.transaction.model.dto.TxRegisterDTO;
-import io.nuls.transaction.model.po.TransactionsPO;
+import io.nuls.transaction.model.po.TransactionPO;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
@@ -372,7 +372,7 @@ public class TransactionCmd extends BaseCmd {
             Integer pageNumber = null == params.get("pageNumber") ? 1 : Integer.parseInt(params.get("pageNumber").toString());
             String address = (String) params.get("address");
 
-            Page<TransactionsPO> list = transactionH2Service.getTxs(address, assetChainId, assetId, type, pageNumber, pageSize);
+            Page<TransactionPO> list = transactionH2Service.getTxs(address, assetChainId, assetId, type, pageNumber, pageSize);
             return success(list);
         } catch (NulsException e) {
             errorLogProcess(chain, e);

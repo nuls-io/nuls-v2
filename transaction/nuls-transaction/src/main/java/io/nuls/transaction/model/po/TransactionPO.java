@@ -8,7 +8,7 @@ import java.math.BigInteger;
  * @author: Charlie
  * @date: 2018/11/14
  */
-public class TransactionsPO {
+public class TransactionPO {
 
     private Integer id;
 
