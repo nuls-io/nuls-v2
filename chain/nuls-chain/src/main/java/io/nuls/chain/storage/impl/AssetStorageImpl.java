@@ -5,10 +5,11 @@ import io.nuls.chain.storage.AssetStorage;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static io.nuls.chain.util.LoggerUtil.Log;
 
 /**
  * @author tangyi

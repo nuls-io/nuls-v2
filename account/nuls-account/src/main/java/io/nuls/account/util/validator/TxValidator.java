@@ -27,6 +27,7 @@ package io.nuls.account.util.validator;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Chain;
+import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.manager.ChainManager;
@@ -36,6 +37,7 @@ import io.nuls.base.data.Coin;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
@@ -44,10 +46,12 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 交易验证工具类
@@ -62,6 +66,8 @@ public class TxValidator {
     private ChainManager chainManager;
     @Autowired
     private TransactionService transactionService;
+    @Autowired
+    private MultiSignAccountService multiSignAccountService;
 
     /**
      * 验证交易
@@ -163,16 +169,27 @@ public class TxValidator {
      * @return boolean
      */
     private boolean validateSign(Chain chain, Transaction tx, CoinData coinData) throws NulsException {
+        int chainId = chain.getConfig().getChainId();
         // 确认验证签名正确性
         if (!SignatureUtil.validateTransactionSignture(tx)) {
             throw new NulsException(AccountErrorCode.SIGNATURE_ERROR);
         }
-        //如果是多签交易，验证签名地址是否正确
-        if (tx.isMultiSignTx()) {
-            for (CoinFrom coinFrom : coinData.getFrom()) {
-                if (!SignatureUtil.containsAddress(tx, coinFrom.getAddress(), chain.getConfig().getChainId())) {
-                    return false;
+
+        // 判断from中地址和签名的地址是否匹配
+        for (CoinFrom coinFrom : coinData.getFrom()) {
+            if (tx.isMultiSignTx()) {
+                //如果是多签交易，校验from地址是否属于多签地址
+                MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
+                if (null == multiSigAccount) {
+                    throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
                 }
+                for (byte[] bytes : multiSigAccount.getPubKeyList()) {
+                    if (!SignatureUtil.containsAddress(tx, bytes, chainId)) {
+                        throw new NulsException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
+                    }
+                }
+            } else if (!SignatureUtil.containsAddress(tx, coinFrom.getAddress(), chainId)) {
+                throw new NulsException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
             }
         }
         return true;
@@ -201,8 +218,8 @@ public class TxValidator {
                 throw new NulsException(AccountErrorCode.CHAINID_ERROR);
             }
             // 链中是否存在该资产
-            if (chain.getConfig().getAssetsId() == assetsId) {
-                return true;
+            if (chain.getConfig().getAssetsId() != assetsId) {
+                throw new NulsException(AccountErrorCode.ASSETID_ERROR);
             }
         }
         return true;
@@ -230,8 +247,8 @@ public class TxValidator {
                 throw new NulsException(AccountErrorCode.CHAINID_ERROR);
             }
             // 链中是否存在该资产
-            if (chain.getConfig().getAssetsId() == assetsId) {
-                return true;
+            if (chain.getConfig().getAssetsId() != assetsId) {
+                throw new NulsException(AccountErrorCode.ASSETID_ERROR);
             }
         }
         return true;
@@ -252,7 +269,7 @@ public class TxValidator {
         }
         BigInteger feeTo = BigInteger.ZERO;
         for (CoinTo coinTo : coinData.getTo()) {
-            feeFrom = feeFrom.add(accrueFee(chain, coinTo));
+            feeTo = feeTo.add(accrueFee(chain, coinTo));
         }
         //交易中实际的手续费
         BigInteger fee = feeFrom.subtract(feeTo);

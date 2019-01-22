@@ -116,3 +116,4 @@ buildNumber.properties
 # log
 logs/
 data/
+keystore/

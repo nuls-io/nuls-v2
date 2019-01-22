@@ -24,7 +24,7 @@ public interface TxErrorCode {
     ErrorCode NULL_PARAMETER = ErrorCode.init("10013");
     ErrorCode DATA_ERROR = ErrorCode.init("10014");
     ErrorCode DATA_NOT_FOUND = ErrorCode.init("10015");
-    ErrorCode DOWNLOAD_VERSION_FAILD = ErrorCode.init("10016");
+    ErrorCode ACCOUNT_NOT_EXIST = ErrorCode.init("10016");
     ErrorCode PARSE_JSON_FAILD = ErrorCode.init("10017");
     ErrorCode FILE_OPERATION_FAILD = ErrorCode.init("10018");
     ErrorCode ILLEGAL_ACCESS_EXCEPTION = ErrorCode.init("10019");

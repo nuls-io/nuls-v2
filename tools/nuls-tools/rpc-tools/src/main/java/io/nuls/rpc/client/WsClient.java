@@ -1,11 +1,11 @@
 package io.nuls.rpc.client;
 
+import io.nuls.rpc.client.runtime.ClientRuntime;
+import io.nuls.rpc.client.thread.ResponseAutoProcessor;
 import io.nuls.rpc.model.message.Ack;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.client.runtime.ClientRuntime;
-import io.nuls.rpc.client.thread.ResponseAutoProcessor;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import org.java_websocket.client.WebSocketClient;
@@ -14,6 +14,8 @@ import org.java_websocket.handshake.ServerHandshake;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -63,6 +65,12 @@ public class WsClient extends WebSocketClient {
      * */
     private final Thread responseAutoThread = new Thread(new ResponseAutoProcessor(this));
 
+    /**
+     * 请求超时的请求
+     * Request for timeout
+     * */
+    private final List<String> timeOutMessageList = new ArrayList<>();
+
     public WsClient(String url) throws URISyntaxException {
         super(new URI(url));
     }
@@ -96,6 +104,14 @@ public class WsClient extends WebSocketClient {
                 case Response:
                     Response response = JSONUtils.map2pojo((Map) message.getMessageData(), Response.class);
                     /*
+                    如果收到已请求超时的返回直接丢弃
+                    Discard directly if you receive a return that has been requested for a timeout
+                     */
+                    if(timeOutMessageList.contains(response.getRequestId())){
+                        break;
+                    }
+
+                    /*
                     Response：还要判断是否需要自动处理
                     Response: Determines whether automatic processing is required
                      */
@@ -118,7 +134,7 @@ public class WsClient extends WebSocketClient {
     @Override
     public void onClose(int paramInt, String paramString, boolean paramBoolean) {
         connected = false;
-        ClientRuntime.stopWsClient(this);
+        //ClientRuntime.stopWsClient(this);
     }
 
     @Override
@@ -177,5 +193,9 @@ public class WsClient extends WebSocketClient {
 
     public boolean isConnected() {
         return connected;
+    }
+
+    public List<String> getTimeOutMessageList() {
+        return timeOutMessageList;
     }
 }

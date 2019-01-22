@@ -24,6 +24,8 @@
 
 package io.nuls.transaction.model.bo;
 
+import io.nuls.tools.data.StringUtils;
+
 /**
  * 验证交易结果组合封装 返回结果
  * @author: Charlie
@@ -62,6 +64,18 @@ public class VerifyTxResult {
     }
 
     public String getDesc() {
+      /*  if(StringUtils.isBlank(this.desc)){
+            switch (this.code){
+                case SUCCESS:
+                    return "验证通过";
+                case ORPHAN:
+                    return "孤儿交易";
+                case DOUBLE_SPENDING:
+                    return "双花交易";
+                case OTHER_EXCEPTION:
+                    return "其他验证不通过情况";
+            }
+        }*/
         return desc;
     }
 

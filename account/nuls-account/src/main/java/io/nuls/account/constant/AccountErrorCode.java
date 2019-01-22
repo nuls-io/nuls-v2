@@ -105,4 +105,5 @@ public interface AccountErrorCode {
     ErrorCode TX_COINTO_NOT_FOUND = ErrorCode.init("30039");
     ErrorCode CHAINID_ERROR = ErrorCode.init("30040");
     ErrorCode ASSETID_ERROR = ErrorCode.init("30041");
+    ErrorCode SIGN_ADDRESS_NOT_MATCH = ErrorCode.init("30042");
 }

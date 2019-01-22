@@ -1,6 +1,5 @@
 package io.nuls.poc.utils.validator;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -24,7 +23,7 @@ import java.util.*;
 public class BatchValidator {
 
     /**
-     * 共识模块交易批量验证方法
+     * 共识模块交易批量验证方法,返回验证未通过的交易
      * Batch Verification Method for Consensus Module Transactions
      *
      * @param txList transaction list
@@ -51,7 +50,7 @@ public class BatchValidator {
                     break;
                 case ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT : withdrawTxs.add(tx);
                     break;
-                default:continue;
+                default:break;
             }
         }
         Set<String> redPunishAddressSet = new HashSet<>();
@@ -102,6 +101,9 @@ public class BatchValidator {
             tx = iterator.next();
             redPunishData.parse(tx.getTxData(),0);
             String addressHex = HexUtil.encode(redPunishData.getAddress());
+            /*
+            * 重复的红牌交易不打包
+            * */
             if(!addressHexSet.add(addressHex)){
                iterator.remove();
             }
@@ -146,9 +148,9 @@ public class BatchValidator {
      * @param redPunishAddressSet       red punish address list
      * */
     private void stopAgentValid(List<Transaction>stopAgentTxs,Set<String> redPunishAddressSet)throws NulsException{
-        Set<NulsDigestData> hashSet = new HashSet<>();
-        Iterator<Transaction> iterator = stopAgentTxs.iterator();
+        Set<NulsDigestData> hashSet = new HashSet<>();Iterator<Transaction> iterator = stopAgentTxs.iterator();
         StopAgent stopAgent = new StopAgent();
+        Agent agent = new Agent();
         while (iterator.hasNext()){
             stopAgent.parse(iterator.next().getTxData(),0);
             if(!hashSet.add(stopAgent.getCreateTxHash())){
@@ -162,11 +164,9 @@ public class BatchValidator {
                     iterator.remove();
                     continue;
                 }
-                Agent agent = new Agent();
                 agent.parse(createAgentTx.getTxData(),0);
-                stopAgent.setAddress(agent.getAgentAddress());
             }
-            if(!redPunishAddressSet.isEmpty() && redPunishAddressSet.contains(AddressTool.getStringAddressByBytes(stopAgent.getAddress()))){
+            if(!redPunishAddressSet.isEmpty() && (redPunishAddressSet.contains(HexUtil.encode(agent.getAgentAddress())) || redPunishAddressSet.contains(HexUtil.encode(agent.getPackingAddress())))){
                 iterator.remove();
             }
         }

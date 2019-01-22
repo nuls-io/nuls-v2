@@ -35,7 +35,7 @@ public class ServerRuntime {
      * 本模块是否可以启动服务（所依赖模块是否可以连接）
      * Can this module start the service? (Can the dependent modules be connected?)
      */
-    public static boolean startService = true;
+    public static boolean startService = false;
 
     /**
      * 本模块所有对外提供的接口的详细信息
@@ -52,7 +52,7 @@ public class ServerRuntime {
     public static final Map<String, ConfigItem> CONFIG_ITEM_MAP = new ConcurrentHashMap<>();
 
     /**
-     * 其他模块连接到本地的连接结合
+     * 其他模块连接到本地的连接集合
      * Other modules connect to local connection combinations
      *
      * key:WebSocket   value:ServerData
@@ -326,7 +326,7 @@ public class ServerRuntime {
         try {
             return CMD_CHANGE_COUNT.get(cmd);
         } catch (Exception e) {
-            return 0;
+            return 1;
         }
     }
 
@@ -363,6 +363,7 @@ public class ServerRuntime {
             if(count <= 0){
                 SUBSCRIBE_COUNT.remove(cmd);
                 CMD_CHANGE_COUNT.remove(cmd);
+                return;
             }
             SUBSCRIBE_COUNT.put(cmd,count);
         }
@@ -391,6 +392,7 @@ public class ServerRuntime {
     public static void subscribeCountAdd(String cmd){
         if(!SUBSCRIBE_COUNT.containsKey(cmd)){
             SUBSCRIBE_COUNT.put(cmd,1);
+            return;
         }
         int count = SUBSCRIBE_COUNT.get(cmd)+1;
         SUBSCRIBE_COUNT.put(cmd,count);
@@ -459,6 +461,7 @@ public class ServerRuntime {
         找到订阅该接口的Message和WsData,然后判断订阅该接口的Message事件是否触发
          */
         CopyOnWriteArrayList<Message> messageList = CMD_SUBSCRIBE_MESSAGE_MAP.get(cmd);
+        int changeCount = addCmdChangeCount(cmd);
         for (Message message:messageList) {
             WsData wsData = MESSAGE_TO_WSDATA_MAP.get(message);
             String key = getSubscribeKey(message.getMessageId(),cmd);
@@ -466,11 +469,9 @@ public class ServerRuntime {
                 int initCount = wsData.getSubscribeInitCount().get(key);
                 Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
                 long eventCount = Long.parseLong(request.getSubscriptionEventCounter());
-                int changeCount = addCmdChangeCount(cmd);
                 if((changeCount - initCount)%eventCount == 0){
                     try {
-                        response.setRequestId(message.getMessageId());
-                        wsData.getRequestEventResponseQueue().put(response);
+                        wsData.getRequestEventResponseQueue().put(getRealResponse(cmd,message.getMessageId(),response));
                     }catch (InterruptedException e){
                         Log.error(e);
                     }
@@ -499,7 +500,7 @@ public class ServerRuntime {
 
     /**
      * 更新模块是否可启动状态
-     * Update module bootable status
+     * Update module bootAble status
      * */
     public static void updateStatus(){
         if(!startService){

@@ -20,6 +20,7 @@ import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.ConfirmedTxService;
+import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
 import io.nuls.transaction.utils.TransactionTimeComparator;
 
@@ -36,7 +37,7 @@ public class VerifyTxProcessTask implements Runnable {
     private TransactionManager transactionManager = SpringLiteContext.getBean(TransactionManager.class);
 
     private UnverifiedTxStorageService unverifiedTxStorageService = SpringLiteContext.getBean(UnverifiedTxStorageService.class);
-    private ConfirmedTxService confirmedTxService = SpringLiteContext.getBean(ConfirmedTxService.class);
+    private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
     private TransactionH2Service transactionH2Service = SpringLiteContext.getBean(TransactionH2Service.class);
 
@@ -49,8 +50,8 @@ public class VerifyTxProcessTask implements Runnable {
         this.chain = chain;
     }
 
-//    int count = 0;
-//    int size = 0;
+    int count = 0;
+    int size = 0;
 
     @Override
     public void run() {
@@ -65,6 +66,7 @@ public class VerifyTxProcessTask implements Runnable {
         } catch (Exception e) {
             chain.getLogger().error(e);
         }
+//        System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
     }
 
     private void doTask(Chain chain){
@@ -74,12 +76,15 @@ public class VerifyTxProcessTask implements Runnable {
 
         Transaction tx = null;
         while ((tx = unverifiedTxStorageService.pollTx(chain)) != null && orphanTxList.size() < TxConstant.ORPHAN_CONTAINER_MAX_SIZE) {
+            size++;
             processTx(chain, tx, false);
+            System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
         }
     }
 
     private boolean processTx(Chain chain, Transaction tx, boolean isOrphanTx){
         try {
+            chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] txhash:{}", tx.getHash());
             int chainId = chain.getChainId();
             boolean rs = transactionManager.verify(chain, tx);
             //todo 跨链交易单独处理, 是否需要进行跨链验证？
@@ -88,8 +93,9 @@ public class VerifyTxProcessTask implements Runnable {
                 return false;
             }
             //获取一笔交易(从已确认交易库中获取？)
-            Transaction transaction = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
-            if(null != transaction){
+            //Transaction transaction = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+            Transaction existTx = txService.getTransaction(chain, tx.getHash());
+            if(null != existTx){
                 return isOrphanTx;
             }
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
@@ -104,13 +110,17 @@ public class VerifyTxProcessTask implements Runnable {
                 //广播交易hash
                 //todo 调试暂时注释
 //                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
+                count++;
                 return true;
             }
+            chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " +
+                    "coinData not success - code: {}, - reason:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc());
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){
                 //todo 孤儿交易还是10分钟删, 如何处理nonce值??
-                long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+                //todo long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
+                long currentTimeMillis = System.currentTimeMillis();//todo 测试代码
                 return tx.getTime() < (currentTimeMillis - 3600000L);
             }
         } catch (Exception e) {

@@ -47,5 +47,5 @@ public interface TransactionH2Service {
      * @param indexName table index name
      * @param number number of tables 分表的数量
      */
-    void createTxTables(String tableName, String indexName, String uniqueName, int number);
+    void createTxTablesIfNotExists(String tableName, String indexName, String uniqueName, int number);
 }

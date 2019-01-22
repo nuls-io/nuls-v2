@@ -1,0 +1,117 @@
+[
+  {
+    "name": "language",
+    "remark": "language",
+    "readOnly": "true",
+    "value": "en"
+  },
+  {
+    "name": "encoding",
+    "remark": "encoding",
+    "readOnly": "true",
+    "value": "UTF-8"
+  },
+
+  {
+    "name": "rocksdb.datapath",
+    "remark": "数据库路径",
+    "readOnly": "true",
+    "value": "../../ledger"
+  },
+
+
+  {
+    "name": "asset_symbol_max",
+    "remark": "资产最大单位字节",
+    "readOnly": "true",
+    "value": "8"
+  },
+  {
+    "name": "asset_name_max",
+    "remark": "资产最大名称字节",
+    "readOnly": "true",
+    "value": "20"
+  },
+  {
+    "name": "asset_depositNuls",
+    "remark": "抵押主网资产数",
+    "readOnly": "true",
+    "value": "1000"
+  },
+
+  {
+    "name": "asset_depositNuls_destroy_rate",
+    "remark": "抵押主网资销毁比例",
+    "readOnly": "true",
+    "value": "0.2"
+  },
+  {
+    "name": "asset_depositNuls_lock_rate",
+    "remark": "抵押主网资锁定比例",
+    "readOnly": "true",
+    "value": "0.8"
+  },
+  {
+    "name": "asset_initNumber_min",
+    "remark": "资产初始化最小值",
+    "readOnly": "true",
+    "value": "100000"
+  },
+
+  {
+    "name": "asset_initNumber_max",
+    "remark": "资产最大值",
+    "readOnly": "true",
+    "value": "1000000000"
+  },
+  {
+    "name": "asset_decimalPlaces_min",
+    "remark": "最小小数点位数",
+    "readOnly": "true",
+    "value": "4"
+  },
+  {
+    "name": "asset_decimalPlaces_max",
+    "remark": "最大小数点位数",
+    "readOnly": "true",
+    "value": "8"
+  },
+  {
+    "name": "asset_recovery_rate",
+    "remark": "撤销时,资产必须已回收比例",
+    "readOnly": "true",
+    "value": "0.9"
+  },
+
+  {
+    "name": "nuls_chain_id",
+    "remark": "主网id",
+    "readOnly": "true",
+    "value": "8964"
+  },
+  {
+    "name": "nuls_chain_name",
+    "remark": "主网名称",
+    "readOnly": "true",
+    "value": "chain"
+  },
+  {
+    "name": "nuls_asset_id",
+    "remark": "主网资产id",
+    "readOnly": "true",
+    "value": "1"
+  },
+
+  {
+    "name": "nuls_asset_initNumber_max",
+    "remark": "主网资产初始数量",
+    "readOnly": "true",
+    "value": "100000000"
+  },
+  {
+    "name": "nuls_asset_symbol",
+    "remark": "主网资产单位",
+    "readOnly": "true",
+    "value": "NULS"
+  }
+]

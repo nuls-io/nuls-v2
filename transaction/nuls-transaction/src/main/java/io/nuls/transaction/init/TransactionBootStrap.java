@@ -11,7 +11,9 @@ import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
 import io.nuls.tools.thread.TimeService;
 import io.nuls.transaction.constant.TxConstant;
+import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.h2.dao.impl.BaseService;
+import io.nuls.transaction.db.h2.dao.impl.TransactionH2ServiceImpl;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
@@ -44,6 +46,7 @@ public class TransactionBootStrap {
             initLanguage();
             //启动WebSocket服务,向外提供RPC接口
             initServer();
+            initH2Table();
             while (!ServerRuntime.isReady()) {
                 Log.info("wait depend modules ready");
                 Thread.sleep(2000L);
@@ -131,5 +134,16 @@ public class TransactionBootStrap {
             Log.error("Transaction startup webSocket server error!");
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 创建H2的表, 如果存在则不会创建
+     */
+    public static void initH2Table(){
+        TransactionH2Service ts = SpringLiteContext.getBean(TransactionH2Service.class);
+        ts.createTxTablesIfNotExists(TxConstant.H2_TX_TABLE_NAME_PREFIX,
+                TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
+                TxConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
+                TxConstant.H2_TX_TABLE_NUMBER);
     }
 }

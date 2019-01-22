@@ -6,8 +6,6 @@ import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ByteUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.UnsupportedEncodingException;
 
@@ -15,8 +13,6 @@ import java.io.UnsupportedEncodingException;
  * Created by lanjinsheng on 2019/01/02
  */
 public class LedgerUtils {
-    static final Logger logger = LoggerFactory.getLogger(LedgerUtils.class);
-
     /**
      * rockdb key
      *

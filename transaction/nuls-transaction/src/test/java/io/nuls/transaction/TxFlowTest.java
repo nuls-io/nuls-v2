@@ -33,25 +33,21 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.TxService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import javax.validation.constraints.AssertTrue;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: Charlie
@@ -68,48 +64,60 @@ public class TxFlowTest {
     static int assetId = 1;
     //入账金额
     static BigInteger amount = BigInteger.valueOf(100000000000L);
+    static String password="nuls123456";
 
-    private TxService txService;
-    private ChainManager chainManager;
     private Chain chain;
     private Transaction tx;
     private CoinData coinData;
 
     @Before
     public void before() throws Exception{
-//        InitializerTest.init();
         NoUse.mockModule();
-//        txService = SpringLiteContext.getBean(TxService.class);
-//        chainManager = SpringLiteContext.getBean(ChainManager.class);
-        //初始化token
-        addGenesisAsset();
-//        chain = chainManager.getChain(chainId);
+        chain = new Chain();
+        chain.setConfig(new ConfigBean(12345, 1));
+//        初始化token
+//        addGenesisAsset();
     }
 
 
     @Test
     public void newCtx() throws Exception{
-        chain = new Chain();
-        chain.setConfig(new ConfigBean(12345, 1));
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
-        System.out.println(balance.longValue());
+        for(int i = 0; i<10; i++) {
+            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
+            System.out.println(balance.longValue());
+            CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
+                    createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
+            //调接口
+            String json = JSONUtils.obj2json(ctxTransfer);
+            Map<String, Object> params = JSONUtils.json2map(json);
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
+            Assert.assertTrue(null != response.getResponseData());
+            Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
+            Assert.assertTrue(null != map);
+            Log.info("{}", map.get("value"));
+            Thread.sleep(3000L);
+        }
+        packableTxs();
 
-        CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
-                createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-        //调接口
-        String json = JSONUtils.obj2json(ctxTransfer);
 
-        Map<String, Object> params = JSONUtils.json2map(json);
-//        Map map = (HashMap)TransactionCall.request("tx_createCtx", ModuleE.TX.abbr, params);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
+    }
+    @Test
+    public void packableTxs() throws Exception{
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        long endTime = System.currentTimeMillis() + 10000L;
+        System.out.println("endTime: " + endTime);
+        params.put("endTimestamp", endTime);
+        params.put("maxTxDataSize",2 * 1024 * 1024L);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params);
         Assert.assertTrue(null != response.getResponseData());
-        Map map = (HashMap)((HashMap) response.getResponseData()).get("tx_createCtx");
+        Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_packableTxs");
         Assert.assertTrue(null != map);
-        Log.info("{}", map.get("value"));
-        /*String hash = txService.createCrossTransaction(chain,
-                createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-        System.out.println(hash);*/
-
+        List<String> list = (List)map.get("list");
+        Log.info("packableTxs:");
+        for(String s : list){
+            Log.info(s);
+        }
     }
 
     private List<CoinDTO> createFromCoinDTOList(){
@@ -117,14 +125,14 @@ public class TxFlowTest {
         coinDTO.setAssetsId(assetId);
         coinDTO.setAssetsChainId(assetChainId);
         coinDTO.setAddress(address1);
-        coinDTO.setAmount(new BigInteger("20000000000"));
+        coinDTO.setAmount(new BigInteger("200000000"));
         coinDTO.setPassword("nuls123456");
 
         CoinDTO coinDTO2 = new CoinDTO();
         coinDTO2.setAssetsId(assetId);
         coinDTO2.setAssetsChainId(assetChainId);
         coinDTO2.setAddress(address2);
-        coinDTO2.setAmount(new BigInteger("10000000000"));
+        coinDTO2.setAmount(new BigInteger("100000000"));
         coinDTO2.setPassword("nuls123456");
         List< CoinDTO > listFrom = new ArrayList<>();
         listFrom.add(coinDTO);
@@ -137,13 +145,13 @@ public class TxFlowTest {
         coinDTO.setAssetsId(assetId);
         coinDTO.setAssetsChainId(8964);
         coinDTO.setAddress("VatuPuZeEc1YJ21iasZH6SMAD2VNL0423");
-        coinDTO.setAmount(new BigInteger("20000000000"));
+        coinDTO.setAmount(new BigInteger("200000000"));
 
         CoinDTO coinDTO2 = new CoinDTO();
         coinDTO2.setAssetsId(assetId);
         coinDTO2.setAssetsChainId(8964);
         coinDTO2.setAddress("K7gb72AMXhymt8wBH3fwBUqSwf4EX0423");
-        coinDTO2.setAmount(new BigInteger("10000000000"));
+        coinDTO2.setAmount(new BigInteger("100000000"));
         List< CoinDTO > listTO = new ArrayList<>();
         listTO.add(coinDTO);
         listTO.add(coinDTO2);
@@ -196,4 +204,87 @@ public class TxFlowTest {
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         Log.info("response {}", response);
     }
+
+    //连续交易测试
+    @Test
+    public void contineCtx() throws Exception{
+        String address="LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";
+        for(int i = 0; i<3; i++) {
+            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address), assetChainId, assetId);
+            System.out.println(balance.longValue());
+            //组装普通转账交易
+            Map transferMap=this.createTransferTx();
+            //调用接口
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+            Assert.assertTrue(null != result);
+            Log.info("{}", result.get("value"));
+            System.out.println("transfer: "+result.get("value"));
+
+            //组装创建节点交易
+            Map agentTxMap=this.createAgentTx();
+            //调用接口
+//            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+//            result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_createAgent"));
+//            Assert.assertTrue(null != result);
+//            Log.info("{}", result.get("txHex"));
+//            System.out.println("transfer: "+result.get("txHex"));
+
+            //Thread.sleep(3000L);
+        }
+        //packableTxs();
+    }
+
+    /**
+     * 创建普通转账交易
+     * @return
+     */
+    private Map createTransferTx()
+    {
+        Map transferMap = new HashMap();
+        transferMap.put("chainId",chainId);
+        transferMap.put("remark","transfer test");
+        List<CoinDTO> inputs=new ArrayList<>();
+        List<CoinDTO> outputs=new ArrayList<>();
+        CoinDTO inputCoin1=new CoinDTO();
+        inputCoin1.setAddress("LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930");
+        inputCoin1.setPassword(password);
+        inputCoin1.setAssetsChainId(chainId);
+        inputCoin1.setAssetsId(1);
+        inputCoin1.setAmount(new BigInteger("10000000"));
+        inputs.add(inputCoin1);
+
+        CoinDTO outputCoin1=new CoinDTO();
+        outputCoin1.setAddress("JcgbDRvBqQ67Uq4Tb52U22ieJdr3G3930");
+        outputCoin1.setPassword(password);
+        outputCoin1.setAssetsChainId(chainId);
+        outputCoin1.setAssetsId(1);
+        outputCoin1.setAmount(new BigInteger("10000000"));
+        outputs.add(outputCoin1);
+
+        transferMap.put("inputs",inputs);
+        transferMap.put("outputs",outputs);
+        return transferMap;
+    }
+
+    /**
+     * 创建节点
+     * */
+    public Map createAgentTx()throws Exception{
+        Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
+        Address rewardAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
+        Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
+        Map<String,Object> params = new HashMap<>();
+        params.put("agentAddress",agentAddress.getBase58());
+        params.put("chainId",1);
+        params.put("deposit",20000);
+        params.put("commissionRate",10);
+        params.put("packingAddress",packingAddress.getBase58());
+        params.put("password","");
+        params.put("rewardAddress",rewardAddress.getBase58());
+        return params;
+//        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
+//        System.out.println(cmdResp.getResponseData());
+    }
+
 }

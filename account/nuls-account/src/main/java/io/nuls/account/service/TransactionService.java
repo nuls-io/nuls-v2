@@ -52,7 +52,7 @@ public interface TransactionService {
      * @return transfer transaction hash
      * @throws NulsException
      */
-    String multipleAddressTransfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
+    String transfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
 
     /**
      * 校验该链是否有该资产
