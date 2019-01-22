@@ -24,12 +24,15 @@ import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.block.model.Node;
 
+import java.io.File;
 import java.util.Comparator;
 
 /**
- * 配置常量
+ * 常量
  *
- * @author lan
+ * @author captain
+ * @version 1.0
+ * @date 19-1-22 下午3:34
  */
 public interface Constant {
 
@@ -37,12 +40,12 @@ public interface Constant {
      * 模块配置文件名称
      * Module configuration file name.
      */
-    String MODULES_CONFIG_FILE = "modules.json";
+    String MODULES_CONFIG_FILE = System.getProperty("user.home") + "/nuls_2.0/resources/nuls-block/modules.json";
 
     /**
      * db文件存放目录
      */
-    String DATA_PATH = "../../data";
+    String DATA_PATH = System.getProperty("user.home") + "/data/block";
     /**
      * 存储每条链的配置信息
      */
