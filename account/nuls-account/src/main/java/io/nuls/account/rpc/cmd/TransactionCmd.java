@@ -5,9 +5,14 @@ import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
+import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.MulitpleAddressTransferDto;
+import io.nuls.account.model.po.AliasPo;
+import io.nuls.account.service.AliasService;
 import io.nuls.account.service.TransactionService;
+import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.annotation.ResisterTx;
 import io.nuls.account.util.annotation.TxMethodType;
@@ -15,6 +20,7 @@ import io.nuls.account.util.log.LogUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.account.util.validator.TxValidator;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -31,9 +37,7 @@ import io.nuls.tools.parse.JSONUtils;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: qinyifeng
@@ -49,6 +53,9 @@ public class TransactionCmd extends BaseCmd {
     private ChainManager chainManager;
     @Autowired
     private TxValidator txValidator;
+    @Autowired
+    private AliasStorageService aliasStorageService;
+
 
     /**
      * 转账交易验证
@@ -134,6 +141,11 @@ public class TransactionCmd extends BaseCmd {
                 if (!AddressTool.validAddress(from.getAssetsChainId(), from.getAddress())) {
                     throw new NulsException(AccountErrorCode.ADDRESS_ERROR);
                 }
+                //转出账户列表中不能有多签账户
+                //from中不能有多签地址
+                if (AddressTool.isMultiSignAddress(from.getAddress())) {
+                    throw new NulsException(AccountErrorCode.IS_MULTI_SIGNATURE_ADDRESS);
+                }
                 fromTotal = fromTotal.add(from.getAmount());
             }
             BigInteger toTotal = BigInteger.ZERO;
@@ -160,6 +172,76 @@ public class TransactionCmd extends BaseCmd {
             return failed(e.getErrorCode());
         } catch (IOException e) {
             return failed(e.getMessage());
+        } catch (Exception e) {
+            return failed(e.getMessage());
+        }
+        LogUtil.debug("ac_multipleAddressTransfer end");
+        return success(map);
+    }
+
+    /**
+     * 创建别名转账交易
+     *
+     * create the transaction of transfer by alias
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_transferByAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transfer by alias")
+    public Response transferByAlias(Map params) {
+        LogUtil.debug("ac_transferByAlias start");
+        Map<String, String> map = new HashMap<>(1);
+        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
+        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
+        Object amountObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
+        Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
+        try {
+            // check parameters
+            if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || aliasObj == null ||
+                    amountObj == null || remarkObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            int chainId = (int) chainIdObj;
+            String address = (String) addressObj;
+            String password = (String) passwordObj;
+            String alias = (String) aliasObj;
+            BigInteger amount = new BigInteger((String) amountObj);
+            String remark = (String) remarkObj;
+            if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            if (!validTxRemark(remark)) { // check transaction remark
+                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
+            }
+            AliasPo aliasPo = aliasStorageService.getAlias(chainId,alias); //根据别名查询出地址
+            if (aliasPo == null) {
+                throw new NulsRuntimeException(AccountErrorCode.ALIAS_NOT_EXIST);
+            }
+            Chain chain = chainManager.getChainMap().get(chainId);
+            if (chain == null) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
+            int assetId = chain.getConfig().getAssetsId();
+            CoinDto fromCoinDto = new CoinDto();
+            CoinDto toCoinDto = new CoinDto();
+            fromCoinDto.setAddress(address);
+            fromCoinDto.setAmount(amount);
+            fromCoinDto.setAssetsChainId(chainId);
+            fromCoinDto.setAssetsId(assetId);
+            fromCoinDto.setPassword(password);
+
+            toCoinDto.setAddress(AddressTool.getStringAddressByBytes(aliasPo.getAddress()));
+            toCoinDto.setAmount(amount);
+            fromCoinDto.setAssetsChainId(chainId);
+            fromCoinDto.setAssetsId(assetId);
+            Transaction tx = transactionService.transferByAlias(chainId, fromCoinDto, toCoinDto, remark);
+            map.put("txHash", tx.getHash().getDigestHex());
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
         } catch (Exception e) {
             return failed(e.getMessage());
         }

@@ -990,7 +990,7 @@ public class AccountCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_multipleAddressTransfer end");
+        LogUtil.debug("ac_verifySignData end");
         return success(map);
     }
 
