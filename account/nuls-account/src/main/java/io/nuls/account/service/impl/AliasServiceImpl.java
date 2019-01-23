@@ -203,47 +203,6 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) {
-        Set<Transaction> result = new HashSet<>();
-        if (null == txList || txList.isEmpty()) {
-            return new ArrayList<>(result);
-        }
-        Map<String, Transaction> aliasNamesMap = new HashMap<>();
-        Map<String, Transaction> accountAddressMap = new HashMap<>();
-        try {
-            for (Transaction transaction : txList) {
-                if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS) {
-                    Alias alias = new Alias();
-                    alias.parse(new NulsByteBuffer(transaction.getTxData()));
-                    String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-                    //check alias
-                    Transaction tmp = aliasNamesMap.get(alias.getAlias());
-                    if (tmp != null) { // the alias is already exist
-                        result.add(transaction);
-                        result.add(tmp);
-                        continue;
-                    } else {
-                        aliasNamesMap.put(alias.getAlias(), transaction);
-                    }
-                    //check address
-                    tmp = accountAddressMap.get(address);
-                    if (tmp != null) { // the address is already exist
-                        result.add(transaction);
-                        result.add(tmp);
-                        continue;
-                    } else {
-                        accountAddressMap.put(address, transaction);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            LogUtil.error("", e);
-            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
-        }
-        return new ArrayList<>(result);
-    }
-
-    @Override
     public boolean aliasTxValidate(int chainId, Transaction transaction) throws Exception {
         Alias alias = new Alias();
         alias.parse(new NulsByteBuffer(transaction.getTxData()));

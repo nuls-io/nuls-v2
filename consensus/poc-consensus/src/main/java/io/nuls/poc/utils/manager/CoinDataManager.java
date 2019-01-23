@@ -1,5 +1,6 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -9,6 +10,7 @@ import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -17,6 +19,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * CoinData操作工具类
@@ -37,21 +40,21 @@ public class CoinDataManager {
      * @param txSize   交易大小/transaction size
      * @return         组装的CoinData/Assembled CoinData
      * */
-    public CoinData getCoinData(byte[] address,Chain chain, BigInteger amount, long lockTime, int txSize)throws NulsRuntimeException{
+    public CoinData getCoinData(byte[] address,Chain chain, BigInteger amount, long lockTime, int txSize)throws NulsException{
         CoinData coinData = new CoinData();
         CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
-        //todo 账本模块获取nonce 可用余额
-        byte[] nonce = new byte[8];
-        BigInteger available = new BigInteger("50000000000");
+        Map<String,Object> result = CallMethodUtils.getBalanceAndNonce(chain, AddressTool.getStringAddressByBytes(address));
+        byte[] nonce = HexUtil.decode((String)result.get("nonce"));
+        BigInteger available = (BigInteger)result.get("available");
         //手续费
         CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,nonce, (byte)0);
         txSize += from.size();
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         BigInteger fromAmount = amount.add(fee);
         if(BigIntegerUtils.isLessThan(available,fromAmount)){
-            throw new NulsRuntimeException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
+            throw new NulsException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
         }
         from.setAmount(fromAmount);
         coinData.addFrom(from);
@@ -74,7 +77,7 @@ public class CoinDataManager {
         CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
-        //todo 账本模块获取该账户锁定金额和可用余额 可用余额是否够支付手续费，锁定金额是否大于等于锁定金额
+        //todo 账本模块获取该账户锁定金额和可用余额 可用余额是否够支付手续费，锁定金额是否大于等于解锁金额
         BigInteger available = new BigInteger("10000");
         //手续费
         CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,(byte)-1);

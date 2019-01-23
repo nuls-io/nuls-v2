@@ -714,7 +714,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     @Override
     @SuppressWarnings("unchecked")
     public Result batchValid(Map<String, Object> params) {
-        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX_HEX_LIST) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -723,7 +723,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            List<String> txHexList = JSONUtils.json2list((String) params.get(ConsensusConstant.PARAM_TX), String.class);
+            List<String> txHexList = JSONUtils.json2list((String) params.get(ConsensusConstant.PARAM_TX_HEX_LIST), String.class);
             List<Transaction> txList = new ArrayList<>();
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
