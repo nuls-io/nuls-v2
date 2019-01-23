@@ -54,4 +54,5 @@ public interface ConsensusErrorCode {
     ErrorCode ACCOUNT_VALID_ERROR = ErrorCode.init("70040");
     ErrorCode TX_SIGNTURE_ERROR = ErrorCode.init("70041");
     ErrorCode AGENT_INVALID = ErrorCode.init("70042");
+    ErrorCode COIN_DATA_VALID_ERROR = ErrorCode.init("70043");
 }

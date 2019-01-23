@@ -8,10 +8,12 @@ import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.round.MeetingMember;
 import io.nuls.poc.model.bo.round.MeetingRound;
+import io.nuls.poc.model.bo.tx.txdata.Agent;
 import io.nuls.poc.model.bo.tx.txdata.RedPunishData;
 import io.nuls.poc.model.bo.tx.txdata.YellowPunishData;
 import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishReasonEnum;
+import io.nuls.poc.utils.manager.CoinDataManager;
 import io.nuls.poc.utils.manager.ConsensusManager;
 import io.nuls.poc.utils.manager.PunishManager;
 import io.nuls.poc.utils.manager.RoundManager;
@@ -19,6 +21,7 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.util.*;
@@ -38,6 +41,8 @@ public class BlockValidator {
    private PunishManager punishManager;
    @Autowired
    private ConsensusManager consensusManager;
+   @Autowired
+   private CoinDataManager coinDataManager;
    /**
     * 区块头验证
     * Block verification
@@ -303,15 +308,17 @@ public class BlockValidator {
       红牌交易类型为黄牌过多
       The type of red card trading is too many yellow cards
       */
-      else if(punishData.getReasonCode() == PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode()){
-
-      }else{
+      else if(punishData.getReasonCode() != PunishReasonEnum.TOO_MUCH_YELLOW_PUNISH.getCode()){
          throw new NulsException(ConsensusErrorCode.BLOCK_PUNISH_VALID_ERROR);
       }
-      /*todo
+
+      /*
       CoinData验证
       CoinData verification
       */
+      if(!coinDataValidate(chain,tx)){
+         throw new NulsException(ConsensusErrorCode.COIN_DATA_VALID_ERROR);
+      }
       return true;
    }
 
@@ -334,6 +341,45 @@ public class BlockValidator {
       Transaction coinBaseTransaction = consensusManager.createCoinBaseTx(chain ,member, block.getTxs(), currentRound, block.getHeader().getHeight() + chain.getConfig().getCoinbaseUnlockHeight());
       if (null == coinBaseTransaction || !tx.getHash().equals(coinBaseTransaction.getHash())) {
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("the coin base tx is wrong! height: " + block.getHeader().getHeight() + " , hash : " + block.getHeader().getHash());
+         return false;
+      }
+      return true;
+   }
+
+   /**
+    * CoinData 验证
+    * CoinData Verification
+    *
+    * @param tx      red punish transaction
+    * @param chain   chain info
+    * @return       验证是否成功/Verify success
+    * */
+   private boolean coinDataValidate(Chain chain,Transaction tx)throws NulsException{
+      Agent punishAgent = null;
+      RedPunishData punishData;
+      punishData = new RedPunishData();
+      punishData.parse(tx.getTxData(),0);
+      for (Agent agent:chain.getAgentList()) {
+         if (agent.getDelHeight() > 0 && (tx.getBlockHeight() <= 0 || agent.getDelHeight() < tx.getBlockHeight())) {
+            continue;
+         }
+         if (Arrays.equals(punishData.getAddress(), agent.getAgentAddress())) {
+            punishAgent = agent;
+            break;
+         }
+      }
+      if (null == punishAgent) {
+         Log.info(ConsensusErrorCode.AGENT_NOT_EXIST.getMsg());
+         return false;
+      }
+      CoinData coinData = coinDataManager.getStopAgentCoinData(chain,punishAgent,tx.getTime()+chain.getConfig().getRedPublishLockTime());
+      try {
+         if (!Arrays.equals(coinData.serialize(), tx.getCoinData())){
+            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("++++++++++ RedPunish verification does not pass, redPunish type:{}, - height:{}, - redPunish tx timestamp:{}", punishData.getReasonCode(), tx.getBlockHeight(), tx.getTime());
+            return false;
+         }
+      }catch (IOException e){
+         chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
          return false;
       }
       return true;
