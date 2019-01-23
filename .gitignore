@@ -115,7 +115,5 @@ buildNumber.properties
 # Nuls output
 # log
 logs/
-
-# chain data
 data/
-
+keystore/

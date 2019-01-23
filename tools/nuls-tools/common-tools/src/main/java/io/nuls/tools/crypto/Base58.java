@@ -127,6 +127,10 @@ public class Base58 {
         return Arrays.copyOfRange(decoded, outputStart - zeros, decoded.length);
     }
 
+    /***
+     * 先将给定的Base58字符串解码为原始数据字节，然后再将字节数组转为对应的BigInteger
+     * @param input   Base58字符串
+     * */
     public static BigInteger decodeToBigInteger(String input) throws Exception {
         return new BigInteger(1, decode(input));
     }
@@ -135,9 +139,10 @@ public class Base58 {
      * Decodes the given base58 string into the original data bytes, using the checksum in the
      * last 4 bytes of the decoded data to verify that the rest are correct. The checksum is
      * removed from the returned data.
+     * 将给定的Base58字符串解码为原始数据字节，使用解码数据的最后4字节以验证其余数据是否正确校验和是从返回的数据中删除
      *
      * @param input the base58-encoded string to decode (which should include the checksum)
-     * @return byte
+     * @return byte[]
      * @throws Exception if the input is not base 58 or the checksum does not validate.
      */
     public static byte[] decodeChecked(String input) throws Exception {
@@ -158,6 +163,7 @@ public class Base58 {
      * Divides a number, represented as an array of bytes each containing a single digit
      * in the specified base, by the given divisor. The given number is modified in-place
      * to contain the quotient, and the return value is the remainder.
+     * 将一个数字表示为一个字节数组，每个字节包含一个数字在指定的基数中，由给定的除数。给定的数字被修改到位包含商，返回值为余数。
      *
      * @param number     the number to divide
      * @param firstDigit the index within the array of the first non-zero digit

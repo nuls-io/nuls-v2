@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.nuls.transaction.db.h2.dao.impl.mapper.TransactionMapper">
+
+    <resultMap id="BaseResultMap" type="io.nuls.transaction.model.po.TransactionPO">
+        <id column="id" jdbcType="INTEGER" property="id" />
+        <result column="address" jdbcType="VARCHAR" property="address" />
+        <result column="hash" jdbcType="VARCHAR" property="hash" />
+        <result column="type" jdbcType="INTEGER" property="type" />
+        <result column="assetChainId" jdbcType="INTEGER" property="amount" />
+        <result column="assetId" jdbcType="INTEGER" property="amount" />
+        <result column="amount" jdbcType="BIGINT" property="amount" />
+        <result column="state" jdbcType="INTEGER" property="state" />
+        <result column="time" jdbcType="BIGINT" property="time" />
+    </resultMap>
+
+    <update id="createTxTables" parameterType="java.util.List">
+        <foreach collection="list" item="tx" separator=";">
+            CREATE TABLE IF NOT EXISTS ${tx.tableName} (
+            id int(11) NOT NULL primary key auto_increment,
+            address VARCHAR(40) not null,
+            hash    VARCHAR(70) not null,
+            type    TINYINT     not null,
+            assetChainId  INT      not null,
+            assetId  INT      not null,
+            amount  BIGINT      not null,
+            state   TINYINT     not null,
+            time   BIGINT      not null
+            );
+            create index IF NOT EXISTS ${tx.indexName}
+            on ${tx.tableName} (address, time, type);
+--             create UNIQUE index IF NOT EXISTS ${tx.uniqueName}
+--             on ${tx.tableName} (address, hash);
+        </foreach>
+    </update>
+
+    <insert id="insert">
+      insert into ${tableName} (address, hash, `type`, assetChainId, assetId, amount, state, `time`)
+        values
+        (#{txPo.address}, #{txPo.hash}, #{txPo.type}, #{txPo.assetChainId}, #{txPo.assetId}, #{txPo.amount}, #{txPo.state}, #{txPo.time})
+    </insert>
+
+    <insert id="batchInsert">
+        insert into ${tableName} (address, hash, `type`, assetChainId, assetId, amount, state, `time`)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.address}, #{item.hash}, #{item.type}, #{item.assetChainId}, #{item.assetId}, #{item.amount}, #{item.state}, #{item.time})
+        </foreach>
+    </insert>
+
+
+    <select id="getTxs" parameterType="io.nuls.h2.utils.Searchable" resultMap="BaseResultMap">
+        select id, address, hash, `type`, assetChainId, assetId, amount, state, `time`
+         from ${tableName}
+        <include refid="io.nuls.h2.common.CommonMapper.Search_Where_multiple"/>
+    </select>
+
+    <select id="queryCount" resultType="java.lang.Long">
+        select count(id)
+        from ${tableName}
+        <include refid="io.nuls.h2.common.CommonMapper.Search_Where_multiple"/>
+    </select>
+    
+    <delete id="delete" parameterType="String" >
+        delete from ${tableName} where address=#{address} and hash = #{hash}
+    </delete>
+
+</mapper>

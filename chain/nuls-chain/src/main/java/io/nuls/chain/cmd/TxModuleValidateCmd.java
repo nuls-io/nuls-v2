@@ -1,0 +1,132 @@
+/*
+ * MIT License
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ */
+package io.nuls.chain.cmd;
+
+import io.nuls.base.data.Transaction;
+import io.nuls.chain.info.ChainTxConstants;
+import io.nuls.chain.model.dto.Asset;
+import io.nuls.chain.model.dto.BlockChain;
+import io.nuls.rpc.model.CmdAnnotation;
+import io.nuls.rpc.model.Parameter;
+import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+
+import static io.nuls.chain.util.LoggerUtil.Log;
+
+/**
+ * @author lan
+ * @date 2018/11/22
+ */
+@Component
+public class TxModuleValidateCmd extends BaseChainCmd {
+    @Autowired
+    private TxAssetCmd txAssetCmd;
+    @Autowired
+    private TxChainCmd txChainCmd;
+
+    /**
+     * chainModuleTxValidate
+     * 批量校验
+     */
+    @CmdAnnotation(cmd = "cm_chainModuleTxValidate", version = 1.0,
+            description = "chainModuleTxValidate")
+    @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "txHexs", parameterType = "array")
+    public Response chainModuleTxValidate(Map params) {
+        try {
+            //TODO:
+            //1获取交易类型
+            //2进入不同验证器里处理
+            //3封装失败交易返回
+            List<Transaction> registerChainAndAssetList = new ArrayList<>();
+            List<Transaction> destroyAssetAndChainList = new ArrayList<>();
+            List<Transaction> addAssetToChainList = new ArrayList<>();
+            List<Transaction> removeAssetFromChainList = new ArrayList<>();
+
+            for (String txHex : (String[]) params.get("txHexs")) {
+
+                Transaction tx = new Transaction();
+                tx.parse(HexUtil.hexToByte(txHex), 0);
+
+                switch (tx.getType()) {
+                    case ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET:
+                        registerChainAndAssetList.add(tx);
+                        break;
+                    case ChainTxConstants.TX_TYPE_DESTROY_ASSET_AND_CHAIN:
+                        destroyAssetAndChainList.add(tx);
+                        break;
+                    case ChainTxConstants.TX_TYPE_ADD_ASSET_TO_CHAIN:
+                        addAssetToChainList.add(tx);
+                        break;
+                    case ChainTxConstants.TX_TYPE_REMOVE_ASSET_FROM_CHAIN:
+                        removeAssetFromChainList.add(tx);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            registerChainAndAssetList.sort(Comparator.comparingDouble(Transaction::getTime));
+            destroyAssetAndChainList.sort(Comparator.comparingDouble(Transaction::getTime));
+            addAssetToChainList.sort(Comparator.comparingDouble(Transaction::getTime));
+            removeAssetFromChainList.sort(Comparator.comparingDouble(Transaction::getTime));
+
+            /*
+            验证注册链
+             */
+            List<Transaction> errorList = errorInRegisterChainAndAssetList(registerChainAndAssetList);
+
+            return success();
+        } catch (Exception e) {
+            Log.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    private List<Transaction> errorInRegisterChainAndAssetList(List<Transaction> registerChainAndAssetList) throws Exception {
+        List<Transaction> errorTransaction = new ArrayList<>();
+        List<Integer> newChainIdList = new ArrayList<>();
+        List<Integer> newAssetIdList = new ArrayList<>();
+        for (Transaction tx : registerChainAndAssetList) {
+            BlockChain newChain = buildChainWithTxData(tx.hex(), new Transaction(), false);
+            Asset newAsset = buildAssetWithTxChain(tx.hex(), new Transaction());
+            if (!newChainIdList.contains(newChain.getChainId())
+                    && !newAssetIdList.contains(newAsset.getAssetId())) {
+                newChainIdList.add(newChain.getChainId());
+                newAssetIdList.add(newAsset.getAssetId());
+            } else {
+                errorTransaction.add(tx);
+            }
+        }
+        return errorTransaction;
+    }
+}

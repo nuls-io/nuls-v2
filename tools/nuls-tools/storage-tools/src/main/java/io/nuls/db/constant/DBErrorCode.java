@@ -19,26 +19,16 @@
  */
 package io.nuls.db.constant;
 
+/**
+ * @author qinyifeng
+ */
 public interface DBErrorCode {
-
-    ErrorCode SUCCESS = ErrorCode.init("10000");
-    ErrorCode FAILED = ErrorCode.init("10001");
-    ErrorCode LANGUAGE_CANNOT_SET_NULL = ErrorCode.init("10005");
-    ErrorCode NULL_PARAMETER = ErrorCode.init("10013");
-    ErrorCode DB_MODULE_START_FAIL = ErrorCode.init("20000");
-    ErrorCode DB_UNKOWN_EXCEPTION = ErrorCode.init("20001");
-    ErrorCode DB_SESSION_MISS_INIT = ErrorCode.init("20002");
-    ErrorCode DB_SAVE_CANNOT_NULL = ErrorCode.init("20003");
-    ErrorCode DB_SAVE_BATCH_LIMIT_OVER = ErrorCode.init("20004");
-    ErrorCode DB_DATA_ERROR = ErrorCode.init("20005");
-    ErrorCode DB_SAVE_ERROR = ErrorCode.init("20006");
-    ErrorCode DB_UPDATE_ERROR = ErrorCode.init("20007");
-    ErrorCode DB_ROLLBACK_ERROR = ErrorCode.init("20008");
-    ErrorCode DB_TABLE_EXIST = ErrorCode.init("20009");
-    ErrorCode DB_TABLE_NOT_EXIST = ErrorCode.init("20010");
-    ErrorCode DB_TABLE_CREATE_EXCEED_LIMIT = ErrorCode.init("20011");
-    ErrorCode DB_TABLE_CREATE_ERROR = ErrorCode.init("20012");
-    ErrorCode DB_TABLE_CREATE_PATH_ERROR = ErrorCode.init("20013");
-    ErrorCode DB_TABLE_DESTROY_ERROR = ErrorCode.init("20014");
-    ErrorCode DB_BATCH_CLOSE = ErrorCode.init("20015");
+    String NULL_PARAMETER = "Parameter can not be null";
+    String DB_UNKOWN_EXCEPTION = "DB error";
+    String DB_TABLE_EXIST = "DB table exists";
+    String DB_TABLE_NOT_EXIST = "DB table not exists";
+    String DB_TABLE_CREATE_ERROR = "Create DB table error";
+    String DB_TABLE_CREATE_PATH_ERROR = "Create DB table path error";
+    String DB_TABLE_DESTROY_ERROR = "Destroy DB table error";
+    String DB_TABLE_FAILED_BATCH_CLOSE = "DB batch operation closed";
 }

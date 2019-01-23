@@ -40,6 +40,7 @@ import java.util.Arrays;
 /**
  * A Sha256Hash just wraps a byte[] so that equals and hashcode work correctly, allowing it to be used as keys in a
  * map. It also checks that the length is correct and provides a bit more type safety.
+ * @author
  */
 public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
     private static final long serialVersionUID = 3986948258337764647L;
@@ -241,7 +242,7 @@ public class Sha256Hash implements Serializable, Comparable<Sha256Hash> {
     @Override
     public int hashCode() {
         // Use the last 4 bytes, not the first 4 which are often zeros in Bitcoin.
-        return Ints.fromBytes(bytes[LENGTH - 4], bytes[LENGTH - 3], bytes[LENGTH - 2], bytes[LENGTH - 1]);
+        return ByteUtils.bytesToInt(ByteUtils.reverseBytes(Arrays.copyOfRange(bytes,bytes.length-4,bytes.length)));
     }
 
     @Override

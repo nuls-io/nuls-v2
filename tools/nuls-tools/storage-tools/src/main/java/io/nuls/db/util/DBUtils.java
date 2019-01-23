@@ -24,6 +24,8 @@
  */
 package io.nuls.db.util;
 
+import io.nuls.tools.data.StringUtils;
+
 import java.io.File;
 import java.net.URL;
 
@@ -34,7 +36,7 @@ import java.net.URL;
  */
 public class DBUtils {
 
-    public static File loadDataPath(String path) throws Exception {
+    public static File loadDataPath(String path) {
         File dir;
         String pathSeparator = System.getProperty("path.separator");
         String unixPathSeparator = ":";

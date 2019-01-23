@@ -6,19 +6,19 @@
         <artifactId>nuls-tools</artifactId>
         <groupId>io.nuls</groupId>
         <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>io.nuls.nuls-tools</groupId>
     <artifactId>common-tools</artifactId>
+    <name>common-tools</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <slf4j.version>1.7.7</slf4j.version>
-        <logback.version>1.1.2</logback.version>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>11</java.version>
+        <slf4j.version>1.7.21</slf4j.version>
+        <logback.version>1.2.3</logback.version>
     </properties>
 
     <dependencies>
@@ -27,7 +27,6 @@
             <artifactId>bcprov-jdk16</artifactId>
             <version>1.40</version>
         </dependency>
-
         <!-- Logger -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -49,6 +48,7 @@
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
         </dependency>
+
         <!-- JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -122,6 +122,15 @@
     </dependencies>
 
     <build>
-        <finalName>${project.name}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

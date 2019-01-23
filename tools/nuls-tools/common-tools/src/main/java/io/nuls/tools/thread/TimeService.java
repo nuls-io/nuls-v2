@@ -89,6 +89,8 @@ public class TimeService implements Runnable {
      */
     private static long lastSyncTime;
 
+
+
     /**
      * 同步网络时间
      */
@@ -101,7 +103,8 @@ public class TimeService implements Runnable {
             long localBeforeTime = System.currentTimeMillis();
 
             long netTime = getWebTime(urlList.get(i));
-
+            Log.info(urlList.get(i)+"netTime:==="+netTime);
+            Log.info("localtime:==="+System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }
@@ -131,11 +134,10 @@ public class TimeService implements Runnable {
             client.setDefaultTimeout(1000);
             client.setSoTimeout(1000);
             InetAddress inetAddress = InetAddress.getByName(address);
-            Log.debug("start ask time....");
             TimeInfo timeInfo = client.getTime(inetAddress);
-            Log.debug("done!");
             return timeInfo.getMessage().getTransmitTimeStamp().getTime();
         } catch (Exception e) {
+            e.printStackTrace();
             return 0L;
         }
     }
@@ -197,4 +199,5 @@ public class TimeService implements Runnable {
     public static long getNetTimeOffset() {
         return netTimeOffset;
     }
+
 }

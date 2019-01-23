@@ -25,10 +25,14 @@
 package io.nuls.tools.core.ioc;
 
 import io.nuls.tools.basic.InitializingBean;
-import io.nuls.tools.core.annotation.*;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.annotation.Interceptor;
+import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.core.inteceptor.DefaultMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptor;
 import io.nuls.tools.core.inteceptor.base.BeanMethodInterceptorManager;
-import io.nuls.tools.core.inteceptor.DefaultMethodInterceptor;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
@@ -102,7 +106,7 @@ public class SpringLiteContext {
                         try {
                             ((InitializingBean) bean).afterPropertiesSet();
                         } catch (Exception e) {
-                            Log.error(e);
+                            Log.error(e.getMessage());
                         }
                     }
                 }
@@ -172,7 +176,7 @@ public class SpringLiteContext {
         if (null == name || name.trim().length() == 0) {
             Set<String> nameSet = CLASS_NAME_SET_MAP.get(field.getType());
             if (nameSet == null || nameSet.isEmpty()) {
-                throw new Exception("Can't find the bean,field:" + field.getName());
+                throw new Exception("Can't find the model,field:" + field.getName());
             } else if (nameSet.size() == 1) {
                 name = nameSet.iterator().next();
             } else {
@@ -181,7 +185,7 @@ public class SpringLiteContext {
         }
         value = getBean(name);
         if (null == value) {
-            throw new Exception("Can't find the bean named:" + name);
+            throw new Exception("Can't find the model named:" + name);
         }
         field.setAccessible(true);
         field.set(obj, value);
@@ -191,7 +195,7 @@ public class SpringLiteContext {
 
     /**
      * 根据名称获取bean
-     * get bean by bean name
+     * get model by model name
      *
      * @param name 对象名称，Bean Name
      */
@@ -204,8 +208,31 @@ public class SpringLiteContext {
     }
 
     /**
+     * 根据对象类型字符串获取该类型实例的名称
+     * Gets the name of the type instance according to the object type.
+     */
+    public static Object getBeanByClass(String clazzStr) {
+        if(StringUtils.isBlank(clazzStr)){
+            return null;
+        }
+        String[] paths = clazzStr.split("\\.");
+        if(paths.length == 0){
+            return null;
+        }
+        String beanName = paths[paths.length - 1];
+        String start = beanName.substring(0, 1).toLowerCase();
+        String end = beanName.substring(1);
+        String lowerBeanName = start + end;
+        Object value = BEAN_OK_MAP.get(lowerBeanName);
+        if (null == value) {
+            value = BEAN_TEMP_MAP.get(lowerBeanName);
+        }
+        return value;
+    }
+
+    /**
      * 检查一个类型，如果这个类型上被注释了我们关心的注解，如：Service/Component/Interceptor,就对这个对象进行加载，并放入bean管理器中
-     * Check a type, if this is commented on the type annotation, we care about, such as: (Service/Component/Interceptor), is to load the object, and in the bean manager
+     * Check a type, if this is commented on the type annotation, we care about, such as: (Service/Component/Interceptor), is to load the object, and in the model manager
      *
      * @param clazz class type
      */
@@ -232,7 +259,7 @@ public class SpringLiteContext {
             try {
                 loadBean(beanName, clazz, aopProxy);
             } catch (NulsException e) {
-                Log.error(e);
+                Log.error(e.getMessage());
                 return;
             }
         }
@@ -243,7 +270,7 @@ public class SpringLiteContext {
                 Constructor constructor = clazz.getDeclaredConstructor();
                 interceptor = (BeanMethodInterceptor) constructor.newInstance();
             } catch (Exception e) {
-                Log.error(e);
+                Log.error(e.getMessage());
                 return;
             }
             BeanMethodInterceptorManager.addBeanMethodInterceptor(((Interceptor) interceptorAnn).value(), interceptor);
@@ -292,11 +319,11 @@ public class SpringLiteContext {
      */
     private static Object loadBean(String beanName, Class clazz, boolean proxy) throws NulsException {
         if (BEAN_OK_MAP.containsKey(beanName)) {
-            Log.error("bean name repetition (" + beanName + "):" + clazz.getName());
+            Log.error("model name repetition (" + beanName + "):" + clazz.getName());
             return BEAN_OK_MAP.get(beanName);
         }
         if (BEAN_TEMP_MAP.containsKey(beanName)) {
-            Log.error("bean name repetition (" + beanName + "):" + clazz.getName());
+            Log.error("model name repetition (" + beanName + "):" + clazz.getName());
             return BEAN_TEMP_MAP.get(beanName);
         }
         Object bean = null;
@@ -306,10 +333,10 @@ public class SpringLiteContext {
             try {
                 bean = clazz.newInstance();
             } catch (InstantiationException e) {
-                Log.error(e);
+                Log.error(e.getMessage());
                 throw new NulsException(e);
             } catch (IllegalAccessException e) {
-                Log.error(e);
+                Log.error(e.getMessage());
                 throw new NulsException(e);
             }
         }

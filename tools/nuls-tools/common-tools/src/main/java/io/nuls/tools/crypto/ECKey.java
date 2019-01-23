@@ -66,6 +66,7 @@ public class ECKey {
     private static final X9ECParameters CURVE_PARAMS = CustomNamedCurves.getByName("secp256k1");
     public static final ECDomainParameters CURVE;
     public static final BigInteger HALF_CURVE_ORDER;
+    public static final int SIGNUM = 1;
     /**
      * 随机种子
      */
@@ -88,7 +89,7 @@ public class ECKey {
      **/
     protected final BigInteger priv;
     /**
-     * 公匙
+     * 椭圆曲线点
      **/
     private final ECPoint pub;
 
@@ -100,6 +101,10 @@ public class ECKey {
         this(SECURE_RANDOM);
     }
 
+    /**
+     * 使用给定的{@link SecureRandom}对象生成一个全新的密钥对。点压缩是这样使用的
+     * 结果公钥将是33个字节（32个用于坐标，1个字节用于表示y位）。
+     **/
     public ECKey(SecureRandom secureRandom) {
         ECKeyPairGenerator generator = new ECKeyPairGenerator();
         ECKeyGenerationParameters keygenParams = new ECKeyGenerationParameters(CURVE, secureRandom);
@@ -113,10 +118,10 @@ public class ECKey {
     }
 
     /**
-     * 根据私匙和公匙创建
+     * 根据私匙和椭圆曲线点创建
      *
-     * @param priv
-     * @param pub
+     * @param priv 私钥
+     * @param pub  公钥
      */
     private ECKey(BigInteger priv, ECPoint pub) {
         if (priv != null) {
@@ -129,32 +134,51 @@ public class ECKey {
         creationTimeSeconds = System.currentTimeMillis();
     }
 
+    /**
+     * 根据私匙创建密码器
+     * @param privKey    private key
+     * @return ECKey
+     */
     public static ECKey fromPrivate(BigInteger privKey) {
         return fromPrivate(privKey, true);
     }
 
     /**
-     * 根据私匙创建密码器，并选择是否压缩公匙
+     * 根据私匙创建密码器，并选择是否压缩椭圆曲线点
      *
      * @param privKey    private key
      * @param compressed compressed
      * @return ECKey
      */
     public static ECKey fromPrivate(BigInteger privKey, boolean compressed) {
-
         ECPoint point = publicPointFromPrivate(privKey);
         return new ECKey(privKey, getPointWithCompression(point, compressed));
     }
 
 
+    /**
+     * 创建一个不能用于签名的ECKey，仅从给定的编码点验证签名,pub的压缩状态将被保留。
+     * @param pubKey    public key
+     * @return ECKey
+     */
     public static ECKey fromPublicOnly(byte[] pubKey) {
         return new ECKey(null, CURVE.getCurve().decodePoint(pubKey));
     }
 
+    /**
+     * 根据ECPoint创建密码器
+     * @param pub    ECPoint
+     * @return ECKey
+     */
     public static ECKey fromPublicOnly(ECPoint pub) {
         return new ECKey(null, pub);
     }
 
+    /**
+     * 根据私钥生成ECPoint椭圆曲线点
+     * @param privKey    private key
+     * @return ECPoint
+     */
     public static ECPoint publicPointFromPrivate(BigInteger privKey) {
         if (privKey.bitLength() > CURVE.getN().bitLength()) {
             privKey = privKey.mod(CURVE.getN());
@@ -162,6 +186,12 @@ public class ECKey {
         return new FixedPointCombMultiplier().multiply(CURVE.getG(), privKey);
     }
 
+    /**
+     * 根据EncryptedData和公钥生成ECKey
+     * @param encryptedPrivateKey    私钥封装类
+     * @param pubKey                 公钥
+     * @return ECKey
+     */
     public static ECKey fromEncrypted(EncryptedData encryptedPrivateKey, byte[] pubKey) {
         ECKey key = fromPublicOnly(pubKey);
         ObjectUtils.canNotEmpty(encryptedPrivateKey, "encryptedPrivateKey can not null!");
@@ -169,6 +199,11 @@ public class ECKey {
         return key;
     }
 
+    /**
+     * 获取公钥的byte[],指定是否压缩
+     * @param compressed  是否压缩
+     * @return  byte[]
+     * */
     protected byte[] getPubKey(boolean compressed) {
         return pub.getEncoded(compressed);
     }
@@ -224,12 +259,20 @@ public class ECKey {
         return getPublicKeyAsHex(false);
     }
 
+    /**
+     * 获取公匙转16进制后的字符串，指定是否压缩
+     * @param compressed  是否压缩
+     * @return String
+     * */
     public String getPublicKeyAsHex(boolean compressed) {
         return HexUtil.encode(getPubKey(compressed));
     }
 
     /**
-     * 压缩公匙
+     * 用于压缩椭圆曲线点的实用程序，如果已经压缩，则返回相同的点
+     * @param point      压缩前的公钥public key
+     * @param compressed 是否压缩
+     * @return   ECPoint 压缩后的公钥
      **/
     private static ECPoint getPointWithCompression(ECPoint point, boolean compressed) {
         if (point.isCompressed() == compressed) {
@@ -241,6 +284,13 @@ public class ECKey {
         return CURVE.getCurve().createPoint(x, y, compressed);
     }
 
+    /**
+     * 验证数据签名
+     * @param data        需验证的数据
+     * @param signature   签名
+     * @param pub         公钥
+     * @return boolean        验证是否通过
+     * */
     public static boolean verify(byte[] data, ECDSASignature signature, byte[] pub) {
         ECDSASigner signer = new ECDSASigner();
         ECPublicKeyParameters params = new ECPublicKeyParameters(CURVE.getCurve().decodePoint(pub), CURVE);
@@ -253,10 +303,24 @@ public class ECKey {
         }
     }
 
+
+    /**
+     * 验证数据签名
+     * @param data        需验证的数据
+     * @param signature   签名
+     * @param pub         公钥
+     * @return boolean        验证是否通过
+     * */
     public static boolean verify(byte[] data, byte[] signature, byte[] pub) {
         return verify(data, ECDSASignature.decodeFromDER(signature), pub);
     }
 
+    /**
+     * 用当前ECKey公钥验证签名
+     * @param hash        需验证的数据
+     * @param signature   签名
+     * @return boolean    验证是否通过
+     * */
     public boolean verify(byte[] hash, byte[] signature) {
         return ECKey.verify(hash, signature, getPubKey());
     }
@@ -265,6 +329,9 @@ public class ECKey {
         private static final long serialVersionUID = 2789844760773725676L;
     }
 
+    /**
+     * 静态内部类 签名封装类
+     * */
     public static class ECDSASignature {
         public final BigInteger r, s;
 
@@ -300,7 +367,7 @@ public class ECKey {
                 // Thus, we always use the positive versions. See: http://r6.ca/blog/20111119T211504Z.html
                 return new ECDSASignature(r.getPositiveValue(), s.getPositiveValue());
             } catch (IOException e) {
-                Log.error(e);
+                Log.error(e.getMessage());
                 throw new RuntimeException(e);
             } finally {
                 if (decoder != null) {
@@ -349,18 +416,41 @@ public class ECKey {
         }
     }
 
+    /**
+     * 用私钥对数据进行签名
+     * @param hash    需签名数据
+     * @return byte[] 签名
+     * */
     public byte[] sign(byte[] hash) {
         return sign(hash, null);
     }
 
+    /**
+     * 用私钥对数据进行签名
+     * @param hash    需签名数据
+     * @param aesKey  私钥
+     * @return byte[] 签名
+     * */
     public byte[] sign(Sha256Hash hash, BigInteger aesKey) {
         return doSign(hash.getBytes(), priv);
     }
 
+    /**
+     * 用私钥对数据进行签名
+     * @param hash    需签名数据
+     * @param aesKey  私钥
+     * @return byte[] 签名
+     * */
     public byte[] sign(byte[] hash, BigInteger aesKey) {
         return doSign(hash, priv);
     }
 
+    /**
+     * 用私钥对数据进行签名
+     * @param input    需签名数据
+     * @param privateKeyForSigning  私钥
+     * @return byte[] 签名
+     * */
     protected byte[] doSign(byte[] input, BigInteger privateKeyForSigning) {
         HexUtil.checkNotNull(privateKeyForSigning);
         ECDSASigner signer = new ECDSASigner(new HMacDSAKCalculator(new SHA256Digest()));
@@ -370,10 +460,18 @@ public class ECKey {
         return new ECDSASignature(components[0], components[1]).toCanonicalised().encodeToDER();
     }
 
+    /**
+     * 该ECKey对象是否有私钥
+     * @return  boolean 有私钥返回true，否则返回false
+     * */
     public boolean hasPrivKey() {
         return priv != null;
     }
 
+    /**
+     * 该ECKey对象是否已经压缩过
+     * @return  boolean 已压缩返回true，否则返回false
+     * */
     public boolean isCompressed() {
         return pub.isCompressed();
     }
@@ -394,6 +492,10 @@ public class ECKey {
         this.encryptedPrivateKey = encryptedPrivateKey;
     }
 
+    /**
+     * 验证16进制私钥字符串是否正确
+     * @return  boolean 正确返回true,否则返回false
+     * */
     public static boolean isValidPrivteHex(String privateHex) {
         int len = privateHex.length();
         if (len % 2 == 1) {
@@ -406,6 +508,9 @@ public class ECKey {
         return true;
     }
 
+    /**
+     * ECKey比较器（按公钥比较）
+     * */
     public static final Comparator<ECKey> PUBKEY_COMPARATOR = new Comparator<ECKey>() {
         private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
 
