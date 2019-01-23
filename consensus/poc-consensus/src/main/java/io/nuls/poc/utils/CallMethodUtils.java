@@ -178,7 +178,7 @@ public class CallMethodUtils {
      * @param address
      * */
     @SuppressWarnings("unchecked")
-    public Map<String,Object> getBalanceAndNonce(Chain chain,String address)throws NulsException{
+    public static Map<String,Object> getBalanceAndNonce(Chain chain,String address)throws NulsException{
         Map<String,Object> params = new HashMap(4);
         params.put("chainId",chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
@@ -202,7 +202,7 @@ public class CallMethodUtils {
      * @param address
      * */
     @SuppressWarnings("unchecked")
-    public Map<String,Object> getBalance(Chain chain,String address)throws NulsException{
+    public static Map<String,Object> getBalance(Chain chain,String address)throws NulsException{
         Map<String,Object> params = new HashMap(4);
         params.put("chainId",chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
