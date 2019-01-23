@@ -35,6 +35,17 @@ public interface ConfirmedTxService {
      */
     /*boolean saveTx(Chain chain, Transaction transaction);*/
 
+
+    /**
+     * 保存创世块的交易
+     * @param chain
+     * @param txhexList
+     * @param blockHeaderDigest
+     * @return
+     * @throws NulsException
+     */
+    boolean saveGengsisTxList(Chain chain, List<Transaction> txhexList, BlockHeaderDigest blockHeaderDigest) throws NulsException;
+
     /**
      * 保存区块中已确认交易
      * @param chain
@@ -42,6 +53,8 @@ public interface ConfirmedTxService {
      * @return
      */
     boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeaderDigest blockHeaderDigest) throws NulsException;
+
+
 
     /**
      * 批量回滚已确认交易
