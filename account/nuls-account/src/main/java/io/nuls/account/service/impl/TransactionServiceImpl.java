@@ -29,14 +29,17 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.TxUtil;
+import io.nuls.account.util.log.LogUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
@@ -69,6 +72,49 @@ public class TransactionServiceImpl implements TransactionService {
     private MultiSignAccountService multiSignAccountService;
 
     @Override
+    public List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) {
+        Set<Transaction> result = new HashSet<>();
+        if (null == txList || txList.isEmpty()) {
+            return new ArrayList<>(result);
+        }
+        Map<String, Transaction> aliasNamesMap = new HashMap<>();
+        Map<String, Transaction> accountAddressMap = new HashMap<>();
+        try {
+            for (Transaction transaction : txList) {
+                if (transaction.getType() == AccountConstant.TX_TYPE_ACCOUNT_ALIAS) {
+                    Alias alias = new Alias();
+                    alias.parse(new NulsByteBuffer(transaction.getTxData()));
+                    String address = AddressTool.getStringAddressByBytes(alias.getAddress());
+                    //check alias
+                    Transaction tmp = aliasNamesMap.get(alias.getAlias());
+                    // the alias is already exist
+                    if (tmp != null) {
+                        result.add(transaction);
+                        result.add(tmp);
+                        continue;
+                    } else {
+                        aliasNamesMap.put(alias.getAlias(), transaction);
+                    }
+                    //check address
+                    tmp = accountAddressMap.get(address);
+                    // the address is already exist
+                    if (tmp != null) {
+                        result.add(transaction);
+                        result.add(tmp);
+                        continue;
+                    } else {
+                        accountAddressMap.put(address, transaction);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LogUtil.error("", e);
+            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
+        }
+        return new ArrayList<>(result);
+    }
+
+    @Override
     public String transfer(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
         Transaction tx = this.assemblyTransaction(chainId, fromList, toList, remark);
         return tx.getHash().getDigestHex();
@@ -82,8 +128,6 @@ public class TransactionServiceImpl implements TransactionService {
         //TODO 如果是多签账户并且签名数量达到了最小值则广播交易,该功能待别名转账做完成后再补充  EdwardChan
         return tx;
     }
-
-
 
     private Transaction assemblyTransaction(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
         Transaction tx = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
