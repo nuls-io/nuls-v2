@@ -140,17 +140,18 @@ public class TransactionManager {
      */
     public boolean verify(Chain chain, Transaction tx) {
         try {
-            baseValidateTx(chain, tx);
+            TxRegister txRegister = getTxRegister(chain, tx.getType());
+            baseValidateTx(chain, tx, txRegister);
             //由于跨链交易直接调模块内部验证器接口，可不通过RPC接口
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
                return txService.crossTransactionValidator(chain, tx);
-            }else {
-                TxRegister txRegister = this.getTxRegister(chain, tx.getType());
+            }else if(!txRegister.getSystemTx()) {
                 //调验证器
                 return TransactionCall.txProcess(chain, txRegister.getValidator(), txRegister.getModuleCode(), tx.hex());
             }
+            return true;
         } catch (NulsException e) {
-            chain.getLogger().error(e);
+            chain.getLogger().error("tx type: " + tx.getType(), e);
             return false;
         } catch (Exception e) {
             chain.getLogger().error(TxErrorCode.IO_ERROR.getMsg());
@@ -174,8 +175,7 @@ public class TransactionManager {
      * @param tx
      * @return Result
      */
-    private void baseValidateTx(Chain chain, Transaction tx) throws NulsException {
-
+    private void baseValidateTx(Chain chain, Transaction tx, TxRegister txRegister) throws NulsException {
         if (null == tx) {
             throw new NulsException(TxErrorCode.TX_NOT_EXIST);
         }
@@ -191,7 +191,6 @@ public class TransactionManager {
         if (tx.size() > TxConstant.TX_MAX_SIZE) {
             throw new NulsException(TxErrorCode.TX_SIZE_TOO_LARGE);
         }
-        TxRegister txRegister = getTxRegister(chain, tx.getType());
         //验证签名
         validateTxSignature(tx, txRegister, chain);
         //如果有coinData, 则进行验证,有一些交易没有coinData数据
@@ -257,7 +256,7 @@ public class TransactionManager {
     private void validateCoinFromBase(Chain chain, int type, List<CoinFrom> listFrom) throws NulsException {
         //coinBase交易没有from
         if (type == TxConstant.TX_TYPE_COINBASE) {
-            throw new NulsException(TxErrorCode.SUCCESS);
+            return;
         }
         if (null == listFrom || listFrom.size() == 0) {
             throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);

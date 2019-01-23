@@ -25,7 +25,6 @@ import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.manager.ContextManager;
-import io.nuls.block.model.Node;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.test.TransactionStorageService;
 import io.nuls.rpc.client.CmdDispatcher;
@@ -106,15 +105,35 @@ public class TransactionUtil {
      *
      * @param chainId
      * @param blockHeaderPo
+     * @param txs
+     * @param localInit
      * @return
      */
-    public static boolean save(int chainId, BlockHeaderPo blockHeaderPo) {
+    public static boolean save(int chainId, BlockHeaderPo blockHeaderPo, List<Transaction> txs, boolean localInit) {
+        if (localInit) {
+            return saveGengsisTransaction(chainId, blockHeaderPo, txs);
+        } else {
+            return saveNormal(chainId, blockHeaderPo);
+        }
+    }
+
+    /**
+     * 批量保存交易
+     *
+     * @param chainId
+     * @param blockHeaderPo
+     * @return
+     */
+    public static boolean saveNormal(int chainId, BlockHeaderPo blockHeaderPo) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            params.put("txHashList", blockHeaderPo.getTxHashList());
+            List<NulsDigestData> txHashList = blockHeaderPo.getTxHashList();
+            List<String> list = new ArrayList<>();
+            txHashList.forEach(e -> list.add(e.getDigestHex()));
+            params.put("txHashList", list);
             BlockHeaderDigest blockHeaderDigest = new BlockHeaderDigest();
             blockHeaderDigest.setBlockHeaderHash(blockHeaderPo.getHash());
             blockHeaderDigest.setHeight(blockHeaderPo.getHeight());
@@ -204,5 +223,40 @@ public class TransactionUtil {
             return null;
         }
 //        return service.query(chainId, hash);
+    }
+
+    /**
+     * 批量保存交易
+     *
+     * @param chainId
+     * @param blockHeaderPo
+     * @return
+     */
+    public static boolean saveGengsisTransaction(int chainId, BlockHeaderPo blockHeaderPo, List<Transaction> txs) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            List<String> list = new ArrayList<>();
+            txs.forEach(e -> {
+                try {
+                    list.add(e.hex());
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            });
+            params.put("txHexList", list);
+            BlockHeaderDigest blockHeaderDigest = new BlockHeaderDigest();
+            blockHeaderDigest.setBlockHeaderHash(blockHeaderPo.getHash());
+            blockHeaderDigest.setHeight(blockHeaderPo.getHeight());
+            blockHeaderDigest.setTime(blockHeaderPo.getTime());
+            params.put("secondaryDataHex", HexUtil.encode(blockHeaderDigest.serialize()));
+            return CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_gengsisSave", params).isSuccess();
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
     }
 }

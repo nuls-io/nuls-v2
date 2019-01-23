@@ -11,6 +11,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
+import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
@@ -18,6 +19,7 @@ import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
+import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.rpc.call.ChainCall;
 import io.nuls.transaction.rpc.call.LedgerCall;
 import io.nuls.transaction.rpc.call.NetworkCall;
@@ -61,6 +63,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     @Autowired
     private CtxService ctxService;
 
+    @Autowired
+    private TransactionH2Service transactionH2Service;
+
     @Override
     public Transaction getConfirmedTransaction(Chain chain, NulsDigestData hash) {
         if (null == hash) {
@@ -74,6 +79,42 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
         }
         return confirmedTxStorageService.saveTx(chain.getChainId(), tx);
+    }
+
+    @Override
+    public boolean saveGengsisTxList(Chain chain, List<Transaction> txhexList, BlockHeaderDigest blockHeaderDigest) throws NulsException {
+        if (null == chain || txhexList == null || txhexList.size() == 0) {
+            throw new NulsException(TxErrorCode.PARAMETER_ERROR);
+        }
+        LedgerCall.coinDataBatchNotify(chain);
+        for(Transaction tx : txhexList){
+            //todo 批量验证coinData，接口和单个的区别？
+            VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, true);
+            if (!verifyTxResult.success()) {
+                return false;
+            }
+        }
+        List<Transaction> savedList = new ArrayList<>();
+        for(Transaction tx : txhexList){
+            //将交易保存、提交、发送至账本
+            ResultSaveCommitTx resultSaveCommitTx = saveCommitTx(chain, tx, null);
+            if (resultSaveCommitTx.rs) {
+                savedList.add(tx);
+            } else {
+                //回滚当前交易已提交的步骤
+                rollbackCurrentTx(chain, tx, resultSaveCommitTx);
+                //回滚之前的交易
+                this.rollbackTxList(chain, savedList, blockHeaderDigest, false);
+                // 保存区块交易失败, 回滚交易数
+                chain.getLogger().error("Save block transaction failed, rollback {} transactions", savedList.size());
+                return false;
+            }
+        }
+        for(Transaction tx : txhexList) {
+            //保存到h2数据库
+            transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
+        }
+        return true;
     }
 
     @Override
