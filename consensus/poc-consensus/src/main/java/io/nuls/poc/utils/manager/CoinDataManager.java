@@ -72,23 +72,23 @@ public class CoinDataManager {
      * @param txSize   交易大小/transaction size
      * @return         组装的CoinData/Assembled CoinData
      * */
-    public CoinData getUnlockCoinData(byte[] address,Chain chain, BigInteger amount, long lockTime, int txSize)throws NulsRuntimeException{
+    public CoinData getUnlockCoinData(byte[] address,Chain chain, BigInteger amount, long lockTime, int txSize)throws NulsException{
+        Map<String,Object> balanceMap = CallMethodUtils.getBalance(chain,AddressTool.getStringAddressByBytes(address));
+        BigInteger freeze = (BigInteger) balanceMap.get("freeze");
+        if(BigIntegerUtils.isLessThan(freeze,amount)){
+            throw new NulsException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
+        }
         CoinData coinData = new CoinData();
         CoinTo to = new CoinTo(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount, lockTime);
         coinData.addTo(to);
         txSize += to.size();
-        //todo 账本模块获取该账户锁定金额和可用余额 可用余额是否够支付手续费，锁定金额是否大于等于解锁金额
-        BigInteger available = new BigInteger("10000");
         //手续费
         CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,(byte)-1);
+        coinData.addFrom(from);
         txSize += from.size();
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
-        BigInteger fromAmount = amount.add(fee);
-        if(BigIntegerUtils.isLessThan(available,fromAmount)){
-            throw new NulsRuntimeException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
-        }
-        from.setAmount(fromAmount);
-        coinData.addFrom(from);
+        BigInteger realToAmount = amount.subtract(fee);
+        to.setAmount(realToAmount);
         return  coinData;
     }
 

@@ -310,7 +310,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             cancelDeposit.setJoinTxHash(hash);
             cancelDepositTransaction.setTxData(cancelDeposit.serialize());
             CoinData coinData = coinDataManager.getUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0, cancelDepositTransaction.size() + P2PHKSignature.SERIALIZE_LENGTH);
-            coinData.getFrom().get(0).setNonce(hash.getDigestBytes());
+            coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getDigestBytes()));
             cancelDepositTransaction.setCoinData(coinData.serialize());
             //交易签名
             String priKey = (String) callResult.get("priKey");
