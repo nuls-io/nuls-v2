@@ -27,11 +27,13 @@ package io.nuls.transaction;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
@@ -54,7 +56,7 @@ import java.util.*;
  * @author: Charlie
  * @date: 2019-01-15
  */
-public class TxFlowTest {
+public class TestTx {
 
     static int chainId = 12345;
     static int assetChainId = 12345;
@@ -73,19 +75,14 @@ public class TxFlowTest {
 
     @Before
     public void before() throws Exception{
-//        NoUse.mockModule();
-        WsServer.getInstance("test", "TestModule", "test.com")
-                .moduleRoles("test_role", new String[]{"1.0"})
-                .moduleVersion("1.0")
-//                .dependencies(ModuleE.CM.abbr, "1.1")
-                .connect("ws://192.168.1.57:8887");
+        NoUse.mockModule();
 
         // Get information from kernel
         CmdDispatcher.syncKernel();
         chain = new Chain();
         chain.setConfig(new ConfigBean(12345, 1));
 //        初始化token
-        addGenesisAsset();
+//        addGenesisAsset();
     }
 
 
@@ -311,6 +308,30 @@ public class TxFlowTest {
         return params;
 //        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
 //        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    public void importPriKeyTest() {
+        try {
+            //账户已存在则覆盖 If the account exists, it covers.
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("priKey", "00c86fc91cd07aa58eab0128f3b4c10b44deede12a2084d7a1f99156679515bf93");
+            params.put("password", "");
+            params.put("overwrite", true);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
+            String address = (String) result.get("address");
+//            assertEquals(accountList.get(0), address);
+            //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
+            params.put("overwrite", false);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+        } catch (NulsRuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

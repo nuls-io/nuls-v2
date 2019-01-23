@@ -971,8 +971,8 @@ public class TxServiceImpl implements TxService {
                     transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
                 }
             }
+            verifyTxResult.setCode(VerifyTxResult.SUCCESS);
         }
-        verifyTxResult.setCode(VerifyTxResult.SUCCESS);
         return verifyTxResult;
     }
 
