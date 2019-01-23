@@ -25,36 +25,26 @@
 
 package io.nuls.account.service.impl;
 
-import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountService;
+import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
-import io.nuls.base.data.Coin;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
-import io.nuls.base.signture.MultiSignTxSignature;
+import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
-import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
-import io.nuls.tools.data.ObjectUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -62,12 +52,7 @@ import io.nuls.tools.log.Log;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.ListIterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author: qinyifeng
@@ -80,11 +65,25 @@ public class TransactionServiceImpl implements TransactionService {
     @Autowired
     private ChainManager chainManager;
 
+    @Autowired
+    private MultiSignAccountService multiSignAccountService;
+
     @Override
     public String transfer(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
         Transaction tx = this.assemblyTransaction(chainId, fromList, toList, remark);
         return tx.getHash().getDigestHex();
     }
+
+    @Override
+    public Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark) {
+        List<CoinDto> fromList = Arrays.asList(from);
+        List<CoinDto> toList = Arrays.asList(to);
+        Transaction tx = this.assemblyTransaction(chainId, fromList, toList, remark);
+        //TODO 如果是多签账户并且签名数量达到了最小值则广播交易,该功能待别名转账做完成后再补充  EdwardChan
+        return tx;
+    }
+
+
 
     private Transaction assemblyTransaction(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
         Transaction tx = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
@@ -377,12 +376,21 @@ public class TransactionServiceImpl implements TransactionService {
      */
     private int getSignatureSize(List<CoinFrom> coinFroms) {
         int size = 0;
-        Set<String> signAddress = new HashSet<>();
+        Set<String> commonAddress = new HashSet<>();
+        Set<MultiSigAccount> multiSignAddress = new HashSet<>();
         for (CoinFrom coinFrom : coinFroms) {
-            byte[] address = coinFrom.getAddress();
-            signAddress.add(AddressTool.getStringAddressByBytes(address));
+            String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
+            MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(coinFrom.getAssetsChainId(),address);
+            if (multiSigAccount != null) { //多签
+                multiSignAddress.add(multiSigAccount);
+            } else {
+                commonAddress.add(address);
+            }
         }
-        size += signAddress.size() * P2PHKSignature.SERIALIZE_LENGTH;
+        size += commonAddress.size() * P2PHKSignature.SERIALIZE_LENGTH;
+        for (MultiSigAccount account : multiSignAddress) {
+            size += account.getM() * 72; //TODO 72是否准确？EdwardChan
+        }
         return size;
     }
 
