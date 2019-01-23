@@ -54,6 +54,8 @@ public interface TransactionService {
      */
     String transfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
 
+    Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark);
+
     /**
      * 校验该链是否有该资产
      *
