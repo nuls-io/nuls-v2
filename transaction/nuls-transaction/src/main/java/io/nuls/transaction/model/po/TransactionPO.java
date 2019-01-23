@@ -1,8 +1,16 @@
 package io.nuls.transaction.model.po;
 
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.Transaction;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.transaction.constant.TxConstant;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author: Charlie
@@ -40,6 +48,7 @@ public class TransactionPO {
     public int createTableIndex(){
         return (this.address.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER;
     }
+
 
     public Integer getId() {
         return id;

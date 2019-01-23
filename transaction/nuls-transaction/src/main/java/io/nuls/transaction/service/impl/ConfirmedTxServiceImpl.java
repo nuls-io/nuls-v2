@@ -114,6 +114,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             //保存到h2数据库
             transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
         }
+        chain.getLogger().debug("保存创世块交易完成..OK");
         return true;
     }
 
@@ -184,7 +185,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             if (rs) {
                 step = 1;
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
+                if (!txRegister.getSystemTx()){
+                    rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
+                }
             }
             if (rs) {
                 step = 2;
@@ -220,7 +223,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             if(step >= 2){
                 //通过各模块回滚交易业务逻辑
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx.hex());
+                if (!txRegister.getSystemTx()) {
+                    TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx.hex());
+                }
             }
             if(step >= 1){
                 //从已确认库中删除该交易
@@ -356,7 +361,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             //交易业务回滚
             try {
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                rs = TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx.hex());
+                if (!txRegister.getSystemTx()) {
+                    rs = TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx.hex());
+                }
             } catch (Exception e) {
                 rs = false;
                 chain.getLogger().error(e);
@@ -396,7 +403,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                     Transaction tx = rollbackedList.get(i);
                     confirmedTxStorageService.saveTx(chain.getChainId(), tx);
                     TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                    TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
+                    if (!txRegister.getSystemTx()) {
+                        TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
+                    }
                     LedgerCall.commitTxLedger(chain, tx, true);
                     if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER
                             && null != ctxService.getTx(chain, tx.getHash())) {
@@ -430,7 +439,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
             if(setp >= 4){
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
+                if (!txRegister.getSystemTx()) {
+                    TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
+                }
             }
             if(setp >= 3){
                 LedgerCall.commitTxLedger(chain, tx, true);

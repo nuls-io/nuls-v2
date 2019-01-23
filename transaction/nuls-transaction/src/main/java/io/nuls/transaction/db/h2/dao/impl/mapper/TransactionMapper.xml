@@ -31,8 +31,8 @@
             );
             create index IF NOT EXISTS ${tx.indexName}
             on ${tx.tableName} (address, time, type);
-            create UNIQUE index IF NOT EXISTS ${tx.uniqueName}
-            on ${tx.tableName} (address, hash);
+--             create UNIQUE index IF NOT EXISTS ${tx.uniqueName}
+--             on ${tx.tableName} (address, hash);
         </foreach>
     </update>
 
