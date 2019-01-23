@@ -723,7 +723,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            List<String> txHexList = JSONUtils.json2list((String) params.get(ConsensusConstant.PARAM_TX_HEX_LIST), String.class);
+            List<String> txHexList = (List<String>)params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
             List<Transaction> txList = new ArrayList<>();
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
@@ -739,9 +739,6 @@ public class ConsensusServiceImpl implements ConsensusService {
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
-        } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
 
