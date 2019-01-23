@@ -210,7 +210,7 @@ public class TransactionUtil {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            params.put("txHash", hash);
+            params.put("txHash", hash.getDigestHex());
             Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
             Map responseData = (Map) response.getResponseData();
             String txHex = (String) responseData.get("tx_getTx");
