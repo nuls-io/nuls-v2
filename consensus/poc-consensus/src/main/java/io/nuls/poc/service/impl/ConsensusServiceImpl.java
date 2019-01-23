@@ -736,7 +736,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 resultTxHashList.add(tx.getHash().getDigestHex());
             }
             Map<String, Object> result = new HashMap<>(2);
-            result.put("value",resultTxHashList);
+            result.put("list",resultTxHashList);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
