@@ -43,6 +43,21 @@ import java.util.Map;
 public interface TransactionService {
 
     /**
+     * accountTxValidate
+     * 1.检查是否多个交易设置了同样的别名
+     * 2.检测一个acount只能设置一个别名
+     * accountTxValidate
+     * 1.Check if multiple aliasTransaction have the same alias.
+     * 2.Detecting an acount can only set one alias.
+     *
+     * @param chainId
+     * @param txList 需要检查的交易列表/A list of transactions to be checked.
+     *
+     * @return
+     */
+    List<Transaction> accountTxValidate(int chainId, List<Transaction> txList) throws Exception;
+
+    /**
      * 多地址转账
      *
      * @param currentChainId 当前链ID
@@ -53,6 +68,8 @@ public interface TransactionService {
      * @throws NulsException
      */
     String transfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
+
+    Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark);
 
     /**
      * 校验该链是否有该资产

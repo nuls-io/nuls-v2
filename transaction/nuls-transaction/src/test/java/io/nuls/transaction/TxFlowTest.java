@@ -194,7 +194,7 @@ public class TxFlowTest {
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinTo coinTo = new CoinTo();
-        coinTo.setAddress(AddressTool.getAddress(address3));
+        coinTo.setAddress(AddressTool.getAddress(address1));
         coinTo.setAmount(amount);
         coinTo.setAssetsChainId(assetChainId);
         coinTo.setAssetsId(assetId);
@@ -250,11 +250,11 @@ public class TxFlowTest {
             //组装创建节点交易
             Map agentTxMap=this.createAgentTx();
             //调用接口
-//            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
-//            result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_createAgent"));
-//            Assert.assertTrue(null != result);
-//            Log.info("{}", result.get("txHex"));
-//            System.out.println("transfer: "+result.get("txHex"));
+            Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+            result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
+            Assert.assertTrue(null != result);
+            Log.info("{}", result.get("txHex"));
+            System.out.println("transfer: "+result.get("txHex"));
 
             //Thread.sleep(3000L);
         }
@@ -297,17 +297,17 @@ public class TxFlowTest {
      * 创建节点
      * */
     public Map createAgentTx()throws Exception{
-        Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        Address rewardAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
-        Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
+        Address agentAddress = new Address(chainId,(byte)assetId, SerializeUtils.sha256hash160(address1.getBytes()));
+        Address rewardAddress = new Address(chainId,(byte)assetId,SerializeUtils.sha256hash160(address2.getBytes()));
+        Address packingAddress = new Address(chainId,(byte)assetId,SerializeUtils.sha256hash160(address3.getBytes()));
         Map<String,Object> params = new HashMap<>();
-        params.put("agentAddress",agentAddress.getBase58());
-        params.put("chainId",1);
+        params.put("agentAddress",address1);
+        params.put("chainId",chainId);
         params.put("deposit",20000);
         params.put("commissionRate",10);
-        params.put("packingAddress",packingAddress.getBase58());
-        params.put("password","");
-        params.put("rewardAddress",rewardAddress.getBase58());
+        params.put("packingAddress",address2);
+        params.put("password",password);
+        params.put("rewardAddress",address3);
         return params;
 //        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
 //        System.out.println(cmdResp.getResponseData());

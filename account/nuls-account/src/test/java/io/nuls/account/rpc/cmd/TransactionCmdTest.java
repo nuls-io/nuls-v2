@@ -3,11 +3,14 @@ package io.nuls.account.rpc.cmd;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.TransferDto;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -15,6 +18,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -45,12 +49,42 @@ public class TransactionCmdTest {
 
     @Test
     public void transfer() throws Exception {
+        //组装普通转账交易
+        TransferDto transferDto = this.createTransferTx();
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+        String txDigestHex = (String) result.get(RpcConstant.VALUE);
+        System.out.println(txDigestHex);
+    }
+
+    //连续交易测试
+    @Test
+    public void contineCtx() throws Exception {
+        for (int i = 0; i < 10; i++) {
+            //组装普通转账交易
+            TransferDto transferDto = this.createTransferTx();
+            //调用接口
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
+            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+            Assert.assertTrue(null != result);
+            Log.info("{}", result.get("value"));
+            System.out.println("transfer: " + result.get("value"));
+            //Thread.sleep(3000L);
+        }
+    }
+
+    /**
+     * 创建普通转账交易
+     *
+     * @return
+     */
+    private TransferDto createTransferTx() {
         TransferDto transferDto = new TransferDto();
         transferDto.setChainId(chainId);
         transferDto.setRemark("transfer test");
-        List<CoinDto> inputs=new ArrayList<>();
-        List<CoinDto> outputs=new ArrayList<>();
-        CoinDto inputCoin1=new CoinDto();
+        List<CoinDto> inputs = new ArrayList<>();
+        List<CoinDto> outputs = new ArrayList<>();
+        CoinDto inputCoin1 = new CoinDto();
         inputCoin1.setAddress("LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930");
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
@@ -58,7 +92,7 @@ public class TransactionCmdTest {
         inputCoin1.setAmount(new BigInteger("10000000"));
         inputs.add(inputCoin1);
 
-        CoinDto outputCoin1=new CoinDto();
+        CoinDto outputCoin1 = new CoinDto();
         outputCoin1.setAddress("JcgbDRvBqQ67Uq4Tb52U22ieJdr3G3930");
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
@@ -68,10 +102,7 @@ public class TransactionCmdTest {
 
         transferDto.setInputs(inputs);
         transferDto.setOutputs(outputs);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", JSONUtils.json2map(JSONUtils.obj2json(transferDto)));
-        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
-        String txDigestHex = (String) result.get(RpcConstant.VALUE);
-        System.out.println(txDigestHex);
+        return transferDto;
     }
 
 }
