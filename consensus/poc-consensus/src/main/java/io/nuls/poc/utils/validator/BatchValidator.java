@@ -45,6 +45,8 @@ public class BatchValidator {
             throw new NulsException(ConsensusErrorCode.TRANSACTION_LIST_IS_NULL);
         }
         List<Transaction> redPunishTxs = new ArrayList<>();
+        List<Transaction> yellowPunishTxs = new ArrayList<>();
+        List<Transaction> coinBasePunishTxs = new ArrayList<>();
         List<Transaction> createAgentTxs = new ArrayList<>();
         List<Transaction> stopAgentTxs = new ArrayList<>();
         List<Transaction> depositTxs = new ArrayList<>();
@@ -60,6 +62,10 @@ public class BatchValidator {
                 case ConsensusConstant.TX_TYPE_JOIN_CONSENSUS : depositTxs.add(tx);
                     break;
                 case ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT : withdrawTxs.add(tx);
+                    break;
+                case ConsensusConstant.TX_TYPE_YELLOW_PUNISH : yellowPunishTxs.add(tx);
+                    break;
+                case ConsensusConstant.TX_TYPE_COINBASE : coinBasePunishTxs.add(tx);
                     break;
                 default:break;
             }
@@ -97,6 +103,8 @@ public class BatchValidator {
         txList.removeAll(stopAgentTxs);
         txList.removeAll(depositTxs);
         txList.removeAll(withdrawTxs);
+        txList.removeAll(yellowPunishTxs);
+        txList.removeAll(coinBasePunishTxs);
     }
 
     /**
