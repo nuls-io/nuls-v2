@@ -98,6 +98,7 @@ public class CmdTxTest {
         params.put("isConfirmTx",false);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
+
     }
     /**
      * 测试只有coinFrom的交易
