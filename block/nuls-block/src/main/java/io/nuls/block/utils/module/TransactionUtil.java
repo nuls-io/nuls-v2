@@ -64,8 +64,12 @@ public class TransactionUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getSystemTypes", params);
-            Map responseData = (Map) response.getResponseData();
-            return (List<Integer>) responseData.get("tx_getSystemTypes");
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                return (List<Integer>) responseData.get("tx_getSystemTypes");
+            } else {
+                return null;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -215,11 +219,15 @@ public class TransactionUtil {
             params.put("chainId", chainId);
             params.put("txHash", hash.getDigestHex());
             Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
-            Map responseData = (Map) response.getResponseData();
-            String txHex = (String) responseData.get("tx_getTx");
-            Transaction transaction = new Transaction();
-            transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
-            return transaction;
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                String txHex = (String) responseData.get("tx_getTx");
+                Transaction transaction = new Transaction();
+                transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                return transaction;
+            } else {
+                return null;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
