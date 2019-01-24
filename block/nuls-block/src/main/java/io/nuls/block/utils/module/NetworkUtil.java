@@ -67,6 +67,9 @@ public class NetworkUtil {
             params.put("pageSize", 0);
 
             Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
+            if (!response.isSuccess()) {
+                return List.of();
+            }
             Map responseData = (Map) response.getResponseData();
             List list = (List) responseData.get("nw_getNodes");
             List nodes = new ArrayList();

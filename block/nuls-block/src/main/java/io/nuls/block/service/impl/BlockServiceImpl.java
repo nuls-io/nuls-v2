@@ -344,12 +344,11 @@ public class BlockServiceImpl implements BlockService {
 
     @Override
     public boolean broadcastBlock(int chainId, Block block) {
+        NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
         SmallBlockMessage message = new SmallBlockMessage();
         message.setSmallBlock(BlockUtil.getSmallBlock(chainId, block));
         boolean broadcast = NetworkUtil.broadcast(chainId, message, SMALL_BLOCK_MESSAGE);
-        if (!broadcast) {
-            rollbackBlock(chainId, BlockUtil.toBlockHeaderPo(block), true);
-        }
+        messageLog.debug("chainId-" + chainId + ", hash-" + block.getHeader().getHash() + ", broadcast-" + broadcast);
         return broadcast;
     }
 
