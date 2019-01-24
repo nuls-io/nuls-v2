@@ -306,7 +306,7 @@ public class CtxServiceImpl implements CtxService {
         verifyResultList.add(verifyResult);
         ctx.setCtxVerifyResultList(verifyResultList);
         //TODO 获取共识节点的节点地址
-        String packingAddress = ConsensusCall.cs_getNodePackingAddress(chain);
+        String packingAddress = ConsensusCall.getNodePackingAddress(chain);
         //判断当前节点是共识节点还是普通节点
         if (StringUtils.isNotBlank(packingAddress)) {
             //共识节点
