@@ -144,5 +144,15 @@ public interface RpcParameterNameConstant {
      */
     String SIG_HEX = "sigHex";
 
+    /**
+     * the to Address hex
+     */
+    String TO_ADDRESS = "toAddress";
+
+    /**
+     * the amount
+     */
+    String AMOUNT = "amount";
+
 
 }

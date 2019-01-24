@@ -5,10 +5,13 @@ import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
+import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.TransferDto;
 import io.nuls.account.model.po.AliasPo;
+import io.nuls.account.service.AccountService;
+import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.TxUtil;
@@ -18,6 +21,7 @@ import io.nuls.account.util.log.LogUtil;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.account.util.validator.TxValidator;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -25,6 +29,7 @@ import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
@@ -55,6 +60,13 @@ public class TransactionCmd extends BaseCmd {
 
     @Autowired
     private AliasStorageService aliasStorageService;
+    @Autowired
+    private AccountService accountService;
+
+    @Autowired
+    private MultiSignAccountService multiSignAccountService;
+
+
 
     /**
      * validate the transaction
@@ -292,6 +304,75 @@ public class TransactionCmd extends BaseCmd {
             return failed(e.getMessage());
         }
         LogUtil.debug("ac_multipleAddressTransfer end");
+        return success(map);
+    }
+
+    /**
+     * 创建多签转账交易
+     *
+     * create the multi sign transaction
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transfer by alias")
+    public Response createMultiSignTransfer(Map params) {
+        LogUtil.debug("ac_createMultiSignTransfer start");
+        Map<String, String> map = new HashMap<>(1);
+        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+        Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
+        Object toAddressObj = params == null ? null : params.get(RpcParameterNameConstant.TO_ADDRESS);
+        Object amountObj = params == null ? null : params.get(RpcParameterNameConstant.AMOUNT);
+        Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.REMARK);
+        try {
+            // check parameters
+            if (params == null || chainIdObj == null || addressObj == null || signAddressObj == null ||
+                    amountObj == null || toAddressObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            int chainId = (int) chainIdObj;
+            String address = (String) addressObj;
+            String password = (String) passwordObj;
+            String signAddress = (String) signAddressObj;
+            String toAddress = (String) toAddressObj;
+            BigInteger amount = new BigInteger((String) amountObj);
+            String remark = (String) remarkObj;
+            if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            // check transaction remark
+            if (!validTxRemark(remark)) {
+                throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
+            }
+            //根据别名查询出地址
+            Account account = accountService.getAccount(chainId,signAddress);
+            if (account == null) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId,address);
+            if (multiSigAccount == null) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            //验证签名账户是否属于多签账户,如果不是多签账户下的地址则提示错误
+            if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
+                throw new  NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
+            }
+            Chain chain = chainManager.getChainMap().get(chainId);
+            if (chain == null) {
+                throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
+            }
+            Transaction tx = transactionService.createMultiSignTransfer(chainId, account, password, multiSigAccount, toAddress, amount, remark);
+            map.put("txData", HexUtil.encode(tx.serialize()));
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            return failed(e.getMessage());
+        }
+        LogUtil.debug("ac_createMultiSignTransfer end");
         return success(map);
     }
 
