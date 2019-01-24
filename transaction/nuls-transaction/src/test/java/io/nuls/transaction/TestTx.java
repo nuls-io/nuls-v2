@@ -27,10 +27,13 @@ package io.nuls.transaction;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.server.WsServer;
 import io.nuls.tools.crypto.HexUtil;
+import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
@@ -53,7 +56,7 @@ import java.util.*;
  * @author: Charlie
  * @date: 2019-01-15
  */
-public class TxFlowTest {
+public class TestTx {
 
     static int chainId = 12345;
     static int assetChainId = 12345;
@@ -73,6 +76,9 @@ public class TxFlowTest {
     @Before
     public void before() throws Exception{
         NoUse.mockModule();
+
+        // Get information from kernel
+        CmdDispatcher.syncKernel();
         chain = new Chain();
         chain.setConfig(new ConfigBean(12345, 1));
 //        初始化token
@@ -82,11 +88,18 @@ public class TxFlowTest {
 
     @Test
     public void newCtx() throws Exception{
-        for(int i = 0; i<10; i++) {
-            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
-            System.out.println(balance.longValue());
+        for(int i = 0; i<5; i++) {
+            BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
+            BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address2), assetChainId, assetId);
+            BigInteger balance3 = LedgerCall.getBalance(chain, AddressTool.getAddress(address3), assetChainId, assetId);
+            BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address4), assetChainId, assetId);
+            System.out.println("address1: " + balance1.longValue());
+            System.out.println("address2: " + balance2.longValue());
+            System.out.println("address3: " + balance3.longValue());
+            System.out.println("address4: " + balance4.longValue());
             CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
                     createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
+            //普通转账
             //调接口
             String json = JSONUtils.obj2json(ctxTransfer);
             Map<String, Object> params = JSONUtils.json2map(json);
@@ -95,13 +108,23 @@ public class TxFlowTest {
             Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
             Assert.assertTrue(null != map);
             Log.info("{}", map.get("value"));
+
+            Thread.sleep(3000L);
+
+            Map transferMap = this.createTransferTx();
+            //调用接口
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+            Assert.assertTrue(null != result);
+            Log.info("{}", result.get("value"));
             Thread.sleep(3000L);
         }
-        packableTxs();
+        //packableTxs();
 
 
     }
-    @Test
+
+//    @Test
     public void packableTxs() throws Exception{
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -210,10 +233,10 @@ public class TxFlowTest {
     public void contineCtx() throws Exception{
         String address="LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";
         for(int i = 0; i<3; i++) {
-            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address), assetChainId, assetId);
+            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
             System.out.println(balance.longValue());
             //组装普通转账交易
-            Map transferMap=this.createTransferTx();
+            Map transferMap = this.createTransferTx();
             //调用接口
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
             HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
@@ -224,11 +247,11 @@ public class TxFlowTest {
             //组装创建节点交易
             Map agentTxMap=this.createAgentTx();
             //调用接口
-//            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
-//            result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("cs_createAgent"));
-//            Assert.assertTrue(null != result);
-//            Log.info("{}", result.get("txHex"));
-//            System.out.println("transfer: "+result.get("txHex"));
+            Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+            result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
+            Assert.assertTrue(null != result);
+            Log.info("{}", result.get("txHex"));
+            System.out.println("transfer: "+result.get("txHex"));
 
             //Thread.sleep(3000L);
         }
@@ -247,18 +270,18 @@ public class TxFlowTest {
         List<CoinDTO> inputs=new ArrayList<>();
         List<CoinDTO> outputs=new ArrayList<>();
         CoinDTO inputCoin1=new CoinDTO();
-        inputCoin1.setAddress("LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930");
+        inputCoin1.setAddress(address1);
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
-        inputCoin1.setAssetsId(1);
+        inputCoin1.setAssetsId(assetId);
         inputCoin1.setAmount(new BigInteger("10000000"));
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1=new CoinDTO();
-        outputCoin1.setAddress("JcgbDRvBqQ67Uq4Tb52U22ieJdr3G3930");
+        outputCoin1.setAddress(address2);
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
-        outputCoin1.setAssetsId(1);
+        outputCoin1.setAssetsId(assetId);
         outputCoin1.setAmount(new BigInteger("10000000"));
         outputs.add(outputCoin1);
 
@@ -271,20 +294,44 @@ public class TxFlowTest {
      * 创建节点
      * */
     public Map createAgentTx()throws Exception{
-        Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        Address rewardAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmgd".getBytes()));
-        Address packingAddress = new Address(1,(byte)1,SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fegfgqmd".getBytes()));
+        Address agentAddress = new Address(chainId,(byte)assetId, SerializeUtils.sha256hash160(address1.getBytes()));
+        Address rewardAddress = new Address(chainId,(byte)assetId,SerializeUtils.sha256hash160(address2.getBytes()));
+        Address packingAddress = new Address(chainId,(byte)assetId,SerializeUtils.sha256hash160(address3.getBytes()));
         Map<String,Object> params = new HashMap<>();
-        params.put("agentAddress",agentAddress.getBase58());
-        params.put("chainId",1);
+        params.put("agentAddress",address1);
+        params.put("chainId",chainId);
         params.put("deposit",20000);
         params.put("commissionRate",10);
-        params.put("packingAddress",packingAddress.getBase58());
-        params.put("password","");
-        params.put("rewardAddress",rewardAddress.getBase58());
+        params.put("packingAddress",address2);
+        params.put("password",password);
+        params.put("rewardAddress",address3);
         return params;
 //        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
 //        System.out.println(cmdResp.getResponseData());
+    }
+
+    @Test
+    public void importPriKeyTest() {
+        try {
+            //账户已存在则覆盖 If the account exists, it covers.
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("priKey", "00c86fc91cd07aa58eab0128f3b4c10b44deede12a2084d7a1f99156679515bf93");
+            params.put("password", "");
+            params.put("overwrite", true);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
+            String address = (String) result.get("address");
+//            assertEquals(accountList.get(0), address);
+            //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
+            params.put("overwrite", false);
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+        } catch (NulsRuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

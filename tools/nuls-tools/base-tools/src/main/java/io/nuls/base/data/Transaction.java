@@ -244,8 +244,8 @@ public class Transaction extends BaseNulsData implements Cloneable {
         this.size = size;
     }
 
-    public static Transaction getInstance(String Hex) throws NulsException {
-        return getInstance(HexUtil.decode(Hex));
+    public static Transaction getInstance(String hex) throws NulsException {
+        return getInstance(HexUtil.decode(hex));
     }
 
     public static Transaction getInstance(byte[] txBytes) throws NulsException {

@@ -83,7 +83,7 @@ public class DataShowMonitorTest implements Runnable  {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
         for(NodeGroup nodeGroup:nodeGroupList){
-
+            Log.info("chainId={},magicNumber={},isSelfChain={}",nodeGroup.getChainId(),nodeGroup.getMagicNumber(),nodeGroup.isSelf());
             Collection<Node> c1=nodeGroup.getConnectNodes();
             Log.info("begin============================printlnPeer c1:SelfConnectNodes============="+c1.size());
             for(Node n:c1){

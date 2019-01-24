@@ -109,18 +109,17 @@ public class VerifyTxProcessTask implements Runnable {
                 LedgerCall.commitTxLedger(chain, tx, false);
                 //广播交易hash
                 //todo 调试暂时注释
-//                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
+                NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
                 count++;
                 return true;
             }
             chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " +
-                    "coinData not success - code: {}, - reason:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc());
+                    "coinData not success - code: {}, - reason:{}, - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getHash().getDigestHex());
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){
                 //todo 孤儿交易还是10分钟删, 如何处理nonce值??
-                //todo long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
-                long currentTimeMillis = System.currentTimeMillis();//todo 测试代码
+                long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
                 return tx.getTime() < (currentTimeMillis - 3600000L);
             }
         } catch (Exception e) {

@@ -181,7 +181,6 @@ public class PunishManager {
     }
 
     /**
-     * todo
      * 更新惩罚证据列表并验证节点是否应该给红牌惩罚
      * Follow the new penalty evidence list and verify whether the node should give a red card penalty
      *

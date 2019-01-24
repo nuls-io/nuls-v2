@@ -9,8 +9,10 @@ import io.nuls.poc.model.bo.config.ConfigBean;
 import io.nuls.poc.model.bo.config.ConfigItem;
 import io.nuls.poc.model.bo.tx.TxRegisterDetail;
 import io.nuls.poc.storage.ConfigService;
+import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.poc.utils.annotation.ResisterTx;
 import io.nuls.poc.utils.enumeration.TxMethodType;
+import io.nuls.poc.utils.enumeration.TxProperty;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.ioc.ScanUtil;
@@ -83,11 +85,11 @@ public class ChainManager {
             * 链交易注册
             * Chain Trading Registration
             * */
-            /*while (true){
+            while (true){
                 if(CallMethodUtils.registerTx(chain,txRegisterDetailList)){
                     break;
                 }
-            }*/
+            }
 
             /*
             初始化链数据库表
@@ -262,9 +264,9 @@ public class ChainManager {
                 }
             }
         }
-        if(registerDetailMap.size() == 0){
-            return null;
-        }
+        registerDetailMap.put(ConsensusConstant.TX_TYPE_COINBASE,new TxRegisterDetail(TxProperty.COIN_BASE));
+        registerDetailMap.put(ConsensusConstant.TX_TYPE_RED_PUNISH,new TxRegisterDetail(TxProperty.RED_PUNISH));
+        registerDetailMap.put(ConsensusConstant.TX_TYPE_YELLOW_PUNISH,new TxRegisterDetail(TxProperty.YELLOW_PUNISH));
         return new ArrayList<>(registerDetailMap.values());
     }
 

@@ -235,7 +235,50 @@ public class TransactionCmd extends BaseCmd {
             errorLogProcess(chain, e);
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+        resultMap.put("value", result);
+        return success(resultMap);
+    }
+
+    /**
+     * Save the transaction in the new block that was verified to the database
+     * 保存创世块的交易, 接收完整交易hex
+     *
+     * @param params Map
+     * @return Response
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_GENGSIS_SAVE, version = 1.0, description = "transaction save")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHexList", parameterType = "List")
+    @Parameter(parameterName = "secondaryDataHex", parameterType = "String")
+    public Response txGengsisSave(Map params) {
+        Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        boolean result = false;
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("txHexList"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("secondaryDataHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
+
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if(null == chain){
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            List<String> txHexList = (List<String>) params.get("txHexList");
+            List<Transaction> txList = new ArrayList<>();
+            for (String txHex : txHexList) {
+                txList.add(TxUtil.getTransaction(txHex));
+            }
+            BlockHeaderDigest blockHeaderDigest = TxUtil.getInstance((String)params.get("secondaryDataHex"), BlockHeaderDigest.class);
+            result = confirmedTxService.saveGengsisTxList(chain, txList, blockHeaderDigest);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+        Map<String, Boolean> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         resultMap.put("value", result);
         return success(resultMap);
     }
@@ -334,6 +377,7 @@ public class TransactionCmd extends BaseCmd {
             if (!NulsDigestData.validHash(txHash)) {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
+            Log.debug("getConfirmedTransaction : " + txHash);
             Transaction tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
             if(tx == null){
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
@@ -392,7 +436,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = TxCmd.TX_VERIFY, version = 1.0, description = "")
+    @CmdAnnotation(cmd = TxCmd.TX_BATCHVERIFY, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response batchVerify(Map params){
         boolean result = false;

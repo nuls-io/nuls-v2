@@ -4,7 +4,7 @@ package io.nuls.h2.entity;
  * @author: Charlie
  * @date: 2018/11/14
  */
-public class TransactionPo {
+public class TransactionPO {
 
     private String address;
 

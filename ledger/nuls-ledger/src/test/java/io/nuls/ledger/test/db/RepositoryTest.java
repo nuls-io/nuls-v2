@@ -33,15 +33,11 @@ import io.nuls.ledger.db.RepositoryImpl;
 import io.nuls.ledger.model.ModuleConfig;
 import io.nuls.tools.log.Log;
 import org.junit.Before;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by wangkun23 on 2018/11/21.
  */
 public class RepositoryTest {
-
-    final Logger logger = LoggerFactory.getLogger(getClass());
 
     private Repository repository;
 

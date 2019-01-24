@@ -36,7 +36,6 @@ import org.junit.Test;
  * @description
  */
 public class WsKernel {
-
     @Test
     public  void test() throws Exception {
         //模拟启动内核模块

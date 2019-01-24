@@ -27,8 +27,6 @@ package io.nuls.ledger.test;
 
 import io.nuls.tools.exception.NulsException;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -37,8 +35,6 @@ import java.io.IOException;
  */
 
 public class AccountStateSerializerTest extends BaseTest {
-
-    final Logger logger = LoggerFactory.getLogger(AccountStateSerializerTest.class);
 
     @Test
     public void test() throws IOException, NulsException {

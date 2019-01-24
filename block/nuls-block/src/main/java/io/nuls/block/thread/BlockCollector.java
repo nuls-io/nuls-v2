@@ -55,7 +55,7 @@ public class BlockCollector implements Runnable {
     private int chainId;
     private NulsLogger commonLog;
 
-    public BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
+    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
         this.params = params;
         this.executor = executor;
         this.futures = futures;
@@ -78,7 +78,7 @@ public class BlockCollector implements Runnable {
                     Node node = result.getNode();
                     long endHeight = startHeight + size - 1;
                     commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
-                    node.adjustCredit(true);
+                    node.adjustCredit(true, result.getDuration());
                     params.getNodes().offer(node);
                     List<Block> blockList = CacheHandler.getBlockList(chainId, result.getMessageHash());
                     blockList.sort(BLOCK_COMPARATOR);
@@ -105,9 +105,9 @@ public class BlockCollector implements Runnable {
     private void retryDownload(BlockDownLoadResult result) {
         //归还下载失败的节点
         Node node = result.getNode();
-        node.adjustCredit(false);
+        node.adjustCredit(false, result.getDuration());
         params.getNodes().offer(node);
-        commonLog.info("retry download blocks, fail node:" + node + ", start:" + result.getStartHeight());
+        commonLog.info("download blocks fail, node:" + node + ", start:" + result.getStartHeight());
         PriorityBlockingQueue<Node> nodes = params.getNodes();
         try {
             result.setNode(nodes.take());
@@ -123,6 +123,7 @@ public class BlockCollector implements Runnable {
     }
 
     private boolean downloadBlockFromNode(BlockDownLoadResult result) {
+        commonLog.info("retry download blocks, node:" + result.getNode() + ", start:" + result.getStartHeight());
         BlockWorker worker = new BlockWorker(result.getStartHeight(), result.getSize(), chainId, result.getNode());
         Future<BlockDownLoadResult> submit = executor.submit(worker);
         try {

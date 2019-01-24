@@ -22,7 +22,6 @@ import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -194,56 +193,6 @@ public class AliasCmd extends BaseCmd {
     }
 
     /**
-     * validate the transaction
-     *
-     * @param params
-     * @return
-     */
-    @CmdAnnotation(cmd = "ac_accountTxValidate", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "validate the transaction")
-    public Response accountTxValidate(Map params) {
-        LogUtil.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
-        int chainId = 0;
-        List<String> txHexList;
-        List<Transaction> lists = null;
-        List<Transaction> result = null;
-        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object txHexListObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX_LIST);
-        try {
-            // check parameters
-            if (params == null || chainIdObj == null || txHexListObj == null) {
-                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
-            }
-            chainId = (Integer) chainIdObj;
-            txHexList = (List<String>) txHexListObj;
-            //TODO after the parameter format was determine,here will be modify
-            if (txHexList != null) {
-                //Transaction transaction = Transaction.getInstance(txHex);
-                txHexList.forEach(txHex -> {
-                    try {
-                        lists.add(Transaction.getInstance(txHex));
-                    } catch (NulsException e) {
-                        e.printStackTrace();
-                    }
-                });
-                result = aliasService.accountTxValidate(chainId, lists);
-            }
-        } catch (NulsRuntimeException e) {
-            LogUtil.error("", e);
-            return failed(e.getErrorCode());
-        } catch (NulsException e) {
-            LogUtil.error("", e);
-            return failed(e.getErrorCode());
-        } catch (Exception e) {
-            LogUtil.error("", e);
-            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
-        }
-        Map<String, List<Transaction>> resultMap = new HashMap<>();
-        resultMap.put("list", result);
-        LogUtil.debug("ac_accountTxValidate end");
-        return success(resultMap);
-    }
-
-    /**
      * validate the transaction of alias
      *
      * @param params
@@ -294,7 +243,7 @@ public class AliasCmd extends BaseCmd {
         String secondaryDataHex;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
-        Object secondaryDataHexObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
+        Object secondaryDataHexObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
         try {
             // check parameters
             if (params == null || chainIdObj == null || txHexObj == null) {
@@ -336,7 +285,7 @@ public class AliasCmd extends BaseCmd {
         String secondaryDataHex;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
-        Object secondaryDataHexObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
+        Object secondaryDataHexObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
         try {
             // check parameters
             if (params == null || chainIdObj == null || txHexObj == null) {

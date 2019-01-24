@@ -187,7 +187,12 @@ public class Constants {
     public static final String RESPONSE_TIMEOUT = "Response timeout";
     public static final String CMD_NOT_FOUND = "Cmd not found";
     public static final String CMD_DUPLICATE = "Duplicate cmd found";
-    public static final String RANGE_REGEX = "[(\\[]\\d+,\\d+[)\\]]";
+    //public static final String RANGE_REGEX = "[(\\[]\\d+,\\d+[)\\]]";
+    /**
+     * 参数验证正则表达式
+     * Parametric Verification Regular Expressions
+     * */
+    public static final String RANGE_REGEX ="\\[(\\-|\\+)?\\d+(\\.\\d+)?,(\\-|\\+)?\\d+(\\.\\d+)?\\]";
     public static final String PARAM_WRONG_RANGE = "Param wrong range";
     public static final String PARAM_WRONG_FORMAT = "Param wrong format";
     public static final String PARAM_NULL = "Param null";
@@ -200,4 +205,15 @@ public class Constants {
     public static String nextSequence() {
         return SEQUENCE.incrementAndGet() + "";
     }
+
+    /**
+     * 参数类型
+     * Parameter type
+     * */
+    public static final String PARAM_TYPE_BYTE = "byte";
+    public static final String PARAM_TYPE_SHORT = "short";
+    public static final String PARAM_TYPE_INT = "int";
+    public static final String PARAM_TYPE_LONG = "long";
+    public static final String PARAM_TYPE_FLOAT = "float";
+    public static final String PARAM_TYPE_DOUBLE = "double";
 }

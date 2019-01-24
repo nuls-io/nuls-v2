@@ -115,7 +115,7 @@ public class AccountCmdTest {
 
     @Test
     public void createAccountTest() throws Exception {
-        int count = 1;
+        int count = 3;
         //test to create an account that is not empty.
         List<String> accountList = createAccount(chainId, count, password);
         //checking the number of accounts returned

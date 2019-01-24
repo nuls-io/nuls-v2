@@ -137,10 +137,10 @@ public class TxUtil {
                 transactionPO.setAssetChainId(coinFrom.getAssetsChainId());
                 transactionPO.setAssetId(coinFrom.getAssetsId());
                 transactionPO.setAmount(coinFrom.getAmount());
-                // 0普通交易，-1解锁金额交易（退出共识，退出委托）
+                // 0普通交易，(-1:按时间解锁, 1:按高度解锁)解锁金额交易（退出共识，退出委托）
                 byte locked = coinFrom.getLocked();
                 int state = 0;
-                if(locked == -1){
+                if(locked == -1 || locked == 1){
                     state = 3;
                 }
                 transactionPO.setState(state);

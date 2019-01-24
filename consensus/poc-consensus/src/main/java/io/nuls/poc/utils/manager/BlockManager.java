@@ -28,17 +28,25 @@ public class BlockManager {
      *
      * @param chain chain info
      */
+    @SuppressWarnings("unchecked")
     public void loadBlockHeader(Chain chain) throws Exception {
         Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
         params.put("chainId", chain.getConfig().getChainId());
         params.put("size", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
-        if (!cmdResp.isSuccess()) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("init blockHeader failed!");
-            return;
+        Map<String, Object> resultMap;
+        List<String> blockHeaderHexs = new ArrayList<>();
+        if(cmdResp.isSuccess()){
+            resultMap = (Map<String, Object>) cmdResp.getResponseData();
+            blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
         }
-        Map<String, Object> resultMap = (Map<String, Object>) cmdResp.getResponseData();
-        List<String> blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
+        while(!cmdResp.isSuccess() && blockHeaderHexs.size() == 0){
+            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
+            if(cmdResp.isSuccess()){
+                resultMap = (Map<String, Object>) cmdResp.getResponseData();
+                blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
+            }
+        }
         List<BlockHeader> blockHeaders = new ArrayList<>();
         for (String blockHeaderHex : blockHeaderHexs) {
             BlockHeader blockHeader = new BlockHeader();

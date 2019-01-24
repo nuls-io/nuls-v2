@@ -18,10 +18,7 @@ import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 公共远程方法调用工具类
@@ -181,7 +178,7 @@ public class CallMethodUtils {
      * @param address
      * */
     @SuppressWarnings("unchecked")
-    public Map<String,Object> getBalanceAndNonce(Chain chain,String address)throws NulsException{
+    public static Map<String,Object> getBalanceAndNonce(Chain chain,String address)throws NulsException{
         Map<String,Object> params = new HashMap(4);
         params.put("chainId",chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
@@ -205,7 +202,7 @@ public class CallMethodUtils {
      * @param address
      * */
     @SuppressWarnings("unchecked")
-    public Map<String,Object> getBalance(Chain chain,String address)throws NulsException{
+    public static Map<String,Object> getBalance(Chain chain,String address)throws NulsException{
         Map<String,Object> params = new HashMap(4);
         params.put("chainId",chain.getConfig().getChainId());
         params.put("assetChainId", chain.getConfig().getChainId());
@@ -343,5 +340,23 @@ public class CallMethodUtils {
         }catch (Exception e){
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
         }
+    }
+
+    /**
+     * 根据交易HASH获取NONCE（交易HASH后8位）
+     * Obtain NONCE according to HASH (the last 8 digits of HASH)
+     * */
+    public static String getNonce(String txHash){
+        return txHash.substring(txHash.length()-8);
+    }
+
+    /**
+     * 根据交易HASH获取NONCE（交易HASH后8位）
+     * Obtain NONCE according to HASH (the last 8 digits of HASH)
+     * */
+    public static byte[] getNonce(byte[] txHash){
+        byte[] targetArr = new byte[8];
+        System.arraycopy(txHash,txHash.length-8,targetArr,0,8);
+        return targetArr;
     }
 }

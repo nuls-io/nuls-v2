@@ -40,6 +40,7 @@ import io.nuls.tools.thread.TimeService;
 import org.java_websocket.WebSocket;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -411,19 +412,22 @@ public class CmdHandler {
         Get the set range
          */
         String range = cmdParameter.getParameterValidRange();
-        int start = range.startsWith("(")
-                ? Integer.parseInt(range.substring(range.indexOf("(") + 1, range.indexOf(","))) + 1
-                : Integer.parseInt(range.substring(range.indexOf("[") + 1, range.indexOf(",")));
-        int end = range.endsWith(")")
-                ? Integer.parseInt(range.substring(range.indexOf(",") + 1, range.indexOf(")"))) + 1
-                : Integer.parseInt(range.substring(range.indexOf(",") + 1, range.indexOf("]")));
-        int value = Integer.parseInt(params.get(cmdParameter.getParameterName()).toString());
 
+        BigDecimal start = range.startsWith("(")
+                ? new BigDecimal(range.substring(range.indexOf("(") + 1, range.indexOf(",")))
+                : new BigDecimal(range.substring(range.indexOf("[") + 1, range.indexOf(",")));
+
+
+        BigDecimal end = range.endsWith(")")
+                ? new BigDecimal(range.substring(range.indexOf(",") + 1, range.indexOf(")")))
+                : new BigDecimal(range.substring(range.indexOf(",") + 1, range.indexOf("]")));
+
+        BigDecimal value = new BigDecimal(params.get(cmdParameter.getParameterName()).toString());
         /*
         判断是否在范围内
         Judge whether it is within the range
          */
-        return start <= value && value <= end;
+        return value.compareTo(start)>=0 && value.compareTo(end)<=0;
     }
 
     /**

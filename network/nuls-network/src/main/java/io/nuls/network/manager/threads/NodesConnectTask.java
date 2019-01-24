@@ -130,33 +130,31 @@ public class NodesConnectTask implements Runnable  {
             Collection<NodeGroup> nodeGroups = NodeGroupManager.getInstance().getNodeGroupCollection();
             for (NodeGroup nodeGroup : nodeGroups) {
                 try {
-                if(nodeGroup.isLock()){
-                    continue;
-                }
-                if (nodeGroup.isInMaxOutNumber()) {
+                    if(nodeGroup.isLock()){
+                        continue;
+                    }
+                    if (nodeGroup.isInMaxOutNumber()) {
+                        /*
+                         * 连接不饱和，向种子节点寻求更多的地址
+                         *Connection is not saturated, seek more addresses from the seed node
+                         */
+                        MessageManager.getInstance().sendGetAddrMessage(nodeGroup.getMagicNumber(),false,true);
+                        Collection<Node> nodes = nodeGroup.getDisConnectNodes();
+                        connectPeer(nodes,nodeGroup.getMagicNumber());
+                    }
                     /*
-                     * 连接不饱和，向种子节点寻求更多的地址
-                     *Connection is not saturated, seek more addresses from the seed node
+                     * 跨链连接
+                     * Cross-chain connection
                      */
-                    MessageManager.getInstance().sendGetAddrMessage(nodeGroup.getMagicNumber(),false,true);
-                    Collection<Node> nodes = nodeGroup.getDisConnectNodes();
-                    connectPeer(nodes,nodeGroup.getMagicNumber());
-                }
-                /*
-                 * 跨链连接
-                 * Cross-chain connection
-                 */
-                if(nodeGroup.isInCrossMaxOutNumber()){
-                    /*
-                     * 连接不饱和，向种子节点寻求更多的地址
-                     *Connection is not saturated, seek more addresses from the seed node
-                     */
-                    MessageManager.getInstance().sendGetAddrMessage(nodeGroup.getMagicNumber(),true,true);
-                    Collection<Node> nodes = nodeGroup.getDisConnectCrossNodes();
-                    connectPeer(nodes,nodeGroup.getMagicNumber());
-                }
-
-
+                    if(nodeGroup.isInCrossMaxOutNumber()){
+                        /*
+                         * 连接不饱和，向种子节点寻求更多的地址
+                         *Connection is not saturated, seek more addresses from the seed node
+                         */
+                        MessageManager.getInstance().sendGetAddrMessage(nodeGroup.getMagicNumber(),true,true);
+                        Collection<Node> nodes = nodeGroup.getDisConnectCrossNodes();
+                        connectPeer(nodes,nodeGroup.getMagicNumber());
+                    }
                 }catch(Exception e){
                     e.printStackTrace();
                 }

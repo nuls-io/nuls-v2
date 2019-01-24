@@ -50,7 +50,7 @@ public class BlockDownLoadResult {
      */
     private boolean success;
     /**
-     * 耗时
+     * 下载耗时(不精确)
      */
     private long duration;
     /**
@@ -58,12 +58,13 @@ public class BlockDownLoadResult {
      */
     private NulsDigestData messageHash;
 
-    public BlockDownLoadResult(NulsDigestData messageHash, long startHeight, int size, Node node, boolean b) {
+    public BlockDownLoadResult(NulsDigestData messageHash, long startHeight, int size, Node node, boolean b, long duration) {
         this.messageHash = messageHash;
         this.startHeight = startHeight;
         this.size = size;
         this.node = node;
         this.success = b;
+        this.duration = duration;
     }
 
 }

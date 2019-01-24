@@ -45,6 +45,7 @@ import java.util.concurrent.*;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.block.constant.Constant.CONSENSUS_WORKING;
+import static io.nuls.block.constant.Constant.NODE_COMPARATOR;
 
 /**
  * 区块同步主线程,管理多条链的区块同步
@@ -212,7 +213,7 @@ public class BlockSynchronizer implements Runnable {
     public BlockDownloaderParams statistics(List<Node> availableNodes, ChainContext context) {
         BlockDownloaderParams params = new BlockDownloaderParams();
         params.setAvailableNodesCount(availableNodes.size());
-        PriorityBlockingQueue<Node> nodeQueue = new PriorityBlockingQueue<>(availableNodes.size(), Node.COMPARATOR);
+        PriorityBlockingQueue<Node> nodeQueue = new PriorityBlockingQueue<>(availableNodes.size(), NODE_COMPARATOR);
         params.setNodes(nodeQueue);
         //每个节点的(最新HASH+最新高度)是key
         String key = "";

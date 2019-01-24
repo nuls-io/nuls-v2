@@ -35,8 +35,8 @@ import static org.junit.Assert.*;
 public class AccountServiceTest {
 
     protected static AccountService accountService;
-    protected int chainId = 8964;
-    protected String password = "";
+    protected int chainId = 12345;
+    protected String password = "nuls123456";
 
     @BeforeClass
     public static void beforeTest() {
@@ -103,17 +103,19 @@ public class AccountServiceTest {
     public void createAccountTest() throws Exception {
         int count = 5;
         //Test to create an account that is not empty.
-        List<Account> accountList = accountService.createAccount(chainId, count, password);
+//        List<Account> accountList = accountService.createAccount(chainId, count, password);
+//        //Checking the number of accounts returned
+//        assertEquals(accountList.size(), count);
+//        for(Account account : accountList){
+//            System.out.println(account.getAddress().getBase58());
+//        }
+        //Test to create an empty password account
+        List<Account> accountList = accountService.createAccount(chainId, count, null);
         //Checking the number of accounts returned
         assertEquals(accountList.size(), count);
         for(Account account : accountList){
             System.out.println(account.getAddress().getBase58());
         }
-        //Test to create an empty password account
-        accountList = accountService.createAccount(chainId, count, null);
-        //Checking the number of accounts returned
-        assertEquals(accountList.size(), count);
-
         try {
             //Test the largest number of generated accounts.
             accountList = accountService.createAccount(chainId, 101, password);

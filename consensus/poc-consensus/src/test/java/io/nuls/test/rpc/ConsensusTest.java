@@ -25,7 +25,7 @@ import java.util.Map;
  * 2018/12/1
  * */
 public class ConsensusTest {
-    private  int chainId = 1;
+    private  int chainId = 12345;
     private  String success = "1";
 
     @BeforeClass
@@ -116,7 +116,7 @@ public class ConsensusTest {
         try {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", 1);
+            params.put("chainId", 12345);
             params.put("count", 4);
             params.put("password", null);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
@@ -135,7 +135,7 @@ public class ConsensusTest {
             String rewardAddress = accountList.get(2);
             Map<String,Object> caParams = new HashMap<>();
             caParams.put("agentAddress",agentAddress);
-            caParams.put("chainId",1);
+            caParams.put("chainId",12345);
             caParams.put("deposit",20000);
             caParams.put("commissionRate",10);
             caParams.put("packingAddress",packingAddress);
@@ -148,7 +148,7 @@ public class ConsensusTest {
 
             //3.创建节点交易提交
             Map<String,Object>caTxCommit = new HashMap<>();
-            caTxCommit.put("chainId",1);
+            caTxCommit.put("chainId",12345);
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.setHeight(0);
             caTxCommit.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
@@ -162,7 +162,7 @@ public class ConsensusTest {
             //4.委托节点交易创建
             String depositAddress = accountList.get(3);
             Map<String,Object> dpParams = new HashMap<>();
-            dpParams.put("chainId",1);
+            dpParams.put("chainId",12345);
             dpParams.put("address",depositAddress);
             dpParams.put("agentHash",agentHash);
             dpParams.put("deposit","300000");
@@ -173,7 +173,7 @@ public class ConsensusTest {
 
             //5.委托交易提交
             Map<String,Object>dpTxCommitParams = new HashMap<>();
-            dpTxCommitParams.put("chainId",1);
+            dpTxCommitParams.put("chainId",12345);
             BlockHeader blockHeader1 = new BlockHeader();
             blockHeader.setHeight(0);
             dpTxCommitParams.put("blockHeader", HexUtil.encode(blockHeader1.serialize()));

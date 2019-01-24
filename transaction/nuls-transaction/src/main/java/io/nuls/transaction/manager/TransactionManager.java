@@ -140,17 +140,18 @@ public class TransactionManager {
      */
     public boolean verify(Chain chain, Transaction tx) {
         try {
-            baseValidateTx(chain, tx);
+            TxRegister txRegister = getTxRegister(chain, tx.getType());
+            baseValidateTx(chain, tx, txRegister);
             //由于跨链交易直接调模块内部验证器接口，可不通过RPC接口
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
-               return txService.crossTransactionValidator(chain, tx);
-            }else {
-                TxRegister txRegister = this.getTxRegister(chain, tx.getType());
+                return txService.crossTransactionValidator(chain, tx);
+            } else if (!txRegister.getSystemTx()) {
                 //调验证器
                 return TransactionCall.txProcess(chain, txRegister.getValidator(), txRegister.getModuleCode(), tx.hex());
             }
+            return true;
         } catch (NulsException e) {
-            chain.getLogger().error(e);
+            chain.getLogger().error("tx type: " + tx.getType(), e);
             return false;
         } catch (Exception e) {
             chain.getLogger().error(TxErrorCode.IO_ERROR.getMsg());
@@ -174,8 +175,7 @@ public class TransactionManager {
      * @param tx
      * @return Result
      */
-    private void baseValidateTx(Chain chain, Transaction tx) throws NulsException {
-
+    private void baseValidateTx(Chain chain, Transaction tx, TxRegister txRegister) throws NulsException {
         if (null == tx) {
             throw new NulsException(TxErrorCode.TX_NOT_EXIST);
         }
@@ -191,7 +191,6 @@ public class TransactionManager {
         if (tx.size() > TxConstant.TX_MAX_SIZE) {
             throw new NulsException(TxErrorCode.TX_SIZE_TOO_LARGE);
         }
-        TxRegister txRegister = getTxRegister(chain, tx.getType());
         //验证签名
         validateTxSignature(tx, txRegister, chain);
         //如果有coinData, 则进行验证,有一些交易没有coinData数据
@@ -199,9 +198,9 @@ public class TransactionManager {
             //coinData基础验证以及手续费 (from中所有的nuls资产-to中所有nuls资产)
             CoinData coinData = TxUtil.getCoinData(tx);
             validateCoinFromBase(chain, tx.getType(), coinData.getFrom());
-            validateCoinToBase(coinData.getTo());
+            validateCoinToBase(coinData.getTo(), tx.getType());
             validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
-        }else if(tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() != TxConstant.TX_TYPE_RED_PUNISH){
+        } else if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() != TxConstant.TX_TYPE_RED_PUNISH) {
             //不是红黄牌,必有coinData
             throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
         }
@@ -209,23 +208,24 @@ public class TransactionManager {
 
     /**
      * 验证签名 只需要验证,需要验证签名的交易(一些系统交易不用签名)
+     *
      * @param tx
      * @return
      * @throws NulsException
      */
-    private void validateTxSignature(Transaction tx, TxRegister txRegister, Chain chain) throws NulsException{
+    private void validateTxSignature(Transaction tx, TxRegister txRegister, Chain chain) throws NulsException {
         //只需要验证,需要验证签名的交易(一些系统交易不用签名)
-        if(txRegister.verifySignature) {
+        if (txRegister.verifySignature) {
             Set<String> addressSet = SignatureUtil.getAddressFromTX(tx, chain.getChainId());
             CoinData coinData = TxUtil.getCoinData(tx);
-            if(null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0){
+            if (null == coinData || null == coinData.getFrom() || coinData.getFrom().size() <= 0) {
                 throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
             }
             //判断from中地址和签名的地址是否匹配
-            for(CoinFrom coinFrom : coinData.getFrom()) {
-                if(tx.isMultiSignTx()){
+            for (CoinFrom coinFrom : coinData.getFrom()) {
+                if (tx.isMultiSignTx()) {
                     MultiSigAccount multiSigAccount = AccountCall.getMultiSigAccount(coinFrom.getAddress());
-                    if(null == multiSigAccount){
+                    if (null == multiSigAccount) {
                         throw new NulsException(TxErrorCode.ACCOUNT_NOT_EXIST);
                     }
                     for (byte[] bytes : multiSigAccount.getPubKeyList()) {
@@ -234,7 +234,7 @@ public class TransactionManager {
                             throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
                         }
                     }
-                }else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))) {
+                } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))) {
                     throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
                 }
             }
@@ -257,7 +257,7 @@ public class TransactionManager {
     private void validateCoinFromBase(Chain chain, int type, List<CoinFrom> listFrom) throws NulsException {
         //coinBase交易没有from
         if (type == TxConstant.TX_TYPE_COINBASE) {
-            throw new NulsException(TxErrorCode.SUCCESS);
+            return;
         }
         if (null == listFrom || listFrom.size() == 0) {
             throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
@@ -266,7 +266,7 @@ public class TransactionManager {
         for (CoinFrom coinFrom : listFrom) {
             byte[] addrBytes = coinFrom.getAddress();
             int addrChainId = AddressTool.getChainIdByAddress(addrBytes);
-            int assetsId =  coinFrom.getAssetsId();
+            int assetsId = coinFrom.getAssetsId();
 
             //如果不是跨链交易，from中地址对应的链id必须发起链id，跨链交易在验证器中验证
             if (type != TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
@@ -301,17 +301,19 @@ public class TransactionManager {
      * @param listTo
      * @return Result
      */
-    private void validateCoinToBase(List<CoinTo> listTo) throws NulsException {
-        if (null == listTo || listTo.size() == 0) {
-            throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
+    private void validateCoinToBase(List<CoinTo> listTo, int type) throws NulsException {
+        if (type != TxConstant.TX_TYPE_COINBASE) {
+            if (null == listTo || listTo.size() == 0) {
+                throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
+            }
         }
         //验证收款方是不是属于同一条链
         Integer addressChainId = null;
         Set<String> uniqueCoin = new HashSet<>();
         for (CoinTo coinTo : listTo) {
             int chainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
-            int assetsChainId =  coinTo.getAssetsChainId();
-            int assetsId =  coinTo.getAssetsId();
+            int assetsChainId = coinTo.getAssetsChainId();
+            int assetsId = coinTo.getAssetsId();
             if (null == addressChainId) {
                 addressChainId = chainId;
                 continue;
@@ -320,7 +322,7 @@ public class TransactionManager {
             }
             //验证账户地址,资产链id,资产id的组合唯一性
             boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinTo.getAddress()) + "-" + assetsChainId + "-" + assetsId);
-            if(!rs){
+            if (!rs) {
                 throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
         }
@@ -335,8 +337,8 @@ public class TransactionManager {
      * @param coinData
      * @return Result
      */
-    private void validateFee(Chain chain, int type, int txSize, CoinData coinData ,TxRegister txRegister) throws NulsException {
-        if(txRegister.getSystemTx()){
+    private void validateFee(Chain chain, int type, int txSize, CoinData coinData, TxRegister txRegister) throws NulsException {
+        if (txRegister.getSystemTx()) {
             //系统交易没有手续费
             return;
         }

@@ -37,11 +37,12 @@ public interface TxCmd {
     String TX_REGISTER = "tx_register";
     String TX_PACKABLETXS = "tx_packableTxs";
     String TX_SAVE = "tx_save";
+    String TX_GENGSIS_SAVE = "tx_gengsisSave";
     String TX_ROLLBACK = "tx_rollback";
     String TX_GETTX = "tx_getTx";
     String TX_GETTXS = "tx_getTxs";
 //    String TX_DELETE = "tx_delete";
-    String TX_VERIFY = "tx_verify";
+    String TX_BATCHVERIFY = "tx_batchVerify";
     String TX_GETTXSINFO = "tx_getTxsInfo";
     String TX_GETTXPROCESSORS = "tx_getTxProcessors";
     String TX_RUNCHAIN = "tx_runChain";

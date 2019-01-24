@@ -78,6 +78,9 @@ public class WsServer extends WebSocketServer {
         Setting the Connection URL of Core Module(Manager)
          */
         ServerRuntime.setKernelUrl(kernelUrl);
+
+        Thread.sleep(1000L);
+
         /*
         与核心模块（Manager）握手
         Shake hands with the core module (Manager)

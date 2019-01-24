@@ -21,14 +21,17 @@
 package io.nuls.block.service.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.service.BlockStorageService;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.nuls.block.constant.Constant.*;
@@ -99,8 +102,30 @@ public class BlockStorageServiceImpl implements BlockStorageService {
     }
 
     @Override
-    public List<BlockHeaderPo> query(int chainId, long startHeight, long endHeight) {
-        return null;
+    public List<BlockHeader> query(int chainId, long startHeight, long endHeight) {
+        ArrayList<byte []> keys = new ArrayList<>();
+        for (long i = startHeight; i <= endHeight; i++) {
+            keys.add(SerializeUtils.uint64ToByteArray(i));
+        }
+        List<byte[]> valueList = RocksDBService.multiGetValueList(BLOCK_HEADER + chainId, keys);
+        if (valueList == null) {
+            return null;
+        }
+        List<BlockHeader> blockHeaders = new ArrayList<>();
+        for (byte[] bytes : valueList) {
+            BlockHeader header = new BlockHeader();
+            try {
+                header.parse(new NulsByteBuffer(bytes));
+            } catch (NulsException e) {
+                commonLog.debug("ChainStorageServiceImpl-batchquery-fail");
+                e.printStackTrace();
+                commonLog.error(e);
+                return null;
+            }
+            blockHeaders.add(header);
+        }
+        blockHeaders.sort(BLOCK_HEADER_COMPARATOR);
+        return blockHeaders;
     }
 
     @Override

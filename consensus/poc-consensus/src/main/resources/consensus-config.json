@@ -76,12 +76,12 @@
   },
   {
     "key":"chainId",
-    "value":1,
+    "value":12345,
     "readOnly":true
   },
   {
     "key":"seedNodes",
-    "value":"MgxBu7J6kMyDjkmPfNxdq51vhpcRx0100,PTfwR9vJY7FHdH7r4JVXsRwzQJMV60100,NqyzKfPUwKUpc4BGgndg5VZF87AfJ0100",
+    "value":"SCjzGbq1FZuqxz41sTpexiLDggrk93930,MYhMupGkyj792ZiecwapJUhv11EPd3930,YJhB6vwtTtcX8hd31xQWxXW65vqqG3930",
     "readOnly":true
   }
 ]

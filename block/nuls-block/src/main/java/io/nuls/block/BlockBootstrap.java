@@ -75,6 +75,7 @@ public class BlockBootstrap {
                     .dependencies(ModuleE.KE.abbr, "1.0")
                     .dependencies(ModuleE.CS.abbr, "1.0")
                     .dependencies(ModuleE.NW.abbr, "1.0")
+                    .dependencies(ModuleE.TX.abbr, "1.0")
                     .scanPackage(RPC_DEFAULT_SCAN_PACKAGE)
                     .connect("ws://localhost:8887");
             // Get information from kernel
@@ -83,8 +84,6 @@ public class BlockBootstrap {
             RocksDBService.init(DATA_PATH);
             RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
             RocksDBService.createTable(CHAIN_PARAMETERS);
-            //加载配置
-            ConfigLoader.load();
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("error occur when init, " + e.getMessage());
@@ -99,6 +98,8 @@ public class BlockBootstrap {
             }
             NetworkUtil.register();
             commonLog.info("service start");
+            //加载配置
+            ConfigLoader.load();
 //            onlyRunWhenTest();
 
             //开启区块同步线程

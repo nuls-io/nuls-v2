@@ -43,7 +43,10 @@ public class ConsensusManager {
      * @param round     latest local round/本地最新轮次信息
      */
     public void addConsensusTx(Chain chain, BlockHeader bestBlock, List<Transaction> txList, MeetingMember self, MeetingRound round) throws NulsException, IOException {
-        Transaction coinBaseTransaction = createCoinBaseTx(chain,self, txList, round, bestBlock.getHeight() + 1 + chain.getConfig().getCoinbaseUnlockHeight());
+        /*
+        * NULS2.0共识奖励不需要锁定
+        * */
+        Transaction coinBaseTransaction = createCoinBaseTx(chain,self, txList, round, 0);
         txList.add(0, coinBaseTransaction);
         punishManager.punishTx(chain, bestBlock, txList, self, round);
     }
@@ -61,26 +64,18 @@ public class ConsensusManager {
      */
     public Transaction createCoinBaseTx(Chain chain,MeetingMember member, List<Transaction> txList, MeetingRound localRound, long unlockHeight) throws IOException,NulsException {
         Transaction tx = new Transaction(ConsensusConstant.TX_TYPE_COINBASE);
-        try {
-            CoinData coinData = new CoinData();
-            /*
-            计算共识奖励
-            Calculating consensus Awards
-            */
-            List<CoinTo> rewardList = calcReward(chain,txList, member, localRound, unlockHeight);
-            for (CoinTo coin : rewardList) {
-                coinData.addTo(coin);
-            }
-            tx.setTime(member.getPackEndTime());
-            tx.setCoinData(coinData.serialize());
-            tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
-        } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
-            throw e;
-        }catch (NulsException e){
-            chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e.getMessage());
-            throw e;
+        CoinData coinData = new CoinData();
+        /*
+        计算共识奖励
+        Calculating consensus Awards
+        */
+        List<CoinTo> rewardList = calcReward(chain,txList, member, localRound, unlockHeight);
+        for (CoinTo coin : rewardList) {
+            coinData.addTo(coin);
         }
+        tx.setTime(member.getPackEndTime());
+        tx.setCoinData(coinData.serialize());
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         return tx;
     }
 

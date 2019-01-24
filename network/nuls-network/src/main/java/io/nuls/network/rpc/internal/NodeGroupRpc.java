@@ -33,7 +33,6 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.NodeGroupConnector;
 import io.nuls.network.model.po.NodeGroupPo;
 import io.nuls.network.model.vo.NodeGroupVo;
-import io.nuls.network.storage.DbService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -53,7 +52,6 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 @Component
 public class NodeGroupRpc extends BaseCmd {
     private NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
-    private DbService dbService=StorageManager.getInstance().getDbService();
     /**
      * nw_createNodeGroup
      * 创建跨链网络
@@ -61,10 +59,10 @@ public class NodeGroupRpc extends BaseCmd {
     @CmdAnnotation(cmd = "nw_createNodeGroup", version = 1.0,
             description = "createNodeGroup")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "magicNumber", parameterType = "long", parameterValidRange = "[1,4294967295]")
-    @Parameter(parameterName = "maxOut", parameterType = "int",parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "maxIn", parameterType = "int",parameterValidRange = "[1,65535]")
-    @Parameter(parameterName = "minAvailableCount", parameterType = "int",parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "magicNumber", parameterType = "String")
+    @Parameter(parameterName = "maxOut", parameterType = "String")
+    @Parameter(parameterName = "maxIn", parameterType = "String")
+    @Parameter(parameterName = "minAvailableCount", parameterType = "String")
     @Parameter(parameterName = "seedIps", parameterType = "String")
     @Parameter(parameterName = "isMoonNode", parameterType = "int",parameterValidRange = "[0,1]")
     public Response createNodeGroup(Map params) {
@@ -102,7 +100,7 @@ public class NodeGroupRpc extends BaseCmd {
         nodeGroup.setSelf(isSelf);
         //存储nodegroup
         nodeGroupPos.add((NodeGroupPo)nodeGroup.parseToPo());
-        dbService.saveNodeGroups(nodeGroupPos);
+        StorageManager.getInstance().getDbService().saveNodeGroups(nodeGroupPos);
         nodeGroupManager.addNodeGroup(nodeGroup.getChainId(),nodeGroup);
         // 成功
         return success();
@@ -229,8 +227,8 @@ public class NodeGroupRpc extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
     public Response delGroupByChainId(Map  params) {
         int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
-        dbService.deleteGroup(chainId);
-        dbService.deleteGroupNodeKeys(chainId);
+        StorageManager.getInstance().getDbService().deleteGroup(chainId);
+        StorageManager.getInstance().getDbService().deleteGroupNodeKeys(chainId);
         //删除网络连接
         NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
         nodeGroup.destroy();

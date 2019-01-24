@@ -60,7 +60,6 @@ import java.util.*;
 public class ConsensusServiceImpl implements ConsensusService {
     @Autowired
     private AgentStorageService agentService;
-
     @Autowired
     private DepositStorageService depositService;
     @Autowired
@@ -90,6 +89,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 创建节点
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result createAgent(Map<String, Object> params) {
         if (params == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -134,8 +134,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             //4.交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAgentAddress(), dto.getPassword(), priKey, tx);
-            //todo 5.将交易发送给交易管理模块
-
+            CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHex", HexUtil.encode(tx.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
@@ -199,8 +198,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
-            //todo 将交易传递给交易管理模块
-
+            CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHex", HexUtil.encode(tx.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
@@ -251,8 +249,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
-
-            //todo 将交易传递给交易管理模块
+            CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHex", HexUtil.encode(tx.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
@@ -288,10 +285,8 @@ public class ConsensusServiceImpl implements ConsensusService {
             }
             //账户验证
             HashMap callResult = CallMethodUtils.accountValid(dto.getChainId(), dto.getAddress(), dto.getPassword());
-
-            //todo 从交易模块获取委托交易（交易模块）+ 返回数据处理
             NulsDigestData hash = NulsDigestData.fromDigestHex(dto.getTxHash());
-            Transaction depositTransaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
+            Transaction depositTransaction = CallMethodUtils.getTransaction(chain,dto.getTxHash());
             if (depositTransaction == null) {
                 return Result.getFailed(ConsensusErrorCode.TX_NOT_EXIST);
             }
@@ -315,12 +310,12 @@ public class ConsensusServiceImpl implements ConsensusService {
             cancelDeposit.setJoinTxHash(hash);
             cancelDepositTransaction.setTxData(cancelDeposit.serialize());
             CoinData coinData = coinDataManager.getUnlockCoinData(cancelDeposit.getAddress(), chain, deposit.getDeposit(), 0, cancelDepositTransaction.size() + P2PHKSignature.SERIALIZE_LENGTH);
-            coinData.getFrom().get(0).setNonce(hash.getDigestBytes());
+            coinData.getFrom().get(0).setNonce(CallMethodUtils.getNonce(hash.getDigestBytes()));
             cancelDepositTransaction.setCoinData(coinData.serialize());
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, cancelDepositTransaction);
-            //todo 将交易传递给交易管理模块
+            CallMethodUtils.sendTx(chain,HexUtil.encode(cancelDepositTransaction.serialize()));
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("txHex", HexUtil.encode(cancelDepositTransaction.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
@@ -484,7 +479,7 @@ public class ConsensusServiceImpl implements ConsensusService {
                 yellowPunishList.add(new PunishLogDTO(po));
             }
         }
-        Map<String, List<PunishLogDTO>> resultMap = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+        Map<String, List<PunishLogDTO>> resultMap = new HashMap<>(2);
         resultMap.put("redPunish", redPunishList);
         resultMap.put("yellowPunish", yellowPunishList);
         return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultMap);
@@ -719,7 +714,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     @Override
     @SuppressWarnings("unchecked")
     public Result batchValid(Map<String, Object> params) {
-        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX_HEX_LIST) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -728,7 +723,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            List<String> txHexList = JSONUtils.json2list((String) params.get(ConsensusConstant.PARAM_TX), String.class);
+            List<String> txHexList = (List<String>)params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
             List<Transaction> txList = new ArrayList<>();
             for (String txHex : txHexList) {
                 Transaction tx = new Transaction();
@@ -736,17 +731,16 @@ public class ConsensusServiceImpl implements ConsensusService {
                 txList.add(tx);
             }
             batchValidator.batchValid(txList, chain);
-            List<String> resultTxHexList = new ArrayList<>();
+            List<String> resultTxHashList = new ArrayList<>();
             for (Transaction tx : txList) {
-                resultTxHexList.add(HexUtil.encode(tx.serialize()));
+                resultTxHashList.add(tx.getHash().getDigestHex());
             }
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(resultTxHexList);
+            Map<String, Object> result = new HashMap<>(2);
+            result.put("list",resultTxHashList);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
-        } catch (IOException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(ConsensusErrorCode.DATA_PARSE_ERROR);
         }
     }
 

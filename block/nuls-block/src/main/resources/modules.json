@@ -45,7 +45,7 @@
     "name": "chainId",
     "remark": "链ID",
     "readOnly": "true",
-    "value": "1"
+    "value": "12345"
   },
   {
     "name": "blockMaxSize",
@@ -87,7 +87,7 @@
     "name": "minNodeAmount",
     "remark": "最小可用节点个数,低于此数不同步区块",
     "readOnly": "false",
-    "value": "3"
+    "value": "0"
   },
   {
     "name": "downloadNumber",

@@ -21,13 +21,18 @@
 package io.nuls.block.constant;
 
 import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.block.model.Node;
 
+import java.io.File;
 import java.util.Comparator;
 
 /**
- * 配置常量
+ * 常量
  *
- * @author lan
+ * @author captain
+ * @version 1.0
+ * @date 19-1-22 下午3:34
  */
 public interface Constant {
 
@@ -40,7 +45,7 @@ public interface Constant {
     /**
      * db文件存放目录
      */
-    String DATA_PATH = "../../data";
+    String DATA_PATH = System.getProperty("user.home") + "/data/block";
     /**
      * 存储每条链的配置信息
      */
@@ -85,5 +90,28 @@ public interface Constant {
      */
     int CONSENSUS_WAITING = 0;
 
-    public static final Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
+    /**
+     * 区块排序器
+     */
+    Comparator<Block> BLOCK_COMPARATOR = (o1, o2) -> (int) (o1.getHeader().getHeight() - o2.getHeader().getHeight());
+
+    /**
+     * 区块头排序器
+     */
+    Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
+
+    /**
+     * 节点比较器,默认按信用值排序
+     */
+    Comparator<Node> NODE_COMPARATOR = Comparator.comparingInt(Node::getCredit).reversed();
+
+    /**
+     * 下载单个区块的超时时间
+     */
+    long SINGLE_DOWNLOAD_TIMEOUNT = 1000L;
+
+    /**
+     * 下载多个区块的超时时间
+     */
+    long BATCH_DOWNLOAD_TIMEOUNT = 30L;
 }

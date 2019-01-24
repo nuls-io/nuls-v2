@@ -110,4 +110,16 @@ public class DepositTest {
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getDepositList", params);
         System.out.println(cmdResp.getResponseData());
     }
+
+    @Test
+    public void paramTest()throws Exception{
+        Map<String,Object> params = new HashMap<>();
+        params.put("intCount",1);
+        params.put("byteCount",125);
+        params.put("shortCount",1555);
+        params.put("longCount",666666);
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.KE.abbr, "paramTestCmd", params);
+        System.out.println(cmdResp);
+
+    }
 }

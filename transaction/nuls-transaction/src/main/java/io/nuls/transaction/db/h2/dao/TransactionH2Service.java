@@ -15,7 +15,7 @@ public interface TransactionH2Service {
     Page<TransactionPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type, Integer state,
                                Long startTime, Long endTime, int pageNumber, int pageSize);
 
-    Page<TransactionPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type,  int pageNumber, int pageSize);
+    Page<TransactionPO> getTxs(String address, Integer assetChainId, Integer assetId, Integer type, int pageNumber, int pageSize);
 
     int saveTx(TransactionPO txPo);
 

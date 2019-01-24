@@ -26,7 +26,10 @@
 package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.*;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
+import io.nuls.base.data.CoinTo;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
@@ -35,8 +38,6 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import org.junit.Before;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -44,11 +45,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.nuls.ledger.utils.LoggerUtil.logger;
+
 /**
  * Created by ljs on 2019/01/06.
  */
 public class CmdTest {
-    final Logger logger = LoggerFactory.getLogger(getClass());
 
     @Before
     public void before() throws Exception {
