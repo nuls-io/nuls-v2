@@ -9,7 +9,6 @@ import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.TransferDto;
 import io.nuls.account.model.po.AliasPo;
-import io.nuls.account.service.AliasService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.TxUtil;
@@ -237,10 +236,10 @@ public class TransactionCmd extends BaseCmd {
         Map<String, String> map = new HashMap<>(1);
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
-        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
-        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
-        Object amountObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
-        Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_Hex);
+        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
+        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
+        Object amountObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
+        Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
         try {
             // check parameters
             if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || aliasObj == null ||

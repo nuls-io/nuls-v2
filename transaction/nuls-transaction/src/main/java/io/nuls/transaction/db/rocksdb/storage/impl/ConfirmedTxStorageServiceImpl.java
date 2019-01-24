@@ -27,7 +27,7 @@ import java.util.Map;
  * @date: 2018/11/13
  */
 @Service
-public class ConfirmedTxServiceImpl implements ConfirmedTxStorageService, InitializingBean {
+public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService, InitializingBean {
 
     @Override
     public void afterPropertiesSet() throws NulsException {
@@ -104,7 +104,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxStorageService, Initia
         }
         boolean result = false;
         try {
-            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CONFIRMED, hash.serialize());
+            result = RocksDBService.delete(TxDBConstant.DB_TRANSACTION_CONFIRMED + chainId, hash.serialize());
         } catch (Exception e) {
             Log.error(e);
         }

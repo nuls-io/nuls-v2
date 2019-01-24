@@ -197,12 +197,12 @@ public interface AccountConstant {
      */
     byte NORMAL_TX_LOCKED = 0;
 
-    public static final Comparator<String> PUBKEY_COMPARATOR = new Comparator<String>() {
-        private Comparator<byte[]> comparator = UnsignedBytes.lexicographicalComparator();
+    Comparator<String> PUBKEY_COMPARATOR = new Comparator<String>() {
+        private Comparator<byte[]> COMPARATOR = UnsignedBytes.lexicographicalComparator();
 
         @Override
         public int compare(String k1, String k2) {
-            return comparator.compare(HexUtil.decode(k1), HexUtil.decode(k2));
+            return COMPARATOR.compare(HexUtil.decode(k1), HexUtil.decode(k2));
         }
     };
 

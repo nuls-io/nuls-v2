@@ -83,7 +83,7 @@ public interface TxConstant {
     /** 注册链交易*/
     int TX_TYPE_REGISTER_CHAIN_AND_ASSET = 11;
     /** 销毁链*/
-    int TX_TYPE_destroy_CHAIN_AND_ASSET = 12;
+    int TX_TYPE_DESTROY_CHAIN_AND_ASSET = 12;
     /** 为链新增一种资产*/
     int TX_TYPE_ADD_ASSET_TO_CHAIN = 13;
     /** 删除链上资产*/

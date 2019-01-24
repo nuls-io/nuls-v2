@@ -78,6 +78,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (null == tx) {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
         }
+        chain.getLogger().debug("saveConfirmedTx: " + tx.getHash().getDigestHex());
         return confirmedTxStorageService.saveTx(chain.getChainId(), tx);
     }
 
@@ -128,14 +129,14 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             int chainId = chain.getChainId();
             List<Transaction> savedList = new ArrayList<>();
             List<byte[]> txHashs = new ArrayList<>();
-            List<NulsDigestData> ctxhashList = new ArrayList<>();
+            List<NulsDigestData> ctxHashList = new ArrayList<>();
             for (int i = 0; i < txHashList.size(); i++) {
                 NulsDigestData hash = txHashList.get(i);
                 txHashs.add(hash.serialize());
                 //从已验证但未打包的交易中取出交易
                 Transaction tx = unconfirmedTxStorageService.getTx(chainId, hash);
                 //将交易保存、提交、发送至账本
-                ResultSaveCommitTx resultSaveCommitTx = saveCommitTx(chain, tx, ctxhashList);
+                ResultSaveCommitTx resultSaveCommitTx = saveCommitTx(chain, tx, ctxHashList);
                 if (resultSaveCommitTx.rs) {
                     savedList.add(tx);
                 } else {
@@ -150,7 +151,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
             //保存生效高度
             long effectHeight = blockHeaderDigest.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
-            boolean rs = confirmedTxStorageService.saveCrossTxEffectList(chainId, effectHeight, ctxhashList);
+            boolean rs = confirmedTxStorageService.saveCrossTxEffectList(chainId, effectHeight, ctxHashList);
             if(!rs){
                 this.rollbackTxList(chain, savedList, blockHeaderDigest, false);
                 return false;
@@ -492,6 +493,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 if (null == tx) {
                     throw new NulsException(TxErrorCode.TX_NOT_EXIST);
                 }
+                txList.add(tx);
             }
             return rollbackTxList(chain, txList, blockHeaderDigest, true);
         } catch (NulsException e) {
