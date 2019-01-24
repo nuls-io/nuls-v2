@@ -41,6 +41,7 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.bo.config.ConfigItem;
+import io.nuls.transaction.rpc.call.BlockCall;
 
 import java.util.List;
 import java.util.Map;
@@ -96,8 +97,8 @@ public class ChainManager {
             initTx(chain);
             schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chainId, chain);
-            //todo 订阅Block模块接口
-            //BlockCall.subscriptionNewBlockHeight(chain);
+            //订阅Block模块接口
+            BlockCall.subscriptionNewBlockHeight(chain);
 
             Log.debug("\nchain = " +JSONUtils.obj2PrettyJson(chain));
         }

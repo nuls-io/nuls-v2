@@ -165,4 +165,24 @@ public class TxRegister {
         }
         return this.getTxType()==(((TxRegister) obj).getTxType());
     }
+
+    @Override
+    public String toString() {
+        return "TxRegister{" +
+                "txType=" + txType +
+                ", validator='" + validator + '\'' +
+                ", commit='" + commit + '\'' +
+                ", rollback='" + rollback + '\'' +
+                ", systemTx=" + systemTx +
+                ", unlockTx=" + unlockTx +
+                ", verifySignature=" + verifySignature +
+                ", moduleValidator='" + moduleValidator + '\'' +
+                ", moduleCode='" + moduleCode + '\'' +
+                '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
 }
