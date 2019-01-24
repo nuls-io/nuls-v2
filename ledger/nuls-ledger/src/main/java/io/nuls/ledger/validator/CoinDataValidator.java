@@ -69,13 +69,13 @@ public class CoinDataValidator {
      */
     private Map<String,List<TempAccountState>> accountBalanceValidateTxMap = new ConcurrentHashMap<>();
 
-    private static final int VALIDATE_SUCCESS_CODE  = 1;
+    public  static final int VALIDATE_SUCCESS_CODE  = 1;
     private static final String VALIDATE_SUCCESS_DESC = "success";
-    private static final int VALIDATE_ORPHAN_CODE = 2;
+    public static final int VALIDATE_ORPHAN_CODE = 2;
     private static final String VALIDATE_ORPHAN_DESC = "address {%s},nonce {%s} is orphan transaction";
-    private static final int VALIDATE_DOUBLE_EXPENSES_CODE = 3;
+    public static final int VALIDATE_DOUBLE_EXPENSES_CODE = 3;
     private static final String VALIDATE_DOUBLE_EXPENSES_DESC = "address {%s},nonce {%s} is double expenses";
-    private static final int VALIDATE_FAIL_CODE = 4;
+    public static final int VALIDATE_FAIL_CODE = 4;
     private static final String VALIDATE_FAIL_DESC = "address {%s},nonce {%s} validate fail:{%s}";
 
     @Autowired
@@ -84,7 +84,6 @@ public class CoinDataValidator {
     private Repository repository;
 
     public boolean hadValidateTx(int addressChainId,Transaction tx){
-        //TODO:hash 值校验
         Map<String,Transaction> batchValidateTxMap = chainsBatchValidateTxMap.get(String.valueOf(addressChainId));
         if(null == batchValidateTxMap  || null == batchValidateTxMap.get(tx.getHash().toString())){
             return false;
@@ -119,7 +118,6 @@ public class CoinDataValidator {
      * @return ValidateResult
      */
     public ValidateResult bathValidatePerTx(int chainId,Transaction tx){
-        //TODO:交易Hash值校验
         Map<String,Transaction> batchValidateTxMap = chainsBatchValidateTxMap.get(String.valueOf(chainId));
         //先校验，再逐笔放入缓存
         //交易的 hash值如果已存在，返回false，交易的from coin nonce 如果不连续，则存在双花。
@@ -131,6 +129,7 @@ public class CoinDataValidator {
         CoinData coinData =  CoinDataUtils.parseCoinData(tx.getCoinData());
         if(null == coinData){
             //例如黄牌交易，直接返回
+            batchValidateTxMap.put(tx.getHash().toString(),tx);
             return new ValidateResult(VALIDATE_SUCCESS_CODE,VALIDATE_SUCCESS_DESC);
         }
         List<CoinFrom> coinFroms = coinData.getFrom();
@@ -167,7 +166,8 @@ public class CoinDataValidator {
      * @return
      */
     private ValidateResult validateCommonCoinData(AccountState accountState,String address,BigInteger fromAmount,String fromNonce){
-        if(accountState.getAvailableAmount().compareTo(fromAmount)== -1 ){
+        BigInteger totalAmount = accountState.getAvailableAmount().add(accountState.getUnconfirmedAmount());
+        if(totalAmount.compareTo(fromAmount)== -1 ){
             logger.info("balance is not enough");
             ValidateResult validateResult = new ValidateResult(VALIDATE_FAIL_CODE,String.format(VALIDATE_FAIL_DESC,address,fromNonce,"balance is not enough"));
             return validateResult;
@@ -253,6 +253,7 @@ public class CoinDataValidator {
                 //交易池中账户存在一样的nonce
                 if(tempAccountState1.getNonce().equalsIgnoreCase(nonce)){
                     logger.info("{}=={}=={}==nonce is double expenses! nonce ={}", address, coinFrom.getAssetsChainId(), coinFrom.getAssetsId(),nonce);
+                    return false;
                 }
             }
             list.add(new TempAccountState(assetKey, nonce, txNonce,tempAccountState.getBalance().subtract(coinFrom.getAmount())));
@@ -319,10 +320,6 @@ public class CoinDataValidator {
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
             String nonce = HexUtil.encode(coinFrom.getNonce());
             AccountState accountState = accountStateService.getAccountState(address,addressChainId, coinFrom.getAssetsChainId(), coinFrom.getAssetsId());
-//            if(accountState == null){
-//                ValidateResult validateResult = new ValidateResult(VALIDATE_FAIL_CODE,String.format(VALIDATE_FAIL_DESC,address,nonce,"account not exist"));
-//                return validateResult;
-//            }
             //初始花费交易,nonce为 fffffff;已兼容处理。
             //普通交易
             if(coinFrom.getLocked() == 0){

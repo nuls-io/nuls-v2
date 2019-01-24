@@ -200,7 +200,7 @@ public class TransactionManager {
             validateCoinFromBase(chain, tx.getType(), coinData.getFrom());
             validateCoinToBase(coinData.getTo(), tx.getType());
             validateFee(chain, tx.getType(), tx.size(), coinData, txRegister);
-        } else if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH || tx.getType() != TxConstant.TX_TYPE_RED_PUNISH) {
+        } else if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH && tx.getType() != TxConstant.TX_TYPE_RED_PUNISH) {
             //不是红黄牌,必有coinData
             throw new NulsException(TxErrorCode.TX_DATA_VALIDATION_ERROR);
         }

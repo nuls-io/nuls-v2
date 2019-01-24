@@ -24,8 +24,6 @@
 
 package io.nuls.transaction.model.bo;
 
-import io.nuls.tools.data.StringUtils;
-
 /**
  * 验证交易结果组合封装 返回结果
  * @author: Charlie

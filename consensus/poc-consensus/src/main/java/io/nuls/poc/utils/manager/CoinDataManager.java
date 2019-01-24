@@ -47,7 +47,7 @@ public class CoinDataManager {
         txSize += to.size();
         Map<String,Object> result = CallMethodUtils.getBalanceAndNonce(chain, AddressTool.getStringAddressByBytes(address));
         byte[] nonce = HexUtil.decode((String)result.get("nonce"));
-        BigInteger available = (BigInteger)result.get("available");
+        BigInteger available = new BigInteger(result.get("available").toString());
         //手续费
         CoinFrom from = new CoinFrom(address,chain.getConfig().getChainId(),chain.getConfig().getAssetsId(),amount,nonce, (byte)0);
         txSize += from.size();
@@ -74,7 +74,7 @@ public class CoinDataManager {
      * */
     public CoinData getUnlockCoinData(byte[] address,Chain chain, BigInteger amount, long lockTime, int txSize)throws NulsException{
         Map<String,Object> balanceMap = CallMethodUtils.getBalance(chain,AddressTool.getStringAddressByBytes(address));
-        BigInteger freeze = (BigInteger) balanceMap.get("freeze");
+        BigInteger freeze = new BigInteger(balanceMap.get("freeze").toString());
         if(BigIntegerUtils.isLessThan(freeze,amount)){
             throw new NulsException(ConsensusErrorCode.BANANCE_NOT_ENNOUGH);
         }

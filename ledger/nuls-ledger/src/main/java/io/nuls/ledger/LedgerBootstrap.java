@@ -86,6 +86,7 @@ public class LedgerBootstrap {
     public static void initRocksDb() {
         try {
             RocksDBService.init(ModuleConfig.getInstance().getDatabaseDir());
+
         } catch (Exception e) {
             logger.error(e);
         }

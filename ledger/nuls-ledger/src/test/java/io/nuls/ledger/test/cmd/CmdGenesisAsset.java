@@ -56,7 +56,6 @@ public class CmdGenesisAsset {
     int assetId = 1;
     //入账金额
     BigInteger amount = BigInteger.valueOf(100000000000L);
-
     Transaction buildTransaction() throws IOException {
         //封装交易执行
         Transaction tx = new Transaction();

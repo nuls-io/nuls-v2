@@ -193,7 +193,7 @@ public class ConfirmedTxStorageServiceImpl implements ConfirmedTxStorageService,
     @Override
     public boolean saveCrossTxEffectList(int chainId, long height, List<NulsDigestData> hashList) {
         if (hashList == null || hashList.size() == 0 || height < 0) {
-            return false;
+            return true;
         }
         CrossTxEffectList crossTxEffectList = new CrossTxEffectList();
         crossTxEffectList.hashList = hashList;
