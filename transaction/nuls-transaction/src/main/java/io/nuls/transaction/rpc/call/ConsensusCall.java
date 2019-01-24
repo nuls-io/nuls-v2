@@ -69,7 +69,7 @@ public class ConsensusCall {
      * @param chain
      * @return
      */
-    public static String cs_getNodePackingAddress(Chain chain) throws NulsException {
+    public static String getNodePackingAddress(Chain chain) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
