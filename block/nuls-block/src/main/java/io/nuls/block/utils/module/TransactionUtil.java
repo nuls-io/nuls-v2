@@ -161,7 +161,10 @@ public class TransactionUtil {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            params.put("txHashList", blockHeaderPo.getTxHashList());
+            List<NulsDigestData> txHashList = blockHeaderPo.getTxHashList();
+            List<String> list = new ArrayList<>();
+            txHashList.forEach(e -> list.add(e.getDigestHex()));
+            params.put("txHashList", list);
             BlockHeaderDigest blockHeaderDigest = new BlockHeaderDigest();
             blockHeaderDigest.setBlockHeaderHash(blockHeaderPo.getHash());
             blockHeaderDigest.setHeight(blockHeaderPo.getHeight());
