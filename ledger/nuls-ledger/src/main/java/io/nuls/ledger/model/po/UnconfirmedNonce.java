@@ -51,6 +51,7 @@ public class UnconfirmedNonce extends BaseNulsData {
     @Setter
     @Getter
     private String nonce;
+
     public UnconfirmedNonce(String nonce){
         this.nonce = nonce;
         this.time = TimeUtils.getCurrentTime();

@@ -31,7 +31,7 @@ package io.nuls.ledger.utils;
  **/
 public class TimeUtils {
     public static long getCurrentTime(){
-        //TODO：可以改为网络时间
+        //TODO：改为网络时间
         return System.currentTimeMillis();
     }
 }
