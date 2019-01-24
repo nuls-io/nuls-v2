@@ -98,7 +98,7 @@ public class ChainManager {
             schedulerManager.createTransactionScheduler(chain);
             chainMap.put(chainId, chain);
             //订阅Block模块接口
-            BlockCall.subscriptionNewBlockHeight(chain);
+//            BlockCall.subscriptionNewBlockHeight(chain);
 
             Log.debug("\nchain = " +JSONUtils.obj2PrettyJson(chain));
         }
