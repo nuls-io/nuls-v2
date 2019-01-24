@@ -129,6 +129,7 @@ public class CoinDataValidator {
         CoinData coinData =  CoinDataUtils.parseCoinData(tx.getCoinData());
         if(null == coinData){
             //例如黄牌交易，直接返回
+            batchValidateTxMap.put(tx.getHash().toString(),tx);
             return new ValidateResult(VALIDATE_SUCCESS_CODE,VALIDATE_SUCCESS_DESC);
         }
         List<CoinFrom> coinFroms = coinData.getFrom();
