@@ -2,6 +2,7 @@ package io.nuls.transaction.db.rocksdb.storage;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.transaction.model.po.TransactionsPO;
 
 import java.util.List;
 
@@ -57,4 +58,11 @@ public interface UnconfirmedTxStorageService {
      * @return 删除是否成功
      */
     boolean removeTxList(int chainId, List<byte[]> hashList);
+
+    /**
+     * 查询所有已验证交易数据，包含保存时间
+     * @param chainId
+     * @return
+     */
+    List<TransactionsPO> getAllTxPOList(int chainId);
 }
