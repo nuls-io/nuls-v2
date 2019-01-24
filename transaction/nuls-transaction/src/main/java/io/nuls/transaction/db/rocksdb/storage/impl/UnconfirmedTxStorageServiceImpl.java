@@ -1,7 +1,6 @@
 package io.nuls.transaction.db.rocksdb.storage.impl;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.TransactionManager;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.db.service.RocksDBService;
@@ -12,6 +11,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxDBConstant;
 import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.model.po.TransactionsPO;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ import java.util.List;
 public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageService, InitializingBean {
 
     @Override
-    public void afterPropertiesSet() throws NulsException {
+    public void afterPropertiesSet() {
     }
 
     @Override
@@ -36,7 +36,10 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         if (tx == null) {
             return false;
         }
-        byte[] txHashBytes = null;
+        TransactionsPO txPO = new TransactionsPO(tx);
+        //设置入库保存时间
+        txPO.setCreateTime(System.currentTimeMillis());
+        byte[] txHashBytes;
         try {
             txHashBytes = tx.getHash().serialize();
         } catch (IOException e) {
@@ -45,7 +48,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         }
         boolean result = false;
         try {
-            result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_CACHE + chainId, txHashBytes, tx.serialize());
+            result = RocksDBService.put(TxDBConstant.DB_TRANSACTION_CACHE + chainId, txHashBytes, txPO.serialize());
         } catch (Exception e) {
             Log.error(e);
         }
@@ -58,7 +61,7 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         if (hash == null) {
             return null;
         }
-        byte[] hashBytes = null;
+        byte[] hashBytes;
         try {
             hashBytes = hash.serialize();
         } catch (IOException e) {
@@ -69,7 +72,10 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         Transaction tx = null;
         if (null != txBytes) {
             try {
-                tx = TransactionManager.getInstance(new NulsByteBuffer(txBytes, 0));
+                TransactionsPO txPO = new TransactionsPO();
+                txPO.parse(new NulsByteBuffer(txBytes, 0));
+                tx = txPO.toTransaction();
+                //tx = TransactionManager.getInstance(new NulsByteBuffer(txBytes, 0));
             } catch (Exception e) {
                 Log.error(e);
                 return null;
@@ -102,14 +108,16 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
         //根据交易hash批量查询交易数据
         List<byte[]> list = RocksDBService.multiGetValueList(TxDBConstant.DB_TRANSACTION_CACHE + chainId, hashList);
         if (list != null) {
-            for (byte[] value : list) {
-                Transaction transaction = new Transaction();
+            for (byte[] txBytes : list) {
+                Transaction tx = new Transaction();
                 try {
-                    transaction.parse(value, 0);
+                    TransactionsPO txPO = new TransactionsPO();
+                    txPO.parse(txBytes, 0);
+                    tx = txPO.toTransaction();
                 } catch (NulsException e) {
                     Log.error(e);
                 }
-                txList.add(transaction);
+                txList.add(tx);
             }
         }
         return txList;
@@ -129,5 +137,24 @@ public class UnconfirmedTxStorageServiceImpl implements UnconfirmedTxStorageServ
             Log.error(e);
         }
         return false;
+    }
+
+    @Override
+    public List<TransactionsPO> getAllTxPOList(int chainId) {
+        List<TransactionsPO> txList = new ArrayList<>();
+        //根据交易hash批量查询交易数据
+        List<byte[]> list = RocksDBService.valueList(TxDBConstant.DB_TRANSACTION_CACHE + chainId);
+        if (list != null) {
+            for (byte[] txBytes : list) {
+                TransactionsPO txPO = new TransactionsPO();
+                try {
+                    txPO.parse(txBytes, 0);
+                } catch (NulsException e) {
+                    Log.error(e);
+                }
+                txList.add(txPO);
+            }
+        }
+        return txList;
     }
 }

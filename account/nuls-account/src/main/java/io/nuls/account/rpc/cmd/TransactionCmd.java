@@ -34,6 +34,7 @@ import io.nuls.tools.parse.JSONUtils;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ public class TransactionCmd extends BaseCmd {
         LogUtil.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
         List<String> txHexList;
-        List<Transaction> lists = null;
+        List<Transaction> lists = new ArrayList<>();
         List<Transaction> result = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object txHexListObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX_LIST);
