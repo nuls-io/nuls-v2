@@ -88,15 +88,15 @@ public class TestTx {
 
     @Test
     public void newCtx() throws Exception{
-        for(int i = 0; i<5; i++) {
-            BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
+        for(int i = 0; i<1; i++) {
+           /* BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
             BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address2), assetChainId, assetId);
             BigInteger balance3 = LedgerCall.getBalance(chain, AddressTool.getAddress(address3), assetChainId, assetId);
             BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address4), assetChainId, assetId);
             System.out.println("address1: " + balance1.longValue());
             System.out.println("address2: " + balance2.longValue());
             System.out.println("address3: " + balance3.longValue());
-            System.out.println("address4: " + balance4.longValue());
+            System.out.println("address4: " + balance4.longValue());*/
             CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
                     createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
             //普通转账
@@ -111,13 +111,13 @@ public class TestTx {
 
             Thread.sleep(3000L);
 
-            Map transferMap = this.createTransferTx();
+           /* Map transferMap = this.createTransferTx();
             //调用接口
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
             HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
             Assert.assertTrue(null != result);
             Log.info("{}", result.get("value"));
-            Thread.sleep(3000L);
+            Thread.sleep(3000L);*/
         }
         //packableTxs();
 
