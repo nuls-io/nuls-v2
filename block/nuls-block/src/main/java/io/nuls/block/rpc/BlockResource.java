@@ -248,8 +248,9 @@ public class BlockResource extends BaseCmd {
             int chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = new Block();
             block.parse(new NulsByteBuffer(HexUtil.decode((String) map.get("block"))));
-            commonLog.info("recieve smallBlock from local node, chainId:" + chainId + ", height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
-            if (service.saveBlock(chainId, block, 1, true) && service.broadcastBlock(chainId, block)) {
+            commonLog.info("recieve block from local node, chainId:" + chainId + ", height:" + block.getHeader().getHeight() + ", hash:" + block.getHeader().getHash());
+            service.broadcastBlock(chainId, block);
+            if (service.saveBlock(chainId, block, 1, true)) {
                 return success();
             } else {
                 return failed(BlockErrorCode.PARAMETER_ERROR);
