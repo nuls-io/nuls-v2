@@ -96,7 +96,13 @@ public class TransactionUtil {
                 txHashList.add(transaction.hex());
             }
             params.put("txList", txHashList);
-            return CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params).isSuccess();
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map data = (Map) responseData.get("tx_batchVerify");
+                return (Boolean) data.get("value");
+            }
+            return false;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -143,7 +149,13 @@ public class TransactionUtil {
             blockHeaderDigest.setHeight(blockHeaderPo.getHeight());
             blockHeaderDigest.setTime(blockHeaderPo.getTime());
             params.put("secondaryDataHex", HexUtil.encode(blockHeaderDigest.serialize()));
-            return CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_save", params).isSuccess();
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_save", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map data = (Map) responseData.get("tx_save");
+                return (Boolean) data.get("value");
+            }
+            return false;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -174,7 +186,13 @@ public class TransactionUtil {
             blockHeaderDigest.setHeight(blockHeaderPo.getHeight());
             blockHeaderDigest.setTime(blockHeaderPo.getTime());
             params.put("secondaryDataHex", HexUtil.encode(blockHeaderDigest.serialize()));
-            return CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params).isSuccess();
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map data = (Map) responseData.get("tx_rollback");
+                return (Boolean) data.get("value");
+            }
+            return false;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -263,7 +281,13 @@ public class TransactionUtil {
             blockHeaderDigest.setHeight(blockHeaderPo.getHeight());
             blockHeaderDigest.setTime(blockHeaderPo.getTime());
             params.put("secondaryDataHex", HexUtil.encode(blockHeaderDigest.serialize()));
-            return CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_gengsisSave", params).isSuccess();
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_gengsisSave", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map data = (Map) responseData.get("tx_gengsisSave");
+                return (Boolean) data.get("value");
+            }
+            return false;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
