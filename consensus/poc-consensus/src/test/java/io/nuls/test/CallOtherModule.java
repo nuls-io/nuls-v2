@@ -31,7 +31,7 @@ public class CallOtherModule {
             if (!cmdResp.isSuccess()) {
                 return;
             }
-            accountList = (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount");
+            accountList = (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
             System.out.println(accountList);
         } catch (Exception e) {
             e.printStackTrace();
