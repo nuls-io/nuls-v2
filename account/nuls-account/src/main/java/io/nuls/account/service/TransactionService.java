@@ -24,12 +24,15 @@
 
 package io.nuls.account.service;
 
+import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.CoinDto;
+import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.exception.NulsException;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +73,13 @@ public interface TransactionService {
     String transfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
 
     Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark);
+
+
+    Transaction createMultiSignTransfer(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
+            throws NulsException,IOException;
+
+    Transaction createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
+            throws NulsException,IOException;
 
     /**
      * 校验该链是否有该资产
