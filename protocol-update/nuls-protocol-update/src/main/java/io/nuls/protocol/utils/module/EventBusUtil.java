@@ -1,18 +1,14 @@
 /*
  * MIT License
- *
- * Copyright (c) 2017-2018 nuls.io
- *
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,37 +16,44 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
-package io.nuls.rpc.model;
+
+package io.nuls.protocol.utils.module;
 
 /**
- * Module information
+ * 调用事件总线模块接口的工具类
+ * Utility class that invokes the event-bus module interface
  *
- * @author tangyi
+ * @author captain
+ * @version 1.0
+ * @date 19-1-25 上午11:46
  */
-public enum ModuleE {
+public class EventBusUtil {
+
     /**
-     * prefix + name
+     * 订阅事件
+     *
+     * @param moduleId
+     * @param topic
+     * @return
+     * @throws Exception
      */
-    KE("ke", "Kernel", "nuls.io"),
-    CM("cm", "Chain", "nuls.io"),
-    AC("ac", "Account", "nuls.io"),
-    NW("nw", "Network", "nuls.io"),
-    CS("cs", "Consensus", "nuls.io"),
-    BL("bl", "Block", "nuls.io"),
-    LG("lg", "Ledger", "nuls.io"),
-    TX("tx", "Transaction", "nuls.io"),
-    EB("eb", "EventBus", "nuls.io"),
-    PU("pu", "ProtocolUpdate", "nuls.io");
-
-    public final String abbr;
-    public final String name;
-    public final String domain;
-
-    ModuleE(String abbr, String name, String domain) {
-        this.abbr = abbr;
-        this.name = name;
-        this.domain = domain;
+    public static boolean subscribe(String moduleId, String topic) {
+//        String response = CmdDispatcher.request("subscribe", null);
+        return true;
     }
+
+    /**
+     * 发布事件
+     *
+     * @param moduleId
+     * @param topic
+     * @return
+     * @throws Exception
+     */
+    public static boolean send(String moduleId, String topic, String eventJson) {
+//        String response = CmdDispatcher.request("send", null);
+        return true;
+    }
+
 }

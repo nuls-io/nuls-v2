@@ -1,18 +1,14 @@
 /*
  * MIT License
- *
- * Copyright (c) 2017-2018 nuls.io
- *
+ * Copyright (c) 2017-2019 nuls.io
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,37 +16,50 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
  */
-package io.nuls.rpc.model;
+
+package io.nuls.protocol.service;
+
+import io.nuls.base.data.Block;
+import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.protocol.model.po.BlockHeaderPo;
+
+import java.util.List;
 
 /**
- * Module information
+ * 区块服务
  *
- * @author tangyi
+ * @author captain
+ * @version 1.0
+ * @date 18-11-6 下午4:57
  */
-public enum ModuleE {
+public interface ProtocolService {
+
     /**
-     * prefix + name
+     * todo 待实现
+     * 启动一条链
+     *
+     * @param chainId 链ID
+     * @return
      */
-    KE("ke", "Kernel", "nuls.io"),
-    CM("cm", "Chain", "nuls.io"),
-    AC("ac", "Account", "nuls.io"),
-    NW("nw", "Network", "nuls.io"),
-    CS("cs", "Consensus", "nuls.io"),
-    BL("bl", "Block", "nuls.io"),
-    LG("lg", "Ledger", "nuls.io"),
-    TX("tx", "Transaction", "nuls.io"),
-    EB("eb", "EventBus", "nuls.io"),
-    PU("pu", "ProtocolUpdate", "nuls.io");
+    boolean startChain(int chainId);
 
-    public final String abbr;
-    public final String name;
-    public final String domain;
+    /**
+     * todo 待实现
+     * 停止一条链
+     *
+     * @param chainId   链ID
+     * @param cleanData 是否清理数据
+     * @return
+     */
+    boolean stopChain(int chainId, boolean cleanData);
 
-    ModuleE(String abbr, String name, String domain) {
-        this.abbr = abbr;
-        this.name = name;
-        this.domain = domain;
-    }
+    /**
+     * 初始化方法
+     *
+     * @param chainId
+     */
+    void init(int chainId);
+
 }

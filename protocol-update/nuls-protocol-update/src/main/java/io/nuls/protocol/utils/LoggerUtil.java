@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,35 +22,32 @@
  * SOFTWARE.
  *
  */
-package io.nuls.rpc.model;
+package io.nuls.protocol.utils;
+
+import ch.qos.logback.classic.Level;
+import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.ProtocolContext;
+import io.nuls.tools.log.logback.LoggerBuilder;
+import io.nuls.tools.log.logback.NulsLogger;
 
 /**
- * Module information
+ * 日志工具类
+ * Logging utility class
  *
- * @author tangyi
+ * @author captain
+ * @version 1.0
+ * @date 19-1-25 上午11:40
  */
-public enum ModuleE {
-    /**
-     * prefix + name
-     */
-    KE("ke", "Kernel", "nuls.io"),
-    CM("cm", "Chain", "nuls.io"),
-    AC("ac", "Account", "nuls.io"),
-    NW("nw", "Network", "nuls.io"),
-    CS("cs", "Consensus", "nuls.io"),
-    BL("bl", "Block", "nuls.io"),
-    LG("lg", "Ledger", "nuls.io"),
-    TX("tx", "Transaction", "nuls.io"),
-    EB("eb", "EventBus", "nuls.io"),
-    PU("pu", "ProtocolUpdate", "nuls.io");
+public class LoggerUtil {
 
-    public final String abbr;
-    public final String name;
-    public final String domain;
+    public static NulsLogger commonLog = LoggerBuilder.getLogger("protocol","common", Level.DEBUG);
 
-    ModuleE(String abbr, String name, String domain) {
-        this.abbr = abbr;
-        this.name = name;
-        this.domain = domain;
+    public static void init(int chainId, String levelString) {
+        Level level = Level.valueOf(levelString);
+        NulsLogger commonLog = LoggerBuilder.getLogger("protocol/chain-"+chainId+"/","common", level);
+        NulsLogger messageLog = LoggerBuilder.getLogger("protocol/chain-"+chainId+"/","message", level);
+        ProtocolContext context = ContextManager.getContext(chainId);
+        context.setCommonLog(commonLog);
+        context.setMessageLog(messageLog);
     }
 }
