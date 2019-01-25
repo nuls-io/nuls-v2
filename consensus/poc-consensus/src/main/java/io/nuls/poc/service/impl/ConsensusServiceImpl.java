@@ -1501,7 +1501,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         try {
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getUnencryptedAddressList", params);
-            List<String> accountAddressList = (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList");
+            List<String> accountAddressList = (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList")).get("list");
             List<Agent> workAgentList = chain.getWorkAgentList(chain.getNewestHeader().getHeight());
             String packAddress = null;
             for (Agent agent : workAgentList) {

@@ -123,7 +123,7 @@ public class ConsensusTest {
             if (!cmdResp.isSuccess()) {
                 return;
             }
-            accountList = (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount");
+            accountList = (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
             if(accountList == null || accountList.size() == 0){
                 return;
             }
