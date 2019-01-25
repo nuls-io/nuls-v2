@@ -115,6 +115,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = RpcParameterNameConstant.TX_HEX, parameterType = "String")
     public Response transferTxValidate(Map<String, Object> params) {
         LogUtil.debug("ac_transferTxValidate start");
+        Map<String, Boolean> resultMap = new HashMap<>();
         boolean result;
         try {
             if (params.get(RpcParameterNameConstant.CHAIN_ID) == null || params.get(RpcParameterNameConstant.TX_HEX) == null) {
@@ -129,12 +130,12 @@ public class TransactionCmd extends BaseCmd {
             result = txValidator.validateTx(chainId, transaction);
         } catch (NulsException e) {
             LogUtil.warn("", e);
-            return failed(e.getErrorCode());
+            result = false;
         } catch (Exception e) {
             LogUtil.error("", e);
-            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+            result = false;
         }
-        Map<String, Boolean> resultMap = new HashMap<>();
+
         resultMap.put("value", result);
         LogUtil.debug("ac_transferTxValidate end");
         return success(resultMap);
@@ -146,7 +147,9 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_transferTxCommit", version = 1.0, description = "create transfer transaction commit 1.0")
     @ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.COMMIT, methodName = "ac_transferTxCommit")
     public Response transferTxCommit(Map<String, Object> params) {
-        return success();
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", true);
+        return success(resultMap);
     }
 
     /**
@@ -155,7 +158,9 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_transferTxRollback", version = 1.0, description = "create transfer transaction rollback 1.0")
     @ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.ROLLBACK, methodName = "ac_transferTxRollback")
     public Response transferTxRollback(Map<String, Object> params) {
-        return success();
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", true);
+        return success(resultMap);
     }
 
     /**
@@ -225,7 +230,7 @@ public class TransactionCmd extends BaseCmd {
 
     /**
      * 创建别名转账交易
-     *
+     * <p>
      * create the transaction of transfer by alias
      *
      * @param params
@@ -261,7 +266,7 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
             //根据别名查询出地址
-            AliasPo aliasPo = aliasStorageService.getAlias(chainId,alias);
+            AliasPo aliasPo = aliasStorageService.getAlias(chainId, alias);
             if (aliasPo == null) {
                 throw new NulsRuntimeException(AccountErrorCode.ALIAS_NOT_EXIST);
             }
@@ -295,7 +300,6 @@ public class TransactionCmd extends BaseCmd {
         LogUtil.debug("ac_multipleAddressTransfer end");
         return success(map);
     }
-
 
 
     /**
