@@ -29,6 +29,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.rpc.call.TransactionCmdCall;
@@ -44,14 +45,17 @@ import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
+import io.nuls.tools.thread.TimeService;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -127,6 +131,74 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction tx = this.assemblyTransaction(chainId, fromList, toList, remark);
         //TODO 如果是多签账户并且签名数量达到了最小值则广播交易,该功能待别名转账做完成后再补充  EdwardChan
         return tx;
+    }
+
+    @Override
+    public Transaction createMultiSignTransfer(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
+            throws NulsException,IOException {
+        //create transaction
+        Transaction transaction = new Transaction();
+        transaction.setTime(TimeService.currentTimeMillis());
+        transaction.setRemark(StringUtils.bytes(remark));
+        //build coin data
+        buildMultiSignTransactionCoinData(transaction,chainId,multiSigAccount,toAddress,amount);
+        //sign
+        TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction,account,password);
+        //process transaction
+        txMutilProcessing(multiSigAccount, transaction, transactionSignature);
+        return transaction;
+    }
+
+    @Override
+    public Transaction createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
+            throws NulsException,IOException {
+        //create transaction
+        AliasTransaction transaction = new AliasTransaction();
+        transaction.setTime(TimeService.currentTimeMillis());
+        transaction.setRemark(StringUtils.bytes(remark));
+        Alias alias = new Alias(multiSigAccount.getAddress().getAddressBytes(), aliasName);
+        transaction.setTxData(alias.serialize());
+        //build coin data
+        buildMultiSignTransactionCoinData(transaction,chainId,multiSigAccount,toAddress,BigInteger.ONE);
+        TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction,account,password);
+        //sign
+        //process transaction
+        txMutilProcessing(multiSigAccount, transaction, transactionSignature);
+        return transaction;
+    }
+
+    private Transaction buildMultiSignTransactionCoinData(Transaction transaction,int chainId, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount) throws IOException {
+        Chain chain = chainManager.getChainMap().get(chainId);
+        int assetsId = chain.getConfig().getAssetsId();
+        CoinFrom coinFrom = new CoinFrom(multiSigAccount.getAddress().getAddressBytes(), chainId, assetsId);
+        CoinTo coinTo = new CoinTo(AddressTool.getAddress(toAddress), chainId, assetsId, amount);
+        int txSize = transaction.size() + coinFrom.size() + coinTo.size() + ((int) multiSigAccount.getM()) * 72;
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize); //计算手续费
+        BigInteger totalAmount = amount.add(fee); //总费用为
+        coinFrom.setAmount(totalAmount);
+        //检查余额是否充足
+        BigInteger mainAsset = TxUtil.getBalance(chainId, chainId, assetsId, coinFrom.getAddress());
+        if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) { //余额不足
+            throw new NulsRuntimeException(AccountErrorCode.INSUFFICIENT_FEE);
+        }
+        CoinData coinData = new CoinData();
+        coinData.setFrom(Arrays.asList(coinFrom));
+        coinData.setTo(Arrays.asList(coinTo));
+        transaction.setCoinData(coinData.serialize());
+        return transaction;
+    }
+
+    private TransactionSignature buildMultiSignTransactionSignature(Transaction transaction, Account account, String password) throws NulsException,IOException {
+        transaction.setHash(NulsDigestData.calcDigestData(transaction.serializeForHash()));
+        //使用签名账户对交易进行签名
+        TransactionSignature transactionSignature = new TransactionSignature();
+        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        ECKey eckey = account.getEcKey(password);
+        P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction, eckey);
+        p2PHKSignatures.add(p2PHKSignature);
+        transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+        transaction.setTransactionSignature(transactionSignature.serialize());
+        return transactionSignature;
     }
 
     private Transaction assemblyTransaction(int chainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) {
@@ -447,6 +519,38 @@ public class TransactionServiceImpl implements TransactionService {
     private int getMultiSignAddressSignatureSize(int signNumber) {
         int size = signNumber * P2PHKSignature.SERIALIZE_LENGTH;
         return size;
+    }
+
+    /**
+     * 多签交易处理
+     * 如果达到最少签名数则广播交易，否则什么也不做
+     **/
+    public void txMutilProcessing(MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws IOException {
+        //当已签名数等于M则自动广播该交易
+        if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
+            TransactionCmdCall.newTx(multiSigAccount.getChainId(), HexUtil.encode(tx.serialize()));
+            // Result saveResult = accountLedgerService.verifyAndSaveUnconfirmedTransaction(tx);
+//            if (saveResult.isFailed()) {
+//                if (KernelErrorCode.DATA_SIZE_ERROR.getCode().equals(saveResult.getErrorCode().getCode())) {
+//                    //重新算一次交易(不超出最大交易数据大小下)的最大金额
+//                    Result rs = accountLedgerService.getMaxAmountOfOnce(fromAddr, tx, TransactionFeeCalculator.OTHER_PRECE_PRE_1024_BYTES);
+//                    if (rs.isSuccess()) {
+//                        Na maxAmount = (Na) rs.getData();
+//                        rs = Result.getFailed(KernelErrorCode.DATA_SIZE_ERROR_EXTEND);
+//                        rs.setMsg(rs.getMsg() + maxAmount.toDouble());
+//                    }
+//                    return rs;
+//                }
+//                return saveResult;
+//            }
+//            transactionService.newTx(tx);
+//            Result sendResult = transactionService.broadcastTx(tx);
+//            if (sendResult.isFailed()) {
+//                accountLedgerService.deleteTransaction(tx);
+//                return sendResult;
+//            }
+//            return Result.getSuccess().setData(tx.getHash().getDigestHex());
+        }
     }
 
 }

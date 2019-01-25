@@ -94,6 +94,9 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
     @Autowired
     private ChainManager chainManager;
 
+    @Autowired
+    private TransactionService transactionService;
+
 
     @Override
     public MultiSigAccount createMultiSigAccount(int chainId, List<String> pubKeys, int minSigns) {
@@ -166,7 +169,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
      **/
     @Override
     public Transaction setMultiAlias(int chainId, String address, String password, String aliasName, String signAddr) {
-        AliasTransaction aliasTransaction;
+        Transaction transaction;
         try {
             Account account = accountService.getAccount(chainId, signAddr);
             MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, address);
@@ -181,48 +184,12 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
                     throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
             }
-            byte[] addressBytes = AddressTool.getAddress(address);
-            Alias alias = new Alias(addressBytes, aliasName);
-            aliasTransaction = new AliasTransaction();
-            aliasTransaction.setTime(TimeService.currentTimeMillis());
-            aliasTransaction.setTxData(alias.serialize());
-            Chain chain = chainManager.getChainMap().get(chainId);
-            int assetsId = chain.getConfig().getAssetsId();
-            //TODO 不同链设置别名是否都燃烧nuls?
-            CoinFrom coinFrom = new CoinFrom(addressBytes, chainId, assetsId);
-            coinFrom.setAddress(addressBytes);
-            CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, chainId, assetsId, BigInteger.ONE);
-            int txSize = aliasTransaction.size() + coinFrom.size() + coinTo.size() + ((int) multiSigAccount.getM()) * 72;
-            //计算手续费
-            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
-            //总费用为
-            BigInteger totalAmount = BigInteger.ONE.add(fee);
-            coinFrom.setAmount(totalAmount);
-            //检查余额是否充足
-            BigInteger mainAsset = TxUtil.getBalance(chainId, chainId, assetsId, coinFrom.getAddress());
-            if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) { //余额不足
-                throw new NulsException(AccountErrorCode.INSUFFICIENT_FEE);
-            }
-            CoinData coinData = new CoinData();
-            coinData.setFrom(Arrays.asList(coinFrom));
-            coinData.setTo(Arrays.asList(coinTo));
-            aliasTransaction.setCoinData(coinData.serialize());
-            //计算交易数据摘要哈希
-            aliasTransaction.setHash(NulsDigestData.calcDigestData(aliasTransaction.serializeForHash()));
-            //使用签名账户对交易进行签名
-            TransactionSignature transactionSignature = new TransactionSignature();
-            List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
-            ECKey eckey = account.getEcKey(password);
-            P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(aliasTransaction, eckey);
-            p2PHKSignatures.add(p2PHKSignature);
-            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
-            aliasTransaction.setTransactionSignature(transactionSignature.serialize());
-            txMutilProcessing(multiSigAccount, aliasTransaction, transactionSignature);
+            transaction = transactionService.createSetAliasMultiSignTransaction(chainId, account, password, multiSigAccount, AddressTool.getStringAddressByBytes(AccountConstant.BLACK_HOLE_ADDRESS),aliasName , null);
         } catch (Exception e) {
             LogUtil.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
         }
-        return aliasTransaction;
+        return transaction;
     }
 
     private MultiSigAccount saveMultiSigAccount(int chainId, Address addressObj, List<String> pubKeys, int minSigns) {
