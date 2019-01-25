@@ -725,7 +725,8 @@ public class TxServiceImpl implements TxService {
                 VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
                 if (!verifyTxResult.success()) {
                     chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " +
-                            "coinData not success - code: {}, - reason:{}, - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getHash().getDigestHex());
+                            "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
+                            verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
                     continue;
                 }
                 packingTxList.add(tx);
@@ -863,7 +864,8 @@ public class TxServiceImpl implements TxService {
                 VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
                 if (!verifyTxResult.success()) {
                     chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " +
-                            "coinData not success - code: {}, - reason:{}, - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getHash().getDigestHex());
+                            "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
+                            verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
                     filterList.add(tx);
                     iterator.remove();
                     continue;
