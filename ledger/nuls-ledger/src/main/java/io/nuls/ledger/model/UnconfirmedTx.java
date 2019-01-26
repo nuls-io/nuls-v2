@@ -22,16 +22,49 @@
  * SOFTWARE.
  *
  */
-package io.nuls.ledger.utils;
+package io.nuls.ledger.model;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.math.BigInteger;
 
 /**
  * @author lan
  * @description
- * @date 2019/01/07
+ * @date 2019/01/10
  **/
-public class TimeUtils {
-    public static long getCurrentTime(){
-        //TODO：改为网络时间
-        return System.currentTimeMillis();
+@ToString
+@NoArgsConstructor
+public class UnconfirmedTx {
+
+    @Setter
+    @Getter
+    private String txHash;
+    @Setter
+    @Getter
+    private BigInteger spendAmount = BigInteger.ZERO;
+    @Setter
+    @Getter
+    private BigInteger  earnAmount = BigInteger.ZERO;
+
+    @Setter
+    @Getter
+    private String  address = "";
+
+    @Setter
+    @Getter
+    private int  assetChainId = 0;
+
+    @Setter
+    @Getter
+    private int  assetId = 0;
+
+    public UnconfirmedTx(String address,int assetChainId,int assetId){
+        this.address = address;
+        this.assetChainId = assetChainId;
+        this.assetId = assetId;
     }
 }

@@ -25,6 +25,7 @@
  */
 package io.nuls.ledger.service;
 
+import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.po.AccountState;
 
 /**
@@ -70,17 +71,17 @@ public interface AccountStateService {
      * @param addressChainId
      * @param assetKey
      * @param nonce
+     * @param txHash
      */
-    void rollUnconfirmTx(int addressChainId,String assetKey,String nonce);
+    void rollUnconfirmTx(int addressChainId,String assetKey,String nonce,String txHash);
+
     /**
      *
-     * @param address
-     * @param assetChainId
-     * @param assetId
-     * @param nonce
-     * @return UnconfirmedNonce
+     * @param addressChainId
+     * @param newNonce
+     * @param unconfirmedTx
      */
-    void setUnconfirmNonce(String address, int addressChainId, int assetChainId, int assetId, String nonce,String newNonce);
+    void setUnconfirmTx(int addressChainId, String newNonce, UnconfirmedTx unconfirmedTx);
 
 
 

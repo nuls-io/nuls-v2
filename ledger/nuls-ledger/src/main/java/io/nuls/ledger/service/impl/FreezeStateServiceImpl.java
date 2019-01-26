@@ -34,8 +34,6 @@ import io.nuls.ledger.service.FreezeStateService;
 import io.nuls.ledger.utils.TimeUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -52,7 +50,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         //是否改为网络时间？
         long nowTime = TimeUtils.getCurrentTime();
         if(nowTime - latestUnfreezeTime > LedgerConstant.TIME_RECALCULATE_FREEZE){
-            //解锁世家超过1000ms了,进行重新计算
+            //解锁时间超时了,进行重新计算
             return true;
         }
         return false;
@@ -89,7 +87,7 @@ public class FreezeStateServiceImpl implements FreezeStateService {
         for(FreezeHeightState freezeHeightState : heightList){
             if(freezeHeightState.getHeight()  <= nowHeight){
                 //时间到期，进行解锁
-                    heightRemove.add(freezeHeightState);
+                heightRemove.add(freezeHeightState);
             }else{
                 //因为正序排列，所以可以跳出
                 break;

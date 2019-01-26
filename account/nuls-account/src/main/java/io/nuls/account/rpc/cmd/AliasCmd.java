@@ -218,14 +218,14 @@ public class AliasCmd extends BaseCmd {
             result = aliasService.aliasTxValidate(chainId, transaction);
         } catch (NulsRuntimeException e) {
             LogUtil.info("", e);
-            return failed(e.getErrorCode());
+            result=false;
         } catch (Exception e) {
             LogUtil.error("", e);
-            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+            result=false;
         }
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
-        LogUtil.debug("ac_aliasTxCommit end");
+        LogUtil.debug("ac_aliasTxValidate end");
         return success(resultMap);
     }
 

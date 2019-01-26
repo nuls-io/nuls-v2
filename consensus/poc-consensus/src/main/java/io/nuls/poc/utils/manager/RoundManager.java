@@ -346,7 +346,7 @@ public class RoundManager {
             Map<String,Object> params = new HashMap<>(2);
             params.put(ConsensusConstant.PARAM_CHAIN_ID,chain.getConfig().getChainId());
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr,"ac_getUnencryptedAddressList", params);
-            List<String> accountAddressList =  (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList");
+            List<String> accountAddressList =  (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList")).get("list");
             if(accountAddressList != null && accountAddressList.size()>0){
                 for (String address:accountAddressList) {
                     packingAddressList.add(AddressTool.getAddress(address));

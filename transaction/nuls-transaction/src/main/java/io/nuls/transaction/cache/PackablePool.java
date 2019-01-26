@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * 交易已完成交易管理模块的校验(打包的时候从这里取), 包括孤儿交易
+ *
  * @author: Charlie
  * @date: 2018/11/13
  */
@@ -71,23 +72,11 @@ public class PackablePool {
         return txs;
     }
 
-    public List<Transaction> getAllOrphan(Chain chain) {
-        return new ArrayList<>(chain.getOrphanContainer().values());
-    }
-
-    public void remove(Chain chain, NulsDigestData hash) {
-        chain.getOrphanContainer().remove(hash);
-    }
-
-    public boolean exist(Chain chain, NulsDigestData hash) {
-        return chain.getOrphanContainer().containsKey(hash);
-    }
-
-    public void clear(Chain chain) {
-        try {
-            chain.getTxQueue().clear();
-            chain.getOrphanContainer().clear();
-        } finally {
+    public boolean exist(Chain chain, Transaction tx, boolean isOrphan) {
+        if (isOrphan) {
+            return chain.getOrphanContainer().containsKey(tx.getHash());
+        } else {
+            return chain.getTxQueue().contains(tx);
         }
     }
 
@@ -99,12 +88,28 @@ public class PackablePool {
         return chain.getTxQueue().size();
     }
 
-    public int getOrphanPoolSize(Chain chain) {
-        return chain.getOrphanContainer().size();
+    public List<Transaction> getAllOrphan(Chain chain) {
+        return new ArrayList<>(chain.getOrphanContainer().values());
     }
 
     public void removeOrphan(Chain chain, NulsDigestData hash) {
         chain.getOrphanContainer().remove(hash);
+    }
+
+    public boolean existOrphan(Chain chain, NulsDigestData hash) {
+        return chain.getOrphanContainer().containsKey(hash);
+    }
+
+    public void clear(Chain chain) {
+        try {
+            chain.getTxQueue().clear();
+            chain.getOrphanContainer().clear();
+        } finally {
+        }
+    }
+
+    public int getOrphanPoolSize(Chain chain) {
+        return chain.getOrphanContainer().size();
     }
 
 }

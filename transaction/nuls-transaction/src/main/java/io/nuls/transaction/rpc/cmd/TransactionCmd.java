@@ -439,7 +439,6 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.TX_BATCHVERIFY, version = 1.0, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     public Response batchVerify(Map params){
-        boolean result = false;
         VerifyTxResult verifyTxResult = null;
         Chain chain = null;
         try {
@@ -461,9 +460,8 @@ public class TransactionCmd extends BaseCmd {
             return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, Object> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
-        boolean rs = verifyTxResult.success();
-        resultMap.put("success", rs);
-        resultMap.put("code", verifyTxResult.getCode());
+        boolean result = verifyTxResult.success();
+        resultMap.put("value", result);
         return success(resultMap);
     }
 
