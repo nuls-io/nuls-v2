@@ -46,6 +46,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
+import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
@@ -150,6 +151,34 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
+    public Transaction signMultiSignTransaction(int chainId, Account account, String password, String txHex)
+            throws NulsException,IOException {
+        //create transaction
+        Transaction transaction = new Transaction();
+        transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+
+        CoinData coinData = new CoinData();
+        coinData.parse(new NulsByteBuffer(transaction.getCoinData()));
+        List<CoinFrom> list = coinData.getFrom();
+        if (list == null || list.size() != 1 ) {
+            throw new NulsRuntimeException(AccountErrorCode.TX_NOT_EFFECTIVE);
+        }
+        byte[] address = list.get(0).getAddress();
+        MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId,AddressTool.getStringAddressByBytes(address));
+        if (multiSigAccount == null ) {
+            throw new NulsRuntimeException(AccountErrorCode.TX_NOT_EFFECTIVE);
+        }
+        //验证签名地址账户是否属于多签账户
+        if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
+            throw new NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
+        }
+        TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction,account,password);
+        //process transaction
+        txMutilProcessing(multiSigAccount, transaction, transactionSignature);
+        return transaction;
+    }
+
+    @Override
     public Transaction createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
             throws NulsException,IOException {
         //create transaction
@@ -192,7 +221,19 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setHash(NulsDigestData.calcDigestData(transaction.serializeForHash()));
         //使用签名账户对交易进行签名
         TransactionSignature transactionSignature = new TransactionSignature();
-        List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
+        List<P2PHKSignature> p2PHKSignatures;
+        if (transaction.getTransactionSignature() != null) {
+            transactionSignature.parse(new NulsByteBuffer(transaction.getTransactionSignature()));
+            p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+            for (P2PHKSignature p2PHKSignature: p2PHKSignatures) {
+                if(Arrays.equals(p2PHKSignature.getPublicKey(),account.getPubKey())){
+                    throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ALREADY_SIGNED);
+                }
+            }
+
+        } else {
+            p2PHKSignatures = Arrays.asList();
+        }
         ECKey eckey = account.getEcKey(password);
         P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction, eckey);
         p2PHKSignatures.add(p2PHKSignature);

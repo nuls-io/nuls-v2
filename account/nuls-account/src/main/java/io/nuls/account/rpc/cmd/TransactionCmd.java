@@ -320,7 +320,7 @@ public class TransactionCmd extends BaseCmd {
         LogUtil.debug("ac_createMultiSignTransfer start");
         Map<String, String> map = new HashMap<>(1);
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
         Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
         Object toAddressObj = params == null ? null : params.get(RpcParameterNameConstant.TO_ADDRESS);
@@ -346,7 +346,7 @@ public class TransactionCmd extends BaseCmd {
             if (!validTxRemark(remark)) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
-            //根据别名查询出地址
+            //查询出账户
             Account account = accountService.getAccount(chainId,signAddress);
             if (account == null) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
@@ -373,6 +373,51 @@ public class TransactionCmd extends BaseCmd {
             return failed(e.getMessage());
         }
         LogUtil.debug("ac_createMultiSignTransfer end");
+        return success(map);
+    }
+
+    /**
+     * 多签交易签名
+     *
+     * sign MultiSign Transaction
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "sign MultiSign Transaction")
+    public Response signMultiSignTransaction(Map params) {
+        LogUtil.debug("ac_signMultiSignTransaction start");
+        Map<String, String> map = new HashMap<>(1);
+        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+        Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
+        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        try {
+            // check parameters
+            if (params == null || chainIdObj == null || signAddressObj == null ||
+                    txHexObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            int chainId = (int) chainIdObj;
+            String password = (String) passwordObj;
+            String signAddress = (String) signAddressObj;
+            String txHex = (String) txHexObj;
+
+            //查询出账户
+            Account account = accountService.getAccount(chainId,signAddress);
+            if (account == null) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            Transaction tx = transactionService.signMultiSignTransaction(chainId, account, password, txHex);
+            map.put("txData", HexUtil.encode(tx.serialize()));
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            return failed(e.getMessage());
+        }
+        LogUtil.debug("ac_signMultiSignTransaction end");
         return success(map);
     }
 

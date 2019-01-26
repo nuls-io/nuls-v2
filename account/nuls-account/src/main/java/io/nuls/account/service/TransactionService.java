@@ -78,6 +78,9 @@ public interface TransactionService {
     Transaction createMultiSignTransfer(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
             throws NulsException,IOException;
 
+    Transaction signMultiSignTransaction(int chainId, Account account, String password, String txHex)
+            throws NulsException,IOException;
+
     Transaction createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
             throws NulsException,IOException;
 
