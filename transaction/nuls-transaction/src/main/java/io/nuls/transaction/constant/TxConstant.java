@@ -161,4 +161,7 @@ public interface TxConstant {
 
     /** 友链链内最近N个出块者阈值*/
     int RECENT_PACKAGER_THRESHOLD = 30;
+
+    /** 未确认交易过期毫秒数-30分钟 */
+    int UNCONFIRMED_TX_EXPIRE_MS = 30*60*1000;
 }

@@ -54,6 +54,7 @@ public class CmdRollBackTest {
         NoUse.mockModule();
     }
     Transaction buildTx() throws IOException {
+
             double version = 1.0;
             // Build params map
             Map<String, Object> params = new HashMap<>();

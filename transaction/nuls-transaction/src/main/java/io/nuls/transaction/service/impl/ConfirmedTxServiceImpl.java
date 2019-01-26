@@ -115,7 +115,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             //保存到h2数据库
             transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
         }
-        chain.getLogger().debug("保存创世块交易完成..OK");
+        chain.getLogger().debug("保存创世块交易完成");
         return true;
     }
 
@@ -152,7 +152,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             //保存生效高度
             long effectHeight = blockHeaderDigest.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
             boolean rs = confirmedTxStorageService.saveCrossTxEffectList(chainId, effectHeight, ctxHashList);
-            if(!rs){
+            if (!rs) {
                 this.rollbackTxList(chain, savedList, blockHeaderDigest, false);
                 return false;
             }
@@ -192,7 +192,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
             if (rs) {
                 step = 2;
-                rs = LedgerCall.commitTxLedger(chain, tx, true);
+                if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH) {
+                    rs = LedgerCall.commitTxLedger(chain, tx, true);
+                }
             }
             if (rs) {
                 step = 3;
@@ -407,7 +409,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                     if (!txRegister.getSystemTx()) {
                         TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex());
                     }
-                    LedgerCall.commitTxLedger(chain, tx, true);
+                    if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH) {
+                        LedgerCall.commitTxLedger(chain, tx, true);
+                    }
                     if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER
                             && null != ctxService.getTx(chain, tx.getHash())) {
                         //不需要对该步骤结果设置step, 该步骤内部有处理回滚.
@@ -445,7 +449,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 }
             }
             if(setp >= 3){
-                LedgerCall.commitTxLedger(chain, tx, true);
+                if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH) {
+                    LedgerCall.commitTxLedger(chain, tx, true);
+                }
             }
             if(setp >= 2){
                 if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER

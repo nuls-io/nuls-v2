@@ -36,6 +36,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.IOException;
+import java.math.BigInteger;
 
 /**
  * @author lan
@@ -44,36 +45,49 @@ import java.io.IOException;
  **/
 @ToString
 @NoArgsConstructor
-public class UnconfirmedNonce extends BaseNulsData {
+public class UnconfirmedAmount extends BaseNulsData {
     @Setter
     @Getter
     private long time;
     @Setter
     @Getter
-    private String nonce;
+    private String txHash;
+    @Setter
+    @Getter
+    private BigInteger spendAmount = BigInteger.ZERO;
+    @Setter
+    @Getter
+    private BigInteger  earnAmount = BigInteger.ZERO;
 
-    public UnconfirmedNonce(String nonce){
-        this.nonce = nonce;
+    public UnconfirmedAmount(BigInteger earn, BigInteger spend){
+        spendAmount=spendAmount.add(spend);
+        earnAmount = earnAmount.add(earn);
         this.time = TimeUtils.getCurrentTime();
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint48(time);
-        stream.writeString(nonce);
+        stream.writeString(txHash);
+        stream.writeBigInteger(spendAmount);
+        stream.writeBigInteger(earnAmount);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.time = byteBuffer.readUint48();
-        this.nonce = byteBuffer.readString();
+        this.txHash = byteBuffer.readString();
+        this.spendAmount = byteBuffer.readBigInteger();
+        this.earnAmount = byteBuffer.readBigInteger();
     }
 
     @Override
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfUint48();
-        size += SerializeUtils.sizeOfString(nonce);
+        size += SerializeUtils.sizeOfString(txHash);
+        size += SerializeUtils.sizeOfBigInteger();
+        size += SerializeUtils.sizeOfBigInteger();
         return size;
     }
 }

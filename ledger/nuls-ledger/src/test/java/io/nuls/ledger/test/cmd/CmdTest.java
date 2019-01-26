@@ -83,6 +83,7 @@ public class CmdTest {
     @Test
     public void getBalanceNonce() throws Exception {
         double version = 1.0;
+
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)

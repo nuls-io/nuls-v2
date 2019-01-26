@@ -27,6 +27,7 @@ package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
@@ -37,6 +38,7 @@ import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.StringUtils;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.nuls.ledger.utils.LoggerUtil.logger;
@@ -131,14 +133,18 @@ public class AccountStateCmd extends BaseCmd {
         Integer assetId = (Integer) params.get("assetId");
         AccountState accountState = accountStateService.getAccountState(address, chainId,assetChainId, assetId);
         Map<String,Object> rtMap = new HashMap<>();
-        rtMap.put("available",accountState.getAvailableAmount());
-        String unconfirmedNonce = accountState.getLatestUnconfirmedNonce();
-        if(StringUtils.isNotBlank(unconfirmedNonce)){
-            rtMap.put("nonce",unconfirmedNonce);
+        List<UnconfirmedNonce> unconfirmedNonces = accountState.getUnconfirmedNonces();
+        if(unconfirmedNonces.size()> 0) {
+            rtMap.put("nonce", accountState.getLatestUnconfirmedNonce());
             rtMap.put("nonceType",LedgerConstant.UNCONFIRMED_NONCE);
         }else{
             rtMap.put("nonce",accountState.getNonce());
             rtMap.put("nonceType",LedgerConstant.CONFIRMED_NONCE);
+        }
+        if(accountState.getUnconfirmedAmounts().size()> 0){
+            rtMap.put("available",accountState.getAvailableAmount().add(accountState.getUnconfirmedAmount()));
+        }else{
+            rtMap.put("available",accountState.getAvailableAmount());
         }
         return success(rtMap);
     }

@@ -29,6 +29,8 @@ import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
 import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.AccountBalance;
+import io.nuls.ledger.model.UnconfirmedTx;
+import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.TransactionService;
@@ -41,12 +43,10 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ByteUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.nuls.tools.log.Log;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by wangkun23 on 2018/11/28.
@@ -80,9 +80,17 @@ public class TransactionServiceImpl implements TransactionService {
             //例如黄牌交易，直接返回
             return  true;
         }
+        ValidateResult validateResult = coinDataValidator.validateCoinData(addressChainId,transaction);
+        if(validateResult.getValidateCode() != CoinDataValidator.VALIDATE_SUCCESS_CODE){
+            Log.error("validateResult = {}={}",validateResult.getValidateCode(),validateResult.getValidateDesc());
+            return false;
+        }
         byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
         String currentTxNonce =  HexUtil.encode(nonce8Bytes);
+        Map<String,UnconfirmedTx> accountsMap = new ConcurrentHashMap<>();
         List<CoinFrom> froms = coinData.getFrom();
+        List<CoinTo> tos = coinData.getTo();
+        String txHash = transaction.getHash().toString();
         for (CoinFrom from : froms) {
             if(LedgerUtils.isNotLocalChainAccount(addressChainId,from.getAddress())){
                 //非本地网络账户地址,不进行处理
@@ -92,14 +100,30 @@ public class TransactionServiceImpl implements TransactionService {
             int assetChainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
             String nonce = HexUtil.encode(from.getNonce());
-            if(from.getLocked()>0){
-                //解锁交易处理
+            if(from.getLocked() == 0){
+                //非解锁交易处理
+                String accountKey = LedgerUtils.getKeyStr(address,assetChainId,assetId);
+                CoinDataUtils.calTxFromAmount(accountsMap,from,txHash,accountKey);
 
             }else {
-                //非解锁交易处理
-
-                accountStateService.setUnconfirmNonce(address, addressChainId,assetChainId, assetId, nonce,currentTxNonce);
+                //TODO:解锁交易处理[未确认解锁交易From，暂时不处理]
             }
+        }
+        for (CoinTo to : tos) {
+            String address = AddressTool.getStringAddressByBytes(to.getAddress());
+            int assetChainId = to.getAssetsChainId();
+            int assetId = to.getAssetsId();
+            if(to.getLockTime() == 0){
+                //普通交易
+                String accountKey = LedgerUtils.getKeyStr(address,assetChainId,assetId);
+                CoinDataUtils.calTxToAmount(accountsMap,to,txHash,accountKey);
+            }
+        }
+        Set keys = accountsMap.keySet();
+        Iterator<String> it = keys.iterator();
+        while(it.hasNext()){
+            UnconfirmedTx unconfirmedTx = accountsMap.get(it.next());
+            accountStateService.setUnconfirmTx(addressChainId,currentTxNonce,unconfirmedTx);
         }
         return true;
     }
@@ -122,9 +146,8 @@ public class TransactionServiceImpl implements TransactionService {
             //批量交易按交易进行账户的金额处理，再按交易为原子性进行提交,updateAccounts用于一笔交易的账户缓存，最后统一处理
             Map<String,AccountBalance> updateAccounts = new HashMap<>();
             //更新账户状态
-            byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
+            String nonce8BytesStr = LedgerUtils.getNonceStrByTxHash(transaction);
             String txHash =  transaction.getHash().toString();
-            String nonce8BytesStr = HexUtil.encode(nonce8Bytes);
             List<CoinFrom> froms = coinData.getFrom();
             for (CoinFrom from : froms) {
                 if(LedgerUtils.isNotLocalChainAccount(addressChainId,from.getAddress())){
@@ -157,6 +180,7 @@ public class TransactionServiceImpl implements TransactionService {
             //提交交易中的所有账号记录
             try {
                 for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
+                    entry.getValue().getNowAccountState().updateConfirmedAmount(txHash);
                     accountStateService.updateAccountStateByTx(entry.getKey(),entry.getValue().getPreAccountState(),entry.getValue().getNowAccountState());
                 }
             }catch(Exception e){
@@ -233,6 +257,7 @@ public class TransactionServiceImpl implements TransactionService {
             return  true;
         }
         List<CoinFrom> froms = coinData.getFrom();
+        String txHash = transaction.getHash().toString();
         for (CoinFrom from : froms) {
             if(LedgerUtils.isNotLocalChainAccount(addressChainId,from.getAddress())){
                 //非本地网络账户地址,不进行处理
@@ -242,7 +267,7 @@ public class TransactionServiceImpl implements TransactionService {
             int assetChainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
             String assetKey = LedgerUtils.getKeyStr(address,assetChainId,assetId);
-            accountStateService.rollUnconfirmTx(addressChainId,assetKey,HexUtil.encode(from.getNonce()));
+            accountStateService.rollUnconfirmTx(addressChainId,assetKey,HexUtil.encode(from.getNonce()),txHash);
         }
         return true;
     }

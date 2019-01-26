@@ -54,7 +54,6 @@ public class CmdWrongDataTest {
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-//        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
     }
 
     /**

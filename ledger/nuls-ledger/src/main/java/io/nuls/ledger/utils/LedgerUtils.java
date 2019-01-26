@@ -3,9 +3,9 @@ package io.nuls.ledger.utils;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.model.po.UnconfirmedAmount;
 import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ByteUtils;
 
 import java.io.UnsupportedEncodingException;
 
@@ -82,8 +82,11 @@ public class LedgerUtils {
 
 
     public static String getNonceStrByTxHash(Transaction tx){
-        byte [] nonce8Bytes = ByteUtils.copyOf(tx.getHash().getDigestBytes(), 8);
-        String nonce8BytesStr = HexUtil.encode(nonce8Bytes);
+        byte[] out = new byte[8];
+        byte [] in = tx.getHash().getDigestBytes();
+        int copyEnd = in.length;
+        System.arraycopy(in,  (copyEnd-8), out, 0, 8);
+        String nonce8BytesStr = HexUtil.encode(out);
         return nonce8BytesStr;
     }
 
@@ -93,7 +96,12 @@ public class LedgerUtils {
         }
         return false;
     }
-
+    public static boolean isExpiredAmount(UnconfirmedAmount unconfirmedAmount){
+        if(TimeUtils.getCurrentTime() - unconfirmedAmount.getTime() > LedgerConstant.UNCONFIRM_NONCE_EXPIRED_TIME){
+            return true;
+        }
+        return false;
+    }
     /**
      * 判断资产是否属于本地节点账户
      * @param chainId chainId

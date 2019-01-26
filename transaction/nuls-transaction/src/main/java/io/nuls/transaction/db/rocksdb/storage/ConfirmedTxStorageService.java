@@ -66,8 +66,8 @@ public interface ConfirmedTxStorageService {
      * 保存跨链交易的生效高度和交易hash
      * @param chainId
      * @param height 跨链交易生效高度
-     * @param hashList
-     * @return boolean
+     * @param hashList 跨链交易的hash
+     * @return boolean 如果hashList为空 直接返回true
      */
     boolean saveCrossTxEffectList(int chainId, long height, List<NulsDigestData> hashList);
 
