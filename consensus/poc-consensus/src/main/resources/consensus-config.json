@@ -11,7 +11,7 @@
   },
   {
     "key":"packingAmount",
-    "value":"10000",
+    "value":"20000000000000",
     "readOnly":true
   },
   {
@@ -41,27 +41,27 @@
   },
   {
     "key":"depositMin",
-    "value":"20000",
+    "value":"2000000000000",
     "readOnly":true
   },
   {
     "key":"depositMax",
-    "value":"500000",
+    "value":"50000000000000",
     "readOnly":true
   },
   {
     "key":"commissionMin",
-    "value":"200000",
+    "value":"20000000000000",
     "readOnly":true
   },
   {
     "key":"commissionMax",
-    "value":"500000",
+    "value":"50000000000000",
     "readOnly":true
   },
   {
     "key":"entrusterDepositMin",
-    "value":"2000",
+    "value":"200000000000",
     "readOnly":true
   },
   {

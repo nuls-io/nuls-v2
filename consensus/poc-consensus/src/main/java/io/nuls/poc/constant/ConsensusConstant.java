@@ -102,8 +102,8 @@ public interface ConsensusConstant {
     int MAX_ACCEPT_NUM_OF_DEPOSIT = 250;
     int MAX_AGENT_COUNT_OF_ADRRESS = 1;
 
-    BigInteger SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = BigInteger.valueOf(200000);
-    BigInteger SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = BigInteger.valueOf(500000);
+    BigInteger SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = new BigInteger("20000000000000");
+    BigInteger SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = new BigInteger("50000000000000");
 
     /**
      * unit:round of consensus
