@@ -234,7 +234,8 @@ public class TransactionManager {
                             throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
                         }
                     }
-                } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))) {
+                } else if (!addressSet.contains(AddressTool.getStringAddressByBytes(coinFrom.getAddress()))
+                        && tx.getType() != TxConstant.TX_TYPE_STOP_AGENT) {
                     throw new NulsException(TxErrorCode.SIGN_ADDRESS_NOT_MATCH_COINFROM);
                 }
             }
