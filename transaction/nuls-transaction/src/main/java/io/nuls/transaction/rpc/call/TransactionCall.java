@@ -6,6 +6,7 @@ import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -64,6 +65,7 @@ public class TransactionCall {
         }
     }
 
+
     /**
      * txProcess 根据交易模块code调用RPC
      * Single transaction txProcess
@@ -75,10 +77,28 @@ public class TransactionCall {
      * @return
      */
     public static boolean txProcess(Chain chain, String cmd, String moduleCode, String txHex) throws NulsException {
+
+        return txProcess(chain, cmd, moduleCode, txHex, null);
+    }
+    /**
+     * txProcess 根据交易模块code调用RPC
+     * Single transaction txProcess
+     *
+     * @param chain
+     * @param cmd
+     * @param moduleCode
+     * @param txHex
+     * @return
+     */
+    public static boolean txProcess(Chain chain, String cmd, String moduleCode, String txHex, String blockHeaderDigest) throws NulsException {
         //调用单个交易验证器
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put("chainId", chain.getChainId());
         params.put("txHex", txHex);
+        if(StringUtils.isNotBlank(blockHeaderDigest)) {
+            params.put("blockHeaderDigest", blockHeaderDigest);
+        }
+
         Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
         try {
             chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));

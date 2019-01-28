@@ -66,6 +66,15 @@ public class TestTx{
     static String address4 = "R9CxmNqtBDEm9iWX2Cod46QGCNE2M3930";
     static String address5 = "LFkghywKjdE2G3SZUcTsMkzcJ7tda3930";
     static String address6 = "QMwz71wTKgp9sZ8g44A9WNgXk11u23930";
+
+    static String address7 = "WEXAmsUJSNAvCx2zUaXziy3ZYX1em3930";
+    static String address8 = "TewWmmtBxuxN14FRazZXdtD9XuH313930";
+    static String address9 = "WodfCXTbJ22mPa35Y61yNTRh1x3zB3930";
+
+    static String address10 = "SPWAxuodkw222367N88eavYDWRraG3930";
+    static String address11 = "Rnt57eZnH8Dd7K3LudJXmmEutYJZD3930";
+    static String address12 = "XroY3cLWTfgKMRRRLCP5rhvo1gHY63930";
+
     static int assetId = 1;
     //入账金额
     static BigInteger amount = BigInteger.valueOf(1000000000000000L);
@@ -89,13 +98,37 @@ public class TestTx{
 
     @Test
     public void test() throws Exception{
-        addGenesisAsset(address1);
-        addGenesisAsset(address2);
-        addGenesisAsset(address3);
-        addGenesisAsset(address4);
-        addGenesisAsset(address5);
-        addGenesisAsset(address6);
+//        addGenesisAsset(address1);
+//        addGenesisAsset(address2);
+//        addGenesisAsset(address3);
+//        addGenesisAsset(address4);
+//        addGenesisAsset(address5);
+//        addGenesisAsset(address6);
+        addGenesisAsset(address7);
+        addGenesisAsset(address8);
+        addGenesisAsset(address9);
+        addGenesisAsset(address10);
+        addGenesisAsset(address11);
+        addGenesisAsset(address12);
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address10), assetChainId, assetId);
+        System.out.println(balance.longValue());
     }
+    @Test
+    public void consensusTx() throws Exception{
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address7), assetChainId, assetId);
+        System.out.println(balance.longValue());
+
+        //组装创建节点交易
+        Map agentTxMap=this.createAgentTx(address9, address1);
+        //调用接口
+        Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
+        Assert.assertTrue(null != result);
+        Log.info("{}", result.get("txHex"));
+        System.out.println("transfer: "+result.get("txHex"));  //Thread.sleep(3000L);
+    }
+    //packableTxs();
+
 
     @Test
     public void multiThreadCreateTx(){
@@ -253,35 +286,6 @@ public class TestTx{
         Log.info("response {}", response);
     }
 
-    //连续交易测试
-    @Test
-    public void contineCtx() throws Exception{
-        String address="LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";
-        for(int i = 0; i<3; i++) {
-            BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
-            System.out.println(balance.longValue());
-            //组装普通转账交易
-            Map transferMap = this.createTransferTx();
-            //调用接口
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
-            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
-            Assert.assertTrue(null != result);
-            Log.info("{}", result.get("value"));
-            System.out.println("transfer: "+result.get("value"));
-
-            //组装创建节点交易
-            Map agentTxMap=this.createAgentTx();
-            //调用接口
-            Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
-            result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
-            Assert.assertTrue(null != result);
-            Log.info("{}", result.get("txHex"));
-            System.out.println("transfer: "+result.get("txHex"));
-
-            //Thread.sleep(3000L);
-        }
-        //packableTxs();
-    }
 
     /**
      * 创建普通转账交易
@@ -318,18 +322,18 @@ public class TestTx{
     /**
      * 创建节点
      * */
-    public Map createAgentTx()throws Exception{
-        Address agentAddress = new Address(chainId,(byte)assetId, SerializeUtils.sha256hash160(address1.getBytes()));
-        Address rewardAddress = new Address(chainId,(byte)assetId,SerializeUtils.sha256hash160(address2.getBytes()));
-        Address packingAddress = new Address(chainId,(byte)assetId,SerializeUtils.sha256hash160(address3.getBytes()));
+    public Map createAgentTx(String agentAddr, String packingAddr)throws Exception{
+        Address agentAddress = new Address(chainId,(byte)assetId, SerializeUtils.sha256hash160(agentAddr.getBytes()));
+        Address rewardAddress = new Address(chainId,(byte)assetId,SerializeUtils.sha256hash160(agentAddr.getBytes()));
+        Address packingAddress = new Address(chainId,(byte)assetId,SerializeUtils.sha256hash160(packingAddr.getBytes()));
         Map<String,Object> params = new HashMap<>();
-        params.put("agentAddress",address1);
+        params.put("agentAddress",agentAddr);
         params.put("chainId",chainId);
         params.put("deposit",20000);
         params.put("commissionRate",10);
-        params.put("packingAddress",address2);
-        params.put("password",password);
-        params.put("rewardAddress",address3);
+        params.put("packingAddress",packingAddr);
+        params.put("password","");
+        params.put("rewardAddress",agentAddr);
         return params;
 //        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
 //        System.out.println(cmdResp.getResponseData());
@@ -342,7 +346,7 @@ public class TestTx{
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            params.put("priKey", "5aaa30809d7296c8b3e34ca710323fb33762c5b95673068a03d058eeceda1898");
+            params.put("priKey", "00d1e4d568489995f4b45789f372a1c23823241ccb6a6709d164658384fdaaa822");
             params.put("password", "");
             params.put("overwrite", true);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
