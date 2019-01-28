@@ -192,9 +192,9 @@ public class ConsensusServiceImpl implements ConsensusService {
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTxData(stopAgent.serialize());
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, CallMethodUtils.currentTime() + chain.getConfig().getStopAgentLockTime());
-            tx.setCoinData(coinData.serialize());
-            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+P2PHKSignature.SERIALIZE_LENGTH);
+            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+P2PHKSignature.SERIALIZE_LENGTH+coinData.serialize().length);
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
+            tx.setCoinData(coinData.serialize());
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
