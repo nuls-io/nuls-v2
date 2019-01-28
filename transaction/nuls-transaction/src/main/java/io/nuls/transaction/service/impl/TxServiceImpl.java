@@ -592,17 +592,17 @@ public class TxServiceImpl implements TxService {
         Map<String, CrossTxData> map = new HashMap<>(TxConstant.INIT_CAPACITY_8);
         List<String> list = new ArrayList<>();
         //todo 有测试代码
-        int test = 0;
+//        int test = 0;//测试代码 主动制造不通过的情况, 会造成不通过交易之后含有相同地址资产的交易不通过
         for(String hex : txHexList){
             Transaction tx = TxUtil.getTransaction(hex);
             CrossTxData crossTxData = TxUtil.getInstance(tx.getTxData(), CrossTxData.class);
             if(map.containsValue(crossTxData)){
                 list.add(tx.getHash().getDigestHex());
             }
-            if(test == 2){
-                list.add(tx.getHash().getDigestHex());
-            }
-            test++;
+//            if(test == 2){
+//                list.add(tx.getHash().getDigestHex());
+//            }
+//            test++;
 
         }
         return list;
@@ -976,7 +976,23 @@ public class TxServiceImpl implements TxService {
         }
 
         //统一验证
-        boolean rs = TransactionCall.txsModuleValidators(chain, moduleVerifyMap);
+        Iterator<Map.Entry<TxRegister, List<String>>> it = moduleVerifyMap.entrySet().iterator();
+        boolean rs = true;
+        while (it.hasNext()) {
+            Map.Entry<TxRegister, List<String>> entry = it.next();
+            List<String> txhashList = null;
+            if (entry.getKey().getModuleCode().equals(ModuleE.TX.abbr)) {
+                //模块统一验证,交易模块,不用调RPC接口
+                txhashList = transactionModuleValidator(chain, entry.getValue());
+            } else {
+                txhashList = TransactionCall.txModuleValidator(chain, entry.getKey().getModuleValidator(), entry.getKey().getModuleCode(), entry.getValue());
+            }
+            if(txhashList != null && txhashList.size() > 0){
+                rs = false;
+                break;
+            }
+        }
+
         if(rs){
             for(Transaction tx : txList){
                 //如果该交易不在交易管理待打包库中，则进行保存

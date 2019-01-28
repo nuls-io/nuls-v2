@@ -59,6 +59,7 @@ public class TransactionCall {
             }
             return resData.get(cmd);
         } catch (Exception e) {
+            Log.debug("cmd: {}", cmd);
             throw new NulsException(e);
         }
     }

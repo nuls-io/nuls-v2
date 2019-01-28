@@ -93,7 +93,7 @@ public class CreateTxThread implements Runnable {
             Assert.assertTrue(null != map);
             Log.info("{}", map.get("value"));
 
-            Thread.sleep(3000L);
+//            Thread.sleep(3000L);
 
 //            Map transferMap1 = this.createTransferTx(address1, address2, password);
 //            //调用接口
@@ -116,13 +116,13 @@ public class CreateTxThread implements Runnable {
 //            Assert.assertTrue(null != result3);
 //            Log.info("{}", result3.get("value"));
 
-//            Map transferMap4 = this.createTransferTx(address4, address1, "");
-//            //调用接口
-//            Response cmdResp4 = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap4);
-//            HashMap result4 = (HashMap) (((HashMap) cmdResp4.getResponseData()).get("ac_transfer"));
-//            Assert.assertTrue(null != result4);
-//            Log.info("{}", result4.get("value"));
-//            Thread.sleep(4000L);
+            Map transferMap4 = this.createTransferTx(address4, address1, "");
+            //调用接口
+            Response cmdResp4 = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap4);
+            HashMap result4 = (HashMap) (((HashMap) cmdResp4.getResponseData()).get("ac_transfer"));
+            Assert.assertTrue(null != result4);
+            Log.info("{}", result4.get("value"));
+            Thread.sleep(4000L);
         }
     }
     private List<CoinDTO> createFromCoinDTOList(){
