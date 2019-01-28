@@ -944,6 +944,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             agentManager.addAgent(chain, agent);
             Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
             result.put("agentHash", agent.getTxHash().getDigestHex());
+            result.put("value", true);
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
