@@ -27,6 +27,7 @@ package io.nuls.account.service;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.CoinDto;
+import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.Result;
@@ -75,13 +76,13 @@ public interface TransactionService {
     Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark);
 
 
-    Transaction createMultiSignTransfer(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
+    MultiSignTransactionResultDto createMultiSignTransfer(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
             throws NulsException,IOException;
 
-    Transaction signMultiSignTransaction(int chainId, Account account, String password, String txHex)
+    MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txHex)
             throws NulsException,IOException;
 
-    Transaction createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
+    MultiSignTransactionResultDto createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
             throws NulsException,IOException;
 
     /**

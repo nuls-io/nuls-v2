@@ -32,6 +32,7 @@ import io.nuls.account.model.bo.AccountKeyStore;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
+import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.model.po.MultiSigAccountPo;
 import io.nuls.account.rpc.call.EventCmdCall;
@@ -168,8 +169,8 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
      * @param signAddr 签名地址
      **/
     @Override
-    public Transaction setMultiAlias(int chainId, String address, String password, String aliasName, String signAddr) {
-        Transaction transaction;
+    public MultiSignTransactionResultDto setMultiAlias(int chainId, String address, String password, String aliasName, String signAddr) {
+        MultiSignTransactionResultDto multiSignTransactionResultDto;
         try {
             Account account = accountService.getAccount(chainId, signAddr);
             MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, address);
@@ -184,12 +185,12 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
                     throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
             }
-            transaction = transactionService.createSetAliasMultiSignTransaction(chainId, account, password, multiSigAccount, AddressTool.getStringAddressByBytes(AccountConstant.BLACK_HOLE_ADDRESS),aliasName , null);
+            multiSignTransactionResultDto = transactionService.createSetAliasMultiSignTransaction(chainId, account, password, multiSigAccount, AddressTool.getStringAddressByBytes(AccountConstant.BLACK_HOLE_ADDRESS),aliasName , null);
         } catch (Exception e) {
             LogUtil.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
         }
-        return transaction;
+        return multiSignTransactionResultDto;
     }
 
     private MultiSigAccount saveMultiSigAccount(int chainId, Address addressObj, List<String> pubKeys, int minSigns) {

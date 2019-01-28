@@ -32,6 +32,7 @@ import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.CoinDto;
+import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.account.rpc.call.TransactionCmdCall;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.MultiSignAccountService;
@@ -46,7 +47,6 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
-import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
@@ -135,7 +135,7 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Transaction createMultiSignTransfer(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
+    public MultiSignTransactionResultDto createMultiSignTransfer(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
             throws NulsException,IOException {
         //create transaction
         Transaction transaction = new Transaction();
@@ -146,12 +146,15 @@ public class TransactionServiceImpl implements TransactionService {
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction,account,password);
         //process transaction
-        txMutilProcessing(multiSigAccount, transaction, transactionSignature);
-        return transaction;
+        boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
+        MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
+        multiSignTransactionResultDto.setBroadcasted(isBroadcasted);
+        multiSignTransactionResultDto.setTransaction(transaction);
+        return multiSignTransactionResultDto;
     }
 
     @Override
-    public Transaction signMultiSignTransaction(int chainId, Account account, String password, String txHex)
+    public MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txHex)
             throws NulsException,IOException {
         //create transaction
         Transaction transaction = new Transaction();
@@ -175,11 +178,15 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction,account,password);
         //process transaction
         txMutilProcessing(multiSigAccount, transaction, transactionSignature);
-        return transaction;
+        boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
+        MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
+        multiSignTransactionResultDto.setBroadcasted(isBroadcasted);
+        multiSignTransactionResultDto.setTransaction(transaction);
+        return multiSignTransactionResultDto;
     }
 
     @Override
-    public Transaction createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
+    public MultiSignTransactionResultDto createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
             throws NulsException,IOException {
         //create transaction
         AliasTransaction transaction = new AliasTransaction();
@@ -192,8 +199,11 @@ public class TransactionServiceImpl implements TransactionService {
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction,account,password);
         //sign
         //process transaction
-        txMutilProcessing(multiSigAccount, transaction, transactionSignature);
-        return transaction;
+        boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
+        MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
+        multiSignTransactionResultDto.setBroadcasted(isBroadcasted);
+        multiSignTransactionResultDto.setTransaction(transaction);
+        return multiSignTransactionResultDto;
     }
 
     private Transaction buildMultiSignTransactionCoinData(Transaction transaction,int chainId, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount) throws IOException {
@@ -566,7 +576,7 @@ public class TransactionServiceImpl implements TransactionService {
      * 多签交易处理
      * 如果达到最少签名数则广播交易，否则什么也不做
      **/
-    public void txMutilProcessing(MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws IOException {
+    public boolean txMutilProcessing(MultiSigAccount multiSigAccount, Transaction tx, TransactionSignature transactionSignature) throws IOException {
         //当已签名数等于M则自动广播该交易
         if (multiSigAccount.getM() == transactionSignature.getP2PHKSignatures().size()) {
             TransactionCmdCall.newTx(multiSigAccount.getChainId(), HexUtil.encode(tx.serialize()));
@@ -591,7 +601,9 @@ public class TransactionServiceImpl implements TransactionService {
 //                return sendResult;
 //            }
 //            return Result.getSuccess().setData(tx.getHash().getDigestHex());
+        return true;
         }
+        return false;
     }
 
 }
