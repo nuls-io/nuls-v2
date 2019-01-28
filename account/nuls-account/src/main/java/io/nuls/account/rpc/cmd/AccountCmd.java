@@ -87,8 +87,9 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
+        map.put(RpcConstant.LIST, list);
         LogUtil.debug("ac_createAccount end");
-        return success(list);
+        return success(map);
     }
 
     /**
@@ -143,8 +144,9 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         }
+        map.put(RpcConstant.LIST, accounts);
         LogUtil.debug("ac_createOfflineAccount end");
-        return success(accounts);
+        return success(map);
     }
 
     /**
@@ -213,8 +215,9 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
+        map.put(RpcConstant.LIST, simpleAccountList);
         LogUtil.debug("ac_getAccountList end");
-        return success(simpleAccountList);
+        return success(map);
     }
 
     /**
@@ -227,6 +230,7 @@ public class AccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_getUnencryptedAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "query all account collections and put them in cache")
     public Response getUnencryptedAddressList(Map params) {
         LogUtil.debug("getUnencryptedAddressList start");
+        Map<String, List<String>> map = new HashMap<>();
         List<String> unencryptedAddressList = new ArrayList<>();
         try {
             //query all accounts
@@ -251,8 +255,9 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
+        map.put(RpcConstant.LIST, unencryptedAddressList);
         LogUtil.debug("getUnencryptedAddressList end");
-        return success(unencryptedAddressList);
+        return success(map);
     }
 
     /**
@@ -426,8 +431,9 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
+        map.put(RpcConstant.LIST, privateKeyList);
         LogUtil.debug("ac_getAllPriKey end");
-        return success(privateKeyList);
+        return success(map);
     }
 
     /**

@@ -23,6 +23,7 @@ package io.nuls.block.thread;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.Node;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * 一个区块下载线程的下载结果
@@ -32,6 +33,7 @@ import lombok.Data;
  * @date 18-11-9 下午4:17
  */
 @Data
+@NoArgsConstructor
 public class BlockDownLoadResult {
     /**
      * 下载区块起始高度
@@ -48,7 +50,7 @@ public class BlockDownLoadResult {
     /**
      * 标志从node节点批量下载区块是否成功,要全部下载完成才算成功
      */
-    private boolean success;
+    private boolean success = false;
     /**
      * 下载耗时(不精确)
      */

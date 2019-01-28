@@ -77,7 +77,6 @@ public class BlockSynchronizer implements Runnable {
                     if (synchronize(chainId)) {
                         break;
                     }
-                    Thread.sleep(1000L);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -146,8 +145,7 @@ public class BlockSynchronizer implements Runnable {
             long end = System.currentTimeMillis();
             commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
             if (success) {
-                //todo 为了测试分叉链、孤儿链修改，正式版本改回
-                if (true) {
+                if (checkIsNewest(chainId, params, context)) {
                     commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
@@ -254,7 +252,9 @@ public class BlockSynchronizer implements Runnable {
         ChainParameters parameters = context.getParameters();
         int config = availableNodes.size() * parameters.getConsistencyNodePercent() / 100;
         if (count >= config) {
-            nodeQueue.addAll(nodeMap.get(key));
+            List<Node> nodeList = nodeMap.get(key);
+            nodeQueue.addAll(nodeList);
+            params.setList(nodeList);
             Node node = nodeQueue.peek();
             params.setNetLatestHash(node.getHash());
             params.setNetLatestHeight(node.getHeight());

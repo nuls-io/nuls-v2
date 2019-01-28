@@ -45,7 +45,7 @@ public class CoinTo extends Coin {
         stream.writeUint16(assetsChainId);
         stream.writeUint16(assetsId);
         stream.writeBigInteger(amount);
-        stream.writeUint32(lockTime);
+        stream.writeVarInt(lockTime);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class CoinTo extends Coin {
         this.assetsChainId = byteBuffer.readUint16();
         this.assetsId = byteBuffer.readUint16();
         this.amount = byteBuffer.readBigInteger();
-        this.lockTime = byteBuffer.readUint32();
+        this.lockTime = byteBuffer.readVarInt();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class CoinTo extends Coin {
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfBigInteger();
-        size += SerializeUtils.sizeOfUint32();
+        size += SerializeUtils.sizeOfVarInt(lockTime);
         return size;
     }
 

@@ -124,6 +124,10 @@ public interface RpcConstant {
      */
     String VALUE = "value";
     /**
+     * 集合返回值默认键key
+     */
+    String LIST = "list";
+    /**
      * 账户地址
      */
     String ADDRESS = "address";

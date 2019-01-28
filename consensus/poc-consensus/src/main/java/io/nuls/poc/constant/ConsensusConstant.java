@@ -197,7 +197,7 @@ public interface ConsensusConstant {
     int PAGE_SIZE_MAX_VALUE = 100;
     String PARAM_CHAIN_ID = "chainId";
     String PARAM_ADDRESS = "address";
-    String PARAM_TX = "tx";
+    String PARAM_TX = "txHex";
     String PARAM_TX_HEX_LIST = "txHexList";
     String PARAM_HEIGHT = "height";
     String PARAM_BLOCK_HEADER ="blockHeader";

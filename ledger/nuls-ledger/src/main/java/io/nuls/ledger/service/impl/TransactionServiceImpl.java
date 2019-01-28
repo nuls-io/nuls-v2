@@ -42,7 +42,6 @@ import io.nuls.ledger.validator.CoinDataValidator;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.log.Log;
 
 import java.util.*;
@@ -85,8 +84,7 @@ public class TransactionServiceImpl implements TransactionService {
             Log.error("validateResult = {}={}",validateResult.getValidateCode(),validateResult.getValidateDesc());
             return false;
         }
-        byte [] nonce8Bytes = ByteUtils.copyOf(transaction.getHash().getDigestBytes(), 8);
-        String currentTxNonce =  HexUtil.encode(nonce8Bytes);
+        String currentTxNonce = LedgerUtils.getNonceStrByTxHash(transaction);
         Map<String,UnconfirmedTx> accountsMap = new ConcurrentHashMap<>();
         List<CoinFrom> froms = coinData.getFrom();
         List<CoinTo> tos = coinData.getTo();

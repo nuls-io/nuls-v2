@@ -24,6 +24,7 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.model.Node;
 import lombok.Data;
 
+import java.util.List;
 import java.util.concurrent.PriorityBlockingQueue;
 
 /**
@@ -53,9 +54,13 @@ public class BlockDownloaderParams {
      */
     private NulsDigestData localLatestHash;
     /**
-     * 网络上一致可用的节点
+     * 网络上一致可用的节点(阻塞，用于正常同步)
      */
     private PriorityBlockingQueue<Node> nodes;
+    /**
+     * 网络上一致可用的节点(用于失败重试)
+     */
+    private List<Node> list;
     /**
      * 网络上可用节点数>=nodes.size()
      */

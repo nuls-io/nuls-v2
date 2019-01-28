@@ -56,7 +56,7 @@ import java.util.*;
  * @author: Charlie
  * @date: 2019-01-15
  */
-public class TestTx {
+public class TestTx{
 
     static int chainId = 12345;
     static int assetChainId = 12345;
@@ -64,9 +64,11 @@ public class TestTx {
     static String address2 = "KS3wfAPFAmY8EwMFz21EXhJMXf8DV3930";
     static String address3 = "Vxb3xxatcFFTZZe3wynX6CfAsvzAx3930";
     static String address4 = "R9CxmNqtBDEm9iWX2Cod46QGCNE2M3930";
+    static String address5 = "LFkghywKjdE2G3SZUcTsMkzcJ7tda3930";
+    static String address6 = "QMwz71wTKgp9sZ8g44A9WNgXk11u23930";
     static int assetId = 1;
     //入账金额
-    static BigInteger amount = BigInteger.valueOf(100000000000000L);
+    static BigInteger amount = BigInteger.valueOf(1000000000000000L);
     static String password="nuls123456";
 
     private Chain chain;
@@ -85,40 +87,63 @@ public class TestTx {
 //        addGenesisAsset();
     }
 
+    @Test
+    public void test() throws Exception{
+        addGenesisAsset(address1);
+        addGenesisAsset(address2);
+        addGenesisAsset(address3);
+        addGenesisAsset(address4);
+        addGenesisAsset(address5);
+        addGenesisAsset(address6);
+    }
+
+    @Test
+    public void multiThreadCreateTx(){
+        for(int i=0; i<1;i++){
+            Thread thread = new Thread(new CreateTxThread(), "MR" + i);
+            thread.start();
+        }
+        try {
+            while (true) {
+                Thread.sleep(1000000L);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     @Test
     public void newCtx() throws Exception{
-        for(int i = 0; i<2; i++) {
-            BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
-            BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address2), assetChainId, assetId);
+        BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
+        BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address2), assetChainId, assetId);
 //            BigInteger balance3 = LedgerCall.getBalance(chain, AddressTool.getAddress(address3), assetChainId, assetId);
 //            BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address4), assetChainId, assetId);
-            System.out.println("address1: " + balance1.longValue());
-            System.out.println("address2: " + balance2.longValue());
+        System.out.println("address1: " + balance1.longValue());
+        System.out.println("address2: " + balance2.longValue());
 //            System.out.println("address3: " + balance3.longValue());
 //            System.out.println("address4: " + balance4.longValue());
-       /*     CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
-                    createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-            //普通转账
-            //调接口
-            String json = JSONUtils.obj2json(ctxTransfer);
-            Map<String, Object> params = JSONUtils.json2map(json);
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
-            Assert.assertTrue(null != response.getResponseData());
-            Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
-            Assert.assertTrue(null != map);
-            Log.info("{}", map.get("value"));
+   /*     CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
+                createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
+        //普通转账
+        //调接口
+        String json = JSONUtils.obj2json(ctxTransfer);
+        Map<String, Object> params = JSONUtils.json2map(json);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
+        Assert.assertTrue(null != response.getResponseData());
+        Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
+        Assert.assertTrue(null != map);
+        Log.info("{}", map.get("value"));
 
-            Thread.sleep(3000L);*/
+        Thread.sleep(3000L);*/
 
-            Map transferMap = this.createTransferTx();
-            //调用接口
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
-            HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
-            Assert.assertTrue(null != result);
-            Log.info("{}", result.get("value"));
-            Thread.sleep(3000L);
-        }
+        Map transferMap = this.createTransferTx();
+        //调用接口
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+        Assert.assertTrue(null != result);
+        Log.info("{}", result.get("value"));
+        Thread.sleep(4000L);
         //packableTxs();
 
 
@@ -186,12 +211,12 @@ public class TestTx {
      * @return
      * @throws IOException
      */
-    private static Transaction buildTransaction() throws IOException {
+    private static Transaction buildTransaction(String address) throws IOException {
         //封装交易执行
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinTo coinTo = new CoinTo();
-        coinTo.setAddress(AddressTool.getAddress(address2));
+        coinTo.setAddress(AddressTool.getAddress(address));
         coinTo.setAmount(amount);
         coinTo.setAssetsChainId(assetChainId);
         coinTo.setAssetsId(assetId);
@@ -211,14 +236,14 @@ public class TestTx {
      * 铸币
      * @throws Exception
      */
-    public static void addGenesisAsset() throws Exception {
+    public static void addGenesisAsset(String address) throws Exception {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
         Log.info("response {}", response);
         params.put("isBatchValidate", true);
-        Transaction transaction = buildTransaction();
+        Transaction transaction = buildTransaction(address);
         params.put("txHex", HexUtil.encode(transaction.serialize()));
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         Log.info("response {}", response);
@@ -317,7 +342,7 @@ public class TestTx {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            params.put("priKey", "00c86fc91cd07aa58eab0128f3b4c10b44deede12a2084d7a1f99156679515bf93");
+            params.put("priKey", "5aaa30809d7296c8b3e34ca710323fb33762c5b95673068a03d058eeceda1898");
             params.put("password", "");
             params.put("overwrite", true);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);

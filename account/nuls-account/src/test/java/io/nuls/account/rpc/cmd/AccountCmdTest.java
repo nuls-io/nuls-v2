@@ -70,7 +70,7 @@ public class AccountCmdTest {
             if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
                 return null;
             }
-            accountList = (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount");
+            accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -146,7 +146,7 @@ public class AccountCmdTest {
         params.put("password", password);
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
         //List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(cmdResp.getResponseData()), AccountOfflineDto.class);
-        List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")), AccountOfflineDto.class);
+        List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")).get("list")), AccountOfflineDto.class);
         assertEquals(accountList.size(), count);
         for (AccountOfflineDto account : accountList) {
             System.out.println(account.getAddress());
@@ -182,7 +182,7 @@ public class AccountCmdTest {
     public void getAccountListTest() throws Exception {
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountList", null);
         //List<SimpleAccountDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(cmdResp.getResponseData()), SimpleAccountDto.class);
-        List<SimpleAccountDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountList")), SimpleAccountDto.class);
+        List<SimpleAccountDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAccountList")).get("list")), SimpleAccountDto.class);
         accountList.forEach(account -> System.out.println(account.getAddress()));
     }
 
@@ -221,11 +221,11 @@ public class AccountCmdTest {
             params.put("password", password);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAllPriKey", params);
             if (AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
-                List<String> privateKeyAllList = (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_getAllPriKey");
+                List<String> privateKeyAllList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAllPriKey")).get("list");
                 //query all accounts privateKey the specified chain
                 params.put("chainId", 1);
                 cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAllPriKey", params);
-                List<String> privateKeyList = (List<String>) ((HashMap) cmdResp.getResponseData()).get("ac_getAllPriKey");
+                List<String> privateKeyList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAllPriKey")).get("list");
                 assertTrue(privateKeyList.size() >= accountList.size());
                 assertTrue(privateKeyAllList.size() >= privateKeyList.size());
             }
@@ -534,7 +534,7 @@ public class AccountCmdTest {
             //创建未加密离线账户 create unencrypted account
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
             //List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResponseData())).get("list")), AccountOfflineDto.class);
-            List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")), AccountOfflineDto.class);
+            List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")).get("list")), AccountOfflineDto.class);
             String address = accountList.get(0).getAddress();
             String priKey = accountList.get(0).getPriKey();
 
@@ -576,14 +576,14 @@ public class AccountCmdTest {
             params.put("count", 1);
             //创建未加密离线账户 create unencrypted account
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
-            List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")), AccountOfflineDto.class);
+            List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")).get("list")), AccountOfflineDto.class);
             String address = accountList.get(0).getAddress();
             String priKey = accountList.get(0).getPriKey();
 
             //创建加密离线账户 create encrypted account
             params.put("password", password);
             cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
-            accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")), AccountOfflineDto.class);
+            accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")).get("list")), AccountOfflineDto.class);
             String encryptedPriKey2 = accountList.get(0).getEncryptedPriKey();
 
             //为账户设置密码 set password for account
@@ -619,7 +619,7 @@ public class AccountCmdTest {
 
             //测试错误的密码 testing the wrong password
             params.put("priKey", encryptedPriKey);
-            params.put("password", password + "errorpwd123");
+            params.put("password", password + "errorpwd");
             cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_updateOfflineAccountPassword", params);
             result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_updateOfflineAccountPassword"));
             assertEquals(AccountErrorCode.PASSWORD_IS_WRONG.getCode(), result.get("code"));

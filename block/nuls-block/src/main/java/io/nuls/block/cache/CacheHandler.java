@@ -26,9 +26,7 @@ import io.nuls.block.message.BlockMessage;
 import io.nuls.block.message.CompleteMessage;
 import io.nuls.block.thread.BlockWorker;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -101,11 +99,11 @@ public class CacheHandler {
         NulsDigestData requestHash = message.getRequestHash();
         List<Block> blockList = workerBlockCacher.get(chainId).get(requestHash);
         Block block = message.getBlock();
-        if (blockList != null && block != null) {
+        if (blockList != null && block != null && !blockList.contains(block)) {
             blockList.add(block);
             return;
         }
-        singleBlockCacher.get(chainId).complete(message.getRequestHash(), block);
+        singleBlockCacher.get(chainId).complete(requestHash, block);
     }
 
     /**
