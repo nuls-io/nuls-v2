@@ -6,6 +6,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.poc.constant.ConsensusConstant;
@@ -258,7 +259,7 @@ public class TxValidator {
         }
         byte[] nodeAddressBytes = null;
         //节点地址及出块地址不能是种子节点
-        for (String nodeAddress:seedNodesStr.split("")) {
+        for (String nodeAddress:seedNodesStr.split(",")) {
             nodeAddressBytes = AddressTool.getAddress(nodeAddress);
             if(Arrays.equals(nodeAddressBytes, agent.getAgentAddress())){
                 throw new NulsException(ConsensusErrorCode.AGENT_EXIST);
@@ -308,7 +309,8 @@ public class TxValidator {
     private boolean stopAgentCoinDataValid(Chain chain,Transaction tx,AgentPo agentPo,StopAgent stopAgent,CoinData coinData)throws NulsException,IOException {
         Agent agent = agentManager.poToAgent(agentPo);
         CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, CallMethodUtils.currentTime() + chain.getConfig().getStopAgentLockTime());
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
+        int size = tx.size() - tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
         localCoinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
         if(!Arrays.equals(coinData.serialize(),localCoinData.serialize())){
             return false;

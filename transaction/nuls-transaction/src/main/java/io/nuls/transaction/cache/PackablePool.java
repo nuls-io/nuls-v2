@@ -80,10 +80,6 @@ public class PackablePool {
         }
     }
 
-    public int size(Chain chain) {
-        return chain.getTxQueue().size();
-    }
-
     public int getPoolSize(Chain chain) {
         return chain.getTxQueue().size();
     }

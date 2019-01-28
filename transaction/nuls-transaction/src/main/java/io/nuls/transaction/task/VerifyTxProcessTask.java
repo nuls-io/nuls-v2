@@ -120,7 +120,8 @@ public class VerifyTxProcessTask implements Runnable {
             }else if(isOrphanTx){
                 //todo 孤儿交易还是10分钟删, 如何处理nonce值??
                 long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
-                return tx.getTime() < (currentTimeMillis - 3600000L);
+//                return tx.getTime() < (currentTimeMillis - 3600000L);
+                return tx.getTime() < (currentTimeMillis - 60000L);//TODO 调试暂时改为60秒
             }
         } catch (Exception e) {
             Log.error(e);
