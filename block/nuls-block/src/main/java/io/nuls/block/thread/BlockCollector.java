@@ -29,10 +29,8 @@ import io.nuls.block.model.Node;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Future;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.Set;
+import java.util.concurrent.*;
 
 import static io.nuls.block.constant.Constant.BLOCK_COMPARATOR;
 
@@ -74,24 +72,29 @@ public class BlockCollector implements Runnable {
             while (startHeight <= netLatestHeight) {
                 result = futures.take().get();
                 int size = result.getSize();
+                Node node = result.getNode();
+                long endHeight = startHeight + size - 1;
+                PriorityBlockingQueue<Node> nodes = params.getNodes();
                 if (result.isSuccess()) {
-                    Node node = result.getNode();
-                    long endHeight = startHeight + size - 1;
                     commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
                     node.adjustCredit(true, result.getDuration());
-                    params.getNodes().offer(node);
+                    nodes.offer(node);
                     List<Block> blockList = CacheHandler.getBlockList(chainId, result.getMessageHash());
                     blockList.sort(BLOCK_COMPARATOR);
                     queue.addAll(blockList);
                 } else {
-                    retryDownload(result);
+                    //归还下载失败的节点
+                    node.adjustCredit(false, result.getDuration());
+                    nodes.offer(node);
+                    commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", fail");
+                    retryDownload(startHeight, size, 0);
                 }
                 startHeight += size;
             }
-            commonLog.info("BlockCollector stop work");
+            commonLog.info("BlockCollector stop work normally");
         } catch (Exception e) {
             e.printStackTrace();
-            commonLog.error(e);
+            commonLog.error("BlockCollector stop work abnormally-" + e);
         }
     }
 
@@ -99,40 +102,35 @@ public class BlockCollector implements Runnable {
     /**
      * 下载失败重试,直到成功为止
      *
-     * @param result
+     * @param startHeight
+     * @param size
+     * @param index
      * @return
      */
-    private void retryDownload(BlockDownLoadResult result) {
-        //归还下载失败的节点
-        Node node = result.getNode();
-        node.adjustCredit(false, result.getDuration());
-        params.getNodes().offer(node);
-        commonLog.info("download blocks fail, node:" + node + ", start:" + result.getStartHeight());
-        PriorityBlockingQueue<Node> nodes = params.getNodes();
-        try {
-            result.setNode(nodes.take());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            commonLog.error(e);
-        }
-
-        if (downloadBlockFromNode(result)) {
+    private void retryDownload(long startHeight, int size, int index) {
+        List<Node> nodeList = params.getList();
+        BlockDownLoadResult result = downloadBlockFromNode(startHeight, size, nodeList.get(index % nodeList.size()));
+        if (result.isSuccess()) {
+            Node node = result.getNode();
+            long endHeight = startHeight + size - 1;
+            commonLog.info("get " + size + " blocks:" + startHeight + "->" + endHeight + " ,from:" + node.getId() + ", success");
+            List<Block> blockList = CacheHandler.getBlockList(chainId, result.getMessageHash());
+            blockList.sort(BLOCK_COMPARATOR);
+            queue.addAll(blockList);
             return;
         }
-        retryDownload(result);
+        retryDownload(startHeight, size, ++index);
     }
 
-    private boolean downloadBlockFromNode(BlockDownLoadResult result) {
-        commonLog.info("retry download blocks, node:" + result.getNode() + ", start:" + result.getStartHeight());
-        BlockWorker worker = new BlockWorker(result.getStartHeight(), result.getSize(), chainId, result.getNode());
+    private BlockDownLoadResult downloadBlockFromNode(long startHeight, int size, Node node) {
+        commonLog.info("retry download blocks, node:" + node + ", start:" + startHeight);
+        BlockWorker worker = new BlockWorker(startHeight, size, chainId, node);
         Future<BlockDownLoadResult> submit = executor.submit(worker);
         try {
-            return submit.get().isSuccess();
+            return submit.get();
         } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            return new BlockDownLoadResult();
         }
-        return false;
     }
 
 }

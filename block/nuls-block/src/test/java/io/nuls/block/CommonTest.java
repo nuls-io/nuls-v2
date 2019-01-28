@@ -21,8 +21,10 @@
 package io.nuls.block;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.block.constant.ChainTypeEnum;
 import io.nuls.block.model.Chain;
+import io.nuls.block.model.Node;
 import io.nuls.rpc.client.WsClient;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
@@ -40,6 +42,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
+
+import static io.nuls.block.constant.Constant.NODE_COMPARATOR;
 
 public class CommonTest {
 
@@ -185,5 +189,34 @@ public class CommonTest {
         chains.forEach(e -> e.setType(ChainTypeEnum.FORK));
         SortedSet<Chain> ss = Collections.emptySortedSet();
         ss.forEach(e -> e.setType(ChainTypeEnum.FORK));
+    }
+
+    @Test
+    public void test5() {
+        {
+            SortedSet<Node> nodes = new TreeSet<>(NODE_COMPARATOR);
+            Random random = new Random();
+            long l = System.currentTimeMillis();
+            for (int i = 0; i < 10000000; i++) {
+                nodes.add(getNode(random.nextInt()));
+            }
+            System.out.println("SortedSet-"+(System.currentTimeMillis() - l));
+        }
+        {
+            List<Node> nodes = new ArrayList<>();
+            Random random = new Random();
+            long l = System.currentTimeMillis();
+            for (int i = 0; i < 10000000; i++) {
+                nodes.add(getNode(random.nextInt()));
+            }
+            nodes.sort(NODE_COMPARATOR);
+            System.out.println("List-"+(System.currentTimeMillis() - l));
+        }
+    }
+
+    private Node getNode(int credit){
+        Node node = new Node();
+        node.setCredit(credit);
+        return node;
     }
 }
