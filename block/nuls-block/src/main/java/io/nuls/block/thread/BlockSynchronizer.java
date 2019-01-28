@@ -251,14 +251,15 @@ public class BlockSynchronizer implements Runnable {
 
         ChainParameters parameters = context.getParameters();
         int config = availableNodes.size() * parameters.getConsistencyNodePercent() / 100;
-        if (count >= config) {
-            List<Node> nodeList = nodeMap.get(key);
-            nodeQueue.addAll(nodeList);
-            params.setList(nodeList);
-            Node node = nodeQueue.peek();
-            params.setNetLatestHash(node.getHash());
-            params.setNetLatestHeight(node.getHeight());
+        if (count < config) {
+            return params;
         }
+        List<Node> nodeList = nodeMap.get(key);
+        nodeQueue.addAll(nodeList);
+        params.setList(nodeList);
+        Node node = nodeQueue.peek();
+        params.setNetLatestHash(node.getHash());
+        params.setNetLatestHeight(node.getHeight());
 
         // a read-only method
         // upgrade from optimistic read to read lock

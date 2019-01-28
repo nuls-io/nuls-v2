@@ -46,23 +46,37 @@ public class BlockExtendsData extends BaseNulsData {
 
     protected int packingIndexOfRound;
 
-    private Integer mainVersion;
-
-    private Integer currentVersion;
-
-    private Integer percent;
-
-    private Long delay;
-
-    private byte[] stateRoot;
+    /**
+     * 主网版本是否与区块的版本一致
+     */
+    private boolean upgrade;
 
     /**
-     * 根据轮次开始时间计算轮次结束时间
-     * @param packing_interval 打包间隔时间（单位：毫秒）
-     * */
-    public long getRoundEndTime(long packing_interval) {
-        return roundStartTime + consensusMemberCount * packing_interval;
-    }
+     * 主网版本
+     */
+    private short mainVersion;
+
+    /**
+     * 区块的版本
+     */
+    private short blockVersion;
+
+    /**
+     * 统计区间大小(500-10000)
+     */
+    private short interval;
+
+    /**
+     * 每个统计区间内的最小生效比例(60-100)
+     */
+    private byte effectiveRatio;
+
+    /**
+     * 协议生效要满足的连续区间数(50-1000)
+     */
+    private short continuousIntervalCount;
+
+    private byte[] stateRoot;
 
     public BlockExtendsData() {
     }
@@ -73,6 +87,62 @@ public class BlockExtendsData extends BaseNulsData {
         } catch (NulsException e) {
             Log.error(e);
         }
+    }
+
+    public boolean isUpgrade() {
+        return upgrade;
+    }
+
+    public void setUpgrade(boolean upgrade) {
+        this.upgrade = upgrade;
+    }
+
+    public short getMainVersion() {
+        return mainVersion;
+    }
+
+    public void setMainVersion(short mainVersion) {
+        this.mainVersion = mainVersion;
+    }
+
+    public short getBlockVersion() {
+        return blockVersion;
+    }
+
+    public void setBlockVersion(short blockVersion) {
+        this.blockVersion = blockVersion;
+    }
+
+    public short getInterval() {
+        return interval;
+    }
+
+    public void setInterval(short interval) {
+        this.interval = interval;
+    }
+
+    public byte getEffectiveRatio() {
+        return effectiveRatio;
+    }
+
+    public void setEffectiveRatio(byte effectiveRatio) {
+        this.effectiveRatio = effectiveRatio;
+    }
+
+    public short getContinuousIntervalCount() {
+        return continuousIntervalCount;
+    }
+
+    public void setContinuousIntervalCount(short continuousIntervalCount) {
+        this.continuousIntervalCount = continuousIntervalCount;
+    }
+
+    /**
+     * 根据轮次开始时间计算轮次结束时间
+     * @param packing_interval 打包间隔时间（单位：毫秒）
+     * */
+    public long getRoundEndTime(long packing_interval) {
+        return roundStartTime + consensusMemberCount * packing_interval;
     }
 
     public int getConsensusMemberCount() {
@@ -115,12 +185,10 @@ public class BlockExtendsData extends BaseNulsData {
         size += SerializeUtils.sizeOfUint16();  // consensusMemberCount
         size += SerializeUtils.sizeOfUint48();  // roundStartTime
         size += SerializeUtils.sizeOfUint16();  // packingIndexOfRound
-        if (currentVersion != null) {
-            size += SerializeUtils.sizeOfUint32();  // mainVersion
-            size += SerializeUtils.sizeOfUint32();  // currentVersion
-            size += SerializeUtils.sizeOfUint16();  // percent;
-            size += SerializeUtils.sizeOfUint32();  // delay;
-            size += SerializeUtils.sizeOfBytes(stateRoot);
+        if (upgrade) {
+            size += 10;
+        } else {
+            size += 3;
         }
         return size;
     }
@@ -131,12 +199,13 @@ public class BlockExtendsData extends BaseNulsData {
         stream.writeUint16(consensusMemberCount);
         stream.writeUint48(roundStartTime);
         stream.writeUint16(packingIndexOfRound);
-        if (currentVersion != null) {
-            stream.writeUint32(mainVersion);
-            stream.writeUint32(currentVersion);
-            stream.writeUint16(percent);
-            stream.writeUint32(delay);
-            stream.writeBytesWithLength(stateRoot);
+        stream.writeBoolean(upgrade);
+        stream.writeShort(mainVersion);
+        if (upgrade) {
+            stream.writeShort(blockVersion);
+            stream.writeShort(interval);
+            stream.writeByte(effectiveRatio);
+            stream.writeShort(continuousIntervalCount);
         }
     }
 
@@ -146,52 +215,14 @@ public class BlockExtendsData extends BaseNulsData {
         this.consensusMemberCount = byteBuffer.readUint16();
         this.roundStartTime = byteBuffer.readUint48();
         this.packingIndexOfRound = byteBuffer.readUint16();
-        if (!byteBuffer.isFinished()) {
-            this.mainVersion = byteBuffer.readInt32();
-            this.currentVersion = byteBuffer.readInt32();
-            this.percent = byteBuffer.readUint16();
-            this.delay = byteBuffer.readUint32();
-            this.stateRoot = byteBuffer.readByLengthByte();
+        this.upgrade = byteBuffer.readBoolean();
+        this.mainVersion = byteBuffer.readShort();
+        if (upgrade) {
+            this.blockVersion = byteBuffer.readShort();
+            this.interval = byteBuffer.readShort();
+            this.effectiveRatio = byteBuffer.readByte();
+            this.continuousIntervalCount = byteBuffer.readShort();
         }
-    }
-
-    public Integer getMainVersion() {
-        return mainVersion;
-    }
-
-    public void setMainVersion(Integer mainVersion) {
-        this.mainVersion = mainVersion;
-    }
-
-    public Integer getCurrentVersion() {
-        return currentVersion;
-    }
-
-    public void setCurrentVersion(Integer currentVersion) {
-        this.currentVersion = currentVersion;
-    }
-
-    public Integer getPercent() {
-        return percent;
-    }
-
-    public void setPercent(Integer percent) {
-        this.percent = percent;
-    }
-
-    public Long getDelay() {
-        return delay;
-    }
-
-    public void setDelay(Long delay) {
-        this.delay = delay;
-    }
-
-    public String getProtocolKey() {
-        if (currentVersion != null && currentVersion > 1) {
-            return this.currentVersion + "-" + this.percent + "-" + this.delay;
-        }
-        return null;
     }
 
     public byte[] getStateRoot() {

@@ -23,10 +23,8 @@ package io.nuls.protocol.thread.monitor;
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolContext;
-import io.nuls.protocol.model.ProtocolVersion;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.StampedLock;
 
 import static io.nuls.protocol.utils.LoggerUtil.commonLog;
@@ -70,7 +68,7 @@ public class ProtocolMonitor implements Runnable {
                             continue;
                         }
                         // possibly racy reads
-                        List<ProtocolVersion> versionList = context.getVersionList();
+
                         if (!lock.validate(stamp)) {
                             continue;
                         }

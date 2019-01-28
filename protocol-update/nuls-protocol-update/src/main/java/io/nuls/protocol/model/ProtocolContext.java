@@ -25,6 +25,7 @@ package io.nuls.protocol.model;
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.service.ProtocolService;
 import io.nuls.protocol.utils.LoggerUtil;
+import io.nuls.protocol.utils.module.BlockUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
 import lombok.Getter;
@@ -112,7 +113,8 @@ public class ProtocolContext {
         service.init(chainId);
         //各类缓存初始化
 
-
+        //定时调度接口初始化
+        BlockUtil.register(chainId);
     }
 
     public void start() {

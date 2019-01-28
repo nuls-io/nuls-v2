@@ -24,7 +24,6 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolContext;
-import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.thread.monitor.ProtocolMonitor;
 import io.nuls.protocol.utils.ConfigLoader;
 import io.nuls.rpc.client.CmdDispatcher;
@@ -91,7 +90,7 @@ public class ProtocolBootstrap {
                 Thread.sleep(2000L);
             }
 
-            commonLog.info("service start");
+            commonLog.info("service starting");
             //加载配置
             ConfigLoader.load();
             //开启分叉链处理线程

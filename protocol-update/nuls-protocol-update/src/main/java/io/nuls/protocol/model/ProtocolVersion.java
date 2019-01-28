@@ -14,7 +14,7 @@ public class ProtocolVersion extends BaseNulsData {
     /**
      * 协议版本号
      */
-    private byte version;
+    private short version;
 
     /**
      * 统计区间大小(500-10000)
@@ -33,12 +33,12 @@ public class ProtocolVersion extends BaseNulsData {
 
     @Override
     public int size() {
-        return 6;
+        return 7;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeByte(version);
+        stream.writeShort(version);
         stream.writeShort(interval);
         stream.writeByte(effectiveRatio);
         stream.writeShort(continuousIntervalCount);
@@ -46,7 +46,7 @@ public class ProtocolVersion extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.version = byteBuffer.readByte();
+        this.version = byteBuffer.readShort();
         this.interval = byteBuffer.readShort();
         this.effectiveRatio = byteBuffer.readByte();
         this.continuousIntervalCount = byteBuffer.readShort();

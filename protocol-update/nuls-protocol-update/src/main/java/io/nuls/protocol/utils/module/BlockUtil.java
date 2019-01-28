@@ -22,6 +22,7 @@ package io.nuls.protocol.utils.module;
 
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.rpc.callback.BlockHeaderInvoke;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -61,6 +62,20 @@ public class BlockUtil {
             e.printStackTrace();
             commonLog.error(e);
             return false;
+        }
+    }
+
+    public static void register(int chainId){
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            CmdDispatcher.requestAndInvoke(ModuleE.BL.abbr, "latestBlockHeader", params, "0", "1", new BlockHeaderInvoke(chainId));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
         }
     }
 
