@@ -345,6 +345,9 @@ public class ServerRuntime {
         WsData wsData = new WsData();
         wsData.setWebSocket(webSocket);
         wsData.getThreadPool().execute(new RequestSingleProcessor(wsData));
+        wsData.getThreadPool().execute(new RequestSingleProcessor(wsData));
+        wsData.getThreadPool().execute(new RequestSingleProcessor(wsData));
+        wsData.getThreadPool().execute(new RequestSingleProcessor(wsData));
         wsData.getThreadPool().execute(new RequestByPeriodProcessor(wsData));
         wsData.getThreadPool().execute(new RequestByCountProcessor(wsData));
         SERVER_DATA_MAP.put(webSocket,wsData);
