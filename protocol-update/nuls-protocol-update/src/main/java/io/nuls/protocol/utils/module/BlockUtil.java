@@ -20,14 +20,16 @@
 
 package io.nuls.protocol.utils.module;
 
-import io.nuls.protocol.constant.RunningStatusEnum;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.rpc.callback.BlockHeaderInvoke;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,25 +46,30 @@ public class BlockUtil {
      * 更新本模块的运行时状态
      *
      * @param chainId
-     * @param moduleString
-     * @param status
+     * @param begin
+     * @param end
      * @return
      */
-    public static boolean get(int chainId, String moduleString, RunningStatusEnum status) {
+    public static List<BlockHeader> getBlockHeaders(int chainId, long begin, long end) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
-            Map<String, Object> params = new HashMap<>(5);
+            Map<String, Object> params = new HashMap<>(3);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            params.put("module", moduleString);
-            params.put("status", status.ordinal());
+            params.put("begin", begin);
+            params.put("end", end);
 
-            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, "getBlockHeadersByHeightRange", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                List<BlockHeader> result = (List) responseData.get("getBlockHeadersByHeightRange");
+                return result;
+            }
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
-            return false;
         }
+        return null;
     }
 
     public static void register(int chainId){

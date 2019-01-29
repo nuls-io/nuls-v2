@@ -48,6 +48,10 @@ public interface Constant {
      * 存储每条链的配置信息
      */
     String PROTOCOL_CONFIG = "ProtocolConfig";
+    /**
+     * 存储每条链的版本统计信息
+     */
+    String STATISTICS = "Statistics";
 
     /**
      * 默认扫描包路径

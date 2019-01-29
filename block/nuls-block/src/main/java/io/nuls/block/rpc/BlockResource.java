@@ -167,6 +167,34 @@ public class BlockResource extends BaseCmd {
     }
 
     /**
+     * 获取区块头
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_BLOCK_HEADERS_BY_HEIGHT_RANGE, version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "begin", parameterType = "long")
+    @Parameter(parameterName = "end", parameterType = "long")
+    public Response getBlockHeadersByHeightRange(Map map) {
+        try {
+            int chainId = Integer.parseInt(map.get("chainId").toString());
+            long startHeight = Long.parseLong(map.get("begin").toString());
+            long endheight = Long.parseLong(map.get("end").toString());
+            List<BlockHeader> blockHeaders = service.getBlockHeader(chainId, startHeight, endheight);
+            List<String> hexList = new ArrayList<>();
+            for (BlockHeader blockHeader : blockHeaders) {
+                hexList.add(HexUtil.encode(blockHeader.serialize()));
+            }
+            return success(hexList);
+        } catch (IOException e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return failed(e.getMessage());
+        }
+    }
+
+    /**
      * 根据高度获取区块
      *
      * @param map

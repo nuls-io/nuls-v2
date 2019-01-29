@@ -20,13 +20,6 @@
 
 package io.nuls.protocol.service;
 
-import io.nuls.base.data.Block;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.protocol.model.po.BlockHeaderPo;
-
-import java.util.List;
-
 /**
  * 区块服务
  *

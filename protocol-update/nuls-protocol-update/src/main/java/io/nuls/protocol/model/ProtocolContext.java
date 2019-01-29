@@ -23,6 +23,7 @@
 package io.nuls.protocol.model;
 
 import io.nuls.protocol.constant.RunningStatusEnum;
+import io.nuls.protocol.model.po.Statistics;
 import io.nuls.protocol.service.ProtocolService;
 import io.nuls.protocol.utils.LoggerUtil;
 import io.nuls.protocol.utils.module.BlockUtil;
@@ -46,7 +47,7 @@ import java.util.concurrent.locks.StampedLock;
 @NoArgsConstructor
 public class ProtocolContext {
     /**
-     * 代表该链的运行状态
+     * 代表模块的运行状态
      */
     @Getter
     private RunningStatusEnum status;
@@ -59,6 +60,13 @@ public class ProtocolContext {
     private int chainId;
 
     /**
+     * 最新高度
+     */
+    @Getter
+    @Setter
+    private long latestHeight;
+
+    /**
      * 当前生效的协议版本
      */
     @Getter
@@ -66,11 +74,32 @@ public class ProtocolContext {
     private ProtocolVersion protocolVersion;
 
     /**
-     * 缓存的未统计区间
+     * 缓存的未统计区间协议对象列表
      */
     @Getter
     @Setter
     private List<ProtocolVersion> versionList;
+
+    /**
+     * 缓存的未统计区间内各协议版本占比
+     */
+    @Getter
+    @Setter
+    private Map<ProtocolVersion, Integer> proportionMap;
+
+    /**
+     * 缓存的未统计区间内区块数
+     */
+    @Getter
+    @Setter
+    private int count;
+
+    /**
+     * 上一条缓存的统计信息
+     */
+    @Getter
+    @Setter
+    private Statistics lastValidStatistics;
 
     /**
      * 链的运行时参数
@@ -92,13 +121,6 @@ public class ProtocolContext {
     @Getter
     @Setter
     private NulsLogger commonLog;
-
-    /**
-     * 记录消息收发日志
-     */
-    @Getter
-    @Setter
-    private NulsLogger messageLog;
 
     public synchronized void setStatus(RunningStatusEnum status) {
         this.status = status;
