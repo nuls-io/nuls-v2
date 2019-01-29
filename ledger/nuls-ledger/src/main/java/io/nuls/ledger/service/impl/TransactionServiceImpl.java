@@ -154,11 +154,11 @@ public class TransactionServiceImpl implements TransactionService {
                 }
                 boolean process = false;
                 AccountBalance accountBalance = getAccountBalance(addressChainId,from,txHash,transaction.getBlockHeight(),updateAccounts);
-                if(from.getLocked() != 0){
-                    process = lockedTransactionProcessor.processFromCoinData(from,nonce8BytesStr,transaction.getHash().toString(),  accountBalance.getNowAccountState());
-                }else {
+                if(from.getLocked() == 0){
                     //非解锁交易处理
                     process = commontTransactionProcessor.processFromCoinData(from,nonce8BytesStr,transaction.getHash().toString(),  accountBalance.getNowAccountState());
+                }else {
+                    process = lockedTransactionProcessor.processFromCoinData(from,nonce8BytesStr,transaction.getHash().toString(),  accountBalance.getNowAccountState());
                 }
                 if(!process){
                     Log.info("address={},txHash = {} processFromCoinData is fail.",addressChainId,transaction.getHash().toString());
