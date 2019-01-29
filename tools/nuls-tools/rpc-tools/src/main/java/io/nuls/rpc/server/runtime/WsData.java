@@ -10,10 +10,7 @@ import org.java_websocket.WebSocket;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.*;
 
 /**
  * 做为服务器端时，一个连接里面包含的数据
@@ -47,7 +44,7 @@ public class WsData {
      * 单次响应队列，Message
      * Single called queue.Message.
      */
-    private final LinkedBlockingQueue<Object []> requestSingleQueue = new LinkedBlockingQueue<>();
+    private final ConcurrentLinkedQueue<Object []> requestSingleQueue = new ConcurrentLinkedQueue<>();
 
     /**
      * 多次响应队列（根据时间间隔订阅/Period），Message
@@ -96,7 +93,7 @@ public class WsData {
      * 该链接处理消息的需要的线程
      * The thread that the link needs to process the message
      * */
-    private final ExecutorService threadPool = ThreadUtils.createThreadPool(3, 50, new NulsThreadFactory("ServerProcessor"));
+    private final ExecutorService threadPool = ThreadUtils.createThreadPool(6, 50, new NulsThreadFactory("ServerProcessor"));
 
 
     /**
@@ -199,7 +196,7 @@ public class WsData {
         return cmdInvokeTime;
     }
 
-    public LinkedBlockingQueue<Object []> getRequestSingleQueue() {
+    public ConcurrentLinkedQueue<Object[]> getRequestSingleQueue() {
         return requestSingleQueue;
     }
 

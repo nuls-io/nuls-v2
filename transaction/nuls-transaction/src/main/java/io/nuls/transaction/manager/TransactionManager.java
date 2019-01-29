@@ -145,11 +145,8 @@ public class TransactionManager {
             //由于跨链交易直接调模块内部验证器接口，可不通过RPC接口
             if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER) {
                 return txService.crossTransactionValidator(chain, tx);
-            } else if (!txRegister.getSystemTx()) {
-                //调验证器
-                return TransactionCall.txProcess(chain, txRegister.getValidator(), txRegister.getModuleCode(), tx.hex());
             }
-            return true;
+            return TransactionCall.txValidatorProcess(chain, txRegister, tx.hex());
         } catch (NulsException e) {
             chain.getLogger().error("tx type: " + tx.getType(), e);
             return false;
@@ -310,21 +307,13 @@ public class TransactionManager {
         }
         //验证收款方是不是属于同一条链
         Integer addressChainId = null;
-        Set<String> uniqueCoin = new HashSet<>();
         for (CoinTo coinTo : listTo) {
             int chainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
-            int assetsChainId = coinTo.getAssetsChainId();
-            int assetsId = coinTo.getAssetsId();
             if (null == addressChainId) {
                 addressChainId = chainId;
                 continue;
             } else if (addressChainId != chainId) {
                 throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
-            }
-            //验证账户地址,资产链id,资产id的组合唯一性
-            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinTo.getAddress()) + "-" + assetsChainId + "-" + assetsId);
-            if (!rs) {
-                throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
         }
     }

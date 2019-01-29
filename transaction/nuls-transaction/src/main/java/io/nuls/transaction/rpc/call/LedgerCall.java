@@ -7,6 +7,7 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyTxResult;
@@ -114,8 +115,9 @@ public class LedgerCall {
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", addressString);
-            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "getBalance", params);
+            Map result = (Map)TransactionCall.request(ModuleE.LG.abbr, "getBalance", params);
 //            return BigIntegerUtils.stringToBigInteger((String) result.get("available"));
+            System.out.println(JSONUtils.obj2PrettyJson(result));
             Object available = result.get("available");
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
         } catch (Exception e) {
