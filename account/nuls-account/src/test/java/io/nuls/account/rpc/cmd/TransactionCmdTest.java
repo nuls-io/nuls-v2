@@ -3,6 +3,7 @@ package io.nuls.account.rpc.cmd;
 import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.TransferDto;
+import io.nuls.account.rpc.call.LegerCmdCall;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
@@ -67,6 +68,7 @@ public class TransactionCmdTest {
 
     /**
      * 铸币
+     *
      * @throws Exception
      */
     public void addGenesisAsset(String address) throws Exception {
@@ -81,13 +83,14 @@ public class TransactionCmdTest {
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         Log.info("response {}", response);
 
-        params.put("isConfirmTx",true);
+        params.put("isConfirmTx", true);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         Log.info("response {}", response);
     }
 
     /**
      * 铸币交易
+     *
      * @return
      * @throws IOException
      */
@@ -113,7 +116,7 @@ public class TransactionCmdTest {
     }
 
     @Test
-    public void testGenesisAsset() throws Exception{
+    public void testGenesisAsset() throws Exception {
         addGenesisAsset(address1);
         addGenesisAsset(address2);
         addGenesisAsset(address3);
@@ -146,14 +149,14 @@ public class TransactionCmdTest {
 //            System.out.println("transfer: " + result.get("value"));
 
             //组装创建节点交易
-            Map agentTxMap=this.createAgentTx();
-            //调用接口
-            Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
-            HashMap result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
-            Assert.assertTrue(null != result);
-            String txHex=(String)result.get("txHex");
-            Log.info("{}", txHex);
-            System.out.println("createAgent: "+txHex);
+//            Map agentTxMap = this.createAgentTx(address1, address2);
+//            //调用接口
+//            Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+//            HashMap result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
+//            Assert.assertTrue(null != result);
+//            String txHex = (String) result.get("txHex");
+//            Log.info("{}", txHex);
+//            System.out.println("createAgent: " + txHex);
 
             //创建节点交易提交
             //String agentHash=this.createAgentCommit(txHex);
@@ -208,20 +211,51 @@ public class TransactionCmdTest {
     /**
      * 创建节点
      */
-    public Map createAgentTx() throws Exception {
+    public Map createAgentTx(String agentAddress, String packingAddress) throws Exception {
         Map<String, Object> params = new HashMap<>();
-        params.put("agentAddress", address1);
+        params.put("agentAddress", agentAddress);
         params.put("chainId", chainId);
-        params.put("deposit", 20000*100000000l);
+        params.put("deposit", 20000 * 100000000l);
         params.put("commissionRate", 10);
-        params.put("packingAddress", address2);
+        params.put("packingAddress", packingAddress);
         params.put("password", null);
-        params.put("rewardAddress", address3);
+        params.put("rewardAddress", agentAddress);
         return params;
+    }
+
+    @Test
+    public void createAgentTx() throws Exception {
+        BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, address1);
+        System.out.println(balance.longValue());
+        //组装创建节点交易
+        Map agentTxMap = this.createAgentTx(address1, address2);
+        //调用接口
+        Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
+        Assert.assertTrue(null != result);
+        Log.info("{}", result.get("txHex"));
+        System.out.println("transfer: " + result.get("txHex"));  //Thread.sleep(3000L);
+    }
+
+    @Test
+    public void stopAgentTx() throws Exception {
+        //组装创建节点交易
+        //Map agentTxMap=this.createAgentTx(address9, address1);
+        Map<String, Object> txMap = new HashMap();
+        txMap.put("chainId", chainId);
+        txMap.put("address", address1);
+        txMap.put("password", "");
+        //调用接口
+        Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
+        Assert.assertTrue(null != result);
+        Log.info("{}", result.get("txHex"));
+        System.out.println("transfer: " + result.get("txHex"));  //Thread.sleep(3000L);
     }
 
     /**
      * 创建节点交易提交
+     *
      * @param caTxHex
      * @return
      */
@@ -258,17 +292,42 @@ public class TransactionCmdTest {
     }
 
     /**
+     * 委托节点交易创建
+     */
+    @Test
+    public void depositToAgent() throws Exception {
+        BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, address4);
+        System.out.println(balance.longValue());
+        //组装委托节点交易
+        String agentHash = "00207ebda6a6a4a8089f358f2a6b96d9257a67ef20defb184acf2c571f54fdec6a08";
+        Map<String, Object> dpParams = new HashMap<>();
+        dpParams.put("chainId", chainId);
+        dpParams.put("address", address4);
+        dpParams.put("agentHash", agentHash);
+        dpParams.put("deposit", 20000 * 100000000L);
+        Response dpResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
+        HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
+        String dpTxHex = (String) dpResult.get("txHex");
+        System.out.println(dpTxHex);
+        balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, address4);
+        System.out.println(balance.longValue());
+    }
+
+    /**
      * 退出共识
+     *
      * @throws Exception
      */
-    public void withdraw()throws Exception{
-        Map<String,Object>params = new HashMap<>();
-        params.put("chainId",chainId);
-        //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        params.put("address",address4);
-        params.put("txHash","");
+    @Test
+    public void withdraw() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        params.put("address", address4);
+        params.put("txHash", "0020b48a9922396edf0dd4c9dcad7eca7d3b96251acec4c9c22ffd55f3af7467b23b");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
+        BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, address4);
+        System.out.println(balance.longValue());
     }
 
 }

@@ -50,6 +50,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -237,6 +238,7 @@ public class TxValidator {
         if (null == listTo || listTo.size() == 0) {
             throw new NulsException(AccountErrorCode.TX_COINTO_NOT_FOUND);
         }
+        Set<String> uniqueCoin = new HashSet<>();
         int chainId = chain.getConfig().getChainId();
         for (CoinTo coinTo : listTo) {
             int addrChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
@@ -250,7 +252,13 @@ public class TxValidator {
             if (chain.getConfig().getAssetsId() != assetsId) {
                 throw new NulsException(AccountErrorCode.ASSETID_ERROR);
             }
+            //验证账户地址,资产链id,资产id的组合唯一性
+            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinTo.getAddress()) + "-" + assetsChainId + "-" + assetsId);
+            if (!rs) {
+                throw new NulsException(AccountErrorCode.COINTO_DUPLICATE_COIN);
+            }
         }
+
         return true;
     }
 
