@@ -71,7 +71,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (null == hash) {
             return null;
         }
-        return confirmedTxStorageService.getTx(chain.getChainId(), hash);
+         return confirmedTxStorageService.getTx(chain.getChainId(), hash);
     }
 
     private boolean saveTx(Chain chain, Transaction tx) {
@@ -186,9 +186,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             if (rs) {
                 step = 1;
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                if (!txRegister.getSystemTx()){
-                    rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex(), HexUtil.encode(blockHeaderDigest.serialize()));
-                }
+                rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeaderDigest.serialize()));
             }
             if (rs) {
                 step = 2;
@@ -226,9 +224,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             if(step >= 2){
                 //通过各模块回滚交易业务逻辑
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                if (!txRegister.getSystemTx()) {
-                    TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx.hex(), HexUtil.encode(blockHeaderDigest.serialize()));
-                }
+                TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeaderDigest.serialize()));
             }
             if(step >= 1){
                 //从已确认库中删除该交易
@@ -364,9 +360,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             //交易业务回滚
             try {
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                if (!txRegister.getSystemTx()) {
-                    rs = TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx.hex(), HexUtil.encode(blockHeaderDigest.serialize()));
-                }
+                rs = TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeaderDigest.serialize()));
             } catch (Exception e) {
                 rs = false;
                 chain.getLogger().error(e);
@@ -406,9 +400,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                     Transaction tx = rollbackedList.get(i);
                     confirmedTxStorageService.saveTx(chain.getChainId(), tx);
                     TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                    if (!txRegister.getSystemTx()) {
-                        TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex(), HexUtil.encode(blockHeaderDigest.serialize()));
-                    }
+                    TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeaderDigest.serialize()));
                     if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH) {
                         LedgerCall.commitTxLedger(chain, tx, true);
                     }
@@ -444,9 +436,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
             if(setp >= 4){
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                if (!txRegister.getSystemTx()) {
-                    TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex(), HexUtil.encode(blockHeaderDigest.serialize()));
-                }
+                TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeaderDigest.serialize()));
             }
             if(setp >= 3){
                 if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH) {

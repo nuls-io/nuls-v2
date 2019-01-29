@@ -137,8 +137,8 @@ public class AgentTest {
     @Test
     public void getAgentInfo()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
-        params.put("agentHash","0020fef3f394953c601f6abe82f223d5c5673d3b4d7461e575f663954a7c4e055317");
+        params.put("chainId",12345);
+        params.put("agentHash","00207de58e4afadc846932aa9c0398ce90ed1e35c5b722e977b14a0f93397d438343");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentInfo", params);
         System.out.println(cmdResp.getResponseData());
     }

@@ -98,20 +98,20 @@ public class TestTx{
 
     @Test
     public void test() throws Exception{
-//        addGenesisAsset(address1);
-//        addGenesisAsset(address2);
-//        addGenesisAsset(address3);
-//        addGenesisAsset(address4);
-//        addGenesisAsset(address5);
-//        addGenesisAsset(address6);
+       addGenesisAsset(address1);
+        addGenesisAsset(address2);
+        addGenesisAsset(address3);
+        addGenesisAsset(address4);
+        addGenesisAsset(address5);
+        addGenesisAsset(address6);
         addGenesisAsset(address7);
         addGenesisAsset(address8);
         addGenesisAsset(address9);
         addGenesisAsset(address10);
         addGenesisAsset(address11);
         addGenesisAsset(address12);
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address10), assetChainId, assetId);
-        System.out.println(balance.longValue());
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address7), assetChainId, assetId);
+        System.out.println(JSONUtils.obj2PrettyJson(balance));
     }
 
     @Test

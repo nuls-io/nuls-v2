@@ -619,10 +619,18 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
         }
         boolean hasNulsFrom = false;
+        Set<String> uniqueCoin = new HashSet<>();
         for (CoinFrom coinFrom : listFrom) {
             //是否有nuls(手续费)
             if (TxUtil.isNulsAsset(coinFrom)) {
                 hasNulsFrom = true;
+            }
+            //验证账户地址,资产链id,资产id的组合唯一性
+            int assetsChainId = coinFrom.getAssetsChainId();
+            int assetsId = coinFrom.getAssetsId();
+            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId);
+            if (!rs) {
+                throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
             //只有NULS主网节点才会进入跨链交易验证器，直接验证资产即可
             //todo
@@ -641,7 +649,15 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
         }
         //验证跨链交易的from和to的资产是否存在(有效)
+        Set<String> uniqueCoin = new HashSet<>();
         for (CoinTo coinTo : listTo) {
+            //验证账户地址,资产链id,资产id的组合唯一性
+            int assetsChainId = coinTo.getAssetsChainId();
+            int assetsId = coinTo.getAssetsId();
+            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinTo.getAddress()) + "-" + assetsChainId + "-" + assetsId);
+            if (!rs) {
+                throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
+            }
             //todo
            /* if (!ChainCall.verifyAssetExist(coinTo.getAssetsChainId(), coinTo.getAssetsId())) {
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
