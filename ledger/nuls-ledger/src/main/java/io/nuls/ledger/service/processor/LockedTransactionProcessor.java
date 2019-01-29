@@ -60,18 +60,6 @@ public class LockedTransactionProcessor implements TxProcessor {
     public boolean processFromCoinData(CoinFrom coin,String nonce,String hash,  AccountState accountState) {
 
         if(coin.getLocked() == -1) {
-            //按高度移除锁定
-            List<FreezeHeightState> list = accountState.getFreezeHeightStates();
-            for(FreezeHeightState freezeHeightState : list){
-                if(freezeHeightState.getNonce().equalsIgnoreCase(HexUtil.encode(coin.getNonce()))){
-                    if(0 == freezeHeightState.getAmount().compareTo(coin.getAmount())){
-                        //金额一致，移除
-                        list.remove(freezeHeightState);
-                        return true;
-                    }
-                }
-            }
-        }else {
             //按时间移除锁定
             List<FreezeLockTimeState> list = accountState.getFreezeLockTimeStates();
             for (FreezeLockTimeState freezeLockTimeState : list) {
@@ -79,6 +67,19 @@ public class LockedTransactionProcessor implements TxProcessor {
                     if(0 == freezeLockTimeState.getAmount().compareTo(coin.getAmount())) {
                         //金额一致，移除
                         list.remove(freezeLockTimeState);
+                        return true;
+                    }
+                }
+            }
+
+        }else {
+            //按高度移除锁定
+            List<FreezeHeightState> list = accountState.getFreezeHeightStates();
+            for(FreezeHeightState freezeHeightState : list){
+                if(freezeHeightState.getNonce().equalsIgnoreCase(HexUtil.encode(coin.getNonce()))){
+                    if(0 == freezeHeightState.getAmount().compareTo(coin.getAmount())){
+                        //金额一致，移除
+                        list.remove(freezeHeightState);
                         return true;
                     }
                 }
