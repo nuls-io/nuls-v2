@@ -67,7 +67,7 @@ public class DepositManager {
             return;
         }
         for (int index = 0;index <= depositList.size() ; index++ ){
-            if(deposit.getTxHash().equals(depositList.get(index))){
+            if(deposit.getTxHash().equals(depositList.get(index).getTxHash())){
                 depositList.set(index,deposit);
             }
         }
