@@ -311,7 +311,7 @@ public class TxValidator {
         CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, CallMethodUtils.currentTime() + chain.getConfig().getStopAgentLockTime());
         int size = tx.size() - tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
-        localCoinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
+        localCoinData.getTo().get(0).setAmount(localCoinData.getTo().get(0).getAmount().subtract(fee));
         if(!Arrays.equals(coinData.serialize(),localCoinData.serialize())){
             return false;
         }
