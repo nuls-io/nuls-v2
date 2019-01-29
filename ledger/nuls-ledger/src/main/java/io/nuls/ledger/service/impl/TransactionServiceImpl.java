@@ -173,12 +173,12 @@ public class TransactionServiceImpl implements TransactionService {
                 }
                 AccountBalance accountBalance = getAccountBalance(addressChainId,to,txHash,transaction.getBlockHeight(),updateAccounts);
 
-                if(to.getLockTime() > 0){
-                    //锁定交易处理
-                    lockedTransactionProcessor.processToCoinData(to,nonce8BytesStr,transaction.getHash().toString(), accountBalance.getNowAccountState());
-                }else {
+                if(to.getLockTime() == 0){
                     //非锁定交易处理
                     commontTransactionProcessor.processToCoinData(to,nonce8BytesStr,transaction.getHash().toString(),  accountBalance.getNowAccountState());
+                }else {
+                    //锁定交易处理
+                    lockedTransactionProcessor.processToCoinData(to,nonce8BytesStr,transaction.getHash().toString(), accountBalance.getNowAccountState());
                 }
             }
             //提交交易中的所有账号记录
