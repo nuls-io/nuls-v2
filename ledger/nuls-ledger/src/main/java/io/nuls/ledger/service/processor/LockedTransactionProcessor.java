@@ -36,8 +36,6 @@ import io.nuls.ledger.service.AccountStateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -59,9 +57,9 @@ public class LockedTransactionProcessor implements TxProcessor {
      * @param hash
      */
     @Override
-    public void processFromCoinData(CoinFrom coin,String nonce,String hash,  AccountState accountState) {
+    public boolean processFromCoinData(CoinFrom coin,String nonce,String hash,  AccountState accountState) {
 
-        if(coin.getLocked() < LedgerConstant.MAX_HEIGHT_VALUE  && coin.getLocked() != -1) {
+        if(coin.getLocked() == -1) {
             //按高度移除锁定
             List<FreezeHeightState> list = accountState.getFreezeHeightStates();
             for(FreezeHeightState freezeHeightState : list){
@@ -69,6 +67,7 @@ public class LockedTransactionProcessor implements TxProcessor {
                     if(0 == freezeHeightState.getAmount().compareTo(coin.getAmount())){
                         //金额一致，移除
                         list.remove(freezeHeightState);
+                        return true;
                     }
                 }
             }
@@ -80,11 +79,12 @@ public class LockedTransactionProcessor implements TxProcessor {
                     if(0 == freezeLockTimeState.getAmount().compareTo(coin.getAmount())) {
                         //金额一致，移除
                         list.remove(freezeLockTimeState);
+                        return true;
                     }
                 }
             }
         }
-
+        return false;
     }
 
     /**
@@ -94,7 +94,7 @@ public class LockedTransactionProcessor implements TxProcessor {
      * @param hash
      */
     @Override
-    public void processToCoinData(CoinTo coin,String nonce,String hash, AccountState accountState) {
+    public boolean processToCoinData(CoinTo coin,String nonce,String hash, AccountState accountState) {
         if(coin.getLockTime() < LedgerConstant.MAX_HEIGHT_VALUE  && coin.getLockTime() != -1){
             //按高度锁定
             FreezeHeightState freezeHeightState = new FreezeHeightState();
@@ -114,5 +114,6 @@ public class LockedTransactionProcessor implements TxProcessor {
             freezeLockTimeState.setTxHash(hash);
             accountState.getFreezeLockTimeStates().add(freezeLockTimeState);
         }
+        return true;
     }
 }

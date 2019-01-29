@@ -31,8 +31,6 @@ import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * 普通交易处理
@@ -46,13 +44,15 @@ public class CommontTransactionProcessor implements TxProcessor {
 
 
     @Override
-    public void processFromCoinData(CoinFrom coin,String nonce,String hash,  AccountState accountState) {
+    public boolean processFromCoinData(CoinFrom coin,String nonce,String hash,  AccountState accountState) {
         accountState.addTotalFromAmount(coin.getAmount());
         accountState.updateConfirmedNonce(nonce);
+        return true;
     }
 
     @Override
-    public void processToCoinData(CoinTo coin,String nonce,String hash,  AccountState accountState) {
+    public boolean processToCoinData(CoinTo coin,String nonce,String hash,  AccountState accountState) {
         accountState.addTotalToAmount(coin.getAmount());
+        return true;
     }
 }
