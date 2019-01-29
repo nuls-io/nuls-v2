@@ -154,5 +154,10 @@ public interface RpcParameterNameConstant {
      */
     String AMOUNT = "amount";
 
+    /**
+     * the TYPE
+     */
+    String TYPE = "type";
+
 
 }
