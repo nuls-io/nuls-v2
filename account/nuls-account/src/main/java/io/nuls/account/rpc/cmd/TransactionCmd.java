@@ -8,6 +8,7 @@ import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.CoinDto;
+import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.account.model.dto.TransferDto;
 import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.service.AccountService;
@@ -241,7 +242,7 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
-     * 创建别名转账交易
+     * 创建别名转账交易,仅仅针对非多签账户
      * <p>
      * create the transaction of transfer by alias
      *
@@ -301,7 +302,6 @@ public class TransactionCmd extends BaseCmd {
             fromCoinDto.setAssetsId(assetId);
             Transaction tx = transactionService.transferByAlias(chainId, fromCoinDto, toCoinDto, remark);
             map.put("txHash", tx.getHash().getDigestHex());
-            //TODO 判断转出账户是否是多签账户，如果为多签则返回16进制交易串，这一部份与多签账户转账交易完成后再补充 Edward
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
@@ -309,7 +309,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_multipleAddressTransfer end");
+        LogUtil.debug("ac_transferByAlias end");
         return success(map);
     }
 
@@ -325,24 +325,49 @@ public class TransactionCmd extends BaseCmd {
     public Response createMultiSignTransfer(Map params) {
         LogUtil.debug("ac_createMultiSignTransfer start");
         Map<String, String> map = new HashMap<>(1);
+        MultiSigAccount multiSigAccount = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
         Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
+        Object typeObj = params == null ? null : params.get(RpcParameterNameConstant.TYPE);
+        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
         Object toAddressObj = params == null ? null : params.get(RpcParameterNameConstant.TO_ADDRESS);
         Object amountObj = params == null ? null : params.get(RpcParameterNameConstant.AMOUNT);
         Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.REMARK);
         try {
             // check parameters
             if (params == null || chainIdObj == null || addressObj == null || signAddressObj == null ||
-                    amountObj == null || toAddressObj == null) {
+                    amountObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             int chainId = (int) chainIdObj;
             String address = (String) addressObj;
             String password = (String) passwordObj;
             String signAddress = (String) signAddressObj;
+            int type = (int) typeObj;
+            String alias = (String) aliasObj;
             String toAddress = (String) toAddressObj;
+            if (type == 1) {
+                if (toAddress == null) {
+                    throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
+                }
+            } else if(type == 2 ){
+                if (alias == null) {
+                    throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
+                }
+                AliasPo aliasPo = aliasStorageService.getAlias(chainId,alias);
+                if (aliasPo == null) {
+                    throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+                }
+                toAddress = AddressTool.getStringAddressByBytes(aliasPo.getAddress());
+            } else {
+                throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
+            }
+            multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId,address);
+            if (multiSigAccount == null) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
             BigInteger amount = new BigInteger((String) amountObj);
             String remark = (String) remarkObj;
             if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
@@ -352,15 +377,12 @@ public class TransactionCmd extends BaseCmd {
             if (!validTxRemark(remark)) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
-            //根据别名查询出地址
+            //查询出账户
             Account account = accountService.getAccount(chainId,signAddress);
             if (account == null) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
-            MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId,address);
-            if (multiSigAccount == null) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-            }
+
             //验证签名账户是否属于多签账户,如果不是多签账户下的地址则提示错误
             if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
                 throw new  NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
@@ -369,8 +391,12 @@ public class TransactionCmd extends BaseCmd {
             if (chain == null) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
-            Transaction tx = transactionService.createMultiSignTransfer(chainId, account, password, multiSigAccount, toAddress, amount, remark);
-            map.put("txData", HexUtil.encode(tx.serialize()));
+            MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.createMultiSignTransfer(chainId, account, password, multiSigAccount, toAddress, amount, remark);
+            if (multiSignTransactionResultDto.isBroadcasted()) {
+                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
+            } else {
+                map.put("txHex", HexUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
+            }
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
@@ -379,6 +405,54 @@ public class TransactionCmd extends BaseCmd {
             return failed(e.getMessage());
         }
         LogUtil.debug("ac_createMultiSignTransfer end");
+        return success(map);
+    }
+
+    /**
+     * 多签交易签名
+     *
+     * sign MultiSign Transaction
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "sign MultiSign Transaction")
+    public Response signMultiSignTransaction(Map params) {
+        LogUtil.debug("ac_signMultiSignTransaction start");
+        Map<String, String> map = new HashMap<>(1);
+        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+        Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
+        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        try {
+            // check parameters
+            if (params == null || chainIdObj == null || signAddressObj == null ||
+                    txHexObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            int chainId = (int) chainIdObj;
+            String password = (String) passwordObj;
+            String signAddress = (String) signAddressObj;
+            String txHex = (String) txHexObj;
+            //查询出账户
+            Account account = accountService.getAccount(chainId,signAddress);
+            if (account == null) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.signMultiSignTransaction(chainId, account, password, txHex);
+            if (multiSignTransactionResultDto.isBroadcasted()) {
+                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
+            } else {
+                map.put("txHex", HexUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
+            }
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            return failed(e.getMessage());
+        }
+        LogUtil.debug("ac_signMultiSignTransaction end");
         return success(map);
     }
 
