@@ -84,7 +84,7 @@ public class VerifyTxProcessTask implements Runnable {
 
     private boolean processTx(Chain chain, Transaction tx, boolean isOrphanTx){
         try {
-            chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] txhash:{}", tx.getHash());
+            chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] txhash:{}, type:{}", tx.getHash(), tx.getType());
             int chainId = chain.getChainId();
             boolean rs = transactionManager.verify(chain, tx);
             //todo 跨链交易单独处理, 是否需要进行跨链验证？

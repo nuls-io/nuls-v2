@@ -202,7 +202,7 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.TX_SAVE, version = 1.0, description = "transaction save")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHashList", parameterType = "List")
-    @Parameter(parameterName = "secondaryDataHex", parameterType = "String")
+    @Parameter(parameterName = "blockHeaderHex", parameterType = "String")
     public Response txSave(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = false;
@@ -210,7 +210,7 @@ public class TransactionCmd extends BaseCmd {
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txHashList"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            ObjectUtils.canNotEmpty(params.get("secondaryDataHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("blockHeaderHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
 
             chain = chainManager.getChain((int) params.get("chainId"));
             if(null == chain){
@@ -247,7 +247,7 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.TX_GENGSIS_SAVE, version = 1.0, description = "transaction save")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHexList", parameterType = "List")
-    @Parameter(parameterName = "secondaryDataHex", parameterType = "String")
+    @Parameter(parameterName = "blockHeaderHex", parameterType = "String")
     public Response txGengsisSave(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = false;
@@ -255,7 +255,7 @@ public class TransactionCmd extends BaseCmd {
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txHexList"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            ObjectUtils.canNotEmpty(params.get("secondaryDataHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("blockHeaderHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
 
             chain = chainManager.getChain((int) params.get("chainId"));
             if(null == chain){
@@ -290,7 +290,7 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = TxCmd.TX_ROLLBACK, version = 1.0, description = "transaction rollback")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHashList", parameterType = "List")
-    @Parameter(parameterName = "secondaryDataHex", parameterType = "String")
+    @Parameter(parameterName = "blockHeaderHex", parameterType = "String")
     public Response txRollback(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = false;
@@ -298,7 +298,7 @@ public class TransactionCmd extends BaseCmd {
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("txHashList"), TxErrorCode.PARAMETER_ERROR.getMsg());
-            ObjectUtils.canNotEmpty(params.get("secondaryDataHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("blockHeaderHex"), TxErrorCode.PARAMETER_ERROR.getMsg());
             chain = chainManager.getChain((int) params.get("chainId"));
             if(null == chain){
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
