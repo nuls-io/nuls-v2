@@ -144,7 +144,7 @@ public class TransactionUtil {
             List<String> list = new ArrayList<>();
             txHashList.forEach(e -> list.add(e.getDigestHex()));
             params.put("txHashList", list);
-            params.put("secondaryDataHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            params.put("blockHeaderHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_save", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -177,7 +177,7 @@ public class TransactionUtil {
             List<String> list = new ArrayList<>();
             txHashList.forEach(e -> list.add(e.getDigestHex()));
             params.put("txHashList", list);
-            params.put("secondaryDataHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            params.put("blockHeaderHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -268,7 +268,7 @@ public class TransactionUtil {
                 }
             });
             params.put("txHexList", list);
-            params.put("secondaryDataHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
+            params.put("blockHeaderHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_gengsisSave", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
