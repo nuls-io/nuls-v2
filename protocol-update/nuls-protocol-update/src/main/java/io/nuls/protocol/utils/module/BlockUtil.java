@@ -22,6 +22,7 @@ package io.nuls.protocol.utils.module;
 
 import io.nuls.base.data.BlockHeader;
 import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.rpc.callback.BlockHeaderInvoke;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
@@ -50,7 +51,7 @@ public class BlockUtil {
      * @param end
      * @return
      */
-    public static List<BlockHeader> getBlockHeaders(int chainId, long begin, long end) {
+    public static List<ProtocolVersion> getBlockHeaders(int chainId, long begin, long end) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(3);
@@ -62,7 +63,7 @@ public class BlockUtil {
             Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, "getBlockHeadersByHeightRange", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
-                List<BlockHeader> result = (List) responseData.get("getBlockHeadersByHeightRange");
+                List<ProtocolVersion> result = (List) responseData.get("getBlockHeadersByHeightRange");
                 return result;
             }
         } catch (Exception e) {

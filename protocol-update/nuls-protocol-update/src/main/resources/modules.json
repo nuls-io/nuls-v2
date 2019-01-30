@@ -1,26 +1,50 @@
 [
   {
-    "name": "version",
-    "remark": "本地协议版本",
-    "readOnly": "true",
-    "value": "1"
+    "name": "logLevel",
+    "remark": "日志级别",
+    "readOnly": "false",
+    "value": "DEBUG"
   },
   {
-    "name": "interval",
-    "remark": "统计区间大小(500-10000)",
+    "name": "chainId",
+    "remark": "链ID",
+    "readOnly": "true",
+    "value": "12345"
+  },
+  {
+    "name": "intervalMaximum",
+    "remark": "统计区间最大值",
+    "readOnly": "true",
+    "value": "10000"
+  },
+  {
+    "name": "intervalMinimum",
+    "remark": "统计区间最小值",
+    "readOnly": "true",
+    "value": "500"
+  },
+  {
+    "name": "effectiveRatioMinimum",
+    "remark": "每个统计区间内的最小生效比例",
+    "readOnly": "true",
+    "value": "70"
+  },
+  {
+    "name": "effectiveRatioMaximum",
+    "remark": "每个统计区间内的最大生效比例",
+    "readOnly": "true",
+    "value": "100"
+  },
+  {
+    "name": "continuousIntervalCountMaximum",
+    "remark": "协议生效要满足的连续区间数",
     "readOnly": "true",
     "value": "1000"
   },
   {
-    "name": "effectiveRatio",
-    "remark": "每个统计区间内的最小生效比例(60-100)",
+    "name": "continuousIntervalCountMinimum",
+    "remark": "协议生效要满足的连续区间数",
     "readOnly": "true",
-    "value": "80"
-  },
-  {
-    "name": "continuousIntervalCount",
-    "remark": "协议生效要满足的连续区间数(50-1000)",
-    "readOnly": "true",
-    "value": "100"
+    "value": "50"
   }
 ]

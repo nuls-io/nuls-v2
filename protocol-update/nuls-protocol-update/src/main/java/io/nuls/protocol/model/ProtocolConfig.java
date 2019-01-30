@@ -41,71 +41,60 @@ import java.util.Map;
 @NoArgsConstructor
 public class ProtocolConfig extends BaseNulsData {
 
-    /**
-     * 链名
-     */
-    private String chainName;
+
+    {
+        "name": "",
+            "remark": "日志级别",
+            "readOnly": "false",
+            "value": "DEBUG"
+    },
+    {
+        "name": "chainId",
+            "remark": "链ID",
+            "readOnly": "true",
+            "value": "12345"
+    },
+    {
+        "name": "intervalMaximum",
+            "remark": "统计区间最大值",
+            "readOnly": "true",
+            "value": "10000"
+    },
+    {
+        "name": "intervalMinimum",
+            "remark": "统计区间最小值",
+            "readOnly": "true",
+            "value": "500"
+    },
+    {
+        "name": "effectiveRatioMinimum",
+            "remark": "每个统计区间内的最小生效比例",
+            "readOnly": "true",
+            "value": "70"
+    },
+    {
+        "name": "effectiveRatioMaximum",
+            "remark": "每个统计区间内的最大生效比例",
+            "readOnly": "true",
+            "value": "100"
+    },
+    {
+        "name": "continuousIntervalCountMaximum",
+            "remark": "协议生效要满足的连续区间数",
+            "readOnly": "true",
+            "value": "1000"
+    },
+    {
+        "name": "continuousIntervalCountMinimum",
+            "remark": "协议生效要满足的连续区间数",
+            "readOnly": "true",
+            "value": "50"
+    }
+
     /**
      * 链ID
      */
     private int chainId;
-    /**
-     * 区块大小阈值
-     */
-    private int protocolMaxSize;
-    /**
-     * 网络重置阈值
-     */
-    private int resetTime;
-    /**
-     * 分叉链比主链高几个区块就进行链切换
-     */
-    private int chainSwtichThreshold;
-    /**
-     * 分叉链、孤儿链区块最大缓存数量
-     */
-    private int cacheSize;
-    /**
-     * 接收新区块的范围
-     */
-    private int heightRange;
-    /**
-     * 每次回滚区块最大值
-     */
-    private int maxRollback;
-    /**
-     * 一致节点比例
-     */
-    private int consistencyNodePercent;
-    /**
-     * 系统运行最小节点数
-     */
-    private int minNodeAmount;
-    /**
-     * 每次从一个节点下载多少区块
-     */
-    private int downloadNumber;
-    /**
-     * 区块头中扩展字段的最大长度
-     */
-    private int extendMaxSize;
-    /**
-     * 为阻止恶意节点提前出块,设置此参数
-     * 区块时间戳大于当前时间多少就丢弃该区块
-     */
-    private int validBlockInterval;
-    /**
-     * 同步区块时最多缓存多少个区块
-     */
-    private int protocolCache;
-    /**
-     * 系统正常运行时最多缓存多少个从别的节点接收到的小区块
-     */
-    private int smallBlockCache;
-    /**
-     * 孤儿链最大年龄
-     */
-    private int orphanChainMaxAge;
     /**
      * 日志级别
      */

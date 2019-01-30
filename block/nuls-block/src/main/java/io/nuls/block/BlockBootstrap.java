@@ -36,7 +36,6 @@ import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
@@ -67,7 +66,7 @@ public class BlockBootstrap {
     private static void init() {
         try {
             //扫描包路径io.nuls.block,初始化bean
-            SpringLiteContext.init(DEFAULT_SCAN_PACKAGE, new ModularServiceMethodInterceptor());
+            SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
             //rpc服务初始化
             WsServer.getInstance(ModuleE.BL)
                     .moduleRoles(new String[]{"1.0"})

@@ -8,8 +8,11 @@ import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.model.po.Statistics;
 import io.nuls.protocol.service.StatisticsStorageService;
+import io.nuls.protocol.utils.module.BlockUtil;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.core.annotation.Autowired;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -19,12 +22,16 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Data
+@Component
+@NoArgsConstructor
 public class BlockHeaderInvoke extends BaseInvoke {
 
     private int chainId;
 
+    @Autowired
     private StatisticsStorageService service;
 
     public BlockHeaderInvoke(int chainId) {
@@ -129,11 +136,11 @@ public class BlockHeaderInvoke extends BaseInvoke {
                                 context.setProtocolVersion(protocolVersion);
                                 commonLog.info("chainId-" + chainId + ", protocol version rollback-" + protocolVersion);
                             }
-                            context.getLatestHeight();
-                            context.setCount(0);
+                            List<ProtocolVersion> protocolVersions = BlockUtil.getBlockHeaders(chainId, latestHeight, latestHeight);
+                            versionList.addAll(Objects.requireNonNull(protocolVersions));
+                            context.setCount((int) (latestHeight - newValidStatistics.getHeight()));
                             context.setLastValidStatistics(newValidStatistics);
                             //复原旧统计数据
-                            versionList.clear();
                             proportionMap.clear();
                         }
                     }
