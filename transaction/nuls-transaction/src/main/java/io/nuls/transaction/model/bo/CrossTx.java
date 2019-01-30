@@ -59,7 +59,7 @@ public class CrossTx extends BaseNulsData {
     /** 跨链交易在当前链生效的高度(交易的block高度 + 阈值高度)*/
     private long height = -1L;
 
-    /** 该跨链交易在本链中的验证状态 */
+    /** 交易 */
     private Transaction tx;
 
     /**

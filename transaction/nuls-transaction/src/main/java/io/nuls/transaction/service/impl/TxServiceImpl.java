@@ -37,7 +37,6 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
-import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -46,13 +45,16 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
-import io.nuls.transaction.db.rocksdb.storage.UnverifiedTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.db.rocksdb.storage.UnverifiedTxStorageService;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.rpc.call.*;
+import io.nuls.transaction.rpc.call.AccountCall;
+import io.nuls.transaction.rpc.call.LedgerCall;
+import io.nuls.transaction.rpc.call.NetworkCall;
+import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
@@ -668,13 +670,13 @@ public class TxServiceImpl implements TxService {
 
 
     @Override
-    public boolean crossTransactionCommit(Chain chain, Transaction tx, BlockHeaderDigest blockHeaderDigest) {
+    public boolean crossTransactionCommit(Chain chain, Transaction tx, BlockHeader blockHeader) {
         //todo 调账本记账
         return true;
     }
 
     @Override
-    public boolean crossTransactionRollback(Chain chain, Transaction tx, BlockHeaderDigest blockHeaderDigest) {
+    public boolean crossTransactionRollback(Chain chain, Transaction tx, BlockHeader blockHeader) {
         //todo 调账本回滚？
         return true;
     }
