@@ -21,12 +21,12 @@
 package io.nuls.block.utils.module;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.test.TransactionStorageService;
+import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -144,11 +144,7 @@ public class TransactionUtil {
             List<String> list = new ArrayList<>();
             txHashList.forEach(e -> list.add(e.getDigestHex()));
             params.put("txHashList", list);
-            BlockHeaderDigest blockHeaderDigest = new BlockHeaderDigest();
-            blockHeaderDigest.setBlockHeaderHash(blockHeaderPo.getHash());
-            blockHeaderDigest.setHeight(blockHeaderPo.getHeight());
-            blockHeaderDigest.setTime(blockHeaderPo.getTime());
-            params.put("secondaryDataHex", HexUtil.encode(blockHeaderDigest.serialize()));
+            params.put("secondaryDataHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_save", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -181,11 +177,7 @@ public class TransactionUtil {
             List<String> list = new ArrayList<>();
             txHashList.forEach(e -> list.add(e.getDigestHex()));
             params.put("txHashList", list);
-            BlockHeaderDigest blockHeaderDigest = new BlockHeaderDigest();
-            blockHeaderDigest.setBlockHeaderHash(blockHeaderPo.getHash());
-            blockHeaderDigest.setHeight(blockHeaderPo.getHeight());
-            blockHeaderDigest.setTime(blockHeaderPo.getTime());
-            params.put("secondaryDataHex", HexUtil.encode(blockHeaderDigest.serialize()));
+            params.put("secondaryDataHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
@@ -276,11 +268,7 @@ public class TransactionUtil {
                 }
             });
             params.put("txHexList", list);
-            BlockHeaderDigest blockHeaderDigest = new BlockHeaderDigest();
-            blockHeaderDigest.setBlockHeaderHash(blockHeaderPo.getHash());
-            blockHeaderDigest.setHeight(blockHeaderPo.getHeight());
-            blockHeaderDigest.setTime(blockHeaderPo.getTime());
-            params.put("secondaryDataHex", HexUtil.encode(blockHeaderDigest.serialize()));
+            params.put("secondaryDataHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
             Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_gengsisSave", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
