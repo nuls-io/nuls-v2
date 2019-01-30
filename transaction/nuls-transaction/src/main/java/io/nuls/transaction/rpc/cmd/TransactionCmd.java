@@ -1,10 +1,7 @@
 package io.nuls.transaction.rpc.cmd;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import io.nuls.base.data.BlockHeaderDigest;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Page;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -226,8 +223,8 @@ public class TransactionCmd extends BaseCmd {
                 txHashList.add(NulsDigestData.fromDigestHex(hashHex));
             }
             //批量保存已确认交易
-            BlockHeaderDigest blockHeaderDigest = TxUtil.getInstance((String)params.get("secondaryDataHex"), BlockHeaderDigest.class);
-            result = confirmedTxService.saveTxList(chain, txHashList, blockHeaderDigest);
+            BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
+            result = confirmedTxService.saveTxList(chain, txHashList, blockHeader);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -269,8 +266,8 @@ public class TransactionCmd extends BaseCmd {
             for (String txHex : txHexList) {
                 txList.add(TxUtil.getTransaction(txHex));
             }
-            BlockHeaderDigest blockHeaderDigest = TxUtil.getInstance((String)params.get("secondaryDataHex"), BlockHeaderDigest.class);
-            result = confirmedTxService.saveGengsisTxList(chain, txList, blockHeaderDigest);
+            BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
+            result = confirmedTxService.saveGengsisTxList(chain, txList, blockHeader);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -313,8 +310,8 @@ public class TransactionCmd extends BaseCmd {
                 txHashList.add(NulsDigestData.fromDigestHex(hashHex));
             }
             //批量回滚已确认交易
-            BlockHeaderDigest blockHeaderDigest = TxUtil.getInstance((String)params.get("secondaryDataHex"), BlockHeaderDigest.class);
-            result = confirmedTxService.rollbackTxList(chain, txHashList, blockHeaderDigest);
+            BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
+            result = confirmedTxService.rollbackTxList(chain, txHashList, blockHeader);
 
         } catch (NulsException e) {
             errorLogProcess(chain, e);
