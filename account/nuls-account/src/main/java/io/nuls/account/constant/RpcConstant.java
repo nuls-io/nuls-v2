@@ -71,6 +71,14 @@ public interface RpcConstant {
      */
     String TX_MODULE_VALIDATE_CMD = "moduleValidator";
     /**
+     * 模块统一交易提交接口
+     */
+    String TX_MODULE_COMMIT_CMD = "commit";
+    /**
+     * 模块统一交易回滚接口
+     */
+    String TX_MODULE_ROLLBACK_CMD = "rollback";
+    /**
      * 交易类型
      */
     String TX_TYPE = "txType";
