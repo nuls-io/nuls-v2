@@ -59,13 +59,15 @@ public class RequestSingleProcessor implements Runnable {
                  */
                 if(!wsData.getRequestSingleQueue().isEmpty()){
                     Object[] objects = wsData.getRequestSingleQueue().poll();
-                    String messageId = (String) objects[0];
-                    Request request = (Request) objects[1];
-                    /*
-                    Request，调用本地方法
-                    If it is Request, call the local method
-                    */
-                    CmdHandler.callCommandsWithPeriod(wsData.getWebSocket(), request.getRequestMethods(), messageId);
+                    if(objects != null && objects.length == 2){
+                        String messageId = (String) objects[0];
+                        Request request = (Request) objects[1];
+                        /*
+                        Request，调用本地方法
+                        If it is Request, call the local method
+                        */
+                        CmdHandler.callCommandsWithPeriod(wsData.getWebSocket(), request.getRequestMethods(), messageId);
+                    }
                 }
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {
