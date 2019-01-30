@@ -43,6 +43,17 @@ public class ModuleTxRegisterDTO {
      * 模块统一验证器
      */
     private String moduleValidator;
+
+    /**
+     * Transaction validator cmd name
+     */
+    private String validate;
+
+    /**
+     * Transaction commit cmd name
+     */
+    private String commit;
+
     /**
      * 交易验证器
      */
@@ -84,11 +95,30 @@ public class ModuleTxRegisterDTO {
         this.list = list;
     }
 
+    public String getValidate() {
+        return validate;
+    }
+
+    public void setValidate(String validate) {
+        this.validate = validate;
+    }
+
+    public String getCommit() {
+        return commit;
+    }
+
+    public void setCommit(String commit) {
+        this.commit = commit;
+    }
+
     @Override
     public String toString() {
         return "ModuleTxRegisterDTO{" +
-                "moduleCode='" + moduleCode + '\'' +
+                "chainId=" + chainId +
+                ", moduleCode='" + moduleCode + '\'' +
                 ", moduleValidator='" + moduleValidator + '\'' +
+                ", validate='" + validate + '\'' +
+                ", commit='" + commit + '\'' +
                 ", list=" + list +
                 '}';
     }

@@ -37,16 +37,6 @@ public class TxRegisterDTO {
     private int txType;
 
     /**
-     * Transaction validator cmd name
-     */
-    private String validateCmd;
-
-    /**
-     * Transaction commit cmd name
-     */
-    private String commitCmd;
-
-    /**
      * Transaction rollback cmd name
      */
     private String rollbackCmd;
@@ -82,22 +72,6 @@ public class TxRegisterDTO {
 
     public void setTxType(int txType) {
         this.txType = txType;
-    }
-
-    public String getValidateCmd() {
-        return validateCmd;
-    }
-
-    public void setValidateCmd(String validateCmd) {
-        this.validateCmd = validateCmd;
-    }
-
-    public String getCommitCmd() {
-        return commitCmd;
-    }
-
-    public void setCommitCmd(String commitCmd) {
-        this.commitCmd = commitCmd;
     }
 
     public String getRollbackCmd() {
@@ -136,8 +110,6 @@ public class TxRegisterDTO {
     public String toString() {
         return "TxRegistersDTO{" +
                 "txType=" + txType +
-                ", validateCmd='" + validateCmd + '\'' +
-                ", commitCmd='" + commitCmd + '\'' +
                 ", rollbackCmd='" + rollbackCmd + '\'' +
                 ", systemTx=" + systemTx +
                 ", unlockTx=" + unlockTx +
