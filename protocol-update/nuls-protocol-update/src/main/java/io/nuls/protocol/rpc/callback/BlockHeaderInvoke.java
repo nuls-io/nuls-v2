@@ -43,8 +43,6 @@ public class BlockHeaderInvoke extends BaseInvoke {
     public void callBack(Response response) {
         ProtocolContext context = ContextManager.getContext(chainId);
         NulsLogger commonLog = context.getCommonLog();
-
-        commonLog.debug("chainId-" + chainId + ", blockheader update");
         if (response.isSuccess()) {
             String hex = (String) response.getResponseData();
             BlockHeader blockHeader = new BlockHeader();
@@ -61,12 +59,16 @@ public class BlockHeaderInvoke extends BaseInvoke {
                 //保存区块
                 Statistics lastValidStatistics = context.getLastValidStatistics();
                 if (height == latestHeight + 1) {
+                    commonLog.debug("chainId-" + chainId + ", save block");
                     //缓存统计总数+1
                     int count = context.getCount();
                     count++;
                     context.setCount(count);
                     context.setLatestHeight(height);
                     boolean upgrade = data.isUpgrade();
+                    List<ProtocolVersion> versionList = context.getVersionList();
+                    Map<ProtocolVersion, Integer> proportionMap = context.getProportionMap();
+                    ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
                     //升级标志为真
                     if (upgrade) {
                         commonLog.debug("chainId-" + chainId + ", save block, protocol upgrade");
@@ -76,31 +78,56 @@ public class BlockHeaderInvoke extends BaseInvoke {
                         protocolVersion.setEffectiveRatio(data.getEffectiveRatio());
                         protocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
                         //缓存起来
-                        List<ProtocolVersion> versionList = context.getVersionList();
                         versionList.add(protocolVersion);
                         //重新计算统计信息
-                        Map<ProtocolVersion, Integer> proportionMap = context.getProportionMap();
                         proportionMap.merge(protocolVersion, 1, (a, b) -> a + b);
-                        int expect = count * protocolVersion.getEffectiveRatio();
+                        int expect = protocolVersion.getInterval() * protocolVersion.getEffectiveRatio() / 100;
                         int real = proportionMap.get(protocolVersion);
                         //占比超过阈值，保存一条统计记录到数据库
-                        if (real >= expect) {
+                        if (real >= expect || count >= currentProtocolVersion.getInterval()) {
                             //初始化一条统计信息，与区块高度绑定，并存到数据库
                             Statistics statistics = new Statistics();
                             statistics.setHeight(height);
-                            statistics.setProtocolVersion(protocolVersion);
-                            if (lastValidStatistics.getProtocolVersion().equals(protocolVersion)) {
+                            if (lastValidStatistics != null) {
+                                statistics.setLastHeight(lastValidStatistics.getHeight());
+                            }
+                            //说明不是新版本的统计信息
+                            if (lastValidStatistics != null && real < expect) {
                                 statistics.setCount((short) (lastValidStatistics.getCount() + 1));
+                                statistics.setProtocolVersion(currentProtocolVersion);
+                            } else {
+                                statistics.setProtocolVersion(protocolVersion);
+                                statistics.setCount((short) 1);
+                            }
+                            boolean b = service.save(chainId, statistics);
+                            commonLog.info("chainId-" + chainId + ", height-" + height + ", save-" + b + ", new statistics-" + statistics);
+                            //如果某协议版本连续统计确认数大于阈值，则进行版本升级
+                            if (statistics.getProtocolVersion().equals(protocolVersion) && statistics.getCount() >= protocolVersion.getContinuousIntervalCount()) {
+                                //设置新协议版本
+                                context.setCurrentProtocolVersion(protocolVersion);
+                                commonLog.info("chainId-" + chainId + ", height-"+ height + ", new protocol version available-" + protocolVersion);
+                            }
+                            context.setCount(0);
+                            context.setLastValidStatistics(statistics);
+                            //清除旧统计数据
+                            versionList.clear();
+                            proportionMap.clear();
+                        }
+                    } else {
+                        short interval = currentProtocolVersion.getInterval();
+                        if (count >= interval) {
+                            //初始化一条统计信息，与区块高度绑定，并存到数据库
+                            Statistics statistics = new Statistics();
+                            statistics.setHeight(height);
+                            statistics.setProtocolVersion(currentProtocolVersion);
+                            if (lastValidStatistics != null) {
+                                statistics.setCount((short) (lastValidStatistics.getCount() + 1));
+                                statistics.setLastHeight(lastValidStatistics.getHeight());
                             } else {
                                 statistics.setCount((short) 1);
                             }
-                            service.save(chainId, statistics);
-                            //如果某协议版本连续统计确认数大于阈值，则进行版本升级
-                            if (statistics.getCount() >= protocolVersion.getContinuousIntervalCount()) {
-                                //设置新协议版本
-                                context.setCurrentProtocolVersion(protocolVersion);
-                                commonLog.info("chainId-" + chainId + ", new protocol version available-" + protocolVersion);
-                            }
+                            boolean b = service.save(chainId, statistics);
+                            commonLog.info("chainId-" + chainId + ", height-" + height + ", save-" + b + ", new statistics-" + statistics);
                             context.setCount(0);
                             context.setLastValidStatistics(statistics);
                             //清除旧统计数据
@@ -111,6 +138,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
                 }
                 //回滚区块
                 if (height == latestHeight) {
+                    commonLog.debug("chainId-" + chainId + ", rollback block");
                     //缓存统计总数-1
                     int count = context.getCount();
                     count--;

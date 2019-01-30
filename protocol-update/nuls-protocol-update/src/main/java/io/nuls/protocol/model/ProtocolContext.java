@@ -33,6 +33,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.StampedLock;
@@ -135,6 +137,8 @@ public class ProtocolContext {
 
     public void init() {
         lock = new StampedLock();
+        versionList = new ArrayList<>();
+        proportionMap = new HashMap<>();
         LoggerUtil.init(chainId, config.getLogLevel());
         this.setStatus(RunningStatusEnum.READY);
         //服务初始化

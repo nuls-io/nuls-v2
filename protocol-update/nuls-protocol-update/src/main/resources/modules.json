@@ -3,7 +3,7 @@
     "name": "logLevel",
     "remark": "日志级别",
     "readOnly": "false",
-    "value": "DEBUG"
+    "value": "info"
   },
   {
     "name": "chainId",

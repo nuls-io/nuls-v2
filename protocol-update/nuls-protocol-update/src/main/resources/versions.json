@@ -10,5 +10,11 @@
     "interval": "100",
     "effectiveRatio": "80",
     "continuousIntervalCount": "10"
+  },
+  {
+    "version": "3",
+    "interval": "100",
+    "effectiveRatio": "90",
+    "continuousIntervalCount": "20"
   }
 ]
