@@ -48,7 +48,7 @@ import java.util.Map;
  *
  * @author qinyifeng
  * @date 2018/12/11
- * */
+ */
 @Service
 public class ConfigServiceImpl implements ConfigService, InitializingBean {
 
@@ -65,9 +65,9 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
     }
 
     @Override
-    public boolean save(ConfigBean bean, int chainID) throws Exception{
-        if(bean == null){
-            return  false;
+    public boolean save(ConfigBean bean, int chainID) throws Exception {
+        if (bean == null) {
+            return false;
         }
         return RocksDBService.put(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(bean));
     }
@@ -75,9 +75,9 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
     @Override
     public ConfigBean get(int chainID) {
         try {
-            byte[] value = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF,ByteUtils.intToBytes(chainID));
+            byte[] value = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF, ByteUtils.intToBytes(chainID));
             return ObjectUtils.bytesToObject(value);
-        }catch (Exception e){
+        } catch (Exception e) {
             LogUtil.error(e);
             return null;
         }
@@ -86,10 +86,10 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
     @Override
     public boolean delete(int chainID) {
         try {
-            return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF,ByteUtils.intToBytes(chainID));
-        }catch (Exception e){
+            return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF, ByteUtils.intToBytes(chainID));
+        } catch (Exception e) {
             LogUtil.error(e);
-            return  false;
+            return false;
         }
     }
 
@@ -98,13 +98,15 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF);
             Map<Integer, ConfigBean> configBeanMap = new HashMap<>(AccountConstant.INIT_CAPACITY);
-            for (Entry<byte[], byte[]>entry:list) {
-                int key = ByteUtils.bytesToInt(entry.getKey());
-                ConfigBean value = ObjectUtils.bytesToObject(entry.getValue());
-                configBeanMap.put(key,value);
+            if (list != null) {
+                for (Entry<byte[], byte[]> entry : list) {
+                    int key = ByteUtils.bytesToInt(entry.getKey());
+                    ConfigBean value = ObjectUtils.bytesToObject(entry.getValue());
+                    configBeanMap.put(key, value);
+                }
             }
             return configBeanMap;
-        }catch (Exception e){
+        } catch (Exception e) {
             LogUtil.error(e);
             return null;
         }

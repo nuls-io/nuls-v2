@@ -4,16 +4,20 @@ import io.nuls.account.ServiceInitializer;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.txdata.Alias;
+import io.nuls.account.rpc.call.LegerCmdCall;
 import io.nuls.account.service.AccountService;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,49 +39,58 @@ public class AliasCmdTest {
     protected double version2 = 1.0;
     protected String version = "1.0";
 
-    static AccountService accountService;
+    //static AccountService accountService;
 
     @BeforeClass
     public static void start() throws Exception {
-        ServiceInitializer.initialize();
-        accountService = SpringLiteContext.getBean(AccountService.class);
+//        ServiceInitializer.initialize();
+//        accountService = SpringLiteContext.getBean(AccountService.class);
+        NoUse.mockModule();
     }
 
     /**
-     *
      * get an account
-     *
-     * */
-    public Account createAnAccount() {
-        Account account = null;
-        List<Account> accountList = accountService.createAccount(chainId, 1, password);
+     */
+    public String createAnAccount() {
+        String address = null;
+        List<String> accountList = null;
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, version);
+            params.put("chainId", chainId);
+            params.put("count", 1);
+            params.put("password", password);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
+                return null;
+            }
+            accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         assertNotNull(accountList);
-        account = accountList.get(0);
-        assertNotNull(account);
-        return account;
+        address = accountList.get(0);
+        assertNotNull(address);
+        return address;
     }
 
     /**
-     *
      * create transaction
-     *
-     * */
+     */
     public Transaction createTransaction() throws Exception {
-        Account account = createAnAccount();
+        String address = createAnAccount();
         Transaction transaction = new Transaction();
         transaction.setType(AccountConstant.TX_TYPE_ACCOUNT_ALIAS);
         Alias alias = new Alias();
-        alias.setAddress(account.getAddress().getAddressBytes());
+        alias.setAddress(AddressTool.getAddress(address));
         alias.setAlias("alias_" + System.currentTimeMillis());
         transaction.setTxData(alias.serialize());
         return transaction;
     }
 
     /**
-     *
      * get an account
-     *
-     * */
+     */
     public Map<String, Object> createAliasTxCommitParam() throws Exception {
         Transaction transaction = createTransaction();
         Map<String, Object> params = new HashMap<>();
@@ -91,8 +104,7 @@ public class AliasCmdTest {
 
     /**
      * get an account
-     *
-     * */
+     */
     public Response aliasTxCommit(Map<String, Object> params) throws Exception {
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_aliasTxCommit", params);
         return cmdResp;
@@ -102,11 +114,12 @@ public class AliasCmdTest {
     @Test
     public void setAliasTest() throws Exception {
         //create an account for test
-        Account account = createAnAccount();
+        //String address = createAnAccount();
+        String address="SPWAxuodkw222367N88eavYDWRraG3930";
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
-        params.put("address", account.getAddress().getBase58());
+        params.put("address", address);
         params.put("password", password);
         params.put("alias", "alias_" + System.currentTimeMillis());
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
@@ -115,16 +128,18 @@ public class AliasCmdTest {
         assertNotNull(result);
         String fee = (String) result.get("txHash");
         assertNotNull(fee);
+        BigInteger balance = LegerCmdCall.getBalance(chainId, chainId, 1, address);
+        System.out.println(balance.longValue());
     }
 
     @Test
     public void getAliasFeeTest() throws Exception {
         //create an account for test
-        Account account = createAnAccount();
+        String address = createAnAccount();
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
-        params.put("address", account.getAddress().getBase58());
+        params.put("address", address);
         params.put("alias", "alias_" + System.currentTimeMillis());
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasFee", params);
         assertNotNull(cmdResp);
@@ -136,15 +151,12 @@ public class AliasCmdTest {
     }
 
 
-
-
     @Test
     public void getAliasByAddressTest() throws Exception {
         //create account
         //get the aliasfee
         //set the alias
         //get the alias by address
-        System.out.println(accountService);
         int count = 1;
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -174,7 +186,6 @@ public class AliasCmdTest {
         assertTrue(value);
         //verify the alias which is not usable
         //TODO
-
 
 
     }
