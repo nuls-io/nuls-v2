@@ -914,7 +914,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     @SuppressWarnings("unchecked")
     @Override
     public Result createAgentCommit(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST) == null) {
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -929,7 +929,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
             transaction.parse(HexUtil.decode(txHex), 0);
-            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST);
+            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.parse(HexUtil.decode(headerHex), 0);
             Agent agent = new Agent();
@@ -1029,7 +1029,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     @Override
     @SuppressWarnings("unchecked")
     public Result stopAgentCommit(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST) == null) {
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -1044,7 +1044,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
             transaction.parse(HexUtil.decode(txHex), 0);
-            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST);
+            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.parse(HexUtil.decode(headerHex), 0);
             if (transaction.getTime() < (blockHeader.getTime() - 300000L)) {
@@ -1190,7 +1190,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     @Override
     @SuppressWarnings("unchecked")
     public Result depositCommit(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST) == null) {
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -1205,7 +1205,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
             transaction.parse(HexUtil.decode(txHex), 0);
-            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST);
+            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.parse(HexUtil.decode(headerHex), 0);
             Deposit deposit = new Deposit();
@@ -1398,7 +1398,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     @Override
     @SuppressWarnings("unchecked")
     public Result redPunishCommit(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST) == null) {
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -1413,7 +1413,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             transaction.parse(HexUtil.decode(txHex), 0);
-            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST);
+            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.parse(HexUtil.decode(headerHex), 0);
             if(!punishManager.redPunishCommit(transaction,chain,blockHeader)){
@@ -1431,7 +1431,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     @Override
     @SuppressWarnings("unchecked")
     public Result redPunishRollBack(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST) == null) {
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -1446,7 +1446,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             transaction.parse(HexUtil.decode(txHex), 0);
-            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST);
+            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.parse(HexUtil.decode(headerHex), 0);
             if(!punishManager.redPunishRollback(transaction,chain,blockHeader)){
@@ -1464,7 +1464,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     @Override
     @SuppressWarnings("unchecked")
     public Result yellowPunishCommit(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST) == null) {
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -1480,7 +1480,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             transaction.parse(HexUtil.decode(txHex), 0);
             BlockHeader blockHeader = new BlockHeader();
-            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST);
+            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
             blockHeader.parse(HexUtil.decode(headerHex), 0);
             if(!punishManager.yellowPunishCommit(transaction,chain,blockHeader)){
                 return Result.getFailed(ConsensusErrorCode.SAVE_FAILED);
@@ -1497,7 +1497,7 @@ public class ConsensusServiceImpl implements ConsensusService {
     @Override
     @SuppressWarnings("unchecked")
     public Result yellowPunishRollBack(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST) == null) {
+        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -1512,7 +1512,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
             Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
             transaction.parse(HexUtil.decode(txHex), 0);
-            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_DIGEST);
+            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.parse(HexUtil.decode(headerHex), 0);
             if(!punishManager.yellowPunishRollback(transaction,chain,blockHeader)){
