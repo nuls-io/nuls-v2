@@ -26,8 +26,6 @@ import java.util.Map;
 import java.util.Objects;
 
 @Data
-@Component
-@NoArgsConstructor
 @EqualsAndHashCode(callSuper=false)
 public class BlockHeaderInvoke extends BaseInvoke {
 
@@ -84,7 +82,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
                         int expect = protocolVersion.getInterval() * protocolVersion.getEffectiveRatio() / 100;
                         int real = proportionMap.get(protocolVersion);
                         //占比超过阈值，保存一条统计记录到数据库
-                        if (real >= expect || count >= currentProtocolVersion.getInterval()) {
+                        if ((real >= expect && count >= protocolVersion.getInterval()) || count >= currentProtocolVersion.getInterval()) {
                             //初始化一条统计信息，与区块高度绑定，并存到数据库
                             Statistics statistics = new Statistics();
                             statistics.setHeight(height);
