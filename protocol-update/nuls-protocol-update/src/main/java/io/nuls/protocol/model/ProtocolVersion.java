@@ -5,11 +5,23 @@ import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.IOException;
+import java.util.Comparator;
 
+/**
+ * 协议版本
+ *
+ * @author captain
+ * @version 1.0
+ * @date 19-1-30 下午3:23
+ */
 @Data
+@EqualsAndHashCode(callSuper=false)
 public class ProtocolVersion extends BaseNulsData {
+
+    public static final Comparator<ProtocolVersion> COMPARATOR = Comparator.comparingInt(ProtocolVersion::getVersion);
 
     /**
      * 协议版本号

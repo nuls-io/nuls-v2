@@ -34,76 +34,31 @@ public interface ConfigConstant {
      */
     String CHAIN_ID = "chainId";
     /**
-     * 链名
-     */
-    String CHAIN_NAME = "chainName";
-    /**
-     * 服务IP
-     */
-    String SERVER_IP = "serverIp";
-    /**
-     * 服务端口
-     */
-    String SERVER_PORT = "serverPort";
-    /**
-     * 区块大小阈值
-     */
-    String BLOCK_MAX_SIZE = "protocolMaxSize";
-    /**
-     * 网络重置阈值
-     */
-    String RESET_TIME = "resetTime";
-    /**
-     * 分叉链比主链高几个区块就进行链切换
-     */
-    String CHAIN_SWTICH_THRESHOLD = "chainSwtichThreshold";
-    /**
-     * 分叉链、孤儿链区块最大缓存数量
-     */
-    String CACHE_SIZE = "cacheSize";
-    /**
-     * 接收新区块的范围
-     */
-    String HEIGHT_RANGE = "heightRange";
-    /**
-     * 每次回滚区块最大值
-     */
-    String MAX_ROLLBACK = "maxRollback";
-    /**
-     * 一致节点比例
-     */
-    String CONSISTENCY_NODE_PERCENT = "consistencyNodePercent";
-    /**
-     * 系统运行最小节点数
-     */
-    String MIN_NODE_AMOUNT = "minNodeAmount";
-    /**
-     * 每次从一个节点下载多少区块
-     */
-    String DOWNLOAD_NUMBER = "downloadNumber";
-    /**
-     * 区块头中扩展字段的最大长度
-     */
-    String EXTEND_MAX_SIZE = "extendMaxSize";
-    /**
-     * 为阻止恶意节点提前出块,设置此参数
-     * 区块时间戳大于当前时间多少就丢弃该区块
-     */
-    String VALID_BLOCK_INTERVAL = "validBlockInterval";
-    /**
-     * 同步区块时最多缓存多少个区块
-     */
-    String BLOCK_CACHE = "protocolCache";
-    /**
-     * 系统正常运行时最多缓存多少个从别的节点接收到的小区块
-     */
-    String SMALL_BLOCK_CACHE = "smallBlockCache";
-    /**
-     * 孤儿链最大年龄
-     */
-    String ORPHAN_CHAIN_MAX_AGE = "orphanChainMaxAge";
-    /**
      * 日志级别
      */
     String LOG_LEVEL = "logLevel";
+    /**
+     * 日志级别
+     */
+    String INTERVAL_MAXIMUM = "intervalMaximum";
+    /**
+     * 日志级别
+     */
+    String INTERVAL_MINIMUM = "intervalMinimum";
+    /**
+     * 日志级别
+     */
+    String EFFECTIVE_RATIO_MINIMUM = "effectiveRatioMinimum";
+    /**
+     * 日志级别
+     */
+    String EFFECTIVE_RATIO_MAXIMUM = "effectiveRatioMaximum";
+    /**
+     * 日志级别
+     */
+    String CONTINUOUS_INTERVAL_COUNT_MAXIMUM = "continuousIntervalCountMaximum";
+    /**
+     * 日志级别
+     */
+    String CONTINUOUS_INTERVAL_COUNT_MINIMUM = "continuousIntervalCountMinimum";
 }

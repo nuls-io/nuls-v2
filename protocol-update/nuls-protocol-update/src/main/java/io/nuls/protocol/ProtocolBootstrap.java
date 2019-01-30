@@ -110,7 +110,7 @@ public class ProtocolBootstrap {
                 if (RunningStatusEnum.FAIL.equals(context.getStatus())) {
                     System.exit(0);
                 }
-                ProtocolVersion protocolVersion = context.getProtocolVersion();
+                ProtocolVersion protocolVersion = context.getCurrentProtocolVersion();
                 commonLog.info("chainId:" + chainId + ", protocaolVersion:" + protocolVersion.getVersion());
                 try {
                     Thread.sleep(10000L);

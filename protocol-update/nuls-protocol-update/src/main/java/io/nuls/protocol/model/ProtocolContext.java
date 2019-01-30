@@ -71,7 +71,14 @@ public class ProtocolContext {
      */
     @Getter
     @Setter
-    private ProtocolVersion protocolVersion;
+    private ProtocolVersion currentProtocolVersion;
+
+    /**
+     * 从配置文件读取的协议对象列表
+     */
+    @Getter
+    @Setter
+    private List<ProtocolVersion> localVersionList;
 
     /**
      * 缓存的未统计区间协议对象列表
@@ -136,7 +143,7 @@ public class ProtocolContext {
         //各类缓存初始化
 
         //定时调度接口初始化
-        BlockUtil.register(chainId);
+//        BlockUtil.register(chainId);
     }
 
     public void start() {

@@ -58,7 +58,7 @@ public class ProtocolResource extends BaseCmd {
     public Response getProtocolVersion(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         Map<String, Short> responseData = new HashMap<>(1);
-        responseData.put("value", ContextManager.getContext(chainId).getProtocolVersion().getVersion());
+        responseData.put("value", ContextManager.getContext(chainId).getCurrentProtocolVersion().getVersion());
         return success(responseData);
     }
 

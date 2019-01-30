@@ -21,12 +21,11 @@
 package io.nuls.protocol.service.impl;
 
 import io.nuls.db.service.RocksDBService;
+import io.nuls.protocol.constant.Constant;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.service.ProtocolService;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.logback.NulsLogger;
-
-import static io.nuls.protocol.constant.Constant.*;
 
 /**
  * 区块服务实现类
@@ -52,12 +51,7 @@ public class ProtocolServiceImpl implements ProtocolService {
     public void init(int chainId) {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
-//            RocksDBService.createTable(BLOCK_HEADER + chainId);
-//            RocksDBService.createTable(BLOCK_HEADER_INDEX + chainId);
-//            if (RocksDBService.existTable(CACHED_BLOCK + chainId)) {
-//                RocksDBService.destroyTable(CACHED_BLOCK + chainId);
-//            }
-//            RocksDBService.createTable(CACHED_BLOCK + chainId);
+            RocksDBService.createTable(Constant.STATISTICS + chainId);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

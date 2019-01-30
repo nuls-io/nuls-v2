@@ -21,13 +21,13 @@
     "name": "intervalMinimum",
     "remark": "统计区间最小值",
     "readOnly": "true",
-    "value": "500"
+    "value": "100"
   },
   {
     "name": "effectiveRatioMinimum",
     "remark": "每个统计区间内的最小生效比例",
     "readOnly": "true",
-    "value": "70"
+    "value": "60"
   },
   {
     "name": "effectiveRatioMaximum",
@@ -37,14 +37,14 @@
   },
   {
     "name": "continuousIntervalCountMaximum",
-    "remark": "协议生效要满足的连续区间数",
+    "remark": "协议生效要满足的最大连续区间数",
     "readOnly": "true",
     "value": "1000"
   },
   {
     "name": "continuousIntervalCountMinimum",
-    "remark": "协议生效要满足的连续区间数",
+    "remark": "协议生效要满足的最小连续区间数",
     "readOnly": "true",
-    "value": "50"
+    "value": "10"
   }
 ]

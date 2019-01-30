@@ -33,5 +33,5 @@ public interface CommandConstant {
     String NETWORK_MESSAGE = "message";
 
     //普通服务对应的RPC命令
-    String GET_PROTOCOL_VERSION = "getProtocolVersion";
+    String GET_PROTOCOL_VERSION = "getCurrentProtocolVersion";
 }

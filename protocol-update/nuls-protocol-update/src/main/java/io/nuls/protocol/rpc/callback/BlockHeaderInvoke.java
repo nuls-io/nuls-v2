@@ -4,6 +4,7 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.model.po.Statistics;
@@ -11,13 +12,13 @@ import io.nuls.protocol.service.StatisticsStorageService;
 import io.nuls.protocol.utils.module.BlockUtil;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
-import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
@@ -27,12 +28,12 @@ import java.util.Objects;
 @Data
 @Component
 @NoArgsConstructor
+@EqualsAndHashCode(callSuper=false)
 public class BlockHeaderInvoke extends BaseInvoke {
 
     private int chainId;
 
-    @Autowired
-    private StatisticsStorageService service;
+    private StatisticsStorageService service = SpringLiteContext.getBean(StatisticsStorageService.class);
 
     public BlockHeaderInvoke(int chainId) {
         this.chainId = chainId;
@@ -45,8 +46,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
 
         commonLog.debug("chainId-" + chainId + ", blockheader update");
         if (response.isSuccess()) {
-            Map responseData = (Map) response.getResponseData();
-            String hex = (String) responseData.get("latestBlockHeader");
+            String hex = (String) response.getResponseData();
             BlockHeader blockHeader = new BlockHeader();
             try {
                 blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
@@ -54,6 +54,9 @@ public class BlockHeaderInvoke extends BaseInvoke {
                 BlockExtendsData data = new BlockExtendsData();
                 data.parse(new NulsByteBuffer(extend));
                 long height = blockHeader.getHeight();
+                if (!validate(data, context)) {
+                    commonLog.debug("chainId-" + chainId + ", invalid blockheader-" + height);
+                }
                 long latestHeight = context.getLatestHeight();
                 //保存区块
                 Statistics lastValidStatistics = context.getLastValidStatistics();
@@ -95,7 +98,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
                             //如果某协议版本连续统计确认数大于阈值，则进行版本升级
                             if (statistics.getCount() >= protocolVersion.getContinuousIntervalCount()) {
                                 //设置新协议版本
-                                context.setProtocolVersion(protocolVersion);
+                                context.setCurrentProtocolVersion(protocolVersion);
                                 commonLog.info("chainId-" + chainId + ", new protocol version available-" + protocolVersion);
                             }
                             context.setCount(0);
@@ -133,7 +136,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
                             Statistics newValidStatistics = service.get(chainId, lastValidStatistics.getLastHeight());
                             if (newValidStatistics.getCount() < protocolVersion.getContinuousIntervalCount()) {
                                 //设置新协议版本
-                                context.setProtocolVersion(protocolVersion);
+                                context.setCurrentProtocolVersion(protocolVersion);
                                 commonLog.info("chainId-" + chainId + ", protocol version rollback-" + protocolVersion);
                             }
                             List<ProtocolVersion> protocolVersions = BlockUtil.getBlockHeaders(chainId, latestHeight, latestHeight);
@@ -149,6 +152,46 @@ public class BlockHeaderInvoke extends BaseInvoke {
                 commonLog.error(e);
             }
         }
+    }
 
+    /**
+     * 验证区块头协议信息正确性
+     *
+     * @param data
+     * @param context
+     * @return
+     */
+    private boolean validate(BlockExtendsData data, ProtocolContext context){
+        boolean upgrade = data.isUpgrade();
+        if (upgrade) {
+            short blockVersion = data.getBlockVersion();
+            ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
+            if (currentProtocolVersion.getVersion() >= blockVersion) {
+                return false;
+            }
+            short interval = data.getInterval();
+            ProtocolConfig config = context.getConfig();
+            if (interval > config.getIntervalMaximum()) {
+                return false;
+            }
+            if (interval < config.getIntervalMinimum()) {
+                return false;
+            }
+            byte effectiveRatio = data.getEffectiveRatio();
+            if (effectiveRatio > config.getEffectiveRatioMaximum()) {
+                return false;
+            }
+            if (effectiveRatio < config.getEffectiveRatioMinimum()) {
+                return false;
+            }
+            short continuousIntervalCount = data.getContinuousIntervalCount();
+            if (continuousIntervalCount > config.getContinuousIntervalCountMaximum()) {
+                return false;
+            }
+            if (continuousIntervalCount < config.getContinuousIntervalCountMinimum()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

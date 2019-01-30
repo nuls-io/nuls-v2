@@ -41,6 +41,12 @@ public interface Constant {
     String MODULES_CONFIG_FILE = "modules.json";
 
     /**
+     * 协议版本配置文件名称
+     * Module configuration file name.
+     */
+    String PROTOCOL_CONFIG_FILE = "versions.json";
+
+    /**
      * db文件存放目录
      */
     String DATA_PATH = System.getProperty("user.home") + "/data/protocol";

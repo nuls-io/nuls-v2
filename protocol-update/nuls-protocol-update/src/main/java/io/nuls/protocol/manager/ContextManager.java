@@ -22,6 +22,7 @@ package io.nuls.protocol.manager;
 
 import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.model.ProtocolContext;
+import io.nuls.protocol.model.ProtocolVersion;
 import lombok.Data;
 
 import java.util.List;
@@ -48,15 +49,18 @@ public class ContextManager {
     private ContextManager() {
     }
 
-    public static void init(ProtocolConfig protocolConfig) {
-        ProtocolContext chainContext = new ProtocolContext();
+    public static void init(ProtocolConfig protocolConfig, List<ProtocolVersion> versions) {
+        ProtocolContext protocolContext = new ProtocolContext();
         int chainId = protocolConfig.getChainId();
         chainIds.add(chainId);
-        ContextManager.contextMap.put(chainId, chainContext);
-        chainContext.setChainId(chainId);
-        chainContext.setConfig(protocolConfig);
-        chainContext.init();
-        commonLog.info("new chainContext add! chainId-" + chainId);
+        ContextManager.contextMap.put(chainId, protocolContext);
+        protocolContext.setChainId(chainId);
+        protocolContext.setConfig(protocolConfig);
+        versions.sort(ProtocolVersion.COMPARATOR);
+        protocolContext.setLocalVersionList(versions);
+        protocolContext.setCurrentProtocolVersion(versions.get(0));
+        protocolContext.init();
+        commonLog.info("new protocolContext add! chainId-" + chainId);
     }
 
     public static ProtocolContext getContext(int chainId) {
