@@ -23,59 +23,44 @@
  *
  */
 
-package io.nuls.account.storage;
+package io.nuls.account.model.dto;
 
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.model.po.AliasPo;
-
-import java.util.List;
+import io.nuls.base.data.Transaction;
 
 /**
- * @author EdwardChan
- * @date
+ * @author: EdwardChan
  */
-public interface AliasStorageService {
+
+public class MultiSignTransactionResultDto {
 
     /**
-     * @auther EdwardChan
-     * @date Nov.9th 2018
+     * 是否已经广播
      */
-    @Deprecated
-    List<AliasPo> getAliasList(int chainId);
-
+    private boolean isBroadcasted;
 
     /**
-     * get alias,contain the account alias and multi sign account alias
-     *
-     * @param chainId
-     * @param alias
-     * @return aliasPo
+     * 交易对象
      */
-    AliasPo getAlias(int chainId, String alias);
+    private Transaction transaction;
 
 
-    /**
-     * get alias by address
-     *
-     * if the alias isn't exist,return null
-     *
-     * @param chainId
-     * @param address
-     * @return
-     */
-    AliasPo getAliasByAddress(int chainId, String address);
+    public MultiSignTransactionResultDto() {
 
-    /**
-     * save the alias
-     *
-     * @param alias
-     * @return the result
-     */
-    boolean saveAlias(int chainId, Alias alias);
+    }
 
-    /**
-     * remove Alias by chainId and alias
-     */
-    boolean removeAlias(int chainId, String alias);
+    public boolean isBroadcasted() {
+        return isBroadcasted;
+    }
 
+    public void setBroadcasted(boolean isBroadcasted) {
+        this.isBroadcasted = isBroadcasted;
+    }
+
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
+    }
 }

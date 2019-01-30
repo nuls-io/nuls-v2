@@ -108,13 +108,12 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     public Transaction setAlias(int chainId, String address, String password, String aliasName) {
         Transaction tx = null;
         try {
-
             if (!AddressTool.validAddress(chainId, address)) {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
-            if (StringUtils.isNotBlank(aliasName)) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
-            }
+//            if (StringUtils.isNotBlank(aliasName)) {
+//                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
+//            }
             if (!FormatValidUtils.validAlias(aliasName)) {
                 throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
             }
@@ -321,21 +320,24 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         alias.setAlias(account.getAlias());
         alias.setAddress(account.getAddress().getAddressBytes());
         tx.setTxData(alias.serialize());
+        //设置别名烧毁账户所属本链的主资产
         Chain chain = chainManager.getChainMap().get(account.getChainId());
         int assetsId = chain.getConfig().getAssetsId();
-        //TODO 不同链设置别名是否都燃烧nuls?
-        CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId);
+        //查询账本获取nonce值
+        byte[] nonce = TxUtil.getNonce( account.getChainId(),  account.getChainId(), assetsId, account.getAddress().getAddressBytes());
+        CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
-        CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, BigInteger.ONE);
+        CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
         int txSize = tx.size() + coinFrom.size() + coinTo.size() + 72;
         //计算手续费
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         //总费用为
-        BigInteger totalAmount = BigInteger.ONE.add(fee);
+        BigInteger totalAmount = AccountConstant.ALIAS_FEE.add(fee);
         coinFrom.setAmount(totalAmount);
         //检查余额是否充足
         BigInteger mainAsset = TxUtil.getBalance(account.getChainId(), account.getChainId(), assetsId, coinFrom.getAddress());
-        if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) { //余额不足
+        //余额不足
+        if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) {
             throw new NulsRuntimeException(AccountErrorCode.INSUFFICIENT_FEE);
         }
         CoinData coinData = new CoinData();

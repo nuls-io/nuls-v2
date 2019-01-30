@@ -2,6 +2,7 @@ package io.nuls.account.rpc.cmd;
 
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
+import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.util.log.LogUtil;
@@ -13,6 +14,7 @@ import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.FormatValidUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -156,6 +158,7 @@ public class MultiSignAccountCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_setMultiSigAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set the alias of multi sign account")
     public Object setMultiAlias(Map params) {
         LogUtil.debug("ac_setMultiSigAlias start,params size:{}", params == null ? 0 : params.size());
+        Map<String, String> map = new HashMap<>();
         int chainId;
         String address, password, alias, signAddress, txHash = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -188,9 +191,11 @@ public class MultiSignAccountCmd extends BaseCmd {
             if (!aliasService.isAliasUsable(chainId, alias)) {
                 throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
             }
-            Transaction transaction = multiSignAccountService.setMultiAlias(chainId, address, password, alias, signAddress);
-            if (transaction != null && transaction.getHash() != null) {
-                txHash = transaction.getHash().getDigestHex();
+            MultiSignTransactionResultDto multiSignTransactionResultDto = multiSignAccountService.setMultiAlias(chainId, address, password, alias, signAddress);
+            if (multiSignTransactionResultDto.isBroadcasted()) {
+                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
+            } else {
+                map.put("txHex", HexUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
             }
         } catch (NulsRuntimeException e) {
             LogUtil.info("", e);
@@ -199,10 +204,8 @@ public class MultiSignAccountCmd extends BaseCmd {
             LogUtil.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
-        Map<String, String> result = new HashMap<>();
-        result.put("txHash", txHash);
         LogUtil.debug("ac_setMultiSigAlias end");
-        return success(result);
+        return success(map);
     }
 
     /**
@@ -240,6 +243,5 @@ public class MultiSignAccountCmd extends BaseCmd {
         LogUtil.debug("ac_getMultiSigAccount end");
         return success(multiSigAccount);
     }
-
 
 }

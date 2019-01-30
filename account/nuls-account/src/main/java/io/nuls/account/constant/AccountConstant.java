@@ -30,6 +30,7 @@ import com.google.common.primitives.UnsignedBytes;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.crypto.HexUtil;
 
+import java.math.BigInteger;
 import java.util.Comparator;
 
 /**
@@ -103,7 +104,7 @@ public interface AccountConstant {
      * 设置别名的费用(烧毁)
      * The cost of setting an alias
      */
-    //Na ALIAS_NA = Na.parseNuls(1);
+    BigInteger ALIAS_FEE = BigInteger.valueOf(100000000);
 
     /**
      * 转账交易的类型
@@ -149,9 +150,9 @@ public interface AccountConstant {
 
     /**
      * 黑洞地址，该地址的资产无法找回
-     * //TODO 该地址需要加上链ID，否则无法适配新的地址规则
+     * //TODO 测试地址，后期需修改
      */
-    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("Nse5FeeiYk1opxdc5RqYpEWkiUDGNuLs");
+    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("WEXAmsUJSNAvCx2zUaXziy3ZYX1em3930");
 
     /**
      * --------[EVENT constant] -------

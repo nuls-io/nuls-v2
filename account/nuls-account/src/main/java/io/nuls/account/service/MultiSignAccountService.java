@@ -24,6 +24,7 @@
 
 package io.nuls.account.service;
 
+import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
 
@@ -85,5 +86,5 @@ public interface MultiSignAccountService {
     boolean removeMultiSigAccount(int chainId,String address);
 
 
-    Transaction setMultiAlias(int chainId, String address, String password, String aliasName, String signAddr);
+    MultiSignTransactionResultDto setMultiAlias(int chainId, String address, String password, String aliasName, String signAddr);
 }
