@@ -273,6 +273,66 @@ public class PocConsensusResource extends BaseCmd{
     }
 
     /**
+     * 红牌交易提交
+     * */
+    @CmdAnnotation(cmd = "cs_redPunishCommit", version = 1.0, description = "withdraw deposit agent transaction commit 1.0")
+    @ResisterTx(txType = TxProperty.RED_PUNISH,methodType = TxMethodType.COMMIT,methodName = "cs_redPunishCommit")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "tx", parameterType = "String")
+    public Response redPunishCommit(Map<String,Object> params){
+        Result result = service.redPunishCommit(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
+     * 红牌交易回滚
+     * */
+    @CmdAnnotation(cmd = "cs_redPunishRollBack", version = 1.0, description = "withdraw deposit agent transaction rollback 1.0")
+    @ResisterTx(txType = TxProperty.RED_PUNISH,methodType = TxMethodType.ROLLBACK,methodName = "cs_redPunishRollBack")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "tx", parameterType = "String")
+    public Response redPunishRollBack(Map<String,Object> params){
+        Result result = service.redPunishRollBack(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
+     * 黄牌交易提交
+     * */
+    @CmdAnnotation(cmd = "cs_yellowPunishCommit", version = 1.0, description = "withdraw deposit agent transaction commit 1.0")
+    @ResisterTx(txType = TxProperty.YELLOW_PUNISH,methodType = TxMethodType.COMMIT,methodName = "cs_yellowPunishCommit")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "tx", parameterType = "String")
+    public Response yellowPunishCommit(Map<String,Object> params){
+        Result result = service.yellowPunishCommit(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
+     * 黄牌交易回滚
+     * */
+    @CmdAnnotation(cmd = "cs_yellowPunishRollBack", version = 1.0, description = "withdraw deposit agent transaction rollback 1.0")
+    @ResisterTx(txType = TxProperty.YELLOW_PUNISH,methodType = TxMethodType.ROLLBACK,methodName = "cs_yellowPunishRollBack")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "tx", parameterType = "String")
+    public Response yellowPunishRollBack(Map<String,Object> params){
+        Result result = service.yellowPunishRollBack(params);
+        if(result.isFailed()){
+            return failed(result.getErrorCode());
+        }
+        return success(result.getData());
+    }
+
+    /**
      * 查询共识节点列表
      * */
     @CmdAnnotation(cmd = "cs_getAgentList", version = 1.0, description = "query consensus node list 1.0")
