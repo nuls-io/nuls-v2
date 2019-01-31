@@ -291,7 +291,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         try {
             AliasPo po = aliasStorageService.getAlias(chainId, alias.getAlias());
             if (po != null && Arrays.equals(po.getAddress(), alias.getAddress())) {
-                aliasStorageService.removeAlias(chainId, alias.getAlias());
+                result = aliasStorageService.removeAlias(chainId, alias.getAlias());
                 AccountPo accountPo = accountStorageService.getAccount(alias.getAddress());
                 if (accountPo != null) {
                     accountPo.setAlias("");
