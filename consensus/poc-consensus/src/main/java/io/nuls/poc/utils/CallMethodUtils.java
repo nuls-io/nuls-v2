@@ -247,6 +247,7 @@ public class CallMethodUtils {
             params.put("chainId",chain.getConfig().getChainId());
             params.put("list",txRegisterDetailList);
             params.put("moduleCode",ModuleE.CS.abbr);
+            params.put("moduleValidator","cs_batchValid");
             params.put("commit","cs_commit");
             params.put("rollback","cs_rollback");
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
