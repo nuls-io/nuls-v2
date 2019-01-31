@@ -36,7 +36,7 @@ import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
-import io.nuls.account.util.log.LogUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -168,7 +168,7 @@ public class AccountKeyStoreServiceImpl implements AccountKeyStoreService {
                 try {
                     fileOutputStream.close();
                 } catch (IOException e) {
-                    LogUtil.error(e);
+                    Log.error(e);
                 }
             }
         }

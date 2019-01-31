@@ -40,20 +40,20 @@ public interface ConfirmedTxService {
      * 保存创世块的交易
      * @param chain
      * @param txhexList
-     * @param blockHeader
+     * @param blockHeaderHex
      * @return
      * @throws NulsException
      */
-    boolean saveGengsisTxList(Chain chain, List<Transaction> txhexList, BlockHeader blockHeader) throws NulsException;
+    boolean saveGengsisTxList(Chain chain, List<Transaction> txhexList, String blockHeaderHex) throws NulsException;
 
     /**
      * 保存区块中已确认交易
      * @param chain
      * @param txHashList
-     * @param blockHeader
+     * @param blockHeaderHex
      * @return
      */
-    boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeader blockHeader) throws NulsException;
+    boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException;
 
 
 
@@ -61,10 +61,10 @@ public interface ConfirmedTxService {
      * 批量回滚已确认交易
      * @param chain
      * @param txHashList
-     * @param blockHeader
+     * @param blockHeaderHex
      * @return
      */
-    boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeader blockHeader) throws NulsException;
+    boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException;
 
     /**
      * 根据最新区块高度扫描是否有需要处理的跨链交易,如果有则进行跨链发送

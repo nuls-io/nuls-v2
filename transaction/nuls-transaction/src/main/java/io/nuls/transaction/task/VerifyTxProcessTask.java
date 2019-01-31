@@ -106,7 +106,9 @@ public class VerifyTxProcessTask implements Runnable {
                 //保存到h2数据库
                 transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
                 //调账本记录未确认交易
-                LedgerCall.commitTxLedger(chain, tx, false);
+                List<String> txHexList = new ArrayList<>();
+                txHexList.add(tx.hex());
+                LedgerCall.commitTxLedger(chain, txHexList, false);
                 //广播交易hash
                 //todo 调试暂时注释
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
@@ -133,15 +135,21 @@ public class VerifyTxProcessTask implements Runnable {
 
     private void doOrphanTxTask(Chain chain) throws NulsException{
         //时间排序TransactionTimeComparator
-        orphanTxList.sort(txComparator);
-        Iterator<Transaction> it = orphanTxList.iterator();
-        while (it.hasNext()) {
-            Transaction tx = it.next();
-            boolean success = processTx(chain, tx, true);
-            if (success) {
-                LedgerCall.rollbackTxLedger(chain, tx, false);
-                it.remove();
+        try {
+            orphanTxList.sort(txComparator);
+            Iterator<Transaction> it = orphanTxList.iterator();
+            while (it.hasNext()) {
+                Transaction tx = it.next();
+                boolean success = processTx(chain, tx, true);
+                if (success) {
+                    List<String> txHexList = new ArrayList<>();
+                    txHexList.add(tx.hex());
+                    LedgerCall.rollbackTxLedger(chain, txHexList, false);
+                    it.remove();
+                }
             }
+        } catch (Exception e) {
+            throw new NulsException(e);
         }
     }
 

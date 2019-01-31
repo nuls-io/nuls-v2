@@ -222,8 +222,8 @@ public class ChainManager {
         txRegister.setModuleValidator(TxConstant.TX_MODULE_VALIDATOR);
         txRegister.setTxType(TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER);
         txRegister.setValidator(TxConstant.CROSS_TRANSFER_VALIDATOR);
-        txRegister.setCommit("");
-        txRegister.setRollback("");
+        txRegister.setCommit(TxConstant.CROSS_TRANSFER_COMMIT);
+        txRegister.setRollback(TxConstant.CROSS_TRANSFER_ROLLBACK);
         txRegister.setSystemTx(true);
         txRegister.setUnlockTx(false);
         txRegister.setVerifySignature(true);

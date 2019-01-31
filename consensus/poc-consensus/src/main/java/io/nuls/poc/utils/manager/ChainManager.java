@@ -254,12 +254,8 @@ public class ChainManager {
                     if (!registerDetailMap.containsKey(annotation.txType().txType)) {
                         registerDetailMap.put(annotation.txType().txType, new TxRegisterDetail(annotation.txType()));
                     }
-                    if (annotation.methodType().equals(TxMethodType.COMMIT)) {
-                        registerDetailMap.get(annotation.txType().txType).setCommitCmd(annotation.methodName());
-                    } else if (annotation.methodType().equals(TxMethodType.VALID)) {
-                        registerDetailMap.get(annotation.txType().txType).setValidateCmd(annotation.methodName());
-                    } else if (annotation.methodType().equals(TxMethodType.ROLLBACK)) {
-                        registerDetailMap.get(annotation.txType().txType).setRollbackCmd(annotation.methodName());
+                    if (annotation.methodType().equals(TxMethodType.VALID)) {
+                        registerDetailMap.get(annotation.txType().txType).setValidator(annotation.methodName());
                     }
                 }
             }

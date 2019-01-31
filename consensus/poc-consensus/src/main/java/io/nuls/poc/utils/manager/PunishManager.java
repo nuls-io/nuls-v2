@@ -531,7 +531,7 @@ public class PunishManager {
         return  redPunishAddressSet;
     }
 
-    public boolean redPunishCommit(Transaction tx,Chain chain,BlockHeader blockHeader)throws Exception{
+    public boolean redPunishCommit(Transaction tx,Chain chain,BlockHeader blockHeader)throws NulsException{
         int chainId = chain.getConfig().getChainId();
         RedPunishData punishData = new RedPunishData();
         punishData.parse(tx.getTxData(),0);
@@ -619,7 +619,7 @@ public class PunishManager {
         return true;
     }
 
-    public boolean redPunishRollback(Transaction tx,Chain chain,BlockHeader blockHeader)throws Exception{
+    public boolean redPunishRollback(Transaction tx,Chain chain,BlockHeader blockHeader)throws NulsException{
         int chainId = chain.getConfig().getChainId();
         RedPunishData punishData = new RedPunishData();
         punishData.parse(tx.getTxData(),0);

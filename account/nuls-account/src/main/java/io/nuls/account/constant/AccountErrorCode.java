@@ -108,4 +108,5 @@ public interface AccountErrorCode {
     ErrorCode SIGN_ADDRESS_NOT_MATCH = ErrorCode.init("30042");
     ErrorCode ADDRESS_ALREADY_SIGNED = ErrorCode.init("30043");
     ErrorCode COINTO_DUPLICATE_COIN = ErrorCode.init("30044");
+    ErrorCode ALIAS_SAVE_ERROR = ErrorCode.init("30045");
 }
