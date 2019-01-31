@@ -80,7 +80,11 @@ public class ChainManager {
             */
             initTable(chainId);
             //注册账户相关交易
-            TransactionCmdCall.registerTx(chainId);
+            while (true) {
+                if (TransactionCmdCall.registerTx(chainId)) {
+                    break;
+                }
+            }
             chainMap.put(chainId, chain);
         }
     }
