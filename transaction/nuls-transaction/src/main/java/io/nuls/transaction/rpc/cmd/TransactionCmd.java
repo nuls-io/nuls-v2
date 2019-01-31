@@ -227,8 +227,8 @@ public class TransactionCmd extends BaseCmd {
                 txHashList.add(NulsDigestData.fromDigestHex(hashHex));
             }
             //批量保存已确认交易
-            BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
-            result = confirmedTxService.saveTxList(chain, txHashList, blockHeader);
+            //BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
+            result = confirmedTxService.saveTxList(chain, txHashList, (String)params.get("blockHeaderHex"));
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -270,8 +270,8 @@ public class TransactionCmd extends BaseCmd {
             for (String txHex : txHexList) {
                 txList.add(TxUtil.getTransaction(txHex));
             }
-            BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
-            result = confirmedTxService.saveGengsisTxList(chain, txList, blockHeader);
+//            BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
+            result = confirmedTxService.saveGengsisTxList(chain, txList, (String)params.get("blockHeaderHex"));
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -314,8 +314,8 @@ public class TransactionCmd extends BaseCmd {
                 txHashList.add(NulsDigestData.fromDigestHex(hashHex));
             }
             //批量回滚已确认交易
-            BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
-            result = confirmedTxService.rollbackTxList(chain, txHashList, blockHeader);
+//            BlockHeader blockHeader = TxUtil.getInstance((String)params.get("blockHeaderHex"), BlockHeader.class);
+            result = confirmedTxService.rollbackTxList(chain, txHashList, (String)params.get("blockHeaderHex"));
 
         } catch (NulsException e) {
             errorLogProcess(chain, e);

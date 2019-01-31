@@ -3,6 +3,7 @@ package io.nuls.transaction.rpc.call;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 
 import java.util.HashMap;
@@ -50,7 +51,8 @@ public class ChainCall {
             HashMap result = (HashMap) TransactionCall.request(ModuleE.CM.abbr,"cm_assetCirculateValidator", params);
             return (int) result.get("value") == 1;
         } catch (Exception e) {
-            throw new NulsException(e);
+            Log.error(e);
+            return false;
         }
     }
 

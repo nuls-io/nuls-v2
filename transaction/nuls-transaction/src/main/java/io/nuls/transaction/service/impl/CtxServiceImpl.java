@@ -96,7 +96,6 @@ public class CtxServiceImpl implements CtxService {
         ctx.setTx(tx);
         ctx.setSenderChainId(chainId);
         ctx.setSenderNodeId(nodeId);
-        ctx.setState(TxConstant.CTX_UNPROCESSED_0);
         unverifiedCtxStorageService.putTx(chain.getChainId(), ctx);
     }
 
@@ -121,16 +120,16 @@ public class CtxServiceImpl implements CtxService {
         return ctxStorageService.getTxList(chain.getChainId());
     }
 
-    @Override
-    public boolean updateCrossTxState(Chain chain, NulsDigestData hash, int state) {
-        CrossTx crossTx = ctxStorageService.getTx(chain.getChainId(), hash);
-        if (null != crossTx) {
-            chain.getLogger().error(hash.getDigestHex() + TxErrorCode.TX_NOT_EXIST.getMsg());
-            return false;
-        }
-        crossTx.setState(state);
-        return ctxStorageService.putTx(chain.getChainId(), crossTx);
-    }
+//    @Override
+//    public boolean updateCrossTxState(Chain chain, NulsDigestData hash, int state) {
+//        CrossTx crossTx = ctxStorageService.getTx(chain.getChainId(), hash);
+//        if (null != crossTx) {
+//            chain.getLogger().error(hash.getDigestHex() + TxErrorCode.TX_NOT_EXIST.getMsg());
+//            return false;
+//        }
+//        crossTx.setState(state);
+//        return ctxStorageService.putTx(chain.getChainId(), crossTx);
+//    }
 
     /**
      * 接收链内其他节点广播的跨链验证结果, 并保存.
@@ -200,7 +199,13 @@ public class CtxServiceImpl implements CtxService {
         //保存到h2数据库
         transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
         //调账本记录未确认交易
-        LedgerCall.commitTxLedger(chain, tx, false);
+        List<String> txHexList = new ArrayList<>();
+        try {
+            txHexList.add(tx.hex());
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+        LedgerCall.commitTxLedger(chain, txHexList, false);
         //广播交易hash
         BroadcastCrossTxHashMessage ctxHashMessage = new BroadcastCrossTxHashMessage();
         ctxHashMessage.setCommand(TxCmd.NW_NEW_CROSS_HASH);
@@ -324,14 +329,12 @@ public class CtxServiceImpl implements CtxService {
                 rsMessage.setPackingAddress(packingAddress);
                 //广播交易hash
                 NetworkCall.broadcast(chain.getChainId(), rsMessage);
-                ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
             }
         } else {
             //普通节点
             if (verifyResultList.size() >= 3) {
                 //广播交易hash
                 NetworkCall.broadcastTxHash(chain.getChainId(), message.getRequestHash());
-                ctx.setState(TxConstant.CTX_VERIFY_RESULT_2);
             }
         }
 

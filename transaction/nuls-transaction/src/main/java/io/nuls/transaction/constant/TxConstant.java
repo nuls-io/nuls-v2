@@ -104,19 +104,19 @@ public interface TxConstant {
      */
     long CTX_EFFECT_THRESHOLD = 30;
 
-    /**
-     * 跨链交易验证过程
-     */
-    /** 接收新的跨链交易创建 */
-    int CTX_UNPROCESSED_0 = 0;
-    /** 已发送请求跨链验证消息 */
-    int CTX_VERIFY_REQUEST_1 = 1;
-    /** 已接收到跨链验证结果 广播本节点验证结果给本链其他节点进行统计 */
-    int CTX_VERIFY_RESULT_2 = 2;
-    /** 接收到其他节点发送的验证结果，并已统计出结果，放入待打包 */
-    int CTX_NODE_STATISTICS_RESULT_3 = 3;
-    /** 已进入区块并确认 */
-    int CTX_COMFIRM_4 = 4;
+//    /**
+//     * 跨链交易验证过程
+//     */
+//    /** 接收新的跨链交易创建 */
+//    int CTX_UNPROCESSED_0 = 0;
+//    /** 已发送请求跨链验证消息 */
+//    int CTX_VERIFY_REQUEST_1 = 1;
+//    /** 已接收到跨链验证结果 广播本节点验证结果给本链其他节点进行统计 */
+//    int CTX_VERIFY_RESULT_2 = 2;
+//    /** 接收到其他节点发送的验证结果，并已统计出结果，放入待打包 */
+//    int CTX_NODE_STATISTICS_RESULT_3 = 3;
+//    /** 已进入区块并确认 */
+//    int CTX_COMFIRM_4 = 4;
 
     /**
      * 跨链交易固定为非解锁交易
