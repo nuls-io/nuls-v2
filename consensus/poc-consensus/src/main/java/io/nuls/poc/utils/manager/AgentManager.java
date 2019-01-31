@@ -1,13 +1,20 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
+import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.model.bo.tx.txdata.Agent;
+import io.nuls.poc.model.bo.tx.txdata.StopAgent;
 import io.nuls.poc.model.po.AgentPo;
+import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.AgentStorageService;
+import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.utils.compare.AgentComparator;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,6 +31,12 @@ import java.util.List;
 public class AgentManager{
     @Autowired
     private AgentStorageService agentStorageService;
+
+    @Autowired
+    private DepositStorageService depositStorageService;
+
+    @Autowired
+    private DepositManager depositManager;
     /**
      * 加载节点信息
      * Initialize node information
@@ -148,5 +161,89 @@ public class AgentManager{
     public String getAgentId(NulsDigestData hash) {
         String hashHex = hash.getDigestHex();
         return hashHex.substring(hashHex.length() - 8).toUpperCase();
+    }
+
+    public boolean createAgentCommit(Transaction transaction, BlockHeader blockHeader, Chain chain)throws NulsException {
+        Agent agent = new Agent();
+        agent.parse(transaction.getTxData(), 0);
+        agent.setTxHash(transaction.getHash());
+        agent.setBlockHeight(blockHeader.getHeight());
+        agent.setTime(transaction.getTime());
+        AgentPo agentPo = agentToPo(agent);
+        if (!agentStorageService.save(agentPo, chain.getConfig().getChainId())) {
+            throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
+        }
+        addAgent(chain, agent);
+        return true;
+    }
+
+    public boolean createAgentRollBack(Transaction transaction,Chain chain) throws NulsException{
+        if (!agentStorageService.delete(transaction.getHash(), chain.getConfig().getChainId())) {
+           throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
+        }
+        removeAgent(chain, transaction.getHash());
+        return true;
+    }
+
+    public boolean stopAgentCommit(Transaction transaction, Chain chain)throws NulsException{
+        int chainId = chain.getConfig().getChainId();
+        //找到需要注销的节点信息
+        StopAgent stopAgent = new StopAgent();
+        stopAgent.parse(transaction.getTxData(), 0);
+        AgentPo agentPo = agentStorageService.get(stopAgent.getCreateTxHash(), chain.getConfig().getChainId());
+        if (agentPo == null || agentPo.getDelHeight() > 0) {
+            throw new NulsException(ConsensusErrorCode.AGENT_NOT_EXIST);
+        }
+        //找到该节点的委托信息,并设置委托状态为退出
+        List<DepositPo> depositPoList = depositStorageService.getList(chainId);
+        for (DepositPo depositPo : depositPoList) {
+            if (depositPo.getDelHeight() > -1L) {
+                continue;
+            }
+            if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
+                continue;
+            }
+            depositPo.setDelHeight(transaction.getBlockHeight());
+            if (!depositStorageService.save(depositPo, chainId)) {
+                throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
+            }
+            depositManager.updateDeposit(chain, depositManager.poToDeposit(depositPo));
+        }
+        agentPo.setDelHeight(transaction.getBlockHeight());
+        //保存数据库和缓存
+        if (!agentStorageService.save(agentPo, chainId)) {
+            throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
+        }
+        updateAgent(chain, poToAgent(agentPo));
+        return true;
+    }
+
+    public boolean stopAgentRollBack(Transaction transaction,Chain chain) throws NulsException{
+        int chainId = chain.getConfig().getChainId();
+        StopAgent stopAgent = new StopAgent();
+        stopAgent.parse(transaction.getTxData(), 0);
+        AgentPo agentPo = agentStorageService.get(stopAgent.getCreateTxHash(), chainId);
+        agentPo.setDelHeight(-1);
+        //找到该节点的委托信息,并设置委托状态为退出
+        List<DepositPo> depositPoList = depositStorageService.getList(chainId);
+        for (DepositPo depositPo : depositPoList) {
+            if (depositPo.getDelHeight() != transaction.getBlockHeight()) {
+                continue;
+            }
+            if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
+                continue;
+            }
+            depositPo.setDelHeight(-1);
+            if (!depositStorageService.save(depositPo, chainId)) {
+                throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
+            }
+            depositManager.updateDeposit(chain, depositManager.poToDeposit(depositPo));
+        }
+        //保存数据库和缓存
+        if (!agentStorageService.save(agentPo, chainId)) {
+            throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
+        }
+        updateAgent(chain,poToAgent(agentPo));
+        return true;
     }
 }

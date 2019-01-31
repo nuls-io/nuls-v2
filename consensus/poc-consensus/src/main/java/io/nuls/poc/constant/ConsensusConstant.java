@@ -205,6 +205,7 @@ public interface ConsensusConstant {
     String PARAM_BLOCK="block";
     String PARAM_EVIDENCE_HEADER ="evidenceHeader";
     String VALID_RESULT ="valid";
+    String PARAM_RESULT_VALUE ="value";
     String PARAM_STATUS = "status";
 
     /**

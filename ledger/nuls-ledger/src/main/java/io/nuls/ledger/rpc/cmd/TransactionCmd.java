@@ -39,6 +39,7 @@ import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.nuls.ledger.utils.LoggerUtil.logger;
@@ -55,6 +56,7 @@ public class TransactionCmd extends BaseCmd {
 
     /**
      * 未确认交易提交
+     *
      * @param params
      * @return
      */
@@ -62,40 +64,52 @@ public class TransactionCmd extends BaseCmd {
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "txHexList", parameterType = "List")
     @Parameter(parameterName = "isConfirmTx", parameterType = "boolean")
     public Response commitTx(Map params) {
-        Map<String,Object> rtData = new HashMap<>();
+        Map<String, Object> rtData = new HashMap<>();
         Integer chainId = (Integer) params.get("chainId");
-        String txHex = (String) params.get("txHex");
+        List<String> txHexList = (List) params.get("txHexList");
         boolean isConfirmTx = Boolean.valueOf(params.get("isConfirmTx").toString());
-        if (StringUtils.isBlank(txHex)) {
-            return failed("txHex is blank");
-        }
-        byte[] txStream = HexUtil.decode(txHex);
-        Transaction tx = new Transaction();
-        try {
-            tx.parse(new NulsByteBuffer(txStream));
-        } catch (NulsException e) {
-            logger.error("transaction parse error", e);
-            return failed("transaction parse error");
+        if (null == txHexList || 0 == txHexList.size()) {
+            return failed("txHexList is blank");
         }
         int value = 0;
-        if(isConfirmTx){
-            if(transactionService.confirmTxProcess(chainId,tx)){
-                value =1;
+        for (String txHex : txHexList) {
+            if (StringUtils.isBlank(txHex)) {
+                return failed("txHex is blank");
             }
-        }else{
-            if(transactionService.unConfirmTxProcess(chainId,tx)){
-                value =1;
+            byte[] txStream = HexUtil.decode(txHex);
+            Transaction tx = new Transaction();
+            try {
+                tx.parse(new NulsByteBuffer(txStream));
+            } catch (NulsException e) {
+                logger.error("transaction parse error", e);
+                return failed("transaction parse error");
+            }
+            if (isConfirmTx) {
+                if (transactionService.confirmTxProcess(chainId, tx)) {
+                    value = 1;
+                } else {
+                    value = 0;
+                    break;
+                }
+            } else {
+                if (transactionService.unConfirmTxProcess(chainId, tx)) {
+                    value = 1;
+                } else {
+                    value = 0;
+                    break;
+                }
             }
         }
-        rtData.put("value",value);
+        rtData.put("value", value);
         return success(rtData);
     }
 
     /**
      * 逐笔回滚交易
+     *
      * @param params
      * @return
      */
@@ -103,35 +117,50 @@ public class TransactionCmd extends BaseCmd {
             version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "txHex", parameterType = "String")
+    @Parameter(parameterName = "txHexList", parameterType = "List")
     @Parameter(parameterName = "isConfirmTx", parameterType = "boolean")
     public Response rollBackConfirmTx(Map params) {
-        Map<String,Object> rtData = new HashMap<>();
-        Integer chainId = (Integer) params.get("chainId");
-        String txHex = (String) params.get("txHex");
-        boolean isConfirmTx = Boolean.valueOf(params.get("isConfirmTx").toString());
-        if (StringUtils.isBlank(txHex)) {
-            return failed("txHex not blank");
-        }
-        byte[] txStream = HexUtil.decode(txHex);
-        Transaction tx = new Transaction();
+        Map<String, Object> rtData = new HashMap<>();
+        int value = 0;
         try {
-            tx.parse(new NulsByteBuffer(txStream));
-        } catch (NulsException e) {
-            logger.error("transaction parse error", e);
-            return failed("transaction parse error");
-        }
-        int  value = 0;
-        if(isConfirmTx){
-            if(transactionService.rollBackConfirmTx(chainId,tx)){
-                value = 1;
+            Integer chainId = (Integer) params.get("chainId");
+            List<String> txHexList = (List) params.get("txHexList");
+            boolean isConfirmTx = Boolean.valueOf(params.get("isConfirmTx").toString());
+            if (null == txHexList || 0 == txHexList.size()) {
+                return failed("txHexList is blank");
             }
-        }else{
-            if(transactionService.rollBackUnconfirmTx(chainId,tx)){
-                value = 1;
+            for (String txHex : txHexList) {
+                if (StringUtils.isBlank(txHex)) {
+                    return failed("txHex not blank");
+                }
+                byte[] txStream = HexUtil.decode(txHex);
+                Transaction tx = new Transaction();
+                try {
+                    tx.parse(new NulsByteBuffer(txStream));
+                } catch (NulsException e) {
+                    logger.error("transaction parse error", e);
+                    return failed("transaction parse error");
+                }
+                if (isConfirmTx) {
+                    if (transactionService.rollBackConfirmTx(chainId, tx)) {
+                        value = 1;
+                    } else {
+                        value = 0;
+                        break;
+                    }
+                } else {
+                    if (transactionService.rollBackUnconfirmTx(chainId, tx)) {
+                        value = 1;
+                    } else {
+                        value = 0;
+                        break;
+                    }
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        rtData.put("value",1);
+        rtData.put("value", value);
         return success(rtData);
     }
 }
