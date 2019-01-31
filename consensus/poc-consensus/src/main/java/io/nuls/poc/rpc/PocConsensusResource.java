@@ -1,5 +1,6 @@
 package io.nuls.poc.rpc;
 
+import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.service.ConsensusService;
 import io.nuls.poc.utils.annotation.ResisterTx;
 import io.nuls.poc.utils.enumeration.TxMethodType;
@@ -59,37 +60,6 @@ public class PocConsensusResource extends BaseCmd{
     }
 
     /**
-     * 创建节点交易提交
-     * */
-    @CmdAnnotation(cmd = "cs_createAgentCommit", version = 1.0, description = "create agent transaction commit 1.0")
-    @ResisterTx(txType = TxProperty.CREATE_AGENT,methodType = TxMethodType.COMMIT,methodName = "cs_createAgentCommit")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    @Parameter(parameterName = "blockHeader", parameterType = "String")
-    public Response createAgentCommit(Map<String,Object> params){
-        Result result = service.createAgentCommit(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
-     * 创建节点交易回滚
-     * */
-    @CmdAnnotation(cmd = "cs_createAgentRollBack", version = 1.0, description = "create agent transaction rollback 1.0")
-    @ResisterTx(txType = TxProperty.CREATE_AGENT,methodType = TxMethodType.ROLLBACK,methodName = "cs_createAgentRollBack")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response createAgentRollBack(Map<String,Object> params){
-        Result result = service.createAgentRollBack(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
      * 注销节点
      * */
     @CmdAnnotation(cmd = "cs_stopAgent", version = 1.0, description = "stop agent 1.0")
@@ -117,36 +87,6 @@ public class PocConsensusResource extends BaseCmd{
         return success(result.getData());
     }
 
-    /**
-     * 注销节点交易提交
-     * */
-    @CmdAnnotation(cmd = "cs_stopAgentCommit", version = 1.0, description = "stop agent transaction commit 1.0")
-    @ResisterTx(txType = TxProperty.STOP_AGENT,methodType = TxMethodType.COMMIT,methodName = "cs_stopAgentCommit")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    @Parameter(parameterName = "blockHeader", parameterType = "String")
-    public Response stopAgentCommit(Map<String,Object> params){
-        Result result = service.stopAgentCommit(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
-     * 注销节点交易回滚
-     * */
-    @CmdAnnotation(cmd = "cs_stopAgentRollBack", version = 1.0, description = "stop agent transaction rollback 1.0")
-    @ResisterTx(txType = TxProperty.STOP_AGENT,methodType = TxMethodType.ROLLBACK,methodName = "cs_stopAgentRollBack")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response stopAgentRollBack(Map<String,Object> params){
-        Result result = service.stopAgentRollBack(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
 
     /**
      * 委托共识
@@ -174,37 +114,6 @@ public class PocConsensusResource extends BaseCmd{
     @Parameter(parameterName = "tx", parameterType = "String")
     public Response depositValid(Map<String,Object> params){
         Result result = service.depositValid(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
-     * 委托共识交易提交
-     * */
-    @CmdAnnotation(cmd = "cs_depositCommit", version = 1.0, description = "deposit agent transaction commit 1.0")
-    @ResisterTx(txType = TxProperty.JOIN_DEPOSIT,methodType = TxMethodType.COMMIT,methodName = "cs_depositCommit")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    @Parameter(parameterName = "blockHeader", parameterType = "String")
-    public Response depositCommit(Map<String,Object> params){
-        Result result = service.depositCommit(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
-     * 委托共识交易回滚
-     * */
-    @CmdAnnotation(cmd = "cs_depositRollBack", version = 1.0, description = "deposit agent transaction rollback 1.0")
-    @ResisterTx(txType = TxProperty.JOIN_DEPOSIT,methodType = TxMethodType.ROLLBACK,methodName = "cs_depositRollBack")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response depositRollBack(Map<String,Object> params){
-        Result result = service.depositRollBack(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }
@@ -242,15 +151,16 @@ public class PocConsensusResource extends BaseCmd{
         return success(result.getData());
     }
 
+
     /**
-     * 退出共识交易提交
+     * 共识模块交易提交
      * */
-    @CmdAnnotation(cmd = "cs_withdrawCommit", version = 1.0, description = "withdraw deposit agent transaction commit 1.0")
-    @ResisterTx(txType = TxProperty.CANCEL_DEPOSIT,methodType = TxMethodType.COMMIT,methodName = "cs_withdrawCommit")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response withdrawCommit(Map<String,Object> params){
-        Result result = service.withdrawCommit(params);
+    @CmdAnnotation(cmd = "cs_commit", version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
+    @Parameter(parameterName = ConsensusConstant.PARAM_CHAIN_ID, parameterType = "int")
+    @Parameter(parameterName = ConsensusConstant.PARAM_BLOCK_HEADER_HEX, parameterType = "String")
+    @Parameter(parameterName = ConsensusConstant.PARAM_TX_HEX_LIST, parameterType = "List<String>")
+    public Response commit(Map<String,Object> params){
+        Result result = service.commitCmd(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }
@@ -258,74 +168,14 @@ public class PocConsensusResource extends BaseCmd{
     }
 
     /**
-     * 退出共识交易回滚
+     * 共识模块交易回滚
      * */
-    @CmdAnnotation(cmd = "cs_withdrawRollBack", version = 1.0, description = "withdraw deposit agent transaction rollback 1.0")
-    @ResisterTx(txType = TxProperty.CANCEL_DEPOSIT,methodType = TxMethodType.ROLLBACK,methodName = "cs_withdrawRollBack")
+    @CmdAnnotation(cmd = "cs_rollback", version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response withdrawRollBack(Map<String,Object> params){
-        Result result = service.withdrawRollBack(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
-     * 红牌交易提交
-     * */
-    @CmdAnnotation(cmd = "cs_redPunishCommit", version = 1.0, description = "withdraw deposit agent transaction commit 1.0")
-    @ResisterTx(txType = TxProperty.RED_PUNISH,methodType = TxMethodType.COMMIT,methodName = "cs_redPunishCommit")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response redPunishCommit(Map<String,Object> params){
-        Result result = service.redPunishCommit(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
-     * 红牌交易回滚
-     * */
-    @CmdAnnotation(cmd = "cs_redPunishRollBack", version = 1.0, description = "withdraw deposit agent transaction rollback 1.0")
-    @ResisterTx(txType = TxProperty.RED_PUNISH,methodType = TxMethodType.ROLLBACK,methodName = "cs_redPunishRollBack")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response redPunishRollBack(Map<String,Object> params){
-        Result result = service.redPunishRollBack(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
-     * 黄牌交易提交
-     * */
-    @CmdAnnotation(cmd = "cs_yellowPunishCommit", version = 1.0, description = "withdraw deposit agent transaction commit 1.0")
-    @ResisterTx(txType = TxProperty.YELLOW_PUNISH,methodType = TxMethodType.COMMIT,methodName = "cs_yellowPunishCommit")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response yellowPunishCommit(Map<String,Object> params){
-        Result result = service.yellowPunishCommit(params);
-        if(result.isFailed()){
-            return failed(result.getErrorCode());
-        }
-        return success(result.getData());
-    }
-
-    /**
-     * 黄牌交易回滚
-     * */
-    @CmdAnnotation(cmd = "cs_yellowPunishRollBack", version = 1.0, description = "withdraw deposit agent transaction rollback 1.0")
-    @ResisterTx(txType = TxProperty.YELLOW_PUNISH,methodType = TxMethodType.ROLLBACK,methodName = "cs_yellowPunishRollBack")
-    @Parameter(parameterName = "chainId", parameterType = "int")
-    @Parameter(parameterName = "tx", parameterType = "String")
-    public Response yellowPunishRollBack(Map<String,Object> params){
-        Result result = service.yellowPunishRollBack(params);
+    @Parameter(parameterName = ConsensusConstant.PARAM_BLOCK_HEADER_HEX, parameterType = "String")
+    @Parameter(parameterName = "txHexList", parameterType = "List<String>")
+    public Response rollback(Map<String,Object> params){
+        Result result = service.rollbackCmd(params);
         if(result.isFailed()){
             return failed(result.getErrorCode());
         }

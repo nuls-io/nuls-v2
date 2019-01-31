@@ -38,7 +38,7 @@ import io.nuls.account.service.AccountService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.TxUtil;
-import io.nuls.account.util.log.LogUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
@@ -113,7 +113,7 @@ public class TransactionServiceImpl implements TransactionService {
                 }
             }
         } catch (Exception e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
         }
         return new ArrayList<>(result);

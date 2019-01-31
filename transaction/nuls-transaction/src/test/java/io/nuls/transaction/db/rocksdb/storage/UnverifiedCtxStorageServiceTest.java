@@ -33,7 +33,6 @@ public class UnverifiedCtxStorageServiceTest {
     @Test
     public void putTx() throws Exception {
         CrossTx ctx = TestConstant.createCrossChainTx();
-        ctx.setState(TxConstant.CTX_UNPROCESSED_0);
         boolean result = unverifiedCtxStorageService.putTx(chainId, ctx);
         Assert.assertTrue(result);
     }

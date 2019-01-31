@@ -30,7 +30,9 @@ import io.nuls.transaction.utils.TransactionIndexComparator;
 import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Charlie
@@ -71,7 +73,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (null == hash) {
             return null;
         }
-         return confirmedTxStorageService.getTx(chain.getChainId(), hash);
+        return confirmedTxStorageService.getTx(chain.getChainId(), hash);
     }
 
     private boolean saveTx(Chain chain, Transaction tx) {
@@ -83,379 +85,229 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     @Override
-    public boolean saveGengsisTxList(Chain chain, List<Transaction> txhexList, BlockHeader blockHeader) throws NulsException {
+    public boolean saveGengsisTxList(Chain chain, List<Transaction> txhexList, String blockHeaderHex) throws NulsException {
         if (null == chain || txhexList == null || txhexList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
         LedgerCall.coinDataBatchNotify(chain);
-        for(Transaction tx : txhexList){
+        List<NulsDigestData> txHashList = new ArrayList<>();
+        for (Transaction tx : txhexList) {
+            txHashList.add(tx.getHash());
             //todo 批量验证coinData，接口和单个的区别？
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, true);
             if (!verifyTxResult.success()) {
                 return false;
             }
         }
-        List<Transaction> savedList = new ArrayList<>();
-        for(Transaction tx : txhexList){
-            //将交易保存、提交、发送至账本
-            ResultSaveCommitTx resultSaveCommitTx = saveCommitTx(chain, tx, null, blockHeader);
-            if (resultSaveCommitTx.rs) {
-                savedList.add(tx);
-            } else {
-                //回滚当前交易已提交的步骤
-                rollbackCurrentTx(chain, tx, resultSaveCommitTx, blockHeader);
-                //回滚之前的交易
-                this.rollbackTxList(chain, savedList, blockHeader, false);
-                // 保存区块交易失败, 回滚交易数
-                chain.getLogger().error("Save block transaction failed, rollback {} transactions", savedList.size());
-                return false;
-            }
+        if (saveTxList(chain, txHashList, blockHeaderHex)) {
+            chain.getLogger().debug("保存创世块交易失败");
+            return false;
         }
-        for(Transaction tx : txhexList) {
+        for (Transaction tx : txhexList) {
             //保存到h2数据库
             transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
         }
-        chain.getLogger().debug("保存创世块交易完成");
         return true;
     }
 
+    /**
+     * 1.保存交易
+     * 2.调提交易接口
+     * 3.调账本
+     * 4.从未打包交易库中删除交易
+     */
     @Override
-    public boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeader blockHeader) throws NulsException {
-
+    public boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException {
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
+        List<Transaction> txList = new ArrayList<>();
+        List<String> txHexList = new ArrayList<>();
+        int chainId = chain.getChainId();
+        List<byte[]> txHashs = new ArrayList<>();
+        //组装统一验证参数数据,key为各模块统一验证器cmd
+        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         try {
-            int chainId = chain.getChainId();
-            List<Transaction> savedList = new ArrayList<>();
-            List<byte[]> txHashs = new ArrayList<>();
-            List<NulsDigestData> ctxHashList = new ArrayList<>();
             for (int i = 0; i < txHashList.size(); i++) {
                 NulsDigestData hash = txHashList.get(i);
                 txHashs.add(hash.serialize());
-                //从已验证但未打包的交易中取出交易
                 Transaction tx = unconfirmedTxStorageService.getTx(chainId, hash);
-                //将交易保存、提交、发送至账本
-                ResultSaveCommitTx resultSaveCommitTx = saveCommitTx(chain, tx, ctxHashList, blockHeader);
-                if (resultSaveCommitTx.rs) {
-                    savedList.add(tx);
+                String txHex = tx.hex();
+                txHexList.add(txHex);
+                TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
+                if (moduleVerifyMap.containsKey(txRegister)) {
+                    moduleVerifyMap.get(txRegister).add(txHex);
                 } else {
-                    //回滚当前交易已提交的步骤
-                    rollbackCurrentTx(chain, tx, resultSaveCommitTx, blockHeader);
-                    //回滚之前的交易
-                    this.rollbackTxList(chain, savedList, blockHeader, false);
-                    // 保存区块交易失败, 回滚交易数
-                    chain.getLogger().error("Save block transaction failed, rollback {} transactions", savedList.size());
-                    return false;
+                    List<String> txHexs = new ArrayList<>();
+                    txHexs.add(txHex);
+                    moduleVerifyMap.put(txRegister, txHexs);
                 }
             }
-            //保存生效高度
-            long effectHeight = blockHeader.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
-            boolean rs = confirmedTxStorageService.saveCrossTxEffectList(chainId, effectHeight, ctxHashList);
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+            return false;
+        }
+
+        if (!saveTxs(chain, txList, true)) {
+            return false;
+        }
+        if (!commitTxs(chain, moduleVerifyMap, blockHeaderHex, true)) {
+            removeTxs(chain, txList, false);
+            return false;
+        }
+        if (!commitLedger(chain, txHexList)) {
+            rollbackTxs(chain, moduleVerifyMap, blockHeaderHex, false);
+            removeTxs(chain, txList, false);
+            return false;
+        }
+        //如果确认交易成功，则从未打包交易库中删除交易
+        unconfirmedTxStorageService.removeTxList(chainId, txHashs);
+        return true;
+    }
+
+
+    //保存交易
+    public boolean saveTxs(Chain chain, List<Transaction> txList, boolean atomicity) {
+        List<Transaction> savedList = new ArrayList<>();
+        for (Transaction tx : txList) {
+            if (saveTx(chain, tx)) {
+                savedList.add(tx);
+            } else {
+                if(atomicity) {
+                    removeTxs(chain, savedList, false);
+                }
+                break;
+            }
+        }
+        return false;
+    }
+
+    //调提交易
+    public boolean commitTxs(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, String blockHeaderHex, boolean atomicity) {
+        //调用交易模块统一验证器 批量
+        Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        boolean result = true;
+        for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
+            boolean rs = TransactionCall.txProcess(chain, entry.getKey().getCommit(),
+                    entry.getKey().getModuleCode(), entry.getValue(), blockHeaderHex);
             if (!rs) {
-                this.rollbackTxList(chain, savedList, blockHeader, false);
-                return false;
-            }
-            //如果确认交易成功，则从未打包交易库中删除交易
-            unconfirmedTxStorageService.removeTxList(chainId, txHashs);
-            return true;
-        } catch (NulsException e) {
-            throw new NulsException(e.getErrorCode());
-        } catch (Exception e) {
-            throw new NulsException(e);
-        }
-    }
-
-    /**
-     * 处理保存交易至数据库后,处理交易确认逻辑
-     * 1.交易提交
-     * 2.发送账本
-     * 3.处理跨链交易, 更新交易验证流转状态, 添加至该区块的跨链交易hash集合
-     *
-     * @param chain       链
-     * @param tx          要保存的交易
-     * @param ctxhashList 该区块中所有的跨链交易hash集合
-     * @return int 返回成功了几个步骤, 如果未达成功的步骤数,则需要对应回滚之前的步骤
-     */
-    private ResultSaveCommitTx saveCommitTx(Chain chain, Transaction tx, List<NulsDigestData> ctxhashList, BlockHeader blockHeader) {
-        boolean rs = false;
-        int step = 0;
-        //ResultSaveCommitTx rs = new ResultSaveCommitTx(false, 0);
-        try {
-            rs = saveTx(chain, tx);
-            if (rs) {
-                step = 1;
-                TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeader.serialize()));
-            }
-            if (rs) {
-                step = 2;
-                if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH) {
-                    rs = LedgerCall.commitTxLedger(chain, tx, true);
-                }
-            }
-            if (rs) {
-                step = 3;
-                if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER
-                        && null != ctxService.getTx(chain, tx.getHash())) {
-                    //不需要对该步骤结果设置step, 该步骤内部有处理回滚.
-                    rs = ctxCommit(chain, tx, ctxhashList);
-                }
-            }
-        } catch (Exception e) {
-            chain.getLogger().error(e);
-        }
-        return new ResultSaveCommitTx(rs, step);
-    }
-
-    /**
-     * 根据提交结果 回滚该交易对应的步骤
-     * @param chain
-     * @param tx
-     * @param resultSaveCommitTx
-     */
-    private void rollbackCurrentTx(Chain chain, Transaction tx, ResultSaveCommitTx resultSaveCommitTx, BlockHeader blockHeader){
-        int step = resultSaveCommitTx.step;
-        try {
-            if(step >= 3){
-                //回滚账本
-                LedgerCall.rollbackTxLedger(chain, tx, true);
-            }
-            if(step >= 2){
-                //通过各模块回滚交易业务逻辑
-                TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeader.serialize()));
-            }
-            if(step >= 1){
-                //从已确认库中删除该交易
-                confirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
-            }
-        } catch (Exception e) {
-            chain.getLogger().error(e);
-        }
-    }
-
-    private class ResultSaveCommitTx {
-        boolean rs;
-        int step;
-
-        public ResultSaveCommitTx(boolean rs, int step) {
-            this.rs = rs;
-            this.step = step;
-        }
-    }
-
-
-    /**
-     * 保存交易时对跨链交易进行处理, 包括跨链交易变更状态, 向链管理提交跨链交易coinData, 记录hash
-     *
-     * @param chain
-     * @param tx
-     * @return
-     */
-    private boolean ctxCommit(Chain chain, Transaction tx, List<NulsDigestData> ctxhashList){
-        //跨链交易变更状态
-        if(null != ctxhashList) {
-            ctxhashList.add(tx.getHash());
-        }
-        boolean rs = ctxService.updateCrossTxState(chain, tx.getHash(), TxConstant.CTX_COMFIRM_4);
-        if(!rs){
-            return false;
-        }
-        String coinDataHex = HexUtil.encode(tx.getCoinData());
-        try {
-            rs = ChainCall.ctxChainLedgerCommit(coinDataHex);
-            if(!rs){
-               throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
-            }
-            return true;
-        } catch (NulsException e) {
-            if( null != ctxhashList) {
-                ctxhashList.remove(tx.getHash());
-            }
-            ctxService.updateCrossTxState(chain, tx.getHash(), TxConstant.CTX_NODE_STATISTICS_RESULT_3);
-            chain.getLogger().error(e);
-            return false;
-        }
-    }
-
-    /**
-     * 回滚交易时对跨链交易进行处理, 包括跨链交易变更状态, 通知链管理回滚coinData
-     * @param chain
-     * @param tx
-     * @return
-     */
-    private boolean ctxRollback(Chain chain, Transaction tx){
-        boolean rs = ctxService.updateCrossTxState(chain, tx.getHash(), TxConstant.CTX_NODE_STATISTICS_RESULT_3);
-        if (!rs) {
-            return false;
-        }
-        String coinDataHex = HexUtil.encode(tx.getCoinData());
-        try {
-            rs = ChainCall.ctxChainLedgerRollback(coinDataHex);
-            if(!rs){
-                throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
-            }
-            return true;
-        } catch (NulsException e) {
-            ctxService.updateCrossTxState(chain, tx.getHash(), TxConstant.CTX_COMFIRM_4);
-            chain.getLogger().error(e);
-            return false;
-        }
-    }
-
-    /**
-     * 回滚区块交易时, 需要保留跨链交易至, 待打包队列?
-     *
-     * @param chain
-     * @param savedList
-     * @param blockHeader
-     * @param atomicity         回滚是否具有原子性(是否是回滚已确认过的区块), 回滚块时为true, 需要处理回滚失败的情况, 保存块时为false(保存交易失败时的回滚,不再处理回滚失败的情况)
-     * @return
-     * @throws NulsException
-     */
-    private boolean rollbackTxList(Chain chain, List<Transaction> savedList, BlockHeader blockHeader, boolean atomicity) throws NulsException {
-        if (null == chain || savedList == null || savedList.size() == 0) {
-            throw new NulsException(TxErrorCode.PARAMETER_ERROR);
-        }
-        /*
-            atomicity: true 回滚过程失败时, 要处理回滚失败的情况
-            atomicity: false 回滚过程失败时, 不再处理回滚失败的情况
-         */
-        int chainId = chain.getChainId();
-        boolean rs = false;
-
-        List<Transaction> rollbackedList = new ArrayList<>();
-        for (int i = savedList.size() - 1; i >= 0; i--) {
-            Transaction tx = savedList.get(i);
-            /*
-                放回待打包库
-                如果是友链过来的跨链交易则需要处理跨链流程
-                回滚账本
-                交易业务回滚
-                最后放回打包待队列
-            */
-            //放回待打包数据库
-            rs = unconfirmedTxStorageService.putTx(chainId, tx);
-            if (atomicity && !rs) {
-                //reCommitCurrentTx(chain, tx, 1);
+                result = false;
                 break;
             }
-
-            //如果是友链过来的跨链交易则需要处理跨链流程
-            if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER
-                    && null != ctxService.getTx(chain, tx.getHash())) {
-                rs = ctxRollback(chain, tx);
-                if (atomicity && !rs) {
-                    reCommitCurrentTx(chain, tx, 1, blockHeader);
-                    break;
-                }
-            }
-            //回滚账本
-            rs = LedgerCall.rollbackTxLedger(chain, tx, true);
-            if (atomicity && !rs) {
-                reCommitCurrentTx(chain, tx, 2, blockHeader);
-                break;
-            }
-            //交易业务回滚
-            try {
-                TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                rs = TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeader.serialize()));
-            } catch (Exception e) {
-                rs = false;
-                chain.getLogger().error(e);
-            }
-            if (atomicity && !rs) {
-                reCommitCurrentTx(chain, tx, 3, blockHeader);
-                break;
-            }
-            //从已确认交易数据库(主链)中删除
-            rs = confirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
-            if (atomicity && !rs) {
-                reCommitCurrentTx(chain, tx, 4, blockHeader);
-                break;
-            }
-            //从新放入待打包队列
-            rs = savePackable(chain, tx);
-            if (atomicity){
-               if(!rs) {
-                   rollbackedList.add(tx);
-               }else{
-                   reCommitCurrentTx(chain, tx, 5, blockHeader);
-               }
-            }
+            successed.put(entry.getKey(), entry.getValue());
         }
-
-        boolean ctsRs = true;
-        //如果是回滚已确认过的区块,则需要删除已记录的回滚块中跨链交易的生效高度
-        if(atomicity){
-            long effectHeight = blockHeader.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
-            ctsRs = confirmedTxStorageService.removeCrossTxEffectList(chainId, effectHeight);
-        }
-        //有回滚失败的, 重新commit
-        boolean failed = (atomicity && savedList.size() != rollbackedList.size()) || (atomicity && !ctsRs);
-        if (failed) {
-            try {
-                for (int i = rollbackedList.size() - 1; i >= 0; i--) {
-                    Transaction tx = rollbackedList.get(i);
-                    confirmedTxStorageService.saveTx(chain.getChainId(), tx);
-                    TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                    TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeader.serialize()));
-                    if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH) {
-                        LedgerCall.commitTxLedger(chain, tx, true);
-                    }
-                    if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER
-                            && null != ctxService.getTx(chain, tx.getHash())) {
-                        //不需要对该步骤结果设置step, 该步骤内部有处理回滚.
-                        ctxCommit(chain, tx, null);
-                    }
-                    unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
-                }
-            } catch (Exception e) {
-                chain.getLogger().error(e);
-                throw new NulsException(e);
-            }
-
+        if (!result && atomicity) {
+            rollbackTxs(chain, successed, blockHeaderHex, false);
             return false;
         }
         return true;
     }
 
-
-
-    /**
-     * 某个交易回滚失败时,需要重新提交已回滚成功的步骤
-     * @param chain
-     * @param tx
-     * @param setp
-     */
-    private void reCommitCurrentTx(Chain chain, Transaction tx, int setp, BlockHeader blockHeader){
+    //提交账本
+    public boolean commitLedger(Chain chain, List<String> txHexList) {
         try {
-            if(setp >= 5){
-                confirmedTxStorageService.saveTx(chain.getChainId(),tx);
+            return LedgerCall.commitTxLedger(chain, txHexList, true);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
+            return false;
+        }
+    }
+
+    public boolean removeTxs(Chain chain, List<Transaction> txList, boolean atomicity) {
+        List<Transaction> successedList = new ArrayList<>();
+        for (Transaction tx : txList) {
+            if (confirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash())) {
+                successedList.add(tx);
+            } else {
+                if(atomicity){
+                    saveTxs(chain, successedList, false);
+                }
             }
-            if(setp >= 4){
+        }
+        return false;
+    }
+
+    public boolean rollbackTxs(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, String blockHeaderHex, boolean atomicity) {
+        Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        boolean result = true;
+        for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
+            boolean rs = TransactionCall.txProcess(chain, entry.getKey().getRollback(),
+                    entry.getKey().getModuleCode(), entry.getValue(), blockHeaderHex);
+            if (!rs) {
+                result = false;
+                break;
+            }
+            successed.put(entry.getKey(), entry.getValue());
+        }
+        if (!result && atomicity) {
+            commitTxs(chain, successed, blockHeaderHex, false);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean rollbackLedger(Chain chain, List<String> txHexList) {
+        try {
+            return LedgerCall.rollbackTxLedger(chain, txHexList, true);
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
+            return false;
+        }
+    }
+
+
+    @Override
+    public boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException {
+        if (null == chain || txHashList == null || txHashList.size() == 0) {
+            throw new NulsException(TxErrorCode.PARAMETER_ERROR);
+        }
+        int chainId = chain.getChainId();
+        List<byte[]> txHashs = new ArrayList<>();
+        List<Transaction> txList = new ArrayList<>();
+        List<String> txHexList = new ArrayList<>();
+        //组装统一验证参数数据,key为各模块统一验证器cmd
+        Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        try {
+            for (int i = 0; i < txHashList.size(); i++) {
+                NulsDigestData hash = txHashList.get(i);
+                txHashs.add(hash.serialize());
+                Transaction tx = confirmedTxStorageService.getTx(chainId, hash);
+                String txHex = tx.hex();
+                txHexList.add(txHex);
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeader.serialize()));
-            }
-            if(setp >= 3){
-                if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH) {
-                    LedgerCall.commitTxLedger(chain, tx, true);
+                if (moduleVerifyMap.containsKey(txRegister)) {
+                    moduleVerifyMap.get(txRegister).add(txHex);
+                } else {
+                    List<String> txHexs = new ArrayList<>();
+                    txHexs.add(txHex);
+                    moduleVerifyMap.put(txRegister, txHexs);
                 }
-            }
-            if(setp >= 2){
-                if (tx.getType() == TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER
-                        && null != ctxService.getTx(chain, tx.getHash())) {
-                    //不需要对该步骤结果设置step, 该步骤内部有处理回滚.
-                    ctxCommit(chain, tx, null);
-                }
-            }
-            if(setp >= 1){
-                unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
             }
         } catch (Exception e) {
             chain.getLogger().error(e);
+            return false;
         }
+
+
+        if (!rollbackLedger(chain, txHexList)) {
+            return false;
+        }
+        if (!rollbackTxs(chain, moduleVerifyMap, blockHeaderHex, true)) {
+            commitLedger(chain, txHexList);
+            return false;
+        }
+        if (!removeTxs(chain, txList, true)) {
+            commitTxs(chain, moduleVerifyMap, blockHeaderHex, false);
+            saveTxs(chain, txList, false);
+            return false;
+        }
+
+        //放入未确认库, 和待打包队列
+        for (Transaction tx : txList) {
+            unconfirmedTxStorageService.putTx(chain.getChainId(), tx);
+            savePackable(chain, tx);
+        }
+        return true;
     }
 
     /**
@@ -474,28 +326,55 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return true;
     }
 
-    @Override
-    public boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeader blockHeader) throws NulsException {
-        if (null == chain || txHashList == null || txHashList.size() == 0) {
-            throw new NulsException(TxErrorCode.PARAMETER_ERROR);
+    /**
+     * 保存交易时对跨链交易进行处理, 包括跨链交易变更状态, 向链管理提交跨链交易coinData, 记录hash
+     *
+     * @param chain
+     * @param tx
+     * @return
+     */
+    private boolean ctxCommit(Chain chain, Transaction tx, List<NulsDigestData> ctxhashList) {
+        //跨链交易变更状态
+        if (null != ctxhashList) {
+            ctxhashList.add(tx.getHash());
         }
+        String coinDataHex = HexUtil.encode(tx.getCoinData());
         try {
-            int chainId = chain.getChainId();
-            List<Transaction> txList = new ArrayList<>();
-            for (int i = 0; i < txHashList.size(); i++) {
-                NulsDigestData hash = txHashList.get(i);
-                //从已验证但未打包的交易中取出交易
-                Transaction tx = unconfirmedTxStorageService.getTx(chainId, hash);
-                if (null == tx) {
-                    throw new NulsException(TxErrorCode.TX_NOT_EXIST);
-                }
-                txList.add(tx);
+            boolean rs = ChainCall.ctxChainLedgerCommit(coinDataHex);
+            if (!rs) {
+                throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
             }
-            return rollbackTxList(chain, txList, blockHeader, true);
+            return true;
         } catch (NulsException e) {
-            throw new NulsException(e.getErrorCode());
+            if (null != ctxhashList) {
+                ctxhashList.remove(tx.getHash());
+            }
+            chain.getLogger().error(e);
+            return false;
         }
     }
+
+    /**
+     * 回滚交易时对跨链交易进行处理, 包括跨链交易变更状态, 通知链管理回滚coinData
+     *
+     * @param chain
+     * @param tx
+     * @return
+     */
+    private boolean ctxRollback(Chain chain, Transaction tx) {
+        String coinDataHex = HexUtil.encode(tx.getCoinData());
+        try {
+            boolean rs = ChainCall.ctxChainLedgerRollback(coinDataHex);
+            if (!rs) {
+                throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
+            }
+            return true;
+        } catch (NulsException e) {
+            chain.getLogger().error(e);
+            return false;
+        }
+    }
+
 
 
     @Override
@@ -526,11 +405,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             if (chainId == TxConstant.NULS_CHAINID) {
                 if (toChainId == chainId) {
                     //todo 已到达目标链发送回执
-                }else {
+                } else {
                     //广播给 toChainId 链的节点
                     NetworkCall.broadcastTxHash(toChainId, tx.getHash());
                 }
-            }else{
+            } else {
                 //广播给 主网 链的节点
                 NetworkCall.broadcastTxHash(TxConstant.NULS_CHAINID, tx.getHash());
             }

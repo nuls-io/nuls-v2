@@ -44,6 +44,7 @@ import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
+import io.nuls.transaction.db.rocksdb.storage.ConfirmedTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.UnverifiedTxStorageService;
@@ -51,11 +52,9 @@ import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.rpc.call.AccountCall;
-import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.rpc.call.NetworkCall;
-import io.nuls.transaction.rpc.call.TransactionCall;
+import io.nuls.transaction.rpc.call.*;
 import io.nuls.transaction.service.ConfirmedTxService;
+import io.nuls.transaction.service.CtxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -90,6 +89,12 @@ public class TxServiceImpl implements TxService {
 
     @Autowired
     private TransactionH2Service transactionH2Service;
+
+    @Autowired
+    private CtxService ctxService;
+
+    @Autowired
+    private ConfirmedTxStorageService confirmedTxStorageService;
 
     @Override
     public boolean register(Chain chain, TxRegister txRegister) {
@@ -670,15 +675,60 @@ public class TxServiceImpl implements TxService {
 
 
     @Override
-    public boolean crossTransactionCommit(Chain chain, Transaction tx, BlockHeader blockHeader) {
-        //todo 调账本记账
-        return true;
+    public boolean crossTransactionCommit(Chain chain, List<String> txHexList, BlockHeader blockHeader) throws NulsException {
+
+        List<NulsDigestData> txHash = new ArrayList<>();
+        List<String> successedCoinDataHexs = new ArrayList<>();
+        boolean rs = true;
+        for(String txHex : txHexList){
+            Transaction tx = TxUtil.getTransaction(txHex);
+            txHash.add(tx.getHash());
+            String coinDataHex = HexUtil.encode(tx.getCoinData());
+            if(!ChainCall.ctxChainLedgerCommit(coinDataHex)){
+                rs = false;
+                break;
+            }
+            successedCoinDataHexs.add(coinDataHex);
+        }
+        if(rs) {
+            //保存生效高度
+            long effectHeight = blockHeader.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
+            return confirmedTxStorageService.saveCrossTxEffectList(chain.getChainId(), effectHeight, txHash);
+        }else{
+            for(String coinDataHex : successedCoinDataHexs){
+                if(!ChainCall.ctxChainLedgerRollback(coinDataHex)){
+                    throw new NulsException(TxErrorCode.FAILED);
+                }
+            }
+            return false;
+        }
+
     }
 
     @Override
-    public boolean crossTransactionRollback(Chain chain, Transaction tx, BlockHeader blockHeader) {
-        //todo 调账本回滚？
-        return true;
+    public boolean crossTransactionRollback(Chain chain, List<String> txHexList, BlockHeader blockHeader) throws NulsException {
+        List<String> successedCoinDataHexs = new ArrayList<>();
+        boolean rs = true;
+        for(String txHex : txHexList){
+            Transaction tx = TxUtil.getTransaction(txHex);
+            String coinDataHex = HexUtil.encode(tx.getCoinData());
+            if(!ChainCall.ctxChainLedgerRollback(coinDataHex)){
+                rs = false;
+                break;
+            }
+            successedCoinDataHexs.add(coinDataHex);
+        }
+        if(rs) {
+            long effectHeight = blockHeader.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
+            return confirmedTxStorageService.removeCrossTxEffectList(chain.getChainId(), effectHeight);
+        }else{
+            for(String coinDataHex : successedCoinDataHexs){
+                if(!ChainCall.ctxChainLedgerCommit(coinDataHex)){
+                    throw new NulsException(TxErrorCode.FAILED);
+                }
+            }
+            return false;
+        }
     }
 
     /**
@@ -1043,8 +1093,12 @@ public class TxServiceImpl implements TxService {
         chain.getLogger().debug("\n---------------------- rollbackTxLedger -----------------------");
         try {
             //通知账本回滚nonce
-            LedgerCall.rollbackTxLedger(chain, tx, false);
+            List<String> txHexList = new ArrayList<>();
+            txHexList.add(tx.hex());
+            LedgerCall.rollbackTxLedger(chain, txHexList, false);
         } catch (NulsException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         }
 

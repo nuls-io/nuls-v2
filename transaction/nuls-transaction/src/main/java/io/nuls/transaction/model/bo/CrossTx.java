@@ -45,9 +45,6 @@ import java.util.List;
  */
 public class CrossTx extends BaseNulsData {
 
-    /** 该跨链交易在本链中的验证状态 */
-    private int state;
-
     /** 交易的来源节点, 用于经跨链验证时需要排除的节点*/
     private int senderChainId;
 
@@ -79,7 +76,6 @@ public class CrossTx extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(state);
         stream.writeUint16(senderChainId);
         stream.writeString(senderNodeId);
         stream.writeVarInt(height);
@@ -100,7 +96,6 @@ public class CrossTx extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.state = byteBuffer.readUint16();
         this.senderChainId = byteBuffer.readUint16();
         this.senderNodeId = byteBuffer.readString();
         this.height = byteBuffer.readVarInt();
@@ -122,7 +117,6 @@ public class CrossTx extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
-        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfString(senderNodeId);
         size += SerializeUtils.sizeOfVarInt(height);
@@ -148,14 +142,6 @@ public class CrossTx extends BaseNulsData {
 
     public void setTx(Transaction tx) {
         this.tx = tx;
-    }
-
-    public int getState() {
-        return state;
-    }
-
-    public void setState(int state) {
-        this.state = state;
     }
 
     public int getSenderChainId() {

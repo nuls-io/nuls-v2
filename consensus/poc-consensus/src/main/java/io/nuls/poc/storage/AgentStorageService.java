@@ -2,6 +2,7 @@ package io.nuls.poc.storage;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.poc.model.po.AgentPo;
+import io.nuls.tools.exception.NulsException;
 
 import java.util.List;
 
@@ -50,7 +51,7 @@ public interface AgentStorageService {
      * @return 节点信息列表/agent list
      * @exception Exception
      * */
-    List<AgentPo> getList(int chainID) throws  Exception;
+    List<AgentPo> getList(int chainID) throws NulsException;
 
     /**
      * 获取当前网络节点数量

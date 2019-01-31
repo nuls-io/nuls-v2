@@ -7,6 +7,7 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -72,8 +73,7 @@ public class DepositStorageServiceImpl implements DepositStorageService {
     }
 
     @Override
-    public List<DepositPo> getList(int chainID) throws Exception{
-        try {
+    public List<DepositPo> getList(int chainID) throws NulsException {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainID);
             List<DepositPo> depositList = new ArrayList<>();
             for (Entry<byte[], byte[]> entry:list) {
@@ -85,10 +85,6 @@ public class DepositStorageServiceImpl implements DepositStorageService {
                 depositList.add(po);
             }
             return  depositList;
-        }catch (Exception e){
-            Log.error(e);
-            throw e;
-        }
     }
 
     @Override

@@ -19,7 +19,6 @@ public class CrossTxTest {
     @Before
     public void setUp() throws Exception {
         obj = new CrossTx();
-        obj.setState(3);
         obj.setSenderChainId(324);
         obj.setSenderNodeId("23");
         obj.setVerifyNodeList(Arrays.asList(
@@ -56,7 +55,6 @@ public class CrossTxTest {
             obj2.parse(new NulsByteBuffer(bytes));
             assertTrue(obj.getHeight()==obj2.getHeight());
             assertEquals(obj.size(), obj2.size());
-            assertEquals(obj.getState(), obj2.getState());
             assertTrue(obj.getSenderNodeId().equals(obj2.getSenderNodeId()));
             assertTrue(obj.getSenderChainId() == obj2.getSenderChainId());
             assertTrue(Arrays.equals(obj.getTx().serialize(), obj2.getTx().serialize()));

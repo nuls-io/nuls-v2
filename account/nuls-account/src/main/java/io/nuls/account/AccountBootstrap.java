@@ -4,7 +4,7 @@ import io.nuls.account.config.NulsConfig;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountParam;
 import io.nuls.account.rpc.call.TransactionCmdCall;
-import io.nuls.account.util.log.LogUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.client.CmdDispatcher;
@@ -26,7 +26,7 @@ import java.io.IOException;
  */
 public class AccountBootstrap {
     public static void main(String[] args) {
-        LogUtil.info("Account Bootstrap start...");
+        Log.info("Account Bootstrap start...");
 
         try {
             //初始化配置
@@ -47,7 +47,7 @@ public class AccountBootstrap {
             //TimeService.getInstance().start();
             Log.debug("START-SUCCESS");
         } catch (Exception e) {
-            LogUtil.error("Account Bootstrap failed", e);
+            Log.error("Account Bootstrap failed", e);
             System.exit(-1);
         }
     }
@@ -74,10 +74,10 @@ public class AccountBootstrap {
                 }
                 NulsConfig.KERNEL_MODULE_URL = NulsConfig.MODULES_CONFIG.getCfgValue(AccountConstant.CFG_SYSTEM_SECTION, AccountConstant.KERNEL_MODULE_URL);
             } catch (Exception e) {
-                LogUtil.error(e);
+                Log.error(e);
             }
         } catch (IOException e) {
-            LogUtil.error("Account Bootstrap initCfg failed", e);
+            Log.error("Account Bootstrap initCfg failed", e);
             throw new RuntimeException("Account Bootstrap initCfg failed");
         }
     }
@@ -104,7 +104,7 @@ public class AccountBootstrap {
             CmdDispatcher.syncKernel();
 
         } catch (Exception e) {
-            LogUtil.error("Account initServer failed", e);
+            Log.error("Account initServer failed", e);
         }
     }
 }

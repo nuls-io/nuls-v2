@@ -39,17 +39,7 @@ public class TxRegisterDTO {
     /**
      * Transaction validator cmd name
      */
-    private String validateCmd;
-
-    /**
-     * Transaction commit cmd name
-     */
-    private String commitCmd;
-
-    /**
-     * Transaction rollback cmd name
-     */
-    private String rollbackCmd;
+    private String validator;
 
     /**
      * 是否是系统产生的交易（打包节点产生，用于出块奖励结算、红黄牌惩罚），该种类型的交易在验证块大小时不计算在内，该类型交易不需要手续费
@@ -84,28 +74,12 @@ public class TxRegisterDTO {
         this.txType = txType;
     }
 
-    public String getValidateCmd() {
-        return validateCmd;
+    public String getValidator() {
+        return validator;
     }
 
-    public void setValidateCmd(String validateCmd) {
-        this.validateCmd = validateCmd;
-    }
-
-    public String getCommitCmd() {
-        return commitCmd;
-    }
-
-    public void setCommitCmd(String commitCmd) {
-        this.commitCmd = commitCmd;
-    }
-
-    public String getRollbackCmd() {
-        return rollbackCmd;
-    }
-
-    public void setRollbackCmd(String rollbackCmd) {
-        this.rollbackCmd = rollbackCmd;
+    public void setValidator(String validator) {
+        this.validator = validator;
     }
 
     public boolean isSystemTx() {
@@ -134,11 +108,9 @@ public class TxRegisterDTO {
 
     @Override
     public String toString() {
-        return "TxRegistersDTO{" +
+        return "TxRegisterDTO{" +
                 "txType=" + txType +
-                ", validateCmd='" + validateCmd + '\'' +
-                ", commitCmd='" + commitCmd + '\'' +
-                ", rollbackCmd='" + rollbackCmd + '\'' +
+                ", validator='" + validator + '\'' +
                 ", systemTx=" + systemTx +
                 ", unlockTx=" + unlockTx +
                 ", verifySignature=" + verifySignature +

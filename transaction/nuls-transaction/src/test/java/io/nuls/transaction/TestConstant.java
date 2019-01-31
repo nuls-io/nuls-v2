@@ -196,7 +196,6 @@ public class TestConstant {
 
     public static CrossTx createCrossChainTx() throws Exception {
         CrossTx obj = new CrossTx();
-        obj.setState(4);
         obj.setSenderChainId(324);
         obj.setSenderNodeId("23");
         obj.setVerifyNodeList(Arrays.asList(

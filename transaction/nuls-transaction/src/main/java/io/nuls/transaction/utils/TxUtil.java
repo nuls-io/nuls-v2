@@ -202,5 +202,4 @@ public class TxUtil {
         return AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
 
     }
-
 }

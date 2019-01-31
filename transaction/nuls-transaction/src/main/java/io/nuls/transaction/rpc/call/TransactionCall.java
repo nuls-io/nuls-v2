@@ -99,25 +99,22 @@ public class TransactionCall {
      * @param chain
      * @param cmd
      * @param moduleCode
-     * @param tx
+     * @param txHexList
      * @return
      */
-    public static boolean txProcess(Chain chain, String cmd, String moduleCode, Transaction tx, String blockHeaderDigest) throws NulsException {
+    public static boolean txProcess(Chain chain, String cmd, String moduleCode,  List<String> txHexList, String blockHeaderHex) {
         try {
-            if(tx.getType() == TxConstant.TX_TYPE_COINBASE || StringUtils.isBlank(cmd)){
-                //coinbase 没有提交回滚接口, 或者没有注册commit或者rollback接口的交易, 直接返回true
-                return true;
-            }
             //调用单个交易验证器
             Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
             params.put("chainId", chain.getChainId());
-            params.put("txHex", tx.hex());
-            params.put("blockHeaderDigest", blockHeaderDigest);
+            params.put("txHexList", txHexList);
+            params.put("blockHeaderHex", blockHeaderHex);
             Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
             chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
             return (Boolean) result.get("value");
         } catch (Exception e) {
-            throw new NulsException(e);
+            chain.getLogger().error(e);
+            return false;
         }
     }
 
