@@ -59,16 +59,12 @@ public class TransactionCmd extends BaseCmd {
     private ChainManager chainManager;
     @Autowired
     private TxValidator txValidator;
-
     @Autowired
     private AliasStorageService aliasStorageService;
     @Autowired
     private AccountService accountService;
-
     @Autowired
     private MultiSignAccountService multiSignAccountService;
-
-
 
     /**
      * validate the transaction
@@ -190,7 +186,7 @@ public class TransactionCmd extends BaseCmd {
      * 转账交易提交
      */
     @CmdAnnotation(cmd = "ac_transferTxCommit", version = 1.0, description = "create transfer transaction commit 1.0")
-    @ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.COMMIT, methodName = "ac_transferTxCommit")
+    //@ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.COMMIT, methodName = "ac_transferTxCommit")
     public Response transferTxCommit(Map<String, Object> params) {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", true);
@@ -201,7 +197,7 @@ public class TransactionCmd extends BaseCmd {
      * 转账交易回滚
      */
     @CmdAnnotation(cmd = "ac_transferTxRollback", version = 1.0, description = "create transfer transaction rollback 1.0")
-    @ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.ROLLBACK, methodName = "ac_transferTxRollback")
+    //@ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.ROLLBACK, methodName = "ac_transferTxRollback")
     public Response transferTxRollback(Map<String, Object> params) {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", true);
@@ -215,7 +211,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_transfer", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi-account transfer transaction")
+    @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "create a multi-account transfer transaction")
     public Response transfer(Map params) {
         LogUtil.debug("ac_transfer start");
         Map<String, String> map = new HashMap<>(1);
@@ -281,7 +277,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_transferByAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transfer by alias")
+    @CmdAnnotation(cmd = "ac_transferByAlias", version = 1.0, description = "transfer by alias")
     public Response transferByAlias(Map params) {
         LogUtil.debug("ac_transferByAlias start");
         Map<String, String> map = new HashMap<>(1);
@@ -353,7 +349,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transfer by alias")
+    @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "transfer by alias")
     public Response createMultiSignTransfer(Map params) {
         LogUtil.debug("ac_createMultiSignTransfer start");
         Map<String, String> map = new HashMap<>(1);
@@ -448,7 +444,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "sign MultiSign Transaction")
+    @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, description = "sign MultiSign Transaction")
     public Response signMultiSignTransaction(Map params) {
         LogUtil.debug("ac_signMultiSignTransaction start");
         Map<String, String> map = new HashMap<>(1);
