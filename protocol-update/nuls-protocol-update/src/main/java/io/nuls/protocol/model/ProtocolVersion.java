@@ -29,11 +29,6 @@ public class ProtocolVersion extends BaseNulsData {
     private short version;
 
     /**
-     * 统计区间大小(500-10000)
-     */
-    private short interval;
-
-    /**
      * 每个统计区间内的最小生效比例(60-100)
      */
     private byte effectiveRatio;
@@ -45,13 +40,12 @@ public class ProtocolVersion extends BaseNulsData {
 
     @Override
     public int size() {
-        return 7;
+        return 5;
     }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeShort(version);
-        stream.writeShort(interval);
         stream.writeByte(effectiveRatio);
         stream.writeShort(continuousIntervalCount);
     }
@@ -59,7 +53,6 @@ public class ProtocolVersion extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.version = byteBuffer.readShort();
-        this.interval = byteBuffer.readShort();
         this.effectiveRatio = byteBuffer.readByte();
         this.continuousIntervalCount = byteBuffer.readShort();
     }

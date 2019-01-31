@@ -12,14 +12,8 @@
     "value": "12345"
   },
   {
-    "name": "intervalMaximum",
-    "remark": "统计区间最大值",
-    "readOnly": "true",
-    "value": "10000"
-  },
-  {
-    "name": "intervalMinimum",
-    "remark": "统计区间最小值",
+    "name": "interval",
+    "remark": "统计区间",
     "readOnly": "true",
     "value": "100"
   },

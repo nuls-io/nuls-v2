@@ -26,7 +26,7 @@ public class Statistics extends BaseNulsData {
     private long lastHeight;
 
     /**
-     * 统计信息生效高度
+     * 本次统计信息生效高度
      */
     private long height;
     /**

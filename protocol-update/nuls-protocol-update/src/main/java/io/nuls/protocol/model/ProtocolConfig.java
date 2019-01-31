@@ -51,13 +51,9 @@ public class ProtocolConfig extends BaseNulsData {
     private String logLevel;
 
     /**
-     * 统计区间最大值
+     * 统计区间
      */
-    private short intervalMaximum;
-    /**
-     * 统计区间最小值
-     */
-    private short intervalMinimum;
+    private short interval;
     /**
      * 每个统计区间内的最小生效比例
      */
@@ -79,8 +75,7 @@ public class ProtocolConfig extends BaseNulsData {
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeUint16(chainId);
         stream.writeString(logLevel);
-        stream.writeShort(intervalMaximum);
-        stream.writeShort(intervalMinimum);
+        stream.writeShort(interval);
         stream.writeByte(effectiveRatioMinimum);
         stream.writeByte(effectiveRatioMaximum);
         stream.writeShort(continuousIntervalCountMaximum);
@@ -91,8 +86,7 @@ public class ProtocolConfig extends BaseNulsData {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.chainId = byteBuffer.readUint16();
         this.logLevel = byteBuffer.readString();
-        this.intervalMaximum = byteBuffer.readShort();
-        this.intervalMinimum = byteBuffer.readShort();
+        this.interval = byteBuffer.readShort();
         this.effectiveRatioMinimum = byteBuffer.readByte();
         this.effectiveRatioMaximum = byteBuffer.readByte();
         this.continuousIntervalCountMaximum = byteBuffer.readShort();
@@ -101,7 +95,7 @@ public class ProtocolConfig extends BaseNulsData {
 
     @Override
     public int size() {
-        int size = 12;
+        int size = 10;
         size += SerializeUtils.sizeOfString(logLevel);
         return size;
     }
@@ -109,8 +103,7 @@ public class ProtocolConfig extends BaseNulsData {
     public void init(Map<String, ConfigItem> map) {
         this.chainId = Integer.parseInt(map.get(ConfigConstant.CHAIN_ID).getValue());
         this.logLevel = map.get(ConfigConstant.LOG_LEVEL).getValue();
-        this.intervalMaximum = Short.parseShort(map.get(ConfigConstant.INTERVAL_MAXIMUM).getValue());
-        this.intervalMinimum = Short.parseShort(map.get(ConfigConstant.INTERVAL_MINIMUM).getValue());
+        this.interval = Short.parseShort(map.get(ConfigConstant.INTERVAL).getValue());
         this.effectiveRatioMinimum = Byte.parseByte(map.get(ConfigConstant.EFFECTIVE_RATIO_MINIMUM).getValue());
         this.effectiveRatioMaximum = Byte.parseByte(map.get(ConfigConstant.EFFECTIVE_RATIO_MAXIMUM).getValue());
         this.continuousIntervalCountMaximum = Short.parseShort(map.get(ConfigConstant.CONTINUOUS_INTERVAL_COUNT_MAXIMUM).getValue());

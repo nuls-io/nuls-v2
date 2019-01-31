@@ -47,24 +47,14 @@ public class BlockExtendsData extends BaseNulsData {
     protected int packingIndexOfRound;
 
     /**
-     * 主网版本是否与区块的版本一致
-     */
-    private boolean upgrade;
-
-    /**
-     * 主网版本
+     * 主网当前生效的版本
      */
     private short mainVersion;
 
     /**
-     * 区块的版本
+     * 区块的版本，可以理解为本地钱包的版本
      */
     private short blockVersion;
-
-    /**
-     * 统计区间大小(500-10000)
-     */
-    private short interval;
 
     /**
      * 每个统计区间内的最小生效比例(60-100)
@@ -89,14 +79,6 @@ public class BlockExtendsData extends BaseNulsData {
         }
     }
 
-    public boolean isUpgrade() {
-        return upgrade;
-    }
-
-    public void setUpgrade(boolean upgrade) {
-        this.upgrade = upgrade;
-    }
-
     public short getMainVersion() {
         return mainVersion;
     }
@@ -111,14 +93,6 @@ public class BlockExtendsData extends BaseNulsData {
 
     public void setBlockVersion(short blockVersion) {
         this.blockVersion = blockVersion;
-    }
-
-    public short getInterval() {
-        return interval;
-    }
-
-    public void setInterval(short interval) {
-        this.interval = interval;
     }
 
     public byte getEffectiveRatio() {
@@ -185,11 +159,7 @@ public class BlockExtendsData extends BaseNulsData {
         size += SerializeUtils.sizeOfUint16();  // consensusMemberCount
         size += SerializeUtils.sizeOfUint48();  // roundStartTime
         size += SerializeUtils.sizeOfUint16();  // packingIndexOfRound
-        if (upgrade) {
-            size += 10;
-        } else {
-            size += 3;
-        }
+        size += 7;
         return size;
     }
 
@@ -199,14 +169,10 @@ public class BlockExtendsData extends BaseNulsData {
         stream.writeUint16(consensusMemberCount);
         stream.writeUint48(roundStartTime);
         stream.writeUint16(packingIndexOfRound);
-        stream.writeBoolean(upgrade);
         stream.writeShort(mainVersion);
-        if (upgrade) {
-            stream.writeShort(blockVersion);
-            stream.writeShort(interval);
-            stream.writeByte(effectiveRatio);
-            stream.writeShort(continuousIntervalCount);
-        }
+        stream.writeShort(blockVersion);
+        stream.writeByte(effectiveRatio);
+        stream.writeShort(continuousIntervalCount);
     }
 
     @Override
@@ -215,14 +181,10 @@ public class BlockExtendsData extends BaseNulsData {
         this.consensusMemberCount = byteBuffer.readUint16();
         this.roundStartTime = byteBuffer.readUint48();
         this.packingIndexOfRound = byteBuffer.readUint16();
-        this.upgrade = byteBuffer.readBoolean();
         this.mainVersion = byteBuffer.readShort();
-        if (upgrade) {
-            this.blockVersion = byteBuffer.readShort();
-            this.interval = byteBuffer.readShort();
-            this.effectiveRatio = byteBuffer.readByte();
-            this.continuousIntervalCount = byteBuffer.readShort();
-        }
+        this.blockVersion = byteBuffer.readShort();
+        this.effectiveRatio = byteBuffer.readByte();
+        this.continuousIntervalCount = byteBuffer.readShort();
     }
 
     public byte[] getStateRoot() {

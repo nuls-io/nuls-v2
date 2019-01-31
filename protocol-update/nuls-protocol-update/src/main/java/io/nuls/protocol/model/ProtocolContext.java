@@ -139,6 +139,10 @@ public class ProtocolContext {
         lock = new StampedLock();
         versionList = new ArrayList<>();
         proportionMap = new HashMap<>();
+        lastValidStatistics = new Statistics();
+        lastValidStatistics.setCount((short) 0);
+        lastValidStatistics.setHeight(0);
+        lastValidStatistics.setProtocolVersion(currentProtocolVersion);
         LoggerUtil.init(chainId, config.getLogLevel());
         this.setStatus(RunningStatusEnum.READY);
         //服务初始化

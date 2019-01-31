@@ -40,11 +40,7 @@ public interface ConfigConstant {
     /**
      * 日志级别
      */
-    String INTERVAL_MAXIMUM = "intervalMaximum";
-    /**
-     * 日志级别
-     */
-    String INTERVAL_MINIMUM = "intervalMinimum";
+    String INTERVAL = "interval";
     /**
      * 日志级别
      */
