@@ -2,6 +2,8 @@ package io.nuls.poc.storage;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.poc.model.po.DepositPo;
+import io.nuls.tools.exception.NulsException;
+
 import java.util.List;
 
 /**
@@ -51,7 +53,7 @@ public interface DepositStorageService {
      * @return List<DepositPo>
      * @exception
      * */
-    List<DepositPo> getList(int chainID) throws  Exception;
+    List<DepositPo> getList(int chainID) throws NulsException;
 
     /**
      * 获取委托信息长度

@@ -19,17 +19,7 @@ public class TxRegisterDetail {
     * 交易验证方法
     * Transaction verification method
     * */
-    private String validateCmd;
-    /**
-    * 交易提交方法
-    * Transaction submission method
-    * */
-    private String commitCmd;
-    /**
-    * 交易回滚方法
-    * Transaction rollback method
-    * */
-    private String rollbackCmd;
+    private String validator;
     /**
      * 是否是系统交易
      * Is it a system transaction
@@ -55,9 +45,7 @@ public class TxRegisterDetail {
         this.systemTx = txProperty.systemTx;
         this.unlockTx = txProperty.unlockTx;
         this.verifySignature = txProperty.verifySignature;
-        this.validateCmd = "";
-        this.validateCmd = "";
-        this.commitCmd = "";
+        this.validator = "";
     }
 
     public int getTxType() {
@@ -68,28 +56,12 @@ public class TxRegisterDetail {
         this.txType = txType;
     }
 
-    public String getValidateCmd() {
-        return validateCmd;
+    public String getValidator() {
+        return validator;
     }
 
-    public void setValidateCmd(String validateCmd) {
-        this.validateCmd = validateCmd;
-    }
-
-    public String getCommitCmd() {
-        return commitCmd;
-    }
-
-    public void setCommitCmd(String commitCmd) {
-        this.commitCmd = commitCmd;
-    }
-
-    public String getRollbackCmd() {
-        return rollbackCmd;
-    }
-
-    public void setRollbackCmd(String rollbackCmd) {
-        this.rollbackCmd = rollbackCmd;
+    public void setValidator(String validator) {
+        this.validator = validator;
     }
 
     public boolean isSystemTx() {

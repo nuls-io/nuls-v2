@@ -7,6 +7,7 @@ import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.po.AgentPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
@@ -73,8 +74,7 @@ public class AgentStorageServiceImpl implements AgentStorageService{
     }
 
     @Override
-    public List<AgentPo> getList(int chainID) throws  Exception{
-        try {
+    public List<AgentPo> getList(int chainID) throws NulsException {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainID);
             List<AgentPo> agentList = new ArrayList<>();
             for (Entry<byte[], byte[]> entry:list) {
@@ -86,10 +86,6 @@ public class AgentStorageServiceImpl implements AgentStorageService{
                 agentList.add(po);
             }
             return  agentList;
-        }catch (Exception e){
-            Log.error(e);
-            throw e;
-        }
     }
 
     @Override
