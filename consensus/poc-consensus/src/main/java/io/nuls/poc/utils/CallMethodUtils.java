@@ -247,8 +247,8 @@ public class CallMethodUtils {
             params.put("chainId",chain.getConfig().getChainId());
             params.put("list",txRegisterDetailList);
             params.put("moduleCode",ModuleE.CS.abbr);
-            params.put("commitCmd","commitCmd");
-            params.put("rollbackCmd","rollbackCmd");
+            params.put("commit","commit");
+            params.put("rollback","rollback");
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_register", params);
             if(!cmdResp.isSuccess()){
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("chain ："+ chain.getConfig().getChainId()+" Failure of transaction registration");
