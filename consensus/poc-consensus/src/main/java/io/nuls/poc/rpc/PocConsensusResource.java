@@ -155,7 +155,7 @@ public class PocConsensusResource extends BaseCmd{
     /**
      * 共识模块交易提交
      * */
-    @CmdAnnotation(cmd = "commit", version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
+    @CmdAnnotation(cmd = "cs_commit", version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
     @Parameter(parameterName = ConsensusConstant.PARAM_CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = ConsensusConstant.PARAM_BLOCK_HEADER_HEX, parameterType = "String")
     @Parameter(parameterName = ConsensusConstant.PARAM_TX_HEX_LIST, parameterType = "List<String>")
@@ -170,7 +170,7 @@ public class PocConsensusResource extends BaseCmd{
     /**
      * 共识模块交易回滚
      * */
-    @CmdAnnotation(cmd = "rollback", version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
+    @CmdAnnotation(cmd = "cs_rollback", version = 1.0, description = "withdraw deposit agent transaction validate 1.0")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = ConsensusConstant.PARAM_BLOCK_HEADER_HEX, parameterType = "String")
     @Parameter(parameterName = "txHexList", parameterType = "List<String>")
