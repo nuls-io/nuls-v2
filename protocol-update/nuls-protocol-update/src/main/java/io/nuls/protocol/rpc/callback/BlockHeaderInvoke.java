@@ -118,7 +118,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
         Map<ProtocolVersion, Integer> proportionMap = context.getProportionMap();
         ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
         if (!validate(data, context)) {
-            commonLog.debug("chainId-" + chainId + ", invalid blockheader-" + height);
+            commonLog.error("chainId-" + chainId + ", invalid blockheader-" + height);
             return;
         }
         commonLog.debug("chainId-" + chainId + ", save block, protocol upgrade, height-" + height);
@@ -141,7 +141,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
                 already += real;
                 int expect = interval * version.getEffectiveRatio() / 100;
                 //占比超过阈值，保存一条新协议统计记录到数据库
-                if (real >= expect) {
+                if (!version.equals(currentProtocolVersion) && real >= expect) {
                     //初始化一条新协议统计信息，与区块高度绑定，并存到数据库
                     Statistics statistics = new Statistics();
                     statistics.setHeight(height);
@@ -205,7 +205,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
     private boolean validate(BlockExtendsData data, ProtocolContext context){
         short blockVersion = data.getBlockVersion();
         ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
-        if (currentProtocolVersion.getVersion() >= blockVersion) {
+        if (currentProtocolVersion.getVersion() > blockVersion) {
             return false;
         }
         ProtocolConfig config = context.getConfig();
