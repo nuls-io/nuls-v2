@@ -28,7 +28,7 @@ package io.nuls.account.util;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.model.bo.Account;
-import io.nuls.account.util.log.LogUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
 import io.nuls.tools.crypto.ECKey;
@@ -152,7 +152,7 @@ public class AccountTool {
             }
             result = byteArrayOutputStream.toByteArray();
         } catch (Exception e) {
-            LogUtil.error("",e);
+            Log.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         } finally {
             try {
