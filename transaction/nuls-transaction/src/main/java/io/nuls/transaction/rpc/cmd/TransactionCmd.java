@@ -65,6 +65,8 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "moduleCode", parameterType = "String")
     @Parameter(parameterName = "moduleValidator", parameterType = "String")
+    @Parameter(parameterName = "commit", parameterType = "String")
+    @Parameter(parameterName = "rollback", parameterType = "String")
     @Parameter(parameterName = "list", parameterType = "List")
     public Response register(Map params) {
         Map<String, Boolean> map = new HashMap<>(TxConstant.INIT_CAPACITY_16);
@@ -74,6 +76,8 @@ public class TransactionCmd extends BaseCmd {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("moduleCode"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("moduleValidator"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("commit"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("rollback"), TxErrorCode.PARAMETER_ERROR.getMsg());
             ObjectUtils.canNotEmpty(params.get("list"), TxErrorCode.PARAMETER_ERROR.getMsg());
 
             JSONUtils.getInstance().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -93,9 +97,9 @@ public class TransactionCmd extends BaseCmd {
                 txRegister.setModuleCode(moduleTxRegisterDto.getModuleCode());
                 txRegister.setModuleValidator(moduleTxRegisterDto.getModuleValidator());
                 txRegister.setTxType(txRegisterDto.getTxType());
-                txRegister.setValidator(txRegisterDto.getValidateCmd());
-                txRegister.setCommit(txRegisterDto.getCommitCmd());
-                txRegister.setRollback(txRegisterDto.getRollbackCmd());
+                txRegister.setValidator(txRegisterDto.getValidator());
+                txRegister.setCommit(moduleTxRegisterDto.getCommit());
+                txRegister.setRollback(moduleTxRegisterDto.getRollback());
                 txRegister.setSystemTx(txRegisterDto.isSystemTx());
                 txRegister.setUnlockTx(txRegisterDto.isUnlockTx());
                 txRegister.setVerifySignature(txRegisterDto.isVerifySignature());

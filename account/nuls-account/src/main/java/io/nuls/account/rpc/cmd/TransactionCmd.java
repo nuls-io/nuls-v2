@@ -18,7 +18,7 @@ import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.annotation.ResisterTx;
 import io.nuls.account.util.annotation.TxMethodType;
-import io.nuls.account.util.log.LogUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.account.util.validator.TxValidator;
 import io.nuls.base.basic.AddressTool;
@@ -74,7 +74,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_accountTxValidate", version = 1.0, description = "validate the transaction")
     public Response accountTxValidate(Map params) {
-        LogUtil.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
+        Log.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
         List<String> txHexList;
         List<Transaction> lists = new ArrayList<>();
@@ -100,18 +100,18 @@ public class TransactionCmd extends BaseCmd {
                 result = transactionService.accountTxValidate(chainId, lists);
             }
         } catch (NulsRuntimeException e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             return failed(e.getErrorCode());
         } catch (NulsException e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, List<Transaction>> resultMap = new HashMap<>();
         resultMap.put("list", result);
-        LogUtil.debug("ac_accountTxValidate end");
+        Log.debug("ac_accountTxValidate end");
         return success(resultMap);
     }
 
@@ -123,11 +123,11 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_commitTx", version = 1.0, description = "batch commit the transaction")
     public Response commitTx(Map params) {
-        LogUtil.debug("ac_commitTx start,params size:{}", params == null ? 0 : params.size());
+        Log.debug("ac_commitTx start,params size:{}", params == null ? 0 : params.size());
 
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", true);
-        LogUtil.debug("ac_commitTx end");
+        Log.debug("ac_commitTx end");
         return success(resultMap);
     }
     /**
@@ -138,11 +138,11 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_rollbackTx", version = 1.0, description = "batch rollback the transaction")
     public Response rollbackTx(Map params) {
-        LogUtil.debug("ac_rollbackTx start,params size:{}", params == null ? 0 : params.size());
+        Log.debug("ac_rollbackTx start,params size:{}", params == null ? 0 : params.size());
 
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", true);
-        LogUtil.debug("ac_rollbackTx end");
+        Log.debug("ac_rollbackTx end");
         return success(resultMap);
     }
 
@@ -155,7 +155,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = RpcParameterNameConstant.CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = RpcParameterNameConstant.TX_HEX, parameterType = "String")
     public Response transferTxValidate(Map<String, Object> params) {
-        LogUtil.debug("ac_transferTxValidate start");
+        Log.debug("ac_transferTxValidate start");
         Map<String, Boolean> resultMap = new HashMap<>();
         boolean result;
         try {
@@ -170,15 +170,15 @@ public class TransactionCmd extends BaseCmd {
             Transaction transaction = TxUtil.getTransaction(txHex);
             result = txValidator.validateTx(chainId, transaction);
         } catch (NulsException e) {
-            LogUtil.warn("", e);
+            Log.warn("", e);
             result = false;
         } catch (Exception e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             result = false;
         }
 
         resultMap.put("value", result);
-        LogUtil.debug("ac_transferTxValidate end");
+        Log.debug("ac_transferTxValidate end");
         return success(resultMap);
     }
 
@@ -213,7 +213,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "create a multi-account transfer transaction")
     public Response transfer(Map params) {
-        LogUtil.debug("ac_transfer start");
+        Log.debug("ac_transfer start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -265,7 +265,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_transfer end");
+        Log.debug("ac_transfer end");
         return success(map);
     }
 
@@ -279,7 +279,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_transferByAlias", version = 1.0, description = "transfer by alias")
     public Response transferByAlias(Map params) {
-        LogUtil.debug("ac_transferByAlias start");
+        Log.debug("ac_transferByAlias start");
         Map<String, String> map = new HashMap<>(1);
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
@@ -337,7 +337,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_transferByAlias end");
+        Log.debug("ac_transferByAlias end");
         return success(map);
     }
 
@@ -351,7 +351,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "transfer by alias")
     public Response createMultiSignTransfer(Map params) {
-        LogUtil.debug("ac_createMultiSignTransfer start");
+        Log.debug("ac_createMultiSignTransfer start");
         Map<String, String> map = new HashMap<>(1);
         MultiSigAccount multiSigAccount = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -432,7 +432,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_createMultiSignTransfer end");
+        Log.debug("ac_createMultiSignTransfer end");
         return success(map);
     }
 
@@ -446,7 +446,7 @@ public class TransactionCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, description = "sign MultiSign Transaction")
     public Response signMultiSignTransaction(Map params) {
-        LogUtil.debug("ac_signMultiSignTransaction start");
+        Log.debug("ac_signMultiSignTransaction start");
         Map<String, String> map = new HashMap<>(1);
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
@@ -480,7 +480,7 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_signMultiSignTransaction end");
+        Log.debug("ac_signMultiSignTransaction end");
         return success(map);
     }
 

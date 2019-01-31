@@ -149,9 +149,9 @@ public interface TxService {
      */
     List<String> transactionModuleValidator(Chain chain, List<String> txHexList) throws NulsException;
 
-    boolean crossTransactionCommit(Chain chain, Transaction transaction, BlockHeader blockHeader) throws NulsException;
+    boolean crossTransactionCommit(Chain chain, List<String> txHex, BlockHeader blockHeader) throws NulsException;
 
-    boolean crossTransactionRollback(Chain chain, Transaction transaction, BlockHeader blockHeader) throws NulsException;
+    boolean crossTransactionRollback(Chain chain, List<String> txHex, BlockHeader blockHeader) throws NulsException;
 
 
     /**

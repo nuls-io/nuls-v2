@@ -670,13 +670,13 @@ public class TxServiceImpl implements TxService {
 
 
     @Override
-    public boolean crossTransactionCommit(Chain chain, Transaction tx, BlockHeader blockHeader) {
+    public boolean crossTransactionCommit(Chain chain, List<String> txHex, BlockHeader blockHeader) {
         //todo 调账本记账
         return true;
     }
 
     @Override
-    public boolean crossTransactionRollback(Chain chain, Transaction tx, BlockHeader blockHeader) {
+    public boolean crossTransactionRollback(Chain chain, List<String> txHex, BlockHeader blockHeader) {
         //todo 调账本回滚？
         return true;
     }
