@@ -105,43 +105,32 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public Transaction setAlias(int chainId, String address, String password, String aliasName) {
+    public Transaction setAlias(int chainId, String address, String password, String aliasName) throws Exception {
         Transaction tx = null;
-        try {
-            if (!AddressTool.validAddress(chainId, address)) {
-                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-            }
-//            if (StringUtils.isNotBlank(aliasName)) {
-//                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
-//            }
-            if (!FormatValidUtils.validAlias(aliasName)) {
-                throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
-            }
-            Account account = accountService.getAccount(chainId, address);
-            if (null == account) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-            }
-            if (account.isEncrypted() && account.isLocked()) {
-                if (!account.validatePassword(password)) {
-                    throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
-            }
-            if (!isAliasUsable(chainId, aliasName)) {
-                throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
-            }
-            account.setChainId(chainId);
-            account.setAlias(aliasName);
-            tx = createAliasTrasactionWithoutSign(account);
-            signTransaction(tx, account, password);
-            TransactionCmdCall.newTx(account.getChainId(), HexUtil.encode(tx.serialize()));
 
-            //TODO how to save the chainId?EdwardChan
-            //todo sign the transaction
-            //todo send the transaction to transaction manage module
-        } catch (Exception e) {
-            LogUtil.error("", e);
-            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
+        if (!AddressTool.validAddress(chainId, address)) {
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
+        if (!FormatValidUtils.validAlias(aliasName)) {
+            throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
+        }
+        Account account = accountService.getAccount(chainId, address);
+        if (null == account) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        if (account.isEncrypted() && account.isLocked()) {
+            if (!account.validatePassword(password)) {
+                throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
+        }
+        if (!isAliasUsable(chainId, aliasName)) {
+            throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
+        }
+        account.setChainId(chainId);
+        account.setAlias(aliasName);
+        tx = createAliasTrasactionWithoutSign(account);
+        signTransaction(tx, account, password);
+        TransactionCmdCall.newTx(account.getChainId(), HexUtil.encode(tx.serialize()));
         return tx;
     }
 

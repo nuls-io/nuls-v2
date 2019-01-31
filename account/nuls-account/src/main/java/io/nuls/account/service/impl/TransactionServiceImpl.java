@@ -130,7 +130,6 @@ public class TransactionServiceImpl implements TransactionService {
         List<CoinDto> fromList = Arrays.asList(from);
         List<CoinDto> toList = Arrays.asList(to);
         Transaction tx = this.assemblyTransaction(chainId, fromList, toList, remark);
-        //TODO 如果是多签账户并且签名数量达到了最小值则广播交易,该功能待别名转账做完成后再补充  EdwardChan
         return tx;
     }
 

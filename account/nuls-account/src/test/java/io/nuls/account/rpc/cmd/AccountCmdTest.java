@@ -8,6 +8,7 @@ import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.AccountKeyStoreDto;
 import io.nuls.account.model.dto.AccountOfflineDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
+import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
@@ -58,25 +59,6 @@ public class AccountCmdTest {
         NoUse.mockModule();
     }
 
-    private List<String> createAccount(int chainId, int count, String password) {
-        List<String> accountList = null;
-        try {
-            Map<String, Object> params = new HashMap<>();
-            params.put(Constants.VERSION_KEY_STR, version);
-            params.put("chainId", chainId);
-            params.put("count", count);
-            params.put("password", password);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
-            if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
-                return null;
-            }
-            accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return accountList;
-    }
-
     public SimpleAccountDto getAccountByAddress(int chainId, String address) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
@@ -117,7 +99,7 @@ public class AccountCmdTest {
     public void createAccountTest() throws Exception {
         int count = 3;
         //test to create an account that is not empty.
-        List<String> accountList = createAccount(chainId, count, password);
+        List<String> accountList = CommonRpcOperation.createAccount(count);
         //checking the number of accounts returned
         assertEquals(accountList.size(), count);
         for (String address : accountList) {
@@ -125,12 +107,12 @@ public class AccountCmdTest {
         }
 
         //Test to create an empty password account
-        accountList = createAccount(chainId, count, null);
+        accountList = CommonRpcOperation.createAccount(chainId, count, null);
         //Checking the number of accounts returned
         assertEquals(accountList.size(), count);
 
         //Test the largest number of generated accounts.
-        accountList = createAccount(chainId, 101, null);
+        accountList = CommonRpcOperation.createAccount(chainId, 101, null);
         assertNull(accountList);
 
 
@@ -155,7 +137,7 @@ public class AccountCmdTest {
 
     @Test
     public void removeAccountTest() throws Exception {
-        List<String> accountList = createAccount(chainId, 2, password);
+        List<String> accountList = CommonRpcOperation.createAccount(chainId, 2, password);
 
         SimpleAccountDto account = getAccountByAddress(chainId, accountList.get(0));
         assertNotNull(account);
@@ -173,7 +155,7 @@ public class AccountCmdTest {
 
     @Test
     public void getAccountByAddressTest() throws Exception {
-        List<String> accountList = createAccount(chainId, 1, password);
+        List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
         SimpleAccountDto accountDto = getAccountByAddress(chainId, accountList.get(0));
         assertEquals(accountList.get(0), accountDto.getAddress());
     }
@@ -188,7 +170,7 @@ public class AccountCmdTest {
 
     @Test
     public void getAddressListTest() throws Exception {
-        List<String> accountList = createAccount(chainId, 1, password);
+        List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, version);
         params.put("chainId", chainId);
@@ -213,7 +195,7 @@ public class AccountCmdTest {
     @Test
     public void getAllPrivateKeyTest() {
         try {
-            List<String> accountList = createAccount(1, 1, password);
+            List<String> accountList = CommonRpcOperation.createAccount(1, 1, password);
             //query all accounts privateKey
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
@@ -240,7 +222,7 @@ public class AccountCmdTest {
     public void getPrivateKeyTest() {
         try {
             //create password accounts
-            List<String> accountList = createAccount(chainId, 1, password);
+            List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             //query specified account private key
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
@@ -263,7 +245,7 @@ public class AccountCmdTest {
         try {
             String remark = "test remark";
             //Create encrypted account
-            List<String> accountList = createAccount(chainId, 1, password);
+            List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             //Set the correct remarks for the account
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, version);
@@ -283,7 +265,7 @@ public class AccountCmdTest {
     public void importAccountByPriKeyTest() {
         try {
             //create encrypted account
-            List<String> accountList = createAccount(chainId, 1, password);
+            List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             String priKey = getPriKeyByAddress(chainId, accountList.get(0), password);
             assertNotNull(priKey);
             //账户已存在则覆盖 If the account exists, it covers.
@@ -337,7 +319,7 @@ public class AccountCmdTest {
     public void importAccountByKeystoreTest() {
         try {
             //create encrypted account
-            List<String> accountList = createAccount(chainId, 1, password);
+            List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             String priKey = getPriKeyByAddress(chainId, accountList.get(0), password);
             assertNotNull(priKey);
 
@@ -414,7 +396,7 @@ public class AccountCmdTest {
     public void exportAccountKeyStoreTest() {
         try {
             //create encrypted account
-            List<String> accountList = createAccount(chainId, 1, password);
+            List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             String address = accountList.get(0);
 
             //测试不指定备份路径
@@ -442,7 +424,7 @@ public class AccountCmdTest {
 
             //测试指定windows备份路径
             //Create an unencrypted account for test
-            accountList = createAccount(chainId, 1, null);
+            accountList = CommonRpcOperation.createAccount(chainId, 1, null);
             pathDir = "D:\\workspace\\github\\nuls_2.0\\测试2\\back\\up";
             params.put("address", accountList.get(0));
             params.remove("password");
@@ -462,7 +444,7 @@ public class AccountCmdTest {
     public void setPasswordTest() {
         try {
             //创建未加密账户 create unencrypted account
-            List<String> accountList = createAccount(chainId, 1, null);
+            List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, null);
             String address = accountList.get(0);
 
             //为账户设置密码 set password for account
@@ -489,7 +471,7 @@ public class AccountCmdTest {
     public void updatePasswordTest() {
         try {
             //创建未加密账户 create unencrypted account
-            List<String> accountList = createAccount(chainId, 1, null);
+            List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, null);
             String address = accountList.get(0);
 
             //为未设置密码的账户修改密码 change password for account
@@ -644,7 +626,7 @@ public class AccountCmdTest {
         try {
             // create account
             //创建未加密账户 create unencrypted account
-            List<String> accountList = createAccount(chainId, 1, null);
+            List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, null);
             String address = accountList.get(0);
 
             Map<String, Object> params = new HashMap<>();
@@ -678,7 +660,7 @@ public class AccountCmdTest {
     public void validationPasswordTest() {
         try {
             //创建未加密账户 create unencrypted account
-            List<String> accountList = createAccount(chainId, 1, null);
+            List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, null);
             String address = accountList.get(0);
 
             //验证账户是否正确 verify that the account password is correct
@@ -712,7 +694,7 @@ public class AccountCmdTest {
     public void signDigestTest() {
         try {
             //创建加密账户 create encrypted account
-            List<String> accountList = createAccount(chainId, 1, password);
+            List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
             String address = accountList.get(0);
             //byte[] addressBytes = accountList.get(0).getAddress().getAddressBytes();
             byte[] addressBytes = accountList.get(0).getBytes();
