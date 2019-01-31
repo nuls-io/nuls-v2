@@ -1107,6 +1107,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             case(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT): return depositManager.cancelDepositCommit(tx,chain);
             case(ConsensusConstant.TX_TYPE_YELLOW_PUNISH): return punishManager.yellowPunishCommit(tx,chain,header);
             case(ConsensusConstant.TX_TYPE_RED_PUNISH): return punishManager.redPunishCommit(tx,chain,header);
+            case(ConsensusConstant.TX_TYPE_COINBASE) : return true;
             default: return false;
         }
     }
@@ -1125,6 +1126,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             case(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT): return depositManager.cancelDepositRollBack(tx,chain);
             case(ConsensusConstant.TX_TYPE_YELLOW_PUNISH): return punishManager.yellowPunishRollback(tx,chain,header);
             case(ConsensusConstant.TX_TYPE_RED_PUNISH): return punishManager.redPunishRollback(tx,chain,header);
+            case(ConsensusConstant.TX_TYPE_COINBASE) : return true;
             default: return false;
         }
     }
