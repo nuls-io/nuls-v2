@@ -21,7 +21,6 @@ import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.storage.AgentStorageService;
 import io.nuls.poc.storage.DepositStorageService;
-import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.poc.utils.manager.AgentManager;
 import io.nuls.poc.utils.manager.ChainManager;
 import io.nuls.poc.utils.manager.CoinDataManager;
@@ -269,7 +268,7 @@ public class TxValidator {
             }
         }
         //节点地址及出块地址不能重复
-        List<Agent> agentList = chain.getAgentList();
+        List<Agent> agentList = chain.getWorkAgentList(chain.getNewestHeader().getHeight());
         if(agentList != null && agentList.size()>0){
             Set<String> set = new HashSet<>();
             for (Agent agentTemp:agentList) {
@@ -308,10 +307,10 @@ public class TxValidator {
      * */
     private boolean stopAgentCoinDataValid(Chain chain,Transaction tx,AgentPo agentPo,StopAgent stopAgent,CoinData coinData)throws NulsException,IOException {
         Agent agent = agentManager.poToAgent(agentPo);
-        CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, CallMethodUtils.currentTime() + chain.getConfig().getStopAgentLockTime());
+        CoinData localCoinData = coinDataManager.getStopAgentCoinData(chain, agent, coinData.getTo().get(0).getLockTime());
         int size = tx.size() - tx.getTransactionSignature().length + P2PHKSignature.SERIALIZE_LENGTH;
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(size);
-        localCoinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
+        localCoinData.getTo().get(0).setAmount(localCoinData.getTo().get(0).getAmount().subtract(fee));
         if(!Arrays.equals(coinData.serialize(),localCoinData.serialize())){
             return false;
         }

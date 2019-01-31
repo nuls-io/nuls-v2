@@ -67,7 +67,7 @@ public class BlockBootstrap {
     private static void init() {
         try {
             //扫描包路径io.nuls.block,初始化bean
-            SpringLiteContext.init(DEFAULT_SCAN_PACKAGE, new ModularServiceMethodInterceptor());
+            SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
             //rpc服务初始化
             WsServer.getInstance(ModuleE.BL)
                     .moduleRoles(new String[]{"1.0"})

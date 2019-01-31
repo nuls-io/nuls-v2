@@ -119,6 +119,34 @@ public interface ConsensusService {
     Result withdrawRollBack(Map<String,Object> params);
 
     /**
+     * 红牌交易提交
+     * @param params
+     * @return Result
+     * */
+    Result redPunishCommit(Map<String,Object> params);
+
+    /**
+     * 红牌交易回滚
+     * @param params
+     * @return Result
+     * */
+    Result redPunishRollBack(Map<String,Object> params);
+
+    /**
+     * 黄牌交易提交
+     * @param params
+     * @return Result
+     * */
+    Result yellowPunishCommit(Map<String,Object> params);
+
+    /**
+     * 黄牌交易回滚
+     * @param params
+     * @return Result
+     * */
+    Result yellowPunishRollBack(Map<String,Object> params);
+
+    /**
      * 获取节点列表
      * @param params
      * return Result

@@ -152,12 +152,17 @@ public class TransactionServiceImpl implements TransactionService {
                     //非本地网络账户地址,不进行处理
                     continue;
                 }
+                boolean process = false;
                 AccountBalance accountBalance = getAccountBalance(addressChainId,from,txHash,transaction.getBlockHeight(),updateAccounts);
-                if(from.getLocked() > 0){
-                    lockedTransactionProcessor.processFromCoinData(from,nonce8BytesStr,transaction.getHash().toString(),  accountBalance.getNowAccountState());
-                }else {
+                if(from.getLocked() == 0){
                     //非解锁交易处理
-                    commontTransactionProcessor.processFromCoinData(from,nonce8BytesStr,transaction.getHash().toString(),  accountBalance.getNowAccountState());
+                    process = commontTransactionProcessor.processFromCoinData(from,nonce8BytesStr,transaction.getHash().toString(),  accountBalance.getNowAccountState());
+                }else {
+                    process = lockedTransactionProcessor.processFromCoinData(from,nonce8BytesStr,transaction.getHash().toString(),  accountBalance.getNowAccountState());
+                }
+                if(!process){
+                    Log.info("address={},txHash = {} processFromCoinData is fail.",addressChainId,transaction.getHash().toString());
+                    return false;
                 }
             }
             List<CoinTo> tos = coinData.getTo();
@@ -167,12 +172,13 @@ public class TransactionServiceImpl implements TransactionService {
                     continue;
                 }
                 AccountBalance accountBalance = getAccountBalance(addressChainId,to,txHash,transaction.getBlockHeight(),updateAccounts);
-                if(to.getLockTime() > 0){
-                    //锁定交易处理
-                    lockedTransactionProcessor.processToCoinData(to,nonce8BytesStr,transaction.getHash().toString(), accountBalance.getNowAccountState());
-                }else {
+
+                if(to.getLockTime() == 0){
                     //非锁定交易处理
                     commontTransactionProcessor.processToCoinData(to,nonce8BytesStr,transaction.getHash().toString(),  accountBalance.getNowAccountState());
+                }else {
+                    //锁定交易处理
+                    lockedTransactionProcessor.processToCoinData(to,nonce8BytesStr,transaction.getHash().toString(), accountBalance.getNowAccountState());
                 }
             }
             //提交交易中的所有账号记录
@@ -185,6 +191,7 @@ public class TransactionServiceImpl implements TransactionService {
                 e.printStackTrace();
                 //回滚
                 rollBackConfirmTx(addressChainId,transaction);
+                return false;
             }
             return true;
         }

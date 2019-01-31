@@ -62,13 +62,14 @@ public class DepositManager {
      * */
     public void updateDeposit(Chain chain,Deposit deposit){
         List<Deposit> depositList = chain.getDepositList();
-        if(depositList == null || depositList.size() == 0){
+        if(depositList.size() == 0){
             depositList.add(deposit);
             return;
         }
-        for (int index = 0;index <= depositList.size() ; index++ ){
-            if(deposit.getTxHash().equals(depositList.get(index))){
+        for (int index = 0;index < depositList.size() ; index++ ){
+            if(deposit.getTxHash().equals(depositList.get(index).getTxHash())){
                 depositList.set(index,deposit);
+                break;
             }
         }
     }

@@ -1,6 +1,6 @@
 package io.nuls.transaction.service.impl;
 
-import io.nuls.base.data.BlockHeaderDigest;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.annotation.Autowired;
@@ -12,8 +12,8 @@ import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
-import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.ConfirmedTxStorageService;
+import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.manager.TransactionManager;
@@ -71,7 +71,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (null == hash) {
             return null;
         }
-        return confirmedTxStorageService.getTx(chain.getChainId(), hash);
+         return confirmedTxStorageService.getTx(chain.getChainId(), hash);
     }
 
     private boolean saveTx(Chain chain, Transaction tx) {
@@ -83,7 +83,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     @Override
-    public boolean saveGengsisTxList(Chain chain, List<Transaction> txhexList, BlockHeaderDigest blockHeaderDigest) throws NulsException {
+    public boolean saveGengsisTxList(Chain chain, List<Transaction> txhexList, BlockHeader blockHeader) throws NulsException {
         if (null == chain || txhexList == null || txhexList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
@@ -98,14 +98,14 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         List<Transaction> savedList = new ArrayList<>();
         for(Transaction tx : txhexList){
             //将交易保存、提交、发送至账本
-            ResultSaveCommitTx resultSaveCommitTx = saveCommitTx(chain, tx, null, blockHeaderDigest);
+            ResultSaveCommitTx resultSaveCommitTx = saveCommitTx(chain, tx, null, blockHeader);
             if (resultSaveCommitTx.rs) {
                 savedList.add(tx);
             } else {
                 //回滚当前交易已提交的步骤
-                rollbackCurrentTx(chain, tx, resultSaveCommitTx, blockHeaderDigest);
+                rollbackCurrentTx(chain, tx, resultSaveCommitTx, blockHeader);
                 //回滚之前的交易
-                this.rollbackTxList(chain, savedList, blockHeaderDigest, false);
+                this.rollbackTxList(chain, savedList, blockHeader, false);
                 // 保存区块交易失败, 回滚交易数
                 chain.getLogger().error("Save block transaction failed, rollback {} transactions", savedList.size());
                 return false;
@@ -120,7 +120,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     @Override
-    public boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeaderDigest blockHeaderDigest) throws NulsException {
+    public boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeader blockHeader) throws NulsException {
 
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
@@ -136,24 +136,24 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 //从已验证但未打包的交易中取出交易
                 Transaction tx = unconfirmedTxStorageService.getTx(chainId, hash);
                 //将交易保存、提交、发送至账本
-                ResultSaveCommitTx resultSaveCommitTx = saveCommitTx(chain, tx, ctxHashList, blockHeaderDigest);
+                ResultSaveCommitTx resultSaveCommitTx = saveCommitTx(chain, tx, ctxHashList, blockHeader);
                 if (resultSaveCommitTx.rs) {
                     savedList.add(tx);
                 } else {
                     //回滚当前交易已提交的步骤
-                    rollbackCurrentTx(chain, tx, resultSaveCommitTx, blockHeaderDigest);
+                    rollbackCurrentTx(chain, tx, resultSaveCommitTx, blockHeader);
                     //回滚之前的交易
-                    this.rollbackTxList(chain, savedList, blockHeaderDigest, false);
+                    this.rollbackTxList(chain, savedList, blockHeader, false);
                     // 保存区块交易失败, 回滚交易数
                     chain.getLogger().error("Save block transaction failed, rollback {} transactions", savedList.size());
                     return false;
                 }
             }
             //保存生效高度
-            long effectHeight = blockHeaderDigest.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
+            long effectHeight = blockHeader.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
             boolean rs = confirmedTxStorageService.saveCrossTxEffectList(chainId, effectHeight, ctxHashList);
             if (!rs) {
-                this.rollbackTxList(chain, savedList, blockHeaderDigest, false);
+                this.rollbackTxList(chain, savedList, blockHeader, false);
                 return false;
             }
             //如果确认交易成功，则从未打包交易库中删除交易
@@ -177,7 +177,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      * @param ctxhashList 该区块中所有的跨链交易hash集合
      * @return int 返回成功了几个步骤, 如果未达成功的步骤数,则需要对应回滚之前的步骤
      */
-    private ResultSaveCommitTx saveCommitTx(Chain chain, Transaction tx, List<NulsDigestData> ctxhashList, BlockHeaderDigest blockHeaderDigest) {
+    private ResultSaveCommitTx saveCommitTx(Chain chain, Transaction tx, List<NulsDigestData> ctxhashList, BlockHeader blockHeader) {
         boolean rs = false;
         int step = 0;
         //ResultSaveCommitTx rs = new ResultSaveCommitTx(false, 0);
@@ -186,9 +186,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             if (rs) {
                 step = 1;
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                if (!txRegister.getSystemTx()){
-                    rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex(), HexUtil.encode(blockHeaderDigest.serialize()));
-                }
+                rs = TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeader.serialize()));
             }
             if (rs) {
                 step = 2;
@@ -216,7 +214,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      * @param tx
      * @param resultSaveCommitTx
      */
-    private void rollbackCurrentTx(Chain chain, Transaction tx, ResultSaveCommitTx resultSaveCommitTx, BlockHeaderDigest blockHeaderDigest){
+    private void rollbackCurrentTx(Chain chain, Transaction tx, ResultSaveCommitTx resultSaveCommitTx, BlockHeader blockHeader){
         int step = resultSaveCommitTx.step;
         try {
             if(step >= 3){
@@ -226,9 +224,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             if(step >= 2){
                 //通过各模块回滚交易业务逻辑
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                if (!txRegister.getSystemTx()) {
-                    TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx.hex(), HexUtil.encode(blockHeaderDigest.serialize()));
-                }
+                TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeader.serialize()));
             }
             if(step >= 1){
                 //从已确认库中删除该交易
@@ -313,12 +309,12 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      *
      * @param chain
      * @param savedList
-     * @param blockHeaderDigest
+     * @param blockHeader
      * @param atomicity         回滚是否具有原子性(是否是回滚已确认过的区块), 回滚块时为true, 需要处理回滚失败的情况, 保存块时为false(保存交易失败时的回滚,不再处理回滚失败的情况)
      * @return
      * @throws NulsException
      */
-    private boolean rollbackTxList(Chain chain, List<Transaction> savedList, BlockHeaderDigest blockHeaderDigest, boolean atomicity) throws NulsException {
+    private boolean rollbackTxList(Chain chain, List<Transaction> savedList, BlockHeader blockHeader, boolean atomicity) throws NulsException {
         if (null == chain || savedList == null || savedList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
@@ -351,34 +347,32 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                     && null != ctxService.getTx(chain, tx.getHash())) {
                 rs = ctxRollback(chain, tx);
                 if (atomicity && !rs) {
-                    reCommitCurrentTx(chain, tx, 1, blockHeaderDigest);
+                    reCommitCurrentTx(chain, tx, 1, blockHeader);
                     break;
                 }
             }
             //回滚账本
             rs = LedgerCall.rollbackTxLedger(chain, tx, true);
             if (atomicity && !rs) {
-                reCommitCurrentTx(chain, tx, 2, blockHeaderDigest);
+                reCommitCurrentTx(chain, tx, 2, blockHeader);
                 break;
             }
             //交易业务回滚
             try {
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                if (!txRegister.getSystemTx()) {
-                    rs = TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx.hex(), HexUtil.encode(blockHeaderDigest.serialize()));
-                }
+                rs = TransactionCall.txProcess(chain, txRegister.getRollback(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeader.serialize()));
             } catch (Exception e) {
                 rs = false;
                 chain.getLogger().error(e);
             }
             if (atomicity && !rs) {
-                reCommitCurrentTx(chain, tx, 3, blockHeaderDigest);
+                reCommitCurrentTx(chain, tx, 3, blockHeader);
                 break;
             }
             //从已确认交易数据库(主链)中删除
             rs = confirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
             if (atomicity && !rs) {
-                reCommitCurrentTx(chain, tx, 4, blockHeaderDigest);
+                reCommitCurrentTx(chain, tx, 4, blockHeader);
                 break;
             }
             //从新放入待打包队列
@@ -387,7 +381,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                if(!rs) {
                    rollbackedList.add(tx);
                }else{
-                   reCommitCurrentTx(chain, tx, 5, blockHeaderDigest);
+                   reCommitCurrentTx(chain, tx, 5, blockHeader);
                }
             }
         }
@@ -395,7 +389,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         boolean ctsRs = true;
         //如果是回滚已确认过的区块,则需要删除已记录的回滚块中跨链交易的生效高度
         if(atomicity){
-            long effectHeight = blockHeaderDigest.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
+            long effectHeight = blockHeader.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
             ctsRs = confirmedTxStorageService.removeCrossTxEffectList(chainId, effectHeight);
         }
         //有回滚失败的, 重新commit
@@ -406,9 +400,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                     Transaction tx = rollbackedList.get(i);
                     confirmedTxStorageService.saveTx(chain.getChainId(), tx);
                     TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                    if (!txRegister.getSystemTx()) {
-                        TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex(), HexUtil.encode(blockHeaderDigest.serialize()));
-                    }
+                    TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeader.serialize()));
                     if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH) {
                         LedgerCall.commitTxLedger(chain, tx, true);
                     }
@@ -437,16 +429,14 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      * @param tx
      * @param setp
      */
-    private void reCommitCurrentTx(Chain chain, Transaction tx, int setp, BlockHeaderDigest blockHeaderDigest){
+    private void reCommitCurrentTx(Chain chain, Transaction tx, int setp, BlockHeader blockHeader){
         try {
             if(setp >= 5){
                 confirmedTxStorageService.saveTx(chain.getChainId(),tx);
             }
             if(setp >= 4){
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
-                if (!txRegister.getSystemTx()) {
-                    TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx.hex(), HexUtil.encode(blockHeaderDigest.serialize()));
-                }
+                TransactionCall.txProcess(chain, txRegister.getCommit(), txRegister.getModuleCode(), tx, HexUtil.encode(blockHeader.serialize()));
             }
             if(setp >= 3){
                 if (tx.getType() != TxConstant.TX_TYPE_YELLOW_PUNISH) {
@@ -485,7 +475,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     @Override
-    public boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeaderDigest blockHeaderDigest) throws NulsException {
+    public boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeader blockHeader) throws NulsException {
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
@@ -501,7 +491,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 }
                 txList.add(tx);
             }
-            return rollbackTxList(chain, txList, blockHeaderDigest, true);
+            return rollbackTxList(chain, txList, blockHeader, true);
         } catch (NulsException e) {
             throw new NulsException(e.getErrorCode());
         }

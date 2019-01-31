@@ -216,13 +216,14 @@ public class ChainManager {
     }
 
     private void initTx(Chain chain){
+        //todo 需要处理: 作为友链时,不会有此交易,友链有自己的跨链交易和协议转换机制
         TxRegister txRegister = new TxRegister();
         txRegister.setModuleCode(TxConstant.MODULE_CODE);
         txRegister.setModuleValidator(TxConstant.TX_MODULE_VALIDATOR);
         txRegister.setTxType(TxConstant.TX_TYPE_CROSS_CHAIN_TRANSFER);
         txRegister.setValidator(TxConstant.CROSS_TRANSFER_VALIDATOR);
-        txRegister.setCommit(TxConstant.CROSS_TRANSFER_COMMIT);
-        txRegister.setRollback(TxConstant.CROSS_TRANSFER_ROLLBACK);
+        txRegister.setCommit("");
+        txRegister.setRollback("");
         txRegister.setSystemTx(true);
         txRegister.setUnlockTx(false);
         txRegister.setVerifySignature(true);

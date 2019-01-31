@@ -76,7 +76,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_accountTxValidate", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "validate the transaction")
+    @CmdAnnotation(cmd = "ac_accountTxValidate", version = 1.0, description = "validate the transaction")
     public Response accountTxValidate(Map params) {
         LogUtil.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
@@ -118,6 +118,38 @@ public class TransactionCmd extends BaseCmd {
         LogUtil.debug("ac_accountTxValidate end");
         return success(resultMap);
     }
+
+    /**
+     * batch commit the transaction
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_commitTx", version = 1.0, description = "batch commit the transaction")
+    public Response commitTx(Map params) {
+        LogUtil.debug("ac_commitTx start,params size:{}", params == null ? 0 : params.size());
+
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", true);
+        LogUtil.debug("ac_commitTx end");
+        return success(resultMap);
+    }
+    /**
+     * batch rollback the transaction
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_rollbackTx", version = 1.0, description = "batch rollback the transaction")
+    public Response rollbackTx(Map params) {
+        LogUtil.debug("ac_rollbackTx start,params size:{}", params == null ? 0 : params.size());
+
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", true);
+        LogUtil.debug("ac_rollbackTx end");
+        return success(resultMap);
+    }
+
 
     /**
      * 转账交易验证

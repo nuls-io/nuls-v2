@@ -1,6 +1,6 @@
 package io.nuls.transaction.service;
 
-import io.nuls.base.data.BlockHeaderDigest;
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
@@ -40,19 +40,20 @@ public interface ConfirmedTxService {
      * 保存创世块的交易
      * @param chain
      * @param txhexList
-     * @param blockHeaderDigest
+     * @param blockHeader
      * @return
      * @throws NulsException
      */
-    boolean saveGengsisTxList(Chain chain, List<Transaction> txhexList, BlockHeaderDigest blockHeaderDigest) throws NulsException;
+    boolean saveGengsisTxList(Chain chain, List<Transaction> txhexList, BlockHeader blockHeader) throws NulsException;
 
     /**
      * 保存区块中已确认交易
      * @param chain
      * @param txHashList
+     * @param blockHeader
      * @return
      */
-    boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeaderDigest blockHeaderDigest) throws NulsException;
+    boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeader blockHeader) throws NulsException;
 
 
 
@@ -60,9 +61,10 @@ public interface ConfirmedTxService {
      * 批量回滚已确认交易
      * @param chain
      * @param txHashList
+     * @param blockHeader
      * @return
      */
-    boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeaderDigest blockHeaderDigest) throws NulsException;
+    boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, BlockHeader blockHeader) throws NulsException;
 
     /**
      * 根据最新区块高度扫描是否有需要处理的跨链交易,如果有则进行跨链发送

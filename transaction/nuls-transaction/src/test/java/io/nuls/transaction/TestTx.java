@@ -98,23 +98,24 @@ public class TestTx{
 
     @Test
     public void test() throws Exception{
-//        addGenesisAsset(address1);
-//        addGenesisAsset(address2);
-//        addGenesisAsset(address3);
-//        addGenesisAsset(address4);
-//        addGenesisAsset(address5);
-//        addGenesisAsset(address6);
+       addGenesisAsset(address1);
+        addGenesisAsset(address2);
+        addGenesisAsset(address3);
+        addGenesisAsset(address4);
+        addGenesisAsset(address5);
+        addGenesisAsset(address6);
         addGenesisAsset(address7);
         addGenesisAsset(address8);
         addGenesisAsset(address9);
         addGenesisAsset(address10);
         addGenesisAsset(address11);
         addGenesisAsset(address12);
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address10), assetChainId, assetId);
-        System.out.println(balance.longValue());
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address7), assetChainId, assetId);
+        System.out.println(JSONUtils.obj2PrettyJson(balance));
     }
+
     @Test
-    public void consensusTx() throws Exception{
+    public void createAgentTx() throws Exception{
         BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address7), assetChainId, assetId);
         System.out.println(balance.longValue());
 
@@ -127,7 +128,56 @@ public class TestTx{
         Log.info("{}", result.get("txHex"));
         System.out.println("transfer: "+result.get("txHex"));  //Thread.sleep(3000L);
     }
-    //packableTxs();
+
+    @Test
+    public void stopAgentTx() throws Exception{
+
+        //组装创建节点交易
+        //Map agentTxMap=this.createAgentTx(address9, address1);
+        Map<String, Object> txMap = new HashMap();
+        txMap.put("chainId", chainId);
+        txMap.put("address", address9);
+        txMap.put("password", "");
+        //调用接口
+        Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
+        Assert.assertTrue(null != result);
+        Log.info("{}", result.get("txHex"));
+        System.out.println("transfer: "+result.get("txHex"));  //Thread.sleep(3000L);
+    }
+
+
+
+    /**
+     * 委托节点交易创建
+     */
+    @Test
+    public void depositToAgent() throws Exception {
+        //组装委托节点交易
+        String agentHash = "0020392e698d4e68bf8ea5275d8f953ea2092586afafe3d60b05b595331efa1e36c2";
+        Map<String, Object> dpParams = new HashMap<>();
+        dpParams.put("chainId", chainId);
+        dpParams.put("address", address10);
+        dpParams.put("agentHash", agentHash);
+        dpParams.put("deposit", 20000*100000000L);
+        Response dpResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
+        HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
+        String dpTxHex = (String) dpResult.get("txHex");
+    }
+
+    /**
+     * 退出共识
+     * @throws Exception
+     */
+    public void withdraw()throws Exception{
+        Map<String,Object>params = new HashMap<>();
+        params.put("chainId",chainId);
+        //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
+        params.put("address",address4);
+        params.put("txHash","");
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
+        System.out.println(cmdResp.getResponseData());
+    }
 
 
     @Test
@@ -156,7 +206,7 @@ public class TestTx{
         System.out.println("address2: " + balance2.longValue());
 //            System.out.println("address3: " + balance3.longValue());
 //            System.out.println("address4: " + balance4.longValue());
-   /*     CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
+        CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
                 createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
         //普通转账
         //调接口
@@ -168,16 +218,16 @@ public class TestTx{
         Assert.assertTrue(null != map);
         Log.info("{}", map.get("value"));
 
-        Thread.sleep(3000L);*/
+        Thread.sleep(3000L);
 
-        Map transferMap = this.createTransferTx();
+      /*  Map transferMap = this.createTransferTx();
         //调用接口
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
         Log.info("{}", result.get("value"));
         Thread.sleep(4000L);
-        //packableTxs();
+        //packableTxs();*/
 
 
     }
@@ -329,7 +379,7 @@ public class TestTx{
         Map<String,Object> params = new HashMap<>();
         params.put("agentAddress",agentAddr);
         params.put("chainId",chainId);
-        params.put("deposit",20000);
+        params.put("deposit", 20000 * 100000000L);
         params.put("commissionRate",10);
         params.put("packingAddress",packingAddr);
         params.put("password","");

@@ -339,7 +339,7 @@ public class AccountState extends BaseNulsData {
     }
 
     /**
-     * 查询用户所有可用金额
+     * 查询用户冻结金额
      *
      * @return
      */

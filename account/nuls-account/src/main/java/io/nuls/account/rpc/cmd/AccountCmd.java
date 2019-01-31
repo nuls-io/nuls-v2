@@ -949,13 +949,13 @@ public class AccountCmd extends BaseCmd {
     }
 
     /**
-     * 验证数据签名接口
+     * 验证数据签名
      * verify sign
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_verifySignData", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi-account transfer transaction")
+    @CmdAnnotation(cmd = "ac_verifySignData", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Verification Data Signature")
     public Response verifySignData(Map params) {
         LogUtil.debug("ac_verifySignData start");
         Map<String, Boolean> map = new HashMap<>(1);

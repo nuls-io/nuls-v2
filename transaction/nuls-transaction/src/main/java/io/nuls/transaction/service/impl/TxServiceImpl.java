@@ -37,7 +37,6 @@ import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
-import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
@@ -46,13 +45,16 @@ import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.rocksdb.storage.CtxStorageService;
-import io.nuls.transaction.db.rocksdb.storage.UnverifiedTxStorageService;
 import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
+import io.nuls.transaction.db.rocksdb.storage.UnverifiedTxStorageService;
 import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.model.bo.*;
 import io.nuls.transaction.model.dto.AccountSignDTO;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.rpc.call.*;
+import io.nuls.transaction.rpc.call.AccountCall;
+import io.nuls.transaction.rpc.call.LedgerCall;
+import io.nuls.transaction.rpc.call.NetworkCall;
+import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TxUtil;
@@ -619,10 +621,18 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(TxErrorCode.COINFROM_NOT_FOUND);
         }
         boolean hasNulsFrom = false;
+        Set<String> uniqueCoin = new HashSet<>();
         for (CoinFrom coinFrom : listFrom) {
             //是否有nuls(手续费)
             if (TxUtil.isNulsAsset(coinFrom)) {
                 hasNulsFrom = true;
+            }
+            //验证账户地址,资产链id,资产id的组合唯一性
+            int assetsChainId = coinFrom.getAssetsChainId();
+            int assetsId = coinFrom.getAssetsId();
+            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinFrom.getAddress()) + "-" + assetsChainId + "-" + assetsId);
+            if (!rs) {
+                throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
             }
             //只有NULS主网节点才会进入跨链交易验证器，直接验证资产即可
             //todo
@@ -641,7 +651,15 @@ public class TxServiceImpl implements TxService {
             throw new NulsException(TxErrorCode.COINTO_NOT_FOUND);
         }
         //验证跨链交易的from和to的资产是否存在(有效)
+        Set<String> uniqueCoin = new HashSet<>();
         for (CoinTo coinTo : listTo) {
+            //验证账户地址,资产链id,资产id的组合唯一性
+            int assetsChainId = coinTo.getAssetsChainId();
+            int assetsId = coinTo.getAssetsId();
+            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinTo.getAddress()) + "-" + assetsChainId + "-" + assetsId);
+            if (!rs) {
+                throw new NulsException(TxErrorCode.COINFROM_HAS_DUPLICATE_COIN);
+            }
             //todo
            /* if (!ChainCall.verifyAssetExist(coinTo.getAssetsChainId(), coinTo.getAssetsId())) {
                 throw new NulsException(TxErrorCode.ASSET_NOT_EXIST);
@@ -652,13 +670,13 @@ public class TxServiceImpl implements TxService {
 
 
     @Override
-    public boolean crossTransactionCommit(Chain chain, Transaction tx, BlockHeaderDigest blockHeaderDigest) {
+    public boolean crossTransactionCommit(Chain chain, Transaction tx, BlockHeader blockHeader) {
         //todo 调账本记账
         return true;
     }
 
     @Override
-    public boolean crossTransactionRollback(Chain chain, Transaction tx, BlockHeaderDigest blockHeaderDigest) {
+    public boolean crossTransactionRollback(Chain chain, Transaction tx, BlockHeader blockHeader) {
         //todo 调账本回滚？
         return true;
     }
