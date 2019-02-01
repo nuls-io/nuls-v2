@@ -126,7 +126,7 @@ public class CmdValidateTest {
         coinTo.setAmount(BigInteger.valueOf(100));
         coinTo.setAssetsChainId(assetChainId);
         coinTo.setAssetsId(assetId);
-        coinTo.setLockTime(0);
+        coinTo.setLockTime(-1);
         List<CoinFrom> coinFroms =new ArrayList<>();
 //        coinFroms.add(coinFrom);
         List<CoinTo> coinTos =new ArrayList<>();

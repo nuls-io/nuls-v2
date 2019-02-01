@@ -109,7 +109,9 @@ public class CmdRollBackTest {
             tx = buildTx();
             Map<String,Object> params = new HashMap<>();
             params.put("chainId", 8096);
-            params.put("txHex",HexUtil.encode(tx.serialize()));
+            List<String> txHexList = new ArrayList<>();
+            txHexList.add(HexUtil.encode(tx.serialize()));
+            params.put("txHexList",txHexList);
             params.put("isConfirmTx",true);
             Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "rollBackConfirmTx", params);
             logger.info("response {}", response);
