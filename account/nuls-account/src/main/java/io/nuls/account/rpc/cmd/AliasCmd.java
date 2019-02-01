@@ -225,7 +225,7 @@ public class AliasCmd extends BaseCmd {
         }
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", result);
-        Log.debug("ac_aliasTxValidate end");
+        Log.debug("ac_aliasTxValidate end,result is:{}",result);
         return success(resultMap);
     }
 

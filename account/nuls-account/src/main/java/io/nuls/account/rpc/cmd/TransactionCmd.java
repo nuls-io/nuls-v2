@@ -403,11 +403,11 @@ public class TransactionCmd extends BaseCmd {
         Log.debug("ac_transferByAlias start");
         Map<String, String> map = new HashMap<>(1);
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
-        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
-        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
-        Object amountObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
-        Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
+        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
+        Object amountObj = params == null ? null : params.get(RpcParameterNameConstant.AMOUNT);
+        Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.REMARK);
         try {
             // check parameters
             if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || aliasObj == null ||

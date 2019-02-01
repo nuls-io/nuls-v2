@@ -4,8 +4,8 @@ import io.nuls.account.constant.RpcConstant;
 import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.TransferDto;
 import io.nuls.account.rpc.call.LegerCmdCall;
+import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
@@ -19,10 +19,11 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.parse.SerializeUtils;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigInteger;
@@ -44,6 +45,8 @@ import static org.junit.Assert.assertTrue;
  * @date: 2018/11/2
  */
 public class TransactionCmdTest {
+
+    Logger logger = LoggerFactory.getLogger(this.getClass());
 
     //protected static AccountService accountService;
 
@@ -134,6 +137,66 @@ public class TransactionCmdTest {
         String txDigestHex = (String) result.get(RpcConstant.VALUE);
         System.out.println(txDigestHex);
     }
+
+    /**
+     * 别名转账测试用例
+     *
+     * 1st:构建别名转账请求参数
+     * 2end:将请求发送到账户模块
+     * 3ird:检查返回结果
+     *
+     * */
+    @Test
+    public void transferByAlias() throws Exception {
+        //创建账户
+        List<String> accoutList = CommonRpcOperation.createAccount(2);
+        assertTrue(accoutList != null & accoutList.size() == 2);
+        String fromAddress = accoutList.get(0);
+        String toAddress = accoutList.get(1);
+        //铸币
+        addGenesisAsset(fromAddress);
+        addGenesisAsset(toAddress); //because the to address need to set alias
+        //设置别名
+        String alias = "edwardtest";
+        String txHash = CommonRpcOperation.setAlias(toAddress,alias);
+        assertNotNull(txHash);
+        //查询设置别名是否成功
+        String afterSetALias;
+        int i = 0;
+        do{
+            afterSetALias = CommonRpcOperation.getAliasByAddress(toAddress);
+            if (afterSetALias == null) {
+                Thread.sleep(5000);
+            } else {
+                break;
+            }
+            i ++;
+            logger.warn("getAliasByAddress return null,retry times:{}",i);
+        } while (i <=10 );
+        assertNotNull(afterSetALias);
+        //转账前查询转入方余额
+
+        //别名转账
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId",chainId);
+        params.put("address", fromAddress);
+        params.put("password", password);
+        params.put("alias", alias);
+        params.put("amount", "1000");
+        params.put("remark","EdwardTest");
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transferByAlias", params);
+        System.out.println("ac_transferByAlias response:" + JSONUtils.obj2json(cmdResp));
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transferByAlias"));
+        String txDigestHex = (String) result.get(RpcConstant.TX_HASH);
+        System.out.println(txDigestHex);
+        assertNotNull(txDigestHex);
+        //转账后查询转入方余额
+        //TODO 此处可能需要延时，因为涉及到交易广播与确认
+
+
+    }
+
+
 
     //连续交易测试
     @Test
