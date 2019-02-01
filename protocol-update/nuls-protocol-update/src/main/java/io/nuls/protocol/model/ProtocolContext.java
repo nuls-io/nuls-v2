@@ -33,10 +33,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.StampedLock;
 
 /**
@@ -76,18 +73,18 @@ public class ProtocolContext {
     private ProtocolVersion currentProtocolVersion;
 
     /**
+     * 所有生效的协议版本历史记录，回滚用
+     */
+    @Getter
+    @Setter
+    private Stack<ProtocolVersion> protocolVersionHistory;
+
+    /**
      * 从配置文件读取的协议对象列表
      */
     @Getter
     @Setter
     private List<ProtocolVersion> localVersionList;
-
-    /**
-     * 缓存的未统计区间协议对象列表
-     */
-    @Getter
-    @Setter
-    private List<ProtocolVersion> versionList;
 
     /**
      * 缓存的未统计区间内各协议版本占比
@@ -137,12 +134,13 @@ public class ProtocolContext {
 
     public void init() {
         lock = new StampedLock();
-        versionList = new ArrayList<>();
         proportionMap = new HashMap<>();
         lastValidStatistics = new Statistics();
         lastValidStatistics.setCount((short) 0);
         lastValidStatistics.setHeight(0);
         lastValidStatistics.setProtocolVersion(currentProtocolVersion);
+        protocolVersionHistory = new Stack<>();
+        protocolVersionHistory.push(currentProtocolVersion);
         LoggerUtil.init(chainId, config.getLogLevel());
         this.setStatus(RunningStatusEnum.READY);
         //服务初始化

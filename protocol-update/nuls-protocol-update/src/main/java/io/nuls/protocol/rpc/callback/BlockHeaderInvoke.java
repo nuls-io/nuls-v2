@@ -54,7 +54,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
                 Statistics lastValidStatistics = context.getLastValidStatistics();
                 if (height == latestHeight + 1) {
                     //保存区块
-                    save(context, commonLog, data, height, latestHeight, lastValidStatistics);
+                    save(context, commonLog, data, height, lastValidStatistics);
                 }
                 if (height == latestHeight) {
                     //回滚区块
@@ -67,69 +67,71 @@ public class BlockHeaderInvoke extends BaseInvoke {
     }
 
     private void rollback(ProtocolContext context, NulsLogger commonLog, BlockExtendsData data, long height, long latestHeight, Statistics lastValidStatistics) {
-        commonLog.debug("chainId-" + chainId + ", rollback block");
         //缓存统计总数-1
         int count = context.getCount();
         count--;
-        context.setCount(count);
-        if (!validate(data, context)) {
-            commonLog.debug("chainId-" + chainId + ", invalid blockheader-" + height);
-            return;
-        }
-        commonLog.debug("chainId-" + chainId + ", rollback block, protocol downgrade");
-        ProtocolVersion protocolVersion = new ProtocolVersion();
-        protocolVersion.setVersion(data.getBlockVersion());
-        protocolVersion.setEffectiveRatio(data.getEffectiveRatio());
-        protocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
-        //移除缓存
-        List<ProtocolVersion> versionList = context.getVersionList();
-        versionList.remove(protocolVersion);
-        //重新计算统计信息
         Map<ProtocolVersion, Integer> proportionMap = context.getProportionMap();
-        proportionMap.merge(protocolVersion, 1, (a, b) -> a - b);
+        if (!validate(data, context)) {
+            commonLog.error("chainId-" + chainId + ", invalid blockheader-" + height);
+        } else {
+            ProtocolVersion newProtocolVersion = new ProtocolVersion();
+            newProtocolVersion.setVersion(data.getBlockVersion());
+            newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
+            newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
+            commonLog.debug("chainId-" + chainId + ", rollback block, height-" + height + ", protocol-" + newProtocolVersion);
+            //重新计算统计信息
+            proportionMap.merge(newProtocolVersion, 1, (a, b) -> a - b);
+        }
+        //缓存统计总数==0时，从数据库加载上一条统计记录
+        ProtocolConfig config = context.getConfig();
+        short interval = config.getInterval();
+        if (count == 0) {
+            List<ProtocolVersion> protocolVersions = BlockUtil.getBlockHeaders(chainId, height - 1000, height);
+            for (ProtocolVersion version : protocolVersions) {
+                proportionMap.merge(version, 1, (a, b) -> a + b);
+            }
+            count = interval;
+        }
         //区块高度到达阈值，从数据库删除一条统计记录
-        if (height == lastValidStatistics.getHeight()) {
+        if (count == interval - 1) {
             service.delete(chainId, height);
             Statistics newValidStatistics = service.get(chainId, lastValidStatistics.getLastHeight());
-            if (newValidStatistics.getCount() < protocolVersion.getContinuousIntervalCount()) {
+            context.setLastValidStatistics(newValidStatistics);
+            if (newValidStatistics.getCount() < context.getCurrentProtocolVersion().getContinuousIntervalCount()) {
                 //设置新协议版本
+                ProtocolVersion protocolVersion = context.getProtocolVersionHistory().pop();
                 context.setCurrentProtocolVersion(protocolVersion);
                 commonLog.info("chainId-" + chainId + ", protocol version rollback-" + protocolVersion);
             }
-            List<ProtocolVersion> protocolVersions = BlockUtil.getBlockHeaders(chainId, latestHeight, latestHeight);
-            versionList.addAll(Objects.requireNonNull(protocolVersions));
-            context.setCount((int) (latestHeight - newValidStatistics.getHeight()));
             context.setLastValidStatistics(newValidStatistics);
             //复原旧统计数据
             proportionMap.clear();
         }
+        context.setCount(count);
+        context.setLatestHeight(height - 1);
 
     }
 
-    private void save(ProtocolContext context, NulsLogger commonLog, BlockExtendsData data, long height, long latestHeight, Statistics lastValidStatistics) {
-        commonLog.debug("chainId-" + chainId + ", save block");
+    private void save(ProtocolContext context, NulsLogger commonLog, BlockExtendsData data, long height, Statistics lastValidStatistics) {
         //缓存统计总数+1
         int count = context.getCount();
         count++;
         context.setCount(count);
         context.setLatestHeight(height);
 
-        List<ProtocolVersion> versionList = context.getVersionList();
         Map<ProtocolVersion, Integer> proportionMap = context.getProportionMap();
         ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
         if (!validate(data, context)) {
             commonLog.error("chainId-" + chainId + ", invalid blockheader-" + height);
-            return;
+        } else {
+            ProtocolVersion newProtocolVersion = new ProtocolVersion();
+            newProtocolVersion.setVersion(data.getBlockVersion());
+            newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
+            newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
+            commonLog.debug("chainId-" + chainId + ", save block, height-" + height + ", protocol-" + newProtocolVersion);
+            //重新计算统计信息
+            proportionMap.merge(newProtocolVersion, 1, (a, b) -> a + b);
         }
-        commonLog.debug("chainId-" + chainId + ", save block, protocol upgrade, height-" + height);
-        ProtocolVersion newProtocolVersion = new ProtocolVersion();
-        newProtocolVersion.setVersion(data.getBlockVersion());
-        newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
-        newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
-        //缓存起来
-        versionList.add(newProtocolVersion);
-        //重新计算统计信息
-        proportionMap.merge(newProtocolVersion, 1, (a, b) -> a + b);
         ProtocolConfig config = context.getConfig();
         short interval = config.getInterval();
         //每1000块进行一次统计
@@ -159,12 +161,12 @@ public class BlockHeaderInvoke extends BaseInvoke {
                     if (statistics.getCount() >= version.getContinuousIntervalCount()) {
                         //设置新协议版本
                         context.setCurrentProtocolVersion(version);
+                        context.getProtocolVersionHistory().push(version);
                         commonLog.info("chainId-" + chainId + ", height-"+ height + ", new protocol version available-" + version);
                     }
                     context.setCount(0);
                     context.setLastValidStatistics(statistics);
                     //清除旧统计数据
-                    versionList.clear();
                     proportionMap.clear();
                     return;
                 }
@@ -189,10 +191,8 @@ public class BlockHeaderInvoke extends BaseInvoke {
             context.setCount(0);
             context.setLastValidStatistics(statistics);
             //清除旧统计数据
-            versionList.clear();
             proportionMap.clear();
         }
-
     }
 
     /**
