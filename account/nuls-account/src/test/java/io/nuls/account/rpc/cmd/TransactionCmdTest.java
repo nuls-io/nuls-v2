@@ -136,9 +136,7 @@ public class TransactionCmdTest {
 
     /**
      * 别名转账测试用例
-     *
-     *
-     * */
+     */
     @Test
     public void transferByAlias() throws Exception {
         //创建账户
@@ -149,34 +147,40 @@ public class TransactionCmdTest {
         //铸币
         addGenesisAsset(fromAddress);
         addGenesisAsset(toAddress); //because the to address need to set alias
+        BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, fromAddress);
+        BigInteger balance2 = LegerCmdCall.getBalance(chainId, assetChainId, assetId, toAddress);
+        System.out.println(fromAddress+"====="+balance.longValue());
+        System.out.println(toAddress+"====="+balance2.longValue());
         //设置别名
-        String alias = "edwardtest";
-        String txHash = CommonRpcOperation.setAlias(toAddress,alias);
+        //String alias = "edwardtest";
+        String alias = "edward" + System.currentTimeMillis();
+        System.out.println(alias);
+        String txHash = CommonRpcOperation.setAlias(toAddress, alias);
         assertNotNull(txHash);
         //查询设置别名是否成功
         String afterSetALias;
         int i = 0;
-        do{
+        do {
             afterSetALias = CommonRpcOperation.getAliasByAddress(toAddress);
             if (afterSetALias == null) {
                 Thread.sleep(5000);
             } else {
                 break;
             }
-            i ++;
-            logger.warn("getAliasByAddress return null,retry times:{}",i);
-        } while (i <=10 );
+            i++;
+            logger.warn("getAliasByAddress return null,retry times:{}", i);
+        } while (i <= 10);
         assertNotNull(afterSetALias);
         //转账前查询转入方余额
 
         //别名转账
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId",chainId);
+        params.put("chainId", chainId);
         params.put("address", fromAddress);
         params.put("password", password);
         params.put("alias", alias);
         params.put("amount", "1000");
-        params.put("remark","EdwardTest");
+        params.put("remark", "EdwardTest");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transferByAlias", params);
         System.out.println("ac_transferByAlias response:" + JSONUtils.obj2json(cmdResp));
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transferByAlias"));
@@ -196,7 +200,7 @@ public class TransactionCmdTest {
      *
      * */
     @Test
-    public void createMultiSignTransfer() throws Exception {
+    public void createMultiSignTransferTest() throws Exception {
         //创建多签账户
         MultiSigAccount multiSigAccount = CommonRpcOperation.createMultiSigAccount();
         assertNotNull(multiSigAccount);

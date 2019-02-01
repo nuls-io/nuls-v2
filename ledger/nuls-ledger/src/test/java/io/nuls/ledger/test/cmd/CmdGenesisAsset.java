@@ -95,7 +95,9 @@ public class CmdGenesisAsset {
         logger.info("response {}", response);
         params.put("isBatchValidate", true);
         Transaction transaction = buildTransaction();
-        params.put("txHex",HexUtil.encode(transaction.serialize()));
+        List<String> txHexList = new ArrayList<>();
+        txHexList.add(HexUtil.encode(transaction.serialize()));
+        params.put("txHexList",txHexList);
          response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
 

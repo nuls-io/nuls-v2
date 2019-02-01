@@ -91,7 +91,9 @@ public class CmdWrongDataTest {
         coinData.setTo(coinTos);
         tx.setCoinData(coinData.serialize());
         params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        List<String> txHexList = new ArrayList<>();
+        txHexList.add(HexUtil.encode(tx.serialize()));
+        params.put("txHexList",txHexList);
         Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
