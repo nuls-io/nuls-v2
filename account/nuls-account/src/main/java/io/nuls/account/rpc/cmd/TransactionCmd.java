@@ -532,7 +532,7 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
 
-            //验证签名账户是否属于多签账户,如果不是多签账户下的地址则提示错误
+            //验证签名账户是否属于多签账户的签名账户,如果不是多签账户下的地址则提示错误
             if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
                 throw new NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
             }
