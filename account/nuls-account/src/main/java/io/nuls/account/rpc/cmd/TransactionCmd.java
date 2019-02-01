@@ -470,7 +470,7 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "transfer by alias")
+    @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "create multi sign transfer")
     public Response createMultiSignTransfer(Map params) {
         Log.debug("ac_createMultiSignTransfer start");
         Map<String, String> map = new HashMap<>(1);
