@@ -158,17 +158,17 @@ public class AliasCmdTest {
         //set the alias
         //get the alias by address
         int count = 1;
+        String address="SPWAxuodkw222367N88eavYDWRraG3930";
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
-        params.put("alias", "alias_" + System.currentTimeMillis());
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasFee", params);
+        params.put("address", address);
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasByAddress", params);
         assertNotNull(cmdResp);
-        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAliasFee");
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAliasByAddress");
         assertNotNull(result);
-        String fee = (String) result.get("fee");
-        assertNotNull(fee);
-        assertNotNull(cmdResp);
+        String alias = (String) result.get("alias");
+        assertNotNull(alias);
     }
 
     @Test

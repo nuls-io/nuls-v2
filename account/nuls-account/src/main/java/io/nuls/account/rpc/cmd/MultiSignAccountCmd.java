@@ -18,7 +18,9 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.FormatValidUtils;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
+import org.bouncycastle.util.encoders.Hex;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,12 +61,19 @@ public class MultiSignAccountCmd extends BaseCmd {
             }
             // parse params
             int chainId = (int) chainIdObj;
-            List<String> pubKeys = (List<String>) pubKeysObj;
             int minSigns = (int) minSignsObj;
+            List<String> pubKeysList = (List<String>) pubKeysObj;
             //create the account
-            MultiSigAccount multiSigAccount = multiSignAccountService.createMultiSigAccount(chainId, pubKeys, minSigns);
+            MultiSigAccount multiSigAccount = multiSignAccountService.createMultiSigAccount(chainId, pubKeysList, minSigns);
             if (multiSigAccount == null) { //create failed
                 throw new NulsRuntimeException(AccountErrorCode.FAILED);
+            }
+            List<Map<String,String>> pubKeys = new ArrayList<>();
+            for (byte[] pubKeyBytes : multiSigAccount.getPubKeyList()) {
+                Map<String,String> tmpMap = new HashMap<>();
+                tmpMap.put("pubKey", HexUtil.encode(pubKeyBytes));
+                tmpMap.put("address",AddressTool.getStringAddressByBytes(AddressTool.getAddress(pubKeyBytes,chainId)));
+                pubKeys.add(tmpMap);
             }
             map.put("address", multiSigAccount.getAddress().getBase58());
             map.put("minSigns", minSigns);
