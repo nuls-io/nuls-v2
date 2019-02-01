@@ -129,7 +129,7 @@ public class TransactionCmd extends BaseCmd {
     @CmdAnnotation(cmd = "ac_commitTx", version = 1.0, description = "batch commit the transaction")
     public Response commitTx(Map params) {
         Log.debug("ac_commitTx start,params size:{}", params == null ? 0 : params.size());
-        boolean result = false;
+        boolean result = true;
         int chainId;
         List<String> txHexList;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
@@ -447,8 +447,8 @@ public class TransactionCmd extends BaseCmd {
 
             toCoinDto.setAddress(AddressTool.getStringAddressByBytes(aliasPo.getAddress()));
             toCoinDto.setAmount(amount);
-            fromCoinDto.setAssetsChainId(chainId);
-            fromCoinDto.setAssetsId(assetId);
+            toCoinDto.setAssetsChainId(chainId);
+            toCoinDto.setAssetsId(assetId);
             Transaction tx = transactionService.transferByAlias(chainId, fromCoinDto, toCoinDto, remark);
             map.put("txHash", tx.getHash().getDigestHex());
         } catch (NulsException e) {
