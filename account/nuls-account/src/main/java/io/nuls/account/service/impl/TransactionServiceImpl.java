@@ -210,12 +210,11 @@ public class TransactionServiceImpl implements TransactionService {
         int assetsId = chain.getConfig().getAssetsId();
         CoinFrom coinFrom = new CoinFrom(multiSigAccount.getAddress().getAddressBytes(), chainId, assetsId);
         CoinTo coinTo = new CoinTo(AddressTool.getAddress(toAddress), chainId, assetsId, amount);
-        int txSize = transaction.size() + coinFrom.size() + coinTo.size() + ((int) multiSigAccount.getM()) * 72;
+        int txSize = transaction.size() + coinFrom.size() + coinTo.size() + ((int) multiSigAccount.getM()) * P2PHKSignature.SERIALIZE_LENGTH;
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize); //计算手续费
         BigInteger totalAmount = amount.add(fee); //总费用为
         coinFrom.setAmount(totalAmount);
         //检查余额是否充足
-        System.out.println(HexUtil.encode(coinFrom.getAddress()));
         BigInteger mainAsset = TxUtil.getBalance(chainId, chainId, assetsId, coinFrom.getAddress());
         if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) { //余额不足
             throw new NulsRuntimeException(AccountErrorCode.INSUFFICIENT_FEE);
@@ -556,7 +555,8 @@ public class TransactionServiceImpl implements TransactionService {
         }
         size += commonAddress.size() * P2PHKSignature.SERIALIZE_LENGTH;
         for (MultiSigAccount account : multiSignAddress) {
-            size += account.getM() * 72; //TODO 72是否准确？EdwardChan
+            //不管是单签还是多签账户，最终签名的方式都一样，所以长度也一样（注意，1.0版本中多签账户签名后长度为72）
+            size += account.getM() * P2PHKSignature.SERIALIZE_LENGTH;
         }
         return size;
     }
