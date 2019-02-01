@@ -54,7 +54,7 @@ public interface AliasService {
      * @param aliasName the alias to set
      * @return Transaction
      */
-    Transaction setAlias(int chainId, String address, String password, String aliasName);
+    Transaction setAlias(int chainId, String address, String password, String aliasName) throws Exception;
 
     /**
      * 获取设置别名交易手续费

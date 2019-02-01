@@ -163,4 +163,9 @@ public interface RpcConstant {
      * Role_Event
      */
     String ROLE_EV = "Role_Event";
+
+    /**
+     * TX_HASH
+     */
+    String TX_HASH = "txHash";
 }
