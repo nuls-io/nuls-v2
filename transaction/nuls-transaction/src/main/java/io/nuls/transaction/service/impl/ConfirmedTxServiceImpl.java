@@ -3,6 +3,7 @@ package io.nuls.transaction.service.impl;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
@@ -26,6 +27,7 @@ import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.rpc.call.TransactionCall;
 import io.nuls.transaction.service.ConfirmedTxService;
 import io.nuls.transaction.service.CtxService;
+import io.nuls.transaction.service.TxService;
 import io.nuls.transaction.utils.TransactionIndexComparator;
 import io.nuls.transaction.utils.TxUtil;
 
@@ -68,6 +70,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     @Autowired
     private TransactionH2Service transactionH2Service;
 
+    @Autowired
+    private TxService txService;
+
     @Override
     public Transaction getConfirmedTransaction(Chain chain, NulsDigestData hash) {
         if (null == hash) {
@@ -96,6 +101,8 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             //todo 批量验证coinData，接口和单个的区别？
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, true);
             if (!verifyTxResult.success()) {
+                chain.getLogger().debug("\n*** Debug *** [保存创世块交易失败] " +
+                        "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
                 return false;
             }
         }
@@ -169,6 +176,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     //保存交易
     public boolean saveTxs(Chain chain, List<Transaction> txList, boolean atomicity) {
         List<Transaction> savedList = new ArrayList<>();
+        boolean rs = true;
         for (Transaction tx : txList) {
             if (saveTx(chain, tx)) {
                 savedList.add(tx);
@@ -176,10 +184,11 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 if(atomicity) {
                     removeTxs(chain, savedList, false);
                 }
+                rs = false;
                 break;
             }
         }
-        return false;
+        return rs;
     }
 
     //调提交易
@@ -188,8 +197,18 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
-            boolean rs = TransactionCall.txProcess(chain, entry.getKey().getCommit(),
-                    entry.getKey().getModuleCode(), entry.getValue(), blockHeaderHex);
+            boolean rs;
+            if(entry.getKey().getModuleCode().equals(TxConstant.MODULE_CODE)){
+                try {
+                    rs = txService.crossTransactionCommit(chain, entry.getValue(), blockHeaderHex);
+                } catch (NulsException e) {
+                    chain.getLogger().error(e);
+                    rs = false;
+                }
+            }else {
+                rs = TransactionCall.txProcess(chain, entry.getKey().getCommit(),
+                        entry.getKey().getModuleCode(), entry.getValue(), blockHeaderHex);
+            }
             if (!rs) {
                 result = false;
                 break;
@@ -215,6 +234,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
     public boolean removeTxs(Chain chain, List<Transaction> txList, boolean atomicity) {
         List<Transaction> successedList = new ArrayList<>();
+        boolean rs = true;
         for (Transaction tx : txList) {
             if (confirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash())) {
                 successedList.add(tx);
@@ -222,17 +242,29 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 if(atomicity){
                     saveTxs(chain, successedList, false);
                 }
+                rs = false;
+                break;
             }
         }
-        return false;
+        return rs;
     }
 
     public boolean rollbackTxs(Chain chain, Map<TxRegister, List<String>> moduleVerifyMap, String blockHeaderHex, boolean atomicity) {
         Map<TxRegister, List<String>> successed = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         boolean result = true;
         for (Map.Entry<TxRegister, List<String>> entry : moduleVerifyMap.entrySet()) {
-            boolean rs = TransactionCall.txProcess(chain, entry.getKey().getRollback(),
-                    entry.getKey().getModuleCode(), entry.getValue(), blockHeaderHex);
+            boolean rs;
+            if(entry.getKey().getModuleCode().equals(TxConstant.MODULE_CODE)){
+                try {
+                    rs = txService.crossTransactionRollback(chain, entry.getValue(), blockHeaderHex);
+                } catch (NulsException e) {
+                    chain.getLogger().error(e);
+                    rs = false;
+                }
+            }else {
+                rs = TransactionCall.txProcess(chain, entry.getKey().getRollback(),
+                        entry.getKey().getModuleCode(), entry.getValue(), blockHeaderHex);
+            }
             if (!rs) {
                 result = false;
                 break;
@@ -324,55 +356,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
         }
         return true;
-    }
-
-    /**
-     * 保存交易时对跨链交易进行处理, 包括跨链交易变更状态, 向链管理提交跨链交易coinData, 记录hash
-     *
-     * @param chain
-     * @param tx
-     * @return
-     */
-    private boolean ctxCommit(Chain chain, Transaction tx, List<NulsDigestData> ctxhashList) {
-        //跨链交易变更状态
-        if (null != ctxhashList) {
-            ctxhashList.add(tx.getHash());
-        }
-        String coinDataHex = HexUtil.encode(tx.getCoinData());
-        try {
-            boolean rs = ChainCall.ctxChainLedgerCommit(coinDataHex);
-            if (!rs) {
-                throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
-            }
-            return true;
-        } catch (NulsException e) {
-            if (null != ctxhashList) {
-                ctxhashList.remove(tx.getHash());
-            }
-            chain.getLogger().error(e);
-            return false;
-        }
-    }
-
-    /**
-     * 回滚交易时对跨链交易进行处理, 包括跨链交易变更状态, 通知链管理回滚coinData
-     *
-     * @param chain
-     * @param tx
-     * @return
-     */
-    private boolean ctxRollback(Chain chain, Transaction tx) {
-        String coinDataHex = HexUtil.encode(tx.getCoinData());
-        try {
-            boolean rs = ChainCall.ctxChainLedgerRollback(coinDataHex);
-            if (!rs) {
-                throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
-            }
-            return true;
-        } catch (NulsException e) {
-            chain.getLogger().error(e);
-            return false;
-        }
     }
 
 

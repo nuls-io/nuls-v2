@@ -675,7 +675,7 @@ public class TxServiceImpl implements TxService {
 
 
     @Override
-    public boolean crossTransactionCommit(Chain chain, List<String> txHexList, BlockHeader blockHeader) throws NulsException {
+    public boolean crossTransactionCommit(Chain chain, List<String> txHexList, String blockHeaderHex) throws NulsException {
 
         List<NulsDigestData> txHash = new ArrayList<>();
         List<String> successedCoinDataHexs = new ArrayList<>();
@@ -692,6 +692,7 @@ public class TxServiceImpl implements TxService {
         }
         if(rs) {
             //保存生效高度
+            BlockHeader blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
             long effectHeight = blockHeader.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
             return confirmedTxStorageService.saveCrossTxEffectList(chain.getChainId(), effectHeight, txHash);
         }else{
@@ -706,7 +707,7 @@ public class TxServiceImpl implements TxService {
     }
 
     @Override
-    public boolean crossTransactionRollback(Chain chain, List<String> txHexList, BlockHeader blockHeader) throws NulsException {
+    public boolean crossTransactionRollback(Chain chain, List<String> txHexList, String blockHeaderHex) throws NulsException {
         List<String> successedCoinDataHexs = new ArrayList<>();
         boolean rs = true;
         for(String txHex : txHexList){
@@ -719,6 +720,7 @@ public class TxServiceImpl implements TxService {
             successedCoinDataHexs.add(coinDataHex);
         }
         if(rs) {
+            BlockHeader blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
             long effectHeight = blockHeader.getHeight() + TxConstant.CTX_EFFECT_THRESHOLD;
             return confirmedTxStorageService.removeCrossTxEffectList(chain.getChainId(), effectHeight);
         }else{
