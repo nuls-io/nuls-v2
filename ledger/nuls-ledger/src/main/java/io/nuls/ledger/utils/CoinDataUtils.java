@@ -43,8 +43,8 @@ public class CoinDataUtils {
         }else{
             unconfirmedTx = map.get(accountKey);
         }
-        unconfirmedTx.getSpendAmount().add(coinFrom.getAmount());
-        unconfirmedTx.setSpendAmount(unconfirmedTx.getEarnAmount().add(coinFrom.getAmount()));
+//        unconfirmedTx.getSpendAmount().add(coinFrom.getAmount());
+        unconfirmedTx.setSpendAmount(unconfirmedTx.getSpendAmount().add(coinFrom.getAmount()));
         map.put(accountKey,unconfirmedTx);
     }
     public  static void  calTxToAmount(Map<String,UnconfirmedTx> map, CoinTo coinTo,String txHash,String accountKey){
