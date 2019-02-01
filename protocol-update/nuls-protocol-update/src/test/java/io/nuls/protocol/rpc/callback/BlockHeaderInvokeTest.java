@@ -6,6 +6,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolContext;
+import io.nuls.protocol.service.BlockStorageService;
 import io.nuls.protocol.utils.ConfigLoader;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.MessageUtil;
@@ -18,8 +19,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Stack;
 
 import static io.nuls.protocol.constant.Constant.*;
@@ -29,15 +28,23 @@ public class BlockHeaderInvokeTest {
 
     private static int chainId = 12345;
 
+    private static BlockStorageService service = null;
+
+    private String BLOCK_HEADER_INDEX = "BlockHeaderIndex";
+    private String BLOCK_HEADER = "BlockHeader";
+
     @BeforeClass
     public static void beforeClass() {
         SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
         RocksDBService.init(DATA_PATH);
+        service = SpringLiteContext.getBean(BlockStorageService.class);
     }
 
     @Before
     public void setUp() throws Exception {
         RocksDBService.createTable(PROTOCOL_CONFIG);
+        RocksDBService.createTable(BLOCK_HEADER_INDEX + chainId);
+        RocksDBService.createTable(BLOCK_HEADER + chainId);
         ConfigLoader.load();
     }
 
@@ -45,6 +52,8 @@ public class BlockHeaderInvokeTest {
     public void tearDown() throws Exception {
         RocksDBService.destroyTable(PROTOCOL_CONFIG);
         RocksDBService.destroyTable(Constant.STATISTICS + chainId);
+        RocksDBService.destroyTable(BLOCK_HEADER_INDEX + chainId);
+        RocksDBService.destroyTable(BLOCK_HEADER + chainId);
     }
 
     /**
@@ -437,6 +446,7 @@ public class BlockHeaderInvokeTest {
             blockHeader.setExtend(data.serialize());
             invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
             stack.push(blockHeader);
+            service.save(chainId, blockHeader);
         }
         //V1-->V2,并且V2持续运行一段时间
         for (int i = 1889; i <= 18888; i++) {
@@ -465,6 +475,7 @@ public class BlockHeaderInvokeTest {
                 assertEquals(2, version);
             }
             stack.add(blockHeader);
+            service.save(chainId, blockHeader);
         }
         //V2-->V3,并且V3持续运行一段时间
         for (int i = 18889; i <= 28888; i++) {
@@ -493,6 +504,7 @@ public class BlockHeaderInvokeTest {
                 assertEquals(3, version);
             }
             stack.add(blockHeader);
+            service.save(chainId, blockHeader);
         }
 
         //开始回滚

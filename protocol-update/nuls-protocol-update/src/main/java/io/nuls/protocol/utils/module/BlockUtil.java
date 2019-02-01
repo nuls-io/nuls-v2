@@ -20,15 +20,21 @@
 
 package io.nuls.protocol.utils.module;
 
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.rpc.callback.BlockHeaderInvoke;
+import io.nuls.protocol.service.BlockStorageService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +49,8 @@ import java.util.Map;
  */
 public class BlockUtil {
 
+    private static BlockStorageService service = SpringLiteContext.getBean(BlockStorageService.class);
+
     /**
      * 更新本模块的运行时状态
      *
@@ -52,25 +60,42 @@ public class BlockUtil {
      * @return
      */
     public static List<ProtocolVersion> getBlockHeaders(int chainId, long begin, long end) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
-        try {
-            Map<String, Object> params = new HashMap<>(3);
-//            params.put(Constants.VERSION_KEY_STR, "1.0");
-            params.put("chainId", chainId);
-            params.put("begin", begin);
-            params.put("end", end);
-
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, "getBlockHeadersByHeightRange", params);
-            if (response.isSuccess()) {
-                Map responseData = (Map) response.getResponseData();
-                List<ProtocolVersion> result = (List) responseData.get("getBlockHeadersByHeightRange");
-                return result;
+        List<BlockHeader> blockHeaders = service.query(chainId, begin, end);
+        List<ProtocolVersion> result = new ArrayList<>();
+        for (BlockHeader blockHeader : blockHeaders) {
+            byte[] extend = blockHeader.getExtend();
+            BlockExtendsData data = new BlockExtendsData();
+            try {
+                data.parse(new NulsByteBuffer(extend));
+            } catch (NulsException e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            commonLog.error(e);
+            ProtocolVersion newProtocolVersion = new ProtocolVersion();
+            newProtocolVersion.setVersion(data.getBlockVersion());
+            newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
+            newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
+            result.add(newProtocolVersion);
         }
-        return null;
+        return result;
+//        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+//        try {
+//            Map<String, Object> params = new HashMap<>(3);
+////            params.put(Constants.VERSION_KEY_STR, "1.0");
+//            params.put("chainId", chainId);
+//            params.put("begin", begin);
+//            params.put("end", end);
+//
+//            Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, "getBlockHeadersByHeightRange", params);
+//            if (response.isSuccess()) {
+//                Map responseData = (Map) response.getResponseData();
+//                List<ProtocolVersion> result = (List) responseData.get("getBlockHeadersByHeightRange");
+//                return result;
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            commonLog.error(e);
+//        }
+//        return null;
     }
 
     public static void register(int chainId){

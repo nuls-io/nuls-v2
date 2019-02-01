@@ -58,7 +58,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
                 }
                 if (height == latestHeight) {
                     //回滚区块
-                    rollback(context, commonLog, data, height, latestHeight, lastValidStatistics);
+                    rollback(context, commonLog, data, height, lastValidStatistics);
                 }
             } catch (NulsException e) {
                 commonLog.error(e);
@@ -66,7 +66,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
         }
     }
 
-    private void rollback(ProtocolContext context, NulsLogger commonLog, BlockExtendsData data, long height, long latestHeight, Statistics lastValidStatistics) {
+    private void rollback(ProtocolContext context, NulsLogger commonLog, BlockExtendsData data, long height, Statistics lastValidStatistics) {
         //缓存统计总数-1
         int count = context.getCount();
         count--;
@@ -86,7 +86,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
         ProtocolConfig config = context.getConfig();
         short interval = config.getInterval();
         if (count == 0) {
-            List<ProtocolVersion> protocolVersions = BlockUtil.getBlockHeaders(chainId, height - 1000, height);
+            List<ProtocolVersion> protocolVersions = BlockUtil.getBlockHeaders(chainId, height - interval, height - 1);
             for (ProtocolVersion version : protocolVersions) {
                 proportionMap.merge(version, 1, (a, b) -> a + b);
             }
