@@ -215,6 +215,7 @@ public class TransactionServiceImpl implements TransactionService {
         BigInteger totalAmount = amount.add(fee); //总费用为
         coinFrom.setAmount(totalAmount);
         //检查余额是否充足
+        System.out.println(HexUtil.encode(coinFrom.getAddress()));
         BigInteger mainAsset = TxUtil.getBalance(chainId, chainId, assetsId, coinFrom.getAddress());
         if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) { //余额不足
             throw new NulsRuntimeException(AccountErrorCode.INSUFFICIENT_FEE);
@@ -241,7 +242,7 @@ public class TransactionServiceImpl implements TransactionService {
             }
 
         } else {
-            p2PHKSignatures = Arrays.asList();
+            p2PHKSignatures = new ArrayList<>();
         }
         ECKey eckey = account.getEcKey(password);
         P2PHKSignature p2PHKSignature = SignatureUtil.createSignatureByEckey(transaction, eckey);

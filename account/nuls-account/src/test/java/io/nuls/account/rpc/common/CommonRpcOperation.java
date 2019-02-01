@@ -3,6 +3,7 @@ package io.nuls.account.rpc.common;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcConstant;
+import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.AccountKeyStoreDto;
@@ -10,10 +11,7 @@ import io.nuls.account.model.dto.AccountOfflineDto;
 import io.nuls.account.model.dto.SimpleAccountDto;
 import io.nuls.account.rpc.call.LegerCmdCall;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Page;
+import io.nuls.base.data.*;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
@@ -28,6 +26,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +81,25 @@ public class CommonRpcOperation {
         return accountList;
     }
 
+    public static Map<String,Object> getAccountByAddress(int chainId, String address) {
+        HashMap accountMap = null;
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put(Constants.VERSION_KEY_STR, version);
+            params.put("chainId", chainId);
+            params.put("address", address);
+
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
+            if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
+                return null;
+            }
+            accountMap = ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return accountMap;
+    }
+
     public static String setAlias(String address, String alias) throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
@@ -114,5 +132,54 @@ public class CommonRpcOperation {
         assertNotNull(result);
         String alias = (String) result.get("alias");
         return alias;
+    }
+
+    /**
+     * 创建多签账户
+     *
+     *
+     *
+     * **/
+    public static MultiSigAccount createMultiSigAccount() throws Exception {
+        MultiSigAccount multiSigAccount = new MultiSigAccount();
+        List<String> accountList = createAccount(3);
+        Map<String, Object> params = new HashMap<>();
+        List<String> pubKeys = new ArrayList<>();
+        List<byte[]> pubKeysBytesList = new ArrayList<>();
+        for (String address:accountList ) {
+            Map<String,Object> accountMap = getAccountByAddress(chainId,address);
+            //pubKeys.add(HexUtil.encode(account.getPubKey()));
+            assertNotNull(accountMap);
+            Object pubKeyHexObj = accountMap.get("pubkeyHex");
+            assertNotNull(pubKeyHexObj);
+            String pubKeyHex = pubKeyHexObj.toString();
+            pubKeys.add(pubKeyHex);
+        }
+        multiSigAccount.setChainId(chainId);
+
+        multiSigAccount.setM((byte) 2);
+
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("chainId", multiSigAccount.getChainId());
+        params.put("pubKeys", pubKeys);
+        params.put("minSigns", multiSigAccount.getM());
+        //create the multi sign accout
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSigAccount", params);
+        assertNotNull(cmdResp);
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSigAccount");
+        assertNotNull(result);
+        String address = (String) result.get("address");
+        assertNotNull(address);
+        multiSigAccount.setAddress(new Address(address));
+        int resultMinSigns = (int) result.get("minSigns");
+        assertEquals(resultMinSigns,2);
+        List<Map<String,String>> resultPubKeys = (List<Map<String,String>>) result.get("pubKeys");
+        assertNotNull(resultPubKeys);
+        assertEquals(resultPubKeys.size(),3);
+        for (Map<String,String> map : resultPubKeys) {
+            pubKeysBytesList.add(HexUtil.decode(map.get("pubKey")));
+        }
+        multiSigAccount.setPubKeyList(pubKeysBytesList);
+        return multiSigAccount;
     }
 }

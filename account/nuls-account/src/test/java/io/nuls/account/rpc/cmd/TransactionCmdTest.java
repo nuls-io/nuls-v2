@@ -5,13 +5,9 @@ import io.nuls.account.model.dto.CoinDto;
 import io.nuls.account.model.dto.TransferDto;
 import io.nuls.account.rpc.call.LegerCmdCall;
 import io.nuls.account.rpc.common.CommonRpcOperation;
+import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.CoinData;
-import io.nuls.base.data.CoinFrom;
-import io.nuls.base.data.CoinTo;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
@@ -141,9 +137,6 @@ public class TransactionCmdTest {
     /**
      * 别名转账测试用例
      *
-     * 1st:构建别名转账请求参数
-     * 2end:将请求发送到账户模块
-     * 3ird:检查返回结果
      *
      * */
     @Test
@@ -192,11 +185,52 @@ public class TransactionCmdTest {
         assertNotNull(txDigestHex);
         //转账后查询转入方余额
         //TODO 此处可能需要延时，因为涉及到交易广播与确认
-
-
     }
 
+    /**
+     * 创建多签转账交易，包括别名转账以及非别名转账
+     *
+     * 1st:构建别名转账请求参数
+     * 2end:将请求发送到账户模块
+     * 3ird:检查返回结果
+     *
+     * */
+    @Test
+    public void createMultiSignTransfer() throws Exception {
+        //创建多签账户
+        MultiSigAccount multiSigAccount = CommonRpcOperation.createMultiSigAccount();
+        assertNotNull(multiSigAccount);
+        String fromAddress = AddressTool.getStringAddressByBytes(multiSigAccount.getAddress().getAddressBytes());
+        assertNotNull(fromAddress);
+        String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(0),chainId));
+        assertNotNull(signAddress);
+        //创建一个接收方账户
+        List<String> accoutList = CommonRpcOperation.createAccount(1);
+        assertTrue(accoutList != null & accoutList.size() == 1);
+        String toAddress = accoutList.get(0);
+        //铸币
+        addGenesisAsset(fromAddress);
+        System.out.println(HexUtil.encode(AddressTool.getAddress(fromAddress)));
+        BigInteger balance = TxUtil.getBalance(chainId,chainId,assetId,AddressTool.getAddress(fromAddress));
+        System.out.println(balance);
 
+        //创建多签账户转账交易
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId",chainId);
+        params.put("address", fromAddress);
+        params.put("signAddress", signAddress);
+        params.put("password", password);
+        params.put("type", 1);
+        params.put("toAddress",toAddress);
+        params.put("amount", "1000");
+        params.put("remark","EdwardTest");
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignTransfer", params);
+        System.out.println("ac_createMultiSignTransfer response:" + JSONUtils.obj2json(cmdResp));
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignTransfer"));
+        String txHex = (String) result.get(RpcConstant.TX_DATA_HEX);
+        System.out.println(txHex);
+        assertNotNull(txHex);
+    }
 
     //连续交易测试
     @Test
