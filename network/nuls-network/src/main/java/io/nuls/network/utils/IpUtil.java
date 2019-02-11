@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2017-2018 nuls.io
+ * Copyright (c) 2017-2019 nuls.io
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,121 +22,47 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager;
+package io.nuls.network.utils;
 
-import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.model.dto.IpAddress;
-
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.*;
+import io.nuls.network.constant.NetworkConstant;
+import io.nuls.tools.log.Log;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
 
+import java.net.*;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 /**
- * 用于管理本地节点的相关信息
- * local node info  manager
- * @author lan
- * @date 2018/11/01
- *
+ * @author vivi
  */
-public class LocalInfoManager extends BaseManager {
+public class IpUtil {
+    private static final Pattern pattern = Pattern.compile("\\<dd class\\=\"fz24\">(.*?)\\<\\/dd>");
 
-    private static LocalInfoManager instance = new LocalInfoManager();
-    public static LocalInfoManager getInstance(){
-        return instance;
-    }
+    private static final Set<String> ips = new HashSet<>();
 
-    private IpAddress externalAddress=new IpAddress("0.0.0.0",0);
-
-    /**
-     * 是否地址广播
-     */
-    private volatile boolean isAddrBroadcast=false;
-    /**
-     * 是否已尝试过自己连接自己
-     */
-    private  volatile boolean connectedMySelf;
-    /**
-     * 当前节点是否是自身网络种子节点
-     */
-    private volatile boolean isSelfNetSeed;
-
-    /**
-     * 本机IP集合
-     */
-    private static final Set<String> IPS = new HashSet<>();
-
-    public void updateExternalAddress(String ip,int port){
-        externalAddress.setIpStr(ip);
-        externalAddress.setPort(port);
-
-    }
-
-    boolean isConnectedMySelf() {
-        return connectedMySelf;
-    }
-
-    void setConnectedMySelf(boolean connectedMySelf) {
-        this.connectedMySelf = connectedMySelf;
-    }
-
-    boolean isSelfNetSeed() {
-        return isSelfNetSeed;
-    }
-
-
-
-    /**
-     *
-     * @return boolean
-     */
-    boolean isAddrBroadcast() {
-        return isAddrBroadcast;
-    }
-
-    /**
-     * 设置是否已经广播过自身地址
-     * @param addrBroadcast true or false
-     */
-    void setAddrBroadcast(boolean addrBroadcast) {
-        isAddrBroadcast = addrBroadcast;
-    }
-
-    public IpAddress getExternalAddress() {
-        return externalAddress;
-    }
-
-    /**
-     *  setExternalAddress
-     * @param externalAddress IpAddress
-     */
-    public void setExternalAddress(IpAddress externalAddress) {
-        this.externalAddress = externalAddress;
-    }
-
-
-    public boolean isSelfIp(String ip){
-       if(externalAddress.getIp().getHostAddress().equals(ip)){
-           return true;
-       }
-        return IPS.contains(ip);
-    }
     static {
         List<String> localIPs = getLocalIP();
-        IPS.addAll(localIPs);
+        for (String ip : localIPs) {
+            ips.add(ip);
+        }
+    }
+
+    public static Set<String> getIps() {
+        return ips;
     }
 
     private static ArrayList<String> getLocalIP() {
         ArrayList<String> iplist = new ArrayList<>();
+        boolean loop = false;
         String bindip;
         Enumeration<?> network;
         List<NetworkInterface> netlist = new ArrayList<>();
         try {
             network = NetworkInterface.getNetworkInterfaces();
             while (network.hasMoreElements()) {
+                loop = true;
                 NetworkInterface ni = (NetworkInterface) network.nextElement();
                 if (ni.isLoopback()) {
                     continue;
@@ -144,15 +70,15 @@ public class LocalInfoManager extends BaseManager {
                 netlist.add(0, ni);
                 InetAddress ip;
                 for (NetworkInterface list : netlist) {
+                    if (loop == false) {
+                        break;
+                    }
                     Enumeration<?> card = list.getInetAddresses();
                     while (card.hasMoreElements()) {
                         while (true) {
                             ip = null;
                             try {
-                                Object object = card.nextElement();
-                                if(object instanceof  InetAddress){
-                                    ip = (InetAddress) card.nextElement();
-                                }
+                                ip = (InetAddress) card.nextElement();
                             } catch (Exception e) {
 
                             }
@@ -164,11 +90,14 @@ public class LocalInfoManager extends BaseManager {
                                     continue;
                                 }
                             }
+                            if (ip instanceof Inet6Address) {
+                                continue;
+                            }
                             if (ip instanceof Inet4Address) {
                                 bindip = ip.getHostAddress();
                                 boolean addto = true;
-                                for (String anIplist : iplist) {
-                                    if (bindip.equals(anIplist)) {
+                                for (int n = 0; n < iplist.size(); n++) {
+                                    if (bindip.equals(iplist.get(n))) {
                                         addto = false;
                                         break;
                                     }
@@ -190,34 +119,68 @@ public class LocalInfoManager extends BaseManager {
         return iplist;
     }
 
-    @Override
-    public void init() {
-        for (String ip : IPS) {
-            if (isSelfSeedNode(ip)) {
-                isSelfNetSeed = true;
-                break;
-            }
-        }
-    }
-
-    /**
-     * 是否是种子节点
-     * Is it a seed node
-     * @param ip  just ip address not port
-     * @return boolean
-     */
-    private boolean isSelfSeedNode(String ip) {
-        List<String> seedList=NetworkParam.getInstance().getSeedIpList();
-        for (String seedIp : seedList) {
-            if (seedIp.equals(ip)) {
-                return true;
-            }
+    public static boolean judgeLocalIsServer(String localIP, String remoteIP) {
+        long local = ipToLong(localIP);
+        long remote = ipToLong(remoteIP);
+        if (local < remote) {
+            return true;
         }
         return false;
     }
 
-    @Override
-    public void start() {
+    public static long ipToLong(String ipAddress) {
+        long result = 0;
+        String[] ipAddressInArray = ipAddress.split("\\.");
+        for (int i = 3; i >= 0; i--) {
+            long ip = Long.parseLong(ipAddressInArray[3 - i]);
+            //left shifting 24,16,8,0 and bitwise OR
+            //1. 192 << 24
+            //1. 168 << 16
+            //1. 1   << 8
+            //1. 2   << 0
+            result |= ip << (i * 8);
+        }
+        return result;
+    }
 
+    public static String getNodeId(InetSocketAddress socketAddress) {
+        if (socketAddress == null) {
+            return null;
+        }
+        return socketAddress.getHostString() + NetworkConstant.COLON + socketAddress.getPort();
+    }
+
+    /**
+     * 判断是否为合法IP * @return the ip
+     */
+    public static boolean isboolIp(String ipAddress) {
+        String ip = "([1-9]|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])(\\.(\\d|[1-9]\\d|1\\d{2}|2[0-4]\\d|25[0-5])){3}";
+        Pattern pattern = Pattern.compile(ip);
+        Matcher matcher = pattern.matcher(ipAddress);
+        return matcher.matches();
+    }
+
+    public static void main(String[] args) {
+        List<String> list = new ArrayList<>();
+        list.add("119.23.248.143");
+        list.add("119.23.212.239");
+        list.add("39.108.181.47");
+        list.add("185.7�\u000B��<\u0011��");
+        list.add("39.104.136.6");
+        list.add("47.107.45.135");
+        list.add("51.15.63.174");
+        list.add("39.108.167.178");
+        list.add("47.106.149.140");
+        list.add("139.159.147.21");
+        list.add("122.114.0.96");
+        list.add("127.0.0.1");
+        list.add("192.168.1.1");
+        list.add("256.2.3.4");
+        list.add("0.0.0.0");
+        list.add("0.0.0");
+
+        for (String str : list) {
+            System.out.println(isboolIp(str));
+        }
     }
 }

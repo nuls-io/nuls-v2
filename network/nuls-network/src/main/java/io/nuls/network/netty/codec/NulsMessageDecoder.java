@@ -52,14 +52,12 @@ public class NulsMessageDecoder extends ByteToMessageDecoder {
             if (decoded != null) {
                 out.add(decoded);
             }
-        }else{
+        } else {
+            Log.error("illegal message REC");
             in.clear();
             //如果一个连接有多条链，此时通道需要保留，不该关闭连接
-            if(connectionManager.isPeerSingleGroup(ctx.channel())){
-                ctx.close();
-            }else{
-                Log.error("illegal message REC");
-            }
+            ctx.close();
+
         }
     }
 }

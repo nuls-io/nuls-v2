@@ -24,8 +24,9 @@
  */
 package io.nuls.network.storage;
 
-import io.nuls.network.model.po.GroupNodeKeys;
-import io.nuls.network.model.po.NodeGroupPo;
+import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.po.GroupNodesPo;
+import io.nuls.network.model.po.GroupPo;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.tools.exception.NulsException;
@@ -35,48 +36,40 @@ import java.util.Map;
 
 /**
  * DbService
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
-public interface  DbService {
+public interface DbService {
     /**
      * get nodeGroups
+     *
      * @return List<NodeGroupPo>
      */
-    List<NodeGroupPo> getAllNodeGroups() throws NulsException;
+    List<GroupPo> getAllNodeGroups() throws NulsException;
 
-    /**
-     * get nodes
-     * @return  List<NodePo>
-     */
-    List<NodePo> getAllNodes() throws NulsException;
-    Map<String,NodePo> getAllNodesMap() throws NulsException;
-    /**
-     * @description  save node groups
-     * @param nodeGroups nodeGroups
-     */
-    void saveNodeGroups(List<NodeGroupPo> nodeGroups);
+    void saveNodes(NodeGroup nodeGroup);
 
-    void saveNodes(List<NodePo> nodePos);
-    void batchSaveGroupNodeKeys(List<GroupNodeKeys> groupNodeKeysList);
-    void saveGroupNodeKeys(GroupNodeKeys groupNodeKeys);
+    GroupNodesPo getNodesByChainId(int chainId) throws NulsException;
 
-    void deleteNode(String nodeId);
 
     void deleteGroup(int chainId);
 
-    void deleteGroupNodeKeys(int chainId);
+    /**
+     * @param nodeGroups nodeGroups
+     * @description save node groups
+     */
+    void saveNodeGroups(List<GroupPo> nodeGroups);
 
+    GroupPo getNodeGroupByChainId(int chainId) throws NulsException;
 
-     NodeGroupPo getNodeGroupByChainId(int chainId) throws NulsException;
-     GroupNodeKeys getGroupNodeKeysByChainId(int chainId) throws NulsException;
 
     /**
      * save protocol register info
      */
 
     void saveOrUpdateProtocolRegisterInfo(RoleProtocolPo roleProtocolPo);
+
     /**
      * init protocol register info
      */

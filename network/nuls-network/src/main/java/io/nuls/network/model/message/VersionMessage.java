@@ -32,25 +32,27 @@ import io.nuls.tools.exception.NulsException;
 
 /**
  * VersionMessage
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
-public class VersionMessage  extends BaseMessage<VersionMessageBody> {
+public class VersionMessage extends BaseMessage<VersionMessageBody> {
 
     @Override
     protected VersionMessageBody parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
         try {
             return byteBuffer.readNulsData(new VersionMessageBody());
         } catch (Exception e) {
-           throw new NulsException(e);
+            throw new NulsException(e);
         }
     }
+
     public VersionMessage() {
-       super(NetworkConstant.CMD_MESSAGE_VERSION);
+        super(NetworkConstant.CMD_MESSAGE_VERSION);
     }
-    public VersionMessage(long magicNumber,String cmd,VersionMessageBody body) {
-        super(cmd,magicNumber);
+
+    public VersionMessage(long magicNumber, String cmd, VersionMessageBody body) {
+        super(cmd, magicNumber);
         this.setMsgBody(body);
     }
 }

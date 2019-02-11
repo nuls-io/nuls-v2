@@ -33,11 +33,13 @@ import io.nuls.tools.constant.ToolsConstant;
 import io.nuls.tools.exception.NulsException;
 
 import java.io.IOException;
+
 /**
  * message body
  */
 public class MessageBody extends BaseNulsData {
-   byte [] empty =ToolsConstant.PLACE_HOLDER;
+    byte[] empty = ToolsConstant.PLACE_HOLDER;
+
     public MessageBody() {
 
     }

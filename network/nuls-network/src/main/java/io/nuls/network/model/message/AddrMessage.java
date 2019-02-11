@@ -33,9 +33,9 @@ import io.nuls.tools.exception.NulsException;
 /**
  * peer地址协议消息
  * addr message
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
 public class AddrMessage extends BaseMessage<AddrMessageBody> {
 
@@ -44,15 +44,16 @@ public class AddrMessage extends BaseMessage<AddrMessageBody> {
         try {
             return byteBuffer.readNulsData(new AddrMessageBody());
         } catch (Exception e) {
-           throw new NulsException(e);
+            throw new NulsException(e);
         }
     }
+
     public AddrMessage() {
-       super(NetworkConstant.CMD_MESSAGE_ADDR,0);
+        super(NetworkConstant.CMD_MESSAGE_ADDR, 0);
     }
 
     public AddrMessage(long magicNumber, String cmd, AddrMessageBody body) {
-        super(cmd,magicNumber);
+        super(cmd, magicNumber);
         this.setMsgBody(body);
     }
 }

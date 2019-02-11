@@ -23,18 +23,20 @@
  *
  */
 package io.nuls.network.manager;
+
 /**
  * 基础管理
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
-abstract  public class BaseManager {
+abstract public class BaseManager {
     /**
      * 初始化
      * init
      */
     public abstract void init();
+
     /**
      * 启动
      * start

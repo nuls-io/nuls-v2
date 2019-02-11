@@ -36,11 +36,11 @@ import java.io.IOException;
 
 
 /**
- *时间请求消息
+ * 时间请求消息
  * time request protocol message body
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
 public class GetTimeMessageBody extends BaseNulsData {
 

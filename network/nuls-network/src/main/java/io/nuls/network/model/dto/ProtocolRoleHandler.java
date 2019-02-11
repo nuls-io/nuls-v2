@@ -33,10 +33,11 @@ public class ProtocolRoleHandler {
     private String role;
     private String handler;
 
-    public ProtocolRoleHandler(String role,String handler){
+    public ProtocolRoleHandler(String role, String handler) {
         this.role = role;
         this.handler = handler;
     }
+
     public String getHandler() {
         return handler;
     }
@@ -53,7 +54,7 @@ public class ProtocolRoleHandler {
         this.role = role;
     }
 
-    public boolean sameHandler(ProtocolRoleHandler pHandler){
+    public boolean sameHandler(ProtocolRoleHandler pHandler) {
         return (handler.equalsIgnoreCase(pHandler.getHandler()) && role.equalsIgnoreCase(pHandler.getRole()));
     }
 }

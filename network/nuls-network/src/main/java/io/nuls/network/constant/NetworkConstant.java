@@ -27,8 +27,8 @@ package io.nuls.network.constant;
 
 /**
  * 配置常量
- * @author lan
  *
+ * @author lan
  */
 public interface NetworkConstant {
     /**
@@ -43,7 +43,7 @@ public interface NetworkConstant {
      * 读写都不存在情况下，100秒超时，单位s
      * 100 seconds timeout, unit s when there is no reading or writing
      */
-    int ALL_IDEL_TIME_OUT = 1000000;
+    int ALL_IDEL_TIME_OUT = 100;
     /**
      * 记录该帧数据长度
      * MAX FRAME LENGTH
@@ -59,7 +59,7 @@ public interface NetworkConstant {
      * 握手被拒绝后,锁定的时间,即下次再连接的间隔时间,单位 分钟
      * After the handshake is rejected, the time of the lock, that is, the interval between the next reconnection, in minutes
      */
-    int CONNECT_FAIL_LOCK_MINUTE=10;
+    int CONNECT_FAIL_LOCK_MINUTE = 10;
 
     /**
      * 10秒链内网络数量与高度无变更,则认为网络状态已稳定
@@ -67,8 +67,8 @@ public interface NetworkConstant {
      */
     int NODEGROUP_NET_STABLE_TIME_MILLIONS = 10 * 1000;
     /**
-     *  连接重复最大次数
-     *  connect try number of times
+     * 连接重复最大次数
+     * connect try number of times
      */
     int NODE_CONNECT_TRY_MAX_TIMES = 50;
     /**
@@ -96,12 +96,11 @@ public interface NetworkConstant {
     String NETWORK_MOON_SEED_IP = "network.moon.seed.ip";
 
     /**
-     *
      * ========================================
      * --------[RPC CMD] -------
      * ========================================
      * 内部协议指令
-     *Internal protocol directive
+     * Internal protocol directive
      */
     String CMD_MESSAGE_VERSION = "version";
     String CMD_MESSAGE_VERACK = "verAck";
@@ -112,12 +111,11 @@ public interface NetworkConstant {
     String CMD_MESSAGE_RESPONSE_TIME = "responseTime";
 
     /**
-     *
      * ========================================
      * --------[RPC CMD] -------
      * ========================================
      * 外部指令
-     *External instruction
+     * External instruction
      */
     String CMD_BL_BEST_BLOCK_HEADER = "latestBlockHeader";
 
@@ -125,14 +123,14 @@ public interface NetworkConstant {
     /**
      * --------[DB tables] -------
      */
-    String DB_NAME_NETWORK_NODEGROUPS="nwNodeGroups";
-    String DB_NAME_NETWORK_NODES="nwNodes";
-    String DB_NAME_NETWORK_GROUP_NODESKEYS="nwGroupNodesKeys";
-    String DB_NAME_NETWORK_PROTOCOL_REGISTER="nwProtocolRegister";
+    String DB_NAME_NETWORK_NODEGROUPS = "nwNodeGroups";
+    //    String DB_NAME_NETWORK_NODES="nwNodes";
+    String DB_NAME_NETWORK_GROUP_NODES = "nwGroupNodes";
+    String DB_NAME_NETWORK_PROTOCOL_REGISTER = "nwProtocolRegister";
     /**
      * --------[Special Splitter] -------
      */
-    String COMMA=",";
-    String COLON=":";
-    String DOWN_LINE="_";
+    String COMMA = ",";
+    String COLON = ":";
+    String DOWN_LINE = "_";
 }

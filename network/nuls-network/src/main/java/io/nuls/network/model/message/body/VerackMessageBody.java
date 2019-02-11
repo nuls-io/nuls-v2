@@ -33,20 +33,24 @@ import java.io.IOException;
 
 /**
  * vrack protocol message body
- * @author  lan
+ *
+ * @author lan
  */
-public class VerackMessageBody  extends MessageBody {
-    public static int VER_SUCCESS=1;
-    public static int VER_CONNECT_MAX=2;
-    public static int VER_FAIL=100;
+public class VerackMessageBody extends MessageBody {
+    public static int VER_SUCCESS = 1;
+    public static int VER_CONNECT_MAX = 2;
+    public static int VER_FAIL = 100;
 
-    int ackCode =VER_SUCCESS;
-    public VerackMessageBody(int ackCode ) {
-        this.ackCode=ackCode;
+    int ackCode = VER_SUCCESS;
+
+    public VerackMessageBody(int ackCode) {
+        this.ackCode = ackCode;
     }
+
     public VerackMessageBody() {
 
     }
+
     @Override
     public int size() {
         return 1;
@@ -57,13 +61,14 @@ public class VerackMessageBody  extends MessageBody {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write((byte)ackCode);
+        stream.write((byte) ackCode);
 
     }
 
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
-        ackCode= buffer.readByte() & 0xFF;   ;
+        ackCode = buffer.readByte() & 0xFF;
+        ;
     }
 
     public int getAckCode() {

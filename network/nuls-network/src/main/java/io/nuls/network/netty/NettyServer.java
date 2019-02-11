@@ -37,9 +37,9 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * NettyServer
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
 public class NettyServer {
 
@@ -72,7 +72,7 @@ public class NettyServer {
         try {
             // Start the server.
             ChannelFuture future = serverBootstrap.bind(port).sync();
-            Log.info("boot server:"+port);
+            Log.info("boot server:" + port);
             // Wait until the server socket is closed.
             future.channel().closeFuture().sync();
         } catch (InterruptedException e) {

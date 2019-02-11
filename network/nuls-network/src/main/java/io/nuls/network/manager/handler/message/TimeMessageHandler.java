@@ -33,13 +33,14 @@ import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.TimeMessage;
 import io.nuls.network.model.message.base.BaseMessage;
+
 import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * time message handler
+ *
  * @author lan
  * @date 2018/11/02
- *
  */
 public class TimeMessageHandler extends BaseMessageHandler {
 
@@ -54,39 +55,36 @@ public class TimeMessageHandler extends BaseMessageHandler {
     }
 
     /**
-     *
      * 接收消息处理
      * Receive message processing
-     * @param message   address message
-     * @param nodeKey      peer node key
-     * @param isServer client=false or server=true
+     *
+     * @param message address message
+     * @param node    Node
      * @return NetworkEventResult
      */
     @Override
-    public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
-        NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
-        Node node =nodeGroup .getConnectNodeMap().get(nodeKey);
-        Log.debug("TimeMessageHandler Recieve:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+    public NetworkEventResult recieve(BaseMessage message, Node node) {
+        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber());
+        Log.debug("TimeMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         /*
          * 处理应答消息
          */
-        TimeMessage timeMessage=(TimeMessage)message;
-        TimeService.addPeerTime(node.getId(),timeMessage.getMsgBody().getMessageId(),timeMessage.getMsgBody().getTime());
-        return   NetworkEventResult.getResultSuccess();
+        TimeMessage timeMessage = (TimeMessage) message;
+        TimeService.addPeerTime(node.getId(), timeMessage.getMsgBody().getMessageId(), timeMessage.getMsgBody().getTime());
+        return NetworkEventResult.getResultSuccess();
     }
 
     /**
-     *
      * TimeMessageHandler sending a message
-     * @param message   address message
-     * @param node      peer info
-     * @param isServer client=false or server=true
-     * @param asyn  default true
+     *
+     * @param message address message
+     * @param node    peer info
+     * @param asyn    default true
      * @return NetworkEventResult
      */
     @Override
-    public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
-        Log.debug("TimeMessageHandler Send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
-        return super.send(message,node,isServer,asyn);
+    public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
+        Log.debug("TimeMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        return super.send(message, node, asyn);
     }
 }

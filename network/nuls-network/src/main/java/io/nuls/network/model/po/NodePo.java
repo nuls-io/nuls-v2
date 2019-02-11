@@ -40,6 +40,7 @@ import java.io.IOException;
  * @create: 2018/11/08
  **/
 public class NodePo extends  BasePo{
+    private long magicNumber;
     private String id;
 
     private String ip;
@@ -58,7 +59,8 @@ public class NodePo extends  BasePo{
     public NodePo(){
         super();
     }
-    public NodePo(String id,String ip,int port,int crossPort,boolean isCrossConnect){
+    public NodePo(long magicNumber,String id,String ip,int port,int crossPort,boolean isCrossConnect){
+        this.magicNumber = magicNumber;
         this.ip=ip;
         this.id=id;
         this.port=port;
@@ -67,29 +69,32 @@ public class NodePo extends  BasePo{
     }
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeUint32(magicNumber);
         stream.writeString(id);
         stream.writeString(ip);
-        stream.writeUint32(port);
-        stream.writeUint32(crossPort);
+        stream.writeUint16(port);
+        stream.writeUint16(crossPort);
         stream.writeBoolean(isCrossConnect);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.magicNumber =byteBuffer.readUint32();
         this.id = byteBuffer.readString();
         this.ip = byteBuffer.readString();
-        this.port = byteBuffer.readInt32();
-        this.crossPort = byteBuffer.readInt32();
+        this.port = byteBuffer.readUint16();
+        this.crossPort = byteBuffer.readUint16();
         this.isCrossConnect = byteBuffer.readBoolean();
     }
 
     @Override
     public int size() {
         int size=0;
+        size += SerializeUtils.sizeOfUint32();
         size += SerializeUtils.sizeOfString(id);
         size += SerializeUtils.sizeOfString(ip);
-        size += SerializeUtils.sizeOfInt32();
-        size += SerializeUtils.sizeOfInt32();
+        size += SerializeUtils.sizeOfUint16();
+        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfBoolean();
         return size;
     }
@@ -136,7 +141,7 @@ public class NodePo extends  BasePo{
 
     @Override
     public Dto parseDto() {
-        Node   node = new Node(ip, port, Node.OUT, isCrossConnect);
+        Node   node = new Node(magicNumber,ip, port, Node.OUT, isCrossConnect);
         node.setRemoteCrossPort(crossPort);
         return node;
     }

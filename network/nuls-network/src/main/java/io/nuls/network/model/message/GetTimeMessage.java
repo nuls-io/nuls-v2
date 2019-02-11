@@ -33,9 +33,9 @@ import io.nuls.tools.exception.NulsException;
 /**
  * 请求 时间协议消息
  * get time message
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
 public class GetTimeMessage extends BaseMessage<GetTimeMessageBody> {
 
@@ -44,15 +44,16 @@ public class GetTimeMessage extends BaseMessage<GetTimeMessageBody> {
         try {
             return byteBuffer.readNulsData(new GetTimeMessageBody());
         } catch (Exception e) {
-           throw new NulsException(e);
+            throw new NulsException(e);
         }
     }
+
     public GetTimeMessage() {
-       super(NetworkConstant.CMD_MESSAGE_GET_TIME);
+        super(NetworkConstant.CMD_MESSAGE_GET_TIME);
     }
 
     public GetTimeMessage(long magicNumber, String cmd, GetTimeMessageBody body) {
-        super(cmd,magicNumber);
+        super(cmd, magicNumber);
         this.setMsgBody(body);
     }
 }

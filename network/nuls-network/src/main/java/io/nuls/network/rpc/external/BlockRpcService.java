@@ -27,15 +27,15 @@ package io.nuls.network.rpc.external;
 import io.nuls.network.model.dto.BestBlockInfo;
 
 /**
- *
- * @description 调用外部区块模块接口
  * @author lan
+ * @description 调用外部区块模块接口
  * @date 2018/12/07
  **/
-public interface  BlockRpcService {
+public interface BlockRpcService {
     /**
      * 获取区块高度
-     * @param chainId  chainId
+     *
+     * @param chainId chainId
      * @return BestBlockInfo
      */
     BestBlockInfo getBestBlockHeader(int chainId);

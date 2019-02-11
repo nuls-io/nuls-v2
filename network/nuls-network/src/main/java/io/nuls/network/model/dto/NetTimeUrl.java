@@ -29,13 +29,15 @@ package io.nuls.network.model.dto;
  * @description
  * @date 2018/12/06
  **/
-public class NetTimeUrl implements Comparable<NetTimeUrl>{
+public class NetTimeUrl implements Comparable<NetTimeUrl> {
     private String url;
     private long time = 0;
-    public NetTimeUrl(String url,long time){
+
+    public NetTimeUrl(String url, long time) {
         this.url = url;
         this.time = time;
     }
+
     public String getUrl() {
         return url;
     }
@@ -54,7 +56,7 @@ public class NetTimeUrl implements Comparable<NetTimeUrl>{
 
     @Override
     public int compareTo(NetTimeUrl o) {
-        if(this.time > o.getTime()){
+        if (this.time > o.getTime()) {
             return 1;
         }
         return -1;

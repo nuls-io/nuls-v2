@@ -44,13 +44,13 @@ public class ThreadTest {
     @Test
     public void clientConnectTest(){
         start();
-        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
-        executor.scheduleAtFixedRate(new NodesConnectTaskTest(), 5, 1, TimeUnit.SECONDS);
-        try {
-            Thread.sleep(1000000000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
+//        executor.scheduleAtFixedRate(new NodesConnectTaskTest(), 5, 1, TimeUnit.SECONDS);
+//        try {
+//            Thread.sleep(1000000000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
 }

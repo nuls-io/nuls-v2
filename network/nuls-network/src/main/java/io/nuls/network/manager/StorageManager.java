@@ -26,8 +26,8 @@ package io.nuls.network.manager;
 
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.po.GroupNodeKeys;
-import io.nuls.network.model.po.NodeGroupPo;
+import io.nuls.network.model.po.GroupNodesPo;
+import io.nuls.network.model.po.GroupPo;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.po.RoleProtocolPo;
 import io.nuls.network.storage.DbService;
@@ -43,78 +43,67 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * 存储管理
  * storage  manager
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
-public class StorageManager extends BaseManager{
-    private static StorageManager storageManager=new StorageManager();
-    private static Map<String,NodePo> cacheAllNodes=new ConcurrentHashMap<>();
-    private DbService dbService=null;
-    private StorageManager(){
+public class StorageManager extends BaseManager {
+    private static StorageManager storageManager = new StorageManager();
+    private static Map<String, NodePo> cacheAllNodes = new ConcurrentHashMap<>();
+    private DbService dbService = null;
+
+    private StorageManager() {
 
     }
-    public DbService getDbService(){
+
+    public DbService getDbService() {
         return dbService;
     }
-    public static StorageManager getInstance(){
+
+    public static StorageManager getInstance() {
         return storageManager;
     }
 
     /**
-     *  getAllNodeGroupFromDb
-     * @return  List<NodeGroup
-     */
-    List<NodeGroup> getAllNodeGroupFromDb(){
-        List<NodeGroup> nodeGroups=new ArrayList<>();
+     * getAllNodeGroupFromDb
+     *
+     * @return List<NodeGroup
+                    */
+    List<NodeGroup> getAllNodeGroupFromDb() {
+        List<NodeGroup> nodeGroups = new ArrayList<>();
         try {
-            List<NodeGroupPo> nodeGroupPos=dbService.getAllNodeGroups();
-            for(NodeGroupPo nodeGroupPo:nodeGroupPos){
-                nodeGroups.add((NodeGroup)nodeGroupPo.parseDto());
+            List<GroupPo> groupPos = dbService.getAllNodeGroups();
+            for (GroupPo groupPo : groupPos) {
+                nodeGroups.add((NodeGroup) groupPo.parseDto());
             }
         } catch (NulsException e) {
             e.printStackTrace();
         }
         return nodeGroups;
     }
+
     /**
      * get Nodes
+     *
      * @param chainId chainId
-     * @return  List<Node>
+     * @return List<Node>
      */
-    List<Node> getNodesByChainId(int chainId){
-        List<Node> nodes=new ArrayList<>();
+    GroupNodesPo getNodesByChainId(int chainId) {
         try {
-            if(cacheAllNodes.size() == 0){
-                cacheAllNodes=dbService.getAllNodesMap();
-            }
-            GroupNodeKeys groupNodeKeysList=dbService.getGroupNodeKeysByChainId(chainId);
-            if(null != groupNodeKeysList){
-                for(String nodeKey:groupNodeKeysList.getNodeKeys()){
-                    NodePo nodePo=cacheAllNodes.get(nodeKey);
-                    nodes.add((Node)nodePo.parseDto());
-                }
-            }
-
+            return dbService.getNodesByChainId(chainId);
         } catch (NulsException e) {
             e.printStackTrace();
         }
-        return nodes;
+        return null;
     }
 
-    public void saveNodes(List<NodePo> list,int chainId) {
-        try {
-            GroupNodeKeys groupNodeKeys = dbService.getGroupNodeKeysByChainId(chainId);
-            List<String> groupNodeKeyList = groupNodeKeys.getNodeKeys();
-            for (NodePo nodePo : list) {
-                groupNodeKeyList.add(nodePo.getId());
-            }
-            dbService.saveNodes(list);
-            dbService.saveGroupNodeKeys(groupNodeKeys);
-        } catch (NulsException e) {
-            e.printStackTrace();
-        }
-    }
+//    public void saveNodes(List<NodePo> list,int chainId) {
+//        try {
+//          //TODO:
+//        } catch (NulsException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     /**
      * 删除 数据库 group信息
@@ -122,32 +111,33 @@ public class StorageManager extends BaseManager{
      * @param list list
      * @param chainId chainId
      */
-    public void delGroupNodes(List<String> list,int chainId) {
-        try {
-            GroupNodeKeys groupNodeKeys = dbService.getGroupNodeKeysByChainId(chainId);
-            List<String> groupNodeKeyList = groupNodeKeys.getNodeKeys();
-            for (String nodeId : list) {
-                groupNodeKeyList.remove(nodeId);
-            }
-            dbService.saveGroupNodeKeys(groupNodeKeys);
-        } catch (NulsException e) {
-            e.printStackTrace();
-        }
-    }
+//    public void delGroupNodes(List<String> list,int chainId) {
+//        try {
+////            GroupNodeKeys groupNodeKeys = dbService.getGroupNodeKeysByChainId(chainId);
+////            List<String> groupNodeKeyList = groupNodeKeys.getNodeKeys();
+////            for (String nodeId : list) {
+////                groupNodeKeyList.remove(nodeId);
+////            }
+////            dbService.saveGroupNodeKeys(groupNodeKeys);
+//        } catch (NulsException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     /**
      * 加载所有模块的协议注册信息
      * load ProtocolRegisterInfos form db
-     * @return  List<RoleProtocolPo>
+     *
+     * @return List<RoleProtocolPo>
      */
-    public List<RoleProtocolPo> getProtocolRegisterInfos(){
+    public List<RoleProtocolPo> getProtocolRegisterInfos() {
         return dbService.getProtocolRegisterInfos();
     }
 
     @Override
     public void init() {
         try {
-            dbService=SpringLiteContext.getBean(DbServiceImpl.class);
+            dbService = SpringLiteContext.getBean(DbServiceImpl.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
