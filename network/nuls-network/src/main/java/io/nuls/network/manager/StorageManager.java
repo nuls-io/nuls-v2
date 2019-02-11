@@ -96,33 +96,7 @@ public class StorageManager extends BaseManager {
         }
         return null;
     }
-
-//    public void saveNodes(List<NodePo> list,int chainId) {
-//        try {
-//          //TODO:
-//        } catch (NulsException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
-    /**
-     * 删除 数据库 group信息
-     * delGroupNodes
-     * @param list list
-     * @param chainId chainId
-     */
-//    public void delGroupNodes(List<String> list,int chainId) {
-//        try {
-////            GroupNodeKeys groupNodeKeys = dbService.getGroupNodeKeysByChainId(chainId);
-////            List<String> groupNodeKeyList = groupNodeKeys.getNodeKeys();
-////            for (String nodeId : list) {
-////                groupNodeKeyList.remove(nodeId);
-////            }
-////            dbService.saveGroupNodeKeys(groupNodeKeys);
-//        } catch (NulsException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    
 
     /**
      * 加载所有模块的协议注册信息
