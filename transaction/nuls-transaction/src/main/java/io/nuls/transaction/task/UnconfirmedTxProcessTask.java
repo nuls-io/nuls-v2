@@ -93,7 +93,7 @@ public class UnconfirmedTxProcessTask implements Runnable {
     private boolean processTx(Chain chain, Transaction tx) {
         try {
             txService.clearInvalidTx(chain, tx);
-            chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " + "txhash:{}", tx.getHash().getDigestHex());
+            chain.getLogger().debug("\n*** Debug *** [UnconfirmedTxProcessTask] " + "txhash:{}", tx.getHash().getDigestHex());
         } catch (Exception e) {
             Log.error(e);
         }
