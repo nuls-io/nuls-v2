@@ -90,13 +90,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     @Override
-    public boolean saveGengsisTxList(Chain chain, List<Transaction> txhexList, String blockHeaderHex) throws NulsException {
-        if (null == chain || txhexList == null || txhexList.size() == 0) {
+    public boolean saveGengsisTxList(Chain chain, List<Transaction> txList, String blockHeaderHex) throws NulsException {
+        if (null == chain || txList == null || txList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
         LedgerCall.coinDataBatchNotify(chain);
         List<NulsDigestData> txHashList = new ArrayList<>();
-        for (Transaction tx : txhexList) {
+        for (Transaction tx : txList) {
             txHashList.add(tx.getHash());
             //todo 批量验证coinData，接口和单个的区别？
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, true);
@@ -106,14 +106,15 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 return false;
             }
         }
-        if (saveTxList(chain, txHashList, blockHeaderHex)) {
+        if (!saveBlockTxList(chain, txList, blockHeaderHex, true)) {
             chain.getLogger().debug("保存创世块交易失败");
             return false;
         }
-        for (Transaction tx : txhexList) {
+        for (Transaction tx : txList) {
             //保存到h2数据库
             transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
         }
+        chain.getLogger().debug("保存创世块交易成功");
         return true;
     }
 
@@ -128,19 +129,31 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
-        List<Transaction> txList = new ArrayList<>();
+        try {
+            List<Transaction> txList = new ArrayList<>();
+            for (int i = 0; i < txHashList.size(); i++) {
+                NulsDigestData hash = txHashList.get(i);
+                Transaction tx = unconfirmedTxStorageService.getTx(chain.getChainId(), hash);
+                txList.add(tx);
+            }
+            return saveBlockTxList(chain, txList, blockHeaderHex, false);
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+            return false;
+        }
+    }
+
+    public boolean saveBlockTxList(Chain chain,  List<Transaction> txList, String blockHeaderHex, boolean gengsis) throws NulsException {
         List<String> txHexList = new ArrayList<>();
         int chainId = chain.getChainId();
         List<byte[]> txHashs = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         try {
-            for (int i = 0; i < txHashList.size(); i++) {
-                NulsDigestData hash = txHashList.get(i);
-                txHashs.add(hash.serialize());
-                Transaction tx = unconfirmedTxStorageService.getTx(chainId, hash);
+            for (Transaction tx : txList) {
                 String txHex = tx.hex();
                 txHexList.add(txHex);
+                txHashs.add(tx.getHash().serialize());
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
                 if (moduleVerifyMap.containsKey(txRegister)) {
                     moduleVerifyMap.get(txRegister).add(txHex);
@@ -158,12 +171,14 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (!saveTxs(chain, txList, true)) {
             return false;
         }
-        if (!commitTxs(chain, moduleVerifyMap, blockHeaderHex, true)) {
+        if (!gengsis && !commitTxs(chain, moduleVerifyMap, blockHeaderHex, true)) {
             removeTxs(chain, txList, false);
             return false;
         }
         if (!commitLedger(chain, txHexList)) {
-            rollbackTxs(chain, moduleVerifyMap, blockHeaderHex, false);
+            if(!gengsis) {
+                rollbackTxs(chain, moduleVerifyMap, blockHeaderHex, false);
+            }
             removeTxs(chain, txList, false);
             return false;
         }

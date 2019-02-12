@@ -98,7 +98,7 @@ public class TestTx{
 
     @Test
     public void test() throws Exception{
-       addGenesisAsset(address1);
+        addGenesisAsset(address1);
         addGenesisAsset(address2);
         addGenesisAsset(address3);
         addGenesisAsset(address4);
@@ -154,7 +154,7 @@ public class TestTx{
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "0020392e698d4e68bf8ea5275d8f953ea2092586afafe3d60b05b595331efa1e36c2";
+        String agentHash = "0020cd550e025eae244dc62b101379c7694e6c7e25a06fd607c29efbd7499f82bb62";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
         dpParams.put("address", address10);
@@ -169,12 +169,13 @@ public class TestTx{
      * 退出共识
      * @throws Exception
      */
+    @Test
     public void withdraw()throws Exception{
         Map<String,Object>params = new HashMap<>();
         params.put("chainId",chainId);
         //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        params.put("address",address4);
-        params.put("txHash","");
+        params.put("address",address10);
+        params.put("txHash","00208bb9f6ec49c0013c7d6a868733510ce29b0433566634ec6c4e8d02f9af3d63ce");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
     }
@@ -208,7 +209,6 @@ public class TestTx{
 //            System.out.println("address4: " + balance4.longValue());
         CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
                 createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-        //普通转账
         //调接口
         String json = JSONUtils.obj2json(ctxTransfer);
         Map<String, Object> params = JSONUtils.json2map(json);
@@ -327,11 +327,15 @@ public class TestTx{
         Log.info("response {}", response);
         params.put("isBatchValidate", true);
         Transaction transaction = buildTransaction(address);
+
         params.put("txHex", HexUtil.encode(transaction.serialize()));
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         Log.info("response {}", response);
 
         params.put("isConfirmTx",true);
+        List<String> list = new ArrayList<>();
+        list.add(HexUtil.encode(transaction.serialize()));
+        params.put("txHexList", list);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         Log.info("response {}", response);
     }
