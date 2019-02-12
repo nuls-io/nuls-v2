@@ -25,14 +25,17 @@
 
 package io.nuls.network.constant;
 
+import io.nuls.network.utils.IpUtil;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
- *
  * 加载配置文件的参数放在这个bean对象中
  * The parameters for loading the configuration file are placed in this bean object.
- * @author  lan
  *
+ * @author lan
  */
 public class NetworkParam {
 
@@ -43,7 +46,9 @@ public class NetworkParam {
     }
 
     private NetworkParam() {
+        this.localIps.addAll(IpUtil.getIps());
     }
+
     private int chainId;
 
     private int port;
@@ -70,9 +75,11 @@ public class NetworkParam {
 
     private boolean moonNode;
 
-    private String  language;
-    private String  encoding;
-    private String  dbPath;
+    private String language;
+    private String encoding;
+    private String dbPath;
+
+    private List<String> localIps = new ArrayList<>();
 
 
     public int getPort() {
@@ -201,5 +208,17 @@ public class NetworkParam {
 
     public void setDbPath(String dbPath) {
         this.dbPath = dbPath;
+    }
+
+    public List<String> getLocalIps() {
+
+        return localIps;
+    }
+
+    public String getExternalIp() {
+        if (localIps.size() > 0) {
+            return localIps.get(localIps.size() - 1);
+        }
+        return null;
     }
 }

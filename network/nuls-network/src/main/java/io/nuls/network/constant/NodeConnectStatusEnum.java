@@ -22,20 +22,22 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager.threads;
+package io.nuls.network.constant;
 
 /**
- *
- * @description  定时清理缓存中过期数据信息
- *Timed cleaning of expired data information in the cache
- *
- * @author lan
- * @date  2018/11/14
- **/
-public class CacheClearTask implements Runnable  {
-    @Override
-    public void run() {
-
-    }
-
+ * 对等节点的连接状态
+ * UNCONNECT  未连接
+ * CONNECTING 连接中
+ * CONNECTED 建立连接
+ * DISCONNECT 断开连接
+ * FAIL  连接失败
+ * AVAILABLE 握手成功
+ */
+public class NodeConnectStatusEnum {
+    public final static int UNCONNECT = 0;
+    public final static int CONNECTING = 1;
+    public final static int CONNECTED = 2;
+    public final static int DISCONNECT = 3;
+    public final static int FAIL = 4;
+    public final static int AVAILABLE = 5;
 }

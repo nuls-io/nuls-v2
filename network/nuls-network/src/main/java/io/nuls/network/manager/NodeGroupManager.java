@@ -33,104 +33,108 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * （节点组）管理
  * node group  manager
+ *
  * @author lan
  * @date 2018/11/01
- *
  **/
-public class NodeGroupManager extends BaseManager{
-    public static NodeGroupManager getInstance(){
+public class NodeGroupManager extends BaseManager {
+    public static NodeGroupManager getInstance() {
         return nodeGroupManager;
     }
 
 
-    private static NodeGroupManager nodeGroupManager=new NodeGroupManager();
-    private  StorageManager storageManager=StorageManager.getInstance();
+    private static NodeGroupManager nodeGroupManager = new NodeGroupManager();
+    private StorageManager storageManager = StorageManager.getInstance();
     /**
      * key:chainId
      */
-    private  Map<String,NodeGroup> nodeGroupMap=new ConcurrentHashMap<>();
-    private ManagerStatusEnum status=ManagerStatusEnum.UNINITIALIZED;
+    private Map<String, NodeGroup> nodeGroupMap = new ConcurrentHashMap<>();
+    private ManagerStatusEnum status = ManagerStatusEnum.UNINITIALIZED;
 
     /**
      * key:magicNumber value:chainId
      */
-    private static Map<String,String> mgicNumChainIdMap=new ConcurrentHashMap<>();
-    private NodeGroupManager(){
+    private static Map<String, String> mgicNumChainIdMap = new ConcurrentHashMap<>();
+
+    private NodeGroupManager() {
 
     }
 
 
-    public  Collection<NodeGroup> getNodeGroupCollection(){
+    public Collection<NodeGroup> getNodeGroupCollection() {
         return nodeGroupMap.values();
     }
 
-    public  NodeGroup  getNodeGroupByMagic(long magicNumber){
-        String chainId=mgicNumChainIdMap.get(String.valueOf(magicNumber));
-        if(null == chainId){
+    public NodeGroup getNodeGroupByMagic(long magicNumber) {
+        String chainId = mgicNumChainIdMap.get(String.valueOf(magicNumber));
+        if (null == chainId) {
             return null;
         }
         return nodeGroupMap.get(chainId);
     }
 
-    public  NodeGroup  getNodeGroupByChainId(int chainId){
+    public NodeGroup getNodeGroupByChainId(int chainId) {
         return nodeGroupMap.get(String.valueOf(chainId));
     }
 
+    public NodeGroup getMoonMainNet() {
+        if (NetworkParam.getInstance().isMoonNode()) {
+            return getNodeGroupByChainId(NetworkParam.getInstance().getChainId());
+        }
+        return null;
+    }
+
     /**
-     *
      * @return List<NodeGroup>
      */
-    public List<NodeGroup> getNodeGroups(){
+    public List<NodeGroup> getNodeGroups() {
         return new ArrayList<>(nodeGroupMap.values());
 
     }
 
-    public int getChainIdByMagicNum(long magicNum){
-        if(null != mgicNumChainIdMap.get(String.valueOf(magicNum))){
+    public int getChainIdByMagicNum(long magicNum) {
+        if (null != mgicNumChainIdMap.get(String.valueOf(magicNum))) {
             return Integer.valueOf(mgicNumChainIdMap.get(String.valueOf(magicNum)));
         }
         return 0;
     }
 
     /**
-     *
-     * @param chainId chain Id
+     * @param chainId   chain Id
      * @param nodeGroup nodeGroup
      */
-    public void addNodeGroup(int chainId,NodeGroup nodeGroup){
-        nodeGroupMap.put(String.valueOf(chainId),nodeGroup);
-        mgicNumChainIdMap.put(String.valueOf(nodeGroup.getMagicNumber()),String.valueOf(chainId));
+    public void addNodeGroup(int chainId, NodeGroup nodeGroup) {
+        nodeGroupMap.put(String.valueOf(chainId), nodeGroup);
+        mgicNumChainIdMap.put(String.valueOf(nodeGroup.getMagicNumber()), String.valueOf(chainId));
     }
-    public void removeNodeGroup(int chainId){
+
+    public void removeNodeGroup(int chainId) {
         nodeGroupMap.remove(String.valueOf(chainId));
-        if(null != mgicNumChainIdMap.get(String.valueOf(chainId))){
+        if (null != mgicNumChainIdMap.get(String.valueOf(chainId))) {
             mgicNumChainIdMap.remove(mgicNumChainIdMap.get(String.valueOf(chainId)));
         }
     }
 
-    public boolean validMagicNumber(long magicNumber){
+    public boolean validMagicNumber(long magicNumber) {
         return null != mgicNumChainIdMap.get(String.valueOf(magicNumber));
     }
 
 
     @Override
     public void init() {
-        NodeGroupManager nodeGroupManager=NodeGroupManager.getInstance();
-        NetworkParam networkParam=NetworkParam.getInstance();
+        NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
+        NetworkParam networkParam = NetworkParam.getInstance();
         /*
          * 获取配置的信息，进行自有网络的nodeGroup配置初始化
          * Obtain the configuration information and initialize the nodeGroup configuration of the own netw
          */
-        NodeGroup nodeGroup=new NodeGroup(networkParam.getPacketMagic(),networkParam.getChainId(), networkParam.getMaxInCount(),networkParam.getMaxOutCount(),
-                0,false);
-        if(networkParam.isMoonNode()){
-            nodeGroup.setMoonNet(true);
-            nodeGroup.setCrossActive(true);
-        }
-        nodeGroupManager.addNodeGroup(networkParam.getChainId(),nodeGroup);
+        NodeGroup nodeGroup = new NodeGroup(networkParam.getPacketMagic(), networkParam.getChainId(), networkParam.getMaxInCount(), networkParam.getMaxOutCount(),
+                0);
+        nodeGroupManager.addNodeGroup(networkParam.getChainId(), nodeGroup);
 
         /*
          *友链跨链部分等待跨链模块的初始化调用，卫星链的跨链group通过数据库进行初始化
@@ -138,16 +142,15 @@ public class NodeGroupManager extends BaseManager{
          *  Friends chain cross-chain part waiting for the initialization call of the cross-chain module, the cross-chain group of the satellite chain is initialized through the database
          * Get the existing nodeGroup cross-chain network group information in the database
          */
-        List<NodeGroup> list=storageManager.getAllNodeGroupFromDb();
-        for(NodeGroup dbNodeGroup:list){
-            dbNodeGroup.setMoonNet(true);
-            dbNodeGroup.setSelf(false);
+        List<NodeGroup> list = storageManager.getAllNodeGroupFromDb();
+        for (NodeGroup dbNodeGroup : list) {
             dbNodeGroup.setCrossActive(true);
-            nodeGroupManager.addNodeGroup(dbNodeGroup.getChainId(),dbNodeGroup);
+            nodeGroupManager.addNodeGroup(dbNodeGroup.getChainId(), dbNodeGroup);
         }
     }
+
     @Override
     public void start() {
-        status=ManagerStatusEnum.RUNNING;
+        status = ManagerStatusEnum.RUNNING;
     }
 }

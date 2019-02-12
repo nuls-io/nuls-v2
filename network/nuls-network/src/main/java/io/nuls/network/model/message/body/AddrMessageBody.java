@@ -26,7 +26,6 @@
 package io.nuls.network.model.message.body;
 
 
-
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
@@ -42,27 +41,29 @@ import java.util.List;
 /**
  * peer地址协议消息体
  * addr protocol message body
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
 public class AddrMessageBody extends BaseNulsData {
 
-    private List<IpAddress> ipAddressList=new ArrayList<>();
+    private List<IpAddress> ipAddressList = new ArrayList<>();
 
 
     public AddrMessageBody() {
 
     }
-    public void addAddr(IpAddress addr){
+
+    public void addAddr(IpAddress addr) {
         ipAddressList.add(addr);
     }
+
     @Override
     public int size() {
         int s = 0;
-        if(ipAddressList.size() > 0){
-            s +=ipAddressList.size() * (new  IpAddress().size());
-        }else{
+        if (ipAddressList.size() > 0) {
+            s += ipAddressList.size() * (new IpAddress().size());
+        } else {
             s = 4;
         }
         return s;
@@ -73,9 +74,9 @@ public class AddrMessageBody extends BaseNulsData {
      */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        if(0 == ipAddressList.size()){
+        if (0 == ipAddressList.size()) {
             stream.write(ToolsConstant.PLACE_HOLDER);
-        }else {
+        } else {
             for (IpAddress address : ipAddressList) {
                 address.serializeToStream(stream);
             }
@@ -85,11 +86,11 @@ public class AddrMessageBody extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
         try {
-           while(!buffer.isFinished()){
-               IpAddress address=new IpAddress();
-               address.parse(buffer);
-               ipAddressList.add(address);
-           }
+            while (!buffer.isFinished()) {
+                IpAddress address = new IpAddress();
+                address.parse(buffer);
+                ipAddressList.add(address);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new NulsException(e);

@@ -81,17 +81,16 @@ public class CreateTxThread implements Runnable {
             BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
             BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address2), assetChainId, assetId);
             System.out.println("======= Thread : " + Thread.currentThread().getName() + "=======");
-           CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
+            CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
                     createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-            //普通转账
             //调接口
-            String json = JSONUtils.obj2json(ctxTransfer);
-            Map<String, Object> params = JSONUtils.json2map(json);
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
-            Assert.assertTrue(null != response.getResponseData());
-            Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
-            Assert.assertTrue(null != map);
-            Log.info("{}", map.get("value"));
+//            String json = JSONUtils.obj2json(ctxTransfer);
+//            Map<String, Object> params = JSONUtils.json2map(json);
+//            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
+//            Assert.assertTrue(null != response.getResponseData());
+//            Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
+//            Assert.assertTrue(null != map);
+//            Log.info("{}", map.get("value"));
 
 //            Thread.sleep(3000L);
 

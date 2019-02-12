@@ -30,7 +30,7 @@ package io.nuls.network.model.vo;
  * @author: lan
  * @create: 2018/11/09
  **/
-public class NodeGroupVo  implements  Ivo{
+public class NodeGroupVo implements Ivo {
     private int chainId;
     private long magicNumber;
     private int totalCount;

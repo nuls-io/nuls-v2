@@ -25,22 +25,32 @@
 
 package io.nuls.network.manager.handler.message;
 
+import io.nuls.network.constant.NetworkParam;
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
+import io.nuls.network.netty.container.NodesContainer;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.*;
+
 import static io.nuls.network.utils.LoggerUtil.Log;
+
 /**
  * 发送与接收 连接地址 协议消息处理类
  * get address message handler
  * Send and receive connection address protocol message processing class
+ *
  * @author lan
  * @date 2018/10/15
- *
  */
 public class GetAddrMessageHandler extends BaseMessageHandler {
 
@@ -53,32 +63,84 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
     public static GetAddrMessageHandler getInstance() {
         return instance;
     }
+
     /**
-     *
      * 接收消息处理
      * Receive message processing
-     * @param message   address message
-     * @param nodeKey      peer node key
-     * @param isServer client=false or server=true
+     *
+     * @param message address message
+     * @param node    peer node
      * @return NetworkEventResult
      */
     @Override
-    public NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer) {
-        Node node = NodeGroupManager.getInstance().getNodeGroupByMagic(message.getHeader().getMagicNumber()).getConnectNodeMap().get(nodeKey);
-        Log.debug("GetAddrMessageHandler Recieve:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+    public NetworkEventResult recieve(BaseMessage message, Node node) {
+        Log.debug("GetAddrMessageHandler Recieve:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
         //发送addr消息
-        AddrMessage addressMessage=MessageFactory.getInstance().buildAddrMessage(node,message.getHeader().getMagicNumber());
-        if(0 == addressMessage.getMsgBody().getIpAddressList().size()){
+        List<IpAddress> ipAddresses = getAvailableNodes(node);
+        AddrMessage addressMessage = MessageFactory.getInstance().buildAddrMessage(ipAddresses, message.getHeader().getMagicNumber());
+        if (0 == addressMessage.getMsgBody().getIpAddressList().size()) {
             Log.info("No Address");
-        }else {
+        } else {
             MessageManager.getInstance().sendToNode(addressMessage, node, true);
         }
-        return  NetworkEventResult.getResultSuccess();
+        return NetworkEventResult.getResultSuccess();
     }
 
     @Override
-    public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
-        Log.debug("GetAddrMessageHandler Send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
-        return super.send(message,node,isServer,asyn);
+    public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
+        Log.debug("GetAddrMessageHandler Send:" + (node.isServer() ? "Server" : "Client") + ":" + node.getIp() + ":" + node.getRemotePort() + "==CMD=" + message.getHeader().getCommandStr());
+        return super.send(message, node, asyn);
     }
+
+    private List<IpAddress> getAvailableNodes(Node node) {
+        NodeGroup nodeGroup = null;
+        List<IpAddress> addressList = new ArrayList<>();
+        if (NetworkParam.getInstance().isMoonNode()) {
+            //是主网节点，回复
+            //从跨链连接过来的请求
+            nodeGroup = NodeGroupManager.getInstance().getMoonMainNet();
+        } else {
+            nodeGroup = node.getNodeGroup();
+        }
+        if (null == nodeGroup) {
+            return addressList;
+        } else {
+            Collection<Node> nodes = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values();
+            nodes.addAll(nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().values());
+            addAddress(nodes, addressList, node.getIp(), node.isCrossConnect());
+        }
+        return addressList;
+
+    }
+
+    private void addAddress(Collection<Node> nodes, List<IpAddress> list, String fromIp, boolean isCross) {
+        for (Node peer : nodes) {
+            /*
+             * 排除自身连接信息，比如组网A=====B，A向B请求地址，B给的地址列表需排除A地址。
+             * Exclude self-connection information, such as networking A=====B,
+             * A requests an address from B, and the address list given by B excludes the A address.
+             */
+            if (peer.getIp().equals(fromIp)) {
+                continue;
+            }
+            /*
+             * 只有主动连接的节点地址才可使用。
+             * Only active node addresses are available for use.
+             */
+            if (Node.OUT == peer.getType()) {
+                try {
+                    int port = peer.getRemotePort();
+                    if (isCross) {
+                        port = peer.getRemoteCrossPort();
+                    }
+                    InetAddress inetAddress = InetAddress.getByName(peer.getIp());
+                    IpAddress ipAddress = new IpAddress(inetAddress, port);
+                    list.add(ipAddress);
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
 }

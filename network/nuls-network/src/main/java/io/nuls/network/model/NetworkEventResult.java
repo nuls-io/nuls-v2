@@ -32,9 +32,9 @@ import io.nuls.tools.constant.ErrorCode;
 
 /**
  * NetworkEventResult
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
 public class NetworkEventResult {
 
@@ -42,12 +42,13 @@ public class NetworkEventResult {
     private ErrorCode errorCode;
     private BaseNulsData resultData;
 
-    public NetworkEventResult(boolean success,ErrorCode errorCode,BaseNulsData resultData) {
+    public NetworkEventResult(boolean success, ErrorCode errorCode, BaseNulsData resultData) {
         this.success = success;
         this.errorCode = errorCode;
         this.resultData = resultData;
     }
-    public NetworkEventResult(boolean success,ErrorCode errorCode) {
+
+    public NetworkEventResult(boolean success, ErrorCode errorCode) {
         this.success = success;
         this.errorCode = errorCode;
     }
@@ -77,15 +78,18 @@ public class NetworkEventResult {
     }
 
     public static NetworkEventResult getResultSuccess() {
-        return  new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
+        return new NetworkEventResult(true, NetworkErrorCode.SUCCESS);
     }
+
     public static NetworkEventResult getResultSuccess(BaseNulsData resultData) {
-        return  new NetworkEventResult(true, NetworkErrorCode.SUCCESS,resultData);
+        return new NetworkEventResult(true, NetworkErrorCode.SUCCESS, resultData);
     }
+
     public static NetworkEventResult getResultFail(ErrorCode errorCode) {
-        return  new NetworkEventResult(false,errorCode);
+        return new NetworkEventResult(false, errorCode);
     }
-    public static NetworkEventResult getResultFail(ErrorCode errorCode,BaseNulsData resultData) {
-        return  new NetworkEventResult(false,errorCode,resultData);
+
+    public static NetworkEventResult getResultFail(ErrorCode errorCode, BaseNulsData resultData) {
+        return new NetworkEventResult(false, errorCode, resultData);
     }
 }

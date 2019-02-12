@@ -34,10 +34,10 @@ import io.nuls.tools.constant.ErrorCode;
  *
  * @author Lan
  */
-public interface NetworkErrorCode{
-    ErrorCode SUCCESS= ErrorCode.init("10000");
+public interface NetworkErrorCode {
+    ErrorCode SUCCESS = ErrorCode.init("10000");
 
-    ErrorCode FAIL= ErrorCode.init("50000");
+    ErrorCode FAIL = ErrorCode.init("50000");
 
     ErrorCode DATA_ERROR = ErrorCode.init("20002");
     ErrorCode PARAMETER_ERROR = ErrorCode.init("20003");

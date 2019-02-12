@@ -117,8 +117,6 @@ public class LedgerCall {
             params.put("assetId", assetId);
             params.put("address", addressString);
             Map result = (Map)TransactionCall.request(ModuleE.LG.abbr, "getBalance", params);
-//            return BigIntegerUtils.stringToBigInteger((String) result.get("available"));
-            System.out.println(JSONUtils.obj2PrettyJson(result));
             Object available = result.get("available");
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
         } catch (Exception e) {

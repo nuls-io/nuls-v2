@@ -27,255 +27,186 @@ package io.nuls.network.manager;
 
 import io.netty.channel.Channel;
 import io.netty.channel.socket.SocketChannel;
-import io.nuls.network.constant.ManagerStatusEnum;
-import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.constant.NetworkParam;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
+import io.nuls.network.constant.*;
 import io.nuls.network.locker.Lockers;
+import io.nuls.network.manager.handler.MessageHandlerFactory;
+import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.model.NodeGroupConnector;
-import io.nuls.network.model.dto.IpAddress;
+import io.nuls.network.model.message.VersionMessage;
+import io.nuls.network.model.po.GroupNodesPo;
+import io.nuls.network.netty.NettyClient;
 import io.nuls.network.netty.NettyServer;
+import io.nuls.network.netty.container.NodesContainer;
+import io.nuls.network.utils.IpUtil;
 import io.nuls.tools.thread.ThreadUtils;
+import io.nuls.tools.thread.TimeService;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
+
 /**
  * 连接管理器,连接的启动，停止，连接引用缓存管理
  * Connection manager, connection start, stop, connection reference cache management
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
-public class ConnectionManager extends BaseManager{
+public class ConnectionManager extends BaseManager {
     private TaskManager taskManager = TaskManager.getInstance();
     private static ConnectionManager instance = new ConnectionManager();
     /**
-     *作为Server 被动连接的peer
+     * 作为Server 被动连接的peer
      * Passer as a server passive connection
      */
-    private Map<String, Node> cacheConnectNodeInMap=new ConcurrentHashMap<>();
+    private Map<String, Node> cacheConnectNodeInMap = new ConcurrentHashMap<>();
     /**
      * 作为client 主动连接的peer
-     *As the client actively connected peer
+     * As the client actively connected peer
      */
-    private  Map<String, Node> cacheConnectNodeOutMap=new ConcurrentHashMap<>();
+    private Map<String, Node> cacheConnectNodeOutMap = new ConcurrentHashMap<>();
 
 
     public static ConnectionManager getInstance() {
         return instance;
     }
+
     private ConnectionManager() {
 
     }
 
     /**
-     * Server所有连接的IP,通过这个集合判断是否存在过载
-     * As the Server all passively connected IP, through this set to determine whether there is overload
-     * Key:ip+"_"+magicNumber+(_OUT=_2 OR _IN=_1 )  value: connectNumber
+     * 节点连接失败
+     *
+     * @param node
      */
-    private  Map<String, Integer> cacheConnectGroupIpMap=new ConcurrentHashMap<>();
+    public void nodeConnectFail(Node node) {
+
+        node.setStatus(NodeStatusEnum.UNAVAILABLE);
+        node.setConnectStatus(NodeConnectStatusEnum.FAIL);
+
+        node.setFailCount(node.getFailCount() + 1);
+        node.setLastProbeTime(TimeService.currentTimeMillis());
+    }
 
     private StorageManager storageManager = StorageManager.getInstance();
-    private LocalInfoManager localInfoManager = LocalInfoManager.getInstance();
-    private ManagerStatusEnum status=ManagerStatusEnum.UNINITIALIZED;
+    private ManagerStatusEnum status = ManagerStatusEnum.UNINITIALIZED;
 
-    public  boolean  isRunning(){
-        return  instance.status==ManagerStatusEnum.RUNNING;
+    public boolean isRunning() {
+        return instance.status == ManagerStatusEnum.RUNNING;
     }
 
     /**
      * 加载种子节点
-     *loadSeedsNode
+     * loadSeedsNode
      */
-    private void loadSeedsNode(){
-        NetworkParam networkParam=NetworkParam.getInstance();
-        List<String> list=networkParam.getSeedIpList();
-        NodeGroup nodeGroup= NodeGroupManager.getInstance().getNodeGroupByMagic(networkParam.getPacketMagic());
-        for(String seed:list){
-            String []peer=seed.split(NetworkConstant.COLON);
-            if(localInfoManager.isSelfIp(peer[0])){
+    private void loadSeedsNode() {
+        NetworkParam networkParam = NetworkParam.getInstance();
+        List<String> list = networkParam.getSeedIpList();
+        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(networkParam.getPacketMagic());
+        for (String seed : list) {
+            String[] peer = seed.split(NetworkConstant.COLON);
+            if (IpUtil.getIps().contains(peer[0])) {
                 continue;
             }
-            Node node=new Node(peer[0],Integer.valueOf(peer[1]),Node.OUT,false);
-            nodeGroup.addDisConnetNode(node,false);
+            Node node = new Node(nodeGroup.getMagicNumber(), peer[0], Integer.valueOf(peer[1]), Node.OUT, false);
+            node.setConnectStatus(NodeConnectStatusEnum.UNCONNECT);
+            node.setSeedNode(true);
+            node.setStatus(NodeStatusEnum.CONNECTABLE);
+            nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().put(node.getId(), node);
+            nodeGroup.getLocalNetNodeContainer().getUncheckNodes().remove(node.getId());
+            nodeGroup.getLocalNetNodeContainer().getDisconnectNodes().remove(node.getId());
+            nodeGroup.getLocalNetNodeContainer().getFailNodes().remove(node.getId());
         }
     }
-    public boolean isPeerSingleGroup(Channel channel){
-        SocketChannel socketChannel = (SocketChannel) channel;
-        String remoteIP = socketChannel.remoteAddress().getHostString();
-        int port = socketChannel.remoteAddress().getPort();
-        String nodeId = remoteIP+NetworkConstant.COLON+port;
-        Node node = ConnectionManager.getInstance().getNodeByCache(nodeId);
-        if(null != node){
-            return null == node.getNodeGroupConnectors() || node.getNodeGroupConnectors().size() <= 1;
+
+    public void nodeClientConnectSuccess(Node node) {
+        NodeGroup nodeGroup = node.getNodeGroup();
+        NodesContainer nodesContainer = null;
+        if (node.isCrossConnect()) {
+            nodesContainer = nodeGroup.getCrossNodeContainer();
+        } else {
+            nodesContainer = nodeGroup.getLocalNetNodeContainer();
         }
+        nodesContainer.getConnectedNodes().put(node.getId(), node);
+        nodesContainer.getCanConnectNodes().remove(node.getId());
+        node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
+
+//        Log.info("node {} connect success !", node.getId());
+        //发送握手
+        VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(node, nodeGroup.getMagicNumber());
+        BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(versionMessage.getHeader().getCommandStr());
+        handler.send(versionMessage, node, true);
+    }
+
+    private void cacheNode(Node node, SocketChannel channel) {
+
+        String name = "node-" + node.getId();
+        boolean exists = AttributeKey.exists(name);
+        AttributeKey attributeKey;
+        if (exists) {
+            attributeKey = AttributeKey.valueOf(name);
+        } else {
+            attributeKey = AttributeKey.newInstance(name);
+        }
+        Attribute<Node> attribute = channel.attr(attributeKey);
+        attribute.set(node);
+    }
+
+    public boolean nodeConnectIn(String ip, int port, SocketChannel channel) {
+        boolean isCross = false;
+        //client 连接 server的端口是跨链端口?
+        if (channel.localAddress().getPort() == NetworkParam.getInstance().getCrossPort()) {
+            isCross = true;
+        }
+        //此时无法判定业务所属的网络id，所以无法归属哪个group,只有在version消息处理时才能知道
+        Node node = new Node(0L, ip, port, Node.IN, isCross);
+        node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
+        node.setChannel(channel);
+        cacheNode(node, channel);
         return true;
     }
 
-    /**
-     * 在物理连接断开时时候进行调用
-     * Called when the physical connection is broken
-     * @param nodeKey node id
-     * @param nodeType connection in or out
-     */
-    public void removeCacheConnectNodeMap(String nodeKey,int nodeType){
-        Lockers.NODE_ESTABLISH_CONNECT_LOCK.lock();
-        try {
-            Node node;
-            if (Node.OUT == nodeType) {
-                node = cacheConnectNodeOutMap.get(nodeKey);
-                cacheConnectNodeOutMap.remove(nodeKey);
-            } else {
-                node = cacheConnectNodeInMap.get(nodeKey);
-                cacheConnectNodeInMap.remove(nodeKey);
-            }
-            List<NodeGroupConnector> list = node.getNodeGroupConnectors();
-            for (NodeGroupConnector nodeGroupConnector : list) {
-                subGroupMaxIp(node, nodeGroupConnector.getMagicNumber(), true);
-            }
-            if(null != node) {
-                node.disConnectNodeChannel();
-            }
-        }finally {
-            Lockers.NODE_ESTABLISH_CONNECT_LOCK.unlock();
+    public void nodeConnectDisconnect(Node node) {
+        if (node.getChannel() != null) {
+            node.setChannel(null);
+        }
+        NodeGroup nodeGroup = node.getNodeGroup();
+        NodesContainer nodesContainer = null;
+        if (node.isCrossConnect()) {
+            nodesContainer = nodeGroup.getCrossNodeContainer();
+        } else {
+            nodesContainer = nodeGroup.getLocalNetNodeContainer();
+        }
+        //连接断开后,判断是否是为连接成功，还是连接成功后断开
+        if (node.getConnectStatus() == NodeConnectStatusEnum.CONNECTED ||
+                node.getConnectStatus() == NodeConnectStatusEnum.AVAILABLE) {
+            node.setFailCount(0);
+            node.setConnectStatus(NodeConnectStatusEnum.DISCONNECT);
+
+            nodesContainer.getDisconnectNodes().put(node.getId(), node);
+            nodesContainer.getConnectedNodes().remove(node.getId());
+
+//            Log.info("node {} disconnect !", node.getId());
+        } else {
+            // 如果是未连接成功，标记为连接失败，失败次数+1，记录当前失败时间，供下次尝试连接使用
+            nodeConnectFail(node);
+            nodesContainer.getCanConnectNodes().remove(node.getId());
+            nodesContainer.getFailNodes().put(node.getId(), node);
         }
     }
 
-    /**
-     * 通过连接类型来获取peer连接信息
-     * Get peer connection information by connection type
-     * @param nodeId node id
-     * @param nodeType connection in or out
-     * @return node
-     */
-    public Node getNodeByCache(String nodeId,int nodeType)
-    {
-        if(Node.OUT == nodeType){
-            return cacheConnectNodeOutMap.get(nodeId);
-        }else{
-            return cacheConnectNodeInMap.get(nodeId);
-        }
-    }
-
-    /**
-     * 通过nodeId来获取peer连接信息，从主动与被动连接缓存中查找
-     *Get peer connection information through nodeId,
-     * find from active and passive connection cache
-     * @param nodeId peer node id
-     * @return node
-     */
-    private Node getNodeByCache(String nodeId)
-    {
-        if(null != cacheConnectNodeOutMap.get(nodeId)){
-            return cacheConnectNodeOutMap.get(nodeId);
-        }else{
-            return cacheConnectNodeInMap.get(nodeId);
-        }
-    }
-
-    public List<Node> getCacheAllNodeList(){
-        List<Node> nodesList=new ArrayList<>();
-        nodesList.addAll(cacheConnectNodeInMap.values());
-        nodesList.addAll(cacheConnectNodeOutMap.values());
-        return nodesList;
-    }
-    /**
-     * 处理已经成功建立socket物理连接的节点
-     */
-    public boolean processConnectNode(Node node) {
-        Lockers.NODE_ESTABLISH_CONNECT_LOCK.lock();
-        try {
-            if (Node.IN == node.getType()) {
-                cacheConnectNodeInMap.put(node.getId(), node);
-            } else {
-                cacheConnectNodeOutMap.put(node.getId(), node);
-            }
-        }finally {
-            Lockers.NODE_ESTABLISH_CONNECT_LOCK.unlock();
-        }
-        return true;
-    }
-
-
-    /**
-     * 放在业务握手时候进行调用，不放在物理socket建立调用。
-     * 因为连接是多链共享的
-     *
-     * @param node peer connection
-     * @param magicNum net id
-     *
-     */
-    public void addGroupMaxIp(Node node,long magicNum,int nodeType){
-        String ip=node.getId().split(NetworkConstant.COLON)[0];
-        String key=ip+NetworkConstant.DOWN_LINE+magicNum+NetworkConstant.DOWN_LINE+nodeType;
-        cacheConnectGroupIpMap.merge(key, 1, (a, b) -> a + b);
-    }
-
-    /**
-     * 减少链接入地址
-     * sub chain max Ip
-     * @param node peer node
-     * @param magicNum net id
-     * @param isAll  if true remove all in client,if false remove single
-     */
-    public void subGroupMaxIp (Node node,long magicNum,boolean isAll){
-        String ip=node.getId().split(NetworkConstant.COLON)[0];
-        String key=ip+NetworkConstant.DOWN_LINE+magicNum+NetworkConstant.DOWN_LINE+node.getType() ;
-        if(isAll){
-            cacheConnectGroupIpMap.remove(key);
-            return;
-        }
-
-        if(null != cacheConnectGroupIpMap.get(key) && cacheConnectGroupIpMap.get(key)>1){
-            cacheConnectGroupIpMap.put(key,cacheConnectGroupIpMap.get(key)-1);
-        }else{
-            cacheConnectGroupIpMap.remove(key);
-        }
-    }
-
-
-
-    /**
-     * client-主动连接 判断是否已经有业务对应的被动连接 存在.如果存在返回false.
-     * server-被动连接  判断是否有业务对应的连接存在最大值，并且判断是否作为client主动业务已经存在该连接.
-     * @param peerIp peerIp
-     * @param macgicNumber macgicNumber
-     * @param maxInSameIp maxInSameIp
-     * @param nodeType nodeType
-     * @return boolean : true exceed
-     */
-    public boolean isPeerConnectExceedMax(String peerIp,long macgicNumber,int maxInSameIp,int nodeType){
-        String key = peerIp+NetworkConstant.DOWN_LINE+macgicNumber+NetworkConstant.DOWN_LINE+nodeType;
-        if(nodeType == Node.IN){
-            String tempKey =  peerIp+NetworkConstant.DOWN_LINE+macgicNumber+NetworkConstant.DOWN_LINE+ Node.OUT;
-            //并且判断是否作为client主动业务已经存在该连接.
-            if(null != cacheConnectGroupIpMap.get(tempKey)){
-                return true;
-            }
-            //判断是否有业务对应的连接存在最大值
-            if(null != cacheConnectGroupIpMap.get(key)) {
-                return cacheConnectGroupIpMap.get(key) >= maxInSameIp;
-            }
-        }else {
-            String tempKey =  peerIp+NetworkConstant.DOWN_LINE+macgicNumber+NetworkConstant.DOWN_LINE+Node.IN;
-            //判断是否已经有业务对应的被动连接 存在
-            if (null != cacheConnectGroupIpMap.get(key) ||  null != cacheConnectGroupIpMap.get(tempKey)) {
-                return true;
-            }
-        }
-        return false;
-    }
 
     /**
      * netty boot
      */
-    private void nettyBoot(){
+    private void nettyBoot() {
         serverStart();
         clientStart();
         Log.info("==========================NettyBoot");
@@ -284,12 +215,12 @@ public class ConnectionManager extends BaseManager{
     /**
      * server start
      */
-    private void serverStart(){
-        NettyServer server=new NettyServer(NetworkParam.getInstance().getPort());
-        NettyServer serverCross=new NettyServer(NetworkParam.getInstance().getCrossPort());
+    private void serverStart() {
+        NettyServer server = new NettyServer(NetworkParam.getInstance().getPort());
+        NettyServer serverCross = new NettyServer(NetworkParam.getInstance().getCrossPort());
         server.init();
         serverCross.init();
-        ThreadUtils.createAndRunThread("node server start", ()-> {
+        ThreadUtils.createAndRunThread("node server start", () -> {
             try {
                 server.start();
             } catch (InterruptedException e) {
@@ -297,7 +228,7 @@ public class ConnectionManager extends BaseManager{
                 Log.error(e.getMessage());
             }
         }, false);
-        ThreadUtils.createAndRunThread("node crossServer start", ()-> {
+        ThreadUtils.createAndRunThread("node crossServer start", () -> {
             try {
                 serverCross.start();
             } catch (InterruptedException e) {
@@ -312,62 +243,37 @@ public class ConnectionManager extends BaseManager{
         taskManager.clientConnectThreadStart();
     }
 
-    /**
-     * connect peer
-     * @param node node
-     */
-    public  void connectionNode(Node node) {
-        //发起连接
-        Lockers.NODE_LAUNCH_CONNECT_LOCK.lock();
+
+    public boolean connection(Node node) {
         try {
-            if(node.isIdle()) {
-                node.setIdle(false);
-                taskManager.doConnect(node);
-            }
-        }finally {
-            Lockers.NODE_LAUNCH_CONNECT_LOCK.unlock();
+            NettyClient client = new NettyClient(node);
+            return client.start();
+        } catch (Exception e) {
+            Log.error("connect to node {} error : {}", node.getId(), e.getMessage());
+            return false;
         }
-    }
-    /**
-     * 自我连接
-     * selfConnection
-     */
-    public void selfConnection(){
-        if(LocalInfoManager.getInstance().isConnectedMySelf()){
-            return;
-        }
-        if(LocalInfoManager.getInstance().isSelfNetSeed()){
-            return;
-        }
-        IpAddress ipAddress=LocalInfoManager.getInstance().getExternalAddress();
-        Node node=new Node(ipAddress.getIp().getHostAddress(),ipAddress.getPort(),Node.OUT,false);
-        connectionNode(node);
-        LocalInfoManager.getInstance().setConnectedMySelf(true);
     }
 
     @Override
     public void init() {
-        status=ManagerStatusEnum.INITIALIZED;
-        Collection<NodeGroup> nodeGroups=NodeGroupManager.getInstance().getNodeGroupCollection();
-        for(NodeGroup nodeGroup:nodeGroups){
-            if(nodeGroup.isSelf()){
-                //自有网络组，增加种子节点的加载，跨链网络组，则无此步骤
+        status = ManagerStatusEnum.INITIALIZED;
+        Collection<NodeGroup> nodeGroups = NodeGroupManager.getInstance().getNodeGroupCollection();
+        for (NodeGroup nodeGroup : nodeGroups) {
+            if (!nodeGroup.isMoonCrossGroup()) {
+                //自有网络组，增加种子节点的加载，主网的跨链网络组，则无此步骤
                 loadSeedsNode();
             }
             //数据库获取node
-            List<Node> nodes=storageManager.getNodesByChainId(nodeGroup.getChainId());
-            for(Node node:nodes){
-                nodeGroup.addDisConnetNode(node,false);
-            }
+            GroupNodesPo groupNodesPo = storageManager.getNodesByChainId(nodeGroup.getChainId());
+            nodeGroup.loadNodes(groupNodesPo);
         }
     }
 
     @Override
     public void start() {
         nettyBoot();
-        status=ManagerStatusEnum.RUNNING;
+        status = ManagerStatusEnum.RUNNING;
     }
-
 
 
 }

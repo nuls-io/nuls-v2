@@ -22,53 +22,21 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.network.model.message.body;
-
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.tools.exception.NulsException;
-
-import java.io.IOException;
+package io.nuls.network.constant;
 
 /**
- * vrack protocol message body
- * @author  lan
+ * 节点状态类型描述：
+ * UNCHECK 未确认peer连接
+ * AVAILABLE 可用的连接(server in 进来的连接)
+ * CONNECTABLE 可用的连接(已验证可连接的ip)
+ * UNAVAILABLE  无效的连接
+ *
+ * @author lan
  */
-public class ByeMessageBody extends MessageBody {
-    public static int CODE_BYE=1;
+public class NodeStatusEnum {
 
-    int byeCode =CODE_BYE;
-    public ByeMessageBody(int byeCode ) {
-        this.byeCode=byeCode;
-    }
-    public ByeMessageBody() {
-
-    }
-    @Override
-    public int size() {
-        return 1;
-    }
-
-    /**
-     * serialize important field
-     */
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write((byte)byeCode);
-
-    }
-
-    @Override
-    public void parse(NulsByteBuffer buffer) throws NulsException {
-        byeCode= buffer.readByte() & 0xFF;   ;
-    }
-
-    public int getByeCode() {
-        return byeCode;
-    }
-
-    public void setByeCode(int byeCode) {
-        this.byeCode = byeCode;
-    }
+    public final static int UNCHECK = 0;
+    public final static int AVAILABLE = 1;
+    public final static int CONNECTABLE = 2;
+    public final static int UNAVAILABLE = 3;
 }

@@ -28,7 +28,7 @@ package io.nuls.network.constant;
  * 管理器运行状态枚举
  * The manager runs state enumeration.
  *
- * @author  Lan
+ * @author Lan
  */
 public enum ManagerStatusEnum {
 
@@ -78,8 +78,7 @@ public enum ManagerStatusEnum {
      * 运行出现异常
      * Running exception
      */
-    EXCEPTION,
-    ;
+    EXCEPTION,;
 
     @Override
     public String toString() {

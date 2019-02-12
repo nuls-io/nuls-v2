@@ -684,10 +684,11 @@ public class TxServiceImpl implements TxService {
             Transaction tx = TxUtil.getTransaction(txHex);
             txHash.add(tx.getHash());
             String coinDataHex = HexUtil.encode(tx.getCoinData());
-            if(!ChainCall.ctxChainLedgerCommit(coinDataHex)){
+           /* todo 等链管理启用
+           if(!ChainCall.ctxChainLedgerCommit(coinDataHex)){
                 rs = false;
                 break;
-            }
+            }*/
             successedCoinDataHexs.add(coinDataHex);
         }
         if(rs) {
@@ -713,10 +714,11 @@ public class TxServiceImpl implements TxService {
         for(String txHex : txHexList){
             Transaction tx = TxUtil.getTransaction(txHex);
             String coinDataHex = HexUtil.encode(tx.getCoinData());
+            /* todo 等链管理启用
             if(!ChainCall.ctxChainLedgerRollback(coinDataHex)){
                 rs = false;
                 break;
-            }
+            }*/
             successedCoinDataHexs.add(coinDataHex);
         }
         if(rs) {

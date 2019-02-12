@@ -24,11 +24,9 @@
  */
 package io.nuls.network.manager;
 
-import io.nuls.network.manager.threads.DataShowMonitorTest;
-import io.nuls.network.manager.threads.GroupStatusMonitor;
-import io.nuls.network.manager.threads.NodesConnectTask;
-import io.nuls.network.manager.threads.TimeService;
+import io.nuls.network.manager.threads.*;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeGroup;
 import io.nuls.network.netty.NettyClient;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
@@ -41,19 +39,22 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 /**
  * 线程任务管理
  * threads   manager
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
-public class TaskManager extends BaseManager{
+public class TaskManager extends BaseManager {
     private static TaskManager taskManager = new TaskManager();
-    private TaskManager(){
+    private ScheduledThreadPoolExecutor executorService;
+
+    private TaskManager() {
 
     }
+
     private boolean clientThreadStart = false;
 
-    public static TaskManager getInstance(){
-        if(null == taskManager){
+    public static TaskManager getInstance() {
+        if (null == taskManager) {
             taskManager = new TaskManager();
         }
         return taskManager;
@@ -63,9 +64,10 @@ public class TaskManager extends BaseManager{
     /**
      * 所有client主动连接通过该方法调用线程发出
      * client connect thread
+     *
      * @param node Node
      */
-     void doConnect(Node node) {
+    void doConnect(Node node) {
         ThreadUtils.createAndRunThread("doConnect", () -> {
             NettyClient client = new NettyClient(node);
             client.start();
@@ -79,27 +81,36 @@ public class TaskManager extends BaseManager{
 
     @Override
     public void start() {
+        executorService = ThreadUtils.createScheduledThreadPool(4, new NulsThreadFactory("NetWorkThread"));
+        connectTasks();
         scheduleGroupStatusMonitor();
         timeServiceThreadStart();
         testThread();
     }
 
-    private void testThread(){
+    private void connectTasks() {
+        executorService.scheduleAtFixedRate(new NodeMaintenanceTask(), 1000L, 5000L, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(new SaveNodeInfoTask(), 1, 5, TimeUnit.MINUTES);
+        executorService.scheduleAtFixedRate(new NodeDiscoverTask(), 3000L, 10000L, TimeUnit.MILLISECONDS);
+        RunOnceAfterNetStableThreadStart();
+
+    }
+
+    private void testThread() {
         //测试调试专用 开始
-        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("DataShowMonitorTest"));
-        executor.scheduleAtFixedRate(new DataShowMonitorTest(), 5, 10, TimeUnit.SECONDS);
+        executorService.scheduleAtFixedRate(new DataShowMonitorTest(), 5, 10, TimeUnit.SECONDS);
         //测试调试专用 结束
     }
-    private void scheduleGroupStatusMonitor(){
-        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("GroupStatusMonitor"));
-        executor.scheduleAtFixedRate(new GroupStatusMonitor(), 5, 10, TimeUnit.SECONDS);
+
+    private void scheduleGroupStatusMonitor() {
+        executorService.scheduleAtFixedRate(new GroupStatusMonitor(), 5, 10, TimeUnit.SECONDS);
     }
-    synchronized  void clientConnectThreadStart() {
-        if(clientThreadStart){
+
+    synchronized void clientConnectThreadStart() {
+        if (clientThreadStart) {
             return;
         }
-        ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("NodesConnectThread"));
-        executor.scheduleAtFixedRate(new NodesConnectTask(), 5, 10, TimeUnit.SECONDS);
+//        executorService.scheduleAtFixedRate(new NodesConnectTask(), 5, 10, TimeUnit.SECONDS);
         clientThreadStart = true;
     }
 
@@ -114,4 +125,16 @@ public class TaskManager extends BaseManager{
         ThreadUtils.createAndRunThread("TimeService", timeService, true);
     }
 
+    /**
+     * 地址请求分享线程
+     */
+    private void RunOnceAfterNetStableThreadStart() {
+        Log.debug("----------- RunOnceAfterNetStableThread start -------------");
+        ThreadUtils.createAndRunThread("share-mine-node", new RunAfterNetStableTask());
+    }
+
+    public void createShareAddressTask(NodeGroup nodeGroup, boolean isCross) {
+        Log.debug("----------- createShareAddressTask start -------------");
+        ThreadUtils.createAndRunThread("share-mine-node", new ShareAddressTask(nodeGroup));
+    }
 }

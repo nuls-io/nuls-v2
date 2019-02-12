@@ -41,9 +41,8 @@ import java.util.Map;
 import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
- *
- * @description
  * @author lan
+ * @description
  * @date 2018/12/07
  **/
 @Service
@@ -51,17 +50,17 @@ public class BlockRpcServiceImpl implements BlockRpcService {
     @Override
     public BestBlockInfo getBestBlockHeader(int chainId) {
         BestBlockInfo bestBlockInfo = new BestBlockInfo();
-        Map<String,Object> map = new HashMap<>();
-        map.put("chainId",chainId);
+        Map<String, Object> map = new HashMap<>();
+        map.put("chainId", chainId);
         try {
 //            long startTime = System.currentTimeMillis();
 //            Log.info("start RPC Time :{}",startTime);
-            Response response =  CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER,map,500 );
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER, map, 500);
 //            long endTime = System.currentTimeMillis();
 //            Log.info("end RPC Time :{}",System.currentTimeMillis());
 //            Log.info("used Time :{}",endTime-startTime);
-            if(null != response && response.isSuccess()){
-                Map responseData = (Map)response.getResponseData();
+            if (null != response && response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
                 String hex = (String) responseData.get("bestBlockHeader");
                 BlockHeader header = new BlockHeader();
                 header.parse(new NulsByteBuffer(HexUtil.decode(hex)));

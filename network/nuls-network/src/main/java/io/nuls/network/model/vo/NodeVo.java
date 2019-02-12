@@ -30,7 +30,7 @@ package io.nuls.network.model.vo;
  * @author: lan
  * @create: 2018/11/09
  **/
-public class NodeVo implements Ivo{
+public class NodeVo implements Ivo {
     private int chainId;
     private String nodeId;
     private long magicNumber;
@@ -38,9 +38,9 @@ public class NodeVo implements Ivo{
     private long blockHeight;
     private String blockHash;
     private String ip;
-    private int  port;
+    private int port;
     private int state;
-    private  int isOut;
+    private int isOut;
     private long time;
 
     public int getChainId() {
