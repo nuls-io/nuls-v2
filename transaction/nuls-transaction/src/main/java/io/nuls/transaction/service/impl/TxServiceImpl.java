@@ -812,6 +812,10 @@ public class TxServiceImpl implements TxService {
                             verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
                     continue;
                 }
+                /*if (tx.getType() == 2) {
+                    chain.getLogger().debug("**************************** 测试未确认垃圾交易回收,对转账交易不打包");
+                    continue;
+                }*/
                 packingTxList.add(tx);
                 totalSize += txSize;
                 //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
@@ -948,7 +952,7 @@ public class TxServiceImpl implements TxService {
                 //验证coinData
                 VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
                 if (!verifyTxResult.success()) {
-                    chain.getLogger().debug("\n*** Debug *** [verifyAgain] " +
+                    chain.getLogger().debug("*** Debug *** [verifyAgain] " +
                             "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}",
                             verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
                     filterList.add(tx);

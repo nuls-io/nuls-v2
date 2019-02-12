@@ -100,7 +100,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             //todo 批量验证coinData，接口和单个的区别？
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, true);
             if (!verifyTxResult.success()) {
-                chain.getLogger().debug("\n*** Debug *** [保存创世块交易失败] " +
+                chain.getLogger().debug("*** Debug *** [保存创世块交易失败] " +
                         "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
                 return false;
             }

@@ -73,11 +73,13 @@ public class UnconfirmedTxProcessTask implements Runnable {
 
     private void doTask(Chain chain) {
         List<TransactionsPO> txPOList = unconfirmedTxStorageService.getAllTxPOList(chain.getChainId());
+        chain.getLogger().debug("*** Debug *** [UnconfirmedTxProcessTask] unconfirmed list size: {}", txPOList.size());
         if (txPOList == null || txPOList.size() == 0) {
             return;
         }
 
         List<Transaction> expireTxList = this.getExpireTxList(txPOList);
+        chain.getLogger().debug("*** Debug *** [UnconfirmedTxProcessTask] expire list size: {}", expireTxList.size());
         Transaction tx;
         for (int i = 0; i < expireTxList.size(); i++) {
             tx = expireTxList.get(i);
@@ -85,7 +87,8 @@ public class UnconfirmedTxProcessTask implements Runnable {
             if (!packablePool.exist(chain, tx, false)) {
                 size++;
                 processTx(chain, tx);
-                System.out.println("count: " + count + " , size : " + size);
+                chain.getLogger().debug("*** Debug *** [UnconfirmedTxProcessTask] destroy tx - type:{}, - hash:{}", tx.getType(), tx.getHash().getDigestHex());
+//                System.out.println("count: " + count + " , size : " + size);
             }
         }
     }
@@ -93,7 +96,7 @@ public class UnconfirmedTxProcessTask implements Runnable {
     private boolean processTx(Chain chain, Transaction tx) {
         try {
             txService.clearInvalidTx(chain, tx);
-            chain.getLogger().debug("\n*** Debug *** [UnconfirmedTxProcessTask] " + "txhash:{}", tx.getHash().getDigestHex());
+//            chain.getLogger().debug("*** Debug *** [UnconfirmedTxProcessTask] " + "txhash:{}", tx.getHash().getDigestHex());
         } catch (Exception e) {
             Log.error(e);
         }

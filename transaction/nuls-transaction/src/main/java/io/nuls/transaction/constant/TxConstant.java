@@ -163,5 +163,5 @@ public interface TxConstant {
     int RECENT_PACKAGER_THRESHOLD = 30;
 
     /** 未确认交易过期毫秒数-30分钟 */
-    int UNCONFIRMED_TX_EXPIRE_MS = 30*60*1000;
+    int UNCONFIRMED_TX_EXPIRE_MS = 30000;// 30 * 60 * 1000;
 }

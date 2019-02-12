@@ -117,6 +117,60 @@ public class TestTx {
     }
 
     @Test
+    public void multiThreadCreateTx() {
+        for (int i = 0; i < 1; i++) {
+            Thread thread = new Thread(new CreateTxThread(), "MR" + i);
+            thread.start();
+        }
+        try {
+            while (true) {
+                Thread.sleep(1000000L);
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * 转账
+     * @throws Exception
+     */
+    @Test
+    public void newCtx() throws Exception {
+        BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
+        BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address2), assetChainId, assetId);
+//            BigInteger balance3 = LedgerCall.getBalance(chain, AddressTool.getAddress(address3), assetChainId, assetId);
+//            BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address4), assetChainId, assetId);
+        System.out.println("address1: " + balance1.longValue());
+        System.out.println("address2: " + balance2.longValue());
+//            System.out.println("address3: " + balance3.longValue());
+//            System.out.println("address4: " + balance4.longValue());
+        CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
+                createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
+        //调接口
+        String json = JSONUtils.obj2json(ctxTransfer);
+        Map<String, Object> params = JSONUtils.json2map(json);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
+        Assert.assertTrue(null != response.getResponseData());
+        Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
+        Assert.assertTrue(null != map);
+        Log.info("{}", map.get("value"));
+
+        Thread.sleep(3000L);
+
+      /*  Map transferMap = this.createTransferTx();
+        //调用接口
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+        Assert.assertTrue(null != result);
+        Log.info("{}", result.get("value"));
+        Thread.sleep(4000L);
+        //packableTxs();*/
+
+    }
+
+    @Test
     public void createAgentTx() throws Exception {
         BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address7), assetChainId, assetId);
         System.out.println(balance.longValue());
@@ -180,61 +234,6 @@ public class TestTx {
         params.put("txHash", "00208bb9f6ec49c0013c7d6a868733510ce29b0433566634ec6c4e8d02f9af3d63ce");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
-    }
-
-
-    @Test
-    public void multiThreadCreateTx() {
-        for (int i = 0; i < 1; i++) {
-            Thread thread = new Thread(new CreateTxThread(), "MR" + i);
-            thread.start();
-        }
-        try {
-            while (true) {
-                Thread.sleep(1000000L);
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /**
-     * 转账
-     * @throws Exception
-     */
-    @Test
-    public void newCtx() throws Exception {
-        BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
-        BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address2), assetChainId, assetId);
-//            BigInteger balance3 = LedgerCall.getBalance(chain, AddressTool.getAddress(address3), assetChainId, assetId);
-//            BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address4), assetChainId, assetId);
-        System.out.println("address1: " + balance1.longValue());
-        System.out.println("address2: " + balance2.longValue());
-//            System.out.println("address3: " + balance3.longValue());
-//            System.out.println("address4: " + balance4.longValue());
-        CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
-                createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-        //调接口
-        String json = JSONUtils.obj2json(ctxTransfer);
-        Map<String, Object> params = JSONUtils.json2map(json);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
-        Assert.assertTrue(null != response.getResponseData());
-        Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
-        Assert.assertTrue(null != map);
-        Log.info("{}", map.get("value"));
-
-        Thread.sleep(3000L);
-
-      /*  Map transferMap = this.createTransferTx();
-        //调用接口
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
-        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
-        Assert.assertTrue(null != result);
-        Log.info("{}", result.get("value"));
-        Thread.sleep(4000L);
-        //packableTxs();*/
-
     }
 
     /**
