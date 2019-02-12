@@ -85,7 +85,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (null == tx) {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
         }
-        chain.getLogger().debug("saveConfirmedTx: " + tx.getHash().getDigestHex());
         return confirmedTxStorageService.saveTx(chain.getChainId(), tx);
     }
 
@@ -126,6 +125,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      */
     @Override
     public boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException {
+        chain.getLogger().debug("开始保存区块中的交易");
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
@@ -194,6 +194,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         boolean rs = true;
         for (Transaction tx : txList) {
             if (saveTx(chain, tx)) {
+                chain.getLogger().debug("saveConfirmedTx -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
                 savedList.add(tx);
             } else {
                 if(atomicity) {

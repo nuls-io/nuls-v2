@@ -26,18 +26,15 @@ package io.nuls.transaction.task;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.cache.PackablePool;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.rocksdb.storage.UnconfirmedTxStorageService;
 import io.nuls.transaction.model.bo.Chain;
-import io.nuls.transaction.model.bo.VerifyTxResult;
 import io.nuls.transaction.model.po.TransactionsPO;
-import io.nuls.transaction.rpc.call.LedgerCall;
+import io.nuls.transaction.rpc.call.NetworkCall;
 import io.nuls.transaction.service.TxService;
-import io.nuls.transaction.utils.TransactionTimeComparator;
-import io.nuls.transaction.utils.TxUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +51,6 @@ public class UnconfirmedTxProcessTask implements Runnable {
     private PackablePool packablePool = SpringLiteContext.getBean(PackablePool.class);
     private TxService txService = SpringLiteContext.getBean(TxService.class);
     private UnconfirmedTxStorageService unconfirmedTxStorageService = SpringLiteContext.getBean(UnconfirmedTxStorageService.class);
-
-    private TransactionTimeComparator txComparator = SpringLiteContext.getBean(TransactionTimeComparator.class);
 
     private Chain chain;
 
@@ -101,7 +96,6 @@ public class UnconfirmedTxProcessTask implements Runnable {
             chain.getLogger().debug("\n*** Debug *** [VerifyTxProcessTask] " + "txhash:{}", tx.getHash().getDigestHex());
         } catch (Exception e) {
             Log.error(e);
-            e.printStackTrace();
         }
         return false;
     }
@@ -114,10 +108,14 @@ public class UnconfirmedTxProcessTask implements Runnable {
      */
     private List<Transaction> getExpireTxList(List<TransactionsPO> txPOList) {
         List<Transaction> expireTxList = new ArrayList<>();
-        long currentTime = System.currentTimeMillis();
-        //过滤指定时间内过期的交易
-        List<TransactionsPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - TxConstant.UNCONFIRMED_TX_EXPIRE_MS > txPo.getCreateTime()).collect(Collectors.toList());
-        expireTxPOList.forEach(txPo -> expireTxList.add(txPo.toTransaction()));
+        try {
+            long currentTime = NetworkCall.getCurrentTimeMillis();
+            //过滤指定时间内过期的交易
+            List<TransactionsPO> expireTxPOList = txPOList.stream().filter(txPo -> currentTime - TxConstant.UNCONFIRMED_TX_EXPIRE_MS > txPo.getCreateTime()).collect(Collectors.toList());
+            expireTxPOList.forEach(txPo -> expireTxList.add(txPo.toTransaction()));
+        } catch (NulsException e) {
+            Log.error(e);
+        }
         return expireTxList;
     }
 }
