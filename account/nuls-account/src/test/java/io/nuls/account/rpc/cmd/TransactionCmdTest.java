@@ -7,6 +7,7 @@ import io.nuls.account.rpc.call.LegerCmdCall;
 import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.*;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
@@ -201,39 +202,35 @@ public class TransactionCmdTest {
      * */
     @Test
     public void createMultiSignTransferTest() throws Exception {
-        //创建多签账户
-        MultiSigAccount multiSigAccount = CommonRpcOperation.createMultiSigAccount();
-        assertNotNull(multiSigAccount);
-        String fromAddress = AddressTool.getStringAddressByBytes(multiSigAccount.getAddress().getAddressBytes());
-        assertNotNull(fromAddress);
-        String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(0),chainId));
-        assertNotNull(signAddress);
-        //创建一个接收方账户
-        List<String> accoutList = CommonRpcOperation.createAccount(1);
-        assertTrue(accoutList != null & accoutList.size() == 1);
-        String toAddress = accoutList.get(0);
-        //铸币
-        addGenesisAsset(fromAddress);
-        System.out.println(HexUtil.encode(AddressTool.getAddress(fromAddress)));
-        BigInteger balance = TxUtil.getBalance(chainId,chainId,assetId,AddressTool.getAddress(fromAddress));
-        System.out.println(balance);
+        createMultiSignTransfer();
 
-        //创建多签账户转账交易
+    }
+
+    /**
+     * 多签转账签名
+     *
+     *
+     * */
+    @Test
+    public void signMultiSignTransactionTest() throws Exception {
+        Map<String,Object> map = createMultiSignTransfer();
+        String txHex = map.get("txHex").toString();
+        MultiSigAccount multiSigAccount = (MultiSigAccount) map.get("multiSigAccount");
+        String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(1),chainId));
+
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId",chainId);
-        params.put("address", fromAddress);
+        params.put("chainId", chainId);
         params.put("signAddress", signAddress);
         params.put("password", password);
-        params.put("type", 1);
-        params.put("toAddress",toAddress);
-        params.put("amount", "1000");
-        params.put("remark","EdwardTest");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignTransfer", params);
-        System.out.println("ac_createMultiSignTransfer response:" + JSONUtils.obj2json(cmdResp));
-        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignTransfer"));
-        String txHex = (String) result.get(RpcConstant.TX_DATA_HEX);
-        System.out.println(txHex);
-        assertNotNull(txHex);
+        params.put("txHex", txHex);
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_signMultiSignTransaction", params);
+        Log.info("ac_signMultiSignTransaction response:{}",cmdResp);
+        assertNotNull(cmdResp);
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_signMultiSignTransaction"));
+        assertNotNull(result);
+        String txHash = (String)result.get("txHash");
+        assertNotNull(txHash);
+
     }
 
     //连续交易测试
@@ -429,6 +426,46 @@ public class TransactionCmdTest {
         System.out.println(cmdResp.getResponseData());
         BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, address4);
         System.out.println(balance.longValue());
+    }
+
+    private Map<String,Object> createMultiSignTransfer() throws Exception {
+        //创建多签账户
+        MultiSigAccount multiSigAccount = CommonRpcOperation.createMultiSigAccount();
+        assertNotNull(multiSigAccount);
+        String fromAddress = AddressTool.getStringAddressByBytes(multiSigAccount.getAddress().getAddressBytes());
+        assertNotNull(fromAddress);
+        String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(0),chainId));
+        assertNotNull(signAddress);
+        //创建一个接收方账户
+        List<String> accoutList = CommonRpcOperation.createAccount(1);
+        assertTrue(accoutList != null & accoutList.size() == 1);
+        String toAddress = accoutList.get(0);
+        //铸币
+        addGenesisAsset(fromAddress);
+        System.out.println(HexUtil.encode(AddressTool.getAddress(fromAddress)));
+        BigInteger balance = TxUtil.getBalance(chainId,chainId,assetId,AddressTool.getAddress(fromAddress));
+        System.out.println(balance);
+
+        //创建多签账户转账交易
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId",chainId);
+        params.put("address", fromAddress);
+        params.put("signAddress", signAddress);
+        params.put("password", password);
+        params.put("type", 1);
+        params.put("toAddress",toAddress);
+        params.put("amount", "1000");
+        params.put("remark","EdwardTest");
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignTransfer", params);
+        System.out.println("ac_createMultiSignTransfer response:" + JSONUtils.obj2json(cmdResp));
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignTransfer"));
+        String txHex = (String) result.get(RpcConstant.TX_DATA_HEX);
+        System.out.println(txHex);
+        assertNotNull(txHex);
+        Map<String,Object> map = new HashMap<>();
+        map.put("multiSigAccount",multiSigAccount);
+        map.put("txHex",txHex);
+        return map;
     }
 
 }
