@@ -85,7 +85,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         if (null == tx) {
             throw new NulsRuntimeException(TxErrorCode.PARAMETER_ERROR);
         }
-        chain.getLogger().debug("saveConfirmedTx: " + tx.getHash().getDigestHex());
         return confirmedTxStorageService.saveTx(chain.getChainId(), tx);
     }
 
@@ -101,7 +100,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             //todo 批量验证coinData，接口和单个的区别？
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, true);
             if (!verifyTxResult.success()) {
-                chain.getLogger().debug("\n*** Debug *** [保存创世块交易失败] " +
+                chain.getLogger().debug("*** Debug *** [保存创世块交易失败] " +
                         "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
                 return false;
             }
@@ -126,6 +125,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      */
     @Override
     public boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException {
+        chain.getLogger().debug("开始保存区块中的交易");
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
@@ -194,6 +194,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         boolean rs = true;
         for (Transaction tx : txList) {
             if (saveTx(chain, tx)) {
+                chain.getLogger().debug("saveConfirmedTx -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
                 savedList.add(tx);
             } else {
                 if(atomicity) {

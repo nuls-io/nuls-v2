@@ -52,11 +52,13 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.util.*;
 
+import static org.junit.Assert.assertNotNull;
+
 /**
  * @author: Charlie
  * @date: 2019-01-15
  */
-public class TestTx{
+public class TestTx {
 
     static int chainId = 12345;
     static int assetChainId = 12345;
@@ -78,14 +80,14 @@ public class TestTx{
     static int assetId = 1;
     //入账金额
     static BigInteger amount = BigInteger.valueOf(1000000000000000L);
-    static String password="nuls123456";
+    static String password = "nuls123456";
 
     private Chain chain;
     private Transaction tx;
     private CoinData coinData;
 
     @Before
-    public void before() throws Exception{
+    public void before() throws Exception {
         NoUse.mockModule();
 
         // Get information from kernel
@@ -97,7 +99,7 @@ public class TestTx{
     }
 
     @Test
-    public void test() throws Exception{
+    public void test() throws Exception {
         addGenesisAsset(address1);
         addGenesisAsset(address2);
         addGenesisAsset(address3);
@@ -115,75 +117,8 @@ public class TestTx{
     }
 
     @Test
-    public void createAgentTx() throws Exception{
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address7), assetChainId, assetId);
-        System.out.println(balance.longValue());
-
-        //组装创建节点交易
-        Map agentTxMap=this.createAgentTx(address9, address1);
-        //调用接口
-        Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
-        Assert.assertTrue(null != result);
-        Log.info("{}", result.get("txHex"));
-        System.out.println("transfer: "+result.get("txHex"));  //Thread.sleep(3000L);
-    }
-
-    @Test
-    public void stopAgentTx() throws Exception{
-
-        //组装创建节点交易
-        //Map agentTxMap=this.createAgentTx(address9, address1);
-        Map<String, Object> txMap = new HashMap();
-        txMap.put("chainId", chainId);
-        txMap.put("address", address9);
-        txMap.put("password", "");
-        //调用接口
-        Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
-        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
-        Assert.assertTrue(null != result);
-        Log.info("{}", result.get("txHex"));
-        System.out.println("transfer: "+result.get("txHex"));  //Thread.sleep(3000L);
-    }
-
-
-
-    /**
-     * 委托节点交易创建
-     */
-    @Test
-    public void depositToAgent() throws Exception {
-        //组装委托节点交易
-        String agentHash = "0020cd550e025eae244dc62b101379c7694e6c7e25a06fd607c29efbd7499f82bb62";
-        Map<String, Object> dpParams = new HashMap<>();
-        dpParams.put("chainId", chainId);
-        dpParams.put("address", address10);
-        dpParams.put("agentHash", agentHash);
-        dpParams.put("deposit", 20000*100000000L);
-        Response dpResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
-        HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
-        String dpTxHex = (String) dpResult.get("txHex");
-    }
-
-    /**
-     * 退出共识
-     * @throws Exception
-     */
-    @Test
-    public void withdraw()throws Exception{
-        Map<String,Object>params = new HashMap<>();
-        params.put("chainId",chainId);
-        //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        params.put("address",address10);
-        params.put("txHash","00208bb9f6ec49c0013c7d6a868733510ce29b0433566634ec6c4e8d02f9af3d63ce");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
-        System.out.println(cmdResp.getResponseData());
-    }
-
-
-    @Test
-    public void multiThreadCreateTx(){
-        for(int i=0; i<1;i++){
+    public void multiThreadCreateTx() {
+        for (int i = 0; i < 1; i++) {
             Thread thread = new Thread(new CreateTxThread(), "MR" + i);
             thread.start();
         }
@@ -197,8 +132,12 @@ public class TestTx{
     }
 
 
+    /**
+     * 转账
+     * @throws Exception
+     */
     @Test
-    public void newCtx() throws Exception{
+    public void newCtx() throws Exception {
         BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
         BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address2), assetChainId, assetId);
 //            BigInteger balance3 = LedgerCall.getBalance(chain, AddressTool.getAddress(address3), assetChainId, assetId);
@@ -229,29 +168,118 @@ public class TestTx{
         Thread.sleep(4000L);
         //packableTxs();*/
 
-
     }
 
-//    @Test
-    public void packableTxs() throws Exception{
+    @Test
+    public void createAgentTx() throws Exception {
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address7), assetChainId, assetId);
+        System.out.println(balance.longValue());
+
+        //组装创建节点交易
+        Map agentTxMap = this.createAgentTx(address9, address1);
+        //调用接口
+        Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
+        Assert.assertTrue(null != result);
+        Log.info("{}", result.get("txHex"));
+        System.out.println("transfer: " + result.get("txHex"));  //Thread.sleep(3000L);
+    }
+
+    @Test
+    public void stopAgentTx() throws Exception {
+
+        //组装创建节点交易
+        //Map agentTxMap=this.createAgentTx(address9, address1);
+        Map<String, Object> txMap = new HashMap();
+        txMap.put("chainId", chainId);
+        txMap.put("address", address9);
+        txMap.put("password", "");
+        //调用接口
+        Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
+        Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
+        Assert.assertTrue(null != result);
+        Log.info("{}", result.get("txHex"));
+        System.out.println("transfer: " + result.get("txHex"));  //Thread.sleep(3000L);
+    }
+
+
+    /**
+     * 委托节点交易创建
+     */
+    @Test
+    public void depositToAgent() throws Exception {
+        //组装委托节点交易
+        String agentHash = "0020cd550e025eae244dc62b101379c7694e6c7e25a06fd607c29efbd7499f82bb62";
+        Map<String, Object> dpParams = new HashMap<>();
+        dpParams.put("chainId", chainId);
+        dpParams.put("address", address10);
+        dpParams.put("agentHash", agentHash);
+        dpParams.put("deposit", 20000 * 100000000L);
+        Response dpResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
+        HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
+        String dpTxHex = (String) dpResult.get("txHex");
+    }
+
+    /**
+     * 退出共识
+     *
+     * @throws Exception
+     */
+    @Test
+    public void withdraw() throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("chainId", chainId);
+        //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
+        params.put("address", address10);
+        params.put("txHash", "00208bb9f6ec49c0013c7d6a868733510ce29b0433566634ec6c4e8d02f9af3d63ce");
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
+        System.out.println(cmdResp.getResponseData());
+    }
+
+    /**
+     * 设置别名
+     * @throws Exception
+     */
+    @Test
+    public void alias() throws Exception {
+        String alias = "charlie" + System.currentTimeMillis();
+        Map<String, Object> params = new HashMap<>();
+        params.put(Constants.VERSION_KEY_STR, "1.0");
+        params.put("chainId", chainId);
+        params.put("address", address1);
+        params.put("password", password);
+        params.put("alias", alias);
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
+        System.out.println("ac_setAlias result:" + JSONUtils.obj2json(cmdResp));
+        assertNotNull(cmdResp);
+        HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setAlias");
+        assertNotNull(result);
+        String txHash = (String) result.get("txHash");
+        assertNotNull(txHash);
+        Log.info("alias-txHash{}", txHash);
+    }
+
+
+    //    @Test
+    public void packableTxs() throws Exception {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         long endTime = System.currentTimeMillis() + 10000L;
         System.out.println("endTime: " + endTime);
         params.put("endTimestamp", endTime);
-        params.put("maxTxDataSize",2 * 1024 * 1024L);
+        params.put("maxTxDataSize", 2 * 1024 * 1024L);
         Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params);
         Assert.assertTrue(null != response.getResponseData());
         Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_packableTxs");
         Assert.assertTrue(null != map);
-        List<String> list = (List)map.get("list");
+        List<String> list = (List) map.get("list");
         Log.info("packableTxs:");
-        for(String s : list){
+        for (String s : list) {
             Log.info(s);
         }
     }
 
-    private List<CoinDTO> createFromCoinDTOList(){
+    private List<CoinDTO> createFromCoinDTOList() {
         CoinDTO coinDTO = new CoinDTO();
         coinDTO.setAssetsId(assetId);
         coinDTO.setAssetsChainId(assetChainId);
@@ -265,13 +293,13 @@ public class TestTx{
         coinDTO2.setAddress(address2);
         coinDTO2.setAmount(new BigInteger("100000000"));
         coinDTO2.setPassword("nuls123456");
-        List< CoinDTO > listFrom = new ArrayList<>();
+        List<CoinDTO> listFrom = new ArrayList<>();
         listFrom.add(coinDTO);
         listFrom.add(coinDTO2);
         return listFrom;
     }
 
-    private List<CoinDTO> createToCoinDTOList(){
+    private List<CoinDTO> createToCoinDTOList() {
         CoinDTO coinDTO = new CoinDTO();
         coinDTO.setAssetsId(assetId);
         coinDTO.setAssetsChainId(8964);
@@ -283,7 +311,7 @@ public class TestTx{
         coinDTO2.setAssetsChainId(8964);
         coinDTO2.setAddress("K7gb72AMXhymt8wBH3fwBUqSwf4EX0423");
         coinDTO2.setAmount(new BigInteger("100000000"));
-        List< CoinDTO > listTO = new ArrayList<>();
+        List<CoinDTO> listTO = new ArrayList<>();
         listTO.add(coinDTO);
         listTO.add(coinDTO2);
         return listTO;
@@ -291,6 +319,7 @@ public class TestTx{
 
     /**
      * 铸币交易
+     *
      * @return
      * @throws IOException
      */
@@ -317,6 +346,7 @@ public class TestTx{
 
     /**
      * 铸币
+     *
      * @throws Exception
      */
     public static void addGenesisAsset(String address) throws Exception {
@@ -332,7 +362,7 @@ public class TestTx{
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         Log.info("response {}", response);
 
-        params.put("isConfirmTx",true);
+        params.put("isConfirmTx", true);
         List<String> list = new ArrayList<>();
         list.add(HexUtil.encode(transaction.serialize()));
         params.put("txHexList", list);
@@ -343,16 +373,16 @@ public class TestTx{
 
     /**
      * 创建普通转账交易
+     *
      * @return
      */
-    private Map createTransferTx()
-    {
+    private Map createTransferTx() {
         Map transferMap = new HashMap();
-        transferMap.put("chainId",chainId);
-        transferMap.put("remark","transfer test");
-        List<CoinDTO> inputs=new ArrayList<>();
-        List<CoinDTO> outputs=new ArrayList<>();
-        CoinDTO inputCoin1=new CoinDTO();
+        transferMap.put("chainId", chainId);
+        transferMap.put("remark", "transfer test");
+        List<CoinDTO> inputs = new ArrayList<>();
+        List<CoinDTO> outputs = new ArrayList<>();
+        CoinDTO inputCoin1 = new CoinDTO();
         inputCoin1.setAddress(address1);
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
@@ -360,7 +390,7 @@ public class TestTx{
         inputCoin1.setAmount(new BigInteger("10000000"));
         inputs.add(inputCoin1);
 
-        CoinDTO outputCoin1=new CoinDTO();
+        CoinDTO outputCoin1 = new CoinDTO();
         outputCoin1.setAddress(address2);
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
@@ -368,26 +398,26 @@ public class TestTx{
         outputCoin1.setAmount(new BigInteger("10000000"));
         outputs.add(outputCoin1);
 
-        transferMap.put("inputs",inputs);
-        transferMap.put("outputs",outputs);
+        transferMap.put("inputs", inputs);
+        transferMap.put("outputs", outputs);
         return transferMap;
     }
 
     /**
      * 创建节点
-     * */
-    public Map createAgentTx(String agentAddr, String packingAddr)throws Exception{
-        Address agentAddress = new Address(chainId,(byte)assetId, SerializeUtils.sha256hash160(agentAddr.getBytes()));
-        Address rewardAddress = new Address(chainId,(byte)assetId,SerializeUtils.sha256hash160(agentAddr.getBytes()));
-        Address packingAddress = new Address(chainId,(byte)assetId,SerializeUtils.sha256hash160(packingAddr.getBytes()));
-        Map<String,Object> params = new HashMap<>();
-        params.put("agentAddress",agentAddr);
-        params.put("chainId",chainId);
+     */
+    public Map createAgentTx(String agentAddr, String packingAddr) throws Exception {
+        Address agentAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(agentAddr.getBytes()));
+        Address rewardAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(agentAddr.getBytes()));
+        Address packingAddress = new Address(chainId, (byte) assetId, SerializeUtils.sha256hash160(packingAddr.getBytes()));
+        Map<String, Object> params = new HashMap<>();
+        params.put("agentAddress", agentAddr);
+        params.put("chainId", chainId);
         params.put("deposit", 20000 * 100000000L);
-        params.put("commissionRate",10);
-        params.put("packingAddress",packingAddr);
-        params.put("password","");
-        params.put("rewardAddress",agentAddr);
+        params.put("commissionRate", 10);
+        params.put("packingAddress", packingAddr);
+        params.put("password", "");
+        params.put("rewardAddress", agentAddr);
         return params;
 //        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
 //        System.out.println(cmdResp.getResponseData());
