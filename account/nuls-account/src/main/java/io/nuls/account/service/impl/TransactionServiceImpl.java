@@ -137,7 +137,7 @@ public class TransactionServiceImpl implements TransactionService {
     public MultiSignTransactionResultDto createMultiSignTransfer(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
             throws NulsException,IOException {
         //create transaction
-        Transaction transaction = new Transaction();
+        Transaction transaction = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
         transaction.setTime(TimeService.currentTimeMillis());
         transaction.setRemark(StringUtils.bytes(remark));
         //build coin data
@@ -282,6 +282,8 @@ public class TransactionServiceImpl implements TransactionService {
             }
             //交易签名
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
+            //缓存当前交易hash
+            this.cacheTxHash(tx);
             //发起新交易
             TransactionCmdCall.newTx(chainId, tx.hex());
         } catch (NulsException e) {
@@ -604,6 +606,18 @@ public class TransactionServiceImpl implements TransactionService {
         return true;
         }
         return false;
+    }
+
+    /**
+     * 缓存发出的交易hash
+     * @param tx
+     * @throws NulsException
+     */
+    private void cacheTxHash(Transaction tx) throws NulsException{
+        CoinData coinData = TxUtil.getCoinData(tx);
+        for (CoinFrom coinFrom : coinData.getFrom()){
+            TxUtil.PRE_HASH_MAP.put(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), tx.getHash());
+        }
     }
 
 }
