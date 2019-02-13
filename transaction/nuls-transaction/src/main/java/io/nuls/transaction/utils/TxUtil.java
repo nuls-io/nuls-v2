@@ -202,4 +202,18 @@ public class TxUtil {
         return AddressTool.getChainIdByAddress(coinData.getTo().get(0).getAddress());
 
     }
+
+    /**
+     * 根据上一个交易hash获取下一个合法的nonce
+     * @param hash
+     * @return
+     */
+    public static byte[] getNonceByPreHash(NulsDigestData hash){
+        byte[] out = new byte[8];
+        byte [] in = hash.getDigestBytes();
+        int copyEnd = in.length;
+        System.arraycopy(in,  (copyEnd-8), out, 0, 8);
+        String nonce8BytesStr = HexUtil.encode(out);
+        return HexUtil.decode(nonce8BytesStr);
+    }
 }

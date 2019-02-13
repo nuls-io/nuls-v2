@@ -1,5 +1,6 @@
 package io.nuls.transaction.service.impl;
 
+import io.nuls.base.constant.TxStatusEnum;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
@@ -150,7 +151,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
         try {
+            BlockHeader blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
             for (Transaction tx : txList) {
+                tx.setBlockHeight(blockHeader.getHeight());
                 String txHex = tx.hex();
                 txHexList.add(txHex);
                 txHashs.add(tx.getHash().serialize());
@@ -193,6 +196,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         List<Transaction> savedList = new ArrayList<>();
         boolean rs = true;
         for (Transaction tx : txList) {
+            tx.setStatus(TxStatusEnum.CONFIRMED);
             if (saveTx(chain, tx)) {
                 chain.getLogger().debug("saveConfirmedTx -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
                 savedList.add(tx);

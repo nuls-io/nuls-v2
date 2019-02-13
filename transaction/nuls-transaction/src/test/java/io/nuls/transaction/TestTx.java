@@ -68,18 +68,28 @@ public class TestTx {
     static String address4 = "R9CxmNqtBDEm9iWX2Cod46QGCNE2M3930";
     static String address5 = "LFkghywKjdE2G3SZUcTsMkzcJ7tda3930";
     static String address6 = "QMwz71wTKgp9sZ8g44A9WNgXk11u23930";
-
     static String address7 = "WEXAmsUJSNAvCx2zUaXziy3ZYX1em3930";
     static String address8 = "TewWmmtBxuxN14FRazZXdtD9XuH313930";
     static String address9 = "WodfCXTbJ22mPa35Y61yNTRh1x3zB3930";
-
     static String address10 = "SPWAxuodkw222367N88eavYDWRraG3930";
     static String address11 = "Rnt57eZnH8Dd7K3LudJXmmEutYJZD3930";
     static String address12 = "XroY3cLWTfgKMRRRLCP5rhvo1gHY63930";
 
+
+    static String address20 = "H3eriRPPdbSMxXfg5MFYVfGmypNma3930";
+    static String address21 = "H9jzu275LW7qUPo4boZoN611Hc2DE3930";
+    static String address22 = "Hev98WnFwR55FJffop8H2J24VJe5y3930";
+    static String address23 = "HgmTfwiFhTLNuz2sRLgz3BrXcyY9F3930";
+    static String address24 = "JHwrmyKbu4KmSxy27HctqSG8aQqdY3930";
+    static String address25 = "JtM2x9hyUPfUQCfNnZZb4XG1eciS13930";
+    static String address26 = "JyBjVrGPbpr4smwbwUzDokQz2F7Gw3930";
+    static String address27 = "K8vyxqeu6dyfR35XcdqNZK4fW9h2N3930";
+    static String address28 = "KKQmeMGKfkkmQF5onWBY487zHdB7Q3930";
+    static String address29 = "KMNPqwARu77qAL4UCkd5Vwvj5PAtw3930";
+
     static int assetId = 1;
     //入账金额
-    static BigInteger amount = BigInteger.valueOf(1000000000000000L);
+    static BigInteger amount = BigInteger.valueOf(1000000L * 100000000L);
     static String password = "nuls123456";
 
     private Chain chain;
@@ -112,8 +122,22 @@ public class TestTx {
         addGenesisAsset(address10);
         addGenesisAsset(address11);
         addGenesisAsset(address12);
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address7), assetChainId, assetId);
+
+        addGenesisAsset(address20);
+        addGenesisAsset(address21);
+        addGenesisAsset(address22);
+        addGenesisAsset(address23);
+        addGenesisAsset(address24);
+        addGenesisAsset(address25);
+        addGenesisAsset(address26);
+        addGenesisAsset(address27);
+        addGenesisAsset(address28);
+        addGenesisAsset(address29);
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address4), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance));
+
+        BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address6), assetChainId, assetId);
+        System.out.println(JSONUtils.obj2PrettyJson(balance2));
     }
 
     @Test
@@ -430,7 +454,19 @@ public class TestTx {
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
+
             params.put("priKey", "00d1e4d568489995f4b45789f372a1c23823241ccb6a6709d164658384fdaaa822");
+//            params.put("priKey", "008e7861842b2ca881326f40482e905f0119a608d90f7aa60ac80f06bf0c196d09");
+//            params.put("priKey", "00e97ec0c01607f58bc692c604739c63ebf5aed2e9d01b9f427be4aa1cf53b4dea");
+//            params.put("priKey", "00ae4df86385da0cce8b72fb463fc07d8767af36ad2cc78baf624b8815234bcc71");
+//            params.put("priKey", "7b06ab2a94bf81eeea2606b6f87406ddb0b45f0f2a4d9a676c56ca81b3706c36");
+//            params.put("priKey", "00fed14ccaa20c41107b7a00b279960235d981e698a717234c63f6fa25cbc5abcb");
+//            params.put("priKey", "00c97dab006f1d973ad9d7f38a79125c24a1ebcdb3a687a3b4f84ddda97548e116");
+//            params.put("priKey", "00adee90f664e1575c371f38a801449ac5324ba406e9931fb0cf51babc0d23e09b");
+//            params.put("priKey", "008878a0099b7393b59a6bd728d97abbe6b593af1603dc3043550bcc8fc61ffbe6");
+//            params.put("priKey", "211eb443e477cff92610b9eb733d71de61a75fe56f7253be91b715f2004eb409");
+//            params.put("priKey", "6dec834b2556df23bb0fbc3607720f462be7ef8d28a34caf3847d91b8c9c6f93");
+//            params.put("priKey", "00af59aa43536f6162a7166cdc1a389b32be0a06bc06f71a601a92e08fd2788dfe");
             params.put("password", "");
             params.put("overwrite", true);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
@@ -446,5 +482,6 @@ public class TestTx {
             e.printStackTrace();
         }
     }
+
 
 }

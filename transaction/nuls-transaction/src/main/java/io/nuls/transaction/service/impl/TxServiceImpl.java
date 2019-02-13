@@ -101,6 +101,8 @@ public class TxServiceImpl implements TxService {
         return transactionManager.register(chain, txRegister);
     }
 
+    private static final Map<String, NulsDigestData> PRE_HASH_MAP = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+
     @Override
     public void newTx(Chain chain, Transaction tx) throws NulsException {
         Transaction txExist = getTransaction(chain, tx.getHash());
@@ -382,11 +384,31 @@ public class TxServiceImpl implements TxService {
             if (BigIntegerUtils.isLessThan(balance, amount)) {
                 throw new NulsException(TxErrorCode.INSUFFICIENT_BALANCE);
             }
-            byte[] nonce = LedgerCall.getNonce(chain, addr, assetChainId, assetId);
+            byte[] nonce = getNonce(chain, addr, assetChainId, assetId);
             CoinFrom coinFrom = new CoinFrom(address, assetChainId, assetId, amount, nonce, TxConstant.CORSS_TX_LOCKED);
             coinFroms.add(coinFrom);
         }
         return coinFroms;
+    }
+
+
+    /**
+     * 获取nonce
+     * 先获取上一个发出去的交易的hash,用来计算当前交易的nonce,如果没有缓存上一个交易hash则直接向账本获取nonce
+     * @param chain
+     * @param address
+     * @param assetChainId
+     * @param assetId
+     * @return
+     * @throws NulsException
+     */
+    public byte[] getNonce(Chain chain, String address, int assetChainId, int assetId) throws NulsException{
+        NulsDigestData hash = PRE_HASH_MAP.get(address);
+        if(null == hash){
+            return  LedgerCall.getNonce(chain, address, assetChainId, assetId);
+        }else{
+            return TxUtil.getNonceByPreHash(hash);
+        }
     }
 
     /**
@@ -529,7 +551,7 @@ public class TxServiceImpl implements TxService {
                 CoinFrom feeCoinFrom = new CoinFrom();
                 byte[] address = coinFrom.getAddress();
                 feeCoinFrom.setAddress(address);
-                feeCoinFrom.setNonce(LedgerCall.getNonce(chain, AddressTool.getStringAddressByBytes(address), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID));
+                feeCoinFrom.setNonce(getNonce(chain, AddressTool.getStringAddressByBytes(address), TxConstant.NULS_CHAINID, TxConstant.NULS_CHAIN_ASSETID));
                 txSize += feeCoinFrom.size();
                 //新增coinfrom，重新计算本交易预计收取的手续费
                 targetFee = TransactionFeeCalculator.getCrossTxFee(txSize);
@@ -1027,11 +1049,6 @@ public class TxServiceImpl implements TxService {
             if (!transactionManager.verify(chain, tx)) {
                 return verifyTxResult;
             }
-            /* 暂时取消单个验证coinData
-            if (!LedgerCall.verifyCoinData(chain, tx, false)) {
-                return false;
-            }
-            */
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
             TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
             if (moduleVerifyMap.containsKey(txRegister)) {
@@ -1092,13 +1109,12 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public void clearInvalidTx(Chain chain, Transaction tx) {
-        chain.getLogger().debug("\n---------------------- rollbackClear txHash: " + tx.getHash().getDigestHex());
-
+        chain.getLogger().debug("---------------------- rollbackClear txHash: " + tx.getHash().getDigestHex());
         unconfirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash());
         //移除H2交易记录
-        chain.getLogger().debug("\n---------------------- clear H2 -----------------------");
+        chain.getLogger().debug("---------------------- clear H2 -----------------------");
         transactionH2Service.deleteTx(tx);
-        chain.getLogger().debug("\n---------------------- rollbackTxLedger -----------------------");
+        chain.getLogger().debug("---------------------- rollbackTxLedger -----------------------\n");
         try {
             //通知账本回滚nonce
             List<String> txHexList = new ArrayList<>();

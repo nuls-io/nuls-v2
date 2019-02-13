@@ -58,9 +58,6 @@ public class UnconfirmedTxProcessTask implements Runnable {
         this.chain = chain;
     }
 
-    int count = 0;
-    int size = 0;
-
     @Override
     public void run() {
         try {
@@ -68,7 +65,6 @@ public class UnconfirmedTxProcessTask implements Runnable {
         } catch (Exception e) {
             chain.getLogger().error(e);
         }
-//        System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
     }
 
     private void doTask(Chain chain) {
@@ -85,10 +81,8 @@ public class UnconfirmedTxProcessTask implements Runnable {
             tx = expireTxList.get(i);
             //如果该未确认交易不在待打包池中，则认为是过期脏数据，需要清理
             if (!packablePool.exist(chain, tx, false)) {
-                size++;
                 processTx(chain, tx);
                 chain.getLogger().debug("*** Debug *** [UnconfirmedTxProcessTask] destroy tx - type:{}, - hash:{}", tx.getType(), tx.getHash().getDigestHex());
-//                System.out.println("count: " + count + " , size : " + size);
             }
         }
     }
@@ -96,7 +90,6 @@ public class UnconfirmedTxProcessTask implements Runnable {
     private boolean processTx(Chain chain, Transaction tx) {
         try {
             txService.clearInvalidTx(chain, tx);
-//            chain.getLogger().debug("*** Debug *** [UnconfirmedTxProcessTask] " + "txhash:{}", tx.getHash().getDigestHex());
         } catch (Exception e) {
             Log.error(e);
         }
