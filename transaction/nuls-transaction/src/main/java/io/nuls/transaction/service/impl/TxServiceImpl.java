@@ -211,6 +211,7 @@ public class TxServiceImpl implements TxService {
                 signEcKeys.add(ecKey);
             }
             SignatureUtil.createTransactionSignture(tx, signEcKeys);
+            this.cacheTxHash(tx);
             this.newTx(chain, tx);
             return tx;
         } catch (IOException e) {
@@ -295,6 +296,7 @@ public class TxServiceImpl implements TxService {
                 p2PHKSignatures.sort(P2PHKSignature.PUBKEY_COMPARATOR);
                 multiSignTxSignature.setP2PHKSignatures(p2PHKSignatures);
                 tx.setTransactionSignature(multiSignTxSignature.serialize());
+                this.cacheTxHash(tx);
                 this.newTx(chain, tx);
                 map.put(TxConstant.MULTI_TX_HASH, tx.getHash().getDigestHex());
             } else {
@@ -408,6 +410,18 @@ public class TxServiceImpl implements TxService {
             return  LedgerCall.getNonce(chain, address, assetChainId, assetId);
         }else{
             return TxUtil.getNonceByPreHash(hash);
+        }
+    }
+
+    /**
+     * 缓存发出的交易hash
+     * @param tx
+     * @throws NulsException
+     */
+    private void cacheTxHash(Transaction tx) throws NulsException{
+        CoinData coinData = TxUtil.getCoinData(tx);
+        for (CoinFrom coinFrom : coinData.getFrom()){
+           PRE_HASH_MAP.put(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), tx.getHash());
         }
     }
 
