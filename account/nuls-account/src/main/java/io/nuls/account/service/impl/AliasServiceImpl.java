@@ -335,6 +335,8 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         tx.setCoinData(coinData.serialize());
         //计算交易数据摘要哈希
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        //缓存当前交易hash
+        TxUtil.PRE_HASH_MAP.put(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), tx.getHash());
         return tx;
     }
 
