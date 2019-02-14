@@ -66,9 +66,12 @@ public class MultiSignTxSignature extends TransactionSignature {
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         this.m = byteBuffer.readByte();
         long count = byteBuffer.readVarInt();
-        List<byte[]> pubKeyList = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            pubKeyList.add(byteBuffer.readByLengthByte());
+        if (0 < count) {
+            List<byte[]> pubKeyList = new ArrayList<>();
+            for (int i = 0; i < count; i++) {
+                pubKeyList.add(byteBuffer.readByLengthByte());
+            }
+            this.pubKeyList = pubKeyList;
         }
         super.parse(byteBuffer);
     }
