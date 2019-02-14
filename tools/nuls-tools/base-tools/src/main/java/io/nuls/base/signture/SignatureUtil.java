@@ -52,7 +52,7 @@ import java.util.*;
  *
  * @author tag
  * 2018/10/10
- * */
+ */
 @Component
 public class SignatureUtil {
     /**
@@ -65,7 +65,7 @@ public class SignatureUtil {
             if (tx.getTransactionSignature() == null && tx.getTransactionSignature().length == 0) {
                 throw new NulsException(new Exception());
             }
-            if(!tx.isMultiSignTx()){
+            if (!tx.isMultiSignTx()) {
                 TransactionSignature transactionSignature = new TransactionSignature();
                 transactionSignature.parse(tx.getTransactionSignature(), 0);
                 if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
@@ -76,7 +76,7 @@ public class SignatureUtil {
                         throw new NulsException(new Exception("Transaction signature error !"));
                     }
                 }
-            }else {
+            } else {
                 MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
                 transactionSignature.parse(tx.getTransactionSignature(), 0);
                 if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
@@ -88,11 +88,11 @@ public class SignatureUtil {
                     if (ECKey.verify(tx.getHash().getDigestBytes(), signature.getSignData().getSignBytes(), signature.getPublicKey())) {
                         validCount++;
                     }
-                    if(validCount >= transactionSignature.getM()){
+                    if (validCount >= transactionSignature.getM()) {
                         break;
                     }
                 }
-                if(validCount < transactionSignature.getM()){
+                if (validCount < transactionSignature.getM()) {
                     throw new NulsException(new Exception("Transaction signature error !"));
                 }
             }
@@ -106,17 +106,18 @@ public class SignatureUtil {
 
     /**
      * 验证数据签名
+     *
      * @param digestBytes
      * @param p2PHKSignature
      * @return
      * @throws NulsException
      */
     public static boolean validateSignture(byte[] digestBytes, P2PHKSignature p2PHKSignature) throws NulsException {
-        if(null == p2PHKSignature){
+        if (null == p2PHKSignature) {
             throw new NulsException(new Exception("P2PHKSignature is null!"));
         }
         if (ECKey.verify(digestBytes, p2PHKSignature.getSignData().getSignBytes(), p2PHKSignature.getPublicKey())) {
-           return true;
+            return true;
         }
         return false;
     }
@@ -148,13 +149,22 @@ public class SignatureUtil {
             return null;
         }
         try {
-            TransactionSignature transactionSignature = new TransactionSignature();
-            transactionSignature.parse(tx.getTransactionSignature(), 0);
-            if ((transactionSignature.getP2PHKSignatures() == null || transactionSignature.getP2PHKSignatures().size() == 0)) {
+            List<P2PHKSignature> p2PHKSignatures;
+            if (tx.isMultiSignTx()) {
+                MultiSignTxSignature transactionSignature = new MultiSignTxSignature();
+                transactionSignature.parse(tx.getTransactionSignature(), 0);
+                p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+            } else {
+                TransactionSignature transactionSignature = new TransactionSignature();
+                transactionSignature.parse(tx.getTransactionSignature(), 0);
+                p2PHKSignatures = transactionSignature.getP2PHKSignatures();
+            }
+
+            if ((p2PHKSignatures == null || p2PHKSignatures.size() == 0)) {
                 return null;
             }
-            if (transactionSignature.getP2PHKSignatures() != null && transactionSignature.getP2PHKSignatures().size() > 0) {
-                for (P2PHKSignature signature : transactionSignature.getP2PHKSignatures()) {
+            if (p2PHKSignatures != null && p2PHKSignatures.size() > 0) {
+                for (P2PHKSignature signature : p2PHKSignatures) {
                     if (signature.getPublicKey() != null || signature.getPublicKey().length == 0) {
                         addressSet.add(AddressTool.getStringAddressByBytes(AddressTool.getAddress(signature.getPublicKey(), chainId)));
                     }
@@ -170,8 +180,8 @@ public class SignatureUtil {
     /**
      * 生成交易TransactionSignture
      *
-     * @param tx           交易
-     * @param signEckeys   需要生成普通签名的秘钥
+     * @param tx         交易
+     * @param signEckeys 需要生成普通签名的秘钥
      */
     public static void createTransactionSignture(Transaction tx, List<ECKey> signEckeys) throws IOException {
         TransactionSignature transactionSignature = new TransactionSignature();
@@ -205,8 +215,8 @@ public class SignatureUtil {
     /**
      * 生成交易的签名传统
      *
-     * @param tx       交易
-     * @param priKey   私钥
+     * @param tx     交易
+     * @param priKey 私钥
      */
     public static P2PHKSignature createSignatureByPriKey(Transaction tx, String priKey) {
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(priKey)));
