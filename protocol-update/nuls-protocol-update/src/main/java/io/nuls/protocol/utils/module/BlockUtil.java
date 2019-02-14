@@ -26,10 +26,8 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.rpc.callback.BlockHeaderInvoke;
-import io.nuls.protocol.service.BlockStorageService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -49,8 +47,6 @@ import java.util.Map;
  */
 public class BlockUtil {
 
-    private static BlockStorageService service = SpringLiteContext.getBean(BlockStorageService.class);
-
     /**
      * 更新本模块的运行时状态
      *
@@ -60,7 +56,7 @@ public class BlockUtil {
      * @return
      */
     public static List<ProtocolVersion> getBlockHeaders(int chainId, long begin, long end) {
-        List<BlockHeader> blockHeaders = service.query(chainId, begin, end);
+        List<BlockHeader> blockHeaders = new ArrayList<>();
         List<ProtocolVersion> result = new ArrayList<>();
         for (BlockHeader blockHeader : blockHeaders) {
             byte[] extend = blockHeader.getExtend();

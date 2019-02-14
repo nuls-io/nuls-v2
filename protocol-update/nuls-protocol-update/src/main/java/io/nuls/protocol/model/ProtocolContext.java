@@ -73,6 +73,13 @@ public class ProtocolContext {
     private ProtocolVersion currentProtocolVersion;
 
     /**
+     * 当前生效的协议版本计数
+     */
+    @Getter
+    @Setter
+    private int currentProtocolVersionCount;
+
+    /**
      * 所有生效的协议版本历史记录，回滚用
      */
     @Getter

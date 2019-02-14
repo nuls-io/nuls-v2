@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Stack;
 
 @Data
 @EqualsAndHashCode(callSuper=false)
@@ -86,10 +87,6 @@ public class BlockHeaderInvoke extends BaseInvoke {
         ProtocolConfig config = context.getConfig();
         short interval = config.getInterval();
         if (count == 0) {
-            List<ProtocolVersion> protocolVersions = BlockUtil.getBlockHeaders(chainId, height - interval, height - 1);
-            for (ProtocolVersion version : protocolVersions) {
-                proportionMap.merge(version, 1, (a, b) -> a + b);
-            }
             count = interval;
         }
         //区块高度到达阈值，从数据库删除一条统计记录
@@ -97,19 +94,22 @@ public class BlockHeaderInvoke extends BaseInvoke {
             service.delete(chainId, height);
             Statistics newValidStatistics = service.get(chainId, lastValidStatistics.getLastHeight());
             context.setLastValidStatistics(newValidStatistics);
-            if (newValidStatistics.getCount() < context.getCurrentProtocolVersion().getContinuousIntervalCount()) {
+            ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
+            if (newValidStatistics.getProtocolVersion().equals(currentProtocolVersion) && newValidStatistics.getCount() < currentProtocolVersion.getContinuousIntervalCount()) {
                 //设置新协议版本
-                ProtocolVersion protocolVersion = context.getProtocolVersionHistory().pop();
-                context.setCurrentProtocolVersion(protocolVersion);
-                commonLog.info("chainId-" + chainId + ", protocol version rollback-" + protocolVersion);
+                Stack<ProtocolVersion> history = context.getProtocolVersionHistory();
+                if (history.size() > 1) {
+                    ProtocolVersion pop = history.pop();
+                    ProtocolVersion protocolVersion = history.peek();
+                    context.setCurrentProtocolVersion(protocolVersion);
+                    commonLog.info("chainId-" + chainId + ", height-" + height + ", protocol version rollback-" + pop + ", new protocol version available-" + protocolVersion);
+                }
             }
             context.setLastValidStatistics(newValidStatistics);
-            //复原旧统计数据
-            proportionMap.clear();
+            context.setProportionMap(newValidStatistics.getProtocolVersionMap());
         }
         context.setCount(count);
         context.setLatestHeight(height - 1);
-
     }
 
     private void save(ProtocolContext context, NulsLogger commonLog, BlockExtendsData data, long height, Statistics lastValidStatistics) {
@@ -149,6 +149,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
                     statistics.setHeight(height);
                     statistics.setLastHeight(lastValidStatistics.getHeight());
                     statistics.setProtocolVersion(version);
+                    statistics.setProtocolVersionMap(proportionMap);
                     //计数统计
                     if (lastValidStatistics.getProtocolVersion().equals(version)) {
                         statistics.setCount((short) (lastValidStatistics.getCount() + 1));
@@ -180,16 +181,14 @@ public class BlockHeaderInvoke extends BaseInvoke {
             statistics.setHeight(height);
             statistics.setLastHeight(lastValidStatistics.getHeight());
             statistics.setProtocolVersion(currentProtocolVersion);
+            statistics.setProtocolVersionMap(proportionMap);
             //计数统计
-            if (lastValidStatistics.getProtocolVersion().equals(currentProtocolVersion)) {
-                statistics.setCount((short) (lastValidStatistics.getCount() + 1));
-            } else {
-                statistics.setCount((short) 1);
-            }
+            statistics.setCount((short) (context.getCurrentProtocolVersionCount() + 1));
             boolean b = service.save(chainId, statistics);
             commonLog.info("chainId-" + chainId + ", height-" + height + ", save-" + b + ", new statistics-" + statistics);
             context.setCount(0);
             context.setLastValidStatistics(statistics);
+            context.setCurrentProtocolVersionCount(context.getCurrentProtocolVersionCount() + 1);
             //清除旧统计数据
             proportionMap.clear();
         }

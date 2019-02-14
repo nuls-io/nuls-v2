@@ -9,6 +9,9 @@ import io.nuls.tools.parse.SerializeUtils;
 import lombok.Data;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 版本统计信息,实质上也是由生效高度串联的一条链
@@ -38,10 +41,19 @@ public class Statistics extends BaseNulsData {
      */
     private ProtocolVersion protocolVersion;
 
+    /**
+     * 统计区间内所有协议的占比
+     */
+    private Map<ProtocolVersion,Integer> protocolVersionMap;
+
     @Override
     public int size() {
         int size = 18;
         size += SerializeUtils.sizeOfNulsData(protocolVersion);
+        size += SerializeUtils.sizeOfInt16();
+        for (int i = 0; i < protocolVersionMap.size(); i++) {
+            size += 7;
+        }
         return size;
     }
 
@@ -51,6 +63,12 @@ public class Statistics extends BaseNulsData {
         stream.writeInt64(height);
         stream.writeShort(count);
         stream.writeNulsData(protocolVersion);
+        stream.writeShort((short) protocolVersionMap.size());
+        Set<Map.Entry<ProtocolVersion, Integer>> entries = protocolVersionMap.entrySet();
+        for (Map.Entry<ProtocolVersion, Integer> entry : entries) {
+            stream.writeNulsData(entry.getKey());
+            stream.writeUint16(entry.getValue());
+        }
     }
 
     @Override
@@ -59,6 +77,11 @@ public class Statistics extends BaseNulsData {
         this.height = byteBuffer.readInt64();
         this.count = byteBuffer.readShort();
         this.protocolVersion = byteBuffer.readNulsData(new ProtocolVersion());
+        this.protocolVersionMap = new HashMap<>();
+        short size = byteBuffer.readShort();
+        for (int i = 0; i < size; i++) {
+            protocolVersionMap.put(byteBuffer.readNulsData(new ProtocolVersion()), byteBuffer.readUint16());
+        }
     }
 
 }
