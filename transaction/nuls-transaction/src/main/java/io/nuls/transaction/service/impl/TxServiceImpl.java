@@ -796,12 +796,13 @@ public class TxServiceImpl implements TxService {
             chain.getLogger().debug("--------------while-----------");
             while (true) {
                 long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
-                chain.getLogger().debug("当前网络时间: {} ", currentTimeMillis);
-                chain.getLogger().debug("获取打包交易结束时间: {}, 还剩{}秒 ", endtimestamp, (endtimestamp - currentTimeMillis)/1000.0);
+                chain.getLogger().debug("########## 当前网络时间: {} ", currentTimeMillis);
+                chain.getLogger().debug("########## 获取打包交易结束时间: {}, 还剩{}秒 ", endtimestamp, (endtimestamp - currentTimeMillis)/1000.0);
                 if (endtimestamp - currentTimeMillis <= TxConstant.VERIFY_OFFSET) {
-                    chain.getLogger().debug("打包时间到: {}, -endtimestamp:{} ,-offset:{}", currentTimeMillis, endtimestamp, TxConstant.VERIFY_OFFSET);
+                    chain.getLogger().debug("########## 打包时间到: {}, -endtimestamp:{} , -offset:{}", currentTimeMillis, endtimestamp, TxConstant.VERIFY_OFFSET);
                     break;
                 }
+                chain.getLogger().debug("########## 开始获取交易");
                 Transaction tx = packablePool.get(chain);
                 if (tx == null) {
                     try {
@@ -833,12 +834,17 @@ public class TxServiceImpl implements TxService {
                     chain.getLogger().debug("丢弃获取hex出错交易,txHash:{}, - type:{}, - time:{}",tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     continue;
                 }
+                long debugeVerifyStart = NetworkCall.getCurrentTimeMillis();
+                chain.getLogger().debug("########## 已花费时间:{} ", debugeVerifyStart - currentTimeMillis);
+                chain.getLogger().debug("########## 开始调用单个验证器, ");
                 //交易业务验证tx
                 if (!transactionManager.verify(chain, tx)) {
                     clearInvalidTx(chain, tx);
                     chain.getLogger().debug("丢弃验证器未验证通过交易,txHash:{}, - type:{}, - time:{}",tx.getHash().getDigestHex(), tx.getType(), tx.getTime());
                     continue;
                 }
+                long debugeVerifyCoinDataStart = NetworkCall.getCurrentTimeMillis();
+                chain.getLogger().debug("########## 单个验证器花费时间:{} ", debugeVerifyCoinDataStart - debugeVerifyStart);
                 //批量验证coinData, 单个发送
                 VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
                 if (!verifyTxResult.success()) {
@@ -848,6 +854,8 @@ public class TxServiceImpl implements TxService {
                             verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), nonce, tx.getHash().getDigestHex());
                     continue;
                 }
+                long debugeMap = NetworkCall.getCurrentTimeMillis();
+                chain.getLogger().debug("########## 单个VerifyCoinData花费时间:{} ", debugeMap - debugeVerifyCoinDataStart);
                 /*if (tx.getType() == 2) {
                     chain.getLogger().debug("**************************** 测试未确认垃圾交易回收,对转账交易不打包");
                     continue;
@@ -863,9 +871,11 @@ public class TxServiceImpl implements TxService {
                     txHexs.add(txHex);
                     moduleVerifyMap.put(txRegister, txHexs);
                 }
+                chain.getLogger().debug("########## 分组花费时间:{} ",  NetworkCall.getCurrentTimeMillis() - debugeVerifyCoinDataStart);
             }
             chain.getLogger().debug("--------------while end-----------");
             chain.getLogger().debug("取出的交易packableTxs - Start:");
+
             try {
                 for(int i = 0; i < packingTxList.size();i++){
                     chain.getLogger().debug(i + ": " + ((Transaction) packingTxList.get(i)).hex());
@@ -875,10 +885,11 @@ public class TxServiceImpl implements TxService {
             }
             chain.getLogger().debug("***");
             chain.getLogger().debug("");
+            long debugeBatch = NetworkCall.getCurrentTimeMillis();
             //统一验证以及之后的再次验证过滤掉的交易集合
             List<Transaction> filterList = new ArrayList<>();
             txModuleValidatorPackable(chain, moduleVerifyMap, filterList);
-            //过滤要未通过验证的交易
+            //过滤未通过验证的交易
             filterTx(packingTxList, filterList);
             //清除被过滤掉的交易
             clearInvalidTx(chain, filterList);
@@ -894,7 +905,7 @@ public class TxServiceImpl implements TxService {
                     throw new NulsException(e);
                 }
             }
-
+            chain.getLogger().debug("---##########--- 批量验证花费时间:{} ",  NetworkCall.getCurrentTimeMillis() - debugeBatch);
         } catch (NulsException e) {
             //可打包交易,全加回去
             for(Transaction tx : packingTxList){
@@ -1133,7 +1144,7 @@ public class TxServiceImpl implements TxService {
             //通知账本回滚nonce
             List<String> txHexList = new ArrayList<>();
             txHexList.add(tx.hex());
-            LedgerCall.rollbackTxLedger(chain, txHexList, false);
+            LedgerCall.rollbackTxLedger(chain, txHexList, null,  false);
         } catch (NulsException e) {
             e.printStackTrace();
         } catch (Exception e) {

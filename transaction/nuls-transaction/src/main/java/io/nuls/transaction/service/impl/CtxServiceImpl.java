@@ -205,7 +205,7 @@ public class CtxServiceImpl implements CtxService {
         } catch (Exception e) {
             throw new NulsException(e);
         }
-        LedgerCall.commitTxLedger(chain, txHexList, false);
+        LedgerCall.commitTxLedger(chain, txHexList, null, false);
         //广播交易hash
         BroadcastCrossTxHashMessage ctxHashMessage = new BroadcastCrossTxHashMessage();
         ctxHashMessage.setCommand(TxCmd.NW_NEW_CROSS_HASH);

@@ -7,6 +7,7 @@ package io.nuls.transaction.constant;
 public interface TxConstant {
 
     String MODULE_CODE = "tx";
+    String CONSENSUS_LOGGER_NAME = "tx/tx";
 
     int NULS_CHAINID = 12345;
     int NULS_CHAIN_ASSETID = 1;

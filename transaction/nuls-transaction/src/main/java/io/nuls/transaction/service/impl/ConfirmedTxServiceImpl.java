@@ -150,8 +150,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         List<byte[]> txHashs = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
         Map<TxRegister, List<String>> moduleVerifyMap = new HashMap<>(TxConstant.INIT_CAPACITY_16);
+        BlockHeader blockHeader = null;
         try {
-            BlockHeader blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
+            blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
             for (Transaction tx : txList) {
                 tx.setBlockHeight(blockHeader.getHeight());
                 String txHex = tx.hex();
@@ -178,7 +179,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             removeTxs(chain, txList, false);
             return false;
         }
-        if (!commitLedger(chain, txHexList)) {
+        if (!commitLedger(chain, txHexList, blockHeader.getHeight())) {
             if(!gengsis) {
                 rollbackTxs(chain, moduleVerifyMap, blockHeaderHex, false);
             }
@@ -243,9 +244,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
     }
 
     //提交账本
-    public boolean commitLedger(Chain chain, List<String> txHexList) {
+    public boolean commitLedger(Chain chain, List<String> txHexList, long blockHeight) {
         try {
-            return LedgerCall.commitTxLedger(chain, txHexList, true);
+            return LedgerCall.commitTxLedger(chain, txHexList, blockHeight, true);
         } catch (NulsException e) {
             chain.getLogger().error(e);
             return false;
@@ -298,9 +299,9 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         return true;
     }
 
-    public boolean rollbackLedger(Chain chain, List<String> txHexList) {
+    public boolean rollbackLedger(Chain chain, List<String> txHexList, Long blockHeight) {
         try {
-            return LedgerCall.rollbackTxLedger(chain, txHexList, true);
+            return LedgerCall.rollbackTxLedger(chain, txHexList, blockHeight,true);
         } catch (NulsException e) {
             chain.getLogger().error(e);
             return false;
@@ -340,12 +341,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             return false;
         }
 
-
-        if (!rollbackLedger(chain, txHexList)) {
+        BlockHeader blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
+        if (!rollbackLedger(chain, txHexList, blockHeader.getHeight())) {
             return false;
         }
+
         if (!rollbackTxs(chain, moduleVerifyMap, blockHeaderHex, true)) {
-            commitLedger(chain, txHexList);
+            commitLedger(chain, txHexList, blockHeader.getHeight());
             return false;
         }
         if (!removeTxs(chain, txList, true)) {

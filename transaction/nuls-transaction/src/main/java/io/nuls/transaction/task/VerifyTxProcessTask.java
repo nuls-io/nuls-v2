@@ -1,11 +1,15 @@
 package io.nuls.transaction.task;
 
+import io.nuls.base.basic.AddressTool;
+import io.nuls.base.data.CoinData;
+import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.transaction.cache.PackablePool;
@@ -78,13 +82,19 @@ public class VerifyTxProcessTask implements Runnable {
         while ((tx = unverifiedTxStorageService.pollTx(chain)) != null && orphanTxList.size() < TxConstant.ORPHAN_CONTAINER_MAX_SIZE) {
             size++;
             processTx(chain, tx, false);
-            System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
+//            System.out.println("count: " + count + " , size : " + size + " , orphan size : " + orphanTxList.size());
         }
     }
 
     private boolean processTx(Chain chain, Transaction tx, boolean isOrphanTx){
         try {
-            chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask] txhash:{}, type:{}", tx.getHash(), tx.getType());
+            chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask] type:[{}], txhash:{}, ", tx.getType(), tx.getHash());
+            CoinData coinData = TxUtil.getCoinData(tx);
+            for(CoinFrom coinFrom : coinData.getFrom()){
+                chain.getLogger().debug("*** Debug *** address:{}, nonce:{}, ", AddressTool.getChainIdByAddress(coinFrom.getAddress()), HexUtil.encode(coinFrom.getNonce()));
+            }
+            chain.getLogger().debug("");
+
             int chainId = chain.getChainId();
             boolean rs = transactionManager.verify(chain, tx);
             //todo 跨链交易单独处理, 是否需要进行跨链验证？
@@ -108,15 +118,17 @@ public class VerifyTxProcessTask implements Runnable {
                 //调账本记录未确认交易
                 List<String> txHexList = new ArrayList<>();
                 txHexList.add(tx.hex());
-                LedgerCall.commitTxLedger(chain, txHexList, false);
+                LedgerCall.commitTxLedger(chain, txHexList, null, false);
                 //广播交易hash
                 //todo 调试暂时注释
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
                 count++;
                 return true;
             }
+            chain.getLogger().debug("@@@@@@@@@@@@@@@@@");
             chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask] " +
                     "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
+            chain.getLogger().debug("@@@@@@@@@@@@@@@@@");
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){
@@ -144,8 +156,10 @@ public class VerifyTxProcessTask implements Runnable {
                 if (success) {
                     List<String> txHexList = new ArrayList<>();
                     txHexList.add(tx.hex());
-                    LedgerCall.rollbackTxLedger(chain, txHexList, false);
+                    LedgerCall.rollbackTxLedger(chain, txHexList, null, false);
                     it.remove();
+                    chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +
+                            "OrphanTx remove - type:{} - txhash:{}", tx.getType(), tx.getHash().getDigestHex());
                 }
             }
         } catch (Exception e) {
