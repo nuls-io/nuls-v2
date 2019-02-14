@@ -56,15 +56,9 @@ public interface AccountStateService {
      * @param assetKey
      * @param accountState
      */
-    void updateAccountStateByTx(String assetKey,AccountState orgAccountState,AccountState accountState);
+    void updateAccountStateByTx(String assetKey,AccountState accountState) throws Exception;
 
-    /**
-     *
-     * @param assetKey
-     * @param txHash
-     * @param height
-     */
-    void rollAccountStateByTx(int addressChainId,String assetKey,String txHash,long height);
+
 
     /**
      *

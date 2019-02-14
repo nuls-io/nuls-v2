@@ -22,40 +22,32 @@
  * SOFTWARE.
  *
  */
-package io.nuls.ledger.utils;
+package io.nuls.ledger.test.task;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
+import io.nuls.ledger.utils.LockerUtils;
 
 /**
  * @author lan
  * @description
- * @date 2019/01/07
+ * @date 2019/02/14
  **/
-public class LockerUtils {
-    public static Map<String,Object> accountLockers = new ConcurrentHashMap<>();
-    private static Object assetLockerAddLocker = new Object();
-    public final static Lock BLOCK_SYNC_LOCKER = new ReentrantLock();
-
-    public static   Object getAccountLocker(String address, int chainId, int assetId)
-    {
-        String accountKey = LedgerUtils.getKeyStr(address, chainId, assetId);
-        synchronized(assetLockerAddLocker) {
-            if (null == accountLockers.get(accountKey)) {
-                accountLockers.put(accountKey, new Object());
-            }
-        }
-        return accountLockers.get(accountKey);
+public class BlockTestThread extends Thread {
+    public static int i = 0;
+    public BlockTestThread(String name){
+        Thread.currentThread().setName(name);
     }
-    public static   Object getAccountLocker(String accountKey)
-    {
-        synchronized(assetLockerAddLocker) {
-            if (null == accountLockers.get(accountKey)) {
-                accountLockers.put(accountKey, new Object());
+    @Override
+    public void run() {
+        try {
+            LockerUtils.BLOCK_SYNC_LOCKER.lock();
+            for(int j = 0 ;j<1000;j++) {
+                System.out.print(Thread.currentThread().getName() + ":");
+                System.out.println(i++);
             }
+        }catch(Exception e){
+            e.printStackTrace();
+        }finally {
+            LockerUtils.BLOCK_SYNC_LOCKER.unlock();
         }
-        return accountLockers.get(accountKey);
     }
 }

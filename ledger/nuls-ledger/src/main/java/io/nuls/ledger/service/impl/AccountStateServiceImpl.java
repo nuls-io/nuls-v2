@@ -39,10 +39,8 @@ import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
-import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.util.List;
-
 /**
  * Created by wangkun23 on 2018/11/29.
  * update by lanjinsheng 2018/12/29.
@@ -57,32 +55,16 @@ public class AccountStateServiceImpl implements AccountStateService {
 
     @Override
     public AccountState createAccount(String address, int addressChainId, int assetChainId, int assetId) {
-        AccountState accountState = new AccountState(addressChainId,assetChainId, assetId, LedgerConstant.INIT_NONCE);
+        AccountState accountState = new AccountState(address,addressChainId,assetChainId, assetId, LedgerConstant.INIT_NONCE);
         byte[] key = LedgerUtils.getKey(address, assetChainId, assetId);
         repository.createAccountState(key, accountState);
         return accountState;
     }
     @Override
-    public void updateAccountStateByTx(String assetKey,AccountState orgAccountState,AccountState accountState){
-       repository.updateAccountStateAndSnapshot(assetKey,orgAccountState,accountState);
+    public void updateAccountStateByTx(String assetKey,AccountState accountState) throws Exception {
+       repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING),accountState);
     }
 
-    @Override
-    public void rollAccountStateByTx(int addressChainId,String assetKey, String txHash, long height) {
-        //账户处理锁
-        synchronized (LockerUtils.getAccountLocker(assetKey)) {
-            byte[] snapshotKeyBytes = LedgerUtils.getSnapshotTxKey(assetKey, txHash, height);
-            AccountState accountState = repository.getSnapshotAccountState(addressChainId,snapshotKeyBytes);
-            try {
-                if (null != accountState) {
-                    repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
-                    repository.delSnapshotAccountState(addressChainId,snapshotKeyBytes);
-                }
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-        }
-    }
     @Override
     public void rollUnconfirmTx(int addressChainId,String assetKey,String nonce,String txHash) {
         //账户处理锁
@@ -96,7 +78,7 @@ public class AccountStateServiceImpl implements AccountStateService {
                    if(hadRollNonce || hadRollAmount) {
                        repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
                    }
-            } catch (UnsupportedEncodingException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -161,7 +143,7 @@ public class AccountStateServiceImpl implements AccountStateService {
             byte[] key = LedgerUtils.getKey(address, assetChainId, assetId);
             AccountState accountState = repository.getAccountState(addressChainId,key);
             if (null == accountState) {
-                accountState = new AccountState(addressChainId,assetChainId, assetId, LedgerConstant.INIT_NONCE);
+                accountState = new AccountState(address,addressChainId,assetChainId, assetId, LedgerConstant.INIT_NONCE);
                 repository.createAccountState(key, accountState);
             } else {
                 //清理未确认交易
@@ -177,7 +159,11 @@ public class AccountStateServiceImpl implements AccountStateService {
                 }
                 //解冻时间锁
                 if (freezeStateService.recalculateFreeze(accountState)) {
-                    repository.updateAccountState(key, accountState);
+                    try {
+                        repository.updateAccountState(key, accountState);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             return accountState;
@@ -205,9 +191,16 @@ public class AccountStateServiceImpl implements AccountStateService {
             accountState.addUnconfirmedAmount(unconfirmedAmount);
             byte[] key = LedgerUtils.getKey(unconfirmedTx.getAddress(),unconfirmedTx.getAssetChainId(),unconfirmedTx.getAssetId());
             //这个改变无需进行账户的snapshot
-            repository.updateAccountState(key, accountState);
+            try {
+                repository.updateAccountState(key, accountState);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
     }
-
+    public static void main(String []args){
+        UnconfirmedTx unconfirmedTx = new UnconfirmedTx();
+        System.out.println(unconfirmedTx.getSpendAmount().compareTo(BigInteger.ZERO)!=0);
+    }
 }

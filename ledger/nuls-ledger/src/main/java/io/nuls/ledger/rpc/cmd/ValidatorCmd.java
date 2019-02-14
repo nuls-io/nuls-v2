@@ -36,8 +36,6 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,7 +59,6 @@ public class ValidatorCmd extends BaseCmd {
     @Parameter(parameterName = "txHex", parameterType = "String")
     @Parameter(parameterName = "isBatchValidate", parameterType = "boolean")
     public Response validateCoinData(Map params) {
-        //TODO.. 验证参数个数和格式
         Integer chainId = (Integer) params.get("chainId");
         String txHex = (String) params.get("txHex");
         boolean isBatchValidate = Boolean.valueOf(params.get("isBatchValidate").toString());

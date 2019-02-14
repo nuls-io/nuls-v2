@@ -44,34 +44,35 @@ import java.util.List;
  */
 @ToString
 @AllArgsConstructor
-public class AccountStatesSnapshotKeys extends BaseNulsData {
+public class BlockSnapshotAccounts extends BaseNulsData {
     /**
-     *  snapshotKeys
+     *  accounts
      */
     @Setter
     @Getter
-    private List<String> snapshotKeys = new ArrayList<String>();
-
-    public AccountStatesSnapshotKeys() {
-        super();
+    private List<AccountState> accounts = new ArrayList<AccountState>();
+    public void addAccountState(AccountState accountState){
+        accounts.add(accountState);
     }
-    public void addSnapshotKey(String key){
-        snapshotKeys.add(key);
+    public BlockSnapshotAccounts() {
+        super();
     }
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(snapshotKeys.size());
-        for (String snapshotKey : snapshotKeys) {
-            stream.writeString(snapshotKey);
+        stream.writeUint16(accounts.size());
+        for (AccountState accountState : accounts) {
+            stream.writeNulsData(accountState);
         }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        int snapshotKeysCount = byteBuffer.readUint16();
-        for (int i = 0; i < snapshotKeysCount; i++) {
+        int accountsCount = byteBuffer.readUint16();
+        for (int i = 0; i < accountsCount; i++) {
             try {
-                this.snapshotKeys.add(byteBuffer.readString());
+                AccountState accountState = new AccountState();
+                byteBuffer.readNulsData(accountState);
+                this.accounts.add(accountState);
             } catch (Exception e) {
                 throw new NulsException(e);
             }
@@ -82,8 +83,8 @@ public class AccountStatesSnapshotKeys extends BaseNulsData {
     public int size() {
         int size = 0;
         size += SerializeUtils.sizeOfUint16();
-        for (String snapshotKey : snapshotKeys) {
-            size += SerializeUtils.sizeOfString(snapshotKey);
+        for (AccountState accountState : accounts) {
+            size +=accountState.size();
         }
         return size;
     }
