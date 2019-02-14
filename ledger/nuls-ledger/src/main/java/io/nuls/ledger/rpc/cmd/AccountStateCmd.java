@@ -69,7 +69,6 @@ public class AccountStateCmd extends BaseCmd {
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "assetId", parameterType = "int")
     public Response getBalance(Map params) {
-        //TODO.. 验证参数个数和格式
         Integer chainId = (Integer) params.get("chainId");
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
@@ -99,7 +98,6 @@ public class AccountStateCmd extends BaseCmd {
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "assetId", parameterType = "int")
     public Response getNonce(Map params) {
-        //TODO.. 验证参数个数和格式
         Integer chainId = (Integer) params.get("chainId");
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");
@@ -126,7 +124,6 @@ public class AccountStateCmd extends BaseCmd {
     @Parameter(parameterName = "address", parameterType = "String")
     @Parameter(parameterName = "assetId", parameterType = "int")
     public Response getBalanceNonce(Map params) {
-        //TODO.. 验证参数个数和格式
         Integer chainId = (Integer) params.get("chainId");
         Integer assetChainId = (Integer) params.get("assetChainId");
         String address = (String) params.get("address");

@@ -27,6 +27,9 @@ package io.nuls.ledger.service;
 
 
 import io.nuls.base.data.Transaction;
+import io.nuls.ledger.model.po.AccountState;
+
+import java.util.List;
 
 /**
  * Created by wangkun23 on 2018/11/28.
@@ -41,14 +44,21 @@ public interface TransactionService {
      */
     boolean unConfirmTxProcess(int addressChainId,Transaction transaction);
 
+
     /**
-     * 已确认交易数据处理
+     * 已确认区块数据提交
      */
-    boolean confirmTxProcess(int addressChainId,Transaction transaction);
+    boolean confirmBlockProcess(int addressChainId,List<Transaction> txList,long blockHeight);
+
     /**
      * 确认交易回滚处理
      */
-    boolean rollBackConfirmTx(int addressChainId,Transaction transaction);
+    boolean rollBackBlock(int addressChainId, List<AccountState> preAccountStates,long blockHeight);
+    /**
+     * 确认交易回滚处理
+     */
+    boolean rollBackConfirmTxs(int addressChainId,long blockHeight);
+
     /**
      * 未确认交易回滚处理
      */

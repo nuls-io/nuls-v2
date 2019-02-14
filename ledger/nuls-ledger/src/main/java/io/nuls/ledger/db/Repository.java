@@ -10,10 +10,10 @@
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,7 +25,11 @@
  */
 package io.nuls.ledger.db;
 
+import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.BlockSnapshotAccounts;
+
+import java.util.List;
 
 public interface Repository {
 
@@ -39,47 +43,56 @@ public interface Repository {
     void createAccountState(byte[] key, AccountState accountState);
 
     /**
-     * update accountState to rocksdb
-     * @param key
-     * @param preAccountState
-     * @param nowAccountState
-     */
-    void updateAccountStateAndSnapshot(String key,AccountState preAccountState,AccountState nowAccountState);
-
-    /**
-     *
      * @param chainId
      * @param key
      * @return AccountState
      */
-    AccountState getAccountState(int chainId,byte[] key);
+    AccountState getAccountState(int chainId, byte[] key);
 
     /**
-     *
      * @param key
      * @param nowAccountState
      */
-    void updateAccountState(byte[] key,AccountState nowAccountState);
+    void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception;
 
     /**
      *
      * @param chainId
-     * @param key
-     * @return AccountState
+     * @param height
      */
-    AccountState getSnapshotAccountState(int chainId,byte[] key);
-
+    void delBlockSnapshot(int chainId,long height) throws Exception;
     /**
      *
      * @param chainId
-     * @param key
+     * @param height
      */
-    void delSnapshotAccountState(int chainId,byte[] key);
+    void saveBlockSnapshot(int chainId,long height,BlockSnapshotAccounts blockSnapshotAccounts) throws Exception;
+    /**
+     *
+     * @param chainId
+     * @param height
+     * @return BlockSnapshotAccounts
+     */
+    BlockSnapshotAccounts getBlockSnapshot(int chainId, long height);
+
 
     /**
      *
      * @param chainId
      * @return
      */
-      long  getBlockHeight(int chainId);
+    long getBlockHeight(int chainId);
+
+    /**
+     *
+     * @param chainId
+     * @param height
+     */
+    void saveOrUpdateBlockHeight(int chainId,long height);
+
+    /**
+     *
+     * @return
+     */
+    List<ChainHeight> getChainsBlockHeight();
 }

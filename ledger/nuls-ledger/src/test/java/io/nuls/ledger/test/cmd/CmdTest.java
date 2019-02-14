@@ -97,6 +97,22 @@ public class CmdTest {
         logger.info("response {}", response);
     }
     @Test
+    public void getBalanceNonce2() throws Exception {
+        double version = 1.0;
+
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        params.put("chainId", 12345);
+        params.put("assetChainId", 12345);
+        params.put("address", "QMwz71wTKgp9sZ8g44A9WNgXk11u23930");
+//        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
+
+        params.put("assetId", 1);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
+        logger.info("response {}", response);
+    }
+    @Test
     public void getNonce() throws Exception {
         double version = 1.0;
         // Build params map

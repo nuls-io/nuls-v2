@@ -32,5 +32,14 @@ package io.nuls.ledger.db;
 public interface DataBaseArea {
     String TB_LEDGER_ACCOUNT = "account";
 
-    String TB_LEDGER_ACCOUNT_SNAPSHOT = "accountSnapshot";
+    /**
+     *   按区块高度来进行上一个账号状态的
+     */
+
+    String TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT = "accountBlockSnapshot";
+
+    /**
+     *   存区块当前确认的高度
+     */
+    String TB_LEDGER_BLOCK_HEIGHT = "chainBlockHeight";
 }
