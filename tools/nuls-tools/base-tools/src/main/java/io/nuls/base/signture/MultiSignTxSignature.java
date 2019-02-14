@@ -71,7 +71,6 @@ public class MultiSignTxSignature extends TransactionSignature {
             pubKeyList.add(byteBuffer.readByLengthByte());
         }
         super.parse(byteBuffer);
-
     }
 
     @Override
