@@ -41,40 +41,48 @@ import java.util.List;
  */
 public class MultiSignTxSignature extends TransactionSignature {
 
+    /**
+     * 多签地址需要M个公钥的签名可以解锁
+     */
     private byte m;
+
+    /**
+     * 生成多签地址所有的公钥
+     */
     private List<byte[]> pubKeyList;
 
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        super.serializeToStream(stream);
         stream.write(m);
         stream.writeVarInt(pubKeyList.size());
         for (int i = 0; i < pubKeyList.size(); i++) {
             stream.writeBytesWithLength(pubKeyList.get(i));
         }
-
-
+        super.serializeToStream(stream);
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        super.parse(byteBuffer);
         this.m = byteBuffer.readByte();
         long count = byteBuffer.readVarInt();
+        List<byte[]> pubKeyList = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             pubKeyList.add(byteBuffer.readByLengthByte());
         }
+        super.parse(byteBuffer);
 
     }
 
     @Override
     public int size() {
-        int size = super.size();
+        int size = 0;
         size += 1;
+        size += SerializeUtils.sizeOfVarInt(pubKeyList == null ? 0 : pubKeyList.size());
         for (int i = 0; i < pubKeyList.size(); i++) {
             size += SerializeUtils.sizeOfBytes(pubKeyList.get(i));
         }
+        size += super.size();
         return size;
     }
 
