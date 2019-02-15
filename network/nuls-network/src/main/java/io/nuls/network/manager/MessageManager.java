@@ -236,7 +236,7 @@ public class MessageManager extends BaseManager {
         }
         if (null != connectNodes && connectNodes.size() > 0) {
             for (Node connectNode : connectNodes) {
-                if (connectNode.getId().equals(excludeNode.getId())) {
+                if (null != excludeNode && connectNode.getId().equals(excludeNode.getId())) {
                     continue;
                 }
                 this.sendToNode(addrMessage, connectNode, asyn);
