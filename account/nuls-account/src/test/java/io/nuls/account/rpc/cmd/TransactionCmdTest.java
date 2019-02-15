@@ -83,6 +83,7 @@ public class TransactionCmdTest {
         List<String> txHexList = Arrays.asList(HexUtil.encode(transaction.serialize()));
         params.put("txHexList", txHexList);
         params.put("isConfirmTx", true);
+        params.put("blockHeight", 0);
         params.remove("txHex");
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         Log.info("response {}", response);
