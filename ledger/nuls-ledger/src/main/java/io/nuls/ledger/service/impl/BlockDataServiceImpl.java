@@ -61,7 +61,7 @@ public class BlockDataServiceImpl implements BlockDataService {
                     //回滚高度
                     for (AccountState accountState :preAccountStates) {
                         String key = LedgerUtils.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
-                        accountStateService.updateAccountStateByTx(key,accountState);
+                        accountStateService.rollAccountState(key,accountState);
                         logger.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountState.getAssetChainId(),accountState.getAssetId(),
                                 accountState.getHeight(), accountState.getTxHash());
                     }

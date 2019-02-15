@@ -159,22 +159,7 @@ public class AccountState extends BaseNulsData {
         unconfirmedAmounts.add(unconfirmedAmount);
     }
 
-    public boolean updateConfirmedNonce(String nonce) {
-        this.nonce = nonce;
-        if (unconfirmedNonces.size() > 0) {
-            UnconfirmedNonce unconfirmedNonce = unconfirmedNonces.get(0);
-            if (unconfirmedNonce.getNonce().equalsIgnoreCase(nonce)) {
-                //未确认的转为确认的，移除集合中的数据
-                unconfirmedNonces.remove(0);
-            } else {
-                //分叉了，清空之前的未提交nonce
-                unconfirmedNonces.clear();
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
+
 
     public boolean updateConfirmedAmount(String hash) {
         if (unconfirmedAmounts.size() > 0) {
@@ -386,4 +371,5 @@ public class AccountState extends BaseNulsData {
         }
         return null;
     }
+
 }
