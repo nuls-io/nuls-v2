@@ -46,7 +46,7 @@ public class CommontTransactionProcessor implements TxProcessor {
     @Override
     public boolean processFromCoinData(CoinFrom coin,String nonce,String hash,  AccountState accountState) {
         accountState.addTotalFromAmount(coin.getAmount());
-        accountState.updateConfirmedNonce(nonce);
+        accountState.setNonce(nonce);
         return true;
     }
 

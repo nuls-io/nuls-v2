@@ -29,10 +29,12 @@ import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.UnconfirmedAmount;
 import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.ledger.service.AccountStateService;
 import io.nuls.ledger.service.FreezeStateService;
+import io.nuls.ledger.utils.CoinDataUtils;
 import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.ledger.utils.LockerUtils;
 import io.nuls.ledger.utils.LoggerUtil;
@@ -61,10 +63,23 @@ public class AccountStateServiceImpl implements AccountStateService {
         return accountState;
     }
     @Override
-    public void updateAccountStateByTx(String assetKey,AccountState accountState) throws Exception {
-       repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING),accountState);
+    public void updateAccountStateByTx(String assetKey, BlockSnapshotAccounts blockSnapshotAccounts, AccountState accountState) throws Exception {
+        //同步下未确认交易账户数据
+        synchronized (LockerUtils.getAccountLocker(assetKey)) {
+            AccountState dbAccountState = repository.getAccountState(accountState.getAddressChainId(),assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
+            List<UnconfirmedNonce> unconfirmedNonces = CoinDataUtils.getConfirmedNonce(accountState.getNonce(),dbAccountState.getUnconfirmedNonces());
+            accountState.setUnconfirmedNonces( unconfirmedNonces);
+            repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
+            blockSnapshotAccounts.addAccountState(dbAccountState);
+        }
     }
-
+    @Override
+    public void rollAccountState(String assetKey, AccountState accountState) throws Exception {
+        //同步下未确认交易账户数据
+        synchronized (LockerUtils.getAccountLocker(assetKey)) {
+            repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
+        }
+    }
     @Override
     public void rollUnconfirmTx(int addressChainId,String assetKey,String nonce,String txHash) {
         //账户处理锁

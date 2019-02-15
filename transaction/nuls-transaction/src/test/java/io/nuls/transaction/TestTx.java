@@ -390,6 +390,7 @@ public class TestTx {
         List<String> list = new ArrayList<>();
         list.add(HexUtil.encode(transaction.serialize()));
         params.put("txHexList", list);
+        params.put("blockHeight", 0);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         Log.info("response {}", response);
     }

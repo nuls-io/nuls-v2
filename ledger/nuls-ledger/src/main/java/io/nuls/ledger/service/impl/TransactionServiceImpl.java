@@ -171,7 +171,7 @@ public class TransactionServiceImpl implements TransactionService {
                             continue;
                         }
                         boolean process = false;
-                        AccountBalance accountBalance = getAccountBalance(addressChainId, from, txHash, transaction.getBlockHeight(), updateAccounts);
+                        AccountBalance accountBalance = getAccountBalance(addressChainId, from, txHash, blockHeight, updateAccounts);
                         if (from.getLocked() == 0) {
                             //非解锁交易处理
                             process = commontTransactionProcessor.processFromCoinData(from, nonce8BytesStr, transaction.getHash().toString(), accountBalance.getNowAccountState());
@@ -200,8 +200,6 @@ public class TransactionServiceImpl implements TransactionService {
                             lockedTransactionProcessor.processToCoinData(to, nonce8BytesStr, transaction.getHash().toString(), accountBalance.getNowAccountState());
                         }
                     }
-
-
                     //整体交易的处理
                     try {
                         for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
@@ -222,10 +220,13 @@ public class TransactionServiceImpl implements TransactionService {
             try {
                 //备份历史
                 repository.saveBlockSnapshot(addressChainId, blockHeight, blockSnapshotAccounts);
+                blockSnapshotAccounts.getAccounts().clear();
                 //更新账本信息
                 for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
-                    accountStateService.updateAccountStateByTx(entry.getKey(), entry.getValue().getNowAccountState());
+                    accountStateService.updateAccountStateByTx(entry.getKey(),blockSnapshotAccounts, entry.getValue().getNowAccountState());
                 }
+                //更新备份历史
+                repository.saveBlockSnapshot(addressChainId, blockHeight, blockSnapshotAccounts);
             } catch (Exception e) {
                 e.printStackTrace();
                 //需要回滚数据
@@ -259,6 +260,7 @@ public class TransactionServiceImpl implements TransactionService {
             accountBalance = new AccountBalance(accountState, orgAccountState);
             updateAccounts.put(key, accountBalance);
         }
+        accountBalance.getNowAccountState().setTxHash(txHash);
         return accountBalance;
     }
 
@@ -273,7 +275,7 @@ public class TransactionServiceImpl implements TransactionService {
             //回滚账号信息
             for (AccountState accountState : preAccountStates) {
                 String key = LedgerUtils.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
-                accountStateService.updateAccountStateByTx(key, accountState);
+                accountStateService.rollAccountState(key, accountState);
                 logger.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountState.getAssetChainId(), accountState.getAssetId(),
                         accountState.getHeight(), accountState.getTxHash());
             }
@@ -307,7 +309,7 @@ public class TransactionServiceImpl implements TransactionService {
             List<AccountState> preAccountStates = blockSnapshotAccounts.getAccounts();
             for (AccountState accountState : preAccountStates) {
                 String key = LedgerUtils.getKeyStr(accountState.getAddress(), accountState.getAssetChainId(), accountState.getAssetId());
-                accountStateService.updateAccountStateByTx(key, accountState);
+                accountStateService.rollAccountState(key, accountState);
                 logger.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountState.getAssetChainId(), accountState.getAssetId(),
                         accountState.getHeight(), accountState.getTxHash());
             }

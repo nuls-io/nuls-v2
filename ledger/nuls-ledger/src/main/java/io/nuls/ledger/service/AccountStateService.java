@@ -27,6 +27,7 @@ package io.nuls.ledger.service;
 
 import io.nuls.ledger.model.UnconfirmedTx;
 import io.nuls.ledger.model.po.AccountState;
+import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 
 /**
  * Created by wangkun23 on 2018/11/29.
@@ -52,11 +53,22 @@ public interface AccountStateService {
     AccountState getAccountState(String address,int addressChainId, int assetChainId, int assetId);
 
     /**
-     *存储新的账户信息时，进行快照存储
+     * 存储新的账户信息时，进行快照存储
+     * @param assetKey
+     * @param blockSnapshotAccounts
+     * @param accountState
+     * @throws Exception
+     */
+    void updateAccountStateByTx(String assetKey, BlockSnapshotAccounts blockSnapshotAccounts, AccountState accountState) throws Exception;
+
+
+    /**
+     * 回滚账户信息
      * @param assetKey
      * @param accountState
+     * @throws Exception
      */
-    void updateAccountStateByTx(String assetKey,AccountState accountState) throws Exception;
+    void rollAccountState(String assetKey, AccountState accountState) throws Exception;
 
 
 
