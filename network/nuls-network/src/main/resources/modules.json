@@ -27,7 +27,7 @@
     "name": "network.self.chainId",
     "remark": "自有主网链id",
     "readOnly": "true",
-    "value": "1"
+    "value": "12345"
   },
   {
     "name": "network.self.magic",
