@@ -111,21 +111,27 @@ public class TestTx {
     @Test
     public void test() throws Exception {
 
-        addGenesisAsset(address21);
-        addGenesisAsset(address21);
-        addGenesisAsset(address22);
-        addGenesisAsset(address23);
-        addGenesisAsset(address24);
-        addGenesisAsset(address25);
-        addGenesisAsset(address26);
-        addGenesisAsset(address27);
-        addGenesisAsset(address28);
-        addGenesisAsset(address29);
+//        addGenesisAsset(address21);
+//        addGenesisAsset(address21);
+//        addGenesisAsset(address22);
+//        addGenesisAsset(address23);
+//        addGenesisAsset(address24);
+//        addGenesisAsset(address25);
+//        addGenesisAsset(address26);
+//        addGenesisAsset(address27);
+//        addGenesisAsset(address28);
+//        addGenesisAsset(address29);
         BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address20), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance));
 
         BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address21), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance2));
+        BigInteger balance3 = LedgerCall.getBalance(chain, AddressTool.getAddress(address22), assetChainId, assetId);
+        System.out.println(JSONUtils.obj2PrettyJson(balance3));
+        BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address24), assetChainId, assetId);
+        System.out.println(JSONUtils.obj2PrettyJson(balance4));
+        BigInteger balance5 = LedgerCall.getBalance(chain, AddressTool.getAddress(address28), assetChainId, assetId);
+        System.out.println(JSONUtils.obj2PrettyJson(balance5));
     }
 
     @Test
