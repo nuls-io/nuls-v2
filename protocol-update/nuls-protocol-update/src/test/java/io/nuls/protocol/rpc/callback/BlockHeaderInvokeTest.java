@@ -108,7 +108,7 @@ public class BlockHeaderInvokeTest {
             version = context.getCurrentProtocolVersion().getVersion();
             if (i == 18900) {
                 assertEquals(2, version);
-                assertEquals(170, context.getLastValidStatistics().getCount());
+                assertEquals(179, context.getLastValidStatistics().getCount());
                 assertEquals(2, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
             if (i == 19000) {
@@ -175,7 +175,7 @@ public class BlockHeaderInvokeTest {
             }
             if (i == 2200) {
                 assertEquals(1, version);
-                assertEquals(1, context.getLastValidStatistics().getCount());
+                assertEquals(20, context.getLastValidStatistics().getCount());
                 assertEquals(1, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
             if (i == 2400) {
@@ -202,7 +202,7 @@ public class BlockHeaderInvokeTest {
             version = context.getCurrentProtocolVersion().getVersion();
             if (i == 18900) {
                 assertEquals(2, version);
-                assertEquals(166, context.getLastValidStatistics().getCount());
+                assertEquals(177, context.getLastValidStatistics().getCount());
                 assertEquals(2, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
             if (i == 19000) {
@@ -281,7 +281,7 @@ public class BlockHeaderInvokeTest {
             version = context.getCurrentProtocolVersion().getVersion();
             if (i == 2400) {
                 assertEquals(1, version);
-                assertEquals(1, context.getLastValidStatistics().getCount());
+                assertEquals(20, context.getLastValidStatistics().getCount());
                 assertEquals(1, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
             if (i == 2500) {
@@ -353,7 +353,7 @@ public class BlockHeaderInvokeTest {
             }
             if (i == 2400) {
                 assertEquals(1, version);
-                assertEquals(1, context.getLastValidStatistics().getCount());
+                assertEquals(20, context.getLastValidStatistics().getCount());
                 assertEquals(1, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
             if (i == 5000) {
@@ -375,7 +375,7 @@ public class BlockHeaderInvokeTest {
             version = context.getCurrentProtocolVersion().getVersion();
             if (i == 18900) {
                 assertEquals(2, version);
-                assertEquals(163, context.getLastValidStatistics().getCount());
+                assertEquals(175, context.getLastValidStatistics().getCount());
                 assertEquals(2, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
             if (i == 19000) {
@@ -399,7 +399,7 @@ public class BlockHeaderInvokeTest {
             version = context.getCurrentProtocolVersion().getVersion();
             if (i == 19300) {
                 assertEquals(2, version);
-                assertEquals(1, context.getLastValidStatistics().getCount());
+                assertEquals(176, context.getLastValidStatistics().getCount());
                 assertEquals(2, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
             if (i == 19400) {
@@ -479,7 +479,7 @@ public class BlockHeaderInvokeTest {
             version = context.getCurrentProtocolVersion().getVersion();
             if (i == 18900) {
                 assertEquals(2, version);
-                assertEquals(170, context.getLastValidStatistics().getCount());
+                assertEquals(179, context.getLastValidStatistics().getCount());
                 assertEquals(2, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
             if (i == 19000) {
