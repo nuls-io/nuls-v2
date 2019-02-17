@@ -62,18 +62,18 @@ public class TestTx {
 
     static int chainId = 12345;
     static int assetChainId = 12345;
-    static String address1 = "QXpkrbKqShZfopyck5jBQSFgbP9cD3930";
-    static String address2 = "KS3wfAPFAmY8EwMFz21EXhJMXf8DV3930";
-    static String address3 = "Vxb3xxatcFFTZZe3wynX6CfAsvzAx3930";
-    static String address4 = "R9CxmNqtBDEm9iWX2Cod46QGCNE2M3930";
-    static String address5 = "LFkghywKjdE2G3SZUcTsMkzcJ7tda3930";
-    static String address6 = "QMwz71wTKgp9sZ8g44A9WNgXk11u23930";
-    static String address7 = "WEXAmsUJSNAvCx2zUaXziy3ZYX1em3930";
-    static String address8 = "TewWmmtBxuxN14FRazZXdtD9XuH313930";
-    static String address9 = "WodfCXTbJ22mPa35Y61yNTRh1x3zB3930";
-    static String address10 = "SPWAxuodkw222367N88eavYDWRraG3930";
-    static String address11 = "Rnt57eZnH8Dd7K3LudJXmmEutYJZD3930";
-    static String address12 = "XroY3cLWTfgKMRRRLCP5rhvo1gHY63930";
+//    static String address20 = "QXpkrbKqShZfopyck5jBQSFgbP9cD3930";
+//    static String address22 = "KS3wfAPFAmY8EwMFz21EXhJMXf8DV3930";
+//    static String address3 = "Vxb3xxatcFFTZZe3wynX6CfAsvzAx3930";
+//    static String address4 = "R9CxmNqtBDEm9iWX2Cod46QGCNE2M3930";
+//    static String address5 = "LFkghywKjdE2G3SZUcTsMkzcJ7tda3930";
+//    static String address6 = "QMwz71wTKgp9sZ8g44A9WNgXk11u23930";
+//    static String address23 = "WEXAmsUJSNAvCx2zUaXziy3ZYX1em3930";
+//    static String address8 = "TewWmmtBxuxN14FRazZXdtD9XuH313930";
+//    static String address9 = "WodfCXTbJ22mPa35Y61yNTRh1x3zB3930";
+//    static String address200 = "SPWAxuodkw222367N88eavYDWRraG3930";
+//    static String address201 = "Rnt57eZnH8Dd7K3LudJXmmEutYJZD3930";
+//    static String address202 = "XroY3cLWTfgKMRRRLCP5rhvo1gHY63930";
 
 
     static String address20 = "H3eriRPPdbSMxXfg5MFYVfGmypNma3930";
@@ -110,20 +110,8 @@ public class TestTx {
 
     @Test
     public void test() throws Exception {
-        addGenesisAsset(address1);
-        addGenesisAsset(address2);
-        addGenesisAsset(address3);
-        addGenesisAsset(address4);
-        addGenesisAsset(address5);
-        addGenesisAsset(address6);
-        addGenesisAsset(address7);
-        addGenesisAsset(address8);
-        addGenesisAsset(address9);
-        addGenesisAsset(address10);
-        addGenesisAsset(address11);
-        addGenesisAsset(address12);
 
-        addGenesisAsset(address20);
+        addGenesisAsset(address21);
         addGenesisAsset(address21);
         addGenesisAsset(address22);
         addGenesisAsset(address23);
@@ -133,10 +121,10 @@ public class TestTx {
         addGenesisAsset(address27);
         addGenesisAsset(address28);
         addGenesisAsset(address29);
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address4), assetChainId, assetId);
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address20), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance));
 
-        BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address6), assetChainId, assetId);
+        BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address21), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance2));
     }
 
@@ -162,14 +150,10 @@ public class TestTx {
      */
     @Test
     public void newCtx() throws Exception {
-        BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
-        BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address2), assetChainId, assetId);
-//            BigInteger balance3 = LedgerCall.getBalance(chain, AddressTool.getAddress(address3), assetChainId, assetId);
-//            BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address4), assetChainId, assetId);
-        System.out.println("address1: " + balance1.longValue());
-        System.out.println("address2: " + balance2.longValue());
-//            System.out.println("address3: " + balance3.longValue());
-//            System.out.println("address4: " + balance4.longValue());
+        BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address20), assetChainId, assetId);
+        BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address21), assetChainId, assetId);
+        System.out.println("address20: " + balance1.longValue());
+        System.out.println("address21: " + balance2.longValue());
         CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
                 createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
         //调接口
@@ -196,11 +180,11 @@ public class TestTx {
 
     @Test
     public void createAgentTx() throws Exception {
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address7), assetChainId, assetId);
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address23), assetChainId, assetId);
         System.out.println(balance.longValue());
 
         //组装创建节点交易
-        Map agentTxMap = this.createAgentTx(address9, address1);
+        Map agentTxMap = this.createAgentTx(address25, address26);
         //调用接口
         Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
@@ -213,10 +197,10 @@ public class TestTx {
     public void stopAgentTx() throws Exception {
 
         //组装创建节点交易
-        //Map agentTxMap=this.createAgentTx(address9, address1);
+        //Map agentTxMap=this.createAgentTx(address21, address20);
         Map<String, Object> txMap = new HashMap();
         txMap.put("chainId", chainId);
-        txMap.put("address", address9);
+        txMap.put("address", address25);
         txMap.put("password", "");
         //调用接口
         Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
@@ -228,7 +212,7 @@ public class TestTx {
 
 
     /**
-     * 委托节点交易创建
+     * 委托节点
      */
     @Test
     public void depositToAgent() throws Exception {
@@ -236,7 +220,7 @@ public class TestTx {
         String agentHash = "0020cd550e025eae244dc62b101379c7694e6c7e25a06fd607c29efbd7499f82bb62";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
-        dpParams.put("address", address10);
+        dpParams.put("address", address27);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 20000 * 100000000L);
         Response dpResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
@@ -254,7 +238,7 @@ public class TestTx {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
-        params.put("address", address10);
+        params.put("address", address27);
         params.put("txHash", "00208bb9f6ec49c0013c7d6a868733510ce29b0433566634ec6c4e8d02f9af3d63ce");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
@@ -270,7 +254,7 @@ public class TestTx {
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
-        params.put("address", address1);
+        params.put("address", address20);
         params.put("password", password);
         params.put("alias", alias);
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
@@ -307,14 +291,14 @@ public class TestTx {
         CoinDTO coinDTO = new CoinDTO();
         coinDTO.setAssetsId(assetId);
         coinDTO.setAssetsChainId(assetChainId);
-        coinDTO.setAddress(address1);
+        coinDTO.setAddress(address20);
         coinDTO.setAmount(new BigInteger("200000000"));
         coinDTO.setPassword("nuls123456");
 
         CoinDTO coinDTO2 = new CoinDTO();
         coinDTO2.setAssetsId(assetId);
         coinDTO2.setAssetsChainId(assetChainId);
-        coinDTO2.setAddress(address2);
+        coinDTO2.setAddress(address21);
         coinDTO2.setAmount(new BigInteger("100000000"));
         coinDTO2.setPassword("nuls123456");
         List<CoinDTO> listFrom = new ArrayList<>();
@@ -327,13 +311,13 @@ public class TestTx {
         CoinDTO coinDTO = new CoinDTO();
         coinDTO.setAssetsId(assetId);
         coinDTO.setAssetsChainId(8964);
-        coinDTO.setAddress("VatuPuZeEc1YJ21iasZH6SMAD2VNL0423");
+        coinDTO.setAddress(address23);
         coinDTO.setAmount(new BigInteger("200000000"));
 
         CoinDTO coinDTO2 = new CoinDTO();
         coinDTO2.setAssetsId(assetId);
         coinDTO2.setAssetsChainId(8964);
-        coinDTO2.setAddress("K7gb72AMXhymt8wBH3fwBUqSwf4EX0423");
+        coinDTO2.setAddress(address24);
         coinDTO2.setAmount(new BigInteger("100000000"));
         List<CoinDTO> listTO = new ArrayList<>();
         listTO.add(coinDTO);
@@ -368,6 +352,7 @@ public class TestTx {
         return tx;
     }
 
+    static int height = 0;
     /**
      * 铸币
      *
@@ -390,7 +375,7 @@ public class TestTx {
         List<String> list = new ArrayList<>();
         list.add(HexUtil.encode(transaction.serialize()));
         params.put("txHexList", list);
-        params.put("blockHeight", 0);
+        params.put("blockHeight", height++);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         Log.info("response {}", response);
     }
@@ -408,7 +393,7 @@ public class TestTx {
         List<CoinDTO> inputs = new ArrayList<>();
         List<CoinDTO> outputs = new ArrayList<>();
         CoinDTO inputCoin1 = new CoinDTO();
-        inputCoin1.setAddress(address1);
+        inputCoin1.setAddress(address23);
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(assetId);
@@ -416,7 +401,7 @@ public class TestTx {
         inputs.add(inputCoin1);
 
         CoinDTO outputCoin1 = new CoinDTO();
-        outputCoin1.setAddress(address2);
+        outputCoin1.setAddress(address24);
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(assetId);

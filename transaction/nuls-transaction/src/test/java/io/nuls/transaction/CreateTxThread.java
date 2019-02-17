@@ -49,19 +49,19 @@ public class CreateTxThread implements Runnable {
     static int chainId = 12345;
     static int assetChainId = 12345;
     static int assetId = 1;
-    static String address1 = "QXpkrbKqShZfopyck5jBQSFgbP9cD3930";
-    static String address2 = "KS3wfAPFAmY8EwMFz21EXhJMXf8DV3930";
-    static String address3 = "LFkghywKjdE2G3SZUcTsMkzcJ7tda3930";
-    static String address4 = "R9CxmNqtBDEm9iWX2Cod46QGCNE2M3930";
-
-    static String password = "nuls123456";
-    static String address6 = "QMwz71wTKgp9sZ8g44A9WNgXk11u23930";
-    static String address5 = "LFkghywKjdE2G3SZUcTsMkzcJ7tda3930";
-    static String address7 = "WEXAmsUJSNAvCx2zUaXziy3ZYX1em3930";
-    static String address9 = "WodfCXTbJ22mPa35Y61yNTRh1x3zB3930";
-    //static String address10 = "SPWAxuodkw222367N88eavYDWRraG3930";
-    static String address11 = "Rnt57eZnH8Dd7K3LudJXmmEutYJZD3930";
-    static String address12 = "XroY3cLWTfgKMRRRLCP5rhvo1gHY63930";
+//    static String address1 = "QXpkrbKqShZfopyck5jBQSFgbP9cD3930";
+//    static String address2 = "KS3wfAPFAmY8EwMFz21EXhJMXf8DV3930";
+//    static String address3 = "LFkghywKjdE2G3SZUcTsMkzcJ7tda3930";
+//    static String address4 = "R9CxmNqtBDEm9iWX2Cod46QGCNE2M3930";
+//
+//    static String password = "nuls123456";
+//    static String address6 = "QMwz71wTKgp9sZ8g44A9WNgXk11u23930";
+//    static String address5 = "LFkghywKjdE2G3SZUcTsMkzcJ7tda3930";
+//    static String address7 = "WEXAmsUJSNAvCx2zUaXziy3ZYX1em3930";
+//    static String address9 = "WodfCXTbJ22mPa35Y61yNTRh1x3zB3930";
+//    //static String address10 = "SPWAxuodkw222367N88eavYDWRraG3930";
+//    static String address11 = "Rnt57eZnH8Dd7K3LudJXmmEutYJZD3930";
+//    static String address12 = "XroY3cLWTfgKMRRRLCP5rhvo1gHY63930";
 
     static String address20 = "H3eriRPPdbSMxXfg5MFYVfGmypNma3930";
     static String address21 = "H9jzu275LW7qUPo4boZoN611Hc2DE3930";
@@ -143,39 +143,39 @@ public class CreateTxThread implements Runnable {
         }
     }
 
-    private List<CoinDTO> createFromCoinDTOList(){
+    private List<CoinDTO> createFromCoinDTOList() {
         CoinDTO coinDTO = new CoinDTO();
         coinDTO.setAssetsId(assetId);
         coinDTO.setAssetsChainId(assetChainId);
-        coinDTO.setAddress(address1);
+        coinDTO.setAddress(address20);
         coinDTO.setAmount(new BigInteger("200000000"));
         coinDTO.setPassword("nuls123456");
 
         CoinDTO coinDTO2 = new CoinDTO();
         coinDTO2.setAssetsId(assetId);
         coinDTO2.setAssetsChainId(assetChainId);
-        coinDTO2.setAddress(address2);
+        coinDTO2.setAddress(address21);
         coinDTO2.setAmount(new BigInteger("100000000"));
         coinDTO2.setPassword("nuls123456");
-        List< CoinDTO > listFrom = new ArrayList<>();
+        List<CoinDTO> listFrom = new ArrayList<>();
         listFrom.add(coinDTO);
         listFrom.add(coinDTO2);
         return listFrom;
     }
 
-    private List<CoinDTO> createToCoinDTOList(){
+    private List<CoinDTO> createToCoinDTOList() {
         CoinDTO coinDTO = new CoinDTO();
         coinDTO.setAssetsId(assetId);
         coinDTO.setAssetsChainId(8964);
-        coinDTO.setAddress("VatuPuZeEc1YJ21iasZH6SMAD2VNL0423");
+        coinDTO.setAddress(address23);
         coinDTO.setAmount(new BigInteger("200000000"));
 
         CoinDTO coinDTO2 = new CoinDTO();
         coinDTO2.setAssetsId(assetId);
         coinDTO2.setAssetsChainId(8964);
-        coinDTO2.setAddress("K7gb72AMXhymt8wBH3fwBUqSwf4EX0423");
+        coinDTO2.setAddress(address24);
         coinDTO2.setAmount(new BigInteger("100000000"));
-        List< CoinDTO > listTO = new ArrayList<>();
+        List<CoinDTO> listTO = new ArrayList<>();
         listTO.add(coinDTO);
         listTO.add(coinDTO2);
         return listTO;
