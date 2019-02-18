@@ -108,7 +108,7 @@ public class BlockHeaderInvokeTest {
             version = context.getCurrentProtocolVersion().getVersion();
             if (i == 18900) {
                 assertEquals(2, version);
-                assertEquals(179, context.getLastValidStatistics().getCount());
+                assertEquals(170, context.getLastValidStatistics().getCount());
                 assertEquals(2, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
             if (i == 19000) {
@@ -202,7 +202,7 @@ public class BlockHeaderInvokeTest {
             version = context.getCurrentProtocolVersion().getVersion();
             if (i == 18900) {
                 assertEquals(2, version);
-                assertEquals(177, context.getLastValidStatistics().getCount());
+                assertEquals(166, context.getLastValidStatistics().getCount());
                 assertEquals(2, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
             if (i == 19000) {
@@ -375,7 +375,7 @@ public class BlockHeaderInvokeTest {
             version = context.getCurrentProtocolVersion().getVersion();
             if (i == 18900) {
                 assertEquals(2, version);
-                assertEquals(175, context.getLastValidStatistics().getCount());
+                assertEquals(163, context.getLastValidStatistics().getCount());
                 assertEquals(2, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
             if (i == 19000) {
@@ -399,7 +399,7 @@ public class BlockHeaderInvokeTest {
             version = context.getCurrentProtocolVersion().getVersion();
             if (i == 19300) {
                 assertEquals(2, version);
-                assertEquals(176, context.getLastValidStatistics().getCount());
+                assertEquals(164, context.getLastValidStatistics().getCount());
                 assertEquals(2, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
             if (i == 19400) {
@@ -420,11 +420,11 @@ public class BlockHeaderInvokeTest {
      */
     @Test
     public void test5() throws IOException {
-        Stack<BlockHeader> stack = new Stack<>();
+        Stack<BlockHeader> rollback = new Stack<>();
         ProtocolContext context = ContextManager.getContext(chainId);
         BlockHeaderInvoke invoke = new BlockHeaderInvoke(chainId);
         //模拟V1持续运行一段时间
-        for (int i = 1; i <= 1888; i++) {
+        for (int i = 1; i <= 888; i++) {
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.setHeight(i);
             BlockExtendsData data = new BlockExtendsData();
@@ -434,10 +434,10 @@ public class BlockHeaderInvokeTest {
             data.setContinuousIntervalCount((short) 10);
             blockHeader.setExtend(data.serialize());
             invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
-            stack.push(blockHeader);
+            rollback.push(blockHeader);
         }
         //V1-->V2,并且V2持续运行一段时间
-        for (int i = 1889; i <= 18888; i++) {
+        for (int i = 889; i <= 4888; i++) {
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.setHeight(i);
             BlockExtendsData data = new BlockExtendsData();
@@ -449,23 +449,23 @@ public class BlockHeaderInvokeTest {
             blockHeader.setExtend(data.serialize());
             invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
             version = context.getCurrentProtocolVersion().getVersion();
-            if (i == 1900) {
+            if (i == 900) {
                 assertEquals(1, version);
-                assertEquals(19, context.getLastValidStatistics().getCount());
+                assertEquals(9, context.getLastValidStatistics().getCount());
                 assertEquals(1, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
-            if (i == 2000) {
+            if (i == 1000) {
                 assertEquals(1, version);
                 assertEquals(1, context.getLastValidStatistics().getCount());
                 assertEquals(2, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
-            if (i == 5000) {
+            if (i == 4800) {
                 assertEquals(2, version);
             }
-            stack.add(blockHeader);
+            rollback.add(blockHeader);
         }
         //V2-->V3,并且V3持续运行一段时间
-        for (int i = 18889; i <= 28888; i++) {
+        for (int i = 4889; i <= 8889; i++) {
             BlockHeader blockHeader = new BlockHeader();
             blockHeader.setHeight(i);
             BlockExtendsData data = new BlockExtendsData();
@@ -477,30 +477,38 @@ public class BlockHeaderInvokeTest {
             blockHeader.setExtend(data.serialize());
             invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
             version = context.getCurrentProtocolVersion().getVersion();
-            if (i == 18900) {
+            if (i == 4900) {
                 assertEquals(2, version);
-                assertEquals(179, context.getLastValidStatistics().getCount());
+                assertEquals(40, context.getLastValidStatistics().getCount());
                 assertEquals(2, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
-            if (i == 19000) {
+            if (i == 5000) {
                 assertEquals(2, version);
                 assertEquals(1, context.getLastValidStatistics().getCount());
                 assertEquals(3, context.getLastValidStatistics().getProtocolVersion().getVersion());
             }
-            if (i == 22000) {
+            if (i == 8000) {
                 assertEquals(3, version);
             }
-            stack.add(blockHeader);
+            rollback.add(blockHeader);
         }
 
+        Stack<BlockHeader> add = new Stack<>();
         //开始回滚
-        for (int i = stack.size() - 1; i >= 0; i--) {
-            BlockHeader blockHeader = stack.pop();
+        for (int i = rollback.size() - 1; i >= 0; i--) {
+            BlockHeader blockHeader = rollback.pop();
+            add.push(blockHeader);
+            invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
+        }
+
+        //再次添加
+        for (int i = add.size() - 1; i >= 0; i--) {
+            BlockHeader blockHeader = add.pop();
             invoke.callBack(response(HexUtil.encode(blockHeader.serialize())));
         }
     }
 
-    public Response response(Object responseData) {
+    private Response response(Object responseData) {
         Response response = MessageUtil.newResponse("", Constants.BOOLEAN_TRUE, "Congratulations! Processing completed！");
         response.setResponseData(responseData);
         return response;

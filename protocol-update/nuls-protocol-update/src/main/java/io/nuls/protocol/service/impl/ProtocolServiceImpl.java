@@ -23,9 +23,19 @@ package io.nuls.protocol.service.impl;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.protocol.constant.Constant;
 import io.nuls.protocol.manager.ContextManager;
+import io.nuls.protocol.model.ProtocolContext;
+import io.nuls.protocol.model.ProtocolVersion;
+import io.nuls.protocol.model.po.Statistics;
 import io.nuls.protocol.service.ProtocolService;
+import io.nuls.protocol.service.StatisticsStorageService;
+import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.log.logback.NulsLogger;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static io.nuls.protocol.utils.LoggerUtil.commonLog;
 
 /**
  * 区块服务实现类
@@ -36,6 +46,9 @@ import io.nuls.tools.log.logback.NulsLogger;
  */
 @Service
 public class ProtocolServiceImpl implements ProtocolService {
+
+    @Autowired
+    private StatisticsStorageService service;
 
     @Override
     public boolean startChain(int chainId) {
@@ -49,9 +62,21 @@ public class ProtocolServiceImpl implements ProtocolService {
 
     @Override
     public void init(int chainId) {
-        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        ProtocolContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
         try {
             RocksDBService.createTable(Constant.STATISTICS + chainId);
+            //初始化一条新协议统计信息，与区块高度绑定，并存到数据库
+            Statistics statistics = new Statistics();
+            statistics.setHeight(0);
+            statistics.setLastHeight(0);
+            statistics.setProtocolVersion(context.getCurrentProtocolVersion());
+            Map<ProtocolVersion, Integer> proportionMap = new HashMap<>();
+            proportionMap.put(context.getCurrentProtocolVersion(), 1);
+            statistics.setProtocolVersionMap(proportionMap);
+            statistics.setCount((short) 0);
+            boolean b = service.save(chainId, statistics);
+            commonLog.info("chainId-" + chainId + ", height-0, save-" + b + ", new statistics-" + statistics);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

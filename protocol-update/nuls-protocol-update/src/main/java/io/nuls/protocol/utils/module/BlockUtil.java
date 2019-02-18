@@ -47,53 +47,6 @@ import java.util.Map;
  */
 public class BlockUtil {
 
-    /**
-     * 更新本模块的运行时状态
-     *
-     * @param chainId
-     * @param begin
-     * @param end
-     * @return
-     */
-    public static List<ProtocolVersion> getBlockHeaders(int chainId, long begin, long end) {
-        List<BlockHeader> blockHeaders = new ArrayList<>();
-        List<ProtocolVersion> result = new ArrayList<>();
-        for (BlockHeader blockHeader : blockHeaders) {
-            byte[] extend = blockHeader.getExtend();
-            BlockExtendsData data = new BlockExtendsData();
-            try {
-                data.parse(new NulsByteBuffer(extend));
-            } catch (NulsException e) {
-                e.printStackTrace();
-            }
-            ProtocolVersion newProtocolVersion = new ProtocolVersion();
-            newProtocolVersion.setVersion(data.getBlockVersion());
-            newProtocolVersion.setEffectiveRatio(data.getEffectiveRatio());
-            newProtocolVersion.setContinuousIntervalCount(data.getContinuousIntervalCount());
-            result.add(newProtocolVersion);
-        }
-        return result;
-//        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
-//        try {
-//            Map<String, Object> params = new HashMap<>(3);
-////            params.put(Constants.VERSION_KEY_STR, "1.0");
-//            params.put("chainId", chainId);
-//            params.put("begin", begin);
-//            params.put("end", end);
-//
-//            Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, "getBlockHeadersByHeightRange", params);
-//            if (response.isSuccess()) {
-//                Map responseData = (Map) response.getResponseData();
-//                List<ProtocolVersion> result = (List) responseData.get("getBlockHeadersByHeightRange");
-//                return result;
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            commonLog.error(e);
-//        }
-//        return null;
-    }
-
     public static void register(int chainId){
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {

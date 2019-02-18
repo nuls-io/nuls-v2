@@ -86,14 +86,14 @@ public class BlockHeaderInvoke extends BaseInvoke {
         //缓存统计总数==0时，从数据库加载上一条统计记录
         ProtocolConfig config = context.getConfig();
         short interval = config.getInterval();
-        if (count == 0) {
-            count = interval;
-        }
         //区块高度到达阈值，从数据库删除一条统计记录
-        if (count == interval - 1) {
-            service.delete(chainId, height);
+        if (count < 0) {
+            boolean b = service.delete(chainId, height);
+            commonLog.info("chainId-" + chainId + ", height-" + height + ", delete-" + b);
+            count = interval - 1;
             Statistics newValidStatistics = service.get(chainId, lastValidStatistics.getLastHeight());
             context.setLastValidStatistics(newValidStatistics);
+            context.setProportionMap(newValidStatistics.getProtocolVersionMap());
             ProtocolVersion currentProtocolVersion = context.getCurrentProtocolVersion();
             if (newValidStatistics.getProtocolVersion().equals(currentProtocolVersion) && newValidStatistics.getCount() < currentProtocolVersion.getContinuousIntervalCount()) {
                 //设置新协议版本
@@ -105,8 +105,6 @@ public class BlockHeaderInvoke extends BaseInvoke {
                     commonLog.info("chainId-" + chainId + ", height-" + height + ", protocol version rollback-" + pop + ", new protocol version available-" + protocolVersion);
                 }
             }
-            context.setLastValidStatistics(newValidStatistics);
-            context.setProportionMap(newValidStatistics.getProtocolVersionMap());
         }
         context.setCount(count);
         context.setLatestHeight(height - 1);
@@ -162,6 +160,7 @@ public class BlockHeaderInvoke extends BaseInvoke {
                     if (statistics.getCount() >= version.getContinuousIntervalCount()) {
                         //设置新协议版本
                         context.setCurrentProtocolVersion(version);
+                        context.setCurrentProtocolVersionCount(statistics.getCount());
                         context.getProtocolVersionHistory().push(version);
                         commonLog.info("chainId-" + chainId + ", height-"+ height + ", new protocol version available-" + version);
                     }
