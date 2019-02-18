@@ -26,6 +26,7 @@ package io.nuls.ledger.rpc.cmd;
 
 import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
+import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -56,6 +57,18 @@ public class DatasTestCmd extends BaseCmd {
         long blockHeight =  Long.valueOf(params.get("blockHeight").toString());
         BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(chainId, blockHeight);
         return success(blockSnapshotAccounts);
+    }
+    @CmdAnnotation(cmd = "getBlock",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    public Response getBlock(Map params) {
+        Map<String, Object> rtData = new HashMap<>();
+        Integer chainId = (Integer) params.get("chainId");
+        long blockHeight =  Long.valueOf(params.get("blockHeight").toString());
+        BlockTxs blockTxs = repository.getBlock(chainId, blockHeight);
+        return success(blockTxs);
     }
 
 }

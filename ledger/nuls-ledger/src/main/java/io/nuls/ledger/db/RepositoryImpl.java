@@ -32,6 +32,7 @@ import io.nuls.ledger.constant.LedgerConstant;
 import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
+import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
@@ -56,6 +57,8 @@ public class RepositoryImpl implements Repository {
             } else {
                 Log.info("table {} exist.", getChainsHeightTableName());
             }
+
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -203,6 +206,7 @@ public class RepositoryImpl implements Repository {
         return rtList;
     }
 
+
     String getLedgerAccountTableName(int chainId) {
         return DataBaseArea.TB_LEDGER_ACCOUNT + chainId;
     }
@@ -213,6 +217,9 @@ public class RepositoryImpl implements Repository {
 
     String getChainsHeightTableName() {
         return DataBaseArea.TB_LEDGER_BLOCK_HEIGHT;
+    }
+    String getBlockTableName(int chainId) {
+        return DataBaseArea.TB_LEDGER_BLOCKS+chainId;
     }
 
     /**
@@ -234,5 +241,44 @@ public class RepositoryImpl implements Repository {
         } catch (Exception e) {
             Log.error(e);
         }
+    }
+
+
+    @Override
+    public void saveBlock(int chainId,long height,BlockTxs blockTxs) {
+        try {
+            String table = getBlockTableName(chainId);
+            if (!RocksDBService.existTable(table)) {
+                RocksDBService.createTable(table);
+            } else {
+                Log.info("table {} exist.", table);
+            }
+            RocksDBService.put(table, ByteUtils.longToBytes(height), blockTxs.serialize());
+            RocksDBService.delete(table,ByteUtils.longToBytes(height-1000));
+        } catch (Exception e) {
+            logger.error("saveBlock serialize error.", e);
+        }
+
+    }
+
+    @Override
+    public BlockTxs getBlock(int chainId, long height) {
+        try {
+
+            byte[] stream = RocksDBService.get(getBlockTableName(chainId), ByteUtils.longToBytes(height));
+            if (stream == null) {
+                return null;
+            }
+            BlockTxs blockTxs = new BlockTxs();
+            try {
+                blockTxs.parse(new NulsByteBuffer(stream));
+            } catch (NulsException e) {
+                logger.error("getAccountState serialize error.", e);
+            }
+            return blockTxs;
+        } catch (Exception e) {
+            logger.error("getBlock serialize error.", e);
+        }
+        return null;
     }
 }

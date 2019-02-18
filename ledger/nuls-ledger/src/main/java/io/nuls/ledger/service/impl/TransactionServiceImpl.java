@@ -34,6 +34,7 @@ import io.nuls.ledger.model.ValidateResult;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.service.AccountStateService;
+import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.service.TransactionService;
 import io.nuls.ledger.service.processor.CommontTransactionProcessor;
 import io.nuls.ledger.service.processor.LockedTransactionProcessor;
@@ -61,6 +62,8 @@ public class TransactionServiceImpl implements TransactionService {
     AccountStateService accountStateService;
     @Autowired
     CoinDataValidator coinDataValidator;
+    @Autowired
+    BlockDataService  blockDataService;
     @Autowired
     LockedTransactionProcessor lockedTransactionProcessor;
     @Autowired
@@ -141,6 +144,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
         try {
+            blockDataService.saveLatestBlockDatas(addressChainId,blockHeight,txList);
             LockerUtils.BLOCK_SYNC_LOCKER.lock();
             long currentDbHeight = repository.getBlockHeight(addressChainId);
             if ((blockHeight - currentDbHeight) != 1) {

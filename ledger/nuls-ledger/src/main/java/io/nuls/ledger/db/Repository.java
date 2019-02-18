@@ -28,6 +28,7 @@ package io.nuls.ledger.db;
 import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
+import io.nuls.ledger.model.po.BlockTxs;
 
 import java.util.List;
 
@@ -56,19 +57,18 @@ public interface Repository {
     void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception;
 
     /**
-     *
      * @param chainId
      * @param height
      */
-    void delBlockSnapshot(int chainId,long height) throws Exception;
+    void delBlockSnapshot(int chainId, long height) throws Exception;
+
     /**
-     *
      * @param chainId
      * @param height
      */
-    void saveBlockSnapshot(int chainId,long height,BlockSnapshotAccounts blockSnapshotAccounts) throws Exception;
+    void saveBlockSnapshot(int chainId, long height, BlockSnapshotAccounts blockSnapshotAccounts) throws Exception;
+
     /**
-     *
      * @param chainId
      * @param height
      * @return BlockSnapshotAccounts
@@ -77,22 +77,29 @@ public interface Repository {
 
 
     /**
-     *
      * @param chainId
      * @return
      */
     long getBlockHeight(int chainId);
 
     /**
-     *
      * @param chainId
      * @param height
      */
-    void saveOrUpdateBlockHeight(int chainId,long height);
+    void saveOrUpdateBlockHeight(int chainId, long height);
 
     /**
-     *
      * @return
      */
     List<ChainHeight> getChainsBlockHeight();
+
+    /**
+     * @return
+     */
+    void saveBlock(int chainId, long height, BlockTxs blockTxs);
+
+    /**
+     * @return
+     */
+    BlockTxs getBlock(int chainId, long height);
 }
