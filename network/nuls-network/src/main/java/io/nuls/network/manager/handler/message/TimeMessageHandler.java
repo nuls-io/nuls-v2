@@ -26,8 +26,8 @@
 package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
-import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -70,7 +70,7 @@ public class TimeMessageHandler extends BaseMessageHandler {
          * 处理应答消息
          */
         TimeMessage timeMessage = (TimeMessage) message;
-        TimeService.addPeerTime(node.getId(), timeMessage.getMsgBody().getMessageId(), timeMessage.getMsgBody().getTime());
+        TimeManager.addPeerTime(node.getId(), timeMessage.getMsgBody().getMessageId(), timeMessage.getMsgBody().getTime());
         return NetworkEventResult.getResultSuccess();
     }
 

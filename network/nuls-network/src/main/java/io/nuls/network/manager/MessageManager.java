@@ -37,7 +37,6 @@ import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.manager.handler.message.GetAddrMessageHandler;
 import io.nuls.network.manager.handler.message.OtherModuleMessageHandler;
-import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -278,11 +277,11 @@ public class MessageManager extends BaseManager {
             ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message.serialize()));
             if (!asyn) {
                 future.await();
-                Log.debug("{}==================ChannelFuture1", TimeService.currentTimeMillis());
+                Log.debug("{}==================ChannelFuture1", TimeManager.currentTimeMillis());
                 if (!future.isSuccess()) {
                     return new NetworkEventResult(false, NetworkErrorCode.NET_BROADCAST_FAIL);
                 }
-                Log.debug("{}==================ChannelFuture2", TimeService.currentTimeMillis());
+                Log.debug("{}==================ChannelFuture2", TimeManager.currentTimeMillis());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -301,7 +300,7 @@ public class MessageManager extends BaseManager {
      * @return
      */
     public NetworkEventResult broadcastToNodes(byte[] message, List<Node> nodes, boolean asyn) {
-        Log.debug("{}==================broadcastToNodes begin", TimeService.currentTimeMillis());
+        Log.debug("{}==================broadcastToNodes begin", TimeManager.currentTimeMillis());
         for (Node node : nodes) {
             Log.debug("==================node {}", node.getId());
             if (node.getChannel() == null || !node.getChannel().isActive()) {
@@ -312,7 +311,7 @@ public class MessageManager extends BaseManager {
                 ChannelFuture future = node.getChannel().writeAndFlush(Unpooled.wrappedBuffer(message));
                 Log.debug("==================writeAndFlush end");
                 if (!asyn) {
-                    Log.debug("{}==========B========ChannelFuture", TimeService.currentTimeMillis());
+                    Log.debug("{}==========B========ChannelFuture", TimeManager.currentTimeMillis());
                     future.await();
                     boolean success = future.isSuccess();
                     Log.debug("==========B========{}success?{}", node.getId(), success);

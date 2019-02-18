@@ -29,7 +29,6 @@ import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.*;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
-import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -178,11 +177,11 @@ public class VersionMessageHandler extends BaseMessageHandler {
         node.setVersionProtocolInfos(versionBody.getProtocolVersion(), versionBody.getBlockHeight(), versionBody.getBlockHash());
         node.setRemoteCrossPort(versionBody.getPortMeCross());
         node.setConnectStatus(NodeConnectStatusEnum.AVAILABLE);
-        node.setConnectTime(TimeService.currentTimeMillis());
+        node.setConnectTime(TimeManager.currentTimeMillis());
         if (node.isCrossConnect()) {
-            node.getNodeGroup().getCrossNodeContainer().setLatestHandshakeSuccTime(TimeService.currentTimeMillis());
+            node.getNodeGroup().getCrossNodeContainer().setLatestHandshakeSuccTime(TimeManager.currentTimeMillis());
         } else {
-            node.getNodeGroup().getLocalNetNodeContainer().setLatestHandshakeSuccTime(TimeService.currentTimeMillis());
+            node.getNodeGroup().getLocalNetNodeContainer().setLatestHandshakeSuccTime(TimeManager.currentTimeMillis());
         }
         //client:接收到server端消息，进行verack答复
         VerackMessage verackMessage = MessageFactory.getInstance().buildVerackMessage(node, message.getHeader().getMagicNumber(), VerackMessageBody.VER_SUCCESS);
