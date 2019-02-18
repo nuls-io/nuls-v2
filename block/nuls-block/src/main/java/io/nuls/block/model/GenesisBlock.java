@@ -124,8 +124,8 @@ public final class GenesisBlock extends Block {
             CoinTo coin = new CoinTo();
             coin.setAddress(ads.getAddressBytes());
             coin.setAmount(new BigInteger(amount));
-            coin.setAssetsChainId(1);
-            coin.setAssetsId(1);
+            coin.setAssetsChainId(12345);
+            coin.setAssetsId(12345);
             coin.setLockTime(lockTime == null ? 0 : lockTime.longValue());
 
             coinData.addTo(coin);
