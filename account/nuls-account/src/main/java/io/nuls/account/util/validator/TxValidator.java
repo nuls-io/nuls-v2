@@ -39,17 +39,23 @@ import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
+import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.SignatureUtil;
 import io.nuls.base.signture.TransactionSignature;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -177,16 +183,19 @@ public class TxValidator {
 
         // 判断from中地址和签名的地址是否匹配
         for (CoinFrom coinFrom : coinData.getFrom()) {
+            //多签交易
             if (tx.isMultiSignTx()) {
-                //如果是多签交易，校验from地址是否属于多签地址
-                MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, AddressTool.getStringAddressByBytes(coinFrom.getAddress()));
-                if (null == multiSigAccount) {
-                    throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+                MultiSignTxSignature txSignature = new MultiSignTxSignature();
+                txSignature.parse(tx.getTransactionSignature(), 0);
+                List<String> pubKeyList = new ArrayList<>();
+                for (byte[] pubKey : txSignature.getPubKeyList()) {
+                    pubKeyList.add(HexUtil.encode(pubKey));
                 }
-                for (byte[] bytes : multiSigAccount.getPubKeyList()) {
-                    if (!SignatureUtil.containsAddress(tx, bytes, chainId)) {
-                        throw new NulsException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
-                    }
+                //根据签名对象中的公钥列表、最小签名数生成多签账户
+                MultiSigAccount multiSigAccount = multiSignAccountService.createMultiSigAccount(chainId, pubKeyList, txSignature.getM());
+                //校验from地址是否与多重签名公钥列表生成的多签地址一致
+                if (!Arrays.equals(multiSigAccount.getAddress().getAddressBytes(), coinFrom.getAddress())) {
+                    throw new NulsException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
                 }
             } else if (!SignatureUtil.containsAddress(tx, coinFrom.getAddress(), chainId)) {
                 throw new NulsException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
@@ -237,6 +246,7 @@ public class TxValidator {
         if (null == listTo || listTo.size() == 0) {
             throw new NulsException(AccountErrorCode.TX_COINTO_NOT_FOUND);
         }
+        Set<String> uniqueCoin = new HashSet<>();
         int chainId = chain.getConfig().getChainId();
         for (CoinTo coinTo : listTo) {
             int addrChainId = AddressTool.getChainIdByAddress(coinTo.getAddress());
@@ -250,7 +260,13 @@ public class TxValidator {
             if (chain.getConfig().getAssetsId() != assetsId) {
                 throw new NulsException(AccountErrorCode.ASSETID_ERROR);
             }
+            //验证账户地址,资产链id,资产id的组合唯一性
+            boolean rs = uniqueCoin.add(AddressTool.getStringAddressByBytes(coinTo.getAddress()) + "-" + assetsChainId + "-" + assetsId);
+            if (!rs) {
+                throw new NulsException(AccountErrorCode.COINTO_DUPLICATE_COIN);
+            }
         }
+
         return true;
     }
 

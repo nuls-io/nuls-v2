@@ -104,7 +104,6 @@ public class VerifyCtxProcessTask implements Runnable {
                         if (!rs) {
                             break;
                         }
-                        ctx.setState(TxConstant.CTX_VERIFY_REQUEST_1);
                         processedList.add(ctx);
                     }
                 }

@@ -36,11 +36,11 @@ import java.io.IOException;
 
 
 /**
- *时间应答消息
+ * 时间应答消息
  * time response protocol message body
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
 public class TimeMessageBody extends BaseNulsData {
     private long messageId = 0;

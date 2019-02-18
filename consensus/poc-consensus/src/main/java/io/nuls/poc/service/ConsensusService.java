@@ -20,19 +20,6 @@ public interface ConsensusService {
      * */
     Result createAgentValid(Map<String,Object> params);
 
-    /**
-     * 创建节点交易提交
-     * @param params
-     * @return Result
-     * */
-    Result createAgentCommit(Map<String,Object> params);
-
-    /**
-     * 创建节点交易回滚
-     * @param params
-     * @return Result
-     * */
-    Result createAgentRollBack(Map<String,Object> params);
 
     /**
      * 注销节点
@@ -48,19 +35,6 @@ public interface ConsensusService {
      * */
     Result stopAgentValid(Map<String,Object> params);
 
-    /**
-     * 注销节点交易提交
-     * @param params
-     * @return Result
-     * */
-    Result stopAgentCommit(Map<String,Object> params);
-
-    /**
-     * 注销节点交易回滚
-     * @param params
-     * @return Result
-     * */
-    Result stopAgentRollBack(Map<String,Object> params);
 
     /**
      * 委托共识
@@ -76,19 +50,6 @@ public interface ConsensusService {
      * */
     Result depositValid(Map<String,Object> params);
 
-    /**
-     * 委托共识交易提交
-     * @param params
-     * @return Result
-     * */
-    Result depositCommit(Map<String,Object> params);
-
-    /**
-     * 委托共识交易回滚
-     * @param params
-     * @return Result
-     * */
-    Result depositRollBack(Map<String,Object> params);
 
     /**
      * 退出共识
@@ -105,18 +66,18 @@ public interface ConsensusService {
     Result withdrawValid(Map<String,Object> params);
 
     /**
-     * 退出共识交易提交
+     * 共识模块交易提交
      * @param params
      * @return Result
      * */
-    Result withdrawCommit(Map<String,Object> params);
+    Result commitCmd(Map<String,Object> params);
 
     /**
-     * 退出共识交易回滚
+     * 共识模块交易回滚
      * @param params
      * @return Result
      * */
-    Result withdrawRollBack(Map<String,Object> params);
+    Result rollbackCmd(Map<String,Object> params);
 
     /**
      * 获取节点列表

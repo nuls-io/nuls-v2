@@ -32,6 +32,7 @@ import io.nuls.account.model.bo.AccountKeyStore;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.bo.tx.AliasTransaction;
 import io.nuls.account.model.bo.tx.txdata.Alias;
+import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.account.model.po.AccountPo;
 import io.nuls.account.model.po.MultiSigAccountPo;
 import io.nuls.account.rpc.call.EventCmdCall;
@@ -41,7 +42,7 @@ import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.storage.MultiSigAccountStorageService;
 import io.nuls.account.util.AccountTool;
 import io.nuls.account.util.TxUtil;
-import io.nuls.account.util.log.LogUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.TransactionFeeCalculator;
@@ -106,7 +107,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
             Address address = new Address(chainId, BaseConstant.P2SH_ADDRESS_TYPE, SerializeUtils.sha256hash160(AccountTool.createMultiSigAccountOriginBytes(chainId, minSigns, pubKeys)));
             multiSigAccount = this.saveMultiSigAccount(chainId, address, pubKeys, minSigns);
         } catch (Exception e) {
-            LogUtil.error(e);
+            Log.error(e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return multiSigAccount;
@@ -122,7 +123,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
                 multiSigAccount = multiSigAccountPo.toAccount();
             }
         } catch (Exception e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return multiSigAccount;
@@ -139,7 +140,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
             }
             multiSigAccount = this.saveMultiSigAccount(chainId, addressObj, pubKeys, minSigns);
         } catch (Exception e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return multiSigAccount;
@@ -157,7 +158,7 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
             Address addressObj = new Address(address);
             result = multiSigAccountStorageService.removeAccount(addressObj);
         } catch (Exception e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return result;
@@ -168,8 +169,8 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
      * @param signAddr 签名地址
      **/
     @Override
-    public Transaction setMultiAlias(int chainId, String address, String password, String aliasName, String signAddr) {
-        Transaction transaction;
+    public MultiSignTransactionResultDto setMultiAlias(int chainId, String address, String password, String aliasName, String signAddr) {
+        MultiSignTransactionResultDto multiSignTransactionResultDto;
         try {
             Account account = accountService.getAccount(chainId, signAddr);
             MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, address);
@@ -184,12 +185,12 @@ public class MultiSigAccountServiceImpl implements MultiSignAccountService {
                     throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
                 }
             }
-            transaction = transactionService.createSetAliasMultiSignTransaction(chainId, account, password, multiSigAccount, AddressTool.getStringAddressByBytes(AccountConstant.BLACK_HOLE_ADDRESS),aliasName , null);
+            multiSignTransactionResultDto = transactionService.createSetAliasMultiSignTransaction(chainId, account, password, multiSigAccount, AddressTool.getStringAddressByBytes(AccountConstant.BLACK_HOLE_ADDRESS),aliasName , null);
         } catch (Exception e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
         }
-        return transaction;
+        return multiSignTransactionResultDto;
     }
 
     private MultiSigAccount saveMultiSigAccount(int chainId, Address addressObj, List<String> pubKeys, int minSigns) {

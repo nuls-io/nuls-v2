@@ -26,22 +26,14 @@
 package io.nuls.network.netty.handler;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
-import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.LocalInfoManager;
-import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
-import io.nuls.network.manager.handler.MessageHandlerFactory;
+import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
-import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
-import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.Node;
-import io.nuls.network.model.NodeGroupConnector;
-import io.nuls.network.model.message.VersionMessage;
 
 import java.io.IOException;
 
@@ -49,100 +41,46 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * client channel handler
+ *
  * @author lan
  * @date 2018/10/15
- *
  */
 public class ClientChannelHandler extends BaseChannelHandler {
     private AttributeKey<Node> key = AttributeKey.valueOf("node");
 
     public ClientChannelHandler() {
-         super();
+        super();
     }
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-    }
-    private   boolean validSelfConnection(ChannelHandlerContext ctx,String remoteIP){
-        Channel channel = ctx.channel();
-        //如果是本机节点访问自己的服务器，则广播本机服务器到全网
-        if (LocalInfoManager.getInstance().isSelfIp(remoteIP)) {
-            //广播自己的Ip
-            MessageManager.getInstance().broadcastSelfAddrToAllNode(true);
-            channel.close();
-            return false;
+        Attribute<Node> nodeAttribute = ctx.channel().attr(key);
+        Node node = nodeAttribute.get();
+        if (node != null && node.getRegisterListener() != null) {
+            node.getRegisterListener().action();
         }
-        return true;
     }
-    /**
-     * 校验channel是否可用
-     * Verify that the channel is available
-     * @param ctx ctx
-     * @param magicNumber magicNumber
-     * @return boolean
-     */
-    private   boolean validConnectNumber(ChannelHandlerContext ctx,long magicNumber, String remoteIP){
-        Channel channel = ctx.channel();
-        //already exist peer ip （In or Out）
-        if( ConnectionManager.getInstance().isPeerConnectExceedMax(remoteIP,magicNumber,1,Node.OUT)){
-//            Log.info("dup connect,close channel");
-            channel.close();
-            return false;
-        }
-        return true;
-    }
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        Channel channel = ctx.channel();
-        SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        String remoteIP = socketChannel.remoteAddress().getHostString();
-        if(!validSelfConnection(ctx,remoteIP)){
-            return;
-        }
-        Attribute<Node> nodeAttribute = channel.attr(key);
-        Node node = nodeAttribute.get();
-        NodeGroupConnector nodeGroupConnector=node.getFirstNodeGroupConnector();
-        if(!validConnectNumber(ctx,nodeGroupConnector.getMagicNumber(),remoteIP)){
-            return;
-        }
-        node.setChannel(channel);
-        node.setIp(remoteIP);
-        node.setRemotePort(socketChannel.remoteAddress().getPort());
-        node.setIdle(false);
-        Log.info("Client Node is active:{}",node.getId());
-        boolean success = ConnectionManager.getInstance().processConnectNode(node);
-        if(!success){
-            Log.error("Client Node processConnectNode fail:{}" ,node.getId());
-            channel.close();
-            return;
-        }
-        //非本机,发送version
-        nodeGroupConnector.setStatus(NodeGroupConnector.CONNECTING);
-        VersionMessage versionMessage=MessageFactory.getInstance().buildVersionMessage(node,nodeGroupConnector.getMagicNumber());
-        if(null == versionMessage){
-            //exception
-            Log.error("build versionMessage error");
-            channel.close();
-            return;
-        }
-        BaseMeesageHandlerInf handler=MessageHandlerFactory.getInstance().getHandler(versionMessage.getHeader().getCommandStr());
-        handler.send(versionMessage, node, false,true);
 
+        Attribute<Node> nodeAttribute = ctx.channel().attr(key);
+
+        Node node = nodeAttribute.get();
+        if (node != null) {
+            node.setChannel(ctx.channel());
+        }
+        if (node != null && node.getConnectedListener() != null) {
+            node.getConnectedListener().action();
+        }
+        Log.info("Client Node is active:{}", node.getId());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        String nodeId =  this.getNodeIdByChannel( ctx.channel());
         super.channelInactive(ctx);
-        Node node=ConnectionManager.getInstance().getNodeByCache(nodeId,Node.OUT);
-        if(null != node) {
-            //移除连接
-            Log.info("Client Node is Inactive:" + node.getId());
-            node.setIdle(true);
-            ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),Node.OUT);
-        }
     }
 
     @Override
@@ -150,14 +88,14 @@ public class ClientChannelHandler extends BaseChannelHandler {
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         String remoteIP = socketChannel.remoteAddress().getHostString();
         int port = socketChannel.remoteAddress().getPort();
-        Log.info("{}-----------------client channelRead-----------------{}:{}",TimeService.currentTimeMillis(), remoteIP,port);
+        Log.info("{}-----------------client channelRead-----------------{}:{}", TimeManager.currentTimeMillis(), remoteIP, port);
         ByteBuf buf = (ByteBuf) msg;
         try {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);
             Node node = nodeAttribute.get();
             if (node != null) {
                 Log.info("-----------------client channelRead  node={} -----------------", node.getId());
-                MessageManager.getInstance().receiveMessage(buf,node,false);
+                MessageManager.getInstance().receiveMessage(buf, node);
             } else {
                 Log.info("-----------------client channelRead  node is null -----------------" + remoteIP + ":" + port);
                 ctx.channel().close();
@@ -165,7 +103,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         } catch (Exception e) {
             e.printStackTrace();
 //            throw e;
-        }finally {
+        } finally {
             buf.release();
         }
     }
@@ -173,9 +111,15 @@ public class ClientChannelHandler extends BaseChannelHandler {
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
+        Attribute<Node> nodeAttribute = ctx.channel().attr(key);
+        Node node = nodeAttribute.get();
+        if (node != null && node.getDisconnectListener() != null) {
+            node.getDisconnectListener().action();
+        }
         Log.info("-----------------client channelInactive  node is channelUnregistered -----------------");
 
     }
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         cause.printStackTrace();

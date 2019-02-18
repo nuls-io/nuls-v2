@@ -27,6 +27,7 @@ package io.nuls.account.service;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
 import io.nuls.account.model.dto.CoinDto;
+import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.base.data.MultiSigAccount;
 import io.nuls.base.data.Transaction;
 import io.nuls.tools.basic.Result;
@@ -72,13 +73,75 @@ public interface TransactionService {
      */
     String transfer(int currentChainId, List<CoinDto> fromList, List<CoinDto> toList, String remark) throws NulsException;
 
+    /**
+     * 别名转账
+     *
+     * the receipt address is alias
+     *
+     * @param chainId chainId
+     * @param from       the from coin dto
+     * @param to         the to coin dto
+     * @param remark         remark
+     * @return transfer transaction
+     *
+     */
     Transaction transferByAlias(int chainId, CoinDto from, CoinDto to, String remark);
 
 
-    Transaction createMultiSignTransfer(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
+    /**
+     *
+     * 创建多签交易
+     *
+     * create multi sign transfer transaction
+     *
+     *
+     * @param chainId chainId
+     * @param account       the account which will sign the transaction
+     * @param password      the account's password
+     * @param multiSigAccount         the multi sign account
+     * @param toAddress         the to address
+     * @param amount         the amount
+     * @param remark         remark
+     * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transaction
+     *
+     */
+    MultiSignTransactionResultDto createMultiSignTransfer(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
             throws NulsException,IOException;
 
-    Transaction createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
+    /**
+     * 多签交易签名
+     *
+     * sign multi sign transaction
+     *
+     * @auther EdwardChan
+     *
+     * @param chainId chainId
+     * @param account       the account which will sign the transaction
+     * @param password         the account's password
+     * @param txHex         the hex data of transaction
+     * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transactio
+     *
+     */
+    MultiSignTransactionResultDto signMultiSignTransaction(int chainId, Account account, String password, String txHex)
+            throws NulsException,IOException;
+
+    /**
+     *
+     * 创建多签账户设置别名交易
+     *
+     * create multi sign account set alias transaction
+     *
+     *
+     * @param chainId chainId
+     * @param account       the account which will sign the transaction
+     * @param password      the account's password
+     * @param multiSigAccount         the multi sign account
+     * @param toAddress         the to address
+     * @param remark         remark
+     * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transaction
+     *
+     */
+    MultiSignTransactionResultDto createSetAliasMultiSignTransaction(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, String aliasName, String remark)
             throws NulsException,IOException;
 
     /**

@@ -26,15 +26,18 @@
 package io.nuls.network.netty.handler;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.model.Node;
+import io.nuls.network.utils.IpUtil;
+
 import static io.nuls.network.utils.LoggerUtil.Log;
 
 
 /**
- *
  * @desription:
  * @author: PierreLuo
  */
@@ -44,13 +47,24 @@ public class HeartbeatServerHandler extends BaseChannelHandler {
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
 
         if (evt instanceof IdleStateEvent) {
-            Log.info(getNodeIdByChannel(ctx.channel())+"====userEventTriggered  IdleStateEvent==");
-            String nodeId = this.getNodeIdByChannel(ctx.channel());
-            Node node = ConnectionManager.getInstance().getNodeByCache(nodeId, Node.OUT);
-            if(null != node){
-                node.setBad(true);
+            SocketChannel channel = (SocketChannel) ctx.channel();
+            String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+            Log.info("{}====userEventTriggered  IdleStateEvent==", nodeId);
+            IdleStateEvent event = (IdleStateEvent) evt;
+            String type = "";
+            if (event.state() == IdleState.READER_IDLE) {
+                type = "read idle";
+            } else if (event.state() == IdleState.WRITER_IDLE) {
+                type = "write idle";
+            } else if (event.state() == IdleState.ALL_IDLE) {
+                type = "all idle";
             }
-            node.getChannel().close();
+            Log.info("type::::" + type);
+//            Log.info(ctx.c                                                                                                                                                                                                                                                                                                                                                                                               ``````hannel().remoteAddress() + "timeout type：" + type);
+            Log.info(" ---------------------- HeartbeatServerHandler ---------------------- ");
+            Log.info("localInfo: " + channel.localAddress().getHostString() + ":" + channel.localAddress().getPort());
+            Log.info("remoteInfo: " + channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort());
+            ctx.channel().close();
         } else {
             super.userEventTriggered(ctx, evt);
         }

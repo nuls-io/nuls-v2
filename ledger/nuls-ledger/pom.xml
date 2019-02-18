@@ -59,7 +59,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.2</version>
+            <version>1.18.4</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -72,25 +72,6 @@
                 <configuration>
                     <source>11</source>
                     <target>11</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <configuration>
-                    <canUpdateCopyright>true</canUpdateCopyright>
-                    <licenseName>mit</licenseName>
-                    <projectName>MIT License</projectName>
-                    <organizationName>nuls.io</organizationName>
-                    <inceptionYear>2017</inceptionYear>
-                    <roots>
-                        <root>src/main/java</root>
-                        <root>src/test/java</root>
-                    </roots>
-                    <addJavaLicenseAfterPackage>false</addJavaLicenseAfterPackage>
-                    <processStartTag>&#8291;&#8291;</processStartTag>
-                    <sectionDelimiter>&#8291;&#8291;</sectionDelimiter>
-                    <processEndTag>&#8291;&#8291;</processEndTag>
                 </configuration>
             </plugin>
             <plugin>

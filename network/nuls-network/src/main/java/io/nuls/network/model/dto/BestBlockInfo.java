@@ -30,7 +30,7 @@ package io.nuls.network.model.dto;
  * @date 2018/12/07
  **/
 public class BestBlockInfo {
-    private String hash="";
+    private String hash = "";
     private long blockHeight = 0L;
 
     public String getHash() {

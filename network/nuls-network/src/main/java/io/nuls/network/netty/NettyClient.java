@@ -43,9 +43,9 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * NettyClient
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
 public class NettyClient {
 
@@ -84,38 +84,17 @@ public class NettyClient {
                 .handler(new NulsChannelInitializer<>(new ClientChannelHandler()));
     }
 
-    public void start() {
+    public boolean start() {
         try {
-            ChannelFuture future = boot.connect(node.getIp(), node.getRemotePort()).addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) throws Exception {
-                    if (future.isSuccess()) {
-                        socketChannel = (SocketChannel) future.channel();
-                    } else {
-                        /*
-                         * 连接失败,进行记录，在NodesConnectThread中统一处理
-                         * Connection failed, record, unified processing in NodesConnectThread
-                         */
-                        Log.error("Client connect to host error: " + future.cause() + ", node: " + node.getId());
-                        node.setBad(true);
-                        node.setLastFailTime(TimeService.currentTimeMillis());
-                        node.setFailCount(node.getFailCount()+1);
-                        if(node.getChannel()!=null && node.getChannel().isActive()){
-                            node.getChannel().close();
-                        }
-                        node.disConnectNodeChannel();
-                        node.setIdle(true);
-                    }
-                }
-            });
-            future.channel().closeFuture().awaitUninterruptibly();
+            ChannelFuture future = boot.connect(node.getIp(), node.getRemotePort());
+            future.await();
+            return future.isSuccess();
         } catch (Exception e) {
-            //maybe time out or refused or something
-            if (socketChannel != null) {
-                socketChannel.close();
+            Log.error("{}", e);
+            if (node.getChannel() != null) {
+                node.getChannel().close();
             }
-            Log.error("Client start exception:" + e.getMessage() + ", remove node: " + node.getId());
-//            nodeManager.removeNode(node.getId());
+            return false;
         }
     }
 

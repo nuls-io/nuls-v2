@@ -22,29 +22,21 @@
  * SOFTWARE.
  *
  */
-package io.nuls.account.config;
-
-import io.nuls.tools.parse.config.IniEntity;
-import org.ini4j.Config;
-import org.ini4j.Ini;
-
-import java.io.IOException;
-import java.net.URL;
+package io.nuls.network.constant;
 
 /**
- * @author Niels
+ * 节点状态类型描述：
+ * UNCHECK 未确认peer连接
+ * AVAILABLE 可用的连接(server in 进来的连接)
+ * CONNECTABLE 可用的连接(已验证可连接的ip)
+ * UNAVAILABLE  无效的连接
+ *
+ * @author lan
  */
-public class ConfigLoader {
+public class NodeStatusEnum {
 
-
-    public static IniEntity loadIni(String fileName) throws IOException {
-        Config cfg = new Config();
-        URL url = ConfigLoader.class.getClassLoader().getResource(fileName);
-        cfg.setMultiSection(true);
-        Ini ini = new Ini();
-        ini.setConfig(cfg);
-        ini.load(url);
-        return new IniEntity(ini);
-    }
-
+    public final static int UNCHECK = 0;
+    public final static int AVAILABLE = 1;
+    public final static int CONNECTABLE = 2;
+    public final static int UNAVAILABLE = 3;
 }

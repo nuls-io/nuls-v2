@@ -11,7 +11,7 @@ import io.nuls.account.service.AccountKeyStoreService;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.util.AccountTool;
-import io.nuls.account.util.log.LogUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.base.data.Page;
 import io.nuls.base.signture.BlockSignature;
 import io.nuls.base.signture.P2PHKSignature;
@@ -60,7 +60,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_createAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a specified number of accounts")
     public Response createAccount(Map params) {
-        LogUtil.debug("ac_createAccount start");
+        Log.debug("ac_createAccount start");
         Map<String, List<String>> map = new HashMap<>();
         List<String> list = new ArrayList<>();
         try {
@@ -88,7 +88,7 @@ public class AccountCmd extends BaseCmd {
             return failed(e.getErrorCode());
         }
         map.put(RpcConstant.LIST, list);
-        LogUtil.debug("ac_createAccount end");
+        Log.debug("ac_createAccount end");
         return success(map);
     }
 
@@ -101,7 +101,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_createOfflineAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create an offline account")
     public Response createOfflineAccount(Map params) {
-        LogUtil.debug("ac_createOfflineAccount start");
+        Log.debug("ac_createOfflineAccount start");
         Map<String, List<AccountOfflineDto>> map = new HashMap<>();
         List<AccountOfflineDto> accounts = new ArrayList<>();
         try {
@@ -145,7 +145,7 @@ public class AccountCmd extends BaseCmd {
             return failed(e.getErrorCode());
         }
         map.put(RpcConstant.LIST, accounts);
-        LogUtil.debug("ac_createOfflineAccount end");
+        Log.debug("ac_createOfflineAccount end");
         return success(map);
     }
 
@@ -158,7 +158,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getAccountByAddress", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "get account according to address")
     public Response getAccountByAddress(Map params) {
-        LogUtil.debug("ac_getAccountByAddress start");
+        Log.debug("ac_getAccountByAddress start");
         Account account;
         try {
             // check parameters
@@ -180,7 +180,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_getAccountByAddress end");
+        Log.debug("ac_getAccountByAddress end");
         return success(new SimpleAccountDto(account));
     }
 
@@ -193,7 +193,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getAccountList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "query all account collections and put them in cache")
     public Response getAccountList(Map params) {
-        LogUtil.debug("ac_getAccountList start");
+        Log.debug("ac_getAccountList start");
         Map<String, List<SimpleAccountDto>> map = new HashMap<>();
         List<SimpleAccountDto> simpleAccountList = new ArrayList<>();
         try {
@@ -216,7 +216,7 @@ public class AccountCmd extends BaseCmd {
             return failed(e.getErrorCode());
         }
         map.put(RpcConstant.LIST, simpleAccountList);
-        LogUtil.debug("ac_getAccountList end");
+        Log.debug("ac_getAccountList end");
         return success(map);
     }
 
@@ -229,7 +229,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getUnencryptedAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "query all account collections and put them in cache")
     public Response getUnencryptedAddressList(Map params) {
-        LogUtil.debug("getUnencryptedAddressList start");
+        Log.debug("getUnencryptedAddressList start");
         Map<String, List<String>> map = new HashMap<>();
         List<String> unencryptedAddressList = new ArrayList<>();
         try {
@@ -256,7 +256,7 @@ public class AccountCmd extends BaseCmd {
             return failed(e.getErrorCode());
         }
         map.put(RpcConstant.LIST, unencryptedAddressList);
-        LogUtil.debug("getUnencryptedAddressList end");
+        Log.debug("getUnencryptedAddressList end");
         return success(map);
     }
 
@@ -269,7 +269,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getAddressList", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "paging query account address list")
     public Response getAddressList(Map params) {
-        LogUtil.debug("ac_getAddressList start");
+        Log.debug("ac_getAddressList start");
         Page<String> resultPage;
         try {
             // check parameters
@@ -316,7 +316,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_getAddressList end");
+        Log.debug("ac_getAddressList end");
         return success(resultPage);
     }
 
@@ -329,7 +329,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_removeAccount", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "remove specified account")
     public Response removeAccount(Map params) {
-        LogUtil.debug("ac_removeAccount start");
+        Log.debug("ac_removeAccount start");
         boolean result;
         try {
             // check parameters
@@ -352,7 +352,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_removeAccount end");
+        Log.debug("ac_removeAccount end");
         Map<String, Boolean> map = new HashMap<>();
         map.put(RpcConstant.VALUE, result);
         return success(map);
@@ -368,7 +368,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getPriKeyByAddress", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "inquire the account's private key according to the address")
     public Response getPriKeyByAddress(Map params) {
-        LogUtil.debug("ac_getPriKeyByAddress start");
+        Log.debug("ac_getPriKeyByAddress start");
         String unencryptedPrivateKey;
         try {
             // check parameters
@@ -391,7 +391,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_getPriKeyByAddress end");
+        Log.debug("ac_getPriKeyByAddress end");
         Map<String, Object> map = new HashMap<>();
         map.put("priKey", unencryptedPrivateKey);
         //账户是否存在
@@ -410,7 +410,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_getAllPriKey", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "get the all local private keys")
     public Response getAllPriKey(Map params) {
-        LogUtil.debug("ac_getAllPriKey start");
+        Log.debug("ac_getAllPriKey start");
         Map<String, List<String>> map = new HashMap<>();
         List<String> privateKeyList = new ArrayList<>();
         try {
@@ -432,7 +432,7 @@ public class AccountCmd extends BaseCmd {
             return failed(e.getErrorCode());
         }
         map.put(RpcConstant.LIST, privateKeyList);
-        LogUtil.debug("ac_getAllPriKey end");
+        Log.debug("ac_getAllPriKey end");
         return success(map);
     }
 
@@ -448,7 +448,7 @@ public class AccountCmd extends BaseCmd {
     @Parameter(parameterName = "address", parameterType = "String", parameterValidRange = "", parameterValidRegExp = "")
     @Parameter(parameterName = "remark", parameterType = "String", parameterValidRange = "", parameterValidRegExp = "")
     public Response setRemark(Map params) {
-        LogUtil.debug("ac_setRemark start");
+        Log.debug("ac_setRemark start");
         Map<String, Boolean> map = new HashMap<>(1);
         boolean result;
         try {
@@ -473,7 +473,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_setRemark end");
+        Log.debug("ac_setRemark end");
         return success(map);
     }
 
@@ -486,7 +486,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_importAccountByPriKey", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "import accounts by private key")
     public Response importAccountByPriKey(Map params) {
-        LogUtil.debug("ac_importAccountByPriKey start");
+        Log.debug("ac_importAccountByPriKey start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -514,7 +514,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_importAccountByPriKey end");
+        Log.debug("ac_importAccountByPriKey end");
         return success(map);
     }
 
@@ -528,7 +528,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_importAccountByKeystore", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "import accounts by AccountKeyStore")
     public Response importAccountByKeystore(Map params) {
-        LogUtil.debug("ac_importAccountByKeystore start");
+        Log.debug("ac_importAccountByKeystore start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -564,7 +564,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_importAccountByKeystore end");
+        Log.debug("ac_importAccountByKeystore end");
         return success(map);
     }
 
@@ -577,7 +577,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_exportAccountKeyStore", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "export account KeyStore")
     public Response exportAccountKeyStore(Map params) {
-        LogUtil.debug("ac_exportAccountKeyStore start");
+        Log.debug("ac_exportAccountKeyStore start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -603,7 +603,7 @@ public class AccountCmd extends BaseCmd {
             return failed(e.getErrorCode());
         }
 
-        LogUtil.debug("ac_exportAccountKeyStore end");
+        Log.debug("ac_exportAccountKeyStore end");
         return success(map);
     }
 
@@ -616,7 +616,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_setPassword", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set account password")
     public Response setPassword(Map params) {
-        LogUtil.debug("ac_setPassword start");
+        Log.debug("ac_setPassword start");
         Map<String, Boolean> map = new HashMap<>(1);
         boolean result;
         try {
@@ -642,7 +642,7 @@ public class AccountCmd extends BaseCmd {
             return failed(e.getErrorCode());
         }
 
-        LogUtil.debug("ac_setPassword end");
+        Log.debug("ac_setPassword end");
         return success(map);
     }
 
@@ -655,7 +655,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_setOfflineAccountPassword", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "set offline account password")
     public Response setOfflineAccountPassword(Map params) {
-        LogUtil.debug("ac_setOfflineAccountPassword start");
+        Log.debug("ac_setOfflineAccountPassword start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -682,7 +682,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_setOfflineAccountPassword end");
+        Log.debug("ac_setOfflineAccountPassword end");
         return success(map);
     }
 
@@ -695,7 +695,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_updatePassword", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "modify the account password by the original password")
     public Response updatePassword(Map params) {
-        LogUtil.debug("ac_updatePassword start");
+        Log.debug("ac_updatePassword start");
         Map<String, Boolean> map = new HashMap<>(1);
         boolean result;
         try {
@@ -723,7 +723,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_updatePassword end");
+        Log.debug("ac_updatePassword end");
         return success(map);
     }
 
@@ -736,7 +736,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_updateOfflineAccountPassword", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "offline account change password")
     public Response updateOfflineAccountPassword(Map params) {
-        LogUtil.debug("ac_updateOfflineAccountPassword start");
+        Log.debug("ac_updateOfflineAccountPassword start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -766,7 +766,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_updateOfflineAccountPassword end");
+        Log.debug("ac_updateOfflineAccountPassword end");
         return success(map);
     }
 
@@ -779,7 +779,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_isEncrypted", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "whether the account is encrypted by the account address")
     public Response isEncrypted(Map params) {
-        LogUtil.debug("ac_isEncrypted start");
+        Log.debug("ac_isEncrypted start");
         Map<String, Boolean> map = new HashMap<>(1);
         try {
             // check parameters
@@ -799,7 +799,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_isEncrypted end");
+        Log.debug("ac_isEncrypted end");
         return success(map);
     }
 
@@ -812,7 +812,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_validationPassword", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "verify that the account password is correct")
     public Response validationPassword(Map params) {
-        LogUtil.debug("ac_validationPassword start");
+        Log.debug("ac_validationPassword start");
         Map<String, Boolean> map = new HashMap<>(1);
         try {
             // check parameters
@@ -842,7 +842,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsRuntimeException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_validationPassword end");
+        Log.debug("ac_validationPassword end");
         return success(map);
     }
 
@@ -855,7 +855,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_signDigest", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "data digest signature")
     public Response signDigest(Map params) {
-        LogUtil.debug("ac_signDigest start");
+        Log.debug("ac_signDigest start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -893,7 +893,7 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_signDigest end");
+        Log.debug("ac_signDigest end");
         return success(map);
     }
 
@@ -906,7 +906,7 @@ public class AccountCmd extends BaseCmd {
      */
     @CmdAnnotation(cmd = "ac_signBlockDigest", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "block data digest signature")
     public Response signBlockDigest(Map params) {
-        LogUtil.debug("ac_signDigest start");
+        Log.debug("ac_signDigest start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -944,20 +944,20 @@ public class AccountCmd extends BaseCmd {
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         }
-        LogUtil.debug("ac_signDigest end");
+        Log.debug("ac_signDigest end");
         return success(map);
     }
 
     /**
-     * 验证数据签名接口
+     * 验证数据签名
      * verify sign
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_verifySignData", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi-account transfer transaction")
+    @CmdAnnotation(cmd = "ac_verifySignData", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "Verification Data Signature")
     public Response verifySignData(Map params) {
-        LogUtil.debug("ac_verifySignData start");
+        Log.debug("ac_verifySignData start");
         Map<String, Boolean> map = new HashMap<>(1);
         try {
             // check parameters
@@ -988,7 +988,7 @@ public class AccountCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_verifySignData end");
+        Log.debug("ac_verifySignData end");
         return success(map);
     }
 

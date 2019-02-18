@@ -37,7 +37,7 @@ public class NulsMessageEncoder extends MessageToMessageEncoder<ByteBuf> {
     @Override
     protected void encode(ChannelHandlerContext ctx, ByteBuf msg, List<Object> out) throws Exception {
         // new protocol
-            out.add(msg.retain());
+        out.add(msg.retain());
 
     }
 }

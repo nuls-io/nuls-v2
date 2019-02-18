@@ -106,4 +106,7 @@ public interface AccountErrorCode {
     ErrorCode CHAINID_ERROR = ErrorCode.init("30040");
     ErrorCode ASSETID_ERROR = ErrorCode.init("30041");
     ErrorCode SIGN_ADDRESS_NOT_MATCH = ErrorCode.init("30042");
+    ErrorCode ADDRESS_ALREADY_SIGNED = ErrorCode.init("30043");
+    ErrorCode COINTO_DUPLICATE_COIN = ErrorCode.init("30044");
+    ErrorCode ALIAS_SAVE_ERROR = ErrorCode.init("30045");
 }

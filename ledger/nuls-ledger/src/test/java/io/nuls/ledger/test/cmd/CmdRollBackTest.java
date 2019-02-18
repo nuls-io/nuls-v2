@@ -49,6 +49,14 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  * @date 2019/01/11
  **/
 public class CmdRollBackTest {
+    public int chainId = 12345;
+    int assetChainId = 12345;
+    //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
+    String address = "LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";
+    String addressTo = "RceDy24yjrhQ72J8xynubWn55PgZj3930";
+    int assetId = 1;
+    //入账金额
+    BigInteger amount = BigInteger.valueOf(100000000000L);
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
@@ -59,16 +67,11 @@ public class CmdRollBackTest {
             // Build params map
             Map<String, Object> params = new HashMap<>();
             // Version information ("1.1" or 1.1 is both available)
-            int chainId = 8096;
-            int assetChainId = 445;
-            String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-            String addressTo = "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f";
-            int assetId = 222;
-            params.put("assetChainId", 445);
+            params.put("assetChainId", assetChainId);
             params.put("address", address);
-            params.put("assetId", 222);
+            params.put("assetId", assetId);
             params.put("chainId", chainId);
-            String nonce = "bb7e377410611d8f";
+            String nonce = "ffffffff";
             //封装交易执行
             Transaction tx = new Transaction();
             CoinData coinData = new CoinData();
@@ -91,7 +94,7 @@ public class CmdRollBackTest {
             coinTos.add(coinTo);
             coinData.setFrom(coinFroms);
             coinData.setTo(coinTos);
-            tx.setBlockHeight(2L);
+            tx.setBlockHeight(1L);
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
        return tx;
@@ -102,15 +105,20 @@ public class CmdRollBackTest {
     public void createTestTx2(){
 
     }
+
+
     @Test
-    public void rollbackTx(){
+    public void rollbackTx() {
         Transaction tx = null;
         try {
             tx = buildTx();
-            Map<String,Object> params = new HashMap<>();
-            params.put("chainId", 8096);
-            params.put("txHex",HexUtil.encode(tx.serialize()));
-            params.put("isConfirmTx",true);
+            Map<String, Object> params = new HashMap<>();
+            params.put("chainId", chainId);
+            List<String> txHexList = new ArrayList<>();
+            txHexList.add(HexUtil.encode(tx.serialize()));
+            params.put("txHexList", txHexList);
+            params.put("blockHeight", 1);
+            params.put("isConfirmTx", true);
             Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "rollBackConfirmTx", params);
             logger.info("response {}", response);
         } catch (IOException e) {
@@ -118,6 +126,36 @@ public class CmdRollBackTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
     }
+        @Test
+        public void getSnapshot(){
+            Transaction tx = null;
+            try {
+                Map<String,Object> params = new HashMap<>();
+                params.put("chainId", chainId);
+                params.put("blockHeight",0);
+                Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getSnapshot", params);
+                logger.info("response {}", response);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+    }
+    @Test
+    public void getBlock(){
+        Transaction tx = null;
+        try {
+            Map<String,Object> params = new HashMap<>();
+            params.put("chainId", chainId);
+            params.put("blockHeight",35);
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBlock", params);
+            logger.info("response {}", response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

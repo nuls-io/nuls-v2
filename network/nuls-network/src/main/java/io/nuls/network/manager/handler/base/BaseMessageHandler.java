@@ -38,21 +38,22 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * base message handler
- * @author  lan
+ *
+ * @author lan
  * @date 2018/11/01
  */
-public abstract  class BaseMessageHandler implements BaseMeesageHandlerInf {
+public abstract class BaseMessageHandler implements BaseMeesageHandlerInf {
     /**
      * 实现发送消息
      * Implement sending a message
-     * @param message   address message
-     * @param node      peer info
-     * @param isServer client=false or server=true
-     * @param asyn  default true
+     *
+     * @param message address message
+     * @param node    peer info
+     * @param asyn    default true
      * @return NetworkEventResult
      */
     @Override
-    public NetworkEventResult send(BaseMessage message, Node node, boolean isServer, boolean asyn) {
+    public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
         try {
             MessageHeader header = message.getHeader();
             header.setMagicNumber(header.getMagicNumber());
@@ -63,14 +64,14 @@ public abstract  class BaseMessageHandler implements BaseMeesageHandlerInf {
                 future.await();
                 boolean success = future.isSuccess();
                 if (!success) {
-                    return  NetworkEventResult.getResultFail(NetworkErrorCode.NET_MESSAGE_SEND_FAIL);
+                    return NetworkEventResult.getResultFail(NetworkErrorCode.NET_MESSAGE_SEND_FAIL);
                 }
             }
         } catch (Exception e) {
             e.printStackTrace();
             Log.error(e.getMessage());
-            return  NetworkEventResult.getResultFail(NetworkErrorCode.NET_MESSAGE_SEND_EXCEPTION);
+            return NetworkEventResult.getResultFail(NetworkErrorCode.NET_MESSAGE_SEND_EXCEPTION);
         }
-        return   NetworkEventResult.getResultSuccess();
+        return NetworkEventResult.getResultSuccess();
     }
 }

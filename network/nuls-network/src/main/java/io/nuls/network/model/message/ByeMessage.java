@@ -32,9 +32,8 @@ import io.nuls.network.model.message.body.MessageBody;
 import io.nuls.tools.exception.NulsException;
 
 /**
- *
- * @description  peer连接主动断开，拒绝业务消息连接
  * @author lan
+ * @description peer连接主动断开，拒绝业务消息连接
  * @date 2018/11/13
  **/
 public class ByeMessage extends BaseMessage {
@@ -42,11 +41,13 @@ public class ByeMessage extends BaseMessage {
     protected BaseNulsData parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException {
         return null;
     }
-    public ByeMessage(){
+
+    public ByeMessage() {
         super(NetworkConstant.CMD_MESSAGE_BYE);
     }
+
     public ByeMessage(long magicNumber, String cmd, MessageBody body) {
-        super(cmd,magicNumber);
+        super(cmd, magicNumber);
         this.setMsgBody(body);
     }
 }

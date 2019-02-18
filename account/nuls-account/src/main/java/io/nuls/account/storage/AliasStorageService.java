@@ -45,7 +45,7 @@ public interface AliasStorageService {
 
 
     /**
-     * get alias
+     * get alias,contain the account alias and multi sign account alias
      *
      * @param chainId
      * @param alias

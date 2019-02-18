@@ -29,7 +29,7 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.po.MultiSigAccountPo;
 import io.nuls.account.storage.MultiSigAccountStorageService;
-import io.nuls.account.util.log.LogUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.base.data.Address;
 import io.nuls.db.constant.DBErrorCode;
 import io.nuls.db.service.RocksDBService;
@@ -57,7 +57,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
                 RocksDBService.createTable(AccountStorageConstant.DB_NAME_MULTI_SIG_ACCOUNT);
             } catch (Exception e) {
                 if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
-                    LogUtil.error(e.getMessage());
+                    Log.error(e.getMessage());
                     throw new NulsRuntimeException(AccountErrorCode.DB_TABLE_CREATE_ERROR);
                 }
             }
@@ -69,7 +69,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
         try {
             return RocksDBService.put(AccountStorageConstant.DB_NAME_MULTI_SIG_ACCOUNT, multiSigAccountPo.getAddress().getAddressBytes(), multiSigAccountPo.serialize());
         } catch (Exception e) {
-            LogUtil.error("",e);
+            Log.error("",e);
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_BATCH_ERROR);
         }
     }
@@ -82,7 +82,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
         try {
             return RocksDBService.delete(AccountStorageConstant.DB_NAME_MULTI_SIG_ACCOUNT, address.getAddressBytes());
         } catch (Exception e) {
-            LogUtil.error(e.getMessage());
+            Log.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_SAVE_ERROR);
         }
     }
@@ -101,7 +101,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
                 }
             }
         } catch (Exception e) {
-            LogUtil.error(e.getMessage());
+            Log.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
         return multiSigAccountPoList;
@@ -118,7 +118,7 @@ public class MultiSigAccountStorageServiceImpl implements MultiSigAccountStorage
             //将byte数组反序列化为AccountPo返回
             multiSigAccountPo.parse(multiSigAccountPoBytes, 0);
         } catch (Exception e) {
-            LogUtil.error(e.getMessage());
+            Log.error(e.getMessage());
             throw new NulsRuntimeException(AccountErrorCode.DB_QUERY_ERROR);
         }
         return multiSigAccountPo;

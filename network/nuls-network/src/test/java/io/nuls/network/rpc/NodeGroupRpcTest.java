@@ -22,20 +22,41 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager.threads;
+package io.nuls.network.rpc;
+
+import io.nuls.network.utils.LoggerUtil;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.NoUse;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- *
- * @description  定时清理缓存中过期数据信息
- *Timed cleaning of expired data information in the cache
- *
  * @author lan
- * @date  2018/11/14
+ * @description
+ * @date 2019/02/10
  **/
-public class CacheClearTask implements Runnable  {
-    @Override
-    public void run() {
+public class NodeGroupRpcTest {
 
+    @Before
+    public void before() throws Exception {
+        NoUse.mockModule();
+//        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
     }
-
+    @Test
+  public void  getGroupByChainId(){
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        params.put("chainId", 1);
+        try {
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_getGroupByChainId", params);
+            LoggerUtil.Log.info("response {}", response);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+   }
 }

@@ -34,6 +34,6 @@ import io.nuls.ledger.model.po.AccountState;
  */
 public interface TxProcessor {
 
-      void processFromCoinData(CoinFrom coin, String nonce, String hash, AccountState accountState);
-      void processToCoinData(CoinTo coin,String nonce,String hash, AccountState accountState);
+      boolean processFromCoinData(CoinFrom coin, String nonce, String hash, AccountState accountState);
+      boolean processToCoinData(CoinTo coin,String nonce,String hash, AccountState accountState);
 }

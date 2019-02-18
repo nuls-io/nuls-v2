@@ -30,6 +30,7 @@ import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.ProtocolRoleHandler;
+import io.nuls.network.netty.container.NodesContainer;
 
 import java.util.Collection;
 import java.util.List;
@@ -40,77 +41,90 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 /**
  * Group event monitor
  * 测试 定时打印连接信息
- * @author  lan
- * @create  2018/11/14
+ *
+ * @author lan
+ * @create 2018/11/14
  */
-public class DataShowMonitorTest implements Runnable  {
+public class DataShowMonitorTest implements Runnable {
     @Override
     public void run() {
         //test
-        printlnCachePeer();
         printlnPeer();
         printlnMem();
         printlnProtocolMap();
     }
 
-    private void printlnProtocolMap(){
-        Collection<Map<String,ProtocolRoleHandler>> values =MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap().values();
-        for (Map<String,ProtocolRoleHandler> map : values) {
+    private void printlnProtocolMap() {
+        Collection<Map<String, ProtocolRoleHandler>> values = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap().values();
+        for (Map<String, ProtocolRoleHandler> map : values) {
             Collection<ProtocolRoleHandler> list = map.values();
             for (ProtocolRoleHandler protocolRoleHandler : list) {
-                Log.debug("protocolRoleHandler =================={}==={}",protocolRoleHandler.getRole(),protocolRoleHandler.getHandler());
+                Log.debug("protocolRoleHandler =================={}==={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
             }
         }
 
     }
 
-    private void printlnCachePeer(){
-        List<Node> list= ConnectionManager.getInstance().getCacheAllNodeList();
-        Log.info("begin============================printlnCachePeer:"+list.size());
-        for(Node node:list){
-            Log.info("************cache connect:"+node.getId());
-        }
-        Log.info("end============================printlnCachePeer:"+list.size());
-    }
-    private void printlnMem(){
+    private void printlnMem() {
 //       byte[] bys = new byte[1024*1024];//申请1M内存
 //       Log.debug("Java进程可以向操作系统申请到的最大内存:"+(Runtime.getRuntime().maxMemory())/(1024*1024)+"M");
 //       Log.debug("Java进程空闲内存:"+(Runtime.getRuntime().freeMemory())/(1024*1024)+"M");
 //       Log.debug("Java进程现在从操作系统那里已经申请了内存:"+(Runtime.getRuntime().totalMemory())/(1024*1024)+"M");
     }
-    private void printlnPeer(){
+
+    private void printlnPeer() {
 
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         List<NodeGroup> nodeGroupList = nodeGroupManager.getNodeGroups();
-        for(NodeGroup nodeGroup:nodeGroupList){
-            Log.info("chainId={},magicNumber={},isSelfChain={}",nodeGroup.getChainId(),nodeGroup.getMagicNumber(),nodeGroup.isSelf());
-            Collection<Node> c1=nodeGroup.getConnectNodes();
-            Log.info("begin============================printlnPeer c1:SelfConnectNodes============="+c1.size());
-            for(Node n:c1){
-                Log.info("*************connect:{},info:{}",n.getId(),n.getNodeGroupConnectorsInfos());
+        for (NodeGroup nodeGroup : nodeGroupList) {
+            Log.info("chainId={},magicNumber={},isLocalChain={}", nodeGroup.getChainId(), nodeGroup.getMagicNumber(), !(nodeGroup.isMoonCrossGroup()));
+            NodesContainer localNodesContainer = nodeGroup.getLocalNetNodeContainer();
+            Collection<Node> c1 = localNodesContainer.getConnectedNodes().values();
+            Collection<Node> c2 = localNodesContainer.getCanConnectNodes().values();
+            Collection<Node> c3 = localNodesContainer.getDisconnectNodes().values();
+            Collection<Node> c4 = localNodesContainer.getUncheckNodes().values();
+            Collection<Node> c5 = localNodesContainer.getFailNodes().values();
+            Log.info("begin============================printlnPeer :SelfConnectNodes=============");
+            for (Node n : c1) {
+                Log.info("*****connected:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            Log.info("end============================printlnPeer c1:SelfConnectNodes=============");
+            for (Node n : c2) {
+                Log.info("*****canConnect:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+            }
+            for (Node n : c3) {
+                Log.info("*****disConnect:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+            }
+            for (Node n : c4) {
+                Log.info("*****uncheck:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+            }
+            for (Node n : c5) {
+                Log.info("*****failed:{},FailCount = {},info:blockHash={},blockHeight={},version={}", n.getId(), n.getFailCount(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+            }
+            Log.info("end============================printlnPeer :SelfConnectNodes=============");
 
-            Collection<Node> c2=nodeGroup.getDisConnectNodes();
-            Log.info("begin============================printlnPeer c2:SelfDisConnectNodes============="+c2.size());
-            for(Node n:c2){
-                Log.info("***********disconnect:"+n.getId());
+            NodesContainer crossNodesContainer = nodeGroup.getCrossNodeContainer();
+            Collection<Node> d1 = crossNodesContainer.getConnectedNodes().values();
+            Collection<Node> d2 = crossNodesContainer.getCanConnectNodes().values();
+            Collection<Node> d3 = crossNodesContainer.getDisconnectNodes().values();
+            Collection<Node> d4 = crossNodesContainer.getUncheckNodes().values();
+            Collection<Node> d5 = crossNodesContainer.getFailNodes().values();
+            Log.info("begin============================printlnPeer :crossConnectNodes=============");
+            for (Node n : d1) {
+                Log.info("*****connected:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            Log.info("end============================printlnPeer c2:SelfDisConnectNodes=============");
-
-            Collection<Node> c3=nodeGroup.getConnectCrossNodes();
-            Log.info("begin============================printlnPeer c3:crossConnectNodes============="+c3.size());
-            for(Node n:c3){
-                Log.info("************cross connect:"+n.getId());
+            for (Node n : d2) {
+                Log.info("*****canConnect:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            Log.info("end============================printlnPeer c3:crossConnectNodes=============");
-
-            Collection<Node> c4=nodeGroup.getDisConnectCrossNodes();
-            Log.info("begin============================printlnPeer c4:crossDisConnectNodes============="+c4.size());
-            for(Node n:c4){
-                Log.info("*************cross disconnect:"+n.getId());
+            for (Node n : d3) {
+                Log.info("*****disConnect:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
             }
-            Log.info("end============================printlnPeer c4:crossDisConnectNodes=============");
+            for (Node n : d4) {
+                Log.info("*****uncheck:{},info:blockHash={},blockHeight={},version={}", n.getId(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+            }
+            for (Node n : d5) {
+                Log.info("*****failed:{},FailCount = {},info:blockHash={},blockHeight={},version={}", n.getId(), n.getFailCount(), n.getBlockHash(), n.getBlockHeight(), n.getVersion());
+            }
+            Log.info("end============================printlnPeer :crossDisConnectNodes=============");
         }
     }
 }

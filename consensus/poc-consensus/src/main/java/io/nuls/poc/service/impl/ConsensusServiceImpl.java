@@ -17,7 +17,6 @@ import io.nuls.poc.model.bo.tx.txdata.StopAgent;
 import io.nuls.poc.model.dto.input.*;
 import io.nuls.poc.model.dto.output.*;
 import io.nuls.poc.model.po.AgentPo;
-import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.service.ConsensusService;
 import io.nuls.poc.storage.AgentStorageService;
@@ -135,7 +134,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAgentAddress(), dto.getPassword(), priKey, tx);
             CallMethodUtils.sendTx(chain,HexUtil.encode(tx.serialize()));
-            Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
+            Map<String, Object> result = new HashMap<>(2);
             result.put("txHex", HexUtil.encode(tx.serialize()));
             return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
         } catch (IOException e) {
@@ -192,9 +191,9 @@ public class ConsensusServiceImpl implements ConsensusService {
             stopAgent.setCreateTxHash(agent.getTxHash());
             tx.setTxData(stopAgent.serialize());
             CoinData coinData = coinDataManager.getStopAgentCoinData(chain, agent, CallMethodUtils.currentTime() + chain.getConfig().getStopAgentLockTime());
-            tx.setCoinData(coinData.serialize());
-            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
+            BigInteger fee = TransactionFeeCalculator.getNormalTxFee(tx.size()+P2PHKSignature.SERIALIZE_LENGTH+coinData.serialize().length);
             coinData.getTo().get(0).setAmount(coinData.getTo().get(0).getAmount().subtract(fee));
+            tx.setCoinData(coinData.serialize());
             //交易签名
             String priKey = (String) callResult.get("priKey");
             CallMethodUtils.transactionSignature(dto.getChainId(), dto.getAddress(), dto.getPassword(), priKey, tx);
@@ -875,6 +874,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 创建节点交易验证
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result createAgentValid(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -895,7 +895,9 @@ public class ConsensusServiceImpl implements ConsensusService {
             if (!result) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+            Map<String, Object> validResult = new HashMap<>(2);
+            validResult.put("value", true);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
@@ -906,83 +908,10 @@ public class ConsensusServiceImpl implements ConsensusService {
     }
 
     /**
-     * 创建节点交易提交
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    public Result createAgentCommit(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER) == null) {
-            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
-        if (chainId <= ConsensusConstant.MIN_VALUE) {
-            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if (chain == null) {
-            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
-        try {
-            String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
-            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
-            transaction.parse(HexUtil.decode(txHex), 0);
-            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER);
-            BlockHeader blockHeader = new BlockHeader();
-            blockHeader.parse(HexUtil.decode(headerHex), 0);
-            Agent agent = new Agent();
-            agent.parse(transaction.getTxData(), 0);
-            agent.setTxHash(transaction.getHash());
-            agent.setBlockHeight(blockHeader.getHeight());
-            agent.setTime(transaction.getTime());
-            AgentPo agentPo = agentManager.agentToPo(agent);
-            if (!agentService.save(agentPo, chainId)) {
-                return Result.getFailed(ConsensusErrorCode.SAVE_FAILED);
-            }
-            agentManager.addAgent(chain, agent);
-            Map<String, Object> result = new HashMap<>(ConsensusConstant.INIT_CAPACITY);
-            result.put("agentHash", agent.getTxHash().getDigestHex());
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
-        } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
-        }
-    }
-
-    /**
-     * 创建节点交易回滚
-     */
-    @Override
-    public Result createAgentRollBack(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
-            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
-        if (chainId <= ConsensusConstant.MIN_VALUE) {
-            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if (chain == null) {
-            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
-        try {
-            String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
-            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_REGISTER_AGENT);
-            transaction.parse(HexUtil.decode(txHex), 0);
-            if (!agentService.delete(transaction.getHash(), chainId)) {
-                return Result.getFailed(ConsensusErrorCode.ROLLBACK_FAILED);
-            }
-            agentManager.removeAgent(chain, transaction.getHash());
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
-        } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
-        }
-    }
-
-    /**
      * 停止节点交易验证
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result stopAgentValid(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -1003,7 +932,9 @@ public class ConsensusServiceImpl implements ConsensusService {
             if (!result) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+            Map<String, Object> validResult = new HashMap<>(2);
+            validResult.put("value", true);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
@@ -1014,127 +945,10 @@ public class ConsensusServiceImpl implements ConsensusService {
     }
 
     /**
-     * 停止节点交易提交
-     */
-    @Override
-    public Result stopAgentCommit(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER) == null) {
-            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
-        if (chainId <= ConsensusConstant.MIN_VALUE) {
-            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if (chain == null) {
-            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
-        try {
-            String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
-            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
-            transaction.parse(HexUtil.decode(txHex), 0);
-            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER);
-            BlockHeader blockHeader = new BlockHeader();
-            blockHeader.parse(HexUtil.decode(headerHex), 0);
-            if (transaction.getTime() < (blockHeader.getTime() - 300000L)) {
-                return Result.getFailed(ConsensusErrorCode.LOCK_TIME_NOT_REACHED);
-            }
-            //找到需要注销的节点信息
-            StopAgent stopAgent = new StopAgent();
-            stopAgent.parse(transaction.getTxData(), 0);
-            AgentPo agentPo = agentService.get(stopAgent.getCreateTxHash(), chainId);
-            if (agentPo == null || agentPo.getDelHeight() > 0) {
-                return Result.getFailed(ConsensusErrorCode.AGENT_NOT_EXIST);
-            }
-            //找到该节点的委托信息,并设置委托状态为退出
-            List<DepositPo> depositPoList = depositService.getList(chainId);
-            for (DepositPo depositPo : depositPoList) {
-                if (depositPo.getDelHeight() > -1L) {
-                    continue;
-                }
-                if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
-                    continue;
-                }
-                depositPo.setDelHeight(transaction.getBlockHeight());
-                if (!depositService.save(depositPo, chainId)) {
-                    return Result.getFailed(ConsensusErrorCode.SAVE_FAILED);
-                }
-                depositManager.updateDeposit(chain, depositManager.poToDeposit(depositPo));
-            }
-            agentPo.setDelHeight(transaction.getBlockHeight());
-            //保存数据库和缓存
-            if (!agentService.save(agentPo, chainId)) {
-                return Result.getFailed(ConsensusErrorCode.SAVE_FAILED);
-            }
-            agentManager.updateAgent(chain, agentManager.poToAgent(agentPo));
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
-        } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
-        } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
-        }
-    }
-
-    /**
-     * 停止节点交易回滚
-     */
-    @Override
-    public Result stopAgentRollBack(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
-            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
-        if (chainId <= ConsensusConstant.MIN_VALUE) {
-            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if (chain == null) {
-            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
-        try {
-            String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
-            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_STOP_AGENT);
-            transaction.parse(HexUtil.decode(txHex), 0);
-            StopAgent stopAgent = new StopAgent();
-            stopAgent.parse(transaction.getTxData(), 0);
-            AgentPo agentPo = agentService.get(stopAgent.getCreateTxHash(), chainId);
-            agentPo.setDelHeight(-1);
-            //找到该节点的委托信息,并设置委托状态为退出
-            List<DepositPo> depositPoList = depositService.getList(chainId);
-            for (DepositPo depositPo : depositPoList) {
-                if (depositPo.getDelHeight() != transaction.getBlockHeight()) {
-                    continue;
-                }
-                if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
-                    continue;
-                }
-                depositPo.setDelHeight(-1);
-                if (!depositService.save(depositPo, chainId)) {
-                    return Result.getFailed(ConsensusErrorCode.ROLLBACK_FAILED);
-                }
-                depositManager.updateDeposit(chain, depositManager.poToDeposit(depositPo));
-            }
-            //保存数据库和缓存
-            if (!agentService.save(agentPo, chainId)) {
-                return Result.getFailed(ConsensusErrorCode.ROLLBACK_FAILED);
-            }
-            agentManager.updateAgent(chain, agentManager.poToAgent(agentPo));
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
-        } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
-        } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(ConsensusErrorCode.DATA_ERROR);
-        }
-    }
-
-    /**
      * 委托共识交易验证
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result depositValid(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -1155,7 +969,9 @@ public class ConsensusServiceImpl implements ConsensusService {
             if (!result) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+            Map<String, Object> validResult = new HashMap<>(2);
+            validResult.put("value", true);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
@@ -1166,83 +982,10 @@ public class ConsensusServiceImpl implements ConsensusService {
     }
 
     /**
-     * 委托共识交易提交
-     */
-    @Override
-    public Result depositCommit(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER) == null) {
-            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
-        if (chainId <= ConsensusConstant.MIN_VALUE) {
-            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if (chain == null) {
-            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
-        try {
-            String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
-            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
-            transaction.parse(HexUtil.decode(txHex), 0);
-            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER);
-            BlockHeader blockHeader = new BlockHeader();
-            blockHeader.parse(HexUtil.decode(headerHex), 0);
-            Deposit deposit = new Deposit();
-            deposit.parse(transaction.getTxData(), 0);
-            deposit.setTxHash(transaction.getHash());
-            deposit.setTime(transaction.getTime());
-            deposit.setBlockHeight(blockHeader.getHeight());
-            DepositPo depositPo = depositManager.depositToPo(deposit);
-            if (!depositService.save(depositPo, chainId)) {
-                return Result.getFailed(ConsensusErrorCode.SAVE_FAILED);
-            }
-            depositManager.addDeposit(chain, deposit);
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
-        } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
-        }
-    }
-
-    /**
-     * 委托共识交易回滚
-     */
-    @Override
-    public Result depositRollBack(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
-            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
-        if (chainId <= ConsensusConstant.MIN_VALUE) {
-            return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
-        }
-        Chain chain = chainManager.getChainMap().get(chainId);
-        if (chain == null) {
-            return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
-        }
-        try {
-            String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
-            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS);
-            transaction.parse(HexUtil.decode(txHex), 0);
-            if (!depositService.delete(transaction.getHash(), chainId)) {
-                return Result.getFailed(ConsensusErrorCode.ROLLBACK_FAILED);
-            }
-            depositManager.removeDeposit(chain, transaction.getHash());
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
-        } catch (NulsException e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
-        } catch (Exception e) {
-            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-        }
-        return Result.getFailed(ConsensusErrorCode.ROLLBACK_FAILED);
-    }
-
-    /**
      * 退出共识交易验证
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result withdrawValid(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -1263,7 +1006,9 @@ public class ConsensusServiceImpl implements ConsensusService {
             if (!result) {
                 return Result.getFailed(ConsensusErrorCode.TX_DATA_VALIDATION_ERROR);
             }
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+            Map<String, Object> validResult = new HashMap<>(2);
+            validResult.put("value", true);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
@@ -1273,12 +1018,11 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
     }
 
-    /**
-     * 退出共识交易提交
-     */
+
     @Override
-    public Result withdrawCommit(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
+    @SuppressWarnings("unchecked")
+    public Result commitCmd(Map<String, Object> params) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX_HEX_LIST) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -1289,41 +1033,42 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (chain == null) {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
+        Map<String, Object> result = new HashMap<>(2);
+        result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
+        List<Transaction> commitSuccessList = new ArrayList<>();
+        BlockHeader blockHeader = new BlockHeader();
         try {
-            String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
-            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
-            transaction.parse(HexUtil.decode(txHex), 0);
-            CancelDeposit cancelDeposit = new CancelDeposit();
-            cancelDeposit.parse(transaction.getTxData(), 0);
-            //获取该笔交易对应的加入共识委托交易
-            DepositPo po = depositService.get(cancelDeposit.getJoinTxHash(), chainId);
-            //委托交易不存在
-            if (po == null) {
-                return Result.getFailed(ConsensusErrorCode.DATA_NOT_EXIST);
+            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
+            blockHeader.parse(HexUtil.decode(headerHex), 0);
+            List<String> txHexList = (List<String>)params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
+            for (String txHex : txHexList) {
+                Transaction tx = new Transaction();
+                tx.parse(HexUtil.decode(txHex), 0);
+                if(transactionCommit(tx,chain,blockHeader)){
+                    commitSuccessList.add(tx);
+                }else{
+                    transactionBatchRollBack(commitSuccessList,chain,blockHeader);
+                    result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
+                    return Result.getFailed(ConsensusErrorCode.SAVE_FAILED).setData(result);
+                }
             }
-            //委托交易已退出
-            if (po.getDelHeight() > 0) {
-                return Result.getFailed(ConsensusErrorCode.DEPOSIT_WAS_CANCELED);
-            }
-            //设置退出共识高度
-            po.setDelHeight(transaction.getBlockHeight());
-            if (!depositService.save(po, chainId)) {
-                return Result.getFailed(ConsensusErrorCode.SAVE_FAILED);
-            }
-            depositManager.updateDeposit(chain, depositManager.poToDeposit(po));
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
-        } catch (NulsException e) {
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,true);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
+        }catch (NulsException e){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
+            try{
+                transactionBatchRollBack(commitSuccessList,chain,blockHeader);
+            }catch (NulsException re){
+                chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(re);
+            }
+            return Result.getFailed(e.getErrorCode()).setData(result);
         }
     }
 
-    /**
-     * 退出共识交易回滚
-     */
     @Override
-    public Result withdrawRollBack(Map<String, Object> params) {
-        if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
+    @SuppressWarnings("unchecked")
+    public Result rollbackCmd(Map<String, Object> params) {
+        if (params == null || params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_TX_HEX_LIST) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
         }
         int chainId = (Integer) params.get(ConsensusConstant.PARAM_CHAIN_ID);
@@ -1334,30 +1079,55 @@ public class ConsensusServiceImpl implements ConsensusService {
         if (chain == null) {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
+        Map<String, Object> result = new HashMap<>(2);
+        result.put(ConsensusConstant.PARAM_RESULT_VALUE ,false);
         try {
-            String txHex = (String) params.get(ConsensusConstant.PARAM_TX);
-            Transaction transaction = new Transaction(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT);
-            transaction.parse(HexUtil.decode(txHex), 0);
-            CancelDeposit cancelDeposit = new CancelDeposit();
-            cancelDeposit.parse(transaction.getTxData(), 0);
-            //获取该笔交易对应的加入共识委托交易
-            DepositPo po = depositService.get(cancelDeposit.getJoinTxHash(), chainId);
-            //委托交易不存在
-            if (po == null) {
-                return Result.getFailed(ConsensusErrorCode.DATA_NOT_EXIST);
+            String headerHex = (String) params.get(ConsensusConstant.PARAM_BLOCK_HEADER_HEX);
+            BlockHeader blockHeader = new BlockHeader();
+            blockHeader.parse(HexUtil.decode(headerHex), 0);
+            List<String> txHexList = (List<String>)params.get(ConsensusConstant.PARAM_TX_HEX_LIST);
+            for (String txHex : txHexList) {
+                Transaction tx = new Transaction();
+                tx.parse(HexUtil.decode(txHex), 0);
+                transactionRollback(tx,chain,blockHeader);
             }
-            if (po.getDelHeight() != transaction.getBlockHeight()) {
-                return Result.getFailed(ConsensusErrorCode.DEPOSIT_NEVER_CANCELED);
-            }
-            po.setDelHeight(-1L);
-            if (!depositService.save(po, chainId)) {
-                return Result.getFailed(ConsensusErrorCode.ROLLBACK_FAILED);
-            }
-            depositManager.updateDeposit(chain, depositManager.poToDeposit(po));
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
-        } catch (NulsException e) {
+            result.put(ConsensusConstant.PARAM_RESULT_VALUE ,true);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(result);
+        }catch (NulsException e){
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
-            return Result.getFailed(e.getErrorCode());
+            return Result.getFailed(e.getErrorCode()).setData(result);
+        }
+    }
+
+    private boolean transactionCommit(Transaction tx,Chain chain,BlockHeader header)throws NulsException{
+        switch (tx.getType()){
+            case(ConsensusConstant.TX_TYPE_REGISTER_AGENT) : return agentManager.createAgentCommit(tx,header,chain);
+            case(ConsensusConstant.TX_TYPE_STOP_AGENT): return agentManager.stopAgentCommit(tx,chain);
+            case(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS): return depositManager.depositCommit(tx,header,chain);
+            case(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT): return depositManager.cancelDepositCommit(tx,chain);
+            case(ConsensusConstant.TX_TYPE_YELLOW_PUNISH): return punishManager.yellowPunishCommit(tx,chain,header);
+            case(ConsensusConstant.TX_TYPE_RED_PUNISH): return punishManager.redPunishCommit(tx,chain,header);
+            case(ConsensusConstant.TX_TYPE_COINBASE) : return true;
+            default: return false;
+        }
+    }
+
+    private void transactionBatchRollBack(List<Transaction> txList, Chain chain,BlockHeader header)throws NulsException{
+        for (Transaction tx:txList) {
+            transactionRollback(tx,chain,header);
+        }
+    }
+
+    private boolean transactionRollback(Transaction tx,Chain chain,BlockHeader header)throws NulsException{
+        switch (tx.getType()){
+            case(ConsensusConstant.TX_TYPE_REGISTER_AGENT) : return agentManager.createAgentRollBack(tx,chain);
+            case(ConsensusConstant.TX_TYPE_STOP_AGENT): return agentManager.stopAgentRollBack(tx,chain);
+            case(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS): return depositManager.depositRollBack(tx,chain);
+            case(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT): return depositManager.cancelDepositRollBack(tx,chain);
+            case(ConsensusConstant.TX_TYPE_YELLOW_PUNISH): return punishManager.yellowPunishRollback(tx,chain,header);
+            case(ConsensusConstant.TX_TYPE_RED_PUNISH): return punishManager.redPunishRollback(tx,chain,header);
+            case(ConsensusConstant.TX_TYPE_COINBASE) : return true;
+            default: return false;
         }
     }
 
@@ -1365,6 +1135,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 缓存最新区块
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result addBlock(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -1382,7 +1153,9 @@ public class ConsensusServiceImpl implements ConsensusService {
             BlockHeader header = new BlockHeader();
             header.parse(HexUtil.decode(headerHex), 0);
             blockManager.addNewBlock(chain, header);
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+            Map<String, Object> validResult = new HashMap<>(2);
+            validResult.put("value", true);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
@@ -1393,6 +1166,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * 链分叉区块回滚
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result chainRollBack(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_HEIGHT) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -1407,13 +1181,16 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         int height = (Integer) params.get(ConsensusConstant.PARAM_HEIGHT);
         blockManager.chainRollBack(chain, height);
-        return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+        Map<String, Object> validResult = new HashMap<>(2);
+        validResult.put("value", true);
+        return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
     }
 
     /**
      * 区块分叉记录
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result addEvidenceRecord(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_BLOCK_HEADER) == null || params.get(ConsensusConstant.PARAM_EVIDENCE_HEADER) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -1432,7 +1209,9 @@ public class ConsensusServiceImpl implements ConsensusService {
             BlockHeader evidenceHeader = new BlockHeader();
             evidenceHeader.parse(HexUtil.decode((String) params.get(ConsensusConstant.PARAM_EVIDENCE_HEADER)), 0);
             punishManager.addEvidenceRecord(chain, header, evidenceHeader);
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+            Map<String, Object> validResult = new HashMap<>(2);
+            validResult.put("value", true);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());
@@ -1446,6 +1225,7 @@ public class ConsensusServiceImpl implements ConsensusService {
      * @return Result
      */
     @Override
+    @SuppressWarnings("unchecked")
     public Result doubleSpendRecord(Map<String, Object> params) {
         if (params.get(ConsensusConstant.PARAM_CHAIN_ID) == null || params.get(ConsensusConstant.PARAM_BLOCK) == null || params.get(ConsensusConstant.PARAM_TX) == null) {
             return Result.getFailed(ConsensusErrorCode.PARAM_ERROR);
@@ -1469,7 +1249,9 @@ public class ConsensusServiceImpl implements ConsensusService {
                 txList.add(tx);
             }
             punishManager.addDoubleSpendRecord(chain, txList, block);
-            return Result.getSuccess(ConsensusErrorCode.SUCCESS);
+            Map<String, Object> validResult = new HashMap<>(2);
+            validResult.put("value", true);
+            return Result.getSuccess(ConsensusErrorCode.SUCCESS).setData(validResult);
         } catch (NulsException e) {
             chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error(e);
             return Result.getFailed(e.getErrorCode());

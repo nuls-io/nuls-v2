@@ -27,7 +27,7 @@ package io.nuls.account.model.po;
 
 
 import io.nuls.account.model.bo.Account;
-import io.nuls.account.util.log.LogUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.Address;

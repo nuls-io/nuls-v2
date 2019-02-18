@@ -54,9 +54,10 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
     public BaseMessage() {
 
     }
-   /**
-    * 初始化基础消息的消息头
-    */
+
+    /**
+     * 初始化基础消息的消息头
+     */
     public BaseMessage(String command, long magicNumber) {
         this.header = new MessageHeader(command, magicNumber);
     }
@@ -65,12 +66,12 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
         this.header = new MessageHeader(command);
     }
 
-   /**
-    * serialize important field
-    */
+    /**
+     * serialize important field
+     */
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        long checksum=getCheckSum();
+        long checksum = getCheckSum();
         header.setChecksum(checksum);
         stream.write(header.serialize());
         stream.write(msgBody.serialize());
@@ -79,21 +80,21 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
 
     public long getCheckSum() throws IOException {
         byte[] data = null;
-        if(null == msgBody || msgBody.size() == 0){
-            data=ToolsConstant.PLACE_HOLDER;
-        }else {
+        if (null == msgBody || msgBody.size() == 0) {
+            data = ToolsConstant.PLACE_HOLDER;
+        } else {
             data = msgBody.serialize();
         }
 //        Log.info("=================getCheckSum:"+data.length);
-        byte [] bodyHash=Sha256Hash.hashTwice(data);
-        byte []get4Byte=ByteUtils.subBytes(bodyHash,0,4);
-        long checksum=ByteUtils.bytesToBigInteger(get4Byte).longValue();
+        byte[] bodyHash = Sha256Hash.hashTwice(data);
+        byte[] get4Byte = ByteUtils.subBytes(bodyHash, 0, 4);
+        long checksum = ByteUtils.bytesToBigInteger(get4Byte).longValue();
         return checksum;
     }
 
-    public boolean isCheckSumValid(){
+    public boolean isCheckSumValid() {
         try {
-            return  getCheckSum()== this.getHeader().getChecksum();
+            return getCheckSum() == this.getHeader().getChecksum();
         } catch (IOException e) {
             e.printStackTrace();
             Log.error(e.getMessage());
@@ -109,6 +110,7 @@ public abstract class BaseMessage<T extends BaseNulsData> extends BaseNulsData {
         this.header = header;
         this.msgBody = parseMessageBody(byteBuffer);
     }
+
     protected abstract T parseMessageBody(NulsByteBuffer byteBuffer) throws NulsException;
 
 

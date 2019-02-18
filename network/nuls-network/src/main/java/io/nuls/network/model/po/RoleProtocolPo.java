@@ -35,13 +35,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @description
  * @author lan
+ * @description
  * @date 2018/12/20
  **/
-public class RoleProtocolPo extends  BasePo{
+public class RoleProtocolPo extends BasePo {
     private String role;
-    private List<ProtocolHandlerPo> protocolHandlerPos =new ArrayList<>();
+    private List<ProtocolHandlerPo> protocolHandlerPos = new ArrayList<>();
 
     public String getRole() {
         return role;
@@ -67,7 +67,7 @@ public class RoleProtocolPo extends  BasePo{
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
         stream.writeString(role);
-        int  protocolHandlerSize = (protocolHandlerPos == null ? 0 : protocolHandlerPos.size());
+        int protocolHandlerSize = (protocolHandlerPos == null ? 0 : protocolHandlerPos.size());
         stream.writeVarInt(protocolHandlerSize);
         if (null != protocolHandlerPos) {
             for (ProtocolHandlerPo protocolHandlerPo : protocolHandlerPos) {
@@ -82,7 +82,7 @@ public class RoleProtocolPo extends  BasePo{
         int protocolHandlerSize = (int) byteBuffer.readVarInt();
         if (0 < protocolHandlerSize) {
             for (int i = 0; i < protocolHandlerSize; i++) {
-                ProtocolHandlerPo  protocolHandlerPo = new ProtocolHandlerPo();
+                ProtocolHandlerPo protocolHandlerPo = new ProtocolHandlerPo();
                 protocolHandlerPo.parse(byteBuffer);
                 protocolHandlerPos.add(protocolHandlerPo);
             }
@@ -91,9 +91,9 @@ public class RoleProtocolPo extends  BasePo{
 
     @Override
     public int size() {
-        int size=0;
+        int size = 0;
         size += SerializeUtils.sizeOfString(role);
-        size+= SerializeUtils.sizeOfVarInt(protocolHandlerPos == null ? 0 : protocolHandlerPos.size());
+        size += SerializeUtils.sizeOfVarInt(protocolHandlerPos == null ? 0 : protocolHandlerPos.size());
         if (null != protocolHandlerPos) {
             for (ProtocolHandlerPo protocolHandlerPo : protocolHandlerPos) {
                 size += protocolHandlerPo.size();

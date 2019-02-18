@@ -39,7 +39,7 @@ import java.io.IOException;
  * @author: lan
  * @create: 2018/11/07
  **/
-public class NodeGroupPo extends BasePo {
+public class GroupPo extends BasePo {
     private long magicNumber = 0;
     private int chainId = 0;
     private int maxOut = 0;
@@ -55,19 +55,20 @@ public class NodeGroupPo extends BasePo {
      * 跨链网络是否激活,卫星链上的默认跨链true,
      * 友链默认false，在跨链模块请求时候这个属性才为true
      */
-    private boolean isCrossActive=false;
+    private boolean isCrossActive = false;
 
     /**
      * 卫星链注册的跨链Group时为false
      */
-    private boolean isSelf=true;
+    private boolean isSelf = true;
     /**
      * 是否卫星网络,只要卫星链上的节点就是true，如果是友链节点为false
      */
-    private boolean isMoonNet=false;
+    private boolean isMoonNet = false;
+
     @Override
     public int size() {
-        int size=0;
+        int size = 0;
         size += SerializeUtils.sizeOfInt64();
         size += SerializeUtils.sizeOfInt32();
         size += SerializeUtils.sizeOfInt32();
@@ -80,7 +81,6 @@ public class NodeGroupPo extends BasePo {
         size += SerializeUtils.sizeOfBoolean();
         return size;
     }
-
 
 
     @Override
@@ -100,16 +100,16 @@ public class NodeGroupPo extends BasePo {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-       this.magicNumber = byteBuffer.readInt64();
-       this.chainId = byteBuffer.readInt32();
-       this.maxOut = byteBuffer.readInt32();
-       this.maxIn = byteBuffer.readInt32();
-       this.maxCrossOut = byteBuffer.readInt32();
-       this.maxCrossIn = byteBuffer.readInt32();
-       this.minAvailableCount = byteBuffer.readInt32();
-       this.isCrossActive = byteBuffer.readBoolean();
-       this.isSelf = byteBuffer.readBoolean();
-       this.isMoonNet = byteBuffer.readBoolean();
+        this.magicNumber = byteBuffer.readInt64();
+        this.chainId = byteBuffer.readInt32();
+        this.maxOut = byteBuffer.readInt32();
+        this.maxIn = byteBuffer.readInt32();
+        this.maxCrossOut = byteBuffer.readInt32();
+        this.maxCrossIn = byteBuffer.readInt32();
+        this.minAvailableCount = byteBuffer.readInt32();
+        this.isCrossActive = byteBuffer.readBoolean();
+        this.isSelf = byteBuffer.readBoolean();
+        this.isMoonNet = byteBuffer.readBoolean();
 
     }
 
@@ -195,7 +195,7 @@ public class NodeGroupPo extends BasePo {
 
     @Override
     public Dto parseDto() {
-        NodeGroup nodeGroup=new NodeGroup(magicNumber,chainId,maxIn,maxOut,minAvailableCount,isMoonNet);
+        NodeGroup nodeGroup = new NodeGroup(magicNumber, chainId, maxIn, maxOut, minAvailableCount);
         return nodeGroup;
     }
 }

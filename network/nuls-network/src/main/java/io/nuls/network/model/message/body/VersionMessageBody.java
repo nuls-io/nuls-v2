@@ -26,7 +26,6 @@
 package io.nuls.network.model.message.body;
 
 
-
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
@@ -42,13 +41,13 @@ import java.io.IOException;
 public class VersionMessageBody extends BaseNulsData {
 
     private long protocolVersion;
-    private IpAddress addrYou=new IpAddress();
+    private IpAddress addrYou = new IpAddress();
     private int portYouCross;
-    private IpAddress addrMe=new IpAddress();
+    private IpAddress addrMe = new IpAddress();
     private int portMeCross;
     private long blockHeight;
-    private String blockHash="";
-    private String extend="";
+    private String blockHash = "";
+    private String extend = "";
 
     public VersionMessageBody() {
 
@@ -89,11 +88,11 @@ public class VersionMessageBody extends BaseNulsData {
         try {
             protocolVersion = buffer.readUint32();
             addrYou.parse(buffer);
-            portYouCross=buffer.readUint16();
+            portYouCross = buffer.readUint16();
             addrMe.parse(buffer);
-            portMeCross=buffer.readUint16();
-            blockHeight=buffer.readUint32();
-            blockHash=buffer.readString();
+            portMeCross = buffer.readUint16();
+            blockHeight = buffer.readUint32();
+            blockHash = buffer.readString();
             extend = buffer.readString();
         } catch (Exception e) {
             throw new NulsException(e);
@@ -109,7 +108,6 @@ public class VersionMessageBody extends BaseNulsData {
     }
 
 
-
     public String getExtend() {
         return extend;
     }
@@ -117,7 +115,6 @@ public class VersionMessageBody extends BaseNulsData {
     public void setExtend(String extend) {
         this.extend = extend;
     }
-
 
 
     public int getPortYouCross() {

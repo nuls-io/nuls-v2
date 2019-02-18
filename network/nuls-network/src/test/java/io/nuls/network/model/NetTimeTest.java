@@ -24,7 +24,7 @@
  */
 package io.nuls.network.model;
 
-import io.nuls.network.manager.threads.TimeService;
+import io.nuls.network.manager.TimeManager;
 import io.nuls.network.model.dto.NetTimeUrl;
 import org.junit.Test;
 
@@ -57,8 +57,8 @@ public class NetTimeTest {
     }
     @Test
    public void timeServiceListTest(){
-        TimeService.getInstance().initWebTimeServer();
-        List<NetTimeUrl> list =  TimeService.getInstance().getNetTimeUrls();
+        TimeManager.getInstance().initWebTimeServer();
+        List<NetTimeUrl> list =  TimeManager.getInstance().getNetTimeUrls();
         for(NetTimeUrl netTimeUrl:list){
             System.out.println(netTimeUrl.getTime() + "================"+netTimeUrl.getUrl());
         }

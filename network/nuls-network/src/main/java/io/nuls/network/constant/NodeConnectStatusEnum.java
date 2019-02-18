@@ -22,53 +22,22 @@
  * SOFTWARE.
  *
  */
-
-package io.nuls.network.model.message.body;
-
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.tools.exception.NulsException;
-
-import java.io.IOException;
+package io.nuls.network.constant;
 
 /**
- * vrack protocol message body
- * @author  lan
+ * 对等节点的连接状态
+ * UNCONNECT  未连接
+ * CONNECTING 连接中
+ * CONNECTED 建立连接
+ * DISCONNECT 断开连接
+ * FAIL  连接失败
+ * AVAILABLE 握手成功
  */
-public class ByeMessageBody extends MessageBody {
-    public static int CODE_BYE=1;
-
-    int byeCode =CODE_BYE;
-    public ByeMessageBody(int byeCode ) {
-        this.byeCode=byeCode;
-    }
-    public ByeMessageBody() {
-
-    }
-    @Override
-    public int size() {
-        return 1;
-    }
-
-    /**
-     * serialize important field
-     */
-    @Override
-    protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.write((byte)byeCode);
-
-    }
-
-    @Override
-    public void parse(NulsByteBuffer buffer) throws NulsException {
-        byeCode= buffer.readByte() & 0xFF;   ;
-    }
-
-    public int getByeCode() {
-        return byeCode;
-    }
-
-    public void setByeCode(int byeCode) {
-        this.byeCode = byeCode;
-    }
+public class NodeConnectStatusEnum {
+    public final static int UNCONNECT = 0;
+    public final static int CONNECTING = 1;
+    public final static int CONNECTED = 2;
+    public final static int DISCONNECT = 3;
+    public final static int FAIL = 4;
+    public final static int AVAILABLE = 5;
 }

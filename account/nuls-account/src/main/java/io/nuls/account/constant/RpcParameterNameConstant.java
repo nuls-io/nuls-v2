@@ -114,6 +114,11 @@ public interface RpcParameterNameConstant {
     String SECONDARY_DATA_HEX = "secondaryDataHex";
 
     /**
+     * blockHeaderDigest
+     */
+    String BLOCK_HEADER_DIGEST = "blockHeaderDigest";
+
+    /**
      * the hex of transaction list
      */
     String TX_HEX_LIST = "txHexList";
@@ -153,6 +158,11 @@ public interface RpcParameterNameConstant {
      * the amount
      */
     String AMOUNT = "amount";
+
+    /**
+     * the TYPE
+     */
+    String TYPE = "type";
 
 
 }

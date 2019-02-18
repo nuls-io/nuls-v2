@@ -30,8 +30,8 @@ import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
+import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
-import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -54,16 +54,16 @@ import java.util.Map;
 import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
+ * @author lan
  * @description 消息远程调用
  * 模块消息处理器注册
  * 发送消息调用
- * @author  lan
- * @date  2018/11/12
+ * @date 2018/11/12
  **/
 @Component
-public class MessageRpc extends BaseCmd{
+public class MessageRpc extends BaseCmd {
 
-    private MessageHandlerFactory messageHandlerFactory =  MessageHandlerFactory.getInstance();
+    private MessageHandlerFactory messageHandlerFactory = MessageHandlerFactory.getInstance();
 
 
     @CmdAnnotation(cmd = "nw_protocolRegister", version = 1.0,
@@ -79,12 +79,12 @@ public class MessageRpc extends BaseCmd{
              * clear cache protocolRoleHandler
              */
             messageHandlerFactory.clearCacheProtocolRoleHandlerMap(role);
-            List<Map<String,String>> protocolCmds = (List<Map<String,String>>)params.get("protocolCmds");
+            List<Map<String, String>> protocolCmds = (List<Map<String, String>>) params.get("protocolCmds");
             List<ProtocolHandlerPo> protocolHandlerPos = new ArrayList<>();
-            for(Map map : protocolCmds){
-                ProtocolRoleHandler protocolRoleHandler = new ProtocolRoleHandler(role,map.get("handler").toString());
-                messageHandlerFactory.addProtocolRoleHandlerMap(map.get("protocolCmd").toString(),protocolRoleHandler);
-                ProtocolHandlerPo protocolHandlerPo = new ProtocolHandlerPo(map.get("protocolCmd").toString(),map.get("handler").toString());
+            for (Map map : protocolCmds) {
+                ProtocolRoleHandler protocolRoleHandler = new ProtocolRoleHandler(role, map.get("handler").toString());
+                messageHandlerFactory.addProtocolRoleHandlerMap(map.get("protocolCmd").toString(), protocolRoleHandler);
+                ProtocolHandlerPo protocolHandlerPo = new ProtocolHandlerPo(map.get("protocolCmd").toString(), map.get("handler").toString());
                 protocolHandlerPos.add(protocolHandlerPo);
             }
             /*
@@ -113,33 +113,42 @@ public class MessageRpc extends BaseCmd{
     @Parameter(parameterName = "excludeNodes", parameterType = "string")
     @Parameter(parameterName = "messageBody", parameterType = "string")
     @Parameter(parameterName = "command", parameterType = "string")
+    @Parameter(parameterName = "isCross", parameterType = "boolean")
     public Response broadcast(Map params) {
         try {
             Log.debug("==================broadcast begin");
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String excludeNodes = String.valueOf(params.get("excludeNodes"));
-            byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
-            String cmd =String.valueOf(params.get("command"));
-            MessageManager messageManager=MessageManager.getInstance();
-            long magicNumber = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId).getMagicNumber();
+            byte[] messageBody = HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
+            String cmd = String.valueOf(params.get("command"));
+            MessageManager messageManager = MessageManager.getInstance();
+            NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
+            if(null == nodeGroup){
+                Log.error("chain is not exist!");
+                return failed(NetworkErrorCode.PARAMETER_ERROR);
+            }
+            long magicNumber = nodeGroup.getMagicNumber();
             long checksum = messageManager.getCheckSum(messageBody);
-            MessageHeader header = new MessageHeader(cmd,magicNumber,checksum,messageBody.length);
-            byte [] headerByte = header.serialize();
-            byte [] message = new byte[headerByte.length+messageBody.length];
+            MessageHeader header = new MessageHeader(cmd, magicNumber, checksum, messageBody.length);
+            byte[] headerByte = header.serialize();
+            byte[] message = new byte[headerByte.length + messageBody.length];
+            boolean isCross = false;
+            if (null != params.get("isCross")) {
+                isCross = Boolean.valueOf(params.get("isCross").toString());
+            }
             System.arraycopy(headerByte, 0, message, 0, headerByte.length);
             System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
-            NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
-            Collection<Node> nodesCollection=nodeGroup.getConnectNodes();
-            excludeNodes=NetworkConstant.COMMA +excludeNodes+NetworkConstant.COMMA;
+            Collection<Node> nodesCollection = nodeGroup.getAvailableNodes(isCross);
+            excludeNodes = NetworkConstant.COMMA + excludeNodes + NetworkConstant.COMMA;
             List<Node> nodes = new ArrayList<>();
-            for(Node node:nodesCollection){
-                if(!excludeNodes.contains(NetworkConstant.COMMA+node.getId()+NetworkConstant.COMMA)){
+            for (Node node : nodesCollection) {
+                if (!excludeNodes.contains(NetworkConstant.COMMA + node.getId() + NetworkConstant.COMMA)) {
                     nodes.add(node);
                 }
             }
-            Log.debug("==================broadcast nodes==size={}",nodes.size());
-            messageManager.broadcastToNodes(message,nodes,true);
+            Log.debug("==================broadcast nodes==size={}", nodes.size());
+            messageManager.broadcastToNodes(message, nodes, true);
         } catch (Exception e) {
             e.printStackTrace();
             return failed(NetworkErrorCode.PARAMETER_ERROR);
@@ -147,9 +156,9 @@ public class MessageRpc extends BaseCmd{
         Log.debug("==================broadcast end");
         return success();
     }
+
     /**
      * nw_sendPeersMsg
-     *
      */
     @CmdAnnotation(cmd = "nw_sendPeersMsg", version = 1.0,
             description = "send peer message")
@@ -161,30 +170,30 @@ public class MessageRpc extends BaseCmd{
         try {
             int chainId = Integer.valueOf(String.valueOf(params.get("chainId")));
             String nodes = String.valueOf(params.get("nodes"));
-            byte [] messageBody =HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
-            String cmd =String.valueOf(params.get("command"));
-            Log.debug("{}==================sendPeersMsg begin, cmd-{}",TimeService.currentTimeMillis(), cmd);
-            MessageManager messageManager=MessageManager.getInstance();
+            byte[] messageBody = HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
+            String cmd = String.valueOf(params.get("command"));
+            Log.debug("{}==================sendPeersMsg begin, cmd-{}", TimeManager.currentTimeMillis(), cmd);
+            MessageManager messageManager = MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
             long magicNumber = nodeGroup.getMagicNumber();
             long checksum = messageManager.getCheckSum(messageBody);
-            MessageHeader header = new MessageHeader(cmd,magicNumber,checksum,messageBody.length);
-            byte [] headerByte = header.serialize();
-            byte [] message = new byte[headerByte.length+messageBody.length];
+            MessageHeader header = new MessageHeader(cmd, magicNumber, checksum, messageBody.length);
+            byte[] headerByte = header.serialize();
+            byte[] message = new byte[headerByte.length + messageBody.length];
             System.arraycopy(headerByte, 0, message, 0, headerByte.length);
             System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
-            String []nodeIds=nodes.split(",");
+            String[] nodeIds = nodes.split(",");
             List<Node> nodesList = new ArrayList<>();
-            for(String nodeId:nodeIds){
-                Node connectNode = nodeGroup.getConnectNode(nodeId);
-                if(null != connectNode){
+            for (String nodeId : nodeIds) {
+                Node connectNode = nodeGroup.getAvailableNode(nodeId);
+                if (null != connectNode) {
                     nodesList.add(connectNode);
                 }
             }
-            Log.debug("==================sendPeersMsg nodesList size={}, cmd-{}, hash-{}",nodesList.size(), cmd, NulsDigestData.calcDigestData(messageBody).getDigestHex());
-            NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message,nodesList,true);
-            Log.debug("=======================networkEventResult {}, cmd-{}",networkEventResult.isSuccess(), cmd);
+            Log.debug("==================sendPeersMsg nodesList size={}, cmd-{}, hash-{}", nodesList.size(), cmd, NulsDigestData.calcDigestData(messageBody).getDigestHex());
+            NetworkEventResult networkEventResult = messageManager.broadcastToNodes(message, nodesList, true);
+            Log.debug("=======================networkEventResult {}, cmd-{}", networkEventResult.isSuccess(), cmd);
         } catch (Exception e) {
             e.printStackTrace();
             return failed(NetworkErrorCode.PARAMETER_ERROR);

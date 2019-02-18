@@ -62,7 +62,7 @@ public interface CtxService {
      * @param state
      * @return
      */
-    boolean updateCrossTxState(Chain chain, NulsDigestData hash, int state);
+//    boolean updateCrossTxState(Chain chain, NulsDigestData hash, int state);
 
 
     /**

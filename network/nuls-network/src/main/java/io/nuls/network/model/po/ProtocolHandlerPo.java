@@ -33,21 +33,23 @@ import io.nuls.tools.parse.SerializeUtils;
 import java.io.IOException;
 
 /**
- * @description
  * @author lan
+ * @description
  * @date 2018/12/20
  **/
-public class ProtocolHandlerPo extends  BasePo{
+public class ProtocolHandlerPo extends BasePo {
     private String protocolCmd;
     private String handler;
 
-    public ProtocolHandlerPo(){
+    public ProtocolHandlerPo() {
         super();
     }
-    public ProtocolHandlerPo(String protocolCmd,String handler){
+
+    public ProtocolHandlerPo(String protocolCmd, String handler) {
         this.protocolCmd = protocolCmd;
         this.handler = handler;
     }
+
     public String getProtocolCmd() {
         return protocolCmd;
     }
@@ -83,7 +85,7 @@ public class ProtocolHandlerPo extends  BasePo{
 
     @Override
     public int size() {
-        int size=0;
+        int size = 0;
         size += SerializeUtils.sizeOfString(protocolCmd);
         size += SerializeUtils.sizeOfString(handler);
         return size;

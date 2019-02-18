@@ -94,12 +94,64 @@ public class CmdTxTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        List<String> txHexList = new ArrayList<>();
+        txHexList.add(HexUtil.encode(tx.serialize()));
+        params.put("txHexList",txHexList);
         params.put("isConfirmTx",false);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
 
     }
+
+    /**
+     * 测试只有coinTo的交易
+     * @throws Exception
+     */
+    @Test
+    public void commitUnConfirmTx3() throws Exception {
+        double version = 1.0;
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        int chainId = 8096;
+        int assetChainId = 445;
+        String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
+        int assetId = 222;
+        params.put("assetChainId", 445);
+        params.put("address", address);
+        params.put("assetId", 222);
+        params.put("chainId", chainId);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
+        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
+        //封装交易执行
+        Transaction tx = new Transaction();
+        CoinData coinData = new CoinData();
+        CoinFrom coinFrom = new CoinFrom();
+        CoinTo coinTo = new CoinTo();
+        coinTo.setAddress(AddressTool.getAddress(address));
+        coinTo.setAmount(BigInteger.valueOf(100));
+        coinTo.setAssetsChainId(assetChainId);
+        coinTo.setAssetsId(assetId);
+        coinTo.setLockTime(-1);
+        List<CoinFrom> coinFroms =new ArrayList<>();
+//        coinFroms.add(coinFrom);
+        List<CoinTo> coinTos =new ArrayList<>();
+        coinTos.add(coinTo);
+        coinData.setFrom(coinFroms);
+        coinData.setTo(coinTos);
+        tx.setBlockHeight(6L);
+        tx.setCoinData(coinData.serialize());
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        params.put("chainId", chainId);
+        List<String> txHexList = new ArrayList<>();
+        txHexList.add(HexUtil.encode(tx.serialize()));
+        params.put("txHexList",txHexList);
+        params.put("isConfirmTx",false);
+        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
+        logger.info("response {}", response);
+
+    }
+
     /**
      * 测试只有coinFrom的交易
      * @throws Exception
@@ -140,7 +192,9 @@ public class CmdTxTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        List<String> txHexList = new ArrayList<>();
+        txHexList.add(HexUtil.encode(tx.serialize()));
+        params.put("txHexList",txHexList);
         params.put("isConfirmTx",false);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
@@ -187,7 +241,9 @@ public class CmdTxTest {
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
         params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        List<String> txHexList = new ArrayList<>();
+        txHexList.add(HexUtil.encode(tx.serialize()));
+        params.put("txHexList",txHexList);
         params.put("isConfirmTx",true);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
@@ -196,21 +252,23 @@ public class CmdTxTest {
      * 测试含有coinFrom与coinTo的交易
      * @throws Exception
      */
-    @Test
-    public void commitConfirmTx2() throws Exception {
+    public int chainId = 12345;
+    int assetChainId = 12345;
+    //    String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
+    String address = "LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930";
+    String addressTo = "RceDy24yjrhQ72J8xynubWn55PgZj3930";
+    int assetId = 1;
+    //入账金额
+    BigInteger amount = BigInteger.valueOf(100000000000L);
+    public Transaction buildTx2() throws Exception {
         double version = 1.0;
         // Build params map
         Map<String, Object> params = new HashMap<>();
-        // Version information ("1.1" or 1.1 is both available)
-        int chainId = 8096;
-        int assetChainId = 445;
-        String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
-        String addressTo = "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f";
-        int assetId = 222;
-        params.put("assetChainId", 445);
+        params.put("assetChainId", assetChainId);
         params.put("address", address);
-        params.put("assetId", 222);
+        params.put("assetId", assetId);
         params.put("chainId", chainId);
+
         Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
@@ -238,8 +296,70 @@ public class CmdTxTest {
         tx.setBlockHeight(2L);
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+       return tx;
+    }
+    @Test
+    public void commitConfirmTx2() throws Exception {
+        Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        params.put("txHex",HexUtil.encode(tx.serialize()));
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
+        logger.info("response {}", response);
+        params.put("isBatchValidate", true);
+        Transaction transaction = buildTx2();
+        List<String> txHexList = new ArrayList<>();
+        txHexList.add(HexUtil.encode(transaction.serialize()));
+        params.put("txHex",HexUtil.encode(transaction.serialize()));
+        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        logger.info("response {}", response);
+        params.put("txHexList",txHexList);
+        params.put("blockHeight",1);
+        params.put("isConfirmTx",true);
+        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
+        logger.info("response {}", response);
+    }
+    /**
+     * 测试只有coinTo的交易
+     * @throws Exception
+     */
+    @Test
+    public void commitConfirmTx3() throws Exception {
+        double version = 1.0;
+        // Build params map
+        Map<String, Object> params = new HashMap<>();
+        // Version information ("1.1" or 1.1 is both available)
+        int chainId = 8096;
+        int assetChainId = 445;
+        String address = "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f";
+        int assetId = 222;
+        params.put("assetChainId", 445);
+        params.put("address", address);
+        params.put("assetId", 222);
+        params.put("chainId", chainId);
+        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
+        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
+        //封装交易执行
+        Transaction tx = new Transaction();
+        CoinData coinData = new CoinData();
+        CoinFrom coinFrom = new CoinFrom();
+        CoinTo coinTo = new CoinTo();
+        coinTo.setAddress(AddressTool.getAddress(address));
+        coinTo.setAmount(BigInteger.valueOf(100));
+        coinTo.setAssetsChainId(assetChainId);
+        coinTo.setAssetsId(assetId);
+        coinTo.setLockTime(-1);
+        List<CoinFrom> coinFroms =new ArrayList<>();
+//        coinFroms.add(coinFrom);
+        List<CoinTo> coinTos =new ArrayList<>();
+        coinTos.add(coinTo);
+        coinData.setFrom(coinFroms);
+        coinData.setTo(coinTos);
+        tx.setBlockHeight(1L);
+        tx.setCoinData(coinData.serialize());
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        params.put("chainId", chainId);
+        List<String> txHexList = new ArrayList<>();
+        txHexList.add(HexUtil.encode(tx.serialize()));
+        params.put("txHexList",txHexList);
         params.put("isConfirmTx",true);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);

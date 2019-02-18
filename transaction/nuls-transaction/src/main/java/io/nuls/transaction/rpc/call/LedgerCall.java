@@ -7,12 +7,14 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyTxResult;
 
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -114,8 +116,7 @@ public class LedgerCall {
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", addressString);
-            HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "getBalance", params);
-//            return BigIntegerUtils.stringToBigInteger((String) result.get("available"));
+            Map result = (Map)TransactionCall.request(ModuleE.LG.abbr, "getBalance", params);
             Object available = result.get("available");
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
         } catch (Exception e) {
@@ -145,15 +146,16 @@ public class LedgerCall {
     /**
      * 发送交易给账本
      * @param chain
-     * @param tx
+     * @param txHexList
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean commitTxLedger(Chain chain, Transaction tx, boolean comfirmed) throws NulsException {
+    public static boolean commitTxLedger(Chain chain, List<String> txHexList, Long blockHeight, boolean comfirmed) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
-            params.put("txHex", tx.hex());
+            params.put("txHexList", txHexList);
+            params.put("blockHeight", blockHeight);
             params.put("isConfirmTx", comfirmed);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitTx", params);
             return (int) result.get("value") == 1;
@@ -165,15 +167,15 @@ public class LedgerCall {
     /**
      * 根据交易回滚数据
      * @param chain
-     * @param tx
+     * @param txHexList
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean rollbackTxLedger(Chain chain, Transaction tx, boolean comfirmed) throws NulsException {
+    public static boolean rollbackTxLedger(Chain chain, List<String> txHexList, Long blockHeight, boolean comfirmed) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
-            params.put("txHex", tx.hex());
+            params.put("txHexList", txHexList);
             params.put("isConfirmTx", comfirmed);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "rollBackConfirmTx", params);
             return (int) result.get("value") == 1;

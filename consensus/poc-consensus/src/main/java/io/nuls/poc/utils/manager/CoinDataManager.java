@@ -161,7 +161,7 @@ public class CoinDataManager {
             createCoinData.parse(createAgentTransaction.getCoinData(),0);
             for (CoinTo to:createCoinData.getTo()) {
                 CoinFrom from = new CoinFrom(agent.getAgentAddress(),chainId,assetsId);
-                if(to.getAmount().compareTo(agent.getTotalDeposit()) == 0 && to.getLockTime() == -1L){
+                if(to.getAmount().compareTo(agent.getDeposit()) == 0 && to.getLockTime() == -1L){
                     from.setAmount(to.getAmount());
                     from.setLocked((byte)-1);
                     from.setNonce(CallMethodUtils.getNonce(createTxHash.getDigestBytes()));

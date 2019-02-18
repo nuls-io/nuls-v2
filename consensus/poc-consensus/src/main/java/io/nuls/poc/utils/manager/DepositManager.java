@@ -1,13 +1,19 @@
 package io.nuls.poc.utils.manager;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.base.data.Transaction;
+import io.nuls.poc.constant.ConsensusErrorCode;
 import io.nuls.poc.model.bo.Chain;
+import io.nuls.poc.model.bo.tx.txdata.CancelDeposit;
 import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.DepositPo;
 import io.nuls.poc.storage.DepositStorageService;
 import io.nuls.poc.utils.compare.DepositComparator;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
+import io.nuls.tools.exception.NulsException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,13 +68,14 @@ public class DepositManager {
      * */
     public void updateDeposit(Chain chain,Deposit deposit){
         List<Deposit> depositList = chain.getDepositList();
-        if(depositList == null || depositList.size() == 0){
+        if(depositList.size() == 0){
             depositList.add(deposit);
             return;
         }
-        for (int index = 0;index <= depositList.size() ; index++ ){
-            if(deposit.getTxHash().equals(depositList.get(index))){
+        for (int index = 0;index < depositList.size() ; index++ ){
+            if(deposit.getTxHash().equals(depositList.get(index).getTxHash())){
                 depositList.set(index,deposit);
+                break;
             }
         }
     }
@@ -127,5 +134,76 @@ public class DepositManager {
         po.setDeposit(deposit.getDeposit());
         po.setTime(deposit.getTime());
         return po;
+    }
+
+    public boolean depositCommit(Transaction transaction, BlockHeader blockHeader, Chain chain)throws NulsException {
+        Deposit deposit = new Deposit();
+        deposit.parse(transaction.getTxData(), 0);
+        deposit.setTxHash(transaction.getHash());
+        deposit.setTime(transaction.getTime());
+        deposit.setBlockHeight(blockHeader.getHeight());
+        DepositPo depositPo = depositToPo(deposit);
+        if (!depositStorageService.save(depositPo, chain.getConfig().getChainId())) {
+            throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
+        }
+        addDeposit(chain, deposit);
+        return true;
+    }
+
+    public boolean depositRollBack(Transaction transaction,Chain chain)throws NulsException{
+        if (!depositStorageService.delete(transaction.getHash(), chain.getConfig().getChainId())) {
+            throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
+        }
+        try{
+            removeDeposit(chain, transaction.getHash());
+        }catch (Exception e){
+            throw new NulsException(e);
+        }
+
+        return true;
+    }
+
+    public boolean cancelDepositCommit(Transaction transaction, Chain chain)throws NulsException{
+        int chainId = chain.getConfig().getChainId();
+        CancelDeposit cancelDeposit = new CancelDeposit();
+        cancelDeposit.parse(transaction.getTxData(), 0);
+        //获取该笔交易对应的加入共识委托交易
+        DepositPo po = depositStorageService.get(cancelDeposit.getJoinTxHash(), chainId);
+        //委托交易不存在
+        if (po == null) {
+            throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
+        }
+        //委托交易已退出
+        if (po.getDelHeight() > 0) {
+            throw new NulsException(ConsensusErrorCode.DEPOSIT_WAS_CANCELED);
+        }
+        //设置退出共识高度
+        po.setDelHeight(transaction.getBlockHeight());
+        if (!depositStorageService.save(po, chainId)) {
+            throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
+        }
+        updateDeposit(chain, poToDeposit(po));
+        return true;
+    }
+
+    public boolean cancelDepositRollBack(Transaction transaction, Chain chain)throws NulsException{
+        int chainId = chain.getConfig().getChainId();
+        CancelDeposit cancelDeposit = new CancelDeposit();
+        cancelDeposit.parse(transaction.getTxData(), 0);
+        //获取该笔交易对应的加入共识委托交易
+        DepositPo po = depositStorageService.get(cancelDeposit.getJoinTxHash(), chainId);
+        //委托交易不存在
+        if (po == null) {
+            throw new NulsException(ConsensusErrorCode.DATA_NOT_EXIST);
+        }
+        if (po.getDelHeight() != transaction.getBlockHeight()) {
+            throw new NulsException(ConsensusErrorCode.DEPOSIT_NEVER_CANCELED);
+        }
+        po.setDelHeight(-1L);
+        if (!depositStorageService.save(po, chainId)) {
+            throw new NulsException(ConsensusErrorCode.ROLLBACK_FAILED);
+        }
+        updateDeposit(chain, poToDeposit(po));
+        return true;
     }
 }

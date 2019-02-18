@@ -26,15 +26,20 @@
 package io.nuls.ledger.db;
 
 import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.constant.LedgerConstant;
+import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
-import io.nuls.ledger.model.po.AccountStatesSnapshotKeys;
+import io.nuls.ledger.model.po.BlockSnapshotAccounts;
+import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.tools.core.annotation.Service;
+import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static io.nuls.ledger.utils.LoggerUtil.logger;
@@ -44,6 +49,20 @@ import static io.nuls.ledger.utils.LoggerUtil.logger;
  */
 @Service
 public class RepositoryImpl implements Repository {
+
+    public RepositoryImpl() {
+        try {
+            if (!RocksDBService.existTable(getChainsHeightTableName())) {
+                RocksDBService.createTable(getChainsHeightTableName());
+            } else {
+                Log.info("table {} exist.", getChainsHeightTableName());
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * create accountState to rocksdb
@@ -61,98 +80,68 @@ public class RepositoryImpl implements Repository {
         }
     }
 
-    /**
-     * update accountState to rocksdb
-     * @param key
-     * @param preAccountState
-     * @param nowAccountState
-     */
-    @Override
-    public void updateAccountStateAndSnapshot(String key,AccountState preAccountState,AccountState nowAccountState){
-        try {
-            addSnapshot(key,preAccountState,nowAccountState);
-            //update account
-            RocksDBService.put(getLedgerAccountTableName(nowAccountState.getAddressChainId()), key.getBytes(LedgerConstant.DEFAULT_ENCODING), nowAccountState.serialize());
-        } catch (Exception e) {
-             e.printStackTrace();
-            logger.error("updateAccountState serialize error.", e);
-        }
-    }
 
     /**
-     * 增加快照交易
+     * 按区块对账号进行快照
+     *
      * @param key
      * @param preAccountState
      * @param nowAccountState
      * @throws Exception
      */
-    private void addSnapshot(String key,AccountState preAccountState,AccountState nowAccountState) throws Exception {
+    private void addBlockSnapshot(String key, AccountState preAccountState, AccountState nowAccountState) throws Exception {
         //bak  account Snapshot,备份账户老状态
         //生成 备份 key:账户-交易-高度 ，value:AccountState
-        String snapshotTxKeyStr =LedgerUtils.getSnapshotTxKeyStr(key,nowAccountState.getTxHash(),nowAccountState.getHeight());
-        RocksDBService.put(getSnapshotTableName(nowAccountState.getAddressChainId()), snapshotTxKeyStr.getBytes(LedgerConstant.DEFAULT_ENCODING), preAccountState.serialize());
-        //存储 key到 keys列表中。 列表  key:账户-高度， value = list(账户-交易-高度);
-        String snapshotHeightKeyStr = LedgerUtils.getSnapshotHeightKeyStr(key,nowAccountState.getHeight());
-        byte[] stream =  RocksDBService.get(getSnapshotTableName(nowAccountState.getAddressChainId()),snapshotHeightKeyStr.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        AccountStatesSnapshotKeys accountStatesSnapshotKeys = new AccountStatesSnapshotKeys();
-        if (stream != null) {
-                accountStatesSnapshotKeys.parse(new NulsByteBuffer(stream));
-        }
-        accountStatesSnapshotKeys.addSnapshotKey(snapshotTxKeyStr);
-        RocksDBService.put(getSnapshotTableName(nowAccountState.getAddressChainId()),snapshotHeightKeyStr.getBytes(LedgerConstant.DEFAULT_ENCODING), accountStatesSnapshotKeys.serialize());
-
+        String snapshotBlockKeyStr = LedgerUtils.getBlockSnapshotKeyStr(key, nowAccountState.getHeight());
+        //nowAccountState 的高度 存的是pre的
+        RocksDBService.put(getBlockSnapshotTableName(nowAccountState.getAddressChainId()), snapshotBlockKeyStr.getBytes(LedgerConstant.DEFAULT_ENCODING), preAccountState.serialize());
         //清除过期的snapshot数据,height = height - CACHE_ACCOUNT_BLOCK以前的数据
-        //get 对应高度的所有索引，进行删除，再删除高度索引本身
-        String snapshotHeightKeyStrDel =LedgerUtils.getSnapshotHeightKeyStr(key,(nowAccountState.getHeight()-LedgerConstant.CACHE_ACCOUNT_BLOCK));
-        byte[] delStream =  RocksDBService.get(getSnapshotTableName(nowAccountState.getAddressChainId()),snapshotHeightKeyStrDel.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        AccountStatesSnapshotKeys accountStatesSnapshotKeysDel = new AccountStatesSnapshotKeys();
-        if (delStream != null) {
-                accountStatesSnapshotKeysDel.parse(new NulsByteBuffer(delStream));
-                List<String> snapshotKeys = accountStatesSnapshotKeysDel.getSnapshotKeys();
-                for(String snapshotKey: snapshotKeys){
-                    RocksDBService.delete(getSnapshotTableName(nowAccountState.getAddressChainId()),snapshotKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
-                }
-                RocksDBService.delete(getSnapshotTableName(nowAccountState.getAddressChainId()), snapshotHeightKeyStrDel.getBytes(LedgerConstant.DEFAULT_ENCODING));
-        }
+        String snapshotHeightKeyStrDel = LedgerUtils.getSnapshotHeightKeyStr(key, (nowAccountState.getHeight() - LedgerConstant.CACHE_ACCOUNT_BLOCK));
+        RocksDBService.delete(getBlockSnapshotTableName(nowAccountState.getAddressChainId()), snapshotHeightKeyStrDel.getBytes(LedgerConstant.DEFAULT_ENCODING));
+
     }
+
+
     /**
      * update accountState to rocksdb
+     *
      * @param key
      * @param nowAccountState
      */
     @Override
-    public void updateAccountState(byte[] key,AccountState nowAccountState){
-        try {
-            //update account
-            RocksDBService.put(getLedgerAccountTableName(nowAccountState.getAddressChainId()), key, nowAccountState.serialize());
-        } catch (Exception e) {
-            logger.error("updateAccountState serialize error.", e);
-        }
+    public void updateAccountState(byte[] key, AccountState nowAccountState) throws Exception {
+        //update account
+        RocksDBService.put(getLedgerAccountTableName(nowAccountState.getAddressChainId()), key, nowAccountState.serialize());
+
+    }
+
+
+    @Override
+    public void delBlockSnapshot(int chainId, long height) throws Exception {
+        RocksDBService.delete(getBlockSnapshotTableName(chainId), ByteUtils.longToBytes(height));
     }
 
     @Override
-    public AccountState getSnapshotAccountState(int chainId,byte[] key) {
-        byte[] stream = RocksDBService.get(getSnapshotTableName(chainId), key);
+    public void saveBlockSnapshot(int chainId, long height, BlockSnapshotAccounts blockSnapshotAccounts) throws Exception {
+        RocksDBService.put(getBlockSnapshotTableName(chainId), ByteUtils.longToBytes(height), blockSnapshotAccounts.serialize());
+
+    }
+
+    @Override
+    public BlockSnapshotAccounts getBlockSnapshot(int chainId, long height) {
+        byte[] stream = RocksDBService.get(getBlockSnapshotTableName(chainId), ByteUtils.longToBytes(height));
         if (stream == null) {
             return null;
         }
-        AccountState accountState = new AccountState();
+        BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
         try {
-            accountState.parse(new NulsByteBuffer(stream));
+            blockSnapshotAccounts.parse(new NulsByteBuffer(stream));
         } catch (NulsException e) {
             logger.error("getAccountState serialize error.", e);
         }
-        return accountState;
+        return blockSnapshotAccounts;
     }
 
-    @Override
-    public void delSnapshotAccountState(int chainId,byte[] key) {
-        try {
-        RocksDBService.delete(getSnapshotTableName(chainId),key);
-        } catch (Exception e) {
-            logger.error("delSnapshotAccountState error.", e);
-        }
-    }
 
     /**
      * get accountState from rocksdb
@@ -161,7 +150,7 @@ public class RepositoryImpl implements Repository {
      * @return
      */
     @Override
-    public AccountState getAccountState(int chainId,byte[] key) {
+    public AccountState getAccountState(int chainId, byte[] key) {
         byte[] stream = RocksDBService.get(getLedgerAccountTableName(chainId), key);
         if (stream == null) {
             return null;
@@ -177,16 +166,62 @@ public class RepositoryImpl implements Repository {
 
     @Override
     public long getBlockHeight(int chainId) {
-        //TODO:
-        return 0;
+        byte[] stream = RocksDBService.get(getChainsHeightTableName(), ByteUtils.intToBytes(chainId));
+        if (stream == null) {
+            return -1;
+        }
+
+        try {
+            long height = ByteUtils.byteToLong(stream);
+            return height;
+        } catch (Exception e) {
+            logger.error("getBlockHeight serialize error.", e);
+        }
+        return -1;
     }
 
-    String getLedgerAccountTableName(int chainId){
-        return DataBaseArea.TB_LEDGER_ACCOUNT+chainId;
+    @Override
+    public void saveOrUpdateBlockHeight(int chainId, long height) {
+        try {
+            RocksDBService.put(getChainsHeightTableName(), ByteUtils.intToBytes(chainId), ByteUtils.longToBytes(height));
+        } catch (Exception e) {
+            logger.error("saveBlockHeight serialize error.", e);
+        }
+
     }
-    String getSnapshotTableName(int chainId){
-        return DataBaseArea.TB_LEDGER_ACCOUNT_SNAPSHOT+chainId;
+
+    @Override
+    public List<ChainHeight> getChainsBlockHeight() {
+        List<Entry<byte[], byte[]>> list = RocksDBService.entryList(getChainsHeightTableName());
+        List<ChainHeight> rtList = new ArrayList<>();
+        if (null == list || 0 == list.size()) {
+            return null;
+        }
+        for (Entry<byte[], byte[]> entry:list){
+            ChainHeight chainHeight = new ChainHeight();
+            chainHeight.setChainId(ByteUtils.bytesToInt(entry.getKey()));
+            chainHeight.setBlockHeight(ByteUtils.byteToLong(entry.getValue()));
+            rtList.add(chainHeight);
+        }
+        return rtList;
     }
+
+
+    String getLedgerAccountTableName(int chainId) {
+        return DataBaseArea.TB_LEDGER_ACCOUNT + chainId;
+    }
+
+    String getBlockSnapshotTableName(int chainId) {
+        return DataBaseArea.TB_LEDGER_ACCOUNT_BLOCK_SNAPSHOT + chainId;
+    }
+
+    String getChainsHeightTableName() {
+        return DataBaseArea.TB_LEDGER_BLOCK_HEIGHT;
+    }
+    String getBlockTableName(int chainId) {
+        return DataBaseArea.TB_LEDGER_BLOCKS+chainId;
+    }
+
     /**
      * 初始化数据库
      */
@@ -197,13 +232,53 @@ public class RepositoryImpl implements Repository {
             } else {
                 Log.info("table {} exist.", getLedgerAccountTableName(addressChainId));
             }
-            if (!RocksDBService.existTable(getSnapshotTableName(addressChainId))) {
-                RocksDBService.createTable(getSnapshotTableName(addressChainId));
+            if (!RocksDBService.existTable(getBlockSnapshotTableName(addressChainId))) {
+                RocksDBService.createTable(getBlockSnapshotTableName(addressChainId));
             } else {
-                Log.info("table {} exist.", getSnapshotTableName(addressChainId));
+                Log.info("table {} exist.", getBlockSnapshotTableName(addressChainId));
             }
+
         } catch (Exception e) {
             Log.error(e);
         }
+    }
+
+
+    @Override
+    public void saveBlock(int chainId,long height,BlockTxs blockTxs) {
+        try {
+            String table = getBlockTableName(chainId);
+            if (!RocksDBService.existTable(table)) {
+                RocksDBService.createTable(table);
+            } else {
+                Log.info("table {} exist.", table);
+            }
+            RocksDBService.put(table, ByteUtils.longToBytes(height), blockTxs.serialize());
+            RocksDBService.delete(table,ByteUtils.longToBytes(height-1000));
+        } catch (Exception e) {
+            logger.error("saveBlock serialize error.", e);
+        }
+
+    }
+
+    @Override
+    public BlockTxs getBlock(int chainId, long height) {
+        try {
+
+            byte[] stream = RocksDBService.get(getBlockTableName(chainId), ByteUtils.longToBytes(height));
+            if (stream == null) {
+                return null;
+            }
+            BlockTxs blockTxs = new BlockTxs();
+            try {
+                blockTxs.parse(new NulsByteBuffer(stream));
+            } catch (NulsException e) {
+                logger.error("getAccountState serialize error.", e);
+            }
+            return blockTxs;
+        } catch (Exception e) {
+            logger.error("getBlock serialize error.", e);
+        }
+        return null;
     }
 }

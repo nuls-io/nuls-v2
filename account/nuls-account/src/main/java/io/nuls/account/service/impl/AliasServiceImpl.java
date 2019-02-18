@@ -40,7 +40,7 @@ import io.nuls.account.service.AliasService;
 import io.nuls.account.storage.AccountStorageService;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.TxUtil;
-import io.nuls.account.util.log.LogUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
@@ -105,44 +105,36 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     }
 
     @Override
-    public Transaction setAlias(int chainId, String address, String password, String aliasName) {
+    public Transaction setAlias(int chainId, String address, String password, String aliasName) throws Exception {
         Transaction tx = null;
-        try {
 
-            if (!AddressTool.validAddress(chainId, address)) {
-                throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-            }
-            if (StringUtils.isNotBlank(aliasName)) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
-            }
-            if (!FormatValidUtils.validAlias(aliasName)) {
-                throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
-            }
-            Account account = accountService.getAccount(chainId, address);
-            if (null == account) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-            }
-            if (account.isEncrypted() && account.isLocked()) {
-                if (!account.validatePassword(password)) {
-                    throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
-                }
-            }
-            if (!isAliasUsable(chainId, aliasName)) {
-                throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
-            }
-            account.setChainId(chainId);
-            account.setAlias(aliasName);
-            tx = createAliasTrasactionWithoutSign(account);
-            signTransaction(tx, account, password);
-            TransactionCmdCall.newTx(account.getChainId(), HexUtil.encode(tx.serialize()));
-
-            //TODO how to save the chainId?EdwardChan
-            //todo sign the transaction
-            //todo send the transaction to transaction manage module
-        } catch (Exception e) {
-            LogUtil.error("", e);
-            throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
+        if (!AddressTool.validAddress(chainId, address)) {
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
+        if (!FormatValidUtils.validAlias(aliasName)) {
+            throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
+        }
+        Account account = accountService.getAccount(chainId, address);
+        if (null == account) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+        }
+        if (account.isEncrypted() && account.isLocked()) {
+            if (!account.validatePassword(password)) {
+                throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
+            }
+        }
+        if (StringUtils.isNotBlank(account.getAlias())) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
+        }
+        if (!isAliasUsable(chainId, aliasName)) {
+            throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
+        }
+
+        account.setChainId(chainId);
+        account.setAlias(aliasName);
+        tx = createAliasTrasactionWithoutSign(account);
+        signTransaction(tx, account, password);
+        TransactionCmdCall.newTx(account.getChainId(), HexUtil.encode(tx.serialize()));
         return tx;
     }
 
@@ -154,15 +146,15 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             if (!AddressTool.validAddress(chainId, address)) {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
-            if (StringUtils.isNotBlank(aliasName)) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
-            }
             if (!FormatValidUtils.validAlias(aliasName)) {
                 throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
             }
             Account account = accountService.getAccount(chainId, address);
             if (null == account) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            if (StringUtils.isNotBlank(account.getAlias())) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
             }
 
             //create a set alias transaction
@@ -171,7 +163,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
             //todo whether need to other operation if the fee is too big
         } catch (Exception e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             throw new NulsRuntimeException(AccountErrorCode.SYS_UNKOWN_EXCEPTION, e);
         }
         return fee;
@@ -181,7 +173,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
     public String getAliasByAddress(int chainId, String address) {
         //check if the account is legal
         if (!AddressTool.validAddress(chainId, address)) {
-            LogUtil.debug("the address is illegal,chainId:{},address:{}", chainId, address);
+            Log.debug("the address is illegal,chainId:{},address:{}", chainId, address);
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
         //get aliasPO
@@ -207,9 +199,6 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Alias alias = new Alias();
         alias.parse(new NulsByteBuffer(transaction.getTxData()));
         String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-//        if (transaction.isSystemTx()) {
-//            throw new NulsRuntimeException(AccountErrorCode.TX_TYPE_ERROR);
-//        }
         if (BaseConstant.CONTRACT_ADDRESS_TYPE == alias.getAddress()[2]) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
@@ -224,40 +213,39 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
         }
         // check the CoinData
-
-//        CoinData coinData = transaction.getCoinData();
-//        if (null == coinData) {
-//            throw new NulsRuntimeException(AccountErrorCode.COINDATA_NOT_FOUND);
-//        }
-//        if (null != coinData.getTo()) {
-//            boolean burned = false;
-//            for (Coin coin : coinData.getTo()) {
-//                if (Arrays.equals(coin.getOwner(), AccountConstant.BLACK_HOLE_ADDRESS) && coin.getNa().equals(Na.NA)) {
-//                    burned = true;
-//                    break;
-//                }
-//            }
-//            if (!burned) {
-//                throw new NulsRuntimeException(AccountErrorCode.MUST_BURN_A_NULS);
-//            }
-//        }
-        //TODO 验证签名
-//        TransactionSignature sig = new TransactionSignature();
-//        try {
-//            sig.parse(transaction.getTransactionSignature(), 0);
-//        } catch (NulsException e) {
-//            LogUtilUtil.error("", e);
-//            throw new NulsRuntimeException(e.getErrorCode());
-//        }
-//        boolean sign;
-//        try {
-//            sign = SignatureUtil.containsAddress(transaction, alias.getAddress());
-//        } catch (NulsException e) {
-//            sign = false;
-//        }
-//        if (!sign) {
-//            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
-//        }
+        CoinData coinData = transaction.getCoinDataInstance();
+        if (null == coinData) {
+            throw new NulsRuntimeException(AccountErrorCode.TX_COINDATA_NOT_EXIST);
+        }
+        if (null != coinData.getTo()) {
+            boolean burned = false;
+            for (Coin coin : coinData.getTo()) {
+                if (Arrays.equals(coin.getAddress(), AccountConstant.BLACK_HOLE_ADDRESS) && coin.getAmount().equals(AccountConstant.ALIAS_FEE)) {
+                    burned = true;
+                    break;
+                }
+            }
+            if (!burned) {
+                throw new NulsRuntimeException(AccountErrorCode.MUST_BURN_A_NULS);
+            }
+        }
+        //验证签名
+        TransactionSignature sig = new TransactionSignature();
+        try {
+            sig.parse(transaction.getTransactionSignature(), 0);
+        } catch (NulsException e) {
+            Log.error("", e);
+            throw new NulsRuntimeException(e.getErrorCode());
+        }
+        boolean sign;
+        try {
+            sign = SignatureUtil.containsAddress(transaction, alias.getAddress(), chainId);
+        } catch (NulsException e) {
+            sign = false;
+        }
+        if (!sign) {
+            throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
+        }
         return true;
     }
 
@@ -280,7 +268,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 accountCacheService.localAccountMaps.put(account.getAddress().getBase58(), account);
             }
         } catch (Exception e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             this.rollbackAlias(chainId, alias);
             return false;
         }
@@ -293,7 +281,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         try {
             AliasPo po = aliasStorageService.getAlias(chainId, alias.getAlias());
             if (po != null && Arrays.equals(po.getAddress(), alias.getAddress())) {
-                aliasStorageService.removeAlias(chainId, alias.getAlias());
+                result = aliasStorageService.removeAlias(chainId, alias.getAlias());
                 AccountPo accountPo = accountStorageService.getAccount(alias.getAddress());
                 if (accountPo != null) {
                     accountPo.setAlias("");
@@ -306,7 +294,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 }
             }
         } catch (Exception e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR, e);
         }
         return result;
@@ -321,21 +309,24 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         alias.setAlias(account.getAlias());
         alias.setAddress(account.getAddress().getAddressBytes());
         tx.setTxData(alias.serialize());
+        //设置别名烧毁账户所属本链的主资产
         Chain chain = chainManager.getChainMap().get(account.getChainId());
         int assetsId = chain.getConfig().getAssetsId();
-        //TODO 不同链设置别名是否都燃烧nuls?
-        CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId);
+        //查询账本获取nonce值
+        byte[] nonce = TxUtil.getNonce(account.getChainId(), account.getChainId(), assetsId, account.getAddress().getAddressBytes());
+        CoinFrom coinFrom = new CoinFrom(account.getAddress().getAddressBytes(), account.getChainId(), assetsId, AccountConstant.ALIAS_FEE, nonce, AccountConstant.NORMAL_TX_LOCKED);
         coinFrom.setAddress(account.getAddress().getAddressBytes());
-        CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, BigInteger.ONE);
+        CoinTo coinTo = new CoinTo(AccountConstant.BLACK_HOLE_ADDRESS, account.getChainId(), assetsId, AccountConstant.ALIAS_FEE);
         int txSize = tx.size() + coinFrom.size() + coinTo.size() + 72;
         //计算手续费
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
         //总费用为
-        BigInteger totalAmount = BigInteger.ONE.add(fee);
+        BigInteger totalAmount = AccountConstant.ALIAS_FEE.add(fee);
         coinFrom.setAmount(totalAmount);
         //检查余额是否充足
         BigInteger mainAsset = TxUtil.getBalance(account.getChainId(), account.getChainId(), assetsId, coinFrom.getAddress());
-        if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) { //余额不足
+        //余额不足
+        if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) {
             throw new NulsRuntimeException(AccountErrorCode.INSUFFICIENT_FEE);
         }
         CoinData coinData = new CoinData();
@@ -344,6 +335,8 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         tx.setCoinData(coinData.serialize());
         //计算交易数据摘要哈希
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        //缓存当前交易hash
+        TxUtil.PRE_HASH_MAP.put(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), tx.getHash());
         return tx;
     }
 

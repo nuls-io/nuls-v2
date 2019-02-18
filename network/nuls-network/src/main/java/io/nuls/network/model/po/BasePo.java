@@ -36,7 +36,9 @@ import io.nuls.network.model.dto.Dto;
 public abstract class BasePo extends BaseNulsData {
     /**
      * change to dto
+     *
      * @return
      */
     public abstract Dto parseDto();
+
 }

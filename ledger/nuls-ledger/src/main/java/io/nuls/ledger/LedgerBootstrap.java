@@ -28,6 +28,8 @@ package io.nuls.ledger;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.config.AppConfig;
 import io.nuls.ledger.model.ModuleConfig;
+import io.nuls.ledger.service.BlockDataService;
+import io.nuls.ledger.service.impl.BlockDataServiceImpl;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
@@ -49,7 +51,8 @@ public class LedgerBootstrap {
             initRocksDb();
             //springLite容器初始化AppInitializing
             SpringLiteContext.init("io.nuls.ledger", new ModularServiceMethodInterceptor());
-            initServer();
+            initLedgerDatas();
+            initRpcServer();
         } catch (Exception e) {
             logger.error("ledger Bootstrap failed", e);
             System.exit(-1);
@@ -62,7 +65,7 @@ public class LedgerBootstrap {
      *
      * @throws Exception
      */
-    public static void initServer() {
+    public static void initRpcServer() {
         try {
             String packageC = "io.nuls.ledger.rpc.cmd";
             String kernelUrl = ModuleConfig.getInstance().getKernelHost() + ":" + ModuleConfig.getInstance().getKernelPort();
@@ -79,6 +82,14 @@ public class LedgerBootstrap {
         }
     }
 
+    /**
+     * 进行数据的校验处理,比如异常关闭模块造成的数据不一致。
+     * 确认的高度是x,则进行x高度的数据恢复处理
+     */
+    public static void initLedgerDatas() throws Exception {
+        BlockDataService blockDataService = SpringLiteContext.getBean(BlockDataServiceImpl.class);
+        blockDataService.initBlockDatas();
+    }
 
     /**
      * 初始化数据库

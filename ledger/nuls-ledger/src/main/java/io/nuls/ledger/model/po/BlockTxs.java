@@ -22,83 +22,66 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.model.po;
+package io.nuls.ledger.model.po;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
-import io.nuls.network.model.dto.Dto;
+import io.nuls.base.data.BaseNulsData;
+import io.nuls.base.data.Transaction;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.parse.SerializeUtils;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @program: nuls2
- * @description: key chainId, value nodeId list
- * @author: lan
- * @create: 2018/11/08
+ * @author lan
+ * @description
+ * @date 2019/02/18
  **/
-public class GroupNodeKeys extends BasePo{
-    private int chainId=0;
-    private List<String> nodeKeys=new ArrayList<>();
+public class BlockTxs extends BaseNulsData {
+    /**
+     *  accounts
+     */
+    @Setter
+    @Getter
+    private List<Transaction> transactions = new ArrayList<Transaction>();
 
+    public BlockTxs() {
+        super();
+    }
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint32(chainId);
-        int nodeKeysSize = (nodeKeys == null ? 0 : nodeKeys.size());
-        stream.writeVarInt(nodeKeysSize);
-        if (null != nodeKeys) {
-            for (String nodeKey : nodeKeys) {
-                stream.writeString(nodeKey);
-            }
+        stream.writeUint16(transactions.size());
+        for (Transaction transaction : transactions) {
+            stream.writeNulsData(transaction);
         }
     }
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readInt32();
-        int nodeKeysSize = (int) byteBuffer.readVarInt();
-        if (0 < nodeKeysSize) {
-            for (int i = 0; i < nodeKeysSize; i++) {
-                String nodeKey=byteBuffer.readString();
-                nodeKeys.add(nodeKey);
+        int txCount = byteBuffer.readUint16();
+        for (int i = 0; i < txCount; i++) {
+            try {
+                Transaction transaction = new Transaction();
+                byteBuffer.readNulsData(transaction);
+                this.transactions.add(transaction);
+            } catch (Exception e) {
+                throw new NulsException(e);
             }
         }
     }
 
     @Override
     public int size() {
-        int size=0;
-        size += SerializeUtils.sizeOfUint32();
-        size+= SerializeUtils.sizeOfVarInt(nodeKeys == null ? 0 : nodeKeys.size());
-        if (null != nodeKeys) {
-            for (String nodeKey : nodeKeys) {
-                size += SerializeUtils.sizeOfString(nodeKey);
-            }
+        int size = 0;
+        size += SerializeUtils.sizeOfUint16();
+        for (Transaction transaction : transactions) {
+            size +=transaction.size();
         }
         return size;
-    }
-
-    public int getChainId() {
-        return chainId;
-    }
-
-    public void setChainId(int chainId) {
-        this.chainId = chainId;
-    }
-
-    public List<String> getNodeKeys() {
-        return nodeKeys;
-    }
-
-    public void setNodeKeys(List<String> nodeKeys) {
-        this.nodeKeys = nodeKeys;
-    }
-
-    @Override
-    public Dto parseDto() {
-        return null;
     }
 }

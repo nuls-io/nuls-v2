@@ -1,5 +1,6 @@
 package io.nuls.transaction.service;
 
+import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.BlockHeaderDigest;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
@@ -148,9 +149,9 @@ public interface TxService {
      */
     List<String> transactionModuleValidator(Chain chain, List<String> txHexList) throws NulsException;
 
-    boolean crossTransactionCommit(Chain chain, Transaction transaction, BlockHeaderDigest blockHeader) throws NulsException;
+    boolean crossTransactionCommit(Chain chain, List<String> txHex, String blockHeaderHex) throws NulsException;
 
-    boolean crossTransactionRollback(Chain chain, Transaction transaction, BlockHeaderDigest blockHeader) throws NulsException;
+    boolean crossTransactionRollback(Chain chain, List<String> txHex, String blockHeaderHex) throws NulsException;
 
 
     /**

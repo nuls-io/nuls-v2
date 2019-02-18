@@ -28,7 +28,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountStorageConstant;
 import io.nuls.account.model.bo.config.ConfigBean;
 import io.nuls.account.storage.ConfigService;
-import io.nuls.account.util.log.LogUtil;
+import io.nuls.tools.log.Log;
 import io.nuls.db.model.Entry;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
@@ -48,7 +48,7 @@ import java.util.Map;
  *
  * @author qinyifeng
  * @date 2018/12/11
- * */
+ */
 @Service
 public class ConfigServiceImpl implements ConfigService, InitializingBean {
 
@@ -58,16 +58,16 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
             try {
                 RocksDBService.createTable(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF);
             } catch (Exception e) {
-                LogUtil.error(e);
+                Log.error(e);
                 throw new NulsException(e);
             }
         }
     }
 
     @Override
-    public boolean save(ConfigBean bean, int chainID) throws Exception{
-        if(bean == null){
-            return  false;
+    public boolean save(ConfigBean bean, int chainID) throws Exception {
+        if (bean == null) {
+            return false;
         }
         return RocksDBService.put(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF, ByteUtils.intToBytes(chainID), ObjectUtils.objectToBytes(bean));
     }
@@ -75,10 +75,10 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
     @Override
     public ConfigBean get(int chainID) {
         try {
-            byte[] value = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF,ByteUtils.intToBytes(chainID));
+            byte[] value = RocksDBService.get(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF, ByteUtils.intToBytes(chainID));
             return ObjectUtils.bytesToObject(value);
-        }catch (Exception e){
-            LogUtil.error(e);
+        } catch (Exception e) {
+            Log.error(e);
             return null;
         }
     }
@@ -86,10 +86,10 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
     @Override
     public boolean delete(int chainID) {
         try {
-            return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF,ByteUtils.intToBytes(chainID));
-        }catch (Exception e){
-            LogUtil.error(e);
-            return  false;
+            return RocksDBService.delete(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF, ByteUtils.intToBytes(chainID));
+        } catch (Exception e) {
+            Log.error(e);
+            return false;
         }
     }
 
@@ -98,14 +98,16 @@ public class ConfigServiceImpl implements ConfigService, InitializingBean {
         try {
             List<Entry<byte[], byte[]>> list = RocksDBService.entryList(AccountStorageConstant.DB_NAME_ACCOUNT_CONGIF);
             Map<Integer, ConfigBean> configBeanMap = new HashMap<>(AccountConstant.INIT_CAPACITY);
-            for (Entry<byte[], byte[]>entry:list) {
-                int key = ByteUtils.bytesToInt(entry.getKey());
-                ConfigBean value = ObjectUtils.bytesToObject(entry.getValue());
-                configBeanMap.put(key,value);
+            if (list != null) {
+                for (Entry<byte[], byte[]> entry : list) {
+                    int key = ByteUtils.bytesToInt(entry.getKey());
+                    ConfigBean value = ObjectUtils.bytesToObject(entry.getValue());
+                    configBeanMap.put(key, value);
+                }
             }
             return configBeanMap;
-        }catch (Exception e){
-            LogUtil.error(e);
+        } catch (Exception e) {
+            Log.error(e);
             return null;
         }
     }

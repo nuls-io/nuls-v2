@@ -211,11 +211,12 @@ public class ChainManager {
          * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
          * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
          * */
-        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.MODULE_CODE, Level.DEBUG);
+        NulsLogger txLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), TxConstant.CONSENSUS_LOGGER_NAME, Level.DEBUG);
         chain.setLogger(txLogger);
     }
 
     private void initTx(Chain chain){
+        //todo 需要处理: 作为友链时,不会有此交易,友链有自己的跨链交易和协议转换机制
         TxRegister txRegister = new TxRegister();
         txRegister.setModuleCode(TxConstant.MODULE_CODE);
         txRegister.setModuleValidator(TxConstant.TX_MODULE_VALIDATOR);

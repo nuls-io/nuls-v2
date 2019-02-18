@@ -34,44 +34,47 @@ import io.nuls.tools.parse.SerializeUtils;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+
 /**
  * ip&port
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
 public class IpAddress extends BaseNulsData {
 
-    private static final int IPSIZE=16;
+    private static final int IPSIZE = 16;
     private InetAddress ip;
     private int port;
-    public IpAddress(){
+
+    public IpAddress() {
         super();
     }
 
 
-    public IpAddress(String ipStr,int port){
+    public IpAddress(String ipStr, int port) {
         try {
-            this.ip=InetAddress.getByName(ipStr);
+            this.ip = InetAddress.getByName(ipStr);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-        this.port=port;
+        this.port = port;
     }
 
 
-    public IpAddress(InetAddress ip,int port){
-        this.ip=ip;
-        this.port=port;
+    public IpAddress(InetAddress ip, int port) {
+        this.ip = ip;
+        this.port = port;
     }
 
-    public void setIpStr(String ipStr){
+    public void setIpStr(String ipStr) {
         try {
-            this.ip=InetAddress.getByName(ipStr);
+            this.ip = InetAddress.getByName(ipStr);
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
     }
+
     public InetAddress getIp() {
         return ip;
     }
@@ -88,15 +91,15 @@ public class IpAddress extends BaseNulsData {
         this.port = port;
     }
 
-        @Override
-        public int size() {
-            int s = 0;
-            // ip 16byte
-            s += IPSIZE;
-            // port 2byte
-            s += SerializeUtils.sizeOfUint16();
-            return s;
-        }
+    @Override
+    public int size() {
+        int s = 0;
+        // ip 16byte
+        s += IPSIZE;
+        // port 2byte
+        s += SerializeUtils.sizeOfUint16();
+        return s;
+    }
 
 
     @Override
@@ -116,9 +119,9 @@ public class IpAddress extends BaseNulsData {
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
         try {
-            byte[] ipAddrBytes =byteBuffer.readBytes(IPSIZE);
+            byte[] ipAddrBytes = byteBuffer.readBytes(IPSIZE);
             ip = InetAddress.getByAddress(ipAddrBytes);
-            port=byteBuffer.readUint16();
+            port = byteBuffer.readUint16();
         } catch (UnknownHostException e) {
             throw new RuntimeException(e);  // Cannot happen.
         } catch (Exception e) {

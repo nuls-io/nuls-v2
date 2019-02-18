@@ -102,8 +102,8 @@ public interface ConsensusConstant {
     int MAX_ACCEPT_NUM_OF_DEPOSIT = 250;
     int MAX_AGENT_COUNT_OF_ADRRESS = 1;
 
-    BigInteger SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = BigInteger.valueOf(200000);
-    BigInteger SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = BigInteger.valueOf(500000);
+    BigInteger SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT = new BigInteger("20000000000000");
+    BigInteger SUM_OF_DEPOSIT_OF_AGENT_UPPER_LIMIT = new BigInteger("50000000000000");
 
     /**
      * unit:round of consensus
@@ -201,9 +201,11 @@ public interface ConsensusConstant {
     String PARAM_TX_HEX_LIST = "txHexList";
     String PARAM_HEIGHT = "height";
     String PARAM_BLOCK_HEADER ="blockHeader";
+    String PARAM_BLOCK_HEADER_HEX ="blockHeaderHex";
     String PARAM_BLOCK="block";
     String PARAM_EVIDENCE_HEADER ="evidenceHeader";
     String VALID_RESULT ="valid";
+    String PARAM_RESULT_VALUE ="value";
     String PARAM_STATUS = "status";
 
     /**
@@ -225,5 +227,5 @@ public interface ConsensusConstant {
      * 获取打包交易最长等待时间(毫秒)
      * Get the longest waiting time for packaged transactions
      * */
-    long GET_TX_MAX_WAIT_TIME = 2000;
+    long GET_TX_MAX_WAIT_TIME = 7000;
  }

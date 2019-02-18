@@ -3,6 +3,7 @@ package io.nuls.transaction.rpc.call;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.exception.NulsException;
+import io.nuls.tools.log.Log;
 import io.nuls.transaction.constant.TxConstant;
 
 import java.util.HashMap;
@@ -28,6 +29,7 @@ public class ChainCall {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("coinDatas", coinDataHex);
+            //todo cmd待确认
             HashMap result = (HashMap) TransactionCall.request(ModuleE.CM.abbr,"cm_assetCirculateValidator",  params);
             return (int) result.get("value") == 1;
         } catch (Exception e) {
@@ -50,7 +52,8 @@ public class ChainCall {
             HashMap result = (HashMap) TransactionCall.request(ModuleE.CM.abbr,"cm_assetCirculateValidator", params);
             return (int) result.get("value") == 1;
         } catch (Exception e) {
-            throw new NulsException(e);
+            Log.error(e);
+            return false;
         }
     }
 

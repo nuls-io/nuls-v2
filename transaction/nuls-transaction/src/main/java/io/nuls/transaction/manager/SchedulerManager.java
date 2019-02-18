@@ -58,7 +58,7 @@ public class SchedulerManager {
         ScheduledThreadPoolExecutor unconfirmedTxExecutor = ThreadUtils.createScheduledThreadPool(1,
                 new NulsThreadFactory(TxConstant.MODULE_CODE));
         //固定延迟时间
-        crossTxExecutor.scheduleWithFixedDelay(new UnconfirmedTxProcessTask(chain), 5, 10, TimeUnit.SECONDS);
+        crossTxExecutor.scheduleWithFixedDelay(new UnconfirmedTxProcessTask(chain), 5, 5, TimeUnit.MINUTES);
         chain.setScheduledThreadPoolExecutor(unconfirmedTxExecutor);
 
         return true;

@@ -24,6 +24,7 @@
  */
 package io.nuls.ledger.test;
 
+import io.nuls.ledger.test.task.BlockTestThread;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -36,13 +37,32 @@ import java.util.Map;
  **/
 public class LanTest {
     @Test
-    public void test1(){
+    public void test1() {
         try {
             Map m = new HashMap();
-            m.put("b",true);
-          System.out.println(Boolean.valueOf(m.get("b").toString()));
+            m.put("b", true);
+            System.out.println(Boolean.valueOf(m.get("b").toString()));
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void test2() {
+        System.out.println("start====");
+        BlockTestThread a = new BlockTestThread("1");
+        a.start();
+        BlockTestThread b = new BlockTestThread("2");
+        b.start();
+        BlockTestThread c = new BlockTestThread("3");
+        c.start();
+        System.out.println("end====");
+
+        try {
+            Thread.sleep(100000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 }

@@ -7,17 +7,21 @@ import io.nuls.account.constant.AccountErrorCode;
 import io.nuls.account.constant.RpcParameterNameConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.Chain;
+import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.model.dto.CoinDto;
+import io.nuls.account.model.dto.MultiSignTransactionResultDto;
 import io.nuls.account.model.dto.TransferDto;
 import io.nuls.account.model.po.AliasPo;
 import io.nuls.account.service.AccountService;
+import io.nuls.account.service.AliasService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.account.service.TransactionService;
 import io.nuls.account.storage.AliasStorageService;
 import io.nuls.account.util.TxUtil;
 import io.nuls.account.util.annotation.ResisterTx;
 import io.nuls.account.util.annotation.TxMethodType;
-import io.nuls.account.util.log.LogUtil;
+import io.nuls.base.basic.NulsByteBuffer;
+import io.nuls.tools.log.Log;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.account.util.validator.TxValidator;
 import io.nuls.base.basic.AddressTool;
@@ -58,16 +62,14 @@ public class TransactionCmd extends BaseCmd {
     private ChainManager chainManager;
     @Autowired
     private TxValidator txValidator;
-
     @Autowired
     private AliasStorageService aliasStorageService;
     @Autowired
     private AccountService accountService;
-
     @Autowired
     private MultiSignAccountService multiSignAccountService;
-
-
+    @Autowired
+    private AliasService aliasService;
 
     /**
      * validate the transaction
@@ -75,9 +77,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_accountTxValidate", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "validate the transaction")
+    @CmdAnnotation(cmd = "ac_accountTxValidate", version = 1.0, description = "validate the transaction")
     public Response accountTxValidate(Map params) {
-        LogUtil.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
+        Log.debug("ac_accountTxValidate start,params size:{}", params == null ? 0 : params.size());
         int chainId = 0;
         List<String> txHexList;
         List<Transaction> lists = new ArrayList<>();
@@ -103,20 +105,168 @@ public class TransactionCmd extends BaseCmd {
                 result = transactionService.accountTxValidate(chainId, lists);
             }
         } catch (NulsRuntimeException e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             return failed(e.getErrorCode());
         } catch (NulsException e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             return failed(e.getErrorCode());
         } catch (Exception e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
         }
         Map<String, List<Transaction>> resultMap = new HashMap<>();
         resultMap.put("list", result);
-        LogUtil.debug("ac_accountTxValidate end");
+        Log.debug("ac_accountTxValidate end");
         return success(resultMap);
     }
+
+    /**
+     * batch commit the transaction
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_commitTx", version = 1.0, description = "batch commit the transaction")
+    public Response commitTx(Map params) {
+        Log.debug("ac_commitTx start,params size:{}", params == null ? 0 : params.size());
+        boolean result = true;
+        int chainId;
+        List<String> txHexList;
+        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+        Object txHexListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX_LIST);
+        Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
+        List<Transaction> commitSucTxList = new ArrayList<>();
+        // check parameters
+        if (params == null || chainIdObj == null || txHexListgObj == null) {
+            return failed(AccountErrorCode.NULL_PARAMETER);
+        }
+        chainId = (Integer) chainIdObj;
+        txHexList = (List<String>) txHexListgObj;
+        //交易提交
+        try {
+            for (String txHex : txHexList) {
+                Transaction tx = Transaction.getInstance(txHex);
+                //别名交易
+                if (AccountConstant.TX_TYPE_ACCOUNT_ALIAS == tx.getType()) {
+                    Alias alias = new Alias();
+                    alias.parse(new NulsByteBuffer(tx.getTxData()));
+                    result = aliasService.aliasTxCommit(chainId, alias);
+                    if (!result) {
+                        break;
+                    }
+                    commitSucTxList.add(tx);
+                }
+            }
+        } catch (NulsException e) {
+            Log.info("", e);
+            result = false;
+        } catch (Exception e) {
+            Log.error("", e);
+            result = false;
+        }
+        //交易回滚
+        try {
+            //如果提交失败，将已经提交成功的交易回滚
+            if (!result) {
+                boolean rollback = true;
+                for (Transaction tx : commitSucTxList) {
+                    Alias alias = new Alias();
+                    alias.parse(new NulsByteBuffer(tx.getTxData()));
+                    rollback = aliasService.rollbackAlias(chainId, alias);
+                }
+                //回滚失败，抛异常
+                if (!rollback) {
+                    throw new NulsException(AccountErrorCode.ALIAS_ROLLBACK_ERROR);
+                }
+            }
+        } catch (NulsException e) {
+            Log.info("", e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            Log.error("", e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", result);
+        Log.debug("ac_commitTx end");
+        return success(resultMap);
+    }
+
+    /**
+     * batch rollback the transaction
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_rollbackTx", version = 1.0, description = "batch rollback the transaction")
+    public Response rollbackTx(Map params) {
+        Log.debug("ac_rollbackTx start,params size:{}", params == null ? 0 : params.size());
+
+        boolean result = false;
+        int chainId;
+        List<String> txHexList;
+        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+        Object txHexListgObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX_LIST);
+        Object blockHeaderDigest = params == null ? null : params.get(RpcParameterNameConstant.BLOCK_HEADER_DIGEST);
+        List<Transaction> rollbackSucTxList = new ArrayList<>();
+        // check parameters
+        if (params == null || chainIdObj == null || txHexListgObj == null) {
+            return failed(AccountErrorCode.NULL_PARAMETER);
+        }
+        chainId = (Integer) chainIdObj;
+        txHexList = (List<String>) txHexListgObj;
+        //交易回滚
+        try {
+            for (String txHex : txHexList) {
+                Transaction tx = Transaction.getInstance(txHex);
+                //别名交易
+                if (AccountConstant.TX_TYPE_ACCOUNT_ALIAS == tx.getType()) {
+                    Alias alias = new Alias();
+                    alias.parse(new NulsByteBuffer(tx.getTxData()));
+                    result = aliasService.rollbackAlias(chainId, alias);
+                    if (!result) {
+                        break;
+                    }
+                    rollbackSucTxList.add(tx);
+                }
+            }
+        } catch (NulsException e) {
+            Log.info("", e);
+            result = false;
+        } catch (Exception e) {
+            Log.error("", e);
+            result = false;
+        }
+        //交易提交
+        try {
+            //如果回滚失败，将已经回滚成功的交易重新保存
+            if (!result) {
+                boolean commit = true;
+                for (Transaction tx : rollbackSucTxList) {
+                    Alias alias = new Alias();
+                    alias.parse(new NulsByteBuffer(tx.getTxData()));
+                    commit = aliasService.aliasTxCommit(chainId, alias);
+                }
+                //保存失败，抛异常
+                if (!commit) {
+                    throw new NulsException(AccountErrorCode.ALIAS_SAVE_ERROR);
+                }
+            }
+        } catch (NulsException e) {
+            Log.info("", e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            Log.error("", e);
+            return failed(AccountErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+
+        Map<String, Boolean> resultMap = new HashMap<>();
+        resultMap.put("value", result);
+        Log.debug("ac_rollbackTx end");
+        return success(resultMap);
+    }
+
 
     /**
      * 转账交易验证
@@ -126,7 +276,7 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = RpcParameterNameConstant.CHAIN_ID, parameterType = "int")
     @Parameter(parameterName = RpcParameterNameConstant.TX_HEX, parameterType = "String")
     public Response transferTxValidate(Map<String, Object> params) {
-        LogUtil.debug("ac_transferTxValidate start");
+        Log.debug("ac_transferTxValidate start");
         Map<String, Boolean> resultMap = new HashMap<>();
         boolean result;
         try {
@@ -141,15 +291,15 @@ public class TransactionCmd extends BaseCmd {
             Transaction transaction = TxUtil.getTransaction(txHex);
             result = txValidator.validateTx(chainId, transaction);
         } catch (NulsException e) {
-            LogUtil.warn("", e);
+            Log.warn("", e);
             result = false;
         } catch (Exception e) {
-            LogUtil.error("", e);
+            Log.error("", e);
             result = false;
         }
 
         resultMap.put("value", result);
-        LogUtil.debug("ac_transferTxValidate end");
+        Log.debug("ac_transferTxValidate end");
         return success(resultMap);
     }
 
@@ -157,7 +307,7 @@ public class TransactionCmd extends BaseCmd {
      * 转账交易提交
      */
     @CmdAnnotation(cmd = "ac_transferTxCommit", version = 1.0, description = "create transfer transaction commit 1.0")
-    @ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.COMMIT, methodName = "ac_transferTxCommit")
+    //@ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.COMMIT, methodName = "ac_transferTxCommit")
     public Response transferTxCommit(Map<String, Object> params) {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", true);
@@ -168,7 +318,7 @@ public class TransactionCmd extends BaseCmd {
      * 转账交易回滚
      */
     @CmdAnnotation(cmd = "ac_transferTxRollback", version = 1.0, description = "create transfer transaction rollback 1.0")
-    @ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.ROLLBACK, methodName = "ac_transferTxRollback")
+    //@ResisterTx(txType = AccountConstant.TX_TYPE_TRANSFER, methodType = TxMethodType.ROLLBACK, methodName = "ac_transferTxRollback")
     public Response transferTxRollback(Map<String, Object> params) {
         Map<String, Boolean> resultMap = new HashMap<>();
         resultMap.put("value", true);
@@ -182,9 +332,9 @@ public class TransactionCmd extends BaseCmd {
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_transfer", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "create a multi-account transfer transaction")
+    @CmdAnnotation(cmd = "ac_transfer", version = 1.0, description = "create a multi-account transfer transaction")
     public Response transfer(Map params) {
-        LogUtil.debug("ac_transfer start");
+        Log.debug("ac_transfer start");
         Map<String, String> map = new HashMap<>(1);
         try {
             // check parameters
@@ -236,28 +386,28 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_transfer end");
+        Log.debug("ac_transfer end");
         return success(map);
     }
 
     /**
-     * 创建别名转账交易
+     * 创建别名转账交易,仅仅针对非多签账户
      * <p>
      * create the transaction of transfer by alias
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_transferByAlias", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transfer by alias")
+    @CmdAnnotation(cmd = "ac_transferByAlias", version = 1.0, description = "transfer by alias")
     public Response transferByAlias(Map params) {
-        LogUtil.debug("ac_transferByAlias start");
+        Log.debug("ac_transferByAlias start");
         Map<String, String> map = new HashMap<>(1);
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
-        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
-        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
-        Object amountObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
-        Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.SECONDARY_DATA_HEX);
+        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
+        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
+        Object amountObj = params == null ? null : params.get(RpcParameterNameConstant.AMOUNT);
+        Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.REMARK);
         try {
             // check parameters
             if (params == null || chainIdObj == null || addressObj == null || passwordObj == null || aliasObj == null ||
@@ -297,11 +447,10 @@ public class TransactionCmd extends BaseCmd {
 
             toCoinDto.setAddress(AddressTool.getStringAddressByBytes(aliasPo.getAddress()));
             toCoinDto.setAmount(amount);
-            fromCoinDto.setAssetsChainId(chainId);
-            fromCoinDto.setAssetsId(assetId);
+            toCoinDto.setAssetsChainId(chainId);
+            toCoinDto.setAssetsId(assetId);
             Transaction tx = transactionService.transferByAlias(chainId, fromCoinDto, toCoinDto, remark);
             map.put("txHash", tx.getHash().getDigestHex());
-            //TODO 判断转出账户是否是多签账户，如果为多签则返回16进制交易串，这一部份与多签账户转账交易完成后再补充 Edward
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
@@ -309,40 +458,65 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_multipleAddressTransfer end");
+        Log.debug("ac_transferByAlias end");
         return success(map);
     }
 
     /**
      * 创建多签转账交易
-     *
+     * <p>
      * create the multi sign transaction
      *
      * @param params
      * @return
      */
-    @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, scope = "private", minEvent = 0, minPeriod = 0, description = "transfer by alias")
+    @CmdAnnotation(cmd = "ac_createMultiSignTransfer", version = 1.0, description = "create multi sign transfer")
     public Response createMultiSignTransfer(Map params) {
-        LogUtil.debug("ac_createMultiSignTransfer start");
+        Log.debug("ac_createMultiSignTransfer start");
         Map<String, String> map = new HashMap<>(1);
+        MultiSigAccount multiSigAccount = null;
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
-        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
         Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
+        Object typeObj = params == null ? null : params.get(RpcParameterNameConstant.TYPE);
+        Object aliasObj = params == null ? null : params.get(RpcParameterNameConstant.ALIAS);
         Object toAddressObj = params == null ? null : params.get(RpcParameterNameConstant.TO_ADDRESS);
         Object amountObj = params == null ? null : params.get(RpcParameterNameConstant.AMOUNT);
         Object remarkObj = params == null ? null : params.get(RpcParameterNameConstant.REMARK);
         try {
             // check parameters
             if (params == null || chainIdObj == null || addressObj == null || signAddressObj == null ||
-                    amountObj == null || toAddressObj == null) {
+                    amountObj == null) {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             int chainId = (int) chainIdObj;
             String address = (String) addressObj;
             String password = (String) passwordObj;
             String signAddress = (String) signAddressObj;
+            int type = (int) typeObj;
+            String alias = (String) aliasObj;
             String toAddress = (String) toAddressObj;
+            if (type == 1) {
+                if (toAddress == null) {
+                    throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
+                }
+            } else if (type == 2) {
+                if (alias == null) {
+                    throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
+                }
+                AliasPo aliasPo = aliasStorageService.getAlias(chainId, alias);
+                if (aliasPo == null) {
+                    throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+                }
+                toAddress = AddressTool.getStringAddressByBytes(aliasPo.getAddress());
+            } else {
+                throw new NulsRuntimeException(AccountErrorCode.PARAMETER_ERROR);
+            }
+            multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId, address);
+            if (multiSigAccount == null) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
             BigInteger amount = new BigInteger((String) amountObj);
             String remark = (String) remarkObj;
             if (BigIntegerUtils.isLessThan(amount, BigInteger.ZERO)) {
@@ -352,25 +526,26 @@ public class TransactionCmd extends BaseCmd {
             if (!validTxRemark(remark)) {
                 throw new NulsException(AccountErrorCode.PARAMETER_ERROR);
             }
-            //根据别名查询出地址
-            Account account = accountService.getAccount(chainId,signAddress);
+            //查询出账户
+            Account account = accountService.getAccount(chainId, signAddress);
             if (account == null) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
             }
-            MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(chainId,address);
-            if (multiSigAccount == null) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
-            }
-            //验证签名账户是否属于多签账户,如果不是多签账户下的地址则提示错误
+
+            //验证签名账户是否属于多签账户的签名账户,如果不是多签账户下的地址则提示错误
             if (!AddressTool.validSignAddress(multiSigAccount.getPubKeyList(), account.getPubKey())) {
-                throw new  NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
+                throw new NulsRuntimeException(AccountErrorCode.SIGN_ADDRESS_NOT_MATCH);
             }
             Chain chain = chainManager.getChainMap().get(chainId);
             if (chain == null) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
-            Transaction tx = transactionService.createMultiSignTransfer(chainId, account, password, multiSigAccount, toAddress, amount, remark);
-            map.put("txData", HexUtil.encode(tx.serialize()));
+            MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.createMultiSignTransfer(chainId, account, password, multiSigAccount, toAddress, amount, remark);
+            if (multiSignTransactionResultDto.isBroadcasted()) {
+                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
+            } else {
+                map.put("txHex", HexUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
+            }
         } catch (NulsException e) {
             return failed(e.getErrorCode());
         } catch (NulsRuntimeException e) {
@@ -378,7 +553,55 @@ public class TransactionCmd extends BaseCmd {
         } catch (Exception e) {
             return failed(e.getMessage());
         }
-        LogUtil.debug("ac_createMultiSignTransfer end");
+        Log.debug("ac_createMultiSignTransfer end");
+        return success(map);
+    }
+
+    /**
+     * 多签交易签名
+     * <p>
+     * sign MultiSign Transaction
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "ac_signMultiSignTransaction", version = 1.0, description = "sign MultiSign Transaction")
+    public Response signMultiSignTransaction(Map params) {
+        Log.debug("ac_signMultiSignTransaction start");
+        Map<String, String> map = new HashMap<>(1);
+        Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+        Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
+        Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
+        Object txHexObj = params == null ? null : params.get(RpcParameterNameConstant.TX_HEX);
+        try {
+            // check parameters
+            if (params == null || chainIdObj == null || signAddressObj == null ||
+                    txHexObj == null) {
+                throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
+            }
+            int chainId = (int) chainIdObj;
+            String password = (String) passwordObj;
+            String signAddress = (String) signAddressObj;
+            String txHex = (String) txHexObj;
+            //查询出账户
+            Account account = accountService.getAccount(chainId, signAddress);
+            if (account == null) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.signMultiSignTransaction(chainId, account, password, txHex);
+            if (multiSignTransactionResultDto.isBroadcasted()) {
+                map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
+            } else {
+                map.put("txHex", HexUtil.encode(multiSignTransactionResultDto.getTransaction().serialize()));
+            }
+        } catch (NulsException e) {
+            return failed(e.getErrorCode());
+        } catch (NulsRuntimeException e) {
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            return failed(e.getMessage());
+        }
+        Log.debug("ac_signMultiSignTransaction end");
         return success(map);
     }
 

@@ -1,11 +1,13 @@
 package io.nuls.transaction.rpc.call;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nuls.base.data.Transaction;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.constant.ErrorCode;
+import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -64,28 +66,56 @@ public class TransactionCall {
         }
     }
 
+
     /**
-     * txProcess 根据交易模块code调用RPC
-     * Single transaction txProcess
-     *
+     * 调用各交易验证器
      * @param chain
-     * @param cmd
-     * @param moduleCode
+     * @param txRegister 交易注册信息
      * @param txHex
      * @return
+     * @throws NulsException
      */
-    public static boolean txProcess(Chain chain, String cmd, String moduleCode, String txHex) throws NulsException {
+    public static boolean txValidatorProcess(Chain chain, TxRegister txRegister, String txHex) throws NulsException {
+
+        if(StringUtils.isBlank(txRegister.getValidator())){
+            //交易没有注册验证器cmd的交易,包括系统交易,则直接返回true
+            return true;
+        }
         //调用单个交易验证器
         Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
         params.put("chainId", chain.getChainId());
         params.put("txHex", txHex);
-        Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
+        Map result = (Map) TransactionCall.request(txRegister.getModuleCode(), txRegister.getValidator(), params);
         try {
-            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
+            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}", txRegister.getModuleCode(), txRegister.getValidator(), JSONUtils.obj2json(result));
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
         return (Boolean) result.get("value");
+    }
+
+    /**
+     * 调用交易的 commit 或者 rollback
+     * @param chain
+     * @param cmd
+     * @param moduleCode
+     * @param txHexList
+     * @return
+     */
+    public static boolean txProcess(Chain chain, String cmd, String moduleCode,  List<String> txHexList, String blockHeaderHex) {
+        try {
+            //调用单个交易验证器
+            Map<String, Object> params = new HashMap(TxConstant.INIT_CAPACITY_8);
+            params.put("chainId", chain.getChainId());
+            params.put("txHexList", txHexList);
+            params.put("blockHeaderHex", blockHeaderHex);
+            Map result = (Map) TransactionCall.request(moduleCode, cmd, params);
+            chain.getLogger().debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(result));
+            return (Boolean) result.get("value");
+        } catch (Exception e) {
+            chain.getLogger().error(e);
+            return false;
+        }
     }
 
     /**
