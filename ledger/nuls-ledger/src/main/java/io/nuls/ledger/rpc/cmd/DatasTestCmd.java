@@ -1,14 +1,18 @@
 /*
  * MIT License
- * Copyright (c) 2017-2019 nuls.io
+ *
+ * Copyright (c) 2017-2018 nuls.io
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -16,14 +20,14 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
  */
+package io.nuls.ledger.rpc.cmd;
 
-package io.nuls.protocol.rpc;
-
-import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.service.ProtocolService;
+import io.nuls.ledger.db.Repository;
+import io.nuls.ledger.model.po.BlockSnapshotAccounts;
+import io.nuls.ledger.model.po.BlockTxs;
 import io.nuls.rpc.cmd.BaseCmd;
-import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -33,31 +37,38 @@ import io.nuls.tools.core.annotation.Component;
 import java.util.HashMap;
 import java.util.Map;
 
-import static io.nuls.protocol.constant.CommandConstant.*;
-
 /**
- * 模块的对外接口类
- *
- * @author captain
- * @version 1.0
- * @date 18-11-9 下午2:04
- */
+ * @author lan
+ * @description 单元测试获取数据使用，实际业务不需要
+ * @date 2019/02/14
+ **/
 @Component
-public class ProtocolResource extends BaseCmd {
-
-    /**
-     * 获取当前主网版本信息
-     *
-     * @param map
-     * @return
-     */
-    @CmdAnnotation(cmd = GET_PROTOCOL_VERSION , version = 1.0, scope = Constants.PUBLIC, description = "")
+public class DatasTestCmd extends BaseCmd {
+    @Autowired
+    Repository repository;
+    @CmdAnnotation(cmd = "getSnapshot",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response getCurrentProtocolVersion(Map map) {
-        int chainId = Integer.parseInt(map.get("chainId").toString());
-        Map<String, Short> responseData = new HashMap<>(1);
-        responseData.put("value", ContextManager.getContext(chainId).getCurrentProtocolVersion().getVersion());
-        return success(responseData);
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    public Response getSnapshot(Map params) {
+        Map<String, Object> rtData = new HashMap<>();
+        Integer chainId = (Integer) params.get("chainId");
+        long blockHeight =  Long.valueOf(params.get("blockHeight").toString());
+        BlockSnapshotAccounts blockSnapshotAccounts = repository.getBlockSnapshot(chainId, blockHeight);
+        return success(blockSnapshotAccounts);
+    }
+    @CmdAnnotation(cmd = "getBlock",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    public Response getBlock(Map params) {
+        Map<String, Object> rtData = new HashMap<>();
+        Integer chainId = (Integer) params.get("chainId");
+        long blockHeight =  Long.valueOf(params.get("blockHeight").toString());
+        BlockTxs blockTxs = repository.getBlock(chainId, blockHeight);
+        return success(blockTxs);
     }
 
 }
