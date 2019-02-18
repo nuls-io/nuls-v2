@@ -103,7 +103,7 @@ public class CmdGenesisAsset {
          response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
         params.put("txHexList",txHexList);
-        params.put("blockHeight",0);
+        params.put("blockHeight",34);
         params.put("isConfirmTx",true);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
