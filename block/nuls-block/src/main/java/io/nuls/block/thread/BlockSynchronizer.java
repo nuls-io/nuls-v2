@@ -94,6 +94,12 @@ public class BlockSynchronizer implements Runnable {
         ChainContext context = ContextManager.getContext(chainId);
         ChainParameters parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
+        if (minNodeAmount == 0) {
+            commonLog.info("skip block syn, minNodeAmount-" + minNodeAmount);
+            context.setStatus(RunningStatusEnum.RUNNING);
+            ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
+            return true;
+        }
         if (availableNodes.size() >= minNodeAmount) {
             //3.统计网络中可用节点的一致区块高度、区块hash
             BlockDownloaderParams params = statistics(availableNodes, context);
