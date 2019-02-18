@@ -26,10 +26,7 @@ package io.nuls.network.manager.threads;
 
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
-import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.MessageFactory;
-import io.nuls.network.manager.MessageManager;
-import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.manager.*;
 import io.nuls.network.model.Node;
 
 import io.nuls.network.model.NodeGroup;
@@ -172,7 +169,7 @@ public class NodeDiscoverTask implements Runnable {
                     node.getNodeGroup().getLocalNetNodeContainer().getFailNodes().put(node.getId(), node);
                 }
             }
-            node.setLastProbeTime(TimeService.currentTimeMillis());
+            node.setLastProbeTime(TimeManager.currentTimeMillis());
         }
     }
 
@@ -203,7 +200,7 @@ public class NodeDiscoverTask implements Runnable {
             return false;
         }
 
-        return (TimeService.currentTimeMillis() - node.getLastProbeTime()) > probeInterval;
+        return (TimeManager.currentTimeMillis() - node.getLastProbeTime()) > probeInterval;
     }
 
     /*

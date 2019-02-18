@@ -101,14 +101,13 @@ public class TransactionServiceImpl implements TransactionService {
             String address = AddressTool.getStringAddressByBytes(from.getAddress());
             int assetChainId = from.getAssetsChainId();
             int assetId = from.getAssetsId();
-            String nonce = HexUtil.encode(from.getNonce());
+            String accountKey = LedgerUtils.getKeyStr(address, assetChainId, assetId);
             if (from.getLocked() == 0) {
                 //非解锁交易处理
-                String accountKey = LedgerUtils.getKeyStr(address, assetChainId, assetId);
                 CoinDataUtils.calTxFromAmount(accountsMap, from, txHash, accountKey);
-
             } else {
-                //TODO:解锁交易处理[未确认解锁交易From，暂时不处理]
+                //解锁交易处理[未确认解锁交易From，暂时不处理]
+                logger.info("unConfirmTxProcess account = {} unlocked tx.txHash = {}",accountKey,txHash);
             }
         }
         for (CoinTo to : tos) {
@@ -132,10 +131,12 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     /**
-     * 已确认区块数据处理
-     * 提交交易：1.交易存库（上一个账户状态进行镜像,存储账户最近100区块以内交易） 2.更新账户
-     *
+     *  已确认区块数据处理
+     * 提交交易：1.交易存库（上一个账户状态进行镜像,存储最近x=500区块以内交易） 2.更新账户
+     * @param addressChainId
      * @param txList
+     * @param blockHeight
+     * @return
      */
     @Override
     public boolean confirmBlockProcess(int addressChainId, List<Transaction> txList, long blockHeight) {
@@ -147,12 +148,11 @@ public class TransactionServiceImpl implements TransactionService {
                 logger.error("addressChainId ={},blockHeight={},ledgerBlockHeight={}", addressChainId, blockHeight, currentDbHeight);
                 return false;
             }
-            //批量交易按交易进行账户的金额处理，再按区块为原子性进行提交,updateAccounts用于一笔交易的账户缓存，最后统一处理
+            //批量交易按交易进行账户的金额处理，再按区块为原子性进行提交,updateAccounts用于账户缓存，最后统一处理
             Map<String, AccountBalance> updateAccounts = new HashMap<>();
             //整体区块备份
             BlockSnapshotAccounts blockSnapshotAccounts = new BlockSnapshotAccounts();
             for (Transaction transaction : txList) {
-
                 //从缓存校验交易
                 if (coinDataValidator.hadValidateTx(addressChainId, transaction)) {
                     CoinData coinData = CoinDataUtils.parseCoinData(transaction.getCoinData());
@@ -200,21 +200,21 @@ public class TransactionServiceImpl implements TransactionService {
                             lockedTransactionProcessor.processToCoinData(to, nonce8BytesStr, transaction.getHash().toString(), accountBalance.getNowAccountState());
                         }
                     }
-                    //整体交易的处理
-                    try {
-                        for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
-                            entry.getValue().getNowAccountState().updateConfirmedAmount(txHash);
-                            //缓存数据
-                            blockSnapshotAccounts.addAccountState(entry.getValue().getPreAccountState());
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        return false;
-                    }
                 } else {
                     return false;
                 }
 
+            }
+            //整体交易的处理
+            try {
+                for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
+                    //缓存数据
+                    blockSnapshotAccounts.addAccountState(entry.getValue().getPreAccountState());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                logger.error("confirmBlockProcess blockSnapshotAccounts addAccountState error!");
+                return false;
             }
             //提交整体数据
             try {
@@ -224,12 +224,14 @@ public class TransactionServiceImpl implements TransactionService {
                 //更新账本信息
                 for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
                     accountStateService.updateAccountStateByTx(entry.getKey(),blockSnapshotAccounts, entry.getValue().getNowAccountState());
+                    logger.info("updateAccountStateByTx account={} Available  balance={}", entry.getKey(), entry.getValue().getNowAccountState().getAvailableAmount());
                 }
                 //更新备份历史
                 repository.saveBlockSnapshot(addressChainId, blockHeight, blockSnapshotAccounts);
             } catch (Exception e) {
                 e.printStackTrace();
                 //需要回滚数据
+                logger.error("confirmBlockProcess  error! go rollBackBlock!");
                 rollBackBlock(addressChainId, blockSnapshotAccounts.getAccounts(), blockHeight);
                 return false;
             }
@@ -313,7 +315,7 @@ public class TransactionServiceImpl implements TransactionService {
                 logger.info("rollBack account={},assetChainId={},assetId={}, height={},lastHash= {} ", key, accountState.getAssetChainId(), accountState.getAssetId(),
                         accountState.getHeight(), accountState.getTxHash());
             }
-            //回滚备份数据
+            //删除备份数据
             repository.delBlockSnapshot(addressChainId, blockHeight);
 
         } catch (Exception e) {
