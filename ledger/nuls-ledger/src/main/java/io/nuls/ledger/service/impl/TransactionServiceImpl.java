@@ -224,6 +224,7 @@ public class TransactionServiceImpl implements TransactionService {
                 //更新账本信息
                 for (Map.Entry<String, AccountBalance> entry : updateAccounts.entrySet()) {
                     accountStateService.updateAccountStateByTx(entry.getKey(),blockSnapshotAccounts, entry.getValue().getNowAccountState());
+                    logger.info("updateAccountStateByTx account={} Available  balance{}={}", entry.getKey(), entry.getValue().getNowAccountState().getAvailableAmount());
                 }
                 //更新备份历史
                 repository.saveBlockSnapshot(addressChainId, blockHeight, blockSnapshotAccounts);
