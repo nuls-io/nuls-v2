@@ -123,9 +123,13 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
                 throw new NulsRuntimeException(AccountErrorCode.PASSWORD_IS_WRONG);
             }
         }
+        if (StringUtils.isNotBlank(account.getAlias())) {
+            throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
+        }
         if (!isAliasUsable(chainId, aliasName)) {
             throw new NulsRuntimeException(AccountErrorCode.ALIAS_EXIST);
         }
+
         account.setChainId(chainId);
         account.setAlias(aliasName);
         tx = createAliasTrasactionWithoutSign(account);
@@ -142,15 +146,15 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             if (!AddressTool.validAddress(chainId, address)) {
                 throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
             }
-            if (StringUtils.isNotBlank(aliasName)) {
-                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
-            }
             if (!FormatValidUtils.validAlias(aliasName)) {
                 throw new NulsRuntimeException(AccountErrorCode.ALIAS_FORMAT_WRONG);
             }
             Account account = accountService.getAccount(chainId, address);
             if (null == account) {
                 throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_NOT_EXIST);
+            }
+            if (StringUtils.isNotBlank(account.getAlias())) {
+                throw new NulsRuntimeException(AccountErrorCode.ACCOUNT_ALREADY_SET_ALIAS);
             }
 
             //create a set alias transaction
@@ -195,9 +199,6 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         Alias alias = new Alias();
         alias.parse(new NulsByteBuffer(transaction.getTxData()));
         String address = AddressTool.getStringAddressByBytes(alias.getAddress());
-//        if (transaction.isSystemTx()) {
-//            throw new NulsRuntimeException(AccountErrorCode.TX_TYPE_ERROR);
-//        }
         if (BaseConstant.CONTRACT_ADDRESS_TYPE == alias.getAddress()[2]) {
             throw new NulsRuntimeException(AccountErrorCode.ADDRESS_ERROR);
         }
@@ -334,6 +335,8 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         tx.setCoinData(coinData.serialize());
         //计算交易数据摘要哈希
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        //缓存当前交易hash
+        TxUtil.PRE_HASH_MAP.put(AddressTool.getStringAddressByBytes(coinFrom.getAddress()), tx.getHash());
         return tx;
     }
 

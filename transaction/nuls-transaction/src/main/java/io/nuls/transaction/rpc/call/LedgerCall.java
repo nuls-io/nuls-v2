@@ -117,8 +117,6 @@ public class LedgerCall {
             params.put("assetId", assetId);
             params.put("address", addressString);
             Map result = (Map)TransactionCall.request(ModuleE.LG.abbr, "getBalance", params);
-//            return BigIntegerUtils.stringToBigInteger((String) result.get("available"));
-            System.out.println(JSONUtils.obj2PrettyJson(result));
             Object available = result.get("available");
             return BigIntegerUtils.stringToBigInteger(String.valueOf(available));
         } catch (Exception e) {
@@ -151,12 +149,13 @@ public class LedgerCall {
      * @param txHexList
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean commitTxLedger(Chain chain, List<String> txHexList, boolean comfirmed) throws NulsException {
+    public static boolean commitTxLedger(Chain chain, List<String> txHexList, Long blockHeight, boolean comfirmed) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
             params.put("txHexList", txHexList);
+            params.put("blockHeight", blockHeight);
             params.put("isConfirmTx", comfirmed);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "commitTx", params);
             return (int) result.get("value") == 1;
@@ -171,7 +170,7 @@ public class LedgerCall {
      * @param txHexList
      * @param comfirmed 是否是已确认的交易
      */
-    public static boolean rollbackTxLedger(Chain chain, List<String> txHexList, boolean comfirmed) throws NulsException {
+    public static boolean rollbackTxLedger(Chain chain, List<String> txHexList, Long blockHeight, boolean comfirmed) throws NulsException {
         try {
             Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             params.put(Constants.VERSION_KEY_STR, "1.0");

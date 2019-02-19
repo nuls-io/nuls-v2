@@ -60,6 +60,9 @@ public class TransactionsPO extends BaseNulsData implements Cloneable {
 
     private byte[] remark;
 
+    /**
+     * 加入未确认数据库时的时间(非交易创建时间)
+     */
     private long createTime;
 
     private transient NulsDigestData hash;

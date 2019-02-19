@@ -82,10 +82,10 @@ public class Test1 {
     @Test
     public void test5(){
         Map<String,Node> a=new ConcurrentHashMap<>();
-        Node node1 = new Node("1.1.1.1",80,1,false);
+        Node node1 = new Node(1L,"1.1.1.1",80,1,false);
         a.put(node1.getId(),node1);
         Map<String,Node> b=new ConcurrentHashMap<>();
-        Node node2 = new Node("3.1.1.1",80,1,false);
+        Node node2 = new Node(1L,"3.1.1.1",80,1,false);
         b.put(node2.getId(),node2);
         b.put(node1.getId(),node1);
         a.clear();
@@ -98,9 +98,9 @@ public class Test1 {
     @Test
     public void test6(){
         List<Node> list = new ArrayList<>();
-        Node node1 = new Node("1.1.1.1",80,1,false);
+        Node node1 = new Node(1L,"1.1.1.1",80,1,false);
         list.add(node1);
-        Node node2 = new Node("3.1.1.1",80,1,false);
+        Node node2 = new Node(1L,"3.1.1.1",80,1,false);
         list.add(node2);
         List<Node> list2 = new ArrayList<>();
         list2.add(node1);

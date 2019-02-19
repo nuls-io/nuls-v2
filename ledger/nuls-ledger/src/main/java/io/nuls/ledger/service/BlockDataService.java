@@ -22,20 +22,13 @@
  * SOFTWARE.
  *
  */
-package io.nuls.network.manager.threads;
+package io.nuls.ledger.service;
 
 /**
- *
- * @description  定时清理缓存中过期数据信息
- *Timed cleaning of expired data information in the cache
- *
  * @author lan
- * @date  2018/11/14
+ * @description
+ * @date 2019/02/14
  **/
-public class CacheClearTask implements Runnable  {
-    @Override
-    public void run() {
-
-    }
-
+public interface BlockDataService {
+    void initBlockDatas() throws Exception;
 }

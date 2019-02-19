@@ -29,11 +29,13 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.util.Attribute;
+import io.netty.util.AttributeKey;
 import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
 import io.nuls.network.model.Node;
+import io.nuls.network.utils.IpUtil;
 
 import java.io.IOException;
 
@@ -41,6 +43,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * Server channel handler
+ *
  * @author lan
  * @date 2018/10/20
  */
@@ -51,57 +54,41 @@ public class ServerChannelHandler extends BaseChannelHandler {
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
         super.channelRegistered(ctx);
-        SocketChannel channel = (SocketChannel) ctx.channel();
-        String remoteIP = channel.remoteAddress().getHostString();
-        Log.info("channelRegistered============{}:{}",remoteIP,channel.remoteAddress().getPort());
-        //查看是否是本机尝试连接本机地址 ，如果是直接关闭连接
-        if (LocalInfoManager.getInstance().isSelfIp(remoteIP)) {
-            Log.info("Server-Local connect close: -------------------------{}:{} ", remoteIP,channel.remoteAddress().getPort());
-            ctx.channel().close();
-            return;
-        }
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        boolean isCrossConnect=isServerCrossConnect(ctx.channel());
-        Node node = new Node(socketChannel.remoteAddress().getHostString(),socketChannel.remoteAddress().getPort(), Node.IN,isCrossConnect);
-        node.setIdle(false);
-        node.setChannel(ctx.channel());
-        Log.info("Server Node is active:{}",node.getId());
-        boolean success = ConnectionManager.getInstance().processConnectNode(node);
+        boolean success = ConnectionManager.getInstance().nodeConnectIn(socketChannel.remoteAddress().getHostString(), socketChannel.remoteAddress().getPort(), socketChannel);
         if (!success) {
-            Log.error("Server Node processConnectNode fail:{}" ,node.getId());
-            ctx.channel().close();
-            return;
+            ctx.close();
         }
 
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        SocketChannel channel = (SocketChannel) ctx.channel();
-        String nodeId = this.getNodeIdByChannel( ctx.channel());
         super.channelInactive(ctx);
-        Node node=ConnectionManager.getInstance().getNodeByCache(nodeId,Node.IN);
-        if(null != node) {
-            Log.info("Server Node is Inactive:" + nodeId);
-            node.setIdle(true);
-            ConnectionManager.getInstance().removeCacheConnectNodeMap(node.getId(),Node.IN);
-        }
+        SocketChannel channel = (SocketChannel) ctx.channel();
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+        Log.info("Server Node is Inactive:" + nodeId);
     }
+
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         SocketChannel channel = (SocketChannel) ctx.channel();
         String remoteIP = channel.remoteAddress().getHostString();
-        Log.info("Server Node is exceptionCaught:{}:{}" ,remoteIP , channel.remoteAddress().getPort());
+        Log.info("Server Node is exceptionCaught:{}:{}", remoteIP, channel.remoteAddress().getPort());
         Log.error(cause.getMessage());
+        Log.error("----------------- server exceptionCaught -------------------");
         if (!(cause instanceof IOException)) {
-            cause.printStackTrace();
+            String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+            //通常发生IOException是因为连接的节点断开了
+            Log.error("----------------nodeId:" + nodeId);
+            Log.error(cause);
         }
-        ctx.channel().close();
+        ctx.close();
     }
 
     @Override
@@ -109,20 +96,20 @@ public class ServerChannelHandler extends BaseChannelHandler {
         SocketChannel channel = (SocketChannel) ctx.channel();
         ByteBuf buf = (ByteBuf) msg;
         String remoteIP = channel.remoteAddress().getHostString();
-        int port=channel.remoteAddress().getPort();
-        String nodeKey=remoteIP+":"+port;
         try {
-            Node node=ConnectionManager.getInstance().getNodeByCache(nodeKey,Node.IN);
+            String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+            Attribute<Node> nodeAttribute = channel.attr(AttributeKey.valueOf("node-" + nodeId));
+            Node node = nodeAttribute.get();
             if (node != null) {
-                MessageManager.getInstance().receiveMessage(buf,node,true);
+                MessageManager.getInstance().receiveMessage(buf, node);
             } else {
-                Log.info("-----------------Server channelRead  node is null -----------------" + remoteIP + ":" + port);
+                Log.info("-----------------Server channelRead  node is null -----------------" + remoteIP + ":" + channel.remoteAddress().getPort());
                 ctx.channel().close();
             }
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
-        }finally {
+        } finally {
             buf.release();
         }
     }
@@ -131,7 +118,14 @@ public class ServerChannelHandler extends BaseChannelHandler {
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
         super.channelUnregistered(ctx);
         SocketChannel channel = (SocketChannel) ctx.channel();
-        Log.info("Server Node is channelUnregistered:{}:{}" ,channel.remoteAddress().getHostString() , channel.remoteAddress().getPort());
+        String nodeId = IpUtil.getNodeId(channel.remoteAddress());
+        Attribute<Node> nodeAttribute = channel.attr(AttributeKey.valueOf("node-" + nodeId));
+
+        Node node = nodeAttribute.get();
+        if (node != null && node.getDisconnectListener() != null) {
+            node.getDisconnectListener().action();
+        }
+        Log.info("Server Node is channelUnregistered:{}:{}", channel.remoteAddress().getHostString(), channel.remoteAddress().getPort());
     }
 
 }

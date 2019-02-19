@@ -28,30 +28,32 @@ package io.nuls.network.manager.handler.base;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.message.base.BaseMessage;
+
 /**
  * messsage handler inf
- * @author  lan
+ *
+ * @author lan
  * @date 2018/11/01
  */
 public interface BaseMeesageHandlerInf {
     /**
-     *接收消息处理
-     *Receive message processing
-     * @param message   address message
-     * @param nodeKey      peer node key
-     * @param isServer client=false or server=true
+     * 接收消息处理
+     * Receive message processing
+     *
+     * @param message address message
+     * @param node    peer info
      * @return NetworkEventResult
      */
-    NetworkEventResult recieve(BaseMessage message, String nodeKey,boolean isServer);
+    NetworkEventResult recieve(BaseMessage message, Node node);
 
     /**
      * 发送消息处理
      * Send message processing
-     * @param message   address message
-     * @param node      peer info
-     * @param isServer client=false or server=true
-     * @param asyn  default true
+     *
+     * @param message address message
+     * @param node    peer info
+     * @param asyn    default true
      * @return NetworkEventResult
      */
-    NetworkEventResult send(BaseMessage message, Node node,boolean isServer, boolean asyn);
+    NetworkEventResult send(BaseMessage message, Node node, boolean asyn);
 }

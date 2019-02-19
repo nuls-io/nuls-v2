@@ -34,17 +34,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * @author lan
  * @description
- * @author  lan
  * @date 2018/12/05
  **/
 @Component
-public class TimeServiceRpc  extends BaseCmd {
+public class TimeServiceRpc extends BaseCmd {
     @CmdAnnotation(cmd = "nw_currentTimeMillis", version = 1.0,
             description = "currentTimeMillis")
     public Response currentTimeMillis(Map params) {
-        Map<String,Long> responseData = new HashMap<>();
-        responseData.put("currentTimeMillis",TimeService.currentTimeMillis());
+        Map<String, Long> responseData = new HashMap<>();
+        responseData.put("currentTimeMillis", TimeService.currentTimeMillis());
         return success(responseData);
     }
 }

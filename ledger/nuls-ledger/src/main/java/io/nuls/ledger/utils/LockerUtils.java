@@ -26,6 +26,8 @@ package io.nuls.ledger.utils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author lan
@@ -34,8 +36,8 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 public class LockerUtils {
     public static Map<String,Object> accountLockers = new ConcurrentHashMap<>();
-    public static Object txLocker = new Object();
     private static Object assetLockerAddLocker = new Object();
+    public final static Lock BLOCK_SYNC_LOCKER = new ReentrantLock();
 
     public static   Object getAccountLocker(String address, int chainId, int assetId)
     {

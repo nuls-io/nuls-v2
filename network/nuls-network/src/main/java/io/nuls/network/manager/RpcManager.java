@@ -29,15 +29,17 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 
 /**
- * @description  Rpc init
  * @author lan
+ * @description Rpc init
  * @date 2018/11/07
  **/
-public class RpcManager extends BaseManager{
+public class RpcManager extends BaseManager {
     private static RpcManager instance = new RpcManager();
-    public static RpcManager getInstance(){
+
+    public static RpcManager getInstance() {
         return instance;
     }
+
     @Override
     public void init() {
 
@@ -58,7 +60,6 @@ public class RpcManager extends BaseManager{
         } catch (Exception e) {
             e.printStackTrace();
         }
-
 
 
     }

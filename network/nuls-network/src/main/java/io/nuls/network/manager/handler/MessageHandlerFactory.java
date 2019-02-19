@@ -44,17 +44,17 @@ import java.util.concurrent.ConcurrentHashMap;
  * 映射 message 与 message handler 的关系
  * message handler factory
  * Map the relationship between message and message handler
+ *
  * @author lan
  * @date 2018/10/15
- *
  */
 public class MessageHandlerFactory {
-    private StorageManager storageManager=StorageManager.getInstance();
+    private StorageManager storageManager = StorageManager.getInstance();
     private static Map<String, BaseMeesageHandlerInf> handlerMap = new HashMap<>();
     /**
-     *key : protocol cmd, value : Map<role,ProtocolRoleHandler>
+     * key : protocol cmd, value : Map<role,ProtocolRoleHandler>
      */
-    private static Map<String,Map<String,ProtocolRoleHandler>> protocolRoleHandlerMap = new ConcurrentHashMap<>();
+    private static Map<String, Map<String, ProtocolRoleHandler>> protocolRoleHandlerMap = new ConcurrentHashMap<>();
 
     private static MessageHandlerFactory INSTANCE = new MessageHandlerFactory();
 
@@ -62,12 +62,12 @@ public class MessageHandlerFactory {
         return INSTANCE;
     }
 
-    public  Map<String,Map<String,ProtocolRoleHandler>> getProtocolRoleHandlerMap() {
+    public Map<String, Map<String, ProtocolRoleHandler>> getProtocolRoleHandlerMap() {
         return protocolRoleHandlerMap;
     }
 
-    public static void addHandler(String messageCmd,BaseMeesageHandlerInf handler){
-        handlerMap.put(messageCmd,handler);
+    public static void addHandler(String messageCmd, BaseMeesageHandlerInf handler) {
+        handlerMap.put(messageCmd, handler);
     }
 
     private MessageHandlerFactory() {
@@ -77,66 +77,73 @@ public class MessageHandlerFactory {
     public BaseMeesageHandlerInf getHandler(String messageCmd) {
         return handlerMap.get(messageCmd);
     }
+
     public OtherModuleMessageHandler getOtherModuleHandler() {
         return OtherModuleMessageHandler.getInstance();
     }
+
     /**
      * add handler Map data
+     *
      * @param protocolCmd protocolCmd
-     * @param handler handler
+     * @param handler     handler
      */
-    public void addProtocolRoleHandlerMap(String protocolCmd,ProtocolRoleHandler handler){
+    public void addProtocolRoleHandlerMap(String protocolCmd, ProtocolRoleHandler handler) {
         Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.lock();
         try {
-            Map<String,ProtocolRoleHandler> roleMap = protocolRoleHandlerMap.get(protocolCmd);
+            Map<String, ProtocolRoleHandler> roleMap = protocolRoleHandlerMap.get(protocolCmd);
             if (null == roleMap) {
                 roleMap = new HashMap<>();
-                roleMap.put(handler.getRole(),handler);
-                protocolRoleHandlerMap.put(protocolCmd,roleMap);
+                roleMap.put(handler.getRole(), handler);
+                protocolRoleHandlerMap.put(protocolCmd, roleMap);
             } else {
                 //replace
-                roleMap.put(handler.getRole(),handler);
+                roleMap.put(handler.getRole(), handler);
 
             }
-        }finally {
+        } finally {
             Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.unlock();
         }
     }
-    public void clearCacheProtocolRoleHandlerMap(String role){
+
+    public void clearCacheProtocolRoleHandlerMap(String role) {
         Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.lock();
         try {
-            Collection<Map<String,ProtocolRoleHandler>> values = protocolRoleHandlerMap.values();
-            for (Map<String,ProtocolRoleHandler> value : values) {
+            Collection<Map<String, ProtocolRoleHandler>> values = protocolRoleHandlerMap.values();
+            for (Map<String, ProtocolRoleHandler> value : values) {
                 value.remove(role);
             }
-        }finally {
+        } finally {
             Lockers.PROTOCOL_HANDLERS_REGISTER_LOCK.unlock();
         }
 
     }
+
     /**
      * get handler data
+     *
      * @param protocolCmd protocolCmd
      * @return Collection
      */
-    public Collection<ProtocolRoleHandler> getProtocolRoleHandlerMap(String protocolCmd){
-        if(null != protocolRoleHandlerMap.get(protocolCmd)){
+    public Collection<ProtocolRoleHandler> getProtocolRoleHandlerMap(String protocolCmd) {
+        if (null != protocolRoleHandlerMap.get(protocolCmd)) {
             return protocolRoleHandlerMap.get(protocolCmd).values();
         }
         return null;
     }
-    public void init(){
+
+    public void init() {
         /*
          * 加载协议注册信息
          * load protocolRegister info
          */
         List<RoleProtocolPo> list = storageManager.getProtocolRegisterInfos();
-        for(RoleProtocolPo roleProtocolPo : list){
+        for (RoleProtocolPo roleProtocolPo : list) {
             roleProtocolPo.getRole();
-            List<ProtocolHandlerPo>   protocolHandlerPos = roleProtocolPo.getProtocolHandlerPos();
-            for(ProtocolHandlerPo protocolHandlerPo : protocolHandlerPos){
-                ProtocolRoleHandler protocolRoleHandler = new ProtocolRoleHandler(roleProtocolPo.getRole(),protocolHandlerPo.getHandler());
-                addProtocolRoleHandlerMap(protocolHandlerPo.getProtocolCmd(),protocolRoleHandler);
+            List<ProtocolHandlerPo> protocolHandlerPos = roleProtocolPo.getProtocolHandlerPos();
+            for (ProtocolHandlerPo protocolHandlerPo : protocolHandlerPos) {
+                ProtocolRoleHandler protocolRoleHandler = new ProtocolRoleHandler(roleProtocolPo.getRole(), protocolHandlerPo.getHandler());
+                addProtocolRoleHandlerMap(protocolHandlerPo.getProtocolCmd(), protocolRoleHandler);
             }
         }
     }

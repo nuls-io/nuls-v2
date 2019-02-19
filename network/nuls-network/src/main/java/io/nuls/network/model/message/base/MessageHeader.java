@@ -60,31 +60,32 @@ public class MessageHeader extends BaseNulsData {
      * ASCII string identifying the packet content, NULL padded
      */
 
-    private byte[]  command=new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
+    private byte[] command = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
 
     /**
      * 校验字段
      * First 4 bytes of  sha256(sha256(payload))
      */
-    private  long checksum;
+    private long checksum;
 
     /**
      * 指令字符串
      * String for command
      */
-    private transient String commandStr=null;
+    private transient String commandStr = null;
 
     public MessageHeader() {
 
     }
 
     public MessageHeader(String command, long magicNumber) {
-        byte []commandBytes= command.getBytes();
+        byte[] commandBytes = command.getBytes();
         System.arraycopy(commandBytes, 0, this.command, 0, commandBytes.length);
         this.magicNumber = magicNumber;
     }
-    public MessageHeader(String command, long magicNumber,long checksum,long payloadLength) {
-        byte []commandBytes= command.getBytes();
+
+    public MessageHeader(String command, long magicNumber, long checksum, long payloadLength) {
+        byte[] commandBytes = command.getBytes();
         System.arraycopy(commandBytes, 0, this.command, 0, commandBytes.length);
         this.magicNumber = magicNumber;
         this.payloadLength = payloadLength;
@@ -92,9 +93,10 @@ public class MessageHeader extends BaseNulsData {
     }
 
     public MessageHeader(String command) {
-        byte []commandBytes= command.getBytes();
+        byte[] commandBytes = command.getBytes();
         System.arraycopy(commandBytes, 0, this.command, 0, commandBytes.length);
     }
+
     /**
      * serialize important field
      */
@@ -106,30 +108,31 @@ public class MessageHeader extends BaseNulsData {
         stream.writeUint32(checksum);
     }
 
-    public String getCommandStr(){
-        if(null != commandStr){
+    public String getCommandStr() {
+        if (null != commandStr) {
             return commandStr;
         }
-        int effectiveCmdLen=0;
-        for(int i = 0;i < 12;i++){
-            if(command[i]!=(byte) 0xFF){
+        int effectiveCmdLen = 0;
+        for (int i = 0; i < 12; i++) {
+            if (command[i] != (byte) 0xFF) {
                 effectiveCmdLen++;
-            }else{
+            } else {
                 break;
             }
         }
-        byte []effectiveCmd=new byte[effectiveCmdLen];
-        System.arraycopy(command, 0,effectiveCmd, 0, effectiveCmdLen);
-        commandStr=new String(effectiveCmd);
+        byte[] effectiveCmd = new byte[effectiveCmdLen];
+        System.arraycopy(command, 0, effectiveCmd, 0, effectiveCmdLen);
+        commandStr = new String(effectiveCmd);
         return commandStr;
     }
+
     @Override
     public void parse(NulsByteBuffer buffer) throws NulsException {
         try {
             magicNumber = buffer.readUint32();
             payloadLength = buffer.readUint32();
             command = buffer.readBytes(12);
-            checksum=buffer.readUint32();
+            checksum = buffer.readUint32();
         } catch (Exception e) {
             throw new NulsException(e);
         }

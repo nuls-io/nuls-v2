@@ -38,6 +38,7 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +55,42 @@ public class TransactionCmd extends BaseCmd {
     @Autowired
     private TransactionService transactionService;
 
+
+    Response parseTxs(List<String> txHexList, List<Transaction> txList) {
+        for (String txHex : txHexList) {
+            if (StringUtils.isBlank(txHex)) {
+                return failed("txHex is blank");
+            }
+            byte[] txStream = HexUtil.decode(txHex);
+            Transaction tx = new Transaction();
+            try {
+                tx.parse(new NulsByteBuffer(txStream));
+                txList.add(tx);
+            } catch (NulsException e) {
+                logger.error("transaction parse error", e);
+                return failed("transaction parse error");
+            }
+        }
+        return success();
+    }
+
+    Transaction parseTxs(String txHex) {
+        if (StringUtils.isBlank(txHex)) {
+            return null;
+        }
+        byte[] txStream = HexUtil.decode(txHex);
+        Transaction tx = new Transaction();
+        try {
+            tx.parse(new NulsByteBuffer(txStream));
+        } catch (NulsException e) {
+            logger.error("transaction parse error", e);
+            return null;
+        }
+        return tx;
+    }
+
     /**
-     * 未确认交易提交
+     * 确认与未确认交易提交
      *
      * @param params
      * @return
@@ -65,6 +100,7 @@ public class TransactionCmd extends BaseCmd {
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHexList", parameterType = "List")
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
     @Parameter(parameterName = "isConfirmTx", parameterType = "boolean")
     public Response commitTx(Map params) {
         Map<String, Object> rtData = new HashMap<>();
@@ -75,33 +111,93 @@ public class TransactionCmd extends BaseCmd {
             return failed("txHexList is blank");
         }
         int value = 0;
-        for (String txHex : txHexList) {
-            if (StringUtils.isBlank(txHex)) {
-                return failed("txHex is blank");
-            }
-            byte[] txStream = HexUtil.decode(txHex);
-            Transaction tx = new Transaction();
-            try {
-                tx.parse(new NulsByteBuffer(txStream));
-            } catch (NulsException e) {
-                logger.error("transaction parse error", e);
-                return failed("transaction parse error");
-            }
-            if (isConfirmTx) {
-                if (transactionService.confirmTxProcess(chainId, tx)) {
-                    value = 1;
-                } else {
-                    value = 0;
-                    break;
-                }
+        List<Transaction> txList = new ArrayList<>();
+        Response parseResponse = parseTxs(txHexList, txList);
+        if (!parseResponse.isSuccess()) {
+            return parseResponse;
+        }
+        if (isConfirmTx) {
+            long blockHeight = Long.valueOf(params.get("blockHeight").toString());
+            if (transactionService.confirmBlockProcess(chainId, txList, blockHeight)) {
+                value = 1;
             } else {
-                if (transactionService.unConfirmTxProcess(chainId, tx)) {
+                value = 0;
+            }
+        } else {
+            //未确认交易按单笔来提交
+            if (txList.size() != 1) {
+                value = 0;
+            } else {
+                if (transactionService.unConfirmTxProcess(chainId, txList.get(0))) {
                     value = 1;
                 } else {
                     value = 0;
-                    break;
                 }
             }
+        }
+        rtData.put("value", value);
+        return success(rtData);
+    }
+
+    /**
+     * 未确认交易提交
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "commitUnconfirmedTx",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    public Response commitUnconfirmedTx(Map params) {
+        Map<String, Object> rtData = new HashMap<>();
+        Integer chainId = (Integer) params.get("chainId");
+        String txHex = params.get("txHex").toString();
+        Transaction tx = parseTxs(txHex);
+        if (null == tx) {
+            return failed("txHex is invalid");
+        }
+        int value = 0;
+        if (transactionService.unConfirmTxProcess(chainId, tx)) {
+            value = 1;
+        } else {
+            value = 0;
+        }
+        rtData.put("value", value);
+        return success(rtData);
+    }
+
+    /**
+     * 区块交易提交
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "commitBlockTxs",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHexList", parameterType = "List")
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    public Response commitBlockTxs(Map params) {
+        Map<String, Object> rtData = new HashMap<>();
+        Integer chainId = (Integer) params.get("chainId");
+        List<String> txHexList = (List) params.get("txHexList");
+        if (null == txHexList || 0 == txHexList.size()) {
+            return failed("txHexList is blank");
+        }
+        int value = 0;
+        List<Transaction> txList = new ArrayList<>();
+        Response parseResponse = parseTxs(txHexList, txList);
+        if (!parseResponse.isSuccess()) {
+            return parseResponse;
+        }
+        long blockHeight = Long.valueOf(params.get("blockHeight").toString());
+        if (transactionService.confirmBlockProcess(chainId, txList, blockHeight)) {
+            value = 1;
+        } else {
+            value = 0;
         }
         rtData.put("value", value);
         return success(rtData);
@@ -118,6 +214,7 @@ public class TransactionCmd extends BaseCmd {
             description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHexList", parameterType = "List")
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
     @Parameter(parameterName = "isConfirmTx", parameterType = "boolean")
     public Response rollBackConfirmTx(Map params) {
         Map<String, Object> rtData = new HashMap<>();
@@ -129,33 +226,92 @@ public class TransactionCmd extends BaseCmd {
             if (null == txHexList || 0 == txHexList.size()) {
                 return failed("txHexList is blank");
             }
-            for (String txHex : txHexList) {
-                if (StringUtils.isBlank(txHex)) {
-                    return failed("txHex not blank");
-                }
-                byte[] txStream = HexUtil.decode(txHex);
-                Transaction tx = new Transaction();
-                try {
-                    tx.parse(new NulsByteBuffer(txStream));
-                } catch (NulsException e) {
-                    logger.error("transaction parse error", e);
-                    return failed("transaction parse error");
-                }
-                if (isConfirmTx) {
-                    if (transactionService.rollBackConfirmTx(chainId, tx)) {
-                        value = 1;
-                    } else {
-                        value = 0;
-                        break;
-                    }
+            List<Transaction> txList = new ArrayList<>();
+            Response parseResponse = parseTxs(txHexList, txList);
+            if (!parseResponse.isSuccess()) {
+                return parseResponse;
+            }
+            if (isConfirmTx) {
+                long blockHeight = Long.valueOf(params.get("blockHeight").toString());
+                if (transactionService.rollBackConfirmTxs(chainId, blockHeight)) {
+                    value = 1;
                 } else {
-                    if (transactionService.rollBackUnconfirmTx(chainId, tx)) {
+                    value = 0;
+                }
+            } else {
+                //未确认交易按单笔来提交
+                if (txList.size() != 1) {
+                    value = 0;
+                } else {
+                    if (transactionService.rollBackUnconfirmTx(chainId, txList.get(0))) {
                         value = 1;
                     } else {
                         value = 0;
-                        break;
                     }
                 }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        rtData.put("value", value);
+        return success(rtData);
+    }
+
+    /**
+     * 逐笔回滚未确认交易
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "rollBackUnconfirmTx",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHex", parameterType = "String")
+    public Response rollBackUnconfirmTx(Map params) {
+        Map<String, Object> rtData = new HashMap<>();
+        int value = 0;
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            String txHex = params.get("txHex").toString();
+            Transaction tx = parseTxs(txHex);
+            if (null == tx) {
+                return failed("txHex is invalid");
+            }
+            if (transactionService.rollBackUnconfirmTx(chainId, tx)) {
+                value = 1;
+            } else {
+                value = 0;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        rtData.put("value", value);
+        return success(rtData);
+    }
+
+
+    /**
+     * 回滚区块交易
+     *
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = "rollBackBlockTxs",
+            version = 1.0, scope = "private", minEvent = 0, minPeriod = 0,
+            description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "blockHeight", parameterType = "long")
+    public Response rollBackBlockTxs(Map params) {
+        Map<String, Object> rtData = new HashMap<>();
+        int value = 0;
+        try {
+            Integer chainId = (Integer) params.get("chainId");
+            long blockHeight = Long.valueOf(params.get("blockHeight").toString());
+            if (transactionService.rollBackConfirmTxs(chainId, blockHeight)) {
+                value = 1;
+            } else {
+                value = 0;
             }
         } catch (Exception e) {
             e.printStackTrace();

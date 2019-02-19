@@ -24,7 +24,6 @@
 
 package io.nuls.transaction;
 
-import io.nuls.base.basic.AddressTool;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -34,7 +33,6 @@ import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
-import io.nuls.transaction.rpc.call.LedgerCall;
 import org.junit.Assert;
 
 import java.math.BigInteger;
@@ -54,8 +52,27 @@ public class CreateTxThread implements Runnable {
     static String address1 = "QXpkrbKqShZfopyck5jBQSFgbP9cD3930";
     static String address2 = "KS3wfAPFAmY8EwMFz21EXhJMXf8DV3930";
     static String address3 = "LFkghywKjdE2G3SZUcTsMkzcJ7tda3930";
-    static String address4 = "QMwz71wTKgp9sZ8g44A9WNgXk11u23930";
-    static String password="nuls123456";
+    static String address4 = "R9CxmNqtBDEm9iWX2Cod46QGCNE2M3930";
+
+    static String password = "nuls123456";
+    static String address6 = "QMwz71wTKgp9sZ8g44A9WNgXk11u23930";
+    static String address5 = "LFkghywKjdE2G3SZUcTsMkzcJ7tda3930";
+    static String address7 = "WEXAmsUJSNAvCx2zUaXziy3ZYX1em3930";
+    static String address9 = "WodfCXTbJ22mPa35Y61yNTRh1x3zB3930";
+    //static String address10 = "SPWAxuodkw222367N88eavYDWRraG3930";
+    static String address11 = "Rnt57eZnH8Dd7K3LudJXmmEutYJZD3930";
+    static String address12 = "XroY3cLWTfgKMRRRLCP5rhvo1gHY63930";
+
+    static String address20 = "H3eriRPPdbSMxXfg5MFYVfGmypNma3930";
+    static String address21 = "H9jzu275LW7qUPo4boZoN611Hc2DE3930";
+    static String address22 = "Hev98WnFwR55FJffop8H2J24VJe5y3930";
+    static String address23 = "HgmTfwiFhTLNuz2sRLgz3BrXcyY9F3930";
+    static String address24 = "JHwrmyKbu4KmSxy27HctqSG8aQqdY3930";
+    static String address25 = "JtM2x9hyUPfUQCfNnZZb4XG1eciS13930";
+    static String address26 = "JyBjVrGPbpr4smwbwUzDokQz2F7Gw3930";
+    static String address27 = "K8vyxqeu6dyfR35XcdqNZK4fW9h2N3930";
+    static String address28 = "KKQmeMGKfkkmQF5onWBY487zHdB7Q3930";
+    static String address29 = "KMNPqwARu77qAL4UCkd5Vwvj5PAtw3930";
 
     private Chain chain;
 
@@ -78,12 +95,9 @@ public class CreateTxThread implements Runnable {
     }
     private void creatTx() throws Exception{
         for(int i = 0; i<999999; i++) {
-            BigInteger balance1 = LedgerCall.getBalance(chain, AddressTool.getAddress(address1), assetChainId, assetId);
-            BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address2), assetChainId, assetId);
             System.out.println("======= Thread : " + Thread.currentThread().getName() + "=======");
-           CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
+            CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
                     createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-            //普通转账
             //调接口
             String json = JSONUtils.obj2json(ctxTransfer);
             Map<String, Object> params = JSONUtils.json2map(json);
@@ -93,38 +107,42 @@ public class CreateTxThread implements Runnable {
             Assert.assertTrue(null != map);
             Log.info("{}", map.get("value"));
 
-//            Thread.sleep(3000L);
+//            createTransfer();
 
-//            Map transferMap1 = this.createTransferTx(address1, address2, password);
-//            //调用接口
-//            Response cmdResp1 = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap1);
-//            HashMap result1 = (HashMap) (((HashMap) cmdResp1.getResponseData()).get("ac_transfer"));
-//            Assert.assertTrue(null != result1);
-//            Log.info("{}", result1.get("value"));
-//
-//            Map transferMap2 = this.createTransferTx(address2, address3, password);
-//            //调用接口
-//            Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap2);
-//            HashMap result2 = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("ac_transfer"));
-//            Assert.assertTrue(null != result2);
-//            Log.info("{}", result2.get("value"));
-//
-//            Map transferMap3 = this.createTransferTx(address3, address4, "");
-//            //调用接口
-//            Response cmdResp3 = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap3);
-//            HashMap result3 = (HashMap) (((HashMap) cmdResp3.getResponseData()).get("ac_transfer"));
-//            Assert.assertTrue(null != result3);
-//            Log.info("{}", result3.get("value"));
-
-            Map transferMap4 = this.createTransferTx(address4, address1, "");
-            //调用接口
-            Response cmdResp4 = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap4);
-            HashMap result4 = (HashMap) (((HashMap) cmdResp4.getResponseData()).get("ac_transfer"));
-            Assert.assertTrue(null != result4);
-            Log.info("{}", result4.get("value"));
-            Thread.sleep(4000L);
+            Thread.sleep(1000L);
         }
     }
+
+    private void createTransfer() throws Exception {
+        String addrFrom = createAccount();
+        TestTx.addGenesisAsset(addrFrom);
+        String AddrTo = address20;//createAccount();
+        Map transferMap = this.createTransferTx(addrFrom, AddrTo, null);
+        //调用接口
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+        Assert.assertTrue(null != result);
+        Log.info("{}", result.get("value"));
+    }
+
+    public static String createAccount() {
+        List<String> accountList = null;
+        try {
+            Map<String, Object> params = new HashMap<>();
+            params.put("version", "1.0");
+            params.put("chainId", chainId);
+            params.put("count", 1);
+            params.put("password", "");
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+
+            accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
+            return accountList.get(0);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     private List<CoinDTO> createFromCoinDTOList(){
         CoinDTO coinDTO = new CoinDTO();
         coinDTO.setAssetsId(assetId);

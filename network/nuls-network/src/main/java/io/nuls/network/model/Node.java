@@ -27,20 +27,11 @@ package io.nuls.network.model;
 
 import io.netty.channel.Channel;
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.network.constant.NetworkParam;
-import io.nuls.network.manager.LocalInfoManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
 import io.nuls.network.model.po.BasePo;
 import io.nuls.network.model.po.NodePo;
-import io.nuls.tools.thread.TimeService;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
+import io.nuls.network.netty.listener.EventListener;
 
 /**
  * 一个peer节点可以同时为多条链使用，
@@ -48,7 +39,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  *
  * @author lan
  */
-public class Node  implements Dto {
+public class Node implements Dto {
 
     /**
      * 1: inNode SERVER,  2: outNode CLIENT
@@ -56,7 +47,7 @@ public class Node  implements Dto {
     public final static int IN = 1;
     public final static int OUT = 2;
 
-
+    private long magicNumber;
     private String id;
 
     private String ip;
@@ -67,15 +58,16 @@ public class Node  implements Dto {
      */
     private int remoteCrossPort = 0;
 
-    private Long lastFailTime=0L;
+    private Long lastFailTime = 0L;
 
-    private Integer failCount=0;
+    private Integer failCount = 0;
 
     private Channel channel;
+
     /**
-     * 是否可连接状态
+     * 节点外网Ip
      */
-    private boolean isIdle=true;
+    private String externalIp;
 
     /**
      * 是否跨链连接
@@ -84,42 +76,81 @@ public class Node  implements Dto {
 
     private int type;
 
-    private volatile  boolean isBad=false;
+    private long connectTime = 0;
+    private long version = 0;
+    private long blockHeight = 0;
+    private String blockHash = "";
+    /**
+     * NodeStatusEnum
+     */
 
+    private int status;
 
     /**
-     *
-     * 1:N 连接器,一条peer连接可以同时属于多个group
+     * NodeConnectStatusEnum
      */
-    private Map<String,NodeGroupConnector> nodeGroupConnectors=new ConcurrentHashMap<>();
 
 
+    private int connectStatus;
+    private boolean isSeedNode;
 
-    public Node(String ip, int remotePort, int type,boolean isCrossConnect) {
-        this(ip+NetworkConstant.COLON +remotePort,ip,remotePort,type,isCrossConnect);
+    private Long lastProbeTime = 0L;
+    private EventListener registerListener;
+    private EventListener connectedListener;
+    private EventListener disconnectListener;
+
+
+    public Node(long magicNumber, String ip, int remotePort, int type, boolean isCrossConnect) {
+        this(ip + NetworkConstant.COLON + remotePort, magicNumber, ip, remotePort, type, isCrossConnect);
     }
 
 
-    public Node(String id, String ip,int remotePort, int type,boolean isCrossConnect) {
+    public Node(String id, long magicNumber, String ip, int remotePort, int type, boolean isCrossConnect) {
         this.ip = ip;
+        this.magicNumber = magicNumber;
         this.remotePort = remotePort;
         this.type = type;
         this.id = id;
-        this.isCrossConnect=isCrossConnect;
+        this.isCrossConnect = isCrossConnect;
     }
 
-    public void destroy() {
-        this.lastFailTime = TimeService.currentTimeMillis();
+    public long getMagicNumber() {
+        return magicNumber;
+    }
+
+    public void setMagicNumber(long magicNumber) {
+        this.magicNumber = magicNumber;
+    }
+
+    public void colse() {
+        this.channel.close();
         this.channel = null;
     }
 
-    public boolean isIdle() {
-        return isIdle;
+    public EventListener getRegisterListener() {
+        return registerListener;
     }
 
-    public void setIdle(boolean idle) {
-        isIdle = idle;
+    public void setRegisterListener(EventListener registerListener) {
+        this.registerListener = registerListener;
     }
+
+    public EventListener getConnectedListener() {
+        return connectedListener;
+    }
+
+    public void setConnectedListener(EventListener connectedListener) {
+        this.connectedListener = connectedListener;
+    }
+
+    public EventListener getDisconnectListener() {
+        return disconnectListener;
+    }
+
+    public void setDisconnectListener(EventListener disconnectListener) {
+        this.disconnectListener = disconnectListener;
+    }
+
 
     public int getType() {
         return type;
@@ -136,7 +167,6 @@ public class Node  implements Dto {
     public void setIp(String ip) {
         this.ip = ip;
     }
-
 
 
     public Integer getFailCount() {
@@ -171,11 +201,19 @@ public class Node  implements Dto {
         return id;
     }
 
+    public boolean isSeedNode() {
+        return isSeedNode;
+    }
+
+    public void setSeedNode(boolean seedNode) {
+        isSeedNode = seedNode;
+    }
+
     public void setId(String id) {
         this.id = id;
     }
 
-     public Channel getChannel() {
+    public Channel getChannel() {
         return channel;
     }
 
@@ -200,7 +238,6 @@ public class Node  implements Dto {
     }
 
 
-
     public boolean isCrossConnect() {
         return isCrossConnect;
     }
@@ -209,110 +246,98 @@ public class Node  implements Dto {
         isCrossConnect = crossConnect;
     }
 
-    public boolean isBad() {
-        return isBad;
+
+    public int getStatus() {
+        return status;
     }
 
-    public void setBad(boolean bad) {
-        isBad = bad;
+    public void setStatus(int status) {
+        this.status = status;
+    }
+
+    public int getConnectStatus() {
+        return connectStatus;
+    }
+
+    public void setConnectStatus(int connectStatus) {
+        this.connectStatus = connectStatus;
+    }
+
+    public Long getLastProbeTime() {
+        return lastProbeTime;
+    }
+
+    public void setLastProbeTime(Long lastProbeTime) {
+        this.lastProbeTime = lastProbeTime;
+    }
+
+    public String getExternalIp() {
+        return externalIp;
+    }
+
+    public void setExternalIp(String externalIp) {
+        this.externalIp = externalIp;
+    }
+
+    public boolean isServer() {
+        if (IN == type) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public long getConnectTime() {
+        return connectTime;
+    }
+
+    public void setConnectTime(long connectTime) {
+        this.connectTime = connectTime;
+    }
+
+    public NodeGroup getNodeGroup() {
+        return NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
     }
 
     /**
      * 设置peer信息
-     * @param magicNumber long
-     * @param version long
-     * @param blockHeight long
-     * @param blockHash String
-     */
-    public void setVersionProtocolInfos(long magicNumber,long version,long blockHeight,String blockHash){
-        NodeGroupConnector nodeGroupConnector=nodeGroupConnectors.get(String.valueOf(magicNumber));
-        nodeGroupConnector.setBlockHeight(blockHeight);
-        nodeGroupConnector.setVersion(version);
-        nodeGroupConnector.setBlockHash(blockHash);
-        NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByMagic(magicNumber);
-        if(blockHeight > nodeGroup.getHightest()){
-            nodeGroup.setHightestBlockNodeId(this.getId());
-            nodeGroup.setHightest(blockHeight);
-        }
-    }
-
-    /**
-     * node节点断开连接后的处理逻辑
-     */
-    public void disConnectNodeChannel(){
-        List<NodeGroupConnector> list=getNodeGroupConnectors();
-        for(NodeGroupConnector nodeGroupConnector:list){
-            NodeGroup nodeGroup=NodeGroupManager.getInstance().getNodeGroupByMagic(nodeGroupConnector.getMagicNumber());
-            nodeGroup.addDisConnetNode(this,true);
-        }
-        nodeGroupConnectors.clear();
-    }
-    public List<NodeGroupConnector> getNodeGroupConnectors(){
-        return new ArrayList<>(nodeGroupConnectors.values());
-    }
-    public void addGroupConnector(long magicNumber){
-        if(null == nodeGroupConnectors.get(String.valueOf(magicNumber))){
-            NodeGroupConnector nodeGroupConnector=new NodeGroupConnector(magicNumber);
-            nodeGroupConnectors.put(String.valueOf(magicNumber),nodeGroupConnector);
-        }else{
-            //已经存在了====Already exist
-            Log.error(id+" nodeGroupConnector already exist.magicNumber="+magicNumber);
-        }
-    }
-
-    /**
      *
-     * @param magicNumber
-     * 移除网络节点
+     * @param version     long
+     * @param blockHeight long
+     * @param blockHash   String
      */
-    public void removeGroupConnector(long magicNumber){
-        if(null == nodeGroupConnectors.get(String.valueOf(magicNumber))){
-            Log.error(id+" nodeGroupConnector not exist.magicNumber="+magicNumber);
-        }else{
-            nodeGroupConnectors.remove(String.valueOf(magicNumber));
-        }
+    public void setVersionProtocolInfos(long version, long blockHeight, String blockHash) {
+        this.version = version;
+        this.blockHash = blockHash;
+        this.blockHeight = blockHeight;
     }
 
-    public NodeGroupConnector getNodeGroupConnector(long magicNumber){
-        return nodeGroupConnectors.get(String.valueOf(magicNumber));
-    }
-    public NodeGroupConnector getFirstNodeGroupConnector(){
-        return nodeGroupConnectors.values().iterator().next();
+    public long getVersion() {
+        return version;
     }
 
-    public boolean isEliminate(){
-        /*
-         *自己节点Ip,移除(自己是种子节点的情况)
-         * Self node Ip, remove (in the case of a seed node)
-         */
-        if (LocalInfoManager.getInstance().isSelfIp(ip)) {
-            return true;
-        }
-        /*
-         *如果是种子节点，不去移除
-         * not eliminate if seed node
-         */
-        if(NetworkParam.getInstance().getSeedIpList().contains(id) && failCount <= NetworkConstant.NODE_CONNECT_TRY_MAX_TIMES ){
-            return false;
-        }
-        return isBad;
+    public void setVersion(long version) {
+        this.version = version;
     }
 
-    /**
-     * node连接的业务信息
-     */
-    public String getNodeGroupConnectorsInfos(){
-        List<NodeGroupConnector> list=getNodeGroupConnectors();
-        StringBuilder stringBuilder= new StringBuilder();
-        for(NodeGroupConnector nodeGroupConnector:list){
-            stringBuilder.append("{magicNum:"+nodeGroupConnector.getMagicNumber());
-            stringBuilder.append("==blockHash:"+nodeGroupConnector.getBlockHash());
-            stringBuilder.append("==blockHeight:"+nodeGroupConnector.getBlockHeight()+"}");
-        }
-       return  stringBuilder.toString();
+    public long getBlockHeight() {
+        return blockHeight;
     }
+
+    public void setBlockHeight(long blockHeight) {
+        this.blockHeight = blockHeight;
+    }
+
+    public String getBlockHash() {
+        return blockHash;
+    }
+
+    public void setBlockHash(String blockHash) {
+        this.blockHash = blockHash;
+    }
+
     @Override
     public BasePo parseToPo() {
-        return  new NodePo(id, ip,remotePort,remoteCrossPort,isCrossConnect );
+        return new NodePo(magicNumber, id, ip, remotePort, remoteCrossPort, isCrossConnect);
     }
 }

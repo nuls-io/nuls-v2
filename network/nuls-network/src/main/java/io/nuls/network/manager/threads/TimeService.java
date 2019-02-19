@@ -28,8 +28,9 @@ package io.nuls.network.manager.threads;
 import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
+import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
-import io.nuls.network.model.NodeGroupConnector;
+import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.NetTimeUrl;
 import io.nuls.network.model.message.GetTimeMessage;
 import org.apache.commons.net.ntp.NTPUDPClient;
@@ -49,7 +50,7 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  */
 public class TimeService implements Runnable {
     private static final int MAX_REQ_PEER_NUMBER = 8;
-    private static Map<String, Long> peerTimesMap = new ConcurrentHashMap<> ();
+    private static Map<String, Long> peerTimesMap = new ConcurrentHashMap<>();
     private static long currentRequestId = System.currentTimeMillis();
     private static TimeService instance = new TimeService();
 
@@ -65,8 +66,7 @@ public class TimeService implements Runnable {
      **/
     private static final long TIME_OFFSET_BOUNDARY = 3000L;
     /**
-     *  等待对等节点回复时间
-     *
+     * 等待对等节点回复时间
      **/
     private static final long TIME_WAIT_PEER_RESPONSE = 2000L;
     /**
@@ -87,6 +87,7 @@ public class TimeService implements Runnable {
      * The last synchronization point.
      */
     private static long lastSyncTime;
+
     public static TimeService getInstance() {
         return instance;
     }
@@ -104,13 +105,14 @@ public class TimeService implements Runnable {
         urlList.add("jp.ntp.org.cn");
         urlList.add("ntp7.aliyun.com");
     }
-    public static void addPeerTime(String nodeId,long requestId,long time){
-        if(currentRequestId == requestId){
-            if(MAX_REQ_PEER_NUMBER > peerTimesMap.size()){
+
+    public static void addPeerTime(String nodeId, long requestId, long time) {
+        if (currentRequestId == requestId) {
+            if (MAX_REQ_PEER_NUMBER > peerTimesMap.size()) {
                 long localBeforeTime = currentRequestId;
                 long localEndTime = System.currentTimeMillis();
                 long value = (time + (localEndTime - localBeforeTime) / 2) - localEndTime;
-                peerTimesMap.put(nodeId,value);
+                peerTimesMap.put(nodeId, value);
             }
         }
     }
@@ -118,60 +120,77 @@ public class TimeService implements Runnable {
     public List<NetTimeUrl> getNetTimeUrls() {
         return netTimeUrls;
     }
-    private void sendGetTimeMessage(Node node,long magicNumber){
-        GetTimeMessage getTimeMessage = MessageFactory.getInstance().buildTimeRequestMessage(magicNumber,currentRequestId);
-        MessageManager.getInstance().sendToNode(getTimeMessage,node,true);
+
+    private void sendGetTimeMessage(Node node) {
+        GetTimeMessage getTimeMessage = MessageFactory.getInstance().buildTimeRequestMessage(node.getMagicNumber(), currentRequestId);
+        MessageManager.getInstance().sendToNode(getTimeMessage, node, true);
     }
-    private synchronized  void syncPeerTime(){
-      //设置请求id
-      currentRequestId = System.currentTimeMillis();
-      long beginTime = currentRequestId;
-      // peerTimesMap 清空
-      peerTimesMap.clear();
-      //随机发出请求
-       List<Node> list = ConnectionManager.getInstance().getCacheAllNodeList();
-       if(list.size()  == 0){
-           return;
-       }
-       int count = 0;
-       for(Node node : list){
-           NodeGroupConnector nodeGroupConnector = node.getFirstNodeGroupConnector();
-           if(null != nodeGroupConnector){
-               sendGetTimeMessage(node,nodeGroupConnector.getMagicNumber());
-               count++;
-           }
-           if(count >= MAX_REQ_PEER_NUMBER){
-               break;
-           }
-       }
-       if(count == 0){
-           return;
-       }
-      //数量或时间满足要求
-      long intervalTime = 0;
-      while(peerTimesMap.size()< MAX_REQ_PEER_NUMBER &&  intervalTime < TIME_WAIT_PEER_RESPONSE){
-          try {
-              Thread.sleep(500L);
-          } catch (InterruptedException e) {
+
+    private synchronized void syncPeerTime() {
+        //设置请求id
+        currentRequestId = System.currentTimeMillis();
+        long beginTime = currentRequestId;
+        // peerTimesMap 清空
+        peerTimesMap.clear();
+        //随机发出请求
+        List<NodeGroup> list = NodeGroupManager.getInstance().getNodeGroups();
+        Collections.shuffle(list);
+        if (list.size() == 0) {
+            return;
+        }
+        int count = 0;
+        boolean nodesEnough = false;
+        for (NodeGroup nodeGroup : list) {
+            Collection<Node> nodes = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values();
+            for (Node node : nodes) {
+                sendGetTimeMessage(node);
+                count++;
+                if (count >= MAX_REQ_PEER_NUMBER) {
+                    nodesEnough = true;
+                    break;
+                }
+            }
+            if (nodesEnough) {
+                break;
+            }
+        }
+
+        if (count == 0) {
+            return;
+        }
+
+        //数量或时间满足要求
+        long intervalTime = 0;
+        while (peerTimesMap.size() < MAX_REQ_PEER_NUMBER && intervalTime < TIME_WAIT_PEER_RESPONSE)
+
+        {
+            try {
+                Thread.sleep(500L);
+            } catch (InterruptedException e) {
                 e.printStackTrace();
-          }
-          intervalTime = System.currentTimeMillis()-beginTime;
-      }
-      int size = peerTimesMap.size();
-      if(size>0){
-          long sum = 0L;
-         Set set = peerTimesMap.keySet();
-          //计算
-          for (Object aSet : set) {
-              sum += peerTimesMap.get(aSet.toString());
-          }
-          netTimeOffset = sum / size;
-      }
-  }
+            }
+            intervalTime = System.currentTimeMillis() - beginTime;
+        }
+
+        int size = peerTimesMap.size();
+        if (size > 0)
+
+        {
+            long sum = 0L;
+            Set set = peerTimesMap.keySet();
+            //计算
+            for (Object aSet : set) {
+                sum += peerTimesMap.get(aSet.toString());
+            }
+            netTimeOffset = sum / size;
+        }
+
+    }
+
     /**
      * 按相应时间排序
      */
-    public  void initWebTimeServer() {
+    public void initWebTimeServer() {
         for (String anUrlList : urlList) {
             long begin = System.currentTimeMillis();
             long netTime = getWebTime(anUrlList);
@@ -189,7 +208,6 @@ public class TimeService implements Runnable {
     }
 
 
-
     /**
      * 同步网络时间
      */
@@ -201,8 +219,8 @@ public class TimeService implements Runnable {
         for (int i = 0; i < netTimeUrls.size(); i++) {
             long localBeforeTime = System.currentTimeMillis();
             long netTime = getWebTime(netTimeUrls.get(i).getUrl());
-            Log.info(urlList.get(i)+"netTime:==="+netTime);
-            Log.info("localtime:==="+System.currentTimeMillis());
+            Log.info(urlList.get(i) + "netTime:===" + netTime);
+            Log.info("localtime:===" + System.currentTimeMillis());
             if (netTime == 0) {
                 continue;
             }
@@ -213,14 +231,14 @@ public class TimeService implements Runnable {
             /*
              * 有3个网络时间返回就可以退出了
              */
-            if(count >= 3){
+            if (count >= 3) {
                 break;
             }
 
         }
         if (count > 0) {
             netTimeOffset = sum / count;
-        }else{
+        } else {
             //从对等网络去获取时间
             syncPeerTime();
         }
@@ -248,7 +266,6 @@ public class TimeService implements Runnable {
             return 0L;
         }
     }
-
 
 
     /**
@@ -287,7 +304,6 @@ public class TimeService implements Runnable {
     public static long currentTimeMillis() {
         return System.currentTimeMillis() + netTimeOffset;
     }
-
 
 
 }

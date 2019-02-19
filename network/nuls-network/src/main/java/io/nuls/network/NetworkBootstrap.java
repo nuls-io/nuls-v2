@@ -46,9 +46,9 @@ import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * boot strap
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
 public class NetworkBootstrap {
     private static NetworkBootstrap bootstrap = null;
@@ -74,7 +74,7 @@ public class NetworkBootstrap {
 
     }
 
-    public void moduleStart(){
+    public void moduleStart() {
         try {
             System.setProperty("io.netty.tryReflectionSetAccessible", "true");
 //            --add-exports java.base/jdk.internal.misc=ALL-UNNAMED
@@ -90,14 +90,14 @@ public class NetworkBootstrap {
 
     /**
      * 配置信息初始化
-     *Configuration information initialization
+     * Configuration information initialization
      */
-    private  void jsonCfgInit() throws Exception {
+    private void jsonCfgInit() throws Exception {
         try {
             NetworkParam networkParam = NetworkParam.getInstance();
             ConfigLoader.loadJsonCfg(NulsConfig.MODULES_CONFIG_FILE);
             // set system language
-            String language = ConfigManager.getValue( NetworkConstant.NETWORK_LANGUAGE);
+            String language = ConfigManager.getValue(NetworkConstant.NETWORK_LANGUAGE);
             networkParam.setLanguage(language);
             I18nUtils.loadLanguage("languages", language);
             I18nUtils.setLanguage(language);
@@ -109,10 +109,10 @@ public class NetworkBootstrap {
             networkParam.setDbPath(dbPath);
             //net parameters
             networkParam.setChainId(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_SELF_CHAIN_ID)));
-            networkParam.setPacketMagic(Long.valueOf(ConfigManager.getValue( NetworkConstant.NETWORK_SELF_MAGIC)));
+            networkParam.setPacketMagic(Long.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_SELF_MAGIC)));
             networkParam.setMaxInCount(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_SELF_NODE_MAX_IN)));
             networkParam.setMaxOutCount(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_SELF_NODE_MAX_OUT)));
-            networkParam.setMaxInSameIp(networkParam.getMaxInCount()/networkParam.getMaxOutCount());
+            networkParam.setMaxInSameIp(networkParam.getMaxInCount() / networkParam.getMaxOutCount());
             networkParam.setPort(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_SELF_SERVER_PORT)));
             String seedIp = ConfigManager.getValue(NetworkConstant.NETWORK_SELF_SEED_IP);
             List<String> ipList = new ArrayList<>();
@@ -122,7 +122,7 @@ public class NetworkBootstrap {
             networkParam.setMoonNode(Boolean.valueOf(ConfigManager.getValue((NetworkConstant.NETWORK_MOON_NODE))));
             networkParam.setCrossMaxInCount(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_CROSS_NODE_MAX_IN)));
             networkParam.setCrossMaxOutCount(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_CROSS_NODE_MAX_OUT)));
-            networkParam.setCorssMaxInSameIp((networkParam.getCrossMaxInCount()/networkParam.getCrossMaxOutCount()));
+            networkParam.setCorssMaxInSameIp((networkParam.getCrossMaxInCount() / networkParam.getCrossMaxOutCount()));
             networkParam.setCrossPort(Integer.valueOf(ConfigManager.getValue(NetworkConstant.NETWORK_CROSS_SERVER_PORT)));
             String seedMoonIp = ConfigManager.getValue(NetworkConstant.NETWORK_MOON_SEED_IP);
             List<String> ipMoonList = new ArrayList<>();
@@ -135,15 +135,15 @@ public class NetworkBootstrap {
             e.printStackTrace();
         }
     }
+
     /**
      * 管理器初始化
      * Manager initialization
      */
-    private  void managerInit(){
+    private void managerInit() {
         RocksDBService.init(NetworkParam.getInstance().getDbPath());
         SpringLiteContext.init("io.nuls.network", new ModularServiceMethodInterceptor());
         StorageManager.getInstance().init();
-        LocalInfoManager.getInstance().init();
         NodeGroupManager.getInstance().init();
         ConnectionManager.getInstance().init();
         MessageManager.getInstance().init();
@@ -153,11 +153,10 @@ public class NetworkBootstrap {
     }
 
     /**
-     *
      * 启动管理模块
      * Manager start
      */
-    private  void managerStart(){
+    private void managerStart() {
         Log.debug("managerStart begin=========");
         NodeGroupManager.getInstance().start();
         ConnectionManager.getInstance().start();

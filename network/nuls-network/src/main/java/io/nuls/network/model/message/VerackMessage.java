@@ -31,10 +31,9 @@ import io.nuls.network.model.message.body.VerackMessageBody;
 import io.nuls.tools.exception.NulsException;
 
 /**
- * @description  握手应答消息 verackMessage
  * @author lan
+ * @description 握手应答消息 verackMessage
  * @date 2018/11/01
- *
  */
 public class VerackMessage extends BaseMessage<VerackMessageBody> {
 
@@ -43,15 +42,16 @@ public class VerackMessage extends BaseMessage<VerackMessageBody> {
         try {
             return byteBuffer.readNulsData(new VerackMessageBody());
         } catch (Exception e) {
-           throw new NulsException(e);
+            throw new NulsException(e);
         }
     }
+
     public VerackMessage() {
-       super(NetworkConstant.CMD_MESSAGE_VERACK);
+        super(NetworkConstant.CMD_MESSAGE_VERACK);
     }
 
     public VerackMessage(long magicNumber, String cmd, VerackMessageBody body) {
-        super(cmd,magicNumber);
+        super(cmd, magicNumber);
         this.setMsgBody(body);
     }
 }

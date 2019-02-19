@@ -33,14 +33,14 @@ import io.nuls.tools.parse.config.IniEntity;
  * <p>
  * Used to manage system configuration items.
  *
- * @author  Niels Wang
+ * @author Niels Wang
  */
 public class NulsConfig {
     /**
      * 模块配置文件名称
      * Module configuration file name.
      */
-    public static  String MODULES_CONFIG_FILE = "modules.json";
+    public static String MODULES_CONFIG_FILE = "modules.json";
 
     /**
      * 模块配置文件中加载的所有配置项

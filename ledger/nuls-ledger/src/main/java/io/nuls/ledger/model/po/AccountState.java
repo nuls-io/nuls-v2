@@ -45,7 +45,9 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccountState extends BaseNulsData {
-
+    @Setter
+    @Getter
+    private String address;
     @Setter
     @Getter
     private int addressChainId;
@@ -116,7 +118,8 @@ public class AccountState extends BaseNulsData {
     private List<FreezeLockTimeState> freezeLockTimeStates = new ArrayList<>();
 
 
-    public AccountState(int addressChainId, int assetChainId, int assetId, String nonce) {
+    public AccountState(String address, int addressChainId, int assetChainId, int assetId, String nonce) {
+        this.address = address;
         this.addressChainId = addressChainId;
         this.assetChainId = assetChainId;
         this.assetId = assetId;
@@ -155,22 +158,9 @@ public class AccountState extends BaseNulsData {
     public void addUnconfirmedAmount(UnconfirmedAmount unconfirmedAmount) {
         unconfirmedAmounts.add(unconfirmedAmount);
     }
-    public boolean updateConfirmedNonce(String nonce) {
-        this.nonce = nonce;
-        if (unconfirmedNonces.size() > 0) {
-            UnconfirmedNonce unconfirmedNonce = unconfirmedNonces.get(0);
-            if (unconfirmedNonce.getNonce().equalsIgnoreCase(nonce)) {
-                //未确认的转为确认的，移除集合中的数据
-                unconfirmedNonces.remove(0);
-            } else {
-                //分叉了，清空之前的未提交nonce
-                unconfirmedNonces.clear();
-            }
-            return true;
-        } else {
-            return false;
-        }
-    }
+
+
+
     public boolean updateConfirmedAmount(String hash) {
         if (unconfirmedAmounts.size() > 0) {
             UnconfirmedAmount unconfirmedAmount = unconfirmedAmounts.get(0);
@@ -186,6 +176,7 @@ public class AccountState extends BaseNulsData {
             return false;
         }
     }
+
     /**
      * 获取账户可用金额（不含锁定金额）
      *
@@ -215,6 +206,7 @@ public class AccountState extends BaseNulsData {
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
+        stream.writeString(address);
         stream.writeUint16(addressChainId);
         stream.writeUint16(assetChainId);
         stream.writeUint16(assetId);
@@ -246,6 +238,7 @@ public class AccountState extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
+        this.address = byteBuffer.readString();
         this.addressChainId = byteBuffer.readUint16();
         this.assetChainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
@@ -304,6 +297,8 @@ public class AccountState extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
+        //address
+        size += SerializeUtils.sizeOfString(address);
         //chainId
         size += SerializeUtils.sizeOfInt16();
         size += SerializeUtils.sizeOfInt16();
@@ -376,4 +371,5 @@ public class AccountState extends BaseNulsData {
         }
         return null;
     }
+
 }

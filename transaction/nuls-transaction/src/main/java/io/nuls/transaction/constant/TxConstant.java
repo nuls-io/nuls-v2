@@ -7,6 +7,7 @@ package io.nuls.transaction.constant;
 public interface TxConstant {
 
     String MODULE_CODE = "tx";
+    String CONSENSUS_LOGGER_NAME = "tx/tx";
 
     int NULS_CHAINID = 12345;
     int NULS_CHAIN_ASSETID = 1;
@@ -163,5 +164,5 @@ public interface TxConstant {
     int RECENT_PACKAGER_THRESHOLD = 30;
 
     /** 未确认交易过期毫秒数-30分钟 */
-    int UNCONFIRMED_TX_EXPIRE_MS = 30*60*1000;
+    int UNCONFIRMED_TX_EXPIRE_MS = 30000;// 30 * 60 * 1000;
 }

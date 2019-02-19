@@ -75,6 +75,8 @@ public class CmdGenesisAsset {
         tx.setBlockHeight(1L);
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        tx.setBlockHeight(0);
+        tx.setTime(50000000000L);
         return tx;
     }
 
@@ -97,10 +99,11 @@ public class CmdGenesisAsset {
         Transaction transaction = buildTransaction();
         List<String> txHexList = new ArrayList<>();
         txHexList.add(HexUtil.encode(transaction.serialize()));
-        params.put("txHexList",txHexList);
+        params.put("txHex",HexUtil.encode(transaction.serialize()));
          response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
-
+        params.put("txHexList",txHexList);
+        params.put("blockHeight",0);
         params.put("isConfirmTx",true);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
@@ -112,9 +115,9 @@ public class CmdGenesisAsset {
         // Version information ("1.1" or 1.1 is both available)
         params.put("chainId", chainId);
         params.put("assetChainId", assetChainId);
+//        address ="RceDy24yjrhQ72J8xynubWn55PgZj3930";
         params.put("address", address);
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
-
         params.put("assetId", assetId);
         Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
         logger.info("response {}", response);

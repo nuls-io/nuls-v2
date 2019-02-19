@@ -37,14 +37,14 @@ import io.nuls.network.netty.handler.HeartbeatServerHandler;
 import java.util.concurrent.TimeUnit;
 
 import static io.nuls.network.constant.NetworkConstant.*;
+
 /**
  * NulsChannelInitializer
+ *
  * @author lan
  * @date 2018/11/01
- *
  */
 public class NulsChannelInitializer<T extends ChannelInboundHandlerAdapter> extends ChannelInitializer<SocketChannel> {
-
 
 
     private T t;

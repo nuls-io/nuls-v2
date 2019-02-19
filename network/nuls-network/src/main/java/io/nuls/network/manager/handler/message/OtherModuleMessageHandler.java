@@ -28,6 +28,7 @@ import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
+import io.nuls.network.model.Node;
 import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
@@ -56,35 +57,33 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
     public static OtherModuleMessageHandler getInstance() {
         return instance;
     }
+
     /**
-     *
      * 接收消息处理
      * Receive message processing
-     * @param message   address message
-     * @param nodeKey      peer node key
-     * @param isServer client=false or server=true
+     *
+     * @param message address message
      * @return NetworkEventResult
      */
     @Override
-    public NetworkEventResult recieve(BaseMessage message, String nodeKey, boolean isServer) {
-        return   NetworkEventResult.getResultSuccess();
+    public NetworkEventResult recieve(BaseMessage message, Node node) {
+        return NetworkEventResult.getResultSuccess();
     }
 
     /**
-     *
      * @param header
      * @param payLoadBody
-     * @param isServer
+     * @param node
      * @return
      */
-    public NetworkEventResult recieve(MessageHeader header,byte[] payLoadBody,String nodeKey, boolean isServer) {
+    public NetworkEventResult recieve(MessageHeader header, byte[] payLoadBody, Node node) {
         long magicNum = header.getMagicNumber();
         int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(magicNum);
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("chainId", chainId);
-        paramMap.put("nodeId", nodeKey);
-        paramMap.put("messageBody",HexUtil.byteToHex(payLoadBody));
-        Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap( header.getCommandStr());
+        paramMap.put("nodeId", node.getId());
+        paramMap.put("messageBody", HexUtil.byteToHex(payLoadBody));
+        Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(header.getCommandStr());
         if (null == protocolRoleHandlers) {
             Log.error("unknown mssages. cmd={},may be handle had not be registered to network.", header.getCommandStr());
         } else {
@@ -99,7 +98,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                 }
             }
         }
-        return   NetworkEventResult.getResultSuccess();
+        return NetworkEventResult.getResultSuccess();
     }
 
 }
