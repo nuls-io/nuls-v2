@@ -30,8 +30,14 @@ package io.nuls.protocol.constant;
 public interface CommandConstant {
 
     //网络消息对应的RPC命令
-    String NETWORK_MESSAGE = "message";
+
 
     //普通服务对应的RPC命令
+
+    /**
+     * 获取当前协议版本号
+     */
     String GET_PROTOCOL_VERSION = "getCurrentProtocolVersion";
+    String SAVE_BLOCK = "saveBlock";
+    String ROLLBACK_BLOCK = "rollbackBlock";
 }

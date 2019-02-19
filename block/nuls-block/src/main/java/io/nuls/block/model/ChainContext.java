@@ -35,6 +35,7 @@ import io.nuls.tools.log.logback.NulsLogger;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Synchronized;
 
 import java.util.List;
 import java.util.concurrent.locks.StampedLock;
@@ -60,6 +61,13 @@ public class ChainContext {
     @Getter
     @Setter
     private int chainId;
+
+    /**
+     * 当前协议版本
+     */
+    @Getter
+    @Setter
+    private short version;
 
     /**
      * 该链的系统交易类型

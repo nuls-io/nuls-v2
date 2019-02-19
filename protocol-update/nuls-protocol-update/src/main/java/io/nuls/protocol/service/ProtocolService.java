@@ -20,6 +20,9 @@
 
 package io.nuls.protocol.service;
 
+import io.nuls.base.data.BlockHeader;
+import io.nuls.tools.exception.NulsException;
+
 /**
  * 区块服务
  *
@@ -54,5 +57,21 @@ public interface ProtocolService {
      * @param chainId
      */
     void init(int chainId);
+
+    /**
+     * 保存新区块头
+     *
+     * @param chainId
+     * @param blockHeader
+     */
+    short save(int chainId, BlockHeader blockHeader) throws NulsException;
+
+    /**
+     * 回滚区块头
+     *
+     * @param chainId
+     * @param blockHeader
+     */
+    short rollback(int chainId, BlockHeader blockHeader) throws NulsException;
 
 }

@@ -21,6 +21,7 @@
 package io.nuls.block;
 
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.VersionConfig;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
@@ -37,9 +38,13 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.tools.io.IoUtils;
+import io.nuls.tools.parse.JSONUtils;
+import io.nuls.tools.parse.config.ConfigItem;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
 
+import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -56,11 +61,14 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
  */
 public class BlockBootstrap {
 
-    public static void main(String[] args) {
-        Thread.currentThread().setName("block-main");
-        init();
-        start();
-        loop();
+    public static void main(String[] args) throws Exception {
+//        Thread.currentThread().setName("block-main");
+//        init();
+//        start();
+//        loop();
+        String configJson = IoUtils.read("version-config.json");
+        List<VersionConfig> versionConfigs = JSONUtils.json2list(configJson, VersionConfig.class);
+        System.out.println(versionConfigs);
     }
 
     private static void init() {
@@ -146,13 +154,6 @@ public class BlockBootstrap {
      * todo 正式版本删除
      */
     public static void onlyRunWhenTest() {
-        ContextManager.chainIds.forEach(e -> {
-            try {
-                RocksDBService.createTable("tx" + e);
-            } catch (Exception e1) {
-                e1.printStackTrace();
-            }
-        });
 //        ChainContext chainContext = ContextManager.getContext(chainId);
 //        chainContext.setStatus(RunningStatusEnum.RUNNING);
 //        Block latestBlock = chainContext.getLatestBlock();

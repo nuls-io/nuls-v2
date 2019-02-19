@@ -77,8 +77,8 @@ public class Statistics extends BaseNulsData {
         this.height = byteBuffer.readInt64();
         this.count = byteBuffer.readShort();
         this.protocolVersion = byteBuffer.readNulsData(new ProtocolVersion());
-        this.protocolVersionMap = new HashMap<>();
         short size = byteBuffer.readShort();
+        this.protocolVersionMap = new HashMap<>(size);
         for (int i = 0; i < size; i++) {
             protocolVersionMap.put(byteBuffer.readNulsData(new ProtocolVersion()), byteBuffer.readUint16());
         }

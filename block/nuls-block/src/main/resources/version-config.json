@@ -1,0 +1,109 @@
+[
+  {
+    "version": "1",
+    "extend": "",
+    "addtx": [
+      {
+        "type": "1",
+        "name": "aaaaa",
+        "validate": "aaaaa",
+        "commit": "aaaaa",
+        "rollback": "aaaaa"
+      }
+    ],
+    "addmsg": [
+      {
+        "name": "BlockMessage",
+        "refer": "io.nuls.block.message.BlockMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.BlockHandler"
+          }
+        ]
+      },
+      {
+        "name": "CompleteMessage",
+        "refer": "io.nuls.block.message.CompleteMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.CompleteHandler"
+          }
+        ]
+      },
+      {
+        "name": "HashListMessage",
+        "refer": "io.nuls.block.message.HashListMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.GetTxGroupHandler"
+          }
+        ]
+      },
+      {
+        "name": "HashMessage",
+        "refer": "io.nuls.block.message.HashMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.ForwardSmallBlockHandler"
+          },
+          {
+            "name": "io.nuls.block.rpc.GetBlockHandler"
+          },
+          {
+            "name": "io.nuls.block.rpc.GetSmallBlockHandler"
+          }
+        ]
+      },
+      {
+        "name": "HeightRangeMessage",
+        "refer": "io.nuls.block.message.HeightRangeMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.GetBlocksHandler"
+          }
+        ]
+      },
+      {
+        "name": "SmallBlockMessage",
+        "refer": "io.nuls.block.message.SmallBlockMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.SmallBlockHandler"
+          }
+        ]
+      },
+      {
+        "name": "TxGroupMessage",
+        "refer": "io.nuls.block.message.TxGroupMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.rpc.TxGroupHandler"
+          }
+        ]
+      },
+      {
+        "name": "TestMessage",
+        "refer": "io.nuls.block.test.TestMessage",
+        "handlers": [
+          {
+            "name": "io.nuls.block.test.TestMessageHandler"
+          }
+        ]
+      }
+    ],
+    "discardtx": [],
+    "discardmsg": []
+  },
+  {
+    "version": "2",
+    "extend": "1",
+    "addtx": [],
+    "addmsg": [],
+    "discardtx": [],
+    "discardmsg": [
+      {
+        "name": "TestMessage"
+      }
+    ]
+  }
+]

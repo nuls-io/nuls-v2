@@ -41,6 +41,7 @@ import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.ChainGenerator;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
+import io.nuls.block.utils.module.ProtocolUtil;
 import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.core.annotation.Autowired;
@@ -234,9 +235,8 @@ public class BlockServiceImpl implements BlockService {
                 }
                 return false;
             }
-            //4.保存区块头,完全保存,更新标记
-            blockHeaderPo.setComplete(true);
-            if (!ConsensusUtil.saveNotice(chainId, header, localInit) || !blockStorageService.save(chainId, blockHeaderPo)) {
+            //4.通知共识模块
+            if (!ConsensusUtil.saveNotice(chainId, header, localInit)) {
                 commonLog.error("update blockheader fail!chainId-" + chainId + ",height-" + height);
                 if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
                     throw new DbRuntimeException("remove transactions error!");
@@ -249,7 +249,25 @@ public class BlockServiceImpl implements BlockService {
                 }
                 return false;
             }
-            //5.如果不是第一次启动,则更新主链属性
+            //5.通知协议升级模块,完全保存,更新标记
+            blockHeaderPo.setComplete(true);
+            if (!ProtocolUtil.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo)) {
+                commonLog.error("update blockheader fail!chainId-" + chainId + ",height-" + height);
+                if (!ConsensusUtil.rollbackNotice(chainId, height)) {
+                    throw new DbRuntimeException("rollbackNotice error!");
+                }
+                if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
+                    throw new DbRuntimeException("remove transactions error!");
+                }
+                if (!blockStorageService.remove(chainId, height)) {
+                    throw new DbRuntimeException("remove blockheader error!");
+                }
+                if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
+                    throw new DbRuntimeException("setLatestHeight error!");
+                }
+                return false;
+            }
+            //6.如果不是第一次启动,则更新主链属性
             if (!localInit) {
                 context.setLatestBlock(block);
                 Chain masterChain = ChainManager.getMasterChain(chainId);
@@ -291,6 +309,10 @@ public class BlockServiceImpl implements BlockService {
             l = lock.writeLock();
         }
         try {
+            BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
+            if (!ProtocolUtil.rollbackNotice(chainId, blockHeader)) {
+
+            }
             if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
                 commonLog.error("rollback transactions fail!chainId-" + chainId + ",height-" + height);
                 return false;
