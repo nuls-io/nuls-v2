@@ -130,7 +130,7 @@ public class TestTx {
         System.out.println(JSONUtils.obj2PrettyJson(balance3));
         BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address24), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance4));
-        BigInteger balance5 = LedgerCall.getBalance(chain, AddressTool.getAddress(address28), assetChainId, assetId);
+        BigInteger balance5 = LedgerCall.getBalance(chain, AddressTool.getAddress("wCPddSNpLLPrfmXTpD8Mk5L5qqXe23930"), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance5));
     }
 

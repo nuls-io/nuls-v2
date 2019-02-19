@@ -41,9 +41,11 @@ import java.util.List;
 
 
 /**
- * @author: Niels Wang
+ * @author: qinyifeng
  */
 public class AddressTool {
+
+    public static String UNDERLINE = "_";
 
     /**
      * 根据地址字符串查询地址字节数组
@@ -181,7 +183,8 @@ public class AddressTool {
     }
 
     /**
-     *通过地址获得chainId
+     * 通过地址获得chainId
+     *
      * @param bytes
      * @return
      */
@@ -264,7 +267,7 @@ public class AddressTool {
 
     /**
      * 根据地址字节数组生成地址字符串
-     * base58(addressType+hash160(pubKey)+XOR(addressType+hash160(pubKey)))+Hex(chianId)
+     * base58(chainId)+_+base58(addressType+hash160(pubKey)+XOR(addressType+hash160(pubKey)))
      *
      * @param addressBytes
      * @return
@@ -276,36 +279,40 @@ public class AddressTool {
         if (addressBytes.length != Address.ADDRESS_LENGTH) {
             return null;
         }
-        byte[] chianIdByte = new byte[2];
-        System.arraycopy(addressBytes, 0, chianIdByte, 0, 2);
-        byte[] body = new byte[21];
-        System.arraycopy(addressBytes, 2, body, 0, 1);
-        System.arraycopy(addressBytes, 3, body, 1, 20);
+        byte[] chainIdByte = new byte[2];
+        System.arraycopy(addressBytes, 0, chainIdByte, 0, 2);
+        byte[] userTypeByte = new byte[2];
+        System.arraycopy(addressBytes, 2, userTypeByte, 0, 1);
+        byte[] hash160 = new byte[20];
+        System.arraycopy(addressBytes, 3, hash160, 0, 20);
 
+        byte[] body = ByteUtils.concatenate(userTypeByte, hash160);
         byte[] bytes = ByteUtils.concatenate(body, new byte[]{getXor(body)});
-        return Base58.encode(bytes) + HexUtil.encode(chianIdByte);
+        String prefix = Base58.encode(chainIdByte);
+        String suffix = Base58.encode(bytes);
+        return prefix + "_" + suffix;
+        //return Base58.encode(bytes) + HexUtil.encode(chainIdByte);
     }
 
     /**
      * 根据地址字符串解码出地址原始字节数组
-     * base58(addressType+hash160(pubKey)+XOR(addressType+hash160(pubKey)))+Hex(chianId)
+     * base58(chainId)+_+base58(addressType+hash160(pubKey)+XOR(addressType+hash160(pubKey)))
+     * addressType在原始数据后补位0
      *
      * @param addressString
      * @return
      */
     private static byte[] getAddressBytes(String addressString) {
-        byte[] result = new byte[Address.ADDRESS_LENGTH + 1];
+        byte[] result;// = new byte[Address.ADDRESS_LENGTH + 1];
         byte[] chainIdBytes;
-        byte[] hash160Bytes;
+        byte[] addressTypeBytes;
+        byte[] hash160Bytes = new byte[Address.ADDRESS_ORIGIN_LENGTH];
         try {
-            int length = addressString.length();
-            String hash160 = addressString.substring(0, length - 4);
-            String chainIdHex = addressString.substring(length - 4, length);
-            chainIdBytes = HexUtil.decode(chainIdHex);
-            hash160Bytes = Base58.decode(hash160);
-
-            System.arraycopy(chainIdBytes, 0, result, 0, 2);
-            System.arraycopy(hash160Bytes, 0, result, 2, 22);
+            chainIdBytes = Base58.decode(addressString.split(UNDERLINE)[0]);
+            byte[] body = Base58.decode(addressString.split(UNDERLINE)[1]);
+            addressTypeBytes = new byte[]{body[0]};
+            System.arraycopy(body, 2, hash160Bytes, 0, 21);
+            result = ByteUtils.concatenate(chainIdBytes, addressTypeBytes, hash160Bytes);
         } catch (Exception e) {
             Log.error(e);
             throw new NulsRuntimeException(e);
@@ -338,7 +345,7 @@ public class AddressTool {
     }
 
     public static boolean isMultiSignAddress(String address) {
-        byte[] addr=AddressTool.getAddress(address);
+        byte[] addr = AddressTool.getAddress(address);
         return isMultiSignAddress(addr);
     }
 
@@ -381,12 +388,12 @@ public class AddressTool {
         return true;
     }
 
-    public static boolean validSignAddress(List<byte[]> bytesList, byte[] bytes){
-        if(bytesList == null || bytesList.size() == 0 || bytes == null){
+    public static boolean validSignAddress(List<byte[]> bytesList, byte[] bytes) {
+        if (bytesList == null || bytesList.size() == 0 || bytes == null) {
             return false;
-        }else{
-            for (byte[] tempBytes:bytesList) {
-                if(Arrays.equals(bytes,tempBytes)){
+        } else {
+            for (byte[] tempBytes : bytesList) {
+                if (Arrays.equals(bytes, tempBytes)) {
                     return true;
                 }
             }
