@@ -50,10 +50,10 @@ public class TransactionCmdTest {
     protected String newPassword = "c12345678";
     protected String version = "1.0";
     protected String success = "1";
-    String address1 = "SPWAxuodkw222367N88eavYDWRraG3930";
-    String address2 = "Rnt57eZnH8Dd7K3LudJXmmEutYJZD3930";
-    String address3 = "XroY3cLWTfgKMRRRLCP5rhvo1gHY63930";
-    String address4 = "WEXAmsUJSNAvCx2zUaXziy3ZYX1em3930";
+    String address1 = "5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5";
+    String address2 = "5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ";
+    String address3 = "5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT";
+    String address4 = "5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi";
     static int assetId = 1;
     //入账金额
     static BigInteger amount = BigInteger.valueOf(1000000000000000L);
@@ -284,19 +284,19 @@ public class TransactionCmdTest {
         List<CoinDto> inputs = new ArrayList<>();
         List<CoinDto> outputs = new ArrayList<>();
         CoinDto inputCoin1 = new CoinDto();
-        inputCoin1.setAddress("KMNPqwARu77qAL4UCkd5Vwvj5PAtw3930");
+        inputCoin1.setAddress("5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF");
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(1);
-        inputCoin1.setAmount(new BigInteger("30000000000"));
+        inputCoin1.setAmount(new BigInteger("20000000000"));
         inputs.add(inputCoin1);
 
         CoinDto outputCoin1 = new CoinDto();
-        outputCoin1.setAddress("wCPddSNpLLPrfmXTpD8Mk5L5qqXe23930");
+        outputCoin1.setAddress("5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi");
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(1);
-        outputCoin1.setAmount(new BigInteger("30000000000"));
+        outputCoin1.setAmount(new BigInteger("20000000000"));
         outputs.add(outputCoin1);
 
         transferDto.setInputs(inputs);
@@ -431,7 +431,7 @@ public class TransactionCmdTest {
         MultiSigAccount multiSigAccount = CommonRpcOperation.createMultiSigAccount();
         assertNotNull(multiSigAccount);
         //String fromAddress = AddressTool.getStringAddressByBytes(multiSigAccount.getAddress().getAddressBytes());
-        String fromAddress = "KMNPqwARu77qAL4UCkd5Vwvj5PAtw3930";
+        String fromAddress = "5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi";
         assertNotNull(fromAddress);
         String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(0), chainId));
         assertNotNull(signAddress);
@@ -449,7 +449,7 @@ public class TransactionCmdTest {
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("address", fromAddress);
-        params.put("signAddress", "wCPddSNpLLPrfmXTpD8Mk5L5qqXe23930");
+        params.put("signAddress", "5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5");
         params.put("password", password);
         params.put("type", 1);
         params.put("toAddress", toAddress);
