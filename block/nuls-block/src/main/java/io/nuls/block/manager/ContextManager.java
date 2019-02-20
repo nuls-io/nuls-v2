@@ -20,6 +20,8 @@
 
 package io.nuls.block.manager;
 
+import io.nuls.base.data.protocol.Protocol;
+import io.nuls.base.data.protocol.ProtocolConfig;
 import io.nuls.block.BlockBootstrap;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
@@ -49,7 +51,7 @@ public class ContextManager {
     private ContextManager() {
     }
 
-    public static void init(ChainParameters chainParameters) {
+    public static void init(ChainParameters chainParameters, Map<Short, Protocol> protocolMap) {
         ChainContext chainContext = new ChainContext();
         int chainId = chainParameters.getChainId();
         chainIds.add(chainId);
@@ -57,6 +59,7 @@ public class ContextManager {
         ContextManager.contextMap.put(chainId, chainContext);
         chainContext.setChainId(chainId);
         chainContext.setParameters(chainParameters);
+        chainContext.setProtocolsMap(protocolMap);
         chainContext.init();
         commonLog.info("new chainContext add! chainId-" + chainId);
     }

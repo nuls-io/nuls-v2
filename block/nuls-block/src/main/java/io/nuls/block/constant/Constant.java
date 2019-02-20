@@ -22,9 +22,9 @@ package io.nuls.block.constant;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.protocol.ProtocolConfig;
 import io.nuls.block.model.Node;
 
-import java.io.File;
 import java.util.Comparator;
 
 /**
@@ -105,6 +105,11 @@ public interface Constant {
      * 区块头排序器
      */
     Comparator<BlockHeader> BLOCK_HEADER_COMPARATOR = Comparator.comparingLong(BlockHeader::getHeight);
+
+    /**
+     * 区块头排序器
+     */
+    Comparator<ProtocolConfig> PROTOCOL_CONFIG_COMPARATOR = Comparator.comparingInt(ProtocolConfig::getVersion);
 
     /**
      * 节点比较器,默认按信用值排序

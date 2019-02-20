@@ -22,6 +22,9 @@ package io.nuls.block.utils.module;
 
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
+import io.nuls.base.data.protocol.ListItem;
+import io.nuls.base.data.protocol.MessageConfig;
+import io.nuls.base.data.protocol.Protocol;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.rpc.client.CmdDispatcher;
@@ -31,6 +34,7 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,7 +46,27 @@ import java.util.Map;
  */
 public class ProtocolUtil {
 
-    public static boolean meaasge(int chainId, BlockHeader blockHeader) {
+    public static boolean meaasgeValidate(int chainId, Class messageClass, Class handlerClass) {
+        ChainContext context = ContextManager.getContext(chainId);
+        short version = context.getVersion();
+        Protocol protocol = context.getProtocolsMap().get(version);
+        List<MessageConfig> allowMsg = protocol.getAllowMsg();
+        String messageClassName = messageClass.getName();
+        String handlerClassName = handlerClass.getName();
+        for (MessageConfig config : allowMsg) {
+            if (config.getRefer().equals(messageClassName)) {
+                List<ListItem> handlers = config.getHandlers();
+                for (ListItem handler : handlers) {
+                    if (handler.getName().equals(handlerClassName)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean transactionValidate(int chainId, Class messageClass, Class handlerClass) {
         return false;
     }
 

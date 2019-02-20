@@ -23,6 +23,7 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
+import io.nuls.base.data.protocol.Protocol;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
@@ -35,9 +36,9 @@ import io.nuls.tools.log.logback.NulsLogger;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.Synchronized;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.StampedLock;
 
 /**
@@ -68,6 +69,13 @@ public class ChainContext {
     @Getter
     @Setter
     private short version;
+
+    /**
+     * 所有协议版本(包括消息、交易映射)
+     */
+    @Getter
+    @Setter
+    private Map<Short, Protocol> protocolsMap;
 
     /**
      * 该链的系统交易类型

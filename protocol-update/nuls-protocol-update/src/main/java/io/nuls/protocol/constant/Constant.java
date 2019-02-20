@@ -49,7 +49,7 @@ public interface Constant {
     /**
      * db文件存放目录
      */
-    String DATA_PATH = System.getProperty("user.home") + "/data/protocol";
+    String DATA_PATH = "../../../../data/protocol";
 
     /**
      * 存储每条链的配置信息

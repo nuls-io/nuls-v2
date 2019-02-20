@@ -38,7 +38,6 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -87,7 +86,7 @@ public class BlockResource extends BaseCmd {
             int chainId = Integer.parseInt(map.get("chainId").toString());
             BlockHeader blockHeader = service.getLatestBlockHeader(chainId);
             return success(HexUtil.encode(blockHeader.serialize()));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
             return failed(e.getMessage());
@@ -107,7 +106,7 @@ public class BlockResource extends BaseCmd {
             int chainId = Integer.parseInt(map.get("chainId").toString());
             Block block = service.getLatestBlock(chainId);
             return success(HexUtil.encode(block.serialize()));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
             return failed(e.getMessage());
@@ -130,7 +129,7 @@ public class BlockResource extends BaseCmd {
             BlockHeaderPo po = service.getBlockHeader(chainId, height);
             BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(po);
             return success(HexUtil.encode(blockHeader.serialize()));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
             return failed(e.getMessage());
@@ -159,7 +158,7 @@ public class BlockResource extends BaseCmd {
                 hexList.add(HexUtil.encode(blockHeader.serialize()));
             }
             return success(hexList);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
             return failed(e.getMessage());
@@ -187,7 +186,7 @@ public class BlockResource extends BaseCmd {
                 hexList.add(HexUtil.encode(blockHeader.serialize()));
             }
             return success(hexList);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
             return failed(e.getMessage());
@@ -209,7 +208,7 @@ public class BlockResource extends BaseCmd {
             Long height = Long.parseLong(map.get("height").toString());
             Block block = service.getBlock(chainId, height);
             return success(HexUtil.encode(block.serialize()));
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
             return failed(e.getMessage());

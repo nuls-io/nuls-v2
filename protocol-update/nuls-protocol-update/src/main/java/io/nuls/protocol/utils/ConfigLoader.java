@@ -22,7 +22,7 @@
 
 package io.nuls.protocol.utils;
 
-import io.nuls.base.data.ProtocolConfig;
+import io.nuls.base.data.protocol.ProtocolConfig;
 import io.nuls.protocol.constant.ConfigConstant;
 import io.nuls.protocol.manager.ConfigManager;
 import io.nuls.protocol.manager.ContextManager;
