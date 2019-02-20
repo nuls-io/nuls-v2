@@ -145,6 +145,8 @@ public class TransactionServiceImpl implements TransactionService {
         buildMultiSignTransactionCoinData(transaction, chainId, multiSigAccount, toAddress, amount);
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
+        //缓存当前交易hash
+        this.cacheTxHash(transaction);
         //process transaction
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
@@ -196,8 +198,10 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setTxData(alias.serialize());
         //build coin data
         buildMultiSignTransactionCoinData(transaction, chainId, multiSigAccount, toAddress, BigInteger.ONE);
-        TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
         //sign
+        TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
+        //缓存当前交易hash
+        this.cacheTxHash(transaction);
         //process transaction
         boolean isBroadcasted = txMutilProcessing(multiSigAccount, transaction, transactionSignature);
         MultiSignTransactionResultDto multiSignTransactionResultDto = new MultiSignTransactionResultDto();
@@ -212,26 +216,28 @@ public class TransactionServiceImpl implements TransactionService {
         //查询账本获取nonce值
         byte[] nonce = TxUtil.getNonce(chainId, chainId, assetsId, multiSigAccount.getAddress().getAddressBytes());
         CoinFrom coinFrom = new CoinFrom(multiSigAccount.getAddress().getAddressBytes(), chainId, assetsId, amount, nonce, AccountConstant.NORMAL_TX_LOCKED);
-        //CoinFrom coinFrom = new CoinFrom(multiSigAccount.getAddress().getAddressBytes(), chainId, assetsId);
         CoinTo coinTo = new CoinTo(AddressTool.getAddress(toAddress), chainId, assetsId, amount);
         int txSize = transaction.size() + coinFrom.size() + coinTo.size() + ((int) multiSigAccount.getM()) * P2PHKSignature.SERIALIZE_LENGTH;
-        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize); //计算手续费
-        BigInteger totalAmount = amount.add(fee); //总费用为
+        //计算手续费
+        BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize);
+        //总费用为
+        BigInteger totalAmount = amount.add(fee);
         coinFrom.setAmount(totalAmount);
         //检查余额是否充足
         BigInteger mainAsset = TxUtil.getBalance(chainId, chainId, assetsId, coinFrom.getAddress());
-        if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) { //余额不足
+        //余额不足
+        if (BigIntegerUtils.isLessThan(mainAsset, totalAmount)) {
             throw new NulsRuntimeException(AccountErrorCode.INSUFFICIENT_FEE);
         }
         CoinData coinData = new CoinData();
         coinData.setFrom(Arrays.asList(coinFrom));
         coinData.setTo(Arrays.asList(coinTo));
         transaction.setCoinData(coinData.serialize());
+        transaction.setHash(NulsDigestData.calcDigestData(transaction.serializeForHash()));
         return transaction;
     }
 
     private TransactionSignature buildMultiSignTransactionSignature(Transaction transaction, MultiSigAccount multiSigAccount, Account account, String password) throws NulsException, IOException {
-        transaction.setHash(NulsDigestData.calcDigestData(transaction.serializeForHash()));
         //使用签名账户对交易进行签名
         //TransactionSignature transactionSignature = new TransactionSignature();
 //        List<P2PHKSignature> p2PHKSignatures;
