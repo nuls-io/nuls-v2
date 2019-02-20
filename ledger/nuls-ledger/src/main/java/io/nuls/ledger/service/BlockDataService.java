@@ -24,6 +24,10 @@
  */
 package io.nuls.ledger.service;
 
+import io.nuls.base.data.Transaction;
+
+import java.util.List;
+
 /**
  * @author lan
  * @description
@@ -31,4 +35,5 @@ package io.nuls.ledger.service;
  **/
 public interface BlockDataService {
     void initBlockDatas() throws Exception;
+    void saveLatestBlockDatas(int chainId,long height,List<Transaction> txList)  throws Exception;
 }

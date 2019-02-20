@@ -23,12 +23,8 @@
  *
  */
 
-package io.nuls.network.manager.threads;
+package io.nuls.network.manager;
 
-import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.MessageFactory;
-import io.nuls.network.manager.MessageManager;
-import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.NetTimeUrl;
@@ -48,52 +44,52 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  *
  * @author vivi & lan
  */
-public class TimeService implements Runnable {
+public class TimeManager extends BaseManager {
     private static final int MAX_REQ_PEER_NUMBER = 8;
     private static Map<String, Long> peerTimesMap = new ConcurrentHashMap<>();
     private static long currentRequestId = System.currentTimeMillis();
-    private static TimeService instance = new TimeService();
+    private static TimeManager instance = new TimeManager();
 
     /**
      * 网站url集合，用于同步网络时间
      */
-    private List<String> urlList = new ArrayList<>();
+    public List<String> urlList = new ArrayList<>();
 
-    private List<NetTimeUrl> netTimeUrls = new ArrayList<>();
+    public List<NetTimeUrl> netTimeUrls = new ArrayList<>();
     /**
      * 时间偏移差距触发点，超过该值会导致本地时间重设，单位毫秒
      * Time migration gap trigger point, which can cause local time reset, unit milliseconds.
      **/
-    private static final long TIME_OFFSET_BOUNDARY = 3000L;
+    public static final long TIME_OFFSET_BOUNDARY = 3000L;
     /**
      * 等待对等节点回复时间
      **/
-    private static final long TIME_WAIT_PEER_RESPONSE = 2000L;
+    public static final long TIME_WAIT_PEER_RESPONSE = 2000L;
     /**
      * 重新同步时间间隔
      * Resynchronize the interval.
      * 2 minutes;
      */
-    private static final long NET_REFRESH_TIME = 2 * 60 * 1000L;
+    public static final long NET_REFRESH_TIME = 2 * 60 * 1000L;
 
     /**
      * 网络时间偏移值
      */
-    private static long netTimeOffset;
+    public static long netTimeOffset;
 
 
     /**
      * 上次同步时间点
      * The last synchronization point.
      */
-    private static long lastSyncTime;
+    public static long lastSyncTime;
 
-    public static TimeService getInstance() {
+    public static TimeManager getInstance() {
         return instance;
     }
 
 
-    private TimeService() {
+    private TimeManager() {
         urlList.add("sgp.ntp.org.cn");
         urlList.add("cn.ntp.org.cn");
         urlList.add("time1.apple.com");
@@ -211,7 +207,7 @@ public class TimeService implements Runnable {
     /**
      * 同步网络时间
      */
-    private void syncWebTime() {
+    public void syncWebTime() {
 
         int count = 0;
         long sum = 0L;
@@ -267,34 +263,6 @@ public class TimeService implements Runnable {
         }
     }
 
-
-    /**
-     * 循环调用同步网络时间方法
-     * Loop call synchronous network time method.
-     */
-    @Override
-    public void run() {
-        long lastTime = System.currentTimeMillis();
-        syncWebTime();
-        while (true) {
-            long newTime = System.currentTimeMillis();
-            if (Math.abs(newTime - lastTime) > TIME_OFFSET_BOUNDARY) {
-                Log.debug("local time changed ：{}", newTime - lastTime);
-                syncWebTime();
-            } else if (currentTimeMillis() - lastSyncTime > NET_REFRESH_TIME) {
-                //每隔一段时间更新网络时间
-                syncWebTime();
-            }
-            lastTime = newTime;
-            try {
-                Thread.sleep(500L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-
     /**
      * 获取当前网络时间毫秒数
      * Gets the current network time in milliseconds.
@@ -306,4 +274,13 @@ public class TimeService implements Runnable {
     }
 
 
+    @Override
+    public void init() {
+
+    }
+
+    @Override
+    public void start() {
+
+    }
 }

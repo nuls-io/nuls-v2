@@ -56,6 +56,7 @@ public class MultiSigAccountCmdTest {
         List<String> pubKeys = new ArrayList<>();
         for (Account account:accountList ) {
             pubKeys.add(HexUtil.encode(account.getPubKey()));
+            System.out.println(account.getAddress().getBase58());
         }
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
@@ -67,6 +68,7 @@ public class MultiSigAccountCmdTest {
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSigAccount");
         assertNotNull(result);
         String address = (String) result.get("address");
+        System.out.println("address: "+address);
         assertNotNull(address);
         int resultMinSigns = (int) result.get("minSigns");
         assertEquals(resultMinSigns,2);

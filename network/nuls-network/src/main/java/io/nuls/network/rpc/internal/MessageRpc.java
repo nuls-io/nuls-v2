@@ -30,8 +30,8 @@ import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
+import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
-import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -122,7 +122,12 @@ public class MessageRpc extends BaseCmd {
             byte[] messageBody = HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
             String cmd = String.valueOf(params.get("command"));
             MessageManager messageManager = MessageManager.getInstance();
-            long magicNumber = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId).getMagicNumber();
+            NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
+            if(null == nodeGroup){
+                Log.error("chain is not exist!");
+                return failed(NetworkErrorCode.PARAMETER_ERROR);
+            }
+            long magicNumber = nodeGroup.getMagicNumber();
             long checksum = messageManager.getCheckSum(messageBody);
             MessageHeader header = new MessageHeader(cmd, magicNumber, checksum, messageBody.length);
             byte[] headerByte = header.serialize();
@@ -134,7 +139,6 @@ public class MessageRpc extends BaseCmd {
             System.arraycopy(headerByte, 0, message, 0, headerByte.length);
             System.arraycopy(messageBody, 0, message, headerByte.length, messageBody.length);
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
-            NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);
             Collection<Node> nodesCollection = nodeGroup.getAvailableNodes(isCross);
             excludeNodes = NetworkConstant.COMMA + excludeNodes + NetworkConstant.COMMA;
             List<Node> nodes = new ArrayList<>();
@@ -168,7 +172,7 @@ public class MessageRpc extends BaseCmd {
             String nodes = String.valueOf(params.get("nodes"));
             byte[] messageBody = HexUtil.hexStringToBytes(String.valueOf(params.get("messageBody")));
             String cmd = String.valueOf(params.get("command"));
-            Log.debug("{}==================sendPeersMsg begin, cmd-{}", TimeService.currentTimeMillis(), cmd);
+            Log.debug("{}==================sendPeersMsg begin, cmd-{}", TimeManager.currentTimeMillis(), cmd);
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
             NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByChainId(chainId);

@@ -6,6 +6,7 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.ledger.model.UnconfirmedTx;
+import io.nuls.ledger.model.po.UnconfirmedAmount;
 import io.nuls.ledger.model.po.UnconfirmedNonce;
 import io.nuls.tools.exception.NulsException;
 
@@ -63,7 +64,7 @@ public class CoinDataUtils {
 
     }
 
-    public static List<UnconfirmedNonce> getConfirmedNonce(String nonce,List<UnconfirmedNonce> unconfirmedNonces) {
+    public static List<UnconfirmedNonce> getUnconfirmedNonces(String nonce,List<UnconfirmedNonce> unconfirmedNonces) {
         if (unconfirmedNonces.size() > 0) {
             int clearIndex = 0;
             boolean hadClear = false;
@@ -88,6 +89,33 @@ public class CoinDataUtils {
 
         } else {
             return unconfirmedNonces;
+        }
+    }
+    public static List<UnconfirmedAmount> getUnconfirmedAmounts(String txHash, List<UnconfirmedAmount> unconfirmedAmounts) {
+        if (unconfirmedAmounts.size() > 0) {
+            int clearIndex = 0;
+            boolean hadClear = false;
+            for(UnconfirmedAmount unconfirmedAmount : unconfirmedAmounts){
+                clearIndex++;
+                if(unconfirmedAmount.getTxHash().equalsIgnoreCase(txHash)){
+                    hadClear=true;
+                    break;
+                }
+            }
+            int size = unconfirmedAmounts.size();
+            //从第list的index=i-1起进行清空
+            if(hadClear) {
+                LoggerUtil.logger.debug("remove UnconfirmedAmount clearIndex = {}",clearIndex);
+                List<UnconfirmedAmount> leftUnconfirmedAmounts = unconfirmedAmounts.subList(clearIndex,size);
+                return leftUnconfirmedAmounts;
+            }else {
+                //分叉了，清空之前的未提交nonce
+                LoggerUtil.logger.debug("remove all");
+                return new ArrayList<>();
+            }
+
+        } else {
+            return unconfirmedAmounts;
         }
     }
 }

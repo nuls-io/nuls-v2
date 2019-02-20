@@ -152,7 +152,7 @@ public interface AccountConstant {
      * 黑洞地址，该地址的资产无法找回
      * //TODO 测试地址，后期需修改
      */
-    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("WEXAmsUJSNAvCx2zUaXziy3ZYX1em3930");
+    byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("5MR_2CW59jPsSMabykKEvbjeEQsbw7nDyZ3");
 
     /**
      * --------[EVENT constant] -------

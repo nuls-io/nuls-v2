@@ -120,9 +120,8 @@ public class TaskManager extends BaseManager {
      */
     private void timeServiceThreadStart() {
         Log.debug("----------- TimeService start -------------");
-        TimeService timeService = TimeService.getInstance();
-        timeService.initWebTimeServer();
-        ThreadUtils.createAndRunThread("TimeService", timeService, true);
+        TimeManager.getInstance().initWebTimeServer();
+        ThreadUtils.createAndRunThread("TimeTask", new TimeTask(), true);
     }
 
     /**

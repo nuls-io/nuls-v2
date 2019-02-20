@@ -42,4 +42,9 @@ public interface DataBaseArea {
      *   存区块当前确认的高度
      */
     String TB_LEDGER_BLOCK_HEIGHT = "chainBlockHeight";
+
+    /**
+     *   存区块交易缓存数据
+     */
+    String TB_LEDGER_BLOCKS = "chainBlocks";
 }

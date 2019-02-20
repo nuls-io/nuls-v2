@@ -27,8 +27,8 @@ package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.manager.NodeGroupManager;
+import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
-import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -79,11 +79,11 @@ public class VerackMessageHandler extends BaseMessageHandler {
 
         } else {
             node.setConnectStatus(NodeConnectStatusEnum.AVAILABLE);
-            node.setConnectTime(TimeService.currentTimeMillis());
+            node.setConnectTime(TimeManager.currentTimeMillis());
             if (node.isCrossConnect()) {
-                node.getNodeGroup().getCrossNodeContainer().setLatestHandshakeSuccTime(TimeService.currentTimeMillis());
+                node.getNodeGroup().getCrossNodeContainer().setLatestHandshakeSuccTime(TimeManager.currentTimeMillis());
             } else {
-                node.getNodeGroup().getLocalNetNodeContainer().setLatestHandshakeSuccTime(TimeService.currentTimeMillis());
+                node.getNodeGroup().getLocalNetNodeContainer().setLatestHandshakeSuccTime(TimeManager.currentTimeMillis());
             }
         }
         return NetworkEventResult.getResultSuccess();

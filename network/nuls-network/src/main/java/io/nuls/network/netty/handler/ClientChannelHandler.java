@@ -26,20 +26,14 @@
 package io.nuls.network.netty.handler;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
-import io.nuls.network.manager.ConnectionManager;
-import io.nuls.network.manager.MessageFactory;
 import io.nuls.network.manager.MessageManager;
-import io.nuls.network.manager.handler.MessageHandlerFactory;
+import io.nuls.network.manager.TimeManager;
 import io.nuls.network.manager.handler.base.BaseChannelHandler;
-import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
-import io.nuls.network.manager.threads.TimeService;
 import io.nuls.network.model.Node;
-import io.nuls.network.model.message.VersionMessage;
 
 import java.io.IOException;
 
@@ -94,7 +88,7 @@ public class ClientChannelHandler extends BaseChannelHandler {
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
         String remoteIP = socketChannel.remoteAddress().getHostString();
         int port = socketChannel.remoteAddress().getPort();
-        Log.info("{}-----------------client channelRead-----------------{}:{}", TimeService.currentTimeMillis(), remoteIP, port);
+        Log.info("{}-----------------client channelRead-----------------{}:{}", TimeManager.currentTimeMillis(), remoteIP, port);
         ByteBuf buf = (ByteBuf) msg;
         try {
             Attribute<Node> nodeAttribute = ctx.channel().attr(key);

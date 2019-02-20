@@ -67,8 +67,10 @@ public class AccountStateServiceImpl implements AccountStateService {
         //同步下未确认交易账户数据
         synchronized (LockerUtils.getAccountLocker(assetKey)) {
             AccountState dbAccountState = repository.getAccountState(accountState.getAddressChainId(),assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING));
-            List<UnconfirmedNonce> unconfirmedNonces = CoinDataUtils.getConfirmedNonce(accountState.getNonce(),dbAccountState.getUnconfirmedNonces());
+            List<UnconfirmedNonce> unconfirmedNonces = CoinDataUtils.getUnconfirmedNonces(accountState.getNonce(),dbAccountState.getUnconfirmedNonces());
             accountState.setUnconfirmedNonces( unconfirmedNonces);
+            List<UnconfirmedAmount> unconfirmedAmounts = CoinDataUtils.getUnconfirmedAmounts(accountState.getTxHash(),dbAccountState.getUnconfirmedAmounts());
+            accountState.setUnconfirmedAmounts(unconfirmedAmounts);
             repository.updateAccountState(assetKey.getBytes(LedgerConstant.DEFAULT_ENCODING), accountState);
             blockSnapshotAccounts.addAccountState(dbAccountState);
         }
