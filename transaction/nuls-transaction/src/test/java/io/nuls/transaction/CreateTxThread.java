@@ -110,7 +110,7 @@ public class CreateTxThread implements Runnable {
 //            createTransfer();
             createTransfer();
 
-            Thread.sleep(50L);
+            Thread.sleep(2000L);
         }
     }
     private void createTransfer() throws Exception {

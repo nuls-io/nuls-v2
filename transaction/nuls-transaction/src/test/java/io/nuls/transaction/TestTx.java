@@ -441,24 +441,28 @@ public class TestTx {
 
     @Test
     public void importPriKeyTest() {
+//        importPriKey("00d1e4d568489995f4b45789f372a1c23823241ccb6a6709d164658384fdaaa822");//种子出块地址
+        importPriKey("008e7861842b2ca881326f40482e905f0119a608d90f7aa60ac80f06bf0c196d09");
+        importPriKey("00e97ec0c01607f58bc692c604739c63ebf5aed2e9d01b9f427be4aa1cf53b4dea");
+        importPriKey("00ae4df86385da0cce8b72fb463fc07d8767af36ad2cc78baf624b8815234bcc71");
+        importPriKey("7b06ab2a94bf81eeea2606b6f87406ddb0b45f0f2a4d9a676c56ca81b3706c36");
+        importPriKey("00fed14ccaa20c41107b7a00b279960235d981e698a717234c63f6fa25cbc5abcb");
+        importPriKey("00c97dab006f1d973ad9d7f38a79125c24a1ebcdb3a687a3b4f84ddda97548e116");
+        importPriKey("00adee90f664e1575c371f38a801449ac5324ba406e9931fb0cf51babc0d23e09b");
+        importPriKey("008878a0099b7393b59a6bd728d97abbe6b593af1603dc3043550bcc8fc61ffbe6");
+        importPriKey("211eb443e477cff92610b9eb733d71de61a75fe56f7253be91b715f2004eb409");
+        importPriKey("6dec834b2556df23bb0fbc3607720f462be7ef8d28a34caf3847d91b8c9c6f93");
+        importPriKey("00af59aa43536f6162a7166cdc1a389b32be0a06bc06f71a601a92e08fd2788dfe");
+    }
+
+    public void importPriKey(String priKey){
         try {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
 
-            params.put("priKey", "00d1e4d568489995f4b45789f372a1c23823241ccb6a6709d164658384fdaaa822");
-//            params.put("priKey", "008e7861842b2ca881326f40482e905f0119a608d90f7aa60ac80f06bf0c196d09");
-//            params.put("priKey", "00e97ec0c01607f58bc692c604739c63ebf5aed2e9d01b9f427be4aa1cf53b4dea");
-//            params.put("priKey", "00ae4df86385da0cce8b72fb463fc07d8767af36ad2cc78baf624b8815234bcc71");
-//            params.put("priKey", "7b06ab2a94bf81eeea2606b6f87406ddb0b45f0f2a4d9a676c56ca81b3706c36");
-//            params.put("priKey", "00fed14ccaa20c41107b7a00b279960235d981e698a717234c63f6fa25cbc5abcb");
-//            params.put("priKey", "00c97dab006f1d973ad9d7f38a79125c24a1ebcdb3a687a3b4f84ddda97548e116");
-//            params.put("priKey", "00adee90f664e1575c371f38a801449ac5324ba406e9931fb0cf51babc0d23e09b");
-//            params.put("priKey", "008878a0099b7393b59a6bd728d97abbe6b593af1603dc3043550bcc8fc61ffbe6");
-//            params.put("priKey", "211eb443e477cff92610b9eb733d71de61a75fe56f7253be91b715f2004eb409");
-//            params.put("priKey", "6dec834b2556df23bb0fbc3607720f462be7ef8d28a34caf3847d91b8c9c6f93");
-//            params.put("priKey", "00af59aa43536f6162a7166cdc1a389b32be0a06bc06f71a601a92e08fd2788dfe");
+            params.put("priKey", priKey);
             params.put("password", "");
             params.put("overwrite", true);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
