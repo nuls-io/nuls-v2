@@ -15,7 +15,7 @@
     "name": "rocksdb.datapath",
     "remark": "数据库路径",
     "readOnly": "true",
-    "value": "./data"
+    "value": "../../../../data/network"
   },
   {
     "name": "network.self.server.port",
