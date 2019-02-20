@@ -4,6 +4,7 @@ import io.nuls.account.ServiceInitializer;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.txdata.Alias;
+import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.base.data.Address;
@@ -36,7 +37,7 @@ public class MultiSigAccountCmdTest {
 
     protected int chainId = 12345;
 
-    protected String password = "a12345678";
+    protected String password = "nuls123456";
 
     static MultiSignAccountService multiSignAccountService;
     static AccountService accountService;
@@ -56,7 +57,6 @@ public class MultiSigAccountCmdTest {
         List<String> pubKeys = new ArrayList<>();
         for (Account account:accountList ) {
             pubKeys.add(HexUtil.encode(account.getPubKey()));
-            System.out.println(account.getAddress().getBase58());
         }
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
@@ -68,7 +68,6 @@ public class MultiSigAccountCmdTest {
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSigAccount");
         assertNotNull(result);
         String address = (String) result.get("address");
-        System.out.println("address: "+address);
         assertNotNull(address);
         int resultMinSigns = (int) result.get("minSigns");
         assertEquals(resultMinSigns,2);

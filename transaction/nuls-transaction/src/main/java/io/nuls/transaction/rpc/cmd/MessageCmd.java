@@ -129,6 +129,8 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析获取完整交易消息
             GetTxMessage message = new GetTxMessage();
+            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
@@ -264,6 +266,8 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析获取完整跨链交易消息
             GetTxMessage message = new GetTxMessage();
+            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
@@ -316,6 +320,8 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析获取完整跨链交易消息
             GetTxMessage message = new GetTxMessage();
+            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
@@ -372,6 +378,8 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析获取完整跨链交易消息
             GetTxMessage message = new GetTxMessage();
+            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
