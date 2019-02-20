@@ -101,7 +101,7 @@ public class AccountServiceTest {
      */
     @Test
     public void createAccountTest() throws Exception {
-        int count = 50;
+        int count = 10;
         //Test to create an account that is not empty.
 //        List<Account> accountList = accountService.createAccount(chainId, count, password);
 //        //Checking the number of accounts returned

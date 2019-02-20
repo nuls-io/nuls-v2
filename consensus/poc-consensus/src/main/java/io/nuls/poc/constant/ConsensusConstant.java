@@ -221,7 +221,7 @@ public interface ConsensusConstant {
      * 区块交易大小（字节）
      * Block transaction size (bytes)
      * */
-    int PACK_TX_MAX_SIZE = 30000;
+    int PACK_TX_MAX_SIZE = 30000*1000;
 
     /**
      * 获取打包交易最长等待时间(毫秒)

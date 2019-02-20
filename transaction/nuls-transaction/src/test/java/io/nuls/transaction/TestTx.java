@@ -76,16 +76,16 @@ public class TestTx {
 //    static String address202 = "XroY3cLWTfgKMRRRLCP5rhvo1gHY63930";
 
 
-    static String address20 = "H3eriRPPdbSMxXfg5MFYVfGmypNma3930";
-    static String address21 = "H9jzu275LW7qUPo4boZoN611Hc2DE3930";
-    static String address22 = "Hev98WnFwR55FJffop8H2J24VJe5y3930";
-    static String address23 = "HgmTfwiFhTLNuz2sRLgz3BrXcyY9F3930";
-    static String address24 = "JHwrmyKbu4KmSxy27HctqSG8aQqdY3930";
-    static String address25 = "JtM2x9hyUPfUQCfNnZZb4XG1eciS13930";
-    static String address26 = "JyBjVrGPbpr4smwbwUzDokQz2F7Gw3930";
-    static String address27 = "K8vyxqeu6dyfR35XcdqNZK4fW9h2N3930";
-    static String address28 = "KKQmeMGKfkkmQF5onWBY487zHdB7Q3930";
-    static String address29 = "KMNPqwARu77qAL4UCkd5Vwvj5PAtw3930";
+    static String address20 = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
+    static String address21 = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
+    static String address22 = "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA";
+    static String address23 = "5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw";
+    static String address24 = "5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk";
+    static String address25 = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+    static String address26 = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
+    static String address27 = "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM";
+    static String address28 = "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r";
+    static String address29 = "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF";
 
     static int assetId = 1;
     //入账金额
@@ -130,7 +130,7 @@ public class TestTx {
         System.out.println(JSONUtils.obj2PrettyJson(balance3));
         BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address24), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance4));
-        BigInteger balance5 = LedgerCall.getBalance(chain, AddressTool.getAddress(address28), assetChainId, assetId);
+        BigInteger balance5 = LedgerCall.getBalance(chain, AddressTool.getAddress(address25), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance5));
     }
 
@@ -464,10 +464,7 @@ public class TestTx {
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             String address = (String) result.get("address");
-//            assertEquals(accountList.get(0), address);
-            //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
-            params.put("overwrite", false);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            Log.info("{}", address);
         } catch (NulsRuntimeException e) {
             e.printStackTrace();
         } catch (Exception e) {

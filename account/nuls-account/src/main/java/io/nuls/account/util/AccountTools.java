@@ -13,7 +13,8 @@ public class AccountTools {
         String prefix = Base58.encode(SerializeUtils.int16ToBytes(chainId));
         byte[] useType = SerializeUtils.int16ToBytes(type);
         byte[] hash160 = SerializeUtils.sha256hash160(ecKey.getPubKey());
-        String suffix = Base58.encode(concatenate(useType, hash160));
+        byte[] body=concatenate(useType, hash160);
+        String suffix = Base58.encode(concatenate(body,new byte[]{getXor(body)}));
         return prefix + "_" + suffix;
     }
 
@@ -22,6 +23,19 @@ public class AccountTools {
         return 0;
     }
 
+    /**
+     * 生成校验位，根据以下字段生成：addressType+hash160(pubKey)
+     *
+     * @param body
+     * @return
+     */
+    private static byte getXor(byte[] body) {
+        byte xor = 0x00;
+        for (int i = 0; i < body.length; i++) {
+            xor ^= body[i];
+        }
+        return xor;
+    }
 
     /**
      * 按照传入的顺序拼接数组为一个包含所有数组的大数组
