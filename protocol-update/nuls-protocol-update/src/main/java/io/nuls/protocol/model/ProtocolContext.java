@@ -122,8 +122,7 @@ public class ProtocolContext {
     private ProtocolConfig config;
 
     /**
-     * 获取锁对象
-     * 清理数据库,区块同步,分叉链维护,孤儿链维护获取该锁
+     * 锁对象
      */
     @Getter
     private StampedLock lock;
@@ -156,7 +155,6 @@ public class ProtocolContext {
         //各类缓存初始化
 
         //定时调度接口初始化
-//        BlockUtil.register(chainId);
     }
 
     public void start() {

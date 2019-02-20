@@ -82,6 +82,7 @@ public class BlockBootstrap {
                     .dependencies(ModuleE.KE.abbr, "1.0")
                     .dependencies(ModuleE.CS.abbr, "1.0")
                     .dependencies(ModuleE.NW.abbr, "1.0")
+                    .dependencies(ModuleE.PU.abbr, "1.0")
                     .dependencies(ModuleE.TX.abbr, "1.0")
                     .scanPackage(RPC_DEFAULT_SCAN_PACKAGE)
                     .connect("ws://localhost:8887");

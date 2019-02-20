@@ -25,8 +25,7 @@ import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 /**
- * 区块管理模块启动类
- * Block module startup class
+ * 虚拟核心模块启动类
  *
  * @author captain
  * @version 1.0

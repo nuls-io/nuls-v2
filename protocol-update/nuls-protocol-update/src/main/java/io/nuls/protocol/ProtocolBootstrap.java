@@ -71,7 +71,6 @@ public class ProtocolBootstrap {
                     .moduleRoles(new String[]{"1.0"})
                     .moduleVersion("1.0")
                     .dependencies(ModuleE.KE.abbr, "1.0")
-                    .dependencies(ModuleE.BL.abbr, "1.0")
                     .scanPackage(RPC_DEFAULT_SCAN_PACKAGE)
                     .connect("ws://localhost:8887");
             // Get information from kernel
@@ -79,6 +78,8 @@ public class ProtocolBootstrap {
             //加载通用数据库
             RocksDBService.init(DATA_PATH);
             RocksDBService.createTable(PROTOCOL_CONFIG);
+            //加载配置
+            ConfigLoader.load();
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("error occur when init, " + e.getMessage());
@@ -91,10 +92,7 @@ public class ProtocolBootstrap {
                 commonLog.info("wait depend modules ready");
                 Thread.sleep(2000L);
             }
-
             commonLog.info("service starting");
-            //加载配置
-            ConfigLoader.load();
             //开启分叉链处理线程
             ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
             forkExecutor.scheduleWithFixedDelay(ProtocolMonitor.getInstance(), 0, 5, TimeUnit.SECONDS);

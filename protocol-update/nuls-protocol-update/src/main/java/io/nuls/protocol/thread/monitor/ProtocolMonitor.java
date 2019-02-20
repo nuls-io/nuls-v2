@@ -80,7 +80,7 @@ public class ProtocolMonitor implements Runnable {
                             continue;
                         }
                         // exclusive access
-                        //进行切换,切换前变更模块运行状态
+                        commonLog.info("chainId-" + chainId + ", do something");
                         break;
                     }
                 } finally {
@@ -92,7 +92,7 @@ public class ProtocolMonitor implements Runnable {
             } catch (Exception e) {
                 e.printStackTrace();
                 context.setStatus(RunningStatusEnum.RUNNING);
-                commonLog.error("chainId-" + chainId + ", switchChain fail, auto rollback fail");
+                commonLog.error("chainId-" + chainId + ", fail");
             }
         }
     }

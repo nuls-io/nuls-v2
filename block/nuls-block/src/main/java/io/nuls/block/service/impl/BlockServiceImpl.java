@@ -217,29 +217,45 @@ public class BlockServiceImpl implements BlockService {
             }
             //2.设置最新高度,如果失败则恢复上一个高度
             if (!blockStorageService.setLatestHeight(chainId, height)) {
-                commonLog.error("set latest height fail!chainId-" + chainId + ",height-" + height);
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                     throw new DbRuntimeException("setLatestHeight error!");
                 }
+                commonLog.error("set latest height fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            //3.保存区块头,保存交易
+            //3.保存区块头
             BlockHeaderPo blockHeaderPo = BlockUtil.toBlockHeaderPo(block);
-            if (!blockStorageService.save(chainId, blockHeaderPo) || !TransactionUtil.save(chainId, blockHeaderPo, block.getTxs(), localInit)) {
-                commonLog.error("save blockheader fail!chainId-" + chainId + ",height-" + height);
+            if (!blockStorageService.save(chainId, blockHeaderPo)) {
                 if (!blockStorageService.remove(chainId, height)) {
                     throw new DbRuntimeException("remove blockheader error!");
                 }
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                     throw new DbRuntimeException("setLatestHeight error!");
                 }
+                commonLog.error("save blockheader fail!chainId-" + chainId + ",height-" + height);
+                return false;
+            }
+            //保存交易
+            if (!TransactionUtil.save(chainId, blockHeaderPo, block.getTxs(), localInit)) {
+                if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
+                    throw new DbRuntimeException("TransactionUtil rollback error!");
+                }
+                if (!blockStorageService.remove(chainId, height)) {
+                    throw new DbRuntimeException("remove blockheader error!");
+                }
+                if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
+                    throw new DbRuntimeException("setLatestHeight error!");
+                }
+                commonLog.error("TransactionUtil save fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             //4.通知共识模块
             if (!ConsensusUtil.saveNotice(chainId, header, localInit)) {
-                commonLog.error("update blockheader fail!chainId-" + chainId + ",height-" + height);
+                if (!ConsensusUtil.rollbackNotice(chainId, height)) {
+                    throw new DbRuntimeException("ConsensusUtil rollbackNotice error!");
+                }
                 if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("remove transactions error!");
+                    throw new DbRuntimeException("TransactionUtil rollback error!");
                 }
                 if (!blockStorageService.remove(chainId, height)) {
                     throw new DbRuntimeException("remove blockheader error!");
@@ -247,24 +263,28 @@ public class BlockServiceImpl implements BlockService {
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                     throw new DbRuntimeException("setLatestHeight error!");
                 }
+                commonLog.error("ConsensusUtil saveNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             //5.通知协议升级模块,完全保存,更新标记
             blockHeaderPo.setComplete(true);
             if (!ProtocolUtil.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo)) {
-                commonLog.error("update blockheader fail!chainId-" + chainId + ",height-" + height);
+                if (!ProtocolUtil.rollbackNotice(chainId, header)) {
+                    throw new DbRuntimeException("ProtocolUtil rollbackNotice error!");
+                }
                 if (!ConsensusUtil.rollbackNotice(chainId, height)) {
-                    throw new DbRuntimeException("rollbackNotice error!");
+                    throw new DbRuntimeException("ConsensusUtil rollbackNotice error!");
                 }
                 if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("remove transactions error!");
+                    throw new DbRuntimeException("TransactionUtil rollback error!");
                 }
                 if (!blockStorageService.remove(chainId, height)) {
-                    throw new DbRuntimeException("remove blockheader error!");
+                    throw new DbRuntimeException("blockStorageService remove error!");
                 }
                 if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
-                    throw new DbRuntimeException("setLatestHeight error!");
+                    throw new DbRuntimeException("blockStorageService setLatestHeight error!");
                 }
+                commonLog.error("ProtocolUtil saveNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             //6.如果不是第一次启动,则更新主链属性
@@ -311,36 +331,72 @@ public class BlockServiceImpl implements BlockService {
         try {
             BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
             if (!ProtocolUtil.rollbackNotice(chainId, blockHeader)) {
-
+                if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
+                    throw new DbRuntimeException("ProtocolUtil saveNotice error!");
+                }
+                commonLog.error("ProtocolUtil rollbackNotice fail!chainId-" + chainId + ",height-" + height);
+                return false;
             }
+
+            if (!ConsensusUtil.rollbackNotice(chainId, height)) {
+                if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
+                    throw new DbRuntimeException("ConsensusUtil saveNotice error!");
+                }
+                if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
+                    throw new DbRuntimeException("ProtocolUtil saveNotice error!");
+                }
+                commonLog.error("ConsensusUtil rollbackNotice fail!chainId-" + chainId + ",height-" + height);
+                return false;
+            }
+
             if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
-                commonLog.error("rollback transactions fail!chainId-" + chainId + ",height-" + height);
+                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo)) {
+                    throw new DbRuntimeException("TransactionUtil saveNormal error!");
+                }
+                if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
+                    throw new DbRuntimeException("ConsensusUtil saveNotice error!");
+                }
+                if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
+                    throw new DbRuntimeException("ProtocolUtil saveNotice error!");
+                }
+                commonLog.error("TransactionUtil rollback fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
             if (!blockStorageService.remove(chainId, height)) {
-                commonLog.error("rollback blockheader fail!chainId-" + chainId + ",height-" + height);
-                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("rollback blockheader error!");
-                }
                 if (!blockStorageService.save(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("rollback blockheader error!");
+                    throw new DbRuntimeException("blockStorageService save error!");
                 }
+                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo)) {
+                    throw new DbRuntimeException("TransactionUtil saveNormal error!");
+                }
+                if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
+                    throw new DbRuntimeException("ConsensusUtil saveNotice error!");
+                }
+                if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
+                    throw new DbRuntimeException("ProtocolUtil saveNotice error!");
+                }
+                commonLog.error("blockStorageService remove fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            if (!ConsensusUtil.rollbackNotice(chainId, height) || !blockStorageService.setLatestHeight(chainId, height - 1)) {
-                commonLog.error("rollback setLatestHeight fail!chainId-" + chainId + ",height-" + height);
-                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("rollback transaction error!");
-                }
-                if (!blockStorageService.save(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("rollback blockheader error!");
-                }
+            if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
                 if (!blockStorageService.setLatestHeight(chainId, height)) {
                     throw new DbRuntimeException("rollback setLatestHeight error!");
                 }
+                if (!blockStorageService.save(chainId, blockHeaderPo)) {
+                    throw new DbRuntimeException("blockStorageService save error!");
+                }
+                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo)) {
+                    throw new DbRuntimeException("TransactionUtil saveNormal error!");
+                }
+                if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
+                    throw new DbRuntimeException("ConsensusUtil saveNotice error!");
+                }
+                if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
+                    throw new DbRuntimeException("ProtocolUtil saveNotice error!");
+                }
+                commonLog.error("rollback setLatestHeight fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-
             context.setLatestBlock(getBlock(chainId, height - 1));
             Chain masterChain = ChainManager.getMasterChain(chainId);
             masterChain.setEndHeight(height - 1);
