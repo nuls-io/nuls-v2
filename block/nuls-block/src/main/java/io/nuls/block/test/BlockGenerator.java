@@ -111,10 +111,6 @@ public final class BlockGenerator extends Thread {
         return ECKey.fromPrivate(new BigInteger(1, HexUtil.decode(PRIVATE_KEY))).getPubKey();
     }
 
-    public static List<Transaction> getTransactions(int size) throws IOException {
-        return getTransactions(size, 1, "1");
-    }
-
     public static List<Transaction> getTransactions(int size, long seed, String symbol) throws IOException {
         List<Transaction> txlist = new ArrayList<>();
         CoinData coinData = new CoinData();
