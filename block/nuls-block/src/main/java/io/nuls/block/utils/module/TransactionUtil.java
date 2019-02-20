@@ -231,7 +231,11 @@ public class TransactionUtil {
             Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
-                String txHex = (String) responseData.get("tx_getTx");
+                Map map = (Map) responseData.get("tx_getTx");
+                String txHex = (String) map.get("txHex");
+                if (txHex == null) {
+                    return null;
+                }
                 Transaction transaction = new Transaction();
                 transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
                 return transaction;
