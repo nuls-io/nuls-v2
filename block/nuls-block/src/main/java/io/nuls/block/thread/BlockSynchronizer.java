@@ -73,10 +73,8 @@ public class BlockSynchronizer implements Runnable {
         for (Integer chainId : ContextManager.chainIds) {
             NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
             try {
-                while (true) {
-                    if (synchronize(chainId)) {
-                        break;
-                    }
+                while (!synchronize(chainId)) {
+                    Thread.sleep(1000L);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -301,6 +299,10 @@ public class BlockSynchronizer implements Runnable {
     private boolean checkLocalBlock(int chainId, BlockDownloaderParams params) {
         long localHeight = params.getLocalLatestHeight();
         long netHeight = params.getNetLatestHeight();
+        //如果本地高度是0，网络高度大于0，直接进行同步？
+        if (localHeight == 0 && netHeight > 0) {
+            return true;
+        }
         //得到共同高度
         long commonHeight = Math.min(localHeight, netHeight);
         if (checkHashEquality(chainId, params)) {
