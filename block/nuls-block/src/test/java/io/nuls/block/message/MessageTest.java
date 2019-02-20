@@ -21,17 +21,20 @@
 package io.nuls.block.message;
 
 import com.google.common.collect.Lists;
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.Block;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.SmallBlock;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.block.model.GenesisBlock;
 import io.nuls.block.test.BlockGenerator;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -162,7 +165,7 @@ public class MessageTest {
     public void testSmallBlockMessage() throws Exception {
         SmallBlockMessage message = new SmallBlockMessage();
         Block block = BlockGenerator.generate(null);
-        Transaction transaction = BlockGenerator.getTransactions(3).get(0);
+        Transaction transaction = buildTransaction("5MR_2Ch2F7jfohNqwwdmMmF3ESQYK2R9bt8");
         SmallBlock smallBlock = new SmallBlock();
         smallBlock.setHeader(block.getHeader());
         smallBlock.addBaseTx(transaction);
@@ -182,7 +185,10 @@ public class MessageTest {
     public void testTxGroupMessage() throws Exception {
         TxGroupMessage message = new TxGroupMessage();
         message.setBlockHash(NulsDigestData.calcDigestData("hello".getBytes()));
-        message.setTransactions(BlockGenerator.getTransactions(4));
+        Transaction transaction = buildTransaction("5MR_2Ch2F7jfohNqwwdmMmF3ESQYK2R9bt8");
+        List<Transaction> transactions = new ArrayList<>();
+        transactions.add(transaction);
+        message.setTransactions(transactions);
         String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
@@ -200,5 +206,32 @@ public class MessageTest {
 
     @After
     public void tearDown() {
+    }
+
+    /**
+     * 铸币交易
+     *
+     * @return
+     * @throws IOException
+     */
+    private static Transaction buildTransaction(String address) throws IOException {
+        //封装交易执行
+        Transaction tx = new Transaction();
+        CoinData coinData = new CoinData();
+        CoinTo coinTo = new CoinTo();
+        coinTo.setAddress(AddressTool.getAddress(address));
+        coinTo.setAmount(BigInteger.TWO);
+        coinTo.setAssetsChainId(12345);
+        coinTo.setAssetsId(1);
+        coinTo.setLockTime(0);
+        List<CoinFrom> coinFroms = new ArrayList<>();
+        List<CoinTo> coinTos = new ArrayList<>();
+        coinTos.add(coinTo);
+        coinData.setFrom(coinFroms);
+        coinData.setTo(coinTos);
+        tx.setBlockHeight(1L);
+        tx.setCoinData(coinData.serialize());
+        tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
+        return tx;
     }
 }
