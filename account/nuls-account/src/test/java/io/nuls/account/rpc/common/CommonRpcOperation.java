@@ -142,7 +142,8 @@ public class CommonRpcOperation {
      * **/
     public static MultiSigAccount createMultiSigAccount() throws Exception {
         MultiSigAccount multiSigAccount = new MultiSigAccount();
-        List<String> accountList = createAccount(3);
+        //List<String> accountList = createAccount(3);
+        List<String> accountList = List.of("5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5","5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ","5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT");
         Map<String, Object> params = new HashMap<>();
         List<String> pubKeys = new ArrayList<>();
         List<byte[]> pubKeysBytesList = new ArrayList<>();

@@ -1,9 +1,8 @@
 package io.nuls.transaction.service.impl;
 
+import io.nuls.base.basic.AddressTool;
 import io.nuls.base.constant.TxStatusEnum;
-import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.NulsDigestData;
-import io.nuls.base.data.Transaction;
+import io.nuls.base.data.*;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -36,6 +35,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.transaction.utils.TxUtil.getCoinData;
 
 /**
  * @author: Charlie
@@ -110,11 +111,17 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             chain.getLogger().debug("保存创世块交易失败");
             return false;
         }
+        int debugCount = 0;
         for (Transaction tx : txList) {
             //保存到h2数据库
-            transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
+            debugCount += transactionH2Service.saveTxs(TxUtil.tx2PO(tx));
         }
-        chain.getLogger().debug("保存创世块交易成功");
+        CoinData coinData = TxUtil.getCoinData(txList.get(0));
+        for (Coin coin : coinData.getTo()){
+            chain.getLogger().debug("address:{}, to:{}", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount());
+        }
+
+        chain.getLogger().debug("保存创世块交易成功,H2数据库生成{}条交易记录", debugCount);
         return true;
     }
 

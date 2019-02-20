@@ -95,25 +95,34 @@ public class CreateTxThread implements Runnable {
     }
     private void creatTx() throws Exception{
         for(int i = 0; i<999999; i++) {
-            System.out.println("======= Thread : " + Thread.currentThread().getName() + "=======");
-            CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
-                    createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
-            //调接口
-            String json = JSONUtils.obj2json(ctxTransfer);
-            Map<String, Object> params = JSONUtils.json2map(json);
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
-            Assert.assertTrue(null != response.getResponseData());
-            Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
-            Assert.assertTrue(null != map);
-            Log.info("{}", map.get("value"));
+//            System.out.println("======= Thread : " + Thread.currentThread().getName() + "=======");
+//            CrossTxTransferDTO ctxTransfer = new CrossTxTransferDTO(chain.getChainId(),
+//                    createFromCoinDTOList(), createToCoinDTOList(), "this is cross-chain transaction");
+//            //调接口
+//            String json = JSONUtils.obj2json(ctxTransfer);
+//            Map<String, Object> params = JSONUtils.json2map(json);
+//            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
+//            Assert.assertTrue(null != response.getResponseData());
+//            Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
+//            Assert.assertTrue(null != map);
+//            Log.info("{}", map.get("value"));
 
 //            createTransfer();
+            createTransfer();
 
-            Thread.sleep(1000L);
+            Thread.sleep(2000L);
         }
     }
-
     private void createTransfer() throws Exception {
+        Map transferMap = this.createTransferTx(address20, address21, null);
+        //调用接口
+        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+        HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
+        Assert.assertTrue(null != result);
+        Log.info("{}", result.get("value"));
+    }
+
+    private void createNewAddressTransfer() throws Exception {
         String addrFrom = createAccount();
         TestTx.addGenesisAsset(addrFrom);
         String AddrTo = address20;//createAccount();

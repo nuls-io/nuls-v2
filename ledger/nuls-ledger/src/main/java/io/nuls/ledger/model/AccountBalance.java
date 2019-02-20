@@ -25,7 +25,11 @@
 package io.nuls.ledger.model;
 
 import io.nuls.ledger.model.po.AccountState;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author lan
@@ -35,11 +39,15 @@ import lombok.*;
 public class AccountBalance {
     @Setter
     @Getter
+    private List<String> nonces = new ArrayList<>();
+    @Setter
+    @Getter
     private AccountState nowAccountState;
     @Setter
     @Getter
     private AccountState preAccountState;
-    public AccountBalance(AccountState nowAccountState,AccountState preAccountState){
+
+    public AccountBalance(AccountState nowAccountState, AccountState preAccountState) {
         this.nowAccountState = nowAccountState;
         this.preAccountState = preAccountState;
     }

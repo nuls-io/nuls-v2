@@ -76,16 +76,16 @@ public class TestTx {
 //    static String address202 = "XroY3cLWTfgKMRRRLCP5rhvo1gHY63930";
 
 
-    static String address20 = "H3eriRPPdbSMxXfg5MFYVfGmypNma3930";
-    static String address21 = "H9jzu275LW7qUPo4boZoN611Hc2DE3930";
-    static String address22 = "Hev98WnFwR55FJffop8H2J24VJe5y3930";
-    static String address23 = "HgmTfwiFhTLNuz2sRLgz3BrXcyY9F3930";
-    static String address24 = "JHwrmyKbu4KmSxy27HctqSG8aQqdY3930";
-    static String address25 = "JtM2x9hyUPfUQCfNnZZb4XG1eciS13930";
-    static String address26 = "JyBjVrGPbpr4smwbwUzDokQz2F7Gw3930";
-    static String address27 = "K8vyxqeu6dyfR35XcdqNZK4fW9h2N3930";
-    static String address28 = "KKQmeMGKfkkmQF5onWBY487zHdB7Q3930";
-    static String address29 = "KMNPqwARu77qAL4UCkd5Vwvj5PAtw3930";
+    static String address20 = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
+    static String address21 = "5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW";
+    static String address22 = "5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA";
+    static String address23 = "5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw";
+    static String address24 = "5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk";
+    static String address25 = "5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo";
+    static String address26 = "5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu";
+    static String address27 = "5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM";
+    static String address28 = "5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r";
+    static String address29 = "5MR_2CVuGjQ3CYVkhFszxfSt6sodg1gDHYF";
 
     static int assetId = 1;
     //入账金额
@@ -130,7 +130,7 @@ public class TestTx {
         System.out.println(JSONUtils.obj2PrettyJson(balance3));
         BigInteger balance4 = LedgerCall.getBalance(chain, AddressTool.getAddress(address24), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance4));
-        BigInteger balance5 = LedgerCall.getBalance(chain, AddressTool.getAddress(address28), assetChainId, assetId);
+        BigInteger balance5 = LedgerCall.getBalance(chain, AddressTool.getAddress(address25), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance5));
     }
 
@@ -441,33 +441,34 @@ public class TestTx {
 
     @Test
     public void importPriKeyTest() {
+        importPriKey("7e304e60c4e29c15382f76c0bb097bda28a1950b78871b6b7eb2bb4cc4ddeb49");//种子出块地址
+        importPriKey("70e871a2e637b4182dfbedc53e164182d266821f4824ab1a3a73055e9f252f98");//种子出块地址
+        importPriKey("00c4a6b90d3f4eb7b50bc85fd0e99ccb717e148b4fde7462e14c590445e589588c");
+        importPriKey("1c2b9fd4417c1aad8ae9f24c982ff294eb50a6462b873b79a879e805a9990346");
+        importPriKey("23848d45b4b34aca8ff24b00949a25a2c9175faf283675128e189eee8b085942");
+        importPriKey("00c77707b21eece6c1ce0b8add04db79dc846f36830effe5c5ae2aced00097fafb");
+        importPriKey("009ad5018ed1fc162c5320b9ae496984dd10227086ad86ea954a209597ff9b7d3a");
+        importPriKey("00def3b0f4bfad2a6abb5f6957829e752a1a30806edc35e98016425d578fdc4e77");
+        importPriKey("00c98ecfd3777745270cacb9afba17ef0284769a83ff2adb4106b8a0baaec9452c");
+        importPriKey("009560d5ed6587822b7aee6f318f50b312c281e4f330b6990396881c6d3f870bc1");
+        importPriKey("00c805d2d6d5e06f57fdfb1aff56ef3c2dd15eee88f36fa7d45d368c352ec5ec0d");
+        importPriKey("00c299b105e2f9b260d7811d5cb94c713cc324e55831cb15a18454f7382f0a5f6e");
+    }
+
+    public void importPriKey(String priKey){
         try {
             //账户已存在则覆盖 If the account exists, it covers.
             Map<String, Object> params = new HashMap<>();
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
 
-            params.put("priKey", "00d1e4d568489995f4b45789f372a1c23823241ccb6a6709d164658384fdaaa822");
-//            params.put("priKey", "008e7861842b2ca881326f40482e905f0119a608d90f7aa60ac80f06bf0c196d09");
-//            params.put("priKey", "00e97ec0c01607f58bc692c604739c63ebf5aed2e9d01b9f427be4aa1cf53b4dea");
-//            params.put("priKey", "00ae4df86385da0cce8b72fb463fc07d8767af36ad2cc78baf624b8815234bcc71");
-//            params.put("priKey", "7b06ab2a94bf81eeea2606b6f87406ddb0b45f0f2a4d9a676c56ca81b3706c36");
-//            params.put("priKey", "00fed14ccaa20c41107b7a00b279960235d981e698a717234c63f6fa25cbc5abcb");
-//            params.put("priKey", "00c97dab006f1d973ad9d7f38a79125c24a1ebcdb3a687a3b4f84ddda97548e116");
-//            params.put("priKey", "00adee90f664e1575c371f38a801449ac5324ba406e9931fb0cf51babc0d23e09b");
-//            params.put("priKey", "008878a0099b7393b59a6bd728d97abbe6b593af1603dc3043550bcc8fc61ffbe6");
-//            params.put("priKey", "211eb443e477cff92610b9eb733d71de61a75fe56f7253be91b715f2004eb409");
-//            params.put("priKey", "6dec834b2556df23bb0fbc3607720f462be7ef8d28a34caf3847d91b8c9c6f93");
-//            params.put("priKey", "00af59aa43536f6162a7166cdc1a389b32be0a06bc06f71a601a92e08fd2788dfe");
+            params.put("priKey", priKey);
             params.put("password", "");
             params.put("overwrite", true);
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             String address = (String) result.get("address");
-//            assertEquals(accountList.get(0), address);
-            //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
-            params.put("overwrite", false);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            Log.info("{}", address);
         } catch (NulsRuntimeException e) {
             e.printStackTrace();
         } catch (Exception e) {
