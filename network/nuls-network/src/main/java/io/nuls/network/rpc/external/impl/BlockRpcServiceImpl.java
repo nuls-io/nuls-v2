@@ -57,7 +57,7 @@ public class BlockRpcServiceImpl implements BlockRpcService {
             Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER, map, 2000);
             if (null != response && response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
-                String hex = (String) responseData.get("latestBlockHeader");
+                String hex = (String) responseData.get(NetworkConstant.CMD_BL_BEST_BLOCK_HEADER);
                 BlockHeader header = new BlockHeader();
                 header.parse(new NulsByteBuffer(HexUtil.decode(hex)));
                 bestBlockInfo.setHash(header.getHash().getDigestHex());
