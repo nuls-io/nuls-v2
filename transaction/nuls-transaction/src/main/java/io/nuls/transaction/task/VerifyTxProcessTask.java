@@ -159,7 +159,7 @@ public class VerifyTxProcessTask implements Runnable {
                     LedgerCall.rollbackTxLedger(chain, txHexList, null, false);
                     it.remove();
                     chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask - OrphanTx] " +
-                            "OrphanTx remove - type:{} - txhash:{}", tx.getType(), tx.getHash().getDigestHex());
+                            "OrphanTx remove - type:{} - txhash:{}, -orphanTxList size:{}", tx.getType(), tx.getHash().getDigestHex(), orphanTxList.size());
                 }
             }
         } catch (Exception e) {

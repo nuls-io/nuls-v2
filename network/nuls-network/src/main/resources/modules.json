@@ -27,7 +27,7 @@
     "name": "network.self.chainId",
     "remark": "自有主网链id",
     "readOnly": "true",
-    "value": "1"
+    "value": "12345"
   },
   {
     "name": "network.self.magic",
@@ -51,7 +51,7 @@
     "name": "network.self.seed.ip",
     "remark": "种子节点",
     "readOnly": "false",
-    "value": "192.168.1.191:8008,192.168.1.175:8008,192.168.1.147:8008,192.168.1.190:8008"
+    "value": "192.168.1.36:8008"
   },
   {
     "name": "network.cross.server.port",
@@ -82,6 +82,6 @@
     "name": "network.moon.seed.ip",
     "remark": "卫星链种子节点",
     "readOnly": "true",
-    "value": "215.159.216.58:8003,215.159.69.140:8003,223.206.200.74:8003"
+    "value": "192.168.1.36:8008"
   }
 ]

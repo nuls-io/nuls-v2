@@ -464,10 +464,7 @@ public class TestTx {
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             String address = (String) result.get("address");
-//            assertEquals(accountList.get(0), address);
-            //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
-            params.put("overwrite", false);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            Log.info("{}", address);
         } catch (NulsRuntimeException e) {
             e.printStackTrace();
         } catch (Exception e) {
