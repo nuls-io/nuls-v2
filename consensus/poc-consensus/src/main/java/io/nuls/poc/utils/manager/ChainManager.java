@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author tag
  * 2018/12/4
- * */
+ */
 @Component
 public class ChainManager {
     @Autowired
@@ -59,10 +59,10 @@ public class ChainManager {
     /**
      * 初始化并启动链
      * Initialize and start the chain
-     * */
-    public void runChain(){
+     */
+    public void runChain() {
         Map<Integer, ConfigBean> configMap = configChain();
-        if(configMap == null || configMap.size() == 0){
+        if (configMap == null || configMap.size() == 0) {
             return;
         }
         List<TxRegisterDetail> txRegisterDetailList = getRegisterTxList();
@@ -70,24 +70,29 @@ public class ChainManager {
         根据配置信息创建初始化链
         Initialize chains based on configuration information
         */
-        for (Map.Entry<Integer,ConfigBean> entry:configMap.entrySet()) {
+        for (Map.Entry<Integer, ConfigBean> entry : configMap.entrySet()) {
             Chain chain = new Chain();
             int chainId = entry.getKey();
             chain.setConfig(entry.getValue());
 
             /*
-            * 初始化链日志对象
-            * Initialization Chain Log Objects
-            * */
+             * 初始化链日志对象
+             * Initialization Chain Log Objects
+             * */
             initLogger(chain);
 
             /*
-            * 链交易注册
-            * Chain Trading Registration
-            * */
-            while (true){
-                if(CallMethodUtils.registerTx(chain,txRegisterDetailList)){
+             * 链交易注册
+             * Chain Trading Registration
+             * */
+            while (true) {
+                if (CallMethodUtils.registerTx(chain, txRegisterDetailList)) {
                     break;
+                }
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
 
@@ -109,7 +114,7 @@ public class ChainManager {
             */
             schedulerManager.createChainScheduler(chain);
 
-            chainMap.put(chainId,chain);
+            chainMap.put(chainId, chain);
         }
     }
 
@@ -118,16 +123,16 @@ public class ChainManager {
      * stop a chain
      *
      * @param chainId 链ID/chain id
-     * */
-    public void stopChain(int chainId){
+     */
+    public void stopChain(int chainId) {
 
     }
 
     /**
      * 删除一条链
      * delete a chain
-     * */
-    public void deleteChain(int chainId){
+     */
+    public void deleteChain(int chainId) {
 
     }
 
@@ -135,8 +140,8 @@ public class ChainManager {
     /**
      * 读取配置文件创建并初始化链
      * Read the configuration file to create and initialize the chain
-     * */
-    private Map<Integer, ConfigBean> configChain(){
+     */
+    private Map<Integer, ConfigBean> configChain() {
         try {
             /*
             读取数据库链信息配置
@@ -148,17 +153,17 @@ public class ChainManager {
             If the system is running for the first time, the local database does not have chain information,
             and the main chain configuration information needs to be read from the configuration file at this time.
             */
-            if(configMap == null || configMap.size() == 0){
+            if (configMap == null || configMap.size() == 0) {
                 String configJson = IoUtils.read(ConsensusConstant.CONFIG_FILE_PATH);
-                List<ConfigItem> configItemList = JSONUtils.json2list(configJson,ConfigItem.class);
+                List<ConfigItem> configItemList = JSONUtils.json2list(configJson, ConfigItem.class);
                 ConfigBean configBean = ConfigManager.initManager(configItemList);
-                if(configBean == null){
+                if (configBean == null) {
                     return null;
                 }
-                configMap.put(configBean.getChainId(),configBean);
+                configMap.put(configBean.getChainId(), configBean);
             }
             return configMap;
-        }catch(Exception e){
+        } catch (Exception e) {
             Log.error(e.getMessage());
             return null;
         }
@@ -167,9 +172,10 @@ public class ChainManager {
     /**
      * 初始化链相关表
      * Initialization chain correlation table
-     * @param chain   chain info
-     * */
-    private void initTable(Chain chain){
+     *
+     * @param chain chain info
+     */
+    private void initTable(Chain chain) {
         NulsLogger logger = chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME);
         int chainId = chain.getConfig().getChainId();
         try {
@@ -177,53 +183,55 @@ public class ChainManager {
             创建共识节点表
             Create consensus node tables
             */
-            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_AGENT+chainId);
+            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_AGENT + chainId);
 
             /*
             创建共识信息表
             Create consensus information tables
             */
-            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT+chainId);
+            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_DEPOSIT + chainId);
 
             /*
             创建红黄牌信息表
             Creating Red and Yellow Card Information Table
             */
-            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH+chainId);
-        }catch (Exception e){
+            RocksDBService.createTable(ConsensusConstant.DB_NAME_CONSENSUS_PUNISH + chainId);
+        } catch (Exception e) {
             if (!DBErrorCode.DB_TABLE_EXIST.equals(e.getMessage())) {
                 logger.error(e.getMessage());
-            }else{
+            } else {
                 logger.error(e.getMessage());
             }
         }
     }
 
-    private void initLogger(Chain chain){
+    private void initLogger(Chain chain) {
         /*
-        * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
-        * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
-        * */
-        NulsLogger consensusLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.CONSENSUS_LOGGER_NAME, Level.DEBUG);
-        NulsLogger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()),ConsensusConstant.BASIC_LOGGER_NAME,Level.DEBUG);
-        chain.getLoggerMap().put(ConsensusConstant.CONSENSUS_LOGGER_NAME,consensusLogger);
-        chain.getLoggerMap().put(ConsensusConstant.BASIC_LOGGER_NAME,rpcLogger);
+         * 共识模块日志文件对象创建,如果一条链有多类日志文件，可在此添加
+         * Creation of Log File Object in Consensus Module，If there are multiple log files in a chain, you can add them here
+         * */
+        NulsLogger consensusLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), ConsensusConstant.CONSENSUS_LOGGER_NAME, Level.DEBUG);
+        NulsLogger rpcLogger = LoggerBuilder.getLogger(String.valueOf(chain.getConfig().getChainId()), ConsensusConstant.BASIC_LOGGER_NAME, Level.DEBUG);
+        chain.getLoggerMap().put(ConsensusConstant.CONSENSUS_LOGGER_NAME, consensusLogger);
+        chain.getLoggerMap().put(ConsensusConstant.BASIC_LOGGER_NAME, rpcLogger);
     }
 
     /**
      * 初始化链缓存数据
+     * 在poc的共识机制下，由于存在轮次信息，节点信息，以及节点被惩罚的红黄牌信息，
+     * 因此需要在初始化的时候，缓存相关的数据，用于计算最新的轮次信息，以及各个节点的信用值等
      * Initialize chain caching data
      *
-     * @param chain  chain info
-     * */
-    private void initCache(Chain chain){
+     * @param chain chain info
+     */
+    private void initCache(Chain chain) {
         try {
             blockManager.loadBlockHeader(chain);
             agentManager.loadAgents(chain);
             depositManager.loadDeposits(chain);
             punishManager.loadPunishes(chain);
             roundManager.initRound(chain);
-        }catch (Exception e){
+        } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
         }
     }
@@ -260,9 +268,9 @@ public class ChainManager {
                 }
             }
         }
-        registerDetailMap.put(ConsensusConstant.TX_TYPE_COINBASE,new TxRegisterDetail(TxProperty.COIN_BASE));
-        registerDetailMap.put(ConsensusConstant.TX_TYPE_RED_PUNISH,new TxRegisterDetail(TxProperty.RED_PUNISH));
-        registerDetailMap.put(ConsensusConstant.TX_TYPE_YELLOW_PUNISH,new TxRegisterDetail(TxProperty.YELLOW_PUNISH));
+        registerDetailMap.put(ConsensusConstant.TX_TYPE_COINBASE, new TxRegisterDetail(TxProperty.COIN_BASE));
+        registerDetailMap.put(ConsensusConstant.TX_TYPE_RED_PUNISH, new TxRegisterDetail(TxProperty.RED_PUNISH));
+        registerDetailMap.put(ConsensusConstant.TX_TYPE_YELLOW_PUNISH, new TxRegisterDetail(TxProperty.YELLOW_PUNISH));
         return new ArrayList<>(registerDetailMap.values());
     }
 

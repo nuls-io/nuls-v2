@@ -9,52 +9,52 @@ import java.math.BigInteger;
  *
  * @author tag
  * 2018/11/7
- * */
+ */
 public class ConfigBean implements Serializable {
     /**
      * 打包间隔时间
      * Packing interval time
-     * */
+     */
     private long packingInterval;
     /**
      * 区块大小
      * block size
-     * */
+     */
     private int blockSize;
     /**
      * 出块最小金额
      * Minimum amount of output
-     * */
+     */
     private BigInteger packingAmount;
     /**
      * 奖励金锁定块数
      * Number of Bonus Locking Blocks
-     * */
+     */
     private int coinbaseUnlockHeight;
     /**
      * 获得红牌保证金锁定时间
      * Lock-in time to get a red card margin
-     * */
+     */
     private long redPublishLockTime;
     /**
      * 注销节点保证金锁定时间
      * Log-off node margin locking time
-     * */
+     */
     private long stopAgentLockTime;
     /**
      * 佣金比例的最小值
      * Minimum commission ratio
-     * */
+     */
     private double commissionRateMin;
     /**
      * 佣金比例的最大值
      * Maximum commission ratio
-     * */
+     */
     private double commissionRateMax;
     /**
      * 创建节点的保证金最小值
      * Minimum margin for creating nodes
-     * */
+     */
     private BigInteger depositMin;
     /**
      * 创建节点的保证金最大值
