@@ -380,10 +380,13 @@ public class TransactionCmd extends BaseCmd {
             }
             Log.debug("getConfirmedTransaction : " + txHash);
             Transaction tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             if(tx == null){
-                throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+                resultMap.put("txHex", null);
+            }else{
+                resultMap.put("txHex", tx.hex());
             }
-            return success(tx.hex());
+            return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());

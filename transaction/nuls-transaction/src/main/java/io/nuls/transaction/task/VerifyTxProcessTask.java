@@ -120,7 +120,6 @@ public class VerifyTxProcessTask implements Runnable {
                 txHexList.add(tx.hex());
                 LedgerCall.commitTxLedger(chain, txHexList, null, false);
                 //广播交易hash
-                //todo 调试暂时注释
                 NetworkCall.broadcastTxHash(chain.getChainId(),tx.getHash());
                 count++;
                 return true;
