@@ -627,6 +627,7 @@ public class TxServiceImpl implements TxService {
         if (fromChainId != crossTxData.getChainId()) {
             throw new NulsException(TxErrorCode.CROSS_TX_PAYER_CHAINID_MISMATCH);
         }
+        // todo 调链管理启用
         return true;
     }
 
@@ -794,10 +795,12 @@ public class TxServiceImpl implements TxService {
             chain.getLogger().debug("获取打包交易开始,当前待打包队列交易数: {} ", packablePool.getPoolSize(chain));
             chain.getLogger().debug("交易最大容量: {} ", maxTxDataSize);
             chain.getLogger().debug("--------------while-----------");
+            long loopDebug = NetworkCall.getCurrentTimeMillis();
             while (true) {
                 long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
-                chain.getLogger().debug("########## 当前网络时间: {} ", currentTimeMillis);
-                chain.getLogger().debug("########## 获取打包交易结束时间: {}, 还剩{}秒 ", endtimestamp, (endtimestamp - currentTimeMillis)/1000.0);
+                chain.getLogger().debug("");
+                chain.getLogger().debug("########## (循环开始)当前网络时间: {} ", currentTimeMillis);
+                chain.getLogger().debug("########## 预留的[获取打包交易]结束时间: {}, 还剩{}秒 ", endtimestamp, (endtimestamp - currentTimeMillis)/1000.0);
                 if (endtimestamp - currentTimeMillis <= TxConstant.VERIFY_OFFSET) {
                     chain.getLogger().debug("########## 打包时间到: {}, -endtimestamp:{} , -offset:{}", currentTimeMillis, endtimestamp, TxConstant.VERIFY_OFFSET);
                     break;
@@ -871,9 +874,14 @@ public class TxServiceImpl implements TxService {
                     txHexs.add(txHex);
                     moduleVerifyMap.put(txRegister, txHexs);
                 }
-                chain.getLogger().debug("########## 分组花费时间:{} ",  NetworkCall.getCurrentTimeMillis() - debugeVerifyCoinDataStart);
+                long loopOnce = NetworkCall.getCurrentTimeMillis() - currentTimeMillis;
+
+                chain.getLogger().debug("########## 分组花费时间:{} ",  NetworkCall.getCurrentTimeMillis() - debugeMap);
+                chain.getLogger().debug("########## 成功取一个交易花费时间(一次循环):{} ", loopOnce);
+                loopDebug += (loopOnce - currentTimeMillis);
+                chain.getLogger().debug("");
             }
-            chain.getLogger().debug("--------------while end-----------");
+            chain.getLogger().debug("--------------while end----花费时间:{}毫秒-------", loopDebug);
             chain.getLogger().debug("取出的交易packableTxs - Start:");
 
             try {
