@@ -31,49 +31,49 @@ public class Chain {
     /**
      * 链基础配置信息
      * Chain Foundation Configuration Information
-     * */
+     */
     private ConfigBean config;
 
     /**
      * 运行状态
      * Chain running state
-     * */
+     */
     private ConsensusStatus consensusStatus;
 
     /**
      * 打包状态
      * Chain packing state
-     * */
+     */
     private boolean canPacking;
 
     /**
      * 最新区块头
      * The most new block
-     * */
-     private BlockHeader newestHeader;
+     */
+    private BlockHeader newestHeader;
 
-     /**
+    /**
      * 节点列表
      * Agent list
-     * */
+     */
     private List<Agent> agentList;
 
     /**
      * 委托信息列表
      * Deposit list
-     * */
+     */
     private List<Deposit> depositList;
 
     /**
      * 黄牌列表
      * Yellow punish list
-     * */
+     */
     private List<PunishLogPo> yellowPunishList;
 
     /**
      * 红牌列表
      * Red punish list
-     * */
+     */
     private List<PunishLogPo> redPunishList;
 
     /**
@@ -88,19 +88,19 @@ public class Chain {
      * 保存本节点需打包的红牌交易,节点打包时需把该集合中所有红牌交易打包并删除
      * To save the red card transactions that need to be packaged by the node,
      * the node should pack and delete all the red card transactions in the set when packing.
-     * */
+     */
     private List<Transaction> redPunishTransactionList;
 
     /**
      * 轮次列表
      * Round list
-     * */
+     */
     private List<MeetingRound> roundList;
 
     /**
      * 最新200轮区块头
      * The latest 200 rounds block
-     * */
+     */
     private List<BlockHeader> blockHeaderList;
 
     private Map<String, NulsLogger> loggerMap;
@@ -110,10 +110,10 @@ public class Chain {
     /**
      * 任务线程池
      * Schedule thread pool
-     * */
+     */
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
-    public Chain(){
+    public Chain() {
         this.consensusStatus = ConsensusStatus.INITING;
         this.canPacking = false;
         this.agentList = new ArrayList<>();
@@ -133,9 +133,9 @@ public class Chain {
      * @param height
      * @return List<agent>
      **/
-    public List<Agent> getWorkAgentList(long height){
+    public List<Agent> getWorkAgentList(long height) {
         List<Agent> workAgentList = new ArrayList<>();
-        for (Agent agent:agentList) {
+        for (Agent agent : agentList) {
             if (agent.getDelHeight() != -1L && agent.getDelHeight() <= height) {
                 continue;
             }
@@ -151,7 +151,7 @@ public class Chain {
             for (Deposit dtx : cdList) {
                 totalDeposit = totalDeposit.add(dtx.getDeposit());
             }
-            if(totalDeposit.compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)>=0){
+            if (totalDeposit.compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT) >= 0) {
                 workAgentList.add(agent);
             }
         }
@@ -165,9 +165,9 @@ public class Chain {
      * @param height
      * @return List<agent>
      **/
-    public Set<String> getWorkAddressList(long height){
+    public Set<String> getWorkAddressList(long height) {
         Set<String> workAddressList = new HashSet<>();
-        for (Agent agent:agentList) {
+        for (Agent agent : agentList) {
             if (agent.getDelHeight() != -1L && agent.getDelHeight() <= height) {
                 continue;
             }
@@ -183,7 +183,7 @@ public class Chain {
             for (Deposit dtx : cdList) {
                 totalDeposit = totalDeposit.add(dtx.getDeposit());
             }
-            if(totalDeposit.compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT)>=0){
+            if (totalDeposit.compareTo(ConsensusConstant.SUM_OF_DEPOSIT_OF_AGENT_LOWER_LIMIT) >= 0) {
                 workAddressList.add(AddressTool.getStringAddressByBytes(agent.getPackingAddress()));
             }
         }
@@ -194,11 +194,11 @@ public class Chain {
      * 获取节点的委托信息
      * Obtaining delegation information of nodes
      *
-     * @param agentHash               节点ID/agent hash
-     * @param startBlockHeight        上一轮次的起始区块高度/Initial blocks of the last round
-     * @return  List<Deposit>
-     * */
-    private List<Deposit> getDepositListByAgentId(NulsDigestData agentHash, long startBlockHeight){
+     * @param agentHash        节点ID/agent hash
+     * @param startBlockHeight 上一轮次的起始区块高度/Initial blocks of the last round
+     * @return List<Deposit>
+     */
+    private List<Deposit> getDepositListByAgentId(NulsDigestData agentHash, long startBlockHeight) {
         List<Deposit> resultList = new ArrayList<>();
         for (int i = depositList.size() - 1; i >= 0; i--) {
             Deposit deposit = depositList.get(i);

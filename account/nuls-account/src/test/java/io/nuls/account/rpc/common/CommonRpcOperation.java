@@ -143,7 +143,7 @@ public class CommonRpcOperation {
     public static MultiSigAccount createMultiSigAccount() throws Exception {
         MultiSigAccount multiSigAccount = new MultiSigAccount();
         //List<String> accountList = createAccount(3);
-        List<String> accountList = List.of("VwpSh9JrVTXa1cBWr7UEKxMeJPR8p3930","QBuC1UWBtsQNyMmxvz9AkLR4ZWNZ53930","Menaq9fUxPgi7XMJ1sH8Kt8m41Sfe3930");
+        List<String> accountList = List.of("5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5","5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ","5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT");
         Map<String, Object> params = new HashMap<>();
         List<String> pubKeys = new ArrayList<>();
         List<byte[]> pubKeysBytesList = new ArrayList<>();
@@ -155,7 +155,6 @@ public class CommonRpcOperation {
             assertNotNull(pubKeyHexObj);
             String pubKeyHex = pubKeyHexObj.toString();
             pubKeys.add(pubKeyHex);
-            System.out.println(address);
         }
         multiSigAccount.setChainId(chainId);
 
@@ -171,7 +170,6 @@ public class CommonRpcOperation {
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSigAccount");
         assertNotNull(result);
         String address = (String) result.get("address");
-        System.out.println(address);
         assertNotNull(address);
         multiSigAccount.setAddress(new Address(address));
         int resultMinSigns = (int) result.get("minSigns");

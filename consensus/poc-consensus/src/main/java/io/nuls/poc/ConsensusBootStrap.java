@@ -53,7 +53,7 @@ public class ConsensusBootStrap {
      * 初始化系统编码
      * Initialization System Coding
      */
-    private static void initSys() throws Exception{
+    private static void initSys() throws Exception {
         System.setProperty(ConsensusConstant.SYS_FILE_ENCODING, UTF_8.name());
         Field charset = Charset.class.getDeclaredField("defaultCharset");
         charset.setAccessible(true);
@@ -64,7 +64,7 @@ public class ConsensusBootStrap {
      * 初始化数据库
      * Initialization database
      */
-    private static void initDB() throws Exception{
+    private static void initDB() throws Exception {
         Properties properties = ConfigLoader.loadProperties(ConsensusConstant.DB_CONFIG_NAME);
         String path = properties.getProperty(ConsensusConstant.DB_DATA_PATH, ConsensusConstant.DB_DATA_DEFAULT_PATH);
         RocksDBService.init(path);
@@ -75,7 +75,7 @@ public class ConsensusBootStrap {
      * 初始化国际化资源文件语言
      * Initialization of International Resource File Language
      */
-    private static void initLanguage() throws Exception{
+    private static void initLanguage() throws Exception {
         LanguageService languageService = SpringLiteContext.getBean(LanguageService.class);
         String languageDB = languageService.getLanguage();
         I18nUtils.loadLanguage("", "");
