@@ -290,18 +290,8 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction tx = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
         tx.setRemark(StringUtils.bytes(remark));
         try {
-            //组装coinFrom、coinTo数据
-            List<CoinFrom> coinFromList = assemblyCoinFrom(chainId, fromList);
-            List<CoinTo> coinToList = assemblyCoinTo(chainId, toList);
-            //来源地址或转出地址为空
-            if (coinFromList.size() == 0 || coinToList.size() == 0) {
-                throw new NulsRuntimeException(AccountErrorCode.COINDATA_IS_INCOMPLETE);
-            }
-            //交易总大小=交易数据大小+签名数据大小
-            int txSize = tx.size() + getSignatureSize(coinFromList);
-            //组装coinData数据
-            CoinData coinData = getCoinData(chainId, coinFromList, coinToList, txSize);
-            tx.setCoinData(coinData.serialize());
+            //组装CoinData中的coinFrom、coinTo数据
+            assemblyCoinData(tx, chainId, fromList, toList);
             //计算交易数据摘要哈希
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             //创建ECKey用于签名
@@ -329,6 +319,43 @@ public class TransactionServiceImpl implements TransactionService {
             throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
         } catch (Exception e) {
             Log.error("assemblyTransaction error.", e);
+            throw new NulsRuntimeException(AccountErrorCode.FAILED);
+        }
+        return tx;
+    }
+
+    /**
+     * 组装CoinData数据
+     * assembly coinFrom data
+     *
+     * @param tx
+     * @param chainId
+     * @param fromList
+     * @param toList
+     * @return
+     */
+    private Transaction assemblyCoinData(Transaction tx, int chainId, List<CoinDto> fromList, List<CoinDto> toList) {
+        try {
+            //组装coinFrom、coinTo数据
+            List<CoinFrom> coinFromList = assemblyCoinFrom(chainId, fromList);
+            List<CoinTo> coinToList = assemblyCoinTo(chainId, toList);
+            //来源地址或转出地址为空
+            if (coinFromList.size() == 0 || coinToList.size() == 0) {
+                throw new NulsRuntimeException(AccountErrorCode.COINDATA_IS_INCOMPLETE);
+            }
+            //交易总大小=交易数据大小+签名数据大小
+            int txSize = tx.size() + getSignatureSize(coinFromList);
+            //组装coinData数据
+            CoinData coinData = getCoinData(chainId, coinFromList, coinToList, txSize);
+            tx.setCoinData(coinData.serialize());
+        } catch (NulsException e) {
+            Log.error("assemblyCoinData exception.", e);
+            throw new NulsRuntimeException(e.getErrorCode());
+        } catch (IOException e) {
+            Log.error("assemblyCoinData io exception.", e);
+            throw new NulsRuntimeException(AccountErrorCode.SERIALIZE_ERROR);
+        } catch (Exception e) {
+            Log.error("assemblyCoinData error.", e);
             throw new NulsRuntimeException(AccountErrorCode.FAILED);
         }
         return tx;
