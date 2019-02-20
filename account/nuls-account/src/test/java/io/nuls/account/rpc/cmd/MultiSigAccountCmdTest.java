@@ -37,7 +37,7 @@ public class MultiSigAccountCmdTest {
 
     protected int chainId = 12345;
 
-    protected String password = "a12345678";
+    protected String password = "nuls123456";
 
     static MultiSignAccountService multiSignAccountService;
     static AccountService accountService;

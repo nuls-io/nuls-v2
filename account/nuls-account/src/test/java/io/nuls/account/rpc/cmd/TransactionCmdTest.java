@@ -438,10 +438,9 @@ public class TransactionCmdTest {
         //创建一个接收方账户
         List<String> accoutList = CommonRpcOperation.createAccount(1);
         assertTrue(accoutList != null & accoutList.size() == 1);
-        String toAddress = accoutList.get(0);
+        String toAddress = "5MR_2Cc14Ph4ZfJTzsfxma8FGZ7FBzcTS87";//accoutList.get(0);
         //铸币
         //addGenesisAsset(fromAddress);
-        System.out.println(HexUtil.encode(AddressTool.getAddress(fromAddress)));
         BigInteger balance = TxUtil.getBalance(chainId, chainId, assetId, AddressTool.getAddress(fromAddress));
         System.out.println(balance);
 

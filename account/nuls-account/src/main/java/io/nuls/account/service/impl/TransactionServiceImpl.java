@@ -209,7 +209,10 @@ public class TransactionServiceImpl implements TransactionService {
     private Transaction buildMultiSignTransactionCoinData(Transaction transaction, int chainId, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount) throws IOException {
         Chain chain = chainManager.getChainMap().get(chainId);
         int assetsId = chain.getConfig().getAssetsId();
-        CoinFrom coinFrom = new CoinFrom(multiSigAccount.getAddress().getAddressBytes(), chainId, assetsId);
+        //查询账本获取nonce值
+        byte[] nonce = TxUtil.getNonce(chainId, chainId, assetsId, multiSigAccount.getAddress().getAddressBytes());
+        CoinFrom coinFrom = new CoinFrom(multiSigAccount.getAddress().getAddressBytes(), chainId, assetsId, amount, nonce, AccountConstant.NORMAL_TX_LOCKED);
+        //CoinFrom coinFrom = new CoinFrom(multiSigAccount.getAddress().getAddressBytes(), chainId, assetsId);
         CoinTo coinTo = new CoinTo(AddressTool.getAddress(toAddress), chainId, assetsId, amount);
         int txSize = transaction.size() + coinFrom.size() + coinTo.size() + ((int) multiSigAccount.getM()) * P2PHKSignature.SERIALIZE_LENGTH;
         BigInteger fee = TransactionFeeCalculator.getNormalTxFee(txSize); //计算手续费
@@ -575,7 +578,8 @@ public class TransactionServiceImpl implements TransactionService {
         for (CoinFrom coinFrom : coinFroms) {
             String address = AddressTool.getStringAddressByBytes(coinFrom.getAddress());
             MultiSigAccount multiSigAccount = multiSignAccountService.getMultiSigAccountByAddress(coinFrom.getAssetsChainId(), address);
-            if (multiSigAccount != null) { //多签
+            if (multiSigAccount != null) {
+                //多签地址
                 multiSignAddress.add(multiSigAccount);
             } else {
                 commonAddress.add(address);

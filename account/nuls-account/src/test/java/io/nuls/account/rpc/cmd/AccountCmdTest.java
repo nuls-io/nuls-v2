@@ -107,13 +107,16 @@ public class AccountCmdTest {
         }
 
         //Test to create an empty password account
-        accountList = CommonRpcOperation.createAccount(chainId, count, null);
+        List<String> accountList2 = CommonRpcOperation.createAccount(chainId, count, null);
         //Checking the number of accounts returned
-        assertEquals(accountList.size(), count);
+        assertEquals(accountList2.size(), count);
+        for (String address : accountList2) {
+            System.out.println(address);
+        }
 
         //Test the largest number of generated accounts.
-        accountList = CommonRpcOperation.createAccount(chainId, 101, null);
-        assertNull(accountList);
+        List<String> accountList3 = CommonRpcOperation.createAccount(chainId, 101, null);
+        assertNull(accountList3);
 
 
     }
