@@ -25,9 +25,9 @@ import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.manager.ContextManager;
 import io.nuls.protocol.model.ProtocolContext;
 import io.nuls.protocol.model.ProtocolVersion;
-import io.nuls.protocol.model.po.Statistics;
 import io.nuls.protocol.thread.monitor.ProtocolMonitor;
 import io.nuls.protocol.utils.ConfigLoader;
+import io.nuls.protocol.utils.module.KernelUtil;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
@@ -63,9 +63,9 @@ public class ProtocolBootstrap {
      * 初始化，完成后系统状态变更为{@link RunningStatusEnum#READY}
      */
     private static void init() {
+        //扫描包路径io.nuls.protocol,初始化bean
+        SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
         try {
-            //扫描包路径io.nuls.protocol,初始化bean
-            SpringLiteContext.init(DEFAULT_SCAN_PACKAGE);
             //rpc服务初始化
             WsServer.getInstance(ModuleE.PU)
                     .moduleRoles(new String[]{"1.0"})
@@ -80,12 +80,19 @@ public class ProtocolBootstrap {
             RocksDBService.createTable(PROTOCOL_CONFIG);
             //加载配置
             ConfigLoader.load();
+            for (Integer chainId : ContextManager.chainIds) {
+                ContextManager.getContext(chainId).setStatus(RunningStatusEnum.READY);
+                KernelUtil.updateStatus(chainId, ModuleE.PU.abbr, RunningStatusEnum.READY);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("error occur when init, " + e.getMessage());
         }
     }
 
+    /**
+     * 启动，完成后系统状态变更为{@link RunningStatusEnum#RUNNING}
+     */
     private static void start() {
         try {
             while (!ServerRuntime.isReady()) {
@@ -93,15 +100,22 @@ public class ProtocolBootstrap {
                 Thread.sleep(2000L);
             }
             commonLog.info("service starting");
-            //开启分叉链处理线程
-            ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
-            forkExecutor.scheduleWithFixedDelay(ProtocolMonitor.getInstance(), 0, 5, TimeUnit.SECONDS);
+            //开启一些监控线程
+            ScheduledThreadPoolExecutor executor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("protocol-monitor"));
+            executor.scheduleWithFixedDelay(ProtocolMonitor.getInstance(), 0, 5, TimeUnit.SECONDS);
+            for (Integer chainId : ContextManager.chainIds) {
+                ContextManager.getContext(chainId).setStatus(RunningStatusEnum.RUNNING);
+                KernelUtil.updateStatus(chainId, ModuleE.PU.abbr, RunningStatusEnum.RUNNING);
+            }
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("error occur when start, " + e.getMessage());
         }
     }
 
+    /**
+     * 循环记录一些日志信息
+     */
     private static void loop() {
         while (true) {
             for (Integer chainId : ContextManager.chainIds) {

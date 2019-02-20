@@ -42,6 +42,10 @@ import java.util.Map;
  */
 public class ProtocolUtil {
 
+    public static boolean meaasge(int chainId, BlockHeader blockHeader) {
+        return false;
+    }
+
     /**
      * 回滚区块时通知协议升级模块
      *

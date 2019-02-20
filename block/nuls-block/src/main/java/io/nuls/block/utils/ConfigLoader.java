@@ -22,6 +22,7 @@
 
 package io.nuls.block.utils;
 
+import io.nuls.base.data.ProtocolConfig;
 import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
@@ -37,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
+import static io.nuls.block.constant.Constant.PROTOCOL_CONFIG_FILE;
 
 /**
  * 配置加载器
@@ -59,7 +61,7 @@ public class ConfigLoader {
         if (list == null || list.size() == 0) {
             loadDefault();
         } else {
-            list.forEach(e -> ContextManager.init(e));
+            list.forEach(ContextManager::init);
         }
     }
 
@@ -69,6 +71,9 @@ public class ConfigLoader {
      * @throws Exception
      */
     private static void loadDefault() throws Exception {
+        String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
+        List<ProtocolConfig> protocolConfigs = JSONUtils.json2list(json, ProtocolConfig.class);
+        System.out.println(protocolConfigs);
         String configJson = IoUtils.read(MODULES_CONFIG_FILE);
         List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
         Map<String, ConfigItem> map = new HashMap<>(configItems.size());

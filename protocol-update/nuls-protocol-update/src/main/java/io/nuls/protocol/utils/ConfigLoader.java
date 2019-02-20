@@ -22,10 +22,10 @@
 
 package io.nuls.protocol.utils;
 
+import io.nuls.base.data.ProtocolConfig;
 import io.nuls.protocol.constant.ConfigConstant;
 import io.nuls.protocol.manager.ConfigManager;
 import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ProtocolConfig;
 import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.service.ConfigStorageService;
 import io.nuls.tools.core.ioc.SpringLiteContext;

@@ -43,6 +43,12 @@ public interface Constant {
     String MODULES_CONFIG_FILE = "modules.json";
 
     /**
+     * 协议配置文件名称
+     * Protocol configuration file name.
+     */
+    String PROTOCOL_CONFIG_FILE = "protocol-config.json";
+
+    /**
      * db文件存放目录
      */
     String DATA_PATH = "../../data/block";

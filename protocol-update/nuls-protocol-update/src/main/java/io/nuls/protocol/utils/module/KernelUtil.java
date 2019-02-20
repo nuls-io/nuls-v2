@@ -56,7 +56,7 @@ public class KernelUtil {
             params.put("module", moduleString);
             params.put("status", status.ordinal());
 
-            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_validBlock", params).isSuccess();
+            return CmdDispatcher.requestAndResponse(ModuleE.KE.abbr, "updateStatus", params).isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
