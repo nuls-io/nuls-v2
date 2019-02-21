@@ -41,6 +41,7 @@ public class BlockManager {
             blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");
         }
         while(!cmdResp.isSuccess() && blockHeaderHexs.size() == 0){
+            Thread.sleep(1000);
             cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
             if(cmdResp.isSuccess()){
                 resultMap = (Map<String, Object>) cmdResp.getResponseData();
