@@ -39,6 +39,23 @@ public class AccountCall {
             throw new NulsException(e);
         }
     }
+    /**
+     * 查询地址是否加密
+     * Is address Encrypted
+     */
+    public static boolean isEncrypted(String address) throws NulsException {
+        try {
+            int chainId = AddressTool.getChainIdByAddress(address);
+            Map<String, Object> params = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("address", address);
+            HashMap result = (HashMap) TransactionCall.request(ModuleE.AC.abbr, "ac_isEncrypted", params);
+            return (boolean) result.get("value");
+        } catch (Exception e) {
+            throw new NulsException(e);
+        }
+    }
 
     /**
      * 查询多签账户

@@ -31,6 +31,7 @@ import io.nuls.base.data.*;
 import io.nuls.base.signture.MultiSignTxSignature;
 import io.nuls.base.signture.P2PHKSignature;
 import io.nuls.base.signture.SignatureUtil;
+import io.nuls.base.signture.TransactionSignature;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -153,6 +154,9 @@ public class TxServiceImpl implements TxService {
                 return map;
             } else {
                 //获多签交易发起者的eckey,进行第一个签名
+                if (!AccountCall.isEncrypted(accountSignDTO.getAddress())){
+                    throw new NulsException(TxErrorCode.ACCOUNT_NOT_ENCRYPTED);
+                }
                 String priKey = AccountCall.getPrikey(accountSignDTO.getAddress(), accountSignDTO.getPassword());
                 ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
                 //验证待签名地址账户是否属于多签账户
@@ -204,19 +208,22 @@ public class TxServiceImpl implements TxService {
             tx.setCoinData(coinData.serialize());
             tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
             //签名
-            List<ECKey> signEcKeys = new ArrayList<>();
+            TransactionSignature transactionSignature = new TransactionSignature();
+            List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             for (CoinDTO coinDTO : listFrom) {
-                String priKey = AccountCall.getPrikey(coinDTO.getAddress(), coinDTO.getPassword());
-                ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
-                signEcKeys.add(ecKey);
+                p2PHKSignatures.add(AccountCall.signDigest(coinDTO.getAddress(), coinDTO.getPassword(), tx.hex()));
             }
-            SignatureUtil.createTransactionSignture(tx, signEcKeys);
+            transactionSignature.setP2PHKSignatures(p2PHKSignatures);
+            tx.setTransactionSignature(transactionSignature.serialize());
             this.cacheTxHash(tx);
             this.newTx(chain, tx);
             return tx;
         } catch (IOException e) {
             Log.error(e);
             throw new NulsException(TxErrorCode.SERIALIZE_ERROR);
+        } catch (Exception e) {
+            Log.error(e);
+            throw new NulsException(e);
         }
     }
 
@@ -243,6 +250,9 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public Map<String, String> signMultiTransaction(Chain chain, String address, String password, String tx) throws NulsException {
+        if (!AccountCall.isEncrypted(address)){
+            throw new NulsException(TxErrorCode.ACCOUNT_NOT_ENCRYPTED);
+        }
         Transaction transaction = TxUtil.getTransaction(tx);
         String priKey = AccountCall.getPrikey(address, password);
         ECKey ecKey = ECKey.fromPrivate(new BigInteger(ECKey.SIGNUM, HexUtil.decode(priKey)));
@@ -368,6 +378,9 @@ public class TxServiceImpl implements TxService {
                 //不是多签交易，from中不能有多签地址
                 if (AddressTool.isMultiSignAddress(address)) {
                     throw new NulsException(TxErrorCode.IS_MULTI_SIGNATURE_ADDRESS);
+                }
+                if (!AccountCall.isEncrypted(addr)){
+                    throw new NulsException(TxErrorCode.ACCOUNT_NOT_ENCRYPTED);
                 }
             }
             if (!AddressTool.validAddress(chain.getChainId(), addr)) {
