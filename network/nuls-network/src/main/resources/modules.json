@@ -51,7 +51,7 @@
     "name": "network.self.seed.ip",
     "remark": "种子节点",
     "readOnly": "false",
-    "value": "192.168.1.36:8008"
+    "value": "192.168.1.192:8008"
   },
   {
     "name": "network.cross.server.port",
@@ -82,6 +82,6 @@
     "name": "network.moon.seed.ip",
     "remark": "卫星链种子节点",
     "readOnly": "true",
-    "value": "192.168.1.36:8008"
+    "value": "192.168.1.192:8008"
   }
 ]
