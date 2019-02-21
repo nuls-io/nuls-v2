@@ -84,6 +84,7 @@ public class BlockBootstrap {
             RocksDBService.init(DATA_PATH);
             RocksDBService.createTable(CHAIN_LATEST_HEIGHT);
             RocksDBService.createTable(CHAIN_PARAMETERS);
+            RocksDBService.createTable(PROTOCOL_CONFIG);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("error occur when init, " + e.getMessage());

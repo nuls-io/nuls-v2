@@ -57,6 +57,10 @@ public interface Constant {
      */
     String CHAIN_PARAMETERS = "ChainParameters";
     /**
+     * 存储每条链的协议配置信息
+     */
+    String PROTOCOL_CONFIG = "ProtocolConfig";
+    /**
      * 存储每条链的最新高度
      */
     String CHAIN_LATEST_HEIGHT = "ChainLatestHeight";

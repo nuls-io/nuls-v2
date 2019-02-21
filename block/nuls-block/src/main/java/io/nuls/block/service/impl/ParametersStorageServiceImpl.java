@@ -92,4 +92,56 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
             return null;
         }
     }
+
+    @Override
+    public boolean saveProtocolConfigJson(String json, int chainId) {
+        byte[] bytes;
+        try {
+            bytes = json.getBytes();
+            return RocksDBService.put(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainId), bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public String getProtocolConfigJson(int chainID) {
+        try {
+            byte[] bytes = RocksDBService.get(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID));
+            return new String(bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean deleteProtocolConfigJson(int chainID) {
+        try {
+            return RocksDBService.delete(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainID));
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public List<String> getProtocolConfigJsonList() {
+        try {
+            var pos = new ArrayList<String>();
+            List<byte[]> valueList = RocksDBService.valueList(Constant.CHAIN_PARAMETERS);
+            for (byte[] bytes : valueList) {
+                pos.add(new String(bytes));
+            }
+            return pos;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+    }
 }

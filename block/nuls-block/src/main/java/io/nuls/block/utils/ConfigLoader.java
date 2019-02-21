@@ -59,10 +59,15 @@ public class ConfigLoader {
      */
     public static void load() throws Exception {
         List<ChainParameters> list = service.getList();
+        List<String> protocolConfigJsonList = service.getProtocolConfigJsonList();
+        protocolConfigJsonList.forEach(e -> );
+        List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
+        protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
+        Map<Short, Protocol> protocolMap = load(protocolConfigs);
         if (list == null || list.size() == 0) {
             loadDefault();
         } else {
-//            list.forEach(ContextManager::init);
+            list.forEach();
         }
     }
 
@@ -86,6 +91,7 @@ public class ConfigLoader {
         po.init(map);
         ContextManager.init(po, protocolMap);
         service.save(po, chainId);
+        service.saveProtocolConfigJson(json, chainId);
     }
 
     private static Map<Short, Protocol> load(List<ProtocolConfigJson> protocolConfigs){

@@ -22,6 +22,7 @@
 
 package io.nuls.block.service;
 
+import io.nuls.base.data.protocol.ProtocolConfigJson;
 import io.nuls.block.model.ChainParameters;
 
 import java.util.List;
@@ -70,4 +71,16 @@ public interface ParametersStorageService {
      * @return 节点信息列表/Node information list
      */
     List<ChainParameters> getList();
+
+    /**
+     * 保存协议配置信息
+     *  @param protocolConfigs
+     * @param chainId*/
+    boolean saveProtocolConfigJson(String protocolConfigs, int chainId);
+
+    String getProtocolConfigJson(int chainID);
+
+    boolean deleteProtocolConfigJson(int chainID);
+
+    List<String> getProtocolConfigJsonList();
 }
