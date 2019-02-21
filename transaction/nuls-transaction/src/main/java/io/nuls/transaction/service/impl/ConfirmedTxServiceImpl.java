@@ -340,6 +340,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
                 NulsDigestData hash = txHashList.get(i);
                 txHashs.add(hash.serialize());
                 Transaction tx = confirmedTxStorageService.getTx(chainId, hash);
+                txList.add(tx);
                 String txHex = tx.hex();
                 txHexList.add(txHex);
                 TxRegister txRegister = transactionManager.getTxRegister(chain, tx.getType());
