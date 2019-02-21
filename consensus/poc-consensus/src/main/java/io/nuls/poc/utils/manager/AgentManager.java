@@ -79,7 +79,7 @@ public class AgentManager{
             return;
         }
         for(int index = 0 ;index < agentList.size();index++){
-            if(agent.getTxHash().equals(agentList.get(index))){
+            if(agent.getTxHash().equals(agentList.get(index).getTxHash())){
                 agentList.set(index,agent);
             }
         }
