@@ -21,7 +21,6 @@
 package io.nuls.block.manager;
 
 import io.nuls.base.data.protocol.Protocol;
-import io.nuls.base.data.protocol.ProtocolConfig;
 import io.nuls.block.BlockBootstrap;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;

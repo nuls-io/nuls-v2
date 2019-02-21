@@ -73,7 +73,7 @@ public class ConfigLoader {
      */
     private static void loadDefault() throws Exception {
         String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
-        List<ProtocolConfig> protocolConfigs = JSONUtils.json2list(json, ProtocolConfig.class);
+        List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
         protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
         Map<Short, Protocol> protocolMap = load(protocolConfigs);
         String configJson = IoUtils.read(MODULES_CONFIG_FILE);
@@ -88,9 +88,9 @@ public class ConfigLoader {
         service.save(po, chainId);
     }
 
-    private static Map<Short, Protocol> load(List<ProtocolConfig> protocolConfigs){
+    private static Map<Short, Protocol> load(List<ProtocolConfigJson> protocolConfigs){
         Map<Short, Protocol> protocolsMap = new HashMap<>();
-        for (ProtocolConfig config : protocolConfigs) {
+        for (ProtocolConfigJson config : protocolConfigs) {
             Protocol protocol = new Protocol();
             protocol.setVersion(config.getVersion());
             short extend = config.getExtend();
