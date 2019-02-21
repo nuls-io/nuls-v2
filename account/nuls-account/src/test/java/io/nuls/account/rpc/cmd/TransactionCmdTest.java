@@ -284,11 +284,11 @@ public class TransactionCmdTest {
         List<CoinDto> inputs = new ArrayList<>();
         List<CoinDto> outputs = new ArrayList<>();
         CoinDto inputCoin1 = new CoinDto();
-        inputCoin1.setAddress("5MR_2CfUsasd33vQV3HqGw6M3JwVsuVxJ7r");
+        inputCoin1.setAddress("5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM");
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(1);
-        inputCoin1.setAmount(new BigInteger("20000000000"));
+        inputCoin1.setAmount(new BigInteger("10000000000"));
         inputs.add(inputCoin1);
 
         CoinDto outputCoin1 = new CoinDto();
@@ -296,7 +296,7 @@ public class TransactionCmdTest {
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(1);
-        outputCoin1.setAmount(new BigInteger("20000000000"));
+        outputCoin1.setAmount(new BigInteger("10000000000"));
         outputs.add(outputCoin1);
 
         transferDto.setInputs(inputs);
