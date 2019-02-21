@@ -319,7 +319,11 @@ public class CallMethodUtils {
             }
             Map responseData = (Map) cmdResp.getResponseData();
             Transaction tx = new Transaction();
-            tx.parse(HexUtil.decode((String) responseData.get("tx_getTx")), 0);
+            Map realData = (Map)responseData.get("tx_getTx");
+            String txHex  = (String)realData.get("txHex");
+            if(!StringUtils.isBlank(txHex)){
+                tx.parse(HexUtil.decode(txHex),0);
+            }
             return tx;
         } catch (Exception e) {
             chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error(e);
