@@ -115,7 +115,7 @@ public class Chain {
 
     public Chain() {
         this.consensusStatus = ConsensusStatus.INITING;
-        this.canPacking = false;
+        this.canPacking = true;
         this.agentList = new ArrayList<>();
         this.depositList = new ArrayList<>();
         this.yellowPunishList = new ArrayList<>();
