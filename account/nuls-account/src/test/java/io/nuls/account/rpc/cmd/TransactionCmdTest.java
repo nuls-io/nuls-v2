@@ -292,7 +292,7 @@ public class TransactionCmdTest {
         inputs.add(inputCoin1);
 
         CoinDto outputCoin1 = new CoinDto();
-        outputCoin1.setAddress("5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi");
+        outputCoin1.setAddress("5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5");
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(1);

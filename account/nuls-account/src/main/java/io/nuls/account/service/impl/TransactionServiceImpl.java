@@ -376,10 +376,6 @@ public class TransactionServiceImpl implements TransactionService {
         for (CoinDto coinDto : listFrom) {
             String address = coinDto.getAddress();
             byte[] addressByte = AddressTool.getAddress(address);
-            //from中不能有多签地址
-            if (AddressTool.isMultiSignAddress(address)) {
-                throw new NulsException(AccountErrorCode.IS_MULTI_SIGNATURE_ADDRESS);
-            }
             //转账交易转出地址必须是本链地址
             if (!AddressTool.validAddress(chainId, address)) {
                 throw new NulsException(AccountErrorCode.IS_NOT_CURRENT_CHAIN_ADDRESS);
