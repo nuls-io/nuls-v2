@@ -148,9 +148,8 @@ public class MessageTest {
     @Test
     public void testHashListMessage() throws Exception {
         HashListMessage message = new HashListMessage();
-        HashListMessage body = new HashListMessage();
-        
-        body.setTxHashList(Lists.newArrayList(NulsDigestData.calcDigestData("hello".getBytes())));
+        message.setBlockHash(NulsDigestData.calcDigestData("00205f3e3489f3625304a0080ab4a0f5b46d15b68f9bb2bc24b54a6128f59b84b774".getBytes()));
+        message.setTxHashList(Lists.newArrayList(NulsDigestData.calcDigestData("00204fd8f7316eb324643197dcc466531556231237adf36a2b3098a7b43526e34261".getBytes())));
         String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
 
@@ -184,10 +183,12 @@ public class MessageTest {
     @Test
     public void testTxGroupMessage() throws Exception {
         TxGroupMessage message = new TxGroupMessage();
-        message.setBlockHash(NulsDigestData.calcDigestData("hello".getBytes()));
-        Transaction transaction = buildTransaction("5MR_2Ch2F7jfohNqwwdmMmF3ESQYK2R9bt8");
+        message.setBlockHash(NulsDigestData.calcDigestData("00205f3e3489f3625304a0080ab4a0f5b46d15b68f9bb2bc24b54a6128f59b84b774".getBytes()));
+        Transaction t1 = buildTransaction("5MR_2Ch2F7jfohNqwwdmMmF3ESQYK2R9bt8");
+        Transaction t2 = buildTransaction("5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu");
         List<Transaction> transactions = new ArrayList<>();
-        transactions.add(transaction);
+        transactions.add(t1);
+        transactions.add(t2);
         message.setTransactions(transactions);
         String hex = HexUtil.encode(message.serialize());
         System.out.println(hex);
