@@ -159,7 +159,7 @@ public class AccountCmdTest {
     @Test
     public void getAccountByAddressTest() throws Exception {
         List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
-        SimpleAccountDto accountDto = getAccountByAddress(chainId, accountList.get(0));
+        SimpleAccountDto accountDto = getAccountByAddress(chainId, "5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA");
         assertEquals(accountList.get(0), accountDto.getAddress());
     }
 
