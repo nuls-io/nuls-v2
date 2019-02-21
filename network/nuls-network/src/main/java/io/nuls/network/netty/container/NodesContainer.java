@@ -27,6 +27,7 @@ package io.nuls.network.netty.container;
 
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.po.NodesContainerPo;
 
@@ -51,7 +52,7 @@ public class NodesContainer implements Serializable {
      */
     private volatile long latestHandshakeSuccTime = 0;
     private volatile boolean hadShareAddr = false;
-    private volatile int status;
+    private volatile int status = NodeGroup.WAIT1;
 
 
     public NodesContainer() {

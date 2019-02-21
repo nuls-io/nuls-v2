@@ -40,10 +40,10 @@ public class ShareAddressTask implements Runnable {
         MessageManager.getInstance().sendGetAddrMessage(nodeGroup, false, true);
         //shareMyServer
         String externalIp = getMyExtranetIp();
+        Log.info("my external ip  is {}", externalIp);
         if (externalIp == null) {
             return;
         }
-        Log.info("my external ip  is {}", externalIp);
         networkParam.getLocalIps().add(externalIp);
         /*自有网络的连接分享*/
         if (!nodeGroup.isMoonCrossGroup()) {
