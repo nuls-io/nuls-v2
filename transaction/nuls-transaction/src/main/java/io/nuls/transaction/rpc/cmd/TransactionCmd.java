@@ -356,7 +356,7 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
-     * 根据hash获取已确认交易
+     * 根据hash获取交易, 先查未确认, 查不到再查已确认
      * Get the transaction that have been packaged into the block from the database
      *
      * @param params
@@ -366,6 +366,47 @@ public class TransactionCmd extends BaseCmd {
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "txHash", parameterType = "String")
     public Response getTx(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("txHash"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if(null == chain){
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            String txHash = (String) params.get("txHash");
+            if (!NulsDigestData.validHash(txHash)) {
+                throw new NulsException(TxErrorCode.HASH_ERROR);
+            }
+            Log.debug("getConfirmedTransaction : " + txHash);
+            Transaction tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            if(tx == null){
+                resultMap.put("txHex", null);
+            }else{
+                resultMap.put("txHex", tx.hex());
+            }
+            return success(resultMap);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+    /**
+     * 根据hash获取已确认交易(只查已确认)
+     * Get the transaction that have been packaged into the block from the database
+     *
+     * @param params
+     * @return Response
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_GET_CONFIRMED_TX, version = 1.0, description = "Get transaction ")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHash", parameterType = "String")
+    public Response getConfirmedTx(Map params) {
         Chain chain = null;
         try {
             ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());

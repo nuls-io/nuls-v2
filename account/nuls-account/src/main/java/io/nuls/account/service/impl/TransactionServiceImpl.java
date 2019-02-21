@@ -135,14 +135,14 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public MultiSignTransactionResultDto createMultiSignTransfer(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
+    public MultiSignTransactionResultDto createMultiSignTransfer(int chainId,int assetsId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
             throws NulsException, IOException {
         //create transaction
         Transaction transaction = new Transaction(AccountConstant.TX_TYPE_TRANSFER);
         transaction.setTime(TimeService.currentTimeMillis());
         transaction.setRemark(StringUtils.bytes(remark));
         //build coin data
-        buildMultiSignTransactionCoinData(transaction, chainId, multiSigAccount, toAddress, amount);
+        buildMultiSignTransactionCoinData(transaction, chainId,assetsId, multiSigAccount, toAddress, amount);
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
         //缓存当前交易hash
@@ -197,7 +197,7 @@ public class TransactionServiceImpl implements TransactionService {
         Alias alias = new Alias(multiSigAccount.getAddress().getAddressBytes(), aliasName);
         transaction.setTxData(alias.serialize());
         //build coin data
-        buildMultiSignTransactionCoinData(transaction, chainId, multiSigAccount, toAddress, BigInteger.ONE);
+        buildMultiSignTransactionCoinData(transaction, chainId,-1, multiSigAccount, toAddress, BigInteger.ONE);
         //sign
         TransactionSignature transactionSignature = buildMultiSignTransactionSignature(transaction, multiSigAccount, account, password);
         //缓存当前交易hash
@@ -210,9 +210,11 @@ public class TransactionServiceImpl implements TransactionService {
         return multiSignTransactionResultDto;
     }
 
-    private Transaction buildMultiSignTransactionCoinData(Transaction transaction, int chainId, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount) throws IOException {
+    private Transaction buildMultiSignTransactionCoinData(Transaction transaction, int chainId, int assetsId, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount) throws IOException {
         Chain chain = chainManager.getChainMap().get(chainId);
-        int assetsId = chain.getConfig().getAssetsId();
+        if (assetsId == -1) {
+            assetsId = chain.getConfig().getAssetsId();
+        }
         //查询账本获取nonce值
         byte[] nonce = TxUtil.getNonce(chainId, chainId, assetsId, multiSigAccount.getAddress().getAddressBytes());
         CoinFrom coinFrom = new CoinFrom(multiSigAccount.getAddress().getAddressBytes(), chainId, assetsId, amount, nonce, AccountConstant.NORMAL_TX_LOCKED);

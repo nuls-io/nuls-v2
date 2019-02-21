@@ -133,6 +133,8 @@ public class SmallBlockHandler extends BaseCmd {
             //还有一种场景时收到smallBlock时,有一些普通交易还没有缓存在未确认交易池中,此时要再从源节点请求
             Map<NulsDigestData, Transaction> txMap = new HashMap<>((int) header.getTxCount());
             List<Transaction> subTxList = smallBlock.getSubTxList();
+            messageLog.info("smallBlock getTxHashList " + smallBlock.getTxHashList());
+            messageLog.info("smallBlock size " + smallBlock.getSubTxList().size());
             for (Transaction tx : subTxList) {
                 txMap.put(tx.getHash(), tx);
             }
@@ -140,7 +142,7 @@ public class SmallBlockHandler extends BaseCmd {
             for (NulsDigestData hash : smallBlock.getTxHashList()) {
                 Transaction tx = txMap.get(hash);
                 if (null == tx) {
-                    tx = TransactionUtil.getTransaction(chainId, hash);
+                    tx = TransactionUtil.getConfirmedTransaction(chainId, hash);
                     if (tx != null) {
                         subTxList.add(tx);
                         txMap.put(hash, tx);
@@ -152,7 +154,8 @@ public class SmallBlockHandler extends BaseCmd {
             }
             //获取没有的交易
             if (!needHashList.isEmpty()) {
-                messageLog.info("block height : " + header.getHeight() + ", tx count : " + header.getTxCount() + " , get group tx of " + needHashList.size());
+                messageLog.info("block height:" + header.getHeight() + ", total tx count:" + header.getTxCount() + " , get group tx of " + needHashList.size());
+                messageLog.info("needHashList:" + needHashList + ", from:" + nodeId);
                 HashListMessage request = new HashListMessage();
                 request.setBlockHash(blockHash);
                 request.setTxHashList(needHashList);
