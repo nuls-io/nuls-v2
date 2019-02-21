@@ -121,7 +121,7 @@ public class TestTx {
 //        addGenesisAsset(address27);
 //        addGenesisAsset(address28);
 //        addGenesisAsset(address29);
-        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress(address20), assetChainId, assetId);
+        BigInteger balance = LedgerCall.getBalance(chain, AddressTool.getAddress("5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5"), assetChainId, assetId);
         System.out.println(JSONUtils.obj2PrettyJson(balance));
 
         BigInteger balance2 = LedgerCall.getBalance(chain, AddressTool.getAddress(address21), assetChainId, assetId);
