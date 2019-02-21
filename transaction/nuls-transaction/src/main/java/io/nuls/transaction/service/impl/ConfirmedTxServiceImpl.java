@@ -121,7 +121,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             chain.getLogger().debug("address:{}, to:{}", AddressTool.getStringAddressByBytes(coin.getAddress()), coin.getAmount());
         }
 
-        chain.getLogger().debug("保存创世块交易成功,H2数据库生成{}条交易记录", debugCount);
+        chain.getLogger().debug("保存创世块交易成功, H2数据库生成{}条交易记录", debugCount);
         return true;
     }
 
@@ -133,7 +133,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
      */
     @Override
     public boolean saveTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException {
-        chain.getLogger().debug("开始保存区块中的交易");
+        chain.getLogger().debug("start save block txs.......");
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
@@ -160,6 +160,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         BlockHeader blockHeader = null;
         try {
             blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
+            chain.getLogger().debug("saveBlockTxList block height:{}", blockHeader.getHeight());
             for (Transaction tx : txList) {
                 tx.setBlockHeight(blockHeader.getHeight());
                 String txHex = tx.hex();
@@ -324,6 +325,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
 
     @Override
     public boolean rollbackTxList(Chain chain, List<NulsDigestData> txHashList, String blockHeaderHex) throws NulsException {
+        chain.getLogger().debug("start rollbackTxList..............");
         if (null == chain || txHashList == null || txHashList.size() == 0) {
             throw new NulsException(TxErrorCode.PARAMETER_ERROR);
         }
@@ -355,6 +357,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         }
 
         BlockHeader blockHeader = TxUtil.getInstance(blockHeaderHex, BlockHeader.class);
+        chain.getLogger().debug("rollbackTxList block height:{}", blockHeader.getHeight());
         if (!rollbackLedger(chain, txHexList, blockHeader.getHeight())) {
             return false;
         }
