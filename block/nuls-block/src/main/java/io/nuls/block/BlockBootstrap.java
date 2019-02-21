@@ -142,11 +142,4 @@ public class BlockBootstrap {
             }
         }
     }
-
-    /**
-     * todo 正式版本删除
-     */
-    public static void onlyRunWhenTest() {
-
-    }
 }

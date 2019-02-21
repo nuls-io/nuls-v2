@@ -54,7 +54,6 @@ public class ContextManager {
         ChainContext chainContext = new ChainContext();
         int chainId = chainParameters.getChainId();
         chainIds.add(chainId);
-        BlockBootstrap.onlyRunWhenTest();
         ContextManager.contextMap.put(chainId, chainContext);
         chainContext.setChainId(chainId);
         chainContext.setParameters(chainParameters);

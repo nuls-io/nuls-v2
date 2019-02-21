@@ -37,7 +37,8 @@ public interface CommandConstant {
     /**
      * 获取当前协议版本号
      */
-    String GET_PROTOCOL_VERSION = "getCurrentProtocolVersion";
+    String GET_MAIN_VERSION = "getMainVersion";
+    String GET_BLOCK_VERSION = "getBlockVersion";
     String SAVE_BLOCK = "saveBlock";
     String ROLLBACK_BLOCK = "rollbackBlock";
 }

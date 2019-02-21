@@ -223,9 +223,9 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("set latest height fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            //3.保存区块头
+            //3.保存区块头, 保存交易
             BlockHeaderPo blockHeaderPo = BlockUtil.toBlockHeaderPo(block);
-            if (!blockStorageService.save(chainId, blockHeaderPo)) {
+            if (!blockStorageService.save(chainId, blockHeaderPo) || !TransactionUtil.save(chainId, blockHeaderPo, block.getTxs(), localInit)) {
                 if (!blockStorageService.remove(chainId, height)) {
                     throw new DbRuntimeException("remove blockheader error!");
                 }
@@ -235,25 +235,8 @@ public class BlockServiceImpl implements BlockService {
                 commonLog.error("save blockheader fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
-            //保存交易
-            if (!TransactionUtil.save(chainId, blockHeaderPo, block.getTxs(), localInit)) {
-                if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("TransactionUtil rollback error!");
-                }
-                if (!blockStorageService.remove(chainId, height)) {
-                    throw new DbRuntimeException("remove blockheader error!");
-                }
-                if (!blockStorageService.setLatestHeight(chainId, height - 1)) {
-                    throw new DbRuntimeException("setLatestHeight error!");
-                }
-                commonLog.error("TransactionUtil save fail!chainId-" + chainId + ",height-" + height);
-                return false;
-            }
             //4.通知共识模块
             if (!ConsensusUtil.saveNotice(chainId, header, localInit)) {
-                if (!ConsensusUtil.rollbackNotice(chainId, height)) {
-                    throw new DbRuntimeException("ConsensusUtil rollbackNotice error!");
-                }
                 if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
                     throw new DbRuntimeException("TransactionUtil rollback error!");
                 }
@@ -269,9 +252,6 @@ public class BlockServiceImpl implements BlockService {
             //5.通知协议升级模块,完全保存,更新标记
             blockHeaderPo.setComplete(true);
             if (!ProtocolUtil.saveNotice(chainId, header) || !blockStorageService.save(chainId, blockHeaderPo)) {
-                if (!ProtocolUtil.rollbackNotice(chainId, header)) {
-                    throw new DbRuntimeException("ProtocolUtil rollbackNotice error!");
-                }
                 if (!ConsensusUtil.rollbackNotice(chainId, height)) {
                     throw new DbRuntimeException("ConsensusUtil rollbackNotice error!");
                 }
@@ -331,17 +311,11 @@ public class BlockServiceImpl implements BlockService {
         try {
             BlockHeader blockHeader = BlockUtil.fromBlockHeaderPo(blockHeaderPo);
             if (!ProtocolUtil.rollbackNotice(chainId, blockHeader)) {
-                if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
-                    throw new DbRuntimeException("ProtocolUtil saveNotice error!");
-                }
                 commonLog.error("ProtocolUtil rollbackNotice fail!chainId-" + chainId + ",height-" + height);
                 return false;
             }
 
             if (!ConsensusUtil.rollbackNotice(chainId, height)) {
-                if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
-                    throw new DbRuntimeException("ConsensusUtil saveNotice error!");
-                }
                 if (!ProtocolUtil.saveNotice(chainId, blockHeader)) {
                     throw new DbRuntimeException("ProtocolUtil saveNotice error!");
                 }
@@ -350,9 +324,6 @@ public class BlockServiceImpl implements BlockService {
             }
 
             if (!TransactionUtil.rollback(chainId, blockHeaderPo)) {
-                if (!TransactionUtil.saveNormal(chainId, blockHeaderPo)) {
-                    throw new DbRuntimeException("TransactionUtil saveNormal error!");
-                }
                 if (!ConsensusUtil.saveNotice(chainId, blockHeader, false)) {
                     throw new DbRuntimeException("ConsensusUtil saveNotice error!");
                 }

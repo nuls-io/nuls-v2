@@ -59,15 +59,17 @@ public class ConfigLoader {
      */
     public static void load() throws Exception {
         List<ChainParameters> list = service.getList();
-        List<String> protocolConfigJsonList = service.getProtocolConfigJsonList();
-        protocolConfigJsonList.forEach(e -> );
-        List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
-        protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
-        Map<Short, Protocol> protocolMap = load(protocolConfigs);
         if (list == null || list.size() == 0) {
             loadDefault();
         } else {
-            list.forEach();
+            for (ChainParameters chainParameters : list) {
+                int chainId = chainParameters.getChainId();
+                String protocolConfigJson = service.getProtocolConfigJson(chainId);
+                List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(protocolConfigJson, ProtocolConfigJson.class);
+                protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
+                Map<Short, Protocol> protocolMap = load(protocolConfigs);
+                ContextManager.init(chainParameters, protocolMap);
+            }
         }
     }
 

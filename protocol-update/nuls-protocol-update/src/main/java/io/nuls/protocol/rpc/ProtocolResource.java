@@ -21,11 +21,9 @@
 package io.nuls.protocol.rpc;
 
 import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.BlockExtendsData;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ProtocolContext;
-import io.nuls.protocol.model.po.Statistics;
+import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.service.ProtocolService;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
@@ -36,9 +34,9 @@ import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.nuls.protocol.constant.CommandConstant.*;
@@ -61,13 +59,25 @@ public class ProtocolResource extends BaseCmd {
      * @param map
      * @return
      */
-    @CmdAnnotation(cmd = GET_PROTOCOL_VERSION , version = 1.0, scope = Constants.PUBLIC, description = "")
+    @CmdAnnotation(cmd = GET_MAIN_VERSION , version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
-    public Response getProtocolVersion(Map map) {
+    public Response getMainVersion(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
-        Map<String, Short> responseData = new HashMap<>(1);
-        responseData.put("value", ContextManager.getContext(chainId).getCurrentProtocolVersion().getVersion());
-        return success(responseData);
+        return success(ContextManager.getContext(chainId).getCurrentProtocolVersion().getVersion());
+    }
+
+    /**
+     * 获取当前钱包版本信息
+     *
+     * @param map
+     * @return
+     */
+    @CmdAnnotation(cmd = GET_BLOCK_VERSION , version = 1.0, scope = Constants.PUBLIC, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    public Response getBlockVersion(Map map) {
+        int chainId = Integer.parseInt(map.get("chainId").toString());
+        List<ProtocolVersion> list = ContextManager.getContext(chainId).getLocalVersionList();
+        return success(list.get(list.size() - 1));
     }
 
     /**
@@ -79,15 +89,19 @@ public class ProtocolResource extends BaseCmd {
     @CmdAnnotation(cmd = SAVE_BLOCK , version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeader", parameterType = "string")
-    public Response save(Map map) throws NulsException {
+    public Response save(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         String hex = map.get("blockHeader").toString();
         BlockHeader blockHeader = new BlockHeader();
-        blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-        short i = service.save(chainId, blockHeader);
-        Map<String, Short> responseData = new HashMap<>(1);
-        responseData.put("version", i);
-        return success(responseData);
+        try {
+            blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
+            short i = service.save(chainId, blockHeader);
+            Map<String, Short> responseData = new HashMap<>(1);
+            responseData.put("version", i);
+            return success(responseData);
+        } catch (NulsException e) {
+            return failed(e.getMessage());
+        }
     }
 
     /**
@@ -99,15 +113,19 @@ public class ProtocolResource extends BaseCmd {
     @CmdAnnotation(cmd = ROLLBACK_BLOCK , version = 1.0, scope = Constants.PUBLIC, description = "")
     @Parameter(parameterName = "chainId", parameterType = "int")
     @Parameter(parameterName = "blockHeader", parameterType = "string")
-    public Response rollback(Map map) throws NulsException {
+    public Response rollback(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
         String hex = map.get("blockHeader").toString();
         BlockHeader blockHeader = new BlockHeader();
-        blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
-        short i = service.rollback(chainId, blockHeader);
-        Map<String, Short> responseData = new HashMap<>(1);
-        responseData.put("version", i);
-        return success(responseData);
+        try {
+            blockHeader.parse(new NulsByteBuffer(HexUtil.decode(hex)));
+            short i = service.rollback(chainId, blockHeader);
+            Map<String, Short> responseData = new HashMap<>(1);
+            responseData.put("version", i);
+            return success(responseData);
+        } catch (NulsException e) {
+            return failed(e.getMessage());
+        }
     }
 
 }
