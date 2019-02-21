@@ -39,6 +39,7 @@ public interface TxCmd {
     String TX_SAVE = "tx_save";
     String TX_GENGSIS_SAVE = "tx_gengsisSave";
     String TX_ROLLBACK = "tx_rollback";
+    String TX_GET_CONFIRMED_TX = "tx_getConfirmedTx";
     String TX_GETTX = "tx_getTx";
     String TX_GETTXS = "tx_getTxs";
 //    String TX_DELETE = "tx_delete";

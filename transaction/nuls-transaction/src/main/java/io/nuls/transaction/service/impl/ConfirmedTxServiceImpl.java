@@ -206,13 +206,14 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         for (Transaction tx : txList) {
             tx.setStatus(TxStatusEnum.CONFIRMED);
             if (saveTx(chain, tx)) {
-                chain.getLogger().debug("saveConfirmedTx -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
+                chain.getLogger().debug("success! saveTxs -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
                 savedList.add(tx);
             } else {
                 if(atomicity) {
                     removeTxs(chain, savedList, false);
                 }
                 rs = false;
+                chain.getLogger().debug("failed! saveTxs  -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
                 break;
             }
         }
@@ -239,6 +240,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
             if (!rs) {
                 result = false;
+                chain.getLogger().debug("failed! commitTxs");
                 break;
             }
             successed.put(entry.getKey(), entry.getValue());
@@ -255,6 +257,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         try {
             return LedgerCall.commitTxLedger(chain, txHexList, blockHeight, true);
         } catch (NulsException e) {
+            chain.getLogger().debug("failed! commitLedger");
             chain.getLogger().error(e);
             return false;
         }
@@ -266,11 +269,13 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
         for (Transaction tx : txList) {
             if (confirmedTxStorageService.removeTx(chain.getChainId(), tx.getHash())) {
                 successedList.add(tx);
+                chain.getLogger().debug("success! removeTxs  -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
             } else {
                 if(atomicity){
                     saveTxs(chain, successedList, false);
                 }
                 rs = false;
+                chain.getLogger().debug("failed! removeTxs  -type[{}], hash:{}", tx.getType(), tx.getHash().getDigestHex());
                 break;
             }
         }
@@ -295,6 +300,7 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             }
             if (!rs) {
                 result = false;
+                chain.getLogger().debug("failed! rollbackcommitTxs ");
                 break;
             }
             successed.put(entry.getKey(), entry.getValue());

@@ -97,27 +97,29 @@ public class AccountCmdTest {
 
     @Test
     public void createAccountTest() throws Exception {
-        int count = 3;
+/*        int count = 3;
         //test to create an account that is not empty.
         List<String> accountList = CommonRpcOperation.createAccount(count);
         //checking the number of accounts returned
         assertEquals(accountList.size(), count);
         for (String address : accountList) {
             System.out.println(address);
-        }
+        }*/
 
         //Test to create an empty password account
-        List<String> accountList2 = CommonRpcOperation.createAccount(chainId, count, null);
+        List<String> accountList2 = CommonRpcOperation.createAccount(23, 2, null);
         //Checking the number of accounts returned
-        assertEquals(accountList2.size(), count);
+        assertEquals(accountList2.size(), 2);
         for (String address : accountList2) {
             System.out.println(address);
         }
+/*
 
         //Test the largest number of generated accounts.
         List<String> accountList3 = CommonRpcOperation.createAccount(chainId, 101, null);
         assertNull(accountList3);
 
+*/
 
     }
 
@@ -159,7 +161,7 @@ public class AccountCmdTest {
     @Test
     public void getAccountByAddressTest() throws Exception {
         List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
-        SimpleAccountDto accountDto = getAccountByAddress(chainId, accountList.get(0));
+        SimpleAccountDto accountDto = getAccountByAddress(chainId, "5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA");
         assertEquals(accountList.get(0), accountDto.getAddress());
     }
 

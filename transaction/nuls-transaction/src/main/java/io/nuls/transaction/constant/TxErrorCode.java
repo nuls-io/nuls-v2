@@ -70,6 +70,7 @@ public interface TxErrorCode {
     ErrorCode COINTO_HAS_DUPLICATE_COIN = ErrorCode.init("10059");
     ErrorCode CALLING_REMOTE_INTERFACE_FAILED = ErrorCode.init("10060");
     ErrorCode SIGN_ADDRESS_NOT_MATCH_COINFROM = ErrorCode.init("10061");
+    ErrorCode ACCOUNT_NOT_ENCRYPTED = ErrorCode.init("10062");
 
 
 
