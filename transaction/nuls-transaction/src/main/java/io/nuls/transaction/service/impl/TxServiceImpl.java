@@ -211,7 +211,7 @@ public class TxServiceImpl implements TxService {
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             for (CoinDTO coinDTO : listFrom) {
-                p2PHKSignatures.add(AccountCall.signDigest(coinDTO.getAddress(), coinDTO.getPassword(), tx.hex()));
+                p2PHKSignatures.add(AccountCall.signDigest(coinDTO.getAddress(), coinDTO.getPassword(), tx.getHash().getDigestHex()));
             }
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
