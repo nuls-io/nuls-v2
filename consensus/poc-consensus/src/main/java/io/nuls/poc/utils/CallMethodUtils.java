@@ -312,14 +312,14 @@ public class CallMethodUtils {
             Map<String, Object> params = new HashMap(4);
             params.put("chainId", chain.getConfig().getChainId());
             params.put("txHash", txHash);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
             if (!cmdResp.isSuccess()) {
                 chain.getLoggerMap().get(ConsensusConstant.CONSENSUS_LOGGER_NAME).error("Acquisition transaction failed！");
                 return null;
             }
             Map responseData = (Map) cmdResp.getResponseData();
             Transaction tx = new Transaction();
-            Map realData = (Map)responseData.get("tx_getTx");
+            Map realData = (Map)responseData.get("tx_getConfirmedTx");
             String txHex  = (String)realData.get("txHex");
             if(!StringUtils.isBlank(txHex)){
                 tx.parse(HexUtil.decode(txHex),0);

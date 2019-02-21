@@ -47,6 +47,7 @@ public class ShareAddressTask implements Runnable {
         networkParam.getLocalIps().add(externalIp);
         /*自有网络的连接分享*/
         if (!nodeGroup.isMoonCrossGroup()) {
+            Log.info("share self ip  is {}", externalIp);
             Node myNode = new Node(nodeGroup.getMagicNumber(), externalIp, networkParam.getPort(), Node.OUT, false);
             myNode.setConnectedListener(() -> {
                 myNode.getChannel().close();
@@ -116,6 +117,7 @@ public class ShareAddressTask implements Runnable {
     }
 
     private void doShare(String externalIp, Collection<Node> nodes, int port) {
+        Log.info("doShare ip ={}:{}", externalIp,port);
         IpAddress ipAddress = new IpAddress(externalIp, port);
         MessageManager.getInstance().broadcastSelfAddrToAllNode(nodes, ipAddress, true);
     }
