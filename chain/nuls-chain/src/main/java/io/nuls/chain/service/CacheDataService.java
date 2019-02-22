@@ -22,25 +22,26 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.util;
+package io.nuls.chain.service;
 
-import io.nuls.rpc.model.message.Response;
+import io.nuls.base.data.Transaction;
+import io.nuls.chain.model.po.BlockHeight;
+import io.nuls.chain.model.po.CacheDatas;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * @author lan
  * @description
- * @date 2019/01/16
+ * @date 2019/02/14
  **/
-public class ResponseUtils {
-    public static Map<String,Object> getResultMap(Response response,String cmd){
-        if(response.isSuccess()){
-            Object o=((Map)response.getResponseData()).get(cmd);
-            if(null != o){
-                return (Map)o;
-            }
-        }
-        return null;
-    }
+public interface CacheDataService {
+    void initBlockDatas() throws Exception;
+    void bakBlockTxs(int chainId, long preHeight, long height, List<Transaction> txList, boolean isCirculate) throws Exception;
+    void rollBlockTxs(int chainId, long height) throws Exception;
+    BlockHeight getBlockHeight(int chainId) throws Exception;
+    void beginBakBlockHeight(int chainId, long blockHeight) throws Exception;
+    void endBakBlockHeight(int chainId, long blockHeight) throws Exception;
+
+    CacheDatas getCacheDatas(long height) throws Exception;
 }

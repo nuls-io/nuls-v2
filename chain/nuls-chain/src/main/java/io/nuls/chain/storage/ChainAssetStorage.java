@@ -1,7 +1,7 @@
 package io.nuls.chain.storage;
 
 
-import io.nuls.chain.model.dto.ChainAsset;
+import io.nuls.chain.model.po.ChainAsset;
 
 public interface ChainAssetStorage {
 

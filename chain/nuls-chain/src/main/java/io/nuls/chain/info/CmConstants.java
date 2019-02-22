@@ -80,13 +80,10 @@ public class CmConstants {
     public static final String NULS_ASSET_SYMBOL = "nuls_asset_symbol";
 
 
-
-
     /**
      * 黑洞地址，该地址的资产无法找回
-     * //TODO 该地址需要加上链ID，否则无法适配新的地址规则
      */
-    public static final byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("JQJmP5xKDzAgJ8tJSQkCtKwbodAu20423");
+    public static final byte[] BLACK_HOLE_ADDRESS = AddressTool.getAddress("5MR_2CeoVHSw9D2c8rBrQiib5DgAQ1hiAXj");
 
-
+    public static final int BAK_BLOCK_MAX_COUNT = 500;
 }

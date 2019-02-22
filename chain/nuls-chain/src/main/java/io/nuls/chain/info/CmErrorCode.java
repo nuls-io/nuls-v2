@@ -33,27 +33,18 @@ import io.nuls.tools.constant.ErrorCode;
  * @create: 2018/11/27
  **/
 public class CmErrorCode {
-
-    public final static ErrorCode Err10002 = ErrorCode.init("10002");
+    public final static ErrorCode SUCCESS = ErrorCode.init("10000");
+    public final static ErrorCode UNKOWN_ERROR = ErrorCode.init("10002");
 
     public final static ErrorCode   BALANCE_NOT_ENOUGH = ErrorCode.init("30001");
+    public final static ErrorCode ERROR_TX_HEX = ErrorCode.init("30002");
+    public final static ErrorCode ERROR_NOT_CROSS_TX= ErrorCode.init("30003");
 
-
-    public final static ErrorCode C10001 = ErrorCode.init("C10001");
-    public final static ErrorCode C10002 = ErrorCode.init("C10002");
+    public final static ErrorCode ERROR_CHAIN_ID_EXIST = ErrorCode.init("C10001");
+    public final static ErrorCode ERROR_CHAIN_ID = ErrorCode.init("C10002");
     public final static ErrorCode ERROR_CHAIN_NOT_FOUND = ErrorCode.init("C10003");
     public final static ErrorCode ERROR_CHAIN_STATUS = ErrorCode.init("C10005");
     public final static ErrorCode ERROR_CHAIN_ASSET_MUTI = ErrorCode.init("C10006");
-
-
-
-    public final static ErrorCode ERROR_ASSET_ID_EXIST = ErrorCode.init("A10005");
-
-
-
-    public final static ErrorCode ERROR_ASSET_NOT_EXIST = ErrorCode.init("A10014");
-    public final static ErrorCode ERROR_ADDRESS_ERROR =  ErrorCode.init("A10016");
-    public final static ErrorCode A10017 =  ErrorCode.init("A10017");
 
     /**
      * 错误编码
@@ -63,6 +54,7 @@ public class CmErrorCode {
     public static final ErrorCode ERROR_ASSET_SYMBOL_EXIST = ErrorCode.init("A10002");
     public static final ErrorCode ERROR_JSON_TO_ASSET = ErrorCode.init("A10003");
     public static final ErrorCode ERROR_ASSET_RECOVERY_RATE =ErrorCode.init( "A10004");
+    public final static ErrorCode ERROR_ASSET_ID_EXIST = ErrorCode.init("A10005");
     public static final ErrorCode ERROR_ASSET_NAME_NULL = ErrorCode.init("A10006");
     public static final ErrorCode ERROR_ASSET_NAME_MAX = ErrorCode.init("A10007");
     public static final ErrorCode ERROR_ASSET_DEPOSITNULS = ErrorCode.init("A10008");
@@ -71,9 +63,10 @@ public class CmErrorCode {
     public static final ErrorCode ERROR_ASSET_DECIMALPLACES_MIN = ErrorCode.init("A10011");
     public static final ErrorCode ERROR_ASSET_DECIMALPLACES_MAX = ErrorCode.init("A10012");
     public static final ErrorCode ERROR_CHAIN_ASSET_NOT_MATCH = ErrorCode.init("A10013");
+    public final static ErrorCode ERROR_ASSET_NOT_EXIST = ErrorCode.init("A10014");
     public static final ErrorCode ERROR_ASSET_EXCEED_INIT = ErrorCode.init("A10015");
-
-
+    public final static ErrorCode ERROR_ADDRESS_ERROR =  ErrorCode.init("A10016");
+    public final static ErrorCode ERROR_TX_HASH =  ErrorCode.init("A10017");
     public static final ErrorCode ERROR_TX_REG_RPC =  ErrorCode.init("A10026");
 
 }

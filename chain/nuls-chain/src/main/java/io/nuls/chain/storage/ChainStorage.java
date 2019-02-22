@@ -1,7 +1,7 @@
 package io.nuls.chain.storage;
 
 
-import io.nuls.chain.model.dto.BlockChain;
+import io.nuls.chain.model.po.BlockChain;
 
 /**
  * 关于链的所有操作：增删改查

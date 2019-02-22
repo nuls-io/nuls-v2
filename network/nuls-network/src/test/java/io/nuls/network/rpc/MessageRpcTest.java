@@ -31,8 +31,13 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.VersionMessage;
 import io.nuls.network.model.message.body.VersionMessageBody;
-import io.nuls.network.rpc.internal.MessageRpc;
+import io.nuls.network.utils.LoggerUtil;
+import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.NoUse;
+import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.net.InetAddress;
@@ -45,7 +50,11 @@ import java.util.Map;
  * @date  2018/11/21
  **/
 public class MessageRpcTest {
-
+    @Before
+    public void before() throws Exception {
+        NoUse.mockModule();
+//        CmdDispatcher.syncKernel("ws://127.0.0.1:8887");
+    }
     private void addNodeGroup(){
         NodeGroup nodeGroup = new NodeGroup(778899,1000,32,55,43);
         NodeGroupManager.getInstance().addNodeGroup(1000,nodeGroup);
@@ -54,9 +63,9 @@ public class MessageRpcTest {
     @Test
     public void broadcast() {
         try {
-            addNodeGroup();
+//            addNodeGroup();
             Map <String,Object>params = new HashMap<>();
-            int chainId = 1000;
+            int chainId = 12345;
             String excludeNodes = "20.30.1020:5599,26.35.52.64:6688";
             VersionMessageBody versionMessageBody = new VersionMessageBody();
             InetAddress inetAddrYou = InetAddress.getByName("192.168.2.3");
@@ -72,8 +81,9 @@ public class MessageRpcTest {
             params.put("chainId",chainId);
             params.put("excludeNodes",excludeNodes);
             params.put("messageBody",HexUtil.byteToHex(versionMessageBody.serialize()));
-            params.put("command",HexUtil.byteToHex(versionMessage.getHeader().getCommand()));
-            new MessageRpc().broadcast(params);
+            params.put("command","block");
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
+            LoggerUtil.Log.info("response {}", response);
 
         }catch (Exception e){
             e.printStackTrace();

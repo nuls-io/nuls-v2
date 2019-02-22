@@ -129,7 +129,7 @@ public class AgentTest {
      * */
     public void getAgentList()throws Exception{
         Map<String,Object>params = new HashMap<>();
-        params.put("chainId",1);
+        params.put("chainId",12345);
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentList", params);
         System.out.println(cmdResp.getResponseData());
     }

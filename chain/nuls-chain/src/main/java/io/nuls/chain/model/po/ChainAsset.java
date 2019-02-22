@@ -1,4 +1,4 @@
-package io.nuls.chain.model.dto;
+package io.nuls.chain.model.po;
 
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
@@ -19,21 +19,36 @@ import java.math.BigInteger;
 @Data
 @ToString
 public class ChainAsset extends BaseNulsData {
-
-    private int chainId;
-
+    /**
+     *资产所在链
+     */
+    private int addressChainId;
+    /**
+     *资产产生链
+     */
+    private int assetChainId;
+    /**
+     *资产id
+     */
     private int assetId;
-
+    /**
+     * 初始值,也可以动态由查询来进行变更
+     */
     private BigInteger initNumber = BigInteger.ZERO;
-
+    /**
+     * 入账，增加资产值
+     */
     private BigInteger inNumber = BigInteger.ZERO;
-
+    /**
+     * 出账，减少资产值
+     */
     private BigInteger outNumber = BigInteger.ZERO;
 
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
-        stream.writeUint16(chainId);
+        stream.writeUint16(addressChainId);
+        stream.writeUint16(assetChainId);
         stream.writeUint16(assetId);
         stream.writeBigInteger(initNumber);
         stream.writeBigInteger(inNumber);
@@ -42,7 +57,8 @@ public class ChainAsset extends BaseNulsData {
 
     @Override
     public void parse(NulsByteBuffer byteBuffer) throws NulsException {
-        this.chainId = byteBuffer.readUint16();
+        this.addressChainId = byteBuffer.readUint16();
+        this.assetChainId = byteBuffer.readUint16();
         this.assetId = byteBuffer.readUint16();
         this.initNumber = byteBuffer.readBigInteger();
         this.inNumber = byteBuffer.readBigInteger();
@@ -52,6 +68,7 @@ public class ChainAsset extends BaseNulsData {
     @Override
     public int size() {
         int size = 0;
+        size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfUint16();
         size += SerializeUtils.sizeOfBigInteger();
