@@ -146,7 +146,6 @@ public class RepositoryImpl implements Repository {
         if (stream == null) {
             return -1;
         }
-
         try {
             long height = ByteUtils.byteToLong(stream);
             return height;
@@ -222,8 +221,6 @@ public class RepositoryImpl implements Repository {
             String table = getBlockTableName(chainId);
             if (!RocksDBService.existTable(table)) {
                 RocksDBService.createTable(table);
-            } else {
-                logger.info("table {} exist.", table);
             }
             RocksDBService.put(table, ByteUtils.longToBytes(height), blockTxs.serialize());
             RocksDBService.delete(table,ByteUtils.longToBytes(height-LedgerConstant.CACHE_ACCOUNT_BLOCK));
