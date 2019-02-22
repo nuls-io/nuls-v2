@@ -47,8 +47,13 @@ public class LoggerUtil {
      * @param payLoadBody
      */
     public static void blockLogs(String cmd, Node node, byte[] payLoadBody,String sendOrRecieved) {
-        if (cmd.equalsIgnoreCase("getBlocks") || cmd.equalsIgnoreCase("getBlock") || cmd.equalsIgnoreCase("block")) {
+        if (cmd.equalsIgnoreCase("complete") || cmd.equalsIgnoreCase("getBlocks") || cmd.equalsIgnoreCase("getBlock") || cmd.equalsIgnoreCase("block")) {
             TestLog.debug("net {} cmd={},peer={},hash={}", sendOrRecieved,cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
+        }
+    }
+    public static void blockLogsRec(String cmd, Node node, byte[] payLoadBody,String result) {
+        if (cmd.equalsIgnoreCase("complete") || cmd.equalsIgnoreCase("getBlocks") || cmd.equalsIgnoreCase("getBlock") || cmd.equalsIgnoreCase("block")) {
+            TestLog.debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(),result);
         }
     }
 }
