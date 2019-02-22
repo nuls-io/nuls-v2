@@ -25,6 +25,8 @@
 package io.nuls.network.utils;
 
 import ch.qos.logback.classic.Level;
+import io.nuls.base.data.NulsDigestData;
+import io.nuls.network.model.Node;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -36,4 +38,17 @@ import io.nuls.tools.log.logback.NulsLogger;
 public class LoggerUtil {
     public static NulsLogger Log = LoggerBuilder.getLogger("./nwLogs", "nw.log", Level.ALL);
     public static NulsLogger TestLog = LoggerBuilder.getLogger("./nwLogs", "block.log", Level.ALL);
+
+    /**
+     * 调试代码
+     *
+     * @param cmd
+     * @param node
+     * @param payLoadBody
+     */
+    public static void blockLogs(String cmd, Node node, byte[] payLoadBody,String sendOrRecieved) {
+        if (cmd.equalsIgnoreCase("getBlock") || cmd.equalsIgnoreCase("block")) {
+            TestLog.debug("net {} cmd={},peer={},hash={}", sendOrRecieved,cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
+        }
+    }
 }

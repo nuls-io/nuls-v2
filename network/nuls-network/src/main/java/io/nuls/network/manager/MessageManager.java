@@ -45,6 +45,7 @@ import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.GetAddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
@@ -55,7 +56,6 @@ import java.util.Collection;
 import java.util.List;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
-import static io.nuls.network.utils.LoggerUtil.TestLog;
 
 /**
  * 消息管理器，用于收发消息
@@ -153,7 +153,7 @@ public class MessageManager extends BaseManager {
                     message = byteBuffer.readNulsData(message);
                 } else {
                     //外部消息，转外部接口
-                    blockLogs(header.getCommandStr(),node,payLoadBody);
+                    LoggerUtil.blockLogs(header.getCommandStr(), node, payLoadBody, "received");
                     Log.debug("==============================receive other module message, hash-" + NulsDigestData.calcDigestData(payLoadBody).getDigestHex() + "node-" + node.getId());
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody, node);
@@ -172,17 +172,7 @@ public class MessageManager extends BaseManager {
             buffer.clear();
         }
     }
-    /**
-     * 调试代码
-     * @param cmd
-     * @param node
-     * @param payLoadBody
-     */
-    void blockLogs(String cmd,Node node,byte[] payLoadBody){
-        if(cmd.equalsIgnoreCase("getBlock") || cmd.equalsIgnoreCase("block")){
-            TestLog.debug("net recied cmd={},peer={},hash={}",cmd,node.getId(),NulsDigestData.calcDigestData(payLoadBody).getDigestHex() );
-        }
-    }
+
 
     public NetworkEventResult broadcastSelfAddrToAllNode(Collection<Node> connectNodes, IpAddress ipAddress, boolean asyn) {
         for (Node connectNode : connectNodes) {

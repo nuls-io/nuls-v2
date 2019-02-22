@@ -39,6 +39,7 @@ import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.model.po.ProtocolHandlerPo;
 import io.nuls.network.model.po.RoleProtocolPo;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -52,7 +53,6 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
-import static io.nuls.network.utils.LoggerUtil.TestLog;
 
 /**
  * @author lan
@@ -124,7 +124,7 @@ public class MessageRpc extends BaseCmd {
             String cmd = String.valueOf(params.get("command"));
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
-            if(null == nodeGroup){
+            if (null == nodeGroup) {
                 Log.error("chain is not exist!");
                 return failed(NetworkErrorCode.PARAMETER_ERROR);
             }
@@ -147,7 +147,7 @@ public class MessageRpc extends BaseCmd {
                 if (!excludeNodes.contains(NetworkConstant.COMMA + node.getId() + NetworkConstant.COMMA)) {
                     nodes.add(node);
                     /*begin test code*/
-                    blockLogs(cmd,node,messageBody);
+                    LoggerUtil.blockLogs(cmd, node, messageBody, "send");
                     /*end test code*/
                 }
             }
@@ -160,18 +160,6 @@ public class MessageRpc extends BaseCmd {
         Log.debug("==================broadcast end");
         return success();
     }
-
-    /**
-     * 调试代码
-     * @param cmd
-     * @param node
-     * @param payLoadBody
-     */
-     void blockLogs(String cmd,Node node,byte[] payLoadBody){
-         if(cmd.equalsIgnoreCase("getBlock") || cmd.equalsIgnoreCase("block")){
-             TestLog.debug("net send cmd={},peer={},hash={}",cmd,node.getId(),NulsDigestData.calcDigestData(payLoadBody).getDigestHex() );
-         }
-     }
 
 
     /**
@@ -206,7 +194,7 @@ public class MessageRpc extends BaseCmd {
                 Node connectNode = nodeGroup.getAvailableNode(nodeId);
                 if (null != connectNode) {
                     /*begin test code*/
-                    blockLogs(cmd,connectNode,messageBody);
+                    LoggerUtil.blockLogs(cmd, connectNode, messageBody, "send");
                     /*end test code*/
                     nodesList.add(connectNode);
                 }
