@@ -35,4 +35,5 @@ import io.nuls.tools.log.logback.NulsLogger;
  **/
 public class LoggerUtil {
     public static NulsLogger Log = LoggerBuilder.getLogger("./logs", "nw.log", Level.ALL);
+    public static NulsLogger TestLog = LoggerBuilder.getLogger("./logs", "block.log", Level.ALL);
 }

@@ -52,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
+import static io.nuls.network.utils.LoggerUtil.TestLog;
 
 /**
  * @author lan
@@ -145,6 +146,9 @@ public class MessageRpc extends BaseCmd {
             for (Node node : nodesCollection) {
                 if (!excludeNodes.contains(NetworkConstant.COMMA + node.getId() + NetworkConstant.COMMA)) {
                     nodes.add(node);
+                    /*begin test code*/
+                    blockLogs(cmd,node,messageBody);
+                    /*end test code*/
                 }
             }
             Log.debug("==================broadcast nodes==size={}", nodes.size());
@@ -156,6 +160,19 @@ public class MessageRpc extends BaseCmd {
         Log.debug("==================broadcast end");
         return success();
     }
+
+    /**
+     * 调试代码
+     * @param cmd
+     * @param node
+     * @param payLoadBody
+     */
+     void blockLogs(String cmd,Node node,byte[] payLoadBody){
+         if(cmd.equalsIgnoreCase("getblock") || cmd.equalsIgnoreCase("block")){
+             TestLog.debug("net send cmd={},peer={},hash={}",cmd,node.getId(),NulsDigestData.calcDigestData(payLoadBody).getDigestHex() );
+         }
+     }
+
 
     /**
      * nw_sendPeersMsg
@@ -188,6 +205,9 @@ public class MessageRpc extends BaseCmd {
             for (String nodeId : nodeIds) {
                 Node connectNode = nodeGroup.getAvailableNode(nodeId);
                 if (null != connectNode) {
+                    /*begin test code*/
+                    blockLogs(cmd,connectNode,messageBody);
+                    /*end test code*/
                     nodesList.add(connectNode);
                 }
             }

@@ -140,7 +140,7 @@ public class NetworkBootstrap {
      * 管理器初始化
      * Manager initialization
      */
-    private void managerInit() {
+    private void managerInit() throws Exception {
         RocksDBService.init(NetworkParam.getInstance().getDbPath());
         SpringLiteContext.init("io.nuls.network", new ModularServiceMethodInterceptor());
         StorageManager.getInstance().init();
@@ -156,7 +156,7 @@ public class NetworkBootstrap {
      * 启动管理模块
      * Manager start
      */
-    private void managerStart() {
+    private void managerStart() throws Exception {
         Log.debug("managerStart begin=========");
         NodeGroupManager.getInstance().start();
         ConnectionManager.getInstance().start();

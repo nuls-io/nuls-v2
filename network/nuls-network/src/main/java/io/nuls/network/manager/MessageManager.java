@@ -55,6 +55,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
+import static io.nuls.network.utils.LoggerUtil.TestLog;
 
 /**
  * 消息管理器，用于收发消息
@@ -152,6 +153,7 @@ public class MessageManager extends BaseManager {
                     message = byteBuffer.readNulsData(message);
                 } else {
                     //外部消息，转外部接口
+                    blockLogs(header.getCommandStr(),node,payLoadBody);
                     Log.debug("==============================receive other module message, hash-" + NulsDigestData.calcDigestData(payLoadBody).getDigestHex() + "node-" + node.getId());
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody, node);
@@ -168,6 +170,17 @@ public class MessageManager extends BaseManager {
 //            throw new NulsException(NetworkErrorCode.DATA_ERROR, e);
         } finally {
             buffer.clear();
+        }
+    }
+    /**
+     * 调试代码
+     * @param cmd
+     * @param node
+     * @param payLoadBody
+     */
+    void blockLogs(String cmd,Node node,byte[] payLoadBody){
+        if(cmd.equalsIgnoreCase("getblock") || cmd.equalsIgnoreCase("block")){
+            TestLog.debug("net recied cmd={},peer={},hash={}",cmd,node.getId(),NulsDigestData.calcDigestData(payLoadBody).getDigestHex() );
         }
     }
 
@@ -328,13 +341,13 @@ public class MessageManager extends BaseManager {
     }
 
     @Override
-    public void init() {
+    public void init() throws Exception {
         MessageFactory.getInstance().init();
 
     }
 
     @Override
-    public void start() {
+    public void start() throws Exception {
 
     }
 }
