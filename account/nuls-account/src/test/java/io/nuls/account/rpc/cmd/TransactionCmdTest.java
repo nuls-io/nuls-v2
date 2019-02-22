@@ -50,10 +50,12 @@ public class TransactionCmdTest {
     protected String newPassword = "c12345678";
     protected String version = "1.0";
     protected String success = "1";
+    String address = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
     String address1 = "5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5";
     String address2 = "5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ";
     String address3 = "5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT";
     String address4 = "5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi";
+
     static int assetId = 1;
     //入账金额
     static BigInteger amount = BigInteger.valueOf(1000000000000000L);
@@ -142,37 +144,36 @@ public class TransactionCmdTest {
     @Test
     public void transferByAlias() throws Exception {
         //创建账户
-        List<String> accoutList = CommonRpcOperation.createAccount(2);
-        assertTrue(accoutList != null & accoutList.size() == 2);
-        String fromAddress = accoutList.get(0);
-        String toAddress = accoutList.get(1);
+        List<String> accoutList = CommonRpcOperation.createAccount(1);
+        assertTrue(accoutList != null & accoutList.size() == 1);
+        String fromAddress = address;
+        String toAddress = "5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5";
         //铸币
-        addGenesisAsset(fromAddress);
-        addGenesisAsset(toAddress); //because the to address need to set alias
+        //addGenesisAsset(fromAddress);
+        //ddGenesisAsset(toAddress); //because the to address need to set alias
         BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, fromAddress);
         BigInteger balance2 = LegerCmdCall.getBalance(chainId, assetChainId, assetId, toAddress);
         System.out.println(fromAddress + "=====" + balance.longValue());
         System.out.println(toAddress + "=====" + balance2.longValue());
         //设置别名
         //String alias = "edwardtest";
-        String alias = "edward" + System.currentTimeMillis();
-        System.out.println(alias);
-        String txHash = CommonRpcOperation.setAlias(toAddress, alias);
-        assertNotNull(txHash);
+        String alias = "alias_1550831248049";
+        //String txHash = CommonRpcOperation.setAlias(toAddress, alias);
+        //assertNotNull(txHash);
         //查询设置别名是否成功
-        String afterSetALias;
-        int i = 0;
-        do {
-            afterSetALias = CommonRpcOperation.getAliasByAddress(toAddress);
-            if (afterSetALias == null) {
-                Thread.sleep(5000);
-            } else {
-                break;
-            }
-            i++;
-            logger.warn("getAliasByAddress return null,retry times:{}", i);
-        } while (i <= 10);
-        assertNotNull(afterSetALias);
+//        String afterSetALias;
+//        int i = 0;
+//        do {
+//            afterSetALias = CommonRpcOperation.getAliasByAddress(toAddress);
+//            if (afterSetALias == null) {
+//                Thread.sleep(5000);
+//            } else {
+//                break;
+//            }
+//            i++;
+//            logger.warn("getAliasByAddress return null,retry times:{}", i);
+//        } while (i <= 10);
+//        assertNotNull(afterSetALias);
         //转账前查询转入方余额
 
         //别名转账
@@ -181,7 +182,7 @@ public class TransactionCmdTest {
         params.put("address", fromAddress);
         params.put("password", password);
         params.put("alias", alias);
-        params.put("amount", "1000");
+        params.put("amount", "10000");
         params.put("remark", "EdwardTest");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transferByAlias", params);
         System.out.println("ac_transferByAlias response:" + JSONUtils.obj2json(cmdResp));
@@ -292,7 +293,7 @@ public class TransactionCmdTest {
         inputs.add(inputCoin1);
 
         CoinDto outputCoin1 = new CoinDto();
-        outputCoin1.setAddress("5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5");
+        outputCoin1.setAddress("5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi");
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(1);
@@ -464,6 +465,15 @@ public class TransactionCmdTest {
         map.put("multiSigAccount", multiSigAccount);
         map.put("txHex", txHex);
         return map;
+    }
+
+    /**
+     * 查询余额
+     */
+    @Test
+    public void getBalance() {
+        BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, "5MR_2Cc14Ph4ZfJTzsfxma8FGZ7FBzcTS87");
+        System.out.println(balance.longValue());
     }
 
 }

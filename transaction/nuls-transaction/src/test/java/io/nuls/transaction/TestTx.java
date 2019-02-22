@@ -130,7 +130,7 @@ public class TestTx {
 
     @Test
     public void importPriKeyTest() {
-//        importPriKey("7e304e60c4e29c15382f76c0bb097bda28a1950b78871b6b7eb2bb4cc4ddeb49");//种子出块地址
+//        importPriKey("7e304e60c4e29c15382f76c0bb097bda28a1950b78871b6b7eb2bb4cc4ddeb49");//种子出块地址 5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB
 //        importPriKey("70e871a2e637b4182dfbedc53e164182d266821f4824ab1a3a73055e9f252f98");//种子出块地址
 
 //        importPriKey("00c299b105e2f9b260d7811d5cb94c713cc324e55831cb15a18454f7382f0a5f6e");//20 5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz
@@ -183,7 +183,7 @@ public class TestTx {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "0020f99aaddd7fc97a815b4df6d1309bd3e3c15681daee9a4692bafe9d9d55ae01dd";
+        String agentHash = "002071370462e8ac89c27cdfd6bf34a6ddd67626d1acb007e70d991b8980f07397b6";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
         dpParams.put("address", address27);

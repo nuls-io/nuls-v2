@@ -538,7 +538,7 @@ public class PunishManager {
         BlockExtendsData roundData = new BlockExtendsData(blockHeader.getExtend());
         PunishLogPo punishLogPo = new PunishLogPo();
         punishLogPo.setAddress(punishData.getAddress());
-        punishLogPo.setHeight(tx.getBlockHeight());
+        punishLogPo.setHeight(blockHeader.getHeight());
         punishLogPo.setRoundIndex(roundData.getRoundIndex());
         punishLogPo.setTime(tx.getTime());
         punishLogPo.setType(PunishType.RED.getCode());
@@ -702,7 +702,7 @@ public class PunishManager {
         for (byte[] address : punishData.getAddressList()) {
             PunishLogPo po = new PunishLogPo();
             po.setAddress(address);
-            po.setHeight(tx.getBlockHeight());
+            po.setHeight(blockHeader.getHeight());
             po.setRoundIndex(roundData.getRoundIndex());
             po.setTime(tx.getTime());
             po.setIndex(index++);
