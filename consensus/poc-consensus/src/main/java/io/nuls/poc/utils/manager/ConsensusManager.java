@@ -177,7 +177,7 @@ public class ConsensusManager {
         创建节点账户所得共识奖励金，总的奖励金*（保证金/（保证金+委托金额））+ 佣金
         Incentives for creating node accounts, total incentives * (margin /(margin + commission amount)+commissions
         */
-        double agentOwnWeight = new BigDecimal(self.getAgent().getDeposit()).divide(new BigDecimal(selfAllDeposit)).doubleValue();
+        double agentOwnWeight = new BigDecimal(self.getAgent().getDeposit()).divide(new BigDecimal(selfAllDeposit),4, RoundingMode.HALF_DOWN).doubleValue();
         double inCaReward = DoubleUtils.mul(inBlockReword, agentOwnWeight);
         double outCaReward = DoubleUtils.mul(outBlockReword, agentOwnWeight);
         /*
