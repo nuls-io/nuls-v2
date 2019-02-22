@@ -3,6 +3,7 @@ package io.nuls.chain;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.chain.config.NulsConfig;
 import io.nuls.chain.info.CmConstants;
+import io.nuls.chain.service.CacheDataService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
 import io.nuls.chain.service.impl.RpcServiceImpl;
@@ -10,6 +11,7 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.parse.ConfigLoader;
@@ -84,14 +86,24 @@ public class ChainBootstrap {
 
             /* 把Nuls2.0主网信息存入数据库中 (Store the Nuls2.0 main network information into the database) */
             initMainChain();
-
+            /* 进行数据库数据初始化（避免异常关闭造成的事务不一致） */
+            initChainDatas();
             /* 提供对外接口 (Provide external interface) */
             startRpcServer();
-
+            waitDependencies();
             /*注册交易处理器*/
             regTxRpc();
         } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
             Log.error(e);
+        }
+    }
+
+    void waitDependencies() throws InterruptedException {
+        while (!ServerRuntime.isReady()) {
+            Log.info("wait depend modules ready");
+            Thread.sleep(2000L);
         }
     }
 
@@ -105,10 +117,10 @@ public class ChainBootstrap {
         /* 读取resources/module.ini (Read resources/module.json) */
         ConfigLoader.loadJsonCfg(NulsConfig.MODULES_CONFIG_FILE);
         /* 设置系统编码 (Set system encoding) */
-        String  encoding =  ConfigManager.getValue(CmConstants.CFG_SYSTEM_DEFAULT_ENCODING);
+        String encoding = ConfigManager.getValue(CmConstants.CFG_SYSTEM_DEFAULT_ENCODING);
         NulsConfig.setEncoding(encoding);
         /* 设置系统语言 (Set system language) */
-        String language =  ConfigManager.getValue(CmConstants.CFG_SYSTEM_LANGUAGE);
+        String language = ConfigManager.getValue(CmConstants.CFG_SYSTEM_LANGUAGE);
         I18nUtils.loadLanguage("languages", language);
         I18nUtils.setLanguage(language);
     }
@@ -120,13 +132,13 @@ public class ChainBootstrap {
     private void initWithFile() {
         /* 基本配置信息 (Basic configuration) */
         configToMap(CmConstants.PARAM_MAP, CmConstants.ASSET_SYMBOL_MAX);
-        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_NAME_MAX);
-        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_DEPOSIT_NULS);
-        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_INIT_NUMBER_MIN);
-        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_INIT_NUMBER_MAX);
-        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_DECIMAL_PLACES_MIN);
-        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_DECIMAL_PLACES_MAX);
-        configToMap(CmConstants.PARAM_MAP,CmConstants.ASSET_RECOVERY_RATE);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.ASSET_NAME_MAX);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.ASSET_DEPOSIT_NULS);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.ASSET_INIT_NUMBER_MIN);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.ASSET_INIT_NUMBER_MAX);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.ASSET_DECIMAL_PLACES_MIN);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.ASSET_DECIMAL_PLACES_MAX);
+        configToMap(CmConstants.PARAM_MAP, CmConstants.ASSET_RECOVERY_RATE);
 
         /* 默认的跨链主资产 (Nuls) (Default cross-chain master asset) */
         configToMap(CmConstants.CHAIN_ASSET_MAP, CmConstants.NULS_CHAIN_ID);
@@ -161,7 +173,7 @@ public class ChainBootstrap {
         }
     }
 
-    private void configToMap(Map<String, String> toMap,  String key) {
+    private void configToMap(Map<String, String> toMap, String key) {
         toMap.put(key, ConfigManager.getValue(key));
     }
 
@@ -175,20 +187,23 @@ public class ChainBootstrap {
         SpringLiteContext.getBean(ChainService.class).initMainChain();
     }
 
+    private void initChainDatas() throws Exception {
+        SpringLiteContext.getBean(CacheDataService.class).initBlockDatas();
+    }
 
-    private void regTxRpc()throws Exception {
-        RpcService rpcService=SpringLiteContext.getBean(RpcServiceImpl.class);
+    private void regTxRpc() throws Exception {
+        RpcService rpcService = SpringLiteContext.getBean(RpcServiceImpl.class);
         rpcService.regTx();
     }
+
     /**
-     *
      * @throws Exception Any error will throw an exception
      */
     private void startRpcServer() throws Exception {
         WsServer.getInstance(ModuleE.CM)
                 .moduleRoles(new String[]{"1.0"})
                 .moduleVersion("1.0")
-                .dependencies(ModuleE.LG.abbr, "1.1")
+                .dependencies(ModuleE.NW.abbr, "1.1")
                 .dependencies(ModuleE.TX.abbr, "1.1")
                 .scanPackage("io.nuls.chain.cmd")
                 .connect("ws://127.0.0.1:8887");
@@ -196,8 +211,8 @@ public class ChainBootstrap {
         // Get information from kernel
         CmdDispatcher.syncKernel();
     }
+
     /**
-     *
      * @throws Exception Any error will throw an exception
      */
     private void regTxHandler() throws Exception {

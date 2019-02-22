@@ -6,12 +6,11 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.model.dto.AccountBalance;
-import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.BlockChain;
+import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.RegisterChainAndAssetTransaction;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
-import io.nuls.chain.service.SeqService;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -38,9 +37,6 @@ public class ChainCmd extends BaseChainCmd {
 
     @Autowired
     private RpcService rpcService;
-
-    @Autowired
-    private SeqService seqService;
 
     @CmdAnnotation(cmd = "cm_chain", version = 1.0, description = "get chain detail")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")

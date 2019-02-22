@@ -1,16 +1,22 @@
 package io.nuls.chain.service.impl;
 
+import io.nuls.base.data.Transaction;
+import io.nuls.chain.info.ChainTxConstants;
 import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmRuntimeInfo;
-import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.BlockChain;
+import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
+import io.nuls.chain.service.RpcService;
 import io.nuls.chain.storage.ChainStorage;
+import io.nuls.chain.util.TxUtil;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
 
 import java.math.BigInteger;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 关于链的所有操作：增删改查
@@ -27,9 +33,11 @@ public class ChainServiceImpl implements ChainService {
 
     @Autowired
     private AssetService assetService;
+    @Autowired
+    private RpcService rpcService;
 
     /**
-     * 把Nuls2.0主网默认注册到Nuls2.0上（Nuls2.0主网可以认为是Nuls2.0生态的第一条友链）
+     * 把Nuls2.0主网默认注册到Nuls2.0上（便于进行链资产的统一处理）
      * Register the Nuls2.0 main network to Nuls2.0 by default (Nuls2.0 main network can be considered as the first friend chain of Nurs2.0 ecosystem)
      *
      * @throws Exception Any error will throw an exception
@@ -41,15 +49,12 @@ public class ChainServiceImpl implements ChainService {
         if (chain != null) {
             return;
         }
-
         chain = new BlockChain();
-        //chain.setName(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_NAME));
         int assetId = Integer.parseInt(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID));
         chain.setRegAssetId(assetId);
         chain.addCreateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(chainId, assetId));
         chainStorage.save(chainId, chain);
-
         Asset asset = new Asset();
         asset.setChainId(chainId);
         asset.setAssetId(assetId);
@@ -108,6 +113,17 @@ public class ChainServiceImpl implements ChainService {
         return chainStorage.load(chainId);
     }
 
+    @Override
+    public boolean chainExist(int chainId) throws Exception {
+        return (null != getChain(chainId));
+    }
+
+    @Override
+    public boolean chainExist(int chainId, Map<String, Integer> map) throws Exception {
+        BlockChain blockChain = getChain(chainId);
+        return ((blockChain != null) || (null != map.get(String.valueOf(chainId))));
+    }
+
 
     /**
      * 注册链
@@ -132,21 +148,31 @@ public class ChainServiceImpl implements ChainService {
         blockChain.addCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
         blockChain.addCirculateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), asset.getAssetId()));
         saveChain(blockChain);
+        /*
+            通知网络模块创建链
+        */
+        rpcService.createCrossGroup(blockChain);
     }
 
     /**
-     * 回滚注册链
-     * Rollback the registered BlockChain
-     *
-     * @param blockChain The rollback BlockChain
-     * @throws Exception Any error will throw an exception
+     * @param txs
+     * @throws Exception
      */
     @Override
-    public void registerBlockChainRollback(BlockChain blockChain) throws Exception {
-        delChain(blockChain);
-        int assetId = blockChain.getRegAssetId();
-        Asset asset = assetService.getAsset(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), assetId));
-        assetService.deleteAsset(asset);
+    public void rpcBlockChainRollback(List<Transaction> txs) throws Exception {
+        /*
+            通知网络模块创建链
+        */
+        for (Transaction tx : txs) {
+            switch (tx.getType()) {
+                case ChainTxConstants.TX_TYPE_REGISTER_CHAIN_AND_ASSET:
+                    BlockChain blockChain = TxUtil.buildChainWithTxData(tx, false);
+                    rpcService.destroyCrossGroup(blockChain);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     /**
@@ -161,7 +187,6 @@ public class ChainServiceImpl implements ChainService {
     public BlockChain destroyBlockChain(BlockChain blockChain) throws Exception {
         //更新资产
         assetService.setStatus(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), blockChain.getDelAssetId()), false);
-
         //更新链
         BlockChain dbChain = getChain(blockChain.getChainId());
         dbChain.setDelAddress(blockChain.getDelAddress());
@@ -170,24 +195,7 @@ public class ChainServiceImpl implements ChainService {
         dbChain.removeCreateAssetId(CmRuntimeInfo.getAssetKey(blockChain.getChainId(), blockChain.getDelAssetId()));
         dbChain.setDelete(true);
         updateChain(dbChain);
-
         return dbChain;
     }
 
-    /**
-     * 回滚销毁的链
-     * Rollback the destroyed BlockChain
-     *
-     * @param dbChain The BlockChain need to be rollback
-     * @throws Exception Any error will throw an exception
-     */
-    @Override
-    public void destroyBlockChainRollback(BlockChain dbChain) throws Exception {
-        //资产回滚
-        String assetKey = CmRuntimeInfo.getAssetKey(dbChain.getChainId(), dbChain.getDelAssetId());
-        assetService.setStatus(assetKey, true);
-        //链回滚
-        dbChain.setDelete(false);
-        updateChain(dbChain);
-    }
 }

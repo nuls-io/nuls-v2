@@ -2,20 +2,20 @@ package io.nuls.chain.service.impl;
 
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
-import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.BlockChain;
-import io.nuls.chain.model.dto.ChainAsset;
+import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.BlockChain;
+import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.storage.AssetStorage;
 import io.nuls.chain.storage.ChainAssetStorage;
-import io.nuls.chain.storage.SeqStorage;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.thread.TimeService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -30,9 +30,6 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private ChainAssetStorage chainAssetStorage;
-
-    @Autowired
-    private SeqStorage seqStorage;
 
     @Autowired
     private ChainService chainService;
@@ -62,14 +59,12 @@ public class AssetServiceImpl implements AssetService {
         String key = CmRuntimeInfo.getChainAssetKey(asset.getChainId(), assetKey);
         asset.addChainId(asset.getChainId());
         assetStorage.save(key, asset);
-
         ChainAsset chainAsset = new ChainAsset();
-        chainAsset.setChainId(asset.getChainId());
+        chainAsset.setAddressChainId(asset.getChainId());
+        chainAsset.setAssetChainId(asset.getChainId());
         chainAsset.setAssetId(asset.getAssetId());
         chainAsset.setInitNumber(asset.getInitNumber());
         chainAssetStorage.save(key, chainAsset);
-
-        seqStorage.setSeq(asset.getChainId(), asset.getAssetId());
     }
 
     /**
@@ -80,7 +75,7 @@ public class AssetServiceImpl implements AssetService {
      */
     @Override
     public void saveOrUpdateChainAsset(int chainId, ChainAsset chainAsset) throws Exception {
-        String assetKey = CmRuntimeInfo.getAssetKey(chainAsset.getChainId(), chainAsset.getAssetId());
+        String assetKey = CmRuntimeInfo.getAssetKey(chainAsset.getAssetChainId(), chainAsset.getAssetId());
         String key = CmRuntimeInfo.getChainAssetKey(chainId, assetKey);
         chainAssetStorage.save(key, chainAsset);
     }
@@ -143,6 +138,12 @@ public class AssetServiceImpl implements AssetService {
         return dbAsset != null;
     }
 
+    @Override
+    public boolean assetExist(Asset asset, Map<String,Integer> map) throws Exception{
+        String assetKey = CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId());
+        Asset dbAsset = assetStorage.load(assetKey);
+        return ((dbAsset != null) || (null != map.get(assetKey)));
+    }
 
     /**
      * getChainAsset

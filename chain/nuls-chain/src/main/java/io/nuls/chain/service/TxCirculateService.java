@@ -24,17 +24,20 @@
  */
 package io.nuls.chain.service;
 
+import io.nuls.base.data.Transaction;
+import io.nuls.chain.model.dto.ChainEventResult;
+import io.nuls.chain.model.dto.CoinDataAssets;
+import io.nuls.tools.exception.NulsException;
+
+import java.util.List;
+
 /**
- * @program: nuls2.0
- * @description:
- * @author: lan
- * @create: 2018/11/26
+ *
+ * 资产流通接口
+ * @author lan
+ * @date 2019/02/21
  **/
-public interface SeqService {
-    /**
-     * createAssetId
-     * @param chainId
-     * @return
-     */
-      int  createAssetId(int chainId) throws Exception;
+public interface TxCirculateService {
+    ChainEventResult circulateCommit(List<Transaction> txs) throws Exception;
+    List<CoinDataAssets> getChainAssetList(byte[] coinDataByte) throws NulsException;
 }

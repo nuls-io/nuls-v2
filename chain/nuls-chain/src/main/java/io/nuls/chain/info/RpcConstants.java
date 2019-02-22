@@ -49,22 +49,35 @@ public interface RpcConstants {
      * 模块统一交易验证器接口
      */
     String TX_MODULE_VALIDATE_CMD = "moduleValidator";
+    String TX_MODULE_VALIDATE_CMD_VALUE  = "chainModuleTxValidate";
+
     /**
      * 交易类型
      */
     String TX_TYPE = "txType";
     /**
-     * 单个交易验证器接口
-     */
-    String TX_VALIDATE_CMD = "validateCmd";
-    /**
      * 交易提交接口
      */
-    String TX_COMMIT_CMD = "commitCmd";
+    String TX_COMMIT_CMD = "commit";
+
+    String TX_COMMIT_CMD_VALUE = "moduleTxsCommit";
+
     /**
      * 交易回滚接口
      */
-    String TX_ROLLBACK_CMD = "rollbackCmd";
+    String TX_ROLLBACK_CMD = "rollback";
+    String TX_ROLLBACK_CMD_VALUE = "moduleTxsRollBack";
+
+
+    /**
+     * 单个交易验证器接口
+     */
+    String TX_VALIDATE_CMD = "validateCmd";
+    String TX_VALIDATE_CMD_VALUE_CHAIN_REG = "cm_chainRegValidator";
+    String TX_VALIDATE_CMD_VALUE_CHAIN_DESTROY = "cm_chainDestroyValidator";
+    String TX_VALIDATE_CMD_VALUE_ASSET_REG = "cm_chainDestroyValidator";
+    String TX_VALIDATE_CMD_VALUE_ASSET_DESTROY = "cm_assetDisableValidator";
+
 
     /**
      * 是否是系统产生的交易（打包节点产生，用于出块奖励结算、红黄牌惩罚）
@@ -95,7 +108,6 @@ public interface RpcConstants {
      * 交易所属链ID
      */
     String TX_CHAIN_ID = "chainId";
-    String  TX_MODULE_VALIDATE_CMD_VALUE = "cm_chainModuleTxValidate";
 
     /**
      * 交易注册

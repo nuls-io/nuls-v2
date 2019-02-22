@@ -1,9 +1,6 @@
 package io.nuls.chain.test;
 
-import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.tx.BlockChainTxType;
-import io.nuls.chain.storage.impl.SeqStorageImpl;
-import io.nuls.db.service.RocksDBService;
+import io.nuls.chain.model.po.Asset;
 import io.nuls.tools.thread.TimeService;
 import org.junit.Test;
 
@@ -23,22 +20,6 @@ public class AssetCmdTest {
         BigInteger b=new BigInteger("4");
         BigInteger c=new BigInteger("10");
         System.out.println(a.multiply(b).divide(c));
-    }
-
-    @Test
-    public void mapSpeed() throws Exception {
-
-        BlockChainTxType.valueOf(1);
-
-        RocksDBService.init("../data");
-        if (!RocksDBService.existTable("seq")) {
-            RocksDBService.createTable("seq");
-        }
-        long start = System.currentTimeMillis();
-        while (System.currentTimeMillis() - start < 1000) {
-            new SeqStorageImpl().nextSeq(1);
-        }
-        System.out.println(new SeqStorageImpl().nextSeq(1));
     }
 
     @Test

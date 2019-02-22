@@ -24,6 +24,7 @@
  */
 package io.nuls.chain.cmd;
 
+import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.TransactionFeeCalculator;
 import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
@@ -34,9 +35,8 @@ import io.nuls.chain.info.CmConstants;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.AccountBalance;
-import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.BlockChain;
-import io.nuls.chain.model.tx.txdata.TxAsset;
+import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.txdata.TxChain;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -44,12 +44,15 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.ByteUtils;
+import io.nuls.tools.data.StringUtils;
+import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.thread.TimeService;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.nuls.chain.util.LoggerUtil.Log;
@@ -60,16 +63,29 @@ import static io.nuls.chain.util.LoggerUtil.Log;
  */
 public class BaseChainCmd extends BaseCmd {
 
-    boolean isMainChain(int chainId) {
-        return Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID)) == chainId;
-    }
 
     boolean isMainAsset(String assetKey) {
         String chainId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID);
         String assetId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID);
         return CmRuntimeInfo.getAssetKey(Integer.valueOf(chainId), Integer.valueOf(assetId)).equals(assetKey);
     }
-
+    Response parseTxs(List<String> txHexList, List<Transaction> txList) {
+        for (String txHex : txHexList) {
+            if (StringUtils.isBlank(txHex)) {
+                return failed("txHex is blank");
+            }
+            byte[] txStream = HexUtil.decode(txHex);
+            Transaction tx = new Transaction();
+            try {
+                tx.parse(new NulsByteBuffer(txStream));
+                txList.add(tx);
+            } catch (NulsException e) {
+                Log.error("transaction parse error", e);
+                return failed("transaction parse error");
+            }
+        }
+        return success();
+    }
     /**
      * 注册链或资产封装coinData,x%资产进入黑洞，y%资产进入锁定
      */
@@ -142,7 +158,6 @@ public class BaseChainCmd extends BaseCmd {
                 blockChain.setDelAddress(txChain.getAddress());
                 blockChain.setDelAssetId(txChain.getAssetId());
             }
-
             return blockChain;
         } catch (Exception e) {
             Log.error(e);
@@ -165,26 +180,25 @@ public class BaseChainCmd extends BaseCmd {
         }
     }
 
-    protected Asset buildAssetWithTxAsset(String txHex, Transaction tx) {
-        try {
-            byte[] txBytes = HexUtil.hexToByte(txHex);
-            tx.parse(txBytes, 0);
-            TxAsset txAsset = new TxAsset();
-            txAsset.parse(tx.getTxData(), 0);
-            Asset asset = new Asset();
-            asset.setTxHash(tx.getHash().toString());
-            return asset;
-        } catch (Exception e) {
-            Log.error(e);
-            return null;
-        }
-    }
+//    protected Asset buildAssetWithTxAsset(String txHex, Transaction tx) {
+//        try {
+//            byte[] txBytes = HexUtil.hexToByte(txHex);
+//            tx.parse(txBytes, 0);
+//            TxAsset txAsset = new TxAsset();
+//            txAsset.parse(tx.getTxData(), 0);
+//            Asset asset = new Asset();
+//            asset.setTxHash(tx.getHash().toString());
+//            return asset;
+//        } catch (Exception e) {
+//            Log.error(e);
+//            return null;
+//        }
+//    }
 
     Asset setDefaultAssetValue(Asset asset) {
         asset.setDepositNuls(Integer.valueOf(CmConstants.PARAM_MAP.get(CmConstants.ASSET_DEPOSIT_NULS)));
         asset.setAvailable(true);
         asset.setCreateTime(TimeService.currentTimeMillis());
-
         return asset;
     }
 
