@@ -126,6 +126,8 @@ public class BlockValidator {
          currentRound = tempRound;
       }
       if (extendsData.getRoundIndex() != currentRound.getIndex() || extendsData.getRoundStartTime() != currentRound.getStartTime()) {
+         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("接收最新区块轮次:"+extendsData.getRoundIndex()+";本地计算轮次:"+currentRound.getIndex());
+         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("接收最新区块轮次开始时间:"+extendsData.getRoundStartTime()+";本地计算轮次开始时间:"+currentRound.getStartTime());
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
       }

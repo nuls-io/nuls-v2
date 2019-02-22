@@ -84,10 +84,10 @@ public class RoundManager {
         for (int i = roundList.size() - 1; i >= 0; i--) {
             round = roundList.get(i);
             if (round.getIndex() == roundIndex) {
-                break;
+                return round;
             }
         }
-        return round;
+        return null;
     }
 
     /**
