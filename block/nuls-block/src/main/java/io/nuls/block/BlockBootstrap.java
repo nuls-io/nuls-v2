@@ -36,7 +36,6 @@ import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.server.WsServer;
 import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
@@ -100,7 +99,6 @@ public class BlockBootstrap {
             commonLog.info("service start");
             //加载配置
             ConfigLoader.load();
-//            onlyRunWhenTest();
 
             //开启区块同步线程
             ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
@@ -141,23 +139,5 @@ public class BlockBootstrap {
                 }
             }
         }
-    }
-
-    /**
-     * todo 正式版本删除
-     */
-    public static void onlyRunWhenTest() {
-        ContextManager.chainIds.forEach(e -> {
-            try {
-                RocksDBService.createTable("tx" + e);
-            } catch (Exception e1) {
-                e1.printStackTrace();
-            }
-        });
-//        ChainContext chainContext = ContextManager.getContext(chainId);
-//        chainContext.setStatus(RunningStatusEnum.RUNNING);
-//        Block latestBlock = chainContext.getLatestBlock();
-//        new Miner("1", latestBlock).start();
-//        new Miner("2", latestBlock).start();
     }
 }

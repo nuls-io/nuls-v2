@@ -45,11 +45,16 @@ public class BlockConsumer implements Callable<Boolean> {
     private int chainId;
     private BlockingQueue<Block> queue;
     private BlockService blockService;
+    /**
+     * 是否继续本次下载，中途发生异常置为false
+     */
+    private boolean flag;
 
-    public BlockConsumer(int chainId, BlockingQueue<Block> queue, BlockDownloaderParams params) {
+    public BlockConsumer(int chainId, BlockingQueue<Block> queue, BlockDownloaderParams params, boolean flag) {
         this.params = params;
         this.chainId = chainId;
         this.queue = queue;
+        this.flag = flag;
         this.blockService = SpringLiteContext.getBean(BlockService.class);
     }
 
@@ -61,11 +66,12 @@ public class BlockConsumer implements Callable<Boolean> {
 
             Block block;
             commonLog.info("BlockConsumer start work");
-            while (startHeight <= netLatestHeight) {
+            while (startHeight <= netLatestHeight && flag) {
                 block = queue.take();
                 boolean saveBlock = blockService.saveBlock(chainId, block, true);
                 if (!saveBlock) {
                     commonLog.error("error occur when save syn blocks");
+                    flag = false;
                     return false;
                 }
                 startHeight++;
@@ -75,6 +81,7 @@ public class BlockConsumer implements Callable<Boolean> {
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("BlockConsumer stop work abnormally");
+            flag = false;
             return false;
         }
     }
