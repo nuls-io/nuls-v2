@@ -179,7 +179,6 @@ public class ConfirmedTxServiceImpl implements ConfirmedTxService {
             chain.getLogger().error(e);
             return false;
         }
-
         if (!saveTxs(chain, txList, true)) {
             return false;
         }
