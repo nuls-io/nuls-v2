@@ -113,12 +113,13 @@ public class CmdGenesisAsset {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         // Version information ("1.1" or 1.1 is both available)
-        params.put("chainId", chainId);
-        params.put("assetChainId", assetChainId);
-//        address ="RceDy24yjrhQ72J8xynubWn55PgZj3930";
+        params.put("chainId", 12345);
+        params.put("assetChainId", 12345);
+        params.put("assetId", 12345);
+        address ="H3eriRPPdbSMxXfg5MFYVfGmypNma3930";
         params.put("address", address);
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
-        params.put("assetId", assetId);
+
         Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
         logger.info("response {}", response);
     }

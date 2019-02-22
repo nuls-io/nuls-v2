@@ -35,6 +35,7 @@ import io.nuls.tools.crypto.HexUtil;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -265,6 +266,8 @@ public class CmdTxTest {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         params.put("assetChainId", assetChainId);
+        address = "Hev98WnFwR55FJffop8H2J24VJe5y3930";
+        assetId = 12345;
         params.put("address", address);
         params.put("assetId", assetId);
         params.put("chainId", chainId);
@@ -275,6 +278,7 @@ public class CmdTxTest {
         Transaction tx = new Transaction();
         CoinData coinData = new CoinData();
         CoinFrom coinFrom = new CoinFrom();
+
         coinFrom.setAddress(AddressTool.getAddress(address));
         coinFrom.setNonce(HexUtil.decode(nonce));
         coinFrom.setAssetsId(assetId);
@@ -293,7 +297,7 @@ public class CmdTxTest {
         coinTos.add(coinTo);
         coinData.setFrom(coinFroms);
         coinData.setTo(coinTos);
-        tx.setBlockHeight(2L);
+        tx.setBlockHeight(0L);
         tx.setCoinData(coinData.serialize());
         tx.setHash(NulsDigestData.calcDigestData(tx.serializeForHash()));
        return tx;
@@ -363,5 +367,22 @@ public class CmdTxTest {
         params.put("isConfirmTx",true);
         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
+    }
+
+    @Test
+    public void goBlockCommit(){
+        Transaction tx = null;
+        try {
+            Map<String,Object> params = new HashMap<>();
+            params.put("chainId", 5555);
+            params.put("blockHeight",0);
+            params.put("addressChainId", chainId);
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "goBatchCommitTest", params);
+            logger.info("response {}", response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
