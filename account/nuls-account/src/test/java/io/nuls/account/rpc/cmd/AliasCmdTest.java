@@ -122,7 +122,7 @@ public class AliasCmdTest {
         params.put("chainId", chainId);
         params.put("address", address);
         params.put("password", password);
-        params.put("alias", "alias_" + System.currentTimeMillis());
+        params.put("alias", "alias_2019");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setAlias");
