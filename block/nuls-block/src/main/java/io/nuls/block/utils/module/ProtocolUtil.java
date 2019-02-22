@@ -27,6 +27,7 @@ import io.nuls.base.data.protocol.MessageConfig;
 import io.nuls.base.data.protocol.Protocol;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
+import io.nuls.block.rpc.callback.ProtocolVersionInvoke;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -119,6 +120,20 @@ public class ProtocolUtil {
             e.printStackTrace();
             commonLog.error(e);
             return false;
+        }
+    }
+
+    public static void subscribe(int chainId){
+        ChainContext context = ContextManager.getContext(chainId);
+        NulsLogger commonLog = context.getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            CmdDispatcher.requestAndInvoke(ModuleE.PU.abbr, "getMainVersion", params, "0", "1", new ProtocolVersionInvoke(chainId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
         }
     }
 
