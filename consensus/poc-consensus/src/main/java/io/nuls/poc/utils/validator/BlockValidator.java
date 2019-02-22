@@ -93,10 +93,7 @@ public class BlockValidator {
       MeetingRound currentRound = roundManager.getCurrentRound(chain);
       boolean hasChangeRound = false;
       if(extendsData.getRoundIndex() < currentRound.getIndex()){
-         MeetingRound round = null;
-         if(!isDownload){
-            round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
-         }
+         MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
          if (round != null) {
             currentRound = round;
          }else{
