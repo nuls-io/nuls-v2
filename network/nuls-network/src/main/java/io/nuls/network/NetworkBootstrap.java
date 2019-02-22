@@ -145,9 +145,9 @@ public class NetworkBootstrap {
         SpringLiteContext.init("io.nuls.network", new ModularServiceMethodInterceptor());
         StorageManager.getInstance().init();
         NodeGroupManager.getInstance().init();
-        ConnectionManager.getInstance().init();
         MessageManager.getInstance().init();
         RpcManager.getInstance().init();
+        ConnectionManager.getInstance().init();
         TaskManager.getInstance().init();
 
     }
@@ -159,9 +159,9 @@ public class NetworkBootstrap {
     private void managerStart() throws Exception {
         Log.debug("managerStart begin=========");
         NodeGroupManager.getInstance().start();
+        RpcManager.getInstance().start();
         ConnectionManager.getInstance().start();
         TaskManager.getInstance().start();
-        RpcManager.getInstance().start();
         Log.debug("managerStart end============");
     }
 
