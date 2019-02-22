@@ -25,12 +25,10 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.po.BlockHeaderPo;
-import io.nuls.block.test.TransactionStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -48,8 +46,6 @@ import java.util.Map;
  * @date 18-11-9 上午10:44
  */
 public class TransactionUtil {
-
-    private static TransactionStorageService service = SpringLiteContext.getBean(TransactionStorageService.class);
 
     /**
      * 获取系统交易类型
