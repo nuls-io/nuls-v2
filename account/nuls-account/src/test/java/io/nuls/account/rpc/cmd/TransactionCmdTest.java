@@ -284,7 +284,7 @@ public class TransactionCmdTest {
         List<CoinDto> inputs = new ArrayList<>();
         List<CoinDto> outputs = new ArrayList<>();
         CoinDto inputCoin1 = new CoinDto();
-        inputCoin1.setAddress("5MR_2CVCFWH7o8AmrTBPLkdg2dYH1UCUJiM");
+        inputCoin1.setAddress("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz");
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(1);
