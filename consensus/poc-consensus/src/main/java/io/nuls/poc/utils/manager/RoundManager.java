@@ -82,8 +82,8 @@ public class RoundManager {
         List<MeetingRound> roundList = chain.getRoundList();
         MeetingRound round = null;
         for (int i = roundList.size() - 1; i >= 0; i--) {
-            round = roundList.get(i);
             if (round.getIndex() == roundIndex) {
+                round = roundList.get(i);
                 break;
             }
         }
