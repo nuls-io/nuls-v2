@@ -179,7 +179,7 @@ public class MessageManager extends BaseManager {
      * @param payLoadBody
      */
     void blockLogs(String cmd,Node node,byte[] payLoadBody){
-        if(cmd.equalsIgnoreCase("getblock") || cmd.equalsIgnoreCase("block")){
+        if(cmd.equalsIgnoreCase("getBlock") || cmd.equalsIgnoreCase("block")){
             TestLog.debug("net recied cmd={},peer={},hash={}",cmd,node.getId(),NulsDigestData.calcDigestData(payLoadBody).getDigestHex() );
         }
     }

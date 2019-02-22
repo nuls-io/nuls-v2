@@ -168,7 +168,7 @@ public class MessageRpc extends BaseCmd {
      * @param payLoadBody
      */
      void blockLogs(String cmd,Node node,byte[] payLoadBody){
-         if(cmd.equalsIgnoreCase("getblock") || cmd.equalsIgnoreCase("block")){
+         if(cmd.equalsIgnoreCase("getBlock") || cmd.equalsIgnoreCase("block")){
              TestLog.debug("net send cmd={},peer={},hash={}",cmd,node.getId(),NulsDigestData.calcDigestData(payLoadBody).getDigestHex() );
          }
      }
