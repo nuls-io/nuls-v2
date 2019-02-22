@@ -354,8 +354,13 @@ public class TransactionCmd extends BaseCmd {
             // check address validity
             BigInteger fromTotal = BigInteger.ZERO;
             for (CoinDto from : inputList) {
+                //校验地址格式
                 if (!AddressTool.validAddress(from.getAssetsChainId(), from.getAddress())) {
                     throw new NulsException(AccountErrorCode.ADDRESS_ERROR);
+                }
+                //from中不能有多签地址
+                if (AddressTool.isMultiSignAddress(from.getAddress())) {
+                    throw new NulsException(AccountErrorCode.IS_MULTI_SIGNATURE_ADDRESS);
                 }
                 fromTotal = fromTotal.add(from.getAmount());
             }
