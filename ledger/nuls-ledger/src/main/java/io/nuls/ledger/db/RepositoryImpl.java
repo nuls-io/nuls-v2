@@ -242,11 +242,7 @@ public class RepositoryImpl implements Repository {
                 return null;
             }
             BlockTxs blockTxs = new BlockTxs();
-            try {
                 blockTxs.parse(new NulsByteBuffer(stream));
-            } catch (NulsException e) {
-                logger.error("getAccountState serialize error.", e);
-            }
             return blockTxs;
         } catch (Exception e) {
             logger.error("getBlock serialize error.", e);
