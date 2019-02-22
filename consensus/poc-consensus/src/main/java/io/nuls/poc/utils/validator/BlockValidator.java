@@ -98,7 +98,10 @@ public class BlockValidator {
       boolean hasChangeRound = false;
       chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("本地最新轮次，轮次："+currentRound.getIndex()+";当前网络时间:"+DateUtils.convertDate(new Date(CallMethodUtils.currentTime())));
       if(extendsData.getRoundIndex() < currentRound.getIndex()){
-         MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
+         MeetingRound round = null;
+         if(!isDownload){
+            round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
+         }
          if (round != null) {
             currentRound = round;
          }else{
