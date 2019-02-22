@@ -22,23 +22,25 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.storage;
+package io.nuls.chain.util;
+
+import io.nuls.rpc.model.message.Response;
+
+import java.util.Map;
 
 /**
- * @program nuls2.0
- * @description Get sequence of chain
  * @author lan
- * @date 2018/11/26
+ * @description
+ * @date 2019/01/16
  **/
-public interface SeqStorage {
-
-    /**
-     * 得到链的下一个序列号
-     */
-    int nextSeq(int chainId) throws Exception;
-
-    /**
-     * 设置链的序列号
-     */
-    boolean setSeq(int chainId, int seq) throws Exception;
+public class ResponseUtil {
+    public static Map<String,Object> getResultMap(Response response,String cmd){
+        if(response.isSuccess()){
+            Object o=((Map)response.getResponseData()).get(cmd);
+            if(null != o){
+                return (Map)o;
+            }
+        }
+        return null;
+    }
 }

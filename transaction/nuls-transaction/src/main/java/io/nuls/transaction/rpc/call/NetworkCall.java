@@ -161,7 +161,12 @@ public class NetworkCall {
                 cmds.add(cmd);
             }
             map.put("protocolCmds", cmds);
-            return CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
+            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map);
+            if(!cmdResp.isSuccess())
+            {
+                Log.error("Calling remote interface failed. module:{} - interface:{} -reason:{}", ModuleE.NW.abbr, "nw_protocolRegister",cmdResp.getResponseComment());
+            }
+            return cmdResp.isSuccess();
         } catch (Exception e) {
             Log.error("Calling remote interface failed. module:{} - interface:{}", ModuleE.NW.abbr, "nw_protocolRegister");
             throw new NulsException(e);

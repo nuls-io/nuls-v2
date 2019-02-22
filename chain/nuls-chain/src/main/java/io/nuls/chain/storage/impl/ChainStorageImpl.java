@@ -1,6 +1,6 @@
 package io.nuls.chain.storage.impl;
 
-import io.nuls.chain.model.dto.BlockChain;
+import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.storage.ChainStorage;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
@@ -9,7 +9,7 @@ import io.nuls.tools.data.ByteUtils;
 import static io.nuls.chain.util.LoggerUtil.Log;
 
 /**
- * 关于链的所有操作：增删改查
+ * 关于链的所有操作：增删改查 key =chainId, value = BlockChain
  * All operations on the chain: Save, delete, update, query
  *
  * @author tangyi

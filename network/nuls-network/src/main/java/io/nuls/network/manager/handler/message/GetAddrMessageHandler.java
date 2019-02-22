@@ -106,8 +106,10 @@ public class GetAddrMessageHandler extends BaseMessageHandler {
             return addressList;
         } else {
             Collection<Node> nodes = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().values();
-            nodes.addAll(nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().values());
-            addAddress(nodes, addressList, node.getIp(), node.isCrossConnect());
+            List nodesList = new ArrayList();
+            nodesList.addAll(nodes);
+            nodesList.addAll(nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().values());
+            addAddress(nodesList, addressList, node.getIp(), node.isCrossConnect());
         }
         return addressList;
 

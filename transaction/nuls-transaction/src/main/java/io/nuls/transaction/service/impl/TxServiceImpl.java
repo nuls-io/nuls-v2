@@ -211,7 +211,9 @@ public class TxServiceImpl implements TxService {
             TransactionSignature transactionSignature = new TransactionSignature();
             List<P2PHKSignature> p2PHKSignatures = new ArrayList<>();
             for (CoinDTO coinDTO : listFrom) {
-                p2PHKSignatures.add(AccountCall.signDigest(coinDTO.getAddress(), coinDTO.getPassword(), tx.hex()));
+                String digestBytesStr = HexUtil.encode(tx.getHash().getDigestBytes());
+                P2PHKSignature p2PHKSignature = AccountCall.signDigest(coinDTO.getAddress(), coinDTO.getPassword(), digestBytesStr);
+                p2PHKSignatures.add(p2PHKSignature);
             }
             transactionSignature.setP2PHKSignatures(p2PHKSignatures);
             tx.setTransactionSignature(transactionSignature.serialize());
@@ -811,14 +813,14 @@ public class TxServiceImpl implements TxService {
             long loopDebug = NetworkCall.getCurrentTimeMillis();
             while (true) {
                 long currentTimeMillis = NetworkCall.getCurrentTimeMillis();
-                chain.getLogger().debug("");
-                chain.getLogger().debug("########## (循环开始)当前网络时间: {} ", currentTimeMillis);
-                chain.getLogger().debug("########## 预留的[获取打包交易]结束时间: {}, 还剩{}秒 ", endtimestamp, (endtimestamp - currentTimeMillis)/1000.0);
+//                chain.getLogger().debug("");
+//                chain.getLogger().debug("########## (循环开始)当前网络时间: {} ", currentTimeMillis);
+//                chain.getLogger().debug("########## 预留的[获取打包交易]结束时间: {}, 还剩{}秒 ", endtimestamp, (endtimestamp - currentTimeMillis)/1000.0);
                 if (endtimestamp - currentTimeMillis <= TxConstant.VERIFY_OFFSET) {
                     chain.getLogger().debug("########## 打包时间到: {}, -endtimestamp:{} , -offset:{}", currentTimeMillis, endtimestamp, TxConstant.VERIFY_OFFSET);
                     break;
                 }
-                chain.getLogger().debug("########## 开始获取交易");
+//                chain.getLogger().debug("########## 开始获取交易");
                 Transaction tx = packablePool.get(chain);
                 if (tx == null) {
                     try {
@@ -851,8 +853,8 @@ public class TxServiceImpl implements TxService {
                     continue;
                 }
                 long debugeVerifyStart = NetworkCall.getCurrentTimeMillis();
-                chain.getLogger().debug("########## 已花费时间:{} ", debugeVerifyStart - currentTimeMillis);
-                chain.getLogger().debug("########## 开始调用单个验证器, ");
+//                chain.getLogger().debug("########## 已花费时间:{} ", debugeVerifyStart - currentTimeMillis);
+//                chain.getLogger().debug("########## 开始调用单个验证器, ");
                 //交易业务验证tx
                 if (!transactionManager.verify(chain, tx)) {
                     clearInvalidTx(chain, tx);
@@ -860,7 +862,7 @@ public class TxServiceImpl implements TxService {
                     continue;
                 }
                 long debugeVerifyCoinDataStart = NetworkCall.getCurrentTimeMillis();
-                chain.getLogger().debug("########## 单个验证器花费时间:{} ", debugeVerifyCoinDataStart - debugeVerifyStart);
+//                chain.getLogger().debug("########## 单个验证器花费时间:{} ", debugeVerifyCoinDataStart - debugeVerifyStart);
                 //批量验证coinData, 单个发送
                 VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, txHex, true);
                 if (!verifyTxResult.success()) {
@@ -871,7 +873,7 @@ public class TxServiceImpl implements TxService {
                     continue;
                 }
                 long debugeMap = NetworkCall.getCurrentTimeMillis();
-                chain.getLogger().debug("########## 单个VerifyCoinData花费时间:{} ", debugeMap - debugeVerifyCoinDataStart);
+//                chain.getLogger().debug("########## 单个VerifyCoinData花费时间:{} ", debugeMap - debugeVerifyCoinDataStart);
                 /*if (tx.getType() == 2) {
                     chain.getLogger().debug("**************************** 测试未确认垃圾交易回收,对转账交易不打包");
                     continue;
@@ -889,8 +891,8 @@ public class TxServiceImpl implements TxService {
                 }
                 long loopOnce = NetworkCall.getCurrentTimeMillis() - currentTimeMillis;
 
-                chain.getLogger().debug("########## 分组花费时间:{} ",  NetworkCall.getCurrentTimeMillis() - debugeMap);
-                chain.getLogger().debug("########## 成功取一个交易花费时间(一次循环):{} ", loopOnce);
+//                chain.getLogger().debug("########## 分组花费时间:{} ",  NetworkCall.getCurrentTimeMillis() - debugeMap);
+//                chain.getLogger().debug("########## 成功取一个交易花费时间(一次循环):{} ", loopOnce);
                 loopDebug += (loopOnce - currentTimeMillis);
                 chain.getLogger().debug("");
             }
@@ -1066,6 +1068,7 @@ public class TxServiceImpl implements TxService {
 
     @Override
     public VerifyTxResult batchVerify(Chain chain, List<String> txHexList) throws NulsException {
+        chain.getLogger().debug("开始区块交易批量验证......");
         VerifyTxResult verifyTxResult = new VerifyTxResult(VerifyTxResult.OTHER_EXCEPTION);
         List<Transaction> txList = new ArrayList<>();
         //组装统一验证参数数据,key为各模块统一验证器cmd
@@ -1076,6 +1079,7 @@ public class TxServiceImpl implements TxService {
             Transaction transaction = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
             if(null != transaction){
                 //交易已存在于已确认块中
+                chain.getLogger().debug("batchVerify failed, tx is existed. hash:{}, -type:{}",tx.getHash().getDigestHex(), tx.getType());
                 return verifyTxResult;
             }
             txList.add(tx);
@@ -1088,11 +1092,13 @@ public class TxServiceImpl implements TxService {
                     /**
                      * 核对(跨链验证的结果)
                      */
+                    chain.getLogger().debug("batchVerify failed, ctx. hash:{}, -type:{}",tx.getHash().getDigestHex(), tx.getType());
                     return verifyTxResult;
                 }
             }
             //验证单个交易
             if (!transactionManager.verify(chain, tx)) {
+                chain.getLogger().debug("batchVerify failed, single tx verify failed. hash:{}, -type:{}",tx.getHash().getDigestHex(), tx.getType());
                 return verifyTxResult;
             }
             //根据模块的统一验证器名，对所有交易进行分组，准备进行各模块的统一验证
@@ -1110,6 +1116,7 @@ public class TxServiceImpl implements TxService {
         for(Transaction tx : txList) {
             verifyTxResult = LedgerCall.verifyCoinData(chain, tx, true);
             if (!verifyTxResult.success()) {
+                chain.getLogger().debug("batchVerify failed, batch verifyCoinData failed. hash:{}, -type:{}",tx.getHash().getDigestHex(), tx.getType());
                 return verifyTxResult;
             }
         }

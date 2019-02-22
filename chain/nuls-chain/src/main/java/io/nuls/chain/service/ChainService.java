@@ -1,8 +1,12 @@
 package io.nuls.chain.service;
 
 
-import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.BlockChain;
+import io.nuls.base.data.Transaction;
+import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.BlockChain;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 关于链的所有操作：增删改查
@@ -59,7 +63,8 @@ public interface ChainService {
      */
     BlockChain getChain(int chainId) throws Exception;
 
-
+    boolean chainExist(int chainId) throws Exception;
+    boolean chainExist(int chainId, Map<String,Integer> map) throws Exception;
     /**
      * 注册链
      * Register a new chain
@@ -70,12 +75,11 @@ public interface ChainService {
     void registerBlockChain(BlockChain blockChain, Asset asset) throws Exception;
 
     /**
-     * 回滚注册链
-     * Rollback the registered BlockChain
-     * @param blockChain The rollback BlockChain
-     * @throws Exception Any error will throw an exception
+     * 回滚远程调用通知
+     * @param txs
+     * @throws Exception
      */
-    void registerBlockChainRollback(BlockChain blockChain) throws Exception;
+    void rpcBlockChainRollback(List<Transaction> txs) throws Exception;
 
     /**
      * 销毁链
@@ -87,11 +91,4 @@ public interface ChainService {
      */
     BlockChain destroyBlockChain(BlockChain blockChain) throws Exception;
 
-    /**
-     * 回滚销毁的链
-     * Rollback the destroyed BlockChain
-     * @param dbChain The BlockChain need to be rollback
-     * @throws Exception Any error will throw an exception
-     */
-    void destroyBlockChainRollback(BlockChain dbChain) throws Exception;
 }

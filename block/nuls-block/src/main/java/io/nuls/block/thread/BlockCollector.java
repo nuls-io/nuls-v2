@@ -52,13 +52,18 @@ public class BlockCollector implements Runnable {
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
     private int chainId;
     private NulsLogger commonLog;
+    /**
+     * 是否继续本次下载，中途发生异常置为false
+     */
+    private boolean flag;
 
-    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
+    BlockCollector(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue, boolean flag) {
         this.params = params;
         this.executor = executor;
         this.futures = futures;
         this.chainId = chainId;
         this.queue = queue;
+        this.flag = flag;
         this.commonLog = ContextManager.getContext(chainId).getCommonLog();
     }
 
@@ -69,7 +74,7 @@ public class BlockCollector implements Runnable {
             long netLatestHeight = params.getNetLatestHeight();
             long startHeight = params.getLocalLatestHeight() + 1;
             commonLog.info("BlockCollector start work");
-            while (startHeight <= netLatestHeight) {
+            while (startHeight <= netLatestHeight && flag) {
                 result = futures.take().get();
                 int size = result.getSize();
                 Node node = result.getNode();
@@ -91,7 +96,7 @@ public class BlockCollector implements Runnable {
                 }
                 startHeight += size;
             }
-            commonLog.info("BlockCollector stop work normally");
+            commonLog.info("BlockCollector stop work, flag-" + flag);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("BlockCollector stop work abnormally-" + e);

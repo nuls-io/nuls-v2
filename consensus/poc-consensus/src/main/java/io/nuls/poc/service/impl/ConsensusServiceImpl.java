@@ -1104,9 +1104,9 @@ public class ConsensusServiceImpl implements ConsensusService {
     private boolean transactionCommit(Transaction tx,Chain chain,BlockHeader header)throws NulsException{
         switch (tx.getType()){
             case(ConsensusConstant.TX_TYPE_REGISTER_AGENT) : return agentManager.createAgentCommit(tx,header,chain);
-            case(ConsensusConstant.TX_TYPE_STOP_AGENT): return agentManager.stopAgentCommit(tx,chain);
+            case(ConsensusConstant.TX_TYPE_STOP_AGENT): return agentManager.stopAgentCommit(tx,header,chain);
             case(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS): return depositManager.depositCommit(tx,header,chain);
-            case(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT): return depositManager.cancelDepositCommit(tx,chain);
+            case(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT): return depositManager.cancelDepositCommit(tx,header,chain);
             case(ConsensusConstant.TX_TYPE_YELLOW_PUNISH): return punishManager.yellowPunishCommit(tx,chain,header);
             case(ConsensusConstant.TX_TYPE_RED_PUNISH): return punishManager.redPunishCommit(tx,chain,header);
             case(ConsensusConstant.TX_TYPE_COINBASE) : return true;

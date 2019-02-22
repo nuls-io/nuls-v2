@@ -78,16 +78,16 @@ public class RoundManager {
      * @param roundIndex   轮次下标/round index
      * @return  MeetingRound
      * */
-    public MeetingRound getRoundByIndex(Chain chain,long roundIndex) throws NulsException{
+    public MeetingRound getRoundByIndex(Chain chain,long roundIndex){
         List<MeetingRound> roundList = chain.getRoundList();
-        MeetingRound round = null;
+        MeetingRound round;
         for (int i = roundList.size() - 1; i >= 0; i--) {
             round = roundList.get(i);
             if (round.getIndex() == roundIndex) {
-                break;
+                return round;
             }
         }
-        return round;
+        return null;
     }
 
     /**

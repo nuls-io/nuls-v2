@@ -52,18 +52,26 @@ public class BlockDownloader implements Callable<Boolean> {
      * 缓存下载结果
      */
     private BlockingQueue<Future<BlockDownLoadResult>> futures;
+    /**
+     * 链ID
+     */
     private int chainId;
+    /**
+     * 是否继续本次下载，中途发生异常置为false
+     */
+    private boolean flag;
     /**
      * 下载到的区块最终放入此队列，由消费线程取出进行保存
      */
     private BlockingQueue<Block> queue;
 
-    public BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue) {
+    public BlockDownloader(int chainId, BlockingQueue<Future<BlockDownLoadResult>> futures, ThreadPoolExecutor executor, BlockDownloaderParams params, BlockingQueue<Block> queue, boolean flag) {
         this.params = params;
         this.executor = executor;
         this.futures = futures;
         this.chainId = chainId;
         this.queue = queue;
+        this.flag = flag;
     }
 
     @Override
@@ -76,7 +84,7 @@ public class BlockDownloader implements Callable<Boolean> {
             ChainParameters chainParameters = ContextManager.getContext(chainId).getParameters();
             int blockCache = chainParameters.getBlockCache();
             int maxDowncount = chainParameters.getDownloadNumber();
-            while (startHeight <= netLatestHeight) {
+            while (startHeight <= netLatestHeight && flag) {
                 while (queue.size() > blockCache) {
                     commonLog.info("BlockDownloader wait！ cached queue size:" + queue.size());
                     Thread.sleep(1000L);
@@ -86,9 +94,9 @@ public class BlockDownloader implements Callable<Boolean> {
                 do {
                     node = nodes.take();
                     credit = node.getCredit();
-                    commonLog.debug("nodes size-" + nodes.size());
                 } while (credit == 0);
                 int size = maxDowncount * credit / 100;
+                size = size <= 0 ? 1 : size;
                 if (startHeight + size > netLatestHeight) {
                     size = (int) (netLatestHeight - startHeight + 1);
                 }
@@ -97,14 +105,15 @@ public class BlockDownloader implements Callable<Boolean> {
                 futures.offer(future);
                 startHeight += size;
             }
-            commonLog.info("BlockDownloader stop work");
+            commonLog.info("BlockDownloader stop work, flag-" + flag);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
+            flag = false;
             return false;
         }
         executor.shutdown();
-        return true;
+        return flag;
     }
 
 }
