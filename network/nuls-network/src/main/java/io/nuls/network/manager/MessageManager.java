@@ -333,6 +333,7 @@ public class MessageManager extends BaseManager {
     @Override
     public void init() throws Exception {
         MessageFactory.getInstance().init();
+        MessageHandlerFactory.getInstance().init();
 
     }
 

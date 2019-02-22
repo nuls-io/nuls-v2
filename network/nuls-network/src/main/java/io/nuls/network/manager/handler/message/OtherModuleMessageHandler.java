@@ -36,11 +36,12 @@ import io.nuls.network.utils.LoggerUtil;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.log.Log;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import static io.nuls.network.utils.LoggerUtil.Log;
+
+;
 
 /**
  * @author lan
