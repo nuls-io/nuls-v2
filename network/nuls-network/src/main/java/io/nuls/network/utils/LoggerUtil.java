@@ -26,9 +26,16 @@ package io.nuls.network.utils;
 
 import ch.qos.logback.classic.Level;
 import io.nuls.base.data.NulsDigestData;
+import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.model.Node;
+import io.nuls.network.model.dto.ProtocolRoleHandler;
+import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.log.logback.LoggerBuilder;
 import io.nuls.tools.log.logback.NulsLogger;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author lan
@@ -38,22 +45,51 @@ import io.nuls.tools.log.logback.NulsLogger;
 public class LoggerUtil {
     public static NulsLogger Log = LoggerBuilder.getLogger("./nwLogs", "nw.log", Level.ALL);
     public static NulsLogger TestLog = LoggerBuilder.getLogger("./nwLogs", "block.log", Level.ALL);
+    public static NulsLogger TestLog2 = LoggerBuilder.getLogger("./nwLogs", "tx.log", Level.ALL);
+    public static NulsLogger TestLog3 = LoggerBuilder.getLogger("./nwLogs", "cs.log", Level.ALL);
+    public static Map<String, NulsLogger> logMap = new HashMap<>();
+
+    static {
+        logMap.put(ModuleE.BL.abbr, TestLog);
+        logMap.put(ModuleE.TX.abbr, TestLog2);
+        logMap.put(ModuleE.CS.abbr, TestLog3);
+    }
 
     /**
-     * 调试代码
-     *
+     *  调试代码
      * @param cmd
      * @param node
      * @param payLoadBody
+     * @param sendOrRecieved
      */
-    public static void blockLogs(String cmd, Node node, byte[] payLoadBody,String sendOrRecieved) {
-        if (cmd.equalsIgnoreCase("complete") || cmd.equalsIgnoreCase("getBlocks") || cmd.equalsIgnoreCase("getBlock") || cmd.equalsIgnoreCase("block")) {
-            TestLog.debug("net {} cmd={},peer={},hash={}", sendOrRecieved,cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
+    public static void blockLogs(String cmd, Node node, byte[] payLoadBody, String sendOrRecieved) {
+        Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(cmd);
+        if (null == protocolRoleHandlers) {
+            Log.error("unknown mssages. cmd={},may be handle had not be registered to network.", cmd);
+        } else {
+            for (ProtocolRoleHandler protocolRoleHandler : protocolRoleHandlers) {
+                if (null != logMap.get(protocolRoleHandler.getRole())) {
+                    logMap.get(protocolRoleHandler.getRole()).debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
+                } else {
+                    Log.debug("net {} cmd={},peer={},hash={}", sendOrRecieved, cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex());
+                }
+            }
         }
     }
-    public static void blockLogsRec(String cmd, Node node, byte[] payLoadBody,String result) {
-        if (cmd.equalsIgnoreCase("complete") || cmd.equalsIgnoreCase("getBlocks") || cmd.equalsIgnoreCase("getBlock") || cmd.equalsIgnoreCase("block")) {
-            TestLog.debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(),result);
+
+    /**
+     *  调试代码
+     * @param role
+     * @param cmd
+     * @param node
+     * @param payLoadBody
+     * @param result
+     */
+    public static void blockLogsRec(String role, String cmd, Node node, byte[] payLoadBody, String result) {
+        if (null != logMap.get(role)) {
+            logMap.get(role).debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result);
+        } else {
+            Log.debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result);
         }
     }
 }

@@ -95,7 +95,7 @@ public class OtherModuleMessageHandler extends BaseMessageHandler {
                     Log.debug("request：{}=={}", protocolRoleHandler.getRole(), protocolRoleHandler.getHandler());
                     Response response = CmdDispatcher.requestAndResponse(protocolRoleHandler.getRole(), protocolRoleHandler.getHandler(), paramMap);
                     Log.debug("response：" + response);
-                    LoggerUtil.blockLogsRec(header.getCommandStr(),node,payLoadBody,response.toString());
+                    LoggerUtil.blockLogsRec(protocolRoleHandler.getRole(),header.getCommandStr(),node,payLoadBody,response.toString());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
