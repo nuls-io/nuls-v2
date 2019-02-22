@@ -39,7 +39,6 @@ import io.nuls.network.netty.NettyClient;
 import io.nuls.network.netty.NettyServer;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.IpUtil;
-import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -270,10 +269,6 @@ public class ConnectionManager extends BaseManager {
 
     @Override
     public void start() throws Exception {
-        while (!ServerRuntime.isReady()) {
-            Log.info("wait depend modules ready");
-            Thread.sleep(2000L);
-        }
         nettyBoot();
         status = ManagerStatusEnum.RUNNING;
     }
