@@ -52,6 +52,7 @@ public class RpcManager extends BaseManager {
                 .moduleRoles(ModuleE.NW.abbr, new String[]{"1.1", "1.2"})
                 .moduleVersion("1.2")
                 .dependencies(ModuleE.KE.abbr, "1.1")
+                .dependencies(ModuleE.BL.abbr, "1.1")
                 .scanPackage("io.nuls.network.rpc")
                 .connect("ws://127.0.0.1:8887");
         // Get information from kernel
