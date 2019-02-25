@@ -74,7 +74,7 @@ public class VerackMessageHandler extends BaseMessageHandler {
          *The server can receive the verack message, receive the message and transition the connection state to the handshake.
          */
         if (VerackMessageBody.VER_CONNECT_MAX == verackMessage.getMsgBody().getAckCode()) {
-
+            Log.info("recieve versionAck peer max!peer = {}s",node.getId());
             node.getChannel().close();
 
         } else {

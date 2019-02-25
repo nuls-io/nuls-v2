@@ -93,8 +93,8 @@ public class NodeMaintenanceTask implements Runnable {
     }
 
     private List<Node> getNeedConnectNodes(NodeGroup nodeGroup, boolean isCross) {
-        Collection<Node> avaliableNodes = nodeGroup.getConnectedNodes(isCross);
-        if (avaliableNodes.size() >= networkParam.getMaxOutCount()) {
+        Collection<Node> connectedNodes = nodeGroup.getConnectedNodes(isCross);
+        if (connectedNodes.size() >= networkParam.getMaxOutCount()) {
             return null;
         }
         Collection<Node> canConnectNodes = nodeGroup.getCanConnectNodes(isCross);
@@ -104,9 +104,9 @@ public class NodeMaintenanceTask implements Runnable {
 
         List<Node> nodeList = new ArrayList<>(canConnectNodes);
 
-        nodeList.removeAll(avaliableNodes);
+        nodeList.removeAll(connectedNodes);
 
-        int maxCount = networkParam.getMaxOutCount() - avaliableNodes.size();
+        int maxCount = networkParam.getMaxOutCount() - connectedNodes.size();
         if (nodeList.size() < maxCount) {
             return nodeList;
         }
