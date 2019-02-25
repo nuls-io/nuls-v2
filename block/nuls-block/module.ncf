@@ -1,0 +1,6 @@
+[JAVA]
+APP_NAME=block
+MAIN_CLASS=io.nuls.block.BlockBootstrap
+Version=1.0.0
+JOPT_XMS=256
+JOPT_XMX=256

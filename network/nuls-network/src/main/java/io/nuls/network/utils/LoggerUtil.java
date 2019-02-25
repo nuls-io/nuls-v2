@@ -62,7 +62,7 @@ public class LoggerUtil {
      * @param payLoadBody
      * @param sendOrRecieved
      */
-    public static void blockLogs(String cmd, Node node, byte[] payLoadBody, String sendOrRecieved) {
+    public static void modulesMsgLogs(String cmd, Node node, byte[] payLoadBody, String sendOrRecieved) {
         Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(cmd);
         if (null == protocolRoleHandlers) {
             Log.error("unknown mssages. cmd={},may be handle had not be registered to network.", cmd);
@@ -85,7 +85,7 @@ public class LoggerUtil {
      * @param payLoadBody
      * @param result
      */
-    public static void blockLogsRec(String role, String cmd, Node node, byte[] payLoadBody, String result) {
+    public static void modulesMsgLogs(String role, String cmd, Node node, byte[] payLoadBody, String result) {
         if (null != logMap.get(role)) {
             logMap.get(role).debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result);
         } else {

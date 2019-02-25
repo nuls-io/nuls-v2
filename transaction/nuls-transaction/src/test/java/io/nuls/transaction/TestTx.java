@@ -183,7 +183,7 @@ public class TestTx {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "002071370462e8ac89c27cdfd6bf34a6ddd67626d1acb007e70d991b8980f07397b6";
+        String agentHash = "0020559797677a9677513bac33378883dd3b1ffa9831d55675ff2d345775123e36ed";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
         dpParams.put("address", address27);
@@ -205,7 +205,7 @@ public class TestTx {
         params.put("chainId", chainId);
         //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         params.put("address", address27);
-        params.put("txHash", "002099727074a1eca4675f2e1e1b92a64110eb4a1c59e49b099e946332d24862f091");
+        params.put("txHash", "0020c2bed94bb1195cfa1c406fa1af9edeedb92a920fa2b77a56d4287ab2895c9333");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
     }

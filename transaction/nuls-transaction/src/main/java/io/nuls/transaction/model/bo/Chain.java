@@ -37,6 +37,11 @@ public class Chain {
 //    private RunningStatus runningStatus;
 
     /**
+     * 是否正在共识出块中
+     */
+    private Boolean packaging;
+
+    /**
      * 日志
      */
     @JsonIgnore
@@ -84,6 +89,7 @@ public class Chain {
     public Chain() throws Exception {
 //        this.runningStatus = RunningStatus.INITING;
 //        this.crossTxVerifyingMap = new HashMap<>();
+        this.packaging = false;
         this.txRegisterMap = new HashMap<>();
         this.txQueue = new LinkedBlockingDeque<>();
         this.orphanContainer = new LimitHashMap(TxConstant.ORPHAN_CONTAINER_MAX_SIZE);
@@ -171,5 +177,13 @@ public class Chain {
 
     public void setBestBlockHeight(long bestBlockHeight) {
         this.bestBlockHeight = bestBlockHeight;
+    }
+
+    public Boolean getPackaging() {
+        return packaging;
+    }
+
+    public void setPackaging(Boolean packaging) {
+        this.packaging = packaging;
     }
 }

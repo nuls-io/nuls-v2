@@ -7,12 +7,5 @@ package io.nuls.transaction.constant;
  */
 public class TxConfig {
 
-    /**
-     *
-     */
-//    public static int CURRENT_CHAINID = 12345;
-    /**
-     *
-     */
-//    public static int CURRENT_CHAIN_ASSETID = 1;
+    public static Boolean PACKAGING = null;
 }
