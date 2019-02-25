@@ -51,13 +51,18 @@ import static io.nuls.network.utils.LoggerUtil.Log;
  */
 public class NodeDiscoverTask implements Runnable {
 
-    // 节点探测结果 -- 成功，能连接
+    /**
+     * 节点探测结果 -- 成功，能连接
+     */
     private final static int PROBE_STATUS_SUCCESS = 1;
-    // 节点探测结果 -- 失败，不能连接，节点不可用
+    /**
+     * 节点探测结果 -- 失败，不能连接，节点不可用
+     */
     private final static int PROBE_STATUS_FAIL = 2;
-    // 节点探测结果 -- 忽略，当断网时，也就是本地节点一个都没有连接时，不确定是对方连不上，还是本地没网，这时忽略
+    /**
+     * 节点探测结果 -- 忽略，当断网时，也就是本地节点一个都没有连接时，不确定是对方连不上，还是本地没网，这时忽略
+     */
     private final static int PROBE_STATUS_IGNORE = 3;
-
 
     private final ConnectionManager connectionManager = ConnectionManager.getInstance();
 
@@ -115,9 +120,6 @@ public class NodeDiscoverTask implements Runnable {
             Map<String, Node> canConnectNodes = nodesContainer.getCanConnectNodes();
             while (true) {
                 Map<String, Node> failNodes = nodesContainer.getFailNodes();
-
-//                Log.info("the fail nodes count is {}", failNodes.size());
-
                 if (failNodes.size() > 0) {
                     probeNodes(failNodes, canConnectNodes, nodesContainer, isCross);
                 }

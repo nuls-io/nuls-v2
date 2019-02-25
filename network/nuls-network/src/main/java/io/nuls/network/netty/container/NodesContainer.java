@@ -117,7 +117,7 @@ public class NodesContainer implements Serializable {
         return containerPo;
     }
     public List<Node> getAvailableNodes() {
-        Collection<Node> nodes = null;
+        Collection<Node> nodes = canConnectNodes.values();
         List<Node> availableNodes = new ArrayList<>();
         if (null != nodes && nodes.size() > 0) {
             for (Node node : nodes) {
@@ -165,6 +165,20 @@ public class NodesContainer implements Serializable {
         return (markCanuseNodeByIp(ip, type, canConnectNodes));
     }
 
+    /**
+     * 获取已经连接的种子节点
+     * @return
+     */
+    public List<Node> getConnectedSeedNodes(){
+        List<Node> connectedSeedNodes = new ArrayList<>();
+        Collection<Node> nodes = connectedNodes.values();
+        for(Node node: nodes){
+            if(node.isSeedNode()) {
+                connectedSeedNodes.add(node);
+            }
+        }
+        return connectedSeedNodes;
+    }
     public boolean markCanuseNodeByIp(String ip, int type, Map<String, Node> nodes) {
         if (ip == null) {
             return false;

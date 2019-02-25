@@ -27,7 +27,6 @@ package io.nuls.network.rpc.internal;
 import io.nuls.network.constant.NetworkErrorCode;
 import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.manager.NodeGroupManager;
-import io.nuls.network.manager.StorageManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
@@ -41,12 +40,11 @@ import io.nuls.rpc.model.message.Response;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.StringUtils;
 
-import static io.nuls.network.utils.LoggerUtil.Log;
-
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * @author lan
@@ -114,7 +112,7 @@ public class NodeRpc extends BaseCmd {
             //移除 peer
             Node node = nodeGroup.getLocalNetNodeContainer().getConnectedNodes().get(nodeId);
             if (null != node) {
-                node.colse();
+                node.close();
             } else {
                 nodeGroup.getLocalNetNodeContainer().getCanConnectNodes().remove(nodeId);
                 nodeGroup.getLocalNetNodeContainer().getUncheckNodes().remove(nodeId);
@@ -124,7 +122,7 @@ public class NodeRpc extends BaseCmd {
 
             node = nodeGroup.getCrossNodeContainer().getConnectedNodes().get(nodeId);
             if (null != node) {
-                node.colse();
+                node.close();
             } else {
                 nodeGroup.getCrossNodeContainer().getCanConnectNodes().remove(nodeId);
                 nodeGroup.getCrossNodeContainer().getUncheckNodes().remove(nodeId);
