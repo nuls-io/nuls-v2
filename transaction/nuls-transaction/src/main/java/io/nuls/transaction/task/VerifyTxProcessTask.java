@@ -110,7 +110,10 @@ public class VerifyTxProcessTask implements Runnable {
             }
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
             if(verifyTxResult.success()){
-                packablePool.add(chain, tx,false);
+                if(chain.getPackaging()) {
+                    //当节点是出块节点时, 才将交易放入待打包队列
+                    packablePool.add(chain, tx, false);
+                }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //保存到h2数据库

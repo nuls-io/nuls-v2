@@ -126,7 +126,8 @@ public class TransactionBootStrap {
                     .moduleVersion("1.0")
                     .dependencies(ModuleE.NW.abbr, "1.0")
                     .dependencies(ModuleE.LG.abbr, "1.0")
-//                    .dependencies(ModuleE.BL.abbr, "1.0")
+                    .dependencies(ModuleE.BL.abbr, "1.0")
+                    .dependencies(ModuleE.CS.abbr, "1.0")
                     .scanPackage("io.nuls.transaction.rpc.cmd")
                     .connect("ws://127.0.0.1:8887");
 
