@@ -153,7 +153,7 @@ public class TestTx {
         System.out.println(balance.longValue());
 
         //组装创建节点交易
-        Map agentTxMap = this.createAgentTx(address27, "5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA");
+        Map agentTxMap = this.createAgentTx(address21, "5MR_2CaU6brvzCnGo2avJvrAsmpMMVEPvQq");
         //调用接口
         Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
