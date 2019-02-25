@@ -354,8 +354,13 @@ public class TransactionCmd extends BaseCmd {
             // check address validity
             BigInteger fromTotal = BigInteger.ZERO;
             for (CoinDto from : inputList) {
+                //校验地址格式
                 if (!AddressTool.validAddress(from.getAssetsChainId(), from.getAddress())) {
                     throw new NulsException(AccountErrorCode.ADDRESS_ERROR);
+                }
+                //from中不能有多签地址
+                if (AddressTool.isMultiSignAddress(from.getAddress())) {
+                    throw new NulsException(AccountErrorCode.IS_MULTI_SIGNATURE_ADDRESS);
                 }
                 fromTotal = fromTotal.add(from.getAmount());
             }
@@ -475,7 +480,9 @@ public class TransactionCmd extends BaseCmd {
         Log.debug("ac_createMultiSignTransfer start");
         Map<String, String> map = new HashMap<>(1);
         MultiSigAccount multiSigAccount = null;
+
         Object chainIdObj = params == null ? null : params.get(RpcParameterNameConstant.CHAIN_ID);
+        Object assetsIdObj = params == null ? null : params.get(RpcParameterNameConstant.ASSETS_Id);
         Object addressObj = params == null ? null : params.get(RpcParameterNameConstant.ADDRESS);
         Object passwordObj = params == null ? null : params.get(RpcParameterNameConstant.PASSWORD);
         Object signAddressObj = params == null ? null : params.get(RpcParameterNameConstant.SIGN_ADDREESS);
@@ -491,6 +498,12 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsRuntimeException(AccountErrorCode.NULL_PARAMETER);
             }
             int chainId = (int) chainIdObj;
+            int assetsId;
+            if (assetsIdObj == null) {
+                assetsId = -1;
+            } else {
+                assetsId = (int) assetsIdObj;
+            }
             String address = (String) addressObj;
             String password = (String) passwordObj;
             String signAddress = (String) signAddressObj;
@@ -540,7 +553,7 @@ public class TransactionCmd extends BaseCmd {
             if (chain == null) {
                 throw new NulsRuntimeException(AccountErrorCode.CHAIN_NOT_EXIST);
             }
-            MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.createMultiSignTransfer(chainId, account, password, multiSigAccount, toAddress, amount, remark);
+            MultiSignTransactionResultDto multiSignTransactionResultDto = transactionService.createMultiSignTransfer(chainId, assetsId, account, password, multiSigAccount, toAddress, amount, remark);
             if (multiSignTransactionResultDto.isBroadcasted()) {
                 map.put("txHash", multiSignTransactionResultDto.getTransaction().getHash().getDigestHex());
             } else {

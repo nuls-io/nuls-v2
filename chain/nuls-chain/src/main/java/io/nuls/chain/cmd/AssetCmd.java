@@ -6,15 +6,14 @@ import io.nuls.base.data.Transaction;
 import io.nuls.chain.info.CmErrorCode;
 import io.nuls.chain.info.CmRuntimeInfo;
 import io.nuls.chain.model.dto.AccountBalance;
-import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.BlockChain;
+import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.tx.AddAssetToChainTransaction;
 import io.nuls.chain.model.tx.DestroyAssetAndChainTransaction;
 import io.nuls.chain.model.tx.RemoveAssetFromChainTransaction;
 import io.nuls.chain.service.AssetService;
 import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
-import io.nuls.chain.service.SeqService;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
 import io.nuls.rpc.model.message.Response;
@@ -42,8 +41,7 @@ public class AssetCmd extends BaseChainCmd {
     private ChainService chainService;
     @Autowired
     private RpcService rpcService;
-    @Autowired
-    private SeqService seqService;
+
 
     @CmdAnnotation(cmd = "cm_asset", version = 1.0, description = "asset")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
@@ -65,6 +63,7 @@ public class AssetCmd extends BaseChainCmd {
      */
     @CmdAnnotation(cmd = "cm_assetReg", version = 1.0, description = "assetReg")
     @Parameter(parameterName = "chainId", parameterType = "int", parameterValidRange = "[1,65535]")
+    @Parameter(parameterName = "assetId", parameterType = "int", parameterValidRange = "[1,65535]")
     @Parameter(parameterName = "symbol", parameterType = "array")
     @Parameter(parameterName = "name", parameterType = "String")
     @Parameter(parameterName = "initNumber", parameterType = "String")
@@ -75,13 +74,11 @@ public class AssetCmd extends BaseChainCmd {
         try {
             /* 组装Asset (Asset object) */
             Asset asset = JSONUtils.map2pojo(params, Asset.class);
-            asset.setAssetId(seqService.createAssetId(asset.getChainId()));
             asset.setAddress(AddressTool.getAddress(String.valueOf(params.get("address"))));
             asset = setDefaultAssetValue(asset);
             if (assetService.assetExist(asset)) {
                 return failed(CmErrorCode.ERROR_ASSET_ID_EXIST);
             }
-
             /* 组装交易发送 (Send transaction) */
             Transaction tx = new AddAssetToChainTransaction();
 

@@ -43,7 +43,6 @@ import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.log.Log;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -94,7 +93,7 @@ public class CoinDataValidator {
     public boolean hadValidateTx(int addressChainId, Transaction tx) {
         Map<String, Transaction> batchValidateTxMap = chainsBatchValidateTxMap.get(String.valueOf(addressChainId));
         if (null == batchValidateTxMap || null == batchValidateTxMap.get(tx.getHash().toString())) {
-            Log.error("txHash = {} is not exist!", tx.getHash().toString());
+            logger.error("txHash = {} is not exist!", tx.getHash().toString());
             return false;
         }
         return true;

@@ -31,6 +31,7 @@ import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.manager.StorageManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
+import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.po.GroupPo;
 import io.nuls.network.model.vo.NodeGroupVo;
 import io.nuls.rpc.cmd.BaseCmd;
@@ -55,7 +56,7 @@ public class NodeGroupRpc extends BaseCmd {
 
     /**
      * nw_createNodeGroup
-     * 创建跨链网络
+     * 主网创建跨链网络或者链工厂创建链
      */
     @CmdAnnotation(cmd = "nw_createNodeGroup", version = 1.0,
             description = "createNodeGroup")
@@ -86,10 +87,8 @@ public class NodeGroupRpc extends BaseCmd {
         int minAvailableCount = Integer.valueOf(String.valueOf(params.get("minAvailableCount")));
         int isMoonNode = Integer.valueOf(String.valueOf(params.get("isMoonNode")));
         boolean isMoonNet = (isMoonNode == 1);
-        //友链创建的是链工厂，isSelf 为true
-        boolean isSelf = !isMoonNet;
-        if (!NetworkParam.getInstance().isMoonNode()) {
-            Log.info("MoonNode is false，but param isMoonNode is 1");
+        if (!NetworkParam.getInstance().isMoonNode() && isMoonNet) {
+            Log.error("Local is not Moon net，but param isMoonNode is 1");
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
         NodeGroup nodeGroup = nodeGroupManager.getNodeGroupByMagic(magicNumber);
@@ -149,6 +148,10 @@ public class NodeGroupRpc extends BaseCmd {
         if (StringUtils.isNotBlank(seedIps)) {
             String[] ips = seedIps.split(NetworkConstant.COMMA);
             Collections.addAll(ipList, ips);
+        }
+        for (String croosSeed : ipList) {
+            String[] crossAddr = croosSeed.split(NetworkConstant.COLON);
+            nodeGroup.addNeedCheckNode(new IpAddress(crossAddr[0], Integer.valueOf(crossAddr[1])), true);
         }
         NetworkParam.getInstance().setMoonSeedIpList(ipList);
         nodeGroup.setCrossActive(true);

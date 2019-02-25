@@ -66,6 +66,12 @@ public enum ChainTypeEnum {
     ORPHAN_FORK,
 
     /**
+     * 重复
+     * running
+     */
+    DUPLICATE,
+
+    /**
      * 孤儿链
      * Running exception
      */

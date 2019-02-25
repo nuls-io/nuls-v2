@@ -820,6 +820,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         chain.setConsensusStatus(ConsensusStatus.RUNNING);
+        chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentConsensusStatus-修改节点共识状态成功......");
         return Result.getSuccess(ConsensusErrorCode.SUCCESS);
     }
 
@@ -842,6 +843,7 @@ public class ConsensusServiceImpl implements ConsensusService {
         }
         if (status == 1) {
             chain.setCanPacking(true);
+            chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("updateAgentStatus-修改节点打包状态成功......");
         } else {
             chain.setCanPacking(false);
         }
@@ -1102,9 +1104,9 @@ public class ConsensusServiceImpl implements ConsensusService {
     private boolean transactionCommit(Transaction tx,Chain chain,BlockHeader header)throws NulsException{
         switch (tx.getType()){
             case(ConsensusConstant.TX_TYPE_REGISTER_AGENT) : return agentManager.createAgentCommit(tx,header,chain);
-            case(ConsensusConstant.TX_TYPE_STOP_AGENT): return agentManager.stopAgentCommit(tx,chain);
+            case(ConsensusConstant.TX_TYPE_STOP_AGENT): return agentManager.stopAgentCommit(tx,header,chain);
             case(ConsensusConstant.TX_TYPE_JOIN_CONSENSUS): return depositManager.depositCommit(tx,header,chain);
-            case(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT): return depositManager.cancelDepositCommit(tx,chain);
+            case(ConsensusConstant.TX_TYPE_CANCEL_DEPOSIT): return depositManager.cancelDepositCommit(tx,header,chain);
             case(ConsensusConstant.TX_TYPE_YELLOW_PUNISH): return punishManager.yellowPunishCommit(tx,chain,header);
             case(ConsensusConstant.TX_TYPE_RED_PUNISH): return punishManager.redPunishCommit(tx,chain,header);
             case(ConsensusConstant.TX_TYPE_COINBASE) : return true;

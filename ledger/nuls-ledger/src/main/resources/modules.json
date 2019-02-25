@@ -34,7 +34,7 @@
     "name": "database.dir",
     "remark": "数据库路径",
     "readOnly": "true",
-    "value": "../../ledger"
+    "value": "../../../../data/ledger"
   },
   {
     "name": "database.name",

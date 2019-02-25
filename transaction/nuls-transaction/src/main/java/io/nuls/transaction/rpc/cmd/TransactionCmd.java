@@ -13,6 +13,7 @@ import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxCmd;
+import io.nuls.transaction.constant.TxConfig;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
@@ -356,7 +357,7 @@ public class TransactionCmd extends BaseCmd {
     }
 
     /**
-     * 根据hash获取已确认交易
+     * 根据hash获取交易, 先查未确认, 查不到再查已确认
      * Get the transaction that have been packaged into the block from the database
      *
      * @param params
@@ -379,11 +380,55 @@ public class TransactionCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.HASH_ERROR);
             }
             Log.debug("getConfirmedTransaction : " + txHash);
-            Transaction tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            Transaction tx = txService.getTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
             if(tx == null){
-                throw new NulsException(TxErrorCode.TX_NOT_EXIST);
+                resultMap.put("txHex", null);
+            }else{
+                resultMap.put("txHex", tx.hex());
             }
-            return success(tx.hex());
+            return success(resultMap);
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
+        }
+    }
+
+    /**
+     * 根据hash获取已确认交易(只查已确认)
+     * Get the transaction that have been packaged into the block from the database
+     *
+     * @param params
+     * @return Response
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_GET_CONFIRMED_TX, version = 1.0, description = "Get transaction ")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "txHash", parameterType = "String")
+    public Response getConfirmedTx(Map params) {
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            ObjectUtils.canNotEmpty(params.get("txHash"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if(null == chain){
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            String txHash = (String) params.get("txHash");
+            if (!NulsDigestData.validHash(txHash)) {
+                throw new NulsException(TxErrorCode.HASH_ERROR);
+            }
+            Log.debug("getConfirmedTransaction : " + txHash);
+            Transaction tx = confirmedTxService.getConfirmedTransaction(chain, NulsDigestData.fromDigestHex(txHash));
+            Map<String, String> resultMap = new HashMap<>(TxConstant.INIT_CAPACITY_8);
+            if(tx == null){
+                resultMap.put("txHex", null);
+            }else{
+                resultMap.put("txHex", tx.hex());
+            }
+            return success(resultMap);
         } catch (NulsException e) {
             errorLogProcess(chain, e);
             return failed(e.getErrorCode());
@@ -503,6 +548,38 @@ public class TransactionCmd extends BaseCmd {
             Log.error(e);
         }else{
             chain.getLogger().error(e);
+        }
+    }
+
+    /**
+     * 节点是否正在打包(由共识调用), 决定了新交易是否放入交易模块的待打包队列
+     * @param params
+     * @return
+     */
+    @CmdAnnotation(cmd = TxCmd.TX_CS_STATE, version = 1.0, description = "")
+    @Parameter(parameterName = "chainId", parameterType = "int")
+    @Parameter(parameterName = "packaging", parameterType = "Boolean")
+    public Response packaging(Map params){
+        Chain chain = null;
+        try {
+            ObjectUtils.canNotEmpty(params.get("chainId"), TxErrorCode.PARAMETER_ERROR.getMsg());
+            chain = chainManager.getChain((int) params.get("chainId"));
+            if(null == chain){
+                throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
+            }
+            Boolean packaging = null == params.get("packaging") ? null : (Boolean)params.get("packaging");
+            if(null == packaging){
+                throw new NulsException(TxErrorCode.PARAMETER_ERROR);
+            }
+            chain.setPackaging(packaging);
+            TxConfig.PACKAGING = packaging;
+            return success();
+        } catch (NulsException e) {
+            errorLogProcess(chain, e);
+            return failed(e.getErrorCode());
+        } catch (Exception e) {
+            errorLogProcess(chain, e);
+            return failed(TxErrorCode.SYS_UNKOWN_EXCEPTION);
         }
     }
 }

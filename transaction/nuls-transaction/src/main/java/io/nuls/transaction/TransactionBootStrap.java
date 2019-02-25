@@ -1,4 +1,4 @@
-package io.nuls.transaction.init;
+package io.nuls.transaction;
 
 import io.nuls.db.service.RocksDBService;
 import io.nuls.rpc.client.CmdDispatcher;
@@ -9,14 +9,11 @@ import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
 import io.nuls.tools.parse.I18nUtils;
-import io.nuls.tools.thread.TimeService;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
 import io.nuls.transaction.db.h2.dao.impl.BaseService;
-import io.nuls.transaction.db.h2.dao.impl.TransactionH2ServiceImpl;
 import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 import io.nuls.transaction.manager.ChainManager;
-import io.nuls.transaction.manager.TransactionManager;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
@@ -54,7 +51,11 @@ public class TransactionBootStrap {
             //启动链
             SpringLiteContext.getBean(ChainManager.class).runChain();
             //注册网络消息协议
-            NetworkCall.registerProtocol();
+            while (!NetworkCall.registerProtocol())
+            {
+                Log.info("wait nw_protocolRegister ready");
+                Thread.sleep(5000L);
+            }
             Log.debug("START-SUCCESS");
         }catch (Exception e){
             Log.error("Transaction startup error!");
@@ -125,7 +126,7 @@ public class TransactionBootStrap {
                     .moduleVersion("1.0")
                     .dependencies(ModuleE.NW.abbr, "1.0")
                     .dependencies(ModuleE.LG.abbr, "1.0")
-//                    .dependencies(ModuleE.BL.abbr, "1.0")
+                    .dependencies(ModuleE.BL.abbr, "1.0")
                     .scanPackage("io.nuls.transaction.rpc.cmd")
                     .connect("ws://127.0.0.1:8887");
 

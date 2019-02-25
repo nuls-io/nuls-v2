@@ -21,7 +21,20 @@ public class CmRuntimeInfo {
         String assetId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID);
         return CmRuntimeInfo.getAssetKey(Integer.valueOf(chainId), Integer.valueOf(assetId));
     }
-
+    public static String getMainChainId() {
+        String chainId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID);
+        return chainId;
+    }
+    public static int getMainIntChainId() {
+        int chainId =Integer.valueOf(CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID));
+        return chainId;
+    }
+    public static String getMainChainAssetKey() {
+        String chainId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_CHAIN_ID);
+        String assetId = CmConstants.CHAIN_ASSET_MAP.get(CmConstants.NULS_ASSET_ID);
+        String assetKey = CmRuntimeInfo.getAssetKey(Integer.valueOf(chainId), Integer.valueOf(assetId));
+        return CmRuntimeInfo.getChainAssetKey(Integer.valueOf(chainId),assetKey);
+    }
     public static String getChainAssetKey(int chainId, String assetKey) {
         return chainId + "-" + assetKey;
     }

@@ -164,5 +164,10 @@ public interface RpcParameterNameConstant {
      */
     String TYPE = "type";
 
+    /**
+     * the ASSETS_Id
+     */
+    String ASSETS_Id = "assetsId";
+
 
 }

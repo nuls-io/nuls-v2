@@ -224,7 +224,7 @@ public class ChainManager {
         txRegister.setValidator(TxConstant.CROSS_TRANSFER_VALIDATOR);
         txRegister.setCommit(TxConstant.CROSS_TRANSFER_COMMIT);
         txRegister.setRollback(TxConstant.CROSS_TRANSFER_ROLLBACK);
-        txRegister.setSystemTx(true);
+        txRegister.setSystemTx(false);
         txRegister.setUnlockTx(false);
         txRegister.setVerifySignature(true);
         transactionManager.register(chain, txRegister);

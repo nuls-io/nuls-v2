@@ -26,7 +26,7 @@ package io.nuls.chain.service;
 
 import io.nuls.base.data.Transaction;
 import io.nuls.chain.model.dto.AccountBalance;
-import io.nuls.chain.model.dto.BlockChain;
+import io.nuls.chain.model.po.BlockChain;
 
 /**
  * 调用外部接口

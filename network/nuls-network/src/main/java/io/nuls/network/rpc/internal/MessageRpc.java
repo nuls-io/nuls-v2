@@ -39,6 +39,7 @@ import io.nuls.network.model.dto.ProtocolRoleHandler;
 import io.nuls.network.model.message.base.MessageHeader;
 import io.nuls.network.model.po.ProtocolHandlerPo;
 import io.nuls.network.model.po.RoleProtocolPo;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.Parameter;
@@ -123,7 +124,7 @@ public class MessageRpc extends BaseCmd {
             String cmd = String.valueOf(params.get("command"));
             MessageManager messageManager = MessageManager.getInstance();
             NodeGroup nodeGroup = NodeGroupManager.getInstance().getNodeGroupByChainId(chainId);
-            if(null == nodeGroup){
+            if (null == nodeGroup) {
                 Log.error("chain is not exist!");
                 return failed(NetworkErrorCode.PARAMETER_ERROR);
             }
@@ -145,6 +146,9 @@ public class MessageRpc extends BaseCmd {
             for (Node node : nodesCollection) {
                 if (!excludeNodes.contains(NetworkConstant.COMMA + node.getId() + NetworkConstant.COMMA)) {
                     nodes.add(node);
+                    /*begin test code*/
+                    LoggerUtil.modulesMsgLogs(cmd, node, messageBody, "send");
+                    /*end test code*/
                 }
             }
             Log.debug("==================broadcast nodes==size={}", nodes.size());
@@ -156,6 +160,7 @@ public class MessageRpc extends BaseCmd {
         Log.debug("==================broadcast end");
         return success();
     }
+
 
     /**
      * nw_sendPeersMsg
@@ -188,6 +193,9 @@ public class MessageRpc extends BaseCmd {
             for (String nodeId : nodeIds) {
                 Node connectNode = nodeGroup.getAvailableNode(nodeId);
                 if (null != connectNode) {
+                    /*begin test code*/
+                    LoggerUtil.modulesMsgLogs(cmd, connectNode, messageBody, "send");
+                    /*end test code*/
                     nodesList.add(connectNode);
                 }
             }

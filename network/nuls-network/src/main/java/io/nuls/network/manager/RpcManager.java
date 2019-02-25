@@ -41,26 +41,20 @@ public class RpcManager extends BaseManager {
     }
 
     @Override
-    public void init() {
+    public void init() throws Exception {
 
     }
 
     @Override
-    public void start() {
-        try {
-            // Start server instance
-            WsServer.getInstance(ModuleE.NW)
-                    .moduleRoles(ModuleE.NW.abbr, new String[]{"1.1", "1.2"})
-                    .moduleVersion("1.2")
-                    .dependencies(ModuleE.KE.abbr, "1.1")
-                    .scanPackage("io.nuls.network.rpc")
-                    .connect("ws://127.0.0.1:8887");
-            // Get information from kernel
-            CmdDispatcher.syncKernel();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
+    public void start() throws Exception {
+        // Start server instance
+        WsServer.getInstance(ModuleE.NW)
+                .moduleRoles(ModuleE.NW.abbr, new String[]{"1.1", "1.2"})
+                .moduleVersion("1.2")
+                .dependencies(ModuleE.KE.abbr, "1.1")
+                .scanPackage("io.nuls.network.rpc")
+                .connect("ws://127.0.0.1:8887");
+        // Get information from kernel
+        CmdDispatcher.syncKernel();
     }
 }

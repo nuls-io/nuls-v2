@@ -25,12 +25,10 @@ import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.po.BlockHeaderPo;
-import io.nuls.block.test.TransactionStorageService;
 import io.nuls.block.utils.BlockUtil;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -48,8 +46,6 @@ import java.util.Map;
  * @date 18-11-9 上午10:44
  */
 public class TransactionUtil {
-
-    private static TransactionStorageService service = SpringLiteContext.getBean(TransactionStorageService.class);
 
     /**
      * 获取系统交易类型
@@ -231,7 +227,11 @@ public class TransactionUtil {
             Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
-                String txHex = (String) responseData.get("tx_getTx");
+                Map map = (Map) responseData.get("tx_getTx");
+                String txHex = (String) map.get("txHex");
+                if (txHex == null) {
+                    return null;
+                }
                 Transaction transaction = new Transaction();
                 transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
                 return transaction;
@@ -243,7 +243,41 @@ public class TransactionUtil {
             commonLog.error(e);
             return null;
         }
-//        return service.query(chainId, hash);
+    }
+
+    /**
+     * 获取单个交易
+     *
+     * @param chainId
+     * @param hash
+     * @return
+     */
+    public static Transaction getConfirmedTransaction(int chainId, NulsDigestData hash) {
+        NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
+        try {
+            Map<String, Object> params = new HashMap<>(2);
+//            params.put(Constants.VERSION_KEY_STR, "1.0");
+            params.put("chainId", chainId);
+            params.put("txHash", hash.getDigestHex());
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
+            if (response.isSuccess()) {
+                Map responseData = (Map) response.getResponseData();
+                Map map = (Map) responseData.get("tx_getConfirmedTx");
+                String txHex = (String) map.get("txHex");
+                if (txHex == null) {
+                    return null;
+                }
+                Transaction transaction = new Transaction();
+                transaction.parse(new NulsByteBuffer(HexUtil.decode(txHex)));
+                return transaction;
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
     }
 
     /**

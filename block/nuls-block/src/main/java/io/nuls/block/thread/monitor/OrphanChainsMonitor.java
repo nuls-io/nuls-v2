@@ -133,6 +133,12 @@ public class OrphanChainsMonitor implements Runnable {
     }
 
     private void copy(Integer chainId, SortedSet<Chain> maintainedOrphanChains, Chain orphanChain) {
+        //如果标记为重复,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.DUPLICATE
+        if (orphanChain.getType().equals(ChainTypeEnum.DUPLICATE)) {
+            orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.DUPLICATE));
+            return;
+        }
+
         //如果标记为与主链相连,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,但是所有orphanChain的直接子链标记为ChainTypeEnum.MASTER_FORK
         if (orphanChain.getType().equals(ChainTypeEnum.MASTER_APPEND)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.MASTER_FORK));
@@ -174,25 +180,48 @@ public class OrphanChainsMonitor implements Runnable {
         }
     }
 
+    /**
+     * 孤儿链与其他链的关系可能是
+     *  相连
+     *  重复
+     *  分叉
+     *  无关
+     * 四种关系
+     *
+     * @param orphanChain
+     * @param masterChain
+     * @param forkChains
+     * @param orphanChains
+     */
     private void mark(Chain orphanChain, Chain masterChain, SortedSet<Chain> forkChains, SortedSet<Chain> orphanChains) {
         //1.判断与主链是否相连
         if (orphanChain.getParent() == null && tryAppend(masterChain, orphanChain)) {
             orphanChain.setType(ChainTypeEnum.MASTER_APPEND);
             return;
         }
-        //2.判断是否从主链分叉
+        //2.判断是否从主链重复
+        if (orphanChain.getParent() == null && tryDuplicate(masterChain, orphanChain)) {
+            orphanChain.setType(ChainTypeEnum.DUPLICATE);
+            return;
+        }
+        //3.判断是否从主链分叉
         if (orphanChain.getParent() == null && tryFork(masterChain, orphanChain)) {
             orphanChain.setType(ChainTypeEnum.MASTER_FORK);
             return;
         }
 
         for (Chain forkChain : forkChains) {
-            //3.判断与分叉链是否相连
+            //4.判断与分叉链是否相连
             if (orphanChain.getParent() == null && tryAppend(forkChain, orphanChain)) {
                 orphanChain.setType(ChainTypeEnum.FORK_APPEND);
                 return;
             }
-            //4.判断是否从分叉链分叉
+            //5.判断与分叉链是否重复
+            if (orphanChain.getParent() == null && tryDuplicate(forkChain, orphanChain)) {
+                orphanChain.setType(ChainTypeEnum.DUPLICATE);
+                return;
+            }
+            //6.判断是否从分叉链分叉
             if (orphanChain.getParent() == null && tryFork(forkChain, orphanChain)) {
                 orphanChain.setType(ChainTypeEnum.FORK_FORK);
                 return;
@@ -204,7 +233,7 @@ public class OrphanChainsMonitor implements Runnable {
             if (anotherOrphanChain.equals(orphanChain)) {
                 continue;
             }
-            //5.判断与孤儿链是否相连
+            //7.判断与孤儿链是否相连
             if (anotherOrphanChain.getParent() == null && tryAppend(orphanChain, anotherOrphanChain)) {
                 anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_APPEND);
                 return;
@@ -214,7 +243,17 @@ public class OrphanChainsMonitor implements Runnable {
                 return;
             }
 
-            //6.判断是否从孤儿链分叉
+            //8.判断与孤儿链是否重复
+            if (anotherOrphanChain.getParent() == null && tryDuplicate(orphanChain, anotherOrphanChain)) {
+                anotherOrphanChain.setType(ChainTypeEnum.DUPLICATE);
+                return;
+            }
+            if (orphanChain.getParent() == null && tryDuplicate(anotherOrphanChain, orphanChain)) {
+                orphanChain.setType(ChainTypeEnum.DUPLICATE);
+                return;
+            }
+
+            //9.判断是否从孤儿链分叉
             if (anotherOrphanChain.getParent() == null && tryFork(orphanChain, anotherOrphanChain)) {
                 anotherOrphanChain.setType(ChainTypeEnum.ORPHAN_FORK);
                 return;
@@ -254,6 +293,17 @@ public class OrphanChainsMonitor implements Runnable {
             return ChainManager.fork(mainChain, subChain);
         }
         return false;
+    }
+
+    /**
+     * 判断subChain是否与mainChain重复
+     *
+     * @param mainChain
+     * @param subChain
+     * @return
+     */
+    private boolean tryDuplicate(Chain mainChain, Chain subChain) {
+        return mainChain.getHashList().contains(subChain.getEndHash());
     }
 
 }

@@ -1,6 +1,6 @@
 package io.nuls.chain.storage.impl;
 
-import io.nuls.chain.model.dto.ChainAsset;
+import io.nuls.chain.model.po.ChainAsset;
 import io.nuls.chain.storage.ChainAssetStorage;
 import io.nuls.db.service.RocksDBService;
 import io.nuls.tools.basic.InitializingBean;
@@ -11,6 +11,9 @@ import static io.nuls.chain.util.LoggerUtil.Log;
  * @author tangyi
  * @date 2018/11/12
  * @description
+ * key = CmRuntimeInfo.getChainAssetKey(chainId, CmRuntimeInfo.getAssetKey(asset.getChainId(), asset.getAssetId())
+ * getAssetId = assetChainId+assetId
+ * value = ChainAsset
  */
 @Component
 public class ChainAssetStorageImpl implements ChainAssetStorage, InitializingBean {

@@ -97,24 +97,29 @@ public class AccountCmdTest {
 
     @Test
     public void createAccountTest() throws Exception {
-        int count = 3;
+/*        int count = 3;
         //test to create an account that is not empty.
         List<String> accountList = CommonRpcOperation.createAccount(count);
         //checking the number of accounts returned
         assertEquals(accountList.size(), count);
         for (String address : accountList) {
             System.out.println(address);
-        }
+        }*/
 
         //Test to create an empty password account
-        accountList = CommonRpcOperation.createAccount(chainId, count, null);
+        List<String> accountList2 = CommonRpcOperation.createAccount(23, 2, null);
         //Checking the number of accounts returned
-        assertEquals(accountList.size(), count);
+        assertEquals(accountList2.size(), 2);
+        for (String address : accountList2) {
+            System.out.println(address);
+        }
+/*
 
         //Test the largest number of generated accounts.
-        accountList = CommonRpcOperation.createAccount(chainId, 101, null);
-        assertNull(accountList);
+        List<String> accountList3 = CommonRpcOperation.createAccount(chainId, 101, null);
+        assertNull(accountList3);
 
+*/
 
     }
 
@@ -156,7 +161,7 @@ public class AccountCmdTest {
     @Test
     public void getAccountByAddressTest() throws Exception {
         List<String> accountList = CommonRpcOperation.createAccount(chainId, 1, password);
-        SimpleAccountDto accountDto = getAccountByAddress(chainId, accountList.get(0));
+        SimpleAccountDto accountDto = getAccountByAddress(chainId, "5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB");
         assertEquals(accountList.get(0), accountDto.getAddress());
     }
 
@@ -283,7 +288,7 @@ public class AccountCmdTest {
             params.put("overwrite", false);
             cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
-/*
+
             //移除账户，再导入 Remove the account and import it according to the private key.
             Map<String, Object> params2 = new HashMap<>();
             params2.put(Constants.VERSION_KEY_STR, version);
@@ -292,14 +297,15 @@ public class AccountCmdTest {
             params2.put("password", password);
             CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params2);
             //账户不存在则创建 If account does not exist, create
+            params.put("priKey", priKey);
             cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
 
             //测试未加密账户
             //create an unencrypted account for test
             //由于getPriKeyByAddress只返回加密账户的私钥，所以无法得到未加密账户私钥，所以使用固定值测试
-            String addressx = "XfbZd1RYgTtQBb7xeP3bziAd2kmQL3930";
-            priKey = "00cf6b28b2885c550506006b72fab1ab85cbf7e1aafdc6c1661e2b82f7f0089185";
+            String addressx = "KMNPqwARu77qAL4UCkd5Vwvj5PAtw3930";
+            priKey = "00af59aa43536f6162a7166cdc1a389b32be0a06bc06f71a601a92e08fd2788dfe";
             //账户已存在则覆盖 If the account exists, it covers.
             params.remove("password");
             params.put("priKey", priKey);
@@ -307,7 +313,7 @@ public class AccountCmdTest {
             cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             address = (String) result.get("address");
-            assertEquals(addressx, address);*/
+            assertEquals(addressx, address);
         } catch (NulsRuntimeException e) {
             e.printStackTrace();
         } catch (Exception e) {

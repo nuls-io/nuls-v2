@@ -25,14 +25,13 @@
 package io.nuls.network.utils;
 
 import io.nuls.network.constant.NetworkConstant;
-import io.nuls.tools.log.Log;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
 
 import java.net.*;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * @author vivi

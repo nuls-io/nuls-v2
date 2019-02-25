@@ -163,7 +163,7 @@ public class DepositManager {
         return true;
     }
 
-    public boolean cancelDepositCommit(Transaction transaction, Chain chain)throws NulsException{
+    public boolean cancelDepositCommit(Transaction transaction,BlockHeader header,Chain chain)throws NulsException{
         int chainId = chain.getConfig().getChainId();
         CancelDeposit cancelDeposit = new CancelDeposit();
         cancelDeposit.parse(transaction.getTxData(), 0);
@@ -178,7 +178,7 @@ public class DepositManager {
             throw new NulsException(ConsensusErrorCode.DEPOSIT_WAS_CANCELED);
         }
         //设置退出共识高度
-        po.setDelHeight(transaction.getBlockHeight());
+        po.setDelHeight(header.getHeight());
         if (!depositStorageService.save(po, chainId)) {
             throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
         }

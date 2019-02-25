@@ -29,7 +29,6 @@ import io.nuls.network.utils.IpUtil;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 加载配置文件的参数放在这个bean对象中

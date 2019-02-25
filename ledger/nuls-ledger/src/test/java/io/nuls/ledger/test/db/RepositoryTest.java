@@ -31,7 +31,7 @@ import io.nuls.ledger.db.DataBaseArea;
 import io.nuls.ledger.db.Repository;
 import io.nuls.ledger.db.RepositoryImpl;
 import io.nuls.ledger.model.ModuleConfig;
-import io.nuls.tools.log.Log;
+import io.nuls.ledger.utils.LoggerUtil;
 import org.junit.Before;
 
 /**
@@ -50,7 +50,7 @@ public class RepositoryTest {
                 RocksDBService.createTable(DataBaseArea.TB_LEDGER_ACCOUNT);
             }
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger.error(e);
         }
         repository = new RepositoryImpl();
     }

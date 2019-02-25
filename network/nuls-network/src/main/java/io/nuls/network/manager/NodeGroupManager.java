@@ -125,7 +125,7 @@ public class NodeGroupManager extends BaseManager {
 
 
     @Override
-    public void init() {
+    public void init() throws Exception {
         NodeGroupManager nodeGroupManager = NodeGroupManager.getInstance();
         NetworkParam networkParam = NetworkParam.getInstance();
         /*
@@ -150,7 +150,7 @@ public class NodeGroupManager extends BaseManager {
     }
 
     @Override
-    public void start() {
+    public void start() throws Exception {
         status = ManagerStatusEnum.RUNNING;
     }
 }

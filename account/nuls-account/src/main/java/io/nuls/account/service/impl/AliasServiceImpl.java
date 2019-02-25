@@ -131,9 +131,11 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         }
 
         account.setChainId(chainId);
-        account.setAlias(aliasName);
-        tx = createAliasTrasactionWithoutSign(account);
+        //创建别名交易
+        tx = createAliasTrasactionWithoutSign(account,aliasName);
+        //签名别名交易
         signTransaction(tx, account, password);
+        //广播别名交易
         TransactionCmdCall.newTx(account.getChainId(), HexUtil.encode(tx.serialize()));
         return tx;
     }
@@ -158,7 +160,7 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
             }
 
             //create a set alias transaction
-            tx = createAliasTrasactionWithoutSign(account);
+            tx = createAliasTrasactionWithoutSign(account,aliasName);
 
             fee = TransactionFeeCalculator.getNormalTxFee(tx.size());
             //todo whether need to other operation if the fee is too big
@@ -300,13 +302,13 @@ public class AliasServiceImpl implements AliasService, InitializingBean {
         return result;
     }
 
-    private Transaction createAliasTrasactionWithoutSign(Account account) throws NulsException, IOException {
+    private Transaction createAliasTrasactionWithoutSign(Account account,String aliasName) throws NulsException, IOException {
         Transaction tx = null;
         //Second:build the transaction
         tx = new AliasTransaction();
         tx.setTime(TimeService.currentTimeMillis());
         Alias alias = new Alias();
-        alias.setAlias(account.getAlias());
+        alias.setAlias(aliasName);
         alias.setAddress(account.getAddress().getAddressBytes());
         tx.setTxData(alias.serialize());
         //设置别名烧毁账户所属本链的主资产

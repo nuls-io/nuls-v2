@@ -4,6 +4,7 @@ import io.nuls.account.ServiceInitializer;
 import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.txdata.Alias;
+import io.nuls.account.rpc.common.CommonRpcOperation;
 import io.nuls.account.service.AccountService;
 import io.nuls.account.service.MultiSignAccountService;
 import io.nuls.base.data.Address;
@@ -36,7 +37,7 @@ public class MultiSigAccountCmdTest {
 
     protected int chainId = 12345;
 
-    protected String password = "a12345678";
+    protected String password = "nuls123456";
 
     static MultiSignAccountService multiSignAccountService;
     static AccountService accountService;

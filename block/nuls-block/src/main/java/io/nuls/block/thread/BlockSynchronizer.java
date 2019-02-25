@@ -73,10 +73,8 @@ public class BlockSynchronizer implements Runnable {
         for (Integer chainId : ContextManager.chainIds) {
             NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
             try {
-                while (true) {
-                    if (synchronize(chainId)) {
-                        break;
-                    }
+                while (!synchronize(chainId)) {
+                    Thread.sleep(1000L);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -133,16 +131,17 @@ public class BlockSynchronizer implements Runnable {
             long startHeight = params.getLocalLatestHeight() + 1;
             long total = netLatestHeight - startHeight + 1;
             long start = System.currentTimeMillis();
+            boolean flag = true;
             //5.开启区块下载器BlockDownloader
-            BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params, queue);
+            BlockDownloader downloader = new BlockDownloader(chainId, futures, executor, params, queue, flag);
             Future<Boolean> downloadFutrue = ThreadUtils.asynExecuteCallable(downloader);
 
             //6.开启区块收集线程BlockCollector,收集BlockDownloader下载的区块
-            BlockCollector collector = new BlockCollector(chainId, futures, executor, params, queue);
+            BlockCollector collector = new BlockCollector(chainId, futures, executor, params, queue, flag);
             ThreadUtils.createAndRunThread("block-collector-" + chainId, collector);
 
             //7.开启区块消费线程BlockConsumer,与上面的BlockDownloader共用一个队列blockQueue
-            BlockConsumer consumer = new BlockConsumer(chainId, queue, params);
+            BlockConsumer consumer = new BlockConsumer(chainId, queue, params, flag);
             Future<Boolean> consumerFuture = ThreadUtils.asynExecuteCallable(consumer);
 
             Boolean downResult = downloadFutrue.get();
@@ -152,6 +151,7 @@ public class BlockSynchronizer implements Runnable {
             commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
             if (success) {
                 if (checkIsNewest(chainId, params, context)) {
+//                if (true) {
                     commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
@@ -301,6 +301,10 @@ public class BlockSynchronizer implements Runnable {
     private boolean checkLocalBlock(int chainId, BlockDownloaderParams params) {
         long localHeight = params.getLocalLatestHeight();
         long netHeight = params.getNetLatestHeight();
+        //如果本地高度是0，网络高度大于0，直接进行同步？
+        if (localHeight == 0 && netHeight > 0) {
+            return true;
+        }
         //得到共同高度
         long commonHeight = Math.min(localHeight, netHeight);
         if (checkHashEquality(chainId, params)) {

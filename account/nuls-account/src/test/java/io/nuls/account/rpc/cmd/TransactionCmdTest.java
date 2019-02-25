@@ -50,10 +50,12 @@ public class TransactionCmdTest {
     protected String newPassword = "c12345678";
     protected String version = "1.0";
     protected String success = "1";
-    String address1 = "SPWAxuodkw222367N88eavYDWRraG3930";
-    String address2 = "Rnt57eZnH8Dd7K3LudJXmmEutYJZD3930";
-    String address3 = "XroY3cLWTfgKMRRRLCP5rhvo1gHY63930";
-    String address4 = "WEXAmsUJSNAvCx2zUaXziy3ZYX1em3930";
+    String address = "5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz";
+    String address1 = "5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5";
+    String address2 = "5MR_2CcRgU3vDGp2uEG3rdzLdyMCbsiLFbJ";
+    String address3 = "5MR_2CckymYvKM7NKpt6fpZproQYMtnGdaT";
+    String address4 = "5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi";
+
     static int assetId = 1;
     //入账金额
     static BigInteger amount = BigInteger.valueOf(1000000000000000L);
@@ -142,37 +144,36 @@ public class TransactionCmdTest {
     @Test
     public void transferByAlias() throws Exception {
         //创建账户
-        List<String> accoutList = CommonRpcOperation.createAccount(2);
-        assertTrue(accoutList != null & accoutList.size() == 2);
-        String fromAddress = accoutList.get(0);
-        String toAddress = accoutList.get(1);
+        List<String> accoutList = CommonRpcOperation.createAccount(1);
+        assertTrue(accoutList != null & accoutList.size() == 1);
+        String fromAddress = address;
+        String toAddress = "5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5";
         //铸币
-        addGenesisAsset(fromAddress);
-        addGenesisAsset(toAddress); //because the to address need to set alias
+        //addGenesisAsset(fromAddress);
+        //ddGenesisAsset(toAddress); //because the to address need to set alias
         BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, fromAddress);
         BigInteger balance2 = LegerCmdCall.getBalance(chainId, assetChainId, assetId, toAddress);
-        System.out.println(fromAddress+"====="+balance.longValue());
-        System.out.println(toAddress+"====="+balance2.longValue());
+        System.out.println(fromAddress + "=====" + balance.longValue());
+        System.out.println(toAddress + "=====" + balance2.longValue());
         //设置别名
         //String alias = "edwardtest";
-        String alias = "edward" + System.currentTimeMillis();
-        System.out.println(alias);
-        String txHash = CommonRpcOperation.setAlias(toAddress, alias);
-        assertNotNull(txHash);
+        String alias = "alias_1550831248049";
+        //String txHash = CommonRpcOperation.setAlias(toAddress, alias);
+        //assertNotNull(txHash);
         //查询设置别名是否成功
-        String afterSetALias;
-        int i = 0;
-        do {
-            afterSetALias = CommonRpcOperation.getAliasByAddress(toAddress);
-            if (afterSetALias == null) {
-                Thread.sleep(5000);
-            } else {
-                break;
-            }
-            i++;
-            logger.warn("getAliasByAddress return null,retry times:{}", i);
-        } while (i <= 10);
-        assertNotNull(afterSetALias);
+//        String afterSetALias;
+//        int i = 0;
+//        do {
+//            afterSetALias = CommonRpcOperation.getAliasByAddress(toAddress);
+//            if (afterSetALias == null) {
+//                Thread.sleep(5000);
+//            } else {
+//                break;
+//            }
+//            i++;
+//            logger.warn("getAliasByAddress return null,retry times:{}", i);
+//        } while (i <= 10);
+//        assertNotNull(afterSetALias);
         //转账前查询转入方余额
 
         //别名转账
@@ -181,7 +182,7 @@ public class TransactionCmdTest {
         params.put("address", fromAddress);
         params.put("password", password);
         params.put("alias", alias);
-        params.put("amount", "1000");
+        params.put("amount", "10000");
         params.put("remark", "EdwardTest");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transferByAlias", params);
         System.out.println("ac_transferByAlias response:" + JSONUtils.obj2json(cmdResp));
@@ -195,12 +196,11 @@ public class TransactionCmdTest {
 
     /**
      * 创建多签转账交易，包括别名转账以及非别名转账
-     *
+     * <p>
      * 1st:构建别名转账请求参数
      * 2end:将请求发送到账户模块
      * 3ird:检查返回结果
-     *
-     * */
+     */
     @Test
     public void createMultiSignTransferTest() throws Exception {
         createMultiSignTransfer();
@@ -209,15 +209,13 @@ public class TransactionCmdTest {
 
     /**
      * 多签转账签名
-     *
-     *
-     * */
+     */
     @Test
     public void signMultiSignTransactionTest() throws Exception {
-        Map<String,Object> map = createMultiSignTransfer();
+        Map<String, Object> map = createMultiSignTransfer();
         String txHex = map.get("txHex").toString();
         MultiSigAccount multiSigAccount = (MultiSigAccount) map.get("multiSigAccount");
-        String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(1),chainId));
+        String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(1), chainId));
 
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
@@ -225,11 +223,11 @@ public class TransactionCmdTest {
         params.put("password", password);
         params.put("txHex", txHex);
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_signMultiSignTransaction", params);
-        Log.info("ac_signMultiSignTransaction response:{}",cmdResp);
+        Log.info("ac_signMultiSignTransaction response:{}", cmdResp);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_signMultiSignTransaction"));
         assertNotNull(result);
-        String txHash = (String)result.get("txHash");
+        String txHash = (String) result.get("txHash");
         assertNotNull(txHash);
 
     }
@@ -287,19 +285,19 @@ public class TransactionCmdTest {
         List<CoinDto> inputs = new ArrayList<>();
         List<CoinDto> outputs = new ArrayList<>();
         CoinDto inputCoin1 = new CoinDto();
-        inputCoin1.setAddress("LU6eNP3pJ5UMn5yn8LeDE3Pxeapsq3930");
+        inputCoin1.setAddress("5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz");
         inputCoin1.setPassword(password);
         inputCoin1.setAssetsChainId(chainId);
         inputCoin1.setAssetsId(1);
-        inputCoin1.setAmount(new BigInteger("10000000"));
+        inputCoin1.setAmount(new BigInteger("10000000000"));
         inputs.add(inputCoin1);
 
         CoinDto outputCoin1 = new CoinDto();
-        outputCoin1.setAddress("JcgbDRvBqQ67Uq4Tb52U22ieJdr3G3930");
+        outputCoin1.setAddress("5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi");
         outputCoin1.setPassword(password);
         outputCoin1.setAssetsChainId(chainId);
         outputCoin1.setAssetsId(1);
-        outputCoin1.setAmount(new BigInteger("100000000"));
+        outputCoin1.setAmount(new BigInteger("10000000000"));
         outputs.add(outputCoin1);
 
         transferDto.setInputs(inputs);
@@ -429,44 +427,53 @@ public class TransactionCmdTest {
         System.out.println(balance.longValue());
     }
 
-    private Map<String,Object> createMultiSignTransfer() throws Exception {
+    private Map<String, Object> createMultiSignTransfer() throws Exception {
         //创建多签账户
         MultiSigAccount multiSigAccount = CommonRpcOperation.createMultiSigAccount();
         assertNotNull(multiSigAccount);
-        String fromAddress = AddressTool.getStringAddressByBytes(multiSigAccount.getAddress().getAddressBytes());
+        //String fromAddress = AddressTool.getStringAddressByBytes(multiSigAccount.getAddress().getAddressBytes());
+        String fromAddress = "5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi";
         assertNotNull(fromAddress);
-        String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(0),chainId));
+        String signAddress = AddressTool.getStringAddressByBytes(AddressTool.getAddress(multiSigAccount.getPubKeyList().get(0), chainId));
         assertNotNull(signAddress);
         //创建一个接收方账户
         List<String> accoutList = CommonRpcOperation.createAccount(1);
         assertTrue(accoutList != null & accoutList.size() == 1);
-        String toAddress = accoutList.get(0);
+        String toAddress = "5MR_2Cc14Ph4ZfJTzsfxma8FGZ7FBzcTS87";//accoutList.get(0);
         //铸币
-        addGenesisAsset(fromAddress);
-        System.out.println(HexUtil.encode(AddressTool.getAddress(fromAddress)));
-        BigInteger balance = TxUtil.getBalance(chainId,chainId,assetId,AddressTool.getAddress(fromAddress));
+        //addGenesisAsset(fromAddress);
+        BigInteger balance = TxUtil.getBalance(chainId, chainId, assetId, AddressTool.getAddress(fromAddress));
         System.out.println(balance);
 
         //创建多签账户转账交易
         Map<String, Object> params = new HashMap<>();
-        params.put("chainId",chainId);
+        params.put("chainId", chainId);
         params.put("address", fromAddress);
-        params.put("signAddress", signAddress);
+        params.put("signAddress", "5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5");
         params.put("password", password);
         params.put("type", 1);
-        params.put("toAddress",toAddress);
+        params.put("toAddress", toAddress);
         params.put("amount", "1000");
-        params.put("remark","EdwardTest");
+        params.put("remark", "EdwardTest");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSignTransfer", params);
         System.out.println("ac_createMultiSignTransfer response:" + JSONUtils.obj2json(cmdResp));
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_createMultiSignTransfer"));
         String txHex = (String) result.get(RpcConstant.TX_DATA_HEX);
         System.out.println(txHex);
         assertNotNull(txHex);
-        Map<String,Object> map = new HashMap<>();
-        map.put("multiSigAccount",multiSigAccount);
-        map.put("txHex",txHex);
+        Map<String, Object> map = new HashMap<>();
+        map.put("multiSigAccount", multiSigAccount);
+        map.put("txHex", txHex);
         return map;
+    }
+
+    /**
+     * 查询余额
+     */
+    @Test
+    public void getBalance() {
+        BigInteger balance = LegerCmdCall.getBalance(chainId, assetChainId, assetId, "5MR_2Cc14Ph4ZfJTzsfxma8FGZ7FBzcTS87");
+        System.out.println(balance.longValue());
     }
 
 }

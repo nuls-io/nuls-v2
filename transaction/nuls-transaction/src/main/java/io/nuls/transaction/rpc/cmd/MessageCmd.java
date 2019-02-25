@@ -129,6 +129,8 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析获取完整交易消息
             GetTxMessage message = new GetTxMessage();
+            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
@@ -137,7 +139,7 @@ public class MessageCmd extends BaseCmd {
                 throw new NulsException(TxErrorCode.CHAIN_NOT_FOUND);
             }
             NulsDigestData txHash = message.getRequestHash();
-            Transaction tx = confirmedTxService.getConfirmedTransaction(chain, txHash);
+            Transaction tx = txService.getTransaction(chain, txHash);
             if (tx == null) {
                 throw new NulsException(TxErrorCode.TX_NOT_EXIST);
             }
@@ -264,6 +266,8 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析获取完整跨链交易消息
             GetTxMessage message = new GetTxMessage();
+            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
@@ -316,6 +320,8 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析获取完整跨链交易消息
             GetTxMessage message = new GetTxMessage();
+            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }
@@ -372,6 +378,8 @@ public class MessageCmd extends BaseCmd {
             String nodeId = params.get(KEY_NODE_ID).toString();
             //解析获取完整跨链交易消息
             GetTxMessage message = new GetTxMessage();
+            byte[] decode = HexUtil.decode(params.get(KEY_MESSAGE_BODY).toString());
+            message.parse(new NulsByteBuffer(decode));
             if (message == null) {
                 return failed(TxErrorCode.PARAMETER_ERROR);
             }

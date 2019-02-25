@@ -26,10 +26,7 @@
 package io.nuls.network.manager.handler.message;
 
 import io.nuls.network.constant.NetworkErrorCode;
-import io.nuls.network.manager.MessageFactory;
-import io.nuls.network.manager.MessageManager;
 import io.nuls.network.manager.NodeGroupManager;
-import io.nuls.network.manager.StorageManager;
 import io.nuls.network.manager.handler.base.BaseMessageHandler;
 import io.nuls.network.model.NetworkEventResult;
 import io.nuls.network.model.Node;
@@ -37,10 +34,8 @@ import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
-import io.nuls.network.model.po.NodePo;
 import io.nuls.network.utils.IpUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static io.nuls.network.utils.LoggerUtil.Log;
@@ -90,12 +85,11 @@ public class AddrMessageHandler extends BaseMessageHandler {
          * 判断地址是否本地已经拥有，如果拥有不转发，PEER是跨链网络也不转发
          * Determine whether the address is already owned locally. If it does not forward, PEER is not a cross-chain network.
          */
-        List<NodePo> addNodes = new ArrayList<>();
-        List<IpAddress> addAddressList = new ArrayList<>();
         for (IpAddress ipAddress : ipAddressList) {
             if (!IpUtil.isboolIp(ipAddress.getIp().getHostAddress())) {
                 continue;
             }
+            Log.info("add check node addr ={}:{}",ipAddress.getIp(),ipAddress.getPort());
             nodeGroup.addNeedCheckNode(ipAddress, node.isCrossConnect());
         }
         return NetworkEventResult.getResultSuccess();

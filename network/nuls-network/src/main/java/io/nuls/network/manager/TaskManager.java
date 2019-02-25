@@ -75,12 +75,12 @@ public class TaskManager extends BaseManager {
     }
 
     @Override
-    public void init() {
+    public void init() throws Exception {
 
     }
 
     @Override
-    public void start() {
+    public void start() throws Exception {
         executorService = ThreadUtils.createScheduledThreadPool(4, new NulsThreadFactory("NetWorkThread"));
         connectTasks();
         scheduleGroupStatusMonitor();

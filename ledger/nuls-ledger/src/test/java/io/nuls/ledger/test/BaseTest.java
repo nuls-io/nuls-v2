@@ -29,9 +29,9 @@ import io.nuls.db.service.RocksDBService;
 import io.nuls.ledger.config.AppConfig;
 import io.nuls.ledger.db.DataBaseArea;
 import io.nuls.ledger.model.ModuleConfig;
+import io.nuls.ledger.utils.LoggerUtil;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.TimeService;
 import org.junit.Before;
 
@@ -51,7 +51,7 @@ public class BaseTest {
             SpringLiteContext.init("io.nuls.ledger", new ModularServiceMethodInterceptor());
             TimeService.getInstance().start();
         } catch (Exception e) {
-            Log.error(e);
+            LoggerUtil.logger.error(e);
         }
     }
 }

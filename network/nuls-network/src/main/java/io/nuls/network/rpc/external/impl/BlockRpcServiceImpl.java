@@ -27,8 +27,10 @@ package io.nuls.network.rpc.external.impl;
 import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.network.constant.NetworkConstant;
+import io.nuls.network.manager.TimeManager;
 import io.nuls.network.model.dto.BestBlockInfo;
 import io.nuls.network.rpc.external.BlockRpcService;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
@@ -51,10 +53,11 @@ public class BlockRpcServiceImpl implements BlockRpcService {
         Map<String, Object> map = new HashMap<>();
         map.put("chainId", chainId);
         try {
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER, map, 500);
+            LoggerUtil.Log.debug("getBestBlockHeader begin time={}", TimeManager.currentTimeMillis());
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER, map, 2000);
             if (null != response && response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
-                String hex = (String) responseData.get("bestBlockHeader");
+                String hex = (String) responseData.get(NetworkConstant.CMD_BL_BEST_BLOCK_HEADER);
                 BlockHeader header = new BlockHeader();
                 header.parse(new NulsByteBuffer(HexUtil.decode(hex)));
                 bestBlockInfo.setHash(header.getHash().getDigestHex());
@@ -62,6 +65,9 @@ public class BlockRpcServiceImpl implements BlockRpcService {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            LoggerUtil.Log.info("getBestBlockHeader end time={}", TimeManager.currentTimeMillis());
+            LoggerUtil.Log.debug("getBestBlockHeader height ={},hash={}", bestBlockInfo.getBlockHeight(), bestBlockInfo.getHash());
         }
 
         return bestBlockInfo;

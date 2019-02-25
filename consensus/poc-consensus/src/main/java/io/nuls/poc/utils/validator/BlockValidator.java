@@ -19,7 +19,6 @@ import io.nuls.poc.utils.manager.PunishManager;
 import io.nuls.poc.utils.manager.RoundManager;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Component;
-import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 
@@ -83,9 +82,6 @@ public class BlockValidator {
       BlockHeader bestBlockHeader = chain.getNewestHeader();
       BlockExtendsData bestExtendsData = new BlockExtendsData(bestBlockHeader.getExtend());
 
-      chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("本地最新区块，轮次:"+bestExtendsData.getRoundIndex()+";打包下标:"+bestExtendsData.getPackingIndexOfRound()+";开始打包时间:"+ DateUtils.convertDate(new Date(bestExtendsData.getRoundStartTime())));
-      chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("接收的新区块，轮次:"+extendsData.getRoundIndex()+";打包下标:"+extendsData.getPackingIndexOfRound()+";开始打包时间:"+DateUtils.convertDate(new Date(extendsData.getRoundStartTime())));
-
       /*
       该区块为本地最新区块之前的区块
       * */
@@ -96,7 +92,6 @@ public class BlockValidator {
       }
       MeetingRound currentRound = roundManager.getCurrentRound(chain);
       boolean hasChangeRound = false;
-      chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).debug("本地最新轮次，轮次："+currentRound.getIndex()+";当前网络时间:"+DateUtils.convertDate(new Date(CallMethodUtils.currentTime())));
       if(extendsData.getRoundIndex() < currentRound.getIndex()){
          MeetingRound round = roundManager.getRoundByIndex(chain, extendsData.getRoundIndex());
          if (round != null) {
@@ -126,6 +121,8 @@ public class BlockValidator {
          currentRound = tempRound;
       }
       if (extendsData.getRoundIndex() != currentRound.getIndex() || extendsData.getRoundStartTime() != currentRound.getStartTime()) {
+         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("接收最新区块轮次:"+extendsData.getRoundIndex()+";本地计算轮次:"+currentRound.getIndex());
+         chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).info("接收最新区块轮次开始时间:"+extendsData.getRoundStartTime()+";本地计算轮次开始时间:"+currentRound.getStartTime());
          chain.getLoggerMap().get(ConsensusConstant.BASIC_LOGGER_NAME).error("block height " + blockHeader.getHeight() + " round startTime is error! hash :" + blockHeader.getHash());
          throw new NulsException(ConsensusErrorCode.BLOCK_ROUND_VALIDATE_ERROR);
       }

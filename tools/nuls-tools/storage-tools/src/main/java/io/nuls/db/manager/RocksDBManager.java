@@ -568,6 +568,7 @@ public class RocksDBManager {
      * @return 数据库连接属性
      */
     private static synchronized Options getCommonOptions(final boolean createIfMissing) {
+        //todo 这里的参数会影响数据库读写性能
         Options options = new Options();
         final Filter bloomFilter = new BloomFilter(10);
         final Statistics stats = new Statistics();

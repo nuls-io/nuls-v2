@@ -25,12 +25,10 @@
 package io.nuls.network.manager;
 
 
-import io.netty.channel.Channel;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.nuls.network.constant.*;
-import io.nuls.network.locker.Lockers;
 import io.nuls.network.manager.handler.MessageHandlerFactory;
 import io.nuls.network.manager.handler.base.BaseMeesageHandlerInf;
 import io.nuls.network.model.Node;
@@ -41,6 +39,7 @@ import io.nuls.network.netty.NettyClient;
 import io.nuls.network.netty.NettyServer;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.IpUtil;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -255,7 +254,7 @@ public class ConnectionManager extends BaseManager {
     }
 
     @Override
-    public void init() {
+    public void init() throws Exception {
         status = ManagerStatusEnum.INITIALIZED;
         Collection<NodeGroup> nodeGroups = NodeGroupManager.getInstance().getNodeGroupCollection();
         for (NodeGroup nodeGroup : nodeGroups) {
@@ -270,10 +269,8 @@ public class ConnectionManager extends BaseManager {
     }
 
     @Override
-    public void start() {
+    public void start() throws Exception {
         nettyBoot();
         status = ManagerStatusEnum.RUNNING;
     }
-
-
 }

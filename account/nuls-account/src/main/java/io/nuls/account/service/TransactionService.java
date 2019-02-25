@@ -96,6 +96,7 @@ public interface TransactionService {
      *
      *
      * @param chainId chainId
+     * @param assetsId assetId
      * @param account       the account which will sign the transaction
      * @param password      the account's password
      * @param multiSigAccount         the multi sign account
@@ -105,7 +106,7 @@ public interface TransactionService {
      * @return MultiSignTransactionResultDto it contains two element:is broadcast and the transaction
      *
      */
-    MultiSignTransactionResultDto createMultiSignTransfer(int chainId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
+    MultiSignTransactionResultDto createMultiSignTransfer(int chainId, int assetsId, Account account, String password, MultiSigAccount multiSigAccount, String toAddress, BigInteger amount, String remark)
             throws NulsException,IOException;
 
     /**

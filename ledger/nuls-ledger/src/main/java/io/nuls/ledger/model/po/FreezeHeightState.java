@@ -29,7 +29,6 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.basic.NulsOutputStreamBuffer;
 import io.nuls.base.data.BaseNulsData;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.SerializeUtils;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -76,16 +75,6 @@ public class FreezeHeightState extends BaseNulsData {
     @Setter
     @Getter
     private long createTime;
-
-
-    public FreezeHeightState(byte[] stream) {
-        NulsByteBuffer buffer = new NulsByteBuffer(stream);
-        try {
-            parse(buffer);
-        } catch (NulsException e) {
-            Log.error("", e);
-        }
-    }
 
     @Override
     protected void serializeToStream(NulsOutputStreamBuffer stream) throws IOException {
