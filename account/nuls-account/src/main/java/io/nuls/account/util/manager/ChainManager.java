@@ -81,6 +81,12 @@ public class ChainManager {
             initTable(chainId);
             //注册账户相关交易
             while (true) {
+                try {
+                    // TODO 临时解决启动依赖问题
+                    Thread.sleep(3000);
+                } catch (InterruptedException e){
+                    e.printStackTrace();
+                }
                 if (TransactionCmdCall.registerTx(chainId)) {
                     break;
                 }
