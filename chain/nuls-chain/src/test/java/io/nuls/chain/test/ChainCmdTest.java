@@ -3,8 +3,8 @@ package io.nuls.chain.test;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.nuls.chain.info.CmConstants;
-import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.BlockChain;
+import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.BlockChain;
 import io.nuls.chain.model.dto.Seed;
 import io.nuls.chain.util.LoggerUtil;
 import io.nuls.rpc.client.CmdDispatcher;

@@ -133,7 +133,7 @@ public class CmdRollBackTest {
             try {
                 Map<String,Object> params = new HashMap<>();
                 params.put("chainId", chainId);
-                params.put("blockHeight",0);
+                params.put("blockHeight",1);
                 Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getSnapshot", params);
                 logger.info("response {}", response);
             } catch (IOException e) {
@@ -148,8 +148,22 @@ public class CmdRollBackTest {
         try {
             Map<String,Object> params = new HashMap<>();
             params.put("chainId", chainId);
-            params.put("blockHeight",35);
+            params.put("blockHeight",1);
             Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBlock", params);
+            logger.info("response {}", response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    @Test
+    public void getBlockHeight(){
+        Transaction tx = null;
+        try {
+            Map<String,Object> params = new HashMap<>();
+            params.put("chainId", chainId);
+            Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBlockHeight", params);
             logger.info("response {}", response);
         } catch (IOException e) {
             e.printStackTrace();

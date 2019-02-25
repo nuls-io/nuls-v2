@@ -176,6 +176,7 @@ public class LedgerCall {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chain.getChainId());
             params.put("txHexList", txHexList);
+            params.put("blockHeight", blockHeight);
             params.put("isConfirmTx", comfirmed);
             HashMap result = (HashMap)TransactionCall.request(ModuleE.LG.abbr, "rollBackConfirmTx", params);
             return (int) result.get("value") == 1;

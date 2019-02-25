@@ -79,7 +79,12 @@ public class ConsensusUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("status", status);
-            return CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
+            boolean success = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
+            while (!success) {
+                Thread.sleep(1000L);
+                success = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_updateAgentStatus", params).isSuccess();
+            }
+            return success;
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

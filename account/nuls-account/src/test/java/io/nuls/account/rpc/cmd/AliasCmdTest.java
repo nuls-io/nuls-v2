@@ -6,6 +6,7 @@ import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.rpc.call.LegerCmdCall;
 import io.nuls.account.service.AccountService;
+import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
 import io.nuls.rpc.client.CmdDispatcher;
@@ -34,7 +35,7 @@ public class AliasCmdTest {
     //protected static AccountService accountService;
 
     protected int chainId = 12345;
-    protected String password = "a12345678";
+    protected String password = "nuls123456";
     protected String newPassword = "c12345678";
     protected double version2 = 1.0;
     protected String version = "1.0";
@@ -115,13 +116,13 @@ public class AliasCmdTest {
     public void setAliasTest() throws Exception {
         //create an account for test
         //String address = createAnAccount();
-        String address="SPWAxuodkw222367N88eavYDWRraG3930";
+        String address="5MR_2CkYEhXKCmUWTEsWRTnaWgYE8kJdfd5";
         Map<String, Object> params = new HashMap<>();
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
         params.put("address", address);
         params.put("password", password);
-        params.put("alias", "alias_" + System.currentTimeMillis());
+        params.put("alias", "alias_2019");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setAlias");

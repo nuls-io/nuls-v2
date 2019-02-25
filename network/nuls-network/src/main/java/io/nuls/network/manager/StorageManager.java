@@ -24,7 +24,6 @@
  */
 package io.nuls.network.manager;
 
-import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.po.GroupNodesPo;
 import io.nuls.network.model.po.GroupPo;
@@ -96,7 +95,7 @@ public class StorageManager extends BaseManager {
         }
         return null;
     }
-    
+
 
     /**
      * 加载所有模块的协议注册信息
@@ -109,16 +108,12 @@ public class StorageManager extends BaseManager {
     }
 
     @Override
-    public void init() {
-        try {
-            dbService = SpringLiteContext.getBean(DbServiceImpl.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public void init() throws Exception {
+        dbService = SpringLiteContext.getBean(DbServiceImpl.class);
     }
 
     @Override
-    public void start() {
+    public void start() throws Exception {
 
     }
 }

@@ -45,6 +45,7 @@ import io.nuls.network.model.message.AddrMessage;
 import io.nuls.network.model.message.GetAddrMessage;
 import io.nuls.network.model.message.base.BaseMessage;
 import io.nuls.network.model.message.base.MessageHeader;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.crypto.Sha256Hash;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
@@ -152,6 +153,7 @@ public class MessageManager extends BaseManager {
                     message = byteBuffer.readNulsData(message);
                 } else {
                     //外部消息，转外部接口
+                    LoggerUtil.blockLogs(header.getCommandStr(), node, payLoadBody, "received");
                     Log.debug("==============================receive other module message, hash-" + NulsDigestData.calcDigestData(payLoadBody).getDigestHex() + "node-" + node.getId());
                     OtherModuleMessageHandler handler = MessageHandlerFactory.getInstance().getOtherModuleHandler();
                     result = handler.recieve(header, payLoadBody, node);
@@ -170,6 +172,7 @@ public class MessageManager extends BaseManager {
             buffer.clear();
         }
     }
+
 
     public NetworkEventResult broadcastSelfAddrToAllNode(Collection<Node> connectNodes, IpAddress ipAddress, boolean asyn) {
         for (Node connectNode : connectNodes) {
@@ -328,13 +331,14 @@ public class MessageManager extends BaseManager {
     }
 
     @Override
-    public void init() {
+    public void init() throws Exception {
         MessageFactory.getInstance().init();
+        MessageHandlerFactory.getInstance().init();
 
     }
 
     @Override
-    public void start() {
+    public void start() throws Exception {
 
     }
 }

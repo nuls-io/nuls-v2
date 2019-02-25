@@ -35,11 +35,11 @@ abstract public class BaseManager {
      * 初始化
      * init
      */
-    public abstract void init();
+    public abstract void init()  throws Exception;
 
     /**
      * 启动
      * start
      */
-    public abstract void start();
+    public abstract void start() throws Exception;
 }

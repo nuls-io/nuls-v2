@@ -275,12 +275,12 @@ public class TimeManager extends BaseManager {
 
 
     @Override
-    public void init() {
+    public void init() throws Exception {
 
     }
 
     @Override
-    public void start() {
+    public void start() throws Exception {
 
     }
 }

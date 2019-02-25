@@ -79,8 +79,9 @@ public class AgentManager{
             return;
         }
         for(int index = 0 ;index < agentList.size();index++){
-            if(agent.getTxHash().equals(agentList.get(index))){
+            if(agent.getTxHash().equals(agentList.get(index).getTxHash())){
                 agentList.set(index,agent);
+                return;
             }
         }
     }
@@ -185,7 +186,7 @@ public class AgentManager{
         return true;
     }
 
-    public boolean stopAgentCommit(Transaction transaction, Chain chain)throws NulsException{
+    public boolean stopAgentCommit(Transaction transaction, BlockHeader blockHeader, Chain chain)throws NulsException{
         int chainId = chain.getConfig().getChainId();
         //找到需要注销的节点信息
         StopAgent stopAgent = new StopAgent();
@@ -203,13 +204,13 @@ public class AgentManager{
             if (!depositPo.getAgentHash().equals(agentPo.getHash())) {
                 continue;
             }
-            depositPo.setDelHeight(transaction.getBlockHeight());
+            depositPo.setDelHeight(blockHeader.getHeight());
             if (!depositStorageService.save(depositPo, chainId)) {
                 throw new NulsException(ConsensusErrorCode.SAVE_FAILED);
             }
             depositManager.updateDeposit(chain, depositManager.poToDeposit(depositPo));
         }
-        agentPo.setDelHeight(transaction.getBlockHeight());
+        agentPo.setDelHeight(blockHeader.getHeight());
         //保存数据库和缓存
         if (!agentStorageService.save(agentPo, chainId)) {
             throw new NulsException(ConsensusErrorCode.SAVE_FAILED);

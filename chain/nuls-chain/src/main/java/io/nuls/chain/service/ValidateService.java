@@ -22,29 +22,33 @@
  * SOFTWARE.
  *
  */
-package io.nuls.chain.service.impl;
+package io.nuls.chain.service;
 
-import io.nuls.chain.service.SeqService;
-import io.nuls.chain.storage.SeqStorage;
-import io.nuls.tools.core.annotation.Autowired;
-import io.nuls.tools.core.annotation.Service;
+import io.nuls.chain.model.dto.ChainEventResult;
+import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.BlockChain;
+
+import java.math.BigInteger;
+import java.util.Map;
 
 /**
  * @author lan
- * @date 2018/11/26
- */
-@Service
-public class SeqServiceImpl implements SeqService {
-    @Autowired
-    private SeqStorage seqStorage;
+ * @description
+ * @date 2019/02/20
+ **/
+public interface ValidateService {
+    ChainEventResult assetDisableValidator(Asset asset) throws Exception;
 
-    /**
-     * createAssetId
-     *
-     * @param chainId Chain ID
-     */
-    @Override
-    public synchronized int createAssetId(int chainId) throws Exception {
-        return seqStorage.nextSeq(chainId);
-    }
+    ChainEventResult assetAddValidator(Asset asset) throws Exception;
+
+    ChainEventResult chainAddValidator(BlockChain blockChain) throws Exception;
+
+    ChainEventResult chainDisableValidator(BlockChain blockChain) throws Exception;
+
+
+    ChainEventResult batchChainRegValidator(BlockChain blockChain, Asset asset, Map<String, Integer> tempChains, Map<String, Integer> tempAssets) throws Exception;
+
+    ChainEventResult batchAssetRegValidator(Asset asset, Map<String, Integer> tempAssets) throws Exception;
+
+    ChainEventResult assetCirculateValidator(int fromChainId, int toChainId, Map<String, BigInteger> fromAssetMap, Map<String, BigInteger> toAssetMap) throws Exception;
 }

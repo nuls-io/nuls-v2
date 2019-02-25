@@ -1,10 +1,11 @@
 package io.nuls.chain.service;
 
 
-import io.nuls.chain.model.dto.Asset;
-import io.nuls.chain.model.dto.ChainAsset;
+import io.nuls.chain.model.po.Asset;
+import io.nuls.chain.model.po.ChainAsset;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author tangyi
@@ -76,6 +77,15 @@ public interface AssetService {
      * @return
      */
     boolean assetExist(Asset asset) throws Exception;
+
+    /**
+     * juge asset exist in chain
+     * @param asset
+     * @param map
+     * @return
+     * @throws Exception
+     */
+    boolean assetExist(Asset asset, Map<String,Integer> map) throws Exception;
 
     /**
      * getChainAsset

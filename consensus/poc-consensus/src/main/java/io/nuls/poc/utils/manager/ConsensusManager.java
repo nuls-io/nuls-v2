@@ -20,6 +20,7 @@ import io.nuls.tools.exception.NulsRuntimeException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -176,7 +177,7 @@ public class ConsensusManager {
         创建节点账户所得共识奖励金，总的奖励金*（保证金/（保证金+委托金额））+ 佣金
         Incentives for creating node accounts, total incentives * (margin /(margin + commission amount)+commissions
         */
-        double agentOwnWeight = new BigDecimal(self.getAgent().getDeposit()).divide(new BigDecimal(selfAllDeposit)).doubleValue();
+        double agentOwnWeight = new BigDecimal(self.getAgent().getDeposit()).divide(new BigDecimal(selfAllDeposit),4, RoundingMode.HALF_DOWN).doubleValue();
         double inCaReward = DoubleUtils.mul(inBlockReword, agentOwnWeight);
         double outCaReward = DoubleUtils.mul(outBlockReword, agentOwnWeight);
         /*
@@ -188,7 +189,7 @@ public class ConsensusManager {
             计算各委托账户权重（委托金额/总的委托金)
             Calculate the weight of each entrusted account (amount of entrusted account/total entrusted fee)
             */
-            double weight = new BigDecimal(deposit.getDeposit()).divide (new BigDecimal(selfAllDeposit)).doubleValue();
+            double weight = new BigDecimal(deposit.getDeposit()).divide (new BigDecimal(selfAllDeposit),4, RoundingMode.HALF_DOWN).doubleValue();
 
             /*
             如果委托账户为创建该节点账户自己,则将节点账户奖励金加上该共识奖励金

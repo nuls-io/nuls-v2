@@ -33,11 +33,9 @@ import io.nuls.ledger.model.ChainHeight;
 import io.nuls.ledger.model.po.AccountState;
 import io.nuls.ledger.model.po.BlockSnapshotAccounts;
 import io.nuls.ledger.model.po.BlockTxs;
-import io.nuls.ledger.utils.LedgerUtils;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.log.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +53,7 @@ public class RepositoryImpl implements Repository {
             if (!RocksDBService.existTable(getChainsHeightTableName())) {
                 RocksDBService.createTable(getChainsHeightTableName());
             } else {
-                Log.info("table {} exist.", getChainsHeightTableName());
+                logger.info("table {} exist.", getChainsHeightTableName());
             }
 
 
@@ -79,28 +77,6 @@ public class RepositoryImpl implements Repository {
             logger.error("createAccountState serialize error.", e);
         }
     }
-
-
-    /**
-     * 按区块对账号进行快照
-     *
-     * @param key
-     * @param preAccountState
-     * @param nowAccountState
-     * @throws Exception
-     */
-    private void addBlockSnapshot(String key, AccountState preAccountState, AccountState nowAccountState) throws Exception {
-        //bak  account Snapshot,备份账户老状态
-        //生成 备份 key:账户-交易-高度 ，value:AccountState
-        String snapshotBlockKeyStr = LedgerUtils.getBlockSnapshotKeyStr(key, nowAccountState.getHeight());
-        //nowAccountState 的高度 存的是pre的
-        RocksDBService.put(getBlockSnapshotTableName(nowAccountState.getAddressChainId()), snapshotBlockKeyStr.getBytes(LedgerConstant.DEFAULT_ENCODING), preAccountState.serialize());
-        //清除过期的snapshot数据,height = height - CACHE_ACCOUNT_BLOCK以前的数据
-        String snapshotHeightKeyStrDel = LedgerUtils.getSnapshotHeightKeyStr(key, (nowAccountState.getHeight() - LedgerConstant.CACHE_ACCOUNT_BLOCK));
-        RocksDBService.delete(getBlockSnapshotTableName(nowAccountState.getAddressChainId()), snapshotHeightKeyStrDel.getBytes(LedgerConstant.DEFAULT_ENCODING));
-
-    }
-
 
     /**
      * update accountState to rocksdb
@@ -170,7 +146,6 @@ public class RepositoryImpl implements Repository {
         if (stream == null) {
             return -1;
         }
-
         try {
             long height = ByteUtils.byteToLong(stream);
             return height;
@@ -229,17 +204,13 @@ public class RepositoryImpl implements Repository {
         try {
             if (!RocksDBService.existTable(getLedgerAccountTableName(addressChainId))) {
                 RocksDBService.createTable(getLedgerAccountTableName(addressChainId));
-            } else {
-                Log.info("table {} exist.", getLedgerAccountTableName(addressChainId));
             }
             if (!RocksDBService.existTable(getBlockSnapshotTableName(addressChainId))) {
                 RocksDBService.createTable(getBlockSnapshotTableName(addressChainId));
-            } else {
-                Log.info("table {} exist.", getBlockSnapshotTableName(addressChainId));
             }
 
         } catch (Exception e) {
-            Log.error(e);
+            logger.error(e);
         }
     }
 
@@ -250,11 +221,9 @@ public class RepositoryImpl implements Repository {
             String table = getBlockTableName(chainId);
             if (!RocksDBService.existTable(table)) {
                 RocksDBService.createTable(table);
-            } else {
-                Log.info("table {} exist.", table);
             }
             RocksDBService.put(table, ByteUtils.longToBytes(height), blockTxs.serialize());
-            RocksDBService.delete(table,ByteUtils.longToBytes(height-1000));
+            RocksDBService.delete(table,ByteUtils.longToBytes(height-LedgerConstant.CACHE_ACCOUNT_BLOCK));
         } catch (Exception e) {
             logger.error("saveBlock serialize error.", e);
         }
@@ -270,11 +239,7 @@ public class RepositoryImpl implements Repository {
                 return null;
             }
             BlockTxs blockTxs = new BlockTxs();
-            try {
                 blockTxs.parse(new NulsByteBuffer(stream));
-            } catch (NulsException e) {
-                logger.error("getAccountState serialize error.", e);
-            }
             return blockTxs;
         } catch (Exception e) {
             logger.error("getBlock serialize error.", e);

@@ -114,7 +114,7 @@ public class Chain {
     private ScheduledThreadPoolExecutor scheduledThreadPoolExecutor;
 
     public Chain() {
-        this.consensusStatus = ConsensusStatus.INITING;
+        this.consensusStatus = ConsensusStatus.RUNNING;
         this.canPacking = false;
         this.agentList = new ArrayList<>();
         this.depositList = new ArrayList<>();
