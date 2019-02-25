@@ -1,0 +1,6 @@
+[JAVA]
+APP_NAME=chain
+Version=1.0.0
+MAIN_CLASS=io.nuls.chain.ChainBootstrap
+JOPT_XMS=256
+JOPT_XMX=256
