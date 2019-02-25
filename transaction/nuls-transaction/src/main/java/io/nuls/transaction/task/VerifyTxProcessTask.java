@@ -102,18 +102,17 @@ public class VerifyTxProcessTask implements Runnable {
             if (!rs) {
                 return false;
             }
-            //获取一笔交易(从已确认交易库中获取？)
-            //Transaction transaction = confirmedTxService.getConfirmedTransaction(chain, tx.getHash());
+            //获取一笔交易
             Transaction existTx = txService.getTransaction(chain, tx.getHash());
             if(null != existTx){
                 return isOrphanTx;
             }
             VerifyTxResult verifyTxResult = LedgerCall.verifyCoinData(chain, tx, false);
             if(verifyTxResult.success()){
-                if(chain.getPackaging()) {
+//                if(chain.getPackaging()) {
                     //当节点是出块节点时, 才将交易放入待打包队列
                     packablePool.add(chain, tx, false);
-                }
+//                }
                 //保存到rocksdb
                 unconfirmedTxStorageService.putTx(chainId, tx);
                 //保存到h2数据库
@@ -127,10 +126,10 @@ public class VerifyTxProcessTask implements Runnable {
                 count++;
                 return true;
             }
-            chain.getLogger().debug("@@@@@@@@@@@@@@@@@");
-            chain.getLogger().debug("*** Debug *** [VerifyTxProcessTask] " +
+            chain.getLogger().info("\n@@@@@@@@@@@@@@@@@");
+            chain.getLogger().info("*** Debug *** [VerifyTxProcessTask] " +
                     "coinData not success - code: {}, - reason:{}, type:{} - txhash:{}", verifyTxResult.getCode(),  verifyTxResult.getDesc(), tx.getType(), tx.getHash().getDigestHex());
-            chain.getLogger().debug("@@@@@@@@@@@@@@@@@");
+            chain.getLogger().info("@@@@@@@@@@@@@@@@@\n");
             if(verifyTxResult.getCode() == VerifyTxResult.ORPHAN && !isOrphanTx){
                 processOrphanTx(tx);
             }else if(isOrphanTx){

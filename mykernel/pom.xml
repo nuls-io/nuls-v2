@@ -50,7 +50,11 @@
             <artifactId>rpc-tools</artifactId>
             <version>${tool.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.4</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -113,15 +117,15 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.1.1</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                            <classpathPrefix>libs/</classpathPrefix>
-                            <mainClass>io.nuls.mykernel.MyKernelBootstrap</mainClass>
-                        </manifest>
-                    </archive>
-                </configuration>
+                <!--<configuration>-->
+                    <!--<archive>-->
+                        <!--<manifest>-->
+                            <!--&lt;!&ndash;<addClasspath>true</addClasspath>&ndash;&gt;-->
+                            <!--&lt;!&ndash;<classpathPrefix>../libs/</classpathPrefix>&ndash;&gt;-->
+                            <!--<mainClass>io.nuls.mykernel.MyKernelBootstrap</mainClass>-->
+                        <!--</manifest>-->
+                    <!--</archive>-->
+                <!--</configuration>-->
             </plugin>
         </plugins>
     </build>
