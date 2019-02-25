@@ -49,6 +49,11 @@ public interface TxCmd {
     String TX_RUNCHAIN = "tx_runChain";
     String TX_STOPCHAIN = "tx_stopChain";
     String TX_CREATE_CROSS_TX = "tx_createCtx";
+    /**
+     * 修改节点共识状态
+     */
+    String TX_CS_STATE = "tx_cs_state";
+
 
     String TX_NEWTX = "tx_newTx";
     /**

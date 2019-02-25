@@ -5,7 +5,7 @@ import io.nuls.base.data.Transaction;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.transaction.TestConstant;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.init.TransactionBootStrap;
+import io.nuls.transaction.TransactionBootStrap;
 import io.nuls.transaction.manager.ChainManager;
 import org.junit.Assert;
 import org.junit.BeforeClass;

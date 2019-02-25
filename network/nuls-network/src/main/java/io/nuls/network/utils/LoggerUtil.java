@@ -44,15 +44,15 @@ import java.util.Map;
  **/
 public class LoggerUtil {
     public static NulsLogger Log = LoggerBuilder.getLogger("./nwLogs", "nw.log", Level.ALL);
-    public static NulsLogger TestLog = LoggerBuilder.getLogger("./nwLogs", "block.log", Level.ALL);
-    public static NulsLogger TestLog2 = LoggerBuilder.getLogger("./nwLogs", "tx.log", Level.ALL);
-    public static NulsLogger TestLog3 = LoggerBuilder.getLogger("./nwLogs", "cs.log", Level.ALL);
+    public static NulsLogger blockMsLog = LoggerBuilder.getLogger("./nwLogs", "block.log", Level.ALL);
+    public static NulsLogger txMsLog = LoggerBuilder.getLogger("./nwLogs", "tx.log", Level.ALL);
+    public static NulsLogger csMsLog = LoggerBuilder.getLogger("./nwLogs", "cs.log", Level.ALL);
     public static Map<String, NulsLogger> logMap = new HashMap<>();
 
     static {
-        logMap.put(ModuleE.BL.abbr, TestLog);
-        logMap.put(ModuleE.TX.abbr, TestLog2);
-        logMap.put(ModuleE.CS.abbr, TestLog3);
+        logMap.put(ModuleE.BL.abbr, blockMsLog);
+        logMap.put(ModuleE.TX.abbr, txMsLog);
+        logMap.put(ModuleE.CS.abbr, csMsLog);
     }
 
     /**
@@ -62,7 +62,7 @@ public class LoggerUtil {
      * @param payLoadBody
      * @param sendOrRecieved
      */
-    public static void blockLogs(String cmd, Node node, byte[] payLoadBody, String sendOrRecieved) {
+    public static void modulesMsgLogs(String cmd, Node node, byte[] payLoadBody, String sendOrRecieved) {
         Collection<ProtocolRoleHandler> protocolRoleHandlers = MessageHandlerFactory.getInstance().getProtocolRoleHandlerMap(cmd);
         if (null == protocolRoleHandlers) {
             Log.error("unknown mssages. cmd={},may be handle had not be registered to network.", cmd);
@@ -85,7 +85,7 @@ public class LoggerUtil {
      * @param payLoadBody
      * @param result
      */
-    public static void blockLogsRec(String role, String cmd, Node node, byte[] payLoadBody, String result) {
+    public static void modulesMsgLogs(String role, String cmd, Node node, byte[] payLoadBody, String result) {
         if (null != logMap.get(role)) {
             logMap.get(role).debug("cmd={},peer={},hash={},rpcResult={}", cmd, node.getId(), NulsDigestData.calcDigestData(payLoadBody).getDigestHex(), result);
         } else {

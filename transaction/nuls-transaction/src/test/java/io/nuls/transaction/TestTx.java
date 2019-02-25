@@ -153,7 +153,7 @@ public class TestTx {
         System.out.println(balance.longValue());
 
         //组装创建节点交易
-        Map agentTxMap = this.createAgentTx(address27, "5MR_2Ch8CCnLwoLWFZ45pFEZSmo1C1pkPFA");
+        Map agentTxMap = this.createAgentTx(address21, "5MR_2CaU6brvzCnGo2avJvrAsmpMMVEPvQq");
         //调用接口
         Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
@@ -183,10 +183,10 @@ public class TestTx {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "002071370462e8ac89c27cdfd6bf34a6ddd67626d1acb007e70d991b8980f07397b6";
+        String agentHash = "00203e805809a9aeadc5b68b82908d6ba0f4ff53e1c6869842002aa064545e824eeb";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
-        dpParams.put("address", address27);
+        dpParams.put("address", address21);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 200000 * 100000000L);
         Response dpResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
@@ -205,7 +205,7 @@ public class TestTx {
         params.put("chainId", chainId);
         //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         params.put("address", address27);
-        params.put("txHash", "002099727074a1eca4675f2e1e1b92a64110eb4a1c59e49b099e946332d24862f091");
+        params.put("txHash", "0020c2bed94bb1195cfa1c406fa1af9edeedb92a920fa2b77a56d4287ab2895c9333");
         Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
     }

@@ -80,10 +80,15 @@ public class ChainManager {
             */
             initTable(chainId);
             //注册账户相关交易
-            while (true) {
-                if (TransactionCmdCall.registerTx(chainId)) {
-                    break;
+            try {
+                while (true) {
+                    if (TransactionCmdCall.registerTx(chainId)) {
+                        break;
+                    }
+                    Thread.sleep(3000L);
                 }
+            } catch (Exception e) {
+                Log.error("Transaction registerTx error!");
             }
             chainMap.put(chainId, chain);
         }

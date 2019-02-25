@@ -68,10 +68,9 @@ public class TransactionCmdCall {
             params.put(RpcConstant.TX_MODULE_COMMIT_CMD, "ac_commitTx");
             params.put(RpcConstant.TX_MODULE_ROLLBACK_CMD, "ac_rollbackTx");
             params.put("list", txRegisterDetailList);
-            System.out.println(JSONUtils.obj2json(params));
             Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, RpcConstant.TX_REGISTER_CMD, params);
             if (!cmdResp.isSuccess()) {
-                Log.error("chain ：" + chainId + " Failure of transaction registration");
+                Log.error("chain ：" + chainId + " Failure of transaction registration,errorMsg: " + cmdResp.getResponseComment());
                 return false;
             }
         } catch (Exception e) {

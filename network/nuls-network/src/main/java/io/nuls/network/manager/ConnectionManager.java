@@ -39,6 +39,7 @@ import io.nuls.network.netty.NettyClient;
 import io.nuls.network.netty.NettyServer;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.utils.IpUtil;
+import io.nuls.rpc.server.runtime.ServerRuntime;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.TimeService;
 
@@ -135,8 +136,7 @@ public class ConnectionManager extends BaseManager {
         nodesContainer.getConnectedNodes().put(node.getId(), node);
         nodesContainer.getCanConnectNodes().remove(node.getId());
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
-
-//        Log.info("node {} connect success !", node.getId());
+        Log.debug("client node {} connect success !", node.getId());
         //发送握手
         VersionMessage versionMessage = MessageFactory.getInstance().buildVersionMessage(node, nodeGroup.getMagicNumber());
         BaseMeesageHandlerInf handler = MessageHandlerFactory.getInstance().getHandler(versionMessage.getHeader().getCommandStr());
@@ -163,6 +163,7 @@ public class ConnectionManager extends BaseManager {
         if (channel.localAddress().getPort() == NetworkParam.getInstance().getCrossPort()) {
             isCross = true;
         }
+        Log.debug("peer = {}:{} connectIn",ip,port);
         //此时无法判定业务所属的网络id，所以无法归属哪个group,只有在version消息处理时才能知道
         Node node = new Node(0L, ip, port, Node.IN, isCross);
         node.setConnectStatus(NodeConnectStatusEnum.CONNECTED);
@@ -272,6 +273,4 @@ public class ConnectionManager extends BaseManager {
         nettyBoot();
         status = ManagerStatusEnum.RUNNING;
     }
-
-
 }

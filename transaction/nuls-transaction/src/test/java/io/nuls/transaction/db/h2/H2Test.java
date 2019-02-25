@@ -1,4 +1,4 @@
-package io.nuls.transaction.init;
+package io.nuls.transaction.db.h2;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.constant.BaseConstant;
