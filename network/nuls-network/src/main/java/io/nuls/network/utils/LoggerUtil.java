@@ -44,15 +44,15 @@ import java.util.Map;
  **/
 public class LoggerUtil {
     public static NulsLogger Log = LoggerBuilder.getLogger("./nwLogs", "nw.log", Level.ALL);
-    public static NulsLogger TestLog = LoggerBuilder.getLogger("./nwLogs", "block.log", Level.ALL);
-    public static NulsLogger TestLog2 = LoggerBuilder.getLogger("./nwLogs", "tx.log", Level.ALL);
-    public static NulsLogger TestLog3 = LoggerBuilder.getLogger("./nwLogs", "cs.log", Level.ALL);
+    public static NulsLogger blockMsLog = LoggerBuilder.getLogger("./nwLogs", "block.log", Level.ALL);
+    public static NulsLogger txMsLog = LoggerBuilder.getLogger("./nwLogs", "tx.log", Level.ALL);
+    public static NulsLogger csMsLog = LoggerBuilder.getLogger("./nwLogs", "cs.log", Level.ALL);
     public static Map<String, NulsLogger> logMap = new HashMap<>();
 
     static {
-        logMap.put(ModuleE.BL.abbr, TestLog);
-        logMap.put(ModuleE.TX.abbr, TestLog2);
-        logMap.put(ModuleE.CS.abbr, TestLog3);
+        logMap.put(ModuleE.BL.abbr, blockMsLog);
+        logMap.put(ModuleE.TX.abbr, txMsLog);
+        logMap.put(ModuleE.CS.abbr, csMsLog);
     }
 
     /**
