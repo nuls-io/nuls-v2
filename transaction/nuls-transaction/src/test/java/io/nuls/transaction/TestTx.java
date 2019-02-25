@@ -183,10 +183,10 @@ public class TestTx {
     @Test
     public void depositToAgent() throws Exception {
         //组装委托节点交易
-        String agentHash = "0020559797677a9677513bac33378883dd3b1ffa9831d55675ff2d345775123e36ed";
+        String agentHash = "00203e805809a9aeadc5b68b82908d6ba0f4ff53e1c6869842002aa064545e824eeb";
         Map<String, Object> dpParams = new HashMap<>();
         dpParams.put("chainId", chainId);
-        dpParams.put("address", address27);
+        dpParams.put("address", address21);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 200000 * 100000000L);
         Response dpResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
