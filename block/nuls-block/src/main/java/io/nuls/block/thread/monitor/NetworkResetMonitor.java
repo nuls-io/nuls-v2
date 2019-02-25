@@ -30,7 +30,7 @@ import static io.nuls.block.utils.LoggerUtil.commonLog;
 /**
  * 区块高度监控器
  * 每隔固定时间间隔启动
- * 如果发现区块高度没更新,通知网络模块重置可用节点
+ * 如果发现区块高度没更新,通知网络模块重置可用节点,并重启区块同步线程
  *
  * @author captain
  * @version 1.0

@@ -25,10 +25,7 @@ import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.thread.BlockSynchronizer;
-import io.nuls.block.thread.monitor.ChainsDbSizeMonitor;
-import io.nuls.block.thread.monitor.ForkChainsMonitor;
-import io.nuls.block.thread.monitor.OrphanChainsMaintainer;
-import io.nuls.block.thread.monitor.OrphanChainsMonitor;
+import io.nuls.block.thread.monitor.*;
 import io.nuls.block.utils.ConfigLoader;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.db.service.RocksDBService;
@@ -104,9 +101,6 @@ public class BlockBootstrap {
 
             //开启区块同步线程
             ThreadUtils.createAndRunThread("block-synchronizer", BlockSynchronizer.getInstance());
-//        //开启区块监控线程
-//        ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("block-monitor"));
-//        monitorExecutor.scheduleAtFixedRate(NetworkResetMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
             //开启分叉链处理线程
             ScheduledThreadPoolExecutor forkExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("fork-chains-monitor"));
             forkExecutor.scheduleWithFixedDelay(ForkChainsMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
@@ -119,6 +113,9 @@ public class BlockBootstrap {
             //开启数据库大小监控线程
             ScheduledThreadPoolExecutor dbSizeExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("db-size-monitor"));
             dbSizeExecutor.scheduleWithFixedDelay(ChainsDbSizeMonitor.getInstance(), 0, 10, TimeUnit.SECONDS);
+            //开启区块监控线程
+            ScheduledThreadPoolExecutor monitorExecutor = ThreadUtils.createScheduledThreadPool(1, new NulsThreadFactory("network-monitor"));
+            monitorExecutor.scheduleWithFixedDelay(NetworkResetMonitor.getInstance(), 0, 60, TimeUnit.SECONDS);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error("error occur when start, " + e.getMessage());
