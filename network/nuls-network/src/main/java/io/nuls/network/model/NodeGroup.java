@@ -280,21 +280,11 @@ public class NodeGroup implements Dto {
     }
 
     public List<Node> getAvailableNodes(boolean isCross) {
-        Collection<Node> nodes = null;
-        List<Node> availableNodes = new ArrayList<>();
         if (isCross) {
-            nodes = crossNodeContainer.getConnectedNodes().values();
+            return crossNodeContainer.getAvailableNodes();
         } else {
-            nodes = localNetNodeContainer.getConnectedNodes().values();
+            return localNetNodeContainer.getAvailableNodes();
         }
-        if (null != nodes && nodes.size() > 0) {
-            for (Node node : nodes) {
-                if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
-                    availableNodes.add(node);
-                }
-            }
-        }
-        return availableNodes;
     }
 
     public Node getAvailableNode(String nodeId) {

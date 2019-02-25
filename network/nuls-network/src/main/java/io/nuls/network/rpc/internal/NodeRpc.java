@@ -198,7 +198,7 @@ public class NodeRpc extends BaseCmd {
             /*
              * only  connection
              */
-            nodes.addAll(nodesContainer.getConnectedNodes().values());
+            nodes.addAll(nodesContainer.getAvailableNodes());
         } else if (STATE_DIS_CONNECT == state) {
             /*
              * only dis connection

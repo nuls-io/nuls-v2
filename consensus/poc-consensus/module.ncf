@@ -1,0 +1,9 @@
+[JAVA]
+APP_NAME=poc-consensus
+MAIN_CLASS=io.nuls.poc.ConsensusBootStrap
+Version=1.0.0
+JOPT_XMS=256
+JOPT_XMX=256
+
+[Core]
+Managed=0

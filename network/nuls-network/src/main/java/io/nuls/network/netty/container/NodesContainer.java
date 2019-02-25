@@ -25,6 +25,7 @@
 
 package io.nuls.network.netty.container;
 
+import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
@@ -32,8 +33,7 @@ import io.nuls.network.model.po.NodePo;
 import io.nuls.network.model.po.NodesContainerPo;
 
 import java.io.Serializable;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class NodesContainer implements Serializable {
@@ -116,7 +116,18 @@ public class NodesContainer implements Serializable {
         }
         return containerPo;
     }
-
+    public List<Node> getAvailableNodes() {
+        Collection<Node> nodes = null;
+        List<Node> availableNodes = new ArrayList<>();
+        if (null != nodes && nodes.size() > 0) {
+            for (Node node : nodes) {
+                if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
+                    availableNodes.add(node);
+                }
+            }
+        }
+        return availableNodes;
+    }
     public NodesContainer(NodesContainerPo containerPo) {
         Node node = null;
         if (containerPo.getDisConnectNodes() != null) {
