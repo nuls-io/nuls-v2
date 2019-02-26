@@ -22,8 +22,8 @@ package io.nuls.protocol.utils.module;
 
 import io.nuls.protocol.constant.RunningStatusEnum;
 import io.nuls.protocol.manager.ContextManager;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.HashMap;
@@ -56,7 +56,7 @@ public class KernelUtil {
             params.put("module", moduleString);
             params.put("status", status.ordinal());
 
-            return CmdDispatcher.requestAndResponse(ModuleE.KE.abbr, "updateStatus", params).isSuccess();
+            return ResponseMessageProcessor.requestAndResponse(ModuleE.KE.abbr, "updateStatus", params).isSuccess();
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);

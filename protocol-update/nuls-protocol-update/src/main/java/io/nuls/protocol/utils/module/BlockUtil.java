@@ -20,21 +20,13 @@
 
 package io.nuls.protocol.utils.module;
 
-import io.nuls.base.basic.NulsByteBuffer;
-import io.nuls.base.data.BlockExtendsData;
-import io.nuls.base.data.BlockHeader;
 import io.nuls.protocol.manager.ContextManager;
-import io.nuls.protocol.model.ProtocolVersion;
 import io.nuls.protocol.rpc.callback.BlockHeaderInvoke;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.exception.NulsException;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.logback.NulsLogger;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,7 +45,7 @@ public class BlockUtil {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            CmdDispatcher.requestAndInvoke(ModuleE.BL.abbr, "latestBlockHeader", params, "0", "1", new BlockHeaderInvoke(chainId));
+            ResponseMessageProcessor.requestAndInvoke(ModuleE.BL.abbr, "latestBlockHeader", params, "0", "1", new BlockHeaderInvoke(chainId));
 
         } catch (Exception e) {
             e.printStackTrace();
