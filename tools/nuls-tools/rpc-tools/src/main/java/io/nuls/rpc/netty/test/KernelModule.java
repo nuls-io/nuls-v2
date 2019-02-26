@@ -1,5 +1,7 @@
-package io.nuls.rpc.info;
+package io.nuls.rpc.netty.test;
 
+import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
@@ -11,12 +13,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 用于测试
- *
- * @author tangyi
- * @date 2018/12/3
- */
-public class NoUse {
+ * @author tag
+ * */
+public class KernelModule {
     /**
      * 模拟核心模块（Manager），测试专用
      * For internal debugging only
@@ -39,6 +38,8 @@ public class NoUse {
         ConnectManager.scanPackage("io.nuls.rpc.cmd.kernel");
         ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr,connectionInformation);
         ConnectManager.updateStatus();
+        // Get information from kernel
+        //Thread.sleep(Integer.MAX_VALUE);
     }
 
     /**
@@ -53,5 +54,13 @@ public class NoUse {
         ConnectManager.getConnectByUrl("ws://"+ HostInfo.getLocalIP()+":8887/ws");
         // Get information from kernel
         ResponseMessageProcessor.syncKernel("ws://"+ HostInfo.getLocalIP()+":8887/ws");
+    }
+
+    public static void main(String[] args){
+        try {
+            mockKernel();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

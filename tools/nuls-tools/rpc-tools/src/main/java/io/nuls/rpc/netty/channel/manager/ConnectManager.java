@@ -1,36 +1,42 @@
-package io.nuls.rpc.server.runtime;
+package io.nuls.rpc.netty.channel.manager;
 
-import io.nuls.rpc.client.runtime.ClientRuntime;
+import io.netty.channel.Channel;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.*;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.server.handler.CmdHandler;
-import io.nuls.rpc.server.thread.RequestByCountProcessor;
-import io.nuls.rpc.server.thread.RequestByPeriodProcessor;
-import io.nuls.rpc.server.thread.RequestSingleProcessor;
+import io.nuls.rpc.netty.bootstrap.NettyClient;
+import io.nuls.rpc.netty.channel.ConnectData;
+import io.nuls.rpc.netty.processor.RequestMessageProcessor;
+import io.nuls.rpc.netty.thread.RequestByCountProcessor;
+import io.nuls.rpc.netty.thread.RequestByPeriodProcessor;
+import io.nuls.rpc.netty.thread.RequestSingleProcessor;
+import io.nuls.rpc.netty.thread.ResponseAutoProcessor;
 import io.nuls.tools.core.ioc.ScanUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
-import org.java_websocket.WebSocket;
+import io.nuls.tools.thread.TimeService;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * 服务端运行时所需要的变量和方法
- * Variables and static methods required for server-side runtime
- *
+ * 链接管理类
+ * Link Management Class
  * @author tag
- * 2018/12/29
+ * 2019/2/21
  * */
-public class ServerRuntime {
+public class ConnectManager {
     /**
      * 本模块是否可以启动服务（所依赖模块是否可以连接）
      * Can this module start the service? (Can the dependent modules be connected?)
@@ -52,12 +58,35 @@ public class ServerRuntime {
     public static final Map<String, ConfigItem> CONFIG_ITEM_MAP = new ConcurrentHashMap<>();
 
     /**
-     * 其他模块连接到本地的连接集合
-     * Other modules connect to local connection combinations
-     *
-     * key:WebSocket   value:ServerData
-     * */
-    public static final Map<WebSocket, WsData> SERVER_DATA_MAP = new ConcurrentHashMap<>();
+     * Key: 角色，Value：角色的连接信息
+     * Key: role, Value: Connection information of the role
+     */
+    public static final Map<String, Map> ROLE_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * 调用远程方法时，可以设置自动回调的本地方法。
+     * Key：调用远程方法的messageId，Value：自动回调的本地方法
+     * <p>
+     * When calling a remote method, you can set the local method for automatic callback
+     * Key: MessageId that calls remote methods, Value: Local method of automatic callback
+     */
+    public static final Map<String, BaseInvoke> INVOKE_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * 链接地址与链接通道的集合
+     * Key: 连接地址(如: ws://127.0.0.1:8887), Value：WsClient对象
+     * <p>
+     * Key: url(ex: ws://127.0.0.1:8887), Value: ConnectData object
+     */
+    public static final Map<String, ConnectData> CHANNEL_MAP = new ConcurrentHashMap<>();
+
+    /**
+     * messageId对应链接通道对象，用于取消订阅的Request
+     * Key：messageId, Value：链接通道
+     * <p>
+     * key: messageId, value: ConnectData
+     */
+    public static final ConcurrentMap<String, ConnectData> MSG_ID_KEY_CHANNEL_MAP = new ConcurrentHashMap<>();
 
     /**
      * 接口被那些Message订阅
@@ -71,9 +100,9 @@ public class ServerRuntime {
      * 订阅接口的Message对应的连接
      * Connection corresponding to Message of Subscription Interface
      * Key：订阅消息/Subscribe message
-     * Value:该订阅消息所属连接/
+     * Value:该订阅消息所属连接
      * */
-    public static final Map<Message, WsData> MESSAGE_TO_WSDATA_MAP = new ConcurrentHashMap<>();
+    public static final Map<Message, ConnectData> MESSAGE_TO_CHANNEL_MAP = new ConcurrentHashMap<>();
 
     /**
      * 接口被订阅次数(事件方式)
@@ -95,12 +124,11 @@ public class ServerRuntime {
      * 核心模块（Manager）的连接地址
      * URL of Core Module (Manager)
      */
-    public static String kernelUrl = "";
-
+    /*public static String kernelUrl = "";
 
     public static void setKernelUrl(String url) {
         kernelUrl = url;
-    }
+    }*/
 
     /**
      * 根据cmd命令和版本号获取本地方法
@@ -147,7 +175,6 @@ public class ServerRuntime {
                 find = cmdDetail;
             }
         }
-
         return find;
     }
 
@@ -210,7 +237,7 @@ public class ServerRuntime {
                  */
                 if (!isRegister(cmdDetail)) {
                     LOCAL.getApiMethods().add(cmdDetail);
-                    CmdHandler.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
+                    RequestMessageProcessor.handlerMap.put(cmdDetail.getInvokeClass(), SpringLiteContext.getBeanByClass(cmdDetail.getInvokeClass()));
                 } else {
                     throw new Exception(Constants.CMD_DUPLICATE + ":" + cmdDetail.getMethodName() + "-" + cmdDetail.getVersion());
                 }
@@ -273,7 +300,6 @@ public class ServerRuntime {
             return null;
         }
         cmdDetail.setParameters(cmdParameters);
-
         return cmdDetail;
     }
 
@@ -328,30 +354,6 @@ public class ServerRuntime {
         } catch (Exception e) {
             return 1;
         }
-    }
-
-    /**
-     * 获取连接数据
-     * Get connection data
-     *
-     * @param webSocket
-     * @param webSocket
-     * @return ServerData
-     * */
-    public static WsData getWsData(WebSocket webSocket){
-        if(!SERVER_DATA_MAP.isEmpty() && SERVER_DATA_MAP.keySet().contains(webSocket)){
-            return  SERVER_DATA_MAP.get(webSocket);
-        }
-        WsData wsData = new WsData();
-        wsData.setWebSocket(webSocket);
-        wsData.getThreadPool().execute(new RequestSingleProcessor(wsData));
-        wsData.getThreadPool().execute(new RequestSingleProcessor(wsData));
-        wsData.getThreadPool().execute(new RequestSingleProcessor(wsData));
-        wsData.getThreadPool().execute(new RequestSingleProcessor(wsData));
-        wsData.getThreadPool().execute(new RequestByPeriodProcessor(wsData));
-        wsData.getThreadPool().execute(new RequestByCountProcessor(wsData));
-        SERVER_DATA_MAP.put(webSocket,wsData);
-        return wsData;
     }
 
     /**
@@ -419,11 +421,11 @@ public class ServerRuntime {
      * 订阅接口（按接口改变次数）
      * Subscription interface (number of changes per interface)
      *
-     * @param wsData   链接信息
-     * @param message  订阅消息
+     * @param connectData   链接信息
+     * @param message       订阅消息
      * */
-    public static void subscribeByEvent(WsData wsData, Message message){
-        MESSAGE_TO_WSDATA_MAP.put(message,wsData);
+    public static void subscribeByEvent(ConnectData connectData, Message message){
+        MESSAGE_TO_CHANNEL_MAP.put(message,connectData);
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         for (String method:request.getRequestMethods().keySet()) {
             if(CMD_SUBSCRIBE_MESSAGE_MAP.containsKey(method)){
@@ -444,7 +446,7 @@ public class ServerRuntime {
      * @param message    取消的订阅消息
      * */
     public static void unsubscribeByEvent(Message message){
-        MESSAGE_TO_WSDATA_MAP.remove(message);
+        MESSAGE_TO_CHANNEL_MAP.remove(message);
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         for (String method:request.getRequestMethods().keySet()) {
             if(CMD_SUBSCRIBE_MESSAGE_MAP.containsKey(method)){
@@ -466,15 +468,15 @@ public class ServerRuntime {
         CopyOnWriteArrayList<Message> messageList = CMD_SUBSCRIBE_MESSAGE_MAP.get(cmd);
         int changeCount = addCmdChangeCount(cmd);
         for (Message message:messageList) {
-            WsData wsData = MESSAGE_TO_WSDATA_MAP.get(message);
+            ConnectData connectData = MESSAGE_TO_CHANNEL_MAP.get(message);
             String key = getSubscribeKey(message.getMessageId(),cmd);
-            if(wsData.getSubscribeInitCount().containsKey(key)){
-                int initCount = wsData.getSubscribeInitCount().get(key);
+            if(connectData.getSubscribeInitCount().containsKey(key)){
+                int initCount = connectData.getSubscribeInitCount().get(key);
                 Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
                 long eventCount = Long.parseLong(request.getSubscriptionEventCounter());
                 if((changeCount - initCount)%eventCount == 0){
                     try {
-                        wsData.getRequestEventResponseQueue().put(getRealResponse(cmd,message.getMessageId(),response));
+                        connectData.getRequestEventResponseQueue().put(getRealResponse(cmd,message.getMessageId(),response));
                     }catch (InterruptedException e){
                         Log.error(e);
                     }
@@ -507,9 +509,12 @@ public class ServerRuntime {
      * */
     public static void updateStatus(){
         if(!startService){
-            for (String role : ServerRuntime.LOCAL.getDependencies().keySet()){
-                if(!ClientRuntime.ROLE_MAP.containsKey(role)){
-                    return;
+            Map dependencies = LOCAL.getDependencies();
+            if(dependencies != null && dependencies.size() > 0){
+                for (String role : LOCAL.getDependencies().keySet()){
+                    if(!ROLE_MAP.containsKey(role)){
+                        return;
+                    }
                 }
             }
             startService = true;
@@ -522,5 +527,144 @@ public class ServerRuntime {
      */
     public static boolean isReady() {
         return startService;
+    }
+
+    /**
+     * 根据角色返回角色的连接信息
+     * Return the role's connection information based on the role
+     */
+    public static String getRemoteUri(String role) {
+        Map map = ROLE_MAP.get(role);
+        return map == null
+                ? null
+                : "ws://" + map.get(Constants.KEY_IP) + ":" + map.get(Constants.KEY_PORT)+"/ws";
+    }
+
+    /**
+     * 根据channel的连接信息
+     * Return the role's connection information based on the role
+     */
+    public static String getRemoteUri(SocketChannel channel) {
+        return "ws://" + channel.remoteAddress().getHostString() + ":" + channel.remoteAddress().getPort()+"/ws";
+    }
+
+    /**
+     * 获取队列中的第一个元素，然后从队列中移除
+     * Get the first item and remove
+     *
+     * @return 队列的第一个元素. The first item in queue.
+     */
+    public static synchronized Message firstMessageInQueue(Queue<Message> messageQueue) {
+        Message message = messageQueue.peek();
+        messageQueue.poll();
+        return message;
+    }
+
+    public static ConnectData getConnectDataByRole(String role)throws Exception{
+        String url = getRemoteUri(role);
+        if(StringUtils.isBlank(url)){
+            throw new Exception("Connection module not started");
+        }
+        return CHANNEL_MAP.get(url);
+    }
+
+    public static ConnectData getConnectDataByChannel(SocketChannel channel)throws Exception{
+        String url = getRemoteUri(channel);
+        if(StringUtils.isBlank(url)){
+            throw new Exception("Connection module not started");
+        }
+        return CHANNEL_MAP.get(url);
+    }
+
+    public static Channel getConnectByRole(String role)throws Exception{
+        String url = getRemoteUri(role);
+        if(StringUtils.isBlank(url)){
+            throw new Exception("Connection module not started");
+        }
+        return getConnectByUrl(url);
+    }
+
+    public static Channel getConnectByUrl(String url)throws Exception{
+        /*
+        如果连接已存在，直接返回
+        If the connection already exists, return directly
+         */
+        if(CHANNEL_MAP.containsKey(url) ){
+            return CHANNEL_MAP.get(url).getChannel();
+        }
+
+        /*
+        如果是第一次连接，则先放入集合
+        If it's the first connection, put it in the collection first
+         */
+
+        SocketChannel channel = NettyClient.createConnect(url);
+        long start = TimeService.currentTimeMillis();
+        while (!channel.isOpen()) {
+            if (TimeService.currentTimeMillis() - start > Constants.MILLIS_PER_SECOND * 5) {
+                throw new Exception("Failed to connect " + url);
+            }
+            Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
+        }
+        createConnectData(channel,url);
+        return channel;
+    }
+
+    public static void createConnectData(SocketChannel channel,String url){
+        ConnectData connectData = new ConnectData(channel);
+        /*
+        连接创建成功之后，启动处理连接通道中传输信息所需线程
+        After the connection is created successfully, start the threads needed
+        to process the transmission of information in the connection channel
+        */
+        connectData.getThreadPool().execute(new RequestSingleProcessor(connectData));
+        connectData.getThreadPool().execute(new RequestSingleProcessor(connectData));
+        connectData.getThreadPool().execute(new RequestSingleProcessor(connectData));
+        connectData.getThreadPool().execute(new RequestByPeriodProcessor(connectData));
+        connectData.getThreadPool().execute(new RequestByCountProcessor(connectData));
+        connectData.getThreadPool().execute(new ResponseAutoProcessor(connectData));
+        connectData.getThreadPool().execute(new ResponseAutoProcessor(connectData));
+        CHANNEL_MAP.put(url,connectData);
+    }
+
+    /**
+     * 停止或断开一个连接,清除该连接相关信息
+     * Stop or disconnect a connection
+     * */
+    public static void disConnect(SocketChannel channel){
+        String url = getRemoteUri(channel);
+        CHANNEL_MAP.remove(url);
+        for (String role : ROLE_MAP.keySet()) {
+            if(url.equals(getRemoteUri(role))){
+                ROLE_MAP.remove(role);
+                break;
+            }
+        }
+        for (Map.Entry<String,ConnectData> entry:MSG_ID_KEY_CHANNEL_MAP.entrySet()) {
+            if(channel.equals(entry.getValue().getChannel())){
+                MSG_ID_KEY_CHANNEL_MAP.remove(entry.getKey());
+                INVOKE_MAP.remove(entry.getKey());
+            }
+        }
+    }
+
+    /**
+     * 判断是否为正整数
+     * Determine whether it is a positive integer
+     *
+     * @param string 待验证的值，Value to be verified
+     * @return boolean
+     */
+    public static boolean isPureDigital(String string) {
+        try {
+            return Integer.parseInt(string) > 0;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static void sendMessage(Channel channel,String message){
+        TextWebSocketFrame frame = new TextWebSocketFrame(message);
+        channel.writeAndFlush(frame);
     }
 }

@@ -1,8 +1,8 @@
-package io.nuls.rpc.server.thread;
+package io.nuls.rpc.netty.thread;
 
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.server.handler.CmdHandler;
-import io.nuls.rpc.server.runtime.WsData;
+import io.nuls.rpc.netty.channel.ConnectData;
+import io.nuls.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.tools.log.Log;
 
 /**
@@ -10,13 +10,13 @@ import io.nuls.tools.log.Log;
  * Subscription event processing threads
  *
  * @author tag
- * 2019/1/5
+ * 2019/2/25
  * */
 public class RequestByCountProcessor implements Runnable{
-    private WsData wsData;
+    private ConnectData connectData;
 
-    public  RequestByCountProcessor(WsData wsData){
-        this.wsData = wsData;
+    public  RequestByCountProcessor(ConnectData connectData){
+        this.connectData = connectData;
     }
 
     /**
@@ -25,10 +25,10 @@ public class RequestByCountProcessor implements Runnable{
      * */
     @Override
     public void run() {
-        while (wsData.isConnected()) {
+        while (connectData.isConnected()) {
             try {
-                if(!wsData.getRequestEventResponseQueue().isEmpty()){
-                    CmdHandler.responseWithEventCount(wsData.getWebSocket(),wsData.getRequestEventResponseQueue().poll());
+                if(!connectData.getRequestEventResponseQueue().isEmpty()){
+                    RequestMessageProcessor.responseWithEventCount(connectData.getChannel(),connectData.getRequestEventResponseQueue().poll());
                 }
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
             } catch (Exception e) {

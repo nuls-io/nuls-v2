@@ -24,8 +24,6 @@
 package io.nuls.h2.dao.impl;
 
 import io.nuls.h2.common.BaseMapper;
-import io.nuls.h2.session.SessionManager;
-import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 
 /**

@@ -22,13 +22,13 @@
  * SOFTWARE.
  *
  */
-package io.nuls.rpc.server.thread;
+package io.nuls.rpc.netty.thread;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
-import io.nuls.rpc.server.runtime.WsData;
-import io.nuls.rpc.server.handler.CmdHandler;
+import io.nuls.rpc.netty.channel.ConnectData;
+import io.nuls.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.tools.log.Log;
 
 /**
@@ -36,14 +36,14 @@ import io.nuls.tools.log.Log;
  * Subscription event processing threads
  *
  * @author tag
- * 2019/1/5
+ * 2019/2/25
  * */
 public class RequestByPeriodProcessor implements Runnable {
 
-    private WsData wsData;
+    private ConnectData connectData;
 
-    public  RequestByPeriodProcessor(WsData wsData){
-        this.wsData = wsData;
+    public  RequestByPeriodProcessor(ConnectData connectData){
+        this.connectData = connectData;
     }
 
     /**
@@ -53,9 +53,9 @@ public class RequestByPeriodProcessor implements Runnable {
     @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {
-        while (wsData.isConnected()) {
+        while (connectData.isConnected()) {
             try {
-                if(!wsData.getRequestPeriodLoopQueue().isEmpty()){
+                if(!connectData.getRequestPeriodLoopQueue().isEmpty()){
                     sendPeriodQueue();
                 }
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
@@ -76,7 +76,7 @@ public class RequestByPeriodProcessor implements Runnable {
         获取队列中的第一个对象
         Get the first item of the queue
          */
-        Object[] objects = wsData.getRequestPeriodLoopQueue().poll();
+        Object[] objects = connectData.getRequestPeriodLoopQueue().poll();
         Message message = (Message) objects[0];
         Request request = (Request) objects[1];
 
@@ -84,9 +84,9 @@ public class RequestByPeriodProcessor implements Runnable {
         需要继续发送，添加回队列
         Need to continue sending, add back to queue
          */
-        boolean isContinue = CmdHandler.responseWithPeriod(wsData, message, request);
+        boolean isContinue = RequestMessageProcessor.responseWithPeriod(connectData, message, request);
         if (isContinue) {
-            wsData.getRequestPeriodLoopQueue().offer(objects);
+            connectData.getRequestPeriodLoopQueue().offer(objects);
         }
     }
 }

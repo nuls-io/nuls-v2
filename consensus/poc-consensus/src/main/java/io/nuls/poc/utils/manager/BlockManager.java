@@ -4,9 +4,9 @@ import io.nuls.base.data.BlockHeader;
 import io.nuls.poc.constant.ConsensusConstant;
 import io.nuls.poc.model.bo.Chain;
 import io.nuls.poc.utils.compare.BlockHeaderComparator;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.crypto.HexUtil;
 
@@ -33,7 +33,7 @@ public class BlockManager {
         Map params = new HashMap(ConsensusConstant.INIT_CAPACITY);
         params.put("chainId", chain.getConfig().getChainId());
         params.put("size", ConsensusConstant.INIT_BLOCK_HEADER_COUNT);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
         Map<String, Object> resultMap;
         List<String> blockHeaderHexs = new ArrayList<>();
         if(cmdResp.isSuccess()){
@@ -42,7 +42,7 @@ public class BlockManager {
         }
         while(!cmdResp.isSuccess() && blockHeaderHexs.size() == 0){
             Thread.sleep(1000);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, "getLatestBlockHeaders", params);
             if(cmdResp.isSuccess()){
                 resultMap = (Map<String, Object>) cmdResp.getResponseData();
                 blockHeaderHexs = (List<String>) resultMap.get("getLatestBlockHeaders");

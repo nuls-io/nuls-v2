@@ -1,36 +1,66 @@
-package io.nuls.rpc.server.runtime;
+package io.nuls.rpc.netty.channel;
 
+import io.netty.channel.socket.SocketChannel;
+import io.nuls.rpc.model.message.Ack;
 import io.nuls.rpc.model.message.Message;
 import io.nuls.rpc.model.message.Request;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
-import org.java_websocket.WebSocket;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.concurrent.*;
 
 /**
- * 做为服务器端时，一个连接里面包含的数据
- * As a server, a connection contains data
- *
+ * 链接基础类
+ * Link base class
  * @author tag
- * 2018/1/2
+ * 2019/2/21
  * */
-public class WsData {
-    /**
-     * 与某个客户端的连接
-     * Connection with a client
-     * */
-    private WebSocket webSocket;
+public class ConnectData {
+
+    private final SocketChannel channel;
 
     /**
-     * 当前链接状态
-     * Current link status
+     * 链接关闭断开标识
+     * Link Close Disconnection Identification
      * */
     private boolean connected = true;
+
+    /**
+     * 从服务端得到的握手确认
+     * Handshake confirmation(NegotiateConnectionResponse) from the server
+     */
+    private final Queue<Message> negotiateResponseQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 从服务端得到的请求确认
+     * Request confirmation(Ack) from the server
+     */
+    private final Queue<Ack> ackQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 从服务端得到的需要手动处理的应答消息
+     * Response that need to be handled manually from the server
+     */
+    private final Queue<Response> responseManualQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 从服务端得到的自动处理的应答消息
+     * Response that need to be handled Automatically from the server
+     */
+    private final Queue<Response> responseAutoQueue = new ConcurrentLinkedQueue<>();
+
+    /**
+     * 请求超时的请求
+     * Request for timeout
+     * */
+    private final List<String> timeOutMessageList = new ArrayList<>();
 
     /**
      * 接口最近调用时间（订阅间隔指定时间返回会用到）
@@ -90,13 +120,6 @@ public class WsData {
     private final Map<String, Integer> subscribeInitCount = new ConcurrentHashMap<>();
 
     /**
-     * 该链接处理消息的需要的线程
-     * The thread that the link needs to process the message
-     * */
-    private final ExecutorService threadPool = ThreadUtils.createThreadPool(6, 50, new NulsThreadFactory("ServerProcessor"));
-
-
-    /**
      * 判断指定消息是否为订阅消息，且是按指定间隔时间返回数据
      * Determines whether the specified message is a subscription message and returns data at a specified interval
      *
@@ -117,11 +140,17 @@ public class WsData {
     }
 
     /**
+     * 该链接处理消息的需要的线程
+     * The thread that the link needs to process the message
+     * */
+    private final ExecutorService threadPool = ThreadUtils.createThreadPool(8, 50, new NulsThreadFactory("ServerProcessor"));
+
+    /**
      * 订阅事件（接口改变次数）
      * Subscription events (number of interface changes)
      * */
     public void subscribeByEvent(Message message){
-        ServerRuntime.subscribeByEvent(this,message);
+        ConnectManager.subscribeByEvent(this,message);
         idToEventMessageMap.put(message.getMessageId(),message);
         addSubscribeInitCount(message);
         requestEventCountLoopList.add(message);
@@ -142,7 +171,7 @@ public class WsData {
             message = idToEventMessageMap.remove(messageId);
             requestEventCountLoopList.remove(message);
             removeSubscribeInitCount(message);
-            ServerRuntime.unsubscribeByEvent(message);
+            ConnectManager.unsubscribeByEvent(message);
         }
     }
 
@@ -154,9 +183,9 @@ public class WsData {
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         for (Object method : request.getRequestMethods().keySet()) {
             String cmd = (String)method;
-            String key = ServerRuntime.getSubscribeKey(message.getMessageId(),cmd);
+            String key = ConnectManager.getSubscribeKey(message.getMessageId(),cmd);
             if(!subscribeInitCount.containsKey(key)){
-                subscribeInitCount.put(key, ServerRuntime.getCmdChangeCount(cmd));
+                subscribeInitCount.put(key, ConnectManager.getCmdChangeCount(cmd));
             }
         }
     }
@@ -169,15 +198,15 @@ public class WsData {
         Request request = JSONUtils.map2pojo((Map) message.getMessageData(), Request.class);
         for (Object method : request.getRequestMethods().keySet()) {
             String cmd = (String)method;
-            String key = ServerRuntime.getSubscribeKey(message.getMessageId(),cmd);
+            String key = ConnectManager.getSubscribeKey(message.getMessageId(),cmd);
             if(subscribeInitCount.containsKey(key)){
                 subscribeInitCount.remove(key);
             }
         }
     }
 
-    public WebSocket getWebSocket() {
-        return webSocket;
+    public ConnectData(SocketChannel channel){
+        this.channel = channel;
     }
 
     public boolean isConnected() {
@@ -188,10 +217,6 @@ public class WsData {
         this.connected = connected;
     }
 
-    public void setWebSocket(WebSocket webSocket) {
-        this.webSocket = webSocket;
-    }
-
     public Map<Message, Long> getCmdInvokeTime() {
         return cmdInvokeTime;
     }
@@ -199,7 +224,6 @@ public class WsData {
     public ConcurrentLinkedQueue<Object[]> getRequestSingleQueue() {
         return requestSingleQueue;
     }
-
     public LinkedBlockingQueue<Object []> getRequestPeriodLoopQueue() {
         return requestPeriodLoopQueue;
     }
@@ -224,7 +248,60 @@ public class WsData {
         return subscribeInitCount;
     }
 
+    public SocketChannel getChannel() {
+        return channel;
+    }
+
+
+    public Queue<Message> getNegotiateResponseQueue() {
+        return negotiateResponseQueue;
+    }
+
+    public Queue<Ack> getAckQueue() {
+        return ackQueue;
+    }
+
+    public Queue<Response> getResponseManualQueue() {
+        return responseManualQueue;
+    }
+
+    public Queue<Response> getResponseAutoQueue() {
+        return responseAutoQueue;
+    }
+
+    public List<String> getTimeOutMessageList() {
+        return timeOutMessageList;
+    }
+
     public ExecutorService getThreadPool() {
         return threadPool;
+    }
+
+    /**
+     * @return 第一条握手确认消息，The first handshake confirmed message
+     */
+    public Message firstMessageInNegotiateResponseQueue() {
+        return negotiateResponseQueue.poll();
+    }
+
+    /**
+     * @return 第一条确认消息，The first ack message
+     */
+    public Ack firstMessageInAckQueue() {
+        return ackQueue.poll();
+    }
+
+    /**
+     * @return 第一条需要手动处理的Response消息，The first Response message that needs to be handled manually
+     */
+    public Response firstMessageInResponseManualQueue() {
+        return responseManualQueue.poll();
+    }
+
+    /**
+     * @return 第一条需要自动处理的Response消息，The first Response message that needs to be handled automatically
+     */
+    public Response firstMessageInResponseAutoQueue() {
+        return responseAutoQueue.poll();
     }
 }

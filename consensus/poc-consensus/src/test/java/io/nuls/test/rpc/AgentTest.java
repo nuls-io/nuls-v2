@@ -2,10 +2,10 @@ package io.nuls.test.rpc;
 
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.parse.SerializeUtils;
 import org.junit.BeforeClass;
@@ -47,7 +47,7 @@ public class AgentTest {
         params.put("packingAddress",packingAddress.getBase58());
         params.put("password","");
         params.put("rewardAddress",rewardAddress.getBase58());
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -65,7 +65,7 @@ public class AgentTest {
         params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
         //params.put("tx","0400b55977c06701005d204e00000000000000000000000000000100014a25417a133876da5e0cdd04a983a8a5d8e70172010001c5fb68d127dfde22eac3d79f697766ba449e642d010001c833737706ca24c1af266ef599097f796ca05a3c00000000000024406801170100014a25417a133876da5e0cdd04a983a8a5d8e7017201000100c0d401000000000000000000000000000800000000000000000001170100014a25417a133876da5e0cdd04a983a8a5d8e7017201000100204e0000000000000000000000000000ffffffff00");
         params.put("tx","0400a9a87ac06701005d204e0000000000000000000000000000010001f6db7f28888015528eae577ae82f985589dc63f20100012f627a02ca063f0c1c9466290c376c97a86edf95010001197a64059dd812fcf6e2d4c2bf22f0b320554c770000000000002440680117010001f6db7f28888015528eae577ae82f985589dc63f201000100c0d40100000000000000000000000000080000000000000000000117010001f6db7f28888015528eae577ae82f985589dc63f201000100204e0000000000000000000000000000ffffffff00");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentCommit", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentCommit", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -77,7 +77,7 @@ public class AgentTest {
         Map<String,Object>params = new HashMap<>();
         params.put("chainId",1);
         params.put("tx","0400a50140a16701005d204e0000000000000000000000000000010001f6db7f28888015528eae577ae82f985589dc63f20100012f627a02ca063f0c1c9466290c376c97a86edf95010001197a64059dd812fcf6e2d4c2bf22f0b320554c770000000000002440680117010001f6db7f28888015528eae577ae82f985589dc63f201000100c0d40100000000000000000000000000080000000000000000000117010001f6db7f28888015528eae577ae82f985589dc63f201000100204e0000000000000000000000000000ffffffff00");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentRollBack", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgentRollBack", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -90,7 +90,7 @@ public class AgentTest {
         params.put("chainId",1);
         Address agentAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("a5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         params.put("address",agentAddress.getBase58());
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -107,7 +107,7 @@ public class AgentTest {
         //组装blockHeader
         params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
         params.put("tx","");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgentCommit", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgentCommit", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -119,7 +119,7 @@ public class AgentTest {
         Map<String,Object>params = new HashMap<>();
         params.put("chainId",1);
         params.put("tx","");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgentRollBack", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgentRollBack", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -130,7 +130,7 @@ public class AgentTest {
     public void getAgentList()throws Exception{
         Map<String,Object>params = new HashMap<>();
         params.put("chainId",12345);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentList", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentList", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -139,7 +139,7 @@ public class AgentTest {
         Map<String,Object>params = new HashMap<>();
         params.put("chainId",12345);
         params.put("agentHash","00207de58e4afadc846932aa9c0398ce90ed1e35c5b722e977b14a0f93397d438343");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentInfo", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentInfo", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -148,7 +148,7 @@ public class AgentTest {
         Map<String,Object>params = new HashMap<>();
         params.put("chainId",1);
         params.put("agentHash","0020fef3f394953c601f6abe82f223d5c5673d3b4d7461e575f663954a7c4e055317");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentStatus", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getAgentStatus", params);
         System.out.println(cmdResp.getResponseData());
     }
 
