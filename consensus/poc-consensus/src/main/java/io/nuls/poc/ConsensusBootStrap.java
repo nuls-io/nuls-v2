@@ -99,7 +99,13 @@ public class ConsensusBootStrap {
                         .dependencies(ModuleE.BL.abbr, "1.0")
                         .scanPackage("io.nuls.poc.rpc");
                 String kernelUrl = "ws://"+ HostInfo.getLocalIP()+":8887/ws";
+                /*
+                * 链接到指定地址
+                * */
                 ConnectManager.getConnectByUrl(kernelUrl);
+                /*
+                * 和指定地址同步
+                * */
                 ResponseMessageProcessor.syncKernel(kernelUrl);
             } catch (Exception e) {
                 Log.error("Account initServer failed", e);
