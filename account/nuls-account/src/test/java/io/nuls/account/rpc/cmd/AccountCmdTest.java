@@ -14,11 +14,11 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Page;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.ByteUtils;
 import io.nuls.tools.exception.NulsRuntimeException;
@@ -64,7 +64,7 @@ public class AccountCmdTest {
         params.put(Constants.VERSION_KEY_STR, version);
         params.put("chainId", chainId);
         params.put("address", address);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
 
         SimpleAccountDto accountDto = JSONUtils.json2pojo(JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAccountByAddress")), SimpleAccountDto.class);
         return accountDto;
@@ -86,7 +86,7 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", address);
             params.put("password", password);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getPriKeyByAddress");
             priKey = (String) result.get("priKey");
         } catch (Exception e) {
@@ -131,7 +131,7 @@ public class AccountCmdTest {
         params.put("chainId", chainId);
         params.put("count", count);
         params.put("password", password);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
         //List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(cmdResp.getResponseData()), AccountOfflineDto.class);
         List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")).get("list")), AccountOfflineDto.class);
         assertEquals(accountList.size(), count);
@@ -152,7 +152,7 @@ public class AccountCmdTest {
         params.put("chainId", chainId);
         params.put("address", accountList.get(0));
         params.put("password", password);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
         assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
         account = getAccountByAddress(chainId, accountList.get(0));
         assertNull(account);
@@ -167,7 +167,7 @@ public class AccountCmdTest {
 
     @Test
     public void getAccountListTest() throws Exception {
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountList", null);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountList", null);
         //List<SimpleAccountDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(cmdResp.getResponseData()), SimpleAccountDto.class);
         List<SimpleAccountDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAccountList")).get("list")), SimpleAccountDto.class);
         accountList.forEach(account -> System.out.println(account.getAddress()));
@@ -181,19 +181,19 @@ public class AccountCmdTest {
         params.put("chainId", chainId);
         params.put("pageNumber", 1);
         params.put("pageSize", 10);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAddressList", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAddressList", params);
         Page<String> resultPage = JSONUtils.json2pojo(JSONUtils.obj2json(((HashMap) cmdResp.getResponseData()).get("ac_getAddressList")), Page.class);
         assertTrue(resultPage.getTotal() > 0);
         resultPage.getList().forEach(System.out::println);
 
         //test paging parameter pageNumber error
         params.put("pageNumber", 0);
-        cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAddressList", params);
+        cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAddressList", params);
         assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
         //Test paging parameter pageSize error
         params.put("pageNumber", 1);
         params.put("pageSize", -1);
-        cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAddressList", params);
+        cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAddressList", params);
         assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
     }
 
@@ -206,12 +206,12 @@ public class AccountCmdTest {
             params.put(Constants.VERSION_KEY_STR, version);
             params.put("chainId", 0);
             params.put("password", password);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAllPriKey", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAllPriKey", params);
             if (AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
                 List<String> privateKeyAllList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAllPriKey")).get("list");
                 //query all accounts privateKey the specified chain
                 params.put("chainId", 1);
-                cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAllPriKey", params);
+                cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAllPriKey", params);
                 List<String> privateKeyList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAllPriKey")).get("list");
                 assertTrue(privateKeyList.size() >= accountList.size());
                 assertTrue(privateKeyAllList.size() >= privateKeyList.size());
@@ -234,7 +234,7 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", accountList.get(0));
             params.put("password", password);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getPriKeyByAddress", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getPriKeyByAddress");
             assertNotNull(result.get("priKey"));
             assertTrue((boolean) result.get("valid"));
@@ -257,7 +257,7 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", accountList.get(0));
             params.put("remark", remark);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setRemark", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setRemark", params);
             assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
         } catch (NulsRuntimeException e) {
             e.printStackTrace();
@@ -280,13 +280,13 @@ public class AccountCmdTest {
             params.put("priKey", "5d3ee4ab8f9d5c03fb061ad14fe014c999a35c4a03d19a56d10cb4ad95d8463c");
             params.put("password", "nuls123456");
             params.put("overwrite", true);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             String address = (String) result.get("address");
 //            assertEquals(accountList.get(0), address);
             //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
             params.put("overwrite", false);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
 
             //移除账户，再导入 Remove the account and import it according to the private key.
@@ -295,10 +295,10 @@ public class AccountCmdTest {
             params2.put("chainId", chainId);
             params2.put("address", accountList.get(0));
             params2.put("password", password);
-            CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params2);
+            ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params2);
             //账户不存在则创建 If account does not exist, create
             params.put("priKey", priKey);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
 
             //测试未加密账户
@@ -310,7 +310,7 @@ public class AccountCmdTest {
             params.remove("password");
             params.put("priKey", priKey);
             params.put("overwrite", true);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             address = (String) result.get("address");
             assertEquals(addressx, address);
@@ -346,14 +346,14 @@ public class AccountCmdTest {
             params.put("keyStore", keyStoreHex);
             params.put("password", password);
             params.put("overwrite", true);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByKeystore");
             String address = (String) result.get("address");
             assertEquals(accountList.get(0), address);
 
             //账户已存在，不覆盖，返回错误提示  If the account exists, it will not be covered,return error message.
             params.put("overwrite", false);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
             assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
 
             //移除账户，再导入 Remove the account and import it according to the private key.
@@ -362,9 +362,9 @@ public class AccountCmdTest {
             params2.put("chainId", chainId);
             params2.put("address", accountList.get(0));
             params2.put("password", password);
-            CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params2);
+            ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params2);
             //账户不存在则创建 If account does not exist, create
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
             assertEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
 
             //测试未加密账户
@@ -387,7 +387,7 @@ public class AccountCmdTest {
             params.put("keyStore", keyStoreHex);
             params.remove("password");
             params.put("overwrite", true);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByKeystore", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByKeystore");
             address = (String) result.get("address");
             assertEquals(addressx, address);
@@ -414,7 +414,7 @@ public class AccountCmdTest {
             params.put("password", password);
             params.put("pathDir", pathDir);
             //导出账户keystore路径  export account keyStore path
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_exportAccountKeyStore", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_exportAccountKeyStore", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_exportAccountKeyStore");
             String path = (String) result.get("path");
             assertNotNull(path);
@@ -423,7 +423,7 @@ public class AccountCmdTest {
             pathDir = "测试1/back/up";
             params.put("pathDir", pathDir);
             //导出账户keystore路径  export account keyStore path
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_exportAccountKeyStore", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_exportAccountKeyStore", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_exportAccountKeyStore");
             path = (String) result.get("path");
             assertNotNull(path);
@@ -436,7 +436,7 @@ public class AccountCmdTest {
             params.remove("password");
             params.put("pathDir", pathDir);
             //导出账户keystore路径  export account keyStore path
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_exportAccountKeyStore", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_exportAccountKeyStore", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_exportAccountKeyStore");
             path = (String) result.get("path");
             assertNotNull(path);
@@ -459,13 +459,13 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", address);
             params.put("password", password);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setPassword");
             Boolean value = (Boolean) result.get("value");
             assertTrue(value);
 
             //为账户重复设置密码 Repeat password for account
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
             //不能再次设置密码 Password cannot be set again.
             assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
         } catch (Exception e) {
@@ -487,25 +487,25 @@ public class AccountCmdTest {
             params.put("address", address);
             params.put("password", password);
             params.put("newPassword", newPassword);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_updatePassword", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_updatePassword", params);
             //未设置密码不能修改密码，必须先设置密码再修改 No password can be changed, password must be set first, then password should be changed.
             assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
 
             //为账户设置密码 set password for account
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
             Map result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setPassword");
             Boolean value = (Boolean) result.get("value");
             assertTrue(value);
 
             //为账户修改密码 change password for account
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_updatePassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_updatePassword", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_updatePassword");
             value = (Boolean) result.get("value");
             assertTrue(value);
 
             //使用错误旧密码为账户修改密码 using old password to change password for account
             params.put("password", "errorpwd123");
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_updatePassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_updatePassword", params);
             assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
         } catch (Exception e) {
             e.printStackTrace();
@@ -520,7 +520,7 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("count", 1);
             //创建未加密离线账户 create unencrypted account
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
             //List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(JSONUtils.json2map(JSONUtils.obj2json(cmdResp.getResponseData())).get("list")), AccountOfflineDto.class);
             List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")).get("list")), AccountOfflineDto.class);
             String address = accountList.get(0).getAddress();
@@ -533,7 +533,7 @@ public class AccountCmdTest {
             params.put("priKey", priKey);
             params.put("password", password);
             //为账户设置密码 set password for account
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setOfflineAccountPassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setOfflineAccountPassword", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setOfflineAccountPassword");
             String encryptedPriKey = (String) result.get("encryptedPriKey");
             assertNotNull(encryptedPriKey);
@@ -545,7 +545,7 @@ public class AccountCmdTest {
             params.put("encryptedPriKey", encryptedPriKey);
             params.put("newPassword", newPassword);
             //为离线账户重复设置密码 repeat password for account
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setOfflineAccountPassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setOfflineAccountPassword", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setOfflineAccountPassword");
             String encryptedPriKeyNew = (String) result.get("encryptedPriKey");
             //可以为离线账户再次设置密码 Password cannot be set again.
@@ -563,14 +563,14 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("count", 1);
             //创建未加密离线账户 create unencrypted account
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
             List<AccountOfflineDto> accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")).get("list")), AccountOfflineDto.class);
             String address = accountList.get(0).getAddress();
             String priKey = accountList.get(0).getPriKey();
 
             //创建加密离线账户 create encrypted account
             params.put("password", password);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createOfflineAccount", params);
             accountList = JSONUtils.json2list(JSONUtils.obj2json(((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createOfflineAccount")).get("list")), AccountOfflineDto.class);
             String encryptedPriKey2 = accountList.get(0).getEncryptedPriKey();
 
@@ -581,7 +581,7 @@ public class AccountCmdTest {
             params.put("address", address);
             params.put("priKey", priKey);
             params.put("password", password);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setOfflineAccountPassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setOfflineAccountPassword", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setOfflineAccountPassword");
             String encryptedPriKey = (String) result.get("encryptedPriKey");
             assertNotNull(encryptedPriKey);
@@ -594,21 +594,21 @@ public class AccountCmdTest {
             params.put("priKey", encryptedPriKey2);
             params.put("password", password);
             params.put("newPassword", newPassword);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_updateOfflineAccountPassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_updateOfflineAccountPassword", params);
             result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_updateOfflineAccountPassword"));
             assertEquals(AccountErrorCode.ADDRESS_ERROR.getCode(), result.get("code"));
 
             //测试错误的私钥 testing the wrong private key
             params.put("address", address);
             params.put("priKey", "86" + encryptedPriKey);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_updateOfflineAccountPassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_updateOfflineAccountPassword", params);
             result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_updateOfflineAccountPassword"));
             assertEquals(AccountErrorCode.PASSWORD_IS_WRONG.getCode(), result.get("code"));
 
             //测试错误的密码 testing the wrong password
             params.put("priKey", encryptedPriKey);
             params.put("password", password + "errorpwd");
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_updateOfflineAccountPassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_updateOfflineAccountPassword", params);
             result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_updateOfflineAccountPassword"));
             assertEquals(AccountErrorCode.PASSWORD_IS_WRONG.getCode(), result.get("code"));
 
@@ -618,7 +618,7 @@ public class AccountCmdTest {
             params.put("priKey", encryptedPriKey);
             params.put("password", password);
             params.put("newPassword", newPassword);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_updateOfflineAccountPassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_updateOfflineAccountPassword", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_updateOfflineAccountPassword");
             String encryptedPriKeyNew = (String) result.get("encryptedPriKey");
             assertNotEquals(encryptedPriKeyNew, encryptedPriKey);
@@ -640,20 +640,20 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", address);
             //验证账户是否加密 verify that the account is encrypted
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_isEncrypted", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_isEncrypted", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_isEncrypted");
             Boolean value = (Boolean) result.get("value");
             assertFalse(value);
 
             //为账户设置密码 set password for account
             params.put("password", password);
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setPassword");
             value = (Boolean) result.get("value");
             assertTrue(value);
 
             //验证账户是否加密 verify that the account is encrypted
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_isEncrypted", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_isEncrypted", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_isEncrypted");
             value = (Boolean) result.get("value");
             assertTrue(value);
@@ -675,19 +675,19 @@ public class AccountCmdTest {
             params.put("chainId", chainId);
             params.put("address", address);
             params.put("password", password);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_validationPassword", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_validationPassword", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_validationPassword");
             Boolean value = (Boolean) result.get("value");
             assertFalse(value);
 
             //为账户设置密码 set password for account
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setPassword", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setPassword");
             value = (Boolean) result.get("value");
             assertTrue(value);
 
             //验证账户是否正确 verify that the account password is correct
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_validationPassword", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_validationPassword", params);
             result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_validationPassword");
             value = (Boolean) result.get("value");
             assertTrue(value);
@@ -735,14 +735,14 @@ public class AccountCmdTest {
             params.put("address", address);
             params.put("password", password);
             params.put("dataHex", dataHex);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
             HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_signDigest"));
             String signatureHex = (String) result.get(RpcConstant.SIGNATURE_HEX);
             assertNotNull(signatureHex);
 
             //测试密码不正确
             params.put("password", password + "error");
-            cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
+            cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_signDigest", params);
             result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_signDigest"));
             assertNotEquals(AccountConstant.SUCCESS_CODE, cmdResp.getResponseStatus());
             assertEquals(AccountErrorCode.PASSWORD_IS_WRONG.getCode(), result.get("code"));
