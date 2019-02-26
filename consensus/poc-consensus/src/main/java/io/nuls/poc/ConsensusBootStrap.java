@@ -97,6 +97,7 @@ public class ConsensusBootStrap {
                         .moduleRoles(new String[]{"1.0"})
                         .moduleVersion("1.0")
                         .dependencies(ModuleE.BL.abbr, "1.0")
+                        .dependencies(ModuleE.TX.abbr, "1.0")
                         .scanPackage("io.nuls.poc.rpc");
                 String kernelUrl = "ws://"+ HostInfo.getLocalIP()+":8887/ws";
                 /*

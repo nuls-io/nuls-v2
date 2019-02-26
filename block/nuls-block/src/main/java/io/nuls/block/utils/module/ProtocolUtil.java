@@ -21,9 +21,6 @@
 package io.nuls.block.utils.module;
 
 import io.nuls.base.data.BlockHeader;
-import io.nuls.base.data.protocol.ListItem;
-import io.nuls.base.data.protocol.MessageConfig;
-import io.nuls.base.data.protocol.Protocol;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.ChainContext;
 import io.nuls.block.rpc.callback.ProtocolVersionInvoke;
@@ -34,7 +31,6 @@ import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,23 +43,24 @@ import java.util.Map;
 public class ProtocolUtil {
 
     public static boolean meaasgeValidate(int chainId, Class messageClass, Class handlerClass) {
-        ChainContext context = ContextManager.getContext(chainId);
-        short version = context.getVersion();
-        Protocol protocol = context.getProtocolsMap().get(version);
-        List<MessageConfig> allowMsg = protocol.getAllowMsg();
-        String messageClassName = messageClass.getName();
-        String handlerClassName = handlerClass.getName();
-        for (MessageConfig config : allowMsg) {
-            if (config.getRefer().equals(messageClassName)) {
-                List<ListItem> handlers = config.getHandlers();
-                for (ListItem handler : handlers) {
-                    if (handler.getName().equals(handlerClassName)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+//        ChainContext context = ContextManager.getContext(chainId);
+//        short version = context.getVersion();
+//        Protocol protocol = context.getProtocolsMap().get(version);
+//        List<MessageConfig> allowMsg = protocol.getAllowMsg();
+//        String messageClassName = messageClass.getName();
+//        String handlerClassName = handlerClass.getName();
+//        for (MessageConfig config : allowMsg) {
+//            if (config.getRefer().equals(messageClassName)) {
+//                List<ListItem> handlers = config.getHandlers();
+//                for (ListItem handler : handlers) {
+//                    if (handler.getName().equals(handlerClassName)) {
+//                        return true;
+//                    }
+//                }
+//            }
+//        }
+//        return false;
+        return true;
     }
 
     public static boolean transactionValidate(int chainId, Class messageClass, Class handlerClass) {
@@ -86,7 +83,7 @@ public class ProtocolUtil {
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "rollbackBlock", params);
             if (response.isSuccess()) {
-                context.setVersion((short) 0);
+                context.setVersion((short) 1);
             }
             return response.isSuccess();
         } catch (Exception e) {
@@ -112,7 +109,7 @@ public class ProtocolUtil {
             params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
             Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.PU.abbr, "saveBlock", params);
             if (response.isSuccess()) {
-                context.setVersion((short) 0);
+                context.setVersion((short) 1);
             }
             return response.isSuccess();
         } catch (Exception e) {
