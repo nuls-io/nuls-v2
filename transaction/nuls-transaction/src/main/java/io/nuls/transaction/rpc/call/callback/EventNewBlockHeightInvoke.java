@@ -41,7 +41,6 @@ import java.util.HashMap;
  * @author: Charlie
  * @date: 2019-01-02
  */
-@Component
 public class EventNewBlockHeightInvoke extends BaseInvoke {
 
     @Autowired
