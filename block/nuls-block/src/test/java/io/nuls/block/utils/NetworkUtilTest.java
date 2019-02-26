@@ -21,10 +21,10 @@
 package io.nuls.block.utils;
 
 import io.nuls.block.model.Node;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +56,7 @@ public class NetworkUtilTest {
         params.put("startPage", 0);
         params.put("pageSize", 0);
 
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
         Map responseData = (Map) response.getResponseData();
         List nw_getNodes = (List) responseData.get("nw_getNodes");
         List nodes = new ArrayList();

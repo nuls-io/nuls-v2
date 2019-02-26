@@ -35,14 +35,21 @@ import java.util.List;
 
 import static io.nuls.block.utils.LoggerUtil.commonLog;
 
+/**
+ * 链运行参数服务实现
+ *
+ * @author captain
+ * @version 1.0
+ * @date 19-2-26 上午10:50
+ */
 @Service
 public class ParametersStorageServiceImpl implements ParametersStorageService {
     @Override
-    public boolean save(ChainParameters chainParameters, int chainID) {
+    public boolean save(ChainParameters chainParameters, int chainId) {
         byte[] bytes;
         try {
             bytes = chainParameters.serialize();
-            return RocksDBService.put(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainID), bytes);
+            return RocksDBService.put(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainId), bytes);
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -51,10 +58,10 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
     }
 
     @Override
-    public ChainParameters get(int chainID) {
+    public ChainParameters get(int chainId) {
         try {
             ChainParameters po = new ChainParameters();
-            byte[] bytes = RocksDBService.get(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainID));
+            byte[] bytes = RocksDBService.get(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainId));
             po.parse(new NulsByteBuffer(bytes));
             return po;
         } catch (Exception e) {
@@ -65,9 +72,9 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
     }
 
     @Override
-    public boolean delete(int chainID) {
+    public boolean delete(int chainId) {
         try {
-            return RocksDBService.delete(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainID));
+            return RocksDBService.delete(Constant.CHAIN_PARAMETERS, ByteUtils.intToBytes(chainId));
         } catch (Exception e) {
             e.printStackTrace();
             commonLog.error(e);
@@ -84,6 +91,58 @@ public class ParametersStorageServiceImpl implements ParametersStorageService {
                 var po = new ChainParameters();
                 po.parse(new NulsByteBuffer(bytes));
                 pos.add(po);
+            }
+            return pos;
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean saveProtocolConfigJson(String json, int chainId) {
+        byte[] bytes;
+        try {
+            bytes = json.getBytes();
+            return RocksDBService.put(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainId), bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public String getProtocolConfigJson(int chainId) {
+        try {
+            byte[] bytes = RocksDBService.get(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainId));
+            return new String(bytes);
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return null;
+        }
+    }
+
+    @Override
+    public boolean deleteProtocolConfigJson(int chainId) {
+        try {
+            return RocksDBService.delete(Constant.PROTOCOL_CONFIG, ByteUtils.intToBytes(chainId));
+        } catch (Exception e) {
+            e.printStackTrace();
+            commonLog.error(e);
+            return false;
+        }
+    }
+
+    @Override
+    public List<String> getProtocolConfigJsonList() {
+        try {
+            var pos = new ArrayList<String>();
+            List<byte[]> valueList = RocksDBService.valueList(Constant.CHAIN_PARAMETERS);
+            for (byte[] bytes : valueList) {
+                pos.add(new String(bytes));
             }
             return pos;
         } catch (Exception e) {

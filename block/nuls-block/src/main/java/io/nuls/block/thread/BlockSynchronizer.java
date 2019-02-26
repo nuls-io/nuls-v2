@@ -30,7 +30,7 @@ import io.nuls.block.model.ChainContext;
 import io.nuls.block.model.ChainParameters;
 import io.nuls.block.model.Node;
 import io.nuls.block.service.BlockService;
-import io.nuls.block.utils.BlockDownloadUtils;
+import io.nuls.block.utils.BlockUtil;
 import io.nuls.block.utils.module.ConsensusUtil;
 import io.nuls.block.utils.module.NetworkUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
@@ -85,7 +85,7 @@ public class BlockSynchronizer implements Runnable {
 
     private boolean synchronize(int chainId) throws Exception {
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
-        //1.调用网络模块接口获取当前chainID网络的可用节点
+        //1.调用网络模块接口获取当前chainId网络的可用节点
         List<Node> availableNodes = NetworkUtil.getAvailableNodes(chainId);
 
         //2.判断可用节点数是否满足最小配置
@@ -93,7 +93,7 @@ public class BlockSynchronizer implements Runnable {
         ChainParameters parameters = context.getParameters();
         int minNodeAmount = parameters.getMinNodeAmount();
         if (minNodeAmount == 0) {
-            commonLog.info("skip block syn, minNodeAmount-" + minNodeAmount);
+            commonLog.info("skip block syn, because minNodeAmount=0");
             context.setStatus(RunningStatusEnum.RUNNING);
             ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
             return true;
@@ -151,16 +151,17 @@ public class BlockSynchronizer implements Runnable {
             commonLog.info("block syn complete, total download:" + total + ", total time:" + (end - start) + ", average time:" + (end - start) / total);
             if (success) {
                 if (checkIsNewest(chainId, params, context)) {
+                    //要测试分叉链切换或者孤儿链，放开下面语句，概率会加大
 //                if (true) {
                     commonLog.info("block syn complete successfully, current height-" + params.getNetLatestHeight());
                     context.setStatus(RunningStatusEnum.RUNNING);
                     ConsensusUtil.notice(chainId, CONSENSUS_WORKING);
                     return true;
                 } else {
-                    commonLog.info("block syn complete but is not newest");
+                    commonLog.warn("block syn complete but is not newest");
                 }
             } else {
-                commonLog.info("block syn fail, downResult:" + downResult + ", storageResult:" + storageResult);
+                commonLog.error("block syn fail, downResult:" + downResult + ", storageResult:" + storageResult);
             }
         } else {
             commonLog.warn("chain-" + chainId + ", available nodes not enough");
@@ -171,7 +172,7 @@ public class BlockSynchronizer implements Runnable {
     /**
      * 检查本地区块是否同步到最新高度,如果不是最新高度,变更同步状态为BlockSynStatusEnum.WAITING,等待下次同步
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param params
      * @param context
      * @return
@@ -294,7 +295,7 @@ public class BlockSynchronizer implements Runnable {
     /**
      * 区块同步前,与网络区块作对比,检查本地区块是否需要回滚
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param params
      * @return
      */
@@ -357,7 +358,7 @@ public class BlockSynchronizer implements Runnable {
         //如果双方共同高度<网络高度,要进行hash判断,需要从网络上下载区块,因为params里只有最新的区块hash,没有旧的hash
         if (commonHeight < netHeight) {
             for (Node node : params.getNodes()) {
-                Block remoteBlock = BlockDownloadUtils.getBlockByHash(chainId, localHash, node);
+                Block remoteBlock = BlockUtil.downloadBlockByHash(chainId, localHash, node.getId());
                 if (remoteBlock != null) {
                     netHash = remoteBlock.getHeader().getHash();
                     return localHash.equals(netHash);

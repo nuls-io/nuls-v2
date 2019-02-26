@@ -43,7 +43,7 @@ public class ConfigManager {
     /**
      * 获取某条链的参数
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param name
      * @return
      */
@@ -55,7 +55,7 @@ public class ConfigManager {
     /**
      * 设置某条链的参数
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param name
      * @param value
      * @return
@@ -73,7 +73,7 @@ public class ConfigManager {
     /**
      * 新增一条链的参数
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param map
      */
     public static void add(int chainId, Map<String, ConfigItem> map) {

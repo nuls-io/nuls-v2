@@ -22,6 +22,7 @@
 
 package io.nuls.block.utils;
 
+import io.nuls.base.data.protocol.*;
 import io.nuls.block.constant.ConfigConstant;
 import io.nuls.block.manager.ConfigManager;
 import io.nuls.block.manager.ContextManager;
@@ -32,11 +33,13 @@ import io.nuls.tools.io.IoUtils;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.config.ConfigItem;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
-import static io.nuls.block.constant.Constant.MODULES_CONFIG_FILE;
+import static io.nuls.block.constant.Constant.*;
 
 /**
  * 配置加载器
@@ -59,7 +62,14 @@ public class ConfigLoader {
         if (list == null || list.size() == 0) {
             loadDefault();
         } else {
-            list.forEach(e -> ContextManager.init(e));
+            for (ChainParameters chainParameters : list) {
+                int chainId = chainParameters.getChainId();
+                String protocolConfigJson = service.getProtocolConfigJson(chainId);
+                List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(protocolConfigJson, ProtocolConfigJson.class);
+                protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
+                Map<Short, Protocol> protocolMap = load(protocolConfigs);
+                ContextManager.init(chainParameters, protocolMap);
+            }
         }
     }
 
@@ -69,6 +79,10 @@ public class ConfigLoader {
      * @throws Exception
      */
     private static void loadDefault() throws Exception {
+        String json = IoUtils.read(PROTOCOL_CONFIG_FILE);
+        List<ProtocolConfigJson> protocolConfigs = JSONUtils.json2list(json, ProtocolConfigJson.class);
+        protocolConfigs.sort(PROTOCOL_CONFIG_COMPARATOR);
+        Map<Short, Protocol> protocolMap = load(protocolConfigs);
         String configJson = IoUtils.read(MODULES_CONFIG_FILE);
         List<ConfigItem> configItems = JSONUtils.json2list(configJson, ConfigItem.class);
         Map<String, ConfigItem> map = new HashMap<>(configItems.size());
@@ -77,8 +91,35 @@ public class ConfigLoader {
         ConfigManager.add(chainId, map);
         ChainParameters po = new ChainParameters();
         po.init(map);
-        ContextManager.init(po);
+        ContextManager.init(po, protocolMap);
         service.save(po, chainId);
+        service.saveProtocolConfigJson(json, chainId);
+    }
+
+    private static Map<Short, Protocol> load(List<ProtocolConfigJson> protocolConfigs){
+        Map<Short, Protocol> protocolsMap = new HashMap<>(protocolConfigs.size());
+        for (ProtocolConfigJson config : protocolConfigs) {
+            Protocol protocol = new Protocol();
+            protocol.setVersion(config.getVersion());
+            short extend = config.getExtend();
+            List<MessageConfig> msgList = new ArrayList<>();
+            List<TransactionConfig> txList = new ArrayList<>();
+            if (extend > 0) {
+                Protocol parent = protocolsMap.get(extend);
+                msgList.addAll(parent.getAllowMsg());
+                txList.addAll(parent.getAllowTx());
+            }
+            msgList.addAll(config.getAddmsg());
+            List<String> discardMsg = config.getDiscardmsg().stream().map(ListItem::getName).collect(Collectors.toList());
+            msgList.removeIf(e -> discardMsg.contains(e.getName()));
+            txList.addAll(config.getAddtx());
+            List<String> discardTx = config.getDiscardtx().stream().map(ListItem::getName).collect(Collectors.toList());
+            txList.removeIf(e -> discardTx.contains(e.getName()));
+            protocol.setAllowMsg(msgList);
+            protocol.setAllowTx(txList);
+            protocolsMap.put(protocol.getVersion(), protocol);
+        }
+        return protocolsMap;
     }
 
 }

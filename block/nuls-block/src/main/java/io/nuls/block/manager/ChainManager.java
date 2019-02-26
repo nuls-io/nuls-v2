@@ -56,17 +56,17 @@ public class ChainManager {
     private static ChainStorageService chainStorageService;
 
     /**
-     * 本机运行的所有主链集合,按照chainID区分
+     * 本机运行的所有主链集合,按照chainId区分
      */
     private static Map<Integer, Chain> masterChains = new HashMap<>();
 
     /**
-     * 本机运行的所有分叉链集合,按照chainID区分
+     * 本机运行的所有分叉链集合,按照chainId区分
      */
     private static Map<Integer, SortedSet<Chain>> forkChains = new HashMap<>();
 
     /**
-     * 本机运行的所有孤儿链集合,按照chainID区分
+     * 本机运行的所有孤儿链集合,按照chainId区分
      */
     private static Map<Integer, SortedSet<Chain>> orphanChains = new HashMap<>();
 
@@ -77,7 +77,7 @@ public class ChainManager {
      * 2.回滚主链到分叉高度.
      * 3.依次添加分叉链集合B中的区块到主链
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param masterChain
      * @param forkChain
      * @return
@@ -240,7 +240,7 @@ public class ChainManager {
     /**
      * 设置主链
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static void setMasterChain(int chainId, Chain chain) {
@@ -250,7 +250,7 @@ public class ChainManager {
     /**
      * 获取主链
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static Chain getMasterChain(int chainId) {
@@ -260,7 +260,7 @@ public class ChainManager {
     /**
      * 新增分叉链
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static boolean addForkChain(int chainId, Chain chain) {
@@ -270,7 +270,7 @@ public class ChainManager {
     /**
      * 删除分叉链，与removeOrphanChain方法的差别在于本方法直接删除对象，不维护引用状态
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static void deleteForkChain(int chainId, Chain chain) {
@@ -281,7 +281,7 @@ public class ChainManager {
     /**
      * 移除分叉链,分叉链占用空间超出限制时,清理空间
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static int removeForkChain(int chainId, Chain chain) {
@@ -330,7 +330,7 @@ public class ChainManager {
     /**
      * 获取分叉链集合
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static SortedSet<Chain> getForkChains(int chainId) {
@@ -341,7 +341,7 @@ public class ChainManager {
     /**
      * 更新分叉链集合
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static void setForkChains(int chainId, SortedSet<Chain> chains) {
@@ -351,7 +351,7 @@ public class ChainManager {
     /**
      * 新增孤儿链
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static boolean addOrphanChain(int chainId, Chain chain) {
@@ -362,7 +362,7 @@ public class ChainManager {
      * 移除孤儿链
      * 孤儿链占用空间超出限制时,清理空间
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param chain
      * @throws Exception
      */
@@ -415,7 +415,7 @@ public class ChainManager {
     /**
      * 获取孤儿链集合
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static SortedSet<Chain> getOrphanChains(int chainId) {
@@ -426,7 +426,7 @@ public class ChainManager {
     /**
      * 更新孤儿链集合
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static void setOrphanChains(int chainId, SortedSet<Chain> chains) {
@@ -480,7 +480,7 @@ public class ChainManager {
     /**
      * 删除孤儿链，与removeOrphanChain方法的差别在于本方法直接删除对象，不维护引用状态
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param orphanChain
      */
     public static void deleteOrphanChain(Integer chainId, Chain orphanChain) {
@@ -491,7 +491,7 @@ public class ChainManager {
     /**
      * 初始化
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      */
     public static void init(int chainId) {
         forkChains.put(chainId, new TreeSet<>(Chain.COMPARATOR));

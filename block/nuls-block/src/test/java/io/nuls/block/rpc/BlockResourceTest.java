@@ -26,10 +26,10 @@ import io.nuls.base.basic.NulsByteBuffer;
 import io.nuls.base.data.Block;
 import io.nuls.base.data.BlockHeader;
 import io.nuls.base.data.NulsDigestData;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -54,7 +54,7 @@ public class BlockResourceTest {
     public void latestHeight() throws Exception {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, LATEST_HEIGHT, params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, LATEST_HEIGHT, params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -62,7 +62,7 @@ public class BlockResourceTest {
     public void latestBlockHeader() throws Exception {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, LATEST_BLOCK_HEADER, params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, LATEST_BLOCK_HEADER, params);
         Map data = (Map) cmdResp.getResponseData();
         String hex = (String) data.get(LATEST_BLOCK_HEADER);
         BlockHeader header = new BlockHeader();
@@ -74,7 +74,7 @@ public class BlockResourceTest {
     public void latestBlock() throws Exception {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, LATEST_BLOCK, params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, LATEST_BLOCK, params);
         Map data = (Map) cmdResp.getResponseData();
         String hex = (String) data.get(LATEST_BLOCK);
         Block block = new Block();
@@ -87,7 +87,7 @@ public class BlockResourceTest {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("height", 100);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HEIGHT, params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HEIGHT, params);
         Map data = (Map) cmdResp.getResponseData();
         String hex = (String) data.get(GET_BLOCK_HEADER_BY_HEIGHT);
         BlockHeader block100 = new BlockHeader();
@@ -95,7 +95,7 @@ public class BlockResourceTest {
         Assert.assertEquals(100, block100.getHeight());
 
         params.put("height", 101);
-        cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HEIGHT, params);
+        cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HEIGHT, params);
         data = (Map) cmdResp.getResponseData();
         hex = (String) data.get(GET_BLOCK_HEADER_BY_HEIGHT);
         BlockHeader block101 = new BlockHeader();
@@ -109,7 +109,7 @@ public class BlockResourceTest {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("size", 100);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_LATEST_BLOCK_HEADERS, params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_LATEST_BLOCK_HEADERS, params);
         Map data = (Map) cmdResp.getResponseData();
         List<String> hexList = (List) data.get(GET_LATEST_BLOCK_HEADERS);
         for (String hex : hexList) {
@@ -123,7 +123,7 @@ public class BlockResourceTest {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("height", 100);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_BY_HEIGHT, params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_BY_HEIGHT, params);
         Map data = (Map) cmdResp.getResponseData();
         String hex = (String) data.get(GET_BLOCK_BY_HEIGHT);
         Block block100 = new Block();
@@ -136,7 +136,7 @@ public class BlockResourceTest {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("height", 100);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HEIGHT, params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HEIGHT, params);
         Map data = (Map) cmdResp.getResponseData();
         String hex = (String) data.get(GET_BLOCK_HEADER_BY_HEIGHT);
         BlockHeader block100 = new BlockHeader();
@@ -145,7 +145,7 @@ public class BlockResourceTest {
         NulsDigestData hash = block100.getHash();
         params.put("chainId", chainId);
         params.put("hash", hash.getDigestHex());
-        cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HASH, params);
+        cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_HEADER_BY_HASH, params);
         data = (Map) cmdResp.getResponseData();
         hex = (String) data.get(GET_BLOCK_HEADER_BY_HASH);
         BlockHeader block100_ = new BlockHeader();
@@ -159,7 +159,7 @@ public class BlockResourceTest {
         Map<String,Object> params = new HashMap<>();
         params.put("chainId", chainId);
         params.put("height", 100);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_BY_HEIGHT, params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_BY_HEIGHT, params);
         Map data = (Map) cmdResp.getResponseData();
         String hex = (String) data.get(GET_BLOCK_BY_HEIGHT);
         Block block100 = new Block();
@@ -168,7 +168,7 @@ public class BlockResourceTest {
         NulsDigestData hash = block100.getHeader().getHash();
         params.put("chainId", chainId);
         params.put("hash", hash.getDigestHex());
-        cmdResp = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_BY_HASH, params);
+        cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_BY_HASH, params);
         data = (Map) cmdResp.getResponseData();
         hex = (String) data.get(GET_BLOCK_BY_HASH);
         Block block100_ = new Block();

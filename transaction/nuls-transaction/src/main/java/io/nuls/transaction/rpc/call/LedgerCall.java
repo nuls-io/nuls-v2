@@ -7,7 +7,6 @@ import io.nuls.rpc.model.ModuleE;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.exception.NulsException;
-import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.VerifyTxResult;

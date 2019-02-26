@@ -1,10 +1,10 @@
 package io.nuls.account.rpc.call;
 
 import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import io.nuls.tools.data.StringUtils;
@@ -34,7 +34,7 @@ public class LegerCmdCall {
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", address);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
             if (!cmdResp.isSuccess()) {
                 Log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", ModuleE.LG.abbr, "getBalance", cmdResp.getResponseComment());
                 throw new NulsException(AccountErrorCode.FAILED);
@@ -60,7 +60,7 @@ public class LegerCmdCall {
             params.put("assetChainId", assetChainId);
             params.put("assetId", assetId);
             params.put("address", address);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
             if (!cmdResp.isSuccess()) {
                 Log.error("Calling remote interface failed. module:{} - interface:{} - ResponseComment:{}", ModuleE.LG.abbr, "getNonce", cmdResp.getResponseComment());
                 throw new NulsException(AccountErrorCode.FAILED);

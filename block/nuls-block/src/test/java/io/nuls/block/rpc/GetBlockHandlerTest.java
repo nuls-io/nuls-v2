@@ -22,10 +22,10 @@ package io.nuls.block.rpc;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.block.message.HashMessage;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.Test;
 
@@ -46,7 +46,7 @@ public class GetBlockHandlerTest {
         message.setRequestHash(NulsDigestData.fromDigestHex("00208d10744a059e403b100866f65d96ce33aedbcf498d1faa7d9f2eff041195d5aa"));
         params.put("messageBody", HexUtil.encode(message.serialize()));
         params.put("command", GET_BLOCK_MESSAGE);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_MESSAGE, params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, GET_BLOCK_MESSAGE, params);
         System.out.println(response);
     }
 }

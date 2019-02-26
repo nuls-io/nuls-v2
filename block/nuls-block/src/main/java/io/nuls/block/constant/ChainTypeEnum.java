@@ -31,61 +31,61 @@ public enum ChainTypeEnum {
 
     /**
      * 与主链相连
-     * waiting
+     * Connected to the master chain
      */
     MASTER_APPEND,
 
     /**
      * 与主链分叉
-     * running
+     * Forked from the master chain
      */
     MASTER_FORK,
 
     /**
      * 与分叉链相连
-     * Running exception
+     * Connected to a fork chain
      */
     FORK_APPEND,
 
     /**
      * 与分叉链分叉
-     * Running exception
+     * Forked from a fork chain
      */
     FORK_FORK,
 
     /**
      * 与孤儿链相连
-     * Running exception
+     * Connected to a orphan chain
      */
     ORPHAN_APPEND,
 
     /**
      * 与孤儿链分叉
-     * Running exception
+     * Forked from a orphan chain
      */
     ORPHAN_FORK,
 
     /**
      * 重复
-     * running
+     * duplicate chain
      */
     DUPLICATE,
 
     /**
      * 孤儿链
-     * Running exception
+     * orphan chain
      */
     ORPHAN,
 
     /**
      * 分叉链
-     * Running exception
+     * fork chain
      */
     FORK,
 
     /**
      * 主链
-     * Running exception
+     * master chain
      */
     MASTER;
 

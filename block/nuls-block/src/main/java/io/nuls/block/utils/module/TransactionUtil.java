@@ -26,9 +26,9 @@ import io.nuls.base.data.Transaction;
 import io.nuls.block.manager.ContextManager;
 import io.nuls.block.model.po.BlockHeaderPo;
 import io.nuls.block.utils.BlockUtil;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.log.logback.NulsLogger;
 
@@ -50,7 +50,7 @@ public class TransactionUtil {
     /**
      * 获取系统交易类型
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static List<Integer> getSystemTypes(int chainId) {
@@ -59,7 +59,7 @@ public class TransactionUtil {
             Map<String, Object> params = new HashMap<>(2);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getSystemTypes", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getSystemTypes", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 return (List<Integer>) responseData.get("tx_getSystemTypes");
@@ -76,12 +76,11 @@ public class TransactionUtil {
     /**
      * 批量验证交易
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param transactions
      * @return
      */
     public static boolean verify(int chainId, List<Transaction> transactions) {
-//        transactions.forEach(e -> service.save(chainId, e));
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
@@ -92,7 +91,7 @@ public class TransactionUtil {
                 txHashList.add(transaction.hex());
             }
             params.put("txList", txHashList);
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_batchVerify", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map data = (Map) responseData.get("tx_batchVerify");
@@ -109,7 +108,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param blockHeaderPo
      * @param txs
      * @param localInit
@@ -126,7 +125,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param blockHeaderPo
      * @return
      */
@@ -141,7 +140,7 @@ public class TransactionUtil {
             txHashList.forEach(e -> list.add(e.getDigestHex()));
             params.put("txHashList", list);
             params.put("blockHeaderHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_save", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_save", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map data = (Map) responseData.get("tx_save");
@@ -158,12 +157,11 @@ public class TransactionUtil {
     /**
      * 批量回滚交易
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param blockHeaderPo
      * @return
      */
     public static boolean rollback(int chainId, BlockHeaderPo blockHeaderPo) {
-//        hashList.forEach(e -> service.remove(chainId, e));
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             Map<String, Object> params = new HashMap<>(2);
@@ -174,7 +172,7 @@ public class TransactionUtil {
             txHashList.forEach(e -> list.add(e.getDigestHex()));
             params.put("txHashList", list);
             params.put("blockHeaderHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_rollback", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map data = (Map) responseData.get("tx_rollback");
@@ -191,14 +189,13 @@ public class TransactionUtil {
     /**
      * 批量获取交易
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hashList
      * @return
      * @throws IOException
      */
     public static List<Transaction> getTransactions(int chainId, List<NulsDigestData> hashList) {
         List<Transaction> transactions = new ArrayList<>();
-//        hashList.forEach(e -> transactions.add(service.query(chainId, e)));
         NulsLogger commonLog = ContextManager.getContext(chainId).getCommonLog();
         try {
             hashList.forEach(e -> transactions.add(getTransaction(chainId, e)));
@@ -213,7 +210,7 @@ public class TransactionUtil {
     /**
      * 获取单个交易
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hash
      * @return
      */
@@ -224,7 +221,7 @@ public class TransactionUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("txHash", hash.getDigestHex());
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getTx", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map map = (Map) responseData.get("tx_getTx");
@@ -248,7 +245,7 @@ public class TransactionUtil {
     /**
      * 获取单个交易
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hash
      * @return
      */
@@ -259,7 +256,7 @@ public class TransactionUtil {
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
             params.put("chainId", chainId);
             params.put("txHash", hash.getDigestHex());
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_getConfirmedTx", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map map = (Map) responseData.get("tx_getConfirmedTx");
@@ -283,7 +280,7 @@ public class TransactionUtil {
     /**
      * 批量保存交易
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param blockHeaderPo
      * @return
      */
@@ -303,7 +300,7 @@ public class TransactionUtil {
             });
             params.put("txHexList", list);
             params.put("blockHeaderHex", HexUtil.encode(BlockUtil.fromBlockHeaderPo(blockHeaderPo).serialize()));
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_gengsisSave", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_gengsisSave", params);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map data = (Map) responseData.get("tx_gengsisSave");

@@ -39,8 +39,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 区块管理模块启动类
- * Block module startup class
+ * 虚拟核心模块启动类
  *
  * @author captain
  * @version 1.0

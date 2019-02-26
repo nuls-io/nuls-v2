@@ -38,7 +38,7 @@ public interface ChainStorageService {
     /**
      * 存储一条链
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param blocks
      * @return
      * @throws Exception
@@ -48,7 +48,7 @@ public interface ChainStorageService {
     /**
      * 存储一个区块
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param block
      * @return
      * @throws Exception
@@ -58,7 +58,7 @@ public interface ChainStorageService {
     /**
      * 查询一个区块
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hash
      * @return
      * @throws NulsException
@@ -68,7 +68,7 @@ public interface ChainStorageService {
     /**
      * 查询一条链
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hashList
      * @return
      * @throws NulsException
@@ -78,7 +78,7 @@ public interface ChainStorageService {
     /**
      * 移除一条链
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hashList
      * @return
      * @throws Exception
@@ -88,7 +88,7 @@ public interface ChainStorageService {
     /**
      * 移除一个区块
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hash
      * @return
      * @throws Exception
@@ -98,7 +98,7 @@ public interface ChainStorageService {
     /**
      * 销毁链存储
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      * @throws Exception
      */

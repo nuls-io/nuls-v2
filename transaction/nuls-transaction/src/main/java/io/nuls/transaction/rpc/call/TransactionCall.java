@@ -1,22 +1,17 @@
 package io.nuls.transaction.rpc.call;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.nuls.base.data.Transaction;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.constant.ErrorCode;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.exception.NulsException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.constant.TxConstant;
-import io.nuls.transaction.constant.TxErrorCode;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.TxRegister;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,24 +31,17 @@ public class TransactionCall {
     public static Object request(String moduleCode, String cmd, Map params) throws NulsException {
         try {
             params.put(Constants.VERSION_KEY_STR, "1.0");
-            Response cmdResp = CmdDispatcher.requestAndResponse(moduleCode, cmd, params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
             Map resData = (Map)cmdResp.getResponseData();
-//            try {
-//                Log.debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(resData));
-//            } catch (JsonProcessingException e) {
-//                e.printStackTrace();
-//            }
             if (!cmdResp.isSuccess()) {
                 String errorMsg = null;
                 if(null == resData){
-                    cmdResp.getResponseComment();
                     errorMsg = String.format("Remote call fail. ResponseComment: %s ", cmdResp.getResponseComment());
                 }else {
                     Map map = (Map) resData.get(cmd);
                     errorMsg = String.format("Remote call fail. msg: %s - code: %s - module: %s - interface: %s \n- params: %s ",
                             map.get("msg"), map.get("code"), moduleCode, cmd, JSONUtils.obj2PrettyJson(params));
                 }
-                //throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
                 throw new Exception(errorMsg);
             }
             if (null == resData) {
