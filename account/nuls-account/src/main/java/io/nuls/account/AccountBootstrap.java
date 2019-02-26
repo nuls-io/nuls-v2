@@ -5,6 +5,7 @@ import io.nuls.account.constant.AccountConstant;
 import io.nuls.account.constant.AccountParam;
 import io.nuls.account.util.manager.ChainManager;
 import io.nuls.db.service.RocksDBService;
+import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.bootstrap.NettyServer;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
@@ -97,7 +98,9 @@ public class AccountBootstrap {
                     .scanPackage("io.nuls.account.rpc.cmd");
 
             // Get information from kernel
-            ResponseMessageProcessor.syncKernel(NulsConfig.KERNEL_MODULE_URL);
+            String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
+            ConnectManager.getConnectByUrl(kernelUrl);
+            ResponseMessageProcessor.syncKernel(kernelUrl);
         } catch (Exception e) {
             Log.error("Account initServer failed", e);
         }
