@@ -122,7 +122,7 @@ public class Node implements Dto {
         this.magicNumber = magicNumber;
     }
 
-    public void colse() {
+    public void close() {
         this.channel.close();
         this.channel = null;
     }
