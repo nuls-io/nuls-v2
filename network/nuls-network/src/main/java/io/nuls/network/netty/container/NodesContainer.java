@@ -117,7 +117,7 @@ public class NodesContainer implements Serializable {
         return containerPo;
     }
     public List<Node> getAvailableNodes() {
-        Collection<Node> nodes = canConnectNodes.values();
+        Collection<Node> nodes = connectedNodes.values();
         List<Node> availableNodes = new ArrayList<>();
         if (null != nodes && nodes.size() > 0) {
             for (Node node : nodes) {
