@@ -565,6 +565,9 @@ public class ConnectManager {
         if(StringUtils.isBlank(url)){
             throw new Exception("Connection module not started");
         }
+        if(CHANNEL_MAP.isEmpty() || CHANNEL_MAP.get(url) == null){
+            getConnectByUrl(url);
+        }
         return CHANNEL_MAP.get(url);
     }
 
