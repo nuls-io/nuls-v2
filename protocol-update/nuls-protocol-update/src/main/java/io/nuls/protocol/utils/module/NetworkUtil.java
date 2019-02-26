@@ -19,9 +19,9 @@
  */
 package io.nuls.protocol.utils.module;
 
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 
 import java.util.Map;
 
@@ -47,7 +47,7 @@ public class NetworkUtil {
         try {
 //            Map<String, Object> params = new HashMap<>(1);
 //            params.put(Constants.VERSION_KEY_STR, "1.0");
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_currentTimeMillis", null);
             if (response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 Map result = (Map) responseData.get("nw_currentTimeMillis");
