@@ -33,22 +33,15 @@ public class TransactionCall {
             params.put(Constants.VERSION_KEY_STR, "1.0");
             Response cmdResp = ResponseMessageProcessor.requestAndResponse(moduleCode, cmd, params);
             Map resData = (Map)cmdResp.getResponseData();
-//            try {
-//                Log.debug("moduleCode:{}, -cmd:{}, -txProcess -rs: {}",moduleCode, cmd, JSONUtils.obj2json(resData));
-//            } catch (JsonProcessingException e) {
-//                e.printStackTrace();
-//            }
             if (!cmdResp.isSuccess()) {
                 String errorMsg = null;
                 if(null == resData){
-                    cmdResp.getResponseComment();
                     errorMsg = String.format("Remote call fail. ResponseComment: %s ", cmdResp.getResponseComment());
                 }else {
                     Map map = (Map) resData.get(cmd);
                     errorMsg = String.format("Remote call fail. msg: %s - code: %s - module: %s - interface: %s \n- params: %s ",
                             map.get("msg"), map.get("code"), moduleCode, cmd, JSONUtils.obj2PrettyJson(params));
                 }
-                //throw new NulsException(TxErrorCode.CALLING_REMOTE_INTERFACE_FAILED);
                 throw new Exception(errorMsg);
             }
             if (null == resData) {
