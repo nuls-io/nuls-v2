@@ -22,26 +22,27 @@
  * SOFTWARE.
  *
  */
-package io.nuls.rpc.client.thread;
-import io.nuls.rpc.client.WsClient;
-import io.nuls.rpc.client.runtime.ClientRuntime;
+package io.nuls.rpc.netty.thread;
+
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.channel.ConnectData;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.log.Log;
 
 /**
  * 消费从服务端获取的消息
  * Consume the messages from servers
  *
- * @author tangyi
- * @date 2018/11/26
+ * @author tag
+ * @date 2019/2/25
  */
 public class ResponseAutoProcessor implements Runnable {
-    private WsClient client;
+    private ConnectData connectData;
 
-    public ResponseAutoProcessor(WsClient client){
-        this.client = client;
+    public ResponseAutoProcessor(ConnectData connectData){
+        this.connectData = connectData;
     }
 
     /**
@@ -51,13 +52,13 @@ public class ResponseAutoProcessor implements Runnable {
     @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {
-        while (client.isConnected()) {
+        while (connectData.isConnected()) {
             try {
                 /*
                 获取队列中的第一个对象
                 Get the first item of the queue
                  */
-                Response response = client.firstMessageInResponseAutoQueue();
+                Response response = connectData.firstMessageInResponseAutoQueue();
                 if (response == null) {
                     Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                     continue;
@@ -73,7 +74,7 @@ public class ResponseAutoProcessor implements Runnable {
                 自动调用本地方法
                 Invoke local method automatically
                  */
-                BaseInvoke baseInvoke = ClientRuntime.INVOKE_MAP.get(messageId);
+                BaseInvoke baseInvoke = ConnectManager.INVOKE_MAP.get(messageId);
                 baseInvoke.callBack(response);
 
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
@@ -81,13 +82,5 @@ public class ResponseAutoProcessor implements Runnable {
                 Log.error(e);
             }
         }
-    }
-
-    public WsClient getClient() {
-        return client;
-    }
-
-    public void setClient(WsClient client) {
-        this.client = client;
     }
 }

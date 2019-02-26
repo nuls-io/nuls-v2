@@ -1,44 +1,20 @@
-/*
- * MIT License
- *
- * Copyright (c) 2017-2018 nuls.io
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- */
-
-package io.nuls.rpc.server.handler;
+package io.nuls.rpc.netty.processor;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.netty.channel.Channel;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdDetail;
 import io.nuls.rpc.model.CmdParameter;
 import io.nuls.rpc.model.message.*;
-import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.rpc.server.runtime.WsData;
+import io.nuls.rpc.netty.channel.ConnectData;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.thread.TimeService;
-import org.java_websocket.WebSocket;
 import org.java_websocket.exceptions.WebsocketNotConnectedException;
+
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -49,14 +25,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import static io.nuls.rpc.info.Constants.CMD_NOT_FOUND;
 
 /**
- * 解析从客户端收到的消息，调用正确的方法
- * Resolve the message received from the client and invoke the correct method
- *
- * @author tangyi
- * @date 2018/10/30
- */
-public class CmdHandler {
-
+ * 消息处理器
+ * Receive message processor
+ * @author  tag
+ * 2019/2/25
+ * */
+public class RequestMessageProcessor {
     public static final Map<String, Object> handlerMap = new HashMap<>();
     public static final Map<String, Class<?>> classMap = new ConcurrentHashMap<>();
 
@@ -64,17 +38,17 @@ public class CmdHandler {
      * 确认握手成功
      * Confirm successful handshake
      *
-     * @param webSocket 用于发送消息 / Used to send message
+     * @param channel 用于发送消息 / Used to send message
      * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
-    public static void negotiateConnectionResponse(WebSocket webSocket) throws JsonProcessingException {
+    public static void negotiateConnectionResponse(Channel channel) throws JsonProcessingException {
         NegotiateConnectionResponse negotiateConnectionResponse = new NegotiateConnectionResponse();
         negotiateConnectionResponse.setNegotiationStatus("1");
         negotiateConnectionResponse.setNegotiationComment("Connection true!");
 
         Message rspMsg = MessageUtil.basicMessage(MessageType.NegotiateConnectionResponse);
         rspMsg.setMessageData(negotiateConnectionResponse);
-        webSocket.send(JSONUtils.obj2json(rspMsg));
+        ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMsg));
     }
 
 
@@ -82,31 +56,30 @@ public class CmdHandler {
      * 确认收到Request
      * Confirm receipt of Request
      *
-     * @param webSocket 用于发送消息 / Used to send message
+     * @param channel 用于发送消息 / Used to send message
      * @param messageId 原始消息ID / The origin message ID
      * @throws JsonProcessingException JSON解析错误 / JSON parsing error
      */
-    public static void ack(WebSocket webSocket, String messageId) throws JsonProcessingException {
+    public static void ack(Channel channel, String messageId) throws JsonProcessingException {
         Ack ack = new Ack();
         ack.setRequestId(messageId);
-
         Message rspMsg = MessageUtil.basicMessage(MessageType.Ack);
         rspMsg.setMessageData(ack);
-        webSocket.send(JSONUtils.obj2json(rspMsg));
+        ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMsg));
     }
 
     /**
      * 服务还未启动完成
      * The service has not been started yet.
      *
-     * @param webSocket 链接通道
+     * @param channel 链接通道
      * @param messageId 请求ID
      * */
-    public static void serviceNotStarted(WebSocket webSocket, String messageId) throws JsonProcessingException {
+    public static void serviceNotStarted(Channel channel, String messageId) throws JsonProcessingException {
         Response response = MessageUtil.newResponse(messageId, Constants.BOOLEAN_FALSE, "Service not started!");
         Message rspMsg = MessageUtil.basicMessage(MessageType.Response);
         rspMsg.setMessageData(response);
-        webSocket.send(JSONUtils.obj2json(rspMsg));
+        ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMsg));
     }
 
     /**
@@ -116,10 +89,10 @@ public class CmdHandler {
      * @serialData   取消订阅的客户端连接信息/Unsubscribed client connection information
      * @param message 取消订阅的消息体 / Unsubscribe message
      */
-    public static synchronized void unsubscribe(WsData wsData, Message message) {
+    public static synchronized void unsubscribe(ConnectData channelData, Message message) {
         Unsubscribe unsubscribe = JSONUtils.map2pojo((Map) message.getMessageData(), Unsubscribe.class);
         for (String requestId : unsubscribe.getUnsubscribeMethods()) {
-            wsData.unsubscribe(requestId);
+            channelData.unsubscribe(requestId);
         }
     }
 
@@ -128,18 +101,17 @@ public class CmdHandler {
      * After current processing, do need to keep the Request information and wait for the next processing?
      * True: keep, False: remove
      *
-     * @param wsData     用于发送消息 / Used to send message
+     * @param channelData     用于发送消息 / Used to send message
      * @param message    原始消息 / The origin message
      * @param request    请求 / The request
      * @return boolean
      */
-    public static boolean responseWithPeriod(WsData wsData,Message message, Request request) {
-
+    public static boolean responseWithPeriod(ConnectData channelData,Message message, Request request) {
         /*
         计算如何处理该Request
         Calculate how to handle the Request
          */
-        int nextProcess = nextProcess(wsData, message, Integer.parseInt(request.getSubscriptionPeriod()));
+        int nextProcess = nextProcess(channelData, message, Integer.parseInt(request.getSubscriptionPeriod()));
         try {
             /*
             nextProcess的具体含义参考"Constants.INVOKE_EXECUTE_KEEP"的注释
@@ -147,12 +119,12 @@ public class CmdHandler {
              */
             switch (nextProcess) {
                 case Constants.EXECUTE_AND_KEEP:
-                    callCommandsWithPeriod(wsData.getWebSocket(), request.getRequestMethods(), message.getMessageId());
-                    wsData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
+                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId());
+                    channelData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
                     return true;
                 case Constants.EXECUTE_AND_REMOVE:
-                    callCommandsWithPeriod(wsData.getWebSocket(), request.getRequestMethods(), message.getMessageId());
-                    wsData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
+                    callCommandsWithPeriod(channelData.getChannel(), request.getRequestMethods(), message.getMessageId());
+                    channelData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
                     return false;
                 case Constants.SKIP_AND_KEEP:
                     return true;
@@ -175,13 +147,13 @@ public class CmdHandler {
      * 处理Request，自动调用正确的方法，返回结果
      * Processing Request, automatically calling the correct method, returning the result
      *
-     * @param webSocket      用于发送消息 / Used to send message
+     * @param channel        用于发送消息 / Used to send message
      * @param requestMethods 请求的方法集合 / The collections of request method
      * @param messageId      原始消息ID / The origin message ID
      * @throws Exception 连接失败 / Connected failed
      */
     @SuppressWarnings("unchecked")
-    public static void callCommandsWithPeriod(WebSocket webSocket, Map requestMethods, String messageId) throws Exception {
+    public static void callCommandsWithPeriod(Channel channel, Map requestMethods, String messageId) throws Exception {
         for (Object object : requestMethods.entrySet()) {
             Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
             String method = entry.getKey();
@@ -200,8 +172,8 @@ public class CmdHandler {
             Get the corresponding method from the locally registered CMD
              */
             CmdDetail cmdDetail = params == null || params.get(Constants.VERSION_KEY_STR) == null
-                    ? ServerRuntime.getLocalInvokeCmd(method)
-                    : ServerRuntime.getLocalInvokeCmd(method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
+                    ? ConnectManager.getLocalInvokeCmd(method)
+                    : ConnectManager.getLocalInvokeCmd(method, Double.parseDouble(params.get(Constants.VERSION_KEY_STR).toString()));
 
             /*
             找不到本地方法，则返回"CMD_NOT_FOUND"错误
@@ -211,7 +183,7 @@ public class CmdHandler {
                 response.setResponseComment(Constants.CMD_NOT_FOUND + ":" + method + "," + (params != null ? params.get(Constants.VERSION_KEY_STR) : ""));
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
-                webSocket.send(JSONUtils.obj2json(rspMessage));
+                ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMessage));
                 return;
             }
 
@@ -224,20 +196,19 @@ public class CmdHandler {
                 response.setResponseComment(validationString);
                 Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
                 rspMessage.setMessageData(response);
-                webSocket.send(JSONUtils.obj2json(rspMessage));
+                ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMessage));
                 return;
             }
 
             Message rspMessage = execute(cmdDetail, params, messageId);
-            //Log.debug("responseWithPeriod: " + JSONUtils.obj2json(rspMessage));
-            webSocket.send(JSONUtils.obj2json(rspMessage));
+            ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMessage));
 
             /*
             执行成功之后判断该接口是否被订阅过，如果被订阅则改变该接口触发次数
             After successful execution, determine if the interface has been subscribed, and if subscribed, change the number of triggers for the interface
              */
-            if(ServerRuntime.SUBSCRIBE_COUNT.containsKey(method)){
-                ServerRuntime.eventTrigger(method,(Response) rspMessage.getMessageData());
+            if(ConnectManager.SUBSCRIBE_COUNT.containsKey(method)){
+                ConnectManager.eventTrigger(method,(Response) rspMessage.getMessageData());
             }
         }
     }
@@ -270,15 +241,15 @@ public class CmdHandler {
      * 处理Request，如果达到EventCount的发送条件，则发送
      * Processing Request, if EventCount's sending condition is met, then send
      *
-     * @param webSocket     用于发送消息 / Used to send message
+     * @param channel     用于发送消息 / Used to send message
      * @param realResponse  订阅事件触发，返回数据
      */
-    public static void responseWithEventCount(WebSocket webSocket, Response realResponse) {
+    public static void responseWithEventCount(Channel channel, Response realResponse) {
         Message rspMessage = MessageUtil.basicMessage(MessageType.Response);
         rspMessage.setMessageData(realResponse);
         try {
             Log.debug("responseWithEventCount: " + JSONUtils.obj2json(rspMessage));
-            webSocket.send(JSONUtils.obj2json(rspMessage));
+            ConnectManager.sendMessage(channel,JSONUtils.obj2json(rspMessage));
         } catch (WebsocketNotConnectedException e) {
             Log.error("Socket disconnected, remove");
         } catch (JsonProcessingException e) {
@@ -291,12 +262,12 @@ public class CmdHandler {
      * 计算如何处理该Request
      * Calculate how to handle the Request
      *
-     * @param wsData             服务器端链接信息 / Server-side Link Information
-     * @param message            原始消息 / The origin message
-     * @param subscriptionPeriod Unit: second
+     * @param channelData             服务器端链接信息 / Server-side Link Information
+     * @param message                 原始消息 / The origin message
+     * @param subscriptionPeriod      Unit: second
      * @return int
      */
-    private static int nextProcess(WsData wsData, Message message, int subscriptionPeriod) {
+    private static int nextProcess(ConnectData channelData, Message message, int subscriptionPeriod) {
         if (subscriptionPeriod == 0) {
             /*
             不需要重复执行，返回EXECUTE_AND_REMOVE（执行，然后丢弃）
@@ -305,16 +276,16 @@ public class CmdHandler {
             return Constants.EXECUTE_AND_REMOVE;
         }
 
-        if (!wsData.getCmdInvokeTime().containsKey(message)) {
+        if (!channelData.getCmdInvokeTime().containsKey(message)) {
             /*
             第一次执行，设置当前时间为执行时间，返回EXECUTE_AND_KEEP（执行，然后保留）
             First execution, set the current time as execution time, return EXECUTE_AND_KEEP (execution, then keep)
              */
-            wsData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
+            channelData.getCmdInvokeTime().put(message, TimeService.currentTimeMillis());
             return Constants.EXECUTE_AND_KEEP;
         }
 
-        if (TimeService.currentTimeMillis() - wsData.getCmdInvokeTime().get(message) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
+        if (TimeService.currentTimeMillis() - channelData.getCmdInvokeTime().get(message) < subscriptionPeriod * Constants.MILLIS_PER_SECOND) {
             /*
             没有达到执行条件，返回SKIP_AND_KEEP（不执行，然后保留）
             If the execution condition is not met, return SKIP_AND_KEEP (not executed, then keep)

@@ -5,9 +5,7 @@ checkModuleItem(){
 	do
 		# echo "line=>$line  $2"
 		pname=$(echo $line | awk -F '=' '{print $1}')
-		pvalue=$(echo $line | awk -F '=' '{print $2}')
 		if [ ${pname} == $2 ]; then
-
 			return 1;
 		fi
 	done
@@ -18,7 +16,19 @@ getModuleItem(){
 	for line in `cat "$1"`
 	do
 		pname=$(echo $line | awk -F '=' '{print $1}')
-		pvalue=$(echo $line | awk -F '=' '{print $2}')
+		pvalue=$(awk -v a="$line" '
+						BEGIN{
+							len = split(a,ary,"=")
+							r=""
+							for ( i = 2; i <= len; i++ ){
+								if(r != ""){
+									r = (r"=")
+								}
+								r=(r""ary[i])
+					 		}
+							print r
+						}
+					')
 		if [ ${pname} == $2 ]; then
 			echo ${pvalue};
 			return 1;
@@ -87,10 +97,3 @@ do
 	done		
 	echo "" >> $moduleNcf
 done
-
-
-ary[0]="a"
-if ! echo "${ary[@]}" | grep -w "ab" &>/dev/null ; then
-	 echo "found"
-fi
-

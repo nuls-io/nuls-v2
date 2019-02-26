@@ -1,36 +1,13 @@
-/*
- * MIT License
- *
- * Copyright (c) 2017-2018 nuls.io
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- */
-package io.nuls.rpc.client;
+package io.nuls.rpc.netty.processor;
 
-import io.nuls.rpc.client.runtime.ClientRuntime;
+import io.netty.channel.Channel;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.invoke.BaseInvoke;
 import io.nuls.rpc.invoke.KernelInvoke;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.*;
-import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.rpc.netty.channel.ConnectData;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.data.StringUtils;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -38,25 +15,24 @@ import io.nuls.tools.thread.TimeService;
 
 import java.util.Map;
 
-/**
- * 用于调用远程方法的类，提供多种调用方式，也只应该使用这个类来调用
- * Classes used to call remote methods, provide multiple ways of invoking, and only this class should be used to invoke
- *
- * @author tangyi
- * @date 2018/11/5
- */
-public class CmdDispatcher {
 
+/**
+ * 消息处理器
+ * Send message processor
+ * @author  tag
+ * 2019/2/25
+ * */
+public class ResponseMessageProcessor {
     /**
-     * 与核心模块（Manager）握手
+     * 与已连接的模块握手
      * Shake hands with the core module (Manager)
      *
      * @return boolean
      * @throws Exception 握手失败, handshake failed
      */
-    public static boolean handshakeKernel() throws Exception {
-        WsClient wsClient = ClientRuntime.getWsClient(ServerRuntime.kernelUrl);
-        if (wsClient == null) {
+    public static boolean handshakeKernel(String url) throws Exception {
+        Channel channel = ConnectManager.getConnectByUrl(url);
+        if (channel == null) {
             throw new Exception("Kernel not available");
         }
 
@@ -66,13 +42,13 @@ public class CmdDispatcher {
          */
         Message message = MessageUtil.basicMessage(MessageType.NegotiateConnection);
         message.setMessageData(MessageUtil.defaultNegotiateConnection());
-        wsClient.send(JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
 
         /*
         是否收到正确的握手确认
         Whether received the correct handshake confirmation?
          */
-        return receiveNegotiateConnectionResponse(ClientRuntime.getWsClient(ServerRuntime.kernelUrl));
+        return receiveNegotiateConnectionResponse(ConnectManager.CHANNEL_MAP.get(url));
     }
 
     /**
@@ -86,13 +62,13 @@ public class CmdDispatcher {
      *
      * @throws Exception 核心模块（Manager）不可用，Core Module (Manager) Not Available
      */
-    public static void syncKernel() throws Exception {
+    public static void syncKernel(String kernelUrl) throws Exception {
         /*
         打造用于同步的Request
         Create Request for Synchronization
          */
         Request request = MessageUtil.defaultRequest();
-        request.getRequestMethods().put("registerAPI", ServerRuntime.LOCAL);
+        request.getRequestMethods().put("registerAPI", ConnectManager.LOCAL);
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
 
@@ -100,8 +76,8 @@ public class CmdDispatcher {
         连接核心模块（Manager）
         Connect to Core Module (Manager)
          */
-        WsClient wsClient = ClientRuntime.getWsClient(ServerRuntime.kernelUrl);
-        if (wsClient == null) {
+        Channel channel = ConnectManager.getConnectByUrl(kernelUrl);
+        if(channel == null){
             throw new Exception("Kernel not available");
         }
 
@@ -109,51 +85,50 @@ public class CmdDispatcher {
         发送请求
         Send request
         */
-        wsClient.send(JSONUtils.obj2json(message));
+        ConnectManager.sendMessage(channel,JSONUtils.obj2json(message));
 
         /*
         获取返回的数据，放入本地变量
         Get the returned data and place it in the local variable
          */
-        Response response = receiveResponse(wsClient,message.getMessageId(), Constants.TIMEOUT_TIMEMILLIS);
+        Response response = receiveResponse(ConnectManager.CHANNEL_MAP.get(kernelUrl),message.getMessageId(), Constants.TIMEOUT_TIMEMILLIS);
         BaseInvoke baseInvoke = new KernelInvoke();
         baseInvoke.callBack(response);
 
         /*
         当有新模块注册到Kernel(Manager)时，需要同步连接信息
          */
-        CmdDispatcher.requestAndInvoke(ModuleE.KE.abbr, "registerAPI", JSONUtils.json2map(JSONUtils.obj2json(ServerRuntime.LOCAL)), "0", "1", baseInvoke);
-        Log.debug("Sync manager success. " + JSONUtils.obj2json(ClientRuntime.ROLE_MAP));
+        requestAndInvoke(ModuleE.KE.abbr, "registerAPI", JSONUtils.json2map(JSONUtils.obj2json(ConnectManager.LOCAL)), "0", "1", baseInvoke);
+        Log.debug("Sync manager success. " + JSONUtils.obj2json(ConnectManager.ROLE_MAP));
 
         /*
         判断所有依赖的模块是否已经启动（发送握手信息）
         Determine whether all dependent modules have been started (send handshake information)
          */
-        if (ServerRuntime.LOCAL.getDependencies() == null) {
-            ServerRuntime.startService = true;
+        if (ConnectManager.LOCAL.getDependencies() == null) {
+            ConnectManager.startService = true;
             Log.debug("Start service!");
             return;
         }
 
-        for (String role : ServerRuntime.LOCAL.getDependencies().keySet()) {
-            String url = ClientRuntime.getRemoteUri(role);
+        for (String role : ConnectManager.LOCAL.getDependencies().keySet()) {
+            String url = ConnectManager.getRemoteUri(role);
             if(StringUtils.isBlank(url)){
                 Log.error("Dependent modules cannot be connected: " + role);
                 return;
             }
             try {
-                ClientRuntime.getWsClient(url);
+                ConnectManager.getConnectByUrl(url);
             } catch (Exception e) {
                 Log.error("Dependent modules cannot be connected: " + role);
-                ServerRuntime.startService = false;
+                ConnectManager.startService = false;
                 return;
             }
         }
 
-        ServerRuntime.startService = true;
+        ConnectManager.startService = true;
         Log.debug("Start service!");
     }
-
 
     /**
      * 发送Request，并等待Response
@@ -183,7 +158,7 @@ public class CmdDispatcher {
     public static Response requestAndResponse(String role, String cmd, Map params, long timeOut) throws Exception {
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_FALSE, Constants.ZERO, Constants.ZERO);
         String messageId = sendRequest(role, request);
-        return receiveResponse(ClientRuntime.getWsClientByRole(role),messageId, timeOut);
+        return receiveResponse(ConnectManager.getConnectDataByRole(role),messageId, timeOut);
     }
 
     /**
@@ -202,7 +177,7 @@ public class CmdDispatcher {
     public static String requestAndInvoke(String role, String cmd, Map params, String subscriptionPeriod, String subscriptionEventCounter, BaseInvoke baseInvoke) throws Exception {
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_FALSE, subscriptionPeriod, subscriptionEventCounter);
         String messageId = sendRequest(role, request);
-        ClientRuntime.INVOKE_MAP.put(messageId, baseInvoke);
+        ConnectManager.INVOKE_MAP.put(messageId, baseInvoke);
         return messageId;
     }
 
@@ -222,7 +197,7 @@ public class CmdDispatcher {
     public static String requestAndInvokeWithAck(String role, String cmd, Map params, String subscriptionPeriod, String subscriptionEventCounter, BaseInvoke baseInvoke) throws Exception {
         Request request = MessageUtil.newRequest(cmd, params, Constants.BOOLEAN_TRUE, subscriptionPeriod, subscriptionEventCounter);
         String messageId = sendRequest(role, request);
-        ClientRuntime.INVOKE_MAP.put(messageId, baseInvoke);
+        ConnectManager.INVOKE_MAP.put(messageId, baseInvoke);
         return receiveAck(role,messageId) ? messageId : null;
     }
 
@@ -237,13 +212,13 @@ public class CmdDispatcher {
      * @throws Exception 请求超时（1分钟），timeout (1 minute)
      */
     public static String requestAndInvoke(String role, Request request, BaseInvoke baseInvoke) throws Exception {
-        if (!ClientRuntime.isPureDigital(request.getSubscriptionPeriod())
-                && !ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
+        if (!ConnectManager.isPureDigital(request.getSubscriptionPeriod())
+                && !ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
             throw new Exception("Wrong value: [SubscriptionPeriod][SubscriptionEventCounter]");
         }
 
         String messageId = sendRequest(role, request);
-        ClientRuntime.INVOKE_MAP.put(messageId, baseInvoke);
+        ConnectManager.INVOKE_MAP.put(messageId, baseInvoke);
         if (Constants.BOOLEAN_FALSE.equals(request.getRequestAck())) {
             return messageId;
         } else {
@@ -266,27 +241,16 @@ public class CmdDispatcher {
         Message message = MessageUtil.basicMessage(MessageType.Request);
         message.setMessageData(request);
 
-        /*
-        从roleMap获取命令需发送到的地址
-        Get the url from roleMap which the command needs to be sent to
-         */
-        String url = ClientRuntime.getRemoteUri(role);
-        if (url == null) {
-            throw new Exception("Cannot find url based on role: " + role);
-        }
-        WsClient wsClient = ClientRuntime.getWsClient(url);
-        /*Log.debug("SendRequest to "
-                + wsClient.getRemoteSocketAddress().getHostString() + ":" + wsClient.getRemoteSocketAddress().getPort() + "->"
-                + JSONUtils.obj2json(message));*/
-        wsClient.send(JSONUtils.obj2json(message));
+        ConnectData connectData = ConnectManager.getConnectDataByRole(role);
 
-        if (ClientRuntime.isPureDigital(request.getSubscriptionPeriod())
-                || ClientRuntime.isPureDigital(request.getSubscriptionEventCounter())) {
+        ConnectManager.sendMessage(connectData.getChannel(),JSONUtils.obj2json(message));
+        if (ConnectManager.isPureDigital(request.getSubscriptionPeriod())
+                || ConnectManager.isPureDigital(request.getSubscriptionEventCounter())) {
             /*
             如果是需要重复发送的消息（订阅消息），记录messageId与客户端的对应关系，用于取消订阅
             If it is a message (subscription message) that needs to be sent repeatedly, record the relationship between the messageId and the WsClient
              */
-            ClientRuntime.MSG_ID_KEY_WS_CLIENT_MAP.put(message.getMessageId(), wsClient);
+            ConnectManager.MSG_ID_KEY_CHANNEL_MAP.put(message.getMessageId(), connectData);
         }
 
         return message.getMessageId();
@@ -314,31 +278,30 @@ public class CmdDispatcher {
         根据messageId获取WsClient，发送取消订阅命令，然后移除本地信息
         Get the WsClient according to messageId, send the unsubscribe command, and then remove the local information
          */
-        WsClient wsClient = ClientRuntime.MSG_ID_KEY_WS_CLIENT_MAP.get(messageId);
-        if (wsClient != null) {
-            wsClient.send(JSONUtils.obj2json(message));
+        ConnectData connectData = ConnectManager.MSG_ID_KEY_CHANNEL_MAP.get(messageId);
+        if (connectData != null) {
+            ConnectManager.sendMessage(connectData.getChannel(),JSONUtils.obj2json(message));
             Log.debug("取消订阅：" + JSONUtils.obj2json(message));
-            ClientRuntime.INVOKE_MAP.remove(messageId);
+            ConnectManager.INVOKE_MAP.remove(messageId);
         }
     }
-
 
     /**
      * 是否握手成功
      * Whether shake hands successfully?
      *
-     * @param client                   被调用模块角色链接/Called module roles
+     * @param connectData                   被调用模块角色链接/Called module roles
      * @return boolean
      * @throws InterruptedException    连接失败 / connection failure
      */
-    public static boolean receiveNegotiateConnectionResponse(WsClient client) throws Exception {
+    public static boolean receiveNegotiateConnectionResponse(ConnectData connectData) throws Exception {
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
             /*
             获取队列中的第一个对象，如果非空，则说明握手成功
             Get the first item of the queue, If not empty, the handshake is successful.
              */
-            Message message = client.firstMessageInNegotiateResponseQueue();
+            Message message = connectData.firstMessageInNegotiateResponseQueue();
             if (message != null) {
                 return true;
             }
@@ -355,19 +318,19 @@ public class CmdDispatcher {
      * 根据messageId获取Response
      * Get response by messageId
      *
-     * @param client    被调用模块角色/Called module roles
-     * @param messageId 订阅时的messageId / MessageId when do subscription
+     * @param connectData    链接通道/Called module roles
+     * @param messageId      订阅时的messageId / MessageId when do subscription
      * @return Response
      * @throws Exception JSON格式转换错误、连接失败 / JSON format conversion error, connection failure
      */
-    private static Response receiveResponse(WsClient client, String messageId, long timeOut) throws Exception {
+    private static Response receiveResponse(ConnectData connectData, String messageId, long timeOut) throws Exception {
         long timeMillis = System.currentTimeMillis();
         while (System.currentTimeMillis() - timeMillis <= timeOut) {
             /*
             获取队列中的第一个对象
             Get the first item of the queue
              */
-            Response response = client.firstMessageInResponseManualQueue();
+            Response response = connectData.firstMessageInResponseManualQueue();
             if (response == null) {
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                 continue;
@@ -385,12 +348,12 @@ public class CmdDispatcher {
             messageId不匹配，放回队列
             Add back to the queue
              */
-            client.getResponseManualQueue().offer(response);
+            connectData.getResponseManualQueue().offer(response);
 
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
 
-        client.getTimeOutMessageList().add(messageId);
+        connectData.getTimeOutMessageList().add(messageId);
         /*
         Timeout Error
          */
@@ -410,13 +373,13 @@ public class CmdDispatcher {
     private static boolean receiveAck(String role,String messageId) throws Exception {
 
         long timeMillis = TimeService.currentTimeMillis();
-        WsClient client = ClientRuntime.getWsClientByRole(role);
+        ConnectData connectData = ConnectManager.getConnectDataByRole(role);
         while (TimeService.currentTimeMillis() - timeMillis <= Constants.TIMEOUT_TIMEMILLIS) {
             /*
             获取队列中的第一个对象，如果是空，舍弃
             Get the first item of the queue, If it is an empty object, discard
              */
-            Ack ack = client.firstMessageInAckQueue();
+            Ack ack = connectData.firstMessageInAckQueue();
             if (ack == null) {
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                 continue;
@@ -434,7 +397,7 @@ public class CmdDispatcher {
             messageId不匹配，放回队列
             Add back to the queue
              */
-            client.getAckQueue().offer(ack);
+            connectData.getAckQueue().offer(ack);
 
             Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
         }
@@ -444,5 +407,4 @@ public class CmdDispatcher {
          */
         return false;
     }
-
 }

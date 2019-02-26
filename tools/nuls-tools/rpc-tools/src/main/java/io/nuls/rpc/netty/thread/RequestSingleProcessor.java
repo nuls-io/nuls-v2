@@ -22,12 +22,12 @@
  * SOFTWARE.
  *
  */
-package io.nuls.rpc.server.thread;
+package io.nuls.rpc.netty.thread;
 
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.message.Request;
-import io.nuls.rpc.server.handler.CmdHandler;
-import io.nuls.rpc.server.runtime.WsData;
+import io.nuls.rpc.netty.channel.ConnectData;
+import io.nuls.rpc.netty.processor.RequestMessageProcessor;
 import io.nuls.tools.log.Log;
 
 /**
@@ -35,13 +35,13 @@ import io.nuls.tools.log.Log;
  * Threads handling client messages
  *
  * @author tag
- * @date 2019/1/3
+ * @date 2019/2/25
  */
 public class RequestSingleProcessor implements Runnable {
-    private WsData wsData;
+    private ConnectData connectData;
 
-    public RequestSingleProcessor(WsData wsData){
-        this.wsData = wsData;
+    public RequestSingleProcessor(ConnectData connectData){
+        this.connectData = connectData;
     }
 
     /**
@@ -51,14 +51,14 @@ public class RequestSingleProcessor implements Runnable {
     @SuppressWarnings("InfiniteLoopStatement")
     @Override
     public void run() {
-        while (wsData.isConnected()) {
+        while (connectData.isConnected()) {
             try {
                 /*
                 获取队列中的第一个对象
                 Get the first item of the queue
                  */
-                if(!wsData.getRequestSingleQueue().isEmpty()){
-                    Object[] objects = wsData.getRequestSingleQueue().poll();
+                if(!connectData.getRequestSingleQueue().isEmpty()){
+                    Object[] objects = connectData.getRequestSingleQueue().poll();
                     if(objects != null && objects.length == 2){
                         String messageId = (String) objects[0];
                         Request request = (Request) objects[1];
@@ -66,7 +66,7 @@ public class RequestSingleProcessor implements Runnable {
                         Request，调用本地方法
                         If it is Request, call the local method
                         */
-                        CmdHandler.callCommandsWithPeriod(wsData.getWebSocket(), request.getRequestMethods(), messageId);
+                        RequestMessageProcessor.callCommandsWithPeriod(connectData.getChannel(), request.getRequestMethods(), messageId);
                     }
                 }
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
