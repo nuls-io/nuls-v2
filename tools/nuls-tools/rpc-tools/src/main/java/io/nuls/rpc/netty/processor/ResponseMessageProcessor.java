@@ -335,7 +335,6 @@ public class ResponseMessageProcessor {
                 Thread.sleep(Constants.INTERVAL_TIMEMILLIS);
                 continue;
             }
-
             if (response.getRequestId().equals(messageId)) {
                 /*
                 messageId匹配，说明就是需要的结果，返回

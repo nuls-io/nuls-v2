@@ -11,6 +11,7 @@ import io.nuls.rpc.model.message.MessageType;
 import io.nuls.rpc.model.message.Response;
 import io.nuls.rpc.netty.channel.ConnectData;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 
 import java.util.Map;
@@ -59,7 +60,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
                 this.handShaker.finishHandshake(ch, response);
                 //设置成功
                 this.handshakeFuture.setSuccess();
-                System.out.println("WebSocket Client connected! response headers[sec-webSocket-extensions]:{}" + response.headers());
+                Log.info("WebSocket Client connected! response headers[sec-webSocket-extensions]:{}" + response.headers());
             } catch (WebSocketHandshakeException var7) {
                 FullHttpResponse res = (FullHttpResponse) msg;
                 String errorMsg = String.format("WebSocket Client failed to connect,status:%s,reason:%s", res.status(), res.content().toString(CharsetUtil.UTF_8));
@@ -122,5 +123,15 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
                     break;
             }
         }
+    }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        Log.info("链接断开:"+ConnectManager.getRemoteUri((SocketChannel) ctx.channel()));
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        ConnectManager.disConnect((SocketChannel) ctx.channel());
     }
 }

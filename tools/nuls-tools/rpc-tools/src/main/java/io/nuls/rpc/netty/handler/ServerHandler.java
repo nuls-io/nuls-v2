@@ -28,9 +28,6 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         SocketChannel socketChannel = (SocketChannel) ctx.channel();
-        System.out.println("IP:"+socketChannel.remoteAddress().getHostString()+";----PORT:"+socketChannel.remoteAddress().getPort());
-        System.out.println("IP:"+socketChannel.localAddress().getHostString()+";----PORT:"+socketChannel.localAddress().getPort());
-
         /*
         * 缓存链接通道
         * cache link channel
@@ -48,12 +45,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<Object> {
 
     @Override
     public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("channelUnregistered");
+        Log.info("链接断开:"+ConnectManager.getRemoteUri((SocketChannel) ctx.channel()));
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println("channelInactive");
+        ConnectManager.disConnect((SocketChannel) ctx.channel());
     }
 
 
