@@ -22,12 +22,12 @@
 
 package io.nuls.rpc.cmd.kernel;
 
-import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.cmd.BaseCmd;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.model.CmdAnnotation;
 import io.nuls.rpc.model.RegisterApi;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
@@ -56,10 +56,10 @@ public class KernelCmd4Test extends BaseCmd {
                 Map<String, Object> role = new HashMap<>(3);
                 role.put(Constants.KEY_IP, registerApi.getConnectionInformation().get(Constants.KEY_IP));
                 role.put(Constants.KEY_PORT, registerApi.getConnectionInformation().get(Constants.KEY_PORT));
-                ClientRuntime.ROLE_MAP.put(registerApi.getModuleAbbreviation(), role);
+                ConnectManager.ROLE_MAP.put(registerApi.getModuleAbbreviation(), role);
             }
             Map<String, Object> dependMap = new HashMap<>(1);
-            dependMap.put("Dependencies", ClientRuntime.ROLE_MAP);
+            dependMap.put("Dependencies", ConnectManager.ROLE_MAP);
             return success(dependMap);
         } catch (Exception e) {
             Log.error(e);

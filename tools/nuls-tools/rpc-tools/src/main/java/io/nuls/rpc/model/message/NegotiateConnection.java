@@ -37,6 +37,10 @@ import lombok.ToString;
 @Data
 @ToString
 public class NegotiateConnection {
+    /**
+     * module abbreviation
+     * */
+    private String abbreviation;
 
     /**
      * Protocol version
