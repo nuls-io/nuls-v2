@@ -124,4 +124,14 @@ public class ClientHandler extends SimpleChannelInboundHandler<Object> {
             }
         }
     }
+
+    @Override
+    public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+        Log.info("链接断开:"+ConnectManager.getRemoteUri((SocketChannel) ctx.channel()));
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        ConnectManager.disConnect((SocketChannel) ctx.channel());
+    }
 }
