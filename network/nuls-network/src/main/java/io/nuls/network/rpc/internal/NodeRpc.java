@@ -226,7 +226,7 @@ public class NodeRpc extends BaseCmd {
         if (null == nodeGroup) {
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }
-        Node node = nodeGroup.getAvailableNode(nodeId);
+        Node node = nodeGroup.getConnectedNode(nodeId);
         if (null == node) {
             return failed(NetworkErrorCode.PARAMETER_ERROR);
         }

@@ -26,6 +26,7 @@
 package io.nuls.network.model;
 
 import io.nuls.network.constant.NetworkParam;
+import io.nuls.network.constant.NodeConnectStatusEnum;
 import io.nuls.network.constant.NodeStatusEnum;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.dto.Dto;
@@ -196,6 +197,7 @@ public class NodeGroup implements Dto {
     /**
      * 1.在可用连接充足情况下，保留一个种子连接，其他的连接需要断开
      * 2.在可用连接不够取代种子情况下，按可用连接数来断开种子连接
+     *
      * @param isCross
      * @return
      */
@@ -213,7 +215,7 @@ public class NodeGroup implements Dto {
             if (nodes.size() > 1 && canConnectNodesNum > 0) {
                 Collections.shuffle(nodes);
                 nodes.remove(0);
-                while(canConnectNodesNum < nodes.size()){
+                while (canConnectNodesNum < nodes.size()) {
                     nodes.remove(0);
                 }
             } else {
@@ -319,7 +321,17 @@ public class NodeGroup implements Dto {
     }
 
     public Node getAvailableNode(String nodeId) {
+        Node node = localNetNodeContainer.getConnectedNodes().get(nodeId);
+        if (null == node) {
+            node = crossNodeContainer.getConnectedNodes().get(nodeId);
+        }
+        if (null != node && NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
+            return node;
+        }
+        return null;
+    }
 
+    public Node getConnectedNode(String nodeId) {
         Node node = localNetNodeContainer.getConnectedNodes().get(nodeId);
         if (null == node) {
             node = crossNodeContainer.getConnectedNodes().get(nodeId);
