@@ -24,9 +24,8 @@
  */
 package io.nuls.rpc.invoke;
 
-import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.log.Log;
 
 import java.util.Map;
@@ -53,9 +52,9 @@ public class KernelInvoke extends BaseInvoke {
         for (Object object : dependMap.entrySet()) {
             Map.Entry<String, Map> entry = (Map.Entry<String, Map>) object;
             logInfo.append("注入：[key=").append(entry.getKey()).append(",value=").append(entry.getValue()).append("]\n");
-            ClientRuntime.ROLE_MAP.put(entry.getKey(), entry.getValue());
+            ConnectManager.ROLE_MAP.put(entry.getKey(), entry.getValue());
         }
-        ServerRuntime.updateStatus();
+        ConnectManager.updateStatus();
         Log.info(logInfo.toString());
     }
 }

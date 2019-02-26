@@ -36,10 +36,7 @@ import io.nuls.network.netty.container.NodesContainer;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -198,6 +195,42 @@ public class NodeGroup implements Dto {
     }
 
     /**
+     * 1.在可用连接充足情况下，保留一个种子连接，其他的连接需要断开
+     * 2.在可用连接不够取代种子情况下，按可用连接数来断开种子连接
+     *
+     * @param isCross
+     * @return
+     */
+    public void stopConnectedSeeds(boolean isCross) {
+        try {
+            List<Node> nodes = null;
+            int canConnectNodesNum = 0;
+            if (isCross) {
+                nodes = crossNodeContainer.getConnectedSeedNodes();
+                canConnectNodesNum = crossNodeContainer.getCanConnectNodes().size();
+            } else {
+                nodes = localNetNodeContainer.getConnectedSeedNodes();
+                canConnectNodesNum = localNetNodeContainer.getCanConnectNodes().size();
+            }
+            if (nodes.size() > 1 && canConnectNodesNum > 0) {
+                Collections.shuffle(nodes);
+                nodes.remove(0);
+                while (canConnectNodesNum < nodes.size()) {
+                    nodes.remove(0);
+                }
+            } else {
+                return;
+            }
+            //断开连接
+            for (Node node : nodes) {
+                node.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * 是否为主网链
      *
      * @return
@@ -280,25 +313,25 @@ public class NodeGroup implements Dto {
     }
 
     public List<Node> getAvailableNodes(boolean isCross) {
-        Collection<Node> nodes = null;
-        List<Node> availableNodes = new ArrayList<>();
         if (isCross) {
-            nodes = crossNodeContainer.getConnectedNodes().values();
+            return crossNodeContainer.getAvailableNodes();
         } else {
-            nodes = localNetNodeContainer.getConnectedNodes().values();
+            return localNetNodeContainer.getAvailableNodes();
         }
-        if (null != nodes && nodes.size() > 0) {
-            for (Node node : nodes) {
-                if (NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
-                    availableNodes.add(node);
-                }
-            }
-        }
-        return availableNodes;
     }
 
     public Node getAvailableNode(String nodeId) {
+        Node node = localNetNodeContainer.getConnectedNodes().get(nodeId);
+        if (null == node) {
+            node = crossNodeContainer.getConnectedNodes().get(nodeId);
+        }
+        if (null != node && NodeConnectStatusEnum.AVAILABLE == node.getConnectStatus()) {
+            return node;
+        }
+        return null;
+    }
 
+    public Node getConnectedNode(String nodeId) {
         Node node = localNetNodeContainer.getConnectedNodes().get(nodeId);
         if (null == node) {
             node = crossNodeContainer.getConnectedNodes().get(nodeId);
@@ -312,11 +345,11 @@ public class NodeGroup implements Dto {
         NodeGroupManager.getInstance().removeNodeGroup(chainId);
         Collection<Node> nodes = this.localNetNodeContainer.getConnectedNodes().values();
         for (Node node : nodes) {
-            node.colse();
+            node.close();
         }
         Collection<Node> crossNodes = this.crossNodeContainer.getConnectedNodes().values();
         for (Node node : crossNodes) {
-            node.colse();
+            node.close();
         }
         this.crossNodeContainer.clear();
         this.localNetNodeContainer.clear();
@@ -327,11 +360,11 @@ public class NodeGroup implements Dto {
         this.crossNodeContainer.setStatus(RECONNECT);
         Collection<Node> nodes = this.localNetNodeContainer.getConnectedNodes().values();
         for (Node node : nodes) {
-            node.colse();
+            node.close();
         }
         Collection<Node> crossNodes = this.crossNodeContainer.getConnectedNodes().values();
         for (Node node : crossNodes) {
-            node.colse();
+            node.close();
         }
         this.localNetNodeContainer.setStatus(WAIT2);
         this.crossNodeContainer.setStatus(WAIT2);

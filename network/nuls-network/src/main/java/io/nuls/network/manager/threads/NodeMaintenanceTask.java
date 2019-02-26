@@ -30,15 +30,13 @@ import io.nuls.network.manager.ConnectionManager;
 import io.nuls.network.manager.NodeGroupManager;
 import io.nuls.network.model.Node;
 import io.nuls.network.model.NodeGroup;
-import io.nuls.network.netty.container.NodesContainer;
-
-import static io.nuls.network.utils.LoggerUtil.Log;
-
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import static io.nuls.network.utils.LoggerUtil.Log;
 
 /**
  * 节点维护任务
@@ -93,8 +91,10 @@ public class NodeMaintenanceTask implements Runnable {
     }
 
     private List<Node> getNeedConnectNodes(NodeGroup nodeGroup, boolean isCross) {
-        Collection<Node> avaliableNodes = nodeGroup.getConnectedNodes(isCross);
-        if (avaliableNodes.size() >= networkParam.getMaxOutCount()) {
+        Collection<Node> connectedNodes = nodeGroup.getConnectedNodes(isCross);
+        if (connectedNodes.size() >= networkParam.getMaxOutCount()) {
+            //进行种子节点的断链
+            nodeGroup.stopConnectedSeeds(isCross);
             return null;
         }
         Collection<Node> canConnectNodes = nodeGroup.getCanConnectNodes(isCross);
@@ -104,9 +104,9 @@ public class NodeMaintenanceTask implements Runnable {
 
         List<Node> nodeList = new ArrayList<>(canConnectNodes);
 
-        nodeList.removeAll(avaliableNodes);
+        nodeList.removeAll(connectedNodes);
 
-        int maxCount = networkParam.getMaxOutCount() - avaliableNodes.size();
+        int maxCount = networkParam.getMaxOutCount() - connectedNodes.size();
         if (nodeList.size() < maxCount) {
             return nodeList;
         }

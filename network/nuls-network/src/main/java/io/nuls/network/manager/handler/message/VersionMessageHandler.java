@@ -41,6 +41,7 @@ import io.nuls.network.model.message.body.VersionMessageBody;
 import io.nuls.network.netty.container.NodesContainer;
 import io.nuls.network.rpc.external.BlockRpcService;
 import io.nuls.network.rpc.external.impl.BlockRpcServiceImpl;
+import io.nuls.network.utils.LoggerUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 
@@ -209,7 +210,7 @@ public class VersionMessageHandler extends BaseMessageHandler {
 
     @Override
     public NetworkEventResult send(BaseMessage message, Node node, boolean asyn) {
-//        Log.debug("VersionMessageHandler send:"+(isServer?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
+        LoggerUtil.Log.debug("VersionMessageHandler send:"+(node.isServer()?"Server":"Client")+":"+node.getIp()+":"+node.getRemotePort()+"==CMD=" +message.getHeader().getCommandStr());
         BlockRpcService blockRpcService = SpringLiteContext.getBean(BlockRpcServiceImpl.class);
         int chainId = NodeGroupManager.getInstance().getChainIdByMagicNum(message.getHeader().getMagicNumber());
         BestBlockInfo bestBlockInfo = blockRpcService.getBestBlockHeader(chainId);

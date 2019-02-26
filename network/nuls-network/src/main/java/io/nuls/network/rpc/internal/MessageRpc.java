@@ -191,12 +191,14 @@ public class MessageRpc extends BaseCmd {
             String[] nodeIds = nodes.split(",");
             List<Node> nodesList = new ArrayList<>();
             for (String nodeId : nodeIds) {
-                Node connectNode = nodeGroup.getAvailableNode(nodeId);
-                if (null != connectNode) {
+                Node availableNode = nodeGroup.getAvailableNode(nodeId);
+                if (null != availableNode) {
                     /*begin test code*/
-                    LoggerUtil.modulesMsgLogs(cmd, connectNode, messageBody, "send");
+                    LoggerUtil.modulesMsgLogs(cmd, availableNode, messageBody, "send");
                     /*end test code*/
-                    nodesList.add(connectNode);
+                    nodesList.add(availableNode);
+                }else{
+                    Log.info("node = {} is not available!");
                 }
             }
             Log.debug("==================sendPeersMsg nodesList size={}, cmd-{}, hash-{}", nodesList.size(), cmd, NulsDigestData.calcDigestData(messageBody).getDigestHex());
