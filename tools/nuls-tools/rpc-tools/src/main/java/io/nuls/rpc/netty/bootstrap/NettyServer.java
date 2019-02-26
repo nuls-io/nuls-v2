@@ -5,7 +5,6 @@ import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.rpc.netty.thread.StartServerProcessor;
-import io.nuls.rpc.server.runtime.ServerRuntime;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -85,7 +84,7 @@ public class NettyServer {
      * @return WsServer
      */
     public NettyServer moduleRoles(String[] value) {
-        ConnectManager.LOCAL.getModuleRoles().put(ServerRuntime.LOCAL.getModuleAbbreviation(), value);
+        ConnectManager.LOCAL.getModuleRoles().put(ConnectManager.LOCAL.getModuleAbbreviation(), value);
         return this;
     }
 

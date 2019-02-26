@@ -48,6 +48,10 @@ public class NulsOutputStreamBuffer {
         this.out = out;
     }
 
+    public void writeByte(byte b) throws IOException {
+        out.write(b);
+    }
+
     public void write(byte[] bytes) throws IOException {
         out.write(bytes);
     }

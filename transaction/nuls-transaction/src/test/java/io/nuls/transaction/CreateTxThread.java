@@ -24,15 +24,13 @@
 
 package io.nuls.transaction;
 
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.Log;
-import io.nuls.tools.parse.JSONUtils;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
-import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import org.junit.Assert;
 
 import java.math.BigInteger;
@@ -101,7 +99,7 @@ public class CreateTxThread implements Runnable {
 //            //调接口
 //            String json = JSONUtils.obj2json(ctxTransfer);
 //            Map<String, Object> params = JSONUtils.json2map(json);
-//            Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
+//            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
 //            Assert.assertTrue(null != response.getResponseData());
 //            Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
 //            Assert.assertTrue(null != map);
@@ -116,7 +114,7 @@ public class CreateTxThread implements Runnable {
     private void createTransfer() throws Exception {
         Map transferMap = this.createTransferTx(address24, "5MR_4bgJiPmxN4mZV2C89thSEdJ8qWnm9Xi", null);
         //调用接口
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
         Log.info("{}", result.get("value"));
@@ -128,7 +126,7 @@ public class CreateTxThread implements Runnable {
         String AddrTo = address20;//createAccount();
         Map transferMap = this.createTransferTx(addrFrom, AddrTo, null);
         //调用接口
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
         Log.info("{}", result.get("value"));
@@ -142,7 +140,7 @@ public class CreateTxThread implements Runnable {
             params.put("chainId", chainId);
             params.put("count", 1);
             params.put("password", "");
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
 
             accountList = (List<String>) ((HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createAccount")).get("list");
             return accountList.get(0);

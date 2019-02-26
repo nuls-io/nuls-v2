@@ -48,7 +48,7 @@ public class ChainGenerator {
      * @param symbol       链标志,生成的hashList与这个字段有关,便与判断测试结果
      * @param parent       父链
      * @param parentSymbol 父链标志
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static Chain newChain(long startHeight, long endHeight, String symbol, Chain parent, String parentSymbol, int chainId, ChainTypeEnum type) {
@@ -77,7 +77,7 @@ public class ChainGenerator {
      *
      * @param endHeight 链终止高度(包括在链内)
      * @param symbol    链标志,生成的hashList与这个字段有关,便与判断测试结果
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @return
      */
     public static Chain newMasterChain(long endHeight, String symbol, int chainId) {
@@ -98,7 +98,7 @@ public class ChainGenerator {
     /**
      * 使用一个区块生成一条链
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param block
      * @param parent  生成分叉链时传父链,生成孤儿链时传null
      * @return
@@ -128,7 +128,7 @@ public class ChainGenerator {
     /**
      * 系统初始化时,由本地的最新区块生成主链
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param block
      * @return
      */

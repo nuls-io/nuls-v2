@@ -39,7 +39,7 @@ public interface BlockService {
     /**
      * 获取创世块
      *
-     * @param chainId 链ID
+     * @param chainId 链Id/chain id
      * @return
      */
     Block getGenesisBlock(int chainId);
@@ -47,7 +47,7 @@ public interface BlockService {
     /**
      * 获取最新的区块头
      *
-     * @param chainId 链ID
+     * @param chainId 链Id/chain id
      * @return
      */
     BlockHeader getLatestBlockHeader(int chainId);
@@ -55,7 +55,7 @@ public interface BlockService {
     /**
      * 获取最新的区块
      *
-     * @param chainId 链ID
+     * @param chainId 链Id/chain id
      * @return
      */
     Block getLatestBlock(int chainId);
@@ -63,7 +63,7 @@ public interface BlockService {
     /**
      * 根据区块高度获取区块头
      *
-     * @param chainId 链ID
+     * @param chainId 链Id/chain id
      * @param height  区块高度
      * @return
      */
@@ -72,7 +72,7 @@ public interface BlockService {
     /**
      * 根据区块高度获取区块
      *
-     * @param chainId 链ID
+     * @param chainId 链Id/chain id
      * @param height  区块高度
      * @return
      */
@@ -81,7 +81,7 @@ public interface BlockService {
     /**
      * 根据区块高度区间获取区块头
      *
-     * @param chainId     链ID
+     * @param chainId 链Id/chain id
      * @param startHeight 起始高度
      * @param endHeight   结束高度
      * @return
@@ -91,7 +91,7 @@ public interface BlockService {
     /**
      * 根据区块hash获取区块头
      *
-     * @param chainId 链ID
+     * @param chainId 链Id/chain id
      * @param hash    区块hash
      * @return
      */
@@ -100,7 +100,7 @@ public interface BlockService {
     /**
      * 根据区块hash获取区块
      *
-     * @param chainId 链ID
+     * @param chainId 链Id/chain id
      * @param hash    区块hash
      * @return
      */
@@ -109,7 +109,7 @@ public interface BlockService {
     /**
      * 根据区块高度区间获取区块
      *
-     * @param chainId     链ID
+     * @param chainId 链Id/chain id
      * @param startHeight 起始高度
      * @param endHeight   结束高度
      * @return
@@ -119,7 +119,7 @@ public interface BlockService {
     /**
      * 保存区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
      *
-     * @param chainId  链ID
+     * @param chainId 链Id/chain id
      * @param block    待保存区块
      * @param needLock 是否需要加锁
      * @return
@@ -129,9 +129,10 @@ public interface BlockService {
     /**
      * 保存区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
      *
-     * @param chainId  链ID
+     * @param chainId 链Id/chain id
      * @param block    待保存区块
      * @param download 是否最新区块,最新区块-1,非最新区块-0
+     * @param needLock 是否需要加同步锁
      * @return
      */
     boolean saveBlock(int chainId, Block block, int download, boolean needLock);
@@ -139,8 +140,9 @@ public interface BlockService {
     /**
      * 回滚区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
      *
-     * @param chainId       链ID
+     * @param chainId 链Id/chain id
      * @param blockHeaderPo 待回滚区块头
+     * @param needLock 是否需要加同步锁
      * @return
      */
     boolean rollbackBlock(int chainId, BlockHeaderPo blockHeaderPo, boolean needLock);
@@ -148,8 +150,9 @@ public interface BlockService {
     /**
      * 回滚区块,已经考虑失败回滚操作,不抛出异常情况下,不会有垃圾数据
      *
-     * @param chainId 链ID
+     * @param chainId 链Id/chain id
      * @param height  待回滚区块高度
+     * @param needLock 是否需要加同步锁
      * @return
      */
     boolean rollbackBlock(int chainId, long height, boolean needLock);
@@ -157,7 +160,7 @@ public interface BlockService {
     /**
      * 转发区块给连接的其他对等节点,允许一个例外（不转发给它）
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param hash        区块
      * @param excludeNode 需要排除的节点,因为从该节点处接收的本区块
      * @return
@@ -167,7 +170,7 @@ public interface BlockService {
     /**
      * 广播区块给连接的其他对等节点
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      * @param block
      * @return
      */
@@ -177,7 +180,7 @@ public interface BlockService {
      * todo 待实现
      * 启动一条链
      *
-     * @param chainId 链ID
+     * @param chainId 链Id/chain id
      * @return
      */
     boolean startChain(int chainId);
@@ -186,7 +189,7 @@ public interface BlockService {
      * todo 待实现
      * 停止一条链
      *
-     * @param chainId   链ID
+     * @param chainId 链Id/chain id
      * @param cleanData 是否清理数据
      * @return
      */
@@ -195,14 +198,15 @@ public interface BlockService {
     /**
      * 初始化方法
      *
-     * @param chainId
+     * @param chainId 链Id/chain id
      */
     void init(int chainId);
 
     /**
      * 根据高度获取区块hash
      *
-     * @param chainId 链ID
+     * @param chainId 链Id/chain id
+     * @param height 区块高度
      * @return
      */
     NulsDigestData getBlockHash(int chainId, long height);

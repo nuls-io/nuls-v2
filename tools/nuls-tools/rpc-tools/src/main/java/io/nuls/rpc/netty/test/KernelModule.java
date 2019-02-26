@@ -47,12 +47,22 @@ public class KernelModule {
      * Analog Startup Module, Unit Test Specific
      */
     public static void mockModule() throws Exception {
-        /*NettyServer.getInstance("test", "TestModule", "test.com")
-                .moduleRoles("test_role", new String[]{"1.0"})
-                .moduleVersion("1.0");*/
-//                .dependencies(ModuleE.CM.abbr, "1.1")
         NettyServer.getInstance("test", "TestModule", "test.com")
                 .moduleRoles("test_role", new String[]{"1.0"})
+                .moduleVersion("1.0");
+
+        ConnectManager.getConnectByUrl("ws://"+ HostInfo.getLocalIP()+":8887/ws");
+        // Get information from kernel
+        ResponseMessageProcessor.syncKernel("ws://"+ HostInfo.getLocalIP()+":8887/ws");
+    }
+
+    /**
+     * 模拟启动模块，单元测试专用
+     * Analog Startup Module, Unit Test Specific
+     */
+    public static void mockModule1() throws Exception {
+        NettyServer.getInstance("test1", "TestModule1", "test1.com")
+                .moduleRoles("test_role1", new String[]{"1.0"})
                 .moduleVersion("1.0");
 
         ConnectManager.getConnectByUrl("ws://"+ HostInfo.getLocalIP()+":8887/ws");

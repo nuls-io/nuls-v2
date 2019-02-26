@@ -30,10 +30,10 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.data.BigIntegerUtils;
 import org.junit.Before;
@@ -74,7 +74,7 @@ public class CmdTest {
         params.put("assetChainId", 445);
         params.put("address", "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f");
         params.put("assetId", 222);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalance", params);
         logger.info("response {}", response);
         BigInteger bigInteger= BigIntegerUtils.stringToBigInteger(((Map)((Map)(response.getResponseData())).get("getBalance")).get("total").toString());
         System.out.print(bigInteger.toString());
@@ -93,7 +93,7 @@ public class CmdTest {
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
 
         params.put("assetId", 222);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
         logger.info("response {}", response);
     }
     @Test
@@ -109,7 +109,7 @@ public class CmdTest {
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
 
         params.put("assetId", 1);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
         logger.info("response {}", response);
     }
     @Test
@@ -122,7 +122,7 @@ public class CmdTest {
         params.put("assetChainId", 445);
         params.put("address", "JgT2JCQvKGRKRjKqyfxRAj2zSCpGca01f");
         params.put("assetId", 222);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         logger.info("response {}", response);
     }
     @Test
@@ -156,7 +156,7 @@ public class CmdTest {
         tx.setCoinData(coinData.serialize());
         params.put("chainId", chainId);
         params.put("txHex",HexUtil.encode(tx.serialize()));
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
 

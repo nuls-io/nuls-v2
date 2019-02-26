@@ -30,10 +30,10 @@ import io.nuls.base.data.CoinData;
 import io.nuls.base.data.CoinFrom;
 import io.nuls.base.data.CoinTo;
 import io.nuls.base.data.Transaction;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -94,7 +94,7 @@ public class CmdWrongDataTest {
         List<String> txHexList = new ArrayList<>();
         txHexList.add(HexUtil.encode(tx.serialize()));
         params.put("txHexList",txHexList);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
 
@@ -136,7 +136,7 @@ public class CmdWrongDataTest {
         params.put("chainId", chainId);
         params.put("txHex",HexUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
     @Test

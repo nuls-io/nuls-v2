@@ -21,16 +21,11 @@
 package io.nuls.mykernel;
 
 import io.nuls.rpc.info.NoUse;
-import io.nuls.rpc.server.runtime.ServerRuntime;
-import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
-import io.nuls.tools.core.ioc.SpringLiteContext;
-import io.nuls.tools.parse.ConfigLoader;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
 import io.nuls.tools.parse.config.IniEntity;
 import io.nuls.tools.thread.ThreadUtils;
-import io.nuls.tools.thread.commom.NulsThreadFactory;
 import lombok.Cleanup;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.tools.ant.util.VectorSet;
 import org.ini4j.Config;
 import org.ini4j.Ini;
 
@@ -38,17 +33,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Vector;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 区块管理模块启动类
- * Block module startup class
+ * 虚拟核心模块启动类
  *
  * @author captain
  * @version 1.0
@@ -91,7 +82,7 @@ public class MyKernelBootstrap {
             ThreadUtils.createAndRunThread("startModule",()->{
                 try {
                     //等待mykernel启动完毕
-                    while (!ServerRuntime.isReady()) {
+                    while (!ConnectManager.isReady()) {
                         TimeUnit.SECONDS.sleep(1);
                     }
                     //获取Modules目录

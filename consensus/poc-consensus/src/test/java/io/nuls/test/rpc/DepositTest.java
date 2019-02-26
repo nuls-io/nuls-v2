@@ -2,10 +2,10 @@ package io.nuls.test.rpc;
 
 import io.nuls.base.data.Address;
 import io.nuls.base.data.BlockHeader;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.parse.SerializeUtils;
 import org.junit.BeforeClass;
@@ -37,7 +37,7 @@ public class DepositTest {
         params.put("agentHash","00205d245e366862da82a1bd36745e1719e8b73e45dc320467d8639f9e0c82c39767");
         //params.put("agentHash","00207d53655ffdb1bd3b5a05bc4d6e14d7c9980ff22e889fa7c2374e2c4b9cd8119f");
         params.put("deposit","300000");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", params);
         System.out.println(cmdResp.getResponseData());
 
     }
@@ -53,7 +53,7 @@ public class DepositTest {
         params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
         params.put("tx","05006eaeecca67010049e09304000000000000000000000000000100014a25417a133876da5e0cdd04a983a8a5d8e7017200205d245e366862da82a1bd36745e1719e8b73e45dc320467d8639f9e0c82c397676801170100014a25417a133876da5e0cdd04a983a8a5d8e7017201000100801a06000000000000000000000000000800000000000000000001170100014a25417a133876da5e0cdd04a983a8a5d8e7017201000100e0930400000000000000000000000000ffffffff00");
         //params.put("tx","0500bdc742a167010049e09304000000000000000000000000000100014a25417a133876da5e0cdd04a983a8a5d8e7017200207d53655ffdb1bd3b5a05bc4d6e14d7c9980ff22e889fa7c2374e2c4b9cd8119f6801170100014a25417a133876da5e0cdd04a983a8a5d8e7017201000100801a06000000000000000000000000000800000000000000000001170100014a25417a133876da5e0cdd04a983a8a5d8e7017201000100e0930400000000000000000000000000ffffffff00");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositCommit", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositCommit", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -67,7 +67,7 @@ public class DepositTest {
         //组装blockHeader
         params.put("blockHeader", HexUtil.encode(blockHeader.serialize()));
         params.put("tx","0500bdc742a167010049e09304000000000000000000000000000100014a25417a133876da5e0cdd04a983a8a5d8e7017200207d53655ffdb1bd3b5a05bc4d6e14d7c9980ff22e889fa7c2374e2c4b9cd8119f6801170100014a25417a133876da5e0cdd04a983a8a5d8e7017201000100801a06000000000000000000000000000800000000000000000001170100014a25417a133876da5e0cdd04a983a8a5d8e7017201000100e0930400000000000000000000000000ffffffff00");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositRollBack", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositRollBack", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -78,7 +78,7 @@ public class DepositTest {
         Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         params.put("address",depositAddress.getBase58());
         params.put("txHash","");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -87,7 +87,7 @@ public class DepositTest {
         Map<String,Object>params = new HashMap<>();
         params.put("chainId",1);
         params.put("tx","");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdrawCommit", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdrawCommit", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -96,7 +96,7 @@ public class DepositTest {
         Map<String,Object>params = new HashMap<>();
         params.put("chainId",1);
         params.put("tx","");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdrawRollBack", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdrawRollBack", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -107,7 +107,7 @@ public class DepositTest {
         params.put("chainId",1);
         params.put("address",depositAddress.getBase58());
         params.put("agentHash","0020fef3f394953c601f6abe82f223d5c5673d3b4d7461e575f663954a7c4e055317");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_getDepositList", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_getDepositList", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -118,7 +118,7 @@ public class DepositTest {
         params.put("byteCount",125);
         params.put("shortCount",1555);
         params.put("longCount",666666);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.KE.abbr, "paramTestCmd", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.KE.abbr, "paramTestCmd", params);
         System.out.println(cmdResp);
 
     }

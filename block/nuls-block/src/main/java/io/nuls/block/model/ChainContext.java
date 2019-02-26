@@ -23,12 +23,14 @@
 package io.nuls.block.model;
 
 import io.nuls.base.data.Block;
+import io.nuls.base.data.protocol.Protocol;
 import io.nuls.block.cache.CacheHandler;
 import io.nuls.block.cache.SmallBlockCacher;
 import io.nuls.block.constant.RunningStatusEnum;
 import io.nuls.block.manager.ChainManager;
 import io.nuls.block.service.BlockService;
 import io.nuls.block.utils.LoggerUtil;
+import io.nuls.block.utils.module.ProtocolUtil;
 import io.nuls.block.utils.module.TransactionUtil;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.logback.NulsLogger;
@@ -37,6 +39,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.StampedLock;
 
 /**
@@ -60,6 +63,20 @@ public class ChainContext {
     @Getter
     @Setter
     private int chainId;
+
+    /**
+     * 当前协议版本
+     */
+    @Getter
+    @Setter
+    private short version;
+
+    /**
+     * 所有协议版本(包括消息、交易映射)
+     */
+    @Getter
+    @Setter
+    private Map<Short, Protocol> protocolsMap;
 
     /**
      * 该链的系统交易类型
@@ -136,6 +153,7 @@ public class ChainContext {
         SmallBlockCacher.init(chainId);
         CacheHandler.init(chainId);
         ChainManager.init(chainId);
+        ProtocolUtil.subscribe(chainId);
     }
 
     public void start() {

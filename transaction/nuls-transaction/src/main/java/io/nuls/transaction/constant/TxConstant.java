@@ -23,7 +23,7 @@ public interface TxConstant {
     /**
      * context path
      */
-    String CONTEXT_PATH = "io.nuls.transaction";
+    String CONTEXT_PATH = "io.nuls";
 
     /**
      * webSocket config

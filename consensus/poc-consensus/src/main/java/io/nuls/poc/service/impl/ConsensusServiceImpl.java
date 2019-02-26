@@ -28,9 +28,9 @@ import io.nuls.poc.utils.manager.*;
 import io.nuls.poc.utils.validator.BatchValidator;
 import io.nuls.poc.utils.validator.BlockValidator;
 import io.nuls.poc.utils.validator.TxValidator;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.basic.Result;
 import io.nuls.tools.core.annotation.Autowired;
 import io.nuls.tools.core.annotation.Service;
@@ -1284,7 +1284,7 @@ public class ConsensusServiceImpl implements ConsensusService {
             return Result.getFailed(ConsensusErrorCode.CHAIN_NOT_EXIST);
         }
         try {
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getUnencryptedAddressList", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getUnencryptedAddressList", params);
             List<String> accountAddressList = (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList")).get("list");
             List<Agent> workAgentList = chain.getWorkAgentList(chain.getNewestHeader().getHeight());
             String packAddress = null;

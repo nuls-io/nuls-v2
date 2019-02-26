@@ -38,7 +38,7 @@ public class EventUtil {
      * @throws Exception
      */
     public static boolean subscribe(String moduleId, String topic) throws Exception {
-//        String response = CmdDispatcher.request("subscribe", null);
+//        String response = ResponseMessageProcessor.request("subscribe", null);
         return true;
     }
 
@@ -51,7 +51,7 @@ public class EventUtil {
      * @throws Exception
      */
     public static boolean send(String moduleId, String topic, String eventJson) throws Exception {
-//        String response = CmdDispatcher.request("send", null);
+//        String response = ResponseMessageProcessor.request("send", null);
         return true;
     }
 

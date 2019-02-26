@@ -1,20 +1,15 @@
 package io.nuls.account.rpc.cmd;
 
-import io.nuls.account.ServiceInitializer;
 import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.model.bo.Account;
 import io.nuls.account.model.bo.tx.txdata.Alias;
 import io.nuls.account.rpc.call.LegerCmdCall;
-import io.nuls.account.service.AccountService;
-import io.nuls.account.util.TxUtil;
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.Transaction;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.tools.core.ioc.SpringLiteContext;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -23,7 +18,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author: qinyifeng
@@ -61,7 +57,7 @@ public class AliasCmdTest {
             params.put("chainId", chainId);
             params.put("count", 1);
             params.put("password", password);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
             if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
                 return null;
             }
@@ -107,7 +103,7 @@ public class AliasCmdTest {
      * get an account
      */
     public Response aliasTxCommit(Map<String, Object> params) throws Exception {
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_aliasTxCommit", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_aliasTxCommit", params);
         return cmdResp;
     }
 
@@ -123,7 +119,7 @@ public class AliasCmdTest {
         params.put("address", address);
         params.put("password", password);
         params.put("alias", "alias_2019");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setAlias");
         assertNotNull(result);
@@ -142,7 +138,7 @@ public class AliasCmdTest {
         params.put("chainId", chainId);
         params.put("address", address);
         params.put("alias", "alias_" + System.currentTimeMillis());
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasFee", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasFee", params);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAliasFee");
         assertNotNull(result);
@@ -164,7 +160,7 @@ public class AliasCmdTest {
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
         params.put("address", address);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasByAddress", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasByAddress", params);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAliasByAddress");
         assertNotNull(result);
@@ -179,7 +175,7 @@ public class AliasCmdTest {
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
         params.put("alias", "alias_" + System.currentTimeMillis());
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_isAliasUsable", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_isAliasUsable", params);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_isAliasUsable");
         assertNotNull(result);
@@ -227,7 +223,7 @@ public class AliasCmdTest {
         rollbackParams.put("chainId", chainId);
         rollbackParams.put("txHex", aliasTxCommitParams.get("txHex").toString());
         rollbackParams.put("secondaryDataHex", "111234134adfadfadfadfad");
-        Response rollbackCmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_aliasTxRollback", rollbackParams);
+        Response rollbackCmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_aliasTxRollback", rollbackParams);
         assertNotNull(rollbackCmdResp);
         HashMap rollbackResult = (HashMap) ((HashMap) rollbackCmdResp.getResponseData()).get("ac_aliasTxRollback");
         assertNotNull(rollbackResult);

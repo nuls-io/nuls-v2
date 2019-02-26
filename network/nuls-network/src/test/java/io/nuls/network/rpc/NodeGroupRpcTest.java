@@ -25,10 +25,10 @@
 package io.nuls.network.rpc;
 
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -53,7 +53,7 @@ public class NodeGroupRpcTest {
         // Version information ("1.1" or 1.1 is both available)
         params.put("chainId", 1);
         try {
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_getGroupByChainId", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getGroupByChainId", params);
             LoggerUtil.Log.info("response {}", response);
         }catch (Exception e){
             e.printStackTrace();

@@ -133,6 +133,8 @@ public class OrphanChainsMonitor implements Runnable {
     }
 
     private void copy(Integer chainId, SortedSet<Chain> maintainedOrphanChains, Chain orphanChain) {
+        System.out.println("OrphanChainsMonitor orphanChain-" + orphanChain);
+        System.out.println("OrphanChainsMonitor after mark orphanChain type-" + orphanChain.getType());
         //如果标记为重复,orphanChain不会复制到新的孤儿链集合,也不会进入分叉链集合,所有orphanChain的直接子链标记为ChainTypeEnum.DUPLICATE
         if (orphanChain.getType().equals(ChainTypeEnum.DUPLICATE)) {
             orphanChain.getSons().forEach(e -> e.setType(ChainTypeEnum.DUPLICATE));

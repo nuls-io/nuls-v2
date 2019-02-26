@@ -26,35 +26,34 @@ package io.nuls.transaction;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
+import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
-import io.nuls.rpc.server.WsServer;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
-import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.model.bo.Chain;
 import io.nuls.transaction.model.bo.config.ConfigBean;
 import io.nuls.transaction.model.dto.CoinDTO;
 import io.nuls.transaction.model.dto.CrossTxTransferDTO;
 import io.nuls.transaction.rpc.call.LedgerCall;
-import io.nuls.transaction.service.TxService;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * @author: Charlie
@@ -101,9 +100,8 @@ public class TestTx {
     @Before
     public void before() throws Exception {
         NoUse.mockModule();
-
         // Get information from kernel
-        CmdDispatcher.syncKernel();
+        ResponseMessageProcessor.syncKernel("ws://" + HostInfo.getLocalIP() + ":8887/ws");
         chain = new Chain();
         chain.setConfig(new ConfigBean(12345, 1));
 //        初始化token
@@ -133,9 +131,9 @@ public class TestTx {
         importPriKey("7e304e60c4e29c15382f76c0bb097bda28a1950b78871b6b7eb2bb4cc4ddeb49");//种子出块地址 5MR_2Cb86fpFbuY4Lici8MJStNxDFYH6kRB
 //        importPriKey("70e871a2e637b4182dfbedc53e164182d266821f4824ab1a3a73055e9f252f98");//种子出块地址
 
-//        importPriKey("00c299b105e2f9b260d7811d5cb94c713cc324e55831cb15a18454f7382f0a5f6e");//20 5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz
-//        importPriKey("00c4a6b90d3f4eb7b50bc85fd0e99ccb717e148b4fde7462e14c590445e589588c");//21 5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW
-//        importPriKey("009ad5018ed1fc162c5320b9ae496984dd10227086ad86ea954a209597ff9b7d3a");//22 5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA
+        importPriKey("00c299b105e2f9b260d7811d5cb94c713cc324e55831cb15a18454f7382f0a5f6e");//20 5MR_2CWWTDXc32s9Wd1guNQzPztFgkyVEsz
+        importPriKey("00c4a6b90d3f4eb7b50bc85fd0e99ccb717e148b4fde7462e14c590445e589588c");//21 5MR_2CbdqKcZktcxntG14VuQDy8YHhc6ZqW
+        importPriKey("009ad5018ed1fc162c5320b9ae496984dd10227086ad86ea954a209597ff9b7d3a");//22 5MR_2Cj9tfgQpdeF7nDy5wyaGG6MZ35H3rA
 //        importPriKey("00c805d2d6d5e06f57fdfb1aff56ef3c2dd15eee88f36fa7d45d368c352ec5ec0d");//23 5MR_2CWKhFuoGVraaxL5FYY3RsQLjLDN7jw
 //        importPriKey("00c77707b21eece6c1ce0b8add04db79dc846f36830effe5c5ae2aced00097fafb");//24 5MR_2CgwCFRoJ8KX37xNqjjR7ttYuJsg8rk
 //        importPriKey("00def3b0f4bfad2a6abb5f6957829e752a1a30806edc35e98016425d578fdc4e77", password);//25 5MR_2CjZkQsN7EnEPcaLgNrMrp6wpPGN6xo
@@ -155,7 +153,7 @@ public class TestTx {
         //组装创建节点交易
         Map agentTxMap = this.createAgentTx(address21, "5MR_2CaU6brvzCnGo2avJvrAsmpMMVEPvQq");
         //调用接口
-        Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", agentTxMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_createAgent"));
         Assert.assertTrue(null != result);
         Log.info("{}", result.get("txHex"));
@@ -169,7 +167,7 @@ public class TestTx {
         txMap.put("address", address27);
         txMap.put("password", "");
         //调用接口
-        Response cmdResp2 = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
+        Response cmdResp2 = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_stopAgent", txMap);
         Map result = (HashMap) (((HashMap) cmdResp2.getResponseData()).get("cs_stopAgent"));
         Assert.assertTrue(null != result);
         Log.info("{}", result.get("txHex"));
@@ -189,7 +187,7 @@ public class TestTx {
         dpParams.put("address", address21);
         dpParams.put("agentHash", agentHash);
         dpParams.put("deposit", 200000 * 100000000L);
-        Response dpResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
+        Response dpResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_depositToAgent", dpParams);
         HashMap dpResult = (HashMap) ((HashMap) dpResp.getResponseData()).get("cs_depositToAgent");
         String dpTxHex = (String) dpResult.get("txHex");
     }
@@ -206,7 +204,7 @@ public class TestTx {
         //Address depositAddress = new Address(1,(byte)1, SerializeUtils.sha256hash160("y5WhgP1iu2Qwt5CiaPTV4Fe2Xqmfd".getBytes()));
         params.put("address", address27);
         params.put("txHash", "0020c2bed94bb1195cfa1c406fa1af9edeedb92a920fa2b77a56d4287ab2895c9333");
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_withdraw", params);
         System.out.println(cmdResp.getResponseData());
     }
 
@@ -223,7 +221,7 @@ public class TestTx {
         params.put("address", address20);
         params.put("password", password);
         params.put("alias", alias);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
         System.out.println("ac_setAlias result:" + JSONUtils.obj2json(cmdResp));
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setAlias");
@@ -248,7 +246,7 @@ public class TestTx {
         //调接口
         String json = JSONUtils.obj2json(ctxTransfer);
         Map<String, Object> params = JSONUtils.json2map(json);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_createCtx", params);
         Assert.assertTrue(null != response.getResponseData());
         Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_createCtx");
         Assert.assertTrue(null != map);
@@ -258,7 +256,7 @@ public class TestTx {
 
       /*  Map transferMap = this.createTransferTx();
         //调用接口
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_transfer", transferMap);
         HashMap result = (HashMap) (((HashMap) cmdResp.getResponseData()).get("ac_transfer"));
         Assert.assertTrue(null != result);
         Log.info("{}", result.get("value"));
@@ -286,7 +284,7 @@ public class TestTx {
             params.put("priKey", priKey);
             params.put("password", pwd);
             params.put("overwrite", true);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_importAccountByPriKey", params);
             HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_importAccountByPriKey");
             String address = (String) result.get("address");
             Log.info("{}", address);
@@ -304,7 +302,7 @@ public class TestTx {
         params.put("chainId", chainId);
         params.put("address", address);
         params.put("password", password);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_removeAccount", params);
         Log.info("{}", JSONUtils.obj2json(cmdResp.getResponseData()));
     }
 
@@ -334,7 +332,7 @@ public class TestTx {
         System.out.println("endTime: " + endTime);
         params.put("endTimestamp", endTime);
         params.put("maxTxDataSize", 2 * 1024 * 1024L);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.TX.abbr, "tx_packableTxs", params);
         Assert.assertTrue(null != response.getResponseData());
         Map map = (HashMap) ((HashMap) response.getResponseData()).get("tx_packableTxs");
         Assert.assertTrue(null != map);
@@ -420,13 +418,13 @@ public class TestTx {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
         Log.info("response {}", response);
         params.put("isBatchValidate", true);
         Transaction transaction = buildTransaction(address);
 
         params.put("txHex", HexUtil.encode(transaction.serialize()));
-        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         Log.info("response {}", response);
 
         params.put("isConfirmTx", true);
@@ -434,7 +432,7 @@ public class TestTx {
         list.add(HexUtil.encode(transaction.serialize()));
         params.put("txHexList", list);
         params.put("blockHeight", height++);
-        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
+        response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         Log.info("response {}", response);
     }
 
@@ -487,7 +485,7 @@ public class TestTx {
         params.put("password", "");
         params.put("rewardAddress", agentAddr);
         return params;
-//        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
+//        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.CS.abbr, "cs_createAgent", params);
 //        System.out.println(cmdResp.getResponseData());
     }
 }

@@ -27,9 +27,9 @@ package io.nuls.network.manager.threads;
 import io.nuls.network.model.NodeGroup;
 import io.nuls.network.model.message.body.TimeMessageBody;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 
 import java.io.IOException;
@@ -71,7 +71,7 @@ public class MessageSendTaskTest implements Runnable  {
         params.put("command","test");
         Response response = null;
         try {
-            response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
+            response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_sendPeersMsg", params);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -43,7 +43,6 @@ import java.util.Map;
 
 import static io.nuls.block.constant.CommandConstant.*;
 
-
 /**
  * 处理收到的{@link HashMessage},用于区块的广播与转发
  *
@@ -57,10 +56,6 @@ public class ForwardSmallBlockHandler extends BaseCmd {
     @CmdAnnotation(cmd = FORWARD_SMALL_BLOCK_MESSAGE, version = 1.0, scope = Constants.PUBLIC, description = "")
     public Response process(Map map) {
         int chainId = Integer.parseInt(map.get("chainId").toString());
-//        ChainContext context = ContextManager.getContext(chainId);
-//        if (!context.getStatus().equals(RUNNING)) {
-//            return success();
-//        }
         String nodeId = map.get("nodeId").toString();
         HashMessage message = new HashMessage();
         NulsLogger messageLog = ContextManager.getContext(chainId).getMessageLog();
@@ -72,7 +67,6 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             messageLog.error(e);
             return failed(BlockErrorCode.PARAMETER_ERROR);
         }
-
         NulsDigestData blockHash = message.getRequestHash();
         BlockForwardEnum status = SmallBlockCacher.getStatus(chainId, blockHash);
         messageLog.debug("recieve HashMessage from node-" + nodeId + ", chainId:" + chainId + ", hash:" + blockHash);
@@ -82,7 +76,6 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             NetworkUtil.setHashAndHeight(chainId, blockHash, block.getSmallBlock().getHeader().getHeight(), nodeId);
             return success();
         }
-
         //2.已收到部分区块,还缺失交易信息,发送HashListMessage到源节点
         if (BlockForwardEnum.INCOMPLETE.equals(status)) {
             CachedSmallBlock block = SmallBlockCacher.getSmallBlock(chainId, blockHash);
@@ -93,7 +86,6 @@ public class ForwardSmallBlockHandler extends BaseCmd {
             NetworkUtil.setHashAndHeight(chainId, blockHash, block.getSmallBlock().getHeader().getHeight(), nodeId);
             return success();
         }
-
         //3.未收到区块
         if (BlockForwardEnum.EMPTY.equals(status)) {
             HashMessage request = new HashMessage();
@@ -103,6 +95,4 @@ public class ForwardSmallBlockHandler extends BaseCmd {
         }
         return success();
     }
-
-
 }

@@ -1,10 +1,10 @@
 package io.nuls.test;
 
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.Constants;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -27,7 +27,7 @@ public class CallOtherModule {
             params.put("chainId", 1);
             params.put("count", 3);
             params.put("password", null);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
             if (!cmdResp.isSuccess()) {
                 return;
             }

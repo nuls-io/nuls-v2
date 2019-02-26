@@ -8,10 +8,11 @@ import io.nuls.chain.service.ChainService;
 import io.nuls.chain.service.RpcService;
 import io.nuls.chain.service.impl.RpcServiceImpl;
 import io.nuls.db.service.RocksDBService;
-import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.server.WsServer;
-import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.rpc.netty.bootstrap.NettyServer;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.parse.ConfigLoader;
@@ -101,7 +102,7 @@ public class ChainBootstrap {
     }
 
     void waitDependencies() throws InterruptedException {
-        while (!ServerRuntime.isReady()) {
+        while (!ConnectManager.isReady()) {
             Log.info("wait depend modules ready");
             Thread.sleep(2000L);
         }
@@ -200,16 +201,23 @@ public class ChainBootstrap {
      * @throws Exception Any error will throw an exception
      */
     private void startRpcServer() throws Exception {
-        WsServer.getInstance(ModuleE.CM)
-                .moduleRoles(new String[]{"1.0"})
-                .moduleVersion("1.0")
+        String packageC = "io.nuls.chain.cmd";
+        NettyServer.getInstance(ModuleE.CM)
+                .moduleRoles(ModuleE.CM.abbr, new String[]{"1.1", "1.2"})
+                .moduleVersion("1.1")
+                .dependencies(ModuleE.KE.abbr, "1.1")
                 .dependencies(ModuleE.NW.abbr, "1.1")
                 .dependencies(ModuleE.TX.abbr, "1.1")
-                .scanPackage("io.nuls.chain.cmd")
-                .connect("ws://127.0.0.1:8887");
-
-        // Get information from kernel
-        CmdDispatcher.syncKernel();
+                .scanPackage(packageC);
+        String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
+        /*
+         * 链接到指定地址
+         * */
+        ConnectManager.getConnectByUrl(kernelUrl);
+        /*
+         * 和指定地址同步
+         * */
+        ResponseMessageProcessor.syncKernel(kernelUrl);
     }
 
     /**

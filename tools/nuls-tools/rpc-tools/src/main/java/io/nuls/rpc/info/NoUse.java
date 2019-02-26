@@ -1,10 +1,9 @@
 package io.nuls.rpc.info;
 
-import io.nuls.rpc.client.CmdDispatcher;
-import io.nuls.rpc.client.runtime.ClientRuntime;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.server.WsServer;
-import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.rpc.netty.bootstrap.NettyServer;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
 import java.util.ArrayList;
@@ -24,26 +23,22 @@ public class NoUse {
      * Simulate a kernel module
      */
     public static void mockKernel() throws Exception {
-        WsServer wsServer = new WsServer(8887);
-        wsServer.setReuseAddr(true);
+        int port = 8887;
+        NettyServer.startServer(port);
         // Start server instance
-        ServerRuntime.LOCAL.setApiMethods(new ArrayList<>());
-        ServerRuntime.LOCAL.setModuleAbbreviation(ModuleE.KE.abbr);
-        ServerRuntime.LOCAL.setModuleName(ModuleE.KE.name);
-        ServerRuntime.LOCAL.setModuleDomain(ModuleE.KE.domain);
+        ConnectManager.LOCAL.setApiMethods(new ArrayList<>());
+        ConnectManager.LOCAL.setModuleAbbreviation(ModuleE.KE.abbr);
+        ConnectManager.LOCAL.setModuleName(ModuleE.KE.name);
+        ConnectManager.LOCAL.setModuleDomain(ModuleE.KE.domain);
         Map<String, String> connectionInformation = new HashMap<>(2);
         connectionInformation.put(Constants.KEY_IP, HostInfo.getLocalIP());
-        connectionInformation.put(Constants.KEY_PORT, wsServer.getPort() + "");
-        ServerRuntime.LOCAL.setConnectionInformation(connectionInformation);
-        ServerRuntime.startService = true;
+        connectionInformation.put(Constants.KEY_PORT, port + "");
+        ConnectManager.LOCAL.setConnectionInformation(connectionInformation);
+        ConnectManager.startService = true;
         SpringLiteContext.init("io.nuls.rpc.cmd.kernel");
-        wsServer.scanPackage("io.nuls.rpc.cmd.kernel").connect("ws://"+HostInfo.getLocalIP()+":8887");
-
-        ClientRuntime.ROLE_MAP.put(ModuleE.KE.abbr,connectionInformation);
-        // Get information from kernel
-        CmdDispatcher.syncKernel();
-
-        Thread.sleep(Integer.MAX_VALUE);
+        ConnectManager.scanPackage("io.nuls.rpc.cmd.kernel");
+        ConnectManager.ROLE_MAP.put(ModuleE.KE.abbr,connectionInformation);
+        ConnectManager.updateStatus();
     }
 
     /**
@@ -51,13 +46,12 @@ public class NoUse {
      * Analog Startup Module, Unit Test Specific
      */
     public static void mockModule() throws Exception {
-        WsServer.getInstance("test", "TestModule", "test.com")
+        NettyServer.getInstance("test", "TestModule", "test.com")
                 .moduleRoles("test_role", new String[]{"1.0"})
-                .moduleVersion("1.0")
-//                .dependencies(ModuleE.CM.abbr, "1.1")
-                .connect("ws://127.0.0.1:8887");
+                .moduleVersion("1.0");
 
+        ConnectManager.getConnectByUrl("ws://"+ HostInfo.getLocalIP()+":8887/ws");
         // Get information from kernel
-        CmdDispatcher.syncKernel();
+        ResponseMessageProcessor.syncKernel("ws://"+ HostInfo.getLocalIP()+":8887/ws");
     }
 }

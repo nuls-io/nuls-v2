@@ -1,37 +1,22 @@
 package io.nuls.account.rpc.common;
 
 import io.nuls.account.constant.AccountConstant;
-import io.nuls.account.constant.AccountErrorCode;
-import io.nuls.account.constant.RpcConstant;
-import io.nuls.account.model.bo.Account;
-import io.nuls.account.model.bo.tx.AliasTransaction;
-import io.nuls.account.model.bo.tx.txdata.Alias;
-import io.nuls.account.model.dto.AccountKeyStoreDto;
-import io.nuls.account.model.dto.AccountOfflineDto;
-import io.nuls.account.model.dto.SimpleAccountDto;
-import io.nuls.account.rpc.call.LegerCmdCall;
-import io.nuls.base.basic.AddressTool;
-import io.nuls.base.data.*;
-import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.base.data.Address;
+import io.nuls.base.data.MultiSigAccount;
 import io.nuls.rpc.info.Constants;
-import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
-import io.nuls.tools.data.ByteUtils;
-import io.nuls.tools.exception.NulsRuntimeException;
 import io.nuls.tools.parse.JSONUtils;
-import io.nuls.tools.thread.TimeService;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author: EdwardChan
@@ -70,7 +55,7 @@ public class CommonRpcOperation {
             params.put("chainId", chainId);
             params.put("count", count);
             params.put("password", password);
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createAccount", params);
             if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
                 return null;
             }
@@ -89,7 +74,7 @@ public class CommonRpcOperation {
             params.put("chainId", chainId);
             params.put("address", address);
 
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAccountByAddress", params);
             if (!AccountConstant.SUCCESS_CODE.equals(cmdResp.getResponseStatus())) {
                 return null;
             }
@@ -107,7 +92,7 @@ public class CommonRpcOperation {
         params.put("address", address);
         params.put("password", password);
         params.put("alias", alias);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_setAlias", params);
         System.out.println("ac_setAlias result:" + JSONUtils.obj2json(cmdResp));
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_setAlias");
@@ -125,7 +110,7 @@ public class CommonRpcOperation {
         params.put(Constants.VERSION_KEY_STR, "1.0");
         params.put("chainId", chainId);
         params.put("address", address);
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasByAddress", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_getAliasByAddress", params);
         System.out.println("ac_getAliasByAddress result:" + JSONUtils.obj2json(cmdResp));
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_getAliasByAddress");
@@ -165,7 +150,7 @@ public class CommonRpcOperation {
         params.put("pubKeys", pubKeys);
         params.put("minSigns", multiSigAccount.getM());
         //create the multi sign accout
-        Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSigAccount", params);
+        Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr, "ac_createMultiSigAccount", params);
         assertNotNull(cmdResp);
         HashMap result = (HashMap) ((HashMap) cmdResp.getResponseData()).get("ac_createMultiSigAccount");
         assertNotNull(result);

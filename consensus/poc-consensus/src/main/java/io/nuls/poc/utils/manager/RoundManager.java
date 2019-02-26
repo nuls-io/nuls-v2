@@ -13,9 +13,9 @@ import io.nuls.poc.model.bo.tx.txdata.Deposit;
 import io.nuls.poc.model.po.PunishLogPo;
 import io.nuls.poc.utils.CallMethodUtils;
 import io.nuls.poc.utils.enumeration.PunishType;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.data.DateUtils;
 import io.nuls.tools.data.DoubleUtils;
@@ -345,7 +345,7 @@ public class RoundManager {
         try {
             Map<String,Object> params = new HashMap<>(2);
             params.put(ConsensusConstant.PARAM_CHAIN_ID,chain.getConfig().getChainId());
-            Response cmdResp = CmdDispatcher.requestAndResponse(ModuleE.AC.abbr,"ac_getUnencryptedAddressList", params);
+            Response cmdResp = ResponseMessageProcessor.requestAndResponse(ModuleE.AC.abbr,"ac_getUnencryptedAddressList", params);
             List<String> accountAddressList =  (List<String>) ((HashMap)((HashMap) cmdResp.getResponseData()).get("ac_getUnencryptedAddressList")).get("list");
             if(accountAddressList != null && accountAddressList.size()>0){
                 for (String address:accountAddressList) {

@@ -270,6 +270,10 @@ public class ConsensusProcess {
         extendsData.setConsensusMemberCount(round.getMemberCount());
         extendsData.setPackingIndexOfRound(self.getPackingIndexOfRound());
         extendsData.setRoundStartTime(round.getStartTime());
+        extendsData.setMainVersion((short) 1);
+        extendsData.setBlockVersion((short) 1);
+        extendsData.setEffectiveRatio((byte) 80);
+        extendsData.setContinuousIntervalCount((short) 100);
         bd.setExtendsData(extendsData);
 
         StringBuilder str = new StringBuilder();

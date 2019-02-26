@@ -1,10 +1,12 @@
 package io.nuls.transaction;
 
 import io.nuls.db.service.RocksDBService;
-import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.h2.utils.MybatisDbHelper;
+import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.server.WsServer;
-import io.nuls.rpc.server.runtime.ServerRuntime;
+import io.nuls.rpc.netty.bootstrap.NettyServer;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.parse.ConfigLoader;
@@ -16,6 +18,7 @@ import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import java.io.InputStream;
@@ -44,7 +47,7 @@ public class TransactionBootStrap {
             //启动WebSocket服务,向外提供RPC接口
             initServer();
             initH2Table();
-            while (!ServerRuntime.isReady()) {
+            while (!ConnectManager.isReady()) {
                 Log.info("wait depend modules ready");
                 Thread.sleep(2000L);
             }
@@ -77,12 +80,9 @@ public class TransactionBootStrap {
             Log.error(e);
         }
     }
-
-    /**
-     * 初始化数据库
-     * */
-    public static void initDB(){
+    public static void initDB() {
         try {
+
             Properties properties = ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
             String path = properties.getProperty(TxConstant.DB_DATA_PATH,
                     TransactionBootStrap.class.getClassLoader().getResource("").getPath() + "data");
@@ -90,9 +90,9 @@ public class TransactionBootStrap {
 
             //todo 单个节点跑多链的时候 h2是否需要通过chain来区分数据库(如何分？)，待确认！！
             String resource = "mybatis/mybatis-config.xml";
-            InputStream in = Resources.getResourceAsStream(resource);
-            BaseService.sqlSessionFactory = new SqlSessionFactoryBuilder().build(in);
-        }catch (Exception e){
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid");
+            MybatisDbHelper.setSqlSessionFactory(sqlSessionFactory);
+        } catch (Exception e) {
             Log.error(e);
         }
     }
@@ -121,17 +121,16 @@ public class TransactionBootStrap {
     public static void initServer(){
         try {
             // todo 依赖模块 Start server instance
-            WsServer.getInstance(ModuleE.TX)
+            NettyServer.getInstance(ModuleE.TX)
                     .moduleRoles(new String[]{"1.0"})
                     .moduleVersion("1.0")
                     .dependencies(ModuleE.NW.abbr, "1.0")
                     .dependencies(ModuleE.LG.abbr, "1.0")
                     .dependencies(ModuleE.BL.abbr, "1.0")
-                    .scanPackage("io.nuls.transaction.rpc.cmd")
-                    .connect("ws://127.0.0.1:8887");
-
-            // Get information from kernel
-            CmdDispatcher.syncKernel();
+                    .scanPackage("io.nuls.transaction.rpc.cmd");
+            String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
+            ConnectManager.getConnectByUrl(kernelUrl);
+            ResponseMessageProcessor.syncKernel(kernelUrl);
         }catch (Exception e){
             Log.error("Transaction startup webSocket server error!");
             e.printStackTrace();

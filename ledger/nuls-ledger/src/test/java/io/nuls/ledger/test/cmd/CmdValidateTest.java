@@ -27,10 +27,10 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -86,7 +86,7 @@ public class CmdValidateTest {
         tx.setCoinData(coinData.serialize());
         params.put("chainId", chainId);
         params.put("txHex",HexUtil.encode(tx.serialize()));
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
 
@@ -101,7 +101,7 @@ public class CmdValidateTest {
 //        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
 //        String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         params.put("chainId", chainId);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
         logger.info("response {}", response);
     }
 
@@ -139,7 +139,7 @@ public class CmdValidateTest {
         params.put("chainId", chainId);
         params.put("txHex",HexUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
-        Response  response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+        Response  response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
 
@@ -158,7 +158,7 @@ public class CmdValidateTest {
         params.put("address", address);
         params.put("assetId", 222);
         params.put("chainId", chainId);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getNonce", params);
         String nonce =  ((Map)((Map)response.getResponseData()).get("getNonce")).get("nonce").toString();
         //封装交易执行
         Transaction tx = new Transaction();
@@ -188,7 +188,7 @@ public class CmdValidateTest {
         params.put("chainId", chainId);
         params.put("txHex",HexUtil.encode(tx.serialize()));
         params.put("isBatchValidate",true);
-          response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+          response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
     }
 }
