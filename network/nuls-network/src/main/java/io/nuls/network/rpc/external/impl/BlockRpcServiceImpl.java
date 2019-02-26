@@ -31,9 +31,9 @@ import io.nuls.network.manager.TimeManager;
 import io.nuls.network.model.dto.BestBlockInfo;
 import io.nuls.network.rpc.external.BlockRpcService;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.tools.crypto.HexUtil;
 
@@ -54,7 +54,7 @@ public class BlockRpcServiceImpl implements BlockRpcService {
         map.put("chainId", chainId);
         try {
             LoggerUtil.Log.debug("getBestBlockHeader begin time={}", TimeManager.currentTimeMillis());
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER, map, 2000);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.BL.abbr, NetworkConstant.CMD_BL_BEST_BLOCK_HEADER, map, 2000);
             if (null != response && response.isSuccess()) {
                 Map responseData = (Map) response.getResponseData();
                 String hex = (String) responseData.get(NetworkConstant.CMD_BL_BEST_BLOCK_HEADER);

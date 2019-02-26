@@ -25,10 +25,10 @@
 package io.nuls.network.rpc;
 
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -56,7 +56,7 @@ public class NodeRpcTest {
         params.put("startPage", 0);
         params.put("pageSize", 0);
         try {
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_getNodes", params);
             LoggerUtil.Log.info("response {}", response);
         }catch (Exception e){
             e.printStackTrace();

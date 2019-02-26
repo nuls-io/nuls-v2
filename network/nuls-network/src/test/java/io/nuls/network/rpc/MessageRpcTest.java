@@ -32,10 +32,10 @@ import io.nuls.network.model.dto.IpAddress;
 import io.nuls.network.model.message.VersionMessage;
 import io.nuls.network.model.message.body.VersionMessageBody;
 import io.nuls.network.utils.LoggerUtil;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -82,7 +82,7 @@ public class MessageRpcTest {
             params.put("excludeNodes",excludeNodes);
             params.put("messageBody",HexUtil.byteToHex(versionMessageBody.serialize()));
             params.put("command","block");
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_broadcast", params);
             LoggerUtil.Log.info("response {}", response);
 
         }catch (Exception e){

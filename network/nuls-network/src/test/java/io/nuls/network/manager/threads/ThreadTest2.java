@@ -24,9 +24,9 @@
  */
 package io.nuls.network.manager.threads;
 
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.Log;
 import io.nuls.tools.thread.ThreadUtils;
 import io.nuls.tools.thread.commom.NulsThreadFactory;
@@ -78,7 +78,7 @@ public class ThreadTest2 {
                 cmds.add(cmd);
             }
             map.put("protocolCmds", cmds);
-            boolean success = CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
+            boolean success = ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_protocolRegister", map).isSuccess();
             Log.debug("get nw_protocolRegister " + success);
             return success;
         } catch (Exception e) {

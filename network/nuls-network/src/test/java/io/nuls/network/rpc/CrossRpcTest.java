@@ -24,10 +24,10 @@
  */
 package io.nuls.network.rpc;
 
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.log.Log;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +56,7 @@ public class CrossRpcTest {
             map.put("minAvailableCount",20);
             map.put("seedIps","");
             map.put("isMoonNode","1");
-            Response response =  CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_createNodeGroup",map );
+            Response response =  ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_createNodeGroup",map );
             Log.info("response={}",response);
         } catch (Exception e) {
             e.printStackTrace();
@@ -68,7 +68,7 @@ public class CrossRpcTest {
         try {
             Map<String,Object> map = new HashMap<>();
             map.put("chainId",54);
-            Response response =  CmdDispatcher.requestAndResponse(ModuleE.NW.abbr, "nw_delNodeGroup",map );
+            Response response =  ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr, "nw_delNodeGroup",map );
             Log.info("response={}",response);
         } catch (Exception e) {
             e.printStackTrace();

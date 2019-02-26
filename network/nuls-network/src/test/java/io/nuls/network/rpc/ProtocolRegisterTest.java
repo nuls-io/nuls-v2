@@ -24,9 +24,11 @@
  */
 package io.nuls.network.rpc;
 
-import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.server.WsServer;
+import io.nuls.rpc.netty.bootstrap.NettyServer;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -42,16 +44,23 @@ import java.util.Map;
 public class ProtocolRegisterTest {
     @Test
     public void test1() throws Exception {
-        WsServer.getInstance(ModuleE.BL)
-                .moduleRoles(new String[]{"1.0", "1.4"})
-                .moduleVersion("1.2")
-//                .dependencies(ModuleE.LG.abbr, "1.1")
-//                .dependencies(ModuleE.BL.abbr, "2.1")
-                .scanPackage("io.nuls.network.rpc.internal")
-                .connect("ws://127.0.0.1:8887");
 
-        // Get information from kernel
-        CmdDispatcher.syncKernel();
+        String packageC = "io.nuls.network.rpc.internal";
+        NettyServer.getInstance(ModuleE.BL)
+                .moduleRoles(ModuleE.NW.abbr, new String[]{"1.1", "1.2"})
+                .moduleVersion("1.1")
+                .dependencies(ModuleE.KE.abbr, "1.1")
+                .scanPackage(packageC);
+        String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
+        /*
+         * 链接到指定地址
+         * */
+        ConnectManager.getConnectByUrl(kernelUrl);
+        /*
+         * 和指定地址同步
+         * */
+        ResponseMessageProcessor.syncKernel(kernelUrl);
+
         Map<String,Object> map = new HashMap<>();
         List<Map<String,String>> cmds = new ArrayList<>();
         map.put("role","bl");
@@ -64,7 +73,7 @@ public class ProtocolRegisterTest {
         cmds.add(cmd1);
         cmds.add(cmd2);
         map.put("protocolCmds",cmds);
-        CmdDispatcher.requestAndResponse(ModuleE.NW.abbr,"nw_protocolRegister",map);
+        ResponseMessageProcessor.requestAndResponse(ModuleE.NW.abbr,"nw_protocolRegister",map);
         Thread.sleep(Integer.MAX_VALUE);
     }
 
