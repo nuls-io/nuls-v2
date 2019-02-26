@@ -1,6 +1,7 @@
 package io.nuls.transaction;
 
 import io.nuls.db.service.RocksDBService;
+import io.nuls.h2.utils.MybatisDbHelper;
 import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.netty.bootstrap.NettyServer;
@@ -17,6 +18,7 @@ import io.nuls.transaction.db.rocksdb.storage.LanguageStorageService;
 import io.nuls.transaction.manager.ChainManager;
 import io.nuls.transaction.rpc.call.NetworkCall;
 import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
 import java.io.InputStream;
@@ -78,12 +80,9 @@ public class TransactionBootStrap {
             Log.error(e);
         }
     }
-
-    /**
-     * 初始化数据库
-     * */
-    public static void initDB(){
+    public static void initDB() {
         try {
+
             Properties properties = ConfigLoader.loadProperties(TxConstant.DB_CONFIG_NAME);
             String path = properties.getProperty(TxConstant.DB_DATA_PATH,
                     TransactionBootStrap.class.getClassLoader().getResource("").getPath() + "data");
@@ -91,9 +90,9 @@ public class TransactionBootStrap {
 
             //todo 单个节点跑多链的时候 h2是否需要通过chain来区分数据库(如何分？)，待确认！！
             String resource = "mybatis/mybatis-config.xml";
-            InputStream in = Resources.getResourceAsStream(resource);
-            BaseService.sqlSessionFactory = new SqlSessionFactoryBuilder().build(in);
-        }catch (Exception e){
+            SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid");
+            MybatisDbHelper.setSqlSessionFactory(sqlSessionFactory);
+        } catch (Exception e) {
             Log.error(e);
         }
     }
