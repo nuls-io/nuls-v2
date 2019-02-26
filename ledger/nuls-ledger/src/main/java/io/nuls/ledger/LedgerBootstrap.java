@@ -30,9 +30,11 @@ import io.nuls.ledger.config.AppConfig;
 import io.nuls.ledger.model.ModuleConfig;
 import io.nuls.ledger.service.BlockDataService;
 import io.nuls.ledger.service.impl.BlockDataServiceImpl;
-import io.nuls.rpc.client.CmdDispatcher;
+import io.nuls.rpc.info.HostInfo;
 import io.nuls.rpc.model.ModuleE;
-import io.nuls.rpc.server.WsServer;
+import io.nuls.rpc.netty.bootstrap.NettyServer;
+import io.nuls.rpc.netty.channel.manager.ConnectManager;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.core.inteceptor.ModularServiceMethodInterceptor;
 import io.nuls.tools.core.ioc.SpringLiteContext;
 
@@ -61,25 +63,25 @@ public class LedgerBootstrap {
 
 
     /**
-     * 初始化websocket服务器，供其他模块调用本模块接口
-     *
-     * @throws Exception
+     * 共识模块启动WebSocket服务，用于其他模块连接共识模块与账本模块RPC交互
      */
-    public static void initRpcServer() {
-        try {
+    private static void initRpcServer() throws Exception {
             String packageC = "io.nuls.ledger.rpc.cmd";
-            String kernelUrl = ModuleConfig.getInstance().getKernelHost() + ":" + ModuleConfig.getInstance().getKernelPort();
-            logger.info("kernel start info {}", kernelUrl);
-            WsServer.getInstance(ModuleE.LG)
-                    //.supportedAPIVersions(new String[]{"1.1", "1.2"})
-                    .moduleRoles(ModuleE.LG.abbr, new String[]{"1.1", "1.2"})
-                    .moduleVersion("1.2")
-                    .scanPackage(packageC)
-                    .connect("ws://127.0.0.1:8887");
-            CmdDispatcher.syncKernel();
-        } catch (Exception e) {
-            logger.error("ledger initServer failed", e);
-        }
+            NettyServer.getInstance(ModuleE.LG)
+                    .moduleRoles(new String[]{"1.0"})
+                    .moduleVersion("1.0")
+                    .dependencies(ModuleE.KE.abbr, "1.1")
+                    .scanPackage(packageC);
+            String kernelUrl = "ws://" + HostInfo.getLocalIP() + ":8887/ws";
+            /*
+             * 链接到指定地址
+             * */
+            ConnectManager.getConnectByUrl(kernelUrl);
+            /*
+             * 和指定地址同步
+             * */
+            ResponseMessageProcessor.syncKernel(kernelUrl);
+
     }
 
     /**

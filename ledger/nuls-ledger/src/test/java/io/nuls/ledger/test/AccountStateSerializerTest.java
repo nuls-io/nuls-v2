@@ -27,6 +27,8 @@ package io.nuls.ledger.test;
 
 import io.nuls.tools.exception.NulsException;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 

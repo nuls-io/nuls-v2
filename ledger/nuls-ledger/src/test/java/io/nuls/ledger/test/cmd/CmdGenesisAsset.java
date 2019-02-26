@@ -26,10 +26,10 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -93,19 +93,19 @@ public class CmdGenesisAsset {
         // Build params map
         Map<String, Object> params = new HashMap<>();
         params.put("chainId", chainId);
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "bathValidateBegin", params);
         logger.info("response {}", response);
         params.put("isBatchValidate", true);
         Transaction transaction = buildTransaction();
         List<String> txHexList = new ArrayList<>();
         txHexList.add(HexUtil.encode(transaction.serialize()));
         params.put("txHex",HexUtil.encode(transaction.serialize()));
-         response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
+         response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "validateCoinData", params);
         logger.info("response {}", response);
         params.put("txHexList",txHexList);
         params.put("blockHeight",35);
         params.put("isConfirmTx",true);
-        response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
+        response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "commitTx", params);
         logger.info("response {}", response);
     }
     @Test
@@ -120,7 +120,7 @@ public class CmdGenesisAsset {
         params.put("address", address);
 //        params.put("address", "LLbmaw1UNmKmd5PfuzP1Zm9dNuAnia01f");
 
-        Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
+        Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBalanceNonce", params);
         logger.info("response {}", response);
     }
 }

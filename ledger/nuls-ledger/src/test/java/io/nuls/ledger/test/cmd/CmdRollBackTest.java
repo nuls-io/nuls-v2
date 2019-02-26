@@ -26,10 +26,10 @@ package io.nuls.ledger.test.cmd;
 
 import io.nuls.base.basic.AddressTool;
 import io.nuls.base.data.*;
-import io.nuls.rpc.client.CmdDispatcher;
 import io.nuls.rpc.info.NoUse;
 import io.nuls.rpc.model.ModuleE;
 import io.nuls.rpc.model.message.Response;
+import io.nuls.rpc.netty.processor.ResponseMessageProcessor;
 import io.nuls.tools.crypto.HexUtil;
 import org.junit.Before;
 import org.junit.Test;
@@ -119,7 +119,7 @@ public class CmdRollBackTest {
             params.put("txHexList", txHexList);
             params.put("blockHeight", 1);
             params.put("isConfirmTx", true);
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "rollBackConfirmTx", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "rollBackConfirmTx", params);
             logger.info("response {}", response);
         } catch (IOException e) {
             e.printStackTrace();
@@ -134,7 +134,7 @@ public class CmdRollBackTest {
                 Map<String,Object> params = new HashMap<>();
                 params.put("chainId", chainId);
                 params.put("blockHeight",1);
-                Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getSnapshot", params);
+                Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getSnapshot", params);
                 logger.info("response {}", response);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -149,7 +149,7 @@ public class CmdRollBackTest {
             Map<String,Object> params = new HashMap<>();
             params.put("chainId", chainId);
             params.put("blockHeight",1);
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBlock", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBlock", params);
             logger.info("response {}", response);
         } catch (IOException e) {
             e.printStackTrace();
@@ -163,7 +163,7 @@ public class CmdRollBackTest {
         try {
             Map<String,Object> params = new HashMap<>();
             params.put("chainId", chainId);
-            Response response = CmdDispatcher.requestAndResponse(ModuleE.LG.abbr, "getBlockHeight", params);
+            Response response = ResponseMessageProcessor.requestAndResponse(ModuleE.LG.abbr, "getBlockHeight", params);
             logger.info("response {}", response);
         } catch (IOException e) {
             e.printStackTrace();
