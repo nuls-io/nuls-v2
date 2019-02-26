@@ -2,6 +2,7 @@ package io.nuls.transaction.cache;
 
 import io.nuls.base.data.NulsDigestData;
 import io.nuls.base.data.Transaction;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Service;
 import io.nuls.transaction.model.bo.Chain;
 
@@ -15,7 +16,7 @@ import java.util.List;
  * @author: Charlie
  * @date: 2018/11/13
  */
-@Service
+@Component
 public class PackablePool {
 
     public boolean addInFirst(Chain chain, Transaction tx, boolean isOrphan) {

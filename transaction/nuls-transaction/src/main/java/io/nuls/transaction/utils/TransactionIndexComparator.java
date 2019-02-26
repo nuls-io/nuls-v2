@@ -25,6 +25,7 @@
 package io.nuls.transaction.utils;
 
 import io.nuls.base.data.Transaction;
+import io.nuls.tools.core.annotation.Component;
 import io.nuls.tools.core.annotation.Service;
 
 import java.util.Comparator;
@@ -33,7 +34,7 @@ import java.util.Comparator;
  * @author: Charlie
  * @date: 2018-12-21
  */
-@Service
+@Component
 public class TransactionIndexComparator implements Comparator<Transaction> {
 
     @Override
