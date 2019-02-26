@@ -212,11 +212,11 @@ public class SpringLiteContext {
      * Gets the name of the type instance according to the object type.
      */
     public static Object getBeanByClass(String clazzStr) {
-        if(StringUtils.isBlank(clazzStr)){
+        if (StringUtils.isBlank(clazzStr)) {
             return null;
         }
         String[] paths = clazzStr.split("\\.");
-        if(paths.length == 0){
+        if (paths.length == 0) {
             return null;
         }
         String beanName = paths[paths.length - 1];
@@ -251,6 +251,7 @@ public class SpringLiteContext {
             }
         } else {
             beanName = ((Service) ann).value();
+            aopProxy = true;
         }
         if (ann != null) {
             if (beanName == null || beanName.trim().length() == 0) {
@@ -353,7 +354,7 @@ public class SpringLiteContext {
     private static Object createProxy(Class clazz, MethodInterceptor interceptor) {
         Enhancer enhancer = new Enhancer();
         enhancer.setSuperclass(clazz);
-        enhancer.setCallback(SpringLiteContext.interceptor);
+        enhancer.setCallback(interceptor);
         return enhancer.create();
     }
 

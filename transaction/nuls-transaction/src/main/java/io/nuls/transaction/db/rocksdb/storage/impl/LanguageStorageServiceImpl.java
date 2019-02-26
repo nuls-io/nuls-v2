@@ -21,7 +21,7 @@ public class LanguageStorageServiceImpl implements LanguageStorageService, Initi
         /**
          * 一个节点共用，不区分chain
          */
-        DBUtil.createTable(TxDBConstant.DB_TX_LANGUAGE);
+       // DBUtil.createTable(TxDBConstant.DB_TX_LANGUAGE);
     }
 
     @Override

@@ -4,15 +4,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nuls.base.constant.BaseConstant;
 import io.nuls.base.data.Address;
 import io.nuls.base.data.Page;
+import io.nuls.h2.utils.MybatisDbHelper;
+import io.nuls.tools.core.ioc.SpringLiteContext;
 import io.nuls.tools.crypto.ECKey;
 import io.nuls.tools.parse.JSONUtils;
 import io.nuls.tools.parse.SerializeUtils;
 import io.nuls.transaction.constant.TxConstant;
 import io.nuls.transaction.db.h2.dao.TransactionH2Service;
+import io.nuls.transaction.db.h2.dao.TransactionService;
 import io.nuls.transaction.db.h2.dao.impl.BaseService;
 import io.nuls.transaction.db.h2.dao.impl.TransactionH2ServiceImpl;
+import io.nuls.transaction.db.h2.dao.impl.TransactionServiceImpl;
 import io.nuls.transaction.model.po.TransactionPO;
 import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 import org.h2.util.StringUtils;
 
@@ -26,18 +31,29 @@ import java.util.*;
  */
 public class H2Test {
 
-    public static void main(String[] args) throws Exception{
-        //System.out.println(("Y31vkMqXEViqpkZ29vysnDG2XPz9Eb822".hashCode() & Integer.MAX_VALUE)%TxConstant.H2_TX_TABLE_NUMBER);
-        before();
-        long start = System.currentTimeMillis();
-        initTestTable();
-        System.out.println("花费时间：" + String.valueOf(System.currentTimeMillis() - start));
 
-        start = System.currentTimeMillis();
-        initTestData();
-        //insert();
-        //delete();
-        System.out.println("查询数据花费时间：" + String.valueOf(System.currentTimeMillis() - start));
+    public static void before() throws Exception {
+        String resource = "mybatis/mybatis-config.xml";
+        SpringLiteContext.init("io.nuls");
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(Resources.getResourceAsReader(resource), "druid");
+        MybatisDbHelper.setSqlSessionFactory(sqlSessionFactory);
+
+
+    }
+
+    public static void main(String[] args) throws Exception {
+        before();
+        testInsert();
+//        testSelect();
+//        long start = System.currentTimeMillis();
+//        initTestTable();
+//        System.out.println("花费时间：" + String.valueOf(System.currentTimeMillis() - start));
+//
+//        start = System.currentTimeMillis();
+//        initTestData();
+//        //insert();
+//        //delete();
+//        System.out.println("查询数据花费时间：" + String.valueOf(System.currentTimeMillis() - start));
 
       /*  for(int i=0;i<20;i++){
             long s = System.currentTimeMillis();
@@ -68,40 +84,58 @@ public class H2Test {
         System.out.println("查询数据花费时间：" + String.valueOf(System.currentTimeMillis() - s));*/
     }
 
-    private static void delete(){
-        Map<String, String> map = new HashMap<>();
-        TransactionH2Service ts = new TransactionH2ServiceImpl();
-        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","00bb56982981c1fce2eee1c21db9ab016676ecea5ae047b0f6fa87b15aceba8f1279");
-        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","00847cebbea85690903e2d0a241d2f8b9ea1d088866f9e12271adc62ec9cce33d61c");
-        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","004015dee1d84f73ba41526966369dc4799b699e0ddf39fe04a9c10965469be119e8");
-        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","00dd8d579acd7a623baca24f2a536ecfc76ac2ce282f6023b9fe48e4eaba21a9b4f3");
-        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","009ad54d7175cce9612039aaa14eb00f3630a3953c63948ada08c78fdf60b8e02b3f");
-        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","001d8b2f97b1784a4a96cc3abf09990fca2d269371892fe61d2153d0d42bdb282dcd");
-        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","004b8813936014c4f8d438e3f5c71c82487d98bc188642a473383a6e6e8de9cd9c24");
-        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","005a58f7cc3999073f37698e834010614e42df3f2a30236198ae464e81f0483dbafd");
-        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","00674b95d94e9f8f666a21b76a26f631ec4f37be35d2de918b8fd0778fc8a290c86f");
-        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822","00b604d95d1cabfedae438d9fa11caa629eba32a7d80af1f38a530268fa3cb1c8554");
+    private static void testSelect() {
+        TransactionService service = new TransactionServiceImpl();
+        service.createTxTablesIfNotExists(TxConstant.H2_TX_TABLE_NAME_PREFIX,
+                TxConstant.H2_TX_TABLE_INDEX_NAME_PREFIX,
+                TxConstant.H2_TX_TABLE_UNIQUE_NAME_PREFIX,
+                TxConstant.H2_TX_TABLE_NUMBER);
+        Page<TransactionPO> page = service.getTxs("5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu", null, null, null, null, null, null, 1, 10);
+        System.out.println(page.getTotal());
 
     }
 
-    private static void insert(){
+    private static void testInsert() {
+        TransactionService service = SpringLiteContext.getBean(TransactionService.class);
+        TransactionPO tx = createTxPo("5MR_2CeG11nRqx7nGNeh8hTXADibqfSYeNu");
+        service.saveTx(tx);
+    }
+
+
+    private static void delete() {
+        Map<String, String> map = new HashMap<>();
+        TransactionH2Service ts = new TransactionH2ServiceImpl();
+        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822", "00bb56982981c1fce2eee1c21db9ab016676ecea5ae047b0f6fa87b15aceba8f1279");
+        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822", "00847cebbea85690903e2d0a241d2f8b9ea1d088866f9e12271adc62ec9cce33d61c");
+        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822", "004015dee1d84f73ba41526966369dc4799b699e0ddf39fe04a9c10965469be119e8");
+        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822", "00dd8d579acd7a623baca24f2a536ecfc76ac2ce282f6023b9fe48e4eaba21a9b4f3");
+        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822", "009ad54d7175cce9612039aaa14eb00f3630a3953c63948ada08c78fdf60b8e02b3f");
+        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822", "001d8b2f97b1784a4a96cc3abf09990fca2d269371892fe61d2153d0d42bdb282dcd");
+        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822", "004b8813936014c4f8d438e3f5c71c82487d98bc188642a473383a6e6e8de9cd9c24");
+        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822", "005a58f7cc3999073f37698e834010614e42df3f2a30236198ae464e81f0483dbafd");
+        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822", "00674b95d94e9f8f666a21b76a26f631ec4f37be35d2de918b8fd0778fc8a290c86f");
+        ts.deleteTx("LD9P3K8GEvfWYmWfUN5BR3zUJu3x7b822", "00b604d95d1cabfedae438d9fa11caa629eba32a7d80af1f38a530268fa3cb1c8554");
+
+    }
+
+    private static void insert() {
         //saveTxsTables
         TransactionH2Service ts = new TransactionH2ServiceImpl();
-        for (int i=0;i<1;i++) {
+        for (int i = 0; i < 1; i++) {
             List<TransactionPO> listPo = new ArrayList<>();
-            for (int j=0;j<200000;j++) {
+            for (int j = 0; j < 200000; j++) {
                 listPo.add(createTxPo());
             }
             ts.saveTxsTables(listPo);
-            System.out.println("OK-"+i);
+            System.out.println("OK-" + i);
         }
     }
 
-    private static void select(String address){
+    private static void select(String address) {
         TransactionH2Service ts = new TransactionH2ServiceImpl();
         String addr = StringUtils.isNullOrEmpty(address) ? ranAddress() : address;
 //        Page<TransactionPO> page =  ts.getTxs(addr, null, null, 1540138501L, System.currentTimeMillis(), 1,15);
-        Page<TransactionPO> page =  ts.getTxs(addr,1,1, 1, null, null, null, 1,15);
+        Page<TransactionPO> page = ts.getTxs(addr, 1, 1, 1, null, null, null, 1, 15);
         try {
             System.out.println(JSONUtils.obj2json(page));
         } catch (JsonProcessingException e) {
@@ -109,26 +143,20 @@ public class H2Test {
         }
     }
 
-    public static void before() throws Exception{
 
-        String resource = "mybatis/mybatis-config.xml";
-        InputStream in = Resources.getResourceAsStream(resource);
-        BaseService.sqlSessionFactory = new SqlSessionFactoryBuilder().build(in);
-    }
-
-    public static void initTestData(){
+    public static void initTestData() {
         TransactionH2Service ts = new TransactionH2ServiceImpl();
-        for (int i=0;i<1;i++) {
+        for (int i = 0; i < 1; i++) {
             List<TransactionPO> listPo = new ArrayList<>();
-            for (int j=0;j<10000;j++) {
-               listPo.add(createTxPo());
+            for (int j = 0; j < 10000; j++) {
+                listPo.add(createTxPo());
             }
             System.out.println(ts.saveTxs(listPo));
         }
     }
 
     //模拟TransactionPo的数据
-    private static TransactionPO createTxPo(){
+    private static TransactionPO createTxPo() {
         Random rand = new Random();
         int amount = rand.nextInt(5050 - 50 + 1) + 50;
         int time = rand.nextInt(1542514842 - 1541001600 + 1) + 1541001600;
@@ -145,37 +173,61 @@ public class H2Test {
         txPo.setAmount(new BigInteger(amount + ""));
         txPo.setState(stateAndType);
         txPo.setType(type);
-        txPo.setTime((long)time);
+        txPo.setTime((long) time);
+        txPo.setAssetChainId(assetChainId);
+        txPo.setAssetId(assetId);
+        return txPo;
+    }
+
+    //模拟TransactionPo的数据
+    private static TransactionPO createTxPo(String address) {
+        Random rand = new Random();
+        int amount = rand.nextInt(5050 - 50 + 1) + 50;
+        int time = rand.nextInt(1542514842 - 1541001600 + 1) + 1541001600;
+        int stateAndType = rand.nextInt(3);
+        int type = rand.nextInt(10) + 1;
+        int assetChainId = rand.nextInt(10) + 1;
+        int assetId = rand.nextInt(30) + 1;
+        TransactionPO txPo = new TransactionPO();
+
+        txPo.setAddress(address); //随机表随机地址
+//        txPo.setAddress(ranSingleAddress());//表_0中随机地址
+        txPo.setHash(getTestHash());
+
+        txPo.setAmount(new BigInteger(amount + ""));
+        txPo.setState(stateAndType);
+        txPo.setType(type);
+        txPo.setTime((long) time);
         txPo.setAssetChainId(assetChainId);
         txPo.setAssetId(assetId);
         return txPo;
     }
 
     //模拟随机生成交易hash，长度68
-    private static String getTestHash(){
-        char[] words = {'a','b','c','d','e','f','0','1','2','3','4','5','6','7','8','9'};
+    private static String getTestHash() {
+        char[] words = {'a', 'b', 'c', 'd', 'e', 'f', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
         //0020b61313f59fbf8b0639b556690d9d6b8f2c89ce1755e6939080ddf13101b452aa
         Random rand = new Random();
         String hash = "00";
         int max = words.length;
-        for(int i = 0; i<66;i++){
+        for (int i = 0; i < 66; i++) {
             int index = rand.nextInt(max);
             hash += words[index];
         }
         return hash;
     }
 
-    private static String getAddr(){
+    private static String getAddr() {
         Address address = new Address((short) 8888, BaseConstant.DEFAULT_ADDRESS_TYPE, SerializeUtils.sha256hash160(new ECKey().getPubKey()));
         return address.getBase58();
     }
 
     //生成,随机地址
-    private static void createAddress(){
+    private static void createAddress() {
         System.out.println("{");
-        for (int i=0;i<100;i++){
+        for (int i = 0; i < 100; i++) {
             String addr = getAddr();
-            System.out.println("\"" + addr + "\""  + (i==99  ? "" : ",") );
+            System.out.println("\"" + addr + "\"" + (i == 99 ? "" : ","));
 //            System.out.println(addr.hashCode());
 //            System.out.println((addr.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER);
 
@@ -184,14 +236,14 @@ public class H2Test {
     }
 
     //生成,会存入同一张表的地址
-    private static void createAddressSameTable(){
+    private static void createAddressSameTable() {
 
         int count = 0;
         System.out.println("{");
-        while (count < 40){
+        while (count < 40) {
             String addr = getAddr();
-            if((addr.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER == 0){
-                System.out.println("\"" + addr + "\""  + (count == 39  ? "" : ",") );
+            if ((addr.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER == 0) {
+                System.out.println("\"" + addr + "\"" + (count == 39 ? "" : ","));
                 count++;
             }
             //System.out.println((addr.hashCode() & Integer.MAX_VALUE) % TxConstant.H2_TX_TABLE_NUMBER);
@@ -201,7 +253,7 @@ public class H2Test {
     }
 
     //多表
-    private static String ranAddress(){
+    private static String ranAddress() {
         //40个种子地址，随机生成交易记录；
         String[] address = {
                 "USEkp7H2s1x2khUgbswMHe9HKmStRb822",
@@ -351,7 +403,7 @@ public class H2Test {
     }
 
     //单表
-    private static String ranSingleAddress(){
+    private static String ranSingleAddress() {
         //40个种子地址，随机生成交易记录；
         String[] address = {
                 "",
@@ -361,7 +413,7 @@ public class H2Test {
         return address[index];
     }
 
-    public static void initTestTable(){
+    public static void initTestTable() {
         TransactionH2Service ts = new TransactionH2ServiceImpl();
         //ts.createTable("transaction", "transaction_index",128);
         ts.createTxTablesIfNotExists(TxConstant.H2_TX_TABLE_NAME_PREFIX,

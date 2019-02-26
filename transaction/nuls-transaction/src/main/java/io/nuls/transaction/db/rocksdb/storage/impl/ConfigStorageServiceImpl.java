@@ -57,7 +57,7 @@ public class ConfigStorageServiceImpl implements ConfigStorageService, Initializ
         /**
          * 一个节点共用，不区分chain
          */
-        DBUtil.createTable(TxDBConstant.DB_MODULE_CONGIF);
+//        DBUtil.createTable(TxDBConstant.DB_MODULE_CONGIF);
     }
 
     @Override
