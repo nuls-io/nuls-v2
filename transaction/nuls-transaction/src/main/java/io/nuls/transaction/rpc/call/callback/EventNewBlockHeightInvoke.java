@@ -60,7 +60,7 @@ public class EventNewBlockHeightInvoke extends BaseInvoke {
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
-            if (!response.isSuccess()) {
+            if (response.isSuccess()) {
                 HashMap result = ((HashMap) response.getResponseData());
                 long blockHeight = (long) result.get("height");
                 chain.setBestBlockHeight(blockHeight);
